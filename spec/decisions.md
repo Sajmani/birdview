@@ -84,6 +84,42 @@ qualified to make).
 Until one is taken, the measured-length branch of P-060 is **Deferred (owner: Sameer)**. The
 modeled branch is unaffected, so this does not block v1 — it bounds how good v1 can be.
 
+### Checked and ruled out: the CC0 Dryad deposit *(2026-09-21)*
+
+Crossref reports no related deposits for `10.1002/ecy.1783`, but a separate CC0 dataset exists
+with Ricklefs as co-author, and it looked like it might dissolve this conflict:
+
+> Jønsson, Lessard & Ricklefs 2015, "The evolution of morphological diversity in continental
+> assemblages of Passerine birds" — `doi:10.5061/dryad.qk461`, CC0-1.0, primary article
+> `10.1111/evo.12622`. One file, `data_morphospace_FINAL.xls`.
+
+**It does not contain total length.** Columns, read from the file by the owner — Dryad blocks
+automated download and its `robots.txt` disallows `/downloads`:
+
+```
+Species name · Clade name · wing length · tail length · tarsus length · middle toe length ·
+bill length · bill width · bill depth · Neotropics · Afrotropics · Orient · Australasia ·
+other region
+```
+
+Two reasons this closes the lead rather than merely deferring it. The measurement suite is
+**exactly what AVONET already provides**, so the deposit adds nothing even ignoring length. And
+its region columns are tropical, with no Nearctic among them, so North American coverage would
+need checking even if the field existed.
+
+The negative result sharpens the original problem: the `Length` column in Ricklefs 2017 is what
+distinguishes that dataset, and it is absent even from the same author's other public deposits.
+Nothing found so far substitutes for it.
+
+### Reframed by P-062 *(2026-09-21)*
+
+This conflict was raised when provenance was binary — a value was either measured or the app was
+misrepresenting it. P-062 removed that premise. If no measured length is ever obtained, every
+length is labeled `modeled`, and the product is honest and complete.
+
+CR-002 is therefore **not a blocker** and should not be treated as one. It governs how good v1's
+length data is, not whether v1 can ship.
+
 ---
 
 ## CR-003 — Location filtering has no redistributable data source
