@@ -1,0 +1,14 @@
+# Inputs fetched at build time and never redistributed (T-004).
+# The ABA checklist is all-rights-reserved; Ricklefs 2017 is not openly licensed.
+/fetched/
+
+# The built dataset is a build artifact, not a source file (T-005): it carries
+# values derived from the non-redistributable inputs above.
+/web/data/species.json
+
+# Compiled binaries
+/birdview
+/birdview-ingest
+/dist/
+
+.DS_Store
