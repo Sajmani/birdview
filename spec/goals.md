@@ -28,6 +28,21 @@ size and the interesting variation is proportional. Across families the size ran
 the honest answer is often surprising. A design that serves one can easily defeat the other, which
 is why scale is a user choice rather than a fixed decision (P-042).
 
+### G-004 — A good citizen of the data commons it depends on
+
+BirdView honors the terms of every source it uses, credits them, and never presents someone
+else's work as its own or as better-grounded than it is.
+
+Almost nothing in BirdView is BirdView's. The measurements are AVONET's, the species list is the
+ABA's, the wingspans are Fox et al.'s. Each arrives with conditions — attribution, non-commercial
+use, no redistribution — and honoring them is a condition of the project existing at all, not
+overhead on top of it. This goal is why the project rejected a dataset it wanted
+([CR-002](decisions.md#cr-002)), fetches one source at build rather than committing it (T-004),
+and records where every number came from (P-062).
+
+It is also why BirdView is worth more than the sum of its sources: a compilation that quietly
+misrepresented their provenance would be worth less than nothing to the people who produced them.
+
 ### G-003 — Shape, not only size
 
 Proportion is visible at a glance: which birds are long-billed, long-necked, long-tailed.

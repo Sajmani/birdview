@@ -14,13 +14,13 @@ the others can be filled in plausibly from a URL alone.
 | --- | --- | --- | --- |
 | [`avonet`](#avonet) | mandatory | by reference, vendored | **adopted** — pinned, vendored, hashed; no criteria yet |
 | [`aba`](#aba) | mandatory | by reference, **not** vendored | **partial** — terms read and quoted, pinned by hash; redistribution refused, so fetched at build |
-| [`fox-wingspan`](#fox-wingspan) | mandatory | by reference, vendored | **named** — license confirmed CC BY 4.0, **not yet retrieved** |
+| [`fox-wingspan`](#fox-wingspan) | mandatory | by reference, vendored | **adopted** — retrieved, hashed against the publisher's MD5, vendored |
 | [`ricklefs`](#ricklefs) | mandatory | **rejected** | **rejected** — Wiley terms prohibit the use, see CR-002 |
 | [`wiley`](#wiley) | mandatory | quoted only, not vendored | **adopted** — terms read and transcribed; the reason `ricklefs` is rejected |
 | [`wcag`](#wcag) | mandatory | absorbed, partial | **partial** — adopted for two criteria, not vendored |
 | [`specman`](#specman) | — (method) | project copy | **adopted** — copied, base pin recorded below |
 
-Two of the seven are not fully adopted, and neither blocks v1. `ricklefs` was evaluated and
+One of the seven is not fully adopted, and it does not block v1. `ricklefs` was evaluated and
 **rejected**: its platform terms prohibit extraction, integration, storage and redistribution
 alike. Its entry is kept so the evaluation is not repeated.
 
@@ -82,19 +82,19 @@ cannot be committed, and a non-commercial, attributed, open-source request costs
 | Field | Value |
 | --- | --- |
 | **Origin** | https://doi.org/10.6084/m9.figshare.32089083 |
-| **Version** | To be pinned on retrieval |
-| **Integrity** | To be recorded in `spec/sources/fox-wingspan/PROVENANCE.md` on retrieval |
+| **Version** | v1, published 2026-04-24 |
+| **Integrity** | [spec/sources/fox-wingspan/PROVENANCE.md](sources/fox-wingspan/PROVENANCE.md) |
 | **Tier** | mandatory (copyright license) |
 | **Import style** | By reference, vendored — CC BY 4.0 permits it |
 | **Scope** | Empirical wingspan (P-060) |
 | **Adopted parts** | Rows with `needs_prediction = 0` only |
 | **Exclusions** | **Predicted wingspans are excluded.** The dataset's `wingspan_predicted_*` columns are regressions from AVONET wing chord; adopting them would reintroduce exactly the modeled-as-measured problem CR-001 resolves. |
 | **Owner** | Fox, Brunton & Shephard |
-| **Status** | **Named, not retrieved.** License confirmed CC BY 4.0 from the figshare record. The file has not been downloaded, hashed, or parsed by this project. |
+| **Status** | **Adopted 2026-09-21.** Retrieved, hashed, vendored; its MD5 matches figshare's published `computed_md5`. Coverage for BirdView's scope measured and recorded. |
 
-Coverage warning carried over from research: roughly 1,424 of 10,618 species have an empirical
-value, and a 20-species spot check of common North American landbirds found only 6. Expect the
-measured fraction to be thin.
+Coverage, now measured rather than estimated: of BirdView's 841 in-scope species, **301 (35.8%)
+have an empirical wingspan**, 510 have only a predicted value that this project excludes, and 30
+have no row at all — every one a Galliform, an order the dataset omits entirely.
 
 ---
 

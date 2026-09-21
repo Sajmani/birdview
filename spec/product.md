@@ -327,7 +327,7 @@ which is the thing the project explicitly rejected. It is load-bearing, not deco
 ### P-062 — Every presented metric carries a provenance record
 Subject: `measurement.provenance.record`
 Value: `{kind, source, sourceTaxon, model}`
-Goals: G-001
+Goals: G-001, G-004
 
 Every metric BirdView presents — total length, wingspan, mass, and each diagram segment — carries
 a record of where that specific value came from:
@@ -356,7 +356,7 @@ is. One record covers all of it, and makes each later gap a labeling problem rat
 redesign.
 
 ### P-063 — The detail view explains each metric's provenance
-Goals: G-001
+Goals: G-001, G-004
 
 In the detail view (P-034), each metric is shown with its provenance stated in plain language —
 naming the source, and for a `near-match` naming the taxon actually measured, for a `modeled`

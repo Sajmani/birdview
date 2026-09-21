@@ -30,10 +30,11 @@ Rationale: the tool should work on a laptop in a cabin. This supersedes the earl
 ### T-003 — Serves on localhost:8080
 Subject: `server.address`
 Value: `localhost:8080`
+Goals: G-001
 
 ### T-004 — Fetch restricted inputs at build time; commit only what may be redistributed
 Subject: `build.inputs`
-Goals: G-001
+Goals: G-004
 
 Inputs whose license forbids redistribution — currently the ABA checklist alone — are downloaded
 onto the building machine at build time, verified against the hashes recorded in
@@ -52,7 +53,7 @@ of its own CSV. Fetching at build keeps the project honest without giving up the
 
 ### T-005 — The built dataset is an artifact, never committed
 Subject: `build.output`
-Goals: G-001
+Goals: G-004
 
 The generated dataset is excluded from version control, because it carries values derived from the
 non-redistributable inputs of T-004. A clean checkout builds it; it is not shipped in the
@@ -60,6 +61,7 @@ repository.
 
 ### T-006 — Identify the client on every outbound request
 Subject: `http.user_agent`
+Goals: G-004
 
 Any HTTP client this project uses to fetch a source sends a descriptive `User-Agent` naming the
 application and a contact. Go's default `Go-http-client/1.1` is not acceptable.
@@ -92,6 +94,7 @@ asserted a conformance level nothing checked. This requirement is checkable and 
 ### T-011 — Local now, public later; never commercial
 Subject: `deployment.posture`
 Value: `local; non-commercial in perpetuity`
+Goals: G-004
 
 BirdView runs locally today and may be deployed publicly later. It will not become a commercial
 offering, and source obligations are recorded against the public, non-commercial case so that a
@@ -108,12 +111,13 @@ Either would become a licensing breach the day BirdView took revenue.
 ### T-020 — The spec bundle is normative
 Subject: `process.spec_location`
 Value: `spec/`
+Goals: G-004
 
 The repository follows the loop in [process.md](process.md). `AGENTS.md` names `spec/` as
 normative so agents reading the instruction file are pointed at it.
 
 ### T-021 — No source is consumed before it is recorded
-Goals: G-001
+Goals: G-004
 
 Every input source appears in [sources.md](sources.md) with its tier, pin, license and status
 *before* code that reads it is written.
