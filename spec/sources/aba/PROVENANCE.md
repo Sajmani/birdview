@@ -21,13 +21,23 @@ helpfully checking the CSV in.
 | **Landing page** | https://www.aba.org/aba-checklist/ |
 | **Download** | `https://www.aba.org/wp-content/uploads/2026/03/ABA_Checklist-8.19.csv.zip` |
 | **Version** | 8.19, January 2026 — 1,161 species on the main list |
-| **Extracted file** | `ABA_Checklist-8.19.csv`, 81,041 bytes, 1,301 lines |
-| **Expected SHA-256** | `9c9539b70e3d2ce2d2d46eb9354528e649e999990ec2ab416c1db222b86331d3` |
-| **Destination** | `fetched/`, which `.gitignore` excludes |
+| **Archive** | 30,951 bytes · SHA-256 `f036c47429585a00ff16417fc4d6d152fd3b600044e7b283c6371718d7c91e07` |
+| **Extracted file** | `ABA_Checklist-8.19.csv`, 81,041 bytes, 1,301 CSV rows |
+| **SHA-256** | `9c9539b70e3d2ce2d2d46eb9354528e649e999990ec2ab416c1db222b86331d3` |
+| **Encoding** | UTF-8, no BOM, CRLF line endings. Non-ASCII occurs only in the French name column. |
+| **Destination** | `fetched/`, which `.gitignore` excludes (verified: rule at `.gitignore:3`) |
 
-**The hash above has not been verified by this project.** It was reported by the research pass
-that established the licensing position, not computed from a file this repository fetched. Treat
-it as expected-value-to-confirm on first retrieval, and correct this record if it differs.
+**Verified 2026-09-21** by fetching the archive with `curl` and hashing both files. The CSV hash
+matches the value an earlier research pass reported, which is now confirmed rather than assumed.
+
+Retrieval is permitted by `https://www.aba.org/robots.txt`, checked the same day: its `Disallow`
+rules cover WooCommerce upload paths, `add-to-cart` query strings and `/wp-admin/`, and a later
+`User-agent: * / Disallow:` block allows everything else. `/wp-content/uploads/2026/` is not
+excluded.
+
+Two artifacts of the archive worth knowing before writing the ingest: it unpacks a `__MACOSX/`
+sidecar directory alongside the CSV, and the CSV's final line ends with a bare LF where every
+other line ends CRLF.
 
 ## Shape of the file
 
@@ -46,10 +56,17 @@ Family is **not** a per-species column. It appears in 99 section-header rows for
 `Ducks, Geese, and Swans (Anatidae)`, which a forward-fill parse recovers — and which supplies
 both the family scientific name for joining and the family common name for badges (P-004).
 
-Row 0 is the copyright blob quoted above. The final row is a footnote.
+Row 0 is the copyright blob quoted above. The final row is a footnote. Together with the 99 family
+headers those make up the 101 rows whose first column is non-blank, so "first column non-blank"
+alone is not a family-header test — the pattern `... (Familyname)` is.
 
-Rarity distribution across the 1,161: code 1 = 490, 2 = 258, 3 = 93, 4 = 124, 5 = 151, 6 = 45.
-BirdView keeps codes 1–3, which is 841 species (P-001).
+Every one of the 1,301 rows has exactly 6 fields, so a parser may rely on the column count.
+
+Rarity distribution across the 1,161 species rows: code 1 = 490, 2 = 258, 3 = 93, 4 = 124,
+5 = 151, 6 = 45. BirdView keeps codes 1–3, which is 841 species (P-001).
+
+**All of the above was measured from the fetched file on 2026-09-21**, not taken from the
+publisher's description.
 
 ## Taxonomy
 
@@ -58,10 +75,36 @@ ABA follows AOS/NACC; AVONET's `AVONET2_eBird` sheet follows eBird/Clements. The
 > "Note that where discrepancies in names occur between Clements/eBird and the AOS, both are
 > listed, that of AOS in parentheses."
 
-Measured join rate on scientific binomial, after stripping parentheticals: **99.4%** (1,154 of
-1,161). All seven misses are genus-level disagreements — *Dryobates* vs *Leuconotopicus* for four
-woodpeckers, *Milvago* vs *Daptrius*, *Coccothraustes* vs *Hesperiphona*, *Basileuterus* vs
-*Euthlypis* — which P-006's synonym table covers.
+**Measured 2026-09-21, against `AVONET2_eBird` itself** — the join BirdView actually performs:
+
+| Set | Joined on binomial | Rate |
+| --- | --- | --- |
+| All 1,161 ABA species | 1,094 | 94.23% |
+| Codes 1–3, the P-001 scope | 819 of 841 | **97.38%** |
+
+An earlier research pass reported 99.4%, but that measured ABA against the **eBird taxonomy
+v2025** CSV. AVONET was published in 2022 and carries the eBird/Clements taxonomy of that era, so
+four years of taxonomic revision sit in the gap. The figure that matters is 97.38%, and it will
+decay further with each ABA and eBird revision.
+
+The 22 in-scope misses fall into three kinds, which matter very differently:
+
+- **Apparent renames (12)** — the pre-revision name is in AVONET and is not a separate ABA
+  species: the four *Anarhynchus* plovers (ex-*Charadrius*), *Astur cooperii* and
+  *Astur atricapillus*, *Ardea ibis*, *Botaurus exilis*, *Gygis candida*, *Pterodroma deserta*,
+  *Spilopelia chinensis*, *Tyto furcata*.
+- **Splits (9)** — the parent is *still* a separate ABA species, so mapping the child onto it
+  makes two species share one set of measurements: *Anthus japonicus*, *Calonectris borealis*,
+  *Larus smithsonianus*, *Larus vegae*, *Numenius hudsonicus*, *Setophaga aestiva*,
+  *Sturnella lilianae*, *Sula brewsteri*, *Vireo swainsoni*. *Larus smithsonianus* and
+  *Larus vegae* both resolve to *Larus argentatus*.
+- **Unresolved (1)** — *Ramosomyia violiceps*; no candidate prior name was found in AVONET.
+
+**The rename/split classification above is provisional.** It was derived mechanically from
+whether the parent name still appears in ABA 8.19, and that test under-detects: *Astur
+atricapillus* is a split from Eurasian Goshawk, and looks like a rename only because the Eurasian
+bird is not on the ABA list. Each entry needs a human taxonomic check before it enters the mapping
+table. See [CR-006](../../decisions.md#cr-006).
 
 ## Open action
 

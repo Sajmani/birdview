@@ -73,13 +73,18 @@ Value: `scientific binomial, normalized`
 Goals: G-001
 
 Species are joined across sources on scientific binomial, after stripping `(...)` parentheticals
-and collapsing internal whitespace, with a committed synonym table covering known genus-level
-disagreements between AOS/NACC (which ABA follows) and eBird/Clements (which AVONET follows).
+and collapsing internal whitespace, with a committed mapping table covering the taxonomic
+divergence between AOS/NACC (which ABA follows) and the 2022-era eBird/Clements taxonomy AVONET
+carries.
 
-Rationale: measured join rate on binomial before any synonym table is 99.4%; all misses are genus
-reshuffles such as *Dryobates* vs *Leuconotopicus*. English name is the worse key despite scoring
-marginally higher on one measurement — hyphenation and Eastern/Western prefixes churn on every
-taxonomy update.
+Rationale: the measured join rate on binomial alone, over the P-001 scope, is **97.38%** — 819 of
+841 — leaving 22 species needing a mapping entry. English name is the worse key: hyphenation and
+Eastern/Western prefixes churn on every taxonomy update.
+
+The 22 are not all renames, and that distinction is the subject of [CR-006](decisions.md#cr-006).
+A rename may be mapped freely. A **split** cannot be mapped without borrowing the parent species'
+measurements, which makes the value no longer a measurement *of that species* and therefore
+engages P-060 and P-061.
 
 ### P-007 — Unmatched species are reported, not silently dropped
 Goals: G-001

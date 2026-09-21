@@ -168,6 +168,62 @@ the work is not repeated:
 
 ---
 
+## CR-006 — Nine ABA species have no AVONET row of their own *(open)*
+
+**Subject:** `dataset.join.key`
+**Kind:** Derived — no pair of requirements contradicts; the conflict appears only when P-006's
+mapping meets P-060's provenance rule
+**Date raised:** 2026-09-21 · **Status: OPEN — owner decision required**
+
+### What was measured
+
+Joining ABA 8.19 codes 1–3 against `AVONET2_eBird` on normalized binomial: **819 of 841 = 97.38%**.
+AVONET carries the 2022-era eBird taxonomy, so four years of revision separate the two sources.
+Full classification is in [sources/aba/PROVENANCE.md](sources/aba/PROVENANCE.md#taxonomy).
+
+Twelve misses look like renames and can be mapped. **Nine are splits**, where the pre-split parent
+is still a separate ABA species in its own right:
+
+| ABA species | Would borrow traits from |
+| --- | --- |
+| American Herring Gull *Larus smithsonianus* | *Larus argentatus* |
+| Vega Gull *Larus vegae* | *Larus argentatus* |
+| Hudsonian Whimbrel *Numenius hudsonicus* | *Numenius phaeopus* |
+| Cory's Shearwater *Calonectris borealis* | *Calonectris diomedea* |
+| Northern Yellow Warbler *Setophaga aestiva* | *Setophaga petechia* |
+| Chihuahuan Meadowlark *Sturnella lilianae* | *Sturnella magna* |
+| Western Warbling-Vireo *Vireo swainsoni* | *Vireo gilvus* |
+| Cocos Booby *Sula brewsteri* | *Sula leucogaster* |
+| Siberian Pipit *Anthus japonicus* | *Anthus rubescens* |
+
+### Why this is a conflict rather than a chore
+
+Mapping a split onto its parent silently attributes one species' measurements to another. Two of
+the rows above resolve to the *same* parent, so American Herring Gull and Vega Gull would render
+as pixel-identical birds in an application whose entire purpose is showing that birds differ in
+size and shape.
+
+It also collides with [CR-001](#cr-001). P-060 divides every value into *measured* or *estimated*;
+a trait borrowed from a pre-split parent is neither. It is a real measurement of a different
+taxon, which is a third category the provenance model does not currently have.
+
+### Options
+
+| Option | Effect |
+| --- | --- |
+| Borrow parent traits, tag as a third provenance class | All 841 species present; honest labeling; P-060/P-061 grow a category |
+| Borrow parent traits silently | Complete dataset, false precision, and identical gull diagrams |
+| Exclude the 9 | 832 species, every one genuinely its own measurement; some common birds missing |
+| Source the 9 elsewhere | Correct and slow; no identified source |
+
+### Also unresolved
+
+*Ramosomyia violiceps* (Violet-crowned Hummingbird) matched no candidate prior name in AVONET and
+needs a manual lookup. And the twelve "renames" were classified mechanically — the test
+under-detects splits, so each needs a human taxonomic check before entering the mapping table.
+
+---
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

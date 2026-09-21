@@ -60,7 +60,7 @@ data for all birds. *Ecology Letters* 25: 581–597.
 | **Adopted parts** | Main checklist only. Provisional Lists A and B are not used. |
 | **Exclusions** | Rarity codes are not carried into the dataset or the UI; they are read at ingest as a scope filter and discarded. |
 | **Owner** | American Birding Association, `info@aba.org` |
-| **Status** | **Partial.** Terms read and quoted; redistribution refused by those terms, so the file is fetched at build and never committed. |
+| **Status** | **Adopted.** Retrieved and hashed 2026-09-21; terms read and quoted; redistribution refused by those terms, so the file is fetched at build and never committed. |
 
 License, quoted verbatim from row 0 of the CSV itself:
 
