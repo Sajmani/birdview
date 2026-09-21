@@ -303,8 +303,9 @@ Goals: G-001
 
 - **Wingspan** — Fox et al. 2026, filtered to `needs_prediction = 0` so only empirical values are
   taken. Stored as the reported min/mid/max triple rather than a point value.
-- **Length** — Ricklefs 2017, passerines only. Subject to the unresolved license question in
-  [CR-002](decisions.md#cr-002).
+- **Length** — **modeled for every species.** No usable source of measured avian total length
+  was found: Ricklefs 2017 was the only candidate and its terms prohibit the use
+  ([CR-002](decisions.md#cr-002)).
 - **Traits** — AVONET, read from whichever of its three taxonomy sheets carries the species as its
   own taxon ([CR-006](decisions.md#cr-006)).
 - **Everything not covered above** — modeled.

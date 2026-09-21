@@ -27,10 +27,12 @@ and has been approved.
 
 Violating any of these is a licensing problem, not a style problem.
 
-- **Never commit anything under `fetched/`** (T-004). The ABA checklist is all-rights-reserved and
-  says so in the first row of its own CSV; Ricklefs 2017 is not openly licensed. They are fetched
-  onto the building machine, used, and never redistributed. `.gitignore` covers this — do not
-  "fix" it.
+- **Never commit anything under `fetched/`** (T-004). The ABA checklist is all-rights-reserved
+  and says so in the first row of its own CSV. It is fetched onto the building machine, used, and
+  never redistributed. `.gitignore` covers this — do not "fix" it.
+- **Never read or process Wiley Online Library material**, including Ricklefs 2017. Its terms
+  prohibit AI tools from ingesting it and prohibit automated access to the site, and the source is
+  rejected ([CR-002](spec/decisions.md#cr-002)). Do not try to revive it as a length source.
 - **Never commit the built dataset** (T-005). It carries values derived from those inputs.
 - **Only AVONET and the Fox wingspan data may be committed** as inputs. Both are CC BY 4.0. If you
   are about to add a third data file to the repository, check [spec/sources.md](spec/sources.md)

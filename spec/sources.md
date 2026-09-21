@@ -15,12 +15,14 @@ the others can be filled in plausibly from a URL alone.
 | [`avonet`](#avonet) | mandatory | by reference, vendored | **adopted** — pinned, vendored, hashed; no criteria yet |
 | [`aba`](#aba) | mandatory | by reference, **not** vendored | **partial** — terms read and quoted, pinned by hash; redistribution refused, so fetched at build |
 | [`fox-wingspan`](#fox-wingspan) | mandatory | by reference, vendored | **named** — license confirmed CC BY 4.0, **not yet retrieved** |
-| [`ricklefs`](#ricklefs) | mandatory | by reference, **not** vendored | **unresolved** — license question open, see CR-002 |
+| [`ricklefs`](#ricklefs) | mandatory | **rejected** | **rejected** — Wiley terms prohibit the use, see CR-002 |
+| [`wiley`](#wiley) | mandatory | quoted only, not vendored | **adopted** — terms read and transcribed; the reason `ricklefs` is rejected |
 | [`wcag`](#wcag) | mandatory | absorbed, partial | **partial** — adopted for two criteria, not vendored |
 | [`specman`](#specman) | — (method) | project copy | **adopted** — copied, base pin recorded below |
 
-Three of the six are not fully adopted, and two of those block nothing in v1. The one that does
-block something is `ricklefs`.
+Two of the seven are not fully adopted, and neither blocks v1. `ricklefs` was evaluated and
+**rejected**: its platform terms prohibit extraction, integration, storage and redistribution
+alike. Its entry is kept so the evaluation is not repeated.
 
 ---
 
@@ -104,12 +106,12 @@ measured fraction to be thin.
 | **Version** | Unpinned |
 | **Integrity** | None — nothing vendored |
 | **Tier** | mandatory (copyright) |
-| **Import style** | Undecided; provisionally fetch-at-build per T-004 |
+| **Import style** | **None — rejected.** Fetch-at-build was the plan; Wiley's Rules of Use G prohibits automated access |
 | **Scope** | Passerine total length (P-060) |
 | **Adopted parts** | `Length` column, passerines |
 | **Exclusions** | — |
 | **Owner** | Ricklefs / Wiley / ESA |
-| **Status** | **Unresolved.** Not CC-licensed; Crossref reports only Wiley version-of-record terms, and the Wiley terms page returns HTTP 403 to automated retrieval, so the terms have not been read. **Blocks the measured-length half of P-060.** See [CR-002](decisions.md#cr-002). |
+| **Status** | **Rejected 2026-09-21.** The terms were read and prohibit extraction, integration with other data, storage in a retrieval system, and redistribution — explicitly regardless of non-commercial use. See [`wiley`](#wiley) and [CR-002](decisions.md#cr-002). |
 
 Two further cautions, both from research rather than from the terms:
 
@@ -117,6 +119,33 @@ Two further cautions, both from research rather than from the terms:
   not establish the data's license. That redistribution is not evidence of permission.
 - Measurements are from museum study skins, which stretch or compress relative to a live bird. It
   is a real published measurement of a different quantity than a field guide's "length".
+
+---
+
+## `wiley`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | https://onlinelibrary.wiley.com/terms-and-conditions#vor |
+| **Version** | Retrieved 2026-09-21; page footer 9/21/26 5:29 PM. Wiley reserves the right to change these terms at any time. |
+| **Integrity** | [spec/sources/wiley/PROVENANCE.md](sources/wiley/PROVENANCE.md) — records the hash of the maintainer's local printout, **not** a vendored file |
+| **Tier** | mandatory |
+| **Import style** | **Quoted only.** The document is deliberately not vendored — see below |
+| **Scope** | Any use of material from Wiley Online Library; in practice, Ricklefs 2017 |
+| **Adopted parts** | Rules of Use A.2, B, C, F, G, H |
+| **Exclusions** | Subscription, PPV and e-commerce terms; warranty limitations; privacy policy |
+| **Owner** | John Wiley & Sons, Inc. |
+| **Status** | **Adopted.** Retrieved by a human, transcribed with quotations, and acted on — it is why `ricklefs` is rejected. |
+
+**This source is not vendored, and the departure is deliberate.** Rules of Use B forbids storing
+Wiley material "in any form or medium in a retrieval system" and F forbids incorporating it "into
+any institutional or other repository under any circumstances". A git repository is both.
+Committing the terms in order to evidence compliance with the terms would breach them. Rules of
+Use C permits "brief quotations for purposes of comment, criticism or similar scholarly
+purposes", so the transcription quotes the governing clauses and the document stays out.
+
+Recorded here as a location and import-style exception, in the same spirit as the AVONET workbook
+exception in [tech.md](tech.md#location-exception-the-avonet-workbook).
 
 ---
 

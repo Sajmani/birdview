@@ -59,11 +59,63 @@ dropped as a simplification.
 
 ---
 
-## CR-002 — Ricklefs 2017 is not openly licensed *(open)*
+## CR-002 — Ricklefs 2017 cannot be used; its terms prohibit it *(resolved)*
 
 **Subject:** `dataset.length.source`
 **Kind:** Cross-source — a mandatory source's terms versus a local requirement
-**Date raised:** 2026-09-20 · **Status: OPEN — owner action required**
+**Date raised:** 2026-09-20 · **Resolved:** 2026-09-21 · **Decided by:** Sameer
+
+### Resolution
+
+**The source is withdrawn. BirdView will not use Ricklefs 2017.** Every total length in v1 is
+`modeled`, tagged as such under P-062 and marked on the card under P-061.
+
+The terms were finally read — the maintainer printed the page from a browser, since the site 403s
+automated requests — and four clauses each independently prohibit what BirdView would do. They are
+transcribed with quotations in
+[sources/wiley/requirements.md](sources/wiley/requirements.md). In brief:
+
+| Clause | Effect |
+| --- | --- |
+| Rules of Use B | No storing material "in a retrieval system", no "systematic distribution" — and expressly "whether or not for commercial or non-profit use or for a fee or free of charge" |
+| Rules of Use C | No integrating the material "with other material or otherwise creat[ing] derivative works" — which is exactly the AVONET join |
+| Rules of Use G | No "automated means of any kind" to access the site, which forecloses the fetch-at-build mechanism of T-004 |
+| Rules of Use F | No incorporation "into any institutional or other repository under any circumstances" |
+
+The decisive detail is in B. This project's non-commercial posture (T-011) has unlocked other
+sources — Macaulay embedding, iNaturalist's CC BY-NC corpus — and it was the natural hope here
+too. The clause forecloses it in as many words.
+
+### Consequence
+
+Roughly half the dataset would have had a measured length; now none does. That is a real quality
+loss and it is worth naming rather than absorbing quietly. What makes it survivable is P-062:
+before per-metric provenance existed, an all-modeled length column meant presenting synthetic
+numbers as data. Now it means a length column honestly labeled `modeled` throughout, with the
+model named in the detail view.
+
+### Still worth doing
+
+**Ask Ricklefs or ESA.** These are platform terms accepted by using Wiley Online Library; they are
+not the last word on what the author or the society may permit for the data itself. A direct grant
+would come with none of the above restrictions. This stays in Work arising as an upside path, not
+a blocker.
+
+**Not relied upon**, and recorded so nobody revives them as shortcuts: that `RS-eco/traitdata`
+redistributes the data under GPL-3 (a package license does not establish the data's license), and
+that measurements may be uncopyrightable facts (a legal judgment nobody here is qualified to make,
+and one that would not touch the contract in any case).
+
+### Note for agents
+
+Rules of Use G also prohibits AI tools from ingesting or processing Wiley material. No agent on
+this project should read the Ricklefs article or its data. Reading the Terms of Use themselves,
+from a copy a human supplied, to establish compliance is the brief-quotation-for-comment case that
+Rules of Use C permits — and should be the last contact this project has with Wiley material.
+
+---
+
+### Original analysis
 
 Ricklefs 2017 is the only source of real total-length measurements for North American birds that
 this project found. Crossref reports only Wiley version-of-record terms and no CC license, and the

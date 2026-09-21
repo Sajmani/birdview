@@ -35,10 +35,14 @@ Value: `localhost:8080`
 Subject: `build.inputs`
 Goals: G-001
 
-Inputs whose license forbids redistribution — the ABA checklist, and Ricklefs 2017 — are
-downloaded onto the building machine at build time, verified against the hashes recorded in
+Inputs whose license forbids redistribution — currently the ABA checklist alone — are downloaded
+onto the building machine at build time, verified against the hashes recorded in
 [sources.md](sources.md), consumed, and never committed. They land under `fetched/`, which
 `.gitignore` excludes.
+
+This mechanism is available only where the publisher permits automated retrieval. It is not a
+general workaround for a restrictive license: Ricklefs 2017 was rejected partly because Wiley's
+terms forbid automated access outright ([CR-002](decisions.md#cr-002)).
 
 The CC BY inputs are committed: the AVONET workbook, and the Fox et al. wingspan data when it is
 retrieved. So is the synonym table of P-006, which is the project's own work.
@@ -130,7 +134,7 @@ What [process.md](process.md#project-bindings) requires each project to declare.
 | **ID citation syntax** | Go line comments, preserving the literal token: `// Verifies: P-042, T-010.` |
 | **Artifact locations** | `spec/`, per the standard layout, with one exception below. |
 | **Subject vocabulary** | Dotted paths, lowercase, e.g. `diagram.scale.mode`, `badge.contrast.ratio`, `dataset.join.key`. New subjects are added by the project owner. |
-| **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never redistribute data derived from the ABA checklist or Ricklefs 2017. |
+| **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never redistribute data derived from the ABA checklist. Never access or process Wiley Online Library material, by any means including an AI agent (CR-002). |
 | **External systems** | Tests make no network requests. Any source fetch is exercised against a local fixture or an `httptest` server, never against the live publisher. |
 | **Approval authority** | Sameer — gates, waivers, amendments, source deviations, risk acceptances. |
 | **Source refresh cadence** | Annually. ABA, AOS and eBird/Clements each revise on roughly yearly cycles, and P-006's synonym table depends on all three. |
