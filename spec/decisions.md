@@ -98,8 +98,12 @@ model named in the detail view.
 
 **Ask Ricklefs or ESA.** These are platform terms accepted by using Wiley Online Library; they are
 not the last word on what the author or the society may permit for the data itself. A direct grant
-would come with none of the above restrictions. This stays in Work arising as an upside path, not
-a blocker.
+would come with none of the above restrictions.
+
+**Deferred until BirdView runs**, by decision of 2026-09-21: a demo that shows the app crediting
+its sources and labeling every modeled value as modeled makes a far better case than a description
+of an intention. See [Work arising](#why-the-permission-asks-wait-for-a-demo). This is an upside
+path, not a blocker — v1 ships with modeled lengths either way.
 
 **Not relied upon**, and recorded so nobody revives them as shortcuts: that `RS-eco/traitdata`
 redistributes the data under GPL-3 (a package license does not establish the data's license), and
@@ -390,10 +394,36 @@ before entering the mapping table.
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
 
-| Item | Owner |
-| --- | --- |
-| Resolve CR-002 — read the Wiley terms, or ask, or drop measured length | Sameer |
-| Ask ABA for written permission to redistribute the checklist | Sameer |
-| Retrieve, hash and vendor `fox-wingspan`; write its `PROVENANCE.md` | — |
-| Write `spec/sources/aba/PROVENANCE.md` with the CSV hash and the fetch procedure | — |
-| Write `acceptance.md` — Gate 2, before any code | — |
+| Item | Owner | Gate |
+| --- | --- | --- |
+| Retrieve, hash and vendor `fox-wingspan`; write its `PROVENANCE.md` | — | before ingest reads it |
+| Write `acceptance.md` — Gate 2, before any code | — | now |
+| Ask Ricklefs or ESA for permission to use the measured-length data | Sameer | **after a working demo** |
+| Ask ABA for written permission to redistribute the checklist | Sameer | **after a working demo** |
+
+### Why the permission asks wait for a demo
+
+*Recorded 2026-09-21.* Both asks are deferred until BirdView runs and can be shown.
+
+A request that describes an intended use is weaker than one that demonstrates it. Showing a
+rights-holder the actual application — what it does with their data, how the data is credited,
+that it is non-commercial and that every value carries visible provenance — answers most of what
+they would otherwise have to take on trust. It also lets them see that BirdView labels a modeled
+length as modeled, which is the strongest available evidence that their measured data would be
+handled honestly.
+
+Neither ask blocks v1, which is what makes waiting free:
+
+- **Ricklefs / ESA** would *add* capability. Every length is currently `modeled`
+  ([CR-002](#cr-002)); a grant would make roughly half of them measured. Nothing breaks without
+  it.
+- **ABA** would *simplify the build*. Fetch-at-build already works under T-004, so a grant would
+  only remove the network step and let T-005 relax. Nothing breaks without it either.
+
+Sending them together after a demo also means one conversation per organization rather than two
+rounds of the same explanation.
+
+**The cost of waiting**, recorded so it is a choice rather than a drift: if ESA grants permission
+late, the length column changes from wholly `modeled` to half `measured`, which will move diagrams
+and re-sort sections. Builders should treat the provenance model (P-062) as the thing that stays
+fixed and the mix of kinds as the thing that moves.
