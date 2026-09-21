@@ -98,7 +98,14 @@ The 22 in-scope misses fall into three kinds, which matter very differently:
   *Larus smithsonianus*, *Larus vegae*, *Numenius hudsonicus*, *Setophaga aestiva*,
   *Sturnella lilianae*, *Sula brewsteri*, *Vireo swainsoni*. *Larus smithsonianus* and
   *Larus vegae* both resolve to *Larus argentatus*.
-- **Unresolved (1)** — *Ramosomyia violiceps*; no candidate prior name was found in AVONET.
+- **Unresolved (1)** — *Ramosomyia violiceps*. **Resolved 2026-09-21:** `AVONET2_eBird` calls it
+  *Leucolia violiceps*; the earlier lookup guessed *Amazilia violiceps*, which is the BirdLife and
+  BirdTree name.
+
+Searching all three AVONET taxonomy sheets rather than `AVONET2_eBird` alone shows that only
+**6** of the 22 are absent from AVONET entirely — *Larus vegae*, *Numenius hudsonicus*,
+*Sturnella lilianae*, *Vireo swainsoni*, *Sula brewsteri* and *Anthus japonicus*. See
+[CR-006](../../decisions.md#cr-006) for the full disposition and the mass caveat.
 
 **The rename/split classification above is provisional.** It was derived mechanically from
 whether the parent name still appears in ABA 8.19, and that test under-detects: *Astur

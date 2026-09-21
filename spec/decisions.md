@@ -216,11 +216,54 @@ taxon, which is a third category the provenance model does not currently have.
 | Exclude the 9 | 832 species, every one genuinely its own measurement; some common birds missing |
 | Source the 9 elsewhere | Correct and slow; no identified source |
 
-### Also unresolved
+### Amended 2026-09-21 — most of them are in AVONET after all
 
-*Ramosomyia violiceps* (Violet-crowned Hummingbird) matched no candidate prior name in AVONET and
-needs a manual lookup. And the twelve "renames" were classified mechanically — the test
-under-detects splits, so each needs a human taxonomic check before entering the mapping table.
+The analysis above searched only `AVONET2_eBird`. AVONET ships **three parallel taxonomies**, and
+searching all of them changes the numbers materially:
+
+| Resolution | Count | Species |
+| --- | --- | --- |
+| Present in `AVONET2_eBird` under an older name | 11 | the four *Anarhynchus* (ex-*Charadrius*), *Astur* ×2 (ex-*Accipiter*), *Ardea ibis* (ex-*Bubulcus*), *Botaurus exilis* (ex-*Ixobrychus*), *Gygis candida* (ex-*G. alba*), *Tyto furcata* (ex-*T. alba*), *Ramosomyia violiceps* (ex-***Leucolia violiceps***) |
+| Own row in `AVONET1_BirdLife` | 4 | *Larus smithsonianus*, *Calonectris borealis*, *Pterodroma deserta*, *Spilopelia chinensis* |
+| Own row in `AVONET3_BirdTree` | 1 | *Setophaga aestiva*, as *Dendroica aestiva* |
+| **Absent from every AVONET taxonomy** | **6** | *Larus vegae*, *Numenius hudsonicus*, *Sturnella lilianae*, *Vireo swainsoni*, *Sula brewsteri*, *Anthus japonicus* |
+
+*Ramosomyia violiceps* is resolved: the earlier lookup guessed *Amazilia violiceps*, which is the
+BirdLife and BirdTree name. `AVONET2_eBird` calls it *Leucolia violiceps*.
+
+**A new option therefore exists:** read trait rows from whichever AVONET taxonomy sheet carries
+the species as its own taxon, recording which sheet each row came from. For the five species
+above this yields genuine own-taxon measurements instead of a borrowed parent's.
+
+**And a new caveat.** Where BirdLife splits a pair, the *linear* traits differ but **mass is
+identical**:
+
+```
+Larus smithsonianus   culmen 69.3  depth 18.3  tail 166.0  wing 429.5  mass 1090.99
+Larus argentatus      culmen 74.0  depth 19.6  tail 170.2  wing 430.8  mass 1090.99
+```
+
+The same holds for *Calonectris borealis*/*diomedea* (both 534.99 g) and *Pterodroma
+deserta*/*feae* (both 311 g). AVONET's mass column is sourced separately from its morphometrics
+and was evidently not split. So diagrams would differentiate correctly while **ordering by mass
+(P-020) would still show the pair as identical** — a smaller version of the original problem,
+confined to one of the three sort metrics.
+
+### Revised options
+
+| Option | Effect |
+| --- | --- |
+| Read across all three AVONET sheets, record the source sheet per species | Reduces the problem from 9 species to 6; mixes taxonomies, which must be recorded per row |
+| Then, for the remaining 6: borrow parent traits with a third provenance class | All 841 present, honestly labeled |
+| Then, for the remaining 6: exclude | 835 species, every trait its own taxon's |
+
+### Still unresolved
+
+The rename/split classification remains provisional. *Astur atricapillus*, *Ardea ibis*, *Gygis
+candida* and *Tyto furcata* are listed as renames because the parent is absent from ABA, but each
+is really a split whose `AVONET2_eBird` row represents the combined taxon. Mapping them is
+therefore the same borrowing problem in a quieter form, and each needs a human taxonomic check
+before entering the mapping table.
 
 ---
 
