@@ -189,6 +189,18 @@ With no filter applied, the initial view is all species, ordered by length.
 Rationale: the full sweep from hummingbird to swan is the clearest statement of what the app is
 for. Opening filtered or empty would hide it.
 
+### P-034 — A card opens a detail view
+Subject: `presentation.detail_view`
+Goals: G-001, G-003
+
+Clicking a species card opens a fuller view of that species: its diagram at a larger size, every
+metric with its value, and the provenance of each metric (P-063).
+
+Rationale: the card is deliberately dense — it exists to be compared against dozens of others at a
+glance, which leaves no room to say where each number came from. The detail view is where that is
+said. It is the surface that makes P-062's provenance record worth recording, rather than metadata
+nobody ever sees.
+
 ---
 
 ## Diagram
@@ -285,30 +297,74 @@ Status: **Withdrawn from v1** with P-050.
 
 ## Measurements
 
-### P-060 — Length and wingspan carry per-value provenance
-Subject: `measurement.provenance`
-Value: `measured | estimated, per value`
+### P-060 — Where length and wingspan come from
+Subject: `measurement.source`
 Goals: G-001
 
-Every total length and every wingspan is tagged as either a published measurement or a modeled
-estimate:
+- **Wingspan** — Fox et al. 2026, filtered to `needs_prediction = 0` so only empirical values are
+  taken. Stored as the reported min/mid/max triple rather than a point value.
+- **Length** — Ricklefs 2017, passerines only. Subject to the unresolved license question in
+  [CR-002](decisions.md#cr-002).
+- **Traits** — AVONET, read from whichever of its three taxonomy sheets carries the species as its
+  own taxon ([CR-006](decisions.md#cr-006)).
+- **Everything not covered above** — modeled.
 
-- **Wingspan, measured** — Fox et al. 2026, filtered to `needs_prediction = 0` so that only
-  empirical values are taken. Stored as the reported min/mid/max triple rather than a point value.
-- **Length, measured** — Ricklefs 2017, passerines only. Subject to the unresolved license
-  question in [CR-002](decisions.md#cr-002).
-- **Everything else** — modeled from AVONET traits and tagged as an estimate.
-
-Rationale: AVONET records neither dimension, and no open source supplies both across the ABA
-avifauna. Mixing measured and modeled values is acceptable *only* because each is labeled. See
+Rationale: AVONET records neither macroscopic dimension, and no open source supplies both across
+the ABA avifauna. Mixing sources of differing authority is acceptable *only* under P-062. See
 [CR-001](decisions.md#cr-001).
 
-### P-061 — The interface distinguishes measured from estimated
+### P-061 — The card marks any metric that is not measured
 Goals: G-001
 
-Wherever a length or wingspan is shown — as a number, and as a scaled diagram — the interface
-makes clear whether it is measured or estimated.
+On the card itself — where numbers and the scaled diagram appear — any metric whose `kind` is not
+`measured` is visibly marked as such, without the card having to explain why.
 
-Rationale: this requirement is what makes P-060 honest rather than merely convenient. If it is
-dropped, P-060 becomes a way of presenting modeled numbers as data, which is the thing the project
-explicitly rejected. It is load-bearing, not decoration.
+Rationale: this is what makes P-060 honest rather than merely convenient. If it is dropped, the
+provenance record becomes metadata nobody sees and BirdView presents modeled numbers as data,
+which is the thing the project explicitly rejected. It is load-bearing, not decoration.
+
+### P-062 — Every presented metric carries a provenance record
+Subject: `measurement.provenance.record`
+Value: `{kind, source, sourceTaxon, model}`
+Goals: G-001
+
+Every metric BirdView presents — total length, wingspan, mass, and each diagram segment — carries
+a record of where that specific value came from:
+
+| Field | Meaning |
+| --- | --- |
+| `kind` | `measured`, `near-match`, or `modeled` |
+| `source` | The dataset and its pinned version, including the sheet where that distinguishes rows |
+| `sourceTaxon` | The binomial the value was actually filed under |
+| `model` | For `modeled` values, the named model that produced it |
+
+The three kinds:
+
+- **`measured`** — a published measurement *of this species*, whatever name it is filed under and
+  whichever sheet it sits in. A value read from `AVONET1_BirdLife`, or found under a pre-revision
+  name such as *Charadrius nivosus* for *Anarhynchus nivosus*, is measured: the specimens are the
+  right birds. `sourceTaxon` records the name so the claim is auditable.
+- **`near-match`** — a published measurement of a **different taxon**, used because none exists
+  for this species. Typically a pre-split parent: *Larus argentatus* standing in for *Larus
+  vegae*. Real data, wrong bird, and the record says so.
+- **`modeled`** — computed rather than measured. `model` names the computation.
+
+Rationale: this generalizes what CR-001 established for lengths and CR-006 for split taxa. Those
+were solved twice, differently, because there was no single place to say how confident a number
+is. One record covers all of it, and makes each later gap a labeling problem rather than a
+redesign.
+
+### P-063 — The detail view explains each metric's provenance
+Goals: G-001
+
+In the detail view (P-034), each metric is shown with its provenance stated in plain language —
+naming the source, and for a `near-match` naming the taxon actually measured, for a `modeled`
+value naming the model.
+
+The detail view also discloses that the **neck/body division is a drawing convention rather than a
+measurement** (P-045). It is the only honest place to say so, since the diagram gives no hint that
+one of its five segments is differently grounded from the other four.
+
+Rationale: the card marks *that* a value is uncertain; this says *how*. "Wingspan estimated from
+wing chord" and "mass measured on Herring Gull, a species this was split from in 2024" are very
+different caveats, and a birder who cares enough to click deserves the difference.

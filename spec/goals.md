@@ -52,5 +52,7 @@ BirdView does not do it.
   standing constraint, not a current circumstance — several sources that BirdView may later draw
   on are usable only on that basis (T-011).
 
-Two things are *not* non-goals, merely unbuilt: taxonomy browsing beyond the family filter, and
-per-species detail pages.
+Taxonomy browsing beyond the family filter is *not* a non-goal, merely unbuilt.
+
+A per-species detail view **is** in scope, as of P-034 — it is where a metric's provenance gets
+explained (P-063), which the card has no room for.

@@ -168,12 +168,42 @@ the work is not repeated:
 
 ---
 
-## CR-006 — Nine ABA species have no AVONET row of their own *(open)*
+## CR-006 — ABA species with no AVONET row of their own *(resolved)*
 
 **Subject:** `dataset.join.key`
 **Kind:** Derived — no pair of requirements contradicts; the conflict appears only when P-006's
-mapping meets P-060's provenance rule
-**Date raised:** 2026-09-21 · **Status: OPEN — owner decision required**
+mapping meets the provenance rule
+**Date raised:** 2026-09-21 · **Resolved:** 2026-09-21 · **Decided by:** Sameer
+
+### Resolution
+
+Two decisions, together:
+
+1. **Read each species from whichever AVONET taxonomy carries it as its own taxon**, recording the
+   sheet and the filed name in its provenance record. This reduces the problem from 9 species to
+   6.
+2. **For the remaining 6, borrow the parent taxon's traits and label them `near-match`** under
+   P-062. All 841 species stay in the dataset, and every borrowed value says whose measurement it
+   actually is.
+
+A value read from another sheet, or found under a pre-revision name, is **`measured`** — the
+specimens are the right birds and only the filing changed. `near-match` is reserved for a value
+measured on a genuinely different taxon.
+
+This mirrors CR-001 exactly: mixed authority is acceptable when, and only when, each value is
+labeled. P-062 now provides the vocabulary both decisions needed, and the detail view of P-034 /
+P-063 is where it reaches the user.
+
+**Resulting status:** P-006 Active as amended · P-062 Active · P-063 Active · the six near-match
+species are `Larus vegae`, `Numenius hudsonicus`, `Sturnella lilianae`, `Vireo swainsoni`,
+`Sula brewsteri`, `Anthus japonicus`.
+
+**Carried forward, not closed by this:** the mass caveat below, and the four renames-in-disguise
+at the end, still need a human taxonomic check before the mapping table is written.
+
+---
+
+### Original analysis
 
 ### What was measured
 
@@ -249,13 +279,14 @@ and was evidently not split. So diagrams would differentiate correctly while **o
 (P-020) would still show the pair as identical** — a smaller version of the original problem,
 confined to one of the three sort metrics.
 
-### Revised options
+### Options considered
 
-| Option | Effect |
-| --- | --- |
-| Read across all three AVONET sheets, record the source sheet per species | Reduces the problem from 9 species to 6; mixes taxonomies, which must be recorded per row |
-| Then, for the remaining 6: borrow parent traits with a third provenance class | All 841 present, honestly labeled |
-| Then, for the remaining 6: exclude | 835 species, every trait its own taxon's |
+| Option | Effect | |
+| --- | --- | --- |
+| Read across all three AVONET sheets, recording the source sheet per species | Reduces the problem from 9 to 6; mixes taxonomies, which must be recorded per row | **chosen** |
+| For the remaining 6, borrow parent traits as `near-match` | All 841 present, honestly labeled | **chosen** |
+| For the remaining 6, exclude them | 835 species, every trait its own taxon's | rejected — loses common birds for a labeling problem |
+| Borrow silently | Complete dataset, false precision, identical gull diagrams | rejected |
 
 ### Still unresolved
 
