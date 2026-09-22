@@ -28,9 +28,15 @@ pure Go functions are the cheapest checker that would actually catch a violation
 rules in JavaScript would have meant either duplicating them in Go for the tests, or testing them
 through a browser harness the project does not have.
 
-So the server computes sections and geometry and renders HTML; the client runs no JavaScript at
-all. Every control is a query parameter and every detail view is a URL, which also makes any view
-shareable. The cost is a page load per interaction, which is unnoticeable on localhost.
+So the server computes sections and geometry and renders HTML. Every control is a query parameter
+and every detail view is a URL, which also makes any view shareable. The cost is a page load per
+interaction, which is unnoticeable on localhost.
+
+**One exception, added deliberately.** A page load per interaction means the browser lands at the
+top each time, discarding your place in a list of 841 birds. A dozen inline lines save the scroll
+position on leaving the index and restore it on return. It is the only script in the project and
+holds no application logic — the rule it protects is that *logic* stays in Go, not that the client
+is inert.
 
 This is what let AC-056 and AC-057 be real checks rather than declared gaps.
 

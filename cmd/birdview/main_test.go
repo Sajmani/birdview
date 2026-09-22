@@ -658,3 +658,40 @@ func TestClearingEverythingShowsGuidance(t *testing.T) {
 		t.Error("All is still marked selected with nothing selected")
 	}
 }
+
+// TestScrollRestorationIsInlineAndSelfContained checks the one script BirdView
+// ships is embedded rather than fetched, and that it is scoped to the index.
+//
+// It cannot check that scrolling actually works -- that needs a browser this
+// project does not have -- so AC-062 is honest about covering presence and
+// self-containment only.
+//
+// Verifies: T-002, P-038. Criterion: AC-062.
+func TestScrollRestorationIsInlineAndSelfContained(t *testing.T) {
+	s := newTestServer(t)
+	_, body := get(t, s, "/")
+
+	if !strings.Contains(body, "birdview.scroll") {
+		t.Error("index carries no scroll-restoration script")
+	}
+	// Inline only: an external script would break T-002 the same way a CDN
+	// stylesheet would, and AC-051 only looks at src/href attributes.
+	for _, tag := range regexp.MustCompile(`<script[^>]*>`).FindAllString(body, -1) {
+		if strings.Contains(tag, "src=") {
+			t.Errorf("script is fetched rather than embedded: %s", tag)
+		}
+	}
+	// Scoped to the index, so a detail page does not consume the saved position.
+	if !strings.Contains(body, `window.location.pathname !== "/"`) {
+		t.Error("script is not scoped to the index; a detail page would eat the saved scroll")
+	}
+	// The detail view ships no script at all.
+	_, detail := get(t, s, "/species/ardea_herodias")
+	if strings.Contains(detail, "<script") {
+		t.Error("detail view carries a script; only the index needs one")
+	}
+	// And the controls remain addressable for anyone who prefers an anchor.
+	if !strings.Contains(body, `id="controls"`) {
+		t.Error("controls have no id; #controls should work as a fallback target")
+	}
+}

@@ -253,6 +253,21 @@ The initial view has every family selected and shows all species, ordered by len
 Rationale: the full sweep from hummingbird to swan is the clearest statement of what the app is
 for. Opening filtered or empty would hide it.
 
+### P-038 — Toggling a control keeps your place
+Subject: `presentation.scroll`
+Goals: G-002
+
+Changing any control preserves the scroll position rather than returning to the top of the page,
+as does returning from a detail view.
+
+Rationale: every control is a link, so each toggle loads a new URL and the browser lands at the
+top — which discards your place in a list of 841 birds. It matters most for the controls that do
+not change the list at all: switching units or scale should leave you looking at the same birds.
+
+The restoration is the only client-side script in BirdView and holds no application logic;
+ordering, sectioning and geometry stay in Go where they are property-tested (see
+[arch.md](arch.md)). Without JavaScript the page behaves as it did before.
+
 ### P-037 — The empty state says what to do
 Subject: `presentation.empty_state`
 Goals: G-002

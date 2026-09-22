@@ -60,7 +60,7 @@
   </div>
 </details>
 
-<details class="controls" open>
+<details class="controls" id="controls" open>
   <summary>Controls</summary>
   <div class="row">
     <span class="lbl">Order by</span>
@@ -129,6 +129,35 @@
   Species list from the ABA Checklist 8.19. Lengths are modeled; click any bird for the provenance
   of every number.
 </footer>
+<script>
+/* Keep the page still across navigations.
+ *
+ * Every control is a link, so toggling one loads a new URL and the browser
+ * lands at the top -- which throws away your place in a list of 841 birds.
+ * This saves the scroll position when leaving the index and restores it on
+ * return, which covers both the controls and the trip out to a detail page
+ * and back.
+ *
+ * It is the only script in BirdView, and it deliberately holds no logic:
+ * ordering, sectioning and geometry stay in Go where they are property-tested.
+ * Without JavaScript the page still works exactly as before, minus this. */
+(function () {
+  var KEY = "birdview.scroll";
+  if (window.location.pathname !== "/") return;
+  try {
+    var y = sessionStorage.getItem(KEY);
+    if (y !== null) {
+      sessionStorage.removeItem(KEY);
+      window.scrollTo(0, parseInt(y, 10) || 0);
+    }
+    window.addEventListener("pagehide", function () {
+      sessionStorage.setItem(KEY, String(window.scrollY));
+    });
+  } catch (e) {
+    /* private mode, storage disabled: fall back to the browser's behavior */
+  }
+})();
+</script>
 </body>
 </html>{{end}}
 

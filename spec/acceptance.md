@@ -385,6 +385,18 @@ that nothing matched; the count reports zero; and All is no longer marked select
 selection as "no filter" (the previous behavior, which showed every bird) and by reverting the
 message to "No species match that filter".
 
+### AC-062 — The scroll script is embedded and scoped to the index
+**Verifies:** P-038, T-002 · **Level:** code · **Method:** rendering test
+**Assertions:** the index carries the script inline, never via `src`; it is scoped to `/` so a
+detail page cannot consume the saved position; the detail view ships no script; and the controls
+carry an `id` so `#controls` works as a fallback target.
+**Status: verified 2026-09-22 — passing, and watched failing** by externalizing the script and by
+removing its path guard.
+
+**This does not check that scrolling works.** That needs a browser, which this project does not
+have. The criterion covers presence, self-containment and scoping only, and the behavior itself is
+a declared gap.
+
 ---
 
 ## Traceability
@@ -410,6 +422,7 @@ message to "No species match that filter".
 | P-035 | AC-059 | |
 | P-036 | — | **gap** — a `<details>` with no behavior to assert |
 | P-037 | AC-061 | |
+| P-038 | AC-062 | partial — behavior unverifiable without a browser |
 | P-040 | AC-033 | |
 | P-041 | AC-030 | |
 | P-042 | AC-031 | |
