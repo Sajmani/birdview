@@ -247,12 +247,18 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	// The width reference must span the whole scale group too, or the crossbar
 	// would be clipped for wide-winged birds in a section whose longest bird is
 	// short -- a gull beside a rail.
+	//
+	// The wingspan alone is enough: legs rake sideways as well, but a pair of
+	// them spreads far less wide than the wings of the same bird, so they never
+	// set the width. That is checked against the whole dataset rather than
+	// guarded here, because a branch for a case that cannot arise is a branch
+	// nothing ever tests -- see TestLegIsModeledFromTheMeasuredTarsus.
 	spanRefs := make([]float64, len(secs))
 	var globalSpan float64
 	for i, sec := range secs {
 		for _, sp := range sec.Species {
-			if sp.Wingspan.Value > spanRefs[i] {
-				spanRefs[i] = sp.Wingspan.Value
+			if w := sp.Wingspan.Value; w > spanRefs[i] {
+				spanRefs[i] = w
 			}
 		}
 		if spanRefs[i] > globalSpan {
@@ -379,7 +385,8 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		row("Total length", sp.TotalLength, view.ByLength, opt.Metric3),
 		row("Wingspan", sp.Wingspan, view.ByWingspan, opt.Metric3),
 		row("Mass", sp.Mass, view.ByMass, opt.Metric3),
-		row("Tarsus (leg)", sp.Tarsus, view.ByLength, opt.Metric3),
+		row("Leg", sp.Leg, view.ByLength, opt.Metric3),
+		row("Tarsus", sp.Tarsus, view.ByLength, opt.Metric3),
 		row("Bill", sp.Segments.Bill, view.ByLength, opt.Metric3),
 		row("Head", sp.Segments.Head, view.ByLength, opt.Metric3),
 		row("Neck", sp.Segments.Neck, view.ByLength, opt.Metric3),

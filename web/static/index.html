@@ -24,9 +24,9 @@
         <li><i class="sw neck"></i><b>Neck</b> &mdash; estimated per family; a drawing convention</li>
         <li><i class="sw body"></i><b>Body</b> &mdash; trunk, estimated from mass</li>
         <li><i class="sw tail"></i><b>Tail</b> &mdash; dashed, to tell it from the body</li>
-        <li><i class="sw leg"></i><b>Legs</b> &mdash; the measured tarsus, raked back from the
-          body&rsquo;s middle. Cranes and stilts stand tall; swifts and hummingbirds barely
-          have any</li>
+        <li><i class="sw leg"></i><b>Legs</b> &mdash; estimated from the measured tarsus, raked
+          back from the body&rsquo;s middle and passing behind it. Cranes and stilts stand tall;
+          swifts and hummingbirds barely have any</li>
         <li><i class="sw wing"></i><b>Wingspan</b> &mdash; the crossbar, at the same scale as the
           bird&rsquo;s height, so a wing really is that long relative to the body</li>
       </ul>
@@ -222,17 +222,17 @@
 {{$g := .Geom}}{{$b := .Box}}
 <svg class="dia" viewBox="0 0 {{f1 $b.W}} {{f1 $b.H}}" preserveAspectRatio="xMidYMid meet" role="img"
      aria-label="scaled outline of {{.S.CommonName}}">
-  <g transform="translate(0,{{f1 (div (sub $b.H $g.TotalHeight) 2)}})">
+  <g transform="translate(0,{{f1 (div (sub $b.H $g.DrawnHeight) 2)}})">
     <line class="wing" x1="{{f1 (sub $g.CX $g.CrossbarHalfWidth)}}" y1="{{f1 $g.YShoulder}}"
           x2="{{f1 (add $g.CX $g.CrossbarHalfWidth)}}" y2="{{f1 $g.YShoulder}}"/>
     <line class="bill" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBillTip}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YCraniumTop}}"/>
     <ellipse class="head" cx="{{f1 $g.CX}}" cy="{{f1 $g.YHeadCenter}}" rx="{{f1 $g.HeadRx}}" ry="{{f1 $g.HeadRy}}"/>
     <line class="neck" x1="{{f1 $g.CX}}" y1="{{f1 $g.YNeckTop}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YShoulder}}"/>
-    <line class="body" x1="{{f1 $g.CX}}" y1="{{f1 $g.YShoulder}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YBodyEnd}}"/>
     <line class="leg" x1="{{f1 $g.CX}}" y1="{{f1 $g.YLegTop}}"
           x2="{{f1 (sub $g.CX $g.LegDX)}}" y2="{{f1 (add $g.YLegTop $g.LegDY)}}"/>
     <line class="leg" x1="{{f1 $g.CX}}" y1="{{f1 $g.YLegTop}}"
           x2="{{f1 (add $g.CX $g.LegDX)}}" y2="{{f1 (add $g.YLegTop $g.LegDY)}}"/>
+    <line class="body" x1="{{f1 $g.CX}}" y1="{{f1 $g.YShoulder}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YBodyEnd}}"/>
     <line class="junction" x1="{{f1 (sub $g.CX 4)}}" y1="{{f1 $g.YBodyEnd}}"
           x2="{{f1 (add $g.CX 4)}}" y2="{{f1 $g.YBodyEnd}}"/>
     <line class="tail" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBodyEnd}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YTailTip}}"/>

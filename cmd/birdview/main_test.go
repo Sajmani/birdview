@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html"
 	"net/http"
 	"net/http/httptest"
@@ -10,12 +11,13 @@ import (
 	"testing"
 
 	"birdview/internal/dataset"
+	"birdview/internal/morphology"
 	"birdview/internal/view"
 	"birdview/web"
 )
 
 func testDataset() *dataset.Dataset {
-	mk := func(id, common, sci, fam string, bill, head, neck, body, tail, span, mass float64, k dataset.Kind) dataset.Species {
+	mk := func(id, common, sci, fam string, bill, head, neck, body, tail, span, mass, tarsus float64, k dataset.Kind) dataset.Species {
 		m := func(v float64) dataset.Metric {
 			return dataset.Metric{Value: v, Prov: dataset.Provenance{
 				Kind: dataset.Measured, Source: "AVONET v7, sheet AVONET2_eBird", SourceTaxon: sci}}
@@ -23,12 +25,17 @@ func testDataset() *dataset.Dataset {
 		mod := func(v float64, s string) dataset.Metric {
 			return dataset.Metric{Value: v, Prov: dataset.Provenance{Kind: dataset.Modeled, Model: s}}
 		}
+		// The leg comes from the real model rather than a literal, so the
+		// fixture cannot quietly disagree with the family factors it claims.
+		legV, legModel := morphology.LegLength(tarsus, fam)
 		sp := dataset.Species{
 			ID: id, CommonName: common, BandingCode: code(common), ScientificName: sci, Family: fam,
 			FamilyCommon: fam + " family", FamilyColor: "#86efac",
 			TotalLength: mod(bill+head+neck+body+tail, "sum of the five diagram segments"),
 			Wingspan:    dataset.Metric{Value: span, Prov: dataset.Provenance{Kind: k, Source: "Fox et al. 2026", SourceTaxon: "Other species"}},
 			Mass:        m(mass),
+			Tarsus:      m(tarsus),
+			Leg:         mod(morphology.Round1(legV), legModel),
 			Segments: dataset.Segments{
 				Bill: m(bill), Head: mod(head, "cranial vault model"), Neck: mod(neck, "neck ratio for "+fam),
 				Body: mod(body, "trunk model"), Tail: m(tail),
@@ -42,12 +49,18 @@ func testDataset() *dataset.Dataset {
 	orders := map[string]string{
 		"Trochilidae": "Apodiformes", "Turdidae": "Passeriformes",
 		"Corvidae": "Passeriformes", "Ardeidae": "Pelecaniformes",
+		"Recurvirostridae": "Charadriiformes",
 	}
+	// Tarsus values are the real AVONET figures, so the modeled legs the fixture
+	// carries are the ones the shipped dataset carries. The stilt is here for
+	// one reason: its feet fall below its tail tip, the case the renderer has to
+	// leave room for and no other fixture bird exercises.
 	sp := []dataset.Species{
-		mk("calypte_anna", "Anna's Hummingbird", "Calypte anna", "Trochilidae", 18, 12, 6, 40, 26, 120, 4, dataset.Measured),
-		mk("turdus_migratorius", "American Robin", "Turdus migratorius", "Turdidae", 20, 18, 12, 90, 85, 390, 77, dataset.Measured),
-		mk("corvus_brachyrhynchos", "American Crow", "Corvus brachyrhynchos", "Corvidae", 50, 30, 22, 170, 180, 1000, 450, dataset.Measured),
-		mk("ardea_herodias", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, dataset.NearMatch),
+		mk("calypte_anna", "Anna's Hummingbird", "Calypte anna", "Trochilidae", 18, 12, 6, 40, 26, 120, 4, 4.6, dataset.Measured),
+		mk("turdus_migratorius", "American Robin", "Turdus migratorius", "Turdidae", 20, 18, 12, 90, 85, 390, 77, 32.7, dataset.Measured),
+		mk("corvus_brachyrhynchos", "American Crow", "Corvus brachyrhynchos", "Corvidae", 50, 30, 22, 170, 180, 1000, 450, 55.0, dataset.Measured),
+		mk("himantopus_mexicanus", "Black-necked Stilt", "Himantopus mexicanus", "Recurvirostridae", 66.6, 42.1, 40.3, 89.5, 73.6, 750, 176.8, 106.7, dataset.NearMatch),
+		mk("ardea_herodias", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, 167.6, dataset.NearMatch),
 	}
 	var fams []dataset.Family
 	seenFam := map[string]bool{}
@@ -64,6 +77,22 @@ func testDataset() *dataset.Dataset {
 		})
 	}
 	return &dataset.Dataset{Families: fams, Species: sp}
+}
+
+// fixtureCounts reports how many species, families and orders testDataset
+// holds. The selector checks state a relationship against these rather than a
+// literal, which would go quietly stale the next time the fixture grows a
+// species -- and growing it is how those checks get sharper, not weaker.
+func fixtureCounts() (species, families, orders int) {
+	ds := testDataset()
+	seen := map[string]bool{}
+	for _, f := range ds.Families {
+		if !seen[f.Order] {
+			seen[f.Order] = true
+			orders++
+		}
+	}
+	return len(ds.Species), len(ds.Families), orders
 }
 
 // code builds a plausible four-letter alpha code from a common name, so the
@@ -173,6 +202,97 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 	}
 }
 
+// diagrams splits a page into its individual <svg> blocks.
+func diagrams(t *testing.T, body string) []string {
+	t.Helper()
+	var out []string
+	for _, m := range regexp.MustCompile(`(?s)<svg class="dia".*?</svg>`).FindAllString(body, -1) {
+		out = append(out, m)
+	}
+	if len(out) == 0 {
+		t.Fatal("page contains no diagrams")
+	}
+	return out
+}
+
+// TestDiagramFitsItsBoxFeetIncluded asserts that the renderer leaves room for
+// legs that reach below the tail tip (P-040).
+//
+// The diagram used to be centered on its bill-to-tail extent, which was safe
+// only while the legs were the measured tarsus. The modeled leg reaches further:
+// 11 of the 841 shipped species stand lower on their feet than their tail
+// reaches, a Black-necked Stilt by 12% of its own length. Centering on
+// bill-to-tail now pushes those feet through the floor of the box.
+//
+// So this reads the emitted SVG and checks that nothing lands outside the
+// viewBox. It runs under per-section scale deliberately: that is where the
+// long-legged bird sets its own reference and fills the box exactly, so an
+// off-by-the-feet error has nowhere to hide. Under global scale the heron sets
+// the scale, the stilt is drawn small, and the same bug leaves it merely
+// off-center -- visible to a human, invisible to an assertion.
+//
+// Verifies: P-040, P-031. Criterion: AC-066.
+func TestDiagramFitsItsBoxFeetIncluded(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/?scale=section")
+
+	coord := regexp.MustCompile(`\b(?:y1|y2|cy)="(-?[0-9.]+)"`)
+	for _, d := range diagrams(t, body) {
+		vb := mustMatch(t, d, `viewBox="0 0 [0-9.]+ ([0-9.]+)"`, "the diagram viewBox")
+		boxH, err := strconv.ParseFloat(vb, 64)
+		if err != nil {
+			t.Fatalf("unreadable viewBox height %q", vb)
+		}
+		dy, err := strconv.ParseFloat(mustMatch(t, d, `translate\(0,(-?[0-9.]+)\)`, "the centering transform"), 64)
+		if err != nil {
+			t.Fatalf("unreadable transform offset: %v", err)
+		}
+		var lowest float64
+		for _, m := range coord.FindAllStringSubmatch(d, -1) {
+			v, err := strconv.ParseFloat(m[1], 64)
+			if err != nil {
+				t.Fatalf("unreadable coordinate %q", m[1])
+			}
+			if v > lowest {
+				lowest = v
+			}
+		}
+		// The template rounds to one decimal, so allow a rounding epsilon.
+		name := mustMatch(t, d, `aria-label="scaled outline of ([^"]+)"`, "the diagram label")
+		if dy+lowest > boxH+0.2 {
+			t.Errorf("%s: drawing reaches %.1f in a %.1f box -- its feet are clipped",
+				name, dy+lowest, boxH)
+		}
+		if dy < -0.2 {
+			t.Errorf("%s: drawing starts at %.1f, above the top of the box", name, dy)
+		}
+	}
+}
+
+// TestLegsDrawBehindTheBody asserts the draw order of P-040: the body stick is
+// painted after the legs, so the legs emerge from behind it.
+//
+// SVG has no z-index -- paint order is document order -- so this is a property
+// of where the element sits in the template and nothing else. Drawn the other
+// way, two leg strokes cross the body stick and the junction mark, and a small
+// bird reads as a scribble rather than as a bird.
+//
+// Verifies: P-040. Criterion: AC-066.
+func TestLegsDrawBehindTheBody(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/")
+	for _, d := range diagrams(t, body) {
+		name := mustMatch(t, d, `aria-label="scaled outline of ([^"]+)"`, "the diagram label")
+		leg, trunk := strings.Index(d, `class="leg"`), strings.Index(d, `class="body"`)
+		if leg < 0 || trunk < 0 {
+			t.Errorf("%s: diagram is missing a leg or body line", name)
+			continue
+		}
+		if leg > trunk {
+			t.Errorf("%s: legs are drawn after the body, so they cross it instead of "+
+				"passing behind it", name)
+		}
+	}
+}
+
 // TestDiagramIsVerticallyCentered asserts P-031: a bird shorter than the
 // drawing area sits in the middle of it, not on the floor.
 //
@@ -211,7 +331,7 @@ func TestDiagramIsVerticallyCentered(t *testing.T) {
 // Verifies: P-034, P-063. Criterion: AC-043.
 func TestDetailShowsEverySegmentWithProvenance(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/species/ardea_herodias")
-	for _, label := range []string{"Total length", "Wingspan", "Mass", "Tarsus (leg)",
+	for _, label := range []string{"Total length", "Wingspan", "Mass", "Leg", "Tarsus",
 		"Bill", "Head", "Neck", "Body", "Tail"} {
 		if !strings.Contains(body, ">"+label+"<") {
 			t.Errorf("detail view omits %q", label)
@@ -610,8 +730,9 @@ func TestAllToggle(t *testing.T) {
 	restore := html.UnescapeString(mustMatch(t, empty,
 		`<a class="btn"[^>]*href="([^"]+)"[^>]*>All`, "the All control on an emptied page"))
 	_, all := get(t, s, restore)
-	if n := strings.Count(all, `class="btn ohdr on"`); n != 3 {
-		t.Errorf("%d of 3 orders selected after re-selecting All", n)
+	_, _, wantOrders := fixtureCounts()
+	if n := strings.Count(all, `class="btn ohdr on"`); n != wantOrders {
+		t.Errorf("%d of %d orders selected after re-selecting All", n, wantOrders)
 	}
 	if !strings.Contains(all, "Great Blue Heron") {
 		t.Error("re-selecting All did not restore the species")
@@ -628,11 +749,12 @@ func TestDefaultSelectsEverything(t *testing.T) {
 	if !regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(body) {
 		t.Error("All is not selected on a fresh page")
 	}
-	if n := strings.Count(body, `class="btn ohdr on"`); n != 3 {
-		t.Errorf("%d of 3 orders selected on a fresh page", n)
+	_, wantFams, wantOrders := fixtureCounts()
+	if n := strings.Count(body, `class="btn ohdr on"`); n != wantOrders {
+		t.Errorf("%d of %d orders selected on a fresh page", n, wantOrders)
 	}
-	if n := strings.Count(body, `class="chip on"`); n != 4 {
-		t.Errorf("%d of 4 families selected on a fresh page", n)
+	if n := strings.Count(body, `class="chip on"`); n != wantFams {
+		t.Errorf("%d of %d families selected on a fresh page", n, wantFams)
 	}
 	if !strings.Contains(body, "Great Blue Heron") {
 		t.Error("fresh page should show every species")
@@ -663,8 +785,9 @@ func TestClearingEverythingShowsGuidance(t *testing.T) {
 	if strings.Contains(empty, "No species match") {
 		t.Error("empty state blames a failed match; the user cleared the selection")
 	}
-	if !strings.Contains(empty, "0 of 4 species") {
-		t.Error("count line should report nothing shown")
+	nSpecies, _, _ := fixtureCounts()
+	if want := fmt.Sprintf("0 of %d species", nSpecies); !strings.Contains(empty, want) {
+		t.Errorf("count line should report nothing shown as %q", want)
 	}
 	// And All must offer the way back.
 	if regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(empty) {

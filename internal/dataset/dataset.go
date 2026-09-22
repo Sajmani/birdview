@@ -89,9 +89,12 @@ type Species struct {
 	Wingspan    Metric `json:"wingspan"`
 	Mass        Metric `json:"mass"`
 
-	// Tarsus is the lower leg. Like Wingspan it is drawn but is NOT part of the
-	// vertical sum, so it lives outside Segments, which must add up (P-041).
+	// Tarsus is the measured lower leg; Leg is the modeled visible leg derived
+	// from it. Both are shown, so a reader can see the measurement and what was
+	// inferred from it. Like Wingspan neither is part of the vertical sum, so
+	// they live outside Segments, which must add up (P-041).
 	Tarsus Metric `json:"tarsus"`
+	Leg    Metric `json:"leg"`
 
 	// Shown in the detail view (P-034).
 	Segments Segments `json:"segments"`
@@ -106,6 +109,7 @@ func (s *Species) AllMetrics() map[string]*Metric {
 		"wingspan":    &s.Wingspan,
 		"mass":        &s.Mass,
 		"tarsus":      &s.Tarsus,
+		"leg":         &s.Leg,
 		"bill":        &s.Segments.Bill,
 		"head":        &s.Segments.Head,
 		"neck":        &s.Segments.Neck,

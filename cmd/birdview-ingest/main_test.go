@@ -2,13 +2,16 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"os"
 	"strings"
 	"testing"
 
 	"birdview/internal/dataset"
+	"birdview/internal/morphology"
 	"birdview/internal/taxonomy"
+	"birdview/internal/view"
 )
 
 const (
@@ -291,5 +294,101 @@ func TestHeadIsNotAConstant(t *testing.T) {
 	if heaviest.ScientificName != biggestHead.ScientificName {
 		t.Errorf("heaviest bird is %s but the largest head belongs to %s",
 			heaviest.ScientificName, biggestHead.ScientificName)
+	}
+}
+
+// TestLegIsModeledFromTheMeasuredTarsus asserts P-040's leg model end to end on
+// the shipped dataset: every leg is derived from the measured tarsus by a named
+// per-family factor, and says so.
+//
+// The factors are invented -- no source measures exposed leg length -- so the
+// thing that makes serializing them defensible is the same thing that makes the
+// neck defensible (P-045, CR-007): the value is tagged modeled, the model string
+// names the factor, the family and the tarsus it was applied to, and the tarsus
+// itself is carried alongside so a reader can recover the measurement.
+//
+// Verifies: P-040, P-062. Criterion: AC-066.
+func TestLegIsModeledFromTheMeasuredTarsus(t *testing.T) {
+	ds := load(t)
+	var lifted int
+	for i := range ds.Species {
+		s := &ds.Species[i]
+
+		if s.Leg.Prov.Kind != dataset.Modeled {
+			t.Errorf("%s: leg is %q; the exposed leg is never measured by any source",
+				s.ScientificName, s.Leg.Prov.Kind)
+		}
+		if s.Tarsus.Prov.Kind == dataset.Modeled {
+			t.Errorf("%s: tarsus is modeled; it is the measurement the leg is built from",
+				s.ScientificName)
+		}
+		// Recompute the factor rather than trusting the value: this is the one
+		// check that fails if the table and the ingest disagree.
+		k, ok := morphology.LegFactors[s.Family]
+		if !ok {
+			k = morphology.DefaultLegFactor
+		}
+		if want := morphology.Round1(s.Tarsus.Value * k); math.Abs(s.Leg.Value-want) > 1e-9 {
+			t.Errorf("%s: leg is %.1f mm, but %.1f x the %.1f mm tarsus is %.1f",
+				s.ScientificName, s.Leg.Value, k, s.Tarsus.Value, want)
+		}
+		// The model string has to let a reader undo the model.
+		for _, want := range []string{s.Family, fmt.Sprintf("%.1f", k), fmt.Sprintf("%.1f mm", s.Tarsus.Value)} {
+			if !strings.Contains(s.Leg.Prov.Model, want) {
+				t.Errorf("%s: leg model %q does not name %q", s.ScientificName, s.Leg.Prov.Model, want)
+			}
+		}
+		if s.Leg.Value < s.Tarsus.Value {
+			t.Errorf("%s: modeled leg %.1f is shorter than the tarsus %.1f it contains",
+				s.ScientificName, s.Leg.Value, s.Tarsus.Value)
+		}
+		if s.Leg.Value > s.Tarsus.Value {
+			lifted++
+		}
+
+		// The tile's width reference is the wingspan alone. That is sound only
+		// while a pair of legs spreads no wider than the wings, which is
+		// structural -- a bird's wingspan dwarfs its legs -- but nothing
+		// enforces it, so say so here rather than carry a branch for a case
+		// that cannot arise.
+		if spread := 2 * s.Leg.Value * view.LegCos; spread > s.Wingspan.Value {
+			t.Errorf("%s: legs spread %.1f mm against a %.1f mm wingspan; the tile width "+
+				"reference no longer covers the drawing", s.ScientificName, spread, s.Wingspan.Value)
+		}
+	}
+	if lifted == 0 {
+		t.Error("no species has a leg longer than its tarsus; the family factors are doing nothing")
+	}
+}
+
+// TestFeetBelowTheTailAreConfinedToWaders checks the consequence of the leg
+// model that the renderer has to cope with, on real data.
+//
+// Modeling the exposed leg made "the feet never fall below the tail tip" false
+// for the first time, which is why the renderer centers on the drawn extent
+// rather than on bill-to-tail. Two things must hold. It has to happen at all,
+// or that renderer path is dead code no test exercises. And it has to stay
+// confined to the long-legged families -- a hummingbird standing lower than its
+// own tail would mean the factors had escaped, and it would look absurd.
+//
+// Verifies: P-040. Criterion: AC-066.
+func TestFeetBelowTheTailAreConfinedToWaders(t *testing.T) {
+	ds := load(t)
+	var below []string
+	for i := range ds.Species {
+		s := &ds.Species[i]
+		if view.VerticalExtent(s) <= s.TotalLength.Value {
+			continue
+		}
+		below = append(below, s.CommonName)
+		// Long-legged means a family the table singles out, not the default.
+		if k, ok := morphology.LegFactors[s.Family]; !ok || k < 1.3 {
+			t.Errorf("%s (%s, factor %.1f) stands lower than its tail tip; only waders and "+
+				"cranes should", s.CommonName, s.Family, k)
+		}
+	}
+	if len(below) == 0 {
+		t.Error("no species reaches below its tail tip, so the renderer's extra room for feet " +
+			"is never exercised by real data")
 	}
 }

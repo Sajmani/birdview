@@ -508,6 +508,73 @@ about 5%, and the figure falls out of the fitting already being done.
 
 ---
 
+## CR-009 — The exposed leg is modeled from the tarsus, reversing P-040
+
+**Subject:** `diagram.legs`
+**Kind:** Direct — a later decision reverses a rejection an earlier one recorded
+**Date:** 2026-09-22 · **Decided by:** Sameer
+
+### What changed
+
+[P-040](product.md#p-040) drew the legs as the measured tarsus and explicitly rejected the
+alternative: *"scaling up by a per-family factor to approximate the exposed leg would replace the
+diagram's one new measurement with another invented table, so it is not done."* That is now done.
+`morphology.LegFactors` scales the tarsus by a per-family factor between 1.0 and 2.0, and the
+diagram draws the result.
+
+### Why it resolves the other way now
+
+The rejected option was rejected for purity, and the purity was costing accuracy in exactly the
+birds the feature exists for. The tarsus is the tarsometatarsus alone; the tibiotarsus above it is
+feathered over in passerines but largely bare in waders and cranes. So drawing the tarsus
+understates the leg, and **understates it most in the long-legged birds** — a Reddish Egret, a
+flamingo and a crane all drew up as unremarkable, which is the one impression the diagram must not
+give.
+
+The purity was also smaller than it looked. A modeled leg tagged `kind: modeled` with
+`model: "exposed leg modeled as 1.9 x the measured tarsus of 167.6 mm (family-specific factor for
+Ardeidae)"` is not passing itself off as a measurement, and **the measured tarsus is still carried
+and still shown**, on its own row in the detail view. Nothing was concealed to buy the accuracy; a
+second row was added.
+
+This is the same shape of argument as [CR-007](#cr-007), and the fourth time P-062 has dissolved a
+constraint that existed only because there was no way to say "this is a model" in the data.
+
+### What it costs, stated plainly
+
+The diagram used to have three parts that were not modeled — bill, tail and tarsus. It now has
+two. The factors are **invented**: no source measures exposed leg length, and unlike the wingspan
+model of [CR-008](#cr-008) there is no empirical column to fit against or validate on. They are a
+drawing parameter of the same kind as the neck ratio of P-045, and carry the same obligation —
+named in the provenance of every value they produce, never presented as measurement.
+
+### Consequence the renderer had to absorb
+
+AC-066 recorded an invariant: feet never fall below the tail tip, which is what let the renderer
+center a diagram on its bill-to-tail extent. **The modeled leg makes that false** for 11 of the
+841 species — an American Flamingo by 30% of its own length, then Whooping Crane, Reddish Egret
+and Black-necked Stilt. That is correct anatomy, so the renderer accommodates it: `VerticalExtent`
+sizes each section's scale on the drawn extent rather than on total length, and the template
+centers on `DrawnHeight`. The invariant is not merely dropped — its replacement is asserted in
+both directions, so a bird standing below its own tail is still confined to the wader families.
+
+Drawing order changed with it. The body stick is painted **after** the legs, so the legs pass
+behind the body rather than crossing it and the junction mark.
+
+### Resulting status
+
+- **P-040** amended: legs are the modeled exposed leg, not the measured tarsus; the rejection
+  above is superseded; the draw order is stated.
+- **AC-066** rewritten: the feet-above-tail assertion is inverted into a drawn-extent invariant,
+  and the leg model gains dataset-wide checks.
+- **P-062** unchanged but newly load-bearing: `Species.Leg` is modeled, `Species.Tarsus` measured,
+  and both are serialized and shown.
+- The tile width reference stays the wingspan alone. A pair of legs never spreads wider than the
+  wings — the widest case in the dataset reaches 35% of it — so that is asserted over the whole
+  dataset rather than guarded by a branch nothing would ever exercise.
+
+---
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

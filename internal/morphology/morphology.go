@@ -133,3 +133,72 @@ func BalanceToSum(bill, head, neck, body, tail float64) (b, h, n, bo, t, total f
 	bo = Round1(total - b - h - n - t)
 	return
 }
+
+// DefaultLegFactor is how much of a bird's visible leg the tarsus accounts for
+// in families not listed in LegFactors.
+const DefaultLegFactor = 1.1
+
+// LegFactors scale the measured tarsus up to an approximate *visible* leg.
+//
+// The tarsus is the tarsometatarsus alone. Above it the tibiotarsus is feathered
+// over in most perching birds but substantially exposed in waders and cranes, so
+// the tarsus understates the leg -- and understates it most in the birds whose
+// legs define them, which is the opposite of useful.
+//
+// **These factors are invented.** No source measures exposed leg length, and
+// they are a drawing parameter of exactly the kind P-045 describes for the neck:
+// named in the provenance of every value they produce, never presented as a
+// measurement. The measured tarsus is carried alongside and shown separately, so
+// a reader can always see what was measured and what was inferred from it.
+var LegFactors = map[string]float64{
+	// Tibia almost wholly exposed.
+	"Phoenicopteridae":  2.0,
+	"Ardeidae":          1.9,
+	"Ciconiidae":        1.9,
+	"Gruidae":           1.9,
+	"Threskiornithidae": 1.8,
+	"Aramidae":          1.8,
+	// Long, clearly visible tibia.
+	"Recurvirostridae": 1.7,
+	"Burhinidae":       1.6,
+	"Rallidae":         1.5,
+	// Moderate.
+	"Scolopacidae":   1.4,
+	"Charadriidae":   1.4,
+	"Haematopodidae": 1.4,
+	"Phasianidae":    1.4,
+	"Cracidae":       1.4,
+	"Cathartidae":    1.4,
+	// Slight.
+	"Anatidae":          1.2,
+	"Laridae":           1.2,
+	"Stercorariidae":    1.2,
+	"Podicipedidae":     1.2,
+	"Gaviidae":          1.2,
+	"Pelecanidae":       1.2,
+	"Phalacrocoracidae": 1.2,
+	"Odontophoridae":    1.2,
+	// Effectively none: the leg is the tarsus and little else.
+	"Apodidae":      1.0,
+	"Trochilidae":   1.0,
+	"Caprimulgidae": 1.0,
+	"Alcedinidae":   1.0,
+	"Fregatidae":    1.0,
+}
+
+// LegLength models the visible leg from the measured tarsus.
+//
+// The description names the factor, the family and the measurement it was
+// applied to, so a reader can recover the tarsus from what is shown (P-062).
+func LegLength(tarsusMm float64, family string) (float64, string) {
+	k, explicit := LegFactors[family]
+	kind := "family default"
+	if !explicit {
+		k = DefaultLegFactor
+	} else {
+		kind = "family-specific"
+	}
+	return tarsusMm * k, fmt.Sprintf(
+		"exposed leg modeled as %.1f x the measured tarsus of %.1f mm (%s factor for %s)",
+		k, tarsusMm, kind, family)
+}

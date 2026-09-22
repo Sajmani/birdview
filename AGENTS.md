@@ -18,10 +18,21 @@ server that embeds and serves the web UI (T-001).
 
 ## Status
 
-**Gate 1 passed; Gate 2 not started.** The requirements are approved. `spec/acceptance.md` does
-not exist yet, and neither does any code. Per [spec/process.md](spec/process.md), criteria come
-before implementation — do not start writing the ingest or the server until `acceptance.md` exists
-and has been approved.
+**Gate 1 and Gate 2 both passed.** The requirements and the acceptance criteria are approved, and
+the code is live: `birdview-ingest` builds 841 species across 91 families, and `birdview` serves
+them. A behavior change still goes spec first, then the criterion, then the code — see
+[spec/process.md](spec/process.md) and "Working on a change" below.
+
+Not done: no README, no deployment plumbing, and public deployment is **blocked** until the ABA
+grants written permission to redistribute its checklist (Work arising in
+[spec/decisions.md](spec/decisions.md)). Serving the app reproduces that checklist to every
+visitor, so this is not a formality.
+
+**A criterion you have not watched fail is not a criterion.** Break the code deliberately, confirm
+each new check goes red, and record in the criterion how you broke it before marking it verified.
+This has caught roughly seven checks that passed vacuously — whole-page string searches matching
+the help text rather than the control, fixtures too small to exercise the behavior under test, and
+a test that survived the reversal of its own requirement.
 
 ## Hard rules
 

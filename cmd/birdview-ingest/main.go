@@ -239,6 +239,9 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 			},
 		}
 
+		legV, legModel := morphology.LegLength(res.traits.Tarsus, sp.Family)
+		rec.Leg = dataset.Metric{Value: morphology.Round1(legV), Prov: modeled(legModel)}
+
 		// Wingspan: empirical where Fox has one for a BirdLife name this
 		// species maps to, modeled otherwise.
 		//

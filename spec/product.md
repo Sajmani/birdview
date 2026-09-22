@@ -346,27 +346,35 @@ Goals: G-003
 
 The diagram is a vertical cross. Top to bottom: a bill stick, a head oval, a neck stick, a body
 stick, and a tail stick — plus one horizontal crossbar representing the wings, and **a pair of
-legs raking back from the body's midpoint, drawn from the measured tarsus**. The leg line is
-always exactly the tarsus long; the rake angle only decides how that length divides between the
-vertical and the horizontal, and it is steeper than 45° because a standing bird's tarsus is
-near-vertical and a shallow rake makes a correct-length leg read short. The tail is
-visually distinguished from the body by stroke style and a mark at the junction between them.
+legs raking back from the body's midpoint**. The leg line is always exactly the modeled leg long;
+the rake angle only decides how that length divides between the vertical and the horizontal, and
+it is steeper than 45° because a standing bird's leg is near-vertical and a shallow rake makes a
+correct-length leg read short. The tail is visually distinguished from the body by stroke style
+and a mark at the junction between them.
+
+**The body stick is drawn after the legs**, so the legs pass behind it. SVG paints in document
+order, so this is a property of the template and nothing else; drawn the other way the leg strokes
+cross the body and the junction mark, and a small bird reads as a scribble.
 
 Legs are not part of the vertical sum of P-041; like the wingspan they are drawn at the same scale
-but measured across a different axis.
+but measured across a different axis. **They may reach below the tail tip** — for 11 of the 841
+species, an American Flamingo by 30% of its own length — so the vertical room a bird needs is its
+drawn extent, feet included, not its total length. See P-042 for what that means for the scale.
 
-Rationale for legs: tarsus is a **measured** trait, so with bill and tail it is one of only three
-parts of the diagram that is not modeled — and it spans 115×, from a Rufous Hummingbird's 2.5 mm
-to a Whooping Crane's 289 mm. A Black-necked Stilt's tarsus is 34% of its total length against a
-Chimney Swift's 9%. That is real, striking, and was previously thrown away.
+Rationale for legs: the tarsus spans 115×, from a Rufous Hummingbird's 2.5 mm to a Whooping
+Crane's 289 mm. A Black-necked Stilt's tarsus is 34% of its total length against a Chimney Swift's
+9%. That is real, striking, and was previously thrown away.
 
-**The legs are shorter than the bird's visible leg, and deliberately so.** The tarsus is the
-tarsometatarsus alone; the tibiotarsus above it is largely feathered in passerines but
-substantially exposed in waders and cranes. Drawing the tarsus therefore understates the leg, and
-understates it most in the long-legged birds. The alternative — scaling up by a per-family factor
-to approximate the exposed leg — would replace the diagram's one new measurement with another
-invented table, so it is not done. The detail view names the metric "Tarsus (leg)" rather than
-"Leg".
+**The drawn leg is modeled, not measured.** The tarsus that AVONET reports is the tarsometatarsus
+alone; the tibiotarsus above it is largely feathered in passerines but substantially exposed in
+waders and cranes, so the tarsus understates the visible leg and understates it most in the
+long-legged birds. The leg is therefore the tarsus scaled by a **per-family factor between 1.0 and
+2.0**. Those factors are invented — no source measures exposed leg length — so they are a drawing
+parameter of the same kind as the neck ratio of P-045, and carry the same obligation: named in the
+provenance of every value they produce, never presented as measurement. The measured tarsus is
+carried alongside and the detail view shows both, on rows labeled "Leg" and "Tarsus", so a reader
+can always recover the measurement from the model. This reverses an earlier rejection of exactly
+this approach; see [CR-009](decisions.md#cr-009).
 
 Rationale: the tail is a stick rather than a triangle because no trait in any source gives a tail
 width, and a triangle would assert a fan shape the data does not support.
@@ -388,6 +396,11 @@ Goals: G-001, G-002
 
 The user switches between a single scale across the entire filtered set, and a scale shared by all
 species within a section. **Global is the default, and is listed first.**
+
+Whichever is chosen, the scale is set by the largest **drawn extent** in the group — bill tip to
+whichever of tail tip or feet reaches lower (P-040) — not by the largest total length. The two
+differ only for long-legged birds, and those are exactly the birds that would otherwise set the
+scale and then be clipped by it.
 
 Rationale: this is the requirement G-001 lives or dies by. A per-tile scale — every bird drawn to
 fill its tile — makes a hummingbird and a swan identical on screen and destroys size intuition
