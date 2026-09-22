@@ -48,10 +48,12 @@ T-003`.
 measurable by construction. That judgment belongs to Gate 1 and to review, and a green run here
 looks exactly like a validated one.
 
-### AC-002 — Generated family colors are legible and mutually distinguishable
+### AC-002 — Generated colors are legible and mutually distinguishable
 **Verifies:** T-010, P-005, `wcag/1.4.6` · **Level:** spec and code · **Method:** pure functions
-over the color generator: WCAG 2.2 contrast ≥ 7:1 against `#000000` for every family, and CIE76
-ΔE ≥ 25 between families adjacent in the selector's sort order
+over the color generator
+**Assertions:** WCAG 2.2 contrast ≥ 7:1 against each badge's **own** text color; CIE76 ΔE ≥ 25
+between families adjacent in the selector; both halves of the gamut are used; and the preset cycle
+strictly alternates light and dark, which requires an even count
 **Run:** `go test ./internal/palette`
 **Status: verified 2026-09-22 — passing, and watched failing** on both halves: lowering the
 contrast floor to 3.0 produced four violations, all blues and violets, where relative luminance is
@@ -62,6 +64,12 @@ The distinctness half was added after the fact, and the gap it closed is worth r
 original check asserted only that no two families shared a hex value. All 91 differed, so it
 passed — while every pair adjacent in the selector was visually identical. Exact inequality is not
 distinguishability, and the entries a reader compares are the ones next to each other.
+
+Two further assertions came from bugs found while fixing that. **Both halves of the gamut**: the
+capacity argument behind P-005 depends on white text being used where it helps, and a generator
+that quietly reverted to black-only would give that up invisibly. **Alternation**: an odd-length
+light/dark cycle wraps onto itself, so one pair of hue-adjacent slots shares a lightness — which
+is what left two pale Passeriformes families at ΔE 4.4. Both have been watched failing.
 it fail by lowering a generated color's luminance.
 
 ### AC-003 — Every vendored source matches its recorded hash
@@ -304,9 +312,11 @@ and the three main metrics.
 ### AC-056 — The family filter selects and clears
 **Verifies:** P-010 · **Level:** code · **Method:** rendering test over `?family=`
 **Assertions:** filtering to one family shows its species and excludes others; no filter shows
-all; and every entry in the selector is labeled with its scientific name, its common name and its
-species count.
-**Status: verified 2026-09-22.**
+all; every entry is labeled with its scientific name, its common name and its species count; the
+selector is grouped by taxonomic order; groups appear in checklist sequence rather than
+alphabetically; and each family sits inside its own order's group.
+**Status: verified 2026-09-22 — passing, and watched failing** by alphabetizing the family list,
+which reorders the groups out of checklist sequence.
 
 ### AC-057 — The unit toggle switches imperial and metric
 **Verifies:** P-032 · **Level:** code · **Method:** rendering test over the tile footer, plus a

@@ -23,6 +23,58 @@ var abaFamilies = []string{
 	"Cardinalidae", "Thraupidae", "Alaudidae", "Motacillidae", "Calcariidae",
 }
 
+// TestContrastAgainstOwnText asserts T-010 as it now reads: a badge is legible
+// when it clears 7:1 against the text it actually carries, which may be black
+// or white. The expected value comes from WCAG, not from a run.
+//
+// Verifies: T-010, P-005, wcag/1.4.6. Criterion: AC-002.
+func TestContrastAgainstOwnText(t *testing.T) {
+	for _, sw := range Generate(abaFamilies, 0) {
+		got, err := sw.ContrastWith()
+		if err != nil {
+			t.Fatalf("%+v: %v", sw, err)
+		}
+		if got < MinContrast {
+			t.Errorf("%s on %s has contrast %.2f:1, want >= %.1f:1", sw.Text, sw.Hex, got, MinContrast)
+		}
+	}
+}
+
+// TestUsesBothHalvesOfTheGamut checks the dark half is actually reached.
+//
+// Requiring black text everywhere caps the reachable palette at about 43
+// mutually distinguishable colors against 91 families; admitting white text
+// raises it to about 69. If every swatch comes back light, that capacity has
+// been silently given up again.
+//
+// Verifies: P-005.
+func TestUsesBothHalvesOfTheGamut(t *testing.T) {
+	var light, dark int
+	for _, sw := range Generate(abaFamilies, 0) {
+		if sw.Text == "#ffffff" {
+			dark++
+		} else {
+			light++
+		}
+	}
+	if dark == 0 || light == 0 {
+		t.Errorf("palette used only one half of the gamut: %d light, %d dark", light, dark)
+	}
+}
+
+// TestPresetsAlternate guards the property that hue-adjacent entries always
+// differ in lightness. An odd-length alternating cycle wraps onto itself and
+// silently breaks it, which is how two pale Passeriformes families ended up at
+// dE 4.4.
+//
+// Verifies: P-005.
+func TestPresetsAlternate(t *testing.T) {
+	if !AlternatesLightAndDark() {
+		t.Error("preset cycle does not strictly alternate light and dark; " +
+			"the count must be even or the cycle wraps light onto light")
+	}
+}
+
 // TestContrast asserts the requirement, not the implementation: every generated
 // badge color clears WCAG 2.2 SC 1.4.6 against black text.
 //
@@ -31,15 +83,18 @@ var abaFamilies = []string{
 //
 // Verifies: T-010, P-005, wcag/1.4.6. Criterion: AC-002.
 func TestContrast(t *testing.T) {
-	colors := Generate(abaFamilies)
+	colors := Generate(abaFamilies, 0)
 	if len(colors) != len(abaFamilies) {
 		t.Fatalf("got %d colors for %d families", len(colors), len(abaFamilies))
 	}
-	for fam, hex := range colors {
-		r, g, b := mustParseHex(t, hex)
-		if got := ContrastOnBlack(r, g, b); got < MinContrast {
-			t.Errorf("%s: %s has contrast %.2f:1 against black, want >= %.1f:1",
-				fam, hex, got, MinContrast)
+	for fam, sw := range colors {
+		got, err := sw.ContrastWith()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got < MinContrast {
+			t.Errorf("%s: %s on %s has contrast %.2f:1, want >= %.1f:1",
+				fam, sw.Text, sw.Hex, got, MinContrast)
 		}
 	}
 }
@@ -81,13 +136,13 @@ func TestKnownContrastValues(t *testing.T) {
 //
 // Verifies: P-005.
 func TestDeterministic(t *testing.T) {
-	a := Generate(abaFamilies)
+	a := Generate(abaFamilies, 0)
 	shuffled := append([]string(nil), abaFamilies...)
 	shuffled[0], shuffled[len(shuffled)-1] = shuffled[len(shuffled)-1], shuffled[0]
-	b := Generate(shuffled)
+	b := Generate(shuffled, 0)
 	for fam, want := range a {
 		if b[fam] != want {
-			t.Errorf("%s: %s then %s -- input order changed the output", fam, want, b[fam])
+			t.Errorf("%s: %+v then %+v -- input order changed the output", fam, want, b[fam])
 		}
 	}
 }
@@ -99,11 +154,11 @@ func TestDeterministic(t *testing.T) {
 // Verifies: P-005.
 func TestDistinct(t *testing.T) {
 	seen := map[string]string{}
-	for fam, hex := range Generate(abaFamilies) {
-		if other, dup := seen[hex]; dup {
-			t.Errorf("%s and %s share %s", other, fam, hex)
+	for fam, sw := range Generate(abaFamilies, 0) {
+		if other, dup := seen[sw.Hex]; dup {
+			t.Errorf("%s and %s share %s", other, fam, sw.Hex)
 		}
-		seen[hex] = fam
+		seen[sw.Hex] = fam
 	}
 }
 
@@ -125,19 +180,19 @@ func TestAdjacentFamiliesAreVisiblyDifferent(t *testing.T) {
 
 	fams := append([]string(nil), abaFamilies...)
 	sort.Strings(fams)
-	colors := Generate(fams)
+	colors := Generate(fams, 0)
 
 	worst := math.Inf(1)
 	for i := 0; i+1 < len(fams); i++ {
-		r1, g1, b1 := mustParseHex(t, colors[fams[i]])
-		r2, g2, b2 := mustParseHex(t, colors[fams[i+1]])
+		r1, g1, b1 := mustParseHex(t, colors[fams[i]].Hex)
+		r2, g2, b2 := mustParseHex(t, colors[fams[i+1]].Hex)
 		d := DeltaE76(r1, g1, b1, r2, g2, b2)
 		if d < worst {
 			worst = d
 		}
 		if d < minDeltaE {
 			t.Errorf("%s (%s) and %s (%s) are adjacent in the selector but differ by only dE %.1f",
-				fams[i], colors[fams[i]], fams[i+1], colors[fams[i+1]], d)
+				fams[i], colors[fams[i]].Hex, fams[i+1], colors[fams[i+1]].Hex, d)
 		}
 	}
 	t.Logf("worst adjacent pair: dE %.1f", worst)

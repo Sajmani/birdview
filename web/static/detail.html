@@ -15,7 +15,7 @@
       <span class="cn">{{.S.CommonName}}{{with .S.BandingCode}} <span class="code">({{.}})</span>{{end}}</span>
       <span class="sn">{{.S.ScientificName}}</span>
     </div>
-    <span class="badge" style="background:{{.S.FamilyColor}}">{{.S.Family}}
+    <span class="badge" style="background:{{.S.FamilyColor}};color:{{.S.FamilyText}}">{{.S.Family}}
       <em>{{.S.FamilyCommon}}</em></span>
   </div>
   {{template "diagram" .}}

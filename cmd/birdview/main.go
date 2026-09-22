@@ -71,8 +71,23 @@ type server struct {
 }
 
 type familyOption struct {
-	Name, Common, Color string
-	Count               int
+	Name, Common     string
+	Color, TextColor string
+	Order            string
+	OrderColor       string
+	OrderText        string
+	Count            int
+}
+
+// orderGroup is one block of the family selector. Grouping by order in the
+// checklist's taxonomic sequence matches how every field guide is arranged,
+// and it is what lets family colors repeat across orders (P-010, P-005).
+type orderGroup struct {
+	Order     string
+	Color     string
+	TextColor string
+	Count     int
+	Families  []familyRow
 }
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) { s.mux.ServeHTTP(w, r) }
@@ -84,21 +99,21 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	}
 	s := &server{mux: http.NewServeMux(), ds: ds, tmpl: tmpl, byID: map[string]*dataset.Species{}}
 
-	counts := map[string]*familyOption{}
+	counts := map[string]int{}
 	for i := range ds.Species {
 		sp := &ds.Species[i]
 		s.byID[sp.ID] = sp
-		f, ok := counts[sp.Family]
-		if !ok {
-			f = &familyOption{Name: sp.Family, Common: sp.FamilyCommon, Color: sp.FamilyColor}
-			counts[sp.Family] = f
-		}
-		f.Count++
+		counts[sp.Family]++
 	}
-	for _, f := range counts {
-		s.fams = append(s.fams, *f)
+	// ds.Families is already in ABA taxonomic sequence; preserve it rather than
+	// alphabetizing, which is what the checklist and every field guide use.
+	for _, f := range ds.Families {
+		s.fams = append(s.fams, familyOption{
+			Name: f.Name, Common: f.Common, Color: f.Color, TextColor: f.TextColor,
+			Order: f.Order, OrderColor: f.OrderColor, OrderText: f.OrderText,
+			Count: counts[f.Name],
+		})
 	}
-	sort.Slice(s.fams, func(i, j int) bool { return s.fams[i].Name < s.fams[j].Name })
 
 	assets, err := fs.Sub(web.Static, "static")
 	if err != nil {
@@ -178,7 +193,7 @@ type familyRow struct {
 
 type pageData struct {
 	Sections []sectionView
-	Families []familyRow
+	Groups   []orderGroup
 	Opt      options
 	Total    int
 	Shown    int
@@ -231,6 +246,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 
 	page := pageData{Opt: opt, Total: len(s.ds.Species), Shown: len(filtered),
 		Query: queryFor(r), ClearURL: familyURL(r, nil)}
+	byOrder := map[string]int{}
 	for _, f := range s.fams {
 		next := map[string]bool{}
 		for k := range opt.Families {
@@ -241,9 +257,17 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		} else {
 			next[f.Name] = true
 		}
-		page.Families = append(page.Families, familyRow{
-			familyOption: f, Selected: opt.Families[f.Name], URL: familyURL(r, next),
-		})
+		row := familyRow{familyOption: f, Selected: opt.Families[f.Name], URL: familyURL(r, next)}
+		gi, ok := byOrder[f.Order]
+		if !ok {
+			page.Groups = append(page.Groups, orderGroup{
+				Order: f.Order, Color: f.OrderColor, TextColor: f.OrderText,
+			})
+			gi = len(page.Groups) - 1
+			byOrder[f.Order] = gi
+		}
+		page.Groups[gi].Families = append(page.Groups[gi].Families, row)
+		page.Groups[gi].Count += f.Count
 	}
 	for i, sec := range secs {
 		sv := sectionView{Index: i + 1, Count: len(sec.Species),

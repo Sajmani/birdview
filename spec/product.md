@@ -61,18 +61,29 @@ Subject: `badge.color.derivation`
 Value: `generated`
 Goals: G-002
 
-Each family gets a badge color derived algorithmically, constrained to satisfy T-010 **and to be
-visibly different from the colors of the families listed next to it**.
+Colors are generated as **two palettes**: one per taxonomic order, and one per family *within* its
+order. Both satisfy T-010, and families are visibly different from those listed next to them.
+
+Two families in different orders may share a color. Their order badge distinguishes them.
 
 Rationale: the ABA area spans 91 families. A hand-curated palette does not scale to that and
 breaks on every taxonomic revision, so generation makes the palette a function of the taxonomy
 rather than a table to maintain.
 
-The adjacency clause is not a refinement, it is the requirement. Evenly spaced hues satisfy
-"distinct colors" on paper and fail completely in practice: at 91 families that is a four-degree
-step, and because the selector lists families in the same sorted order, every neighbor in the list
-came out the same shade. Distinctness must be measured perceptually and between the entries a
-reader actually compares.
+The two-palette split is what makes the problem solvable at all. A legible badge bounds the usable
+gamut at roughly 43 mutually distinguishable colors with black text, or 69 if white text is also
+allowed — against 91 families. No assignment fits 91 into 43. Scoping family colors to their order
+reduces the requirement to the largest order, Passeriformes at 44 families, which does fit.
+
+Distinctness must be measured perceptually, and between the entries a reader actually compares.
+Evenly spaced hues satisfy "distinct colors" on paper and failed completely in practice: at 91
+families that is a four-degree step, and the selector listed families in that same order, so every
+neighbor was the same shade.
+
+**Known residual:** within Passeriformes, 9 of 946 family pairs remain below ΔE 15. The dark half
+of the gamut has less perceptual room than the light half, and 44 families is close to what the
+space holds. Those pairs are never adjacent in the selector, and every badge carries its family
+name.
 
 ### P-006 — Sources join on normalized scientific binomial
 Subject: `dataset.join.key`
@@ -112,12 +123,17 @@ Goals: G-002
 The user can filter to any subset of families, multi-select, with a single control that clears the
 filter and shows everything.
 
-Each family in the selector is labeled with **both its scientific and its common name**, and the
-number of species it contributes.
+The selector is **grouped by taxonomic order, in the ABA checklist's own sequence** rather than
+alphabetically, with each group headed by the order's name and color. Each family is labeled with
+**both its scientific and its common name** and the number of species it contributes.
 
 Rationale: the selector is where the common name earns its place. A birder looking for nightjars
 should not have to know they are Caprimulgidae to find them, and this is the one surface where
 they are choosing a family rather than reading about one they have already been shown.
+
+Checklist sequence is how the ABA checklist, Sibley and every other field guide arrange birds, so
+it is the order a birder already has in their head — and alphabetizing actively discards an
+ordering the source file provides for free.
 
 ### P-011 — Filter by location
 Status: **Withdrawn** — no freely redistributable per-region occurrence data exists at useful

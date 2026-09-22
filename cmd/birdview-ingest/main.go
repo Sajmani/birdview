@@ -131,15 +131,54 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 		return nil, "", err
 	}
 
-	families := map[string]bool{}
+	// Families in the checklist's own taxonomic sequence, with the order each
+	// belongs to. Order is resolved through the same taxon lookup as traits:
+	// taking it from the ABA name alone leaves Tytonidae unplaced, because
+	// AVONET files that bird as Tyto alba (P-006).
+	var famSeq []string
+	famCommon := map[string]string{}
+	famOrder := map[string]string{}
+	seenFam := map[string]bool{}
 	for _, sp := range species {
-		families[sp.Family] = true
+		if !seenFam[sp.Family] {
+			seenFam[sp.Family] = true
+			famSeq = append(famSeq, sp.Family)
+			famCommon[sp.Family] = sp.FamilyCommon
+		}
+		if famOrder[sp.Family] == "" {
+			if r, ok := resolve(sp, wb); ok {
+				famOrder[sp.Family] = wb.OrderOf[r.taxon]
+			}
+		}
 	}
-	famList := make([]string, 0, len(families))
-	for f := range families {
-		famList = append(famList, f)
+	for _, f := range famSeq {
+		if famOrder[f] == "" {
+			return nil, "", fmt.Errorf("family %s could not be placed in an order; "+
+				"the selector groups by order and has nowhere to put it", f)
+		}
 	}
-	colors := palette.Generate(famList)
+
+	// One palette for orders, and one per order for its families. Family colors
+	// need only be distinct within their order, which is what makes 91 families
+	// fit a gamut that holds far fewer (P-005).
+	var orderSeq []string
+	byOrder := map[string][]string{}
+	for _, f := range famSeq {
+		o := famOrder[f]
+		if len(byOrder[o]) == 0 {
+			orderSeq = append(orderSeq, o)
+		}
+		byOrder[o] = append(byOrder[o], f)
+	}
+	orderColors := palette.Generate(orderSeq, 0)
+	famColors := map[string]palette.Swatch{}
+	for i, o := range orderSeq {
+		// A different seed per order keeps families in different orders from
+		// being handed the same color for no reason, though they are allowed to.
+		for f, sw := range palette.Generate(byOrder[o], float64(i)*47.0) {
+			famColors[f] = sw
+		}
+	}
 
 	var (
 		out       []dataset.Species
@@ -181,7 +220,9 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 			ScientificName: sp.ScientificName,
 			Family:         sp.Family,
 			FamilyCommon:   sp.FamilyCommon,
-			FamilyColor:    colors[sp.Family],
+			FamilyColor:    famColors[sp.Family].Hex,
+			FamilyText:     famColors[sp.Family].Text,
+			Order:          famOrder[sp.Family],
 			Segments: dataset.Segments{
 				Bill: dataset.Metric{Value: bill, Prov: traitProv()},
 				Head: dataset.Metric{Value: head, Prov: modeled(headModel)},
@@ -251,7 +292,8 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 	}
 
 	var b strings.Builder
-	fmt.Fprintf(&b, "ABA codes 1-%d: %d species\n", aba.MaxRarityCode, len(species))
+	fmt.Fprintf(&b, "ABA codes 1-%d: %d species in %d families across %d orders\n",
+		aba.MaxRarityCode, len(species), len(famSeq), len(orderSeq))
 	fmt.Fprintf(&b, "  traits measured   : %d\n", counts[string(dataset.Measured)])
 	fmt.Fprintf(&b, "  traits near-match : %d\n", counts[string(dataset.NearMatch)])
 	fmt.Fprintf(&b, "  wingspan measured : %d\n", counts["wingspan measured"])
@@ -265,7 +307,18 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 	fmt.Fprintf(&b, "  awaiting taxonomic check (CR-006): %s\n",
 		strings.Join(taxonomy.AwaitingTaxonomicCheck, ", "))
 
+	fams := make([]dataset.Family, 0, len(famSeq))
+	for _, f := range famSeq {
+		o := famOrder[f]
+		fams = append(fams, dataset.Family{
+			Name: f, Common: famCommon[f], Order: o,
+			Color: famColors[f].Hex, TextColor: famColors[f].Text,
+			OrderColor: orderColors[o].Hex, OrderText: orderColors[o].Text,
+		})
+	}
+
 	return &dataset.Dataset{
+		Families: fams,
 		SourceVersions: map[string]string{
 			"aba":          "ABA Checklist 8.19 (January 2026)",
 			"avonet":       "AVONET v7, doi:10.6084/m9.figshare.16586228",

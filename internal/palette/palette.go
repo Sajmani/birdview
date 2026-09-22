@@ -1,4 +1,14 @@
-// Package palette generates a badge color per family.
+// Package palette generates badge colors.
+//
+// Two palettes are generated, not one: a color per taxonomic order, and a color
+// per family *within* its order. That split is what makes the problem solvable.
+// A colored badge must stay legible, which bounds the usable gamut at roughly
+// 43 mutually distinguishable colors with black text, or 69 if white text is
+// also allowed — against 91 ABA families. No assignment fits 91 into 43.
+//
+// Scoping family colors to their order reduces the requirement to the largest
+// order, Passeriformes with 44 families, which does fit. Two families in
+// different orders may share a color; the order badge tells them apart.
 //
 // Verifies: P-005, T-010, wcag/1.4.6.
 package palette
@@ -15,71 +25,155 @@ import (
 // Verifies: T-010.
 const MinContrast = 7.0
 
-// goldenAngle spaces successive hues as far apart as possible: 360 degrees
-// divided by the golden ratio. Stepping by it means consecutive families land
-// on opposite sides of the wheel while the whole set still covers it evenly.
-const goldenAngle = 137.50776405003785
-
-// satCycle and lightCycle add a second and third axis of separation, so that
-// two families which happen to land on a similar hue still differ in how
-// washed-out or bright they look.
-var (
-	satCycle   = []float64{0.88, 0.55, 0.97}
-	lightCycle = []float64{0.72, 0.80, 0.66}
+const (
+	black = "#000000"
+	white = "#ffffff"
 )
 
-// Generate assigns a color to every family.
+// Swatch is a background together with the text color that stays legible on it.
 //
-// Hues step by the golden angle in sorted family order, rather than marching
-// evenly around the wheel. Even spacing seems the obvious choice and is wrong
-// for this use: with 91 ABA families it puts consecutive hues 4 degrees apart,
-// and the family selector lists families in exactly that order -- so
-// Accipitridae, Acrocephalidae and Aegithalidae came out as three
-// indistinguishable reds sitting side by side. Golden-angle stepping keeps the
-// full-wheel coverage while making neighbors in the list maximally unalike.
+// Carrying the text color is what unlocks the dark half of the gamut: a badge
+// is legible when it clears MinContrast against *its own* text, not
+// specifically against black. Requiring black text discards every dark color
+// and costs about a third of the reachable palette.
+type Swatch struct {
+	Hex  string `json:"hex"`
+	Text string `json:"text"`
+}
+
+// invPhi is 1/golden ratio, used to pick how far apart consecutive entries sit.
+const invPhi = 0.6180339887498949
+
+// stride picks a step k, coprime to n, that walks the n evenly spaced hue slots
+// in an order which keeps consecutive entries far apart.
 //
-// Saturation and lightness cycle with period 3, so families that do land near
-// each other in hue are still separated on another axis.
+// Both properties are needed and neither alone suffices. Spacing hues evenly
+// maximizes the smallest gap between any two, which is what stops a large set
+// from containing a near-identical pair -- golden-angle stepping does not
+// guarantee this, and left Passeriformes with two families at dE 4.2. Walking
+// those slots in sequence, though, gives neighbors adjacent hues, which is the
+// original defect: a list is read in order. Striding by roughly n/phi slots
+// delivers both.
+func stride(n int) int {
+	if n < 3 {
+		return 1
+	}
+	k := int(math.Round(float64(n) * invPhi))
+	for ; k > 1; k-- {
+		if gcd(k, n) == 1 {
+			return k
+		}
+	}
+	return 1
+}
+
+func gcd(a, b int) int {
+	for b != 0 {
+		a, b = b, a%b
+	}
+	return a
+}
+
+// presets alternate light and dark backgrounds, so that hue-adjacent entries
+// always differ in lightness too -- the largest available separation when hues
+// are only a few degrees apart.
 //
-// Lightness is then raised per color until it clears MinContrast against black.
-// That loop is not decoration: relative luminance is strongly hue-dependent --
-// a saturated blue at the same HSL lightness as a yellow has roughly a third of
-// its luminance -- so one fixed lightness that works for yellow fails for blue.
+// The count must be EVEN. An odd-length alternating cycle wraps onto itself:
+// with five presets the last light entry is followed by the first light entry,
+// so one pair of adjacent hue slots shared a lightness. That is exactly how
+// Phylloscopidae and Turdidae came out at dE 4.4, eight degrees apart in hue
+// and both pale.
+var presets = []struct {
+	sat, start float64
+	dark       bool
+}{
+	{0.88, 0.74, false},
+	{0.80, 0.34, true},
+	{0.55, 0.80, false},
+	{0.62, 0.26, true},
+	{0.97, 0.70, false},
+	{0.95, 0.30, true},
+}
+
+// Generate assigns a swatch to each name, deterministically: hues occupy n
+// evenly spaced slots, visited in a stride that keeps consecutive names far
+// apart, with saturation and lightness cycling through presets.
+//
+// Callers pass a distinct seed per order, so families in different orders are
+// not gratuitously given the same color even though they may collide.
 //
 // Verifies: P-005, T-010.
-func Generate(families []string) map[string]string {
-	sorted := append([]string(nil), families...)
+func Generate(names []string, seed float64) map[string]Swatch {
+	sorted := append([]string(nil), names...)
 	sort.Strings(sorted)
 
-	out := make(map[string]string, len(sorted))
-	for i, fam := range sorted {
-		hue := math.Mod(float64(i)*goldenAngle, 360)
-		out[fam] = colorAtLeast(hue, satCycle[i%len(satCycle)],
-			lightCycle[i%len(lightCycle)], MinContrast)
+	n := len(sorted)
+	k := stride(n)
+	step := 360.0 / math.Max(1, float64(n))
+
+	out := make(map[string]Swatch, n)
+	for i, name := range sorted {
+		slot := (i * k) % max(1, n)
+		// Keyed on the slot, not the list index: the pairs at risk of looking
+		// alike are the ones adjacent in HUE, so those are the ones that must
+		// differ in lightness. Cycling by index instead leaves the closest hue
+		// pair free to share a preset, which is what left two Passeriformes
+		// families at dE 4.5.
+		p := presets[slot%len(presets)]
+		hue := math.Mod(seed+float64(slot)*step, 360)
+		out[name] = swatchFor(hue, p.sat, p.start, p.dark)
 	}
 	return out
 }
 
-// colorAtLeast returns the hex color at the given hue and saturation whose
-// contrast against black is at least want, raising lightness from start in
-// small steps until it is. It terminates: at lightness 1.0 the color is white,
-// whose contrast against black is 21:1.
-func colorAtLeast(hue, sat, start, want float64) string {
+// swatchFor walks lightness until the color clears MinContrast against the text
+// it will carry. It terminates: white reaches 21:1 against black text, and
+// black reaches 21:1 against white text.
+func swatchFor(hue, sat, start float64, dark bool) Swatch {
+	if dark {
+		for light := start; light > 0; light -= 0.01 {
+			r, g, b := hslToRGB(hue, sat, light)
+			if ContrastOnWhite(r, g, b) >= MinContrast {
+				return Swatch{hex(r, g, b), white}
+			}
+		}
+		return Swatch{black, white}
+	}
 	for light := start; light < 1.0; light += 0.01 {
 		r, g, b := hslToRGB(hue, sat, light)
-		if ContrastOnBlack(r, g, b) >= want {
-			return fmt.Sprintf("#%02x%02x%02x", r, g, b)
+		if ContrastOnBlack(r, g, b) >= MinContrast {
+			return Swatch{hex(r, g, b), black}
 		}
 	}
-	return "#ffffff"
+	return Swatch{white, black}
 }
 
-// ContrastOnBlack returns the WCAG 2.2 contrast ratio of an sRGB color against
-// pure black, which is (L+0.05)/0.05 where L is relative luminance.
-//
-// Verifies: T-010, wcag/1.4.6.
-func ContrastOnBlack(r, g, b uint8) float64 {
-	return (RelativeLuminance(r, g, b) + 0.05) / 0.05
+// Contrast returns the WCAG 2.2 contrast ratio between two relative luminances.
+func Contrast(l1, l2 float64) float64 {
+	if l1 < l2 {
+		l1, l2 = l2, l1
+	}
+	return (l1 + 0.05) / (l2 + 0.05)
+}
+
+// ContrastOnBlack returns the contrast ratio of an sRGB color against black.
+func ContrastOnBlack(r, g, b uint8) float64 { return Contrast(RelativeLuminance(r, g, b), 0) }
+
+// ContrastOnWhite returns the contrast ratio of an sRGB color against white.
+func ContrastOnWhite(r, g, b uint8) float64 { return Contrast(1, RelativeLuminance(r, g, b)) }
+
+// ContrastWith returns the contrast ratio of a swatch's background against its
+// own text color, which is the ratio T-010 actually constrains.
+func (s Swatch) ContrastWith() (float64, error) {
+	r, g, b, err := ParseHex(s.Hex)
+	if err != nil {
+		return 0, err
+	}
+	tr, tg, tb, err := ParseHex(s.Text)
+	if err != nil {
+		return 0, err
+	}
+	return Contrast(RelativeLuminance(r, g, b), RelativeLuminance(tr, tg, tb)), nil
 }
 
 // RelativeLuminance implements the WCAG 2.x definition.
@@ -93,6 +187,47 @@ func RelativeLuminance(r, g, b uint8) float64 {
 	}
 	return 0.2126*lin(r) + 0.7152*lin(g) + 0.0722*lin(b)
 }
+
+// DeltaE76 returns the CIE76 color difference between two sRGB colors.
+//
+// The scale is conventional and citable, which is why it is used rather than an
+// ad-hoc RGB distance: below about 2.3 a difference is only just noticeable,
+// and 10 or more is clearly different at a glance.
+func DeltaE76(r1, g1, b1, r2, g2, b2 uint8) float64 {
+	l1, a1, bb1 := toLab(r1, g1, b1)
+	l2, a2, bb2 := toLab(r2, g2, b2)
+	return math.Sqrt((l1-l2)*(l1-l2) + (a1-a2)*(a1-a2) + (bb1-bb2)*(bb1-bb2))
+}
+
+func toLab(r8, g8, b8 uint8) (l, a, b float64) {
+	lin := func(c uint8) float64 {
+		s := float64(c) / 255
+		if s <= 0.04045 {
+			return s / 12.92
+		}
+		return math.Pow((s+0.055)/1.055, 2.4)
+	}
+	r, g, bl := lin(r8), lin(g8), lin(b8)
+	x := (0.4124*r + 0.3576*g + 0.1805*bl) / 0.95047
+	y := 0.2126*r + 0.7152*g + 0.0722*bl
+	z := (0.0193*r + 0.1192*g + 0.9505*bl) / 1.08883
+	f := func(t float64) float64 {
+		if t > 0.008856 {
+			return math.Cbrt(t)
+		}
+		return 7.787*t + 16.0/116
+	}
+	fx, fy, fz := f(x), f(y), f(z)
+	return 116*fy - 16, 500 * (fx - fy), 200 * (fy - fz)
+}
+
+// ParseHex reads "#rrggbb".
+func ParseHex(s string) (r, g, b uint8, err error) {
+	_, err = fmt.Sscanf(s, "#%02x%02x%02x", &r, &g, &b)
+	return
+}
+
+func hex(r, g, b uint8) string { return fmt.Sprintf("#%02x%02x%02x", r, g, b) }
 
 func hslToRGB(h, s, l float64) (uint8, uint8, uint8) {
 	c := (1 - math.Abs(2*l-1)) * s
@@ -118,36 +253,17 @@ func hslToRGB(h, s, l float64) (uint8, uint8, uint8) {
 	return to8(r), to8(g), to8(b)
 }
 
-// DeltaE76 returns the CIE76 color difference between two sRGB colors.
-//
-// The scale is conventional and citable, which is why it is used here rather
-// than an ad-hoc RGB distance: below about 2.3 a difference is only just
-// noticeable, and 10 or more is clearly different at a glance.
-func DeltaE76(r1, g1, b1, r2, g2, b2 uint8) float64 {
-	l1, a1, bb1 := toLab(r1, g1, b1)
-	l2, a2, bb2 := toLab(r2, g2, b2)
-	return math.Sqrt((l1-l2)*(l1-l2) + (a1-a2)*(a1-a2) + (bb1-bb2)*(bb1-bb2))
-}
-
-func toLab(r8, g8, b8 uint8) (l, a, b float64) {
-	lin := func(c uint8) float64 {
-		s := float64(c) / 255
-		if s <= 0.04045 {
-			return s / 12.92
-		}
-		return math.Pow((s+0.055)/1.055, 2.4)
+// AlternatesLightAndDark reports whether the preset cycle strictly alternates,
+// which requires an even count. Exposed so a test can assert the property
+// rather than re-deriving it.
+func AlternatesLightAndDark() bool {
+	if len(presets)%2 != 0 {
+		return false
 	}
-	r, g, bl := lin(r8), lin(g8), lin(b8)
-	// sRGB to XYZ, normalized to the D65 white point.
-	x := (0.4124*r + 0.3576*g + 0.1805*bl) / 0.95047
-	y := 0.2126*r + 0.7152*g + 0.0722*bl
-	z := (0.0193*r + 0.1192*g + 0.9505*bl) / 1.08883
-	f := func(t float64) float64 {
-		if t > 0.008856 {
-			return math.Cbrt(t)
+	for i := range presets {
+		if presets[i].dark == presets[(i+1)%len(presets)].dark {
+			return false
 		}
-		return 7.787*t + 16.0/116
 	}
-	fx, fy, fz := f(x), f(y), f(z)
-	return 116*fy - 16, 500 * (fx - fy), 200 * (fy - fz)
+	return true
 }

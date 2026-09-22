@@ -34,11 +34,24 @@ func testDataset() *dataset.Dataset {
 		}
 		return sp
 	}
-	return &dataset.Dataset{Species: []dataset.Species{
+	orders := map[string]string{
+		"Trochilidae": "Apodiformes", "Turdidae": "Passeriformes", "Ardeidae": "Pelecaniformes",
+	}
+	sp := []dataset.Species{
 		mk("calypte_anna", "Anna's Hummingbird", "Calypte anna", "Trochilidae", 18, 12, 6, 40, 26, 120, 4, dataset.Measured),
 		mk("turdus_migratorius", "American Robin", "Turdus migratorius", "Turdidae", 20, 18, 12, 90, 85, 390, 77, dataset.Measured),
 		mk("ardea_herodias", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, dataset.NearMatch),
-	}}
+	}
+	var fams []dataset.Family
+	for i := range sp {
+		sp[i].Order = orders[sp[i].Family]
+		fams = append(fams, dataset.Family{
+			Name: sp[i].Family, Common: sp[i].FamilyCommon, Order: sp[i].Order,
+			Color: "#86efac", TextColor: "#000000",
+			OrderColor: "#1e3a8a", OrderText: "#ffffff",
+		})
+	}
+	return &dataset.Dataset{Families: fams, Species: sp}
 }
 
 // code builds a plausible four-letter alpha code from a common name, so the
@@ -213,8 +226,8 @@ func TestFamilyFilter(t *testing.T) {
 
 	// The selector labels each family with both names and a count (P-010): the
 	// scientific name alone makes the user translate before they can choose.
-	sel := all[strings.Index(all, `class="row chips"`):]
-	sel = sel[:strings.Index(sel, "</div>")]
+	sel := all[strings.Index(all, `class="ordergroups"`):]
+	sel = sel[:strings.Index(sel, `<p class="count"`)]
 	for _, want := range []string{"Ardeidae", "Ardeidae family", "Turdidae", "Trochilidae"} {
 		if !strings.Contains(sel, want) {
 			t.Errorf("family selector is missing %q", want)
@@ -222,6 +235,27 @@ func TestFamilyFilter(t *testing.T) {
 	}
 	if !strings.Contains(sel, "<b>1</b>") {
 		t.Error("family selector shows no species counts")
+	}
+
+	// Grouped by order, in checklist sequence rather than alphabetically
+	// (P-010). Alphabetical would put Ardeidae first; the fixture's checklist
+	// order puts Trochilidae first.
+	for _, order := range []string{"Apodiformes", "Passeriformes", "Pelecaniformes"} {
+		if !strings.Contains(sel, order) {
+			t.Errorf("selector does not show the order %q as a group", order)
+		}
+	}
+	if a, b := strings.Index(sel, "Apodiformes"), strings.Index(sel, "Pelecaniformes"); a > b {
+		t.Error("selector is not in checklist sequence; groups appear reordered")
+	}
+	// Each family chip sits inside its order's group.
+	gi := strings.Index(sel, "Passeriformes")
+	next := strings.Index(sel[gi:], `class="ogroup"`)
+	if next < 0 {
+		next = len(sel) - gi
+	}
+	if !strings.Contains(sel[gi:gi+next], "Turdidae") {
+		t.Error("Turdidae is not inside the Passeriformes group")
 	}
 }
 

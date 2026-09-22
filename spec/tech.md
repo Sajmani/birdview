@@ -96,8 +96,12 @@ Subject: `badge.contrast.ratio`
 Value: `>= 7.0`
 Goals: G-002
 
-Every generated family badge color yields a contrast ratio of at least 7:1 against the black badge
-text, computed per WCAG 2.2 relative luminance.
+Every generated badge color yields a contrast ratio of at least 7:1 against **the text it actually
+carries**, which is black or white per badge, computed per WCAG 2.2 relative luminance.
+
+Requiring black text specifically would be a stricter rule than WCAG asks for, and an expensive
+one: it discards the entire dark half of the gamut and costs about a third of the distinguishable
+colors available to P-005.
 
 Rationale: WCAG is adopted as a **mandatory** source scoped to the contrast criteria only — see
 [sources.md](sources.md#wcag). BirdView makes no broader conformance claim, and saying so is the

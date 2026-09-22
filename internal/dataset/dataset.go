@@ -81,6 +81,8 @@ type Species struct {
 	Family         string `json:"family"`
 	FamilyCommon   string `json:"familyCommon"`
 	FamilyColor    string `json:"familyColor"`
+	FamilyText     string `json:"familyTextColor"`
+	Order          string `json:"order"`
 
 	// The three main metrics shown on every tile (P-031).
 	TotalLength Metric `json:"totalLength"`
@@ -107,10 +109,27 @@ func (s *Species) AllMetrics() map[string]*Metric {
 	}
 }
 
+// Family is one taxonomic family, with the colors its badge uses.
+//
+// Families are listed in the ABA checklist's own taxonomic sequence, which is
+// the order every field guide arranges birds in -- and which alphabetizing
+// discards.
+type Family struct {
+	Name       string `json:"name"`   // scientific, e.g. Anatidae
+	Common     string `json:"common"` // e.g. Ducks, Geese, and Swans
+	Order      string `json:"order"`  // e.g. Anseriformes
+	Color      string `json:"color"`
+	TextColor  string `json:"textColor"`
+	OrderColor string `json:"orderColor"`
+	OrderText  string `json:"orderTextColor"`
+}
+
 // Dataset is the whole compiled output.
 type Dataset struct {
 	// SourceVersions pins what this build was made from, so a served dataset
 	// can be traced back to its inputs (G-004).
 	SourceVersions map[string]string `json:"sourceVersions"`
-	Species        []Species         `json:"species"`
+	// Families in ABA taxonomic sequence, grouped implicitly by Order.
+	Families []Family  `json:"families"`
+	Species  []Species `json:"species"`
 }
