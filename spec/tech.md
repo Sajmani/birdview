@@ -121,6 +121,12 @@ BirdView runs locally today and may be deployed publicly later. It will not beco
 offering, and source obligations are recorded against the public, non-commercial case so that a
 later deployment needs no licensing re-litigation.
 
+**Public deployment is gated on written permission from the ABA.** Serving the application
+reproduces their checklist — the species list, common names, family names and banding codes — to
+every visitor, which the notice in their own file forbids. Keeping the CSV out of the repository
+does not address this; the served pages are the reproduction. The request is drafted and awaiting
+a demo to accompany it.
+
 Rationale: non-commercial is load-bearing, not incidental. Macaulay Library permits embedding for
 non-commercial use only, and iNaturalist's default CC BY-NC corpus is usable on the same basis.
 Either would become a licensing breach the day BirdView took revenue.

@@ -9,7 +9,12 @@ body {
 }
 h1 { font-size: 22px; margin: 0 0 4px; }
 .sub, .count, footer { color: var(--dim); font-size: 12.5px; }
-footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 12px; max-width: 70ch; }
+footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 12px; max-width: 80ch; }
+footer a { color: var(--accent); }
+.credits { list-style: none; padding: 0; margin: 8px 0; }
+.credits li { margin-bottom: 6px; }
+.credits b { color: var(--ink); font-weight: 600; }
+.caveat { margin-top: 10px; }
 
 .controls { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
   padding: 10px 14px; margin: 16px 0 24px; }

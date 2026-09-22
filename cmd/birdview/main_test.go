@@ -782,3 +782,65 @@ func mustFloat(t *testing.T, s string) float64 {
 	}
 	return v
 }
+
+// TestAttributionIsComplete checks every CC BY source is credited the way that
+// license asks: creator, title, a link to the source, and a link to the license.
+//
+// The obligation is real and becomes enforceable the moment the app is public.
+// An earlier footer named the datasets but linked neither the deposits nor the
+// license, which is credit rather than attribution.
+//
+// Verifies: T-011, G-004. Criterion: AC-064.
+func TestAttributionIsComplete(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/")
+	f := body[strings.Index(body, "<footer>"):]
+
+	for _, want := range []string{
+		"Tobias",                              // AVONET creator
+		"10.6084/m9.figshare.16586228",        // AVONET source
+		"Fox",                                 // wingspan creator
+		"10.6084/m9.figshare.32089083",        // wingspan source
+		"creativecommons.org/licenses/by/4.0", // the license itself
+		"American Birding Association",        // the non-CC source still needs credit
+		"ABA Checklist",
+	} {
+		if !strings.Contains(f, want) {
+			t.Errorf("attribution is missing %q", want)
+		}
+	}
+	// And the honesty note that the numbers are mostly modeled.
+	if !strings.Contains(f, "modeled") {
+		t.Error("footer does not disclose that lengths are modeled")
+	}
+	// The detail view is a shareable URL of its own, so it carries credit too.
+	_, detail := get(t, s2(t), "/species/ardea_herodias")
+	if !strings.Contains(detail, "creativecommons.org/licenses/by/4.0") {
+		t.Error("detail view carries no license attribution")
+	}
+}
+
+func s2(t *testing.T) *server { t.Helper(); return newTestServer(t) }
+
+// TestNoUnearnedPermissionClaim guards against the page asserting a permission
+// the project does not hold.
+//
+// The ABA checklist is all rights reserved and BirdView has not asked for a
+// licence yet. A footer reading "used by permission" was written during the
+// attribution pass and is simply false; claiming a right you have not been
+// granted is worse than claiming none, because it misleads the rights holder's
+// own readers.
+//
+// Delete this test only when a written grant exists and is recorded in
+// spec/sources.md.
+//
+// Verifies: G-004. Criterion: AC-064.
+func TestNoUnearnedPermissionClaim(t *testing.T) {
+	for _, page := range []string{"/", "/species/ardea_herodias"} {
+		_, body := get(t, newTestServer(t), page)
+		for _, claim := range []string{"used by permission", "with permission", "licensed from", "under licence", "under license"} {
+			if strings.Contains(strings.ToLower(body), claim) {
+				t.Errorf("%s claims %q; no such grant exists", page, claim)
+			}
+		}
+	}
+}

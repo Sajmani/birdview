@@ -411,6 +411,20 @@ The scoping matters and was got wrong first. Searching the whole page for the sc
 the **instructions**, which name both modes in the same order, so the check passed with the
 buttons reversed. It now reads only the controls panel.
 
+### AC-064 — Attribution is complete, and claims nothing unearned
+**Verifies:** T-011, G-004 · **Level:** code · **Method:** rendering test over the footer
+**Assertions:** each CC BY source is credited with creator, a link to its deposit and a link to the
+license; the ABA checklist is credited as the species list; the footer discloses that lengths are
+modeled; the detail view carries credit too, being a shareable URL of its own; and **no page claims
+a permission the project does not hold**.
+**Status: verified 2026-09-22 — passing, and watched failing** by stripping the license links and
+by reinstating a "used by permission" claim.
+
+The second half exists because the first version of this footer said the ABA checklist was "used by
+permission". It is not — that request has not been sent. Claiming a right you have not been granted
+is worse than claiming none, because it misleads the rights holder's own readers. Remove that
+assertion only when a written grant exists and is recorded in [sources.md](sources.md).
+
 ---
 
 ## Traceability
@@ -456,7 +470,7 @@ buttons reversed. It now reads only the controls panel.
 | T-005 | AC-050 | |
 | T-006 | AC-052 | |
 | T-010 | AC-002 | |
-| T-011 | — | **gap** — a posture, not a testable assertion |
+| T-011 | AC-064 | partial — the non-commercial posture itself is still untestable |
 | T-020, T-021 | AC-001, AC-003, AC-004 | |
 | `wcag/1.4.6` | AC-002 | |
 
