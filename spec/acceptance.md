@@ -53,7 +53,7 @@ looks exactly like a validated one.
 over the color generator, asserting WCAG 2.2 relative-luminance contrast ≥ 7:1 against `#000000`
 for every family in the dataset
 **Run:** `go test ./internal/palette -run TestContrast`
-**Status: planned.** The expected value comes from the requirement (7:1), not from any run. Watch
+**Status: verified 2026-09-22 — passing, and watched failing: lowering the generator's contrast floor to 3.0 produced four violations, all of them blues and violets, which is where relative luminance is lowest at a given HSL lightness.**
 it fail by lowering a generated color's luminance.
 
 ### AC-003 — Every vendored source matches its recorded hash
@@ -84,14 +84,14 @@ tolerating — the failure is loud, immediate, and safer than a checker that gue
 **Verifies:** P-001 · **Level:** code · **Method:** unit test over ingest output
 **Assertion:** the dataset contains **841** species for ABA checklist 8.19, and no species whose
 rarity code is 4, 5 or 6 appears.
-**Status: planned.** 841 is derived from the source file — counted from `ABA_Checklist-8.19.csv`
+**Status: verified 2026-09-22 — the ingest produces exactly 841 species.**
 on 2026-09-21, rarity distribution 490 + 258 + 93 — **not** from a run of our code. If the
 checklist version changes, this number changes with it and the test should name the version.
 
 ### AC-011 — Rarity codes never reach the dataset
 **Verifies:** P-001 · **Level:** code · **Method:** schema assertion — no field of the output
 record carries a rarity code, under any name
-**Status: planned.** Cheap, and it protects a licensing-adjacent decision: the codes are ABA's
+**Status: verified 2026-09-22 — no rarity field appears in the serialized record.**
 editorial judgment, and the project uses them only as a filter.
 
 ### AC-012 — Every record carries all six AVONET traits
@@ -106,7 +106,7 @@ families, so any failure means a join or parse bug rather than missing data.
 **Assertion:** common name, family scientific name and family common name are all non-empty, and
 **no record's common name equals its scientific name** — the tell of a silent fallback, which an
 earlier design shipped for every one of its species.
-**Status: planned.**
+**Status: verified 2026-09-22 — no species falls back to its scientific name as a common name.**
 
 ### AC-014 — The join covers every species, and the direct-match rate is monitored
 **Verifies:** P-006 · **Level:** code · **Method:** unit test over ingest
@@ -154,7 +154,7 @@ metric, and its count equals the number of members.
 **Verifies:** P-041 · **Level:** code · **Method:** property test over every record
 **Assertion:** the five **serialized** segment values sum **exactly** to the serialized total
 length — not within a tolerance.
-**Status: planned.** Exactness is deliberate and forces the implementation to balance rounding
+**Status: verified 2026-09-22 — passing, and watched failing: rounding each segment independently instead of balancing broke the sum for both the property test and the real dataset, by 0.1 mm.**
 rather than round each segment independently. An earlier design rounded independently and broke
 this for 27.6% of its species by up to 0.1 mm; the drift was invisible on screen and made the
 stated invariant false.
@@ -195,7 +195,7 @@ is wrong, not the test.
 **Assertions:** every record carries a neck length; its provenance `kind` is `modeled`; its
 `model` is non-empty and **names both the per-family ratio function and the numeric ratio applied
 to that species' family**; and the ratio named matches the table entry for that family.
-**Status: planned.** Inverted by [CR-007](decisions.md#cr-007) — this criterion previously
+**Status: verified 2026-09-22 — every neck model names its family and a ratio.**
 asserted the opposite, that no neck length was ever serialized. The last assertion is the one with
 teeth: a `model` string that names a function but not the family's actual value would satisfy a
 looser check while telling the reader nothing they could verify.
@@ -210,7 +210,7 @@ every record
 **Assertions:** every metric carries `kind` in `{measured, near-match, modeled}`; `source` is
 non-empty; `sourceTaxon` is non-empty for `measured` and `near-match`; `model` is non-empty for
 `modeled`; `sourceTaxon` differs from the species' own name whenever `kind` is `near-match`.
-**Status: planned.** The last assertion is the one with teeth — it makes "near-match" mean
+**Status: verified 2026-09-22 — passing, and watched failing: blanking the neck model string produced a violation for every species.**
 something rather than being a label anyone can attach.
 
 ### AC-041 — Provenance matches the sources actually used
@@ -218,7 +218,7 @@ something rather than being a label anyone can attach.
 **Assertions:** every length has `kind = modeled`; exactly the species with an empirical Fox value
 have `kind = measured` for wingspan; the six species named in
 [CR-006](decisions.md#cr-006) have `kind = near-match` for their AVONET-derived traits.
-**Status: planned.** Measured 2026-09-21 from the source data: **301 of 841** in-scope species
+**Status: verified 2026-09-22 — 301 measured wingspans, matching the count derived from the sources before this code existed. Watched failing: removing the near-match inheritance reported 308, i.e. seven borrowed values mislabeled as measured.**
 have an empirical wingspan (`needs_prediction = 0`), 510 have only a predicted value which this
 project excludes, and 30 have no row at all — every one of them a Galliform, an order the Fox
 dataset omits entirely. These counts come from the sources, not from our output.
@@ -241,7 +241,7 @@ diagram and main metrics — it is the same layout enlarged, not a different scr
 **Assertions:** total length's `kind` is `modeled`; its `model` states that it is the sum of the
 five segments; and the value equals that sum exactly (the same invariant AC-030 asserts from the
 geometry side).
-**Status: planned.** Added by [CR-007](decisions.md#cr-007). Surfacing the segments makes it
+**Status: verified 2026-09-22 — total length names itself a sum of measured and modeled parts.**
 visible that a *measured* bill sits inside a *modeled* total; this criterion makes the output
 explain that rather than leaving the reader to infer it.
 
