@@ -13,7 +13,7 @@
   see the difference rather than read it off a number.</p>
 </header>
 
-<details class="help" open>
+<details class="help" id="instructions" open>
   <summary>Instructions</summary>
   <div class="helpgrid">
     <section>
@@ -132,19 +132,38 @@
 <script>
 /* Keep the page still across navigations.
  *
- * Every control is a link, so toggling one loads a new URL and the browser
- * lands at the top -- which throws away your place in a list of 841 birds.
- * This saves the scroll position when leaving the index and restores it on
- * return, which covers both the controls and the trip out to a detail page
- * and back.
+ * Every control is a link, so toggling one loads a new URL. Two things reset
+ * that a reader expects to persist: the scroll position, and whether the
+ * Instructions and Controls panels are collapsed -- the markup says open, so
+ * every reload reopened them and pushed the page down.
+ *
+ * Both are remembered for the session. Panels are restored before the scroll,
+ * since collapsing one afterwards would move everything beneath it.
  *
  * It is the only script in BirdView, and it deliberately holds no logic:
  * ordering, sectioning and geometry stay in Go where they are property-tested.
  * Without JavaScript the page still works exactly as before, minus this. */
 (function () {
-  var KEY = "birdview.scroll";
   if (window.location.pathname !== "/") return;
+
+  /* Panels first. Collapsing one after the scroll has been restored would
+     shift everything under it, which is the jump this is here to avoid. */
   try {
+    document.querySelectorAll("details[id]").forEach(function (d) {
+      var k = "birdview.open." + d.id;
+      var saved = sessionStorage.getItem(k);
+      if (saved !== null) d.open = saved === "1";
+      d.addEventListener("toggle", function () {
+        sessionStorage.setItem(k, d.open ? "1" : "0");
+      });
+    });
+  } catch (e) {
+    /* storage unavailable: panels keep their markup default */
+  }
+
+  /* Then the scroll position. */
+  try {
+    var KEY = "birdview.scroll";
     var y = sessionStorage.getItem(KEY);
     if (y !== null) {
       sessionStorage.removeItem(KEY);

@@ -388,10 +388,12 @@ message to "No species match that filter".
 ### AC-062 — The scroll script is embedded and scoped to the index
 **Verifies:** P-038, T-002 · **Level:** code · **Method:** rendering test
 **Assertions:** the index carries the script inline, never via `src`; it is scoped to `/` so a
-detail page cannot consume the saved position; the detail view ships no script; and the controls
-carry an `id` so `#controls` works as a fallback target.
-**Status: verified 2026-09-22 — passing, and watched failing** by externalizing the script and by
-removing its path guard.
+detail page cannot consume the saved position; the detail view ships no script; the controls carry
+an `id` so `#controls` works as a fallback target; both panels carry ids so their collapsed state
+can be keyed on; both still default to open; and panel state is restored **before** the scroll.
+**Status: verified 2026-09-22 — passing, and watched failing** by externalizing the script, by
+removing its path guard, by dropping a panel's id, and by reordering the restores so the scroll
+runs first.
 
 **This does not check that scrolling works.** That needs a browser, which this project does not
 have. The criterion covers presence, self-containment and scoping only, and the behavior itself is
@@ -432,7 +434,7 @@ buttons reversed. It now reads only the controls panel.
 | P-033 | AC-056 | |
 | P-034 | AC-043, AC-054, AC-058 | |
 | P-035 | AC-059 | |
-| P-036 | — | **gap** — a `<details>` with no behavior to assert |
+| P-036 | AC-062 | |
 | P-037 | AC-061 | |
 | P-038 | AC-062 | partial — behavior unverifiable without a browser |
 | P-040 | AC-033 | |

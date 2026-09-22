@@ -696,6 +696,41 @@ func TestScrollRestorationIsInlineAndSelfContained(t *testing.T) {
 	}
 }
 
+// TestCollapsiblePanelsPersist checks the panels can hold their collapsed state
+// across a navigation.
+//
+// The markup says `open`, so without this every reload reopened a panel the
+// reader had deliberately collapsed, pushing the page down -- the same class of
+// defect as losing the scroll position, and visible in the same moment.
+//
+// Both panels need an id for the state to be keyed on, and the restore must run
+// before the scroll restore, or collapsing a panel shifts everything under it
+// after the position has already been set.
+//
+// Verifies: P-035, P-036, P-038. Criterion: AC-062.
+func TestCollapsiblePanelsPersist(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/")
+
+	for _, id := range []string{"instructions", "controls"} {
+		if !strings.Contains(body, `id="`+id+`"`) {
+			t.Errorf("panel %q has no id; its collapsed state cannot be remembered", id)
+		}
+	}
+	if !strings.Contains(body, "birdview.open.") {
+		t.Error("no script remembers the panels' collapsed state")
+	}
+	// Ordering: panels before scroll.
+	if p, s := strings.Index(body, "birdview.open."), strings.Index(body, "birdview.scroll"); p > s {
+		t.Error("scroll is restored before the panels; collapsing one would then shift the page")
+	}
+	// Both panels still default to open for a first-time reader.
+	for _, want := range []string{`class="help" id="instructions" open`, `class="controls" id="controls" open`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("panel does not default to open: expected %q", want)
+		}
+	}
+}
+
 // TestControlOrderAndOptions pins two presentation choices that are easy to
 // undo by accident: the default scale is listed first, and the section step
 // offers its full range.

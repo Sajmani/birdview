@@ -260,12 +260,16 @@ for. Opening filtered or empty would hide it.
 Subject: `presentation.scroll`
 Goals: G-002
 
-Changing any control preserves the scroll position rather than returning to the top of the page,
-as does returning from a detail view.
+Changing any control preserves the scroll position **and the collapsed state of the Instructions
+and Controls panels**, as does returning from a detail view.
 
 Rationale: every control is a link, so each toggle loads a new URL and the browser lands at the
 top — which discards your place in a list of 841 birds. It matters most for the controls that do
 not change the list at all: switching units or scale should leave you looking at the same birds.
+
+The panels are the same defect seen from another angle. Their markup says open, so every reload
+reopened one the reader had deliberately collapsed and pushed the page down. Panel state is
+restored **before** the scroll, since collapsing one afterwards would move everything beneath it.
 
 The restoration is the only client-side script in BirdView and holds no application logic;
 ordering, sectioning and geometry stay in Go where they are property-tested (see
@@ -285,10 +289,11 @@ the control that fixes it.
 Subject: `presentation.controls`
 Goals: G-002
 
-The controls panel is collapsible and starts open, like the instructions above it.
+The controls panel is collapsible and starts open, like the instructions above it. Once collapsed
+it **stays** collapsed across navigations (P-038).
 
 Rationale: the family selector is 91 chips in 25 groups, which pushes the birds well below the
-fold. A reader who has chosen their filter should be able to put it away.
+fold. A reader who has chosen their filter should be able to put it away — and have it stay away.
 
 ### P-035 — The page explains itself
 Subject: `presentation.help`
