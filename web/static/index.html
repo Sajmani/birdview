@@ -9,9 +9,55 @@
 <body>
 <header>
   <h1>BirdView</h1>
-  <p class="sub">How big is that bird, really? Every diagram in a section is drawn to one scale,
-  so the sizes are directly comparable.</p>
+  <p class="sub">How big is that bird, really? Every bird is drawn to one shared scale, so you can
+  see the difference rather than read it off a number.</p>
 </header>
+
+<details class="help" open>
+  <summary>How to read this</summary>
+  <div class="helpgrid">
+    <section>
+      <h3>The diagram</h3>
+      <ul class="legend">
+        <li><i class="sw bill"></i><b>Bill</b> &mdash; the exposed culmen</li>
+        <li><i class="sw head"></i><b>Head</b> &mdash; cranium, estimated from bill depth</li>
+        <li><i class="sw neck"></i><b>Neck</b> &mdash; estimated per family; a drawing convention</li>
+        <li><i class="sw body"></i><b>Body</b> &mdash; trunk, estimated from mass</li>
+        <li><i class="sw tail"></i><b>Tail</b> &mdash; dashed, to tell it from the body</li>
+        <li><i class="sw wing"></i><b>Wingspan</b> &mdash; the crossbar, at the same scale as the
+          bird&rsquo;s height, so a wing really is that long relative to the body</li>
+      </ul>
+    </section>
+    <section>
+      <h3>The controls</h3>
+      <dl>
+        <dt>Order by</dt>
+        <dd>Sort every bird by total length, wingspan or mass. Birds are then grouped into
+          sections of similar size.</dd>
+        <dt>Scale</dt>
+        <dd><b>Global</b> draws everything shown at one scale &mdash; a hummingbird really is a
+          speck beside a swan. <b>Per section</b> rescales each section to itself, which makes
+          shape easier to compare within a group but hides the size gap between groups.</dd>
+        <dt>Section step</dt>
+        <dd>How much larger a bird must be to start a new section. Smaller values give more,
+          tighter sections.</dd>
+        <dt>Units</dt>
+        <dd>Inches and ounces, or centimeters and grams.</dd>
+        <dt>Family</dt>
+        <dd>Click any family to filter to it; click again to drop it. Several can be combined.
+          Each is labeled with its scientific and common name.</dd>
+      </dl>
+    </section>
+    <section>
+      <h3>Where the numbers come from</h3>
+      <p>A <b class="est-demo">~</b> after a measurement means it is estimated rather than
+      measured. Most lengths are: no open dataset publishes body length for North American birds,
+      so BirdView models it and says so.</p>
+      <p><b>Click any bird</b> for every measurement, including each part of the diagram, with the
+      source or the model behind it named individually.</p>
+    </section>
+  </div>
+</details>
 
 <form class="controls" method="get" action="/">
   <div class="row">

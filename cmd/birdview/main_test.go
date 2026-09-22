@@ -352,3 +352,44 @@ func TestDetailDrawsFullScale(t *testing.T) {
 		}
 	}
 }
+
+// TestHelpCoversEveryControl asserts P-035: the page explains its own controls
+// and its diagram, rather than assuming the reader can infer them.
+//
+// The list is deliberately tied to the controls that exist. If a control is
+// added and this check is not updated, the new control is undocumented and
+// this test is the reminder.
+//
+// Verifies: P-035. Criterion: AC-059.
+func TestHelpCoversEveryControl(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/")
+	i := strings.Index(body, `<details class="help"`)
+	if i < 0 {
+		t.Fatal("no help block on the page")
+	}
+	help := body[i:]
+	help = help[:strings.Index(help, "</details>")]
+
+	// Every control offered by the controls bar.
+	for _, control := range []string{"Order by", "Scale", "Section step", "Units", "Family"} {
+		if !strings.Contains(help, control) {
+			t.Errorf("help does not mention the %q control", control)
+		}
+	}
+	// Every part of the diagram, since none of it is self-evident.
+	for _, part := range []string{"Bill", "Head", "Neck", "Body", "Tail", "Wingspan"} {
+		if !strings.Contains(help, ">"+part+"<") {
+			t.Errorf("diagram legend omits %q", part)
+		}
+	}
+	// The two things a reader cannot discover by clicking: what the estimate
+	// marker means, and that both scale modes exist.
+	for _, concept := range []string{"estimated", "Global", "Per section"} {
+		if !strings.Contains(help, concept) {
+			t.Errorf("help does not explain %q", concept)
+		}
+	}
+	if !strings.Contains(help, "open") {
+		t.Error("help should start expanded")
+	}
+}

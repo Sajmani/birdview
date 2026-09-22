@@ -320,6 +320,17 @@ species, with and without an explicit `?scale=`
 **Status: verified 2026-09-22 — passing, and watched failing** by making the detail view adopt the
 dataset-wide reference, which inset the hummingbird by 128 px.
 
+### AC-059 — The page explains every control and the diagram
+**Verifies:** P-035 · **Level:** code · **Method:** rendering test over the help block
+**Assertions:** the help names every control in the controls bar (order, scale, step, units,
+family); the legend names all five diagram segments and the wingspan crossbar; the estimate marker
+and both scale modes are explained; the block starts expanded.
+**Status: verified 2026-09-22 — passing, and watched failing** by removing the scale explanation
+and, separately, the tail from the legend.
+
+This criterion is tied to the controls that exist, so adding a control without documenting it
+fails here. That is deliberate: help text rots silently otherwise.
+
 ---
 
 ## Traceability
@@ -342,6 +353,7 @@ dataset-wide reference, which inset the hummingbird by 128 px.
 | P-032 | AC-057 | |
 | P-033 | — | **gap** |
 | P-034 | AC-043, AC-054, AC-058 | |
+| P-035 | AC-059 | |
 | P-040 | AC-033 | |
 | P-041 | AC-030 | |
 | P-042 | AC-031 | |

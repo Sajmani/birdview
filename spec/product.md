@@ -221,6 +221,22 @@ With no filter applied, the initial view is all species, ordered by length.
 Rationale: the full sweep from hummingbird to swan is the clearest statement of what the app is
 for. Opening filtered or empty would hide it.
 
+### P-035 — The page explains itself
+Subject: `presentation.help`
+Goals: G-001, G-002, G-003
+
+Below the title, the page carries help text covering every control — ordering metric, scale mode,
+section step, units, family filter — **and a legend for the diagram**, naming each of the five
+segments and the wing crossbar. It also explains the estimate marker.
+
+The help is collapsible and starts open, so a returning user can dismiss it without losing it.
+
+Rationale: nothing about the diagram is self-evident. A reader cannot be expected to know that the
+amber stroke is the bill, that the dashed segment is the tail, or that the crossbar is a true
+wingspan rather than a decoration — and the scale toggle, the one control that changes what the
+app is *saying*, is the least discoverable of all. A first-time visitor on the global default sees
+a page of small birds and has no way to learn that per-section exists.
+
 ### P-034 — A tile opens a detail view
 Subject: `presentation.detail_view`
 Goals: G-001, G-003
