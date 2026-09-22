@@ -313,14 +313,18 @@ func TestLegsScaleWithTarsus(t *testing.T) {
 	box := Box{W: 420, H: 160}
 	for _, s := range []*dataset.Species{short, long} {
 		g := Layout(s, s.TotalLength.Value, s.Wingspan.Value, box)
-		if math.Abs(g.LegDX-g.LegDY) > 1e-9 {
-			t.Errorf("%s: legs are not at 45 degrees (dx %.2f, dy %.2f)",
-				s.ScientificName, g.LegDX, g.LegDY)
+		// Whatever the rake, the leg line must be exactly the tarsus long --
+		// the angle may only redistribute that length between the axes.
+		got := math.Hypot(g.LegDX, g.LegDY)
+		want := s.Tarsus.Value * g.PxPerMm
+		if math.Abs(got-want) > 1e-9 {
+			t.Errorf("%s: leg line is %.3f px, want the scaled tarsus %.3f", s.ScientificName, got, want)
 		}
-		want := s.Tarsus.Value * g.PxPerMm / math.Sqrt2
-		if math.Abs(g.LegDX-want) > 1e-9 {
-			t.Errorf("%s: leg extent %.2f, want tarsus/sqrt(2) scaled = %.2f",
-				s.ScientificName, g.LegDX, want)
+		// And it must rake back more steeply than 45 degrees, or a
+		// correct-length leg reads short.
+		if g.LegDY <= g.LegDX {
+			t.Errorf("%s: legs rake at or below 45 degrees (dx %.2f, dy %.2f); the vertical "+
+				"share is what makes a leg look like a leg", s.ScientificName, g.LegDX, g.LegDY)
 		}
 		// And they attach at the body's midpoint.
 		if mid := (g.YShoulder + g.YBodyEnd) / 2; math.Abs(g.YLegTop-mid) > 1e-9 {

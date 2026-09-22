@@ -346,7 +346,10 @@ Goals: G-003
 
 The diagram is a vertical cross. Top to bottom: a bill stick, a head oval, a neck stick, a body
 stick, and a tail stick — plus one horizontal crossbar representing the wings, and **a pair of
-legs raking back from the body's midpoint at 45°, drawn from the measured tarsus**. The tail is
+legs raking back from the body's midpoint, drawn from the measured tarsus**. The leg line is
+always exactly the tarsus long; the rake angle only decides how that length divides between the
+vertical and the horizontal, and it is steeper than 45° because a standing bird's tarsus is
+near-vertical and a shallow rake makes a correct-length leg read short. The tail is
 visually distinguished from the body by stroke style and a mark at the junction between them.
 
 Legs are not part of the vertical sum of P-041; like the wingspan they are drawn at the same scale
@@ -356,6 +359,14 @@ Rationale for legs: tarsus is a **measured** trait, so with bill and tail it is 
 parts of the diagram that is not modeled — and it spans 115×, from a Rufous Hummingbird's 2.5 mm
 to a Whooping Crane's 289 mm. A Black-necked Stilt's tarsus is 34% of its total length against a
 Chimney Swift's 9%. That is real, striking, and was previously thrown away.
+
+**The legs are shorter than the bird's visible leg, and deliberately so.** The tarsus is the
+tarsometatarsus alone; the tibiotarsus above it is largely feathered in passerines but
+substantially exposed in waders and cranes. Drawing the tarsus therefore understates the leg, and
+understates it most in the long-legged birds. The alternative — scaling up by a per-family factor
+to approximate the exposed leg — would replace the diagram's one new measurement with another
+invented table, so it is not done. The detail view names the metric "Tarsus (leg)" rather than
+"Leg".
 
 Rationale: the tail is a stick rather than a triangle because no trait in any source gives a tail
 width, and a triangle would assert a fan shape the data does not support.

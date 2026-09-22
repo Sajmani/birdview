@@ -35,6 +35,17 @@ type Geometry struct {
 	LegDX, LegDY float64
 }
 
+// legRake is how steeply the legs rake back from the body, measured from the
+// horizontal. The line is always exactly the tarsus long; the rake only decides
+// how that length is split between vertical and horizontal.
+//
+// 45 degrees, tried first, spends the same on each and makes a correct-length
+// leg read short: a Black-necked Stilt dropped 10 px against a 42 px body. A
+// standing bird's tarsus is near-vertical anyway, so a steeper rake is both
+// more accurate and more legible. At 60 degrees the vertical share rises from
+// 0.71 to 0.87 of the tarsus, a 22% gain for nothing.
+const legRake = 60 * math.Pi / 180
+
 // headAspect is how wide the cranium oval is drawn relative to its height.
 // A drawing convention with no measured basis, like the neck ratio -- but
 // unlike the neck it produces no metric, so it carries no provenance record.
@@ -79,10 +90,9 @@ func Layout(s *dataset.Species, refLength, refWingspan float64, box Box) Geometr
 	g.CrossbarHalfWidth = s.Wingspan.Value * scale / 2
 
 	g.YLegTop = (g.YShoulder + g.YBodyEnd) / 2
-	// At 45 degrees the horizontal and vertical components are equal, each the
-	// tarsus over root two.
-	leg := s.Tarsus.Value * scale / math.Sqrt2
-	g.LegDX, g.LegDY = leg, leg
+	leg := s.Tarsus.Value * scale
+	g.LegDX = leg * math.Cos(legRake)
+	g.LegDY = leg * math.Sin(legRake)
 	return g
 }
 
