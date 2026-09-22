@@ -71,8 +71,12 @@ type Segments struct {
 
 // Species is one compiled record.
 type Species struct {
-	ID             string `json:"id"`
-	CommonName     string `json:"commonName"`
+	ID         string `json:"id"`
+	CommonName string `json:"commonName"`
+	// BandingCode is the ABA four-letter alpha code, e.g. AMRO. Not to be
+	// confused with the ABA rarity code, which is a scope filter and is
+	// deliberately discarded (P-001).
+	BandingCode    string `json:"bandingCode,omitempty"`
 	ScientificName string `json:"scientificName"`
 	Family         string `json:"family"`
 	FamilyCommon   string `json:"familyCommon"`

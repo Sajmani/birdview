@@ -27,7 +27,10 @@ const MaxRarityCode = 3
 // carried: it is read to select codes 1-3 and then discarded, because it is
 // ABA's editorial judgment rather than BirdView's data (P-001, AC-011).
 type Species struct {
-	CommonName     string
+	CommonName string
+	// Code is the four-letter alpha banding code, e.g. AMRO for American Robin.
+	// ABA notes that these follow AOS English names.
+	Code           string
 	ScientificName string
 	// AltScientificName is the AOS/Clements alternative the file gives in
 	// parentheses, where the two taxonomies disagree. Empty when they agree.
@@ -110,6 +113,7 @@ func Parse(r io.Reader) ([]Species, error) {
 		}
 		out = append(out, Species{
 			CommonName:        strings.TrimSpace(row[1]),
+			Code:              strings.TrimSpace(row[4]),
 			ScientificName:    Normalize(row[3]),
 			AltScientificName: parenthetical(row[3]),
 			Family:            famSci,

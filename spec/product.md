@@ -47,9 +47,10 @@ Subject: `dataset.names.source`
 Value: `ABA Checklist`
 Goals: G-002
 
-English common name, scientific name, family scientific name and family common name all come from
-the ABA checklist. Its section-header rows are formatted `Sandpipers and Allies (Scolopacidae)`,
-supplying both halves of the family name.
+English common name, scientific name, the **four-letter banding code**, family scientific name
+and family common name all come from the ABA checklist. Its section-header rows are formatted
+`Sandpipers and Allies (Scolopacidae)`, supplying both halves of the family name; the banding code
+is a per-species column.
 
 Rationale: one source for all naming, rather than joining a second taxonomy for common names
 alone. AVONET carries no common name at all, and no English-name column exists on any of its
@@ -171,11 +172,20 @@ Goals: G-001, G-002, G-003
 
 Each species is one **tile**, laid out top to bottom:
 
-1. a header carrying the **common name**, the **scientific name**, and the **family badge**;
-2. the diagram;
+1. a header whose first line carries the **common name followed by its four-letter banding code in
+   parentheses**, with the **scientific name right-justified on the same line**; and below it the
+   **family badge**, showing the family's scientific name and its common name together;
+2. the diagram, **vertically centered** in its area;
 3. the main metrics — **length, wingspan, mass** — in the selected unit system.
 
 Tiles wrap to fill the available display width.
+
+Rationale for centering: under global scale a small bird occupies a fraction of the tile's height,
+and bottom-aligning it reads as a rendering fault rather than as the size difference it is.
+Centering makes the empty space symmetric, so it reads as headroom rather than as misalignment.
+
+Family common names are **not** unique across families — several groups share a vernacular
+label — so they are a reading aid beside the scientific name, never an identifier.
 
 ### P-032 — Imperial by default, metric available
 Subject: `units.default`

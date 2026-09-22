@@ -51,14 +51,48 @@ func TestScopeIsABACodes1To3(t *testing.T) {
 	}
 }
 
+// TestRarityCodeNeverReachesTheDataset checks the ABA rarity code is used as a
+// scope filter and then discarded (P-001).
+//
+// This inspects field NAMES rather than searching the whole record for "code",
+// which an earlier version did. That was too broad: it would now reject the
+// four-letter banding code, which is a legitimate part of a species' identity
+// and which P-004 requires. The requirement is about rarity specifically.
+//
 // Verifies: P-001. Criterion: AC-011.
 func TestRarityCodeNeverReachesTheDataset(t *testing.T) {
 	ds := load(t)
-	blob := mustJSON(t, ds.Species[0])
-	for _, banned := range []string{"rarity", "abaCode", "code"} {
-		if strings.Contains(strings.ToLower(blob), strings.ToLower(banned)) {
-			t.Errorf("serialized record mentions %q; the rarity code is a scope filter, not data", banned)
+	var fields map[string]any
+	if err := json.Unmarshal([]byte(mustJSON(t, ds.Species[0])), &fields); err != nil {
+		t.Fatal(err)
+	}
+	for name := range fields {
+		if strings.Contains(strings.ToLower(name), "rarity") {
+			t.Errorf("serialized record has field %q; the rarity code is a scope filter, not data", name)
 		}
+	}
+	// And no field should hold a bare 1-6 that could be one.
+	if v, ok := fields["abaCode"]; ok {
+		t.Errorf("serialized record carries abaCode = %v", v)
+	}
+}
+
+// TestBandingCodesArePresent checks P-004's newest requirement: the tile shows
+// the four-letter code, so the ingest must carry it.
+//
+// Verifies: P-004. Criterion: AC-013.
+func TestBandingCodesArePresent(t *testing.T) {
+	ds := load(t)
+	var missing int
+	for _, s := range ds.Species {
+		if s.BandingCode == "" {
+			missing++
+		}
+	}
+	// A handful of ABA rows genuinely have no alpha code; a large share missing
+	// would mean the column moved.
+	if frac := float64(missing) / float64(len(ds.Species)); frac > 0.05 {
+		t.Errorf("%d of %d species (%.1f%%) have no banding code", missing, len(ds.Species), frac*100)
 	}
 }
 

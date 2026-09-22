@@ -89,8 +89,8 @@ on 2026-09-21, rarity distribution 490 + 258 + 93 — **not** from a run of our 
 checklist version changes, this number changes with it and the test should name the version.
 
 ### AC-011 — Rarity codes never reach the dataset
-**Verifies:** P-001 · **Level:** code · **Method:** schema assertion — no field of the output
-record carries a rarity code, under any name
+**Verifies:** P-001 · **Level:** code · **Method:** inspect the serialized record's field names
+for anything carrying an ABA rarity code
 **Status: verified 2026-09-22 — no rarity field appears in the serialized record.**
 editorial judgment, and the project uses them only as a filter.
 
@@ -288,8 +288,9 @@ integration test that starts the server and requests `/`
 
 ### AC-055 — The tile carries the header, diagram and main metrics
 **Verifies:** P-031 · **Level:** code · **Method:** rendering test
-**Assertion:** every tile shows common name, scientific name, family badge, an SVG diagram, and
-the three main metrics.
+**Assertions:** every tile shows the common name with its banding code in parentheses, the
+scientific name, a family badge naming both the scientific and common family name, an SVG diagram,
+and the three main metrics.
 **Status: verified 2026-09-22.**
 
 ### AC-056 — The family filter selects and clears

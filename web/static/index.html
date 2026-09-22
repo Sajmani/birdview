@@ -72,9 +72,12 @@
 {{define "tile"}}
 <a class="tile" href="/species/{{.S.ID}}">
   <div class="hd">
-    <div class="cn">{{.S.CommonName}}</div>
-    <div class="sn">{{.S.ScientificName}}</div>
-    <span class="badge" style="background:{{.S.FamilyColor}}">{{.S.Family}}</span>
+    <div class="nameline">
+      <span class="cn">{{.S.CommonName}}{{with .S.BandingCode}} <span class="code">({{.}})</span>{{end}}</span>
+      <span class="sn">{{.S.ScientificName}}</span>
+    </div>
+    <span class="badge" style="background:{{.S.FamilyColor}}">{{.S.Family}}
+      <em>{{.S.FamilyCommon}}</em></span>
   </div>
   {{template "diagram" .}}
   <div class="ft">
@@ -87,9 +90,9 @@
 
 {{define "diagram"}}
 {{$g := .Geom}}{{$b := .Box}}
-<svg class="dia" viewBox="0 0 {{f1 $b.W}} {{f1 $b.H}}" preserveAspectRatio="xMidYMax meet" role="img"
+<svg class="dia" viewBox="0 0 {{f1 $b.W}} {{f1 $b.H}}" preserveAspectRatio="xMidYMid meet" role="img"
      aria-label="scaled outline of {{.S.CommonName}}">
-  <g transform="translate(0,{{f1 (sub $b.H $g.TotalHeight)}})">
+  <g transform="translate(0,{{f1 (div (sub $b.H $g.TotalHeight) 2)}})">
     <line class="wing" x1="{{f1 (sub $g.CX $g.CrossbarHalfWidth)}}" y1="{{f1 $g.YShoulder}}"
           x2="{{f1 (add $g.CX $g.CrossbarHalfWidth)}}" y2="{{f1 $g.YShoulder}}"/>
     <line class="bill" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBillTip}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YCraniumTop}}"/>

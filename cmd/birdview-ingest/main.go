@@ -177,6 +177,7 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 		rec := dataset.Species{
 			ID:             id(sp.ScientificName),
 			CommonName:     sp.CommonName,
+			BandingCode:    sp.Code,
 			ScientificName: sp.ScientificName,
 			Family:         sp.Family,
 			FamilyCommon:   sp.FamilyCommon,

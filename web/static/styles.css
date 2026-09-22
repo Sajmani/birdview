@@ -38,15 +38,25 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
   border-radius: 8px; padding: 10px; text-decoration: none; color: inherit; display: block; }
 .tile:hover { border-color: var(--accent); }
 .tile.big { width: min(760px, 100%); }
+.nameline { display: flex; align-items: baseline; gap: 10px; }
 .cn { font-size: 13px; font-weight: 700; }
-.sn { font-size: 11.5px; font-style: italic; color: var(--dim); }
+.cn .code { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim);
+  font-weight: 500; }
+/* Right-justified on the same line, and the first thing to give up room. */
+.sn { font-size: 11.5px; font-style: italic; color: var(--dim); margin-left: auto;
+  text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .badge { display: inline-block; color: #000; font-size: 10.5px; font-weight: 600;
   border-radius: 4px; padding: 1px 6px; margin-top: 4px; }
+.badge em { font-style: normal; font-weight: 400; opacity: .72; }
+.badge em::before { content: "\00b7"; margin: 0 4px; opacity: .6; }
 .ft { display: flex; gap: 14px; font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
   color: var(--dim); border-top: 1px solid var(--line); padding-top: 7px; margin-top: 4px; }
 .ft .est::after { content: "~"; color: var(--accent); margin-left: 2px; }
 
 .dia { display: block; width: 100%; height: auto; margin: 8px 0; }
+.tile.big .nameline { gap: 16px; }
+.tile.big .cn { font-size: 17px; }
+.tile.big .sn { font-size: 13.5px; }
 .bill { stroke: #f59e0b; stroke-width: 2; }
 .head { fill: #475569; stroke: #cbd5e1; stroke-width: 1.2; }
 .neck { stroke: #cbd5e1; stroke-width: 2; }

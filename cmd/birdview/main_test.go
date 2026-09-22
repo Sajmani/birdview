@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -20,7 +21,7 @@ func testDataset() *dataset.Dataset {
 			return dataset.Metric{Value: v, Prov: dataset.Provenance{Kind: dataset.Modeled, Model: s}}
 		}
 		sp := dataset.Species{
-			ID: id, CommonName: common, ScientificName: sci, Family: fam,
+			ID: id, CommonName: common, BandingCode: code(common), ScientificName: sci, Family: fam,
 			FamilyCommon: fam + " family", FamilyColor: "#86efac",
 			TotalLength: mod(bill+head+neck+body+tail, "sum of the five diagram segments"),
 			Wingspan:    dataset.Metric{Value: span, Prov: dataset.Provenance{Kind: k, Source: "Fox et al. 2026", SourceTaxon: "Other species"}},
@@ -37,6 +38,19 @@ func testDataset() *dataset.Dataset {
 		mk("turdus_migratorius", "American Robin", "Turdus migratorius", "Turdidae", 20, 18, 12, 90, 85, 390, 77, dataset.Measured),
 		mk("ardea_herodias", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, dataset.NearMatch),
 	}}
+}
+
+// code builds a plausible four-letter alpha code from a common name, so the
+// fixture exercises the same rendering path as real data.
+func code(common string) string {
+	var out []byte
+	for _, w := range strings.Fields(common) {
+		out = append(out, strings.ToUpper(w[:1])...)
+	}
+	for len(out) < 4 {
+		out = append(out, 'X')
+	}
+	return string(out[:4])
 }
 
 func newTestServer(t *testing.T) *server {
@@ -97,14 +111,58 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/")
 	for _, want := range []string{
 		"American Robin",     // common name
+		"(ARXX)",             // banding code, in parentheses after it
 		"Turdus migratorius", // scientific name
-		"Turdidae",           // family badge
+		"Turdidae",           // family badge, scientific name
+		"Turdidae family",    // family badge, common name alongside it
 		"<svg",               // the diagram
 		"L ", "W ", "M ",     // the three main metrics
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("tile is missing %q", want)
 		}
+	}
+
+	// The common and scientific names share one header line (P-031), so no
+	// block-level element may close between them.
+	i := strings.Index(body, "American Robin")
+	j := strings.Index(body, "Turdus migratorius")
+	if i < 0 || j < 0 || j < i {
+		t.Fatal("names not found in the expected order")
+	}
+	if strings.Contains(body[i:j], "</div>") {
+		t.Error("scientific name is not on the same header line as the common name")
+	}
+}
+
+// TestDiagramIsVerticallyCentered asserts P-031: a bird shorter than the
+// drawing area sits in the middle of it, not on the floor.
+//
+// This matters most under global scale, where a small bird occupies a fraction
+// of the tile's height and bottom-alignment reads as a rendering fault rather
+// than as the size difference it is.
+//
+// Verifies: P-031. Criterion: AC-055.
+func TestDiagramIsVerticallyCentered(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/?scale=global")
+
+	if strings.Contains(body, "xMidYMax") {
+		t.Error("diagram is bottom-anchored (xMidYMax); it should be centered")
+	}
+	m := regexp.MustCompile(`translate\(0,([0-9.]+)\)`).FindAllStringSubmatch(body, -1)
+	if len(m) == 0 {
+		t.Fatal("no diagram transforms found")
+	}
+	// Under one global scale the smallest bird has the most slack, so at least
+	// one diagram must be inset from the top.
+	var inset bool
+	for _, g := range m {
+		if v, _ := strconv.ParseFloat(g[1], 64); v > 0.05 {
+			inset = true
+		}
+	}
+	if !inset {
+		t.Error("every diagram sits at offset 0; under global scale smaller birds should be inset")
 	}
 }
 

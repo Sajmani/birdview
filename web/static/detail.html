@@ -11,9 +11,12 @@
 
 <div class="tile big">
   <div class="hd">
-    <div class="cn">{{.S.CommonName}}</div>
-    <div class="sn">{{.S.ScientificName}}</div>
-    <span class="badge" style="background:{{.S.FamilyColor}}">{{.S.Family}} &middot; {{.S.FamilyCommon}}</span>
+    <div class="nameline">
+      <span class="cn">{{.S.CommonName}}{{with .S.BandingCode}} <span class="code">({{.}})</span>{{end}}</span>
+      <span class="sn">{{.S.ScientificName}}</span>
+    </div>
+    <span class="badge" style="background:{{.S.FamilyColor}}">{{.S.Family}}
+      <em>{{.S.FamilyCommon}}</em></span>
   </div>
   {{template "diagram" .}}
 </div>
