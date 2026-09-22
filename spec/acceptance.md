@@ -349,6 +349,20 @@ and, separately, the tail from the legend.
 This criterion is tied to the controls that exist, so adding a control without documenting it
 fails here. That is deliberate: help text rots silently otherwise.
 
+### AC-060 — Text on a generated background inherits that background's text color
+**Verifies:** P-005, T-010 · **Level:** code · **Method:** structural check over `styles.css`
+**Assertions:** no rule targeting a descendant of `.chip` or `.badge` sets its own `color`, and no
+such rule dims text with `opacity`.
+
+**Status: verified 2026-09-22 — passing, and watched failing** by restoring the fixed grey.
+
+Chips and badges carry a generated background paired with a black-or-white text color chosen so
+the pair clears 7:1. The stylesheet set the family common name to a fixed grey, which ignores
+which half of the palette a chip landed on and went unreadable on both — the common name vanished
+on roughly a dozen chips. Hierarchy has to come from weight and size; dimming undoes the very
+ratio the background was selected for. Checking CSS is crude, but the defect is invisible to a
+rendering test and this catches it exactly.
+
 ---
 
 ## Traceability
@@ -358,7 +372,7 @@ fails here. That is deliberate: help text rots silently otherwise.
 | P-001 | AC-010, AC-011, AC-053 | |
 | P-002, P-003 | AC-012 | |
 | P-004 | AC-013 | |
-| P-005 | AC-002 | |
+| P-005 | AC-002, AC-060 | |
 | P-006 | AC-014 | |
 | P-007 | AC-015 | |
 | P-010 | AC-056 | |

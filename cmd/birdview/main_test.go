@@ -10,6 +10,7 @@ import (
 
 	"birdview/internal/dataset"
 	"birdview/internal/view"
+	"birdview/web"
 )
 
 func testDataset() *dataset.Dataset {
@@ -425,5 +426,92 @@ func TestHelpCoversEveryControl(t *testing.T) {
 	}
 	if !strings.Contains(help, "open") {
 		t.Error("help should start expanded")
+	}
+}
+
+// TestChipTextInheritsItsBackgroundsTextColor guards a bug that shipped: chips
+// carry a generated background with a matching black-or-white text color, and
+// the stylesheet set the family common name to a fixed grey. Grey is unreadable
+// on both halves of the palette, so the common name vanished on roughly a
+// dozen chips.
+//
+// The rule is structural: nothing inside a colored chip or badge may set its
+// own color. Checking the stylesheet is crude but it catches precisely the
+// regression, which a rendering test cannot see.
+//
+// Verifies: P-005, T-010. Criterion: AC-060.
+func TestChipTextInheritsItsBackgroundsTextColor(t *testing.T) {
+	css, err := web.Static.ReadFile("static/styles.css")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, rule := range strings.Split(string(css), "}") {
+		open := strings.Index(rule, "{")
+		if open < 0 {
+			continue
+		}
+		sel, body := rule[:open], rule[open+1:]
+		// Only descendants matter. A default color on the bare .chip is fine --
+		// the "All" chip has no generated background and needs one. The bug was
+		// in the parts nested inside a chip whose background IS generated.
+		if !descendantOfColored(sel) {
+			continue
+		}
+		for _, decl := range strings.Split(body, ";") {
+			decl = strings.TrimSpace(decl)
+			if !strings.HasPrefix(decl, "color:") {
+				continue
+			}
+			v := strings.TrimSpace(strings.TrimPrefix(decl, "color:"))
+			if v != "inherit" && v != "currentColor" {
+				t.Errorf("%s sets %q; text on a generated background must inherit "+
+					"that background's own text color", strings.TrimSpace(sel), decl)
+			}
+		}
+		// Dimming has the same effect as the wrong color: it undercuts the
+		// contrast ratio the background was picked for.
+		if strings.Contains(body, "opacity:") && strings.Contains(sel, "em") {
+			t.Errorf("%s dims its text; hierarchy must come from weight, not opacity, "+
+				"or the 7:1 guarantee is lost", strings.TrimSpace(sel))
+		}
+	}
+}
+
+// descendantOfColored reports whether a selector targets something nested
+// inside an element whose background is a generated color.
+func descendantOfColored(selector string) bool {
+	for _, sel := range strings.Split(selector, ",") {
+		parts := strings.Fields(strings.TrimSpace(sel))
+		for i, p := range parts {
+			if i == len(parts)-1 {
+				break // the subject itself, not a descendant of it
+			}
+			if strings.Contains(p, ".chip") || strings.Contains(p, ".badge") {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// TestOrderLabelsAreNotChips checks the order labels render as plain text.
+// Styling them like chips made them look clickable when they do nothing.
+//
+// Verifies: P-010. Criterion: AC-056.
+func TestOrderLabelsAreNotChips(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/")
+	i := strings.Index(body, `class="ordergroups"`)
+	if i < 0 {
+		t.Fatal("no selector groups")
+	}
+	sel := body[i:]
+	sel = sel[:strings.Index(sel, `<p class="count"`)]
+	for _, h := range regexp.MustCompile(`<div class="ohdr"[^>]*>`).FindAllString(sel, -1) {
+		if strings.Contains(h, "background:") {
+			t.Errorf("order label %q carries a background; it should be plain text", h)
+		}
+	}
+	if strings.Contains(sel, `<a class="ohdr`) {
+		t.Error("order label is a link but nothing has made it a real control")
 	}
 }

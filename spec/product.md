@@ -124,7 +124,8 @@ The user can filter to any subset of families, multi-select, with a single contr
 filter and shows everything.
 
 The selector is **grouped by taxonomic order, in the ABA checklist's own sequence** rather than
-alphabetically, with each group headed by the order's name and color. Each family is labeled with
+alphabetically. Each group is headed by the order's name as **plain text** — not as a chip, since
+a chip-shaped label reads as clickable and these do nothing. Each family is labeled with
 **both its scientific and its common name** and the number of species it contributes.
 
 Rationale: the selector is where the common name earns its place. A birder looking for nightjars

@@ -18,23 +18,33 @@ footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 12px;
   margin: 0 4px 0 14px; }
 .row .lbl:first-child { margin-left: 0; }
 .btn, .chip { display: inline-flex; align-items: center; gap: 5px; text-decoration: none;
-  color: var(--ink); background: #0b1220; border: 1px solid var(--line);
+  background: #0b1220; border: 1px solid var(--line);
   border-radius: 6px; padding: 3px 9px; font-size: 12.5px; }
-.btn.on, .chip.on { background: var(--accent); color: #06283d; border-color: var(--accent); font-weight: 600; }
+/* Family chips get their background and text color inline, generated together
+   so the pair clears 7:1. These defaults only reach chips without one, like
+   the "All" chip. */
+.btn, .chip { color: var(--ink); }
+.btn.on { background: var(--accent); color: #06283d; border-color: var(--accent); font-weight: 600; }
+.chip.on { font-weight: 600; }
 .chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .hint { color: var(--dim); font-size: 11px; font-style: italic; }
-.ordergroups { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
-.ogroup { display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
-  border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; }
-.ohdr { font-size: 10.5px; font-weight: 700; border-radius: 5px; padding: 2px 7px;
-  letter-spacing: .02em; }
-.ohdr b { font-weight: 500; opacity: .75; margin-left: 5px; }
+.ordergroups { display: flex; flex-direction: column; gap: 7px; margin-top: 6px; }
+.ogroup { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; }
+/* Plain text on the page background. Anything chip-shaped reads as clickable,
+   and these are labels. */
+.ohdr { font-size: 10.5px; font-weight: 600; color: var(--dim); text-transform: uppercase;
+  letter-spacing: .06em; min-width: 132px; flex: none; }
+.ohdr b { font-weight: 400; margin-left: 5px; opacity: .8; }
 .ogroup .chip.on { outline: 2px solid var(--accent); outline-offset: 1px; }
-.chip em { font-style: normal; color: var(--dim); font-size: 11.5px; }
-.chip b { color: var(--dim); font-weight: 500; font-size: 11.5px; }
-.chip em::before { content: "\00b7"; margin: 0 5px; opacity: .55; }
-.chip b::before { content: ""; margin-left: 6px; }
-.chip.on em, .chip.on b { color: #06283d; opacity: .8; }
+/* Sub-text inside a colored chip inherits the chip's own text color. A fixed
+   grey ignores whether the chip is light or dark and goes unreadable on both --
+   it made the common name invisible on Anatidae, Columbidae and a dozen others.
+   Hierarchy comes from weight and size, not from dimming, so every character
+   keeps the 7:1 ratio the background was chosen for (T-010). */
+.chip em { font-style: normal; color: inherit; font-weight: 400; font-size: 11.5px; }
+.chip b { color: inherit; font-weight: 700; font-size: 11.5px; }
+.chip em::before { content: "\00b7"; margin: 0 5px; }
+.chip b::before { content: ""; margin-left: 7px; }
 .count { margin: 4px 0 0; }
 
 section { margin-bottom: 28px; }
@@ -58,8 +68,8 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
   text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .badge { display: inline-block; font-size: 10.5px; font-weight: 600;
   border-radius: 4px; padding: 1px 6px; margin-top: 4px; }
-.badge em { font-style: normal; font-weight: 400; opacity: .72; }
-.badge em::before { content: "\00b7"; margin: 0 4px; opacity: .6; }
+.badge em { font-style: normal; font-weight: 400; }
+.badge em::before { content: "\00b7"; margin: 0 4px; }
 .ft { display: flex; gap: 14px; font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
   color: var(--dim); border-top: 1px solid var(--line); padding-top: 7px; margin-top: 4px; }
 .ft .est::after { content: "~"; color: var(--accent); margin-left: 2px; }
