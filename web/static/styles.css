@@ -28,7 +28,7 @@ footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 12px;
    the "All" chip. */
 .btn, .chip { color: var(--ink); }
 .btn.on { background: var(--accent); color: #06283d; border-color: var(--accent); font-weight: 600; }
-.chip.on { font-weight: 600; }
+.chip.on { font-weight: 600; outline: 2px solid var(--accent); outline-offset: 1px; }
 .chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .hint { color: var(--dim); font-size: 11px; font-style: italic; }
 .ordergroups { display: flex; flex-direction: column; gap: 7px; margin-top: 6px; }
@@ -41,7 +41,7 @@ footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 12px;
 .ohdr em { font-style: normal; font-weight: 400; opacity: .75; }
 .ohdr em::before { content: "\00b7"; margin: 0 5px; }
 .ohdr b { font-weight: 600; margin-left: auto; padding-left: 8px; }
-.ogroup .chip.on { outline: 2px solid var(--accent); outline-offset: 1px; }
+.btn b { font-weight: 600; margin-left: 6px; opacity: .8; }
 /* Sub-text inside a colored chip inherits the chip's own text color. A fixed
    grey ignores whether the chip is light or dark and goes unreadable on both --
    it made the common name invisible on Anatidae, Columbidae and a dozen others.

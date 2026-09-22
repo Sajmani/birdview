@@ -197,7 +197,11 @@ type pageData struct {
 	Total    int
 	Shown    int
 	Query    func(...string) template.URL
-	ClearURL template.URL
+	// AllSelected is true only when every family is explicitly filtered in --
+	// not when nothing is selected. Both states display the whole dataset, but
+	// they are different selections, and the control reflects the selection.
+	AllSelected bool
+	AllURL      template.URL
 }
 
 // tileBox is the drawing area for one diagram. Roughly 2.6:1, because a
@@ -244,7 +248,26 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	page := pageData{Opt: opt, Total: len(s.ds.Species), Shown: len(filtered),
-		Query: queryFor(r), ClearURL: familyURL(r, nil)}
+		Query: queryFor(r)}
+
+	// "All" toggles like an order does, over every family. Untoggling it clears
+	// the selection outright rather than leaving 91 redundant parameters behind.
+	page.AllSelected = len(s.fams) > 0
+	for _, f := range s.fams {
+		if !opt.Families[f.Name] {
+			page.AllSelected = false
+			break
+		}
+	}
+	if page.AllSelected {
+		page.AllURL = familyURL(r, nil)
+	} else {
+		every := make(map[string]bool, len(s.fams))
+		for _, f := range s.fams {
+			every[f.Name] = true
+		}
+		page.AllURL = familyURL(r, every)
+	}
 	byOrder := map[string]int{}
 	for _, f := range s.fams {
 		next := map[string]bool{}

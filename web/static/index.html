@@ -87,7 +87,8 @@
 
   <div class="row chips">
     <span class="lbl">Family</span>
-    <a class="chip{{if not .Opt.Families}} on{{end}}" href="{{.ClearURL}}">All ({{.Total}})</a>
+    <a class="btn{{if .AllSelected}} on{{end}}" href="{{.AllURL}}"
+       title="{{if .AllSelected}}Clear every selection{{else}}Select every family{{end}}">All<b>{{.Total}}</b></a>
     <span class="hint">grouped by order, in checklist sequence</span>
   </div>
   <div class="ordergroups">

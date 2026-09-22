@@ -314,8 +314,9 @@ and the three main metrics.
 **Assertions:** filtering to one family shows its species and excludes others; no filter shows
 all; every entry is labeled with its scientific name, its common name and its species count; the
 selector is grouped by taxonomic order; groups appear in checklist sequence rather than
-alphabetically; each family sits inside its own order's group; and each order is a working toggle
-that selects or clears **every** family in it, labeled with its common name.
+alphabetically; each family sits inside its own order's group; each order is a working toggle that
+selects or clears **every** family in it, labeled with its common name; and **All** toggles the
+same way over the whole set, clearing the selection when untoggled.
 **Status: verified 2026-09-22 — passing, and watched failing** by alphabetizing the family list,
 and separately by making the order toggle add only its first family.
 
@@ -325,6 +326,10 @@ it searched for `<a class="ohdr` and the markup had become `<a class="btn ohdr`.
 select-the-whole-group behavior could not be tested at all until the fixture gained an order
 holding **two** families — with one family per order, "select the group" and "select the first
 family" are the same operation.
+
+The All control needed the same care for a different reason: "nothing selected" and "everything
+selected" both display all 841 species, so no assertion on the species count can tell them apart.
+The check reads the control's own state and the orders' states instead.
 
 ### AC-057 — The unit toggle switches imperial and metric
 **Verifies:** P-032 · **Level:** code · **Method:** rendering test over the tile footer, plus a

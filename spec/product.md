@@ -120,8 +120,12 @@ failure, a taxonomy update silently shrinks the dataset and nobody notices.
 ### P-010 — Filter by family
 Goals: G-002
 
-The user can filter to any subset of families, multi-select, with a single control that clears the
-filter and shows everything.
+The user can filter to any subset of families, multi-select. An **All** control toggles like an
+order does, over every family: it selects them all, and untoggling it clears the selection
+outright rather than leaving every family behind as a redundant parameter.
+
+Note that "nothing selected" and "everything selected" display the same 841 species but are
+different selections, and the controls show which one holds.
 
 The selector is **grouped by taxonomic order, in the ABA checklist's own sequence** rather than
 alphabetically. Each group is headed by a **toggle that selects or clears every family in that

@@ -555,3 +555,65 @@ func TestOrderToggles(t *testing.T) {
 		t.Error("clearing the order did not restore the unfiltered view")
 	}
 }
+
+// mustMatch returns the first capture group, failing the test rather than
+// panicking when the pattern does not match -- a break that changes the markup
+// should report what it could not find, not an index-out-of-range.
+func mustMatch(t *testing.T, body, pattern, what string) string {
+	t.Helper()
+	m := regexp.MustCompile(pattern).FindStringSubmatch(body)
+	if m == nil {
+		t.Fatalf("could not find %s (pattern %s)", what, pattern)
+	}
+	return m[1]
+}
+
+// TestAllToggle asserts that "All" behaves like an order toggle over the whole
+// dataset: it selects every family, and untoggling clears the selection.
+//
+// Note that "nothing selected" and "everything selected" both display all 841
+// species, so the control cannot be verified by the species count alone -- the
+// selection state is what differs, and what has to be checked.
+//
+// Verifies: P-010. Criterion: AC-056.
+func TestAllToggle(t *testing.T) {
+	s := newTestServer(t)
+
+	// A fresh view has no selection, so All is off.
+	_, fresh := get(t, s, "/")
+	if regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(fresh) {
+		t.Error("All is marked selected on a view where nothing is selected")
+	}
+	href := html.UnescapeString(mustMatch(t, fresh, `<a class="btn"[^>]*href="([^"]+)"[^>]*>All`,
+		"the All control on a fresh view"))
+
+	// Clicking it selects every family.
+	_, all := get(t, s, href)
+	for _, fam := range []string{"Trochilidae", "Turdidae", "Corvidae", "Ardeidae"} {
+		if !strings.Contains(all, `family=`+fam) && !strings.Contains(all, fam) {
+			t.Errorf("selecting All did not include %s", fam)
+		}
+	}
+	if !regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(all) {
+		t.Fatal("All is not marked selected after selecting every family")
+	}
+	// Every order shows as selected too, since all their families are in.
+	if n := strings.Count(all, `class="btn ohdr on"`); n != 3 {
+		t.Errorf("%d of 3 orders marked selected when everything is selected", n)
+	}
+
+	// Untoggling clears the selection outright, rather than leaving every
+	// family behind as redundant parameters.
+	clear := html.UnescapeString(mustMatch(t, all, `<a class="btn on"[^>]*href="([^"]+)"[^>]*>All`,
+		"the All control once everything is selected"))
+	if strings.Contains(clear, "family=") {
+		t.Errorf("untoggling All produced %q; it should clear the selection", clear)
+	}
+	_, cleared := get(t, s, clear)
+	if strings.Contains(cleared, `class="btn ohdr on"`) {
+		t.Error("orders still show as selected after clearing")
+	}
+	if !strings.Contains(cleared, "Great Blue Heron") {
+		t.Error("clearing the selection should still show every species")
+	}
+}
