@@ -32,35 +32,44 @@ type Reported struct {
 // AVONET's own BirdLife-eBird crosswalk rather than matching names directly.
 type Table map[string]Reported
 
-// Open reads the empirical rows.
-func Open(path string) (Table, error) {
+// observation is one empirical row, used to fit the fallback model.
+type observation struct {
+	order, group string
+	chordMm      float64
+	spanCm       float64
+}
+
+// Open reads the empirical rows and fits the fallback model from them.
+func Open(path string) (Table, *Model, error) {
 	f, err := excelize.OpenFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("wingspan.Open %s: %w", path, err)
+		return nil, nil, fmt.Errorf("wingspan.Open %s: %w", path, err)
 	}
 	defer f.Close()
 
 	rows, err := f.Rows("wingspan data")
 	if err != nil {
-		return nil, fmt.Errorf("wingspan: %w", err)
+		return nil, nil, fmt.Errorf("wingspan: %w", err)
 	}
 	defer rows.Close()
 
 	out := Table{}
+	var obs []observation
 	var idx map[string]int
 	for rows.Next() {
 		cells, err := rows.Columns()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if idx == nil {
 			idx = map[string]int{}
 			for i, c := range cells {
 				idx[strings.TrimSpace(c)] = i
 			}
-			for _, want := range []string{"Species1", "needs_prediction", "wingspan_reported_mid_all"} {
+			for _, want := range []string{"Species1", "needs_prediction", "wingspan_reported_mid_all",
+				"Wing.Length_AVONET", "Order1", "Order_model_grouped"} {
 				if _, ok := idx[want]; !ok {
-					return nil, fmt.Errorf("wingspan: missing required column %q", want)
+					return nil, nil, fmt.Errorf("wingspan: missing required column %q", want)
 				}
 			}
 			continue
@@ -79,8 +88,16 @@ func Open(path string) (Table, error) {
 			Max:   num(at(cells, idx["wingspan_reported_max_all"])),
 			Taxon: name,
 		}
+		if chord := num(at(cells, idx["Wing.Length_AVONET"])); chord > 0 {
+			obs = append(obs, observation{
+				order:   strings.TrimSpace(at(cells, idx["Order1"])),
+				group:   strings.TrimSpace(at(cells, idx["Order_model_grouped"])),
+				chordMm: chord,
+				spanCm:  mid,
+			})
+		}
 	}
-	return out, nil
+	return out, buildModel(obs), nil
 }
 
 // isEmpirical reports whether a needs_prediction cell means "we have a real

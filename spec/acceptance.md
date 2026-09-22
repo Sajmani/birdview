@@ -245,6 +245,15 @@ geometry side).
 visible that a *measured* bill sits inside a *modeled* total; this criterion makes the output
 explain that rather than leaving the reader to infer it.
 
+### AC-045 — The fitted wingspan model reconstructs Fox's published one
+**Verifies:** P-060, P-062 · **Level:** code · **Method:** fit the model, then compare its
+estimate against `wingspan_predicted_*` for every species Fox predicted
+**Assertions:** mean disagreement ≤ 2%; no more than 2% of species disagree by over 10%.
+**Status: verified 2026-09-22 — passing at 1.32% mean, 1.4% over 10% across 9,194 species.**
+The thresholds come from the pre-implementation comparison (mean 1.01%, p99 4.15%), not from
+running this code. Its value is as a tie to an external published reference: if the fitting
+regresses, the dataset does not quietly get worse, the check goes red.
+
 ---
 
 ## Technical
@@ -306,6 +315,7 @@ integration test that starts the server and requests `/`
 | P-044 | AC-034 | |
 | P-045 | AC-035 | |
 | P-060 (composite) | AC-044 | |
+| P-060 (wingspan model) | AC-045 | |
 | P-050 – P-053 | — | withdrawn |
 | P-060 | AC-041 | |
 | P-061 | AC-042 | |

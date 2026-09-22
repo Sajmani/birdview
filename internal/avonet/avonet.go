@@ -48,6 +48,10 @@ type Workbook struct {
 	// cross-check against ABA's family; ABA is authoritative (P-004).
 	FamilyOf map[string]string
 
+	// OrderOf gives the taxonomic order, which the wingspan model needs: the
+	// regression is fitted per order, not per family.
+	OrderOf map[string]string
+
 	// EBirdToBirdLife maps a Species2 name to the Species1 names AVONET pairs
 	// it with. Needed because the Fox wingspan data is keyed on BirdLife names.
 	EBirdToBirdLife map[string][]string
@@ -67,16 +71,17 @@ func Open(path string) (*Workbook, error) {
 		BirdLife:        map[string]Traits{},
 		BirdTree:        map[string]Traits{},
 		FamilyOf:        map[string]string{},
+		OrderOf:         map[string]string{},
 		EBirdToBirdLife: map[string][]string{},
 	}
 
-	if err := wb.readTraits(f, SheetEBird, "Species2", "Family2", wb.EBird, wb.FamilyOf); err != nil {
+	if err := wb.readTraits(f, SheetEBird, "Species2", "Family2", "Order2", wb.EBird, wb.FamilyOf, wb.OrderOf); err != nil {
 		return nil, err
 	}
-	if err := wb.readTraits(f, SheetBirdLife, "Species1", "Family1", wb.BirdLife, nil); err != nil {
+	if err := wb.readTraits(f, SheetBirdLife, "Species1", "Family1", "Order1", wb.BirdLife, nil, wb.OrderOf); err != nil {
 		return nil, err
 	}
-	if err := wb.readTraits(f, SheetBirdTree, "Species3", "Family3", wb.BirdTree, nil); err != nil {
+	if err := wb.readTraits(f, SheetBirdTree, "Species3", "Family3", "Order3", wb.BirdTree, nil, wb.OrderOf); err != nil {
 		return nil, err
 	}
 	if err := wb.readCrosswalk(f); err != nil {
@@ -85,7 +90,7 @@ func Open(path string) (*Workbook, error) {
 	return wb, nil
 }
 
-func (wb *Workbook) readTraits(f *excelize.File, sheet, spCol, famCol string, into map[string]Traits, fams map[string]string) error {
+func (wb *Workbook) readTraits(f *excelize.File, sheet, spCol, famCol, ordCol string, into map[string]Traits, fams, ords map[string]string) error {
 	rows, err := f.Rows(sheet)
 	if err != nil {
 		return fmt.Errorf("avonet: sheet %s: %w", sheet, err)
@@ -122,6 +127,13 @@ func (wb *Workbook) readTraits(f *excelize.File, sheet, spCol, famCol string, in
 		if fams != nil {
 			if i, ok := idx[famCol]; ok {
 				fams[name] = strings.TrimSpace(at(cells, i))
+			}
+		}
+		if ords != nil {
+			if i, ok := idx[ordCol]; ok {
+				if v := strings.TrimSpace(at(cells, i)); v != "" {
+					ords[name] = v
+				}
 			}
 		}
 	}

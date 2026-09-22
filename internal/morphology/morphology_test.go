@@ -110,8 +110,7 @@ func TestModelsAreDescribed(t *testing.T) {
 	_, h := HeadLength(10)
 	_, b := BodyLength(50)
 	_, n := NeckLength(100, "Anatidae")
-	_, w := Wingspan(150, 50)
-	for name, desc := range map[string]string{"head": h, "body": b, "neck": n, "wingspan": w} {
+	for name, desc := range map[string]string{"head": h, "body": b, "neck": n} {
 		if strings.TrimSpace(desc) == "" {
 			t.Errorf("%s model returned an empty description", name)
 		}

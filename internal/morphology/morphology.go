@@ -100,18 +100,6 @@ func NeckLength(bodyMm float64, family string) (float64, string) {
 		fmt.Sprintf("neck modeled as %.2f x trunk (%s ratio for %s)", ratio, kind, family)
 }
 
-// Wingspan models span from the folded wing chord plus a mass-derived chest
-// breadth.
-//
-// Modeled, and used only where no empirical wingspan exists. Wing chord is the
-// folded wing from carpal flexure to the longest primary -- roughly 40% of a
-// span -- so the doubling plus a body allowance is the shape of the estimate.
-func Wingspan(wingChordMm, massG float64) (float64, string) {
-	chest := 10.5 * math.Pow(math.Max(massG, 1.0), 0.33)
-	v := 2.0*wingChordMm*1.15 + chest
-	return v, "span modeled as 2 x wing chord x 1.15 + 10.5 x mass^0.33 (unvalidated)"
-}
-
 // Round1 rounds to 0.1 mm, the resolution BirdView presents.
 func Round1(v float64) float64 { return math.Round(v*10) / 10 }
 

@@ -444,6 +444,70 @@ P-060 so the detail view can say it rather than leave the reader to infer it.
 
 ---
 
+## CR-008 — Fit the wingspan model rather than invent one
+
+**Subject:** `measurement.wingspan.model`
+**Kind:** Over-constraint, reopened by evidence
+**Date:** 2026-09-22 · **Decided by:** Sameer
+
+### What prompted it
+
+The ingest shipped with an invented wingspan model — `2 x chord x 1.15 + 10.5 x mass^0.33` — used
+for 533 of 841 species. Measured against the 1,424 empirical wingspans in the Fox dataset, its
+**mean absolute error is 18.7%**, median 18.2%, worst 49.6%. For an application whose purpose is
+judging relative size, applying that to nearly two thirds of the dataset is not a rounding
+concern.
+
+Five-fold cross-validation on the same empirical data, comparing candidate forms:
+
+| Model | mean | median | p90 |
+| --- | --- | --- | --- |
+| The invented constants | 18.7% | 18.2% | 29.9% |
+| Global log-log on wing chord | 9.0% | 7.3% | 19.0% |
+| **Order-level log-log** | **6.0%** | **4.6%** | **12.6%** |
+
+### The obstacle, and why it was not one
+
+Fox et al. publish exactly this: an order-level regression, with its fitted values shipped in
+`wingspan_predicted_*`. But [sources.md](sources.md#fox-wingspan) excludes those columns, so
+ingesting them would have needed an amendment — and spec2code does not get to reinterpret an
+exclusion.
+
+The resolution avoids the question. BirdView fits **its own** regression on the empirical column
+it already adopts, which is modeling from data the project may use rather than ingesting someone
+else's estimates as data. The exclusion stands unchanged.
+
+### Validation, which is what made the choice safe
+
+Fitted this way and asked for the same 9,194 species Fox predicted, BirdView's model agrees with
+theirs to a **mean of 1.32%** and a median under 1%, with 1.4% of species differing by more than
+10% — mostly extreme-aspect seabirds. It is, in effect, their model reconstructed.
+
+That comparison is now a standing check (AC-045), so a regression in the fitting code shows up as
+disagreement with an external published reference rather than as a silently worse dataset.
+
+Note what could **not** be tested: Fox report no predicted value for species that have an
+empirical one, so there is no held-out set on which to compare their published predictions
+directly against ours. The agreement above is between two models, and the error figures are our
+own cross-validation.
+
+### Also decided: modeled values state their error
+
+A provenance string now reads *"log-log regression of wingspan on wing chord, fitted on 360
+empirical species in Passeriformes from the Fox et al. 2026 dataset; cross-validated median error
+4.7%"*. Knowing a number is an estimate is much less useful than knowing it is an estimate good to
+about 5%, and the figure falls out of the fitting already being done.
+
+### Resulting status
+
+- **P-060** amended: the modeled-wingspan branch names the fitted regression.
+- **P-062** amended: a `model` states the computation *and its measured error* where one exists.
+- **AC-045** added: agreement with Fox's published predictions stays within 2% mean.
+- `morphology.Wingspan`, the invented model, is deleted rather than left for someone to reach for.
+- Coverage is unchanged at 301 measured, 7 near-match, 533 modeled; only the modeled values move.
+
+---
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

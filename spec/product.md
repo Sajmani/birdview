@@ -315,8 +315,12 @@ Status: **Withdrawn from v1** with P-050.
 Subject: `measurement.source`
 Goals: G-001
 
-- **Wingspan** — Fox et al. 2026, filtered to `needs_prediction = 0` so only empirical values are
-  taken. Stored as the reported min/mid/max triple rather than a point value.
+- **Wingspan, measured** — Fox et al. 2026, filtered to `needs_prediction = 0` so only empirical
+  values are taken. Stored as the reported min/mid/max triple rather than a point value.
+- **Wingspan, modeled** — where no empirical value exists, a log-log regression of wingspan on
+  wing chord, fitted **by the ingest** on those same empirical rows, per taxonomic order, with a
+  global fit for orders holding fewer than five empirical species. See
+  [CR-008](decisions.md#cr-008).
 - **Length** — **modeled for every species.** No usable source of measured avian total length
   was found: Ricklefs 2017 was the only candidate and its terms prohibit the use
   ([CR-002](decisions.md#cr-002)).
@@ -367,7 +371,9 @@ The three kinds:
 - **`near-match`** — a published measurement of a **different taxon**, used because none exists
   for this species. Typically a pre-split parent: *Larus argentatus* standing in for *Larus
   vegae*. Real data, wrong bird, and the record says so.
-- **`modeled`** — computed rather than measured. `model` names the computation.
+- **`modeled`** — computed rather than measured. `model` names the computation, and where the
+  model's accuracy has been measured it states that too, so a reader can judge how far to trust
+  the number rather than only knowing that it is an estimate.
 
 Rationale: this generalizes what CR-001 established for lengths and CR-006 for split taxa. Those
 were solved twice, differently, because there was no single place to say how confident a number

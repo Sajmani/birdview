@@ -126,7 +126,7 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	fox, err := wingspan.Open(foxPath)
+	fox, spanModel, err := wingspan.Open(foxPath)
 	if err != nil {
 		return nil, "", err
 	}
@@ -227,7 +227,11 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 			break
 		}
 		if !found {
-			v, model := morphology.Wingspan(res.traits.WingChord, res.traits.Mass)
+			v, model := spanModel.Predict(wb.OrderOf[res.taxon], res.traits.WingChord)
+			if v <= 0 {
+				return nil, "", fmt.Errorf("%s: no wingspan available and no wing chord to model from",
+					sp.ScientificName)
+			}
 			rec.Wingspan = dataset.Metric{Value: morphology.Round1(v), Prov: modeled(model)}
 			counts["wingspan modeled"]++
 		}

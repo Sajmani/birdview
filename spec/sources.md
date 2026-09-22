@@ -88,7 +88,7 @@ cannot be committed, and a non-commercial, attributed, open-source request costs
 | **Import style** | By reference, vendored — CC BY 4.0 permits it |
 | **Scope** | Empirical wingspan (P-060) |
 | **Adopted parts** | Rows with `needs_prediction = 0` only |
-| **Exclusions** | **Predicted wingspans are excluded.** The dataset's `wingspan_predicted_*` columns are regressions from AVONET wing chord; adopting them would reintroduce exactly the modeled-as-measured problem CR-001 resolves. |
+| **Exclusions** | **Predicted wingspans are not ingested as values.** The `wingspan_predicted_*` columns are regressions from AVONET wing chord; taking them as data would reintroduce the modeled-as-measured problem CR-001 resolves. They are used for one other purpose: as the reference BirdView's own fitted model is validated against ([CR-008](decisions.md#cr-008)). Reading them to check our arithmetic is not the same as presenting them as measurements. |
 | **Owner** | Fox, Brunton & Shephard |
 | **Status** | **Adopted 2026-09-21.** Retrieved, hashed, vendored; its MD5 matches figshare's published `computed_md5`. Coverage for BirdView's scope measured and recorded. |
 
