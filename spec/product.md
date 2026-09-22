@@ -61,12 +61,18 @@ Subject: `badge.color.derivation`
 Value: `generated`
 Goals: G-002
 
-Each family gets a badge color derived algorithmically — evenly spaced hues, or a stable hash of
-the family name — constrained to satisfy T-010.
+Each family gets a badge color derived algorithmically, constrained to satisfy T-010 **and to be
+visibly different from the colors of the families listed next to it**.
 
-Rationale: the ABA area spans roughly 80 families. A hand-curated palette does not scale to that
-and breaks on every taxonomic revision. Generation makes the palette a function of the taxonomy
+Rationale: the ABA area spans 91 families. A hand-curated palette does not scale to that and
+breaks on every taxonomic revision, so generation makes the palette a function of the taxonomy
 rather than a table to maintain.
+
+The adjacency clause is not a refinement, it is the requirement. Evenly spaced hues satisfy
+"distinct colors" on paper and fail completely in practice: at 91 families that is a four-degree
+step, and because the selector lists families in the same sorted order, every neighbor in the list
+came out the same shade. Distinctness must be measured perceptually and between the entries a
+reader actually compares.
 
 ### P-006 — Sources join on normalized scientific binomial
 Subject: `dataset.join.key`

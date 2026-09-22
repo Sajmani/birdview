@@ -2,6 +2,8 @@ package palette
 
 import (
 	"fmt"
+	"math"
+	"sort"
 	"testing"
 )
 
@@ -102,6 +104,62 @@ func TestDistinct(t *testing.T) {
 			t.Errorf("%s and %s share %s", other, fam, hex)
 		}
 		seen[hex] = fam
+	}
+}
+
+// TestAdjacentFamiliesAreVisiblyDifferent is the check TestDistinct should
+// always have been. Exact-hex inequality is far too weak: the first generated
+// palette stepped hue evenly in sorted order, which put consecutive families
+// four degrees apart and produced 91 technically-distinct colors of which every
+// neighboring pair was indistinguishable. Accipitridae, Acrocephalidae and
+// Aegithalidae were three identical reds, side by side in the selector.
+//
+// The selector lists families in sorted order, so neighbors there are what a
+// reader actually compares. dE 25 is a deliberate margin over the conventional
+// "clearly different" threshold of 10, and far above the 2-6 the broken palette
+// achieved.
+//
+// Verifies: P-005. Criterion: AC-002.
+func TestAdjacentFamiliesAreVisiblyDifferent(t *testing.T) {
+	const minDeltaE = 25.0
+
+	fams := append([]string(nil), abaFamilies...)
+	sort.Strings(fams)
+	colors := Generate(fams)
+
+	worst := math.Inf(1)
+	for i := 0; i+1 < len(fams); i++ {
+		r1, g1, b1 := mustParseHex(t, colors[fams[i]])
+		r2, g2, b2 := mustParseHex(t, colors[fams[i+1]])
+		d := DeltaE76(r1, g1, b1, r2, g2, b2)
+		if d < worst {
+			worst = d
+		}
+		if d < minDeltaE {
+			t.Errorf("%s (%s) and %s (%s) are adjacent in the selector but differ by only dE %.1f",
+				fams[i], colors[fams[i]], fams[i+1], colors[fams[i+1]], d)
+		}
+	}
+	t.Logf("worst adjacent pair: dE %.1f", worst)
+}
+
+// TestDeltaE76KnownValues pins the color-difference math against values that do
+// not depend on this package, so the distinctness check cannot pass vacuously.
+func TestDeltaE76KnownValues(t *testing.T) {
+	cases := []struct {
+		a, b string
+		want float64
+	}{
+		{"#000000", "#000000", 0},
+		{"#000000", "#ffffff", 100}, // L* runs 0 to 100, a* and b* are 0 for both
+		{"#ff0000", "#ff0000", 0},
+	}
+	for _, c := range cases {
+		r1, g1, b1 := mustParseHex(t, c.a)
+		r2, g2, b2 := mustParseHex(t, c.b)
+		if got := DeltaE76(r1, g1, b1, r2, g2, b2); math.Abs(got-c.want) > 0.5 {
+			t.Errorf("dE(%s,%s) = %.2f, want %.1f", c.a, c.b, got, c.want)
+		}
 	}
 }
 

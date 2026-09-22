@@ -48,12 +48,20 @@ T-003`.
 measurable by construction. That judgment belongs to Gate 1 and to review, and a green run here
 looks exactly like a validated one.
 
-### AC-002 — Generated family colors meet the contrast requirement
-**Verifies:** T-010, P-005, `wcag/1.4.6` · **Level:** spec and code · **Method:** pure function
-over the color generator, asserting WCAG 2.2 relative-luminance contrast ≥ 7:1 against `#000000`
-for every family in the dataset
-**Run:** `go test ./internal/palette -run TestContrast`
-**Status: verified 2026-09-22 — passing, and watched failing: lowering the generator's contrast floor to 3.0 produced four violations, all of them blues and violets, which is where relative luminance is lowest at a given HSL lightness.**
+### AC-002 — Generated family colors are legible and mutually distinguishable
+**Verifies:** T-010, P-005, `wcag/1.4.6` · **Level:** spec and code · **Method:** pure functions
+over the color generator: WCAG 2.2 contrast ≥ 7:1 against `#000000` for every family, and CIE76
+ΔE ≥ 25 between families adjacent in the selector's sort order
+**Run:** `go test ./internal/palette`
+**Status: verified 2026-09-22 — passing, and watched failing** on both halves: lowering the
+contrast floor to 3.0 produced four violations, all blues and violets, where relative luminance is
+lowest at a given HSL lightness; and restoring even hue stepping dropped adjacent families to
+ΔE 2–6.
+
+The distinctness half was added after the fact, and the gap it closed is worth recording. The
+original check asserted only that no two families shared a hex value. All 91 differed, so it
+passed — while every pair adjacent in the selector was visually identical. Exact inequality is not
+distinguishability, and the entries a reader compares are the ones next to each other.
 it fail by lowering a generated color's luminance.
 
 ### AC-003 — Every vendored source matches its recorded hash
