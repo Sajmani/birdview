@@ -1,0 +1,276 @@
+package view
+
+import (
+	"math"
+	"math/rand"
+	"testing"
+
+	"birdview/internal/dataset"
+)
+
+// bird builds a species with segments that sum to total, as the ingest
+// guarantees (P-041).
+func bird(name string, bill, head, neck, body, tail, span, mass float64) *dataset.Species {
+	return &dataset.Species{
+		ScientificName: name,
+		TotalLength:    dataset.Metric{Value: bill + head + neck + body + tail},
+		Wingspan:       dataset.Metric{Value: span},
+		Mass:           dataset.Metric{Value: mass},
+		Segments: dataset.Segments{
+			Bill: dataset.Metric{Value: bill}, Head: dataset.Metric{Value: head},
+			Neck: dataset.Metric{Value: neck}, Body: dataset.Metric{Value: body},
+			Tail: dataset.Metric{Value: tail},
+		},
+	}
+}
+
+func sample() []*dataset.Species {
+	return []*dataset.Species{
+		bird("Calypte anna", 18, 12, 6, 40, 26, 120, 4),
+		bird("Passer domesticus", 12, 14, 9, 55, 55, 240, 28),
+		bird("Turdus migratorius", 20, 18, 12, 90, 85, 390, 77),
+		bird("Corvus brachyrhynchos", 50, 30, 22, 170, 180, 1000, 450),
+		bird("Buteo jamaicensis", 26, 32, 25, 240, 210, 1215, 1100),
+		bird("Ardea herodias", 140, 40, 200, 300, 180, 1825, 2400),
+		bird("Cygnus buccinator", 105, 50, 400, 420, 180, 2400, 11000),
+	}
+}
+
+// Verifies: P-021. Criterion: AC-020.
+func TestSortedAscending(t *testing.T) {
+	for _, m := range []Metric{ByLength, ByWingspan, ByMass} {
+		secs := Sections(sample(), m, DefaultStepPercent)
+		var prev float64
+		for _, sec := range secs {
+			for _, s := range sec.Species {
+				if v := m.Value(s); v < prev {
+					t.Errorf("%s: %s out of order (%v after %v)", m, s.ScientificName, v, prev)
+				} else {
+					prev = v
+				}
+			}
+		}
+	}
+}
+
+// TestSectionRule asserts P-022 as written: a section breaks at the first bird
+// more than N% larger than the MINIMUM of the previous section.
+//
+// Both halves matter. The first says no section spans more than N%. The second
+// says the break happens at the earliest such bird, which is what stops a
+// section drifting wide one bird at a time -- the failure an implementation
+// keyed on the previous maximum would produce while passing casual inspection.
+//
+// Verifies: P-022, P-023. Criterion: AC-021.
+func TestSectionRule(t *testing.T) {
+	r := rand.New(rand.NewSource(7))
+	for _, step := range []float64{5, 10, DefaultStepPercent, 25, 50} {
+		factor := 1 + step/100
+		for trial := 0; trial < 300; trial++ {
+			var in []*dataset.Species
+			for i := 0; i < 1+r.Intn(60); i++ {
+				v := 40 + r.Float64()*1200
+				in = append(in, bird("s", v/5, v/5, v/5, v/5, v/5, v*1.5, v))
+			}
+			secs := Sections(in, ByLength, step)
+
+			var prevMin float64
+			for i, sec := range secs {
+				if sec.Max >= sec.Min*factor {
+					t.Fatalf("step %.0f%%: section %d spans %.3f..%.3f, wider than %.0f%%",
+						step, i, sec.Min, sec.Max, step)
+				}
+				if i > 0 && sec.Min < prevMin*factor {
+					t.Fatalf("step %.0f%%: section %d starts at %.3f, below %.0f%% above the "+
+						"previous minimum %.3f -- it should have joined that section",
+						step, i, sec.Min, step, prevMin)
+				}
+				prevMin = sec.Min
+			}
+		}
+	}
+}
+
+// TestSectionsPartition checks every species lands in exactly one section.
+//
+// Verifies: P-022. Criterion: AC-021.
+func TestSectionsPartition(t *testing.T) {
+	in := sample()
+	var n int
+	seen := map[*dataset.Species]bool{}
+	for _, sec := range Sections(in, ByLength, DefaultStepPercent) {
+		for _, s := range sec.Species {
+			if seen[s] {
+				t.Errorf("%s appears twice", s.ScientificName)
+			}
+			seen[s] = true
+			n++
+		}
+	}
+	if n != len(in) {
+		t.Errorf("sections hold %d species, input had %d", n, len(in))
+	}
+}
+
+// TestSectionRangeMatchesContents verifies the header can state a range that is
+// actually true of its members.
+//
+// Verifies: P-024. Criterion: AC-022.
+func TestSectionRangeMatchesContents(t *testing.T) {
+	for _, sec := range Sections(sample(), ByMass, DefaultStepPercent) {
+		lo, hi := math.Inf(1), math.Inf(-1)
+		for _, s := range sec.Species {
+			v := ByMass.Value(s)
+			lo, hi = math.Min(lo, v), math.Max(hi, v)
+		}
+		if sec.Min != lo || sec.Max != hi {
+			t.Errorf("section reports %.1f..%.1f, contents are %.1f..%.1f", sec.Min, sec.Max, lo, hi)
+		}
+	}
+}
+
+// TestScaleModes asserts P-042: one scale per section, or one for everything.
+//
+// The second assertion is the one with teeth. "Identical within a section" is
+// satisfied trivially by a per-tile implementation whenever a section holds one
+// bird, so the test also requires that sections genuinely differ from each
+// other -- which a per-tile scale could not produce.
+//
+// Verifies: P-042. Criterion: AC-031.
+func TestScaleModes(t *testing.T) {
+	secs := Sections(sample(), ByLength, DefaultStepPercent)
+	if len(secs) < 2 {
+		t.Fatal("sample should produce several sections")
+	}
+
+	perSection := Scales(secs, PerSection)
+	distinct := map[float64]bool{}
+	for i, ref := range perSection {
+		var maxLen float64
+		for _, s := range secs[i].Species {
+			maxLen = math.Max(maxLen, s.TotalLength.Value)
+		}
+		if ref != maxLen {
+			t.Errorf("section %d reference %.1f, want its largest bird %.1f", i, ref, maxLen)
+		}
+		distinct[ref] = true
+	}
+	if len(distinct) < 2 {
+		t.Error("per-section references are all equal; that is a global scale, not a per-section one")
+	}
+
+	global := Scales(secs, Global)
+	for i, ref := range global {
+		if ref != global[0] {
+			t.Errorf("global reference differs between sections %d and 0", i)
+		}
+	}
+	if global[0] != math.Max(perSection[len(perSection)-1], global[0]) {
+		t.Error("global reference should be the largest bird overall")
+	}
+}
+
+// TestCrossbarIsToScale asserts P-043: the crossbar represents wingspan at the
+// same scale as the vertical axis, so its length relative to the bird's drawn
+// height equals wingspan relative to total length.
+//
+// An earlier design's formula carried an extra factor that inverted this with
+// size -- larger birds drew shorter crossbars, and the 300 largest species
+// floored out. This assertion catches that class exactly.
+//
+// Verifies: P-043. Criterion: AC-032.
+func TestCrossbarIsToScale(t *testing.T) {
+	species := sample()
+	box := Box{W: 420, H: 160}
+	var refLen, refSpan float64
+	for _, s := range species {
+		refLen = math.Max(refLen, s.TotalLength.Value)
+		refSpan = math.Max(refSpan, s.Wingspan.Value)
+	}
+	for _, s := range species {
+		g := Layout(s, refLen, refSpan, box)
+		want := s.Wingspan.Value / s.TotalLength.Value
+		got := (g.CrossbarHalfWidth * 2) / g.TotalHeight()
+		if math.Abs(got-want) > 1e-9 {
+			t.Errorf("%s: crossbar/height %.6f, wingspan/length %.6f", s.ScientificName, got, want)
+		}
+	}
+}
+
+// TestLargerBirdsDrawLarger is the property G-001 depends on: at a shared
+// scale, a bigger bird is bigger on screen.
+//
+// Verifies: P-042. Criterion: AC-031.
+func TestLargerBirdsDrawLarger(t *testing.T) {
+	species := sample()
+	box := Box{W: 420, H: 160}
+	var refLen, refSpan float64
+	for _, s := range species {
+		refLen = math.Max(refLen, s.TotalLength.Value)
+		refSpan = math.Max(refSpan, s.Wingspan.Value)
+	}
+	for i := 1; i < len(species); i++ {
+		a, b := species[i-1], species[i]
+		ga := Layout(a, refLen, refSpan, box)
+		gb := Layout(b, refLen, refSpan, box)
+		if a.TotalLength.Value < b.TotalLength.Value && ga.TotalHeight() >= gb.TotalHeight() {
+			t.Errorf("%s (%.0f mm) draws %.1f px, %s (%.0f mm) draws %.1f px",
+				a.ScientificName, a.TotalLength.Value, ga.TotalHeight(),
+				b.ScientificName, b.TotalLength.Value, gb.TotalHeight())
+		}
+	}
+}
+
+// TestSegmentsAbutInPixels checks the drawn parts meet without gap or overlap,
+// which is P-041 expressed in the renderer rather than in the data.
+//
+// Verifies: P-040, P-041.
+func TestSegmentsAbutInPixels(t *testing.T) {
+	s := sample()[5] // heron: a long neck makes ordering errors obvious
+	g := Layout(s, s.TotalLength.Value, s.Wingspan.Value, Box{W: 420, H: 160})
+	ys := []float64{g.YBillTip, g.YCraniumTop, g.YNeckTop, g.YShoulder, g.YBodyEnd, g.YTailTip}
+	for i := 1; i < len(ys); i++ {
+		if ys[i] < ys[i-1] {
+			t.Errorf("coordinate %d (%.2f) is above its predecessor (%.2f)", i, ys[i], ys[i-1])
+		}
+	}
+	if math.Abs(g.YHeadCenter-(g.YCraniumTop+g.HeadRy)) > 1e-9 {
+		t.Error("head oval is not centered between its tangents")
+	}
+	if math.Abs((g.YNeckTop-g.YCraniumTop)-2*g.HeadRy) > 1e-9 {
+		t.Error("head oval height does not match the gap between its tangents")
+	}
+}
+
+// TestSharedScaleWithinSection asserts P-042 directly: birds given the same
+// references are drawn at the same pixels-per-millimeter.
+//
+// This exists because the weaker assertions did not bite. Breaking Layout to
+// scale each bird to its own length -- the exact failure P-042 forbids -- still
+// passed TestLargerBirdsDrawLarger and TestCrossbarIsToScale, because the
+// wingspan constraint happened to preserve size ordering. Comparing the scale
+// factor itself is the only check that cannot be satisfied by accident.
+//
+// Verifies: P-042. Criterion: AC-031.
+func TestSharedScaleWithinSection(t *testing.T) {
+	species := sample()
+	box := Box{W: 420, H: 160}
+	var refLen, refSpan float64
+	for _, s := range species {
+		refLen = math.Max(refLen, s.TotalLength.Value)
+		refSpan = math.Max(refSpan, s.Wingspan.Value)
+	}
+	want := Layout(species[0], refLen, refSpan, box).PxPerMm
+	for _, s := range species {
+		if got := Layout(s, refLen, refSpan, box).PxPerMm; math.Abs(got-want) > 1e-12 {
+			t.Errorf("%s drawn at %.6f px/mm, others at %.6f -- the scale is not shared",
+				s.ScientificName, got, want)
+		}
+	}
+	// And the shared scale must actually fit the largest bird in the box.
+	big := Layout(species[len(species)-1], refLen, refSpan, box)
+	if big.TotalHeight() > box.H+1e-9 || big.CrossbarHalfWidth*2 > box.W+1e-9 {
+		t.Errorf("largest bird overflows: %.1f x %.1f in a %.0f x %.0f box",
+			big.CrossbarHalfWidth*2, big.TotalHeight(), box.W, box.H)
+	}
+}

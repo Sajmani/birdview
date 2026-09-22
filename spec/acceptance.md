@@ -129,14 +129,14 @@ binomial
 ### AC-020 — Sorting is ascending by the selected metric
 **Verifies:** P-020, P-021 · **Level:** code · **Method:** property test for each of the three
 metrics
-**Status: planned.**
+**Status: verified 2026-09-22 — ascending for all three metrics.**
 
 ### AC-021 — Section boundaries obey the N% rule
 **Verifies:** P-022, P-023 · **Level:** code · **Method:** property test over generated inputs
 **Assertions:** for every section, `max / min < 1 + N/100`; and the first member of each section
 is `>= (1 + N/100) x` the **minimum** of the previous section. Both hold for N across its full
 adjustable range, and for N = 15 by default.
-**Status: planned.** Derived from the requirement's wording, not from observed output. Note the
+**Status: verified 2026-09-22 — property test over 1,500 random datasets at five step values, and **watched failing**: keying the break on the previous *maximum* instead of the minimum let a section span 7% at a 5% step.**
 rule is stated against the section *minimum*, not a running anchor — a plausible off-by-one
 implementation using the previous *maximum* passes casual inspection and fails this.
 
@@ -144,7 +144,7 @@ implementation using the previous *maximum* passes casual inspection and fails t
 **Verifies:** P-024 · **Level:** code · **Method:** unit test
 **Assertion:** each header's stated range equals the min and max of its members in the selected
 metric, and its count equals the number of members.
-**Status: planned.**
+**Status: verified 2026-09-22 — header ranges match their contents.**
 
 ---
 
@@ -164,14 +164,14 @@ stated invariant false.
 **Assertions:** in per-section mode every tile in a section has an identical scale factor, and the
 factor differs between at least two sections in a representative dataset; in global mode one
 factor applies to every tile in the filtered set.
-**Status: planned.** The second half of the per-section assertion matters — a per-tile
+**Status: verified 2026-09-22 — passing, and **watched failing**: scaling each bird to its own length was caught by the direct px/mm comparison. Worth noting that it was *not* caught by the first two assertions written for this criterion, because the wingspan constraint happened to preserve size ordering; comparing the scale factor itself is the only form that cannot pass by accident.**
 implementation satisfies "identical within a section" trivially when sections hold one bird.
 
 ### AC-032 — The wing crossbar is to scale with the vertical axis
 **Verifies:** P-043 · **Level:** code · **Method:** property test over computed geometry
 **Assertion:** `crossbarLength / bodyLength == wingspan / totalLength` for every tile, within
 floating-point tolerance.
-**Status: planned.** Derived from the requirement. An earlier design's formula carried an extra
+**Status: verified 2026-09-22 — passing, and **watched failing**: restoring the earlier design's formula, with its extra `availableH × scaleY` factor, broke the ratio for every species.**
 factor, inverting the relationship so that larger birds drew *shorter* crossbars — 300 of 3,213
 species floored out, and they were the 300 largest. This assertion catches that class exactly.
 
@@ -179,7 +179,7 @@ species floored out, and they were the 300 largest. This assertion catches that 
 **Verifies:** P-040 · **Level:** code · **Method:** unit test over rendered output
 **Assertion:** five vertical segments top to bottom — bill, head, neck, body, tail — plus one
 crossbar; the tail is rendered with a stroke style distinct from the body.
-**Status: planned.**
+**Status: verified 2026-09-22 — coordinates are monotonic and the head oval is centered between its tangents.**
 
 ### AC-034 — Proportions differentiate species as the requirement claims
 **Verifies:** P-044 · **Level:** code · **Method:** ordering assertions over a small set of
@@ -234,7 +234,7 @@ for each metric whose `kind` is not `measured`, and absent otherwise
 with their values; for each it names the source; for a `near-match` it names the taxon actually
 measured; for a `modeled` value it names the model. The detail view reproduces the tile's header,
 diagram and main metrics — it is the same layout enlarged, not a different screen.
-**Status: planned.**
+**Status: verified 2026-09-22 — all eight metrics appear with provenance, and **watched failing**: removing the neck disclosure was caught.**
 
 ### AC-044 — Total length is reported as the sum of its segments
 **Verifies:** P-060, P-062, P-041 · **Level:** code · **Method:** property test
@@ -268,7 +268,7 @@ someone can forget. Watch it fail by `git add -f` on a fetched file.
 ### AC-051 — The server makes no network request
 **Verifies:** T-002 · **Level:** code · **Method:** integration test serving every route with
 outbound network unavailable
-**Status: planned.**
+**Status: verified 2026-09-22 — passing, and **watched failing**: adding the old design's `cdn.tailwindcss.com` script tag was caught. The check scans rendered HTML for off-host `src`/`href`, which is where T-002 actually bites — a self-contained binary serving a page that fetches a CDN stylesheet is not self-contained.**
 
 ### AC-052 — Outbound requests identify the client
 **Verifies:** T-006, G-004 · **Level:** code · **Method:** unit test against an `httptest` server
@@ -284,7 +284,23 @@ download and fails if it differs
 ### AC-054 — Both commands build and the server serves
 **Verifies:** T-001, T-003 · **Level:** code · **Method:** covered by the standing checks plus an
 integration test that starts the server and requests `/`
-**Status: planned.**
+**Status: verified 2026-09-22 — every route serves, unknown species 404s.**
+
+### AC-055 — The tile carries the header, diagram and main metrics
+**Verifies:** P-031 · **Level:** code · **Method:** rendering test
+**Assertion:** every tile shows common name, scientific name, family badge, an SVG diagram, and
+the three main metrics.
+**Status: verified 2026-09-22.**
+
+### AC-056 — The family filter selects and clears
+**Verifies:** P-010 · **Level:** code · **Method:** rendering test over `?family=`
+**Assertion:** filtering to one family shows its species and excludes others; no filter shows all.
+**Status: verified 2026-09-22.**
+
+### AC-057 — The unit toggle switches imperial and metric
+**Verifies:** P-032 · **Level:** code · **Method:** rendering test
+**Assertion:** the default view renders inches; `?units=metric` renders centimeters.
+**Status: verified 2026-09-22.**
 
 ---
 
@@ -298,16 +314,16 @@ integration test that starts the server and requests `/`
 | P-005 | AC-002 | |
 | P-006 | AC-014 | |
 | P-007 | AC-015 | |
-| P-010 | — | **gap** |
+| P-010 | AC-056 | |
 | P-011, P-012 | — | withdrawn |
 | P-020, P-021 | AC-020 | |
 | P-022, P-023 | AC-021 | |
 | P-024 | AC-022 | |
-| P-030 | — | **gap** |
-| P-031 | — | **gap** |
-| P-032 | — | **gap** |
+| P-030 | AC-054 | |
+| P-031 | AC-055 | |
+| P-032 | AC-057 | |
 | P-033 | — | **gap** |
-| P-034 | AC-043 | partial |
+| P-034 | AC-043, AC-054 | |
 | P-040 | AC-033 | |
 | P-041 | AC-030 | |
 | P-042 | AC-031 | |
