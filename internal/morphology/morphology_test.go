@@ -92,14 +92,32 @@ func TestShapeDifferentiation(t *testing.T) {
 	}
 }
 
-// TestHeadFloor checks the floor actually binds, since it exists to stop a
-// fine-billed bird drawing a head smaller than its skull.
-func TestHeadFloor(t *testing.T) {
-	if v, _ := HeadLength(1.0); v != 12.0 {
-		t.Errorf("HeadLength(1.0) = %v, want the 12 mm floor", v)
+// TestHeadScalesWithMass asserts the cranium is a function of the bird rather
+// than a constant.
+//
+// The previous model, max(12 mm, bill depth x 1.65), returned exactly 12 mm for
+// 442 of 841 species and for 86% of birds under 200 mm: half the dataset shared
+// one head that varied with nothing. Isometric scaling has no floor, so a
+// regression to a constant shows up as a flat curve here.
+//
+// Verifies: P-062. Criterion: AC-065.
+func TestHeadScalesWithMass(t *testing.T) {
+	// Expected values follow from the model definition, 7.5 * mass^(1/3), not
+	// from running it: 8 g gives 7.5*2 = 15, 1000 g gives 7.5*10 = 75.
+	for _, c := range []struct{ mass, want float64 }{{8, 15}, {1000, 75}, {27, 22.5}} {
+		if got, _ := HeadLength(c.mass); math.Abs(got-c.want) > 0.05 {
+			t.Errorf("HeadLength(%g) = %.2f, want %.2f", c.mass, got, c.want)
+		}
 	}
-	if v, _ := HeadLength(20.0); v != 33.0 {
-		t.Errorf("HeadLength(20.0) = %v, want 33.0", v)
+	// Strictly increasing across the real mass range, with no plateau.
+	prev := 0.0
+	for _, m := range []float64{2.5, 5, 10, 20, 50, 100, 500, 2000, 11000} {
+		got, _ := HeadLength(m)
+		if got <= prev {
+			t.Errorf("head did not grow between the previous mass and %g g (%.1f then %.1f)",
+				m, prev, got)
+		}
+		prev = got
 	}
 }
 
@@ -107,7 +125,7 @@ func TestHeadFloor(t *testing.T) {
 // description. A modeled value with an empty model string would satisfy the
 // schema while telling the reader nothing (P-062).
 func TestModelsAreDescribed(t *testing.T) {
-	_, h := HeadLength(10)
+	_, h := HeadLength(20)
 	_, b := BodyLength(50)
 	_, n := NeckLength(100, "Anatidae")
 	for name, desc := range map[string]string{"head": h, "body": b, "neck": n} {

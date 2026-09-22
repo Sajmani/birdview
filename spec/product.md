@@ -36,11 +36,14 @@ eBird/Clements taxonomy. See [sources.md](sources.md#avonet).
 Goals: G-003
 
 Each species record carries scientific name, family, and these AVONET traits: `Beak.Length_Culmen`,
-`Beak.Depth`, `Tail.Length`, `Wing.Length`, `Secondary1`, `Mass`.
+`Tail.Length`, `Wing.Length`, `Secondary1`, `Mass`.
 
 Rationale: this is the set the diagram and its derivations actually consume. AVONET's other
-columns — `Beak.Width`, `Hand-Wing.Index`, `Tarsus.Length` — are deliberately not ingested;
-carrying unused data invites someone to invent a use for it.
+columns — `Beak.Width`, `Beak.Depth`, `Hand-Wing.Index`, `Tarsus.Length` — are deliberately not
+ingested; carrying unused data invites someone to invent a use for it.
+
+`Beak.Depth` was ingested until the cranium model moved to mass, and was dropped rather than left
+dangling, on exactly that principle.
 
 ### P-004 — Names and families come from the ABA checklist
 Subject: `dataset.names.source`
@@ -391,6 +394,28 @@ the user something false about proportion while looking authoritative.
 Goals: G-003
 
 A dowitcher reads as long-billed, an accipiter as long-tailed, a heron as long-necked.
+
+### P-046 — The cranium is modeled from mass
+Subject: `diagram.head_model`
+Value: `isometric on mass`
+Goals: G-003
+
+Head length scales isometrically with body mass. Like every modeled value it names its function
+(P-062) and claims no measurement.
+
+Rationale: an earlier model derived the cranium from bill depth with a 12 mm floor, and the floor
+bound for **442 of 841 species and 86% of birds under 200 mm**. Half the dataset drew one identical
+head that varied with nothing, consumed a fixed share of every small bird's length, and
+differentiated no species from another — the opposite of what a shape diagram is for. Bill depth is
+in any case a poor predictor of skull length; unfloored it gave a sandpiper a 7 mm head.
+
+Mass is the only whole-animal measurement available, and a linear dimension scaling as its cube
+root is the natural default. There is deliberately **no floor**: a floor would only conceal a bad
+coefficient.
+
+Known limitation: because both cranium and trunk scale on mass, birds of similar mass get similar
+heads. Within a size tier the head therefore differentiates little — the shape signal there comes
+from bill, tail, neck and wingspan, which are measured or family-specific.
 
 ### P-045 — The neck/body split is a named per-family model
 Subject: `diagram.neck_ratio`

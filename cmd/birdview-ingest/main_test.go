@@ -249,3 +249,47 @@ func mustJSON(t *testing.T, v any) string {
 }
 
 func jsonMarshal(v any) ([]byte, error) { return json.Marshal(v) }
+
+// TestHeadIsNotAConstant guards the regression that prompted the model change:
+// the cranium must vary with the bird, not sit on a floor.
+//
+// The previous model pinned 442 of 841 species at exactly 12 mm, so half the
+// dataset drew an identical head that consumed a fixed share of every small
+// bird's length and differentiated nothing.
+//
+// Verifies: P-062. Criterion: AC-065.
+func TestHeadIsNotAConstant(t *testing.T) {
+	ds := load(t)
+	counts := map[float64]int{}
+	for i := range ds.Species {
+		counts[ds.Species[i].Segments.Head.Value]++
+	}
+	var worst float64
+	var worstN int
+	for v, n := range counts {
+		if n > worstN {
+			worst, worstN = v, n
+		}
+	}
+	// A floor shows up as a large pile on one value. Some sharing is expected,
+	// since mass is reported to limited precision.
+	if frac := float64(worstN) / float64(len(ds.Species)); frac > 0.05 {
+		t.Errorf("%d of %d species (%.0f%%) share head length %.1f mm; the cranium has "+
+			"collapsed to a constant", worstN, len(ds.Species), frac*100, worst)
+	}
+	// And it must track mass: the heaviest bird needs the largest head.
+	var heaviest, biggestHead *dataset.Species
+	for i := range ds.Species {
+		s := &ds.Species[i]
+		if heaviest == nil || s.Mass.Value > heaviest.Mass.Value {
+			heaviest = s
+		}
+		if biggestHead == nil || s.Segments.Head.Value > biggestHead.Segments.Head.Value {
+			biggestHead = s
+		}
+	}
+	if heaviest.ScientificName != biggestHead.ScientificName {
+		t.Errorf("heaviest bird is %s but the largest head belongs to %s",
+			heaviest.ScientificName, biggestHead.ScientificName)
+	}
+}

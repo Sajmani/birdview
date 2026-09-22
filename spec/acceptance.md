@@ -112,8 +112,7 @@ editorial judgment, and the project uses them only as a filter.
 
 ### AC-012 — Every record carries all six AVONET traits
 **Verifies:** P-002, P-003 · **Level:** code · **Method:** property test over every record
-**Assertion:** culmen, bill depth, tail, wing chord, secondary and mass are all present and
-positive.
+**Assertion:** culmen, tail, wing chord, secondary and mass are all present and positive.
 **Status: planned.** Trait coverage on `AVONET2_eBird` was measured complete for the target
 families, so any failure means a join or parse bug rather than missing data.
 
@@ -425,6 +424,20 @@ permission". It is not — that request has not been sent. Claiming a right you 
 is worse than claiming none, because it misleads the rights holder's own readers. Remove that
 assertion only when a written grant exists and is recorded in [sources.md](sources.md).
 
+### AC-065 — The cranium varies with the bird
+**Verifies:** P-046, P-062 · **Level:** code · **Method:** unit test on the model plus a
+distribution check over the built dataset
+**Assertions:** head length matches `7.5 × mass^(1/3)` at stated points, grows strictly across the
+real mass range with no plateau, no single value is shared by more than 5% of species, and the
+heaviest bird has the largest head.
+**Status: verified 2026-09-22 — passing, and watched failing** by reinstating a floor, which
+pinned 809 of 841 species at one value.
+
+The distribution check is the one that matters. A unit test on the formula would have passed
+happily while the *old* model collapsed 442 species onto 12 mm, because that model also satisfied
+its own definition. What was wrong was the shape of the result across the dataset, which only a
+distribution assertion can see.
+
 ---
 
 ## Traceability
@@ -457,6 +470,7 @@ assertion only when a written grant exists and is recorded in [sources.md](sourc
 | P-043 | AC-032 | |
 | P-044 | AC-034 | |
 | P-045 | AC-035 | |
+| P-046 | AC-065 | |
 | P-060 (composite) | AC-044 | |
 | P-060 (wingspan model) | AC-045 | |
 | P-050 – P-053 | — | withdrawn |

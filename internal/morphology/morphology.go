@@ -66,14 +66,31 @@ func NeckRatio(family string) (float64, bool) {
 	return r, true
 }
 
-// HeadLength models the cranial vault from bill depth at the nares.
+// HeadLength models the cranium from body mass, isometrically: a linear
+// dimension scales as the cube root of mass.
 //
-// Modeled. The floor keeps very fine-billed birds from drawing a head smaller
-// than their own skull.
-func HeadLength(billDepthMm float64) (float64, string) {
-	v := math.Max(12.0, billDepthMm*1.65)
-	return v, "cranial vault modeled as max(12 mm, bill depth x 1.65)"
+// Modeled, and unvalidated -- no source measures avian head length, so the
+// coefficient is chosen to put a 20 g passerine at roughly 20 mm and is a shape
+// function rather than a fit.
+//
+// It replaces a model based on bill depth, `max(12 mm, depth x 1.65)`, which
+// failed in a way worth remembering: the floor bound for 442 of 841 species and
+// 86% of birds under 200 mm, so most of the dataset shared one constant head
+// that varied with nothing and consumed a fixed share of every small bird's
+// length. Bill depth is in any case a poor predictor of skull length -- unfloored
+// it gave a sandpiper a 7 mm head.
+//
+// There is deliberately no floor. A 2.5 g hummingbird lands near 10 mm, which is
+// about right, so a floor would only hide a bad coefficient.
+func HeadLength(massG float64) (float64, string) {
+	m := math.Max(massG, 1.0)
+	v := headCoefficient * math.Cbrt(m)
+	return v, fmt.Sprintf("cranium modeled as %.1f x mass^(1/3) (isometric, unvalidated)",
+		headCoefficient)
 }
+
+// headCoefficient sets the cranium scale. See HeadLength.
+const headCoefficient = 7.5
 
 // BodyLength models the trunk from body mass by an allometric relation.
 //
