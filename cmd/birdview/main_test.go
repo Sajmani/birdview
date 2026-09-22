@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -35,21 +36,31 @@ func testDataset() *dataset.Dataset {
 		}
 		return sp
 	}
+	// Passeriformes deliberately holds TWO families. With one family per order,
+	// "select the whole group" and "select the first family" are the same
+	// operation, and a bug in the group logic passes unnoticed.
 	orders := map[string]string{
-		"Trochilidae": "Apodiformes", "Turdidae": "Passeriformes", "Ardeidae": "Pelecaniformes",
+		"Trochilidae": "Apodiformes", "Turdidae": "Passeriformes",
+		"Corvidae": "Passeriformes", "Ardeidae": "Pelecaniformes",
 	}
 	sp := []dataset.Species{
 		mk("calypte_anna", "Anna's Hummingbird", "Calypte anna", "Trochilidae", 18, 12, 6, 40, 26, 120, 4, dataset.Measured),
 		mk("turdus_migratorius", "American Robin", "Turdus migratorius", "Turdidae", 20, 18, 12, 90, 85, 390, 77, dataset.Measured),
+		mk("corvus_brachyrhynchos", "American Crow", "Corvus brachyrhynchos", "Corvidae", 50, 30, 22, 170, 180, 1000, 450, dataset.Measured),
 		mk("ardea_herodias", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, dataset.NearMatch),
 	}
 	var fams []dataset.Family
+	seenFam := map[string]bool{}
 	for i := range sp {
 		sp[i].Order = orders[sp[i].Family]
+		if seenFam[sp[i].Family] {
+			continue
+		}
+		seenFam[sp[i].Family] = true
 		fams = append(fams, dataset.Family{
 			Name: sp[i].Family, Common: sp[i].FamilyCommon, Order: sp[i].Order,
 			Color: "#86efac", TextColor: "#000000",
-			OrderColor: "#1e3a8a", OrderText: "#ffffff",
+			OrderCommon: orders[sp[i].Family] + " (group)",
 		})
 	}
 	return &dataset.Dataset{Families: fams, Species: sp}
@@ -494,24 +505,53 @@ func descendantOfColored(selector string) bool {
 	return false
 }
 
-// TestOrderLabelsAreNotChips checks the order labels render as plain text.
-// Styling them like chips made them look clickable when they do nothing.
+// TestOrderToggles asserts P-010's order control: each order is a real toggle
+// that selects or clears its whole group, labeled with its common name.
+//
+// This replaces a check that asserted the opposite -- that order labels were
+// inert text. When the requirement inverted, that check kept passing, because
+// it looked for `<a class="ohdr` and the markup had become `<a class="btn ohdr`.
+// A test that survives the reversal of its own requirement is worse than none.
 //
 // Verifies: P-010. Criterion: AC-056.
-func TestOrderLabelsAreNotChips(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
-	i := strings.Index(body, `class="ordergroups"`)
-	if i < 0 {
-		t.Fatal("no selector groups")
-	}
-	sel := body[i:]
-	sel = sel[:strings.Index(sel, `<p class="count"`)]
-	for _, h := range regexp.MustCompile(`<div class="ohdr"[^>]*>`).FindAllString(sel, -1) {
-		if strings.Contains(h, "background:") {
-			t.Errorf("order label %q carries a background; it should be plain text", h)
+func TestOrderToggles(t *testing.T) {
+	s := newTestServer(t)
+	_, body := get(t, s, "/")
+
+	// Each order is a link carrying its common name, not inert text.
+	for _, order := range []string{"Apodiformes", "Passeriformes", "Pelecaniformes"} {
+		re := regexp.MustCompile(`<a class="btn ohdr[^"]*" href="([^"]+)"[^>]*>` + order)
+		m := re.FindStringSubmatch(body)
+		if m == nil {
+			t.Fatalf("%s is not rendered as a toggle", order)
+		}
+		if !strings.Contains(body, order+`<em>`+order+" (group)") {
+			t.Errorf("%s toggle does not show its common name", order)
 		}
 	}
-	if strings.Contains(sel, `<a class="ohdr`) {
-		t.Error("order label is a link but nothing has made it a real control")
+
+	// Selecting an order selects EVERY family in it. Passeriformes holds two,
+	// so a control that adds only the first fails here.
+	re := regexp.MustCompile(`<a class="btn ohdr[^"]*" href="([^"]+)"[^>]*>Passeriformes`)
+	href := html.UnescapeString(re.FindStringSubmatch(body)[1])
+	_, filtered := get(t, s, href)
+	for _, want := range []string{"American Robin", "American Crow"} {
+		if !strings.Contains(filtered, want) {
+			t.Errorf("selecting Passeriformes did not include %s", want)
+		}
+	}
+	if strings.Contains(filtered, "Great Blue Heron") {
+		t.Error("selecting Passeriformes left another order's species visible")
+	}
+
+	// With the group fully selected the same control clears it.
+	m2 := regexp.MustCompile(`<a class="btn ohdr on" href="([^"]+)"[^>]*>Passeriformes`).
+		FindStringSubmatch(filtered)
+	if m2 == nil {
+		t.Fatal("Passeriformes is not marked selected once both families are filtered in")
+	}
+	_, cleared := get(t, s, html.UnescapeString(m2[1]))
+	if !strings.Contains(cleared, "Great Blue Heron") {
+		t.Error("clearing the order did not restore the unfiltered view")
 	}
 }

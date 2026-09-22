@@ -115,13 +115,14 @@ func (s *Species) AllMetrics() map[string]*Metric {
 // the order every field guide arranges birds in -- and which alphabetizing
 // discards.
 type Family struct {
-	Name       string `json:"name"`   // scientific, e.g. Anatidae
-	Common     string `json:"common"` // e.g. Ducks, Geese, and Swans
-	Order      string `json:"order"`  // e.g. Anseriformes
-	Color      string `json:"color"`
-	TextColor  string `json:"textColor"`
-	OrderColor string `json:"orderColor"`
-	OrderText  string `json:"orderTextColor"`
+	Name        string `json:"name"`        // scientific, e.g. Anatidae
+	Common      string `json:"common"`      // e.g. Ducks, Geese, and Swans
+	Order       string `json:"order"`       // e.g. Anseriformes
+	OrderCommon string `json:"orderCommon"` // project-authored label, e.g. Waterfowl
+	Color       string `json:"color"`
+	TextColor   string `json:"textColor"`
+	OrderColor  string `json:"orderColor"`
+	OrderText   string `json:"orderTextColor"`
 }
 
 // Dataset is the whole compiled output.

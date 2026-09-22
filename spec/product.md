@@ -124,8 +124,13 @@ The user can filter to any subset of families, multi-select, with a single contr
 filter and shows everything.
 
 The selector is **grouped by taxonomic order, in the ABA checklist's own sequence** rather than
-alphabetically. Each group is headed by the order's name as **plain text** — not as a chip, since
-a chip-shaped label reads as clickable and these do nothing. Each family is labeled with
+alphabetically. Each group is headed by a **toggle that selects or clears every family in that
+order**, labeled with the order's scientific name, its common name, and its species count, and
+styled like the other controls rather than like a family chip.
+
+Order common names are **the project's own editorial labels**. No source BirdView uses publishes
+vernacular names for orders, and several are deliberately loose — Charadriiformes really is
+shorebirds plus gulls plus auks. Nothing is derived from them. Each family is labeled with
 **both its scientific and its common name** and the number of species it contributes.
 
 Rationale: the selector is where the common name earns its place. A birder looking for nightjars
@@ -243,6 +248,15 @@ With no filter applied, the initial view is all species, ordered by length.
 
 Rationale: the full sweep from hummingbird to swan is the clearest statement of what the app is
 for. Opening filtered or empty would hide it.
+
+### P-036 — The controls collapse
+Subject: `presentation.controls`
+Goals: G-002
+
+The controls panel is collapsible and starts open, like the instructions above it.
+
+Rationale: the family selector is 91 chips in 25 groups, which pushes the birds well below the
+fold. A reader who has chosen their filter should be able to put it away.
 
 ### P-035 — The page explains itself
 Subject: `presentation.help`

@@ -310,8 +310,13 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 	fams := make([]dataset.Family, 0, len(famSeq))
 	for _, f := range famSeq {
 		o := famOrder[f]
+		common, ok := taxonomy.OrderCommonNames[o]
+		if !ok {
+			return nil, "", fmt.Errorf("order %s has no common name; add one to "+
+				"internal/taxonomy so the selector can label its group", o)
+		}
 		fams = append(fams, dataset.Family{
-			Name: f, Common: famCommon[f], Order: o,
+			Name: f, Common: famCommon[f], Order: o, OrderCommon: common,
 			Color: famColors[f].Hex, TextColor: famColors[f].Text,
 			OrderColor: orderColors[o].Hex, OrderText: orderColors[o].Text,
 		})

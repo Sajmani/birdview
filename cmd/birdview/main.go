@@ -74,8 +74,7 @@ type familyOption struct {
 	Name, Common     string
 	Color, TextColor string
 	Order            string
-	OrderColor       string
-	OrderText        string
+	OrderCommon      string
 	Count            int
 }
 
@@ -83,11 +82,12 @@ type familyOption struct {
 // checklist's taxonomic sequence matches how every field guide is arranged,
 // and it is what lets family colors repeat across orders (P-010, P-005).
 type orderGroup struct {
-	Order     string
-	Color     string
-	TextColor string
-	Count     int
-	Families  []familyRow
+	Order    string
+	Common   string
+	Count    int
+	Selected bool         // every family in the order is filtered in
+	URL      template.URL // toggles the whole group
+	Families []familyRow
 }
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) { s.mux.ServeHTTP(w, r) }
@@ -110,8 +110,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	for _, f := range ds.Families {
 		s.fams = append(s.fams, familyOption{
 			Name: f.Name, Common: f.Common, Color: f.Color, TextColor: f.TextColor,
-			Order: f.Order, OrderColor: f.OrderColor, OrderText: f.OrderText,
-			Count: counts[f.Name],
+			Order: f.Order, OrderCommon: f.OrderCommon, Count: counts[f.Name],
 		})
 	}
 
@@ -260,14 +259,37 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		row := familyRow{familyOption: f, Selected: opt.Families[f.Name], URL: familyURL(r, next)}
 		gi, ok := byOrder[f.Order]
 		if !ok {
-			page.Groups = append(page.Groups, orderGroup{
-				Order: f.Order, Color: f.OrderColor, TextColor: f.OrderText,
-			})
+			page.Groups = append(page.Groups, orderGroup{Order: f.Order, Common: f.OrderCommon})
 			gi = len(page.Groups) - 1
 			byOrder[f.Order] = gi
 		}
 		page.Groups[gi].Families = append(page.Groups[gi].Families, row)
 		page.Groups[gi].Count += f.Count
+	}
+	// An order toggle selects its whole group, or clears it when the group is
+	// already fully selected. Deriving "selected" from the families rather than
+	// tracking it separately means the two can never disagree.
+	for i := range page.Groups {
+		g := &page.Groups[i]
+		g.Selected = true
+		for _, f := range g.Families {
+			if !opt.Families[f.Name] {
+				g.Selected = false
+				break
+			}
+		}
+		next := map[string]bool{}
+		for k := range opt.Families {
+			next[k] = true
+		}
+		for _, f := range g.Families {
+			if g.Selected {
+				delete(next, f.Name)
+			} else {
+				next[f.Name] = true
+			}
+		}
+		g.URL = familyURL(r, next)
 	}
 	for i, sec := range secs {
 		sv := sectionView{Index: i + 1, Count: len(sec.Species),

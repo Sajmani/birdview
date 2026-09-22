@@ -314,9 +314,17 @@ and the three main metrics.
 **Assertions:** filtering to one family shows its species and excludes others; no filter shows
 all; every entry is labeled with its scientific name, its common name and its species count; the
 selector is grouped by taxonomic order; groups appear in checklist sequence rather than
-alphabetically; and each family sits inside its own order's group.
+alphabetically; each family sits inside its own order's group; and each order is a working toggle
+that selects or clears **every** family in it, labeled with its common name.
 **Status: verified 2026-09-22 — passing, and watched failing** by alphabetizing the family list,
-which reorders the groups out of checklist sequence.
+and separately by making the order toggle add only its first family.
+
+Two lessons are recorded in the test itself. An earlier version asserted that order labels were
+*inert text*; when the requirement inverted to make them toggles, that check kept passing, because
+it searched for `<a class="ohdr` and the markup had become `<a class="btn ohdr`. And the
+select-the-whole-group behavior could not be tested at all until the fixture gained an order
+holding **two** families — with one family per order, "select the group" and "select the first
+family" are the same operation.
 
 ### AC-057 — The unit toggle switches imperial and metric
 **Verifies:** P-032 · **Level:** code · **Method:** rendering test over the tile footer, plus a

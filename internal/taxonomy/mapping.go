@@ -70,3 +70,42 @@ var NearMatches = map[string]string{
 var AwaitingTaxonomicCheck = []string{
 	"Astur atricapillus", "Ardea ibis", "Gygis candida", "Tyto furcata",
 }
+
+// OrderCommonNames gives each order an English label for the family selector.
+//
+// **These are the project's own editorial labels, not sourced data.** No input
+// BirdView uses publishes vernacular names for orders: the ABA checklist names
+// families only, and AVONET carries bare scientific orders. They are written to
+// be recognizable to a birder rather than to be taxonomically complete, so
+// several are deliberately loose -- Charadriiformes really is shorebirds plus
+// gulls plus auks, and no short phrase covers it exactly.
+//
+// Anything displayed from this table is a convenience label. Nothing is derived
+// from it, and no measurement depends on it (G-004).
+var OrderCommonNames = map[string]string{
+	"Anseriformes":        "Waterfowl",
+	"Galliformes":         "Gamebirds",
+	"Phoenicopteriformes": "Flamingos",
+	"Podicipediformes":    "Grebes",
+	"Pteroclidiformes":    "Sandgrouse",
+	"Columbiformes":       "Pigeons and Doves",
+	"Cuculiformes":        "Cuckoos",
+	"Caprimulgiformes":    "Nightjars",
+	"Apodiformes":         "Swifts and Hummingbirds",
+	"Gruiformes":          "Cranes, Rails, and Allies",
+	"Charadriiformes":     "Shorebirds, Gulls, and Auks",
+	"Phaethontiformes":    "Tropicbirds",
+	"Gaviiformes":         "Loons",
+	"Procellariiformes":   "Tubenoses",
+	"Ciconiiformes":       "Storks",
+	"Suliformes":          "Boobies, Cormorants, and Allies",
+	"Pelecaniformes":      "Pelicans, Herons, and Ibises",
+	"Accipitriformes":     "Hawks, Eagles, and Vultures",
+	"Strigiformes":        "Owls",
+	"Trogoniformes":       "Trogons",
+	"Coraciiformes":       "Kingfishers and Allies",
+	"Piciformes":          "Woodpeckers",
+	"Falconiformes":       "Falcons",
+	"Psittaciformes":      "Parrots",
+	"Passeriformes":       "Perching Birds",
+}

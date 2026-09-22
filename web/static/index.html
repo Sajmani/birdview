@@ -14,7 +14,7 @@
 </header>
 
 <details class="help" open>
-  <summary>How to read this</summary>
+  <summary>Instructions</summary>
   <div class="helpgrid">
     <section>
       <h3>The diagram</h3>
@@ -44,8 +44,9 @@
         <dt>Units</dt>
         <dd>Inches and ounces, or centimeters and grams.</dd>
         <dt>Family</dt>
-        <dd>Click any family to filter to it; click again to drop it. Several can be combined.
-          Each is labeled with its scientific and common name.</dd>
+        <dd>Grouped by taxonomic order, in checklist sequence &mdash; the order field guides use.
+          Click any family to filter to it, or an order to take the whole group; click again to
+          drop it. Several can be combined.</dd>
       </dl>
     </section>
     <section>
@@ -59,7 +60,8 @@
   </div>
 </details>
 
-<form class="controls" method="get" action="/">
+<details class="controls" open>
+  <summary>Controls</summary>
   <div class="row">
     <span class="lbl">Order by</span>
     {{$q := .Query}}
@@ -91,7 +93,8 @@
   <div class="ordergroups">
     {{range .Groups}}
     <div class="ogroup">
-      <div class="ohdr">{{.Order}} <b>{{.Count}}</b></div>
+      <a class="btn ohdr{{if .Selected}} on{{end}}" href="{{.URL}}"
+         title="{{if .Selected}}Clear{{else}}Select{{end}} every family in {{.Order}}">{{.Order}}<em>{{.Common}}</em><b>{{.Count}}</b></a>
       {{range .Families}}
         <a class="chip{{if .Selected}} on{{end}}" href="{{.URL}}"
            style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">
@@ -102,7 +105,7 @@
     {{end}}
   </div>
   <p class="count">{{.Shown}} of {{.Total}} species</p>
-</form>
+</details>
 
 {{range .Sections}}
 <section>
