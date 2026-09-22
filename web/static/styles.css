@@ -94,7 +94,7 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .help p + p { margin-top: 6px; }
 .legend { list-style: none; padding: 0; }
 .legend li { display: flex; align-items: baseline; gap: 8px; margin-bottom: 3px; }
-.legend b, .help dt { color: var(--ink); font-weight: 600; }
+.legend b, .help dt, .help p b { color: var(--ink); font-weight: 600; }
 .help dt { font-size: 12.5px; margin-top: 6px; }
 .help dd { margin: 1px 0 0; }
 .sw { flex: none; width: 22px; height: 0; border-top-width: 3px; border-top-style: solid;
@@ -106,4 +106,4 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .sw.body { border-color: #64748b; border-top-width: 5px; }
 .sw.tail { border-color: #94a3b8; border-top-style: dashed; }
 .sw.wing { border-color: #0ea5e9; }
-.est-demo { color: var(--accent); }
+.help .est-demo { color: var(--accent); }
