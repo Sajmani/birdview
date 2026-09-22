@@ -36,14 +36,15 @@ eBird/Clements taxonomy. See [sources.md](sources.md#avonet).
 Goals: G-003
 
 Each species record carries scientific name, family, and these AVONET traits: `Beak.Length_Culmen`,
-`Tail.Length`, `Wing.Length`, `Secondary1`, `Mass`.
+`Tarsus.Length`, `Tail.Length`, `Wing.Length`, `Secondary1`, `Mass`.
 
 Rationale: this is the set the diagram and its derivations actually consume. AVONET's other
-columns — `Beak.Width`, `Beak.Depth`, `Hand-Wing.Index`, `Tarsus.Length` — are deliberately not
-ingested; carrying unused data invites someone to invent a use for it.
+columns — `Beak.Width`, `Beak.Depth`, `Hand-Wing.Index` — are deliberately not ingested; carrying
+unused data invites someone to invent a use for it.
 
-`Beak.Depth` was ingested until the cranium model moved to mass, and was dropped rather than left
-dangling, on exactly that principle.
+The set moves both ways. `Beak.Depth` was ingested until the cranium model left bill depth for
+mass, and was dropped rather than left dangling. `Tarsus.Length` went the other way: excluded as
+unused until the diagram gained legs.
 
 ### P-004 — Names and families come from the ABA checklist
 Subject: `dataset.names.source`
@@ -344,8 +345,17 @@ Value: `bill, head, neck, body, tail, wing crossbar`
 Goals: G-003
 
 The diagram is a vertical cross. Top to bottom: a bill stick, a head oval, a neck stick, a body
-stick, and a tail stick — plus one horizontal crossbar representing the wings. The tail is
+stick, and a tail stick — plus one horizontal crossbar representing the wings, and **a pair of
+legs raking back from the body's midpoint at 45°, drawn from the measured tarsus**. The tail is
 visually distinguished from the body by stroke style and a mark at the junction between them.
+
+Legs are not part of the vertical sum of P-041; like the wingspan they are drawn at the same scale
+but measured across a different axis.
+
+Rationale for legs: tarsus is a **measured** trait, so with bill and tail it is one of only three
+parts of the diagram that is not modeled — and it spans 115×, from a Rufous Hummingbird's 2.5 mm
+to a Whooping Crane's 289 mm. A Black-necked Stilt's tarsus is 34% of its total length against a
+Chimney Swift's 9%. That is real, striking, and was previously thrown away.
 
 Rationale: the tail is a stick rather than a triangle because no trait in any source gives a tail
 width, and a triangle would assert a fan shape the data does not support.

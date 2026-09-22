@@ -379,6 +379,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		row("Total length", sp.TotalLength, view.ByLength, opt.Metric3),
 		row("Wingspan", sp.Wingspan, view.ByWingspan, opt.Metric3),
 		row("Mass", sp.Mass, view.ByMass, opt.Metric3),
+		row("Tarsus (leg)", sp.Tarsus, view.ByLength, opt.Metric3),
 		row("Bill", sp.Segments.Bill, view.ByLength, opt.Metric3),
 		row("Head", sp.Segments.Head, view.ByLength, opt.Metric3),
 		row("Neck", sp.Segments.Neck, view.ByLength, opt.Metric3),

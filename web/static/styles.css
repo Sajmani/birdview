@@ -95,6 +95,7 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .body { stroke: #64748b; stroke-width: 5; stroke-linecap: butt; }
 .tail { stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 5 3; }
 .junction { stroke: #cbd5e1; stroke-width: 1.5; }
+.leg { stroke: #d97706; stroke-width: 1.6; stroke-linecap: round; }
 .wing { stroke: #0ea5e9; stroke-width: 2.5; stroke-linecap: round; }
 
 .back a { color: var(--accent); text-decoration: none; }
@@ -134,5 +135,6 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .sw.neck { border-color: #cbd5e1; }
 .sw.body { border-color: #64748b; border-top-width: 5px; }
 .sw.tail { border-color: #94a3b8; border-top-style: dashed; }
+.sw.leg { border-color: #d97706; transform: rotate(35deg); }
 .sw.wing { border-color: #0ea5e9; }
 .help .est-demo { color: var(--accent); }

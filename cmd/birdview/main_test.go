@@ -211,7 +211,8 @@ func TestDiagramIsVerticallyCentered(t *testing.T) {
 // Verifies: P-034, P-063. Criterion: AC-043.
 func TestDetailShowsEverySegmentWithProvenance(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/species/ardea_herodias")
-	for _, label := range []string{"Total length", "Wingspan", "Mass", "Bill", "Head", "Neck", "Body", "Tail"} {
+	for _, label := range []string{"Total length", "Wingspan", "Mass", "Tarsus (leg)",
+		"Bill", "Head", "Neck", "Body", "Tail"} {
 		if !strings.Contains(body, ">"+label+"<") {
 			t.Errorf("detail view omits %q", label)
 		}

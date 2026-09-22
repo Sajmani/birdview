@@ -112,7 +112,7 @@ editorial judgment, and the project uses them only as a filter.
 
 ### AC-012 — Every record carries all six AVONET traits
 **Verifies:** P-002, P-003 · **Level:** code · **Method:** property test over every record
-**Assertion:** culmen, tail, wing chord, secondary and mass are all present and positive.
+**Assertion:** culmen, tarsus, tail, wing chord, secondary and mass are all present and positive.
 **Status: planned.** Trait coverage on `AVONET2_eBird` was measured complete for the target
 families, so any failure means a join or parse bug rather than missing data.
 
@@ -438,6 +438,20 @@ happily while the *old* model collapsed 442 species onto 12 mm, because that mod
 its own definition. What was wrong was the shape of the result across the dataset, which only a
 distribution assertion can see.
 
+### AC-066 — Legs are driven by the measured tarsus
+**Verifies:** P-040 · **Level:** code · **Method:** unit tests over the geometry
+**Assertions:** each leg's horizontal and vertical extent are equal (45°); the extent is the
+scaled tarsus over √2; legs attach at the body's midpoint; a crane's legs dwarf a swift's; and
+**no species' feet fall below its tail tip**.
+**Status: verified 2026-09-22 — passing, and watched failing** by fixing the leg length to a
+constant and by moving the attachment to the shoulder.
+
+The last assertion records an invariant the renderer depends on. Feet drop below the tail tip
+exactly when `tarsus/√2 > body/2 + tail`, which is scale-invariant and true of none of the 841
+species — even a Black-necked Stilt. That is why the renderer can center a diagram on its
+bill-to-tail extent alone. A guard for the other case was written and then deleted: dead by
+construction is worse than an assertion that would tell you when the construction changed.
+
 ---
 
 ## Traceability
@@ -464,7 +478,7 @@ distribution assertion can see.
 | P-036 | AC-062 | |
 | P-037 | AC-061 | |
 | P-038 | AC-062 | partial — behavior unverifiable without a browser |
-| P-040 | AC-033 | |
+| P-040 | AC-033, AC-066 | |
 | P-041 | AC-030 | |
 | P-042 | AC-031, AC-063 | |
 | P-043 | AC-032 | |

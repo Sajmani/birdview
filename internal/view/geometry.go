@@ -1,6 +1,10 @@
 package view
 
-import "birdview/internal/dataset"
+import (
+	"math"
+
+	"birdview/internal/dataset"
+)
 
 // Box is the drawing area available to one diagram, in pixels.
 type Box struct{ W, H float64 }
@@ -21,6 +25,14 @@ type Geometry struct {
 	YBodyEnd          float64 // body meets tail
 	YTailTip          float64
 	CrossbarHalfWidth float64
+
+	// Legs attach at the body's midpoint and rake back toward the tail at 45
+	// degrees, so each has equal horizontal and vertical extent. Drawn from the
+	// measured tarsus -- the lower leg of a standing bird -- which makes them,
+	// with bill and tail, one of the three parts of the diagram that is not
+	// modeled.
+	YLegTop      float64
+	LegDX, LegDY float64
 }
 
 // headAspect is how wide the cranium oval is drawn relative to its height.
@@ -65,6 +77,12 @@ func Layout(s *dataset.Species, refLength, refWingspan float64, box Box) Geometr
 	g.YBodyEnd = g.YShoulder + seg.Body.Value*scale
 	g.YTailTip = g.YBodyEnd + seg.Tail.Value*scale
 	g.CrossbarHalfWidth = s.Wingspan.Value * scale / 2
+
+	g.YLegTop = (g.YShoulder + g.YBodyEnd) / 2
+	// At 45 degrees the horizontal and vertical components are equal, each the
+	// tarsus over root two.
+	leg := s.Tarsus.Value * scale / math.Sqrt2
+	g.LegDX, g.LegDY = leg, leg
 	return g
 }
 

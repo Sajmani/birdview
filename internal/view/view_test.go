@@ -274,3 +274,63 @@ func TestSharedScaleWithinSection(t *testing.T) {
 			big.CrossbarHalfWidth*2, big.TotalHeight(), box.W, box.H)
 	}
 }
+
+// TestFeetStayAboveTheTailTip records the invariant that lets the renderer
+// center a diagram on its bill-to-tail extent alone.
+//
+// Legs rake back from the body's midpoint, so the feet fall below the tail tip
+// exactly when tarsus/sqrt(2) > body/2 + tail. That comparison is
+// scale-invariant, and it holds for none of the 841 species -- even a
+// Black-necked Stilt, whose tarsus is 34% of its length. If it ever fails the
+// renderer needs to center on the larger extent instead, so this fails loudly
+// rather than clipping a bird's feet.
+//
+// Verifies: P-040. Criterion: AC-066.
+func TestFeetStayAboveTheTailTip(t *testing.T) {
+	// A stilt: long tarsus against a short body and tail, the worst real case.
+	stilt := bird("Himantopus mexicanus", 63, 26, 23, 88, 76, 720, 166)
+	stilt.Tarsus = dataset.Metric{Value: 106.7}
+
+	for _, s := range append(sample(), stilt) {
+		g := Layout(s, s.TotalLength.Value, s.Wingspan.Value, Box{W: 420, H: 160})
+		if feet := g.YLegTop + g.LegDY; feet > g.YTailTip+1e-9 {
+			t.Errorf("%s: feet reach %.1f px, below the tail tip at %.1f -- the renderer "+
+				"centers on bill-to-tail and would clip them", s.ScientificName, feet, g.YTailTip)
+		}
+	}
+}
+
+// TestLegsScaleWithTarsus checks the legs are driven by the measurement and
+// rake back at 45 degrees, equal in both components.
+//
+// Verifies: P-040. Criterion: AC-066.
+func TestLegsScaleWithTarsus(t *testing.T) {
+	short := bird("swift", 10, 12, 8, 60, 50, 300, 24)
+	short.Tarsus = dataset.Metric{Value: 11.6}
+	long := bird("crane", 120, 60, 200, 260, 200, 2100, 5000)
+	long.Tarsus = dataset.Metric{Value: 288.8}
+
+	box := Box{W: 420, H: 160}
+	for _, s := range []*dataset.Species{short, long} {
+		g := Layout(s, s.TotalLength.Value, s.Wingspan.Value, box)
+		if math.Abs(g.LegDX-g.LegDY) > 1e-9 {
+			t.Errorf("%s: legs are not at 45 degrees (dx %.2f, dy %.2f)",
+				s.ScientificName, g.LegDX, g.LegDY)
+		}
+		want := s.Tarsus.Value * g.PxPerMm / math.Sqrt2
+		if math.Abs(g.LegDX-want) > 1e-9 {
+			t.Errorf("%s: leg extent %.2f, want tarsus/sqrt(2) scaled = %.2f",
+				s.ScientificName, g.LegDX, want)
+		}
+		// And they attach at the body's midpoint.
+		if mid := (g.YShoulder + g.YBodyEnd) / 2; math.Abs(g.YLegTop-mid) > 1e-9 {
+			t.Errorf("%s: legs attach at %.2f, not the body midpoint %.2f", s.ScientificName, g.YLegTop, mid)
+		}
+	}
+	// A crane's legs must dwarf a swift's, which is the whole point.
+	gs := Layout(short, short.TotalLength.Value, short.Wingspan.Value, box)
+	gl := Layout(long, long.TotalLength.Value, long.Wingspan.Value, box)
+	if gl.LegDX/gl.PxPerMm <= 4*gs.LegDX/gs.PxPerMm {
+		t.Error("crane legs are not dramatically longer than a swift's in real terms")
+	}
+}
