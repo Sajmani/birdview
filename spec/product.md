@@ -106,6 +106,13 @@ Goals: G-002
 The user can filter to any subset of families, multi-select, with a single control that clears the
 filter and shows everything.
 
+Each family in the selector is labeled with **both its scientific and its common name**, and the
+number of species it contributes.
+
+Rationale: the selector is where the common name earns its place. A birder looking for nightjars
+should not have to know they are Caprimulgidae to find them, and this is the one surface where
+they are choosing a family rather than reading about one they have already been shown.
+
 ### P-011 — Filter by location
 Status: **Withdrawn** — no freely redistributable per-region occurrence data exists at useful
 granularity. See [CR-003](decisions.md#cr-003).

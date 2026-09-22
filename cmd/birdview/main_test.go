@@ -209,6 +209,19 @@ func TestFamilyFilter(t *testing.T) {
 	if !strings.Contains(one, "Great Blue Heron") {
 		t.Error("filtering to Ardeidae dropped the heron")
 	}
+
+	// The selector labels each family with both names and a count (P-010): the
+	// scientific name alone makes the user translate before they can choose.
+	sel := all[strings.Index(all, `class="row chips"`):]
+	sel = sel[:strings.Index(sel, "</div>")]
+	for _, want := range []string{"Ardeidae", "Ardeidae family", "Turdidae", "Trochilidae"} {
+		if !strings.Contains(sel, want) {
+			t.Errorf("family selector is missing %q", want)
+		}
+	}
+	if !strings.Contains(sel, "<b>1</b>") {
+		t.Error("family selector shows no species counts")
+	}
 }
 
 // Verifies: P-032. Criterion: AC-057.

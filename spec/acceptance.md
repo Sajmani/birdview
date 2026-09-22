@@ -295,7 +295,9 @@ and the three main metrics.
 
 ### AC-056 — The family filter selects and clears
 **Verifies:** P-010 · **Level:** code · **Method:** rendering test over `?family=`
-**Assertion:** filtering to one family shows its species and excludes others; no filter shows all.
+**Assertions:** filtering to one family shows its species and excludes others; no filter shows
+all; and every entry in the selector is labeled with its scientific name, its common name and its
+species count.
 **Status: verified 2026-09-22.**
 
 ### AC-057 — The unit toggle switches imperial and metric

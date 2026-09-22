@@ -42,7 +42,7 @@
     <a class="chip{{if not .Opt.Families}} on{{end}}" href="{{.ClearURL}}">All ({{.Total}})</a>
     {{range .Families}}
       <a class="chip{{if .Selected}} on{{end}}" href="{{.URL}}">
-        <i style="background:{{.Color}}"></i>{{.Name}} <b>{{.Count}}</b>
+        <i style="background:{{.Color}}"></i>{{.Name}}<em>{{.Common}}</em><b>{{.Count}}</b>
       </a>
     {{end}}
   </div>
