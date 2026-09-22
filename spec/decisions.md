@@ -35,7 +35,7 @@ BIRDBASE, Lislevand and Dunning were each checked and carry neither.
 
 | Option | Satisfies | Violates | Cost |
 | --- | --- | --- | --- |
-| Real data only, accept gaps | 1, 3 | 2 | ~30% wingspan coverage, passerine-only length. Most cards incomplete or absent. |
+| Real data only, accept gaps | 1, 3 | 2 | ~30% wingspan coverage, passerine-only length. Most tiles incomplete or absent. |
 | Return to a modeled source | 2, 3 | 1 | Complete coverage; every number synthetic, which is the position already rejected. |
 | Per-value provenance | 2, 3, and 1 *conditionally* | — | Full coverage with each value labeled measured or estimated. Requires the labeling to be real. |
 | Pursue licenses first | possibly all | — | Indefinite delay, uncertain outcome. |
@@ -68,7 +68,7 @@ dropped as a simplification.
 ### Resolution
 
 **The source is withdrawn. BirdView will not use Ricklefs 2017.** Every total length in v1 is
-`modeled`, tagged as such under P-062 and marked on the card under P-061.
+`modeled`, tagged as such under P-062 and marked on the tile under P-061.
 
 The terms were finally read — the maintainer printed the page from a browser, since the site 403s
 automated requests — and four clauses each independently prohibit what BirdView would do. They are
@@ -387,6 +387,60 @@ candida* and *Tyto furcata* are listed as renames because the parent is absent f
 is really a split whose `AVONET2_eBird` row represents the combined taxon. Mapping them is
 therefore the same borrowing problem in a quieter form, and each needs a human taxonomic check
 before entering the mapping table.
+
+---
+
+## CR-007 — The neck length is surfaced as a metric, superseding CR-004's condition
+
+**Subject:** `diagram.neck_ratio`
+**Kind:** Direct — a later decision reverses a condition an earlier one set
+**Date:** 2026-09-21 · **Decided by:** Sameer
+
+### What changed
+
+[CR-004](#cr-004) kept the per-family neck ratio on one condition, stated plainly: *"If a neck
+length ever appears as a value, this decision is void and must be reopened."* The owner has now
+decided it should appear — in the detail view, alongside every other segment, with provenance
+naming the specific modeling function and the ratio used for that bird's family.
+
+This record reopens it, as CR-004 required.
+
+### Why it resolves the other way now
+
+CR-004 was decided before P-062 existed. At the time the choice lay between hiding the number and
+presenting it as though it were measured, because there was no way to say "drawing convention" in
+the data. Confining it to pixels was the least-bad option available.
+
+Per-metric provenance removes the dilemma. A neck length labeled `kind: modeled` with
+`model: "per-family neck ratio, Ardeidae = 0.35"` is not passing itself off as a measurement; it
+states exactly what it is and what produced it.
+
+And the concealment was never worth much. **The user sees the neck either way** — it is drawn, at
+a length, in every diagram. Withholding the number withheld the explanation, not the claim. Naming
+the function is strictly more honest than drawing an unexplained proportion.
+
+This is the third time P-062 has dissolved a constraint that existed only because provenance was
+binary, after [CR-001](#cr-001) on modeled lengths and [CR-006](#cr-006) on split taxa.
+
+### Resulting status
+
+- **P-045** amended: the ratio is a named per-family model, and the neck length is presented with
+  its function named. No longer "never surfaced as data".
+- **P-063** amended: every metric, including all five segments, is shown with its provenance.
+- **P-034** amended: the detail view is a larger version of the same tile, plus per-segment
+  measurements and provenance.
+- **P-031** amended: the tile header carries scientific name as well as common name and badge.
+- **AC-035** inverted: it asserted the neck length never leaves the drawing layer; it now asserts
+  the neck length *is* serialized, with a `model` naming the family ratio.
+- **CR-004** stands as history. Its reasoning was right for the constraints of its time; only its
+  condition is superseded.
+
+### Consequence worth watching
+
+Surfacing the segments makes the composition of total length visible. A reader will see a
+**measured** bill inside a **modeled** total and may reasonably ask how both are true. The answer
+is that total length is the sum of five segments, two measured and three modeled — now stated in
+P-060 so the detail view can say it rather than leave the reader to infer it.
 
 ---
 

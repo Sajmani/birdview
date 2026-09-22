@@ -70,4 +70,4 @@ BirdView does not do it.
 Taxonomy browsing beyond the family filter is *not* a non-goal, merely unbuilt.
 
 A per-species detail view **is** in scope, as of P-034 — it is where a metric's provenance gets
-explained (P-063), which the card has no room for.
+explained (P-063), which the tile has no room for.

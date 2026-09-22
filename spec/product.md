@@ -165,11 +165,17 @@ Goals: G-001, G-003
 Rationale: photographs were scoped out of v1 (P-050). The diagram is what makes size and shape
 comparable; photographs were always the enrichment.
 
-### P-031 — Card contents
+### P-031 — Tile contents
+Subject: `presentation.tile`
 Goals: G-001, G-002, G-003
 
-Each species is one card showing its common name, its family badge, the diagram, and its length,
-wingspan and mass. Cards wrap to fill the available display width.
+Each species is one **tile**, laid out top to bottom:
+
+1. a header carrying the **common name**, the **scientific name**, and the **family badge**;
+2. the diagram;
+3. the main metrics — **length, wingspan, mass** — in the selected unit system.
+
+Tiles wrap to fill the available display width.
 
 ### P-032 — Imperial by default, metric available
 Subject: `units.default`
@@ -189,17 +195,20 @@ With no filter applied, the initial view is all species, ordered by length.
 Rationale: the full sweep from hummingbird to swan is the clearest statement of what the app is
 for. Opening filtered or empty would hide it.
 
-### P-034 — A card opens a detail view
+### P-034 — A tile opens a detail view
 Subject: `presentation.detail_view`
 Goals: G-001, G-003
 
-Clicking a species card opens a fuller view of that species: its diagram at a larger size, every
-metric with its value, and the provenance of each metric (P-063).
+Clicking a tile opens a detail view that is **a larger version of the same tile** — same header,
+same diagram, same main metrics, same layout — plus:
 
-Rationale: the card is deliberately dense — it exists to be compared against dozens of others at a
-glance, which leaves no room to say where each number came from. The detail view is where that is
-said. It is the surface that makes P-062's provenance record worth recording, rather than metadata
-nobody ever sees.
+- the measurement of **every individual diagram segment**: bill, head, neck, body, tail;
+- the **provenance of every metric shown**, main metrics and segments alike (P-063).
+
+Rationale: the tile is deliberately dense, because it exists to be compared against dozens of
+others at a glance. That leaves no room to say where each number came from. Keeping the detail
+view the *same* layout at a larger size means the user is reading a familiar thing with more of it
+exposed, rather than a different screen they have to re-orient to.
 
 ---
 
@@ -235,9 +244,9 @@ Goals: G-001, G-002
 The user switches between a scale shared by all species within a section, and a single scale
 across the entire filtered set. Per-section is the default.
 
-Rationale: this is the requirement G-001 lives or dies by. A per-card scale — every bird drawn to
-fill its card — makes a hummingbird and a swan identical on screen and destroys size intuition
-entirely. Per-section keeps every card legible while remaining honest within the section, since a
+Rationale: this is the requirement G-001 lives or dies by. A per-tile scale — every bird drawn to
+fill its tile — makes a hummingbird and a swan identical on screen and destroys size intuition
+entirely. Per-section keeps every tile legible while remaining honest within the section, since a
 section spans at most N%. Global is brutally honest across the whole range and renders small birds
 as specks; it is the view that produces the cross-family surprise, so it is offered rather than
 imposed.
@@ -250,7 +259,7 @@ Goals: G-001
 The crossbar's length represents wingspan at the same scale as the vertical axis, so its length
 relative to the body is literal.
 
-Rationale: wingspan runs 1.0–2.5× body length, so honoring this forces a wide card — roughly
+Rationale: wingspan runs 1.0–2.5× body length, so honoring this forces a wide tile — roughly
 2.6:1. That is a real layout cost, accepted because a crossbar on its own arbitrary scale tells
 the user something false about proportion while looking authoritative.
 
@@ -259,20 +268,25 @@ Goals: G-003
 
 A dowitcher reads as long-billed, an accipiter as long-tailed, a heron as long-necked.
 
-### P-045 — The neck/body split is a declared design parameter
+### P-045 — The neck/body split is a named per-family model
 Subject: `diagram.neck_ratio`
-Value: `per-family constant, non-measured`
-Goals: G-003
+Value: `per-family modeling function`
+Goals: G-001, G-003, G-004
 
-The division of the remaining body axis between neck and body uses a hand-assigned per-family
-ratio. **It is a visual design parameter, not a measurement.** It carries no provenance claim, is
-never surfaced to the user as data, and is recorded as a table in the code with this requirement
-cited beside it.
+The division of the remaining body axis between neck and body uses a per-family ratio. The
+resulting **neck length is presented as a metric like any other**, in the detail view, carrying a
+provenance record whose `kind` is `modeled` and whose `model` **names the specific function and
+the ratio applied to that bird's family** — for example, "per-family neck ratio, Ardeidae = 0.35".
 
-Rationale: no source measures avian neck length at this coverage. The alternative — one ratio for
-every species — is more honest and makes every bird the same shape, which defeats G-003. This is
-the one number in BirdView that is invented, and it is confined to pixels. See
-[CR-004](decisions.md#cr-004).
+The ratio table is recorded in the code with this requirement cited beside it.
+
+Rationale: no source measures avian neck length at this coverage, and one ratio for every species
+would make every bird the same shape, defeating G-003. What makes a per-family constant
+acceptable is not hiding it but naming it: a user who wants to know why a heron is drawn
+long-necked can read the exact function that made it so. Hiding the number while still drawing it
+would be the less honest option — the reader sees the neck either way, and only the explanation
+would be missing. Supersedes the condition in [CR-004](decisions.md#cr-004); see
+[CR-007](decisions.md#cr-007).
 
 ---
 
@@ -310,15 +324,20 @@ Goals: G-001
   own taxon ([CR-006](decisions.md#cr-006)).
 - **Everything not covered above** — modeled.
 
+**Total length is a composite.** It is the sum of the five segments (P-041), of which bill and
+tail are measured from AVONET while head, neck and body are modeled. Its `kind` is therefore
+`modeled`, and its `model` says so — a reader who sees a measured bill inside a modeled total
+should be able to find out how both are true at once.
+
 Rationale: AVONET records neither macroscopic dimension, and no open source supplies both across
 the ABA avifauna. Mixing sources of differing authority is acceptable *only* under P-062. See
 [CR-001](decisions.md#cr-001).
 
-### P-061 — The card marks any metric that is not measured
+### P-061 — The tile marks any metric that is not measured
 Goals: G-001
 
-On the card itself — where numbers and the scaled diagram appear — any metric whose `kind` is not
-`measured` is visibly marked as such, without the card having to explain why.
+On the tile itself — where numbers and the scaled diagram appear — any metric whose `kind` is not
+`measured` is visibly marked as such, without the tile having to explain why.
 
 Rationale: this is what makes P-060 honest rather than merely convenient. If it is dropped, the
 provenance record becomes metadata nobody sees and BirdView presents modeled numbers as data,
@@ -358,14 +377,14 @@ redesign.
 ### P-063 — The detail view explains each metric's provenance
 Goals: G-001, G-004
 
-In the detail view (P-034), each metric is shown with its provenance stated in plain language —
-naming the source, and for a `near-match` naming the taxon actually measured, for a `modeled`
-value naming the model.
+In the detail view (P-034), **every** metric — the three main metrics and all five diagram
+segments — is shown with its value and its provenance stated in plain language: naming the source,
+naming the taxon actually measured for a `near-match`, and naming the model for a `modeled` value.
 
-The detail view also discloses that the **neck/body division is a drawing convention rather than a
-measurement** (P-045). It is the only honest place to say so, since the diagram gives no hint that
-one of its five segments is differently grounded from the other four.
+Rationale: the tile marks *that* a value is uncertain; this says *how*. "Wingspan estimated from
+wing chord", "mass measured on Herring Gull, a species this was split from in 2024", and "neck
+length from the per-family ratio for Ardeidae, 0.35 of the body axis" are very different caveats,
+and a birder who cares enough to click deserves the difference.
 
-Rationale: the card marks *that* a value is uncertain; this says *how*. "Wingspan estimated from
-wing chord" and "mass measured on Herring Gull, a species this was split from in 2024" are very
-different caveats, and a birder who cares enough to click deserves the difference.
+Showing the segments individually is what makes the diagram auditable. Without it, the drawing
+asserts five proportions and explains none of them.

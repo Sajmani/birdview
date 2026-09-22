@@ -69,14 +69,15 @@ Cite requirement IDs in comments using the literal token, so one search covers t
 
 ## Gotchas
 
-- **The neck/body ratio is invented, deliberately** (P-045). It is a visual design parameter with
-  no measured basis, and it is sound *only* while it stays out of the dataset and out of any
-  number shown to the user. If you find yourself serializing a neck length, read
-  [CR-004](spec/decisions.md#cr-004) — that decision becomes void.
-- **Per-card diagram scaling destroys the product** (P-042). Scaling every bird to fill its card
+- **The neck/body ratio has no measured basis, and is surfaced anyway** (P-045). It is a
+  per-family modeling function, and the neck length *is* serialized and shown in the detail view —
+  with `kind: modeled` and a `model` naming the function and that family's ratio. Do not quietly
+  drop the model string: naming it is the whole reason showing the number is defensible. See
+  [CR-007](spec/decisions.md#cr-007), which superseded the opposite rule in CR-004.
+- **Per-tile diagram scaling destroys the product** (P-042). Scaling every bird to fill its tile
   makes a hummingbird and a swan identical on screen, which is exactly what BirdView exists to
-  prevent. Scale is per-section or global, never per-card.
-- **The wing crossbar is to scale with the vertical axis** (P-043), which is why cards are wide.
+  prevent. Scale is per-section or global, never per-tile.
+- **The wing crossbar is to scale with the vertical axis** (P-043), which is why tiles are wide.
   A crossbar on its own convenient scale looks authoritative and says something false.
 - **AVONET has no common names and no body length or wingspan.** Three separate designs have
   foundered on assuming otherwise. Common names come from the ABA checklist (P-004); length and

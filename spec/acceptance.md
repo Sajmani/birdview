@@ -161,15 +161,15 @@ stated invariant false.
 
 ### AC-031 — Scale is shared within a section, and globally in global mode
 **Verifies:** P-042 · **Level:** code · **Method:** unit test over computed geometry
-**Assertions:** in per-section mode every card in a section has an identical scale factor, and the
+**Assertions:** in per-section mode every tile in a section has an identical scale factor, and the
 factor differs between at least two sections in a representative dataset; in global mode one
-factor applies to every card in the filtered set.
-**Status: planned.** The second half of the per-section assertion matters — a per-card
+factor applies to every tile in the filtered set.
+**Status: planned.** The second half of the per-section assertion matters — a per-tile
 implementation satisfies "identical within a section" trivially when sections hold one bird.
 
 ### AC-032 — The wing crossbar is to scale with the vertical axis
 **Verifies:** P-043 · **Level:** code · **Method:** property test over computed geometry
-**Assertion:** `crossbarLength / bodyLength == wingspan / totalLength` for every card, within
+**Assertion:** `crossbarLength / bodyLength == wingspan / totalLength` for every tile, within
 floating-point tolerance.
 **Status: planned.** Derived from the requirement. An earlier design's formula carried an extra
 factor, inverting the relationship so that larger birds drew *shorter* crossbars — 300 of 3,213
@@ -190,12 +190,15 @@ sparrow's; an accipiter's tail fraction exceeds a duck's.
 which is what makes this a check rather than a characterization. If an ordering fails, the model
 is wrong, not the test.
 
-### AC-035 — The neck ratio never leaves the drawing layer
-**Verifies:** P-045 · **Level:** code · **Method:** static check over the output schema
-**Assertion:** no serialized field exposes a neck ratio or a neck length as data.
-**Status: planned.** This is the condition [CR-004](decisions.md#cr-004) depends on: the
-per-family ratio is defensible as a drawing convention and indefensible as a measurement. If a
-neck length ever appears as a value, that decision is void.
+### AC-035 — The neck length is serialized with its model named
+**Verifies:** P-045, P-062 · **Level:** code · **Method:** property test over every record
+**Assertions:** every record carries a neck length; its provenance `kind` is `modeled`; its
+`model` is non-empty and **names both the per-family ratio function and the numeric ratio applied
+to that species' family**; and the ratio named matches the table entry for that family.
+**Status: planned.** Inverted by [CR-007](decisions.md#cr-007) — this criterion previously
+asserted the opposite, that no neck length was ever serialized. The last assertion is the one with
+teeth: a `model` string that names a function but not the family's actual value would satisfy a
+looser check while telling the reader nothing they could verify.
 
 ---
 
@@ -220,17 +223,27 @@ have an empirical wingspan (`needs_prediction = 0`), 510 have only a predicted v
 project excludes, and 30 have no row at all — every one of them a Galliform, an order the Fox
 dataset omits entirely. These counts come from the sources, not from our output.
 
-### AC-042 — The card marks every non-measured metric
+### AC-042 — The tile marks every non-measured metric
 **Verifies:** P-061 · **Level:** code · **Method:** rendering test asserting a marker is present
 for each metric whose `kind` is not `measured`, and absent otherwise
 **Status: planned.**
 
-### AC-043 — The detail view explains each metric's provenance
+### AC-043 — The detail view shows every metric and segment with provenance
 **Verifies:** P-063, P-034 · **Level:** code · **Method:** rendering test
-**Assertions:** the detail view names the source for every metric, names the taxon for a
-`near-match`, names the model for a `modeled` value, and states that the neck/body division is a
-drawing convention.
+**Assertions:** the detail view shows all three main metrics **and all five diagram segments**
+with their values; for each it names the source; for a `near-match` it names the taxon actually
+measured; for a `modeled` value it names the model. The detail view reproduces the tile's header,
+diagram and main metrics — it is the same layout enlarged, not a different screen.
 **Status: planned.**
+
+### AC-044 — Total length is reported as the sum of its segments
+**Verifies:** P-060, P-062, P-041 · **Level:** code · **Method:** property test
+**Assertions:** total length's `kind` is `modeled`; its `model` states that it is the sum of the
+five segments; and the value equals that sum exactly (the same invariant AC-030 asserts from the
+geometry side).
+**Status: planned.** Added by [CR-007](decisions.md#cr-007). Surfacing the segments makes it
+visible that a *measured* bill sits inside a *modeled* total; this criterion makes the output
+explain that rather than leaving the reader to infer it.
 
 ---
 
@@ -292,6 +305,7 @@ integration test that starts the server and requests `/`
 | P-043 | AC-032 | |
 | P-044 | AC-034 | |
 | P-045 | AC-035 | |
+| P-060 (composite) | AC-044 | |
 | P-050 – P-053 | — | withdrawn |
 | P-060 | AC-041 | |
 | P-061 | AC-042 | |
@@ -311,7 +325,7 @@ integration test that starts the server and requests `/`
 
 Honest gaps, rather than criteria that would not bite:
 
-- **P-010 (family filter), P-030–P-033 (modes, card contents, units, first load).** These are
+- **P-010 (family filter), P-030–P-033 (modes, tile contents, units, first load).** These are
   interaction behaviors. They are testable, but only with a browser harness this project does not
   have, and a unit test asserting that a template contains a string verifies the template rather
   than the behavior. Covered by human review until a harness exists; promote them when one does.
