@@ -127,11 +127,17 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 // options are the user's current selections, all carried in the query string so
 // that any view is a shareable URL.
 type options struct {
-	Metric   view.Metric
-	Step     float64
-	Scale    view.ScaleMode
-	Families map[string]bool
-	Metric3  bool // imperial when false
+	Metric view.Metric
+	Step   float64
+	Scale  view.ScaleMode
+	// Families holds the explicitly named families. HasSelection distinguishes
+	// a fresh page, where nothing is named and everything is selected, from an
+	// explicitly emptied selection, where nothing is named and nothing is
+	// selected. The two look identical in the query string otherwise, and they
+	// mean opposite things.
+	Families     map[string]bool
+	HasSelection bool
+	Metric3      bool // imperial when false
 }
 
 func parseOptions(r *http.Request) options {
@@ -155,6 +161,7 @@ func parseOptions(r *http.Request) options {
 		o.Step = v
 	}
 	o.Metric3 = q.Get("units") == "metric"
+	_, o.HasSelection = q["family"]
 	for _, f := range q["family"] {
 		if f != "" {
 			o.Families[f] = true
@@ -202,6 +209,9 @@ type pageData struct {
 	// they are different selections, and the control reflects the selection.
 	AllSelected bool
 	AllURL      template.URL
+	// NothingSelected drives the empty state, which has to say something
+	// different from "no matches": the user turned everything off.
+	NothingSelected bool
 }
 
 // tileBox is the drawing area for one diagram. Roughly 2.6:1, because a
@@ -216,10 +226,18 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	}
 	opt := parseOptions(r)
 
+	// A fresh page selects everything; an emptied selection selects nothing.
+	selected := opt.Families
+	if !opt.HasSelection {
+		selected = make(map[string]bool, len(s.fams))
+		for _, f := range s.fams {
+			selected[f.Name] = true
+		}
+	}
 	var filtered []*dataset.Species
 	for i := range s.ds.Species {
 		sp := &s.ds.Species[i]
-		if len(opt.Families) == 0 || opt.Families[sp.Family] {
+		if selected[sp.Family] {
 			filtered = append(filtered, sp)
 		}
 	}
@@ -254,24 +272,25 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	// the selection outright rather than leaving 91 redundant parameters behind.
 	page.AllSelected = len(s.fams) > 0
 	for _, f := range s.fams {
-		if !opt.Families[f.Name] {
+		if !selected[f.Name] {
 			page.AllSelected = false
 			break
 		}
 	}
-	if page.AllSelected {
-		page.AllURL = familyURL(r, nil)
-	} else {
-		every := make(map[string]bool, len(s.fams))
-		for _, f := range s.fams {
-			every[f.Name] = true
-		}
-		page.AllURL = familyURL(r, every)
+	every := make(map[string]bool, len(s.fams))
+	for _, f := range s.fams {
+		every[f.Name] = true
 	}
+	if page.AllSelected {
+		page.AllURL = s.familyURL(r, nil)
+	} else {
+		page.AllURL = s.familyURL(r, every)
+	}
+	page.NothingSelected = len(selected) == 0
 	byOrder := map[string]int{}
 	for _, f := range s.fams {
 		next := map[string]bool{}
-		for k := range opt.Families {
+		for k := range selected {
 			next[k] = true
 		}
 		if next[f.Name] {
@@ -279,7 +298,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		} else {
 			next[f.Name] = true
 		}
-		row := familyRow{familyOption: f, Selected: opt.Families[f.Name], URL: familyURL(r, next)}
+		row := familyRow{familyOption: f, Selected: selected[f.Name], URL: s.familyURL(r, next)}
 		gi, ok := byOrder[f.Order]
 		if !ok {
 			page.Groups = append(page.Groups, orderGroup{Order: f.Order, Common: f.OrderCommon})
@@ -296,13 +315,13 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		g := &page.Groups[i]
 		g.Selected = true
 		for _, f := range g.Families {
-			if !opt.Families[f.Name] {
+			if !selected[f.Name] {
 				g.Selected = false
 				break
 			}
 		}
 		next := map[string]bool{}
-		for k := range opt.Families {
+		for k := range selected {
 			next[k] = true
 		}
 		for _, f := range g.Families {
@@ -312,7 +331,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				next[f.Name] = true
 			}
 		}
-		g.URL = familyURL(r, next)
+		g.URL = s.familyURL(r, next)
 	}
 	for i, sec := range secs {
 		sv := sectionView{Index: i + 1, Count: len(sec.Species),
@@ -451,16 +470,28 @@ func format(v float64, as view.Metric, metric bool) string {
 }
 
 // familyURL rebuilds the current URL with exactly the given families selected.
-func familyURL(r *http.Request, fams map[string]bool) template.URL {
+//
+// Two states get a short encoding. Everything selected is the default, so it
+// needs no family parameter at all; nothing selected is a single empty one.
+// Without that distinction the two would be indistinguishable in the query
+// string while meaning opposite things.
+func (s *server) familyURL(r *http.Request, fams map[string]bool) template.URL {
 	q := r.URL.Query()
 	q.Del("family")
-	names := make([]string, 0, len(fams))
-	for f := range fams {
-		names = append(names, f)
-	}
-	sort.Strings(names)
-	for _, f := range names {
-		q.Add("family", f)
+	switch {
+	case len(fams) == len(s.fams):
+		// default: no parameter
+	case len(fams) == 0:
+		q.Set("family", "")
+	default:
+		names := make([]string, 0, len(fams))
+		for f := range fams {
+			names = append(names, f)
+		}
+		sort.Strings(names)
+		for _, f := range names {
+			q.Add("family", f)
+		}
 	}
 	return template.URL("/?" + q.Encode())
 }

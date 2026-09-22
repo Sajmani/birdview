@@ -376,6 +376,15 @@ on roughly a dozen chips. Hierarchy has to come from weight and size; dimming un
 ratio the background was selected for. Checking CSS is crude, but the defect is invisible to a
 rendering test and this catches it exactly.
 
+### AC-061 — The empty state guides rather than blames
+**Verifies:** P-037, P-010 · **Level:** code · **Method:** rendering test after clearing every
+selection
+**Assertions:** no species are displayed; the page says how to get them back; it does **not** say
+that nothing matched; the count reports zero; and All is no longer marked selected.
+**Status: verified 2026-09-22 — passing, and watched failing** both by treating an emptied
+selection as "no filter" (the previous behavior, which showed every bird) and by reverting the
+message to "No species match that filter".
+
 ---
 
 ## Traceability
@@ -396,9 +405,11 @@ rendering test and this catches it exactly.
 | P-030 | AC-054 | |
 | P-031 | AC-055 | |
 | P-032 | AC-057 | |
-| P-033 | — | **gap** |
+| P-033 | AC-056 | |
 | P-034 | AC-043, AC-054, AC-058 | |
 | P-035 | AC-059 | |
+| P-036 | — | **gap** — a `<details>` with no behavior to assert |
+| P-037 | AC-061 | |
 | P-040 | AC-033 | |
 | P-041 | AC-030 | |
 | P-042 | AC-031 | |

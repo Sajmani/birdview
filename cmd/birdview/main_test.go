@@ -506,53 +506,54 @@ func descendantOfColored(selector string) bool {
 }
 
 // TestOrderToggles asserts P-010's order control: each order is a real toggle
-// that selects or clears its whole group, labeled with its common name.
+// over its whole group, labeled with its common name.
 //
-// This replaces a check that asserted the opposite -- that order labels were
-// inert text. When the requirement inverted, that check kept passing, because
-// it looked for `<a class="ohdr` and the markup had become `<a class="btn ohdr`.
-// A test that survives the reversal of its own requirement is worse than none.
+// Since a fresh page selects everything, the first click on an order REMOVES
+// it. This replaces a check that asserted the opposite -- that order labels
+// were inert text. When that requirement inverted, the check kept passing,
+// because it searched for `<a class="ohdr` and the markup had become
+// `<a class="btn ohdr`. A test that survives the reversal of its own
+// requirement is worse than none.
 //
 // Verifies: P-010. Criterion: AC-056.
 func TestOrderToggles(t *testing.T) {
 	s := newTestServer(t)
 	_, body := get(t, s, "/")
 
-	// Each order is a link carrying its common name, not inert text.
+	// Each order is a link carrying its common name, not inert text, and starts
+	// selected.
 	for _, order := range []string{"Apodiformes", "Passeriformes", "Pelecaniformes"} {
-		re := regexp.MustCompile(`<a class="btn ohdr[^"]*" href="([^"]+)"[^>]*>` + order)
-		m := re.FindStringSubmatch(body)
-		if m == nil {
-			t.Fatalf("%s is not rendered as a toggle", order)
-		}
 		if !strings.Contains(body, order+`<em>`+order+" (group)") {
 			t.Errorf("%s toggle does not show its common name", order)
 		}
-	}
-
-	// Selecting an order selects EVERY family in it. Passeriformes holds two,
-	// so a control that adds only the first fails here.
-	re := regexp.MustCompile(`<a class="btn ohdr[^"]*" href="([^"]+)"[^>]*>Passeriformes`)
-	href := html.UnescapeString(re.FindStringSubmatch(body)[1])
-	_, filtered := get(t, s, href)
-	for _, want := range []string{"American Robin", "American Crow"} {
-		if !strings.Contains(filtered, want) {
-			t.Errorf("selecting Passeriformes did not include %s", want)
+		if !regexp.MustCompile(`<a class="btn ohdr on"[^>]*>` + order).MatchString(body) {
+			t.Errorf("%s does not start selected", order)
 		}
 	}
-	if strings.Contains(filtered, "Great Blue Heron") {
-		t.Error("selecting Passeriformes left another order's species visible")
+
+	// Clicking an order drops EVERY family in it. Passeriformes holds two, so a
+	// control that touches only the first fails here.
+	href := html.UnescapeString(mustMatch(t, body,
+		`<a class="btn ohdr on"[^>]*href="([^"]+)"[^>]*>Passeriformes`, "the Passeriformes toggle"))
+	_, dropped := get(t, s, href)
+	for _, gone := range []string{"American Robin", "American Crow"} {
+		if strings.Contains(dropped, gone) {
+			t.Errorf("dropping Passeriformes left %s visible", gone)
+		}
+	}
+	if !strings.Contains(dropped, "Great Blue Heron") {
+		t.Error("dropping Passeriformes removed another order's species")
 	}
 
-	// With the group fully selected the same control clears it.
-	m2 := regexp.MustCompile(`<a class="btn ohdr on" href="([^"]+)"[^>]*>Passeriformes`).
-		FindStringSubmatch(filtered)
-	if m2 == nil {
-		t.Fatal("Passeriformes is not marked selected once both families are filtered in")
-	}
-	_, cleared := get(t, s, html.UnescapeString(m2[1]))
-	if !strings.Contains(cleared, "Great Blue Heron") {
-		t.Error("clearing the order did not restore the unfiltered view")
+	// And the same control puts them back.
+	back := html.UnescapeString(mustMatch(t, dropped,
+		`<a class="btn ohdr"[^>]*href="([^"]+)"[^>]*>Passeriformes`,
+		"the Passeriformes toggle once cleared"))
+	_, restored := get(t, s, back)
+	for _, want := range []string{"American Robin", "American Crow", "Great Blue Heron"} {
+		if !strings.Contains(restored, want) {
+			t.Errorf("restoring Passeriformes did not bring back %s", want)
+		}
 	}
 }
 
@@ -568,52 +569,92 @@ func mustMatch(t *testing.T, body, pattern, what string) string {
 	return m[1]
 }
 
-// TestAllToggle asserts that "All" behaves like an order toggle over the whole
-// dataset: it selects every family, and untoggling clears the selection.
+// TestAllToggle asserts the All control round-trips: from the default, where
+// everything is selected, it clears the lot; from cleared, it selects them all
+// again.
 //
-// Note that "nothing selected" and "everything selected" both display all 841
-// species, so the control cannot be verified by the species count alone -- the
-// selection state is what differs, and what has to be checked.
+// The species count cannot distinguish the endpoints on its own -- "everything
+// selected" and a restored selection both show every bird -- so the check reads
+// the control states as well.
 //
 // Verifies: P-010. Criterion: AC-056.
 func TestAllToggle(t *testing.T) {
 	s := newTestServer(t)
 
-	// A fresh view has no selection, so All is off.
 	_, fresh := get(t, s, "/")
-	if regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(fresh) {
-		t.Error("All is marked selected on a view where nothing is selected")
-	}
-	href := html.UnescapeString(mustMatch(t, fresh, `<a class="btn"[^>]*href="([^"]+)"[^>]*>All`,
-		"the All control on a fresh view"))
+	clear := html.UnescapeString(mustMatch(t, fresh,
+		`<a class="btn on"[^>]*href="([^"]+)"[^>]*>All`, "the All control on a fresh page"))
 
-	// Clicking it selects every family.
-	_, all := get(t, s, href)
-	for _, fam := range []string{"Trochilidae", "Turdidae", "Corvidae", "Ardeidae"} {
-		if !strings.Contains(all, `family=`+fam) && !strings.Contains(all, fam) {
-			t.Errorf("selecting All did not include %s", fam)
-		}
-	}
-	if !regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(all) {
-		t.Fatal("All is not marked selected after selecting every family")
-	}
-	// Every order shows as selected too, since all their families are in.
-	if n := strings.Count(all, `class="btn ohdr on"`); n != 3 {
-		t.Errorf("%d of 3 orders marked selected when everything is selected", n)
-	}
-
-	// Untoggling clears the selection outright, rather than leaving every
-	// family behind as redundant parameters.
-	clear := html.UnescapeString(mustMatch(t, all, `<a class="btn on"[^>]*href="([^"]+)"[^>]*>All`,
-		"the All control once everything is selected"))
-	if strings.Contains(clear, "family=") {
-		t.Errorf("untoggling All produced %q; it should clear the selection", clear)
-	}
-	_, cleared := get(t, s, clear)
-	if strings.Contains(cleared, `class="btn ohdr on"`) {
+	_, empty := get(t, s, clear)
+	if strings.Count(empty, `class="btn ohdr on"`) != 0 {
 		t.Error("orders still show as selected after clearing")
 	}
-	if !strings.Contains(cleared, "Great Blue Heron") {
-		t.Error("clearing the selection should still show every species")
+	if strings.Count(empty, `class="chip on"`) != 0 {
+		t.Error("families still show as selected after clearing")
+	}
+
+	// Back again: All selects every family, and every order lights up.
+	restore := html.UnescapeString(mustMatch(t, empty,
+		`<a class="btn"[^>]*href="([^"]+)"[^>]*>All`, "the All control on an emptied page"))
+	_, all := get(t, s, restore)
+	if n := strings.Count(all, `class="btn ohdr on"`); n != 3 {
+		t.Errorf("%d of 3 orders selected after re-selecting All", n)
+	}
+	if !strings.Contains(all, "Great Blue Heron") {
+		t.Error("re-selecting All did not restore the species")
+	}
+}
+
+// TestDefaultSelectsEverything asserts that a fresh page has everything on:
+// All, every order and every family (P-010, P-033).
+//
+// Verifies: P-010, P-033. Criterion: AC-056.
+func TestDefaultSelectsEverything(t *testing.T) {
+	s := newTestServer(t)
+	_, body := get(t, s, "/")
+	if !regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(body) {
+		t.Error("All is not selected on a fresh page")
+	}
+	if n := strings.Count(body, `class="btn ohdr on"`); n != 3 {
+		t.Errorf("%d of 3 orders selected on a fresh page", n)
+	}
+	if n := strings.Count(body, `class="chip on"`); n != 4 {
+		t.Errorf("%d of 4 families selected on a fresh page", n)
+	}
+	if !strings.Contains(body, "Great Blue Heron") {
+		t.Error("fresh page should show every species")
+	}
+}
+
+// TestClearingEverythingShowsGuidance asserts the empty state: with nothing
+// selected the page shows no birds and says what to do about it, rather than
+// reporting that nothing matched -- the user turned them off, they did not
+// fail to match.
+//
+// Verifies: P-010. Criterion: AC-061.
+func TestClearingEverythingShowsGuidance(t *testing.T) {
+	s := newTestServer(t)
+	_, body := get(t, s, "/")
+	clear := html.UnescapeString(mustMatch(t, body,
+		`<a class="btn on"[^>]*href="([^"]+)"[^>]*>All`, "the All control on a fresh page"))
+
+	_, empty := get(t, s, clear)
+	for _, gone := range []string{"Great Blue Heron", "American Robin", "American Crow"} {
+		if strings.Contains(empty, gone) {
+			t.Errorf("%s is still displayed after clearing every selection", gone)
+		}
+	}
+	if !strings.Contains(empty, "Select birds to display in") {
+		t.Error("empty state does not tell the user how to get birds back")
+	}
+	if strings.Contains(empty, "No species match") {
+		t.Error("empty state blames a failed match; the user cleared the selection")
+	}
+	if !strings.Contains(empty, "0 of 4 species") {
+		t.Error("count line should report nothing shown")
+	}
+	// And All must offer the way back.
+	if regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(empty) {
+		t.Error("All is still marked selected with nothing selected")
 	}
 }

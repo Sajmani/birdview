@@ -44,9 +44,9 @@
         <dt>Units</dt>
         <dd>Inches and ounces, or centimeters and grams.</dd>
         <dt>Family</dt>
-        <dd>Grouped by taxonomic order, in checklist sequence &mdash; the order field guides use.
-          Click any family to filter to it, or an order to take the whole group; click again to
-          drop it. Several can be combined.</dd>
+        <dd>Everything is selected when you arrive. Click a family to drop it, an order to drop
+          the whole group, or <b>All</b> to clear the lot and start picking. Grouped by taxonomic
+          order in checklist sequence &mdash; the order field guides use.</dd>
       </dl>
     </section>
     <section>
@@ -117,7 +117,11 @@
   </div>
 </section>
 {{else}}
-<p class="empty">No species match that filter.</p>
+  {{if .NothingSelected}}
+    <p class="empty">Select birds to display in <b>Controls</b> above.</p>
+  {{else}}
+    <p class="empty">No species match that filter.</p>
+  {{end}}
 {{end}}
 
 <footer>

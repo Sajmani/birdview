@@ -120,12 +120,12 @@ failure, a taxonomy update silently shrinks the dataset and nobody notices.
 ### P-010 — Filter by family
 Goals: G-002
 
-The user can filter to any subset of families, multi-select. An **All** control toggles like an
-order does, over every family: it selects them all, and untoggling it clears the selection
-outright rather than leaving every family behind as a redundant parameter.
+The user can filter to any subset of families, multi-select. **Everything is selected on arrival**
+— All, every order and every family show as on. An **All** control toggles like an order does,
+over the whole set: untoggling it deselects everything and **no birds are displayed**.
 
-Note that "nothing selected" and "everything selected" display the same 841 species but are
-different selections, and the controls show which one holds.
+Selection is therefore always literal: what is shown is what is selected, and the controls say so.
+There is no separate "unfiltered" state that happens to look like everything being chosen.
 
 The selector is **grouped by taxonomic order, in the ABA checklist's own sequence** rather than
 alphabetically. Each group is headed by a **toggle that selects or clears every family in that
@@ -248,10 +248,20 @@ where the app is trying to make it.
 ### P-033 — First load shows everything
 Goals: G-002
 
-With no filter applied, the initial view is all species, ordered by length.
+The initial view has every family selected and shows all species, ordered by length.
 
 Rationale: the full sweep from hummingbird to swan is the clearest statement of what the app is
 for. Opening filtered or empty would hide it.
+
+### P-037 — The empty state says what to do
+Subject: `presentation.empty_state`
+Goals: G-002
+
+With nothing selected, the display area reads *"Select birds to display in Controls above"*.
+
+Rationale: an empty page is reachable in one click, and "no species match that filter" would be
+untrue and unhelpful — nothing failed to match, the user turned everything off. The message names
+the control that fixes it.
 
 ### P-036 — The controls collapse
 Subject: `presentation.controls`
