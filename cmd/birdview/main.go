@@ -122,7 +122,11 @@ type options struct {
 
 func parseOptions(r *http.Request) options {
 	q := r.URL.Query()
-	o := options{Metric: view.ByLength, Step: view.DefaultStepPercent, Scale: view.PerSection,
+	// Global is the default: the whole point is that a hummingbird and a swan
+	// are not the same size, and opening on a per-section scale shows every
+	// bird at a comfortable size, which is the impression the app exists to
+	// correct (P-042).
+	o := options{Metric: view.ByLength, Step: view.DefaultStepPercent, Scale: view.Global,
 		Families: map[string]bool{}}
 	switch view.Metric(q.Get("by")) {
 	case view.ByWingspan:
@@ -130,8 +134,8 @@ func parseOptions(r *http.Request) options {
 	case view.ByMass:
 		o.Metric = view.ByMass
 	}
-	if view.ScaleMode(q.Get("scale")) == view.Global {
-		o.Scale = view.Global
+	if view.ScaleMode(q.Get("scale")) == view.PerSection {
+		o.Scale = view.PerSection
 	}
 	if v, err := strconv.ParseFloat(q.Get("step"), 64); err == nil && v >= 2 && v <= 100 {
 		o.Step = v
@@ -145,11 +149,16 @@ func parseOptions(r *http.Request) options {
 	return o
 }
 
-// tile is one rendered species.
+// tile is one rendered species. The three footer metrics are formatted here
+// rather than in the template: a template that does its own arithmetic cannot
+// see the unit toggle, which is exactly how the footer came to ignore it.
 type tile struct {
-	S    *dataset.Species
-	Geom view.Geometry
-	Box  view.Box
+	S       *dataset.Species
+	Geom    view.Geometry
+	Box     view.Box
+	Length  string
+	Wing    string
+	MassStr string
 }
 
 type sectionView struct {
@@ -240,7 +249,12 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		sv := sectionView{Index: i + 1, Count: len(sec.Species),
 			Min: format(sec.Min, opt.Metric, opt.Metric3), Max: format(sec.Max, opt.Metric, opt.Metric3)}
 		for _, sp := range sec.Species {
-			sv.Tiles = append(sv.Tiles, tile{S: sp, Geom: view.Layout(sp, refs[i], spanRefs[i], tileBox), Box: tileBox})
+			sv.Tiles = append(sv.Tiles, tile{
+				S: sp, Geom: view.Layout(sp, refs[i], spanRefs[i], tileBox), Box: tileBox,
+				Length:  format(sp.TotalLength.Value, view.ByLength, opt.Metric3),
+				Wing:    format(sp.Wingspan.Value, view.ByWingspan, opt.Metric3),
+				MassStr: format(sp.Mass.Value, view.ByMass, opt.Metric3),
+			})
 		}
 		page.Sections = append(page.Sections, sv)
 	}
@@ -268,6 +282,10 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	}
 	opt := parseOptions(r)
 	box := view.Box{W: tileBox.W * 1.9, H: tileBox.H * 1.9}
+	// The detail view always draws the bird as large as the box allows, whatever
+	// scale the index is using. Under a global scale a small bird is a few
+	// pixels tall by design, and carrying that into the one view devoted to
+	// that single bird would leave nothing to look at (P-034).
 
 	rows := []metricRow{
 		row("Total length", sp.TotalLength, view.ByLength, opt.Metric3),
@@ -332,12 +350,30 @@ func queryFor(r *http.Request) func(...string) template.URL {
 	}
 }
 
+// format renders a value in the selected unit system.
+//
+// Mass in imperial means ounces and pounds. An earlier version returned
+// kilograms above a kilogram regardless of the toggle, so "imperial" showed a
+// metric unit for exactly the birds where it mattered most.
 func format(v float64, as view.Metric, metric bool) string {
 	if as == view.ByMass {
-		if metric || v < 1000 {
+		if metric {
+			if v >= 1000 {
+				return fmt.Sprintf("%.2f kg", v/1000)
+			}
 			return fmt.Sprintf("%.0f g", v)
 		}
-		return fmt.Sprintf("%.2f kg", v/1000)
+		oz := v / 28.349523125
+		switch {
+		case oz >= 16:
+			return fmt.Sprintf("%.1f lb", oz/16)
+		case oz >= 1:
+			return fmt.Sprintf("%.1f oz", oz)
+		default:
+			// A 3 g hummingbird is 0.11 oz; one decimal would erase the
+			// difference between the smallest birds entirely.
+			return fmt.Sprintf("%.2f oz", oz)
+		}
 	}
 	if metric {
 		return fmt.Sprintf("%.1f cm", v/10)

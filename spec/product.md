@@ -199,10 +199,19 @@ Subject: `units.default`
 Value: `imperial`
 Goals: G-001
 
-Lengths in inches and mass in grams by default, with a toggle to metric.
+One toggle switches the whole interface between:
+
+| | length, wingspan | mass |
+| --- | --- | --- |
+| imperial (default) | inches | ounces, pounds above 16 oz |
+| metric | centimeters | grams, kilograms above 1 kg |
+
+**Every** displayed number honors it — tile footers, section headers and the detail view alike.
 
 Rationale: the ABA Area audience is predominantly US; the toggle serves Canadian users and anyone
-who thinks in centimeters.
+who thinks in centimeters. Ounces below one are shown to two decimals, because a 3 g hummingbird
+and a 12 g kinglet both round to 0.1 oz otherwise, erasing the distinction at exactly the size
+where the app is trying to make it.
 
 ### P-033 — First load shows everything
 Goals: G-002
@@ -217,7 +226,8 @@ Subject: `presentation.detail_view`
 Goals: G-001, G-003
 
 Clicking a tile opens a detail view that is **a larger version of the same tile** — same header,
-same diagram, same main metrics, same layout — plus:
+same diagram, same main metrics, same layout — with the bird drawn **as large as the view allows,
+whatever scale the index is using**, plus:
 
 - the measurement of **every individual diagram segment**: bill, head, neck, body, tail;
 - the **provenance of every metric shown**, main metrics and segments alike (P-063).
@@ -226,6 +236,10 @@ Rationale: the tile is deliberately dense, because it exists to be compared agai
 others at a glance. That leaves no room to say where each number came from. Keeping the detail
 view the *same* layout at a larger size means the user is reading a familiar thing with more of it
 exposed, rather than a different screen they have to re-orient to.
+
+The detail view does **not** inherit the index's scale. Under the global default a kinglet is a
+few pixels tall, which is the honest comparison — but the one view devoted to that single bird has
+nothing to compare it against, so carrying the scale there would leave nothing to look at.
 
 ---
 
@@ -253,20 +267,23 @@ total length.
 Rationale: this is what lets the vertical extent of the drawing *be* the bird's length, so that
 two diagrams at the same scale can be compared directly.
 
-### P-042 — Scale is a user toggle
+### P-042 — Scale is a user toggle, defaulting to global
 Subject: `diagram.scale.mode`
-Value: `per-section (default) | global`
+Value: `global (default) | per-section`
 Goals: G-001, G-002
 
-The user switches between a scale shared by all species within a section, and a single scale
-across the entire filtered set. Per-section is the default.
+The user switches between a single scale across the entire filtered set, and a scale shared by all
+species within a section. **Global is the default.**
 
 Rationale: this is the requirement G-001 lives or dies by. A per-tile scale — every bird drawn to
 fill its tile — makes a hummingbird and a swan identical on screen and destroys size intuition
-entirely. Per-section keeps every tile legible while remaining honest within the section, since a
-section spans at most N%. Global is brutally honest across the whole range and renders small birds
-as specks; it is the view that produces the cross-family surprise, so it is offered rather than
-imposed.
+entirely.
+
+Global is the default because the cross-family surprise *is* the product. Opening on a per-section
+scale shows every bird at a comfortable size, which is precisely the false impression BirdView
+exists to correct; a reader could scroll the whole list without ever seeing that a Trumpeter Swan
+dwarfs a kinglet. Per-section remains one click away, and is the better view for comparing within
+a family, which is the other half of G-002.
 
 ### P-043 — The wing crossbar is drawn at the vertical scale
 Subject: `diagram.wingspan.scale`

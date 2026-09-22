@@ -301,9 +301,24 @@ species count.
 **Status: verified 2026-09-22.**
 
 ### AC-057 — The unit toggle switches imperial and metric
-**Verifies:** P-032 · **Level:** code · **Method:** rendering test
-**Assertion:** the default view renders inches; `?units=metric` renders centimeters.
-**Status: verified 2026-09-22.**
+**Verifies:** P-032 · **Level:** code · **Method:** rendering test over the tile footer, plus a
+unit test pinning the conversions
+**Assertions:** the tile footer carries two length values and one mass value in the selected
+system's units, and differs between the two systems; mass converts as `1 oz = 28.349523125 g`.
+**Status: verified 2026-09-22 — passing, and watched failing** on both a hardcoded-inches footer
+and a kilograms-under-imperial conversion.
+
+The first version of this criterion asserted only that a centimeter value appeared *somewhere* on
+the page, and passed for weeks while every tile was hardcoded to inches: the section headers alone
+satisfied it. Counting units inside the footer is what makes it bite — a footer rendering `3.9"`
+contains no `" in"` token, so an exclusion list misses it entirely.
+
+### AC-058 — The detail view draws its bird full scale
+**Verifies:** P-034 · **Level:** code · **Method:** rendering test over the smallest fixture
+species, with and without an explicit `?scale=`
+**Assertion:** the diagram fills the detail view's height regardless of the index's scale mode.
+**Status: verified 2026-09-22 — passing, and watched failing** by making the detail view adopt the
+dataset-wide reference, which inset the hummingbird by 128 px.
 
 ---
 
@@ -326,7 +341,7 @@ species count.
 | P-031 | AC-055 | |
 | P-032 | AC-057 | |
 | P-033 | — | **gap** |
-| P-034 | AC-043, AC-054 | |
+| P-034 | AC-043, AC-054, AC-058 | |
 | P-040 | AC-033 | |
 | P-041 | AC-030 | |
 | P-042 | AC-031 | |

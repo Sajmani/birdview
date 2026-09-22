@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"birdview/internal/dataset"
+	"birdview/internal/view"
 )
 
 func testDataset() *dataset.Dataset {
@@ -224,13 +225,130 @@ func TestFamilyFilter(t *testing.T) {
 	}
 }
 
+// footer returns the contents of the first tile's metric footer.
+func footer(t *testing.T, body string) string {
+	t.Helper()
+	i := strings.Index(body, `<div class="ft">`)
+	if i < 0 {
+		t.Fatal("no tile footer in the page")
+	}
+	rest := body[i:]
+	return rest[:strings.Index(rest, "</div>")]
+}
+
+// TestUnitToggle asserts P-032 where the user actually reads the numbers.
+//
+// The earlier version of this check only looked for a centimeter value
+// somewhere on the page, and passed while every tile was hardcoded to inches:
+// the section headers alone satisfied it. Asserting on the tile footer is the
+// difference between checking the requirement and checking that some part of
+// the page happens to mention the right unit.
+//
 // Verifies: P-032. Criterion: AC-057.
 func TestUnitToggle(t *testing.T) {
 	s := newTestServer(t)
-	if _, b := get(t, s, "/"); !strings.Contains(b, " in ") && !strings.Contains(b, " in<") {
-		t.Error("imperial is the default but no inch values appear")
+
+	// Counting units, rather than looking for a forbidden substring, is what
+	// makes this bite. A footer hardcoded to render inches as `3.9"` contains
+	// no " in" token at all, so an exclusion list silently misses it; requiring
+	// that all three metrics carry the selected system's units does not.
+	check := func(path string, wantLen, wantMass []string) {
+		t.Helper()
+		_, body := get(t, s, path)
+		f := footer(t, body)
+		if n := countAny(f, wantLen); n != 2 {
+			t.Errorf("%s: footer %q has %d of the two length values in %v", path, f, n, wantLen)
+		}
+		if n := countAny(f, wantMass); n != 1 {
+			t.Errorf("%s: footer %q has %d of the one mass value in %v", path, f, n, wantMass)
+		}
 	}
-	if _, b := get(t, s, "/?units=metric"); !strings.Contains(b, " cm") {
-		t.Error("metric toggle produced no centimeter values")
+	check("/", []string{" in"}, []string{" oz", " lb"})
+	check("/?units=metric", []string{" cm"}, []string{" g", " kg"})
+
+	_, a := get(t, s, "/")
+	_, b := get(t, s, "/?units=metric")
+	if footer(t, a) == footer(t, b) {
+		t.Error("tile footer is identical in both unit systems; the toggle does nothing")
+	}
+}
+
+// countAny counts how many of the given tokens appear in s, totaled.
+func countAny(s string, tokens []string) int {
+	n := 0
+	for _, tok := range tokens {
+		n += strings.Count(s, tok)
+	}
+	return n
+}
+
+// TestMassUnitsBySystem pins the mass conversions, which are the ones an
+// earlier version got backwards by rendering kilograms under imperial.
+//
+// Expected values are computed from the definition (1 oz = 28.349523125 g),
+// not read off a run.
+//
+// Verifies: P-032. Criterion: AC-057.
+func TestMassUnitsBySystem(t *testing.T) {
+	cases := []struct {
+		g                float64
+		imperial, metric string
+	}{
+		{4, "0.14 oz", "4 g"},       // hummingbird
+		{77, "2.7 oz", "77 g"},      // robin
+		{2400, "5.3 lb", "2.40 kg"}, // heron
+	}
+	for _, c := range cases {
+		if got := format(c.g, view.ByMass, false); got != c.imperial {
+			t.Errorf("%.0f g imperial: got %q, want %q", c.g, got, c.imperial)
+		}
+		if got := format(c.g, view.ByMass, true); got != c.metric {
+			t.Errorf("%.0f g metric: got %q, want %q", c.g, got, c.metric)
+		}
+	}
+}
+
+// TestDefaultScaleIsGlobal asserts P-042's default. The cross-family surprise
+// is the product; opening on a per-section scale shows every bird at a
+// comfortable size, which is the impression BirdView exists to correct.
+//
+// Verifies: P-042. Criterion: AC-031.
+func TestDefaultScaleIsGlobal(t *testing.T) {
+	if got := parseOptions(httptest.NewRequest(http.MethodGet, "/", nil)).Scale; got != view.Global {
+		t.Errorf("default scale is %q, want %q", got, view.Global)
+	}
+	// And the toggle must still reach the other mode.
+	r := httptest.NewRequest(http.MethodGet, "/?scale=section", nil)
+	if got := parseOptions(r).Scale; got != view.PerSection {
+		t.Errorf("?scale=section gave %q, want %q", got, view.PerSection)
+	}
+}
+
+// TestDetailDrawsFullScale asserts P-034: the detail view fills its box with
+// the one bird it is about, whatever scale the index is using.
+//
+// Under the global default a kinglet is a few pixels tall on the index, which
+// is the honest comparison. Inheriting that here would leave nothing to look at
+// on the page devoted to it.
+//
+// Verifies: P-034. Criterion: AC-058.
+func TestDetailDrawsFullScale(t *testing.T) {
+	s := newTestServer(t)
+	// The hummingbird is the smallest fixture bird, so it is the one that would
+	// be reduced to nothing if the index's scale leaked through.
+	for _, path := range []string{
+		"/species/calypte_anna",
+		"/species/calypte_anna?scale=global",
+		"/species/calypte_anna?scale=section",
+	} {
+		_, body := get(t, s, path)
+		m := regexp.MustCompile(`translate\(0,([0-9.]+)\)`).FindStringSubmatch(body)
+		if m == nil {
+			t.Fatalf("%s: no diagram transform", path)
+		}
+		// Filling the box vertically means no vertical slack, so no inset.
+		if v, _ := strconv.ParseFloat(m[1], 64); v > 0.5 {
+			t.Errorf("%s: diagram inset by %.1f px; it should fill the view", path, v)
+		}
 	}
 }

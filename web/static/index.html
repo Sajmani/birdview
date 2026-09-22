@@ -81,9 +81,9 @@
   </div>
   {{template "diagram" .}}
   <div class="ft">
-    <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>L {{f1 (div .S.TotalLength.Value 25.4)}}"</span>
-    <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>W {{f1 (div .S.Wingspan.Value 25.4)}}"</span>
-    <span{{if ne .S.Mass.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>M {{f1 .S.Mass.Value}} g</span>
+    <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>L {{.Length}}</span>
+    <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>W {{.Wing}}</span>
+    <span{{if ne .S.Mass.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>M {{.MassStr}}</span>
   </div>
 </a>
 {{end}}
