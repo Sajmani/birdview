@@ -70,6 +70,23 @@ Rationale: Wikimedia's User-Agent policy returns HTTP 403 for generic agents, an
 API guidance asks for the same courtesy. Both are relevant when P-050 returns; the rule is stated
 now so it is not discovered later.
 
+### T-007 — The Go version tracks whatever dependencies require
+Subject: `build.go_version`
+Value: `no floor; follow dependencies`
+Goals: G-001
+
+BirdView sets no minimum Go version of its own. When a dependency requires a newer toolchain,
+`go mod tidy` raises the `go` directive and the toolchain switches, and that is an accepted
+routine change rather than one needing a decision.
+
+Rationale: a minimum-version floor exists to protect *dependents* from a bump they did not ask
+for. BirdView exports no library and has no dependents — it is two commands — so the floor would
+protect nobody while costing the project the ability to take upstream fixes.
+
+Current state, for the record rather than as a constraint: `go 1.25.0`, raised from 1.22 by
+excelize v2.11.0, with the toolchain resolving to 1.26.8. Module versions stay pinned in `go.sum`;
+it is only the language and toolchain versions that float.
+
 ---
 
 ## Accessibility
@@ -141,6 +158,7 @@ What [process.md](process.md#project-bindings) requires each project to declare.
 | **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never redistribute data derived from the ABA checklist. Never access or process Wiley Online Library material, by any means including an AI agent (CR-002). |
 | **External systems** | Tests make no network requests. Any source fetch is exercised against a local fixture or an `httptest` server, never against the live publisher. |
 | **Approval authority** | Sameer — gates, waivers, amendments, source deviations, risk acceptances. |
+| **Supported runtime** | Whatever the dependencies require (T-007). No minimum Go version is maintained. |
 | **Source refresh cadence** | Annually. ABA, AOS and eBird/Clements each revise on roughly yearly cycles, and P-006's synonym table depends on all three. |
 | **Existing docs** | `spec/` owns requirements. `PROVENANCE` files under `spec/sources/` own retrieval facts and hashes. A README, when written, owns usage instructions and duplicates neither. |
 
