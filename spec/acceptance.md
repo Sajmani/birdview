@@ -282,8 +282,8 @@ guard on the project's licensing position; everything else protecting T-004 is a
 someone can forget. Watch it fail by `git add -f` on a fetched file.
 
 ### AC-051 — The server makes no network request
-**Verifies:** T-002 · **Level:** code · **Method:** integration test serving every route with
-outbound network unavailable
+**Verifies:** T-002 · **Level:** code · **Method:** rendering test scanning for external
+**subresources** — any `src`, and `href` on a `<link>`
 **Status: verified 2026-09-22 — passing, and **watched failing**: adding the old design's `cdn.tailwindcss.com` script tag was caught. The check scans rendered HTML for off-host `src`/`href`, which is where T-002 actually bites — a self-contained binary serving a page that fetches a CDN stylesheet is not self-contained.**
 
 ### AC-052 — Outbound requests identify the client

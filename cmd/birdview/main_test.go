@@ -113,21 +113,33 @@ func TestRoutesServe(t *testing.T) {
 	}
 }
 
-// externalRef finds a resource the browser would fetch from another host.
-var externalRef = regexp.MustCompile(`(?:src|href)\s*=\s*"(?:https?:)?//[^"]+`)
+// externalSubresource finds something the browser would FETCH from another
+// host: any src attribute, or a stylesheet link.
+//
+// Deliberately not every external href. A hyperlink the reader may click is not
+// a subresource and does not affect self-containment -- and CC BY requires
+// links to each source and license, so a rule against all external hrefs is in
+// direct conflict with AC-064. The first version of this check made exactly
+// that mistake and failed the moment proper attribution was added.
+var externalSubresource = regexp.MustCompile(
+	`(?:src\s*=\s*"(?:https?:)?//[^"]+|<link[^>]+href\s*=\s*"(?:https?:)?//[^"]+)`)
 
 // TestNoExternalResources asserts T-002 where it actually bites: a page that
 // pulls a stylesheet or script from a CDN is not self-contained, however
 // self-contained the binary is. The previous design loaded Tailwind from
 // cdn.tailwindcss.com and would have failed this.
 //
+// What it must NOT forbid is an ordinary hyperlink. T-002 is about what the
+// page loads, not where it points, and CC BY obliges BirdView to link out to
+// every source and license.
+//
 // Verifies: T-002. Criterion: AC-051.
 func TestNoExternalResources(t *testing.T) {
 	s := newTestServer(t)
 	for _, path := range []string{"/", "/species/ardea_herodias"} {
 		_, body := get(t, s, path)
-		if m := externalRef.FindAllString(body, -1); len(m) > 0 {
-			t.Errorf("%s references external resources: %v", path, m)
+		if m := externalSubresource.FindAllString(body, -1); len(m) > 0 {
+			t.Errorf("%s fetches external resources: %v", path, m)
 		}
 	}
 }
