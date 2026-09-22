@@ -397,6 +397,18 @@ removing its path guard.
 have. The criterion covers presence, self-containment and scoping only, and the behavior itself is
 a declared gap.
 
+### AC-063 — The controls offer what the server accepts, default first
+**Verifies:** P-023, P-042 · **Level:** code · **Method:** rendering test scoped to the controls
+panel, plus round-tripping each offered step through `parseOptions`
+**Assertions:** Global is listed before Per section; every offered section step (5, 10, 15, 20,
+30) is parsed as itself rather than falling back to the default.
+**Status: verified 2026-09-22 — passing, and watched failing** by reversing the scale pair and by
+offering a step the server rejects.
+
+The scoping matters and was got wrong first. Searching the whole page for the scale labels matched
+the **instructions**, which name both modes in the same order, so the check passed with the
+buttons reversed. It now reads only the controls panel.
+
 ---
 
 ## Traceability
@@ -425,7 +437,7 @@ a declared gap.
 | P-038 | AC-062 | partial — behavior unverifiable without a browser |
 | P-040 | AC-033 | |
 | P-041 | AC-030 | |
-| P-042 | AC-031 | |
+| P-042 | AC-031, AC-063 | |
 | P-043 | AC-032 | |
 | P-044 | AC-034 | |
 | P-045 | AC-035 | |

@@ -70,17 +70,17 @@
     <a class="btn{{if eq .Opt.Metric "mass"}} on{{end}}" href="{{call $q "by" "mass"}}">Mass</a>
 
     <span class="lbl">Scale</span>
-    <a class="btn{{if eq .Opt.Scale "section"}} on{{end}}" href="{{call $q "scale" "section"}}"
-       title="Every bird in a section shares a scale">Per section</a>
     <a class="btn{{if eq .Opt.Scale "global"}} on{{end}}" href="{{call $q "scale" "global"}}"
        title="One scale across everything shown - small birds become very small">Global</a>
+    <a class="btn{{if eq .Opt.Scale "section"}} on{{end}}" href="{{call $q "scale" "section"}}"
+       title="Every bird in a section shares a scale">Per section</a>
 
     <span class="lbl">Units</span>
     <a class="btn{{if not .Opt.Metric3}} on{{end}}" href="{{call $q "units" "imperial"}}">in / g</a>
     <a class="btn{{if .Opt.Metric3}} on{{end}}" href="{{call $q "units" "metric"}}">cm / g</a>
 
     <span class="lbl">Section step</span>
-    {{range $s := (list "10" "15" "20" "30")}}
+    {{range $s := (list "5" "10" "15" "20" "30")}}
       <a class="btn{{if eq (printf "%.0f" $.Opt.Step) $s}} on{{end}}" href="{{call $q "step" $s}}">{{$s}}%</a>
     {{end}}
   </div>

@@ -695,3 +695,55 @@ func TestScrollRestorationIsInlineAndSelfContained(t *testing.T) {
 		t.Error("controls have no id; #controls should work as a fallback target")
 	}
 }
+
+// TestControlOrderAndOptions pins two presentation choices that are easy to
+// undo by accident: the default scale is listed first, and the section step
+// offers its full range.
+//
+// Verifies: P-023, P-042. Criterion: AC-063.
+func TestControlOrderAndOptions(t *testing.T) {
+	_, page := get(t, newTestServer(t), "/")
+
+	// Scope to the controls panel. The instructions above it also name both
+	// scale modes, in the same order -- searching the whole page matched the
+	// prose and passed even with the buttons reversed.
+	ci := strings.Index(page, `<details class="controls"`)
+	if ci < 0 {
+		t.Fatal("controls panel not found")
+	}
+	body := page[ci:]
+
+	// Global is the default (P-042), so it leads the pair.
+	g := strings.Index(body, `"scale" "global"`)
+	if g < 0 {
+		g = strings.Index(body, `scale=global`)
+	}
+	p := strings.Index(body, `scale=section`)
+	if g < 0 || p < 0 {
+		t.Fatalf("scale controls not found in the panel (global=%d section=%d)", g, p)
+	}
+	if g > p {
+		t.Error("Per section is listed before Global, but Global is the default")
+	}
+
+	// Every offered step must be one the server actually accepts, or the
+	// control silently falls back to the default.
+	for _, step := range []string{"5", "10", "15", "20", "30"} {
+		if !strings.Contains(body, `>`+step+`%<`) {
+			t.Errorf("section step %s%% is not offered", step)
+		}
+		r := httptest.NewRequest(http.MethodGet, "/?step="+step, nil)
+		if got := parseOptions(r).Step; got != mustFloat(t, step) {
+			t.Errorf("step=%s parsed as %v; the control offers a value the server rejects", step, got)
+		}
+	}
+}
+
+func mustFloat(t *testing.T, s string) float64 {
+	t.Helper()
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return v
+}

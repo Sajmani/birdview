@@ -185,6 +185,9 @@ Subject: `sectioning.step_percent`
 Value: `15`
 Goals: G-002
 
+Offered values run from 5% to 30%. Every value the control offers must be one the server accepts,
+or the control silently falls back to the default.
+
 ### P-024 — Section headers state range and count
 Goals: G-001
 
@@ -355,7 +358,7 @@ Value: `global (default) | per-section`
 Goals: G-001, G-002
 
 The user switches between a single scale across the entire filtered set, and a scale shared by all
-species within a section. **Global is the default.**
+species within a section. **Global is the default, and is listed first.**
 
 Rationale: this is the requirement G-001 lives or dies by. A per-tile scale — every bird drawn to
 fill its tile — makes a hummingbird and a swan identical on screen and destroys size intuition
