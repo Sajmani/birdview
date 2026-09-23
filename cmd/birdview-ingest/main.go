@@ -230,17 +230,13 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 				Body: dataset.Metric{Value: body, Prov: modeled(bodyModel)},
 				Tail: dataset.Metric{Value: tail, Prov: traitProv()},
 			},
-			Mass:   dataset.Metric{Value: morphology.Round1(res.traits.Mass), Prov: traitProv()},
-			Tarsus: dataset.Metric{Value: morphology.Round1(res.traits.Tarsus), Prov: traitProv()},
+			Mass: dataset.Metric{Value: morphology.Round1(res.traits.Mass), Prov: traitProv()},
 			TotalLength: dataset.Metric{
 				Value: total,
 				Prov: modeled("sum of the five diagram segments; bill and tail measured, " +
 					"head, neck and trunk modeled"),
 			},
 		}
-
-		legV, legModel := morphology.LegLength(res.traits.Tarsus, sp.Family)
-		rec.Leg = dataset.Metric{Value: morphology.Round1(legV), Prov: modeled(legModel)}
 
 		// Wingspan: empirical where Fox has one for a BirdLife name this
 		// species maps to, modeled otherwise.

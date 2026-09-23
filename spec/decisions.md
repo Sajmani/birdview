@@ -573,6 +573,100 @@ behind the body rather than crossing it and the junction mark.
   wings — the widest case in the dataset reaches 35% of it — so that is asserted over the whole
   dataset rather than guarded by a branch nothing would ever exercise.
 
+**Superseded in full by [CR-010](#cr-010).** The diagram is a bird in flight; legs are gone.
+
+---
+
+## CR-010 — The diagram depicts a bird in flight, and legs are removed entirely
+
+**Subject:** `diagram.posture`, `diagram.legs`
+**Kind:** Premise settled, and a scope cut following from it — supersedes [CR-009](#cr-009)
+**Date:** 2026-09-23 · **Decided by:** Sameer
+
+### The premise, which was never written down
+
+The diagram has always been ambiguous about what it depicts. A vertical body axis reads as a
+standing bird; a spread wing crossbar reads as a flying one. Nothing in the spec said which, and
+every leg decision so far — the rake angle, the Z-shape proposal, CR-009 itself — was really an
+argument about that unstated premise.
+
+It is now stated: **the diagram is a top-down view of a bird in flight.** That reading is what the
+crossbar already assumed, and it makes P-043 better founded than it was — seen from above, wingspan
+and body length genuinely lie in one plane, so drawing them at one scale is not a convention but a
+fact.
+
+### Why legs cannot survive that premise
+
+In flight a bird does one of two things with its legs. Most tuck them up into the flank and belly
+feathers, where they are **invisible**. A minority — herons, cranes, storks, ibises, flamingos,
+stilts, rails, loons, grebes — extend them straight back, where what you see is not the leg but its
+**projection past the tail tip**:
+
+```
+projection = (femur + full tibiotarsus + tarsometatarsus + toes) − (hip → tail tip)
+```
+
+BirdView has exactly one of those terms. `Tarsus.Length` is the tarsometatarsus. The femur is not
+measured by any source; the toes are not measured; the hip's position along the body axis is not
+measured and was simply assumed to be the body midpoint. Worst of all, `LegFactors` models the leg
+*visible on a standing bird*, which deliberately **excludes** the feathered proximal tibiotarsus —
+and that is precisely the part that straightens out and becomes visible in flight. The model
+excludes the term the new premise needs most.
+
+So the quantity is a small residual between two large modeled numbers, with most of one number
+missing.
+
+### The evidence that it does not work
+
+Counting species in the trailing-leg families whose leg clears the tail tip:
+
+| Using | Clears the tail |
+| --- | --- |
+| The measured tarsus | 1 of 110 |
+| The modeled leg (CR-009) | 14 of 110 |
+
+The true figure is far higher — every large heron, egret, crane, stork and ibis does it. Checking
+the textbook field marks against the modeled leg: Whooping Crane +208 mm, Sandhill Crane +115,
+Wood Stork +70, Black-necked Stilt +63, Great Egret +55 — but **White Ibis −14 mm**, a bird whose
+trailing legs are unmistakable in flight. The sign comes out right for the extremes and wrong in
+the middle, which is what systematic underprediction looks like. The plausible numbers were luck,
+not model.
+
+### What is lost, stated plainly
+
+The tarsus was a **measured** trait spanning 115×, from a Rufous Hummingbird's 2.5 mm to a Whooping
+Crane's 289 mm, and CR-009's rationale for drawing it at all still reads well. That range is real
+and it is now not shown anywhere. The honest accounting is that it was only ever *visible* because
+the diagram tacitly depicted a standing bird — the posture the project has now decided against. A
+measurement that can only be displayed by implying a false posture is not a measurement the
+diagram can carry.
+
+Considered and rejected: a fixed-length, not-to-scale marker past the tail for the trailing-leg
+families. It would capture a genuine field mark, but it puts an unscaled element into a diagram
+whose entire premise is that everything in it is to scale. That cost is higher than the gain.
+
+### Resulting status
+
+- **P-040** amended: five segments and a crossbar. No legs. The flight premise is stated there.
+- **P-042** reverted: the scale reference is the largest total length again, not the drawn extent.
+- **P-002/P-003** amended: `Tarsus.Length` is no longer ingested, leaving five AVONET traits.
+- **AC-066** withdrawn — the requirement it verified no longer exists.
+- **AC-012** amended: five traits, not six.
+- Deleted from the code: `morphology.LegFactors`, `DefaultLegFactor`, `LegLength`;
+  `dataset.Species.Leg` and `.Tarsus`; `avonet.Traits.Tarsus`; `view.VerticalExtent`,
+  `Geometry.DrawnHeight`, `LegCos`, `legRake`, `legSin` and the leg coordinates; the leg strokes,
+  legend entry and CSS.
+- CR-009's renderer machinery goes with it. That work was correct for its premise and survived
+  about a day; the premise, not the code, was the thing that was wrong.
+
+### Left open
+
+The **neck** is still modeled on a standing posture, and under the flight premise it is wrong for
+the families that fold it — Ardeidae and Pelecanidae fly with the head drawn back onto the
+shoulders, while our Ardeidae neck ratio of 0.85 is the second-highest in the table. Fixing it
+collides with P-041, since a folded-neck heron's drawn extent is genuinely shorter than its
+catalogued total length. Recorded under Work arising; not resolved here.
+
 ---
 
 ## Work arising
@@ -585,6 +679,7 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | Write `acceptance.md` — Gate 2, before any code | — | now |
 | Ask Ricklefs or ESA for permission to use the measured-length data | Sameer | **after a working demo** |
 | Ask ABA for written permission to redistribute the checklist | Sameer | **after a working demo** |
+| Decide the neck's flight posture: Ardeidae and Pelecanidae fold it, and a folded neck breaks P-041's sum ([CR-010](#cr-010)) | — | before the diagram is called correct |
 
 ### Why the permission asks wait for a demo
 

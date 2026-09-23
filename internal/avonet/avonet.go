@@ -25,16 +25,16 @@ const (
 	SheetCross    = "BirdLife-eBird crosswalk"
 )
 
-// Traits are the six AVONET measurements BirdView consumes. Other columns --
+// Traits are the five AVONET measurements BirdView consumes. Other columns --
 // Beak.Width, Beak.Depth, Hand-Wing.Index -- are deliberately not read: carrying
 // unused data invites someone to invent a use for it (P-003).
 //
-// Beak.Depth was read until the cranium model moved from bill depth to mass,
-// and was dropped rather than left dangling. Tarsus.Length went the other way:
-// unused at first, then ingested when the diagram gained legs.
+// A column that stops earning its place leaves. Beak.Depth was read until the
+// cranium model moved from bill depth to mass. Tarsus.Length made the round
+// trip -- unused, then ingested when the diagram gained legs, then dropped
+// again when the flight premise removed them (CR-010).
 type Traits struct {
 	Culmen    float64 // Beak.Length_Culmen, mm
-	Tarsus    float64 // Tarsus.Length, mm -- the lower leg of a standing bird
 	Tail      float64 // Tail.Length, mm
 	WingChord float64 // Wing.Length, mm -- folded wing, NOT wingspan
 	Secondary float64 // Secondary1, mm
@@ -109,7 +109,7 @@ func (wb *Workbook) readTraits(f *excelize.File, sheet, spCol, famCol, ordCol st
 		}
 		if idx == nil {
 			idx = headerIndex(cells)
-			for _, want := range []string{spCol, "Beak.Length_Culmen", "Tarsus.Length", "Tail.Length", "Wing.Length", "Secondary1", "Mass"} {
+			for _, want := range []string{spCol, "Beak.Length_Culmen", "Tail.Length", "Wing.Length", "Secondary1", "Mass"} {
 				if _, ok := idx[want]; !ok {
 					return fmt.Errorf("avonet: sheet %s is missing required column %q", sheet, want)
 				}
@@ -122,7 +122,6 @@ func (wb *Workbook) readTraits(f *excelize.File, sheet, spCol, famCol, ordCol st
 		}
 		into[name] = Traits{
 			Culmen:    num(at(cells, idx["Beak.Length_Culmen"])),
-			Tarsus:    num(at(cells, idx["Tarsus.Length"])),
 			Tail:      num(at(cells, idx["Tail.Length"])),
 			WingChord: num(at(cells, idx["Wing.Length"])),
 			Secondary: num(at(cells, idx["Secondary1"])),

@@ -92,24 +92,8 @@ const (
 	Global ScaleMode = "global"
 )
 
-// VerticalExtent is how much vertical room a species needs in millimeters:
-// normally its total length, but more when its feet reach below the tail tip.
-//
-// It is scale-free, which is what lets a section agree on one reference before
-// any pixels exist. Using total length alone would clip the feet of the very
-// bird that sets the scale.
-func VerticalExtent(s *dataset.Species) float64 {
-	seg := s.Segments
-	toFeet := seg.Bill.Value + seg.Head.Value + seg.Neck.Value +
-		seg.Body.Value/2 + s.Leg.Value*legSin
-	if toFeet > s.TotalLength.Value {
-		return toFeet
-	}
-	return s.TotalLength.Value
-}
-
-// Scales returns the reference extent each section is drawn against: the
-// largest vertical extent in the section, or in the whole set when global.
+// Scales returns the reference length each section is drawn against: the
+// largest total length in the section, or in the whole set when global.
 //
 // Returning a reference *length* rather than a pixels-per-mm factor keeps this
 // independent of tile size, which the renderer owns.
@@ -121,7 +105,7 @@ func Scales(sections []Section, mode ScaleMode) []float64 {
 	for i, sec := range sections {
 		var m float64
 		for _, s := range sec.Species {
-			if e := VerticalExtent(s); e > m {
+			if e := s.TotalLength.Value; e > m {
 				m = e
 			}
 		}

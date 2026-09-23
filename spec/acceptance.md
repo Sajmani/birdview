@@ -110,9 +110,9 @@ for anything carrying an ABA rarity code
 **Status: verified 2026-09-22 — no rarity field appears in the serialized record.**
 editorial judgment, and the project uses them only as a filter.
 
-### AC-012 — Every record carries all six AVONET traits
+### AC-012 — Every record carries all five AVONET traits
 **Verifies:** P-002, P-003 · **Level:** code · **Method:** property test over every record
-**Assertion:** culmen, tarsus, tail, wing chord, secondary and mass are all present and positive.
+**Assertion:** culmen, tail, wing chord, secondary and mass are all present and positive.
 **Status: planned.** Trait coverage on `AVONET2_eBird` was measured complete for the target
 families, so any failure means a join or parse bug rather than missing data.
 
@@ -438,52 +438,17 @@ happily while the *old* model collapsed 442 species onto 12 mm, because that mod
 its own definition. What was wrong was the shape of the result across the dataset, which only a
 distribution assertion can see.
 
-### AC-066 — Legs are modeled from the tarsus, and the renderer leaves room for them
-**Verifies:** P-040, P-062 · **Level:** code · **Method:** unit tests over the geometry, the
-rendered SVG, and the whole built dataset
+### AC-066 — *(withdrawn)* Legs are modeled from the tarsus
+**Withdrawn 2026-09-23 by [CR-010](decisions.md#cr-010).** The requirement it verified no longer
+exists: the diagram is a bird in flight and has no legs.
 
-**Assertions, geometry:** the leg line is exactly the scaled leg long, whatever the rake; it rakes
-back more steeply than 45°; legs attach at the body's midpoint; a crane's legs dwarf a swift's.
-
-**Assertions, vertical room:** `DrawnHeight` in pixels equals `VerticalExtent` in millimeters at
-the layout's own scale — one quantity in two units, so the figure that sizes a section's scale and
-the figure the template centers on cannot drift apart; a long-legged bird's drawn height genuinely
-exceeds its bill-to-tail extent, while a short-legged bird's does not; and at the reference
-`Scales` picks, nothing overflows the box. In the rendered page, under **per-section** scale, no
-emitted coordinate falls outside the viewBox.
-
-**Assertions, dataset-wide:** every leg is `modeled` and no tarsus is; each leg equals the tarsus
-times the factor its family's entry gives, recomputed independently of the ingest; the model
-string names the family, the factor and the tarsus; no leg is shorter than the tarsus inside it;
-some species' feet *do* fall below the tail tip, and every one that does belongs to a family the
-factor table singles out; and a pair of legs never spreads wider than the wingspan.
-
-**Assertions, draw order:** in every emitted diagram the body line appears after both leg lines.
-
-**Status: verified 2026-09-22 — passing, and watched failing** by: reverting `DrawnHeight` to
-`TotalHeight`; making it unconditionally reach the feet; making `Scales` size on total length;
-giving `VerticalExtent` a different rake from `Layout`; reverting the template to center on
-`TotalHeight`; moving the body line back above the legs; breaking the family lookup in the ingest;
-emptying the factor table; raising the default factor to 3.0; and inflating one family's factor
-until the legs outspread the wings.
-
-This criterion replaced an earlier one asserting the opposite — that **no** species' feet fall
-below the tail tip, which was true of the measured tarsus and is false of the modeled leg
-([CR-009](decisions.md#cr-009)). The replacement is deliberately two-sided. "Feet may reach below
-the tail" on its own would be satisfied by a model that had run away entirely, so it is paired
-with the constraint that only the wader families may do it.
-
-Two fixture notes, because both were places this nearly passed vacuously. The box-fit check runs
-under **per-section** scale, where the long-legged bird sets its own reference and fills the box
-exactly; under global scale the heron sets the scale, the stilt draws small, and the same bug
-leaves it merely off-center — visible to a human, invisible to an assertion. And the server
-fixture gained a Black-necked Stilt for the same reason: before it, every fixture bird had a zero
-tarsus, so nothing server-side exercised a leg at all.
-
-The width reference is the other half of that lesson. Legs reach sideways too, and a branch was
-written to widen the reference for them — then removed, because a pair of legs spreads at most 35%
-of the same bird's wingspan and the branch could never run. It is an assertion over the dataset
-instead: dead by construction is worse than a check that tells you when the construction changed.
+Kept as a record rather than deleted, because the criterion is why the removal was cheap. It
+asserted that some species' feet fall below the tail tip **and** that only wader families may do
+it, and it checked the leg model against the whole dataset rather than a fixture. Those checks are
+what made it obvious that the modeled leg underpredicts the flight projection — 14 of 110 species
+in the trailing-leg families clearing the tail against a true figure far higher, and a White Ibis
+coming out negative. A criterion that only confirmed the code did what the code did would have
+said nothing when the premise changed.
 
 ---
 
@@ -511,7 +476,7 @@ instead: dead by construction is worse than a check that tells you when the cons
 | P-036 | AC-062 | |
 | P-037 | AC-061 | |
 | P-038 | AC-062 | partial — behavior unverifiable without a browser |
-| P-040 | AC-033, AC-066 | |
+| P-040 | AC-033 | AC-066 withdrawn (CR-010) |
 | P-041 | AC-030 | |
 | P-042 | AC-031, AC-063 | |
 | P-043 | AC-032 | |
@@ -523,7 +488,7 @@ instead: dead by construction is worse than a check that tells you when the cons
 | P-050 – P-053 | — | withdrawn |
 | P-060 | AC-041 | |
 | P-061 | AC-042 | |
-| P-062 | AC-040, AC-066 | |
+| P-062 | AC-040 | |
 | P-063 | AC-043 | |
 | T-001, T-003 | AC-054 | |
 | T-002 | AC-051 | |

@@ -11,13 +11,12 @@ import (
 	"testing"
 
 	"birdview/internal/dataset"
-	"birdview/internal/morphology"
 	"birdview/internal/view"
 	"birdview/web"
 )
 
 func testDataset() *dataset.Dataset {
-	mk := func(id, common, sci, fam string, bill, head, neck, body, tail, span, mass, tarsus float64, k dataset.Kind) dataset.Species {
+	mk := func(id, common, sci, fam string, bill, head, neck, body, tail, span, mass float64, k dataset.Kind) dataset.Species {
 		m := func(v float64) dataset.Metric {
 			return dataset.Metric{Value: v, Prov: dataset.Provenance{
 				Kind: dataset.Measured, Source: "AVONET v7, sheet AVONET2_eBird", SourceTaxon: sci}}
@@ -25,17 +24,12 @@ func testDataset() *dataset.Dataset {
 		mod := func(v float64, s string) dataset.Metric {
 			return dataset.Metric{Value: v, Prov: dataset.Provenance{Kind: dataset.Modeled, Model: s}}
 		}
-		// The leg comes from the real model rather than a literal, so the
-		// fixture cannot quietly disagree with the family factors it claims.
-		legV, legModel := morphology.LegLength(tarsus, fam)
 		sp := dataset.Species{
 			ID: id, CommonName: common, BandingCode: code(common), ScientificName: sci, Family: fam,
 			FamilyCommon: fam + " family", FamilyColor: "#86efac",
 			TotalLength: mod(bill+head+neck+body+tail, "sum of the five diagram segments"),
 			Wingspan:    dataset.Metric{Value: span, Prov: dataset.Provenance{Kind: k, Source: "Fox et al. 2026", SourceTaxon: "Other species"}},
 			Mass:        m(mass),
-			Tarsus:      m(tarsus),
-			Leg:         mod(morphology.Round1(legV), legModel),
 			Segments: dataset.Segments{
 				Bill: m(bill), Head: mod(head, "cranial vault model"), Neck: mod(neck, "neck ratio for "+fam),
 				Body: mod(body, "trunk model"), Tail: m(tail),
@@ -51,16 +45,14 @@ func testDataset() *dataset.Dataset {
 		"Corvidae": "Passeriformes", "Ardeidae": "Pelecaniformes",
 		"Recurvirostridae": "Charadriiformes",
 	}
-	// Tarsus values are the real AVONET figures, so the modeled legs the fixture
-	// carries are the ones the shipped dataset carries. The stilt is here for
-	// one reason: its feet fall below its tail tip, the case the renderer has to
-	// leave room for and no other fixture bird exercises.
+	// The stilt adds a fourth order, so the order-group controls are exercised
+	// against something other than the two-family Passeriformes case.
 	sp := []dataset.Species{
-		mk("calypte_anna", "Anna's Hummingbird", "Calypte anna", "Trochilidae", 18, 12, 6, 40, 26, 120, 4, 4.6, dataset.Measured),
-		mk("turdus_migratorius", "American Robin", "Turdus migratorius", "Turdidae", 20, 18, 12, 90, 85, 390, 77, 32.7, dataset.Measured),
-		mk("corvus_brachyrhynchos", "American Crow", "Corvus brachyrhynchos", "Corvidae", 50, 30, 22, 170, 180, 1000, 450, 55.0, dataset.Measured),
-		mk("himantopus_mexicanus", "Black-necked Stilt", "Himantopus mexicanus", "Recurvirostridae", 66.6, 42.1, 40.3, 89.5, 73.6, 750, 176.8, 106.7, dataset.NearMatch),
-		mk("ardea_herodias", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, 167.6, dataset.NearMatch),
+		mk("calypte_anna", "Anna's Hummingbird", "Calypte anna", "Trochilidae", 18, 12, 6, 40, 26, 120, 4, dataset.Measured),
+		mk("turdus_migratorius", "American Robin", "Turdus migratorius", "Turdidae", 20, 18, 12, 90, 85, 390, 77, dataset.Measured),
+		mk("corvus_brachyrhynchos", "American Crow", "Corvus brachyrhynchos", "Corvidae", 50, 30, 22, 170, 180, 1000, 450, dataset.Measured),
+		mk("himantopus_mexicanus", "Black-necked Stilt", "Himantopus mexicanus", "Recurvirostridae", 66.6, 42.1, 40.3, 89.5, 73.6, 750, 176.8, dataset.NearMatch),
+		mk("ardea_herodias", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, dataset.NearMatch),
 	}
 	var fams []dataset.Family
 	seenFam := map[string]bool{}
@@ -215,25 +207,45 @@ func diagrams(t *testing.T, body string) []string {
 	return out
 }
 
-// TestDiagramFitsItsBoxFeetIncluded asserts that the renderer leaves room for
-// legs that reach below the tail tip (P-040).
+// TestDiagramStaysInsideItsBox checks the whole scale chain end to end on the
+// rendered page: Scales picks a reference, Layout turns it into pixels, and the
+// template centers the result. An error anywhere in that chain shows up here as
+// a drawing that runs off the top or bottom of its own viewBox.
 //
-// The diagram used to be centered on its bill-to-tail extent, which was safe
-// only while the legs were the measured tarsus. The modeled leg reaches further:
-// 11 of the 841 shipped species stand lower on their feet than their tail
-// reaches, a Black-necked Stilt by 12% of its own length. Centering on
-// bill-to-tail now pushes those feet through the floor of the box.
+// It runs under per-section scale deliberately. That is where the largest bird
+// in a section sets its own reference and fills the box exactly, leaving no
+// slack for an arithmetic error to hide in; under global scale almost every
+// bird is drawn small and a bad offset merely looks off-center -- visible to a
+// human, invisible to an assertion.
 //
-// So this reads the emitted SVG and checks that nothing lands outside the
-// viewBox. It runs under per-section scale deliberately: that is where the
-// long-legged bird sets its own reference and fills the box exactly, so an
-// off-by-the-feet error has nowhere to hide. Under global scale the heron sets
-// the scale, the stilt is drawn small, and the same bug leaves it merely
-// off-center -- visible to a human, invisible to an assertion.
+// It also runs at a wide step, and refuses to run without one. At the default
+// step every bird in this fixture lands in a section of its own, so a section's
+// minimum and maximum are the same bird and Scales cannot be caught returning
+// the wrong one -- the first version of this test passed happily with Scales
+// inverted to take the minimum. Grouping is the whole point, so the check that
+// grouping happened comes first.
 //
-// Verifies: P-040, P-031. Criterion: AC-066.
-func TestDiagramFitsItsBoxFeetIncluded(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/?scale=section")
+// Verifies: P-031, P-042. Criteria: AC-055, AC-031.
+func TestDiagramStaysInsideItsBox(t *testing.T) {
+	const step = 100
+
+	var all []*dataset.Species
+	ds := testDataset()
+	for i := range ds.Species {
+		all = append(all, &ds.Species[i])
+	}
+	var grouped int
+	for _, sec := range view.Sections(all, view.ByLength, step) {
+		if len(sec.Species) > 1 {
+			grouped++
+		}
+	}
+	if grouped == 0 {
+		t.Fatalf("at step %d%% no section holds more than one species, so this test cannot "+
+			"see a wrong scale reference -- widen the fixture's size range", step)
+	}
+
+	_, body := get(t, newTestServer(t), fmt.Sprintf("/?scale=section&step=%d", step))
 
 	coord := regexp.MustCompile(`\b(?:y1|y2|cy)="(-?[0-9.]+)"`)
 	for _, d := range diagrams(t, body) {
@@ -259,36 +271,11 @@ func TestDiagramFitsItsBoxFeetIncluded(t *testing.T) {
 		// The template rounds to one decimal, so allow a rounding epsilon.
 		name := mustMatch(t, d, `aria-label="scaled outline of ([^"]+)"`, "the diagram label")
 		if dy+lowest > boxH+0.2 {
-			t.Errorf("%s: drawing reaches %.1f in a %.1f box -- its feet are clipped",
+			t.Errorf("%s: drawing reaches %.1f in a %.1f box -- it is clipped at the bottom",
 				name, dy+lowest, boxH)
 		}
 		if dy < -0.2 {
 			t.Errorf("%s: drawing starts at %.1f, above the top of the box", name, dy)
-		}
-	}
-}
-
-// TestLegsDrawBehindTheBody asserts the draw order of P-040: the body stick is
-// painted after the legs, so the legs emerge from behind it.
-//
-// SVG has no z-index -- paint order is document order -- so this is a property
-// of where the element sits in the template and nothing else. Drawn the other
-// way, two leg strokes cross the body stick and the junction mark, and a small
-// bird reads as a scribble rather than as a bird.
-//
-// Verifies: P-040. Criterion: AC-066.
-func TestLegsDrawBehindTheBody(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
-	for _, d := range diagrams(t, body) {
-		name := mustMatch(t, d, `aria-label="scaled outline of ([^"]+)"`, "the diagram label")
-		leg, trunk := strings.Index(d, `class="leg"`), strings.Index(d, `class="body"`)
-		if leg < 0 || trunk < 0 {
-			t.Errorf("%s: diagram is missing a leg or body line", name)
-			continue
-		}
-		if leg > trunk {
-			t.Errorf("%s: legs are drawn after the body, so they cross it instead of "+
-				"passing behind it", name)
 		}
 	}
 }
@@ -331,7 +318,7 @@ func TestDiagramIsVerticallyCentered(t *testing.T) {
 // Verifies: P-034, P-063. Criterion: AC-043.
 func TestDetailShowsEverySegmentWithProvenance(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/species/ardea_herodias")
-	for _, label := range []string{"Total length", "Wingspan", "Mass", "Leg", "Tarsus",
+	for _, label := range []string{"Total length", "Wingspan", "Mass",
 		"Bill", "Head", "Neck", "Body", "Tail"} {
 		if !strings.Contains(body, ">"+label+"<") {
 			t.Errorf("detail view omits %q", label)

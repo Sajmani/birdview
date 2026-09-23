@@ -36,15 +36,16 @@ eBird/Clements taxonomy. See [sources.md](sources.md#avonet).
 Goals: G-003
 
 Each species record carries scientific name, family, and these AVONET traits: `Beak.Length_Culmen`,
-`Tarsus.Length`, `Tail.Length`, `Wing.Length`, `Secondary1`, `Mass`.
+`Tail.Length`, `Wing.Length`, `Secondary1`, `Mass`.
 
 Rationale: this is the set the diagram and its derivations actually consume. AVONET's other
 columns — `Beak.Width`, `Beak.Depth`, `Hand-Wing.Index` — are deliberately not ingested; carrying
 unused data invites someone to invent a use for it.
 
-The set moves both ways. `Beak.Depth` was ingested until the cranium model left bill depth for
-mass, and was dropped rather than left dangling. `Tarsus.Length` went the other way: excluded as
-unused until the diagram gained legs.
+The set moves both ways, and a column that stops earning its place leaves. `Beak.Depth` was
+ingested until the cranium model left bill depth for mass. `Tarsus.Length` made the whole round
+trip — excluded as unused, ingested when the diagram gained legs, then dropped again when the
+flight premise removed them ([CR-010](decisions.md#cr-010)).
 
 ### P-004 — Names and families come from the ABA checklist
 Subject: `dataset.names.source`
@@ -344,37 +345,21 @@ Subject: `diagram.segments`
 Value: `bill, head, neck, body, tail, wing crossbar`
 Goals: G-003
 
+**The diagram is a top-down view of a bird in flight.** Everything below follows from that, and it
+is stated first because leaving it unstated is what made the leg question unanswerable for as long
+as it was; see [CR-010](decisions.md#cr-010).
+
 The diagram is a vertical cross. Top to bottom: a bill stick, a head oval, a neck stick, a body
-stick, and a tail stick — plus one horizontal crossbar representing the wings, and **a pair of
-legs raking back from the body's midpoint**. The leg line is always exactly the modeled leg long;
-the rake angle only decides how that length divides between the vertical and the horizontal, and
-it is steeper than 45° because a standing bird's leg is near-vertical and a shallow rake makes a
-correct-length leg read short. The tail is visually distinguished from the body by stroke style
-and a mark at the junction between them.
+stick, and a tail stick — plus one horizontal crossbar representing the wings. The tail is visually
+distinguished from the body by stroke style and a mark at the junction between them.
 
-**The body stick is drawn after the legs**, so the legs pass behind it. SVG paints in document
-order, so this is a property of the template and nothing else; drawn the other way the leg strokes
-cross the body and the junction mark, and a small bird reads as a scribble.
-
-Legs are not part of the vertical sum of P-041; like the wingspan they are drawn at the same scale
-but measured across a different axis. **They may reach below the tail tip** — for 11 of the 841
-species, an American Flamingo by 30% of its own length — so the vertical room a bird needs is its
-drawn extent, feet included, not its total length. See P-042 for what that means for the scale.
-
-Rationale for legs: the tarsus spans 115×, from a Rufous Hummingbird's 2.5 mm to a Whooping
-Crane's 289 mm. A Black-necked Stilt's tarsus is 34% of its total length against a Chimney Swift's
-9%. That is real, striking, and was previously thrown away.
-
-**The drawn leg is modeled, not measured.** The tarsus that AVONET reports is the tarsometatarsus
-alone; the tibiotarsus above it is largely feathered in passerines but substantially exposed in
-waders and cranes, so the tarsus understates the visible leg and understates it most in the
-long-legged birds. The leg is therefore the tarsus scaled by a **per-family factor between 1.0 and
-2.0**. Those factors are invented — no source measures exposed leg length — so they are a drawing
-parameter of the same kind as the neck ratio of P-045, and carry the same obligation: named in the
-provenance of every value they produce, never presented as measurement. The measured tarsus is
-carried alongside and the detail view shows both, on rows labeled "Leg" and "Tarsus", so a reader
-can always recover the measurement from the model. This reverses an earlier rejection of exactly
-this approach; see [CR-009](decisions.md#cr-009).
+**There are no legs.** In flight most birds tuck them out of sight, and for the minority that
+trail them — herons, cranes, storks, ibises, flamingos, stilts, rails, loons, grebes — what shows
+is the leg's projection past the tail tip, a small residual of quantities BirdView does not have:
+the femur, the toes and the hip's position are unmeasured by any source, and the feathered
+tibiotarsus that straightens out in flight is exactly what a standing-posture leg model leaves out.
+Legs were drawn from the measured tarsus, then from a modeled leg, and are now removed; CR-010
+records the evidence and what the removal costs.
 
 Rationale: the tail is a stick rather than a triangle because no trait in any source gives a tail
 width, and a triangle would assert a fan shape the data does not support.
@@ -397,10 +382,8 @@ Goals: G-001, G-002
 The user switches between a single scale across the entire filtered set, and a scale shared by all
 species within a section. **Global is the default, and is listed first.**
 
-Whichever is chosen, the scale is set by the largest **drawn extent** in the group — bill tip to
-whichever of tail tip or feet reaches lower (P-040) — not by the largest total length. The two
-differ only for long-legged birds, and those are exactly the birds that would otherwise set the
-scale and then be clipped by it.
+Whichever is chosen, the scale is set by the largest total length in the group. Since the segments
+sum to total length (P-041) and nothing is drawn outside them, that is the whole vertical extent.
 
 Rationale: this is the requirement G-001 lives or dies by. A per-tile scale — every bird drawn to
 fill its tile — makes a hummingbird and a swan identical on screen and destroys size intuition
