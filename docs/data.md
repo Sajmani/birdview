@@ -4,8 +4,9 @@ This page exists because BirdView draws confident-looking pictures out of data t
 very thin. If you are going to trust the diagrams, you should know exactly which parts are
 observations and which are arithmetic.
 
-The short version: **three of the five diagram segments are modeled, every total length is modeled,
-and two thirds of the wingspans are modeled.** BirdView labels all of it, per value, in the UI.
+The short version: of the five diagram segments, **bill and tail are measured; head, neck and body
+are modeled.** Every total length is modeled, and two thirds of the wingspans are. BirdView labels
+all of it, per value, in the UI.
 
 ---
 
@@ -43,9 +44,12 @@ it borrowed from. Four of those splits are still awaiting a taxonomic check
 | **Head** | **modeled, unvalidated** — all 841 | `7.5 × mass^(1/3)` |
 | **Body** | **modeled, unvalidated** — all 841 | `18 × mass^0.31` |
 | **Neck** | **modeled, invented** — all 841 | a per-family ratio × the trunk |
-| **Total length** | **modeled** — all 841 | the sum of the five segments above |
+| **Total length** | **modeled** — all 841 | `bill + head + neck + body + tail` |
 
-Two of the five segments are observations. Three are not.
+Those five — bill, head, neck, body, tail — are the diagram's segments, and they are what total
+length is built from. Mass and wingspan are drawn or reported but are not part of the sum.
+
+Of the five, **bill and tail are observations. Head, neck and body are not.**
 
 ### Why every length is modeled
 
