@@ -274,3 +274,125 @@ func TestSharedScaleWithinSection(t *testing.T) {
 			big.CrossbarHalfWidth*2, big.TotalHeight(), box.W, box.H)
 	}
 }
+
+// foldingPair builds two birds with identical measurements whose only
+// difference is that one belongs to a family that folds its neck in flight.
+// Every assertion below is then attributable to the fold and nothing else.
+func foldingPair(neck float64) (folds, extends *dataset.Species) {
+	folds = bird("Ardea herodias", 140, 40, neck, 300, 180, 1825, 2400)
+	folds.Family = "Ardeidae"
+	extends = bird("Antigone canadensis", 140, 40, neck, 300, 180, 1825, 2400)
+	extends.Family = "Gruidae"
+	return folds, extends
+}
+
+// TestFoldedNeckIsTheSameStrokeInLessHeight asserts P-040's folded neck: for the
+// families that fly with the head drawn back onto the shoulders, the neck is an
+// S of two semicircles rather than a stick.
+//
+// What makes the S defensible is that nothing is rescaled. Two semicircles of
+// radius r run 2*pi*r of stroke through 4r of height, so setting r from the
+// neck length means the ink you see is exactly the neck, at the same
+// pixels-per-millimeter as the rest of the bird -- the same neck, curved. The
+// compression that follows is 2/pi, a consequence of the shape rather than a
+// number anyone picked, which is precisely what separates this from the
+// per-family leg factors that CR-010 deleted.
+//
+// So the assertion is on the arc length, which no change to the radius can
+// satisfy by accident, and the compression is checked against 2/pi rather than
+// against whatever the code happens to produce.
+//
+// Verifies: P-040, P-041. Criterion: AC-067.
+func TestFoldedNeckIsTheSameStrokeInLessHeight(t *testing.T) {
+	const neck = 200.0
+	heron, crane := foldingPair(neck)
+
+	box := Box{W: 420, H: 160}
+	gh := Layout(heron, heron.TotalLength.Value, heron.Wingspan.Value, box)
+	gc := Layout(crane, crane.TotalLength.Value, crane.Wingspan.Value, box)
+
+	if !gh.NeckFolded {
+		t.Fatal("Ardeidae flies with the neck folded; Layout did not fold it")
+	}
+	if gc.NeckFolded || gc.NeckArcR != 0 {
+		t.Fatalf("Gruidae flies neck-extended, but Layout folded it (r=%.3f)", gc.NeckArcR)
+	}
+
+	want := neck * gh.PxPerMm
+
+	// The stroke is exactly the neck long.
+	if got := 2 * math.Pi * gh.NeckArcR; math.Abs(got-want) > 1e-9*want {
+		t.Errorf("the folded neck runs %.6f px of arc, but the scaled neck is %.6f px",
+			got, want)
+	}
+	// ...through less height, by exactly 2/pi.
+	drawn := gh.YShoulder - gh.YNeckTop
+	if exp := neckFoldCompression * want; math.Abs(drawn-exp) > 1e-9*want {
+		t.Errorf("the folded neck spans %.6f px, want %.6f -- 2/pi of its own length", drawn, exp)
+	}
+	if drawn >= want {
+		t.Errorf("the folded neck spans %.2f px for a %.2f px neck; folding saved no height",
+			drawn, want)
+	}
+	// The twin that does not fold keeps its full height.
+	if straight := gc.YShoulder - gc.YNeckTop; math.Abs(straight-want) > 1e-9*want {
+		t.Errorf("the straight neck spans %.6f px, want its full %.6f", straight, want)
+	}
+	// The two arcs join halfway down.
+	if mid := gh.YNeckTop + 2*gh.NeckArcR; math.Abs(gh.NeckMid()-mid) > 1e-9 {
+		t.Errorf("NeckMid is %.6f, but the arcs join at %.6f", gh.NeckMid(), mid)
+	}
+	// The whole drawing is shorter by exactly what the neck saved, and by
+	// nothing else -- no other segment may shift.
+	if saved, diff := want-drawn, gc.TotalHeight()-gh.TotalHeight(); math.Abs(diff-saved) > 1e-9*want {
+		t.Errorf("the folded bird draws %.6f px shorter, but its neck saved %.6f -- something "+
+			"other than the neck moved", diff, saved)
+	}
+}
+
+// TestFoldedNeckDoesNotChangeOrdering asserts the other half of CR-011: the fold
+// is a rendering change and nothing else.
+//
+// Two birds of identical total length, one folding and one not, must sort into
+// the same section and be measured against the same reference even though one
+// of them draws visibly shorter. If the fold ever leaks into Sections or Scales,
+// a heron starts sorting as a smaller bird than it is -- which is the one thing
+// this change was not allowed to do.
+//
+// Verifies: P-021, P-042, P-041. Criterion: AC-067.
+func TestFoldedNeckDoesNotChangeOrdering(t *testing.T) {
+	heron, crane := foldingPair(200)
+	in := []*dataset.Species{heron, crane}
+
+	secs := Sections(in, ByLength, DefaultStepPercent)
+	if len(secs) != 1 || len(secs[0].Species) != 2 {
+		t.Fatalf("two birds of equal length should share one section; got %d sections", len(secs))
+	}
+	// The reference must be the folding bird's OWN full length, so it is also
+	// checked against a section holding nothing else. Asking only the mixed
+	// section proves nothing: Scales takes a maximum, so the extended twin masks
+	// any reduction applied to the heron -- which is exactly how the first
+	// version of this check passed while the fold leaked into the scale.
+	alone := Sections([]*dataset.Species{heron}, ByLength, DefaultStepPercent)
+	for _, mode := range []ScaleMode{PerSection, Global} {
+		for _, c := range []struct {
+			label string
+			ref   float64
+		}{{"heron alone", Scales(alone, mode)[0]}, {"mixed section", Scales(secs, mode)[0]}} {
+			if math.Abs(c.ref-heron.TotalLength.Value) > 1e-9 {
+				t.Errorf("%s, %s: scale reference is %.3f, want the full total length %.3f -- "+
+					"the folded neck has leaked into the scale", mode, c.label, c.ref,
+					heron.TotalLength.Value)
+			}
+		}
+	}
+
+	// And the premise of all of the above: they really do draw differently.
+	box := Box{W: 420, H: 160}
+	gh := Layout(heron, heron.TotalLength.Value, heron.Wingspan.Value, box)
+	gc := Layout(crane, crane.TotalLength.Value, crane.Wingspan.Value, box)
+	if gh.TotalHeight() >= gc.TotalHeight() {
+		t.Errorf("the folded bird draws %.2f px and the extended one %.2f -- they are identical, "+
+			"so the checks above prove nothing", gh.TotalHeight(), gc.TotalHeight())
+	}
+}

@@ -450,6 +450,37 @@ in the trailing-leg families clearing the tail against a true figure far higher,
 coming out negative. A criterion that only confirmed the code did what the code did would have
 said nothing when the premise changed.
 
+### AC-067 — A folded neck is the same stroke in less height
+**Verifies:** P-040, P-041, P-034 · **Level:** code · **Method:** unit tests over the geometry plus
+assertions on the rendered page
+
+**Assertions, geometry:** for a folding family the neck is an S and for every other family it is a
+stick; the S's arc length `2πr` equals the scaled neck exactly; its vertical span is `2/π` of that
+length, checked against the ratio rather than against whatever the code produces; the two arcs join
+halfway; and the whole drawing is shorter by exactly what the neck saved and by nothing else, so no
+other segment may shift.
+
+**Assertions, length as data:** a folding bird and a non-folding bird of identical total length
+share a section, and the scale reference is the full total length in both scale modes — checked
+against a section holding **only** the folding bird as well as a mixed one.
+
+**Assertions, rendering:** the heron's neck reaches the page as `<path class="neck">` and every
+other bird's as `<line class="neck">`, never both and never neither; and the Neck row of the detail
+view still reports the full modeled length, read out of that row rather than searched for in the
+whole page.
+
+**Status: verified 2026-09-23 — passing, and watched failing** by: emptying the folding family
+table; setting the arc radius to `neck/4` so the stroke is rescaled; leaking the fold into
+`Scales`; forcing the template to always draw a line; and reporting the drawn neck instead of the
+modeled one in the detail view.
+
+Two vacuity notes, both found by running those breaks. The identical-twin construction that makes
+the geometry assertions clean **defeats** the scale assertion: `Scales` takes a maximum, so the
+extended twin masks any reduction applied to the heron, and the leak break passed until a
+heron-only section was added. And the ordering test ends by asserting the two birds really do draw
+to different heights — without it, a change that stopped folding anything would satisfy every
+other line in that test.
+
 ---
 
 ## Traceability
@@ -476,8 +507,8 @@ said nothing when the premise changed.
 | P-036 | AC-062 | |
 | P-037 | AC-061 | |
 | P-038 | AC-062 | partial — behavior unverifiable without a browser |
-| P-040 | AC-033 | AC-066 withdrawn (CR-010) |
-| P-041 | AC-030 | |
+| P-040 | AC-033, AC-067 | AC-066 withdrawn (CR-010) |
+| P-041 | AC-030, AC-067 | |
 | P-042 | AC-031, AC-063 | |
 | P-043 | AC-032 | |
 | P-044 | AC-034 | |

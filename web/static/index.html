@@ -21,7 +21,9 @@
       <ul class="legend">
         <li><i class="sw bill"></i><b>Bill</b> &mdash; the exposed culmen</li>
         <li><i class="sw head"></i><b>Head</b> &mdash; cranium, estimated from bill depth</li>
-        <li><i class="sw neck"></i><b>Neck</b> &mdash; estimated per family; a drawing convention</li>
+        <li><i class="sw neck"></i><b>Neck</b> &mdash; estimated per family; a drawing convention.
+          Herons and pelicans fly with it folded back, so theirs is drawn as an S &mdash; the
+          same length of line in less height</li>
         <li><i class="sw body"></i><b>Body</b> &mdash; trunk, estimated from mass</li>
         <li><i class="sw tail"></i><b>Tail</b> &mdash; dashed, to tell it from the body</li>
         <li><i class="sw wing"></i><b>Wingspan</b> &mdash; the crossbar, at the same scale as the
@@ -224,8 +226,9 @@
           x2="{{f1 (add $g.CX $g.CrossbarHalfWidth)}}" y2="{{f1 $g.YShoulder}}"/>
     <line class="bill" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBillTip}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YCraniumTop}}"/>
     <ellipse class="head" cx="{{f1 $g.CX}}" cy="{{f1 $g.YHeadCenter}}" rx="{{f1 $g.HeadRx}}" ry="{{f1 $g.HeadRy}}"/>
-    <line class="neck" x1="{{f1 $g.CX}}" y1="{{f1 $g.YNeckTop}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YShoulder}}"/>
-    <line class="body" x1="{{f1 $g.CX}}" y1="{{f1 $g.YShoulder}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YBodyEnd}}"/>
+    {{if $g.NeckFolded}}<path class="neck" d="M {{f1 $g.CX}} {{f1 $g.YNeckTop}} A {{f1 $g.NeckArcR}} {{f1 $g.NeckArcR}} 0 0 1 {{f1 $g.CX}} {{f1 $g.NeckMid}} A {{f1 $g.NeckArcR}} {{f1 $g.NeckArcR}} 0 0 0 {{f1 $g.CX}} {{f1 $g.YShoulder}}"/>
+    {{else}}<line class="neck" x1="{{f1 $g.CX}}" y1="{{f1 $g.YNeckTop}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YShoulder}}"/>
+    {{end}}    <line class="body" x1="{{f1 $g.CX}}" y1="{{f1 $g.YShoulder}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YBodyEnd}}"/>
     <line class="junction" x1="{{f1 (sub $g.CX 4)}}" y1="{{f1 $g.YBodyEnd}}"
           x2="{{f1 (add $g.CX 4)}}" y2="{{f1 $g.YBodyEnd}}"/>
     <line class="tail" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBodyEnd}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YTailTip}}"/>

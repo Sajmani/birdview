@@ -349,9 +349,15 @@ Goals: G-003
 is stated first because leaving it unstated is what made the leg question unanswerable for as long
 as it was; see [CR-010](decisions.md#cr-010).
 
-The diagram is a vertical cross. Top to bottom: a bill stick, a head oval, a neck stick, a body
-stick, and a tail stick — plus one horizontal crossbar representing the wings. The tail is visually
+The diagram is a vertical cross. Top to bottom: a bill stick, a head oval, a neck, a body stick,
+and a tail stick — plus one horizontal crossbar representing the wings. The tail is visually
 distinguished from the body by stroke style and a mark at the junction between them.
+
+**The neck is a stick, except where the family folds it in flight.** Ardeidae and Pelecanidae fly
+with the head drawn back onto the shoulders, and for those the neck is drawn as an **S of two
+semicircular arcs**. The stroke is still exactly the neck long at the diagram's scale — the S is
+the same neck, curved — so it occupies `2/π ≈ 63.7%` of that length vertically. That ratio is a
+consequence of the shape and not a chosen parameter; see [CR-011](decisions.md#cr-011).
 
 **There are no legs.** In flight most birds tuck them out of sight, and for the minority that
 trail them — herons, cranes, storks, ibises, flamingos, stilts, rails, loons, grebes — what shows
@@ -373,6 +379,14 @@ total length.
 
 Rationale: this is what lets the vertical extent of the drawing *be* the bird's length, so that
 two diagrams at the same scale can be compared directly.
+
+**Qualification.** That equality is a property of the segment *lengths*, and it holds without
+exception. It is also true of the drawn vertical extent for 827 of 841 species — but not for the
+folded-neck families of P-040, whose S occupies less height than the neck is long. Their silhouette
+is genuinely shorter than their catalogued length, which is a fact about a flying heron and not a
+rendering error. Everything that treats length as data — ordering, sectioning, the scale reference
+of P-042, and the detail view — uses the full total length regardless of how the neck is drawn, so
+comparability is unaffected. See [CR-011](decisions.md#cr-011).
 
 ### P-042 — Scale is a user toggle, defaulting to global
 Subject: `diagram.scale.mode`

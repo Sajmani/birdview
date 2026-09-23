@@ -665,7 +665,71 @@ The **neck** is still modeled on a standing posture, and under the flight premis
 the families that fold it — Ardeidae and Pelecanidae fly with the head drawn back onto the
 shoulders, while our Ardeidae neck ratio of 0.85 is the second-highest in the table. Fixing it
 collides with P-041, since a folded-neck heron's drawn extent is genuinely shorter than its
-catalogued total length. Recorded under Work arising; not resolved here.
+catalogued total length. **Resolved by [CR-011](#cr-011).**
+
+---
+
+## CR-011 — A folded neck is drawn as an S; length as data is untouched
+
+**Subject:** `diagram.neck.posture`
+**Kind:** Open item from [CR-010](#cr-010), resolved
+**Date:** 2026-09-23 · **Decided by:** Sameer
+
+### What changed
+
+For the families that fold the neck in flight — **Ardeidae** and **Pelecanidae** — the neck is
+drawn as an **S of two semicircular arcs** rather than a straight stick. Everything else about the
+neck is unchanged.
+
+### The property that makes it cheap
+
+The S is **two semicircles of radius r**. Its path length is `2πr` and its vertical extent is `4r`,
+so a neck of length L is drawn with `r = L/2π`, the stroke is **exactly L long at the diagram's
+scale**, and it occupies `2L/π ≈ 63.7%` of L vertically.
+
+That ratio is a **consequence of the shape, not a parameter**. No new number enters the system —
+which is exactly what separates this from the leg factors of CR-009, and why this change needs no
+provenance record: like `headAspect`, it produces no metric. Nothing is rescaled, nothing is
+hidden, and the ink you see is still the neck at the same pixels-per-millimeter as every other
+part of the bird. It is the same neck, curved.
+
+Tightening it further would mean arcs of more than 180°, and *that* would introduce a chosen
+number. If 63.7% ever proves too loose to read as a fold, the cost of the next step is a parameter.
+
+### What it costs
+
+For these 14 species the **drawn vertical extent is no longer the total length**. P-041's rationale
+— "this is what lets the vertical extent of the drawing *be* the bird's length" — now holds for
+827 of 841 species rather than all of them.
+
+That is acceptable, and arguably a correction rather than a concession. A catalogued total length
+is a measurement convention taken from a stretched specimen; a heron in flight genuinely is shorter
+bill-to-tail than that figure. Drawing it at its catalogued extent is the falsehood, not drawing it
+short.
+
+**Length as data is untouched.** Sorting, sectioning, the scale reference and the detail view all
+continue to use the full total length, including the full modeled neck. A heron still sorts and
+sections exactly where its length puts it, and the detail view still reports the neck at its full
+value. Only the silhouette compresses.
+
+### Scope, and the families deliberately left alone
+
+Pelecanidae currently draws the default neck ratio of 0.18, so folding it changes little on screen.
+The flag is still right: it records the posture, and if the ratio is ever corrected — pelicans do
+have long necks — the folding is already in place.
+
+Left as straight sticks, all correct as drawn: cranes, storks, ibises and spoonbills, flamingos,
+waterfowl, loons, grebes, cormorants and anhingas all fly with the neck **extended**. Gulls and
+shorebirds retract the head somewhat but do not fold, and their modeled necks are short enough that
+a stick is not misleading.
+
+### Resulting status
+
+- **P-040** amended: the neck is a stick or an S depending on the family's flight posture.
+- **P-041** amended: the rationale is qualified — drawn extent equals total length except where the
+  neck is folded, and the sum over the *metrics* is unaffected.
+- **AC-067** added.
+- No change to P-045, the neck-ratio model, or to any serialized value.
 
 ---
 
@@ -679,7 +743,28 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | Write `acceptance.md` — Gate 2, before any code | — | now |
 | Ask Ricklefs or ESA for permission to use the measured-length data | Sameer | **after a working demo** |
 | Ask ABA for written permission to redistribute the checklist | Sameer | **after a working demo** |
-| Decide the neck's flight posture: Ardeidae and Pelecanidae fold it, and a folded neck breaks P-041's sum ([CR-010](#cr-010)) | — | before the diagram is called correct |
+| ~~Decide the neck's flight posture~~ — done, [CR-011](#cr-011) | Sameer | closed 2026-09-23 |
+| Assess whether a perched/standing toggle is achievable at any honest accuracy ([CR-011](#cr-011)) | — | before it is offered to users |
+
+### Why the perched toggle is not simply the other half of CR-011
+
+*Recorded 2026-09-23.* Offering "show them perched" sounds like a rendering switch and is not one.
+A perched bird needs two things BirdView does not have.
+
+**Legs.** [CR-010](#cr-010) removed them because a flight silhouette does not show them; a perched
+silhouette is mostly leg. Restoring them restores every problem CR-010 recorded — the femur, the
+toes and the hip position are unmeasured, and the tarsus alone understates the visible leg most in
+the birds whose legs define them. A perched view would need the exposed-leg model that CR-009
+invented and CR-010 deleted, and it would still have no source to validate against.
+
+**A second neck model.** The current ratios are a standing-posture model used, until CR-011, in a
+flight drawing. A perched view needs the perched extension for every family, which is a different
+invented table again — a perched heron's neck is neither folded flat nor fully extended, and where
+it sits between those is not published at this coverage.
+
+So the toggle is not a view of the same data from another angle. It is a second set of invented
+per-family parameters with no empirical check, which is the thing this project has twice decided
+not to buy. Worth revisiting only if a source appears that measures posture, not just skins.
 
 ### Why the permission asks wait for a demo
 

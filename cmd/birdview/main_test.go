@@ -967,3 +967,67 @@ func TestNoUnearnedPermissionClaim(t *testing.T) {
 		}
 	}
 }
+
+// neckRow pulls the Neck row's displayed value out of a detail page, so the
+// assertion is scoped to that row rather than to the whole document. A bare
+// search for a formatted number matches the bill, the tail or a section header
+// just as happily, which is how several checks in this suite previously passed
+// without testing anything.
+func neckRow(t *testing.T, body string) string {
+	t.Helper()
+	return mustMatch(t, body, `<th>Neck</th>\s*<td class="v">([^<]+)</td>`, "the Neck row")
+}
+
+// TestFoldedNeckRendersAsAnArc asserts P-040 where the user sees it: a heron's
+// neck reaches the page as an SVG arc path, every other bird's as a straight
+// line, and the detail view still reports the neck at its full modeled length.
+//
+// That last part is the requirement's real content. The fold is a change to the
+// silhouette only -- if it ever reached the numbers, BirdView would be quietly
+// reporting a shorter heron than it measured.
+//
+// Verifies: P-040, P-041, P-034. Criterion: AC-067.
+func TestFoldedNeckRendersAsAnArc(t *testing.T) {
+	s := newTestServer(t)
+	_, body := get(t, s, "/")
+
+	var folded, straight int
+	for _, d := range diagrams(t, body) {
+		name := mustMatch(t, d, `aria-label="scaled outline of ([^"]+)"`, "the diagram label")
+		isArc := strings.Contains(d, `<path class="neck"`)
+		isLine := strings.Contains(d, `<line class="neck"`)
+		if isArc == isLine {
+			t.Errorf("%s: neck is drawn as %d path and %d line elements; want exactly one of each kind",
+				name, boolToInt(isArc), boolToInt(isLine))
+			continue
+		}
+		// Great Blue Heron is the fixture's only Ardeidae.
+		if want := name == "Great Blue Heron"; isArc != want {
+			t.Errorf("%s: neck drawn as an arc = %v, want %v", name, isArc, want)
+		}
+		if isArc {
+			folded++
+		} else {
+			straight++
+		}
+	}
+	if folded == 0 || straight == 0 {
+		t.Fatalf("%d folded and %d straight necks rendered; the fixture must exercise both",
+			folded, straight)
+	}
+
+	// The metric is untouched: the heron's neck is 200 mm in the fixture, and
+	// the detail view must say so rather than the 12.7 cm the S spans.
+	_, det := get(t, s, "/species/ardea_herodias?units=metric")
+	if got := neckRow(t, det); got != "20.0 cm" {
+		t.Errorf("detail view reports the neck as %q, want the full modeled 20.0 cm -- the "+
+			"fold has leaked out of the drawing and into the data", got)
+	}
+}
+
+func boolToInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
