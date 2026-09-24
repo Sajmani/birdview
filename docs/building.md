@@ -66,6 +66,7 @@ Flags, should you need them:
 | | `-avonet` | `AVONET Supplementary dataset 1.xlsx` |
 | | `-wingspan` | `wingspan_fox2026_AppendixS1.xlsx` |
 | | `-out` | `web/data/species.json` |
+| | `-inat` | `data/inat-taxa.tsv` |
 | `birdview` | `-addr` | `localhost:8080` |
 | | `-data` | `web/data/species.json` |
 
@@ -77,6 +78,20 @@ The built dataset is a build artifact and is gitignored ([T-005](../spec/tech.md
 values derived from the ABA checklist.
 
 ---
+
+## Refreshing the iNaturalist mapping
+
+`data/inat-taxa.tsv` maps each species to an iNaturalist taxon ID, and is **committed**. The
+ingest joins against it offline; nothing fetches it at build or run time (T-022).
+
+```
+go run ./cmd/birdview-inatmap        # ~15 minutes: 841 species at 1 request/second
+```
+
+The pace is what iNaturalist asks for (`inat-api/R1`) and is not negotiable downward. Run it when
+the taxonomy moves — annually, alongside the source refresh — read the diff, and commit it. A
+species that does not resolve confidently is left out on purpose, and its detail page then shows no
+link.
 
 ## Standing checks
 

@@ -163,6 +163,25 @@ They say nothing about the bird.
 
 ---
 
+## The iNaturalist link
+
+The detail page links out to the species on iNaturalist, because BirdView has no photographs.
+
+The link is only shown where the match is **confident**: iNaturalist's scientific name matched
+ours exactly, *and* the common name it returns agrees with ABA's once punctuation and case are
+normalized. Requiring both means a taxonomic revision on either side drops the link rather than
+quietly repointing it at the wrong bird. Species that fail either test show no link at all — not a
+search URL, which would never 404 and would therefore always look like it had worked.
+
+Matching was measured before adoption: on a 55-species sample containing all ten near-match
+splits, 55 resolved exactly on scientific name and 54 also agreed on common name, the one
+difference being a hyphen. Wikimedia Commons was tested too and failed on three of six of the hard
+cases, because it lags the recent splits. [CR-012](../spec/decisions.md) has the full comparison.
+
+BirdView **links and never copies**. No photograph is embedded, hotlinked or cached; the reader
+arrives on iNaturalist, where each image carries its own license — frequently CC BY-NC, which
+covers contributors' work and not the taxonomy we take an identifier from.
+
 ## Scope
 
 **841 species**: ABA Checklist 8.19, rarity codes 1–3. Codes 4 and 5 — casuals and accidentals —

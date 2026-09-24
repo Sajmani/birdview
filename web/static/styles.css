@@ -136,3 +136,4 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .sw.tail { border-color: #94a3b8; border-top-style: dashed; }
 .sw.wing { border-color: #0ea5e9; }
 .help .est-demo { color: var(--accent); }
+.seealso { margin: 14px 0 0; }

@@ -54,6 +54,17 @@ func testDataset() *dataset.Dataset {
 		mk("himantopus_mexicanus", "Black-necked Stilt", "Himantopus mexicanus", "Recurvirostridae", 66.6, 42.1, 40.3, 89.5, 73.6, 750, 176.8, dataset.NearMatch),
 		mk("ardea_herodias", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, dataset.NearMatch),
 	}
+	// iNaturalist taxon IDs (P-064). The stilt is deliberately left unmatched so
+	// both branches of the detail view are exercised: a species iNaturalist has
+	// not confidently matched must show no link at all.
+	inat := map[string]int{
+		"calypte_anna": 5305, "turdus_migratorius": 12727,
+		"corvus_brachyrhynchos": 8021, "ardea_herodias": 4956,
+	}
+	for i := range sp {
+		sp[i].INatTaxonID = inat[sp[i].ID]
+	}
+
 	var fams []dataset.Family
 	seenFam := map[string]bool{}
 	for i := range sp {
@@ -1030,4 +1041,63 @@ func boolToInt(b bool) int {
 		return 1
 	}
 	return 0
+}
+
+// TestINatLinkOnlyForAConfidentMatch asserts P-064 on the rendered page: a
+// species with a mapping gets a link to exactly its taxon page, and one without
+// gets nothing -- no placeholder, no search URL, no "not found" row.
+//
+// The absence is the half worth testing. A search link would never 404, which is
+// exactly what makes it the wrong answer: it always looks like it worked. An
+// absent link is legible.
+//
+// Verifies: P-064. Criterion: AC-068.
+func TestINatLinkOnlyForAConfidentMatch(t *testing.T) {
+	s := newTestServer(t)
+
+	_, matched := get(t, s, "/species/ardea_herodias")
+	href := mustMatch(t, matched, `<a href="(https://www\.inaturalist\.org/taxa/[0-9]+)"`, "the iNaturalist link")
+	if href != "https://www.inaturalist.org/taxa/4956" {
+		t.Errorf("link points at %q, want the heron's taxon page", href)
+	}
+	if !strings.Contains(matched, "Great Blue Heron on\niNaturalist") &&
+		!strings.Contains(matched, "Great Blue Heron on iNaturalist") {
+		t.Error("the link does not name the species and the destination")
+	}
+
+	// The unmatched species must show no iNaturalist reference of any kind.
+	_, unmatched := get(t, s, "/species/himantopus_mexicanus")
+	if strings.Contains(unmatched, "inaturalist.org") {
+		t.Error("a species with no confident match still mentions iNaturalist; it should show nothing")
+	}
+	if strings.Contains(strings.ToLower(unmatched), "not found on inaturalist") {
+		t.Error("a species with no confident match shows a placeholder; it should show nothing")
+	}
+	// And it is otherwise a normal page, so the check above is not passing
+	// because the page failed to render.
+	if !strings.Contains(unmatched, "Black-necked Stilt") {
+		t.Fatal("the unmatched species page did not render")
+	}
+}
+
+// TestNoINaturalistImagesAreEmbedded states the intent behind BirdView linking
+// rather than copying (P-064, inat-terms/R1). AC-051's subresource scan already
+// forbids the mechanism for T-002 reasons; this says why it also matters here.
+//
+// Photographs on iNaturalist are contributors' work under their own licenses,
+// frequently CC BY-NC. Linking engages none of them. Embedding would engage all
+// of them, per photograph.
+//
+// Verifies: P-064. Criterion: AC-068.
+func TestNoINaturalistImagesAreEmbedded(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/species/ardea_herodias")
+	for _, bad := range []string{
+		`src="https://static.inaturalist.org`,
+		`src="https://inaturalist-open-data`,
+		`<img`,
+	} {
+		if strings.Contains(body, bad) {
+			t.Errorf("detail page contains %q; BirdView links to iNaturalist and copies nothing from it", bad)
+		}
+	}
 }

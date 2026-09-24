@@ -481,6 +481,37 @@ heron-only section was added. And the ordering test ends by asserting the two bi
 to different heights — without it, a change that stopped folding anything would satisfy every
 other line in that test.
 
+### AC-068 — The iNaturalist link appears only for a confident match
+**Verifies:** P-064, T-022 · **Level:** code · **Method:** unit tests over the matcher and the
+mapping table, plus assertions on the rendered detail page; the resolver is exercised against an
+`httptest` server, never the live API
+
+**Assertions, matching:** a taxon whose scientific name differs is rejected; a taxon whose common
+name disagrees with ABA's is rejected even when the scientific name matches exactly; a common name
+differing only in punctuation, case or whitespace is **accepted**, so the Western Warbling-Vireo
+hyphen does not cost a link.
+
+**Assertions, the committed table:** every entry parses; every taxon ID is a positive integer;
+every scientific name in it is one BirdView actually has, so a stale row cannot sit unnoticed
+after a taxonomic change.
+
+**Assertions, rendering:** a species with a mapping shows a link whose href is exactly
+`https://www.inaturalist.org/taxa/<id>`; a species **without** one shows no link and no
+placeholder, checked by scoping to the row rather than searching the page; and the page embeds no
+iNaturalist image — the existing AC-051 subresource scan already covers the mechanism, and this
+adds the intent.
+
+**Assertions, courtesy:** the resolver sends a descriptive `User-Agent` (T-006, `inat-api/R4`) and
+waits at least the configured interval between requests (T-022, `inat-api/R1`), both observed
+against the test server.
+
+**Status: planned.**
+
+The confidence gate is the part worth testing hardest, because the failure it prevents is silent.
+Matching on scientific name alone would find the right page nearly always, and the rare miss would
+be a *plausible wrong bird* rather than a visible error — which is exactly the class of bug this
+project keeps finding in its own tests.
+
 ---
 
 ## Traceability
@@ -521,6 +552,7 @@ other line in that test.
 | P-061 | AC-042 | |
 | P-062 | AC-040 | |
 | P-063 | AC-043 | |
+| P-064 | AC-068 | |
 | T-001, T-003 | AC-054 | |
 | T-002 | AC-051 | |
 | T-004 | AC-050, AC-053 | |

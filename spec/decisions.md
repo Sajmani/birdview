@@ -733,6 +733,116 @@ a stick is not misleading.
 
 ---
 
+## CR-012 — Adopting iNaturalist for a species link, and what it is allowed to be
+
+**Subject:** `presentation.detail_view.external_link`
+**Kind:** Source adoption, with three sub-decisions
+**Date:** 2026-09-23 · **Decided by:** Sameer
+
+### What prompted it
+
+BirdView shows abstract diagrams. A reader who has just learned that a Merlin is smaller than they
+thought will immediately want to see one, and BirdView has no photographs and will never have any.
+A link out is the whole answer to that.
+
+### Why not All About Birds, which is the better destination
+
+Cornell's All About Birds has better photography and better species accounts than anything else
+for North American birds, and it was the first choice. It was rejected on two grounds, the second
+decisive.
+
+**Its terms could not be read.** `birds.cornell.edu/home/terms-of-use/` and
+`allaboutbirds.org/robots.txt` both answer an automated request with a Cloudflare HTTP 403. By
+this project's own standard — terms read and quoted before a source is adopted — that is not a
+position from which "permitted" can be written down. Working around the block was rejected on the
+same reasoning that rejected it for the iNaturalist pages, and for Wiley in
+[CR-002](#cr-002).
+
+**Its URLs cannot be constructed.** All About Birds keys on Clements/eBird common names; BirdView
+carries ABA/AOS names, and the ABA checklist's own header warns that the two authorities disagree.
+The disagreement is worst exactly where BirdView is already weakest — the ten recent splits that
+carry near-match provenance. A slug transform would emit links that 404 at an unknown rate, and
+shipping unverified URLs is the same failure as presenting a modeled value as measured.
+
+### Why iNaturalist
+
+It keys on **scientific name**, which BirdView holds and which is far more stable across
+authorities than any common name. Measured on a 55-species stratified sample containing all ten
+near-match splits:
+
+| | |
+| --- | --- |
+| resolved EXACT on scientific name | **55 / 55** |
+| common name *also* agreed exactly | **54 / 55** |
+
+The single disagreement is a hyphen — iNat's "Western Warbling Vireo" against ABA's "Western
+Warbling-Vireo". Every one of the ten splits resolved, with BirdView's own common names returned:
+`Astur atricapillus` → American Goshawk, `Gygis candida` → Blue-billed White-Tern, `Tyto furcata`
+→ American Barn Owl.
+
+Wikimedia Commons was also tested, because its URLs are constructible from the scientific name
+with no API call at all. It failed on **three of six** of the hard cases: no `Astur atricapillus`,
+no `Gygis candida`, no `Tyto furcata`. It lags exactly where the splits are.
+
+### Sub-decision 1: the common name is a required cross-check, not a bonus
+
+A link is emitted only when the scientific name matches exactly **and** the returned common name
+agrees with ABA's, compared with punctuation and case normalized so the Warbling-Vireo hyphen does
+not cost a link.
+
+Scientific-name-exact alone would be enough to find the right page almost always. Requiring both
+means a taxonomic revision on either side shows up as a **dropped link** rather than a link that
+quietly points at the wrong bird — and a wrong bird is worse than no bird on a page whose entire
+purpose is being careful about what it claims.
+
+### Sub-decision 2: a species with no confident match gets no link
+
+Not a search URL, not a guess, not a link to a genus. Nothing. The detail page simply does not
+show the row.
+
+A search link never 404s, which is precisely what makes it a bad idea: it always looks like it
+worked. An absent link is legible — the reader learns that BirdView could not confidently identify
+this bird on iNaturalist, which is true and worth knowing.
+
+### Sub-decision 3: the mapping is a committed table, not a build-time fetch
+
+`birdview-ingest` currently makes **no network request at all**, and [T-002](product.md) keeps the
+server offline at runtime while `tech.md` binds tests to make none either. Resolving 841 names at
+the one-request-per-second that `inat-api/R1` asks for would add roughly fifteen minutes to every
+build and break it entirely offline.
+
+So resolution is a separate, rarely run tool — `cmd/birdview-inatmap` — writing a table that is
+**committed to the repository**, exactly as `internal/taxonomy`'s synonym table already works. The
+ingest joins against the table and never touches the network. The cost is that the table goes
+stale between runs, which is the correct trade: a stale identifier fails visibly as a dropped or
+wrong link, and the refresh is one command.
+
+### What is licensed, and what is not
+
+Nothing in the iNaturalist terms or community guidelines restricts reusing a taxon identifier or
+linking to a taxon page; the vendored copies contain no occurrence of *taxon*, *taxonomy*,
+*database* or *derivative*. The CC BY-NC clause governs Content a contributor posts — the
+photographs a reader will go and look at — not the taxonomy.
+
+**BirdView therefore links and never copies.** No photograph is embedded, hotlinked, cached or
+reproduced, so no contributor's license is engaged. [T-002](tech.md) forbids the embedding
+independently, which is a useful accident: two unrelated rules point the same way.
+
+### Resulting status
+
+- **`sources.md`**: `inat-api` (governing) and `inat-terms` (mandatory) adopted, both vendored by
+  copy from the maintainer's `birdsync` repository and verified byte-for-byte against the SHA-256
+  hashes recorded there. Neither could have been fetched — `inaturalist.org/pages/*` answers an
+  agent with a 403 and a JavaScript challenge.
+- **P-064** added: the detail view links to iNaturalist when, and only when, the match is
+  confident.
+- **T-022** added: the mapping tool paces its requests and identifies itself.
+- **AC-068** added.
+- The existing **T-006** (identify the client) and **AC-052** already discharge `inat-api/R4`,
+  which is why that requirement needed no new work.
+
+---
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

@@ -143,6 +143,22 @@ Goals: G-004
 The repository follows the loop in [process.md](process.md). `AGENTS.md` names `spec/` as
 normative so agents reading the instruction file are pointed at it.
 
+### T-022 — The iNaturalist mapping is built by a separate, paced tool
+Goals: G-004
+
+Resolving species to iNaturalist taxon IDs happens in `cmd/birdview-inatmap`, never in
+`birdview-ingest` and never while serving. The tool waits at least one second between requests
+(`inat-api/R1`) and identifies itself (T-006). Its output is a table committed to the repository;
+the ingest joins against that table and makes no network request.
+
+Rationale: 841 requests at the rate iNaturalist asks for is a quarter of an hour, which does not
+belong in a build — and a build that needs the network is a build that fails on a plane. Keeping
+resolution separate also keeps T-002 and the no-network-in-tests binding intact without exception.
+The table going stale is the accepted cost; a stale ID fails visibly and the refresh is one
+command.
+
+---
+
 ### T-021 — No source is consumed before it is recorded
 Goals: G-004
 

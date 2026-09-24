@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"birdview/internal/dataset"
+	"birdview/internal/inat"
 	"birdview/internal/view"
 	"birdview/web"
 )
@@ -356,6 +357,10 @@ type detailData struct {
 	Metrics []metricRow
 	Opt     options
 	Query   func(...string) template.URL
+
+	// INatURL is empty when no confident iNaturalist match exists, and the
+	// template then renders nothing at all rather than a placeholder (P-064).
+	INatURL string
 }
 
 type metricRow struct {
@@ -385,9 +390,14 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		row("Body", sp.Segments.Body, view.ByLength, opt.Metric3),
 		row("Tail", sp.Segments.Tail, view.ByLength, opt.Metric3),
 	}
+	// Only a confident match gets a link; zero means none was found (P-064).
+	var inatURL string
+	if sp.INatTaxonID > 0 {
+		inatURL = inat.TaxonURL(sp.INatTaxonID)
+	}
 	s.render(w, "detail.html", detailData{
 		S: sp, Geom: view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, box), Box: box,
-		Metrics: rows, Opt: opt, Query: queryFor(r),
+		Metrics: rows, Opt: opt, Query: queryFor(r), INatURL: inatURL,
 	})
 }
 

@@ -17,6 +17,7 @@ import (
 	"birdview/internal/aba"
 	"birdview/internal/avonet"
 	"birdview/internal/dataset"
+	"birdview/internal/inat"
 	"birdview/internal/morphology"
 	"birdview/internal/palette"
 	"birdview/internal/taxonomy"
@@ -30,10 +31,11 @@ const maxUnmatchedFraction = 0.02
 
 func main() {
 	var (
-		abaPath = flag.String("aba", "fetched/ABA_Checklist-8.19.csv", "ABA checklist CSV (fetched, never committed)")
-		avoPath = flag.String("avonet", "AVONET Supplementary dataset 1.xlsx", "AVONET workbook")
-		foxPath = flag.String("wingspan", "wingspan_fox2026_AppendixS1.xlsx", "Fox et al. wingspan workbook")
-		outPath = flag.String("out", "web/data/species.json", "output path (a build artifact)")
+		abaPath  = flag.String("aba", "fetched/ABA_Checklist-8.19.csv", "ABA checklist CSV (fetched, never committed)")
+		avoPath  = flag.String("avonet", "AVONET Supplementary dataset 1.xlsx", "AVONET workbook")
+		foxPath  = flag.String("wingspan", "wingspan_fox2026_AppendixS1.xlsx", "Fox et al. wingspan workbook")
+		inatPath = flag.String("inat", "data/inat-taxa.tsv", "iNaturalist taxon mapping (built by birdview-inatmap)")
+		outPath  = flag.String("out", "web/data/species.json", "output path (a build artifact)")
 	)
 	flag.Parse()
 
@@ -42,6 +44,17 @@ func main() {
 		log.Fatalf("birdview-ingest: %v", err)
 	}
 	fmt.Print(report)
+
+	linked, err := applyINat(ds, *inatPath)
+	if err != nil {
+		// A missing or broken link table must not fail the build -- the links
+		// are an enhancement, and the dataset is correct without them. It must
+		// be loud, though: silently shipping a linkless dataset is how nobody
+		// notices the table was never regenerated.
+		log.Printf("birdview-ingest: WARNING: no iNaturalist links (%v)", err)
+	} else {
+		fmt.Printf("  iNaturalist links: %d of %d species (P-064)\n", linked, len(ds.Species))
+	}
 
 	if err := os.MkdirAll(filepath.Dir(*outPath), 0o755); err != nil {
 		log.Fatalf("birdview-ingest: %v", err)
@@ -335,4 +348,29 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 
 func id(sci string) string {
 	return strings.ToLower(strings.ReplaceAll(sci, " ", "_"))
+}
+
+// applyINat joins the committed iNaturalist mapping onto the dataset (P-064).
+//
+// A species absent from the table gets no taxon ID and therefore no link, which
+// is the intended outcome for anything iNaturalist has not confidently matched
+// -- usually a split it has not yet followed (CR-012).
+func applyINat(ds *dataset.Dataset, path string) (int, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+	table, err := inat.Load(f)
+	if err != nil {
+		return 0, err
+	}
+	var n int
+	for i := range ds.Species {
+		if e, ok := table[ds.Species[i].ScientificName]; ok {
+			ds.Species[i].INatTaxonID = e.TaxonID
+			n++
+		}
+	}
+	return n, nil
 }

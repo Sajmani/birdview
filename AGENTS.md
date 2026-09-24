@@ -45,9 +45,15 @@ Violating any of these is a licensing problem, not a style problem.
   prohibit AI tools from ingesting it and prohibit automated access to the site, and the source is
   rejected ([CR-002](spec/decisions.md#cr-002)). Do not try to revive it as a length source.
 - **Never commit the built dataset** (T-005). It carries values derived from those inputs.
-- **Only AVONET and the Fox wingspan data may be committed** as inputs. Both are CC BY 4.0. If you
-  are about to add a third data file to the repository, check [spec/sources.md](spec/sources.md)
-  first — most candidates this project evaluated could not be redistributed.
+- **Only AVONET and the Fox wingspan data may be committed as source *data*.** Both are CC BY 4.0.
+  If you are about to add a third data file, check [spec/sources.md](spec/sources.md) first — most
+  candidates this project evaluated could not be redistributed. Two other committed files are
+  deliberate and are not source data: `data/inat-taxa.tsv`, a generated table of iNaturalist taxon
+  IDs (T-022), and the vendored terms snapshots under `spec/sources/`.
+- **BirdView links to iNaturalist and copies nothing from it** (P-064). Never embed, hotlink or
+  cache a photograph: those are contributors' work under their own licenses, frequently CC BY-NC.
+  T-002 forbids the mechanism anyway. Taxon IDs are fine — the terms say nothing about the
+  taxonomy, which is checkable against the hashed copies in `spec/sources/inat-terms/`.
 - **Never present a modeled value as a measurement** (P-060, P-061). Every length and wingspan is
   tagged measured or estimated, and the UI shows which. This is the decision the whole measurement
   design rests on — see [CR-001](spec/decisions.md#cr-001).

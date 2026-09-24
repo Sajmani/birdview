@@ -560,6 +560,28 @@ were solved twice, differently, because there was no single place to say how con
 is. One record covers all of it, and makes each later gap a labeling problem rather than a
 redesign.
 
+### P-064 — The detail view links to the species on iNaturalist
+Subject: `presentation.detail_view.external_link`
+Goals: G-001, G-004
+
+The detail view carries a link to the species' iNaturalist taxon page, so a reader who has just
+learned how big a bird is can go and see one.
+
+The link is shown **only where the match is confident**: the scientific name matched iNaturalist's
+exactly, and the common name iNaturalist returns agrees with ABA's once punctuation and case are
+normalized. A species that fails either test shows **no link at all** — not a search URL, not a
+genus page, not a guess.
+
+BirdView **links and never copies**. No photograph is embedded, hotlinked, cached or reproduced;
+the reader arrives on iNaturalist, where each image carries its own license. T-002 forbids the
+embedding independently.
+
+Rationale: BirdView will never have photographs, and a reader surprised by a size wants to see the
+bird. Linking is the whole answer. The confidence gate exists because a link to the *wrong* bird is
+worse than no link on a page whose purpose is being careful about what it claims — and an absent
+link is legible, where a search URL that always "works" hides the failure. See
+[CR-012](decisions.md).
+
 ### P-063 — The detail view explains each metric's provenance
 Goals: G-001, G-004
 

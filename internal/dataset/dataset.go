@@ -84,6 +84,11 @@ type Species struct {
 	FamilyText     string `json:"familyTextColor"`
 	Order          string `json:"order"`
 
+	// INatTaxonID links the detail view to iNaturalist (P-064). Zero means no
+	// confident match, and then no link is shown at all -- not a search URL,
+	// not a guess (CR-012).
+	INatTaxonID int `json:"inatTaxonId,omitempty"`
+
 	// The three main metrics shown on every tile (P-031).
 	TotalLength Metric `json:"totalLength"`
 	Wingspan    Metric `json:"wingspan"`

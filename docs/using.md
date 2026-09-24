@@ -32,6 +32,12 @@ most lengths are modeled, because no open dataset publishes body length for Nort
 **Click any bird** for the detail view — the same tile, larger, with every segment measured out
 individually and the source or formula behind each number named.
 
+The detail view also links to the species on **iNaturalist**, for photographs, range and
+observations. BirdView has no pictures of its own and never will. A handful of species show no
+link: those are ones iNaturalist could not be matched to with confidence, usually a recent
+taxonomic split it has not followed yet, and an absent link is more honest than a guess that lands
+on the wrong bird.
+
 ---
 
 ## The controls

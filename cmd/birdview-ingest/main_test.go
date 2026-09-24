@@ -4,17 +4,20 @@ import (
 	"encoding/json"
 	"math"
 	"os"
+	"sort"
 	"strings"
 	"testing"
 
 	"birdview/internal/dataset"
+	"birdview/internal/inat"
 	"birdview/internal/taxonomy"
 )
 
 const (
-	abaFile = "../../fetched/ABA_Checklist-8.19.csv"
-	avoFile = "../../AVONET Supplementary dataset 1.xlsx"
-	foxFile = "../../wingspan_fox2026_AppendixS1.xlsx"
+	abaFile  = "../../fetched/ABA_Checklist-8.19.csv"
+	avoFile  = "../../AVONET Supplementary dataset 1.xlsx"
+	foxFile  = "../../wingspan_fox2026_AppendixS1.xlsx"
+	inatFile = "../../data/inat-taxa.tsv"
 )
 
 // built caches the compiled dataset across tests: the AVONET workbook is 21 MB
@@ -292,4 +295,66 @@ func TestHeadIsNotAConstant(t *testing.T) {
 		t.Errorf("heaviest bird is %s but the largest head belongs to %s",
 			heaviest.ScientificName, biggestHead.ScientificName)
 	}
+}
+
+// TestINatTableMatchesTheDataset guards the committed mapping against drift.
+//
+// The table is generated rarely and by hand, so it is exactly the kind of
+// artifact that rots quietly: a species renamed by a taxonomic revision leaves a
+// row behind that matches nothing, and the link simply stops appearing with
+// nobody told. This makes that loud.
+//
+// It does NOT require full coverage. A species iNaturalist has not confidently
+// matched is supposed to be absent (P-064) -- usually a recent split it has not
+// followed yet -- so absence is correct and only a *stale* row is a fault.
+//
+// Verifies: P-064, T-022. Criterion: AC-068.
+func TestINatTableMatchesTheDataset(t *testing.T) {
+	f, err := os.Open(inatFile)
+	if err != nil {
+		t.Skipf("skipping: %s is absent; run cmd/birdview-inatmap", inatFile)
+	}
+	defer f.Close()
+	table, err := inat.Load(f)
+	if err != nil {
+		t.Fatalf("the committed mapping does not parse: %v", err)
+	}
+
+	ds := load(t)
+	known := map[string]string{}
+	for i := range ds.Species {
+		known[ds.Species[i].ScientificName] = ds.Species[i].CommonName
+	}
+
+	var stale []string
+	for sci := range table {
+		if _, ok := known[sci]; !ok {
+			stale = append(stale, sci)
+		}
+	}
+	if len(stale) > 0 {
+		sort.Strings(stale)
+		t.Errorf("%d rows name species not in the dataset, so their links are dead: %v",
+			len(stale), stale)
+	}
+
+	// Every ID positive, and no two species pointing at the same taxon -- which
+	// would mean the matcher accepted the same bird twice under different names.
+	seen := map[int]string{}
+	for sci, e := range table {
+		if e.TaxonID <= 0 {
+			t.Errorf("%s has taxon id %d", sci, e.TaxonID)
+		}
+		if prev, dup := seen[e.TaxonID]; dup {
+			t.Errorf("taxon %d is claimed by both %s and %s", e.TaxonID, prev, sci)
+		}
+		seen[e.TaxonID] = sci
+	}
+
+	// The table has to be doing something, or every assertion above is vacuous.
+	if len(table) < len(ds.Species)/2 {
+		t.Errorf("only %d of %d species resolved; the mapping looks broken rather than incomplete",
+			len(table), len(ds.Species))
+	}
+	t.Logf("%d of %d species linked", len(table), len(ds.Species))
 }

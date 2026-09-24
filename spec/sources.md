@@ -18,9 +18,11 @@ the others can be filled in plausibly from a URL alone.
 | [`ricklefs`](#ricklefs) | mandatory | **rejected** | **rejected** — Wiley terms prohibit the use, see CR-002 |
 | [`wiley`](#wiley) | mandatory | quoted only, not vendored | **adopted** — terms read and transcribed; the reason `ricklefs` is rejected |
 | [`wcag`](#wcag) | mandatory | absorbed, partial | **partial** — adopted for two criteria, not vendored |
+| [`inat-api`](#inat-api) | governing | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; governs the mapping tool |
+| [`inat-terms`](#inat-terms) | mandatory | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; almost nothing in it reaches BirdView |
 | [`specman`](#specman) | — (method) | project copy | **adopted** — copied, base pin recorded below |
 
-One of the seven is not fully adopted, and it does not block v1. `ricklefs` was evaluated and
+One of the nine is not fully adopted, and it does not block v1. `ricklefs` was evaluated and
 **rejected**: its platform terms prohibit extraction, integration, storage and redistribution
 alike. Its entry is kept so the evaluation is not repeated.
 
@@ -74,6 +76,62 @@ and the checklist landing page carries no license statement at all.
 
 **Open action:** ask ABA for written permission. It is the only input v1 genuinely depends on that
 cannot be committed, and a non-commercial, attributed, open-source request costs an email.
+
+---
+
+## `inat-api`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | <https://www.inaturalist.org/pages/api+recommended+practices> |
+| **Version** | Page's own revision line: "Revised on February 27, 2025 06:23 PM by kueda" |
+| **Integrity** | [spec/sources/inat-api/PROVENANCE.md](sources/inat-api/PROVENANCE.md) |
+| **Tier** | governing (the operator can throttle or block a client that ignores it) |
+| **Import style** | By reference, vendored — **copied from the maintainer's `birdsync` repository and verified byte-for-byte against the SHA-256 recorded there** |
+| **Scope** | Every request `cmd/birdview-inatmap` makes to `api.inaturalist.org` |
+| **Adopted parts** | `inat-api/R1`–`R8`, in [requirements.md](sources/inat-api/requirements.md) |
+| **Exclusions** | Bulk access routes — observation exports, the weekly GBIF dataset — which serve consumers of observation data. BirdView reads one integer per species from the taxonomy. |
+| **Owner** | iNaturalist |
+| **Status** | **Adopted 2026-09-23.** Vendored and hash-verified; transcribed against BirdView's much narrower use. |
+
+Two of the eight are implemented (`R1` pacing as T-022, `R4` User-Agent as the pre-existing
+T-006); two are not applicable because BirdView never pages; four are satisfied by construction
+because it never authenticates, never posts and downloads no media. `inat-api/R7` is worth noting:
+it is the one requirement `birdsync` records as a knowing departure, and BirdView satisfies it
+only because its needs are so much smaller.
+
+The human-facing page cannot be retrieved by an agent — `www.inaturalist.org/pages/*` answers with
+HTTP 403 and a JavaScript challenge. The API itself serves an identified client normally.
+
+---
+
+## `inat-terms`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | <https://www.inaturalist.org/pages/terms>, <https://www.inaturalist.org/pages/community+guidelines>, and the linked <https://www.inaturalist.org/pages/machine_generated_content> |
+| **Version** | Retrieved 2026-08-09 from a browser; hashes in [PROVENANCE.md](sources/inat-terms/PROVENANCE.md) |
+| **Integrity** | [spec/sources/inat-terms/PROVENANCE.md](sources/inat-terms/PROVENANCE.md) |
+| **Tier** | mandatory (copyright and platform terms) |
+| **Import style** | By reference, vendored — **copied from `birdsync` and hash-verified**, as above |
+| **Scope** | BirdView's use of the platform: unauthenticated reads, and outbound links to taxon pages |
+| **Adopted parts** | `inat-terms/R1`–`R6`, in [requirements.md](sources/inat-terms/requirements.md) |
+| **Exclusions** | Conduct rules unreachable by a client that posts nothing: harassment, sockpuppets, explicit content, commercial AI training |
+| **Owner** | iNaturalist |
+| **Status** | **Adopted 2026-09-23.** Vendored so that one negative finding is checkable rather than remembered. |
+
+BirdView is subject to very little of this, and the entry exists to say which little. **The
+adoption rests on a negative: nothing in either document restricts reusing a taxon identifier or
+linking to a taxon page.** `terms.html` contains no occurrence of *taxon*, *taxonomy*, *database*,
+*derivative*, *hyperlink* or *scrape*. The CC BY-NC clause governs Content a contributor posts —
+observations and photographs — not iNaturalist's taxonomy.
+
+That is exactly the kind of claim that is worthless asserted from memory, which is why hashed
+copies are in the tree: anyone can search them and check.
+
+Photographs stay on iNaturalist. BirdView links; it never copies, caches, hotlinks or embeds an
+image, which [T-002](tech.md) independently forbids anyway. See
+[CR-012](decisions.md) for the adoption reasoning and what was rejected.
 
 ---
 
