@@ -537,16 +537,17 @@ Recorded here so the limit is not mistaken for coverage.
 the stylesheet **as embedded in the binary**, not off disk
 
 **Assertions, measured:** every `color` a rule declares — with custom properties resolved — clears
-4.5:1 against both `--bg` and `--panel`; every rule whose selector targets an anchor additionally
-clears 7:1 against `--bg`. Rules that also set a `background` are excluded, being self-contained and
-governed by T-010.
+**7:1** against both `--bg` and `--panel`. Rules that also set a `background` are excluded, being
+self-contained and governed by T-010.
 
 **Assertions, structural:** the stylesheet carries top-level `a` and `a:visited` rules, so no link
 can fall back to the browser default.
 
 **Status: verified 2026-09-23 — passing, and watched failing** by removing the global link rules
 (which reproduces the original defect exactly), by setting the visited color to the browser's
-`#551A8B`, and by picking a link color that clears AA at 4.90:1 but misses the 7:1 link floor.
+`#551A8B`, by picking a link color that clears AA at 4.90:1 but misses 7:1, and — after the floor
+rose to 7:1 for everything ([CR-014](decisions.md)) — by restoring the previous `--dim` and
+`--accent`, which fail at 5.71:1 and 6.83:1 on a panel.
 
 The structural assertion is the one that would have caught the bug. A measured check sees only
 colors that were declared, and the defect was a color nobody declared — the link inherited

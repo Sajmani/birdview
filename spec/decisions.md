@@ -913,6 +913,62 @@ accent.
 - Still excluded, and still claimed nowhere: keyboard access, focus order, timing, reading level.
   **BirdView claims no WCAG conformance level.**
 
+**The two-floor scheme was superseded the next day by [CR-014](#cr-014).**
+
+---
+
+## CR-014 — One contrast floor, superseding CR-013's two
+
+**Subject:** `text.contrast.ratio`
+**Kind:** Direct — a later decision reverses a tradeoff an earlier one accepted
+**Date:** 2026-09-23 · **Decided by:** Sameer
+
+### What changed
+
+[CR-013](#cr-013) set two floors: 7:1 for links and badges, 4.5:1 for everything else. There is now
+one, **7:1**, and `--dim` and `--accent` moved to clear it.
+
+| | was | now | on page bg | on panel |
+| --- | --- | --- | --- | --- |
+| `--dim` | `#94a3b8` | `#adbbcc` | 6.96 → **9.14** | 5.71 → **7.49** |
+| `--accent` | `#38bdf8` | `#5ccbfa` | 8.33 → **9.67** | 6.83 → **7.93** |
+
+### Why it resolves the other way now
+
+CR-013's reasoning was explicit and, at the time, sound: raising the floor meant repainting the
+interface's secondary text, which looked disproportionate to the one broken link that prompted the
+check. So it recorded the gap instead of closing it.
+
+What that reasoning was missing is that the gap was not hypothetical. **The owner independently
+reported the dim text as hard to read** — scientific names, provenance detail, section counts, all
+at 5.71:1 on a panel. A measured shortfall that a user has actually noticed is no longer a tradeoff
+worth defending; it is the same defect as the link, one tier less severe.
+
+Cheap, too, in the end. Two variables moved and nothing else did. `--accent` as the `.btn.on` fill
+still clears its own dark text at 8.25:1, and `--accent-visited` was already at 7.92:1 on a panel.
+The repaint CR-013 was avoiding turned out to be two hex values.
+
+### What this says about recording a known gap
+
+CR-013 did the right thing by writing the shortfall down with its numbers rather than rounding up
+to a claim BirdView could not support. That is what made this decision a one-line lookup rather
+than a rediscovery — the exact figures were already on the page.
+
+But a recorded gap is a deferral, not a resolution, and this one lasted a day. Worth remembering
+the next time an exception looks cheaper than a fix.
+
+### Resulting status
+
+- **T-023** amended: one floor, 7:1, links and text alike, against both surfaces.
+- **AC-070** amended: the measured assertion is now a single floor, and the watched-failing list
+  gains the two restored colors.
+- The test's two-tier machinery — a separate link floor, and the selector tokenizer that decided
+  which rules were links — is deleted rather than left switched off. It is recoverable from history
+  if the floors ever diverge again.
+- **`sources.md`** unchanged: both WCAG criteria were already adopted, and only which one governs
+  ordinary text has moved.
+- Still claimed nowhere: any WCAG conformance level.
+
 ---
 
 ## Work arising

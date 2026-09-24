@@ -26,22 +26,16 @@ func mustReadStyles(t *testing.T) []byte {
 // invalidate the check.
 var surfaceVars = []string{"--bg", "--panel"}
 
-// linkFloor is WCAG 2.2 SC 1.4.6, the same 7:1 the badges are held to (T-010),
-// and it is applied against the page background because that is where every
-// plain link in BirdView actually sits. Links are interactive, so they get the
-// strict floor; nothing in this palette makes it hard to clear.
-const linkFloor = 7.0
-
-// textFloor is SC 1.4.3, AA, applied to every declared text color against both
-// surfaces. Secondary text -- scientific names, provenance detail, counts --
-// clears AA comfortably but not AAA: --dim is 6.96:1 on the page background and
-// 5.71:1 on a panel. That gap is the one place BirdView's contrast claim is
-// weaker than its badge claim, and T-023 states it rather than rounding it up.
-const textFloor = 4.5
-
-// linkSurface is the surface plain links appear on. Verified: no bare <a> sits
-// inside .help or .controls, whose background is --panel.
-const linkSurface = "--bg"
+// textFloor is WCAG 2.2 SC 1.4.6 (Contrast Enhanced), the same 7:1 the badges
+// are held to (T-010), applied to every declared text color against both
+// surfaces.
+//
+// It was 4.5:1 for a day. The two-floor scheme existed only because --dim sat
+// at 6.96:1 on the page background and 5.71:1 on a panel, and repainting the
+// interface's secondary text looked disproportionate to the link bug that
+// prompted the check. The owner then noticed the dim text too, so the colors
+// moved and one floor covers everything (CR-014).
+const textFloor = 7.0
 
 var (
 	reVar   = regexp.MustCompile(`(--[a-z-]+):\s*(#[0-9a-fA-F]{3,6})`)
@@ -123,22 +117,14 @@ func TestStylesheetContrast(t *testing.T) {
 		fr, fg2, fb := hexRGB(t, fg)
 		lfg := palette.RelativeLuminance(fr, fg2, fb)
 
-		// Every text color must clear AA on both surfaces...
+		// One floor, both surfaces, links and text alike.
 		for _, v := range surfaceVars {
 			br, bgc, bb := hexRGB(t, vars[v])
 			if got := palette.Contrast(lfg, palette.RelativeLuminance(br, bgc, bb)); got < textFloor {
-				t.Errorf("%-30s color %s on %s is %.2f:1, below the %.1f:1 text floor",
+				t.Errorf("%-30s color %s on %s is %.2f:1, below the %.1f:1 floor",
 					sel, fg, v, got, textFloor)
 			}
 			checked++
-		}
-		// ...and a link must clear AAA on the surface links live on.
-		if isLinkSelector(sel) {
-			br, bgc, bb := hexRGB(t, vars[linkSurface])
-			if got := palette.Contrast(lfg, palette.RelativeLuminance(br, bgc, bb)); got < linkFloor {
-				t.Errorf("%-30s link color %s on %s is %.2f:1, below the %.1f:1 link floor",
-					sel, fg, linkSurface, got, linkFloor)
-			}
 		}
 	}
 	if checked == 0 {
@@ -174,17 +160,4 @@ func TestNoLinkUsesTheBrowserDefault(t *testing.T) {
 // what happened on the first run of this test.
 func stripComments(css string) string {
 	return regexp.MustCompile(`(?s)/\*.*?\*/`).ReplaceAllString(css, "")
-}
-
-// isLinkSelector reports whether a selector targets an anchor. Matching on a
-// bare "a" token rather than a substring, so ".seealso" and ".back" do not
-// count themselves.
-func isLinkSelector(sel string) bool {
-	for _, part := range regexp.MustCompile(`[\s,>+~]+`).Split(sel, -1) {
-		base, _, _ := strings.Cut(part, ":")
-		if base == "a" {
-			return true
-		}
-	}
-	return false
 }

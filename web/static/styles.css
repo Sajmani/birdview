@@ -1,6 +1,6 @@
 :root {
   --bg: #0f172a; --panel: #1e293b; --line: #334155; --ink: #f8fafc;
-  --dim: #94a3b8; --accent: #38bdf8; --accent-visited: #c4b5fd;
+  --dim: #adbbcc; --accent: #5ccbfa; --accent-visited: #c4b5fd;
 }
 * { box-sizing: border-box; }
 body {

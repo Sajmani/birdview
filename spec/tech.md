@@ -163,9 +163,9 @@ command.
 Subject: `text.contrast.ratio`
 Goals: G-001
 
-Every text color the stylesheet declares for text on a bare surface clears **4.5:1** (WCAG 2.2
-SC 1.4.3) against both the page background and the panel background. **Links additionally clear
-7:1** (SC 1.4.6) against the page background, which is the surface every plain link sits on.
+Every text color the stylesheet declares for text on a bare surface clears **7:1** (WCAG 2.2
+SC 1.4.6, Contrast Enhanced) against **both** the page background and the panel background. Links
+and ordinary text are held to the same floor, which is also the floor T-010 holds badges to.
 
 Rules that set their own background are excluded and governed by T-010 instead: badges and chips
 pair a generated background with a matching text color, and the pair is what has to clear 7:1.
@@ -176,10 +176,13 @@ unvisited and `#551A8B` visited — which on this background is 1.90:1 and 1.62:
 Rationale: contrast was adopted for badges only, because badge colors are *generated* and an
 unchecked generator is obviously dangerous. Hand-written CSS turned out to be just as dangerous and
 had no check at all: the iNaturalist link of P-064 shipped with no color rule and was effectively
-invisible. The floor is 4.5:1 rather than 7:1 for ordinary text because `--dim` sits at 6.96:1 on
-the page background and 5.71:1 on a panel; raising the floor would mean repainting the secondary
-text of the whole interface, which is a bigger change than the defect warrants. That gap is stated
-rather than rounded up — see [CR-013](decisions.md).
+invisible.
+
+One floor rather than two. The first version of this requirement set 4.5:1 for ordinary text,
+because `--dim` sat at 6.96:1 on the page background and 5.71:1 on a panel and repainting the
+interface's secondary text looked disproportionate to a single broken link. The owner then reported
+the dim text as hard to read too, which settled it: `--dim` and `--accent` moved, and the exception
+went with them. See [CR-014](decisions.md).
 
 ---
 
