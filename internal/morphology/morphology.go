@@ -43,12 +43,16 @@ var NeckRatios = map[string]float64{
 	"Gruidae":           0.85,
 	"Anhingidae":        0.90,
 	"Phalacrocoracidae": 0.55,
-	"Anatidae":          0.70,
-	"Podicipedidae":     0.45,
-	"Gaviidae":          0.50,
-	"Phoenicopteridae":  0.95,
-	"Pelecanidae":       0.75,
-	"Aramidae":          0.70,
+	// Gannets and boobies fly the "cigar" silhouette: the neck is genuinely
+	// extended ahead of the wings, but less snaky than a cormorant's. Placed
+	// between Laridae and Phalacrocoracidae, the two neighbours already here.
+	"Sulidae":          0.45,
+	"Anatidae":         0.70,
+	"Podicipedidae":    0.45,
+	"Gaviidae":         0.50,
+	"Phoenicopteridae": 0.95,
+	"Pelecanidae":      0.75,
+	"Aramidae":         0.70,
 	// Shorebirds, gulls and rails: intermediate.
 	"Scolopacidae":     0.35,
 	"Charadriidae":     0.30,

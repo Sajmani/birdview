@@ -201,7 +201,11 @@ wins, and the join is bridged by an explicit synonym table rather than by fuzzy 
 In rough order of how much it would change the picture:
 
 1. **The neck ratios are invented.** They are the largest unforced assumption in the project, and
-   they visibly drive the silhouette of every long-necked family.
+   they visibly drive the silhouette of every long-necked family. Three families have been
+   corrected by eye so far — Aramidae and Pelecanidae after a reader noticed a short-necked
+   Limpkin, then Sulidae on review — which says the table has a slow error signal rather than that
+   it is converging. **Cervical vertebra count** is the most promising anchor for fixing it
+   properly, and is logged under Work arising in [spec/decisions.md](../spec/decisions.md).
 2. **The head and body models are unvalidated.** Both are plausible shape functions fitted against
    nothing. If either coefficient is off, every length is off in the same direction.
 3. **Lengths are not comparable to published lengths.** They are internally consistent, which is

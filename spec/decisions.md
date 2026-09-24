@@ -983,6 +983,55 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | Ask ABA for written permission to redistribute the checklist | Sameer | **after a working demo** |
 | ~~Decide the neck's flight posture~~ — done, [CR-011](#cr-011) | Sameer | closed 2026-09-23 |
 | Assess whether a perched/standing toggle is achievable at any honest accuracy ([CR-011](#cr-011)) | — | before it is offered to users |
+| Investigate cervical vertebra counts as an anchor for the neck model (P-045) | — | opportunistic; the biggest available win on the weakest model |
+
+### Cervical vertebra counts, and why they are worth chasing
+
+*Recorded 2026-09-23.* The per-family neck ratios of P-045 are the largest unforced assumption in
+the project: invented, unvalidated, and visibly driving the silhouette of every long-necked family.
+Three families have now been corrected by eye — Aramidae and Pelecanidae after a reader noticed a
+short-necked Limpkin, Sulidae on review — which is a sign the table is guesswork with a slow error
+signal, not that it is converging.
+
+**Cervical vertebra count is the most promising anchor available.** Birds run from roughly 11 to 25
+cervicals, against a mammalian fixed seven, and the count tracks neck length closely: swans sit at
+the top of the range, passerines near the bottom, galliforms between. Unlike neck length it is a
+discrete, published, comparable anatomical trait.
+
+It would not give the ratio directly — ours is neck ÷ trunk, so it needs count × mean vertebra
+length ÷ trunk — but it would give a defensible **ordering across all 91 families**. That is enough
+to calibrate the table against the few anchors the project is most confident about, instead of
+inventing each entry independently and waiting for someone to spot the next Limpkin.
+
+Two things are unknown and should not be assumed: whether a dataset exists at BirdView's coverage,
+and whether its license permits use. Both have sunk candidate sources before. Adoption would follow
+the usual path — a `sources.md` entry and a compose-and-resolve pass.
+
+### Sketch: one dash per vertebra
+
+*Recorded 2026-09-23, owner's idea, not a decision.* If the counts existed, the neck could be drawn
+as a **dashed line with one dash per cervical vertebra** — putting a measured, discrete count into
+the one segment that currently carries the least support.
+
+What makes it more than decoration: two birds can reach the same neck length by different means. A
+swan is near the top of the vertebral range; a flamingo has a comparably long neck built from
+fewer, longer vertebrae. That distinction is real, and the diagram cannot presently show it at all.
+
+Three obstacles, recorded so the idea is picked up with its problems attached rather than
+rediscovered:
+
+- **The tail is already dashed**, to distinguish it from the body. Dash would then mean two
+  different things on one figure. The tail would need another treatment; there are options.
+- **It cannot work on the index tiles.** The neck is a fixed fraction of a bird that fills its tile,
+  so its drawn length is roughly scale-independent: about 31 px for the longest-necked species in
+  the set, and under 2 px for a median bird. Twenty dashes in 31 px is a grey blur.
+- **On the detail view it is marginal**, at 1.9× the tile: a heron's neck is about 62 px, giving
+  roughly 3 px per vertebra.
+
+That last figure is the interesting one. Nobody will count 24 dashes, but 3 px is enough to read as
+**texture** — finely divided against coarsely divided — which is exactly the swan-versus-flamingo
+distinction the idea exists to surface. Comparability rather than countability may be the right
+goal, and would be the thing to test.
 
 ### Why the perched toggle is not simply the other half of CR-011
 
