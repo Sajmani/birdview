@@ -27,6 +27,14 @@ const DefaultNeckRatio = 0.18
 //
 // Families absent here get DefaultNeckRatio. The entries are the ones where
 // neck length is the visually defining feature of the family's silhouette.
+//
+// Two were missing and drew the default until a reader noticed a short-necked
+// Limpkin. Aramidae flies neck-extended and is built like a small crane, and
+// Pelecanidae was worse: it was listed as a family that FOLDS its neck while
+// having no neck to fold, so a pelican drew a 5%-of-length stub tucked into an
+// S. view.TestEveryFoldedFamilyHasALongNeck now makes the second class of that
+// mistake impossible; the first was caught by eye, and only a review of the
+// table against the family list will catch the next one.
 var NeckRatios = map[string]float64{
 	// Long-necked waders and waterfowl.
 	"Ardeidae":          0.85,
@@ -39,6 +47,8 @@ var NeckRatios = map[string]float64{
 	"Podicipedidae":     0.45,
 	"Gaviidae":          0.50,
 	"Phoenicopteridae":  0.95,
+	"Pelecanidae":       0.75,
+	"Aramidae":          0.70,
 	// Shorebirds, gulls and rails: intermediate.
 	"Scolopacidae":     0.35,
 	"Charadriidae":     0.30,

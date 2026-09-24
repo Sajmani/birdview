@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"birdview/internal/dataset"
+	"birdview/internal/morphology"
 )
 
 // bird builds a species with segments that sum to total, as the ingest
@@ -394,5 +395,30 @@ func TestFoldedNeckDoesNotChangeOrdering(t *testing.T) {
 	if gh.TotalHeight() >= gc.TotalHeight() {
 		t.Errorf("the folded bird draws %.2f px and the extended one %.2f -- they are identical, "+
 			"so the checks above prove nothing", gh.TotalHeight(), gc.TotalHeight())
+	}
+}
+
+// TestEveryFoldedFamilyHasALongNeck asserts the invariant that ties the two
+// neck tables together: a family only appears in foldedNecks because its neck is
+// long enough that folding it is the defining thing about its flight silhouette.
+// A family drawing the default ratio has no such neck, so listing it in one
+// table and not the other means one of them is wrong.
+//
+// This is not hypothetical. Pelecanidae was in foldedNecks while falling back to
+// the 0.18 default, so a pelican -- a bird whose neck is its most obvious
+// feature -- folded a 5%-of-length stub. The bug survived CR-011 review because
+// each table looked reasonable on its own.
+//
+// Verifies: P-040, P-045. Criterion: AC-069.
+func TestEveryFoldedFamilyHasALongNeck(t *testing.T) {
+	for fam := range foldedNecks {
+		ratio, explicit := morphology.NeckRatio(fam)
+		if !explicit {
+			t.Errorf("%s folds its neck but has no entry in morphology.NeckRatios, so it draws "+
+				"the %.2f default -- one of the two tables is wrong", fam, ratio)
+		}
+	}
+	if len(foldedNecks) == 0 {
+		t.Fatal("no families fold, so this check asserts nothing")
 	}
 }

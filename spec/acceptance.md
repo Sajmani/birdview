@@ -512,6 +512,26 @@ Matching on scientific name alone would find the right page nearly always, and t
 be a *plausible wrong bird* rather than a visible error — which is exactly the class of bug this
 project keeps finding in its own tests.
 
+### AC-069 — A family that folds its neck has a neck to fold
+**Verifies:** P-040, P-045 · **Level:** code · **Method:** unit test cross-checking the two neck
+tables
+**Assertion:** every family in the folded-neck set has an **explicit** entry in
+`morphology.NeckRatios`, rather than falling back to the default ratio.
+
+**Status: verified 2026-09-23 — passing, and watched failing against a real bug**, which is how it
+was written: Pelecanidae was in the folded set with no ratio entry, so a pelican drew a
+5%-of-length stub tucked into an S. The check failed on the live tree before either table changed.
+
+The two tables are independently plausible and jointly wrong, which is why neither review caught
+it. A family is in the folded set *because* its neck is the defining feature of its silhouette; a
+family on the 0.18 default has no such neck. Listing one without the other is always a mistake.
+
+This does **not** catch the other half of the same bug. Aramidae was missing from the ratio table
+while not being in the folded set, so nothing was inconsistent — the Limpkin simply drew a short
+neck, and a reader noticed. No automatic check can tell that a family's neck is too short when the
+ratios are invented in the first place; only a review of the table against the family list will.
+Recorded here so the limit is not mistaken for coverage.
+
 ---
 
 ## Traceability
@@ -538,12 +558,12 @@ project keeps finding in its own tests.
 | P-036 | AC-062 | |
 | P-037 | AC-061 | |
 | P-038 | AC-062 | partial — behavior unverifiable without a browser |
-| P-040 | AC-033, AC-067 | AC-066 withdrawn (CR-010) |
+| P-040 | AC-033, AC-067, AC-069 | AC-066 withdrawn (CR-010) |
 | P-041 | AC-030, AC-067 | |
 | P-042 | AC-031, AC-063 | |
 | P-043 | AC-032 | |
 | P-044 | AC-034 | |
-| P-045 | AC-035 | |
+| P-045 | AC-035, AC-069 | |
 | P-046 | AC-065 | |
 | P-060 (composite) | AC-044 | |
 | P-060 (wingspan model) | AC-045 | |
