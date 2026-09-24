@@ -159,6 +159,30 @@ command.
 
 ---
 
+### T-023 — Link and text colors meet a stated contrast floor
+Subject: `text.contrast.ratio`
+Goals: G-001
+
+Every text color the stylesheet declares for text on a bare surface clears **4.5:1** (WCAG 2.2
+SC 1.4.3) against both the page background and the panel background. **Links additionally clear
+7:1** (SC 1.4.6) against the page background, which is the surface every plain link sits on.
+
+Rules that set their own background are excluded and governed by T-010 instead: badges and chips
+pair a generated background with a matching text color, and the pair is what has to clear 7:1.
+
+**No link may go uncolored.** A link with no rule inherits the browser default — `#0000EE`
+unvisited and `#551A8B` visited — which on this background is 1.90:1 and 1.62:1.
+
+Rationale: contrast was adopted for badges only, because badge colors are *generated* and an
+unchecked generator is obviously dangerous. Hand-written CSS turned out to be just as dangerous and
+had no check at all: the iNaturalist link of P-064 shipped with no color rule and was effectively
+invisible. The floor is 4.5:1 rather than 7:1 for ordinary text because `--dim` sits at 6.96:1 on
+the page background and 5.71:1 on a panel; raising the floor would mean repainting the secondary
+text of the whole interface, which is a bigger change than the defect warrants. That gap is stated
+rather than rounded up — see [CR-013](decisions.md).
+
+---
+
 ### T-021 — No source is consumed before it is recorded
 Goals: G-004
 

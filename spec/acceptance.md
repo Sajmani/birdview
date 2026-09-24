@@ -532,6 +532,31 @@ neck, and a reader noticed. No automatic check can tell that a family's neck is 
 ratios are invented in the first place; only a review of the table against the family list will.
 Recorded here so the limit is not mistaken for coverage.
 
+### AC-070 — No text or link falls below its contrast floor
+**Verifies:** T-023, `wcag/1.4.3`, `wcag/1.4.6` · **Level:** code · **Method:** two checks parsing
+the stylesheet **as embedded in the binary**, not off disk
+
+**Assertions, measured:** every `color` a rule declares — with custom properties resolved — clears
+4.5:1 against both `--bg` and `--panel`; every rule whose selector targets an anchor additionally
+clears 7:1 against `--bg`. Rules that also set a `background` are excluded, being self-contained and
+governed by T-010.
+
+**Assertions, structural:** the stylesheet carries top-level `a` and `a:visited` rules, so no link
+can fall back to the browser default.
+
+**Status: verified 2026-09-23 — passing, and watched failing** by removing the global link rules
+(which reproduces the original defect exactly), by setting the visited color to the browser's
+`#551A8B`, and by picking a link color that clears AA at 4.90:1 but misses the 7:1 link floor.
+
+The structural assertion is the one that would have caught the bug. A measured check sees only
+colors that were declared, and the defect was a color nobody declared — the link inherited
+`#0000EE` at 1.90:1. Measuring what is there cannot find what is missing.
+
+Writing the check found a bug in the check: the selector capture was swallowing the comment
+preceding each rule, so any rule documented with a sentence containing the word "a" was read as a
+link selector and held to 7:1. `.sn` failed that way on the first run. Comments are stripped before
+parsing, and selectors are split into tokens rather than substring-matched.
+
 ---
 
 ## Traceability
@@ -579,6 +604,7 @@ Recorded here so the limit is not mistaken for coverage.
 | T-005 | AC-050 | |
 | T-006 | AC-052 | |
 | T-010 | AC-002 | |
+| T-023 | AC-070 | |
 | T-011 | AC-064 | partial — the non-commercial posture itself is still untestable |
 | T-020, T-021 | AC-001, AC-003, AC-004 | |
 | `wcag/1.4.6` | AC-002 | |

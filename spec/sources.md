@@ -216,9 +216,9 @@ exception in [tech.md](tech.md#location-exception-the-avonet-workbook).
 | **Integrity** | Not vendored |
 | **Tier** | **mandatory** |
 | **Import style** | Absorbed, partial — the adopted criteria are restated as T-010 |
-| **Scope** | Family badge colors only |
-| **Adopted parts** | SC 1.4.3 (Contrast Minimum) and SC 1.4.6 (Contrast Enhanced). BirdView targets 1.4.6, 7:1. |
-| **Exclusions** | **Everything else.** No keyboard-access, focus-order, timing, reading-level or other criteria are adopted, and BirdView claims no conformance level. |
+| **Scope** | Family badge colors (T-010), and link and text colors against the page surfaces (T-023) |
+| **Adopted parts** | SC 1.4.3 (Contrast Minimum) and SC 1.4.6 (Contrast Enhanced). Badges and links target 1.4.6 at 7:1; other text is held to 1.4.3 at 4.5:1. |
+| **Exclusions** | **Everything else.** No keyboard-access, focus-order, timing, reading-level or other criteria are adopted, and BirdView claims no conformance level. The scope widened once, from badges to all text, after an unstyled link shipped at 1.9:1 — see [CR-013](decisions.md). |
 | **Owner** | W3C; project owner grants any deviation |
 | **Status** | **Partial by design.** Adopted for two criteria, restated as a checkable requirement, not vendored. |
 

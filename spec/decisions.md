@@ -843,6 +843,78 @@ independently, which is a useful accident: two unrelated rules point the same wa
 
 ---
 
+## CR-013 — Contrast is checked for all text, at two floors rather than one
+
+**Subject:** `text.contrast.ratio`
+**Kind:** Source scope widened, after a defect the existing scope could not see
+**Date:** 2026-09-23 · **Decided by:** Sameer
+
+### What prompted it
+
+The iNaturalist link of [CR-012](#cr-012) shipped with no `color` rule, so it fell back to the
+browser default: `#0000EE` on a `#0f172a` background, which is **1.90:1**, and `#551A8B` once
+visited, which is **1.62:1**. Effectively invisible. A reader spotted it immediately.
+
+Nothing caught it, and nothing could have. [`wcag`](sources.md) was adopted with its scope set to
+*"Family badge colors only"*, on the reasoning that badge colors are **generated** and an unchecked
+generator is obviously dangerous. That reasoning was right and incomplete: hand-written CSS turned
+out to be just as dangerous, and had no check at all.
+
+### The decision that was not obvious
+
+Extending the badge floor of 7:1 to everything would have been the tidy answer, and it fails
+immediately. `--dim`, the secondary text color used for scientific names, provenance detail and
+counts, is **6.96:1** on the page background and **5.71:1** on a panel. So would `--accent` on a
+panel, at 6.83:1.
+
+Raising the floor to 7:1 therefore means repainting the secondary text of the entire interface —
+a much larger change than a broken link warrants, and one nobody asked for.
+
+So **two floors**, and the gap between them stated rather than rounded up:
+
+| | Floor | Why |
+| --- | --- | --- |
+| Badges and chips | 7:1 against their own text (T-010, unchanged) | the colors are generated |
+| **Links** | **7:1** against the page background | interactive, and the palette clears it easily at 8.33:1 |
+| **All other text** | **4.5:1** against both surfaces | AA; `--dim` clears this comfortably |
+
+Links get the strict floor because nothing makes it hard: `--accent` is already 8.33:1 on the page
+background, and the new visited color is 9.67:1. The 7:1 link check is applied against the page
+background specifically, having verified that no bare `<a>` sits inside `.help` or `.controls`,
+whose surface is `--panel`. If one ever does, the 4.5:1 rule still governs it and the check still
+runs.
+
+### The second assertion, which is the one that matters
+
+A contrast check over *declared* colors is blind to the colour nobody declared — which is precisely
+how this bug shipped. So AC-070 also asserts the stylesheet carries top-level `a` and `a:visited`
+rules, making "someone forgot" impossible rather than merely unlikely.
+
+Colors are now set by a global rule rather than per component, so a new link inherits a good color
+by default instead of needing to be remembered.
+
+### A visited state now exists at all
+
+There was none before. Every link in the interface rendered identically whether or not it had been
+followed, because the components that styled links set `color` without a `:visited` companion,
+which suppresses the browser's own visited color as a side effect. That was invisible rather than
+wrong, until a link appeared with no rule and the default purple arrived at 1.62:1.
+`--accent-visited: #c4b5fd` is 9.67:1 on the page background and clearly distinct from the sky-blue
+accent.
+
+### Resulting status
+
+- **`sources.md`**: the `wcag` scope widens from badges to badges *plus* link and text colors. Both
+  already-adopted criteria are now used, at the two floors above.
+- **T-023** added.
+- **AC-070** added, watched failing three ways, including against the original defect.
+- `--accent-visited` added; link colors moved to global `a` / `a:visited` rules; `.tile`, `.btn` and
+  `.chip` given explicit `:visited` rules so the global rule cannot recolor them.
+- Still excluded, and still claimed nowhere: keyboard access, focus order, timing, reading level.
+  **BirdView claims no WCAG conformance level.**
+
+---
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
