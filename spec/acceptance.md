@@ -558,6 +558,29 @@ preceding each rule, so any rule documented with a sentence containing the word 
 link selector and held to 7:1. `.sn` failed that way on the first run. Comments are stripped before
 parsing, and selectors are split into tokens rather than substring-matched.
 
+### AC-071 — The favicon is BirdView's own, and is actually renderable
+**Verifies:** T-002 · **Level:** code · **Method:** assertions over the served asset and both pages
+
+**Assertions:** `/static/favicon.svg` is served with status 200; it **parses as XML** and its root
+element is `svg` with a `viewBox`; it is drawn in the diagram's own palette; both the index and a
+detail page reference it; and `/favicon.ico` returns 404 rather than the index page, which the
+catch-all route makes worth pinning.
+
+**Status: verified 2026-09-23 — passing, and watched failing** by removing the asset while leaving
+the reference, by removing the reference while leaving the asset, by pointing the reference at a
+CDN (which trips AC-051's existing scan, as intended), and by reintroducing the XML defect below.
+
+No new requirement was added. T-002 already forbids fetching a subresource from another host and
+AC-051 already scans `<link href>` for it — confirmed here by watching a CDN favicon fail that
+check. What AC-051 cannot see is an icon referenced but not served, or served but referenced by
+nothing, so this criterion joins the two ends.
+
+**The format assertion is the part that earned its place.** Its first version searched the body for
+the substring `<svg` and passed against a file no browser could read: the SVG's comment contained a
+double hyphen, which XML forbids, so the icon would simply never have appeared. It now runs the
+parser. A format check that does not parse is not a format check — the same lesson as AC-051's
+subresource scan, one layer down.
+
 ---
 
 ## Traceability
@@ -600,7 +623,7 @@ parsing, and selectors are split into tokens rather than substring-matched.
 | P-063 | AC-043 | |
 | P-064 | AC-068 | |
 | T-001, T-003 | AC-054 | |
-| T-002 | AC-051 | |
+| T-002 | AC-051, AC-071 | |
 | T-004 | AC-050, AC-053 | |
 | T-005 | AC-050 | |
 | T-006 | AC-052 | |

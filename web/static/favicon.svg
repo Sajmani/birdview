@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img"
+     aria-label="BirdView: a bird diagram seen from above">
+  <!--
+    The same figure the app draws: a bird from above, in flight (P-040),
+    reduced to the three parts that survive 16px. Wing crossbar, body and
+    head, plus a bill nub for the palette's amber. The tail is solid rather
+    than dashed, because a 5/3 dash pattern is invisible at this size.
+
+    Colors are the diagram's own, chosen for contrast on #0f172a:
+    wing #5ccbfa at 9.67:1, body and head #cbd5e1 at 12.02:1,
+    bill #f59e0b at 8.31:1. The body's own #64748b is 3.75:1 and is not
+    used here.
+
+    Opaque background rather than transparent, so the icon reads the same
+    against light and dark browser chrome.
+
+    Note for editors: XML forbids a double hyphen inside a comment, so do
+    not write one here. It makes the file unparseable, and a browser will
+    silently show no icon at all.
+  -->
+  <rect width="32" height="32" rx="7" fill="#0f172a"/>
+  <g fill="none" stroke-linecap="round">
+    <!-- Wings first, so the body crosses in front of them, as in the app. -->
+    <path d="M2.5 14.5 H29.5" stroke="#5ccbfa" stroke-width="3"/>
+    <path d="M16 3.5 V7" stroke="#f59e0b" stroke-width="2"/>
+    <circle cx="16" cy="10" r="3.1" fill="#cbd5e1" stroke="none"/>
+    <path d="M16 12.5 V23" stroke="#cbd5e1" stroke-width="4" stroke-linecap="butt"/>
+    <path d="M16 23 V28.5" stroke="#cbd5e1" stroke-width="1.8"/>
+  </g>
+</svg>

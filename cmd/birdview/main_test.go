@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/xml"
 	"fmt"
 	"html"
 	"net/http"
@@ -1099,5 +1100,62 @@ func TestNoINaturalistImagesAreEmbedded(t *testing.T) {
 		if strings.Contains(body, bad) {
 			t.Errorf("detail page contains %q; BirdView links to iNaturalist and copies nothing from it", bad)
 		}
+	}
+}
+
+// TestFaviconIsServedLocally asserts the icon is BirdView's own, not a remote
+// one (T-002), and that both pages actually reference it.
+//
+// No new requirement was needed: T-002 already forbids fetching a subresource
+// from another host, and AC-051's scan already covers a `<link href>` pointing
+// off-host. What that scan cannot see is a favicon that is referenced but not
+// served, or served but referenced by nothing -- so this checks the two ends
+// match.
+//
+// Verifies: T-002. Criterion: AC-071.
+func TestFaviconIsServedLocally(t *testing.T) {
+	s := newTestServer(t)
+
+	code, body := get(t, s, "/static/favicon.svg")
+	if code != http.StatusOK {
+		t.Fatalf("favicon returned %d; the pages reference an asset that is not served", code)
+	}
+	// Parse it, rather than searching for "<svg". The first version of this
+	// check looked for that substring and passed against a file XML cannot
+	// read: the comment contained a double hyphen, which XML forbids, so every
+	// browser would have shown no icon at all. A format assertion that does not
+	// run the parser is not a format assertion.
+	var probe struct {
+		XMLName xml.Name
+		ViewBox string `xml:"viewBox,attr"`
+	}
+	if err := xml.Unmarshal([]byte(body), &probe); err != nil {
+		t.Fatalf("favicon is not well-formed XML, so no browser will render it: %v", err)
+	}
+	if probe.XMLName.Local != "svg" {
+		t.Errorf("favicon root element is %q, want svg", probe.XMLName.Local)
+	}
+	if probe.ViewBox == "" {
+		t.Error("favicon has no viewBox, so it will not scale to a 16px tab")
+	}
+	// It is drawn with the app's own colors, so a theme change that leaves the
+	// icon behind is visible here rather than only in a browser tab.
+	for _, want := range []string{"#0f172a", "#5ccbfa", "#cbd5e1"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("favicon does not use %s; it should be drawn in the diagram's palette", want)
+		}
+	}
+
+	for _, path := range []string{"/", "/species/ardea_herodias"} {
+		_, page := get(t, s, path)
+		if !strings.Contains(page, `href="/static/favicon.svg"`) {
+			t.Errorf("%s does not reference the favicon", path)
+		}
+	}
+
+	// A browser that probes /favicon.ico must get a clean 404, not the index
+	// page -- the catch-all route makes that worth pinning.
+	if code, _ := get(t, s, "/favicon.ico"); code != http.StatusNotFound {
+		t.Errorf("/favicon.ico returned %d, want 404", code)
 	}
 }
