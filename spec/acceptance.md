@@ -654,8 +654,13 @@ assertions on the rendered detail page
 own segment; labels stay in the order the segments do; no two are closer than the line height; and
 the last one stays inside the box.
 
-**Assertions, rendering:** the detail page emits five segment labels plus a **wing chord** label on
-the crossbar, each naming what it measures and carrying the same value the provenance table gives
+**Assertions, geometry:** across every species, the wingspan label placed beyond the wingtip clears
+the segment label column, and the reserved gutter is not so wide that the labels have more room
+than the bird. Checked over the whole fixture rather than one bird, because the binding case is the
+widest-winged species and which one that is changes with the data.
+
+**Assertions, rendering:** the detail page emits five segment labels plus **wing chord** and
+**wingspan** labels on the crossbar, each naming what it measures and carrying the same value the provenance table gives
 for it — read out of the table rather than recomputed, so the two cannot drift apart. The segment
 count is matched on the segment labels alone, so a missing segment cannot hide behind the chord. A
 tile carries none.

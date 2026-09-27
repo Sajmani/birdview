@@ -624,9 +624,14 @@ onto a part of a drawing and holding the correspondence in your head. Labeling t
 removes that step, and the detail view is the one place with room to do it — the tile is
 deliberately dense because it exists to be compared against dozens of others.
 
-This is why the detail diagram is drawn wider than the tile's proportions. The scale is limited by
-height for almost every bird, so widening the box does not enlarge the bird: it creates the margin
-outside the wingtips that the labels occupy.
+The **wing chord** is labeled centred over the measured outer segment it names, and the
+**wingspan** just beyond the right wingtip and on the crossbar's own line, so it reads as naming
+the whole bar rather than any part of it.
+
+This is why the detail diagram is drawn wider than the tile's proportions, and why the bird is laid
+out in only part of that width. The right of the box is reserved for the label column and for the
+wingspan label beyond the wingtip; a wide-winged bird is drawn slightly smaller rather than running
+under its own annotations.
 
 ### P-064 — The detail view links to the species on iNaturalist
 Subject: `presentation.detail_view.external_link`

@@ -1325,3 +1325,47 @@ func TestDetailDiagramIsLabeled(t *testing.T) {
 		t.Error("index tiles carry diagram labels; those belong to the detail view and the legend")
 	}
 }
+
+// TestWingLabelsClearTheColumn asserts the geometry the wing labels depend on:
+// the wingspan label sits just beyond the wingtip, so the bird must be laid out
+// narrow enough that it never reaches the segment label column.
+//
+// Checked across every species rather than one, because the binding case is the
+// widest-winged bird and which species that is changes with the data. Before
+// the gutter existed a Black-footed Albatross's crossbar reached x=988 in a
+// 988-wide box while the column began at 838, so the bar crossed every label on
+// that side.
+//
+// Verifies: P-066. Criterion: AC-073.
+func TestWingLabelsClearTheColumn(t *testing.T) {
+	// Wider than any label this renders; if the estimate is ever wrong it is
+	// wrong in the safe direction.
+	const spanLabelWidth = 150
+
+	full := view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}
+	inner := view.Box{W: full.W - labelGutter, H: full.H}
+	columnX := full.W - 150
+
+	ds := testDataset()
+	var worst float64 = 1e9
+	var worstName string
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		g := view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, inner)
+		end := g.CX + g.CrossbarHalfWidth + 8 + spanLabelWidth
+		if gap := columnX - end; gap < worst {
+			worst, worstName = gap, sp.CommonName
+		}
+	}
+	if worst < 0 {
+		t.Errorf("%s: the wingspan label would reach the segment column by %.1f px; "+
+			"widen labelGutter", worstName, -worst)
+	}
+
+	// And the gutter must not be so wide that it is doing nothing: the widest
+	// bird should still use most of the space it has.
+	if labelGutter >= full.W/2 {
+		t.Errorf("labelGutter is %d of a %.0f box; the bird has less room than its labels",
+			labelGutter, full.W)
+	}
+}

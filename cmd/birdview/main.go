@@ -461,7 +461,20 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 
 // legendBox is the help diagram's drawing area: smaller than the detail view's
 // but the same shape, since it renders through the same template.
-var legendBox = view.Box{W: 380 * 1.5, H: 148 * 1.2}
+var legendBox = view.Box{W: 900, H: 148 * 1.2}
+
+// labelGutter is the width reserved at the right of an annotated diagram: the
+// segment label column, plus room for the wingspan label that sits just beyond
+// the wingtip.
+//
+// The bird is laid out in the remaining width, so a wide-winged bird is drawn
+// slightly smaller rather than running under its own labels. Before this, a
+// Black-footed Albatross's wingtip reached x=988 in a 988-wide box while the
+// label column started at 838, so the crossbar crossed every label on that
+// side.
+// 320 rather than the 290 that merely fits: at 290 the widest-winged species
+// clear the column by 2px, which is not clearance, it is luck.
+const labelGutter = 320
 
 // legendPreferred are the species the help diagram would like to use, best
 // first. Each has a MODELED wingspan, so the dashed inner crossbar of P-065
@@ -489,7 +502,10 @@ func (s *server) legendSpecies() *dataset.Species {
 // labelledTile builds the annotated diagram shared by the detail view and the
 // help legend (P-066), so the two cannot drift apart.
 func labelledTile(sp *dataset.Species, box view.Box, metric bool) tile {
-	g := view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, box)
+	// The bird occupies everything left of the gutter; Box stays the full size,
+	// because the viewBox and the label column are positioned against it.
+	inner := view.Box{W: box.W - labelGutter, H: box.H}
+	g := view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, inner)
 	top := (box.H - g.TotalHeight()) / 2
 	segOf := map[string]dataset.Metric{
 		"bill": sp.Segments.Bill, "head": sp.Segments.Head, "neck": sp.Segments.Neck,
