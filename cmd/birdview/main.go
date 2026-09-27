@@ -181,6 +181,10 @@ type tile struct {
 	Length  string
 	Wing    string
 	MassStr string
+
+	// WingModeled drives the crossbar split: the inner span is dashed only when
+	// the wingspan is modeled (P-065).
+	WingModeled bool
 }
 
 type sectionView struct {
@@ -340,9 +344,10 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		for _, sp := range sec.Species {
 			sv.Tiles = append(sv.Tiles, tile{
 				S: sp, Geom: view.Layout(sp, refs[i], spanRefs[i], tileBox), Box: tileBox,
-				Length:  format(sp.TotalLength.Value, view.ByLength, opt.Metric3),
-				Wing:    format(sp.Wingspan.Value, view.ByWingspan, opt.Metric3),
-				MassStr: format(sp.Mass.Value, view.ByMass, opt.Metric3),
+				WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
+				Length:      format(sp.TotalLength.Value, view.ByLength, opt.Metric3),
+				Wing:        format(sp.Wingspan.Value, view.ByWingspan, opt.Metric3),
+				MassStr:     format(sp.Mass.Value, view.ByMass, opt.Metric3),
 			})
 		}
 		page.Sections = append(page.Sections, sv)
@@ -361,6 +366,10 @@ type detailData struct {
 	// INatURL is empty when no confident iNaturalist match exists, and the
 	// template then renders nothing at all rather than a placeholder (P-064).
 	INatURL string
+
+	// WingModeled drives the crossbar split: the inner span is dashed only when
+	// the wingspan is modeled (P-065).
+	WingModeled bool
 }
 
 type metricRow struct {
@@ -398,6 +407,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	s.render(w, "detail.html", detailData{
 		S: sp, Geom: view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, box), Box: box,
 		Metrics: rows, Opt: opt, Query: queryFor(r), INatURL: inatURL,
+		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 	})
 }
 

@@ -145,3 +145,33 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .sw.wing { border-color: #0ea5e9; }
 .help .est-demo { color: var(--accent); }
 .seealso { margin: 14px 0 0; }
+
+/* Stroke style carries provenance (P-065): solid measured, dashed modeled.
+
+   Head, neck and body are modeled for ALL 841 species, so that signal is
+   CONSTANT. Only the wingspan varies, which is why the crossbar splits: its
+   outer thirds are the measured chord and stay solid, and only the inner span
+   -- which absorbs the whole model error -- is dashed.
+
+   The body takes the crossbar's treatment: 2.5px, 6/3 dash, round caps, with
+   colour alone separating them (body #64748b, wing #0ea5e9).
+
+   The NECK keeps a finer 3/2 pattern on butt caps, and that is not an
+   inconsistency to tidy away. Round caps extend every dash by half the stroke
+   width at each end, so 6/3 at 2.5px paints 8.5 and leaves 0.5 -- fine on a
+   body, which is tens of pixels long, and useless on a neck. A median bird's
+   neck is about 8px at its own scale and a hummingbird's about 6, so a single
+   8.5px lozenge covers the whole segment and the thing reads solid: the exact
+   opposite of what it is meant to say. 3/2 on butt caps still shows a real gap
+   at 6px.
+
+   The tail is SOLID here: it is measured, and the dash it used to carry meant
+   only "this is the tail", a job the junction mark already does. */
+
+.dia .head     { fill: none; }
+.dia .neck     { stroke-dasharray: 3 2; }
+.dia .body     { stroke-width: 2.5; stroke-dasharray: 6 3; stroke-linecap: round; }
+.dia .tail     { stroke-dasharray: none; }
+.dia .wing.est { stroke-dasharray: 6 3; }
+.chordtick          { stroke: #0ea5e9; stroke-width: 1.5; opacity: .85; }
+.diagramkey { margin-top: 16px; max-width: 80ch; }

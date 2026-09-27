@@ -971,6 +971,97 @@ the next time an exception looks cheaper than a fix.
 
 ---
 
+## CR-015 — The drawing carries provenance, and the crossbar splits to do it
+
+**Subject:** `diagram.provenance`
+**Kind:** New capability, with one reversal and two exceptions worth defending
+**Date:** 2026-09-24 · **Decided by:** Sameer
+
+### What changed
+
+Stroke style now encodes provenance: solid measured, dashed modeled, head hollow. The wing crossbar
+is split at the wing chord, so its measured outer portions stay solid even when the span is
+modeled. Both pages document the code. [P-065](product.md) states it.
+
+### The reversal: what dash used to mean
+
+Dash previously meant *"this is the tail, not the body"*. It now means *modeled*, and the tail —
+being measured — becomes **solid**. The tail is still distinguishable: it keeps its own colour and
+the junction mark, which was always doing most of the work. This is a strictly better use of the
+channel, since tail-versus-body was a distinction the drawing already made twice.
+
+### The crossbar split, and an argument that was wrong on the first pass
+
+The initial objection to splitting was this: `span = a × chord^b` is multiplicative
+([CR-008](#cr-008)), so the span does not decompose into a measured part and a modeled remainder,
+and drawing it as though it did would assert a structure the model lacks.
+
+**That objection was aimed at the wrong claim.** It refutes "the span is built from a measured piece
+plus a modeled piece", which nobody proposed. What is actually drawn is a *measured length overlaid
+on* the span: the chord is a real measurement of a real anatomical stretch — carpal joint to primary
+tip — which genuinely lies at the outer end of a spread wing. Overlaying a measured length is not
+the same operation as decomposing a modeled one.
+
+The split is also **more** honest than dashing the whole crossbar, which is what the wrong argument
+would have produced. If the span model is off by 20%, the outer segment is still exactly the length
+it claims; the entire error lands in the inner segment. Measure inward from the wingtip and you get
+truth, outward from the body and you get model. Dashing the whole bar would have spread the
+uncertainty over a stretch that does not carry any.
+
+Checked against all 841 species before adopting, because the argument only holds if the data
+cooperates:
+
+| | |
+| --- | --- |
+| chord provenance | measured 831, near-match 10, **modeled 0** |
+| chord ≥ half-span (which would put the tick outside the wing) | **0 species** |
+| widest chord relative to half-span | 0.845, Calliope Hummingbird |
+
+There is no species for which the outer segment is not a measured length.
+
+Residual approximations, recorded rather than waved away. The chord is measured on a *folded* wing;
+on a spread wing the hand sweeps back slightly, so its projection on the span axis is marginally
+shorter and the tick sits a touch too far inboard — the same order of approximation as the head
+oval's aspect ratio. And the tick's *position* is derived from a modeled span even though its
+distance from the wingtip is not, which is why nothing calls it "the carpal joint".
+
+### Exception 1: the neck's dash pattern differs, deliberately
+
+The body takes the crossbar's exact treatment — 2.5px, 6/3, round caps. The neck keeps a finer 3/2
+on butt caps.
+
+This looks like an inconsistency and is not. Round caps extend every dash by half the stroke width
+at each end, so 6/3 at 2.5px paints 8.5px and leaves 0.5px. A body is tens of pixels long and
+carries that happily. A median neck is about 8px at its own scale and a hummingbird's about 6, so a
+single lozenge covers the whole segment and the neck reads **solid** — the exact opposite of what it
+is there to say. Caught by the owner on sight, after the matched treatment was tried and shipped to
+the prototype.
+
+Recorded because the next person to read the stylesheet will want to tidy the two into agreement.
+
+### Exception 2: three of the five segments never vary
+
+Head, neck and body are modeled for all 841 species, so that part of the signal is constant — worth
+learning once, not worth shouting on every tile. Only the wingspan's provenance differs bird to
+bird, which is why the crossbar gets the loud treatment and the vertical axis is quieter. The head
+is hollow rather than dashed for the same reason as well as the geometric one.
+
+A constant signal is still worth drawing. It is the answer to "which parts of this shape are real",
+which a reader can only ask once but must be able to answer.
+
+### Resulting status
+
+- **P-065** added; **P-040** amended, since the tail's stroke style now means something else.
+- **AC-072** added.
+- `dataset.Species.WingChord` added: AVONET's `Wing.Length`, previously consumed by the wingspan
+  model and discarded. Note this is the **ornithological** chord, carpal joint to primary tip, not
+  the aerodynamic chord of leading edge to trailing edge — the two share a name, and only the first
+  can be drawn along a crossbar.
+- The `?prov=1` prototype flag and its head/body variant switches are **removed**; the rendering is
+  unconditional.
+
+---
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

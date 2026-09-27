@@ -161,3 +161,56 @@ func TestNoLinkUsesTheBrowserDefault(t *testing.T) {
 func stripComments(css string) string {
 	return regexp.MustCompile(`(?s)/\*.*?\*/`).ReplaceAllString(css, "")
 }
+
+// TestStrokeStyleCarriesProvenance asserts P-065 where it is actually defined:
+// in the stylesheet, one rule per drawn element.
+//
+// Verifies: P-065. Criterion: AC-072.
+func TestStrokeStyleCarriesProvenance(t *testing.T) {
+	css := stripComments(string(mustReadStyles(t)))
+
+	decl := func(sel string) string {
+		m := regexp.MustCompile(regexp.QuoteMeta(sel) + `\s*\{([^}]*)\}`).FindStringSubmatch(css)
+		if m == nil {
+			t.Fatalf("stylesheet has no rule for %q", sel)
+		}
+		return m[1]
+	}
+	dashed := func(sel string) bool { return strings.Contains(decl(sel), "stroke-dasharray") }
+
+	// Modeled elements are dashed.
+	for _, sel := range []string{".dia .neck", ".dia .body", ".dia .wing.est"} {
+		if !dashed(sel) {
+			t.Errorf("%s is modeled but carries no stroke-dasharray", sel)
+		}
+	}
+	// The head is hollow, since a dash means nothing on a closed shape.
+	if !strings.Contains(decl(".dia .head"), "fill: none") {
+		t.Error(".dia .head is modeled but is not drawn hollow")
+	}
+	// Measured elements are not dashed. The tail is the one that matters: dash
+	// used to mean "this is the tail", and anyone restoring that on aesthetic
+	// grounds inverts the meaning of the whole scheme while every other
+	// assertion here still passes.
+	if d := decl(".dia .tail"); !strings.Contains(d, "stroke-dasharray: none") {
+		t.Errorf(".dia .tail must explicitly clear its dash: it is a MEASURED length, and a dashed "+
+			"tail reverses what dash means everywhere else. Got %q", strings.TrimSpace(d))
+	}
+	if strings.Contains(decl(".bill"), "stroke-dasharray") {
+		t.Error(".bill is measured but is dashed")
+	}
+
+	// The neck's pattern differs from the body's, deliberately: matching them
+	// makes a 6px neck render as one lozenge, i.e. solid (CR-015).
+	pat := func(sel string) string {
+		m := regexp.MustCompile(`stroke-dasharray:\s*([^;]+)`).FindStringSubmatch(decl(sel))
+		if m == nil {
+			return ""
+		}
+		return strings.TrimSpace(m[1])
+	}
+	if n, b := pat(".dia .neck"), pat(".dia .body"); n == b {
+		t.Errorf("neck and body share the dash pattern %q; the neck needs a finer one, or short "+
+			"necks paint as a single dash and read solid", n)
+	}
+}

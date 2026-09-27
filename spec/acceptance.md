@@ -581,6 +581,43 @@ double hyphen, which XML forbids, so the icon would simply never have appeared. 
 parser. A format check that does not parse is not a format check — the same lesson as AC-051's
 subresource scan, one layer down.
 
+### AC-072 — The diagram distinguishes measured from modeled, and says so
+**Verifies:** P-065, P-040 · **Level:** code · **Method:** geometry unit tests, a structural check
+over the stylesheet, and assertions on both rendered pages
+
+**Assertions, geometry:** `ChordTickX` equals the scaled half-span minus the scaled chord exactly;
+it is zero when no chord is available or when the chord would reach the axis, so the renderer falls
+back to a whole crossbar rather than drawing a tick outside the wing.
+
+**Assertions, stroke style:** in the stylesheet, every modeled element — neck, body, and the
+modeled crossbar — carries a `stroke-dasharray`; every measured one — bill, tail, and the plain
+crossbar — does not; and the head is drawn with `fill: none`. The **tail must not be dashed**, which
+is the assertion that catches a revert to the old meaning of dash.
+
+**Assertions, the neck exception:** the neck's dash pattern differs from the body's. Stated as a
+requirement of the check, not merely tolerated by it, because the two look like an inconsistency
+and tidying them into agreement makes short necks render solid (CR-015).
+
+**Assertions, rendering:** a species with a **measured** wingspan emits no dashed crossbar segment;
+one with a **modeled** wingspan emits exactly one, flanked by two solid segments and marked by two
+ticks; and the index and detail pages each carry text explaining what solid, dashed and the tick
+mean.
+
+**Status: verified 2026-09-24 — passing, and watched failing** by: restoring the tail's dash;
+tidying the neck's pattern to match the body's; giving the head a fill back; placing the tick by
+half the chord instead of the chord; removing the overrun fallback so a tick is drawn outside the
+wing; and deleting the explanatory text from the index.
+
+Found while writing it: the first version of the rendered-page check was **vacuous twice over**.
+The server fixture carried no wing chord, so no crossbar ever split, and no fixture species had a
+modeled wingspan, so the dashed case could not arise. Both were fixed in the fixture rather than
+worked around in the assertion — every fixture bird now has a chord shorter than its own half-span,
+as all 841 real species do, and the crow's wingspan is modeled on purpose.
+
+The tail assertion is the one most likely to look redundant and is the most valuable. Dash used to
+mean "this is the tail"; anyone restoring that on aesthetic grounds reverses the meaning of the
+whole scheme, and every other assertion here would still pass.
+
 ---
 
 ## Traceability
@@ -607,7 +644,7 @@ subresource scan, one layer down.
 | P-036 | AC-062 | |
 | P-037 | AC-061 | |
 | P-038 | AC-062 | partial — behavior unverifiable without a browser |
-| P-040 | AC-033, AC-067, AC-069 | AC-066 withdrawn (CR-010) |
+| P-040 | AC-033, AC-067, AC-069, AC-072 | AC-066 withdrawn (CR-010) |
 | P-041 | AC-030, AC-067 | |
 | P-042 | AC-031, AC-063 | |
 | P-043 | AC-032 | |
@@ -622,6 +659,7 @@ subresource scan, one layer down.
 | P-062 | AC-040 | |
 | P-063 | AC-043 | |
 | P-064 | AC-068 | |
+| P-065 | AC-072 | |
 | T-001, T-003 | AC-054 | |
 | T-002 | AC-051, AC-071 | |
 | T-004 | AC-050, AC-053 | |

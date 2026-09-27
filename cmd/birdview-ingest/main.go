@@ -243,7 +243,8 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 				Body: dataset.Metric{Value: body, Prov: modeled(bodyModel)},
 				Tail: dataset.Metric{Value: tail, Prov: traitProv()},
 			},
-			Mass: dataset.Metric{Value: morphology.Round1(res.traits.Mass), Prov: traitProv()},
+			Mass:      dataset.Metric{Value: morphology.Round1(res.traits.Mass), Prov: traitProv()},
+			WingChord: dataset.Metric{Value: morphology.Round1(res.traits.WingChord), Prov: traitProv()},
 			TotalLength: dataset.Metric{
 				Value: total,
 				Prov: modeled("sum of the five diagram segments; bill and tail measured, " +

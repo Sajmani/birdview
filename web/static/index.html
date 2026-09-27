@@ -55,9 +55,17 @@
     </section>
     <section>
       <h3>Where the numbers come from</h3>
-      <p>A <b class="est-demo">~</b> after a measurement means it is estimated rather than
-      measured. Most lengths are: no open dataset publishes body length for North American birds,
-      so BirdView models it and says so.</p>
+      <p><b>Solid lines are measured. Dashed lines are estimated.</b> So a bill and a tail are
+      drawn solid, a neck and a body dashed, and the head is left hollow &mdash; a dash means
+      nothing on a closed shape, so an empty outline says it instead.</p>
+      <p>The <b>wing crossbar</b> is split. Its solid outer ends are the measured wing chord, from
+      the bend of the wing to the longest primary; the <b>tick marks</b> show where that
+      measurement reaches. Only the span between the ticks is estimated, and it is drawn dashed
+      when it is &mdash; so for two thirds of these birds the wingtips are real and the middle is
+      inferred.</p>
+      <p>A <b class="est-demo">~</b> after a measurement means the same thing in the numbers. Most
+      lengths are estimated: no open dataset publishes body length for North American birds, so
+      BirdView models it and says so.</p>
       <p><b>Click any bird</b> for every measurement, including each part of the diagram, with the
       source or the model behind it named individually.</p>
     </section>
@@ -224,8 +232,24 @@
 <svg class="dia" viewBox="0 0 {{f1 $b.W}} {{f1 $b.H}}" preserveAspectRatio="xMidYMid meet" role="img"
      aria-label="scaled outline of {{.S.CommonName}}">
   <g transform="translate(0,{{f1 (div (sub $b.H $g.TotalHeight) 2)}})">
+    {{if $g.ChordTickX}}
+    {{/* Outer thirds are the MEASURED wing chord: carpal joint to primary tip,
+         so always solid. The inner span carries the whole model error, so it
+         alone is dashed when the wingspan is modeled. */}}
     <line class="wing" x1="{{f1 (sub $g.CX $g.CrossbarHalfWidth)}}" y1="{{f1 $g.YShoulder}}"
+          x2="{{f1 (sub $g.CX $g.ChordTickX)}}" y2="{{f1 $g.YShoulder}}"/>
+    <line class="wing" x1="{{f1 (add $g.CX $g.ChordTickX)}}" y1="{{f1 $g.YShoulder}}"
           x2="{{f1 (add $g.CX $g.CrossbarHalfWidth)}}" y2="{{f1 $g.YShoulder}}"/>
+    <line class="wing{{if .WingModeled}} est{{end}}" x1="{{f1 (sub $g.CX $g.ChordTickX)}}" y1="{{f1 $g.YShoulder}}"
+          x2="{{f1 (add $g.CX $g.ChordTickX)}}" y2="{{f1 $g.YShoulder}}"/>
+    <line class="chordtick" x1="{{f1 (sub $g.CX $g.ChordTickX)}}" y1="{{f1 (sub $g.YShoulder 4)}}"
+          x2="{{f1 (sub $g.CX $g.ChordTickX)}}" y2="{{f1 (add $g.YShoulder 4)}}"/>
+    <line class="chordtick" x1="{{f1 (add $g.CX $g.ChordTickX)}}" y1="{{f1 (sub $g.YShoulder 4)}}"
+          x2="{{f1 (add $g.CX $g.ChordTickX)}}" y2="{{f1 (add $g.YShoulder 4)}}"/>
+    {{else}}
+    <line class="wing{{if .WingModeled}} est{{end}}" x1="{{f1 (sub $g.CX $g.CrossbarHalfWidth)}}" y1="{{f1 $g.YShoulder}}"
+          x2="{{f1 (add $g.CX $g.CrossbarHalfWidth)}}" y2="{{f1 $g.YShoulder}}"/>
+    {{end}}
     <line class="bill" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBillTip}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YCraniumTop}}"/>
     <ellipse class="head" cx="{{f1 $g.CX}}" cy="{{f1 $g.YHeadCenter}}" rx="{{f1 $g.HeadRx}}" ry="{{f1 $g.HeadRy}}"/>
     {{if $g.NeckFolded}}<path class="neck" d="M {{f1 $g.CX}} {{f1 $g.YNeckTop}} A {{f1 $g.NeckArcR}} {{f1 $g.NeckArcR}} 0 0 1 {{f1 $g.CX}} {{f1 $g.NeckMid}} A {{f1 $g.NeckArcR}} {{f1 $g.NeckArcR}} 0 0 0 {{f1 $g.CX}} {{f1 $g.YShoulder}}"/>

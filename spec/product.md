@@ -351,7 +351,10 @@ as it was; see [CR-010](decisions.md#cr-010).
 
 The diagram is a vertical cross. Top to bottom: a bill stick, a head oval, a neck, a body stick,
 and a tail stick — plus one horizontal crossbar representing the wings. The tail is visually
-distinguished from the body by stroke style and a mark at the junction between them.
+distinguished from the body by stroke style, colour and a mark at the junction between them. That
+remains true under P-065, but for a different reason: the tail is measured and so solid, the body
+modeled and so dashed. The junction mark carries the distinction on its own if the two ever share a
+stroke style again.
 
 **The neck is a stick, except where the family folds it in flight.** Ardeidae and Pelecanidae fly
 with the head drawn back onto the shoulders, and for those the neck is drawn as an **S of two
@@ -559,6 +562,35 @@ Rationale: this generalizes what CR-001 established for lengths and CR-006 for s
 were solved twice, differently, because there was no single place to say how confident a number
 is. One record covers all of it, and makes each later gap a labeling problem rather than a
 redesign.
+
+### P-065 — The diagram shows which lengths are measured and which are modeled
+Subject: `diagram.provenance`
+Goals: G-001, G-004
+
+Stroke style carries provenance. A **solid** stroke is a measured length; a **dashed** stroke is a
+modeled one. `near-match` draws solid: it is a real measurement, of a real bird, taken with
+callipers — of a sibling taxon, which the detail view says and the drawing does not.
+
+That gives, for every species: **bill and tail solid**, **neck and body dashed**, and the **head
+drawn hollow** — an unfilled outline, because dash is meaningless on a closed shape and absence of
+fill says the same thing.
+
+**The wing crossbar is split.** Its outer portions are the measured wing chord — carpal joint to
+the tip of the longest primary — and are **always solid**. Only the inner span between them is
+dashed, and only when the wingspan is modeled. A tick marks where the two meet. Where no chord is
+available the crossbar is drawn whole, dashed if the span is modeled.
+
+**Both pages explain the convention**, because a visual code nobody documents is decoration.
+
+Rationale: the diagram asserted five proportions and explained none of them. A reader saw a heron's
+long neck with no cue that it is entirely invented — the `~` markers of P-061 sit on the *numbers*,
+and a reader looking at the shape never meets them. For a project whose central commitment is that
+a modeled value is never presented as a measurement (CR-001), the drawing being silent was the
+largest remaining gap.
+
+The crossbar split earns its complexity: the outer segment's length stays true even when the span
+model is wrong, so all the model's error is attributed to the inner segment, where it belongs. See
+[CR-015](decisions.md).
 
 ### P-064 — The detail view links to the species on iNaturalist
 Subject: `presentation.detail_view.external_link`

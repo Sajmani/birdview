@@ -422,3 +422,42 @@ func TestEveryFoldedFamilyHasALongNeck(t *testing.T) {
 		t.Fatal("no families fold, so this check asserts nothing")
 	}
 }
+
+// TestChordTickMarksTheMeasuredPortion asserts the geometry behind P-065's
+// split crossbar: the tick sits exactly one scaled chord inboard of the wingtip.
+//
+// That identity is the whole argument for splitting the bar. The outer segment
+// is a measured length, so it stays true even when the span model is wrong, and
+// the inner segment absorbs the entire error (CR-015). If the tick is placed by
+// any other rule, the outer segment stops being the chord and the claim the
+// drawing makes becomes false.
+//
+// Verifies: P-065. Criterion: AC-072.
+func TestChordTickMarksTheMeasuredPortion(t *testing.T) {
+	box := Box{W: 420, H: 160}
+	s := bird("Ardea herodias", 140, 40, 200, 300, 180, 1825, 2400)
+	s.WingChord = dataset.Metric{Value: 466.4}
+
+	g := Layout(s, s.TotalLength.Value, s.Wingspan.Value, box)
+	outer := g.CrossbarHalfWidth - g.ChordTickX
+	if want := s.WingChord.Value * g.PxPerMm; math.Abs(outer-want) > 1e-9 {
+		t.Errorf("outer crossbar segment is %.6f px, want the scaled chord %.6f", outer, want)
+	}
+	if g.ChordTickX <= 0 || g.ChordTickX >= g.CrossbarHalfWidth {
+		t.Errorf("tick at %.3f is not strictly inside the half-span %.3f",
+			g.ChordTickX, g.CrossbarHalfWidth)
+	}
+
+	// No chord, and a chord that would reach past the axis, both fall back to a
+	// whole crossbar rather than a tick drawn somewhere impossible.
+	for _, c := range []struct {
+		name  string
+		chord float64
+	}{{"absent", 0}, {"equal to the half-span", 912.5}, {"longer than the half-span", 2000}} {
+		s2 := bird("x", 140, 40, 200, 300, 180, 1825, 2400)
+		s2.WingChord = dataset.Metric{Value: c.chord}
+		if got := Layout(s2, s2.TotalLength.Value, s2.Wingspan.Value, box).ChordTickX; got != 0 {
+			t.Errorf("chord %s: ChordTickX is %.3f, want 0 so the bar is drawn whole", c.name, got)
+		}
+	}
+}

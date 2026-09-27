@@ -26,6 +26,17 @@ type Geometry struct {
 	YTailTip          float64
 	CrossbarHalfWidth float64
 
+	// ChordTickX is how far from the axis the measured wing chord begins, in
+	// px: CrossbarHalfWidth minus the scaled chord. Zero when unknown.
+	//
+	// The chord is the ORNITHOLOGICAL one -- carpal joint
+	// to primary tip, along the wing -- so it occupies the OUTER part of each
+	// half-span and the tick marks its inner end. It is not a boundary between
+	// a measured and a modeled portion of the span: where the span is modeled
+	// it is modeled in full, from this chord, multiplicatively. The tick says
+	// "the measurement reaches to here", nothing more.
+	ChordTickX float64
+
 	// NeckFolded is set for the families that fly with the neck drawn back onto
 	// the shoulders (P-040). Their neck is an S of two semicircles of NeckArcR
 	// rather than a straight stick, so it is the same length of stroke in less
@@ -115,6 +126,9 @@ func Layout(s *dataset.Species, refLength, refWingspan float64, box Box) Geometr
 	g.YBodyEnd = g.YShoulder + seg.Body.Value*scale
 	g.YTailTip = g.YBodyEnd + seg.Tail.Value*scale
 	g.CrossbarHalfWidth = s.Wingspan.Value * scale / 2
+	if c := s.WingChord.Value * scale; c > 0 && c < g.CrossbarHalfWidth {
+		g.ChordTickX = g.CrossbarHalfWidth - c
+	}
 	return g
 }
 

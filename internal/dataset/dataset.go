@@ -94,6 +94,15 @@ type Species struct {
 	Wingspan    Metric `json:"wingspan"`
 	Mass        Metric `json:"mass"`
 
+	// WingChord is AVONET's Wing.Length: the ORNITHOLOGICAL chord, carpal joint
+	// to the tip of the longest primary, measured along the wing. It is not the
+	// aerodynamic chord (leading edge to trailing edge), which is a different
+	// quantity on a different axis and which this diagram has no room for.
+	//
+	// Measured, and the input to the modeled wingspan (CR-008). Drawn as the
+	// solid outer portion of the crossbar (P-065).
+	WingChord Metric `json:"wingChord,omitempty"`
+
 	// Shown in the detail view (P-034).
 	Segments Segments `json:"segments"`
 }

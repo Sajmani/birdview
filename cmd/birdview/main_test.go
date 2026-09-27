@@ -17,7 +17,7 @@ import (
 )
 
 func testDataset() *dataset.Dataset {
-	mk := func(id, common, sci, fam string, bill, head, neck, body, tail, span, mass float64, k dataset.Kind) dataset.Species {
+	mk := func(id, common, sci, fam string, bill, head, neck, body, tail, span, mass, chord float64, k dataset.Kind) dataset.Species {
 		m := func(v float64) dataset.Metric {
 			return dataset.Metric{Value: v, Prov: dataset.Provenance{
 				Kind: dataset.Measured, Source: "AVONET v7, sheet AVONET2_eBird", SourceTaxon: sci}}
@@ -31,6 +31,7 @@ func testDataset() *dataset.Dataset {
 			TotalLength: mod(bill+head+neck+body+tail, "sum of the five diagram segments"),
 			Wingspan:    dataset.Metric{Value: span, Prov: dataset.Provenance{Kind: k, Source: "Fox et al. 2026", SourceTaxon: "Other species"}},
 			Mass:        m(mass),
+			WingChord:   m(chord),
 			Segments: dataset.Segments{
 				Bill: m(bill), Head: mod(head, "cranial vault model"), Neck: mod(neck, "neck ratio for "+fam),
 				Body: mod(body, "trunk model"), Tail: m(tail),
@@ -48,12 +49,17 @@ func testDataset() *dataset.Dataset {
 	}
 	// The stilt adds a fourth order, so the order-group controls are exercised
 	// against something other than the two-family Passeriformes case.
+	//
+	// The final column is the wing chord, and the crow's wingspan is MODELED on
+	// purpose: without one modeled span in the fixture, every crossbar renders
+	// solid and the split of P-065 is never exercised. Every chord is shorter
+	// than its own half-span, as it is for all 841 real species.
 	sp := []dataset.Species{
-		mk("calypte_anna", "Anna's Hummingbird", "Calypte anna", "Trochilidae", 18, 12, 6, 40, 26, 120, 4, dataset.Measured),
-		mk("turdus_migratorius", "American Robin", "Turdus migratorius", "Turdidae", 20, 18, 12, 90, 85, 390, 77, dataset.Measured),
-		mk("corvus_brachyrhynchos", "American Crow", "Corvus brachyrhynchos", "Corvidae", 50, 30, 22, 170, 180, 1000, 450, dataset.Measured),
-		mk("himantopus_mexicanus", "Black-necked Stilt", "Himantopus mexicanus", "Recurvirostridae", 66.6, 42.1, 40.3, 89.5, 73.6, 750, 176.8, dataset.NearMatch),
-		mk("ardea_herodias", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, dataset.NearMatch),
+		mk("calypte_anna", "Anna's Hummingbird", "Calypte anna", "Trochilidae", 18, 12, 6, 40, 26, 120, 4, 49, dataset.Measured),
+		mk("turdus_migratorius", "American Robin", "Turdus migratorius", "Turdidae", 20, 18, 12, 90, 85, 390, 77, 130, dataset.Measured),
+		mk("corvus_brachyrhynchos", "American Crow", "Corvus brachyrhynchos", "Corvidae", 50, 30, 22, 170, 180, 1000, 450, 330, dataset.Modeled),
+		mk("himantopus_mexicanus", "Black-necked Stilt", "Himantopus mexicanus", "Recurvirostridae", 66.6, 42.1, 40.3, 89.5, 73.6, 750, 176.8, 230, dataset.NearMatch),
+		mk("ardea_herodias", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, 466.4, dataset.NearMatch),
 	}
 	// iNaturalist taxon IDs (P-064). The stilt is deliberately left unmatched so
 	// both branches of the detail view are exercised: a species iNaturalist has
@@ -1157,5 +1163,67 @@ func TestFaviconIsServedLocally(t *testing.T) {
 	// page -- the catch-all route makes that worth pinning.
 	if code, _ := get(t, s, "/favicon.ico"); code != http.StatusNotFound {
 		t.Errorf("/favicon.ico returned %d, want 404", code)
+	}
+}
+
+// TestCrossbarSplitsAtTheChord asserts P-065 on the rendered page: a measured
+// wingspan draws no dashed segment, a modeled one draws exactly one, flanked by
+// two solid segments and marked by two ticks.
+//
+// Verifies: P-065. Criterion: AC-072.
+func TestCrossbarSplitsAtTheChord(t *testing.T) {
+	s := newTestServer(t)
+	wing := regexp.MustCompile(`<line class="(wing(?: est)?)"`)
+
+	cases := []struct {
+		id, name    string
+		spanModeled bool
+	}{
+		{"ardea_herodias", "Great Blue Heron", false},
+		{"corvus_brachyrhynchos", "American Crow", true},
+	}
+	for _, c := range cases {
+		_, body := get(t, s, "/species/"+c.id)
+		var solid, dash int
+		for _, m := range wing.FindAllStringSubmatch(body, -1) {
+			if strings.Contains(m[1], "est") {
+				dash++
+			} else {
+				solid++
+			}
+		}
+		ticks := strings.Count(body, `class="chordtick"`)
+		if c.spanModeled {
+			if dash != 1 || solid != 2 {
+				t.Errorf("%s: modeled span drew %d solid and %d dashed wing segments, want 2 and 1",
+					c.name, solid, dash)
+			}
+		} else if dash != 0 || solid != 3 {
+			// A measured span still splits into three; all three are solid.
+			t.Errorf("%s: measured span drew %d solid and %d dashed wing segments, want 3 and 0",
+				c.name, solid, dash)
+		}
+		// Both cases split, so both carry ticks: the split shows where the
+		// measurement reaches, which is true whether or not the span is modeled.
+		if ticks != 2 {
+			t.Errorf("%s: %d chord ticks, want 2", c.name, ticks)
+		}
+	}
+}
+
+// TestBothPagesExplainTheStrokeCode asserts the other half of P-065: a visual
+// code nobody documents is decoration.
+//
+// Verifies: P-065. Criterion: AC-072.
+func TestBothPagesExplainTheStrokeCode(t *testing.T) {
+	s := newTestServer(t)
+	for _, path := range []string{"/", "/species/ardea_herodias"} {
+		_, body := get(t, s, path)
+		low := strings.ToLower(body)
+		for _, want := range []string{"solid", "dashed", "tick", "chord"} {
+			if !strings.Contains(low, want) {
+				t.Errorf("%s does not explain %q; the stroke code is undocumented there", path, want)
+			}
+		}
 	}
 }
