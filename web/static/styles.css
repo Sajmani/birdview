@@ -185,12 +185,20 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .dlabel { fill: var(--ink); font-size: 11px; }
 .dlabel.chord, .dlabel.span { fill: #0ea5e9; }
 .dlabel.est::after { content: " ~"; }
-.legenddia { max-width: 570px; margin: 6px 0; }
+/* Half again the previous 570px. The column is wider than that, so the cap was
+   leaving the legend small with empty space beside it -- and the legend is the
+   one thing in this panel worth looking at (P-035). */
+.legenddia { max-width: 855px; margin: 6px 0; }
 
 /* The control explanations live with the controls they describe, laid out in
    two columns so the definition list does not become a single long ribbon. */
 .ctrlhelp { columns: 2; column-gap: 26px; margin-bottom: 12px; }
 .ctrlhelp dl { margin: 0; font-size: 12.5px; color: var(--dim); }
 .ctrlhelp dt { color: var(--ink); font-weight: 600; margin-top: 6px; }
-.ctrlhelp dt:first-child { margin-top: 0; }
-.ctrlhelp dd { margin: 1px 0 0; break-inside: avoid; }
+.ctrlhelp dd { margin: 1px 0 0; }
+/* Each control is one unit, so a column break cannot land between a heading and
+   the text under it. break-inside on the dd alone does not do this: it keeps
+   the paragraph whole while still allowing the dt to be orphaned above it,
+   which is exactly what happened to "Section step". */
+.ctrlhelp .ctrl { break-inside: avoid; }
+.ctrlhelp .ctrl:first-child dt { margin-top: 0; }

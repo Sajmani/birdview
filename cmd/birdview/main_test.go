@@ -1387,3 +1387,28 @@ func TestWingLabelsClearTheColumn(t *testing.T) {
 			labelGutter, full.W)
 	}
 }
+
+// TestEveryControlEntryIsWrapped is the markup half of the column-break fix:
+// the CSS rule only helps if every heading-and-text pair is actually inside a
+// wrapper for it to act on.
+//
+// Verifies: P-035. Criterion: AC-059.
+func TestEveryControlEntryIsWrapped(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/")
+	i := strings.Index(body, `<div class="ctrlhelp">`)
+	if i < 0 {
+		t.Fatal("no control explanation block")
+	}
+	block := body[i:]
+	block = block[:strings.Index(block, "</details>")]
+
+	dts := strings.Count(block, "<dt>")
+	wrapped := strings.Count(block, `<div class="ctrl"><dt>`)
+	if dts == 0 {
+		t.Fatal("no control entries found")
+	}
+	if wrapped != dts {
+		t.Errorf("%d of %d control entries are wrapped for break-inside; an unwrapped one can "+
+			"have its heading split from its text across the column break", wrapped, dts)
+	}
+}

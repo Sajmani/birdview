@@ -214,3 +214,33 @@ func TestStrokeStyleCarriesProvenance(t *testing.T) {
 			"necks paint as a single dash and read solid", n)
 	}
 }
+
+// TestControlHelpEntriesAreUnbreakable asserts that a column break cannot land
+// between a control's heading and the text under it.
+//
+// This is not a style preference. The control help is laid out in two columns,
+// and "Section step" shipped with its heading at the foot of the first column
+// and its explanation at the head of the second, reading as though the text
+// belonged to whatever came next.
+//
+// `break-inside: avoid` on the dd is NOT sufficient and was what was there
+// before: it keeps the paragraph whole while still allowing the dt to be
+// orphaned above it. The pair has to be one unbreakable box.
+//
+// Verifies: P-035. Criterion: AC-059.
+func TestControlHelpEntriesAreUnbreakable(t *testing.T) {
+	css := stripComments(string(mustReadStyles(t)))
+	m := regexp.MustCompile(`\.ctrlhelp \.ctrl\s*\{([^}]*)\}`).FindStringSubmatch(css)
+	if m == nil {
+		t.Fatal("no rule for .ctrlhelp .ctrl; control entries are not grouped into unbreakable units")
+	}
+	if !strings.Contains(m[1], "break-inside: avoid") {
+		t.Errorf(".ctrlhelp .ctrl does not set break-inside: avoid, so a column break can "+
+			"separate a control's heading from its text. Got %q", strings.TrimSpace(m[1]))
+	}
+	// The multi-column context has to exist, or the rule above guards nothing.
+	if c := regexp.MustCompile(`\.ctrlhelp\s*\{([^}]*)\}`).FindStringSubmatch(css); c == nil ||
+		!strings.Contains(c[1], "columns") {
+		t.Error(".ctrlhelp is not a multi-column layout; the unbreakable rule is guarding nothing")
+	}
+}
