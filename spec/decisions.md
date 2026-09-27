@@ -1062,6 +1062,79 @@ which a reader can only ask once but must be able to answer.
 
 ---
 
+## CR-016 — Total iNaturalist coverage, reached by widening the evidence rather than lowering the bar
+
+**Subject:** `presentation.detail_view.external_link`
+**Kind:** Requirement tightened, after diagnosis showed the shortfall was artifactual
+**Date:** 2026-09-27 · **Decided by:** Sameer
+
+### What prompted it
+
+[CR-012](#cr-012) shipped with 811 of 841 species linked and treated the other 30 as correct
+absences: species iNaturalist had not confidently matched, mostly assumed to be splits it had not
+followed. The owner asked for **100% coverage**.
+
+That request sits directly against CR-012's central rule, that a wrong bird is worse than no link.
+Reaching totality by relaxing the match would have traded a visible absence for an invisible error
+— the worse failure. So the 30 were diagnosed one at a time first.
+
+### What the 30 actually were
+
+Not one was a genuine disagreement. Every one was a formatting or synonym artifact:
+
+| | n | cause |
+| --- | --- | --- |
+| Hawaiian okina | 15 | `ʻ` is U+02BB, Unicode category **Lm** — a *letter* — so `unicode.IsLetter` kept it and `ʻApapane` never matched `Apapane` |
+| ABA parenthetical alternates | 6 | "Chinese Hwamei (Hwamei)": the checklist lists both authorities' names, as its own header says |
+| British spelling | 2 | "Grey-tailed Tattler" against "Gray-tailed Tattler" |
+| Generic reassignment | 5 | iNaturalist uses *Leuconotopicus* and *Hesperiphona* where ABA uses *Dryobates* and *Coccothraustes* |
+| Search failure | 1 | `Alle alle` — the plain search returns a mustard plant and a domestic cat |
+| Preferred-name mismatch | 1 | *Poecile cinctus* |
+
+### The one that looked genuine, and was not
+
+*Poecile cinctus* appeared to be a real vernacular disagreement: iNaturalist prefers **Siberian
+Tit**, ABA says **Gray-headed Chickadee**. Linking it looked like it would need either a
+hand-curated override or scientific-name-only evidence.
+
+Asking for every vernacular rather than the preferred one settled it. iNaturalist holds
+`["Siberian Tit", "Gray-headed Chickadee", "Grey-headed Chickadee", "Alaska Chickadee"]`. **The
+authorities agree**; they disagree only about which name leads.
+
+So comparing against all English names is *more* evidence at the same bar, not a lower bar. Every
+other rule below is the same shape: a name that was always the same name, previously compared in a
+form that could not see it.
+
+### The one rule that genuinely loosens, and why it is safe
+
+Accepting a different genus is the only change that admits a pair the old rule refused on the
+merits. It is bounded two ways: the species epithet must match, **and** a common name must still
+agree. An epithet match alone would be far too loose, and is never accepted alone. *Dryobates
+villosus* links to *Leuconotopicus villosus* because both are the Hairy Woodpecker; it does not link
+to *Leuconotopicus borealis*, and the criterion asserts that.
+
+### Also found
+
+`exact_query` is not a parameter the iNaturalist API recognises. Passed anyway, it is silently
+ignored and the endpoint returns its default popular taxa — Mallard, Western Honey Bee. A resolver
+trusting it would have linked every species to a Mallard while appearing to work. Recorded because
+the failure mode is silent and the parameter name is plausible.
+
+The search endpoint was also replaced with `/v1/taxa/autocomplete`, which finds `Alle alle` where
+the other cannot.
+
+### Resulting status
+
+- **P-064** amended: both names must still agree, but each is compared more thoroughly.
+- **AC-068** extended: a case per bucket, plus the assertion that a differing genus is refused when
+  the common name does not agree.
+- Coverage is now a **required** 841 of 841, asserted over the built dataset rather than reported.
+  A species that stops resolving is a fault, not an absence.
+- The normalizer drops separators rather than collapsing them, because an okina sits *inside* a
+  word and collapsing it to a space merely moves the mismatch: `Hawaiʻi` became `hawai i`.
+
+---
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

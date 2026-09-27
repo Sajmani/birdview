@@ -621,10 +621,22 @@ Goals: G-001, G-004
 The detail view carries a link to the species' iNaturalist taxon page, so a reader who has just
 learned how big a bird is can go and see one.
 
-The link is shown **only where the match is confident**: the scientific name matched iNaturalist's
-exactly, and the common name iNaturalist returns agrees with ABA's once punctuation and case are
-normalized. A species that fails either test shows **no link at all** — not a search URL, not a
-genus page, not a guess.
+The link is shown **only where the match is confident**, which requires **both** names to agree:
+
+- **Scientific name** — identical, or differing only in genus while sharing a species epithet, which
+  is a generic reassignment one authority has made and the other has not.
+- **Common name** — ABA's matches **any** English name iNaturalist holds for the taxon, not merely
+  its preferred one, once case, punctuation and British spelling are normalized and any ABA
+  parenthetical alternate is set aside.
+
+A species that fails **either** test shows **no link at all** — not a search URL, not a genus page,
+not a guess. Neither name alone is sufficient: the scientific name identifies the species and the
+common name is the independent second opinion that stops a near miss becoming a link to the wrong
+bird.
+
+**Coverage is expected to be total.** Every in-scope species resolves under these rules, and a
+species that stops resolving is a fault to investigate rather than an absence to accept — see
+[CR-016](decisions.md).
 
 BirdView **links and never copies**. No photograph is embedded, hotlinked, cached or reproduced;
 the reader arrives on iNaturalist, where each image carries its own license. T-002 forbids the

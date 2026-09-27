@@ -16,10 +16,10 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
-	"unicode"
 )
 
 // TaxonURL is where a taxon ID resolves on the public site.
@@ -37,44 +37,131 @@ type Entry struct {
 // Table maps a BirdView scientific name to its iNaturalist taxon.
 type Table map[string]Entry
 
+// parenthetical matches an ABA alternate name, e.g. the "(Hwamei)" in
+// "Chinese Hwamei (Hwamei)". The checklist's own header explains these: "where
+// discrepancies in names occur between Clements/eBird and the AOS, both are
+// listed, that of AOS in parentheses."
+var parenthetical = regexp.MustCompile(`\s*\([^)]*\)`)
+
 // normalize reduces a common name to the form the two authorities can be
-// compared in: lowercase, no punctuation, single-spaced.
+// compared in: lowercase, British spelling folded, and ASCII letters and digits
+// only, with every separator DROPPED rather than collapsed to a space.
 //
-// This exists for one real case. ABA writes "Western Warbling-Vireo" and
-// iNaturalist writes "Western Warbling Vireo" -- the same bird, disagreeing
-// about a hyphen. Comparing raw strings would drop that link for no reason,
-// and dropping links for no reason trains a reader to distrust the ones that
-// remain.
+// Two decisions here, both learned from real failures.
+//
+// ASCII-only, rather than unicode.IsLetter: the Hawaiian okina is U+02BB, whose
+// Unicode category is Lm -- a LETTER -- so IsLetter keeps it and "ʻApapane"
+// never matches "Apapane". Fifteen Hawaiian species went unlinked for that.
+//
+// Dropped rather than collapsed: an okina sits INSIDE a word, so turning it
+// into a space splits "Hawaiʻi" into "hawai i" and the mismatch survives in a
+// new form. Dropping every separator makes word boundaries irrelevant on both
+// sides, which also absorbs the hyphen in "Western Warbling-Vireo". The cost is
+// that "Graybird" and "Gray bird" would compare equal; the benefit is that no
+// punctuation convention can break a match, and the scientific name is checked
+// independently anyway.
 func normalize(s string) string {
+	s = strings.ToLower(s)
+	s = strings.ReplaceAll(s, "grey", "gray") // Grey-tailed Tattler vs Gray-tailed
+
 	var b strings.Builder
-	space := true // collapse leading space too
-	for _, r := range strings.ToLower(s) {
-		switch {
-		case unicode.IsLetter(r) || unicode.IsDigit(r):
+	for _, r := range s {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
 			b.WriteRune(r)
-			space = false
-		case !space:
-			b.WriteRune(' ')
-			space = true
 		}
 	}
-	return strings.TrimSpace(b.String())
+	return b.String()
+}
+
+// commonVariants returns the forms of a common name worth comparing: the whole
+// thing, and the same with any ABA alternate in parentheses removed.
+func commonVariants(s string) []string {
+	out := []string{normalize(s)}
+	if stripped := parenthetical.ReplaceAllString(s, ""); stripped != s {
+		if n := normalize(stripped); n != "" && n != out[0] {
+			out = append(out, n)
+		}
+	}
+	return out
+}
+
+// gendered are the Latin adjectival endings that change when a species moves
+// genus, longest first so that "rum" is tried before "um".
+//
+// A specific epithet agrees in grammatical gender with its genus, so a generic
+// reassignment can rewrite it: Coccothraustes is masculine and takes
+// vespertinus, Hesperiphona is feminine and takes vespertina. Same bird, same
+// epithet, different ending.
+var gendered = []string{"rum", "um", "us", "is", "ra", "er", "a", "e"}
+
+// stem strips a gendered ending, so epithets can be compared across a change of
+// genus. Short results are left alone: trimming two letters off a five-letter
+// epithet leaves too little to be evidence of anything.
+func stem(epithet string) string {
+	for _, suf := range gendered {
+		if len(epithet) > len(suf)+3 && strings.HasSuffix(epithet, suf) {
+			return epithet[:len(epithet)-len(suf)]
+		}
+	}
+	return epithet
+}
+
+// sameSpecies reports whether two scientific names denote the same species:
+// identical, or differing only in genus while sharing a species epithet -- up
+// to the gender agreement that a change of genus forces.
+//
+// On its own an epithet match would be far too loose; it is only ever accepted
+// alongside an agreeing common name, which is what makes it safe. Dryobates
+// villosus links to Leuconotopicus villosus because both are the Hairy
+// Woodpecker, and does not link to Leuconotopicus borealis.
+func sameSpecies(want, got string) bool {
+	want, got = strings.TrimSpace(want), strings.TrimSpace(got)
+	if strings.EqualFold(want, got) {
+		return true
+	}
+	w, g := strings.Fields(want), strings.Fields(got)
+	if len(w) != 2 || len(g) != 2 {
+		return false
+	}
+	we, ge := strings.ToLower(w[1]), strings.ToLower(g[1])
+	return we == ge || stem(we) == stem(ge)
 }
 
 // Accept reports whether an iNaturalist result is a confident enough match for
 // a BirdView species to link to (P-064).
 //
-// Both names must agree: the scientific name exactly, the common name once
-// punctuation and case are normalized. Scientific name alone would find the
-// right page nearly always -- and the rare miss would be a plausible *wrong
-// bird*, which on this of all pages is worse than no link. Requiring both means
-// a taxonomic revision on either side drops the link rather than silently
-// repointing it.
-func Accept(wantSci, wantCommon, gotSci, gotCommon string) bool {
-	if !strings.EqualFold(strings.TrimSpace(wantSci), strings.TrimSpace(gotSci)) {
+// Both names must agree. The scientific name identifies the species, exactly or
+// through a generic reassignment; the common name is the independent second
+// opinion that stops a near miss becoming a link to the wrong bird. Neither
+// alone is sufficient, and that is the whole design: a plausible wrong bird is
+// worse than no link on a page about being careful what you claim.
+//
+// gotCommons is EVERY English name iNaturalist holds for the taxon, not just
+// its preferred one. That is more evidence at the same bar, not a lower bar:
+// iNaturalist prefers "Siberian Tit" for Poecile cinctus and also carries ABA's
+// "Gray-headed Chickadee", and the two authorities do agree -- they just
+// disagree about which name leads.
+func Accept(wantSci, wantCommon, gotSci string, gotCommons []string) bool {
+	if !sameSpecies(wantSci, gotSci) {
 		return false
 	}
-	return normalize(wantCommon) == normalize(gotCommon) && normalize(wantCommon) != ""
+	want := commonVariants(wantCommon)
+	if len(want) == 0 || want[0] == "" {
+		return false
+	}
+	for _, gc := range gotCommons {
+		for _, g := range commonVariants(gc) {
+			if g == "" {
+				continue
+			}
+			for _, w := range want {
+				if w == g {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 // Load reads a mapping table. The format is one tab-separated record per line,

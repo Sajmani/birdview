@@ -486,14 +486,23 @@ other line in that test.
 mapping table, plus assertions on the rendered detail page; the resolver is exercised against an
 `httptest` server, never the live API
 
-**Assertions, matching:** a taxon whose scientific name differs is rejected; a taxon whose common
-name disagrees with ABA's is rejected even when the scientific name matches exactly; a common name
-differing only in punctuation, case or whitespace is **accepted**, so the Western Warbling-Vireo
-hyphen does not cost a link.
+**Assertions, matching:** a taxon whose species epithet differs is rejected; a taxon whose common
+name disagrees with ABA's is rejected even when the scientific name matches exactly; and each of
+the five forms of agreement is accepted — a Hawaiian okina against its absence, an ABA parenthetical
+alternate, British against American spelling, a hyphen against a space, and a name iNaturalist holds
+but does not prefer. A **different genus** is accepted only alongside an agreeing common name, and
+refused without one ([CR-016](decisions.md)). A **gendered epithet** is matched across a change of
+genus — *Coccothraustes vespertinus* against *Hesperiphona vespertina* — since a specific epithet
+agrees in grammatical gender with its genus, but only where the shared stem is long enough to be
+evidence.
 
-**Assertions, the committed table:** every entry parses; every taxon ID is a positive integer;
-every scientific name in it is one BirdView actually has, so a stale row cannot sit unnoticed
-after a taxonomic change.
+**Assertions, coverage:** every one of the 841 in-scope species has a taxon ID. Total coverage is
+required rather than reported: under these rules a species that fails to resolve is a fault to
+diagnose, not an absence to accept.
+
+**Assertions, the committed table:** every entry parses; every taxon ID is a positive integer and
+unique; every scientific name in it is one BirdView actually has, so a stale row cannot sit
+unnoticed after a taxonomic change.
 
 **Assertions, rendering:** a species with a mapping shows a link whose href is exactly
 `https://www.inaturalist.org/taxa/<id>`; a species **without** one shows no link and no
@@ -505,7 +514,12 @@ adds the intent.
 waits at least the configured interval between requests (T-022, `inat-api/R1`), both observed
 against the test server.
 
-**Status: planned.**
+**Status: verified 2026-09-27 — passing, and watched failing** by: ignoring the common name;
+emitting a search URL instead of nothing; removing the pacing; dropping the `User-Agent`; bypassing
+the zero-ID guard; deleting a row from the committed table; and reverting the gender stemming.
+
+Coverage is **841 of 841**, reached by widening the evidence rather than lowering the bar
+([CR-016](decisions.md)).
 
 The confidence gate is the part worth testing hardest, because the failure it prevents is silent.
 Matching on scientific name alone would find the right page nearly always, and the rare miss would

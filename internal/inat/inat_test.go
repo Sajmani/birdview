@@ -26,6 +26,23 @@ func TestAcceptRequiresBothNames(t *testing.T) {
 		accept                             bool
 	}{
 		{"both agree", "Ardea herodias", "Great Blue Heron", "Ardea herodias", "Great Blue Heron", true},
+		// The five buckets that left 30 species unlinked, each now a case.
+		{"hawaiian okina", "Himatione sanguinea", "Apapane", "Himatione sanguinea", "\u02bbApapane", true},
+		{"okina mid-word", "Chlorodrepanis virens", "Hawaii Amakihi", "Chlorodrepanis virens", "Hawai\u02bbi \u02bbAmakihi", true},
+		{"ABA parenthetical", "Garrulax canorus", "Chinese Hwamei (Hwamei)", "Garrulax canorus", "Chinese Hwamei", true},
+		{"parenthetical mid-name", "Porphyrio poliocephalus", "Gray-headed (Purple) Swamphen", "Porphyrio poliocephalus", "Gray-headed Swamphen", true},
+		{"british spelling", "Tringa brevipes", "Gray-tailed Tattler", "Tringa brevipes", "Grey-tailed Tattler", true},
+		{"genus reassigned", "Dryobates villosus", "Hairy Woodpecker", "Leuconotopicus villosus", "Hairy Woodpecker", true},
+		// A change of genus can rewrite the epithet's gender: Coccothraustes is
+		// masculine, Hesperiphona feminine, and it is the same grosbeak.
+		{"gender agreement", "Coccothraustes vespertinus", "Evening Grosbeak", "Hesperiphona vespertina", "Evening Grosbeak", true},
+		{"gender, other direction", "Hesperiphona vespertina", "Evening Grosbeak", "Coccothraustes vespertinus", "Evening Grosbeak", true},
+		// Stems must still be substantial: a two-letter trim off a short
+		// epithet is not evidence of anything.
+		{"short epithets not stemmed", "Genus alba", "Some Bird", "Other albus", "Some Bird", false},
+		// A different genus is accepted ONLY alongside an agreeing common name.
+		{"genus differs, common differs", "Dryobates villosus", "Hairy Woodpecker", "Leuconotopicus arizonae", "Arizona Woodpecker", false},
+		{"epithet differs too", "Dryobates villosus", "Hairy Woodpecker", "Leuconotopicus borealis", "Hairy Woodpecker", false},
 		{"scientific name differs", "Ardea herodias", "Great Blue Heron", "Ardea alba", "Great Egret", false},
 		{"common name disagrees", "Ardea herodias", "Great Blue Heron", "Ardea herodias", "Grey Heron", false},
 		// The real case this tolerance exists for: ABA hyphenates, iNat does not.
@@ -37,10 +54,31 @@ func TestAcceptRequiresBothNames(t *testing.T) {
 		{"iNat has no common name", "Ardea alba", "Great Egret", "Ardea alba", "", false},
 	}
 	for _, c := range cases {
-		if got := Accept(c.wantSci, c.wantCommon, c.gotSci, c.gotCo); got != c.accept {
+		if got := Accept(c.wantSci, c.wantCommon, c.gotSci, []string{c.gotCo}); got != c.accept {
 			t.Errorf("%s: Accept(%q,%q,%q,%q) = %v, want %v",
 				c.name, c.wantSci, c.wantCommon, c.gotSci, c.gotCo, got, c.accept)
 		}
+	}
+}
+
+// TestAcceptUsesEveryEnglishName covers the case that made 100% coverage
+// possible without lowering the bar: iNaturalist prefers "Siberian Tit" for
+// Poecile cinctus and ALSO carries ABA's "Gray-headed Chickadee". The
+// authorities agree; they disagree only about which name leads.
+//
+// Verifies: P-064. Criterion: AC-068.
+func TestAcceptUsesEveryEnglishName(t *testing.T) {
+	all := []string{"Siberian Tit", "Gray-headed Chickadee", "Alaska Chickadee"}
+	if !Accept("Poecile cinctus", "Gray-headed Chickadee", "Poecile cinctus", all) {
+		t.Error("a name iNaturalist holds but does not prefer was not accepted")
+	}
+	// Still a real bar: a name it does not hold at all is refused.
+	if Accept("Poecile cinctus", "Boreal Chickadee", "Poecile cinctus", all) {
+		t.Error("accepted a common name iNaturalist does not carry for this taxon")
+	}
+	// And the preferred name alone is not special-cased away.
+	if !Accept("Poecile cinctus", "Siberian Tit", "Poecile cinctus", all) {
+		t.Error("the preferred name stopped matching")
 	}
 }
 
@@ -150,8 +188,13 @@ func TestLookupHonorsTheSourceRequirements(t *testing.T) {
 			t.Errorf("request %d sent User-Agent %q, with no contact address", i, ua)
 		}
 	}
+	// A small tolerance, because the assertion is "paced at about the interval"
+	// and neither Sleep nor a round trip is exact to the microsecond. Without
+	// it this fails a few times in a hundred on a gap like 119.8ms, which is
+	// scheduler jitter rather than a client hammering the service.
+	const jitter = 5 * time.Millisecond
 	for i := 1; i < len(*times); i++ {
-		if gap := (*times)[i].Sub((*times)[i-1]); gap < interval {
+		if gap := (*times)[i].Sub((*times)[i-1]); gap < interval-jitter {
 			t.Errorf("requests %d and %d were %v apart, closer than the %v the source asks for",
 				i-1, i, gap, interval)
 		}

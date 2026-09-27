@@ -28,6 +28,7 @@ Aix sponsa	7107	Wood Duck
 Alauda arvensis	7347	Eurasian Skylark
 Alca torda	4501	Razorbill
 Alectoris chukar	846	Chukar
+Alle alle	4524	Dovekie
 Alopochen aegyptiaca	72486	Egyptian Goose
 Amandava amandava	13959	Red Avadavat
 Amazilia yucatanensis	5672	Buff-bellied Hummingbird
@@ -218,8 +219,14 @@ Charadrius hiaticula	4801	Common Ringed Plover
 Charadrius melodus	4798	Piping Plover
 Charadrius semipalmatus	4817	Semipalmated Plover
 Charadrius vociferus	4793	Killdeer
+Chasiempis ibidis	72656	O'ahu 'Elepaio
+Chasiempis sandwichensis	8645	Hawai'i 'Elepaio
+Chasiempis sclateri	72657	Kaua'i 'Elepaio
 Chlidonias niger	4512	Black Tern
 Chloroceryle americana	2669	Green Kingfisher
+Chlorodrepanis flava	512279	Oʻahu ʻAmakihi
+Chlorodrepanis stejnegeri	512280	Kauaʻi ʻAmakihi
+Chlorodrepanis virens	512278	Hawaiʻi ʻAmakihi
 Chondestes grammacus	10479	Lark Sparrow
 Chondrohierax uncinatus	5329	Hook-billed Kite
 Chordeiles acutipennis	19587	Lesser Nighthawk
@@ -232,6 +239,7 @@ Circus hudsonius	558446	Northern Harrier
 Cistothorus palustris	7601	Marsh Wren
 Cistothorus stellaris	1286843	Sedge Wren
 Clangula hyemalis	7170	Long-tailed Duck
+Coccothraustes vespertinus	1650411	Evening Grosbeak
 Coccyzus americanus	1965	Yellow-billed Cuckoo
 Coccyzus erythropthalmus	1960	Black-billed Cuckoo
 Coccyzus minor	1964	Mangrove Cuckoo
@@ -274,9 +282,14 @@ Dendragapus obscurus	1241	Dusky Grouse
 Dendrocygna autumnalis	6893	Black-bellied Whistling-Duck
 Dendrocygna bicolor	6899	Fulvous Whistling-Duck
 Dolichonyx oryzivorus	10487	Bobolink
+Drepanis coccinea	512251	ʻIʻiwi
+Dryobates albolarvatus	1651488	White-headed Woodpecker
+Dryobates arizonae	1651498	Arizona Woodpecker
+Dryobates borealis	1651486	Red-cockaded Woodpecker
 Dryobates nuttallii	792987	Nuttall's Woodpecker
 Dryobates pubescens	792988	Downy Woodpecker
 Dryobates scalaris	792986	Ladder-backed Woodpecker
+Dryobates villosus	1651487	Hairy Woodpecker
 Dryocopus pileatus	17855	Pileated Woodpecker
 Dumetella carolinensis	14995	Gray Catbird
 Egretta caerulea	4937	Little Blue Heron
@@ -323,6 +336,7 @@ Gallinago delicata	144496	Wilson's Snipe
 Gallinago gallinago	318836	Common Snipe
 Gallinula galeata	144479	Common Gallinule
 Gallus gallus	882	Red Junglefowl
+Garrulax canorus	15156	Chinese Hwamei
 Gavia adamsii	4622	Yellow-billed Loon
 Gavia arctica	4623	Arctic Loon
 Gavia immer	4626	Common Loon
@@ -350,7 +364,9 @@ Haemorhous mexicanus	199840	House Finch
 Haemorhous purpureus	199841	Purple Finch
 Haliaeetus leucocephalus	5305	Bald Eagle
 Helmitheros vermivorum	72912	Worm-eating Warbler
+Hemignathus wilsoni	512283	ʻAkiapolaʻau
 Himantopus mexicanus	4836	Black-necked Stilt
+Himatione sanguinea	10684	ʻApapane
 Hirundo rustica	11901	Barn Swallow
 Histrionicus histrionicus	7111	Harlequin Duck
 Horornis diphone	980065	Japanese Bush Warbler
@@ -428,6 +444,8 @@ Loxia curvirostra	10411	Red Crossbill
 Loxia leucoptera	10423	White-winged Crossbill
 Loxia sinesciuris	558637	Cassia Crossbill
 Loxioides bailleui	10284	Palila
+Loxops caeruleirostris	10405	ʻAkekeʻe
+Loxops coccineus	512256	Hawaii ʻAkepa
 Loxops mana	339894	Hawaii Creeper
 Luscinia svecica	13071	Bluethroat
 Magumma parva	145329	'Anianiau
@@ -468,6 +486,7 @@ Molothrus bonariensis	10371	Shiny Cowbird
 Morus bassanus	3802	Northern Gannet
 Motacilla alba	13695	White Wagtail
 Motacilla tschutschensis	145207	Eastern Yellow Wagtail
+Myadestes obscurus	12961	ʻOmaʻo
 Myadestes palmeri	12957	Puaiohi
 Myadestes townsendi	12951	Townsend's Solitaire
 Mycteria americana	4742	Wood Stork
@@ -496,19 +515,23 @@ Onychoprion anaethetus	144527	Bridled Tern
 Onychoprion fuscatus	144525	Sooty Tern
 Onychoprion lunatus	144526	Gray-backed Tern
 Oporornis agilis	10431	Connecticut Warbler
+Oreomystis bairdi	10655	ʻAkikiki
 Oreortyx pictus	1399	Mountain Quail
 Oreoscoptes montanus	15045	Sage Thrasher
 Ortalis vetula	2090	Plain Chachalaca
+Ortygornis pondicerianus	1289691	Grey Francolin
 Oxyura jamaicensis	850859	Ruddy Duck
 Pachyramphus aglaiae	8671	Rose-throated Becard
 Padda oryzivora	72992	Java Sparrow
 Pagophila eburnea	4555	Ivory Gull
+Palmeria dolei	10657	ʻAkohekohe
 Pandion haliaetus	116999	Osprey
 Parabuteo unicinctus	5355	Harris's Hawk
 Parkesia motacilla	73148	Louisiana Waterthrush
 Parkesia noveboracensis	73149	Northern Waterthrush
 Paroaria capitata	10257	Yellow-billed Cardinal
 Paroaria coronata	10254	Red-crested Cardinal
+Paroreomyza montana	10604	Maui ʻAlauahio
 Passer domesticus	13858	House Sparrow
 Passer montanus	13851	Eurasian Tree Sparrow
 Passerculus sandwichensis	9981	Savannah Sparrow
@@ -579,6 +602,7 @@ Podiceps nigricollis	4205	Eared Grebe
 Podilymbus podiceps	4246	Pied-billed Grebe
 Poecile atricapillus	144815	Black-capped Chickadee
 Poecile carolinensis	144814	Carolina Chickadee
+Poecile cinctus	144822	Siberian Tit
 Poecile gambeli	144816	Mountain Chickadee
 Poecile hudsonicus	144821	Boreal Chickadee
 Poecile rufescens	144820	Chestnut-backed Chickadee
@@ -590,6 +614,7 @@ Polioptila nigriceps	7491	Black-capped Gnatcatcher
 Polysticta stelleri	7164	Steller's Eider
 Pooecetes gramineus	10168	Vesper Sparrow
 Porphyrio martinica	519	Purple Gallinule
+Porphyrio poliocephalus	474332	Gray-headed Swamphen
 Porzana carolina	162	Sora
 Progne subis	11867	Purple Martin
 Protonotaria citrea	10729	Prothonotary Warbler
@@ -600,11 +625,13 @@ Psittacara erythrogenys	367572	Red-masked Parakeet
 Psittacara holochlorus	979922	Green Parakeet
 Psittacara mitratus	367571	Mitred Parakeet
 Psittacula krameri	18911	Rose-ringed Parakeet
+Pternistis erckelii	495939	Erckel's Spurfowl
 Pterocles exustus	117083	Chestnut-bellied Sandgrouse
 Pterodroma arminjoniana	485628	Trindade Petrel
 Pterodroma cahow	4036	Bermuda Petrel
 Pterodroma cervicalis	4045	White-necked Petrel
 Pterodroma cookii	4027	Cook's Petrel
+Pterodroma deserta	342043	Desertas Petrel
 Pterodroma externa	4038	Juan Fernandez Petrel
 Pterodroma hasitata	4029	Black-capped Petrel
 Pterodroma hypoleuca	4044	Bonin Petrel
@@ -651,6 +678,7 @@ Selasphorus platycercus	6369	Broad-tailed Hummingbird
 Selasphorus rufus	6363	Rufous Hummingbird
 Selasphorus sasin	6359	Allen's Hummingbird
 Serinus canaria	9246	Island Canary
+Setophaga aestiva	1188207	Northern Yellow Warbler
 Setophaga americana	145233	Northern Parula
 Setophaga caerulescens	199916	Black-throated Blue Warbler
 Setophaga castanea	145236	Bay-breasted Warbler
@@ -668,6 +696,7 @@ Setophaga nigrescens	145254	Black-throated Gray Warbler
 Setophaga occidentalis	145256	Hermit Warbler
 Setophaga palmarum	145242	Palm Warbler
 Setophaga pensylvanica	145239	Chestnut-sided Warbler
+Setophaga petechia	145238	Mangrove Yellow Warbler
 Setophaga pinus	145244	Pine Warbler
 Setophaga pitiayumi	145234	Tropical Parula
 Setophaga ruticilla	10247	American Redstart
@@ -755,6 +784,7 @@ Toxostoma lecontei	14892	LeConte's Thrasher
 Toxostoma longirostre	14895	Long-billed Thrasher
 Toxostoma redivivum	14906	California Thrasher
 Toxostoma rufum	14898	Brown Thrasher
+Tringa brevipes	144489	Grey-tailed Tattler
 Tringa flavipes	3893	Lesser Yellowlegs
 Tringa glareola	3888	Wood Sandpiper
 Tringa incana	144490	Wandering Tattler

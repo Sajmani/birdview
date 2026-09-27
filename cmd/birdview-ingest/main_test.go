@@ -351,10 +351,21 @@ func TestINatTableMatchesTheDataset(t *testing.T) {
 		seen[e.TaxonID] = sci
 	}
 
-	// The table has to be doing something, or every assertion above is vacuous.
-	if len(table) < len(ds.Species)/2 {
-		t.Errorf("only %d of %d species resolved; the mapping looks broken rather than incomplete",
-			len(table), len(ds.Species))
+	// Coverage is REQUIRED to be total (P-064, CR-016). Every one of the 30 that
+	// once failed turned out to be a formatting or synonym artifact, not a real
+	// disagreement, so an unresolved species now means something is wrong --
+	// a taxonomic change, a normalizer regression, or a stale table -- rather
+	// than a bird iNaturalist does not have.
+	var missing []string
+	for i := range ds.Species {
+		if _, ok := table[ds.Species[i].ScientificName]; !ok {
+			missing = append(missing, ds.Species[i].ScientificName)
+		}
 	}
-	t.Logf("%d of %d species linked", len(table), len(ds.Species))
+	if len(missing) > 0 {
+		sort.Strings(missing)
+		t.Errorf("%d of %d species have no iNaturalist link; coverage must be total. "+
+			"Re-run cmd/birdview-inatmap, and if any still fail, diagnose why before "+
+			"accepting the gap: %v", len(missing), len(ds.Species), missing)
+	}
 }

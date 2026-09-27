@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -48,14 +49,18 @@ func NewClient() *Client {
 	}
 }
 
-// taxaResponse is the sliver of /v1/taxa BirdView reads. Everything else in the
-// response -- and it is a lot -- is discarded unparsed.
+// taxaResponse is the sliver of the taxa endpoint BirdView reads. Everything
+// else in the response -- and it is a lot -- is discarded unparsed.
 type taxaResponse struct {
 	Results []struct {
 		ID                  int    `json:"id"`
 		Name                string `json:"name"`
 		Rank                string `json:"rank"`
 		PreferredCommonName string `json:"preferred_common_name"`
+		Names               []struct {
+			Name   string `json:"name"`
+			Locale string `json:"locale"`
+		} `json:"names"`
 	} `json:"results"`
 }
 
@@ -69,7 +74,12 @@ type taxaResponse struct {
 func (c *Client) Lookup(ctx context.Context, sciName, commonName string) (Entry, bool, error) {
 	c.pace()
 
-	u := fmt.Sprintf("%s/taxa?rank=species&q=%s", c.BaseURL, url.QueryEscape(sciName))
+	// autocomplete rather than the plain search: the latter fails outright on
+	// short repeated binomials -- "Alle alle" returns a mustard plant and a
+	// domestic cat -- while autocomplete finds the Dovekie. all_names asks for
+	// every vernacular, not just the preferred one (P-064).
+	u := fmt.Sprintf("%s/taxa/autocomplete?rank=species&all_names=true&q=%s",
+		c.BaseURL, url.QueryEscape(sciName))
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
 		return Entry{}, false, err
@@ -94,7 +104,15 @@ func (c *Client) Lookup(ctx context.Context, sciName, commonName string) (Entry,
 		if r.Rank != "species" {
 			continue
 		}
-		if Accept(sciName, commonName, r.Name, r.PreferredCommonName) {
+		commons := []string{r.PreferredCommonName}
+		for _, n := range r.Names {
+			if strings.HasPrefix(n.Locale, "en") {
+				commons = append(commons, n.Name)
+			}
+		}
+		if Accept(sciName, commonName, r.Name, commons) {
+			// Record the preferred name: it is what a reader will see on the
+			// page they land on, even where the match was made on another.
 			return Entry{ScientificName: sciName, TaxonID: r.ID, CommonName: r.PreferredCommonName}, true, nil
 		}
 	}
