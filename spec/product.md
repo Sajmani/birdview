@@ -622,6 +622,9 @@ Labels never overlap one another. Where two segments are too close together for 
 sit at both midpoints, the text moves and the leader line stretches — the leader, not the text
 position, is what ties a label to its segment.
 
+**Text draws over lines.** Every line in the diagram is emitted before every label, so a leader
+that crosses a label passes behind the words rather than through them.
+
 Rationale: the table already lists every segment with its value, but reading it means mapping a row
 onto a part of a drawing and holding the correspondence in your head. Labeling the drawing directly
 removes that step, and the detail view is the one place with room to do it — the tile is

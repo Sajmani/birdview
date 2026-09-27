@@ -1412,3 +1412,34 @@ func TestEveryControlEntryIsWrapped(t *testing.T) {
 			"have its heading split from its text across the column break", wrapped, dts)
 	}
 }
+
+// TestDiagramTextPaintsOverLines asserts the paint order of the annotated
+// diagram: every line is emitted before every label, so a leader that crosses a
+// label passes behind the words.
+//
+// SVG has no z-index; document order IS paint order. The wing labels used to
+// sit inside the centering group, which put them ahead of the leaders and let
+// the neck's leader strike through "Wing chord" and "Wingspan".
+//
+// Verifies: P-066. Criterion: AC-073.
+func TestDiagramTextPaintsOverLines(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/species/ardea_herodias")
+	svg := mustMatch(t, body, `(?s)(<svg class="dia".*?</svg>)`, "the detail diagram")
+
+	lastLine := strings.LastIndex(svg, "<line")
+	firstText := strings.Index(svg, "<text")
+	if lastLine < 0 || firstText < 0 {
+		t.Fatalf("diagram has %d lines and %d texts; expected both", lastLine, firstText)
+	}
+	if lastLine > firstText {
+		t.Errorf("a <line> is emitted after the first <text> (line at %d, text at %d); "+
+			"SVG paints in document order, so that line is drawn over the label",
+			lastLine, firstText)
+	}
+
+	// And the labels really do exist to be covered, or the check above is
+	// satisfied by a diagram with no text at all.
+	if n := strings.Count(svg, "<text"); n < 7 {
+		t.Errorf("only %d labels in the diagram; expected five segments plus chord and wingspan", n)
+	}
+}

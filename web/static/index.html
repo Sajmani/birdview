@@ -256,26 +256,34 @@
     <line class="junction" x1="{{f1 (sub $g.CX 4)}}" y1="{{f1 $g.YBodyEnd}}"
           x2="{{f1 (add $g.CX 4)}}" y2="{{f1 $g.YBodyEnd}}"/>
     <line class="tail" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBodyEnd}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YTailTip}}"/>
-    {{if .WingspanLabel}}
-    {{/* Just off the right end of the bar and vertically on it, so it reads as
-         naming the whole crossbar rather than any part of it. */}}
-    <text class="dlabel span{{if .WingspanEst}} est{{end}}" text-anchor="start"
-          dominant-baseline="middle" x="{{f1 (add (add $g.CX $g.CrossbarHalfWidth) 8)}}"
-          y="{{f1 $g.YShoulder}}">{{.WingspanLabel}}</text>
-    {{end}}
-    {{if and .ChordLabel $g.ChordTickX}}
-    {{/* Centred over the RIGHT outer segment, which is the measured chord
-         itself, so the words sit on the thing they name. */}}
-    <text class="dlabel chord" text-anchor="middle" y="{{f1 (sub $g.YShoulder 7)}}"
-          x="{{f1 (add $g.CX (div (add $g.ChordTickX $g.CrossbarHalfWidth) 2))}}">{{.ChordLabel}}</text>
-    {{end}}
   </g>
-  {{/* Labels sit OUTSIDE the centering transform, in box coordinates: view has
-       already folded the offset into their y values, and a leader that bends
-       needs both ends in one space (P-066). */}}
+  {{/* EVERYTHING BELOW IS TEXT OR SCAFFOLDING, and the order is load-bearing.
+       SVG paints in document order, so every line is emitted before every
+       label: a leader crossing the wing labels must pass BEHIND the words, not
+       through them. The wing labels used to sit inside the group above, which
+       put them before the leaders and let a leader strike through them.
+
+       These coordinates are the box's, not the group's, so the centering
+       offset is added explicitly -- view has already folded it into the segment
+       labels' own y values (P-066). */}}
   {{range .Labels}}
   <line class="leader" x1="{{f1 (add $g.CX 6)}}" y1="{{f1 .AnchorY}}"
         x2="{{f1 (sub $b.W 150)}}" y2="{{f1 .TextY}}"/>
+  {{end}}
+  {{if .WingspanLabel}}
+  {{/* Just off the right end of the bar and vertically on it, so it reads as
+       naming the whole crossbar rather than any part of it. */}}
+  <text class="dlabel span{{if .WingspanEst}} est{{end}}" text-anchor="start"
+        dominant-baseline="middle" x="{{f1 (add (add $g.CX $g.CrossbarHalfWidth) 8)}}"
+        y="{{f1 (add .TopOffset $g.YShoulder)}}">{{.WingspanLabel}}</text>
+  {{end}}
+  {{if and .ChordLabel $g.ChordTickX}}
+  {{/* Centred over the RIGHT outer segment, which is the measured chord
+       itself, so the words sit on the thing they name. */}}
+  <text class="dlabel chord" text-anchor="middle" y="{{f1 (add .TopOffset (sub $g.YShoulder 7))}}"
+        x="{{f1 (add $g.CX (div (add $g.ChordTickX $g.CrossbarHalfWidth) 2))}}">{{.ChordLabel}}</text>
+  {{end}}
+  {{range .Labels}}
   <text class="dlabel{{if .Est}} est{{end}}" x="{{f1 (sub $b.W 144)}}" y="{{f1 .TextY}}"
         dominant-baseline="middle">{{.Text}}</text>
   {{end}}

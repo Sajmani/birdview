@@ -657,6 +657,10 @@ assertions on the rendered detail page
 own segment; labels stay in the order the segments do; no two are closer than the line height; and
 the last one stays inside the box.
 
+**Assertions, paint order:** in the rendered diagram every line element is emitted before every
+text element, since SVG has no z-index and document order is paint order. The check also requires
+the labels to exist, so it cannot be satisfied by a diagram with no text to cover.
+
 **Assertions, geometry:** across every species, the wingspan label placed beyond the wingtip clears
 the segment label column, and the reserved gutter is not so wide that the labels have more room
 than the bird. Checked over the whole fixture rather than one bird, because the binding case is the
@@ -668,8 +672,10 @@ for it — read out of the table rather than recomputed, so the two cannot drift
 count is matched on the segment labels alone, so a missing segment cannot hide behind the chord. A
 tile carries none.
 
-**Status: verified 2026-09-24 — passing, and watched failing** by anchoring every label at the same
-y, by removing the minimum-gap pass, and by dropping a segment from the list.
+**Status: verified 2026-09-27 — passing, and watched failing** by anchoring every label at the same
+y, by removing the minimum-gap pass, by dropping a segment from the list, by removing the reserved
+gutter and by inflating it, and by moving the wing labels back inside the centering group — which
+reproduces the bug where the neck's leader struck through "Wing chord" and "Wingspan".
 
 **The collision resolver does not fire on real data: 0 of 841 species need it** at the current box
 size and font. It is kept anyway, and tested with a synthetic geometry rather than deleted, because
