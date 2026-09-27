@@ -409,6 +409,21 @@ func TestFamilyFilter(t *testing.T) {
 	}
 }
 
+// tileArea returns the part of the index below the help and controls panels.
+//
+// The help now contains a real labeled diagram of a real species (P-035), so a
+// whole-page search for a bird's name or for a diagram label finds the legend
+// as well as the tiles. Every assertion about what is DISPLAYED has to be
+// scoped here, or it silently answers a different question.
+func tileArea(t *testing.T, body string) string {
+	t.Helper()
+	i := strings.LastIndex(body, "</details>")
+	if i < 0 {
+		t.Fatal("no collapsible panels on the page; cannot locate the tile area")
+	}
+	return body[i:]
+}
+
 // footer returns the contents of the first tile's metric footer.
 func footer(t *testing.T, body string) string {
 	t.Helper()
@@ -492,19 +507,24 @@ func TestMassUnitsBySystem(t *testing.T) {
 	}
 }
 
-// TestDefaultScaleIsGlobal asserts P-042's default. The cross-family surprise
-// is the product; opening on a per-section scale shows every bird at a
-// comfortable size, which is the impression BirdView exists to correct.
+// TestDefaultScaleIsPerSection asserts P-042's default, which CR-017 moved.
+//
+// Global still makes the cross-family argument better than anything else, and
+// this test asserted it for good reasons. What changed is that the diagram
+// acquired a vocabulary -- dashed for modeled, chord ticks, labels -- and at
+// global scale a median bird is a couple of pixels tall, so the landing page
+// was hiding the drawing's own language from every first-time reader.
 //
 // Verifies: P-042. Criterion: AC-031.
-func TestDefaultScaleIsGlobal(t *testing.T) {
-	if got := parseOptions(httptest.NewRequest(http.MethodGet, "/", nil)).Scale; got != view.Global {
-		t.Errorf("default scale is %q, want %q", got, view.Global)
+func TestDefaultScaleIsPerSection(t *testing.T) {
+	if got := parseOptions(httptest.NewRequest(http.MethodGet, "/", nil)).Scale; got != view.PerSection {
+		t.Errorf("default scale is %q, want %q", got, view.PerSection)
 	}
-	// And the toggle must still reach the other mode.
-	r := httptest.NewRequest(http.MethodGet, "/?scale=section", nil)
-	if got := parseOptions(r).Scale; got != view.PerSection {
-		t.Errorf("?scale=section gave %q, want %q", got, view.PerSection)
+	// And the toggle must still reach the other mode: global is one click away,
+	// which is the premise the default change rests on.
+	r := httptest.NewRequest(http.MethodGet, "/?scale=global", nil)
+	if got := parseOptions(r).Scale; got != view.Global {
+		t.Errorf("?scale=global gave %q, want %q", got, view.Global)
 	}
 }
 
@@ -560,12 +580,30 @@ func TestHelpCoversEveryControl(t *testing.T) {
 			t.Errorf("help does not mention the %q control", control)
 		}
 	}
-	// Every part of the diagram, since none of it is self-evident.
-	for _, part := range []string{"Bill", "Head", "Neck", "Body", "Tail", "Wingspan"} {
-		if !strings.Contains(help, ">"+part+"<") {
+	// Every part of the diagram, since none of it is self-evident. These are now
+	// labels on a rendered example rather than swatches in a list, so each is
+	// matched as the start of its label text.
+	for _, part := range []string{"Bill", "Head", "Neck", "Body", "Tail", "Wingspan", "Wing chord"} {
+		if !strings.Contains(help, ">"+part+" ") {
 			t.Errorf("diagram legend omits %q", part)
 		}
 	}
+	// The three sections run in a stated order (P-035): the thing on screen,
+	// then what its strokes mean, then how to change it.
+	order := []string{"The diagram", "Where the numbers come from", "The controls"}
+	at := make([]int, len(order))
+	for i, h := range order {
+		if at[i] = strings.Index(help, ">"+h+"<"); at[i] < 0 {
+			t.Errorf("help has no %q section", h)
+		}
+	}
+	for i := 1; i < len(order); i++ {
+		if at[i-1] >= 0 && at[i] >= 0 && at[i] < at[i-1] {
+			t.Errorf("help section %q comes before %q; the order is %v",
+				order[i], order[i-1], order)
+		}
+	}
+
 	// The two things a reader cannot discover by clicking: what the estimate
 	// marker means, and that both scale modes exist.
 	for _, concept := range []string{"estimated", "Global", "Per section"} {
@@ -675,11 +713,11 @@ func TestOrderToggles(t *testing.T) {
 		`<a class="btn ohdr on"[^>]*href="([^"]+)"[^>]*>Passeriformes`, "the Passeriformes toggle"))
 	_, dropped := get(t, s, href)
 	for _, gone := range []string{"American Robin", "American Crow"} {
-		if strings.Contains(dropped, gone) {
+		if strings.Contains(tileArea(t, dropped), gone) {
 			t.Errorf("dropping Passeriformes left %s visible", gone)
 		}
 	}
-	if !strings.Contains(dropped, "Great Blue Heron") {
+	if !strings.Contains(tileArea(t, dropped), "Great Blue Heron") {
 		t.Error("dropping Passeriformes removed another order's species")
 	}
 
@@ -780,7 +818,7 @@ func TestClearingEverythingShowsGuidance(t *testing.T) {
 
 	_, empty := get(t, s, clear)
 	for _, gone := range []string{"Great Blue Heron", "American Robin", "American Crow"} {
-		if strings.Contains(empty, gone) {
+		if strings.Contains(tileArea(t, empty), gone) {
 			t.Errorf("%s is still displayed after clearing every selection", gone)
 		}
 	}
@@ -889,7 +927,7 @@ func TestControlOrderAndOptions(t *testing.T) {
 	}
 	body := page[ci:]
 
-	// Global is the default (P-042), so it leads the pair.
+	// Per section is the default (P-042, CR-017), so it leads the pair.
 	g := strings.Index(body, `"scale" "global"`)
 	if g < 0 {
 		g = strings.Index(body, `scale=global`)
@@ -898,8 +936,8 @@ func TestControlOrderAndOptions(t *testing.T) {
 	if g < 0 || p < 0 {
 		t.Fatalf("scale controls not found in the panel (global=%d section=%d)", g, p)
 	}
-	if g > p {
-		t.Error("Per section is listed before Global, but Global is the default")
+	if p > g {
+		t.Error("Global is listed before Per section; the default leads the pair")
 	}
 
 	// Every offered step must be one the server actually accepts, or the
@@ -1283,7 +1321,7 @@ func TestDetailDiagramIsLabeled(t *testing.T) {
 	}
 	// A tile has none: the index is dense on purpose.
 	_, index := get(t, newTestServer(t), "/")
-	if strings.Contains(index, `class="dlabel`) {
-		t.Error("tiles carry diagram labels; those belong to the detail view only")
+	if strings.Contains(tileArea(t, index), `class="dlabel`) {
+		t.Error("index tiles carry diagram labels; those belong to the detail view and the legend")
 	}
 }

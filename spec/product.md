@@ -304,17 +304,26 @@ fold. A reader who has chosen their filter should be able to put it away — and
 Subject: `presentation.help`
 Goals: G-001, G-002, G-003
 
-Below the title, the page carries help text covering every control — ordering metric, scale mode,
-section step, units, family filter — **and a legend for the diagram**, naming each of the five
-segments and the wing crossbar. It also explains the estimate marker.
+Below the title, the page carries help text in three sections, in this order: **the diagram**,
+**where the numbers come from**, then **the controls**.
+
+The diagram section is **a real labeled diagram**, the same one the detail view draws, rather than
+a list of colour swatches: every part named and measured against an actual bird. The numbers
+section explains solid against dashed, the wing chord and its ticks, and the estimate marker. The
+controls section covers every control — ordering metric, scale mode, section step, units, family
+filter.
 
 The help is collapsible and starts open, so a returning user can dismiss it without losing it.
 
 Rationale: nothing about the diagram is self-evident. A reader cannot be expected to know that the
-amber stroke is the bill, that the dashed segment is the tail, or that the crossbar is a true
+amber stroke is the bill, that a dashed stroke means estimated, or that the crossbar is a true
 wingspan rather than a decoration — and the scale toggle, the one control that changes what the
-app is *saying*, is the least discoverable of all. A first-time visitor on the global default sees
-a page of small birds and has no way to learn that per-section exists.
+app is *saying*, is the least discoverable of all.
+
+Showing the diagram rather than describing it is the point of the change: a swatch list asks the
+reader to map six colour chips onto a drawing, where a labeled example simply *is* the drawing with
+the answers on it. The order runs from the thing on screen, to what its strokes mean, to how to
+change it.
 
 ### P-034 — A tile opens a detail view
 Subject: `presentation.detail_view`
@@ -393,13 +402,13 @@ rendering error. Everything that treats length as data — ordering, sectioning,
 of P-042, and the detail view — uses the full total length regardless of how the neck is drawn, so
 comparability is unaffected. See [CR-011](decisions.md#cr-011).
 
-### P-042 — Scale is a user toggle, defaulting to global
+### P-042 — Scale is a user toggle, defaulting to per-section
 Subject: `diagram.scale.mode`
-Value: `global (default) | per-section`
+Value: `per-section (default) | global`
 Goals: G-001, G-002
 
 The user switches between a single scale across the entire filtered set, and a scale shared by all
-species within a section. **Global is the default, and is listed first.**
+species within a section. **Per-section is the default, and is listed first.**
 
 Whichever is chosen, the scale is set by the largest total length in the group. Since the segments
 sum to total length (P-041) and nothing is drawn outside them, that is the whole vertical extent.
@@ -408,11 +417,13 @@ Rationale: this is the requirement G-001 lives or dies by. A per-tile scale — 
 fill its tile — makes a hummingbird and a swan identical on screen and destroys size intuition
 entirely.
 
-Global is the default because the cross-family surprise *is* the product. Opening on a per-section
-scale shows every bird at a comfortable size, which is precisely the false impression BirdView
-exists to correct; a reader could scroll the whole list without ever seeing that a Trumpeter Swan
-dwarfs a kinglet. Per-section remains one click away, and is the better view for comparing within
-a family, which is the other half of G-002.
+**The default was global and is now per-section** ([CR-017](decisions.md)). Global still makes the
+cross-family argument better than anything else, and it is one click away and named first in the
+help. But the diagram has since acquired detail a reader has to be able to see — provenance in the
+stroke style (P-065), the chord ticks, the labels of P-066 — and at global scale a median bird is a
+few pixels tall, where none of it is legible. A default that hides the drawing's own vocabulary
+teaches the reader nothing, and a reader who has learned to read one bird is far better placed to
+be surprised by the swan.
 
 ### P-043 — The wing crossbar is drawn at the vertical scale
 Subject: `diagram.wingspan.scale`

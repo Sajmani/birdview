@@ -20,38 +20,15 @@
   <div class="helpgrid">
     <section>
       <h3>The diagram</h3>
-      <ul class="legend">
-        <li><i class="sw bill"></i><b>Bill</b> &mdash; the exposed culmen</li>
-        <li><i class="sw head"></i><b>Head</b> &mdash; cranium, estimated from mass</li>
-        <li><i class="sw neck"></i><b>Neck</b> &mdash; estimated per family; a drawing convention.
-          Herons and pelicans fly with it folded back, so theirs is drawn as an S &mdash; the
-          same length of line in less height</li>
-        <li><i class="sw body"></i><b>Body</b> &mdash; trunk, estimated from mass</li>
-        <li><i class="sw tail"></i><b>Tail</b> &mdash; dashed, to tell it from the body</li>
-        <li><i class="sw wing"></i><b>Wingspan</b> &mdash; the crossbar, at the same scale as the
-          bird&rsquo;s height, so a wing really is that long relative to the body</li>
-      </ul>
-    </section>
-    <section>
-      <h3>The controls</h3>
-      <dl>
-        <dt>Order by</dt>
-        <dd>Sort every bird by total length, wingspan or mass. Birds are then grouped into
-          sections of similar size.</dd>
-        <dt>Scale</dt>
-        <dd><b>Global</b> draws everything shown at one scale &mdash; a hummingbird really is a
-          speck beside a swan. <b>Per section</b> rescales each section to itself, which makes
-          shape easier to compare within a group but hides the size gap between groups.</dd>
-        <dt>Section step</dt>
-        <dd>How much larger a bird must be to start a new section. Smaller values give more,
-          tighter sections.</dd>
-        <dt>Units</dt>
-        <dd>Inches and ounces, or centimeters and grams.</dd>
-        <dt>Family</dt>
-        <dd>Everything is selected when you arrive. Click a family to drop it, an order to drop
-          the whole group, or <b>All</b> to clear the lot and start picking. Grouped by taxonomic
-          order in checklist sequence &mdash; the order field guides use.</dd>
-      </dl>
+      {{if .Legend}}
+      <p>Every bird is drawn as a scaled cross, seen from above in flight. This is a real one:</p>
+      <div class="legenddia">{{template "diagram" .Legend}}</div>
+      <p class="hint">{{.Legend.S.CommonName}} &mdash; the same drawing the detail page shows,
+      with every part named and measured.</p>
+      {{else}}
+      <p>Every bird is drawn as a scaled cross, seen from above in flight: a bill, a head, a neck,
+      a body and a tail down the middle, with the wingspan as a crossbar at the same scale.</p>
+      {{end}}
     </section>
     <section>
       <h3>Where the numbers come from</h3>
@@ -69,6 +46,28 @@
       <p><b>Click any bird</b> for every measurement, including each part of the diagram, with the
       source or the model behind it named individually.</p>
     </section>
+    <section>
+      <h3>The controls</h3>
+      <dl>
+        <dt>Order by</dt>
+        <dd>Sort every bird by total length, wingspan or mass. Birds are then grouped into
+          sections of similar size.</dd>
+        <dt>Scale</dt>
+        <dd><b>Per section</b> rescales each section to itself, so every bird is big enough to
+          read. This is the default. <b>Global</b> draws everything shown at one scale instead
+          &mdash; a hummingbird really is a speck beside a swan. Global is the honest view across
+          families; per section is the better one for comparing shape within a group.</dd>
+        <dt>Section step</dt>
+        <dd>How much larger a bird must be to start a new section. Smaller values give more,
+          tighter sections.</dd>
+        <dt>Units</dt>
+        <dd>Inches and ounces, or centimeters and grams.</dd>
+        <dt>Family</dt>
+        <dd>Everything is selected when you arrive. Click a family to drop it, an order to drop
+          the whole group, or <b>All</b> to clear the lot and start picking. Grouped by taxonomic
+          order in checklist sequence &mdash; the order field guides use.</dd>
+      </dl>
+    </section>
   </div>
 </details>
 
@@ -82,10 +81,10 @@
     <a class="btn{{if eq .Opt.Metric "mass"}} on{{end}}" href="{{call $q "by" "mass"}}">Mass</a>
 
     <span class="lbl">Scale</span>
-    <a class="btn{{if eq .Opt.Scale "global"}} on{{end}}" href="{{call $q "scale" "global"}}"
-       title="One scale across everything shown - small birds become very small">Global</a>
     <a class="btn{{if eq .Opt.Scale "section"}} on{{end}}" href="{{call $q "scale" "section"}}"
        title="Every bird in a section shares a scale">Per section</a>
+    <a class="btn{{if eq .Opt.Scale "global"}} on{{end}}" href="{{call $q "scale" "global"}}"
+       title="One scale across everything shown - small birds become very small">Global</a>
 
     <span class="lbl">Units</span>
     <a class="btn{{if not .Opt.Metric3}} on{{end}}" href="{{call $q "units" "imperial"}}">in / g</a>
@@ -258,6 +257,10 @@
     <line class="junction" x1="{{f1 (sub $g.CX 4)}}" y1="{{f1 $g.YBodyEnd}}"
           x2="{{f1 (add $g.CX 4)}}" y2="{{f1 $g.YBodyEnd}}"/>
     <line class="tail" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBodyEnd}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YTailTip}}"/>
+    {{if .WingspanLabel}}
+    <text class="dlabel span{{if .WingspanEst}} est{{end}}" text-anchor="end"
+          x="{{f1 (add $g.CX $g.CrossbarHalfWidth)}}" y="{{f1 (sub $g.YShoulder 7)}}">{{.WingspanLabel}}</text>
+    {{end}}
     {{if and .ChordLabel $g.ChordTickX}}
     {{/* Centred over the LEFT outer segment, which is the measured chord
          itself. Left, because the right side of the box is the label stack. */}}

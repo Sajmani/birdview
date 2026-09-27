@@ -178,9 +178,15 @@ stated invariant false.
 **Verifies:** P-042 · **Level:** code · **Method:** unit test over computed geometry
 **Assertions:** in per-section mode every tile in a section has an identical scale factor, and the
 factor differs between at least two sections in a representative dataset; in global mode one
-factor applies to every tile in the filtered set.
+factor applies to every tile in the filtered set; **per-section is the default**, global is
+reachable by `?scale=global`, and per-section is listed first in the controls.
 **Status: verified 2026-09-22 — passing, and **watched failing**: scaling each bird to its own length was caught by the direct px/mm comparison. Worth noting that it was *not* caught by the first two assertions written for this criterion, because the wingspan constraint happened to preserve size ordering; comparing the scale factor itself is the only form that cannot pass by accident.**
 implementation satisfies "identical within a section" trivially when sections hold one bird.
+
+The default moved from global to per-section in [CR-017](decisions.md), and the tests asserting the
+old default were inverted rather than deleted. Flipping it exposed a real bug: `parseOptions`
+recognised only the **non**-default value, so the toggle stopped working entirely the moment the
+default changed. Written that way the parser is correct exactly once.
 
 ### AC-032 — The wing crossbar is to scale with the vertical axis
 **Verifies:** P-043 · **Level:** code · **Method:** property test over computed geometry
@@ -353,10 +359,18 @@ dataset-wide reference, which inset the hummingbird by 128 px.
 ### AC-059 — The page explains every control and the diagram
 **Verifies:** P-035 · **Level:** code · **Method:** rendering test over the help block
 **Assertions:** the help names every control in the controls bar (order, scale, step, units,
-family); the legend names all five diagram segments and the wingspan crossbar; the estimate marker
-and both scale modes are explained; the block starts expanded.
-**Status: verified 2026-09-22 — passing, and watched failing** by removing the scale explanation
-and, separately, the tail from the legend.
+family); its three sections appear in the stated order — the diagram, where the numbers come from,
+the controls; the **rendered legend** names all five segments plus the wingspan and the wing chord;
+the estimate marker and both scale modes are explained; the block starts expanded.
+**Status: verified 2026-09-27 — passing, and watched failing** by removing the scale explanation,
+by removing the tail from the legend, by suppressing the legend diagram, and by swapping two
+sections.
+
+The legend is a **rendered diagram of a real species** rather than a list of colour swatches
+([CR-017](decisions.md)), which closes a rot the old one had: it described the tail as "dashed, to
+tell it from the body", and that stopped being true when CR-015 gave dash a different meaning.
+Nothing caught it, because prose and stylesheet had no connection. A rendered diagram cannot drift
+from the renderer.
 
 This criterion is tied to the controls that exist, so adding a control without documenting it
 fails here. That is deliberate: help text rots silently otherwise.

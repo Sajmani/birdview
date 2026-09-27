@@ -143,11 +143,13 @@ type options struct {
 
 func parseOptions(r *http.Request) options {
 	q := r.URL.Query()
-	// Global is the default: the whole point is that a hummingbird and a swan
-	// are not the same size, and opening on a per-section scale shows every
-	// bird at a comfortable size, which is the impression the app exists to
-	// correct (P-042).
-	o := options{Metric: view.ByLength, Step: view.DefaultStepPercent, Scale: view.Global,
+	// Per-section is the default (P-042, CR-017). Global makes the cross-family
+	// argument better and is one click away, but at global scale a median bird
+	// is a couple of pixels tall, and none of the diagram's vocabulary --
+	// dashed for modeled, the chord ticks, the labels -- is legible there. The
+	// default that teaches the reader to read a bird wins over the one that
+	// delivers the shock before they can.
+	o := options{Metric: view.ByLength, Step: view.DefaultStepPercent, Scale: view.PerSection,
 		Families: map[string]bool{}}
 	switch view.Metric(q.Get("by")) {
 	case view.ByWingspan:
@@ -155,8 +157,12 @@ func parseOptions(r *http.Request) options {
 	case view.ByMass:
 		o.Metric = view.ByMass
 	}
-	if view.ScaleMode(q.Get("scale")) == view.PerSection {
-		o.Scale = view.PerSection
+	// Recognise the NON-default explicitly. Written the other way round this
+	// parses only the value that is already the default, so flipping the
+	// default silently disables the toggle -- which is exactly what happened
+	// when CR-017 moved it.
+	if view.ScaleMode(q.Get("scale")) == view.Global {
+		o.Scale = view.Global
 	}
 	if v, err := strconv.ParseFloat(q.Get("step"), 64); err == nil && v >= 2 && v <= 100 {
 		o.Step = v
@@ -186,11 +192,16 @@ type tile struct {
 	// the wingspan is modeled (P-065).
 	WingModeled bool
 
-	// Labels and ChordLabel are always empty on a tile: the annotations of P-066
-	// belong to the detail view, where there is room for them. The shared
-	// diagram template reads both fields from either, so they must exist here.
+	// Labels and ChordLabel are empty on an index tile: the annotations of P-066
+	// need room, so they appear only in the detail view and in the help legend,
+	// both of which build this struct through labelledTile.
 	Labels     []diagramLabel
+	TopOffset  float64
 	ChordLabel string
+	// WingspanLabel sits at the right wingtip, mirroring the chord label at the
+	// left, so the crossbar names the whole span as well as its measured part.
+	WingspanLabel string
+	WingspanEst   bool
 }
 
 type sectionView struct {
@@ -223,6 +234,11 @@ type pageData struct {
 	// NothingSelected drives the empty state, which has to say something
 	// different from "no matches": the user turned everything off.
 	NothingSelected bool
+
+	// Legend is the labeled example diagram the help opens with (P-035). Nil
+	// only if no suitable species exists, in which case the help degrades to
+	// prose rather than breaking.
+	Legend *tile
 }
 
 // tileBox is the drawing area for one diagram. Roughly 2.6:1, because a
@@ -278,6 +294,10 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 
 	page := pageData{Opt: opt, Total: len(s.ds.Species), Shown: len(filtered),
 		Query: queryFor(r)}
+	if sp := s.legendSpecies(); sp != nil {
+		lt := labelledTile(sp, legendBox, opt.Metric3)
+		page.Legend = &lt
+	}
 
 	// "All" toggles like an order does, over every family. Untoggling it clears
 	// the selection outright rather than leaving 91 redundant parameters behind.
@@ -378,9 +398,11 @@ type detailData struct {
 	WingModeled bool
 
 	// Labels annotate the detail diagram (P-066); empty on a tile.
-	Labels     []diagramLabel
-	TopOffset  float64
-	ChordLabel string
+	Labels        []diagramLabel
+	TopOffset     float64
+	ChordLabel    string
+	WingspanLabel string
+	WingspanEst   bool
 }
 
 // diagramLabel is one annotation: where view put it, what it says, and whether
@@ -422,28 +444,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		row("Body", sp.Segments.Body, view.ByLength, opt.Metric3),
 		row("Tail", sp.Segments.Tail, view.ByLength, opt.Metric3),
 	}
-	geom := view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, box)
-	top := (box.H - geom.TotalHeight()) / 2
-	segOf := map[string]dataset.Metric{
-		"bill": sp.Segments.Bill, "head": sp.Segments.Head, "neck": sp.Segments.Neck,
-		"body": sp.Segments.Body, "tail": sp.Segments.Tail,
-	}
-	var labels []diagramLabel
-	for _, l := range geom.DetailLabels(box, top) {
-		m := segOf[l.Key]
-		labels = append(labels, diagramLabel{
-			Label: l,
-			Text:  strings.ToUpper(l.Key[:1]) + l.Key[1:] + "  " + format(m.Value, view.ByLength, opt.Metric3),
-			Est:   m.Prov.Kind == dataset.Modeled,
-		})
-	}
-
-	// The chord is labeled on the crossbar rather than in the right-hand stack,
-	// because it names a horizontal length and belongs beside it (P-066).
-	var chordLabel string
-	if sp.WingChord.Value > 0 {
-		chordLabel = "Wing chord  " + format(sp.WingChord.Value, view.ByLength, opt.Metric3)
-	}
+	lt := labelledTile(sp, box, opt.Metric3)
 
 	// Only a confident match gets a link; zero means none was found (P-064).
 	var inatURL string
@@ -451,10 +452,65 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		inatURL = inat.TaxonURL(sp.INatTaxonID)
 	}
 	s.render(w, "detail.html", detailData{
-		S: sp, Geom: geom, Box: box, Labels: labels, TopOffset: top, ChordLabel: chordLabel,
+		S: sp, Geom: lt.Geom, Box: box, Labels: lt.Labels, TopOffset: lt.TopOffset,
+		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
 		Metrics: rows, Opt: opt, Query: queryFor(r), INatURL: inatURL,
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 	})
+}
+
+// legendBox is the help diagram's drawing area: smaller than the detail view's
+// but the same shape, since it renders through the same template.
+var legendBox = view.Box{W: 380 * 1.5, H: 148 * 1.2}
+
+// legendPreferred are the species the help diagram would like to use, best
+// first. Each has a MODELED wingspan, so the dashed inner crossbar of P-065
+// appears in the legend rather than only in the prose beside it, and none is a
+// neck-folding family, so the neck reads as a plain stick.
+var legendPreferred = []string{"cyanocitta_cristata", "corvus_brachyrhynchos", "cardinalis_cardinalis"}
+
+// legendSpecies picks the bird the help draws. Preference first, then any
+// species with a modeled wingspan, then nothing -- the help degrades to prose
+// rather than breaking if the checklist ever drops all of them.
+func (s *server) legendSpecies() *dataset.Species {
+	for _, id := range legendPreferred {
+		if sp := s.byID[id]; sp != nil {
+			return sp
+		}
+	}
+	for i := range s.ds.Species {
+		if sp := &s.ds.Species[i]; sp.Wingspan.Prov.Kind == dataset.Modeled {
+			return sp
+		}
+	}
+	return nil
+}
+
+// labelledTile builds the annotated diagram shared by the detail view and the
+// help legend (P-066), so the two cannot drift apart.
+func labelledTile(sp *dataset.Species, box view.Box, metric bool) tile {
+	g := view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, box)
+	top := (box.H - g.TotalHeight()) / 2
+	segOf := map[string]dataset.Metric{
+		"bill": sp.Segments.Bill, "head": sp.Segments.Head, "neck": sp.Segments.Neck,
+		"body": sp.Segments.Body, "tail": sp.Segments.Tail,
+	}
+	t := tile{S: sp, Geom: g, Box: box, TopOffset: top,
+		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled}
+	for _, l := range g.DetailLabels(box, top) {
+		m := segOf[l.Key]
+		t.Labels = append(t.Labels, diagramLabel{
+			Label: l,
+			Text:  strings.ToUpper(l.Key[:1]) + l.Key[1:] + "  " + format(m.Value, view.ByLength, metric),
+			Est:   m.Prov.Kind == dataset.Modeled,
+		})
+	}
+	if sp.WingChord.Value > 0 {
+		t.ChordLabel = "Wing chord  " + format(sp.WingChord.Value, view.ByLength, metric)
+	}
+	t.WingspanLabel = "Wingspan  " + format(sp.Wingspan.Value, view.ByWingspan, metric)
+	t.WingspanEst = sp.Wingspan.Prov.Kind == dataset.Modeled
+	return t
 }
 
 // row turns a metric into a display line, stating its provenance in plain

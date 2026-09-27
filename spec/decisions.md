@@ -1135,6 +1135,58 @@ the other cannot.
 
 ---
 
+## CR-017 — Per-section becomes the default, and the legend becomes a diagram
+
+**Subject:** `diagram.scale.mode`, `presentation.help`
+**Kind:** Direct — a later decision reverses a default an earlier one argued for
+**Date:** 2026-09-27 · **Decided by:** Sameer
+
+### What changed
+
+The scale default returns to **per-section**, listed first. The help's diagram section becomes a
+real labeled diagram instead of a list of colour swatches, and the three sections are reordered:
+the diagram, where the numbers come from, then the controls.
+
+### Why the default moves, against P-042's own argument
+
+P-042 argued the case for global plainly and it has not become wrong: *"the cross-family surprise
+**is** the product… a reader could scroll the whole list without ever seeing that a Trumpeter Swan
+dwarfs a kinglet."* That is still true, and global is still one click away and still named first
+in the help text.
+
+What changed is the diagram. Since that default was chosen it has acquired provenance in the stroke
+style ([CR-015](#cr-015)), a split crossbar with chord ticks, and labels ([P-066](product.md)). At
+global scale a median bird is a **few pixels** tall — measured earlier at 1.7px for a robin's neck
+and 0.4px for a hummingbird's — so none of that vocabulary is visible on the landing page. The
+default was hiding the drawing's own language from every first-time reader.
+
+The trade is real and goes both ways, which is why it is recorded rather than quietly flipped. The
+new default costs the immediate cross-family shock; it buys a reader who can actually read a bird,
+and who is better placed to be surprised when they do switch to global. The surprise survives one
+click; the vocabulary did not survive the default.
+
+### Why the legend becomes a diagram
+
+A swatch list asks the reader to map six colour chips onto a drawing. A labeled example **is** the
+drawing with the answers written on it — and BirdView now has exactly that machinery, built for the
+detail view, so the help can show the real thing rather than describe it.
+
+It also removes a class of rot the old legend was prone to: the swatch list described the tail as
+"dashed, to tell it from the body", which stopped being true when CR-015 gave dash a different
+meaning, and nothing caught it because the text and the stylesheet had no connection. A rendered
+diagram cannot drift from the renderer.
+
+### Resulting status
+
+- **P-042** amended: per-section is the default and is listed first.
+- **P-035** amended: three sections in a stated order, and the diagram section is a rendered,
+  labeled diagram.
+- **AC-031** and **AC-059** amended, and the tests that asserted the global default inverted.
+- The help diagram is drawn from a real species with a **modeled** wingspan, so the dashed inner
+  crossbar of P-065 is visible in the legend rather than only in the prose beside it.
+
+---
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
