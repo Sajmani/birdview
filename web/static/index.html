@@ -278,10 +278,11 @@
         y="{{f1 (add .TopOffset $g.YShoulder)}}">{{.WingspanLabel}}</text>
   {{end}}
   {{if and .ChordLabel $g.ChordTickX}}
-  {{/* Centred over the RIGHT outer segment, which is the measured chord
-       itself, so the words sit on the thing they name. */}}
+  {{/* Centred over the LEFT outer segment. Both outer segments are the measured
+       chord, so either names it; the left keeps it clear of the wingspan label,
+       which sits off the right end of the bar. */}}
   <text class="dlabel chord" text-anchor="middle" y="{{f1 (add .TopOffset (sub $g.YShoulder 7))}}"
-        x="{{f1 (add $g.CX (div (add $g.ChordTickX $g.CrossbarHalfWidth) 2))}}">{{.ChordLabel}}</text>
+        x="{{f1 (sub $g.CX (div (add $g.ChordTickX $g.CrossbarHalfWidth) 2))}}">{{.ChordLabel}}</text>
   {{end}}
   {{range .Labels}}
   <text class="dlabel{{if .Est}} est{{end}}" x="{{f1 (sub $b.W 144)}}" y="{{f1 .TextY}}"

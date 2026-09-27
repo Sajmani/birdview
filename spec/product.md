@@ -630,9 +630,10 @@ onto a part of a drawing and holding the correspondence in your head. Labeling t
 removes that step, and the detail view is the one place with room to do it — the tile is
 deliberately dense because it exists to be compared against dozens of others.
 
-The **wing chord** is labeled centred over the measured outer segment it names, and the
-**wingspan** just beyond the right wingtip and on the crossbar's own line, so it reads as naming
-the whole bar rather than any part of it.
+The **wing chord** is labeled centred over the **left** outer segment — both outer segments are the
+measured chord, and the left keeps the label clear of the wingspan. The **wingspan** sits just
+beyond the right wingtip and on the crossbar's own line, so it reads as naming the whole bar rather
+than any part of it.
 
 This is why the detail diagram is drawn wider than the tile's proportions, and why the bird is laid
 out in only part of that width. The right of the box is reserved for the label column and for the
