@@ -265,7 +265,7 @@ for. Opening filtered or empty would hide it.
 Subject: `presentation.scroll`
 Goals: G-002
 
-Changing any control preserves the scroll position **and the collapsed state of the Instructions
+Changing any control preserves the scroll position **and the collapsed state of the Presentation
 and Controls panels**, as does returning from a detail view.
 
 Rationale: every control is a link, so each toggle loads a new URL and the browser lands at the
@@ -294,7 +294,7 @@ the control that fixes it.
 Subject: `presentation.controls`
 Goals: G-002
 
-The controls panel is collapsible and starts open, like the instructions above it. Once collapsed
+The controls panel is collapsible and starts open, like the Presentation panel above it. Once collapsed
 it **stays** collapsed across navigations (P-038).
 
 Rationale: the family selector is 91 chips in 25 groups, which pushes the birds well below the
@@ -304,14 +304,16 @@ fold. A reader who has chosen their filter should be able to put it away — and
 Subject: `presentation.help`
 Goals: G-001, G-002, G-003
 
-Below the title, the page carries help text in three sections, in this order: **the diagram**,
-**where the numbers come from**, then **the controls**.
+Below the title, a **Presentation** panel carries two sections side by side, each half the page:
+**the diagram**, then **where the numbers come from**.
 
 The diagram section is **a real labeled diagram**, the same one the detail view draws, rather than
 a list of colour swatches: every part named and measured against an actual bird. The numbers
-section explains solid against dashed, the wing chord and its ticks, and the estimate marker. The
-controls section covers every control — ordering metric, scale mode, section step, units, family
-filter.
+section explains solid against dashed, the wing chord and its ticks, and the estimate marker.
+
+**The controls explain themselves where they are.** Every control — ordering metric, scale mode,
+section step, units, family filter — is described inside the Controls panel, above the controls
+themselves, in two columns.
 
 The help is collapsible and starts open, so a returning user can dismiss it without losing it.
 
@@ -320,10 +322,11 @@ amber stroke is the bill, that a dashed stroke means estimated, or that the cros
 wingspan rather than a decoration — and the scale toggle, the one control that changes what the
 app is *saying*, is the least discoverable of all.
 
-Showing the diagram rather than describing it is the point of the change: a swatch list asks the
-reader to map six colour chips onto a drawing, where a labeled example simply *is* the drawing with
-the answers on it. The order runs from the thing on screen, to what its strokes mean, to how to
-change it.
+Showing the diagram rather than describing it is the point: a swatch list asks the reader to map
+six colour chips onto a drawing, where a labeled example simply *is* the drawing with the answers
+on it. That needs room, which is why the panel holds two half-page columns rather than three narrow
+ones — and why the control descriptions moved down to sit with the controls they describe, where a
+reader looking at a control finds its explanation without going back up the page.
 
 ### P-034 — A tile opens a detail view
 Subject: `presentation.detail_view`

@@ -124,7 +124,9 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
   padding: 10px 14px; margin: 16px 0 0; }
 .help summary { cursor: pointer; font-size: 12px; text-transform: uppercase;
   letter-spacing: .05em; color: var(--accent); }
-.helpgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+/* Two columns, each half the page: the diagram needs the room, and three
+   columns made all of them too narrow to read (P-035). */
+.helpgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: 20px; margin-top: 12px; }
 .help h3 { font-size: 12px; margin: 0 0 6px; color: var(--ink); }
 .help ul, .help dl, .help p { margin: 0; font-size: 12.5px; color: var(--dim); }
@@ -184,3 +186,11 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .dlabel.chord, .dlabel.span { fill: #0ea5e9; }
 .dlabel.est::after { content: " ~"; }
 .legenddia { max-width: 570px; margin: 6px 0; }
+
+/* The control explanations live with the controls they describe, laid out in
+   two columns so the definition list does not become a single long ribbon. */
+.ctrlhelp { columns: 2; column-gap: 26px; margin-bottom: 12px; }
+.ctrlhelp dl { margin: 0; font-size: 12.5px; color: var(--dim); }
+.ctrlhelp dt { color: var(--ink); font-weight: 600; margin-top: 6px; }
+.ctrlhelp dt:first-child { margin-top: 0; }
+.ctrlhelp dd { margin: 1px 0 0; break-inside: avoid; }

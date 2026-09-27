@@ -15,8 +15,8 @@
   and use the Controls to configure the view. Contact birdview at ajmani dot net with feedback.</p>
 </header>
 
-<details class="help" id="instructions" open>
-  <summary>Instructions</summary>
+<details class="help" id="presentation" open>
+  <summary>Presentation</summary>
   <div class="helpgrid">
     <section>
       <h3>The diagram</h3>
@@ -46,8 +46,12 @@
       <p><b>Click any bird</b> for every measurement, including each part of the diagram, with the
       source or the model behind it named individually.</p>
     </section>
-    <section>
-      <h3>The controls</h3>
+  </div>
+</details>
+
+<details class="controls" id="controls" open>
+  <summary>Controls</summary>
+  <div class="ctrlhelp">
       <dl>
         <dt>Order by</dt>
         <dd>Sort every bird by total length, wingspan or mass. Birds are then grouped into
@@ -67,12 +71,7 @@
           the whole group, or <b>All</b> to clear the lot and start picking. Grouped by taxonomic
           order in checklist sequence &mdash; the order field guides use.</dd>
       </dl>
-    </section>
   </div>
-</details>
-
-<details class="controls" id="controls" open>
-  <summary>Controls</summary>
   <div class="row">
     <span class="lbl">Order by</span>
     {{$q := .Query}}

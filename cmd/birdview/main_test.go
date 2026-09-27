@@ -574,10 +574,29 @@ func TestHelpCoversEveryControl(t *testing.T) {
 	help := body[i:]
 	help = help[:strings.Index(help, "</details>")]
 
-	// Every control offered by the controls bar.
+	// The control explanations now sit WITH the controls rather than in the
+	// Presentation panel, so they are checked in their own scope (CR-018).
+	// Scope to the EXPLANATION block, not the whole controls panel. Every
+	// control name also appears as its own button label a few lines below, so a
+	// panel-wide search is satisfied by the control existing rather than by it
+	// being explained -- which is how the first version of this passed with the
+	// explanations deleted outright.
+	hi := strings.Index(body, `<div class="ctrlhelp">`)
+	if hi < 0 {
+		t.Fatal("the controls panel carries no explanation block")
+	}
+	controls := body[hi:]
+	controls = controls[:strings.Index(controls, "</details>")]
 	for _, control := range []string{"Order by", "Scale", "Section step", "Units", "Family"} {
-		if !strings.Contains(help, control) {
-			t.Errorf("help does not mention the %q control", control)
+		if !strings.Contains(controls, "<dt>"+control+"</dt>") {
+			t.Errorf("the controls panel does not explain the %q control", control)
+		}
+	}
+	// And both scale modes, which is the one control a reader cannot discover
+	// by clicking: it changes what the app is saying, not what it shows.
+	for _, mode := range []string{"Global", "Per section"} {
+		if !strings.Contains(controls, mode) {
+			t.Errorf("the controls panel does not explain %q", mode)
 		}
 	}
 	// Every part of the diagram, since none of it is self-evident. These are now
@@ -588,9 +607,9 @@ func TestHelpCoversEveryControl(t *testing.T) {
 			t.Errorf("diagram legend omits %q", part)
 		}
 	}
-	// The three sections run in a stated order (P-035): the thing on screen,
-	// then what its strokes mean, then how to change it.
-	order := []string{"The diagram", "Where the numbers come from", "The controls"}
+	// Two sections, in a stated order (P-035): the thing on screen, then what
+	// its strokes mean. How to change it moved down to the controls.
+	order := []string{"The diagram", "Where the numbers come from"}
 	at := make([]int, len(order))
 	for i, h := range order {
 		if at[i] = strings.Index(help, ">"+h+"<"); at[i] < 0 {
@@ -604,11 +623,10 @@ func TestHelpCoversEveryControl(t *testing.T) {
 		}
 	}
 
-	// The two things a reader cannot discover by clicking: what the estimate
-	// marker means, and that both scale modes exist.
-	for _, concept := range []string{"estimated", "Global", "Per section"} {
+	// What the estimate marker means: the other thing a reader cannot infer.
+	for _, concept := range []string{"estimated"} {
 		if !strings.Contains(help, concept) {
-			t.Errorf("help does not explain %q", concept)
+			t.Errorf("Presentation panel does not explain %q", concept)
 		}
 	}
 	if !strings.Contains(help, "open") {
@@ -890,7 +908,7 @@ func TestScrollRestorationIsInlineAndSelfContained(t *testing.T) {
 func TestCollapsiblePanelsPersist(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/")
 
-	for _, id := range []string{"instructions", "controls"} {
+	for _, id := range []string{"presentation", "controls"} {
 		if !strings.Contains(body, `id="`+id+`"`) {
 			t.Errorf("panel %q has no id; its collapsed state cannot be remembered", id)
 		}
@@ -903,7 +921,7 @@ func TestCollapsiblePanelsPersist(t *testing.T) {
 		t.Error("scroll is restored before the panels; collapsing one would then shift the page")
 	}
 	// Both panels still default to open for a first-time reader.
-	for _, want := range []string{`class="help" id="instructions" open`, `class="controls" id="controls" open`} {
+	for _, want := range []string{`class="help" id="presentation" open`, `class="controls" id="controls" open`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("panel does not default to open: expected %q", want)
 		}
@@ -918,7 +936,7 @@ func TestCollapsiblePanelsPersist(t *testing.T) {
 func TestControlOrderAndOptions(t *testing.T) {
 	_, page := get(t, newTestServer(t), "/")
 
-	// Scope to the controls panel. The instructions above it also name both
+	// Scope to the controls panel. The Presentation panel above it also names both
 	// scale modes, in the same order -- searching the whole page matched the
 	// prose and passed even with the buttons reversed.
 	ci := strings.Index(page, `<details class="controls"`)

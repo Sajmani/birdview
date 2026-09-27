@@ -358,10 +358,13 @@ dataset-wide reference, which inset the hummingbird by 128 px.
 
 ### AC-059 — The page explains every control and the diagram
 **Verifies:** P-035 · **Level:** code · **Method:** rendering test over the help block
-**Assertions:** the help names every control in the controls bar (order, scale, step, units,
-family); its three sections appear in the stated order — the diagram, where the numbers come from,
-the controls; the **rendered legend** names all five segments plus the wingspan and the wing chord;
-the estimate marker and both scale modes are explained; the block starts expanded.
+**Assertions:** the **Controls** panel explains every control it offers (order, scale, step, units,
+family) and both scale modes; the **Presentation** panel's two sections appear in the stated order —
+the diagram, then where the numbers come from; its **rendered legend** names all five segments plus
+the wingspan and the wing chord; the estimate marker is explained; both panels start expanded.
+
+Each explanation is asserted in its own scope. A whole-page search would let the controls panel
+satisfy a claim about the Presentation panel, and vice versa.
 **Status: verified 2026-09-27 — passing, and watched failing** by removing the scale explanation,
 by removing the tail from the legend, by suppressing the legend diagram, and by swapping two
 sections.
@@ -421,7 +424,7 @@ panel, plus round-tripping each offered step through `parseOptions`
 offering a step the server rejects.
 
 The scoping matters and was got wrong first. Searching the whole page for the scale labels matched
-the **instructions**, which name both modes in the same order, so the check passed with the
+the **Presentation panel**, which named both modes in the same order, so the check passed with the
 buttons reversed. It now reads only the controls panel.
 
 ### AC-064 — Attribution is complete, and claims nothing unearned
