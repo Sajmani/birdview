@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -1442,4 +1443,43 @@ func TestDiagramTextPaintsOverLines(t *testing.T) {
 	if n := strings.Count(svg, "<text"); n < 7 {
 		t.Errorf("only %d labels in the diagram; expected five segments plus chord and wingspan", n)
 	}
+}
+
+// TestHeaderNamesThePanelsThatExist guards against the header pointing at a
+// panel by a name it no longer has.
+//
+// The intro read "Read the Instructions for details" for a while after the
+// panel was retitled Presentation, so it directed the reader to something that
+// was not on the page. Nothing caught it: the panel had a test, the header had
+// a test, and neither knew about the other.
+//
+// Verifies: P-035. Criterion: AC-059.
+func TestHeaderNamesThePanelsThatExist(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/")
+	intro := mustMatch(t, body, `(?s)<p class="sub">(.*?)</p>`, "the header intro")
+
+	titles := regexp.MustCompile(`<summary>([^<]+)</summary>`).FindAllStringSubmatch(body, -1)
+	have := map[string]bool{}
+	for _, m := range titles {
+		have[strings.TrimSpace(m[1])] = true
+	}
+	if len(have) == 0 {
+		t.Fatal("no collapsible panels found")
+	}
+	// Any capitalised panel-ish word the intro points the reader at must be a
+	// panel that exists.
+	for _, word := range regexp.MustCompile(`\b(Instructions|Presentation|Controls)\b`).FindAllString(intro, -1) {
+		if !have[word] {
+			t.Errorf("the header sends the reader to %q, but the panels are %v", word, keysOf(have))
+		}
+	}
+}
+
+func keysOf(m map[string]bool) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
 }
