@@ -1240,9 +1240,12 @@ func TestBothPagesExplainTheStrokeCode(t *testing.T) {
 func TestDetailDiagramIsLabeled(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/species/ardea_herodias?units=metric")
 
-	labels := regexp.MustCompile(`<text class="dlabel[^"]*"[^>]*>([^<]+)</text>`).FindAllStringSubmatch(body, -1)
+	// Matches a segment label, dashed or not, but deliberately NOT the chord:
+	// that one is checked separately below, and folding it in here would let a
+	// missing segment hide behind it.
+	labels := regexp.MustCompile(`<text class="dlabel(?: est)?"[^>]*>([^<]+)</text>`).FindAllStringSubmatch(body, -1)
 	if len(labels) != 5 {
-		t.Fatalf("detail diagram carries %d labels, want one per segment", len(labels))
+		t.Fatalf("detail diagram carries %d segment labels, want one per segment", len(labels))
 	}
 	got := map[string]string{}
 	for _, m := range labels {
@@ -1261,6 +1264,17 @@ func TestDetailDiagramIsLabeled(t *testing.T) {
 		if val != row {
 			t.Errorf("%s: diagram says %q, provenance table says %q", seg, val, row)
 		}
+	}
+
+	// The wing chord is labeled on the crossbar, and like every other label its
+	// value is read out of the provenance table so the two cannot drift.
+	chord := mustMatch(t, body, `<text class="dlabel chord"[^>]*>([^<]+)</text>`, "the wing chord label")
+	if !strings.HasPrefix(chord, "Wing chord ") {
+		t.Errorf("chord label is %q; it should name what it measures", chord)
+	}
+	if got, want := strings.TrimSpace(strings.TrimPrefix(chord, "Wing chord")),
+		mustMatch(t, body, `<th>Wing chord</th>\s*<td class="v">([^<]+)</td>`, "the wing chord row"); got != want {
+		t.Errorf("wing chord: diagram says %q, provenance table says %q", got, want)
 	}
 
 	// Leaders tie each label to its segment.

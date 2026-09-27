@@ -640,9 +640,11 @@ assertions on the rendered detail page
 own segment; labels stay in the order the segments do; no two are closer than the line height; and
 the last one stays inside the box.
 
-**Assertions, rendering:** the detail page emits five labels, each naming its segment and carrying
-the same value the provenance table gives for it — read out of the table rather than recomputed, so
-the two cannot drift apart. A tile carries none.
+**Assertions, rendering:** the detail page emits five segment labels plus a **wing chord** label on
+the crossbar, each naming what it measures and carrying the same value the provenance table gives
+for it — read out of the table rather than recomputed, so the two cannot drift apart. The segment
+count is matched on the segment labels alone, so a missing segment cannot hide behind the chord. A
+tile carries none.
 
 **Status: verified 2026-09-24 — passing, and watched failing** by anchoring every label at the same
 y, by removing the minimum-gap pass, and by dropping a segment from the list.

@@ -181,4 +181,5 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
    footer uses, so the same mark means the same thing everywhere. */
 .leader { stroke: var(--line); stroke-width: 1; }
 .dlabel { fill: var(--ink); font-size: 11px; }
+.dlabel.chord { fill: #0ea5e9; }
 .dlabel.est::after { content: " ~"; }

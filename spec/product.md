@@ -325,6 +325,8 @@ same diagram, same main metrics, same layout — with the bird drawn **as large 
 whatever scale the index is using**, plus:
 
 - the measurement of **every individual diagram segment**: bill, head, neck, body, tail;
+- the **wing chord**, which the crossbar draws as its solid outer portions (P-065) and which would
+  otherwise be the one length visible in the drawing with no row explaining it;
 - the **provenance of every metric shown**, main metrics and segments alike (P-063).
 
 Rationale: the tile is deliberately dense, because it exists to be compared against dozens of
@@ -597,7 +599,8 @@ Subject: `presentation.detail_view.diagram_labels`
 Goals: G-001, G-003
 
 In the detail view, each of the five segments is named and measured **beside the part it
-describes**, joined to it by a leader line. An estimated value carries the same `~` the tile footer
+describes**, joined to it by a leader line. The **wing chord** is labeled too, on the crossbar
+rather than in the stack, because it names a horizontal length and belongs beside one. An estimated value carries the same `~` the tile footer
 uses. The provenance table below the diagram is unchanged: it remains the place where the source or
 model behind each number is explained.
 

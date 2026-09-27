@@ -258,6 +258,12 @@
     <line class="junction" x1="{{f1 (sub $g.CX 4)}}" y1="{{f1 $g.YBodyEnd}}"
           x2="{{f1 (add $g.CX 4)}}" y2="{{f1 $g.YBodyEnd}}"/>
     <line class="tail" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBodyEnd}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YTailTip}}"/>
+    {{if and .ChordLabel $g.ChordTickX}}
+    {{/* Centred over the LEFT outer segment, which is the measured chord
+         itself. Left, because the right side of the box is the label stack. */}}
+    <text class="dlabel chord" text-anchor="middle" y="{{f1 (sub $g.YShoulder 7)}}"
+          x="{{f1 (sub $g.CX (div (add $g.ChordTickX $g.CrossbarHalfWidth) 2))}}">{{.ChordLabel}}</text>
+    {{end}}
   </g>
   {{/* Labels sit OUTSIDE the centering transform, in box coordinates: view has
        already folded the offset into their y values, and a leader that bends
