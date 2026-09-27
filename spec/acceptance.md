@@ -618,6 +618,28 @@ The tail assertion is the one most likely to look redundant and is the most valu
 mean "this is the tail"; anyone restoring that on aesthetic grounds reverses the meaning of the
 whole scheme, and every other assertion here would still pass.
 
+### AC-073 — Every segment is labeled on the detail diagram, and no two labels collide
+**Verifies:** P-066 · **Level:** code · **Method:** unit tests over the label layout plus
+assertions on the rendered detail page
+
+**Assertions, layout:** all five segments get a label; each label's anchor is the midpoint of its
+own segment; labels stay in the order the segments do; no two are closer than the line height; and
+the last one stays inside the box.
+
+**Assertions, rendering:** the detail page emits five labels, each naming its segment and carrying
+the same value the provenance table gives for it — read out of the table rather than recomputed, so
+the two cannot drift apart. A tile carries none.
+
+**Status: verified 2026-09-24 — passing, and watched failing** by anchoring every label at the same
+y, by removing the minimum-gap pass, and by dropping a segment from the list.
+
+**The collision resolver does not fire on real data: 0 of 841 species need it** at the current box
+size and font. It is kept anyway, and tested with a synthetic geometry rather than deleted, because
+unlike the dead branch removed in CR-010 this one is not dead *by construction* — it is dead by the
+current numbers. A larger font, a shorter box or a new segment would all wake it. The dataset-wide
+figure is recorded here so that if someone later finds it untriggered, they find out why before
+removing it.
+
 ---
 
 ## Traceability
@@ -660,6 +682,7 @@ whole scheme, and every other assertion here would still pass.
 | P-063 | AC-043 | |
 | P-064 | AC-068 | |
 | P-065 | AC-072 | |
+| P-066 | AC-073 | |
 | T-001, T-003 | AC-054 | |
 | T-002 | AC-051, AC-071 | |
 | T-004 | AC-050, AC-053 | |

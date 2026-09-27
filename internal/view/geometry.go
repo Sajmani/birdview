@@ -145,3 +145,56 @@ func (g Geometry) NeckMid() float64 { return (g.YNeckTop + g.YShoulder) / 2 }
 // is long and the drawing is correspondingly shorter (CR-011). Length as data
 // is unaffected: Sections and Scales read TotalLength, never this.
 func (g Geometry) TotalHeight() float64 { return g.YTailTip - g.YBillTip }
+
+// Label is one annotation on the detail diagram: a segment named and measured
+// beside the part it describes (P-066).
+type Label struct {
+	Key     string  // bill, head, neck, body, tail
+	AnchorY float64 // the segment's midpoint on the axis: where the leader points
+	TextY   float64 // where the text sits, after collision resolution
+}
+
+// labelMinGap is the vertical room one label needs, in px. Text is 11px, so
+// this is the line box plus a little air.
+const labelMinGap = 14
+
+// DetailLabels places a label beside each of the five segments.
+//
+// Each label wants to sit at its segment's midpoint, and on a small bird the
+// segments are far closer together than the text is tall -- a hummingbird's
+// neck is a few pixels at any scale. So the wanted positions are resolved into
+// a non-overlapping column: a forward pass pushes each label below the one
+// before, then a backward pass lifts the whole run if it has run off the
+// bottom. The leader line, not the text position, is what ties a label to its
+// segment, so moving the text is safe where moving the anchor would not be.
+//
+// Verifies: P-066.
+func (g Geometry) DetailLabels(box Box, topOffset float64) []Label {
+	mid := func(a, b float64) float64 { return topOffset + (a+b)/2 }
+	out := []Label{
+		{Key: "bill", AnchorY: mid(g.YBillTip, g.YCraniumTop)},
+		{Key: "head", AnchorY: mid(g.YCraniumTop, g.YNeckTop)},
+		{Key: "neck", AnchorY: mid(g.YNeckTop, g.YShoulder)},
+		{Key: "body", AnchorY: mid(g.YShoulder, g.YBodyEnd)},
+		{Key: "tail", AnchorY: mid(g.YBodyEnd, g.YTailTip)},
+	}
+	for i := range out {
+		out[i].TextY = out[i].AnchorY
+	}
+	// Forward: never closer than labelMinGap to the previous label.
+	for i := 1; i < len(out); i++ {
+		if d := out[i].TextY - out[i-1].TextY; d < labelMinGap {
+			out[i].TextY = out[i-1].TextY + labelMinGap
+		}
+	}
+	// Backward: if that pushed the last one out of the box, lift the run.
+	if over := out[len(out)-1].TextY - (box.H - 2); over > 0 {
+		for i := len(out) - 1; i >= 0; i-- {
+			out[i].TextY -= over
+			if i > 0 && out[i].TextY-out[i-1].TextY >= labelMinGap {
+				break
+			}
+		}
+	}
+	return out
+}

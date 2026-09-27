@@ -1227,3 +1227,49 @@ func TestBothPagesExplainTheStrokeCode(t *testing.T) {
 		}
 	}
 }
+
+// TestDetailDiagramIsLabeled asserts P-066 on the rendered page: five labels,
+// each naming its segment and carrying the value the provenance table gives for
+// it.
+//
+// The values are read out of the table rather than recomputed here, so the two
+// cannot drift apart. A label that disagreed with the table would be the worst
+// outcome of this feature -- two numbers for one segment on one page.
+//
+// Verifies: P-066. Criterion: AC-073.
+func TestDetailDiagramIsLabeled(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/species/ardea_herodias?units=metric")
+
+	labels := regexp.MustCompile(`<text class="dlabel[^"]*"[^>]*>([^<]+)</text>`).FindAllStringSubmatch(body, -1)
+	if len(labels) != 5 {
+		t.Fatalf("detail diagram carries %d labels, want one per segment", len(labels))
+	}
+	got := map[string]string{}
+	for _, m := range labels {
+		f := strings.Fields(m[1])
+		got[strings.ToLower(f[0])] = strings.Join(f[1:], " ")
+	}
+	for _, seg := range []string{"bill", "head", "neck", "body", "tail"} {
+		val, ok := got[seg]
+		if !ok {
+			t.Errorf("no label for the %s", seg)
+			continue
+		}
+		row := mustMatch(t, body,
+			`<th>`+strings.ToUpper(seg[:1])+seg[1:]+`</th>\s*<td class="v">([^<]+)</td>`,
+			"the "+seg+" row")
+		if val != row {
+			t.Errorf("%s: diagram says %q, provenance table says %q", seg, val, row)
+		}
+	}
+
+	// Leaders tie each label to its segment.
+	if n := strings.Count(body, `class="leader"`); n != 5 {
+		t.Errorf("%d leader lines, want 5", n)
+	}
+	// A tile has none: the index is dense on purpose.
+	_, index := get(t, newTestServer(t), "/")
+	if strings.Contains(index, `class="dlabel`) {
+		t.Error("tiles carry diagram labels; those belong to the detail view only")
+	}
+}

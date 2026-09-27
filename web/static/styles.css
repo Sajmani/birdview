@@ -175,3 +175,10 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .dia .wing.est { stroke-dasharray: 6 3; }
 .chordtick          { stroke: #0ea5e9; stroke-width: 1.5; opacity: .85; }
 .diagramkey { margin-top: 16px; max-width: 80ch; }
+
+/* Detail-diagram labels (P-066). The leader is faint because it is scaffolding;
+   the text is what carries meaning. An estimated value repeats the ~ the tile
+   footer uses, so the same mark means the same thing everywhere. */
+.leader { stroke: var(--line); stroke-width: 1; }
+.dlabel { fill: var(--ink); font-size: 11px; }
+.dlabel.est::after { content: " ~"; }

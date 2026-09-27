@@ -461,3 +461,63 @@ func TestChordTickMarksTheMeasuredPortion(t *testing.T) {
 		}
 	}
 }
+
+// TestDetailLabelsDoNotCollide asserts P-066's layout rules.
+//
+// The collision pass is exercised with a synthetic geometry, because no real
+// species needs it: at the current box and font, 0 of 841 have segment
+// midpoints closer than a line height. It is kept rather than deleted because
+// unlike the dead branch CR-010 removed, this one is dead by the current
+// numbers rather than by construction -- a larger font or a shorter box wakes
+// it -- so it has to be tested by construction too.
+//
+// Verifies: P-066. Criterion: AC-073.
+func TestDetailLabelsDoNotCollide(t *testing.T) {
+	box := Box{W: 988, H: 281}
+
+	// Segments a couple of px apart: every label wants nearly the same y.
+	tight := Geometry{YBillTip: 100, YCraniumTop: 102, YNeckTop: 104,
+		YShoulder: 106, YBodyEnd: 108, YTailTip: 110}
+	got := tight.DetailLabels(box, 0)
+	if len(got) != 5 {
+		t.Fatalf("got %d labels, want one per segment", len(got))
+	}
+	for i, want := range []string{"bill", "head", "neck", "body", "tail"} {
+		if got[i].Key != want {
+			t.Errorf("label %d is %q, want %q -- labels must stay in segment order", i, got[i].Key, want)
+		}
+	}
+	for i := 1; i < len(got); i++ {
+		if d := got[i].TextY - got[i-1].TextY; d < labelMinGap-1e-9 {
+			t.Errorf("labels %s and %s are %.2f px apart, closer than the %d px line height",
+				got[i-1].Key, got[i].Key, d, labelMinGap)
+		}
+	}
+	if last := got[len(got)-1].TextY; last > box.H {
+		t.Errorf("last label at %.1f is below the %.0f px box", last, box.H)
+	}
+
+	// Anchors are untouched by the spreading: the leader is what ties a label
+	// to its segment, so the anchor must stay on the segment's midpoint.
+	for _, c := range []struct {
+		key  string
+		a, b float64
+	}{{"bill", 100, 102}, {"head", 102, 104}, {"neck", 104, 106}, {"body", 106, 108}, {"tail", 108, 110}} {
+		for _, l := range got {
+			if l.Key == c.key {
+				if want := (c.a + c.b) / 2; math.Abs(l.AnchorY-want) > 1e-9 {
+					t.Errorf("%s anchor is %.3f, want its midpoint %.3f", c.key, l.AnchorY, want)
+				}
+			}
+		}
+	}
+
+	// And on a roomy bird nothing moves at all: text sits exactly on the anchor.
+	roomy := Geometry{YBillTip: 0, YCraniumTop: 40, YNeckTop: 80,
+		YShoulder: 130, YBodyEnd: 200, YTailTip: 260}
+	for _, l := range roomy.DetailLabels(box, 0) {
+		if math.Abs(l.TextY-l.AnchorY) > 1e-9 {
+			t.Errorf("%s moved to %.2f from %.2f with room to spare", l.Key, l.TextY, l.AnchorY)
+		}
+	}
+}

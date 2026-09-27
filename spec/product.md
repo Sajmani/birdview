@@ -592,6 +592,28 @@ The crossbar split earns its complexity: the outer segment's length stays true e
 model is wrong, so all the model's error is attributed to the inner segment, where it belongs. See
 [CR-015](decisions.md).
 
+### P-066 — The detail diagram is labeled with each segment and its measurement
+Subject: `presentation.detail_view.diagram_labels`
+Goals: G-001, G-003
+
+In the detail view, each of the five segments is named and measured **beside the part it
+describes**, joined to it by a leader line. An estimated value carries the same `~` the tile footer
+uses. The provenance table below the diagram is unchanged: it remains the place where the source or
+model behind each number is explained.
+
+Labels never overlap one another. Where two segments are too close together for their labels to
+sit at both midpoints, the text moves and the leader line stretches — the leader, not the text
+position, is what ties a label to its segment.
+
+Rationale: the table already lists every segment with its value, but reading it means mapping a row
+onto a part of a drawing and holding the correspondence in your head. Labeling the drawing directly
+removes that step, and the detail view is the one place with room to do it — the tile is
+deliberately dense because it exists to be compared against dozens of others.
+
+This is why the detail diagram is drawn wider than the tile's proportions. The scale is limited by
+height for almost every bird, so widening the box does not enlarge the bird: it creates the margin
+outside the wingtips that the labels occupy.
+
 ### P-064 — The detail view links to the species on iNaturalist
 Subject: `presentation.detail_view.external_link`
 Goals: G-001, G-004

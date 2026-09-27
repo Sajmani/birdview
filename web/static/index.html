@@ -259,5 +259,14 @@
           x2="{{f1 (add $g.CX 4)}}" y2="{{f1 $g.YBodyEnd}}"/>
     <line class="tail" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBodyEnd}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YTailTip}}"/>
   </g>
+  {{/* Labels sit OUTSIDE the centering transform, in box coordinates: view has
+       already folded the offset into their y values, and a leader that bends
+       needs both ends in one space (P-066). */}}
+  {{range .Labels}}
+  <line class="leader" x1="{{f1 (add $g.CX 6)}}" y1="{{f1 .AnchorY}}"
+        x2="{{f1 (sub $b.W 150)}}" y2="{{f1 .TextY}}"/>
+  <text class="dlabel{{if .Est}} est{{end}}" x="{{f1 (sub $b.W 144)}}" y="{{f1 .TextY}}"
+        dominant-baseline="middle">{{.Text}}</text>
+  {{end}}
 </svg>
 {{end}}

@@ -185,6 +185,11 @@ type tile struct {
 	// WingModeled drives the crossbar split: the inner span is dashed only when
 	// the wingspan is modeled (P-065).
 	WingModeled bool
+
+	// Labels is always empty on a tile: the annotations of P-066 belong to the
+	// detail view, where there is room for them. The shared diagram template
+	// reads the field from both, so it has to exist here.
+	Labels []diagramLabel
 }
 
 type sectionView struct {
@@ -370,6 +375,18 @@ type detailData struct {
 	// WingModeled drives the crossbar split: the inner span is dashed only when
 	// the wingspan is modeled (P-065).
 	WingModeled bool
+
+	// Labels annotate the detail diagram (P-066); empty on a tile.
+	Labels    []diagramLabel
+	TopOffset float64
+}
+
+// diagramLabel is one annotation: where view put it, what it says, and whether
+// the value it reports is estimated.
+type diagramLabel struct {
+	view.Label
+	Text string
+	Est  bool
 }
 
 type metricRow struct {
@@ -383,7 +400,10 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	opt := parseOptions(r)
-	box := view.Box{W: tileBox.W * 1.9, H: tileBox.H * 1.9}
+	// Wider than the tile's 2.6:1 so the labels of P-066 have margin outside the
+	// wingtips. The extra width costs nothing: the scale is already limited by
+	// height for almost every bird, so the bird does not grow, the margin does.
+	box := view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}
 	// The detail view always draws the bird as large as the box allows, whatever
 	// scale the index is using. Under a global scale a small bird is a few
 	// pixels tall by design, and carrying that into the one view devoted to
@@ -399,13 +419,29 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		row("Body", sp.Segments.Body, view.ByLength, opt.Metric3),
 		row("Tail", sp.Segments.Tail, view.ByLength, opt.Metric3),
 	}
+	geom := view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, box)
+	top := (box.H - geom.TotalHeight()) / 2
+	segOf := map[string]dataset.Metric{
+		"bill": sp.Segments.Bill, "head": sp.Segments.Head, "neck": sp.Segments.Neck,
+		"body": sp.Segments.Body, "tail": sp.Segments.Tail,
+	}
+	var labels []diagramLabel
+	for _, l := range geom.DetailLabels(box, top) {
+		m := segOf[l.Key]
+		labels = append(labels, diagramLabel{
+			Label: l,
+			Text:  strings.ToUpper(l.Key[:1]) + l.Key[1:] + "  " + format(m.Value, view.ByLength, opt.Metric3),
+			Est:   m.Prov.Kind == dataset.Modeled,
+		})
+	}
+
 	// Only a confident match gets a link; zero means none was found (P-064).
 	var inatURL string
 	if sp.INatTaxonID > 0 {
 		inatURL = inat.TaxonURL(sp.INatTaxonID)
 	}
 	s.render(w, "detail.html", detailData{
-		S: sp, Geom: view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, box), Box: box,
+		S: sp, Geom: geom, Box: box, Labels: labels, TopOffset: top,
 		Metrics: rows, Opt: opt, Query: queryFor(r), INatURL: inatURL,
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 	})
