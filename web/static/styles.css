@@ -184,7 +184,10 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .leader { stroke: var(--line); stroke-width: 1; }
 .dlabel { fill: var(--ink); font-size: 11px; }
 .dlabel.chord, .dlabel.span { fill: #0ea5e9; }
-.dlabel.est::after { content: " ~"; }
+/* No ::after here: generated content produces no box on an SVG <text>, so the
+   rule that used to sit on this line was inert and every modeled value on the
+   diagram drew exactly like a measured one. The ~ is emitted in the markup
+   instead (P-066); .est stays as a styling hook. */
 /* Half again the previous 570px. The column is wider than that, so the cap was
    leaving the legend small with empty space beside it -- and the legend is the
    one thing in this panel worth looking at (P-035). */

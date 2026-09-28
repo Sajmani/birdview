@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"html"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -1304,10 +1305,17 @@ func TestDetailDiagramIsLabeled(t *testing.T) {
 	if len(labels) != 5 {
 		t.Fatalf("detail diagram carries %d segment labels, want one per segment", len(labels))
 	}
-	got := map[string]string{}
+	got, marked := map[string]string{}, map[string]bool{}
 	for _, m := range labels {
 		f := strings.Fields(m[1])
-		got[strings.ToLower(f[0])] = strings.Join(f[1:], " ")
+		seg := strings.ToLower(f[0])
+		val := strings.Join(f[1:], " ")
+		// The estimated marker is emitted in the markup, so strip it before
+		// comparing with the table -- and remember that it was there.
+		if marked[seg] = strings.HasSuffix(val, " ~"); marked[seg] {
+			val = strings.TrimSuffix(val, " ~")
+		}
+		got[seg] = val
 	}
 	for _, seg := range []string{"bill", "head", "neck", "body", "tail"} {
 		val, ok := got[seg]
@@ -1315,11 +1323,21 @@ func TestDetailDiagramIsLabeled(t *testing.T) {
 			t.Errorf("no label for the %s", seg)
 			continue
 		}
+		name := strings.ToUpper(seg[:1]) + seg[1:]
 		row := mustMatch(t, body,
-			`<th>`+strings.ToUpper(seg[:1])+seg[1:]+`</th>\s*<td class="v">([^<]+)</td>`,
-			"the "+seg+" row")
+			`<th>`+name+`</th>\s*<td class="v">([^<]+)</td>`, "the "+seg+" row")
 		if val != row {
 			t.Errorf("%s: diagram says %q, provenance table says %q", seg, val, row)
+		}
+		// The marker must track the provenance the table states for that same
+		// row, not a constant: asserted on the emitted text, because the class
+		// attribute was present and correct while nothing was drawn.
+		kind := mustMatch(t, body,
+			`<th>`+name+`</th>\s*<td class="v">[^<]+</td>\s*<td class="k"><span class="tag t-([a-z-]+)">`,
+			"the "+seg+" provenance kind")
+		if want := kind == "modeled"; marked[seg] != want {
+			t.Errorf("%s: label %q carries the ~ marker = %v, but the table calls it %q",
+				seg, got[seg], marked[seg], kind)
 		}
 	}
 
@@ -1482,4 +1500,139 @@ func keysOf(m map[string]bool) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// TestDetailDiagramLabelsTotalLength asserts P-066's total length label: the one
+// annotation that names the whole bird rather than a part of it.
+//
+// The Great Blue Heron is not an arbitrary fixture. Ardeidae folds its neck
+// (CR-011), so its drawn height is 6-9% short of its total length -- which is
+// what makes the value assertion below bite. For every unfolded bird the two
+// agree exactly, so a version of this test built on any other species would
+// pass just as happily against a label derived from the drawing.
+//
+// Verifies: P-066. Criterion: AC-074.
+func TestDetailDiagramLabelsTotalLength(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/species/ardea_herodias?units=metric")
+
+	el := mustMatch(t, body, `(<text class="dlabel total[^"]*"[^>]*>[^<]+</text>)`,
+		"the total length label")
+
+	// Horizontal: SVG text rotates only via a transform, so its absence is the
+	// assertion. Stated explicitly because "horizontal" is otherwise invisible.
+	if strings.Contains(el, "transform") || strings.Contains(el, "rotate") {
+		t.Errorf("the total length label is rotated; P-066 requires it horizontal: %s", el)
+	}
+	if !strings.Contains(el, `text-anchor="middle"`) {
+		t.Errorf("the total length label is not centred: %s", el)
+	}
+
+	// Centred on the BIRD's axis, not the box's. The two differ by half the
+	// label gutter, so a label centred on the box sits well to the right of the
+	// bird it names.
+	lt := labelledTile(findSpecies(t, "ardea_herodias"), view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, true)
+	if x := attrF(t, el, "x"); math.Abs(x-lt.Geom.CX) > 0.05 {
+		t.Errorf("total length label at x=%.1f; the bird's axis is %.1f (box centre is %.1f)",
+			x, lt.Geom.CX, lt.Box.W/2)
+	}
+	// Below the tail tip, not above it.
+	tail := lt.TopOffset + lt.Geom.YTailTip
+	if y := attrF(t, el, "y"); y <= tail {
+		t.Errorf("total length label at y=%.1f, tail tip at %.1f; it belongs below the tail", y, tail)
+	}
+
+	// It states the bird's length, read from the provenance table -- never the
+	// drawn height, which for this folded-neck bird is a different number.
+	text := mustMatch(t, el, `>([^<]+)</text>`, "the label text")
+	val := strings.TrimSpace(strings.TrimPrefix(text, "Total length"))
+	marked := strings.HasSuffix(val, " ~")
+	val = strings.TrimSuffix(val, " ~")
+	row := mustMatch(t, body, `<th>Total length</th>\s*<td class="v">([^<]+)</td>`,
+		"the total length row")
+	if val != row {
+		t.Errorf("total length: diagram says %q, provenance table says %q", val, row)
+	}
+	// Guard the guard: if the fixture ever stops folding its neck, the check
+	// above goes vacuous and should say so rather than quietly weaken.
+	if !lt.Geom.NeckFolded {
+		t.Fatal("the fixture no longer folds its neck, so this test can no longer " +
+			"distinguish the bird's length from the drawing's height; pick another Ardeidae")
+	}
+
+	// The marker tracks the provenance the table states, not a constant.
+	kind := mustMatch(t, body,
+		`<th>Total length</th>\s*<td class="v">[^<]+</td>\s*<td class="k"><span class="tag t-([a-z-]+)">`,
+		"the total length provenance kind")
+	if want := kind == "modeled"; marked != want {
+		t.Errorf("total length label carries the ~ marker = %v, but the table calls it %q",
+			marked, kind)
+	}
+
+	// No leader: there is no part to point at.
+	if n := strings.Count(body, `class="leader"`); n != 5 {
+		t.Errorf("%d leader lines; the total length label should not add one", n)
+	}
+
+	// The legend carries it; an index tile does not.
+	_, index := get(t, newTestServer(t), "/")
+	if !strings.Contains(index, `class="dlabel total`) {
+		t.Error("the help legend has no total length label; it renders through the same builder")
+	}
+	if strings.Contains(tileArea(t, index), `class="dlabel`) {
+		t.Error("index tiles carry diagram labels; those belong to the detail view and the legend")
+	}
+}
+
+// TestTotalLengthLabelStaysInTheBox asserts the room half of AC-074 across every
+// species, because the binding case is whichever bird is tallest relative to its
+// wingspan and that changes with the data.
+//
+// Without the reserved strip this fails for essentially the whole dataset: the
+// detail view scales each bird to fill the drawing area, so the tail tip lands
+// on its bottom edge and the label is drawn outside the viewBox.
+//
+// Verifies: P-066. Criterion: AC-074.
+func TestTotalLengthLabelStaysInTheBox(t *testing.T) {
+	// The 11px text's descender. The baseline may sit this far above the edge
+	// and no closer.
+	const descender = 3
+
+	ds := testDataset()
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, true)
+		if lt.TotalLabelY+descender > lt.Box.H {
+			t.Errorf("%s: total length label baseline at %.1f (+%d descender) overruns the %.1f box",
+				sp.CommonName, lt.TotalLabelY, descender, lt.Box.H)
+		}
+	}
+}
+
+// findSpecies returns a fixture species by id, so a test can rebuild the same
+// tile the handler built and compare against it rather than against a number
+// copied out of a run.
+func findSpecies(t *testing.T, id string) *dataset.Species {
+	t.Helper()
+	ds := testDataset()
+	for i := range ds.Species {
+		if ds.Species[i].ID == id {
+			return &ds.Species[i]
+		}
+	}
+	t.Fatalf("no fixture species %q", id)
+	return nil
+}
+
+// attrF reads a numeric attribute off a single rendered element.
+func attrF(t *testing.T, el, name string) float64 {
+	t.Helper()
+	m := regexp.MustCompile(name + `="([0-9.-]+)"`).FindStringSubmatch(el)
+	if m == nil {
+		t.Fatalf("no %s attribute on %s", name, el)
+	}
+	v, err := strconv.ParseFloat(m[1], 64)
+	if err != nil {
+		t.Fatalf("%s=%q: %v", name, m[1], err)
+	}
+	return v
 }

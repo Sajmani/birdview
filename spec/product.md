@@ -614,9 +614,16 @@ Goals: G-001, G-003
 
 In the detail view, each of the five segments is named and measured **beside the part it
 describes**, joined to it by a leader line. The **wing chord** is labeled too, on the crossbar
-rather than in the stack, because it names a horizontal length and belongs beside one. An estimated value carries the same `~` the tile footer
+rather than in the stack, because it names a horizontal length and belongs beside one. The
+**total length** is labeled as well — see below. An estimated value carries the same `~` the tile footer
 uses. The provenance table below the diagram is unchanged: it remains the place where the source or
 model behind each number is explained.
+
+The `~` must be in the **markup**. Writing it as CSS generated content is the obvious way and does
+not work: `::after` generates no box on an SVG `<text>`, so the rule is silently inert. This is not
+a hypothetical — it is how the marker was built in `a826b96`, the commit that introduced these
+labels, and it shipped drawing every modeled value identically to a measured one. See
+[AC-073](acceptance.md#ac-073).
 
 Labels never overlap one another. Where two segments are too close together for their labels to
 sit at both midpoints, the text moves and the leader line stretches — the leader, not the text
@@ -639,6 +646,36 @@ This is why the detail diagram is drawn wider than the tile's proportions, and w
 out in only part of that width. The right of the box is reserved for the label column and for the
 wingspan label beyond the wingtip; a wide-winged bird is drawn slightly smaller rather than running
 under its own annotations.
+
+#### The total length label
+
+**Total length is labeled horizontally, centred on the axis, below the tail tip.** It is the only
+label that names the whole bird rather than a part of it, and its placement says so: under the foot
+of the figure, on the centreline, spanning nothing. It takes no leader line — there is no part to
+point at, and proximity to the end of the drawing is the whole of its meaning.
+
+It belongs on the diagram for the reason the segments do, only more so. Total length is the number
+BirdView exists to give a reader intuition about (G-001); every other label names a component of
+it. Leaving it only in the table below made the drawing annotate its own parts while staying silent
+about the thing it is a drawing *of*.
+
+A **bottom strip is added** for it. Without one the label is clipped: the detail view scales the
+bird to fill the box, so a bird whose height binds has its tail tip exactly on the bottom edge and
+nothing below it.
+
+The strip **extends the box downward rather than shrinking the bird into it** — the opposite of
+what the label gutter does horizontally, and deliberately so. Width is fixed by the page column, so
+the gutter has to come out of the bird. Height is not: the drawing can simply be taller, and the
+bird keeps the size [P-034](#p-034) requires. Taking it out of the bird instead would cost 8.5% of
+the detail view's height to buy a one-line label, which is a bad trade and would put this
+requirement in conflict with P-034 rather than beside it.
+
+**It states the bird's length, not the drawing's height.** For the folded-neck families of
+[CR-011](decisions.md#cr-011) these differ: the neck's S spans 2/π of its length, so the figure is
+6–9% shorter than the labeled number across the 14 species affected. That is the rule the neck
+label already follows — CR-011 reports neck length in full while drawing it compressed — and the
+total length label inherits it rather than introducing it. A label derived from the drawn extent
+would be a different and worse thing: it would name a quantity no source states and no table lists.
 
 ### P-064 — The detail view links to the species on iNaturalist
 Subject: `presentation.detail_view.external_link`

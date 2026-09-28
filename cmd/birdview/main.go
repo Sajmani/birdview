@@ -202,6 +202,15 @@ type tile struct {
 	// left, so the crossbar names the whole span as well as its measured part.
 	WingspanLabel string
 	WingspanEst   bool
+	// TotalLabel names the whole bird, centred on the axis below the tail tip
+	// (P-066). It is the bird's reported total length, never the drawn height:
+	// a folded neck makes those differ by 6-9%.
+	//
+	// TotalLabelY is its baseline, computed here rather than in the template so
+	// it cannot drift from the strip reserved for it, and so it is testable.
+	TotalLabel  string
+	TotalEst    bool
+	TotalLabelY float64
 }
 
 type sectionView struct {
@@ -368,8 +377,14 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		sv := sectionView{Index: i + 1, Count: len(sec.Species),
 			Min: format(sec.Min, opt.Metric, opt.Metric3), Max: format(sec.Max, opt.Metric, opt.Metric3)}
 		for _, sp := range sec.Species {
+			g := view.Layout(sp, refs[i], spanRefs[i], tileBox)
 			sv.Tiles = append(sv.Tiles, tile{
-				S: sp, Geom: view.Layout(sp, refs[i], spanRefs[i], tileBox), Box: tileBox,
+				S: sp, Geom: g, Box: tileBox,
+				// Set here rather than recomputed in the template: the template
+				// used to derive the centering from Box.H itself, which silently
+				// disagreed with this value the moment Box stopped being the
+				// drawing area (P-066's bottom strip).
+				TopOffset:   (tileBox.H - g.TotalHeight()) / 2,
 				WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 				Length:      format(sp.TotalLength.Value, view.ByLength, opt.Metric3),
 				Wing:        format(sp.Wingspan.Value, view.ByWingspan, opt.Metric3),
@@ -403,6 +418,9 @@ type detailData struct {
 	ChordLabel    string
 	WingspanLabel string
 	WingspanEst   bool
+	TotalLabel    string
+	TotalEst      bool
+	TotalLabelY   float64
 }
 
 // diagramLabel is one annotation: where view put it, what it says, and whether
@@ -452,8 +470,9 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		inatURL = inat.TaxonURL(sp.INatTaxonID)
 	}
 	s.render(w, "detail.html", detailData{
-		S: sp, Geom: lt.Geom, Box: box, Labels: lt.Labels, TopOffset: lt.TopOffset,
+		S: sp, Geom: lt.Geom, Box: lt.Box, Labels: lt.Labels, TopOffset: lt.TopOffset,
 		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
+		TotalLabel: lt.TotalLabel, TotalEst: lt.TotalEst, TotalLabelY: lt.TotalLabelY,
 		Metrics: rows, Opt: opt, Query: queryFor(r), INatURL: inatURL,
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 	})
@@ -475,6 +494,21 @@ var legendBox = view.Box{W: 900, H: 148 * 1.2}
 // 320 rather than the 290 that merely fits: at 290 the widest-winged species
 // clear the column by 2px, which is not clearance, it is luck.
 const labelGutter = 320
+
+// totalLabelStrip is the height reserved at the bottom of an annotated diagram
+// for the total length label (P-066), the vertical counterpart of labelGutter.
+//
+// Without it the label is clipped rather than merely cramped: the detail view
+// scales the bird to fill the box, so any bird whose height binds has its tail
+// tip exactly on the bottom edge and nothing at all below it.
+//
+// totalLabelGap is where the baseline sits below the tail tip. The strip is the
+// gap plus room for the 11px text's descender, so the glyphs stay inside the
+// viewBox and not merely their baseline.
+const (
+	totalLabelGap   = 15
+	totalLabelStrip = totalLabelGap + 9
+)
 
 // legendPreferred are the species the help diagram would like to use, best
 // first. Each has a MODELED wingspan, so the dashed inner crossbar of P-065
@@ -502,18 +536,29 @@ func (s *server) legendSpecies() *dataset.Species {
 // labelledTile builds the annotated diagram shared by the detail view and the
 // help legend (P-066), so the two cannot drift apart.
 func labelledTile(sp *dataset.Species, box view.Box, metric bool) tile {
-	// The bird occupies everything left of the gutter; Box stays the full size,
-	// because the viewBox and the label column are positioned against it.
-	inner := view.Box{W: box.W - labelGutter, H: box.H}
+	// draw is the area the bird gets; the emitted box is that plus the strip the
+	// total length label sits in, so the label costs the bird nothing. Going the
+	// other way -- keeping the box and shrinking the bird into it -- would take
+	// 8.5% of the detail view's height and contradict P-034, which requires the
+	// bird drawn as large as the view allows. Width has no such freedom, which
+	// is why labelGutter does shrink the bird and this does not.
+	draw := box
+	box.H += totalLabelStrip
+
+	// The bird occupies everything left of the gutter; draw stays the full
+	// height, because the label column is positioned against the emitted box.
+	inner := view.Box{W: draw.W - labelGutter, H: draw.H}
 	g := view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, inner)
-	top := (box.H - g.TotalHeight()) / 2
+	top := (draw.H - g.TotalHeight()) / 2
 	segOf := map[string]dataset.Metric{
 		"bill": sp.Segments.Bill, "head": sp.Segments.Head, "neck": sp.Segments.Neck,
 		"body": sp.Segments.Body, "tail": sp.Segments.Tail,
 	}
 	t := tile{S: sp, Geom: g, Box: box, TopOffset: top,
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled}
-	for _, l := range g.DetailLabels(box, top) {
+	// draw, not box: the segment label column belongs in the drawing area, and
+	// must not spill into the strip the total length label owns.
+	for _, l := range g.DetailLabels(draw, top) {
 		m := segOf[l.Key]
 		t.Labels = append(t.Labels, diagramLabel{
 			Label: l,
@@ -526,6 +571,11 @@ func labelledTile(sp *dataset.Species, box view.Box, metric bool) tile {
 	}
 	t.WingspanLabel = "Wingspan  " + format(sp.Wingspan.Value, view.ByWingspan, metric)
 	t.WingspanEst = sp.Wingspan.Prov.Kind == dataset.Modeled
+	// The reported total length, not g.TotalHeight(): for a folded neck the
+	// drawing is shorter than the bird (CR-011), and the label names the bird.
+	t.TotalLabel = "Total length  " + format(sp.TotalLength.Value, view.ByLength, metric)
+	t.TotalEst = sp.TotalLength.Prov.Kind == dataset.Modeled
+	t.TotalLabelY = top + g.YTailTip + totalLabelGap
 	return t
 }
 

@@ -229,7 +229,10 @@
 {{$g := .Geom}}{{$b := .Box}}
 <svg class="dia" viewBox="0 0 {{f1 $b.W}} {{f1 $b.H}}" preserveAspectRatio="xMidYMid meet" role="img"
      aria-label="scaled outline of {{.S.CommonName}}">
-  <g transform="translate(0,{{f1 (div (sub $b.H $g.TotalHeight) 2)}})">
+  {{/* .TopOffset, not a formula over $b.H: the box is taller than the drawing
+       area by the total-length strip, so recomputing the centering here put the
+       bird 12px low and disagreed with the labels, which use .TopOffset. */}}
+  <g transform="translate(0,{{f1 .TopOffset}})">
     {{if $g.ChordTickX}}
     {{/* Outer thirds are the MEASURED wing chord: carpal joint to primary tip,
          so always solid. The inner span carries the whole model error, so it
@@ -275,7 +278,7 @@
        naming the whole crossbar rather than any part of it. */}}
   <text class="dlabel span{{if .WingspanEst}} est{{end}}" text-anchor="start"
         dominant-baseline="middle" x="{{f1 (add (add $g.CX $g.CrossbarHalfWidth) 8)}}"
-        y="{{f1 (add .TopOffset $g.YShoulder)}}">{{.WingspanLabel}}</text>
+        y="{{f1 (add .TopOffset $g.YShoulder)}}">{{.WingspanLabel}}{{if .WingspanEst}} ~{{end}}</text>
   {{end}}
   {{if and .ChordLabel $g.ChordTickX}}
   {{/* Centred over the LEFT outer segment. Both outer segments are the measured
@@ -286,7 +289,15 @@
   {{end}}
   {{range .Labels}}
   <text class="dlabel{{if .Est}} est{{end}}" x="{{f1 (sub $b.W 144)}}" y="{{f1 .TextY}}"
-        dominant-baseline="middle">{{.Text}}</text>
+        dominant-baseline="middle">{{.Text}}{{if .Est}} ~{{end}}</text>
+  {{end}}
+  {{if .TotalLabel}}
+  {{/* The whole bird, named under the foot of the figure and centred on the
+       drawing axis -- $g.CX, not the box centre: the bird is laid out left of
+       the label gutter, so the two are 160px apart. No leader line; there is no
+       part to point at (P-066). */}}
+  <text class="dlabel total{{if .TotalEst}} est{{end}}" text-anchor="middle"
+        x="{{f1 $g.CX}}" y="{{f1 .TotalLabelY}}">{{.TotalLabel}}{{if .TotalEst}} ~{{end}}</text>
   {{end}}
 </svg>
 {{end}}

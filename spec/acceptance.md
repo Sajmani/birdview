@@ -672,10 +672,26 @@ for it — read out of the table rather than recomputed, so the two cannot drift
 count is matched on the segment labels alone, so a missing segment cannot hide behind the chord. A
 tile carries none.
 
-**Status: verified 2026-09-27 — passing, and watched failing** by anchoring every label at the same
+**Assertions, the estimated marker:** a diagram label whose value is modeled carries the `~` **in
+the emitted markup**, and one whose value is measured does not. Asserted on the text content, not
+on the class attribute: the class is what the inert CSS rule keyed off, so a check that accepted it
+would re-certify the original bug.
+
+**Status: verified 2026-09-28 — passing, and watched failing** by anchoring every label at the same
 y, by removing the minimum-gap pass, by dropping a segment from the list, by removing the reserved
-gutter and by inflating it, and by moving the wing labels back inside the centering group — which
-reproduces the bug where the neck's leader struck through "Wing chord" and "Wingspan".
+gutter and by inflating it, by moving the wing labels back inside the centering group — which
+reproduces the bug where the neck's leader struck through "Wing chord" and "Wingspan" — and, for
+the marker, by reverting the `~` to the `.dlabel.est::after` rule it came from and by marking every
+label estimated regardless of provenance.
+
+**The marker assertion was added because the criterion claimed it and never checked it.** P-066 has
+required the `~` since these labels were introduced in `a826b96`, which implemented it as
+`.dlabel.est::after` — CSS generated content on an SVG `<text>`, which no browser renders. It was
+found by screenshotting the same detail page twice, once with the rule and once without, and
+getting byte-identical PNGs. So from `a826b96` until this criterion was extended, every modeled
+value on the diagram was drawn exactly like a measured one, which is the one thing
+[CR-001](decisions.md#cr-001) exists to prevent. The lesson is the one this file keeps relearning: the obvious
+check would have asserted on `class="dlabel est"`, which was present, correct, and meaningless.
 
 **The collision resolver does not fire on real data: 0 of 841 species need it** at the current box
 size and font. It is kept anyway, and tested with a synthetic geometry rather than deleted, because
@@ -683,6 +699,49 @@ unlike the dead branch removed in CR-010 this one is not dead *by construction* 
 current numbers. A larger font, a shorter box or a new segment would all wake it. The dataset-wide
 figure is recorded here so that if someone later finds it untriggered, they find out why before
 removing it.
+
+### AC-074 — The detail diagram labels the whole bird's total length, under the tail
+**Verifies:** P-066 · **Level:** code · **Method:** geometry assertions over the whole fixture plus
+assertions on the rendered detail page, the help legend and an index tile
+
+**Assertions, placement:** the label is centred on the drawing axis (`text-anchor="middle"` at the
+bird's centreline, not the box's — they differ, because the bird is laid out left of the label
+gutter) and sits **below the tail tip**. It is horizontal: no `transform`/`rotate` on the element.
+It has **no leader line**, so the leader count stays at one per segment.
+
+**Assertions, room:** across **every species in the fixture**, the label's baseline plus its
+descender stays inside the box. The binding case is a bird whose height fills the box — most of
+them, since the detail view scales the bird to fit — so this would fail for the entire dataset if
+the bottom strip were not reserved, and it is checked over all 841 rather than one bird because the
+worst case is whichever species is tallest relative to its wingspan.
+
+**Assertions, value:** the label states the **total length from the provenance table**, read out of
+the rendered table rather than recomputed. The fixture includes a **folded-neck species**
+(Ardeidae), where the drawn height is 6–9% short of the total length — so an implementation that
+labeled the drawn extent instead of the datum produces a visibly different number and fails. This
+is the assertion that would otherwise be vacuous: for every unfolded bird the two agree exactly.
+
+**Assertions, provenance:** total length is modeled for all 841 species today
+([CR-002](decisions.md#cr-002)), so the label carries the `~`. The check reads the provenance rather
+than hardcoding it, so it keeps working — and starts asserting the opposite — if the Ricklefs ask
+is ever granted and the value becomes measured.
+
+**Assertions, scope:** the detail view and the help legend carry the label; an **index tile carries
+none**, like every other annotation of P-066.
+
+**Status: verified 2026-09-28 — passing, and watched failing** by removing the label from the
+template; by centring it on the box centre, which put it at x=494 against the bird's axis at x=334,
+exactly half the gutter adrift; by placing it above the tail tip (y=254.3 against a tail tip at
+269.3); by removing the reserved strip, which overran the box for **all five fixture species**, the
+worst by 15 px; by labeling `TotalHeight()/PxPerMm` instead of the reported length, which the Great
+Blue Heron caught at 78.7 cm against a table reading 86.0 cm; and by dropping the `~`.
+
+**The folded-neck fixture was itself verified to be load-bearing, not decoration.** With the
+`TotalHeight()` bug still in place, the species was swapped to the American Robin and the value
+assertion **passed** — the drawn extent and the total length agree exactly for every unfolded bird,
+so the check would have been vacuous on any of the other four fixtures. The test therefore carries
+a guard that fails loudly if the fixture ever stops folding its neck, and that guard was watched
+firing during this exercise.
 
 ---
 
@@ -726,7 +785,7 @@ removing it.
 | P-063 | AC-043 | |
 | P-064 | AC-068 | |
 | P-065 | AC-072 | |
-| P-066 | AC-073 | |
+| P-066 | AC-073, AC-074 | |
 | T-001, T-003 | AC-054 | |
 | T-002 | AC-051, AC-071 | |
 | T-004 | AC-050, AC-053 | |
