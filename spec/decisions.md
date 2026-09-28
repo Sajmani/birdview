@@ -1196,7 +1196,7 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | Retrieve, hash and vendor `fox-wingspan`; write its `PROVENANCE.md` | — | before ingest reads it |
 | Write `acceptance.md` — Gate 2, before any code | — | now |
 | Ask Ricklefs or ESA for permission to use the measured-length data | Sameer | **after a working demo** |
-| Ask ABA for written permission to redistribute the checklist | Sameer | **after a working demo** |
+| ~~Ask ABA for written permission to redistribute the checklist~~ — **sent 2026-09-27**, awaiting reply | Sameer | done |
 | ~~Decide the neck's flight posture~~ — done, [CR-011](#cr-011) | Sameer | closed 2026-09-23 |
 | Assess whether a perched/standing toggle is achievable at any honest accuracy ([CR-011](#cr-011)) | — | before it is offered to users |
 | Investigate cervical vertebra counts as an anchor for the neck model (P-045) | — | opportunistic; the biggest available win on the weakest model |
@@ -1290,6 +1290,12 @@ Neither ask blocks v1, which is what makes waiting free:
 
 Sending them together after a demo also means one conversation per organization rather than two
 rounds of the same explanation.
+
+**Update, 2026-09-27.** The ABA request was sent, with screenshots rather than a live demo. The
+obvious plan — deploy somewhere they can reach and link it — was circular: hosting BirdView
+publicly is the very thing the email asks permission for. Screenshots reproduce almost nothing, to
+the rights-holder, about their own data, and need no server to stay up. The Ricklefs/ESA ask is
+still outstanding.
 
 **The cost of waiting**, recorded so it is a choice rather than a drift: if ESA grants permission
 late, the length column changes from wholly `modeled` to half `measured`, which will move diagrams
