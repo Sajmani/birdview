@@ -244,3 +244,50 @@ func TestControlHelpEntriesAreUnbreakable(t *testing.T) {
 		t.Error(".ctrlhelp is not a multi-column layout; the unbreakable rule is guarding nothing")
 	}
 }
+
+// TestOrderGroupsIndentWrappedFamilies asserts that a long family list wraps
+// into the column beside its order header rather than back to the page margin.
+//
+// Passeriformes has 44 families and wraps over seven lines. As siblings of the
+// header in one wrapping flex row, every line after the first began at the page
+// margin, under the order toggle, so the block read as a wall of chips with no
+// relationship to the order heading it belonged to.
+//
+// Both halves are asserted here and in the markup test, because either alone is
+// useless: the families need their own box, and the group needs to be a
+// two-column grid for that box to be a column of.
+//
+// Verifies: P-010. Criterion: AC-075.
+func TestOrderGroupsIndentWrappedFamilies(t *testing.T) {
+	css := stripComments(string(mustReadStyles(t)))
+
+	g := regexp.MustCompile(`\.ogroup\s*\{([^}]*)\}`).FindStringSubmatch(css)
+	if g == nil {
+		t.Fatal("no rule for .ogroup")
+	}
+	if !strings.Contains(g[1], "grid") {
+		t.Errorf(".ogroup is not a grid, so the families have no column to wrap inside "+
+			"and a wrapped line returns to the page margin. Got %q", strings.TrimSpace(g[1]))
+	}
+	// Two tracks: the order toggle, then the families. One track would stack
+	// them, and three would leave a gap the chips could wrap into.
+	cols := regexp.MustCompile(`grid-template-columns:\s*([^;}]+)`).FindStringSubmatch(g[1])
+	if cols == nil {
+		t.Fatalf(".ogroup sets no grid-template-columns; got %q", strings.TrimSpace(g[1]))
+	}
+	if n := len(strings.Fields(cols[1])); n != 2 {
+		t.Errorf(".ogroup has %d grid columns (%q), want 2: the order header and the families",
+			n, strings.TrimSpace(cols[1]))
+	}
+
+	// The families' own box must wrap, or a long list overflows the column
+	// instead of running onto a second line inside it.
+	f := regexp.MustCompile(`\.ofams\s*\{([^}]*)\}`).FindStringSubmatch(css)
+	if f == nil {
+		t.Fatal("no rule for .ofams; the families are not a box that can wrap on their own")
+	}
+	if !strings.Contains(f[1], "wrap") {
+		t.Errorf(".ofams does not wrap, so a long family list cannot break onto a second "+
+			"line inside its column. Got %q", strings.TrimSpace(f[1]))
+	}
+}

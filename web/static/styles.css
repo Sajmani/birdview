@@ -44,7 +44,13 @@ footer a:visited { color: var(--accent-visited); }
 .chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .hint { color: var(--dim); font-size: 11px; font-style: italic; }
 .ordergroups { display: flex; flex-direction: column; gap: 7px; margin-top: 6px; }
-.ogroup { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; }
+/* Two columns: the order toggle, then the families. A grid rather than one
+   wrapping flex row, because as siblings of the header the chips wrap back to
+   the page margin -- Passeriformes' 44 families started under the header on
+   every line but the first. The families get their own wrapping box, so all
+   their lines begin at the first family instead. */
+.ogroup { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 5px; }
+.ofams { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; }
 /* Plain text on the page background. Anything chip-shaped reads as clickable,
    and these are labels. */
 /* An order toggle. Styled like the other controls in this box rather than like

@@ -1636,3 +1636,68 @@ func attrF(t *testing.T, el, name string) float64 {
 	}
 	return v
 }
+
+// TestEveryOrderGroupWrapsItsFamilies is the markup half of the wrapped-family
+// indent: the two-column grid only indents anything if the families are in a
+// box of their own, and every group's chips are in it.
+//
+// A chip left as a direct child of .ogroup becomes a third grid item, which
+// lands in a new implicit row at the page margin -- the exact bug the grid was
+// added to fix, reintroduced for one order.
+//
+// Verifies: P-010. Criterion: AC-075.
+func TestEveryOrderGroupWrapsItsFamilies(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/")
+
+	// Split on the group opener rather than matching balanced </div>s: the
+	// nesting is exactly what this test exists to check, so a parse that
+	// depends on it reports a mangled structure as "no groups" instead of as
+	// the defect it is.
+	block := body[strings.Index(body, `<div class="ordergroups">`):]
+	block = block[:strings.Index(block, `<p class="count">`)]
+	parts := strings.Split(block, `<div class="ogroup">`)[1:]
+	groups := make([][]string, 0, len(parts))
+	for _, p := range parts {
+		groups = append(groups, []string{"", p})
+	}
+	if len(groups) == 0 {
+		t.Fatal("no order groups on the page")
+	}
+	// The fixture spans several orders; if it ever collapses to one this test
+	// stops covering the multi-order case and should say so.
+	if len(groups) < 2 {
+		t.Fatalf("only %d order group in the fixture; this cannot show that EVERY group "+
+			"wraps its families", len(groups))
+	}
+
+	totalChips := 0
+	for _, g := range groups {
+		inner := g[1]
+		if n := strings.Count(inner, `<div class="ofams">`); n != 1 {
+			t.Errorf("an order group has %d family boxes, want exactly 1:\n%.200s", n, inner)
+			continue
+		}
+		// Every chip must sit after the wrapper opens. A chip before it is a
+		// direct child of the grid and wraps to the margin.
+		open := strings.Index(inner, `<div class="ofams">`)
+		if before := strings.Count(inner[:open], `class="chip`); before > 0 {
+			t.Errorf("%d family chips sit outside the .ofams box, so they wrap to the "+
+				"page margin instead of indenting", before)
+		}
+		n := strings.Count(inner, `class="chip`)
+		if n == 0 {
+			t.Error("an order group has no family chips at all")
+		}
+		totalChips += n
+		// The order header stays out of the families' box: it is the first
+		// grid column, and inside .ofams it would wrap along with the chips.
+		if hdr := strings.Index(inner, `class="btn ohdr`); hdr < 0 || hdr > open {
+			t.Error("the order header is missing or sits inside the family box; it must be " +
+				"the grid's first column")
+		}
+	}
+	if want := strings.Count(body, `class="chip`) - strings.Count(tileArea(t, body), `class="chip`); totalChips != want {
+		t.Errorf("the groups account for %d chips but the page has %d; some chip is outside "+
+			"an order group entirely", totalChips, want)
+	}
+}

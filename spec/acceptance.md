@@ -743,6 +743,35 @@ so the check would have been vacuous on any of the other four fixtures. The test
 a guard that fails loudly if the fixture ever stops folding its neck, and that guard was watched
 firing during this exercise.
 
+### AC-075 — A long family list wraps inside its order's column
+**Verifies:** P-010 · **Level:** code · **Method:** a structural check over the stylesheet and
+assertions on the rendered markup
+
+**Assertions, layout:** `.ogroup` is a **grid with exactly two tracks** — the order toggle, then
+the families — and `.ofams`, the families' own box, **wraps**. One track would stack the two; a
+third would leave a gap the chips could wrap into.
+
+**Assertions, markup:** every order group contains **exactly one** `.ofams`, every family chip is
+inside it, the order header is **outside** it, and the groups between them account for every
+family chip on the page — so a chip cannot escape an order group entirely.
+
+Both halves are required because either alone does nothing: the grid gives the families a column,
+and the wrapper is what occupies it. A chip left as a direct child of `.ogroup` becomes a third
+grid item and lands in a new implicit row back at the page margin, which is the original bug
+reintroduced for one order.
+
+**Status: verified 2026-09-28 — passing, and watched failing** by reverting `.ogroup` to the
+wrapping flex row it was (the original bug); by collapsing it to one grid column; by removing
+`flex-wrap` from `.ofams`; by deleting the `.ofams` rule; by removing the wrapper from the markup;
+by leaving one chip outside it; and by moving the order header inside it.
+
+**The first version of the markup check found the bug and reported the wrong thing.** It located
+each group with a regex over balanced `</div>`s — but that nesting is precisely what the test
+exists to verify, so removing the wrapper made the parse collapse two groups into one and the
+failure read "only 1 order group in the fixture" rather than "this group has no family box". It
+now splits on the group opener instead. A test whose *parser* depends on the structure under test
+reports its own confusion instead of the defect.
+
 ---
 
 ## Traceability
@@ -755,7 +784,7 @@ firing during this exercise.
 | P-005 | AC-002, AC-060 | |
 | P-006 | AC-014 | |
 | P-007 | AC-015 | |
-| P-010 | AC-056 | |
+| P-010 | AC-056, AC-075 | |
 | P-011, P-012 | — | withdrawn |
 | P-020, P-021 | AC-020 | |
 | P-022, P-023 | AC-021 | |
@@ -805,6 +834,8 @@ Honest gaps, rather than criteria that would not bite:
   interaction behaviors. They are testable, but only with a browser harness this project does not
   have, and a unit test asserting that a template contains a string verifies the template rather
   than the behavior. Covered by human review until a harness exists; promote them when one does.
+  AC-056 and AC-075 do not close this gap: they check the selector's structure and layout, not
+  what clicking a family does.
 - **T-011 (never commercial).** A standing posture with no code to check. It is enforced by the
   human gate and by `sources.md`, not by a test.
 - **P-034 (detail view)** is only partially covered: AC-043 checks that provenance appears there,

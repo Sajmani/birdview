@@ -106,12 +106,18 @@
     <div class="ogroup">
       <a class="btn ohdr{{if .Selected}} on{{end}}" href="{{.URL}}"
          title="{{if .Selected}}Clear{{else}}Select{{end}} every family in {{.Order}}">{{.Order}}<em>{{.Common}}</em><b>{{.Count}}</b></a>
-      {{range .Families}}
+      {{/* The families sit in their own box so a long list wraps inside the
+           column beside the order header, not back to the page margin. Without
+           it the chips are siblings of the header in one wrapping flex row, and
+           Passeriformes' second line starts under the header. */}}
+      <div class="ofams">
+        {{range .Families}}
         <a class="chip{{if .Selected}} on{{end}}" href="{{.URL}}"
            style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">
           {{.Name}}<em>{{.Common}}</em><b>{{.Count}}</b>
         </a>
-      {{end}}
+        {{end}}
+      </div>
     </div>
     {{end}}
   </div>
