@@ -1932,3 +1932,79 @@ func TestCompareBackLinkDropsTheComparison(t *testing.T) {
 		}
 	}
 }
+
+// tileHrefs returns every index tile's own link.
+func tileHrefs(t *testing.T, body string) []string {
+	t.Helper()
+	var out []string
+	for _, m := range regexp.MustCompile(`<a class="tile" href="([^"]+)"`).FindAllStringSubmatch(body, -1) {
+		out = append(out, html.UnescapeString(m[1]))
+	}
+	return out
+}
+
+// TestTileLinksCarryViewState asserts the half of P-068 that is about what a
+// link into the detail view carries.
+//
+// Before this, a tile link was a bare /species/{id}: opening a bird from a
+// filtered, metric index landed on an unfiltered imperial page, and coming
+// back landed on the unfiltered 841. The picker makes that fatal rather than
+// merely untidy, because the picks would be lost on the way in -- before the
+// back link is ever reached.
+//
+// `family` is the deliberate exception and is asserted as such: it is the only
+// unbounded parameter, and carrying it would add ~1.4 MB to one page.
+//
+// Verifies: P-068, P-031. Criterion: AC-077.
+func TestTileLinksCarryViewState(t *testing.T) {
+	s := newTestServer(t)
+	// A filter is active, so `family` is present and would leak if carried.
+	const q = "/?units=metric&by=wingspan&scale=global&step=30" +
+		"&family=Trochilidae&family=Turdidae&species=corvus_brachyrhynchos"
+	_, body := get(t, s, q)
+
+	hrefs := tileHrefs(t, body)
+	if len(hrefs) == 0 {
+		t.Fatal("no tiles on the page")
+	}
+	for _, h := range hrefs {
+		u, err := url.Parse(h)
+		if err != nil {
+			t.Fatalf("unparseable tile href %q: %v", h, err)
+		}
+		if !strings.HasPrefix(u.Path, "/species/") {
+			t.Errorf("tile href %q does not point at a detail view", h)
+		}
+		got := u.Query()
+		for k, want := range map[string]string{
+			"units": "metric", "by": "wingspan", "scale": "global", "step": "30",
+			"species": "corvus_brachyrhynchos",
+		} {
+			if got.Get(k) != want {
+				t.Errorf("tile href %q: %s=%q, want %q", h, k, got.Get(k), want)
+			}
+		}
+		if fam := got["family"]; len(fam) > 0 {
+			t.Errorf("tile href %q carries family=%v; it is the one unbounded parameter and "+
+				"would add ~1.4 MB across 841 tiles", h, fam)
+		}
+	}
+
+	// And the state actually survives the hop: follow a tile, read its back
+	// link. This is the round trip the picker depends on.
+	_, detail := get(t, s, hrefs[0])
+	back := html.UnescapeString(mustMatch(t, detail,
+		`<p class="back"><a href="([^"]+)"`, "the detail page's back link"))
+	bq, err := url.Parse(back)
+	if err != nil {
+		t.Fatalf("unparseable back link %q: %v", back, err)
+	}
+	for k, want := range map[string]string{
+		"units": "metric", "by": "wingspan", "scale": "global", "step": "30",
+		"species": "corvus_brachyrhynchos",
+	} {
+		if bq.Query().Get(k) != want {
+			t.Errorf("back link %q lost %s (got %q, want %q)", back, k, bq.Query().Get(k), want)
+		}
+	}
+}

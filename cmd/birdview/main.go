@@ -213,6 +213,11 @@ type tile struct {
 	TotalLabel  string
 	TotalEst    bool
 	TotalLabelY float64
+
+	// DetailURL is the tile's own link. Built in Go rather than in the
+	// template so it carries the reader's view state (P-068); empty on the
+	// legend tile, which is an illustration and links nowhere.
+	DetailURL template.URL
 }
 
 type sectionView struct {
@@ -387,6 +392,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				// disagreed with this value the moment Box stopped being the
 				// drawing area (P-066's bottom strip).
 				TopOffset:   (tileBox.H - g.TotalHeight()) / 2,
+				DetailURL:   detailLink(r, sp.ID),
 				WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 				Length:      format(sp.TotalLength.Value, view.ByLength, opt.Metric3),
 				Wing:        format(sp.Wingspan.Value, view.ByWingspan, opt.Metric3),
@@ -538,7 +544,7 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 	for _, sp := range chosen {
 		panels = append(panels, comparePanel{
 			tile:      labelledTileAt(sp, box, opt.Metric3, refLength, refWingspan),
-			DetailURL: detailURL(r, sp.ID),
+			DetailURL: detailLink(r, sp.ID),
 			RemoveURL: compareWithout(r, sp.ID),
 		})
 	}
@@ -548,11 +554,24 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 		Query: queryFor(r, "species")})
 }
 
-// detailURL points a panel at its own species page, carrying the display
-// options but not the comparison's species list.
-func detailURL(r *http.Request, id string) template.URL {
+// detailLink builds a link from any page into a species detail view, carrying
+// the view state the reader is in -- minus the one parameter too large to copy
+// 841 times (P-068).
+//
+// The picks ride along because the detail view cannot otherwise tell whether to
+// offer to pick that bird, nor build a link to the set plus it; `units` because
+// the page formats every value with it, and a link without it is why opening a
+// bird from a metric index used to land on an imperial page; `by`, `scale` and
+// `step` so the back link rebuilds the index the reader left.
+//
+// `family` is deliberately dropped. It is the only parameter with no bound on
+// its length: 90 families is about 1.7 KB, which repeated across 841 tile
+// hrefs would add roughly 1.4 MB to one page. The cost, accepted in P-068, is
+// that the in-page back link cannot restore the filter. The browser's own Back
+// button does, because it replays the previous URL.
+func detailLink(r *http.Request, id string) template.URL {
 	q := r.URL.Query()
-	q.Del("species")
+	q.Del("family")
 	if len(q) == 0 {
 		return template.URL("/species/" + id)
 	}

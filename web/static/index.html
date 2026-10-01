@@ -213,7 +213,7 @@
 </html>{{end}}
 
 {{define "tile"}}
-<a class="tile" href="/species/{{.S.ID}}">
+<a class="tile" href="{{.DetailURL}}">
   <div class="hd">
     <div class="nameline">
       <span class="cn">{{.S.CommonName}}{{with .S.BandingCode}} <span class="code">({{.}})</span>{{end}}</span>
