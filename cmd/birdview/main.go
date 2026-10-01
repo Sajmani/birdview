@@ -694,10 +694,23 @@ type comparePanel struct {
 	RemoveURL template.URL
 }
 
+// sortOption is one choice in the comparison view's Sort by control.
+//
+// On is a fact about the panels as they stand, not a stored mode: the sort
+// rewrites the species order in the URL, so there is nowhere for "sorted by
+// mass" to be remembered, and nothing to go stale when a bird is added.
+type sortOption struct {
+	Label string
+	URL   template.URL
+	On    bool
+}
+
 type compareData struct {
 	Panels []comparePanel
 	Opt    options
 	Query  func(...string) template.URL
+	// Sorts is empty below two birds, there being nothing to sort.
+	Sorts []sortOption
 	// Missing are picked ids that no longer resolve, named on the page so a
 	// rotted link says what it lost instead of silently shrinking (CR-018).
 	Missing []string
@@ -739,7 +752,7 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 	// "back" here means "add another bird" (CR-018). Clear, on the index, is
 	// the one control that drops it.
 	s.render(w, "compare.html", compareData{Panels: panels, Opt: opt,
-		Missing: missing, Query: queryFor(r)})
+		Sorts: sortOptions(r, chosen), Missing: missing, Query: queryFor(r)})
 }
 
 // resolvePicks turns requested ids into species, separating the ones that no
@@ -786,6 +799,42 @@ func pickURL(r *http.Request, ids []string) template.URL {
 		q.Add("species", id)
 	}
 	return template.URL("/?" + q.Encode())
+}
+
+// sortedIDs is the species reordered by one metric, ascending and stably, as
+// the index orders its sections (P-021).
+func sortedIDs(sp []*dataset.Species, m view.Metric) []string {
+	s := append([]*dataset.Species(nil), sp...)
+	sort.SliceStable(s, func(i, j int) bool { return m.Value(s[i]) < m.Value(s[j]) })
+	out := make([]string, len(s))
+	for i, x := range s {
+		out[i] = x.ID
+	}
+	return out
+}
+
+// sortOptions builds the Sort by control. Each link is an ordinary comparison
+// URL naming the same birds in a new order (P-067), so a sorted comparison is
+// indistinguishable from one assembled by hand and there is no second place an
+// ordering can live.
+func sortOptions(r *http.Request, chosen []*dataset.Species) []sortOption {
+	if len(chosen) < 2 {
+		return nil
+	}
+	now := make([]string, len(chosen))
+	for i, sp := range chosen {
+		now[i] = sp.ID
+	}
+	var out []sortOption
+	for _, m := range []struct {
+		label  string
+		metric view.Metric
+	}{{"Length", view.ByLength}, {"Wingspan", view.ByWingspan}, {"Mass", view.ByMass}} {
+		ids := sortedIDs(chosen, m.metric)
+		out = append(out, sortOption{
+			Label: m.label, URL: compareURL(r, ids), On: slices.Equal(ids, now)})
+	}
+	return out
 }
 
 // compareURL sends the current picks to the comparison view.

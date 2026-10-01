@@ -109,6 +109,7 @@ footer a:visited { color: var(--accent-visited); }
 .cmprow { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
 .cmppanel { flex: 1 1 640px; max-width: 760px; }
 .cmptitle { font-size: 20px; margin: 0 0 4px; }
+.cmpsort { margin: 12px 0 2px; }
 .cmpnote { margin-top: 4px; }
 .cmplinks { display: flex; gap: 16px; margin: 6px 0 0; font-size: 12.5px; }
 .cmpdrop { margin-left: auto; }

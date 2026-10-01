@@ -49,7 +49,7 @@ func testDataset() *dataset.Dataset {
 	orders := map[string]string{
 		"Trochilidae": "Apodiformes", "Turdidae": "Passeriformes",
 		"Corvidae": "Passeriformes", "Ardeidae": "Pelecaniformes",
-		"Recurvirostridae": "Charadriiformes",
+		"Recurvirostridae": "Charadriiformes", "Alcidae": "Charadriiformes",
 	}
 	// The stilt adds a fourth order, so the order-group controls are exercised
 	// against something other than the two-family Passeriformes case.
@@ -64,6 +64,13 @@ func testDataset() *dataset.Dataset {
 		mk("corvus_brachyrhynchos", "American Crow", "Corvus brachyrhynchos", "Corvidae", 50, 30, 22, 170, 180, 1000, 450, 330, dataset.Modeled),
 		mk("himantopus_mexicanus", "Black-necked Stilt", "Himantopus mexicanus", "Recurvirostridae", 66.6, 42.1, 40.3, 89.5, 73.6, 750, 176.8, 230, dataset.NearMatch),
 		mk("ardea_herodias", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, 466.4, dataset.NearMatch),
+		// The murre is heavier than the crow while being shorter and
+		// narrower-winged, and it is the only species here for which the
+		// three metrics disagree. Without it the fixture is monotonic in
+		// length, wingspan and mass alike, so every sort produces the same
+		// order and a Sort by control that ignored its metric entirely would
+		// pass its own test. Real values: Uria lomvia is a dense diver.
+		mk("uria_lomvia", "Thick-billed Murre", "Uria lomvia", "Alcidae", 32, 40, 28, 200, 46, 726, 964, 206, dataset.Measured),
 	}
 	// One mass is a near-match, as 10 of the 841 real ones are. Without it
 	// every mass square renders solid and the dashed branch of P-065 is never
@@ -2642,5 +2649,129 @@ func TestMassCubeIsRenderedAndExplained(t *testing.T) {
 	_, index := get(t, s, "/")
 	if strings.Contains(tileArea(t, index), "masscube") {
 		t.Error("index tiles carry the mass square; it belongs to the annotated diagram")
+	}
+}
+
+// sortControls returns the comparison view's Sort by options: label, href, on.
+func sortControls(t *testing.T, body string) []struct {
+	Label, Href string
+	On          bool
+} {
+	t.Helper()
+	block := regexp.MustCompile(`(?s)<div class="row cmpsort">.*?</div>`).FindString(body)
+	var out []struct {
+		Label, Href string
+		On          bool
+	}
+	for _, m := range regexp.MustCompile(
+		`<a class="(btn[^"]*)" href="([^"]+)">([^<]+)</a>`).FindAllStringSubmatch(block, -1) {
+		out = append(out, struct {
+			Label, Href string
+			On          bool
+		}{m[3], html.UnescapeString(m[2]), strings.Contains(m[1], " on")})
+	}
+	return out
+}
+
+// TestCompareSortReordersTheURL asserts the Sort by control of P-067.
+//
+// The design decision it pins: sorting rewrites the species order in the URL
+// rather than adding a sort parameter, so the page still draws them in the
+// order given and a sorted comparison is an ordinary comparison URL. If a
+// `sort=` parameter ever appears instead, the panels and the URL can disagree
+// and this fails.
+//
+// Verifies: P-067. Criterion: AC-079.
+func TestCompareSortReordersTheURL(t *testing.T) {
+	s := newTestServer(t)
+	// Deliberately in no metric's order, so no option starts out on.
+	// The murre must be in the set: it is the only fixture species for which
+	// the three metrics disagree, so without it every sort yields the same
+	// order and this test cannot tell one metric from another.
+	const start = "/compare?units=metric&species=ardea_herodias&species=calypte_anna" +
+		"&species=corvus_brachyrhynchos&species=uria_lomvia"
+	body := mustGet(t, s, start)
+
+	opts := sortControls(t, body)
+	if len(opts) != 3 {
+		t.Fatalf("%d sort options, want length, wingspan and mass", len(opts))
+	}
+	ds := testDataset()
+	byID := map[string]*dataset.Species{}
+	for i := range ds.Species {
+		byID[ds.Species[i].ID] = &ds.Species[i]
+	}
+
+	for _, o := range opts {
+		m := map[string]view.Metric{
+			"Length": view.ByLength, "Wingspan": view.ByWingspan, "Mass": view.ByMass,
+		}[o.Label]
+		if m == "" {
+			t.Errorf("unexpected sort option %q", o.Label)
+			continue
+		}
+		u := mustQuery(t, o.Href)
+		if u.Get("units") != "metric" {
+			t.Errorf("%s: the sort link dropped the display options: %q", o.Label, o.Href)
+		}
+		// No sort parameter: the order IS the species order (P-067).
+		if u.Get("sort") != "" || u.Get("by") != "" {
+			t.Errorf("%s: the sort link carries an ordering parameter (%q); the order must "+
+				"live in the species list and nowhere else", o.Label, o.Href)
+		}
+		// The link names the same birds, ascending by that metric.
+		got := u["species"]
+		if len(got) != 4 {
+			t.Errorf("%s: the sort link names %d species, want 4", o.Label, len(got))
+			continue
+		}
+		for i := 1; i < len(got); i++ {
+			prev, cur := byID[got[i-1]], byID[got[i]]
+			if prev == nil || cur == nil {
+				t.Fatalf("%s: sort link names an unknown species: %v", o.Label, got)
+			}
+			if m.Value(cur) < m.Value(prev) {
+				t.Errorf("%s: %s (%.1f) is ordered before %s (%.1f); the sort is ascending",
+					o.Label, cur.CommonName, m.Value(cur), prev.CommonName, m.Value(prev))
+			}
+		}
+
+		// Following it puts the panels in that order, and lights that option.
+		after := mustGet(t, s, o.Href)
+		var drawn []string
+		for _, p := range drawnSpans(t, after) {
+			drawn = append(drawn, findSpeciesByName(t, p.Name).ID)
+		}
+		if !slices.Equal(drawn, got) {
+			t.Errorf("%s: the URL names %v but the page draws %v", o.Label, got, drawn)
+		}
+		for _, a := range sortControls(t, after) {
+			if a.Label == o.Label && !a.On {
+				t.Errorf("%s: after sorting by it, the option does not read as on", o.Label)
+			}
+		}
+	}
+
+	// Guard the guard: if every metric yields the same order, this test cannot
+	// distinguish them and a control that ignored its metric would pass.
+	if slices.Equal(mustQuery(t, opts[0].Href)["species"], mustQuery(t, opts[2].Href)["species"]) {
+		t.Fatal("length and mass sort this set identically, so the fixture cannot tell the " +
+			"three metrics apart; it needs a species that is heavy for its length")
+	}
+
+	// Nothing starts out on, since the fixture order is no metric's order --
+	// otherwise "reads as on after sorting" would pass without sorting.
+	for _, o := range opts {
+		if o.On {
+			t.Errorf("%s reads as on before any sort; the fixture order was meant to match "+
+				"no metric, so this test cannot tell sorting from doing nothing", o.Label)
+		}
+	}
+
+	// Below two birds there is nothing to sort.
+	for _, u := range []string{"/compare?species=calypte_anna", "/compare?species="} {
+		if n := len(sortControls(t, mustGet(t, s, u))); n != 0 {
+			t.Errorf("%s offers %d sort options; there is nothing to sort", u, n)
+		}
 	}
 }

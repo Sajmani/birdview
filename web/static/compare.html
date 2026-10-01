@@ -24,6 +24,17 @@
 their sizes can be read directly against one another. A small bird beside a large one really is
 that small.</p>
 
+{{if .Sorts}}
+{{/* Each link is an ordinary comparison URL naming the same birds in a new
+     order, so the page still draws them in the order given and there is no
+     stored sort to go stale. A metric reads as on when the panels already
+     happen to be in its order (P-067). */}}
+<div class="row cmpsort">
+  <span class="lbl">Sort by</span>
+  {{range .Sorts}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}">{{.Label}}</a>{{end}}
+</div>
+{{end}}
+
 {{/* The panels wrap: with several birds they will not fit on one line at any
      useful size, and a row squeezed until they do would compare nothing
      (P-067). */}}

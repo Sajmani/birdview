@@ -370,6 +370,21 @@ takes **any number** of birds and a path would fix the count. They are drawn in 
 that order is the reader's choice and the page does not reorder it. A species named twice appears
 once — a bird compared against itself is never what was meant.
 
+**A *Sort by* control offers the index's three metrics** — length, wingspan, mass — and orders the
+panels by the chosen one, ascending, as the index orders its sections. It appears only with two
+or more birds, there being nothing to sort below that.
+
+**Sorting rewrites the order in the URL rather than adding a sort parameter.** The link it builds
+names the same species in the new order, so the rule above still holds without exception: what is
+drawn is the order given, and there is no second place an ordering can live. A sorted comparison
+is therefore an ordinary comparison URL, indistinguishable from one assembled bird by bird, and
+shares and bookmarks as itself.
+
+Because nothing is stored, a metric reads as **on** when the panels *currently* happen to be in
+that metric's order — a statement about the arrangement on screen, not about a mode the page is
+in. Remove a bird or add one and the highlight simply stops being true, which is the honest
+result: the page never claims an ordering the panels do not have.
+
 **The scale is set by the largest total length in the set**, and the crossbar by the largest
 wingspan, exactly as P-042 does for a section. There is **no per-panel scale option**. Drawing each
 bird to fill its own panel is what P-042 rejects outright, and in a view whose entire purpose is

@@ -1011,6 +1011,35 @@ comparison views, and this is the change that would have drifted them: the sente
 square had to be added to both. A page carrying a square its key does not explain is the failure
 this guards.
 
+### AC-079 — Sorting a comparison rewrites its URL, and nothing else
+**Verifies:** P-067 · **Level:** code · **Method:** assertions on the rendered comparison view,
+following each sort link
+
+**Assertions, the ordering lives in one place:** each sort link is an ordinary comparison URL
+naming **the same species in a new order**, carries **no `sort` or `by` parameter**, and keeps
+the display options. Following it draws the panels in exactly the order its URL names. This is
+the design decision the criterion exists to pin: an ordering parameter would let the URL and the
+panels disagree, and a sorted comparison would stop being shareable as itself.
+
+**Assertions, the sort:** each metric orders the species **ascending**, as the index orders its
+sections, and the option reads as **on** after its own link is followed. The on-state is a
+statement about the arrangement on screen, so it is checked by sorting and re-reading rather than
+by looking for stored state — there is none.
+
+**Assertions, scope:** no sort control below two birds, there being nothing to sort.
+
+**Status: verified 2026-10-01 — passing, and watched failing** by sorting descending; by sorting
+every option by length regardless of its metric; by adding a `sort=` parameter instead of
+reordering; by offering the control for a single bird; and by hardcoding the on-state true.
+
+**The fixture could not tell the three metrics apart, and the "sort by length regardless"
+breakage is what exposed it.** All five original species were monotonic in length, wingspan and
+mass alike, so every sort produced the same order and a control that ignored its metric entirely
+passed. The fixture now includes the Thick-billed Murre, which is heavier than the crow while
+being shorter and narrower-winged — the one species for which the metrics disagree. The test
+asserts up front that length and mass sort the set differently, so if that property is ever lost
+the test says so instead of quietly passing.
+
 ---
 
 ## Traceability
@@ -1054,7 +1083,7 @@ this guards.
 | P-064 | AC-068 | |
 | P-065 | AC-072 | |
 | P-066 | AC-073, AC-074, AC-078 | |
-| P-067 | AC-076 | |
+| P-067 | AC-076, AC-079 | |
 | P-068 | AC-077 | |
 | T-001, T-003 | AC-054 | |
 | T-002 | AC-051, AC-071 | |
