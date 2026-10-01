@@ -801,6 +801,13 @@ key appears **exactly once** however many birds are shown, and **no provenance t
 marker still appears on modeled values — the compare view may omit the *explanation* (P-063) but
 not the *marking* (P-061).
 
+**Assertions, leaving:** every link back to the index carries the **display options and not the
+species list**. The index does not read `species`, so nothing renders wrongly if it is carried —
+but the index preserves whatever query it is handed, so the parameter is copied into every
+control link on that page and follows the reader through every toggle afterwards. Keeping the
+options is the other half: a back link that drops them has stopped keeping the reader's place
+(P-038).
+
 **Status: verified 2026-09-30 — passing, and watched failing** eleven ways: by laying each panel
 out against its own length (every bird drew at 281.2px, filling its panel, and both scale
 assertions fired); by sharing a scale set by **half** the largest, which the proportionality check
@@ -815,6 +822,12 @@ right order, right labels, right numbers, every panel neatly filled — and comp
 *shared* scale set by the wrong bird passes a proportionality check on its own. Only the pair
 together pins it: one constant across the set, and that constant equal to the scale the largest
 bird gets on its own detail page.
+
+**The leaving assertion was added after the fact, from a user report.** The compare view reused
+`queryFor` unchanged from the detail view, where it is correct because the species lives in the
+path and never appears in the query. On a page that names its subjects *in* the query the same
+call leaks them, and the leak is self-propagating rather than cosmetic. It was watched failing by
+restoring the original call, and over-dropping to confirm the options half bites.
 
 **The fixture is unfolded on purpose.** A folded neck draws shorter than the bird is long
 (CR-011), so its height is deliberately not proportional to its length and would make the scale

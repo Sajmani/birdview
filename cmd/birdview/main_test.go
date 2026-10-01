@@ -7,6 +7,7 @@ import (
 	"math"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"regexp"
 	"slices"
 	"sort"
@@ -1888,5 +1889,46 @@ func TestCompareSelectsAndExplainsItself(t *testing.T) {
 	if !strings.Contains(three, " ~</text>") {
 		t.Error("no estimated marker on any label; the compare view may omit the explanation " +
 			"of provenance but not the marking of it")
+	}
+}
+
+// TestCompareBackLinkDropsTheComparison asserts that leaving the comparison
+// view leaves its species list behind.
+//
+// Every link queryFor builds points at the index, and the index preserves
+// whatever query it is handed. So a species parameter carried back does not
+// just sit in one URL looking odd: the index copies it into every control link
+// on the page, and it follows the reader through every subsequent toggle. The
+// index ignores the parameter, so nothing renders wrongly and nothing
+// complains -- which is exactly why this needs a test rather than a glance.
+//
+// The display options must still survive, or the back link has stopped
+// keeping the reader's place (P-038).
+//
+// Verifies: P-067, P-038. Criterion: AC-076.
+func TestCompareBackLinkDropsTheComparison(t *testing.T) {
+	s := newTestServer(t)
+	_, body := get(t, s, "/compare?units=metric&scale=global&species=calypte_anna&species=ardea_herodias")
+
+	links := regexp.MustCompile(`href="(/\?[^"]*)"`).FindAllStringSubmatch(body, -1)
+	if len(links) == 0 {
+		t.Fatal("the compare page has no link back to the index")
+	}
+	for _, m := range links {
+		href := html.UnescapeString(m[1])
+		u, err := url.Parse(href)
+		if err != nil {
+			t.Fatalf("unparseable index link %q: %v", href, err)
+		}
+		q := u.Query()
+		if got := q["species"]; len(got) > 0 {
+			t.Errorf("index link %q still carries species=%v; the index does not read it and "+
+				"will copy it into every control link on the page", href, got)
+		}
+		// The options are the whole point of preserving the query at all.
+		if q.Get("units") != "metric" || q.Get("scale") != "global" {
+			t.Errorf("index link %q dropped the display options; back should keep the "+
+				"reader's place", href)
+		}
 	}
 }

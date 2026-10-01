@@ -542,7 +542,10 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 			RemoveURL: compareWithout(r, sp.ID),
 		})
 	}
-	s.render(w, "compare.html", compareData{Panels: panels, Opt: opt, Query: queryFor(r)})
+	// The species list is this page's own; the index neither reads it nor
+	// should inherit it.
+	s.render(w, "compare.html", compareData{Panels: panels, Opt: opt,
+		Query: queryFor(r, "species")})
 }
 
 // detailURL points a panel at its own species page, carrying the display
@@ -717,9 +720,18 @@ func (s *server) render(w http.ResponseWriter, name string, data any) {
 
 // queryFor returns a helper that rewrites the current query string, so a
 // control can toggle one setting without discarding the others.
-func queryFor(r *http.Request) func(...string) template.URL {
+//
+// drop names parameters the current page owns and the index does not
+// understand. Every link built here points at the index, and the index
+// preserves whatever it is handed -- so a stray parameter does not just look
+// untidy on one link, it attaches itself to every control the reader touches
+// afterwards. The comparison view drops its own species list for that reason.
+func queryFor(r *http.Request, drop ...string) func(...string) template.URL {
 	return func(kv ...string) template.URL {
 		q := r.URL.Query()
+		for _, k := range drop {
+			q.Del(k)
+		}
 		for i := 0; i+1 < len(kv); i += 2 {
 			if kv[i+1] == "" {
 				q.Del(kv[i])
