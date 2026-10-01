@@ -1258,6 +1258,49 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | ~~Decide the neck's flight posture~~ — done, [CR-011](#cr-011) | Sameer | closed 2026-09-23 |
 | Assess whether a perched/standing toggle is achievable at any honest accuracy ([CR-011](#cr-011)) | — | before it is offered to users |
 | Investigate cervical vertebra counts as an anchor for the neck model (P-045) | — | opportunistic; the biggest available win on the weakest model |
+| Add a **Sort by** control to the comparison view — length, wingspan, mass, the index's three — reordering the panels | — | queued 2026-10-01, owner's request |
+| Decide whether mass gets an **equal-mass cube of water** drawn in the diagram ([below](#a-cube-of-water-for-mass)) | Sameer | evaluated 2026-10-01, not built |
+
+### A cube of water for mass
+
+*Evaluated 2026-10-01, owner's idea, not a decision.* [P-066](product.md#p-066) rejects drawing
+mass as a shape and gives two reasons. The owner then proposed a specific shape that answers one
+of them completely, so the rejection is narrower than it reads and the measurements are recorded
+here rather than left to be redone.
+
+**Draw the cube of water that weighs what the bird weighs**, side = ∛(mass). This is not a model
+of anything: one gram of water is one cubic centimetre, by the historical definition of the gram,
+so the side is a unit conversion and carries no assumption about avian density. It is a real
+length, so it can be drawn at the diagram's own scale and does not introduce the second,
+arbitrary scale P-043 refuses. P-066's objection on that count does not apply to it.
+
+**Measured on the real data, at the detail view's geometry** (drawing area 668 × 281):
+
+| | side |
+| --- | --- |
+| smallest (Fork-tailed Flycatcher, 32 g) | 28 px — 10% of the drawing height |
+| median | 52 px — 18% |
+| largest (Thick-billed Murre, 964 g) | 80 px — 29% |
+
+It fits. Placed in the lower-left corner with an 8px margin, the crossbar intrudes on it for
+**0 of 841 species**; the tightest clearance is 50 px, on Western Grebe.
+
+**What it would add that nothing else shows.** The extremes are not arbitrary: the largest cubes
+belong to alcids — Thick-billed Murre, Parakeet Auklet, Crested Auklet, Marbled Murrelet, all
+dense diving birds — and the smallest to long-tailed, light-bodied species, Fork-tailed and
+Scissor-tailed Flycatcher and Black-billed Magpie. The cube read against the bird's own length is
+**bulk against elongation**, which is exactly the thing a length-and-wingspan diagram cannot say.
+
+**What it still does not do**, and the reason P-066's second objection stands: it compresses. A
+Bushtit and a Common Raven differ 175× in mass and their cubes differ 5.6×. That is arithmetically
+correct for equal-volume cubes and visually understates the gap. It matters less now that the
+number is on the figure — the label can carry the magnitude and the cube the tangibility — but a
+reader who takes the cubes as the mass comparison will read them wrong.
+
+Open if it is taken up: what labels it, whether it appears on index tiles (it should not — the
+tile is dense by design and this is detail-view furniture, as P-066's labels already are), and
+whether it is drawn solid or dashed for the 10 near-match masses, which P-065's vocabulary already
+answers.
 
 ### Cervical vertebra counts, and why they are worth chasing
 
