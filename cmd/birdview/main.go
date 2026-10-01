@@ -15,6 +15,7 @@ import (
 	"html/template"
 	"io/fs"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"sort"
@@ -120,6 +121,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		return nil, err
 	}
 	s.mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(assets))))
+	s.mux.HandleFunc("/compare", s.compare)
 	s.mux.HandleFunc("/species/", s.detail)
 	s.mux.HandleFunc("/", s.index)
 	return s, nil
@@ -478,6 +480,96 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// comparePanel is one bird on the comparison page: the same annotated diagram
+// the detail view draws, plus the two links that make the panel navigable.
+//
+// tile is embedded so the shared "diagram" template, which reads .Geom, .Box,
+// .Labels and the rest off whatever it is handed, works here unchanged.
+type comparePanel struct {
+	tile
+	// DetailURL is where this panel's numbers are explained. P-067 trades the
+	// provenance table for this link, so it is not decoration -- it is the
+	// whole of what makes omitting the table honest.
+	DetailURL template.URL
+	// RemoveURL is the same comparison without this bird.
+	RemoveURL template.URL
+}
+
+type compareData struct {
+	Panels []comparePanel
+	Opt    options
+	Query  func(...string) template.URL
+}
+
+// compare renders several birds to one shared scale (P-067).
+func (s *server) compare(w http.ResponseWriter, r *http.Request) {
+	opt := parseOptions(r)
+	ids := r.URL.Query()["species"]
+
+	// Named order is the reader's choice and is preserved; a repeat is dropped
+	// rather than drawn twice, and an unknown id is an error rather than a
+	// silently shorter page -- a shared link with a typo in it should say so.
+	var chosen []*dataset.Species
+	seen := map[string]bool{}
+	for _, id := range ids {
+		if id == "" || seen[id] {
+			continue
+		}
+		sp, ok := s.byID[id]
+		if !ok {
+			http.Error(w, "unknown species: "+id, http.StatusNotFound)
+			return
+		}
+		seen[id] = true
+		chosen = append(chosen, sp)
+	}
+
+	// One scale for the whole set, taken from the largest bird in it, exactly
+	// as a section does (P-042). Laying each panel out against its own length
+	// would fill every panel equally and compare nothing.
+	var refLength, refWingspan float64
+	for _, sp := range chosen {
+		refLength = math.Max(refLength, sp.TotalLength.Value)
+		refWingspan = math.Max(refWingspan, sp.Wingspan.Value)
+	}
+
+	box := view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}
+	panels := make([]comparePanel, 0, len(chosen))
+	for _, sp := range chosen {
+		panels = append(panels, comparePanel{
+			tile:      labelledTileAt(sp, box, opt.Metric3, refLength, refWingspan),
+			DetailURL: detailURL(r, sp.ID),
+			RemoveURL: compareWithout(r, sp.ID),
+		})
+	}
+	s.render(w, "compare.html", compareData{Panels: panels, Opt: opt, Query: queryFor(r)})
+}
+
+// detailURL points a panel at its own species page, carrying the display
+// options but not the comparison's species list.
+func detailURL(r *http.Request, id string) template.URL {
+	q := r.URL.Query()
+	q.Del("species")
+	if len(q) == 0 {
+		return template.URL("/species/" + id)
+	}
+	return template.URL("/species/" + id + "?" + q.Encode())
+}
+
+// compareWithout is the same comparison minus one bird. Every other parameter
+// survives, including a repeat of some other species.
+func compareWithout(r *http.Request, id string) template.URL {
+	q := r.URL.Query()
+	kept := q["species"][:0:0]
+	for _, v := range q["species"] {
+		if v != id {
+			kept = append(kept, v)
+		}
+	}
+	q["species"] = kept
+	return template.URL("/compare?" + q.Encode())
+}
+
 // legendBox is the help diagram's drawing area: smaller than the detail view's
 // but the same shape, since it renders through the same template.
 var legendBox = view.Box{W: 900, H: 148 * 1.2}
@@ -533,9 +625,22 @@ func (s *server) legendSpecies() *dataset.Species {
 	return nil
 }
 
-// labelledTile builds the annotated diagram shared by the detail view and the
-// help legend (P-066), so the two cannot drift apart.
+// labelledTile builds the annotated diagram for a bird drawn at its own scale:
+// the detail view and the help legend, each of which shows one bird with
+// nothing to measure it against (P-034).
 func labelledTile(sp *dataset.Species, box view.Box, metric bool) tile {
+	return labelledTileAt(sp, box, metric, sp.TotalLength.Value, sp.Wingspan.Value)
+}
+
+// labelledTileAt is the same diagram laid out against an EXTERNAL reference, so
+// several birds can share one scale (P-067).
+//
+// That reference is the whole of the difference between the two views: the
+// bird's own length makes a detail page fill its box, and the set maximum makes
+// a comparison mean something. Getting the argument wrong yields a page that
+// looks entirely correct and compares nothing, which is why AC-076 asserts
+// drawn heights against the length ratio rather than asserting on the markup.
+func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, refWingspan float64) tile {
 	// draw is the area the bird gets; the emitted box is that plus the strip the
 	// total length label sits in, so the label costs the bird nothing. Going the
 	// other way -- keeping the box and shrinking the bird into it -- would take
@@ -548,7 +653,7 @@ func labelledTile(sp *dataset.Species, box view.Box, metric bool) tile {
 	// The bird occupies everything left of the gutter; draw stays the full
 	// height, because the label column is positioned against the emitted box.
 	inner := view.Box{W: draw.W - labelGutter, H: draw.H}
-	g := view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, inner)
+	g := view.Layout(sp, refLength, refWingspan, inner)
 	top := (draw.H - g.TotalHeight()) / 2
 	segOf := map[string]dataset.Metric{
 		"bill": sp.Segments.Bill, "head": sp.Segments.Head, "neck": sp.Segments.Neck,

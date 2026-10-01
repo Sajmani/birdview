@@ -291,3 +291,36 @@ func TestOrderGroupsIndentWrappedFamilies(t *testing.T) {
 			"line inside its column. Got %q", strings.TrimSpace(f[1]))
 	}
 }
+
+// TestComparePanelsWrap asserts the layout half of the comparison view: the
+// panels flow onto as many lines as they need.
+//
+// P-067 requires this rather than treating it as taste. With several birds the
+// panels cannot fit on one line at a readable size, and a row that does not
+// wrap either overflows the page or squeezes the diagrams until the comparison
+// they exist to make is gone.
+//
+// Verifies: P-067. Criterion: AC-076.
+func TestComparePanelsWrap(t *testing.T) {
+	css := stripComments(string(mustReadStyles(t)))
+
+	row := regexp.MustCompile(`\.cmprow\s*\{([^}]*)\}`).FindStringSubmatch(css)
+	if row == nil {
+		t.Fatal("no rule for .cmprow; the comparison panels are not laid out as a row")
+	}
+	if !strings.Contains(row[1], "wrap") {
+		t.Errorf(".cmprow does not wrap, so several birds cannot flow onto further lines. Got %q",
+			strings.TrimSpace(row[1]))
+	}
+	// A wrapping row of items that cannot shrink or share the width is still a
+	// single overflowing line, so the panel needs its own flexible basis.
+	panel := regexp.MustCompile(`\.cmppanel\s*\{([^}]*)\}`).FindStringSubmatch(css)
+	if panel == nil {
+		t.Fatal("no rule for .cmppanel; the panels have no width of their own and inherit " +
+			"the detail view's fixed one")
+	}
+	if !strings.Contains(panel[1], "flex:") {
+		t.Errorf(".cmppanel sets no flex basis, so the panels cannot share a line. Got %q",
+			strings.TrimSpace(panel[1]))
+	}
+}

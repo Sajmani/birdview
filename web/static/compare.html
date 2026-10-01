@@ -1,0 +1,70 @@
+{{define "compare.html"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Compare &mdash; BirdView</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="detail">
+<p class="back"><a href="{{call .Query}}">&larr; back to all birds</a></p>
+
+{{if .Panels}}
+<h1 class="cmptitle">Compared to one scale</h1>
+<p class="note cmpnote">Every bird below is drawn at the same scale, set by the largest of them, so
+their sizes can be read directly against one another. A small bird beside a large one really is
+that small.</p>
+
+{{/* The panels wrap: with several birds they will not fit on one line at any
+     useful size, and a row squeezed until they do would compare nothing
+     (P-067). */}}
+<div class="cmprow">
+  {{range .Panels}}
+  <div class="tile big cmppanel">
+    <div class="hd">
+      <div class="nameline">
+        <span class="cn">{{.S.CommonName}}{{with .S.BandingCode}} <span class="code">({{.}})</span>{{end}}</span>
+        <span class="sn">{{.S.ScientificName}}</span>
+      </div>
+      <span class="badge" style="background:{{.S.FamilyColor}};color:{{.S.FamilyText}}">{{.S.Family}}
+        <em>{{.S.FamilyCommon}}</em></span>
+    </div>
+    {{template "diagram" .}}
+    {{/* P-067 trades the provenance table for this link. It is what makes
+         omitting the table honest, so it is part of every panel. */}}
+    <p class="cmplinks">
+      <a href="{{.DetailURL}}">Where these numbers come from &rarr;</a>
+      <a class="cmpdrop" href="{{.RemoveURL}}">Remove</a>
+    </p>
+  </div>
+  {{end}}
+</div>
+
+{{/* Once for the page, not once per bird: it describes a convention every
+     panel shares, and repeating it would crowd out what it explains. */}}
+<p class="note diagramkey"><b>Solid</b> lines in the diagram are measured; <b>dashed</b> lines are
+estimated. The head is hollow because it is estimated too. On the wing, the solid outer ends are
+the measured wing chord and the <b>ticks</b> mark where it reaches &mdash; only the span between
+them is estimated, and it is dashed when it is.</p>
+
+<p class="note">Each bird links to its own page, where the source or model behind every number is
+named. The neck/body division is a drawing convention, not a measurement: no source records avian
+neck length at this coverage.</p>
+{{else}}
+<h1 class="cmptitle">Nothing to compare yet</h1>
+<p class="note cmpnote">Name the birds in the address, one <code>species</code> each, and they are
+drawn together to a single scale &mdash; for example
+<code>/compare?species=cyanocitta_cristata&amp;species=falco_columbarius</code>. The identifier is
+the one in a bird's own page address.</p>
+{{end}}
+
+<footer>
+  Traits: AVONET, Tobias et al. 2022,
+  <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+  Wingspans: Fox et al. 2026, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+  Species list: ABA Checklist 8.19, &copy; American Birding Association, Inc.
+  <a href="{{call .Query}}">Full credits</a>.
+</footer>
+</body>
+</html>{{end}}

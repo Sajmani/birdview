@@ -693,12 +693,18 @@ value on the diagram was drawn exactly like a measured one, which is the one thi
 [CR-001](decisions.md#cr-001) exists to prevent. The lesson is the one this file keeps relearning: the obvious
 check would have asserted on `class="dlabel est"`, which was present, correct, and meaningless.
 
-**The collision resolver does not fire on real data: 0 of 841 species need it** at the current box
-size and font. It is kept anyway, and tested with a synthetic geometry rather than deleted, because
-unlike the dead branch removed in CR-010 this one is not dead *by construction* — it is dead by the
-current numbers. A larger font, a shorter box or a new segment would all wake it. The dataset-wide
-figure is recorded here so that if someone later finds it untriggered, they find out why before
-removing it.
+**The collision resolver fires on the comparison view, and until then fired nowhere.** It was
+recorded here as dead on real data — 0 of 841 species needed it — because the detail view draws
+every bird to fill its box, so no two segments are closer than the line height. That note
+predicted "a larger font, a shorter box or a new segment would all wake it". What actually woke it
+was [P-067](product.md#p-067), which is none of the three: at a scale set by a larger bird, a
+small one's five segments collapse into a few pixels and the resolver is the only reason its
+labels can be read at all.
+
+Left here as the worked example of why a branch that is dead *by the current numbers* is worth
+keeping, where one dead *by construction* is not — the distinction CR-010 turned on. Deleting it
+while it was unreachable would have meant rediscovering the need for it as a bug, the first time
+two birds were drawn to one scale.
 
 ### AC-074 — The detail diagram labels the whole bird's total length, under the tail
 **Verifies:** P-066 · **Level:** code · **Method:** geometry assertions over the whole fixture plus
@@ -772,6 +778,50 @@ failure read "only 1 order group in the fixture" rather than "this group has no 
 now splits on the group opener instead. A test whose *parser* depends on the structure under test
 reports its own confusion instead of the defect.
 
+### AC-076 — The comparison view shares one scale, wraps, and explains itself once
+**Verifies:** P-067 · **Level:** code · **Method:** assertions on the rendered page, a geometry
+check over the handler's own output, and a structural check over the stylesheet
+
+**Assertions, shared scale:** every panel is laid out against **the same reference**, and that
+reference is the **largest total length** in the set, not each bird's own. Checked by comparing
+the drawn height of two birds of known different lengths: their heights are in the same ratio as
+their total lengths, to within a rounding pixel. This is the assertion the view exists for, and
+the one that fails if a panel is ever laid out against itself — which is what the detail view
+does, and what this code is one argument away from doing by accident.
+
+**Assertions, selection:** the species named in the URL all appear, **in the order given**; a
+species named twice appears **once**; an unknown id is a **404** naming the id rather than a page
+that silently drops it; and a request naming none renders an explanatory page rather than an
+empty one.
+
+**Assertions, layout:** the panels sit in a container the stylesheet makes **wrap**, the diagram
+key appears **exactly once** however many birds are shown, and **no provenance table** is emitted.
+
+**Assertions, provenance:** every panel links to its own species detail view, and the estimated
+marker still appears on modeled values — the compare view may omit the *explanation* (P-063) but
+not the *marking* (P-061).
+
+**Status: verified 2026-09-30 — passing, and watched failing** eleven ways: by laying each panel
+out against its own length (every bird drew at 281.2px, filling its panel, and both scale
+assertions fired); by sharing a scale set by **half** the largest, which the proportionality check
+**passed** and only the largest-bird check caught, at 301.9px against 281.2px; by dropping the
+dedupe; by sorting the panels by length; by silently skipping an unknown id; by rendering the key
+once per bird (3 times for 3 birds); by dropping the detail links; by adding a provenance table;
+by removing `flex-wrap`; by removing the panel's flex basis; and by gutting the empty state.
+
+**The second breakage is why this criterion asserts on geometry at all.** A per-panel scale
+produces a page that is correct in every particular a markup assertion can reach — right birds,
+right order, right labels, right numbers, every panel neatly filled — and compares nothing. And a
+*shared* scale set by the wrong bird passes a proportionality check on its own. Only the pair
+together pins it: one constant across the set, and that constant equal to the scale the largest
+bird gets on its own detail page.
+
+**The fixture is unfolded on purpose.** A folded neck draws shorter than the bird is long
+(CR-011), so its height is deliberately not proportional to its length and would make the scale
+assertion wrong rather than strict. The test fails loudly if any of its three species ever starts
+folding, so the constraint cannot be lost silently — the same guard AC-074 needed for the opposite
+reason.
+
 ---
 
 ## Traceability
@@ -815,6 +865,7 @@ reports its own confusion instead of the defect.
 | P-064 | AC-068 | |
 | P-065 | AC-072 | |
 | P-066 | AC-073, AC-074 | |
+| P-067 | AC-076 | |
 | T-001, T-003 | AC-054 | |
 | T-002 | AC-051, AC-071 | |
 | T-004 | AC-050, AC-053 | |

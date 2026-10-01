@@ -71,6 +71,18 @@ footer a:visited { color: var(--accent-visited); }
 .chip b::before { content: ""; margin-left: 7px; }
 .count { margin: 4px 0 0; }
 
+/* The comparison view (P-067). Panels wrap onto as many lines as they need:
+   with several birds they cannot fit on one line at a readable size, and a row
+   squeezed until they do would defeat the comparison. The basis puts two side
+   by side on a normal laptop and one on anything narrower, and the cap keeps a
+   lone panel the same size it is on its own detail page. */
+.cmprow { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+.cmppanel { flex: 1 1 640px; max-width: 760px; }
+.cmptitle { font-size: 20px; margin: 0 0 4px; }
+.cmpnote { margin-top: 4px; }
+.cmplinks { display: flex; gap: 16px; margin: 6px 0 0; font-size: 12.5px; }
+.cmpdrop { margin-left: auto; }
+
 section { margin-bottom: 28px; }
 h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; gap: 10px;
   border-bottom: 1px solid var(--line); padding-bottom: 6px; }

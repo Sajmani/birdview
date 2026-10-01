@@ -350,6 +350,51 @@ The detail view does **not** inherit the index's scale. Under the global default
 few pixels tall, which is the honest comparison — but the one view devoted to that single bird has
 nothing to compare it against, so carrying the scale there would leave nothing to look at.
 
+### P-067 — A comparison view holds several birds to one scale
+Subject: `presentation.compare_view`
+Value: `/compare?species=<id>&species=<id>…`
+Goals: G-002, G-001, G-003
+
+A **comparison view** draws any number of chosen species together **on a single shared scale**, so
+they can be read directly against one another. It answers G-002's own question — *is a Merlin
+bigger than a Blue Jay?* — which the index answers only for birds that happen to land in the same
+section, and the detail view cannot answer at all.
+
+**The species are named in the URL, as repeated `species` parameters**, so a comparison is a
+shareable link like every other view. Repeated parameters rather than a path, because the view
+takes **any number** of birds and a path would fix the count. They are drawn in the order given:
+that order is the reader's choice and the page does not reorder it. A species named twice appears
+once — a bird compared against itself is never what was meant.
+
+**The scale is set by the largest total length in the set**, and the crossbar by the largest
+wingspan, exactly as P-042 does for a section. There is **no per-panel scale option**. Drawing each
+bird to fill its own panel is what P-042 rejects outright, and in a view whose entire purpose is
+comparison it would not merely fail to help, it would state something false.
+
+Consequently a hummingbird compared against a swan draws the hummingbird a few pixels tall. That is
+the honest answer and the view is for asking the question; a reader who wants to see the
+hummingbird has its detail view one click away.
+
+**Panels wrap.** With several birds they will not fit on one line at any useful size, so they flow
+onto as many lines as they need. Comparing down a column works; comparing across a row that has
+been silently squeezed does not.
+
+**Layout, in order:** the diagrams first, as a wrapping row of panels; then the diagram key — the
+explanation of solid, dashed, hollow and the chord ticks — **once for the page**, not once per
+bird. It describes a drawing convention shared by every panel, and repeating it per bird would
+crowd out the thing it explains.
+
+**There is no provenance table.** Each panel instead **links to that species' detail view**, which
+is where the source or model behind each number is named (P-063).
+
+This is a deliberate scoping of where provenance is *explained*, not a weakening of it. The compare
+view still marks every value that is not measured — the stroke styles of P-065, the hollow head,
+and the `~` on each label — which is exactly what P-061 requires of a surface showing numbers and a
+diagram: mark the kind, *without having to explain why*. What it does not reproduce is the `model`
+and `source` text of P-063. The alternative was to repeat a full provenance table for every bird on
+the page, which would bury the comparison the view exists to make, under the same reasoning that
+keeps the tile dense.
+
 ---
 
 ## Diagram

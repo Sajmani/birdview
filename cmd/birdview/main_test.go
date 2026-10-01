@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -1699,5 +1700,193 @@ func TestEveryOrderGroupWrapsItsFamilies(t *testing.T) {
 	if want := strings.Count(body, `class="chip`) - strings.Count(tileArea(t, body), `class="chip`); totalChips != want {
 		t.Errorf("the groups account for %d chips but the page has %d; some chip is outside "+
 			"an order group entirely", totalChips, want)
+	}
+}
+
+// drawnSpans pulls each compare panel's species name, drawn bill-to-tail height
+// and crossbar half-width out of the rendered page, in document order.
+func drawnSpans(t *testing.T, body string) []struct {
+	Name   string
+	Height float64
+	Half   float64
+} {
+	t.Helper()
+	var out []struct {
+		Name   string
+		Height float64
+		Half   float64
+	}
+	for _, m := range regexp.MustCompile(`(?s)<svg class="dia".*?</svg>`).FindAllString(body, -1) {
+		name := html.UnescapeString(
+			mustMatch(t, m, `aria-label="scaled outline of ([^"]+)"`, "the panel's species"))
+		tail := attrF(t, mustMatch(t, m, `(<line class="tail"[^>]*>)`, "the tail line"), "y2")
+		bill := attrF(t, mustMatch(t, m, `(<line class="bill"[^>]*>)`, "the bill line"), "y1")
+		wing := mustMatch(t, m, `(<line class="wing[^"]*"[^>]*>)`, "a wing line")
+		cx := attrF(t, mustMatch(t, m, `(<line class="bill"[^>]*>)`, "the bill line"), "x1")
+		out = append(out, struct {
+			Name   string
+			Height float64
+			Half   float64
+		}{name, tail - bill, cx - attrF(t, wing, "x1")})
+	}
+	return out
+}
+
+// TestCompareSharesOneScale is the assertion the comparison view exists for:
+// every bird is laid out against the largest in the set, not against itself.
+//
+// This is the failure the code is one argument away from: labelledTileAt with
+// the bird's own length produces a page that looks completely correct, with
+// every panel neatly filled, and compares nothing. No assertion on the markup
+// can see it -- only the drawn geometry can.
+//
+// Verifies: P-067. Criterion: AC-076.
+func TestCompareSharesOneScale(t *testing.T) {
+	s := newTestServer(t)
+	// Unfolded families only. A folded neck draws shorter than the bird is
+	// long (CR-011), so its height is deliberately NOT proportional and would
+	// make this test wrong rather than strict.
+	const q = "/compare?units=metric&species=calypte_anna&species=turdus_migratorius&species=corvus_brachyrhynchos"
+	_, body := get(t, s, q)
+
+	got := drawnSpans(t, body)
+	if len(got) != 3 {
+		t.Fatalf("%d panels, want 3", len(got))
+	}
+	for _, p := range got {
+		if sp := findSpeciesByName(t, p.Name); view.Layout(sp, sp.TotalLength.Value,
+			sp.Wingspan.Value, view.Box{W: 100, H: 100}).NeckFolded {
+			t.Fatalf("%s folds its neck, so its drawn height is not proportional to its "+
+				"length and this fixture can no longer test the scale", p.Name)
+		}
+	}
+
+	// Drawn height must track total length by one constant across the set.
+	// Derived from the requirement -- one scale for the group -- not from a run.
+	var scale float64
+	for _, p := range got {
+		sp := findSpeciesByName(t, p.Name)
+		px := p.Height / sp.TotalLength.Value
+		if scale == 0 {
+			scale = px
+			continue
+		}
+		if math.Abs(px-scale)/scale > 0.005 {
+			t.Errorf("%s is drawn at %.5f px/mm but the first bird at %.5f; the panels do not "+
+				"share a scale", p.Name, px, scale)
+		}
+	}
+
+	// Proportionality alone does not prove the reference is the LARGEST bird:
+	// every panel at half scale would pass it too. The largest bird pins it --
+	// at ref = max it is drawn exactly as it is on its own detail page, where
+	// it is laid out against itself.
+	big := findSpecies(t, "corvus_brachyrhynchos")
+	_, solo := get(t, s2(t), "/species/corvus_brachyrhynchos?units=metric")
+	soloH := drawnSpans(t, solo)[0].Height
+	var bigH float64
+	for _, p := range got {
+		if p.Name == big.CommonName {
+			bigH = p.Height
+		}
+	}
+	if math.Abs(bigH-soloH) > 0.2 {
+		t.Errorf("the largest bird is drawn %.1fpx here but %.1fpx on its own page; the shared "+
+			"scale is not set by the largest bird in the set", bigH, soloH)
+	}
+	// And every other bird must be strictly smaller, or the scale is per-panel.
+	for _, p := range got {
+		if p.Name != big.CommonName && p.Height >= bigH {
+			t.Errorf("%s is drawn %.1fpx, not smaller than the largest bird's %.1fpx",
+				p.Name, p.Height, bigH)
+		}
+	}
+}
+
+// findSpeciesByName looks a fixture species up by common name, which is what
+// the rendered diagram carries.
+func findSpeciesByName(t *testing.T, common string) *dataset.Species {
+	t.Helper()
+	ds := testDataset()
+	for i := range ds.Species {
+		if ds.Species[i].CommonName == common {
+			return &ds.Species[i]
+		}
+	}
+	t.Fatalf("no fixture species named %q", common)
+	return nil
+}
+
+// TestCompareSelectsAndExplainsItself covers the rest of AC-076: which birds
+// appear, in what order, and what the page does and does not carry.
+//
+// Verifies: P-067. Criterion: AC-076.
+func TestCompareSelectsAndExplainsItself(t *testing.T) {
+	s := newTestServer(t)
+
+	// Named order is the reader's and is preserved.
+	_, body := get(t, s, "/compare?species=ardea_herodias&species=calypte_anna")
+	names := []string{}
+	for _, p := range drawnSpans(t, body) {
+		names = append(names, p.Name)
+	}
+	if want := []string{"Great Blue Heron", "Anna's Hummingbird"}; !slices.Equal(names, want) {
+		t.Errorf("panels are %v, want %v in the order named", names, want)
+	}
+	// Reversing the URL reverses the page, or the order is not being honored.
+	_, rev := get(t, s, "/compare?species=calypte_anna&species=ardea_herodias")
+	if first := drawnSpans(t, rev)[0].Name; first != "Anna's Hummingbird" {
+		t.Errorf("reversing the URL gave %q first; the page is imposing its own order", first)
+	}
+
+	// A bird named twice is drawn once.
+	_, dup := get(t, s, "/compare?species=calypte_anna&species=calypte_anna")
+	if n := len(drawnSpans(t, dup)); n != 1 {
+		t.Errorf("a species named twice drew %d panels, want 1", n)
+	}
+
+	// An unknown id is an error that names it, not a silently shorter page.
+	code, msg := get(t, s, "/compare?species=calypte_anna&species=no_such_bird")
+	if code != http.StatusNotFound {
+		t.Errorf("an unknown species gave %d, want 404", code)
+	}
+	if !strings.Contains(msg, "no_such_bird") {
+		t.Errorf("the 404 does not name the bad id: %q", msg)
+	}
+
+	// Naming none explains itself rather than rendering an empty page.
+	_, none := get(t, s, "/compare")
+	if len(drawnSpans(t, none)) != 0 {
+		t.Error("/compare with no species drew a panel")
+	}
+	if !strings.Contains(none, "species") || !strings.Contains(none, "compare?species=") {
+		t.Error("/compare with no species does not say how to name one")
+	}
+
+	// The diagram key is a page-level explanation: once, however many birds.
+	for _, q := range []string{
+		"/compare?species=calypte_anna",
+		"/compare?species=calypte_anna&species=turdus_migratorius&species=ardea_herodias",
+	} {
+		_, b := get(t, s, q)
+		if n := strings.Count(b, `class="note diagramkey"`); n != 1 {
+			t.Errorf("%s carries the diagram key %d times, want exactly 1", q, n)
+		}
+	}
+
+	// No provenance table: P-067 trades it for a link to each detail view.
+	_, three := get(t, s, "/compare?species=calypte_anna&species=turdus_migratorius")
+	if strings.Contains(three, `class="prov"`) {
+		t.Error("the compare page carries a provenance table; P-067 defers that to the detail view")
+	}
+	for _, id := range []string{"calypte_anna", "turdus_migratorius"} {
+		if !strings.Contains(three, `href="/species/`+id) {
+			t.Errorf("no link to /species/%s; that link is what makes omitting the table honest", id)
+		}
+	}
+	// Marking survives even though explaining does not (P-061).
+	if !strings.Contains(three, " ~</text>") {
+		t.Error("no estimated marker on any label; the compare view may omit the explanation " +
+			"of provenance but not the marking of it")
 	}
 }
