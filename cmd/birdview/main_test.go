@@ -2356,10 +2356,23 @@ func TestCompareBirdsToggle(t *testing.T) {
 	s := newTestServer(t)
 	find := func(body string) (class, href string) {
 		t.Helper()
-		m := regexp.MustCompile(`(?s)<a class="(btn[^"]*)" href="([^"]+)"[^>]*>Compare birds</a>`).
+		// Found by class, not by its text: the button now states the mode
+		// ("On"/"Off") and the control set's label carries the name, so
+		// matching on "Compare birds" would find the label instead.
+		m := regexp.MustCompile(`(?s)<a class="(btn cmptoggle[^"]*)" href="([^"]+)"[^>]*>\s*([A-Za-z]+)</a>`).
 			FindStringSubmatch(body)
 		if m == nil {
-			t.Fatal("no Compare birds control in the controls row")
+			t.Fatal("no Compare birds toggle in the controls row")
+		}
+		// The control needs a label of its own, or it reads as one more
+		// Section step option -- which is what it looked like at first.
+		if !strings.Contains(body, `<span class="lbl">Compare birds</span>`) {
+			t.Error("the toggle has no control-set label, so it reads as part of the " +
+				"control before it")
+		}
+		if want := map[bool]string{true: "On", false: "Off"}[strings.Contains(m[1], " on")]; m[3] != want {
+			t.Errorf("the toggle reads %q but its class is %q; the label must state the mode",
+				m[3], m[1])
 		}
 		return m[1], html.UnescapeString(m[2])
 	}

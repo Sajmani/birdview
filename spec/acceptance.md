@@ -878,8 +878,12 @@ directly rather than left to review.
 and the bar lists a picked bird that the filter is **currently hiding**. A filter that appeared to
 discard picks silently would be worse than one that refused to run.
 
-**Assertions, the Controls entry point:** the **Compare birds** toggle is off while browsing and
-on while picking; following it from browsing enters pick mode with nothing picked; and following
+**Assertions, the Controls entry point:** the toggle is a **labelled control set of its own** and
+its button **states the mode** — `Off` while browsing, `On` while picking, matching its styling.
+Both, because an unlabelled button beside the Section step percentages reads as a sixth step
+option. The check finds the button by class rather than by text, since the name is now on the
+label and matching the text would find that instead. The toggle is off while browsing and on
+while picking; following it from browsing enters pick mode with nothing picked; and following
 it while picking leaves by **the same URL Clear uses**, since they do the same thing and two
 links that could drift would eventually disagree. Checked with another parameter in the query:
 with only `species` present, Clear and a bare `/?` are the same string and the comparison cannot

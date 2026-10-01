@@ -101,11 +101,14 @@
       <a class="btn{{if eq (printf "%.0f" $.Opt.Step) $s}} on{{end}}" href="{{call $q "step" $s}}">{{$s}}%</a>
     {{end}}
 
-    {{/* On when picking, so the control shows the mode as well as toggling it
-         (P-068). Turning it off is the same link the bar's Clear uses. */}}
-    <a class="btn{{if .Bar.Picking}} on{{end}}" href="{{.CompareToggleURL}}"
+    {{/* Its own labelled control set, not a trailing button: beside the
+         Section step percentages an unlabelled "Compare birds" read as a sixth
+         step option. The button states the mode rather than naming the
+         control, which the label now does (P-068). */}}
+    <span class="lbl">Compare birds</span>
+    <a class="btn cmptoggle{{if .Bar.Picking}} on{{end}}" href="{{.CompareToggleURL}}"
        title="{{if .Bar.Picking}}Leave compare mode and forget the picks{{else}}Pick birds to compare side by side{{end}}"
-       >Compare birds</a>
+       >{{if .Bar.Picking}}On{{else}}Off{{end}}</a>
   </div>
 
   <div class="row chips">

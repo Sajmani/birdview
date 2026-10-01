@@ -420,8 +420,12 @@ that is explicitly empty, and it is drawn here the same way for the same reason.
 That empty state is also an **entry point**. A **Compare birds** toggle in the controls turns
 pick mode on with nothing picked, and off again — the same thing the bar's Clear does, by the
 same link. It is for a reader who wants to compare before they have a particular bird in mind;
-the detail view's control is for one who already does. The toggle shows the mode as well as
-setting it.
+the detail view's control is for one who already does.
+
+It is **its own labelled control set**, and the button reads **On** or **Off**. Added as an
+unlabelled button after the Section step percentages it read as a sixth step option, because
+every other control in that row is a labelled set of choices. So the label names the control and
+the button states the mode, rather than the button trying to do both.
 
 **Picking does not move the reader.** A pick link navigates to the picked bird's own tile, so the
 browser restores the reading position itself while loading the page. Every control here is a
