@@ -335,17 +335,28 @@
        the label gutter, so the two are 160px apart. No leader lines; there is
        no part to point at. Mass sits here rather than in the stack beside the
        drawing because it is not a length (P-066). */}}
-  {{if .MassCube.Side}}
-  {{/* Mass as water, in the lower-left of the drawing area: one face of a cube
-       of water weighing what the bird weighs, at this diagram's own scale
-       (P-066, CR-019). Dashed when the mass is not measured, like every other
-       estimated stroke (P-065). Drawn here, with the text, so a leader line
-       crossing it passes behind rather than through. */}}
-  <rect class="masscube{{if .MassCube.Est}} est{{end}}"
-        x="{{f1 .MassCube.X}}" y="{{f1 .MassCube.Y}}"
-        width="{{f1 .MassCube.Side}}" height="{{f1 .MassCube.Side}}"
-        ><title>{{.MassCube.Title}}</title></rect>
-  {{end}}
+  {{with .MassCube}}{{if .Side}}
+  {{/* The cube of water that weighs what the bird weighs, in oblique
+       projection (P-066, CR-019). The FACE's base sits on the bottom of the
+       drawing area in every diagram, so the projection grows up and right
+       from a corner that never moves and two cubes can be compared by eye.
+       Top and right faces first, front face over them: nearest last. */}}
+  <g class="masscube{{if .Est}} est{{end}}">
+    <title>{{.Title}}</title>
+    <polygon class="mctop" points="{{f1 .X}},{{f1 .Y}}
+      {{f1 (add .X .Depth)}},{{f1 (sub .Y .Depth)}}
+      {{f1 (add (add .X .Side) .Depth)}},{{f1 (sub .Y .Depth)}}
+      {{f1 (add .X .Side)}},{{f1 .Y}}"/>
+    <polygon class="mcside" points="{{f1 (add .X .Side)}},{{f1 .Y}}
+      {{f1 (add (add .X .Side) .Depth)}},{{f1 (sub .Y .Depth)}}
+      {{f1 (add (add .X .Side) .Depth)}},{{f1 (sub (add .Y .Side) .Depth)}}
+      {{f1 (add .X .Side)}},{{f1 (add .Y .Side)}}"/>
+    <rect class="mcface" x="{{f1 .X}}" y="{{f1 .Y}}"
+          width="{{f1 .Side}}" height="{{f1 .Side}}"/>
+  </g>
+  <text class="dlabel mass{{if .Est}} est{{end}}" text-anchor="middle"
+        x="{{f1 .LabelX}}" y="{{f1 .LabelY}}">{{.Label}}{{if .Est}} ~{{end}}</text>
+  {{end}}{{end}}
   {{range .FootLabels}}
   <text class="dlabel {{.Key}} foot{{if .Est}} est{{end}}" text-anchor="middle"
         x="{{f1 $g.CX}}" y="{{f1 .Y}}">{{.Text}}{{if .Est}} ~{{end}}</text>
@@ -389,8 +400,9 @@
 <p class="note diagramkey"><b>Solid</b> lines in the diagram are measured; <b>dashed</b> lines are
 estimated. The head is hollow because it is estimated too. On the wing, the solid outer ends are
 the measured wing chord and the <b>ticks</b> mark where it reaches &mdash; only the span between
-them is estimated, and it is dashed when it is. The <b>square</b> in the lower-left corner is the
-bird's mass drawn as water: one face of a cube of water that weighs the same, at the same scale
-as the bird. Read against the bird's own length it shows how heavy-set it is &mdash; but the
-cube root flattens big differences, so the number beside the tail is what states the mass.</p>
+them is estimated, and it is dashed when it is. The <b>cube</b> in the lower-left corner is the
+bird's mass drawn as water: a cube of water that weighs the same, at the same scale as the bird.
+Its front face stands on the floor of every diagram, so two cubes can be compared directly. Read
+against the bird's own length it shows how heavy-set it is &mdash; but a cube root flattens big
+differences, so the number under it is what states the mass.</p>
 {{end}}

@@ -1623,16 +1623,21 @@ func TestTotalLengthLabelStaysInTheBox(t *testing.T) {
 	for i := range ds.Species {
 		sp := &ds.Species[i]
 		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, true)
-		if len(lt.FootLabels) < 2 {
-			t.Fatalf("%s: %d whole-bird labels; with fewer than two the stacking this "+
-				"reserves room for is not exercised", sp.CommonName, len(lt.FootLabels))
+		if len(lt.FootLabels) == 0 {
+			t.Fatalf("%s: no whole-bird labels at all", sp.CommonName)
 		}
-		// The LAST one is the binding case: the strip has to clear the whole
-		// stack, not just its first line.
+		// Two things hang below the drawing and the strip must clear whichever
+		// reaches lower: the stack under the tail, and the mass label under
+		// the cube. Checking only one leaves the other free to overrun.
 		last := lt.FootLabels[len(lt.FootLabels)-1]
-		if last.Y+descender > lt.Box.H {
-			t.Errorf("%s: %q baseline at %.1f (+%d descender) overruns the %.1f box",
-				sp.CommonName, last.Text, last.Y, descender, lt.Box.H)
+		for _, c := range []struct {
+			what string
+			y    float64
+		}{{last.Text, last.Y}, {lt.MassCube.Label, lt.MassCube.LabelY}} {
+			if c.y+descender > lt.Box.H {
+				t.Errorf("%s: %q baseline at %.1f (+%d descender) overruns the %.1f box",
+					sp.CommonName, c.what, c.y, descender, lt.Box.H)
+			}
 		}
 	}
 }
@@ -2517,12 +2522,17 @@ func TestEveryReportedMetricIsLabelled(t *testing.T) {
 // massCubeOf returns the mass square's attributes from a rendered diagram.
 func massCubeOf(t *testing.T, body string) (class string, x, y, side float64, ok bool) {
 	t.Helper()
+	g := regexp.MustCompile(`(?s)<g class="(masscube[^"]*)">.*?</g>`).FindStringSubmatch(body)
+	if g == nil {
+		return "", 0, 0, 0, false
+	}
 	m := regexp.MustCompile(
-		`(?s)<rect class="(masscube[^"]*)"\s*x="([0-9.]+)" y="([0-9.]+)"\s*width="([0-9.]+)"`).
-		FindStringSubmatch(body)
+		`(?s)<rect class="mcface" x="([0-9.]+)" y="([0-9.]+)"\s*width="([0-9.]+)"`).
+		FindStringSubmatch(g[0])
 	if m == nil {
 		return "", 0, 0, 0, false
 	}
+	m = []string{m[0], g[1], m[1], m[2], m[3]}
 	f := func(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 	return m[1], f(m[2]), f(m[3]), f(m[4]), true
 }
@@ -2551,15 +2561,38 @@ func TestMassCubeIsWaterToScale(t *testing.T) {
 				"that weighs the same, at the diagram's own scale",
 				sp.CommonName, lt.MassCube.Side, want)
 		}
-		// Inside the DRAWING area, lower-left, clear of the bird.
-		drawH := lt.Box.H - footStrip(len(lt.FootLabels))
-		if lt.MassCube.X < 0 || lt.MassCube.Y+lt.MassCube.Side > drawH+0.01 {
-			t.Errorf("%s: mass square at (%.1f,%.1f) side %.1f escapes the %.1f drawing area",
-				sp.CommonName, lt.MassCube.X, lt.MassCube.Y, lt.MassCube.Side, drawH)
+		// The face's base sits on the floor of the drawing area, at the same
+		// place in EVERY diagram. That fixed corner is the whole point of the
+		// cube form: the projection grows up and right from it, so two cubes
+		// can be compared by eye. A base that moved with the bird would
+		// destroy that without changing a single size.
+		drawH := lt.Box.H - math.Max(footStrip(len(lt.FootLabels)),
+			massLabelGap+footDescender)
+		if base, want := lt.MassCube.Y+lt.MassCube.Side, drawH-massCubeMargin; math.Abs(base-want) > 0.01 {
+			t.Errorf("%s: the cube's face stands at y=%.2f, want %.2f in every diagram",
+				sp.CommonName, base, want)
 		}
-		if right := lt.MassCube.X + lt.MassCube.Side; right >= lt.Geom.CX {
-			t.Errorf("%s: mass square reaches x=%.1f, past the bird's axis at %.1f",
+		if lt.MassCube.X != massCubeMargin {
+			t.Errorf("%s: the cube's face starts at x=%.2f, want %d in every diagram",
+				sp.CommonName, lt.MassCube.X, massCubeMargin)
+		}
+		// The projection grows up and right, and must stay in the drawing and
+		// clear of the bird.
+		if topY := lt.MassCube.Y - lt.MassCube.Depth; topY < 0 {
+			t.Errorf("%s: the cube's top reaches y=%.1f, above the drawing", sp.CommonName, topY)
+		}
+		if right := lt.MassCube.X + lt.MassCube.Side + lt.MassCube.Depth; right >= lt.Geom.CX {
+			t.Errorf("%s: the cube reaches x=%.1f, past the bird's axis at %.1f",
 				sp.CommonName, right, lt.Geom.CX)
+		}
+		if lt.MassCube.Depth <= 0 {
+			t.Errorf("%s: the cube has no depth, so it is a square", sp.CommonName)
+		}
+		// Its label must be centred under the face without being clipped --
+		// a Scissor-tailed Flycatcher's 29px cube once rendered "ass 1.4 oz".
+		if left := lt.MassCube.LabelX - float64(len(lt.MassCube.Label))*massLabelCharWidth/2; left < -0.01 {
+			t.Errorf("%s: the mass label %q starts at x=%.1f and is clipped",
+				sp.CommonName, lt.MassCube.Label, left)
 		}
 		// Measured mass draws solid, near-match dashed (P-065).
 		if want := sp.Mass.Prov.Kind != dataset.Measured; lt.MassCube.Est != want {

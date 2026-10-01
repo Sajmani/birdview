@@ -783,12 +783,24 @@ under the foot of the figure, on the centreline, spanning nothing. They take no 
 there is no part to point at, and proximity to the end of the drawing is the whole of their
 meaning.
 
-**Mass is drawn as a number, and also as water.** A square sits in the **lower-left corner of the
-drawing**: one face of the **cube of water that weighs what the bird weighs**, at the diagram's
-own scale. Its side is ∛(mass), which is a unit conversion and not a model — one gram of water is
+**Mass is drawn as a number, and also as water.** The **cube of water that weighs what the bird
+weighs** is drawn in the **lower-left corner**, in oblique projection, at the diagram's own
+scale. Its side is ∛(mass), which is a unit conversion and not a model — one gram of water is
 one cubic centimetre by definition — so it assumes nothing about the density of birds and
 introduces no second scale. It is drawn away from the figure, and named in the diagram key,
 because an unexplained shape beside a bird would read as part of the bird.
+
+**The front face stands on the floor of the drawing, in the same place in every diagram**, and
+the projection grows up and to the right from there. That fixed corner is what makes two cubes
+comparable at a glance: only their size differs between birds, so the eye has a common origin to
+measure from. A base that moved with the bird would cost that without changing a single number.
+The depth is 0.4 of the side; cabinet projection's conventional 0.5 also clears the crossbar
+everywhere, but leaves 14px where this leaves 21, and no unit test can see that margin because
+the fixture holds five birds.
+
+**Mass is labeled under its cube, not in the stack under the tail**, so the number sits with the
+shape it describes. On a small cube the label is wider than the face and is held clear of the
+left edge rather than centred past it.
 
 It is there for what the rest of the figure cannot say: **bulk against elongation**. Read against
 the bird's own length it is 28–29% of the drawing height for alcids, which are dense divers, and

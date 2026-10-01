@@ -895,13 +895,44 @@ type footLabel struct {
 	Est  bool
 }
 
-// massCube is the square in the lower-left: one face of the cube of water that
-// weighs what the bird weighs (P-066, CR-019).
+// massCube is the cube of water that weighs what the bird weighs, drawn in the
+// lower-left in oblique projection (P-066, CR-019).
+//
+// X,Y is the top-left of the FRONT FACE, and the face's base sits on the
+// bottom of the drawing area in every diagram. That is what makes two cubes
+// comparable at a glance: the projection grows up and to the right from a
+// corner that never moves, so only the cube's size differs between birds.
 type massCube struct {
-	X, Y, Side float64
-	Est        bool // mass not measured -- dashed, per P-065
-	Title      string
+	X, Y, Side, Depth float64
+	// The mass label sits centred under the face rather than in the stack
+	// under the tail, so the number is beside the shape it describes.
+	Label          string
+	LabelX, LabelY float64
+	Est            bool // mass not measured -- dashed, per P-065
+	Title          string
 }
+
+// massCubeDepth is the oblique projection's depth, as a fraction of the side,
+// offset at 45 degrees.
+//
+// Cabinet projection's conventional 0.5 also fits -- measured over all 841
+// species, neither value lets the cube reach the crossbar -- but it leaves
+// only 14px of clearance on Western Grebe against this one's 21px, and the
+// unit tests cannot see that margin because the fixture holds five birds and
+// no grebe. The looser value is the one that survives a data change.
+const massCubeDepth = 0.4
+
+// massLabelGap is how far the mass label's baseline sits below the face.
+const massLabelGap = 12
+
+// massLabelCharWidth approximates one character of the 11px label, used only
+// to stop a small cube's centred label running off the left edge of the
+// drawing -- a Scissor-tailed Flycatcher's cube is 29px wide and its label
+// about 70px, which rendered as "ass 1.4 oz".
+//
+// Deliberately generous: overestimating only nudges the label right, while
+// underestimating clips it again.
+const massLabelCharWidth = 6.2
 
 // massCubeSide is the side of that cube, in millimetres, for a mass in grams.
 //
@@ -983,14 +1014,12 @@ func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, r
 		Key:  "total",
 		Text: "Total length  " + format(sp.TotalLength.Value, view.ByLength, metric),
 		Est:  sp.TotalLength.Prov.Kind != dataset.Measured,
-	}, {
-		Key:  "mass",
-		Text: "Mass  " + format(sp.Mass.Value, view.ByMass, metric),
-		Est:  sp.Mass.Prov.Kind != dataset.Measured,
 	}}
 
 	draw := box
-	box.H += footStrip(len(foot))
+	// The strip has to clear whichever reaches lower: the stack under the tail
+	// or the mass label under the cube.
+	box.H += math.Max(footStrip(len(foot)), massLabelGap+footDescender)
 
 	// The bird occupies everything left of the gutter; draw stays the full
 	// height, because the label column is positioned against the emitted box.
@@ -1029,12 +1058,18 @@ func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, r
 	// was built -- the crossbar reaches into that corner for 0 of 841 species,
 	// the tightest clearance being 50px on Western Grebe.
 	if side := massCubeSide(sp.Mass.Value) * g.PxPerMm; side > 0 {
+		base := draw.H - massCubeMargin
+		label := "Mass  " + format(sp.Mass.Value, view.ByMass, metric)
 		t.MassCube = massCube{
-			X:     massCubeMargin,
-			Y:     draw.H - massCubeMargin - side,
-			Side:  side,
-			Est:   sp.Mass.Prov.Kind != dataset.Measured,
-			Title: "Mass as water: a cube of water weighing the same, to scale",
+			X: massCubeMargin, Y: base - side, Side: side, Depth: side * massCubeDepth,
+			Label: label,
+			// Centred under the face, but never far enough left to be clipped
+			// by the edge of the drawing.
+			LabelX: math.Max(massCubeMargin+side/2,
+				float64(len(label))*massLabelCharWidth/2),
+			LabelY: base + massLabelGap,
+			Est:    sp.Mass.Prov.Kind != dataset.Measured,
+			Title:  "Mass as water: a cube of water weighing the same, to scale",
 		}
 	}
 	return t

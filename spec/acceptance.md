@@ -972,9 +972,17 @@ water is one cubic centimetre — and never read off a run. This is the criterio
 square's claim checkable: it is a real volume at the diagram's own scale, not a glyph on a scale
 of its own, and only the arithmetic can tell those apart.
 
-**Assertions, placement:** inside the **drawing** area and not the emitted box, which is taller by
-the foot strip and wider by the label gutter; and right of its left edge but never reaching the
-bird's own axis, so it cannot sit under the figure or out among the labels.
+**Assertions, placement:** the front face's **base and left edge are identical in every
+diagram** — that fixed corner is the whole point of the cube form, since it gives the eye a
+common origin and lets two cubes be compared directly; a base that drifted with the bird would
+cost that without changing any number. The projection has **non-zero depth**, or it is the square
+this replaced. It stays inside the drawing area above and never reaches the bird's axis to the
+right. Its label is centred under the face but **held clear of the left edge**: a Scissor-tailed
+Flycatcher's 29 px cube renders a ~70 px label, which read "ass 1.4 oz" before it was clamped.
+
+**Assertions, the strip below:** two things now hang under the drawing — the stack under the tail
+and the mass label under the cube — and the reserved strip must clear **whichever reaches
+lower**. Both are asserted; checking one leaves the other free to overrun.
 
 **Assertions, provenance:** solid when the mass is measured, dashed when it is not, as P-065
 requires of every other stroke.
@@ -986,9 +994,12 @@ not documentation of the feature, it is the feature. An index tile carries no sq
 dense by design and this is annotated-diagram furniture, as P-066's labels already are.
 
 **Status: verified 2026-10-01 — passing, and watched failing** by sizing the side on mass rather
-than its cube root; by giving the square a scale of its own instead of the diagram's px/mm; by
-drawing a near-match mass as measured; by removing the key's description of it; and by moving it
-to the lower-right, where it reached x=980 against a bird axis at x=334.
+than its cube root; by giving the cube a scale of its own instead of the diagram's px/mm; by
+drawing a near-match mass as measured; by removing the key's description of it; by moving it to
+the lower-right, where it reached x=980 against a bird axis at x=334; by standing the face on the
+tail tip instead of the floor, so the base moved per bird; by zeroing the depth, which is the
+square this replaced; and by centring the label without the clamp, which clipped it to
+"ass 0.14 oz" on the hummingbird.
 
 **The provenance assertion was vacuous when written, and breaking the code is what showed it.**
 Every fixture mass was `measured`, so the dashed branch never rendered and drawing a near-match

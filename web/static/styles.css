@@ -234,8 +234,11 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
    a length, and a bare outline in a figure made of lines reads as one more
    measurement. Dashed when the mass is not measured, like every other
    estimated stroke. */
-.masscube { fill: #38bdf833; stroke: #38bdf8; stroke-width: 1; }
-.masscube.est { stroke-dasharray: 4 3; }
+.masscube polygon, .masscube rect { stroke: #38bdf8; stroke-width: 1; }
+.mcface { fill: #38bdf83d; }
+.mctop  { fill: #38bdf866; }
+.mcside { fill: #38bdf81f; }
+.masscube.est polygon, .masscube.est rect { stroke-dasharray: 4 3; }
 .dlabel { fill: var(--ink); font-size: 11px; }
 .dlabel.chord, .dlabel.span { fill: #0ea5e9; }
 /* No ::after here: generated content produces no box on an SVG <text>, so the
