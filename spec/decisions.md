@@ -1187,6 +1187,64 @@ diagram cannot drift from the renderer.
 
 ---
 
+## CR-018 — The compare URL contract changes when the index becomes the picker
+
+**Subject:** `presentation.compare_view`, `presentation.pick_mode`
+**Kind:** Direct — a later decision reverses two conditions an earlier one set
+**Date:** 2026-10-01 · **Decided by:** Sameer
+
+### What changed
+
+Two behaviors settled days ago now resolve the other way, both because the same premise
+disappeared. [P-068](product.md#p-068) gives the index a picker, which means the index now reads
+the `species` parameter that the compare view writes.
+
+**a. Leaving the compare view keeps the species list.** Commit `10e938d` removed it, and
+[AC-076](acceptance.md#ac-076) asserted that no link back to the index may carry `species`.
+
+**b. An unrecognised id is dropped and named, not a 404.** `/compare` refused the whole page; it
+now renders the species it recognises and says which it could not.
+
+### Why (a) reverses
+
+The fix in `10e938d` was correct and its reasoning was sound: *"the index does not read `species`,
+so the parameter is copied into every control link on that page and follows the reader through
+every toggle afterwards."* A parameter that means nothing where it lands is litter, and litter
+that propagates is worse.
+
+That argument rests entirely on the index not reading it. P-068 makes the index read it — the
+species list is now the live state of a pick in progress. Carrying it back is no longer litter; it
+is the whole point. Dropping it would break the plainest flow the picker has: open a bird to look
+at it, go back, add it.
+
+What still drops the list is **Clear**, which is how a reader leaves pick mode. So the mechanism
+added in `10e938d` survives; only the control it hangs on moves.
+
+### Why (b) reverses
+
+The 404 was justified as *"a shared link with a typo should say so rather than quietly render a
+shorter page."* The goal was honesty about loss, and that goal has not changed. What changed is
+that a third option exists, which was not considered at the time: **render what is recognised and
+name what is not.** It satisfies the original reasoning better than refusing the page does — the
+reader is told exactly what was lost *and* still gets the comparison.
+
+The case that decides it is not a typo but **rot**. Species ids are derived from scientific names,
+and this checklist renames them: the Sandhill Crane is `antigone_canadensis`, and was
+`grus_canadensis`. A comparison URL is made to be shared and kept, so it will outlive some of the
+ids in it. Under the 404 rule a five-bird comparison dies completely when one genus is reassigned.
+Under drop-and-name it loses one bird and says so, and every link the page then builds omits the
+dead id, so the set repairs itself on the next click.
+
+The index does the same thing for the same reason, so one parameter has one meaning everywhere.
+
+### What this costs
+
+A reader who mistypes an id gets a page rather than an error, and must read the notice to learn
+that something was dropped. That is a real regression in loudness, accepted because the rotted
+link is both likelier and more harmful than the typo: a typo is made and corrected in seconds by
+the person who made it, while a rotted link fails for someone who did not write it and cannot
+tell what was supposed to be there.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

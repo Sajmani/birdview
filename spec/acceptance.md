@@ -790,9 +790,8 @@ the one that fails if a panel is ever laid out against itself — which is what 
 does, and what this code is one argument away from doing by accident.
 
 **Assertions, selection:** the species named in the URL all appear, **in the order given**; a
-species named twice appears **once**; an unknown id is a **404** naming the id rather than a page
-that silently drops it; and a request naming none renders an explanatory page rather than an
-empty one.
+species named twice appears **once**; and a request naming none renders an explanatory page
+rather than an empty one.
 
 **Assertions, layout:** the panels sit in a container the stylesheet makes **wrap**, the diagram
 key appears **exactly once** however many birds are shown, and **no provenance table** is emitted.
@@ -801,12 +800,16 @@ key appears **exactly once** however many birds are shown, and **no provenance t
 marker still appears on modeled values — the compare view may omit the *explanation* (P-063) but
 not the *marking* (P-061).
 
-**Assertions, leaving:** every link back to the index carries the **display options and not the
-species list**. The index does not read `species`, so nothing renders wrongly if it is carried —
-but the index preserves whatever query it is handed, so the parameter is copied into every
-control link on that page and follows the reader through every toggle afterwards. Keeping the
-options is the other half: a back link that drops them has stopped keeping the reader's place
-(P-038).
+**Assertions, leaving:** the link back to the index carries **both the display options and the
+species list** — the picks are live state and returning to add another bird must not discard them
+([CR-018](decisions.md#cr-018)). **Clear** is the one link that drops them, and it must drop them
+all. The two cannot be told apart by URL shape, since both point at `/?…`, so the markup has to
+distinguish them and the check matches on that.
+
+**Assertions, unrecognised ids:** an id matching no species is **dropped with the rest of the set
+rendered**, is **named on the page**, and appears in **no link the page builds** — so the set
+repairs itself on the next click. Asserted with a set mixing valid and invalid ids, because a set
+of one invalid id cannot tell "dropped it" from "refused the page".
 
 **Status: verified 2026-09-30 — passing, and watched failing** eleven ways: by laying each panel
 out against its own length (every bird drew at 281.2px, filling its panel, and both scale
@@ -823,6 +826,12 @@ right order, right labels, right numbers, every panel neatly filled — and comp
 together pins it: one constant across the set, and that constant equal to the scale the largest
 bird gets on its own detail page.
 
+**Both of those assertions reverse what this criterion said on 2026-09-30**, and the reasoning is
+in [CR-018](decisions.md#cr-018). In short: the back link dropped the species list because the
+index did not read it, and P-068 makes the index read it; and the 404 was the honest option until
+drop-and-name turned out to serve the same goal better. The original reasoning for each is kept
+below rather than deleted, because both were right when written.
+
 **The leaving assertion was added after the fact, from a user report.** The compare view reused
 `queryFor` unchanged from the detail view, where it is correct because the species lives in the
 path and never appears in the query. On a page that names its subjects *in* the query the same
@@ -834,6 +843,57 @@ restoring the original call, and over-dropping to confirm the options half bites
 assertion wrong rather than strict. The test fails loudly if any of its three species ever starts
 folding, so the constraint cannot be lost silently — the same guard AC-074 needed for the opposite
 reason.
+
+### AC-077 — Pick mode is the species list, and the picks survive being navigated through
+**Verifies:** P-068, P-031 · **Level:** code · **Method:** assertions on the rendered index and
+detail pages, plus a structural check over the stylesheet
+
+**Assertions, the mode:** with no `species` parameter the index carries **no pick control on any
+tile** and no bar. With one or more it carries a control on **every** tile and a bar. A **bare
+`species=`** holds the mode open with nothing picked — the control and the bar are present and the
+bar says nothing is picked yet.
+
+**Assertions, the tile is not repurposed:** in **both** modes every tile's own link still points
+at `/species/{id}`. This is P-034, and it is the assertion that fails if the pick control is ever
+implemented by changing the tile's href instead of sitting beside it.
+
+**Assertions, picking:** a tile not yet picked offers a link that adds it; a tile already picked
+renders as picked and offers a link that removes it; and the two are **inverses** — following add
+then remove returns the original set, in the original order.
+
+**Assertions, the round trip:** following a tile into the detail view and then its back link
+returns an index whose picks are **unchanged**. This is the flow that does not work before this
+change, and it is checked with **two or more picks** so that "preserved the set" cannot be
+confused with "rebuilt a set of one".
+
+**Assertions, href weight:** a tile href carries `species` and `units` and **not** `family`,
+checked on an index that has an active family filter so the parameter would be there to leak. This
+is a size bound — the regression is invisible until the page is slow — so it is asserted
+directly rather than left to review.
+
+**Assertions, the filter:** picking inside a filtered index neither resets nor ignores the filter,
+and the bar lists a picked bird that the filter is **currently hiding**. A filter that appeared to
+discard picks silently would be worse than one that refused to run.
+
+**Assertions, leaving:** **Clear** removes every `species` parameter and returns the page to
+browsing mode, and **no other control does** — asserted by following every other link on the page
+and confirming the picks survive it.
+
+**Assertions, unrecognised ids:** a set mixing a good id with a dead one renders the good bird,
+**names the dead one on the page**, and emits **no link containing it**. Asserted with a mixed set
+because an all-invalid set cannot distinguish dropping from refusing.
+
+**Status: planned.** To be verified by rendering the pick control in browsing mode; by
+implementing it as a change to the tile's own href; by making add and remove non-inverse; by
+dropping the picks from the tile href so the round trip loses them; by adding `family` to the
+href; by hiding filtered-out picks from the bar; by making a control other than Clear drop the
+picks; and by keeping a dead id in the links the page builds.
+
+**Vacuity traps already identified, recorded so the checks are not written into them:** searching
+the whole page for the word "picked" matches the tile controls as well as the bar, so the bar must
+be matched by its own container; the back link and Clear both point at `/?…` and differ only in
+whether `species` survives, so they must be told apart by class and not by URL shape; and a
+one-species fixture makes the round-trip assertion vacuous.
 
 ---
 
@@ -853,7 +913,7 @@ reason.
 | P-022, P-023 | AC-021 | |
 | P-024 | AC-022 | |
 | P-030 | AC-054 | |
-| P-031 | AC-055 | |
+| P-031 | AC-055, AC-077 | |
 | P-032 | AC-057 | |
 | P-033 | AC-056 | |
 | P-034 | AC-043, AC-054, AC-058 | |
@@ -879,6 +939,7 @@ reason.
 | P-065 | AC-072 | |
 | P-066 | AC-073, AC-074 | |
 | P-067 | AC-076 | |
+| P-068 | AC-077 | |
 | T-001, T-003 | AC-054 | |
 | T-002 | AC-051, AC-071 | |
 | T-004 | AC-050, AC-053 | |

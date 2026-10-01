@@ -227,6 +227,10 @@ Each species is one **tile**, laid out top to bottom:
 
 Tiles wrap to fill the available display width.
 
+In pick mode ([P-068](#p-068)) each tile also carries a **pick control**, beside the tile's own
+link rather than inside it. In browsing mode it is absent entirely, so the tile a reader sees
+almost all the time is unchanged.
+
 Rationale for centering: under global scale a small bird occupies a fraction of the tile's height,
 and bottom-aligning it reads as a rendering fault rather than as the size difference it is.
 Centering makes the empty space symmetric, so it reads as headroom rather than as misalignment.
@@ -394,6 +398,61 @@ diagram: mark the kind, *without having to explain why*. What it does not reprod
 and `source` text of P-063. The alternative was to repeat a full provenance table for every bird on
 the page, which would bury the comparison the view exists to make, under the same reasoning that
 keeps the tile dense.
+
+### P-068 — Birds are picked for comparison from the index, and the picks are the mode
+Subject: `presentation.pick_mode`
+Value: `?species=<id>&species=<id>… — present, even empty, means picking`
+Goals: G-002
+
+A reader assembles a comparison by **picking birds from the index**, where the diagrams and the
+family filter already are, rather than from a separate chooser that would duplicate both.
+
+**The presence of a `species` parameter is the mode.** There is no separate flag. With none, the
+app behaves exactly as it always has. With one or more, every page is in **pick mode**: the index
+offers a pick control on each tile, the index and the detail view carry a bar showing the picks,
+and the detail view offers to pick the bird being read.
+
+A **bare `species=`** — the parameter present with no value — means *picking, nothing picked yet*,
+so unpicking the last bird does not silently drop the reader out of the mode mid-task. This is
+the distinction P-010's family filter already draws between a parameter that is absent and one
+that is explicitly empty, and it is drawn here the same way for the same reason.
+
+**The tile still opens the detail view in both modes.** The pick control is a separate target
+beside it, never a repurposing of the tile, so [P-034](#p-034) holds without exception. A reader
+mid-pick can always open a bird to look at it properly, which is the main thing they will want to
+do while deciding.
+
+**Picking preserves everything else.** The filter, ordering, scale and units all keep working, so
+a reader can narrow to one family and pick three birds from a page showing only that family. The
+bar lists picks the filter is currently hiding, because a filter that appeared to discard them
+would be worse than useless.
+
+**Vocabulary: a bird is *picked*, a family is *selected*.** Both sets are live at once in this
+mode and they mean unrelated things — a reader may have three families selected and two birds
+picked — so they do not share a verb.
+
+#### Unrecognised ids are dropped and named
+
+An id that matches no species is **dropped, and the page says which ids it dropped**, on the index
+and in the comparison view alike. Every link the page then builds omits it, so the set repairs
+itself on the next click.
+
+This is not typo-handling, it is rot-handling. Species ids are derived from scientific names and
+this checklist renames them — the Sandhill Crane is `antigone_canadensis` and was
+`grus_canadensis`. A comparison URL is made to be shared and kept, so it will outlive some of the
+ids in it. See [CR-018](decisions.md#cr-018), which reverses an earlier 404.
+
+#### What a tile link carries, and the one thing it does not
+
+A tile link carries the picks and the display options — `species`, `units`, `by`, `scale`, `step`
+— because the detail view cannot otherwise offer to pick the bird, build a link to the set plus
+that bird, or format a single value in the reader's own units.
+
+It deliberately **does not carry the family filter.** `family` is the only parameter with no bound
+on its length: a 90-family selection is about 1.7 KB, which across 841 tiles would add roughly
+1.4 MB to one page. The consequence, accepted rather than overlooked, is that the in-page back
+link restores the picks, the ordering, the scale and the units, but **not the filter**. The
+browser's own Back button restores that exactly, because it replays the previous URL.
 
 ---
 
