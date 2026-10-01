@@ -826,8 +826,11 @@ right order, right labels, right numbers, every panel neatly filled — and comp
 together pins it: one constant across the set, and that constant equal to the scale the largest
 bird gets on its own detail page.
 
-**Both of those assertions reverse what this criterion said on 2026-09-30**, and the reasoning is
-in [CR-018](decisions.md#cr-018). In short: the back link dropped the species list because the
+**Both of those assertions reverse what this criterion said on 2026-09-30**, and were re-verified
+on 2026-10-01 — **watched failing** by restoring the old `queryFor(r, "species")` so the back link
+dropped the picks again, by restoring the 404 on a dead id, by dropping the dead id with no
+notice, and by reverting the back link's wording. The reasoning for the reversal is in
+[CR-018](decisions.md#cr-018). In short: the back link dropped the species list because the
 index did not read it, and P-068 makes the index read it; and the 404 was the honest option until
 drop-and-name turned out to serve the same goal better. The original reasoning for each is kept
 below rather than deleted, because both were right when written.

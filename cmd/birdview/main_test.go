@@ -1846,13 +1846,22 @@ func TestCompareSelectsAndExplainsItself(t *testing.T) {
 		t.Errorf("a species named twice drew %d panels, want 1", n)
 	}
 
-	// An unknown id is an error that names it, not a silently shorter page.
+	// An unrecognised id is dropped and named, not refused (CR-018). Checked
+	// with a mixed set: an all-invalid one cannot tell dropping from refusing.
 	code, msg := get(t, s, "/compare?species=calypte_anna&species=no_such_bird")
-	if code != http.StatusNotFound {
-		t.Errorf("an unknown species gave %d, want 404", code)
+	if code != http.StatusOK {
+		t.Errorf("a set with one dead id gave %d; it should render what it recognises", code)
+	}
+	if n := len(drawnSpans(t, msg)); n != 1 {
+		t.Errorf("%d panels, want the one recognised bird", n)
 	}
 	if !strings.Contains(msg, "no_such_bird") {
-		t.Errorf("the 404 does not name the bad id: %q", msg)
+		t.Errorf("the page does not name the dropped id: a rotted link must say what it lost")
+	}
+	for _, m := range regexp.MustCompile(`href="([^"]+)"`).FindAllStringSubmatch(msg, -1) {
+		if strings.Contains(html.UnescapeString(m[1]), "no_such_bird") {
+			t.Errorf("link %q still carries the dead id; the set does not self-heal", m[1])
+		}
 	}
 
 	// Naming none explains itself rather than rendering an empty page.
@@ -1892,44 +1901,40 @@ func TestCompareSelectsAndExplainsItself(t *testing.T) {
 	}
 }
 
-// TestCompareBackLinkDropsTheComparison asserts that leaving the comparison
-// view leaves its species list behind.
+// TestCompareBackLinkKeepsTheComparison asserts the reversal in CR-018: the
+// species list goes back with the reader.
 //
-// Every link queryFor builds points at the index, and the index preserves
-// whatever query it is handed. So a species parameter carried back does not
-// just sit in one URL looking odd: the index copies it into every control link
-// on the page, and it follows the reader through every subsequent toggle. The
-// index ignores the parameter, so nothing renders wrongly and nothing
-// complains -- which is exactly why this needs a test rather than a glance.
+// It used to be dropped, and that was right while the index had no use for it
+// -- a parameter that means nothing where it lands is litter, and the index
+// copies whatever it is handed into every control link. P-068 makes the index
+// the picker, so the list is now live state and "back" means "add another
+// bird". Dropping it would break the plainest flow the picker has.
 //
-// The display options must still survive, or the back link has stopped
-// keeping the reader's place (P-038).
+// The display options must still survive, or back has stopped keeping the
+// reader's place (P-038).
 //
-// Verifies: P-067, P-038. Criterion: AC-076.
-func TestCompareBackLinkDropsTheComparison(t *testing.T) {
+// Verifies: P-067, P-068, P-038. Criterion: AC-076.
+func TestCompareBackLinkKeepsTheComparison(t *testing.T) {
 	s := newTestServer(t)
+	want := []string{"calypte_anna", "ardea_herodias"}
 	_, body := get(t, s, "/compare?units=metric&scale=global&species=calypte_anna&species=ardea_herodias")
 
-	links := regexp.MustCompile(`href="(/\?[^"]*)"`).FindAllStringSubmatch(body, -1)
-	if len(links) == 0 {
-		t.Fatal("the compare page has no link back to the index")
+	href := html.UnescapeString(mustMatch(t, body,
+		`<a class="backlink" href="([^"]+)"`, "the back link"))
+	q := mustQuery(t, href)
+	if got := q["species"]; !slices.Equal(got, want) {
+		t.Errorf("back link carries species=%v, want %v: returning to the picker must not "+
+			"discard the comparison", got, want)
 	}
-	for _, m := range links {
-		href := html.UnescapeString(m[1])
-		u, err := url.Parse(href)
-		if err != nil {
-			t.Fatalf("unparseable index link %q: %v", href, err)
-		}
-		q := u.Query()
-		if got := q["species"]; len(got) > 0 {
-			t.Errorf("index link %q still carries species=%v; the index does not read it and "+
-				"will copy it into every control link on the page", href, got)
-		}
-		// The options are the whole point of preserving the query at all.
-		if q.Get("units") != "metric" || q.Get("scale") != "global" {
-			t.Errorf("index link %q dropped the display options; back should keep the "+
-				"reader's place", href)
-		}
+	if q.Get("units") != "metric" || q.Get("scale") != "global" {
+		t.Errorf("back link %q dropped the display options", href)
+	}
+
+	// And it says where it goes, since the index is now a picker mid-task.
+	label := mustMatch(t, body, `class="backlink"[^>]*>(?s)(.*?)</a>`, "the back link text")
+	if !strings.Contains(label, "picking") {
+		t.Errorf("back link reads %q; it returns to the picker, not to an unfiltered list",
+			strings.TrimSpace(label))
 	}
 }
 

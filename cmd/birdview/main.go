@@ -669,30 +669,24 @@ type compareData struct {
 	Panels []comparePanel
 	Opt    options
 	Query  func(...string) template.URL
+	// Missing are picked ids that no longer resolve, named on the page so a
+	// rotted link says what it lost instead of silently shrinking (CR-018).
+	Missing []string
 }
 
 // compare renders several birds to one shared scale (P-067).
 func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 	opt := parseOptions(r)
-	ids := r.URL.Query()["species"]
-
-	// Named order is the reader's choice and is preserved; a repeat is dropped
-	// rather than drawn twice, and an unknown id is an error rather than a
-	// silently shorter page -- a shared link with a typo in it should say so.
-	var chosen []*dataset.Species
-	seen := map[string]bool{}
-	for _, id := range ids {
-		if id == "" || seen[id] {
-			continue
-		}
-		sp, ok := s.byID[id]
-		if !ok {
-			http.Error(w, "unknown species: "+id, http.StatusNotFound)
-			return
-		}
-		seen[id] = true
-		chosen = append(chosen, sp)
-	}
+	// Named order is the reader's and is preserved; a repeat is drawn once,
+	// both handled when the parameter is parsed.
+	//
+	// An id that no longer resolves is dropped and named rather than refused
+	// (CR-018). This page used to 404, which was the honest option until
+	// drop-and-name existed; the case that decides it is not a typo but rot,
+	// since a comparison link is made to be kept and ids follow scientific
+	// names that get reassigned.
+	missing := s.healPicks(r, &opt)
+	chosen, _ := s.resolvePicks(opt.Picks)
 
 	// One scale for the whole set, taken from the largest bird in it, exactly
 	// as a section does (P-042). Laying each panel out against its own length
@@ -712,10 +706,11 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 			RemoveURL: compareWithout(r, sp.ID),
 		})
 	}
-	// The species list is this page's own; the index neither reads it nor
-	// should inherit it.
+	// The species list goes back with the reader: the index is the picker, and
+	// "back" here means "add another bird" (CR-018). Clear, on the index, is
+	// the one control that drops it.
 	s.render(w, "compare.html", compareData{Panels: panels, Opt: opt,
-		Query: queryFor(r, "species")})
+		Missing: missing, Query: queryFor(r)})
 }
 
 // resolvePicks turns requested ids into species, separating the ones that no

@@ -8,7 +8,15 @@
 <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body class="detail">
-<p class="back"><a href="{{call .Query}}">&larr; back to all birds</a></p>
+<p class="back"><a class="backlink" href="{{call .Query}}">&larr; back to picking birds</a></p>
+
+{{if .Missing}}
+{{/* Named, never silently dropped: a kept comparison link outlives some of
+     its own ids, and the reader needs to know what it lost (CR-018). */}}
+<p class="note pickgone">{{len .Missing}} unrecognised and dropped:
+  {{range $i, $m := .Missing}}{{if $i}}, {{end}}<code>{{$m}}</code>{{end}}.
+  Species identifiers follow scientific names, which are occasionally reassigned.</p>
+{{end}}
 
 {{if .Panels}}
 <h1 class="cmptitle">Compared to one scale</h1>
