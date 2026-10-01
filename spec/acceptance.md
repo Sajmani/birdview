@@ -962,6 +962,44 @@ be matched by its own container; the back link and Clear both point at `/?…` a
 whether `species` survives, so they must be told apart by class and not by URL shape; and a
 one-species fixture makes the round-trip assertion vacuous.
 
+### AC-078 — Mass is drawn as the cube of water that weighs the same
+**Verifies:** P-066, P-035 · **Level:** code · **Method:** geometry assertions over every fixture
+species, plus assertions on the rendered detail and comparison pages
+
+**Assertions, arithmetic:** the square's side is `10 × ∛(mass in grams) × px/mm`, to within a
+twentieth of a pixel, for every species. Derived from the definition of the gram — one gram of
+water is one cubic centimetre — and never read off a run. This is the criterion that makes the
+square's claim checkable: it is a real volume at the diagram's own scale, not a glyph on a scale
+of its own, and only the arithmetic can tell those apart.
+
+**Assertions, placement:** inside the **drawing** area and not the emitted box, which is taller by
+the foot strip and wider by the label gutter; and right of its left edge but never reaching the
+bird's own axis, so it cannot sit under the figure or out among the labels.
+
+**Assertions, provenance:** solid when the mass is measured, dashed when it is not, as P-065
+requires of every other stroke.
+
+**Assertions, rendering:** the square reaches both the detail page and the comparison page, the
+diagram key appears **exactly once** on each however many birds are shown, and it **names the
+square**. An unexplained shape beside a bird reads as part of the bird, so the key naming it is
+not documentation of the feature, it is the feature. An index tile carries no square: the tile is
+dense by design and this is annotated-diagram furniture, as P-066's labels already are.
+
+**Status: verified 2026-10-01 — passing, and watched failing** by sizing the side on mass rather
+than its cube root; by giving the square a scale of its own instead of the diagram's px/mm; by
+drawing a near-match mass as measured; by removing the key's description of it; and by moving it
+to the lower-right, where it reached x=980 against a bird axis at x=334.
+
+**The provenance assertion was vacuous when written, and breaking the code is what showed it.**
+Every fixture mass was `measured`, so the dashed branch never rendered and drawing a near-match
+square as solid changed nothing. The fixture now gives the stilt a near-match mass, as 10 of the
+841 real ones are — the same gap the crow's modeled wingspan already fills for the crossbar.
+
+**The diagram key is one template now, not two.** It was duplicated verbatim in the detail and
+comparison views, and this is the change that would have drifted them: the sentence naming the
+square had to be added to both. A page carrying a square its key does not explain is the failure
+this guards.
+
 ---
 
 ## Traceability
@@ -984,7 +1022,7 @@ one-species fixture makes the round-trip assertion vacuous.
 | P-032 | AC-057 | |
 | P-033 | AC-056 | |
 | P-034 | AC-043, AC-054, AC-058 | |
-| P-035 | AC-059 | |
+| P-035 | AC-059, AC-078 | |
 | P-036 | AC-062 | |
 | P-037 | AC-061 | |
 | P-038 | AC-062 | partial — behavior unverifiable without a browser |
@@ -1004,7 +1042,7 @@ one-species fixture makes the round-trip assertion vacuous.
 | P-063 | AC-043 | |
 | P-064 | AC-068 | |
 | P-065 | AC-072 | |
-| P-066 | AC-073, AC-074 | |
+| P-066 | AC-073, AC-074, AC-078 | |
 | P-067 | AC-076 | |
 | P-068 | AC-077 | |
 | T-001, T-003 | AC-054 | |

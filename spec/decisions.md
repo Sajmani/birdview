@@ -1245,6 +1245,55 @@ link is both likelier and more harmful than the typo: a typo is made and correct
 the person who made it, while a rotted link fails for someone who did not write it and cannot
 tell what was supposed to be there.
 
+## CR-019 — Mass gets a shape after all: the cube of water
+
+**Subject:** `presentation.detail_view.diagram_labels`
+**Kind:** Direct — a later decision reverses one an earlier one argued for, on finding one of its
+two reasons did not hold
+**Date:** 2026-10-01 · **Decided by:** Sameer
+
+### What changed
+
+[P-066](product.md#p-066) said mass is drawn as a number **and not as a shape**, one day before
+this. It now also carries a square in the lower-left corner: one face of the cube of water that
+weighs what the bird weighs, drawn at the diagram's own scale.
+
+### Why it reverses
+
+P-066 gave two reasons and they are not equally good. The first — that a mass glyph puts a
+second, arbitrary scale on a figure whose every other dimension shares one, which
+[P-043](product.md#p-043) refuses — **does not apply to this glyph.** One gram of water is one
+cubic centimetre by the historical definition of the gram, so ∛(mass) is a unit conversion and
+not a model: it assumes nothing about the density of birds, and it is a real length that draws at
+the diagram's own px/mm. The objection was to arbitrary scales, and this is not one. The earlier
+text conflated the general case with the specific proposal and rejected both.
+
+The second reason stands and is recorded in P-066 as a limitation rather than deleted: **the cube
+compresses.** A Bushtit and a Common Raven differ 175× in mass and their cubes differ 5.6×. That
+is correct for equal-volume cubes and understates the gap. What changed is that it no longer has
+to carry the magnitude — the mass label was added in the same breath, so the number states the
+175× and the cube says what 928 g of bird is *like*.
+
+### What the cube earns its place with
+
+It shows the one thing a length-and-wingspan diagram cannot: **bulk against elongation.** Read
+against the bird's own length, the largest cubes in the set belong to alcids — Thick-billed
+Murre, Parakeet Auklet, Crested Auklet, Marbled Murrelet, dense diving birds at 28–29% of the
+drawing height — and the smallest to long-tailed, light-bodied species: Fork-tailed Flycatcher,
+Scissor-tailed Flycatcher and Black-billed Magpie, at 10–13%. Nothing else on the figure
+distinguishes a bird that is long from a bird that is heavy.
+
+Measured before it was built, at the detail view's geometry: 28 px smallest, 52 px median, 80 px
+largest, in a drawing area 668 × 281. In the lower-left corner at an 8 px margin the crossbar
+intrudes for **0 of 841 species**, the tightest clearance being 50 px on Western Grebe.
+
+### The risk being accepted
+
+A reader who takes the cubes as *the* mass comparison reads them wrong, by a factor of the cube
+root. The mitigation is that the number is right beside it and the diagram key names what the
+square is. If it proves misleading in use, the thing to remove is the square and not the number —
+the number is what P-066 requires.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
@@ -1259,7 +1308,7 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | Assess whether a perched/standing toggle is achievable at any honest accuracy ([CR-011](#cr-011)) | — | before it is offered to users |
 | Investigate cervical vertebra counts as an anchor for the neck model (P-045) | — | opportunistic; the biggest available win on the weakest model |
 | Add a **Sort by** control to the comparison view — length, wingspan, mass, the index's three — reordering the panels | — | queued 2026-10-01, owner's request |
-| Decide whether mass gets an **equal-mass cube of water** drawn in the diagram ([below](#a-cube-of-water-for-mass)) | Sameer | evaluated 2026-10-01, not built |
+| ~~Decide whether mass gets an **equal-mass cube of water** drawn in the diagram~~ — built, [CR-019](#cr-019) | Sameer | closed 2026-10-01 |
 
 ### A cube of water for mass
 

@@ -733,10 +733,17 @@ model is wrong, so all the model's error is attributed to the inner segment, whe
 Subject: `presentation.detail_view.diagram_labels`
 Goals: G-001, G-003
 
+**Every metric the detail view reports appears in the drawing.** The provenance table below it may
+explain more about a number, but it may not be the only place a number appears: a reader looking
+at the diagram should not have to discover that something was measured and left out of it. Adding
+a metric to the table therefore means adding it to the diagram. This is stated as a rule rather
+than a list because mass was reported and undrawn for days, and every check at the time named the
+metrics it expected — mass among them nowhere.
+
 In the detail view, each of the five segments is named and measured **beside the part it
 describes**, joined to it by a leader line. The **wing chord** is labeled too, on the crossbar
 rather than in the stack, because it names a horizontal length and belongs beside one. The
-**total length** is labeled as well — see below. An estimated value carries the same `~` the tile footer
+**total length** and the **mass** are labeled as well — see below. An estimated value carries the same `~` the tile footer
 uses. The provenance table below the diagram is unchanged: it remains the place where the source or
 model behind each number is explained.
 
@@ -768,12 +775,37 @@ out in only part of that width. The right of the box is reserved for the label c
 wingspan label beyond the wingtip; a wide-winged bird is drawn slightly smaller rather than running
 under its own annotations.
 
-#### The total length label
+#### The whole-bird labels: total length and mass
 
-**Total length is labeled horizontally, centred on the axis, below the tail tip.** It is the only
-label that names the whole bird rather than a part of it, and its placement says so: under the foot
-of the figure, on the centreline, spanning nothing. It takes no leader line — there is no part to
-point at, and proximity to the end of the drawing is the whole of its meaning.
+**Total length and mass are labeled horizontally, centred on the axis, below the tail tip.** They
+are the labels that name the whole bird rather than a part of it, and their placement says so:
+under the foot of the figure, on the centreline, spanning nothing. They take no leader line —
+there is no part to point at, and proximity to the end of the drawing is the whole of their
+meaning.
+
+**Mass is drawn as a number, and also as water.** A square sits in the **lower-left corner of the
+drawing**: one face of the **cube of water that weighs what the bird weighs**, at the diagram's
+own scale. Its side is ∛(mass), which is a unit conversion and not a model — one gram of water is
+one cubic centimetre by definition — so it assumes nothing about the density of birds and
+introduces no second scale. It is drawn away from the figure, and named in the diagram key,
+because an unexplained shape beside a bird would read as part of the bird.
+
+It is there for what the rest of the figure cannot say: **bulk against elongation**. Read against
+the bird's own length it is 28–29% of the drawing height for alcids, which are dense divers, and
+10–13% for long-tailed light-bodied species like the Scissor-tailed Flycatcher and the magpie.
+Length and wingspan cannot tell those apart.
+
+**The cube compresses, and the number is there because it does.** A Bushtit and a Common Raven
+differ in mass by **175×** and their cubes differ by 5.6×, which is correct for equal-volume cubes
+and understates the gap badly. So the number carries the magnitude and the square carries the
+sense of it; a reader who takes the squares alone as the mass comparison will read them wrong.
+See [CR-019](decisions.md#cr-019), which reverses an earlier decision to draw no shape at all, and
+[P-043](#p-043) for why a disc or bar sized by mass — a second, arbitrary scale — is still
+refused.
+
+Mass also behaves differently from its neighbours on provenance, and the drawing shows it:
+**measured for 831 of 841 species**, against a total length modeled for every one. It is usually
+the only unmarked number on the figure, and the only solid-stroked whole-bird mark.
 
 It belongs on the diagram for the reason the segments do, only more so. Total length is the number
 BirdView exists to give a reader intuition about (G-001); every other label names a component of

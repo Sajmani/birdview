@@ -28,10 +28,7 @@
      Go rather than assembled here. */}}
 <p class="pickaction"><a class="btn{{if .Picked}} on{{end}}" href="{{.PickURL}}">{{.PickLabel}}</a></p>
 
-<p class="note diagramkey"><b>Solid</b> lines in the diagram are measured; <b>dashed</b> lines are
-estimated. The head is hollow because it is estimated too. On the wing, the solid outer ends are
-the measured wing chord and the <b>ticks</b> mark where it reaches &mdash; only the span between
-them is estimated, and it is dashed when it is.</p>
+{{template "diagramkey"}}
 
 <h2>Measurements, and where each comes from</h2>
 <table class="prov">

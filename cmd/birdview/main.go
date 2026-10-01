@@ -234,6 +234,10 @@ type tile struct {
 	// folded neck makes those differ by 6-9%.
 	FootLabels []footLabel
 
+	// MassCube is the bird's mass drawn as water: one face of the cube of
+	// water that weighs the same (P-066, CR-019). Side zero means none.
+	MassCube massCube
+
 	// DetailURL is the tile's own link. Built in Go rather than in the
 	// template so it carries the reader's view state (P-068); empty on the
 	// legend tile, which is an illustration and links nowhere.
@@ -592,6 +596,7 @@ type detailData struct {
 	WingspanLabel string
 	WingspanEst   bool
 	FootLabels    []footLabel
+	MassCube      massCube
 
 	// Bar is the pick-mode furniture (P-068), shared with the index.
 	Bar pickBar
@@ -668,8 +673,8 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		Bar: bar, Picked: picked, PickLabel: pickLabel,
 		PickURL:    pickURL(r, toggled(live, sp.ID)),
 		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
-		FootLabels: lt.FootLabels,
-		Metrics:    rows, Opt: opt, Query: queryFor(r), INatURL: inatURL,
+		FootLabels: lt.FootLabels, MassCube: lt.MassCube,
+		Metrics: rows, Opt: opt, Query: queryFor(r), INatURL: inatURL,
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 	})
 }
@@ -890,6 +895,30 @@ type footLabel struct {
 	Est  bool
 }
 
+// massCube is the square in the lower-left: one face of the cube of water that
+// weighs what the bird weighs (P-066, CR-019).
+type massCube struct {
+	X, Y, Side float64
+	Est        bool // mass not measured -- dashed, per P-065
+	Title      string
+}
+
+// massCubeSide is the side of that cube, in millimetres, for a mass in grams.
+//
+// One gram of water is one cubic centimetre, by the historical definition of
+// the gram, so this is a unit conversion and not a model: it assumes nothing
+// about the density of birds. That is what lets the square share the diagram's
+// own scale instead of needing one of its own, which P-043 would refuse.
+func massCubeSide(massG float64) float64 {
+	if massG <= 0 {
+		return 0
+	}
+	return 10 * math.Cbrt(massG) // cm -> mm
+}
+
+// massCubeMargin insets the square from the corner of the drawing area.
+const massCubeMargin = 8
+
 // footStrip is the height n stacked whole-bird labels need.
 func footStrip(n int) float64 {
 	if n == 0 {
@@ -993,6 +1022,21 @@ func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, r
 		foot[i].Y = top + g.YTailTip + footGap + float64(i)*footLine
 	}
 	t.FootLabels = foot
+
+	// Lower-left of the DRAWING area, not the emitted box: the box is taller by
+	// the foot strip and wider by the label gutter, and the square belongs
+	// inside the bird's own area. Measured over the whole dataset before this
+	// was built -- the crossbar reaches into that corner for 0 of 841 species,
+	// the tightest clearance being 50px on Western Grebe.
+	if side := massCubeSide(sp.Mass.Value) * g.PxPerMm; side > 0 {
+		t.MassCube = massCube{
+			X:     massCubeMargin,
+			Y:     draw.H - massCubeMargin - side,
+			Side:  side,
+			Est:   sp.Mass.Prov.Kind != dataset.Measured,
+			Title: "Mass as water: a cube of water weighing the same, to scale",
+		}
+	}
 	return t
 }
 

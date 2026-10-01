@@ -65,6 +65,17 @@ func testDataset() *dataset.Dataset {
 		mk("himantopus_mexicanus", "Black-necked Stilt", "Himantopus mexicanus", "Recurvirostridae", 66.6, 42.1, 40.3, 89.5, 73.6, 750, 176.8, 230, dataset.NearMatch),
 		mk("ardea_herodias", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, 466.4, dataset.NearMatch),
 	}
+	// One mass is a near-match, as 10 of the 841 real ones are. Without it
+	// every mass square renders solid and the dashed branch of P-065 is never
+	// drawn -- the same gap the crow's modeled wingspan fills for the crossbar,
+	// and it was found by breaking the code and watching the check not fail.
+	for i := range sp {
+		if sp[i].ID == "himantopus_mexicanus" {
+			sp[i].Mass.Prov = dataset.Provenance{Kind: dataset.NearMatch,
+				Source: "AVONET v7, sheet AVONET2_eBird", SourceTaxon: "Himantopus himantopus"}
+		}
+	}
+
 	// iNaturalist taxon IDs (P-064). The stilt is deliberately left unmatched so
 	// both branches of the detail view are exercised: a species iNaturalist has
 	// not confidently matched must show no link at all.
@@ -2500,5 +2511,103 @@ func TestEveryReportedMetricIsLabelled(t *testing.T) {
 					"P-066 requires every reported metric to appear in the drawing", units, want)
 			}
 		}
+	}
+}
+
+// massCubeOf returns the mass square's attributes from a rendered diagram.
+func massCubeOf(t *testing.T, body string) (class string, x, y, side float64, ok bool) {
+	t.Helper()
+	m := regexp.MustCompile(
+		`(?s)<rect class="(masscube[^"]*)"\s*x="([0-9.]+)" y="([0-9.]+)"\s*width="([0-9.]+)"`).
+		FindStringSubmatch(body)
+	if m == nil {
+		return "", 0, 0, 0, false
+	}
+	f := func(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
+	return m[1], f(m[2]), f(m[3]), f(m[4]), true
+}
+
+// TestMassCubeIsWaterToScale asserts the mass square of P-066 and CR-019.
+//
+// The square's whole claim is that it is a real volume at the diagram's own
+// scale, not a glyph on a scale of its own. So the assertion is arithmetic:
+// its side must be the cube root of the mass in grams, converted cm to mm, at
+// the diagram's px/mm — derived from the definition of the gram, never read
+// off a run.
+//
+// Verifies: P-066. Criterion: AC-078.
+func TestMassCubeIsWaterToScale(t *testing.T) {
+	ds := testDataset()
+
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, false)
+
+		// One gram of water is one cubic centimetre, so the cube of water
+		// weighing massG grams has side cbrt(massG) cm = 10*cbrt(massG) mm.
+		want := 10 * math.Cbrt(sp.Mass.Value) * lt.Geom.PxPerMm
+		if math.Abs(lt.MassCube.Side-want) > 0.05 {
+			t.Errorf("%s: mass square side %.2f px, want %.2f — it must be the cube of water "+
+				"that weighs the same, at the diagram's own scale",
+				sp.CommonName, lt.MassCube.Side, want)
+		}
+		// Inside the DRAWING area, lower-left, clear of the bird.
+		drawH := lt.Box.H - footStrip(len(lt.FootLabels))
+		if lt.MassCube.X < 0 || lt.MassCube.Y+lt.MassCube.Side > drawH+0.01 {
+			t.Errorf("%s: mass square at (%.1f,%.1f) side %.1f escapes the %.1f drawing area",
+				sp.CommonName, lt.MassCube.X, lt.MassCube.Y, lt.MassCube.Side, drawH)
+		}
+		if right := lt.MassCube.X + lt.MassCube.Side; right >= lt.Geom.CX {
+			t.Errorf("%s: mass square reaches x=%.1f, past the bird's axis at %.1f",
+				sp.CommonName, right, lt.Geom.CX)
+		}
+		// Measured mass draws solid, near-match dashed (P-065).
+		if want := sp.Mass.Prov.Kind != dataset.Measured; lt.MassCube.Est != want {
+			t.Errorf("%s: mass square Est=%v but provenance is %q",
+				sp.CommonName, lt.MassCube.Est, sp.Mass.Prov.Kind)
+		}
+	}
+}
+
+// TestMassCubeIsRenderedAndExplained asserts that the square reaches the page
+// and that the page says what it is.
+//
+// An unexplained shape beside a bird reads as part of the bird, so the key
+// naming it is not documentation of the feature — it is the feature.
+//
+// Verifies: P-066, P-035. Criterion: AC-078.
+func TestMassCubeIsRenderedAndExplained(t *testing.T) {
+	s := newTestServer(t)
+	for _, u := range []string{
+		"/species/ardea_herodias",
+		"/compare?species=ardea_herodias&species=calypte_anna",
+	} {
+		body := mustGet(t, s, u)
+		class, x, _, side, ok := massCubeOf(t, body)
+		if !ok {
+			t.Errorf("%s: no mass square in the diagram", u)
+			continue
+		}
+		if side <= 0 || x < 0 {
+			t.Errorf("%s: mass square has side %.1f at x=%.1f", u, side, x)
+		}
+		if !strings.Contains(class, "masscube") {
+			t.Errorf("%s: mass square class is %q", u, class)
+		}
+		// Exactly one key per page however many birds, and it names the square.
+		if n := strings.Count(body, `class="note diagramkey"`); n != 1 {
+			t.Errorf("%s: %d diagram keys, want exactly 1", u, n)
+		}
+		if !strings.Contains(body, "drawn as water") {
+			t.Errorf("%s: the diagram key does not say what the square is, so it reads as "+
+				"part of the bird", u)
+		}
+	}
+
+	// Not on index tiles: they are dense by design, and this is detail-view
+	// furniture like the labels already are (P-031).
+	_, index := get(t, s, "/")
+	if strings.Contains(tileArea(t, index), "masscube") {
+		t.Error("index tiles carry the mass square; it belongs to the annotated diagram")
 	}
 }
