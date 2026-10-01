@@ -791,7 +791,7 @@ bird keeps the size [P-034](#p-034) requires. Taking it out of the bird instead 
 the detail view's height to buy a one-line label, which is a bad trade and would put this
 requirement in conflict with P-034 rather than beside it.
 
-**It states the bird's length, not the drawing's height.** For the folded-neck families of
+**Total length states the bird's length, not the drawing's height.** For the folded-neck families of
 [CR-011](decisions.md#cr-011) these differ: the neck's S spans 2/π of its length, so the figure is
 6–9% shorter than the labeled number across the 14 species affected. That is the rule the neck
 label already follows — CR-011 reports neck length in full while drawing it compressed — and the

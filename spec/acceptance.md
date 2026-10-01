@@ -672,6 +672,12 @@ for it — read out of the table rather than recomputed, so the two cannot drift
 count is matched on the segment labels alone, so a missing segment cannot hide behind the chord. A
 tile carries none.
 
+**Assertions, completeness:** **every row of the provenance table is labelled in the diagram**,
+with the same value, in both unit systems. Written against the table rather than a list of metric
+names, so it maintains itself: adding a row without labelling it fails. Watched failing by
+removing the mass label — which is the state this check was written to catch — and by labelling
+mass with the wingspan's value.
+
 **Assertions, the estimated marker:** a diagram label whose value is modeled carries the `~` **in
 the emitted markup**, and one whose value is measured does not. Asserted on the text content, not
 on the class attribute: the class is what the inert CSS rule keyed off, so a check that accepted it
@@ -735,7 +741,11 @@ is ever granted and the value becomes measured.
 **Assertions, scope:** the detail view and the help legend carry the label; an **index tile carries
 none**, like every other annotation of P-066.
 
-**Status: verified 2026-09-28 — passing, and watched failing** by removing the label from the
+**Status: verified 2026-10-01** — re-verified after mass joined total length under the tail.
+The box-fit check now asserts the **last** label in the stack, since the strip must clear the
+whole stack and not just its first line; watched failing by sizing the strip for one line, which
+overran by 4px on every species. Originally **verified 2026-09-28 — passing, and watched
+failing** by removing the label from the
 template; by centring it on the box centre, which put it at x=494 against the bird's axis at x=334,
 exactly half the gutter adrift; by placing it above the tail tip (y=254.3 against a tail tip at
 269.3); by removing the reserved strip, which overran the box for **all five fixture species**, the

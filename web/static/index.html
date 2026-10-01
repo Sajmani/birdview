@@ -330,13 +330,14 @@
   <text class="dlabel{{if .Est}} est{{end}}" x="{{f1 (sub $b.W 144)}}" y="{{f1 .TextY}}"
         dominant-baseline="middle">{{.Text}}{{if .Est}} ~{{end}}</text>
   {{end}}
-  {{if .TotalLabel}}
   {{/* The whole bird, named under the foot of the figure and centred on the
        drawing axis -- $g.CX, not the box centre: the bird is laid out left of
-       the label gutter, so the two are 160px apart. No leader line; there is no
-       part to point at (P-066). */}}
-  <text class="dlabel total{{if .TotalEst}} est{{end}}" text-anchor="middle"
-        x="{{f1 $g.CX}}" y="{{f1 .TotalLabelY}}">{{.TotalLabel}}{{if .TotalEst}} ~{{end}}</text>
+       the label gutter, so the two are 160px apart. No leader lines; there is
+       no part to point at. Mass sits here rather than in the stack beside the
+       drawing because it is not a length (P-066). */}}
+  {{range .FootLabels}}
+  <text class="dlabel {{.Key}} foot{{if .Est}} est{{end}}" text-anchor="middle"
+        x="{{f1 $g.CX}}" y="{{f1 .Y}}">{{.Text}}{{if .Est}} ~{{end}}</text>
   {{end}}
 </svg>
 {{end}}

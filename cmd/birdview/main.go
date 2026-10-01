@@ -224,15 +224,15 @@ type tile struct {
 	// left, so the crossbar names the whole span as well as its measured part.
 	WingspanLabel string
 	WingspanEst   bool
-	// TotalLabel names the whole bird, centred on the axis below the tail tip
-	// (P-066). It is the bird's reported total length, never the drawn height:
-	// a folded neck makes those differ by 6-9%.
+	// FootLabels name the whole bird rather than any part of it, stacked on
+	// the drawing axis below the tail tip (P-066): its total length and its
+	// mass. A slice rather than named fields because P-066 requires every
+	// metric the detail view reports to appear in the drawing, so the next
+	// whole-bird metric should be one more entry and not a new layout.
 	//
-	// TotalLabelY is its baseline, computed here rather than in the template so
-	// it cannot drift from the strip reserved for it, and so it is testable.
-	TotalLabel  string
-	TotalEst    bool
-	TotalLabelY float64
+	// Total length is the bird's reported length, never the drawn height: a
+	// folded neck makes those differ by 6-9%.
+	FootLabels []footLabel
 
 	// DetailURL is the tile's own link. Built in Go rather than in the
 	// template so it carries the reader's view state (P-068); empty on the
@@ -591,9 +591,7 @@ type detailData struct {
 	ChordLabel    string
 	WingspanLabel string
 	WingspanEst   bool
-	TotalLabel    string
-	TotalEst      bool
-	TotalLabelY   float64
+	FootLabels    []footLabel
 
 	// Bar is the pick-mode furniture (P-068), shared with the index.
 	Bar pickBar
@@ -670,8 +668,8 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		Bar: bar, Picked: picked, PickLabel: pickLabel,
 		PickURL:    pickURL(r, toggled(live, sp.ID)),
 		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
-		TotalLabel: lt.TotalLabel, TotalEst: lt.TotalEst, TotalLabelY: lt.TotalLabelY,
-		Metrics: rows, Opt: opt, Query: queryFor(r), INatURL: inatURL,
+		FootLabels: lt.FootLabels,
+		Metrics:    rows, Opt: opt, Query: queryFor(r), INatURL: inatURL,
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 	})
 }
@@ -868,20 +866,37 @@ var legendBox = view.Box{W: 900, H: 148 * 1.2}
 // clear the column by 2px, which is not clearance, it is luck.
 const labelGutter = 320
 
-// totalLabelStrip is the height reserved at the bottom of an annotated diagram
-// for the total length label (P-066), the vertical counterpart of labelGutter.
+// The strip reserved at the bottom of an annotated diagram for the whole-bird
+// labels (P-066), the vertical counterpart of labelGutter.
 //
-// Without it the label is clipped rather than merely cramped: the detail view
+// Without it they are clipped rather than merely cramped: the detail view
 // scales the bird to fill the box, so any bird whose height binds has its tail
 // tip exactly on the bottom edge and nothing at all below it.
 //
-// totalLabelGap is where the baseline sits below the tail tip. The strip is the
-// gap plus room for the 11px text's descender, so the glyphs stay inside the
-// viewBox and not merely their baseline.
+// footGap is where the first baseline sits below the tail tip and footLine is
+// the spacing between them; footDescender keeps the glyphs of the last line
+// inside the viewBox, not merely its baseline.
 const (
-	totalLabelGap   = 15
-	totalLabelStrip = totalLabelGap + 9
+	footGap       = 15
+	footLine      = 13
+	footDescender = 9
 )
+
+// footLabel is one whole-bird annotation under the tail.
+type footLabel struct {
+	Key  string // total, mass -- also the CSS hook
+	Text string
+	Y    float64
+	Est  bool
+}
+
+// footStrip is the height n stacked whole-bird labels need.
+func footStrip(n int) float64 {
+	if n == 0 {
+		return 0
+	}
+	return footGap + float64(n-1)*footLine + footDescender
+}
 
 // legendPreferred are the species the help diagram would like to use, best
 // first. Each has a MODELED wingspan, so the dashed inner crossbar of P-065
@@ -928,8 +943,25 @@ func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, r
 	// 8.5% of the detail view's height and contradict P-034, which requires the
 	// bird drawn as large as the view allows. Width has no such freedom, which
 	// is why labelGutter does shrink the bird and this does not.
+	// Every metric the detail view reports has to appear in the drawing
+	// (P-066). The two that name the whole bird rather than a part of it go
+	// under the tail; mass is here and not in the stack because it is not a
+	// length and has no part to point at.
+	//
+	// The reported total length, never g.TotalHeight(): for a folded neck the
+	// drawing is shorter than the bird (CR-011), and the label names the bird.
+	foot := []footLabel{{
+		Key:  "total",
+		Text: "Total length  " + format(sp.TotalLength.Value, view.ByLength, metric),
+		Est:  sp.TotalLength.Prov.Kind != dataset.Measured,
+	}, {
+		Key:  "mass",
+		Text: "Mass  " + format(sp.Mass.Value, view.ByMass, metric),
+		Est:  sp.Mass.Prov.Kind != dataset.Measured,
+	}}
+
 	draw := box
-	box.H += totalLabelStrip
+	box.H += footStrip(len(foot))
 
 	// The bird occupies everything left of the gutter; draw stays the full
 	// height, because the label column is positioned against the emitted box.
@@ -957,11 +989,10 @@ func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, r
 	}
 	t.WingspanLabel = "Wingspan  " + format(sp.Wingspan.Value, view.ByWingspan, metric)
 	t.WingspanEst = sp.Wingspan.Prov.Kind == dataset.Modeled
-	// The reported total length, not g.TotalHeight(): for a folded neck the
-	// drawing is shorter than the bird (CR-011), and the label names the bird.
-	t.TotalLabel = "Total length  " + format(sp.TotalLength.Value, view.ByLength, metric)
-	t.TotalEst = sp.TotalLength.Prov.Kind == dataset.Modeled
-	t.TotalLabelY = top + g.YTailTip + totalLabelGap
+	for i := range foot {
+		foot[i].Y = top + g.YTailTip + footGap + float64(i)*footLine
+	}
+	t.FootLabels = foot
 	return t
 }
 

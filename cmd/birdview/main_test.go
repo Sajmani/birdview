@@ -1612,9 +1612,16 @@ func TestTotalLengthLabelStaysInTheBox(t *testing.T) {
 	for i := range ds.Species {
 		sp := &ds.Species[i]
 		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, true)
-		if lt.TotalLabelY+descender > lt.Box.H {
-			t.Errorf("%s: total length label baseline at %.1f (+%d descender) overruns the %.1f box",
-				sp.CommonName, lt.TotalLabelY, descender, lt.Box.H)
+		if len(lt.FootLabels) < 2 {
+			t.Fatalf("%s: %d whole-bird labels; with fewer than two the stacking this "+
+				"reserves room for is not exercised", sp.CommonName, len(lt.FootLabels))
+		}
+		// The LAST one is the binding case: the strip has to clear the whole
+		// stack, not just its first line.
+		last := lt.FootLabels[len(lt.FootLabels)-1]
+		if last.Y+descender > lt.Box.H {
+			t.Errorf("%s: %q baseline at %.1f (+%d descender) overruns the %.1f box",
+				sp.CommonName, last.Text, last.Y, descender, lt.Box.H)
 		}
 	}
 }
@@ -2452,5 +2459,46 @@ func TestPickLinksAnchorAtTheirTile(t *testing.T) {
 	if !strings.Contains(script, "window.location.hash") {
 		t.Error("the scroll script does not check for a hash, so it will override the " +
 			"browser's own fragment scroll and reintroduce the jump")
+	}
+}
+
+// TestEveryReportedMetricIsLabelled asserts P-066's general rule: the diagram
+// carries every metric the detail view reports, not a chosen subset.
+//
+// Written against the provenance table rather than a list of metric names, so
+// it maintains itself. Mass was reported in the table and absent from the
+// drawing for weeks without anything noticing, because every check named the
+// metrics it expected and mass was not among them. Adding a row to the table
+// now fails this until the drawing carries it too.
+//
+// Verifies: P-066. Criterion: AC-073.
+func TestEveryReportedMetricIsLabelled(t *testing.T) {
+	for _, units := range []string{"metric", "imperial"} {
+		body := mustGet(t, newTestServer(t), "/species/ardea_herodias?units="+units)
+
+		rows := regexp.MustCompile(
+			`<th>([^<]+)</th>\s*<td class="v">([^<]+)</td>`).FindAllStringSubmatch(body, -1)
+		if len(rows) < 9 {
+			t.Fatalf("%s: only %d rows in the provenance table; the fixture cannot show that "+
+				"EVERY reported metric is labelled", units, len(rows))
+		}
+
+		// Every label the diagram draws, whitespace-normalised and stripped of
+		// the estimated marker, which the table does not carry.
+		drawn := map[string]bool{}
+		for _, m := range regexp.MustCompile(
+			`<text class="dlabel[^"]*"[^>]*>([^<]+)</text>`).FindAllStringSubmatch(body, -1) {
+			s := strings.Join(strings.Fields(html.UnescapeString(m[1])), " ")
+			drawn[strings.TrimSuffix(s, " ~")] = true
+		}
+
+		for _, r := range rows {
+			want := strings.Join(strings.Fields(
+				html.UnescapeString(r[1])+" "+html.UnescapeString(r[2])), " ")
+			if !drawn[want] {
+				t.Errorf("%s: the table reports %q but the diagram does not label it; "+
+					"P-066 requires every reported metric to appear in the drawing", units, want)
+			}
+		}
 	}
 }
