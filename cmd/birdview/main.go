@@ -17,6 +17,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"net/url"
 	"os"
 	"sort"
 	"strconv"
@@ -141,6 +142,12 @@ type options struct {
 	Families     map[string]bool
 	HasSelection bool
 	Metric3      bool // imperial when false
+
+	// Picking is pick mode (P-068): the `species` parameter is present, even
+	// if it is empty. Picks are the ids named in it, deduplicated, in the
+	// order given -- that order is the reader's and no page reorders it.
+	Picking bool
+	Picks   []string
 }
 
 func parseOptions(r *http.Request) options {
@@ -170,6 +177,18 @@ func parseOptions(r *http.Request) options {
 		o.Step = v
 	}
 	o.Metric3 = q.Get("units") == "metric"
+	// Pick mode is the presence of the parameter, not a value in it: a bare
+	// `species=` holds the mode open with nothing picked (P-068). Exactly the
+	// distinction drawn just below for `family`.
+	_, o.Picking = q["species"]
+	picked := map[string]bool{}
+	for _, id := range q["species"] {
+		if id == "" || picked[id] {
+			continue
+		}
+		picked[id] = true
+		o.Picks = append(o.Picks, id)
+	}
 	_, o.HasSelection = q["family"]
 	for _, f := range q["family"] {
 		if f != "" {
@@ -218,6 +237,13 @@ type tile struct {
 	// template so it carries the reader's view state (P-068); empty on the
 	// legend tile, which is an illustration and links nowhere.
 	DetailURL template.URL
+
+	// PickURL is the pick control, a SIBLING of the tile link and never a
+	// replacement for it -- the tile opens the detail view in both modes, so
+	// P-034 holds without exception. Empty outside pick mode, which is what
+	// keeps the tile unchanged during ordinary browsing (P-031).
+	PickURL template.URL
+	Picked  bool
 }
 
 type sectionView struct {
@@ -255,7 +281,29 @@ type pageData struct {
 	// only if no suitable species exists, in which case the help degrades to
 	// prose rather than breaking.
 	Legend *tile
+
+	// The pick bar (P-068). Picking drives the whole mode; Picks are resolved
+	// species so the bar can name them, and comes from the WHOLE dataset, not
+	// the filtered list, so a pick the filter is hiding is still shown.
+	Picking      bool
+	Picks        []pickChip
+	PicksMore    int
+	MissingPicks []string
+	CompareURL   template.URL
+	ClearURL     template.URL
 }
+
+// pickChip is one bird in the pick bar, with the link that unpicks it.
+type pickChip struct {
+	Name      string
+	RemoveURL template.URL
+}
+
+// pickBarNames caps how many picks the bar names before collapsing to a count.
+// There is no cap on the picks themselves (the owner's call), so the bar needs
+// one of its own: it is sticky, and an uncapped list of chips would eat the
+// viewport it is pinned to.
+const pickBarNames = 8
 
 // tileBox is the drawing area for one diagram. Roughly 2.6:1, because a
 // to-scale wingspan runs up to ~2.5x body length and P-043 draws it at the
@@ -268,6 +316,37 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	opt := parseOptions(r)
+
+	// Heal the request before anything is built from it. A pick that no longer
+	// resolves is dropped here and reported in the bar, and the request's own
+	// query is rewritten to the surviving set -- so every link the page goes on
+	// to build, tile links and control links alike, omits the dead id and the
+	// set repairs itself on the reader's next click (P-068, CR-018).
+	//
+	// Done here rather than where the bar is assembled because by then the
+	// links have already been built from the raw query, which is the bug this
+	// prevents: the notice appeared while 970 links still carried the dead id.
+	var missingPicks []string
+	if opt.Picking {
+		found, missing := s.resolvePicks(opt.Picks)
+		if len(missing) > 0 {
+			missingPicks = missing
+			live := make([]string, 0, len(found))
+			for _, sp := range found {
+				live = append(live, sp.ID)
+			}
+			opt.Picks = live
+			q := r.URL.Query()
+			q.Del("species")
+			if len(live) == 0 {
+				q.Set("species", "")
+			}
+			for _, id := range live {
+				q.Add("species", id)
+			}
+			r.URL.RawQuery = q.Encode()
+		}
+	}
 
 	// A fresh page selects everything; an emptied selection selects nothing.
 	selected := opt.Families
@@ -334,6 +413,37 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		page.AllURL = s.familyURL(r, every)
 	}
 	page.NothingSelected = len(selected) == 0
+
+	// The pick bar (P-068). Resolved against the whole dataset rather than the
+	// filtered list, so a bird the filter is currently hiding is still named
+	// here -- a filter that appeared to discard picks would be worse than one
+	// that refused to run.
+	page.Picking = opt.Picking
+	pickedSet := map[string]bool{}
+	pickOf := func(string) template.URL { return "" }
+	if opt.Picking {
+		// opt.Picks is already healed above, so everything here is live.
+		found, _ := s.resolvePicks(opt.Picks)
+		live := make([]string, 0, len(found))
+		for _, sp := range found {
+			live = append(live, sp.ID)
+			pickedSet[sp.ID] = true
+		}
+		pickOf = func(id string) template.URL { return pickURL(r, toggled(live, id)) }
+		for i, sp := range found {
+			if i == pickBarNames {
+				page.PicksMore = len(found) - pickBarNames
+				break
+			}
+			page.Picks = append(page.Picks, pickChip{
+				Name: sp.CommonName, RemoveURL: pickURL(r, toggled(live, sp.ID))})
+		}
+		// Every link below is built from `live`, so a dead id named in the URL
+		// is gone the moment the reader clicks anything: the set self-heals.
+		page.MissingPicks = missingPicks
+		page.CompareURL = compareURL(r, live)
+		page.ClearURL = queryFor(r, "species")()
+	}
 	byOrder := map[string]int{}
 	for _, f := range s.fams {
 		next := map[string]bool{}
@@ -393,6 +503,8 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				// drawing area (P-066's bottom strip).
 				TopOffset:   (tileBox.H - g.TotalHeight()) / 2,
 				DetailURL:   detailLink(r, sp.ID),
+				PickURL:     pickOf(sp.ID),
+				Picked:      pickedSet[sp.ID],
 				WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 				Length:      format(sp.TotalLength.Value, view.ByLength, opt.Metric3),
 				Wing:        format(sp.Wingspan.Value, view.ByWingspan, opt.Metric3),
@@ -552,6 +664,80 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 	// should inherit it.
 	s.render(w, "compare.html", compareData{Panels: panels, Opt: opt,
 		Query: queryFor(r, "species")})
+}
+
+// resolvePicks turns requested ids into species, separating the ones that no
+// longer exist (P-068).
+//
+// Missing ids are dropped and reported rather than refused, because the case
+// that matters is not a typo but rot: ids follow scientific names and this
+// checklist renames them -- the Sandhill Crane is antigone_canadensis and was
+// grus_canadensis. A comparison link is made to be kept, so it outlives some of
+// its own ids, and refusing the whole page would kill a five-bird comparison
+// over one reassigned genus. See CR-018.
+func (s *server) resolvePicks(ids []string) (found []*dataset.Species, missing []string) {
+	for _, id := range ids {
+		if sp, ok := s.byID[id]; ok {
+			found = append(found, sp)
+		} else {
+			missing = append(missing, id)
+		}
+	}
+	return found, missing
+}
+
+// carried is the reader's view state minus the one parameter too large to copy
+// across 841 links. See detailLink for why `family` is the exception.
+func carried(r *http.Request) url.Values {
+	q := r.URL.Query()
+	q.Del("family")
+	return q
+}
+
+// pickURL is the current page with the picks replaced. It keeps every other
+// parameter INCLUDING `family`, because picking a bird must not silently drop
+// the filter the reader is picking from (P-068).
+//
+// An empty set writes a bare `species=`, which holds pick mode open with
+// nothing picked rather than dropping the reader back into browsing mid-task.
+func pickURL(r *http.Request, ids []string) template.URL {
+	q := r.URL.Query()
+	q.Del("species")
+	if len(ids) == 0 {
+		q.Set("species", "")
+	}
+	for _, id := range ids {
+		q.Add("species", id)
+	}
+	return template.URL("/?" + q.Encode())
+}
+
+// compareURL sends the current picks to the comparison view.
+func compareURL(r *http.Request, ids []string) template.URL {
+	q := carried(r)
+	q.Del("species")
+	for _, id := range ids {
+		q.Add("species", id)
+	}
+	return template.URL("/compare?" + q.Encode())
+}
+
+// toggled returns the picks with one id added or removed. Adding appends, so
+// the reader's order is the order they picked in.
+func toggled(picks []string, id string) []string {
+	out := make([]string, 0, len(picks)+1)
+	found := false
+	for _, p := range picks {
+		if p == id {
+			found = true
+			continue
+		}
+		out = append(out, p)
+	}
+	if !found {
+		out = append(out, id)
+	}
+	return out
 }
 
 // detailLink builds a link from any page into a species detail view, carrying

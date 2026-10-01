@@ -2008,3 +2008,234 @@ func TestTileLinksCarryViewState(t *testing.T) {
 		}
 	}
 }
+
+// pickBar returns just the pick bar's markup, or "" when there is none.
+//
+// Matched by its own container rather than by searching the page for "picked":
+// that word is on every tile control too, so a page-wide search would report a
+// bar that is not there. This trap is recorded in AC-077.
+func pickBar(t *testing.T, body string) string {
+	t.Helper()
+	m := regexp.MustCompile(`(?s)<div class="pickbar">(.*?)</div>\s*</div>`).FindString(body)
+	return m
+}
+
+func pickControls(body string) []string {
+	var out []string
+	// href="([^"]*)", not +: a control rendered with an EMPTY href is still a
+	// control on the page, and a regex that skipped it would let "shown in
+	// browsing mode" pass as "not shown at all".
+	for _, m := range regexp.MustCompile(`<a class="pick( on)?" href="([^"]*)"`).
+		FindAllStringSubmatch(body, -1) {
+		out = append(out, html.UnescapeString(m[2]))
+	}
+	return out
+}
+
+// TestPickModeIsTheSpeciesParameter asserts the mode itself: absent, present
+// and empty, present and populated.
+//
+// Verifies: P-068, P-031. Criterion: AC-077.
+func TestPickModeIsTheSpeciesParameter(t *testing.T) {
+	s := newTestServer(t)
+
+	_, browsing := get(t, s, "/")
+	if n := len(pickControls(browsing)); n != 0 {
+		t.Errorf("browsing mode shows %d pick controls; the tile a reader sees almost all "+
+			"the time should be unchanged", n)
+	}
+	if pickBar(t, browsing) != "" {
+		t.Error("browsing mode shows the pick bar")
+	}
+
+	// Bare species=: picking, nothing picked. The mode must hold open or
+	// unpicking your last bird drops you out mid-task.
+	_, empty := get(t, s, "/?species=")
+	if n, want := len(pickControls(empty)), len(tileHrefs(t, empty)); n != want {
+		t.Errorf("a bare species= gave %d pick controls for %d tiles", n, want)
+	}
+	if bar := pickBar(t, empty); !strings.Contains(bar, "No birds picked yet") {
+		t.Errorf("a bare species= does not hold the mode open with an empty bar; got %q", bar)
+	}
+
+	// Populated: a control on every tile, and the picked one says so.
+	_, picking := get(t, s, "/?species=calypte_anna")
+	if n, want := len(pickControls(picking)), len(tileHrefs(t, picking)); n != want {
+		t.Errorf("%d pick controls for %d tiles; every tile needs one", n, want)
+	}
+	if n := strings.Count(picking, `class="pick on"`); n != 1 {
+		t.Errorf("%d tiles render as picked, want exactly 1", n)
+	}
+
+	// P-034 in both modes: the tile itself still opens the detail view. This
+	// is what fails if the control is ever built by rewriting the tile's href.
+	for _, body := range []string{browsing, picking} {
+		for _, h := range tileHrefs(t, body) {
+			if u, _ := url.Parse(h); !strings.HasPrefix(u.Path, "/species/") {
+				t.Errorf("a tile links to %q rather than a detail view", h)
+			}
+		}
+	}
+}
+
+// TestPickingIsReversibleAndKeepsTheFilter covers adding, removing, and the
+// interaction with the family filter.
+//
+// Verifies: P-068. Criterion: AC-077.
+func TestPickingIsReversibleAndKeepsTheFilter(t *testing.T) {
+	s := newTestServer(t)
+
+	// Add, then remove, returns the original set in the original order.
+	start := "/?species=corvus_brachyrhynchos&species=calypte_anna"
+	_, body := get(t, s, start)
+	var addURL string
+	for _, h := range pickControls(body) {
+		if q, _ := url.Parse(h); len(q.Query()["species"]) == 3 {
+			addURL = h
+			break
+		}
+	}
+	if addURL == "" {
+		t.Fatal("no pick control adds a third bird")
+	}
+	_, added := get(t, s, addURL)
+	var removeURL string
+	for _, h := range pickControls(added) {
+		if q, _ := url.Parse(h); len(q.Query()["species"]) == 2 {
+			if u, _ := url.Parse(addURL); slices.Equal(q.Query()["species"],
+				u.Query()["species"][:2]) {
+				removeURL = h
+			}
+		}
+	}
+	if removeURL == "" {
+		t.Fatal("after adding, no control removes it again")
+	}
+	back, _ := url.Parse(removeURL)
+	if got, want := back.Query()["species"],
+		[]string{"corvus_brachyrhynchos", "calypte_anna"}; !slices.Equal(got, want) {
+		t.Errorf("add then remove gave %v, want the original %v in the original order", got, want)
+	}
+
+	// The filter survives a pick, and the bar names a pick the filter hides.
+	_, filtered := get(t, s, "/?family=Trochilidae&species=ardea_herodias")
+	for _, h := range pickControls(filtered) {
+		u, _ := url.Parse(h)
+		if got := u.Query()["family"]; !slices.Equal(got, []string{"Trochilidae"}) {
+			t.Errorf("a pick link carries family=%v; picking must not drop the filter "+
+				"the reader is picking from", got)
+		}
+	}
+	if bar := pickBar(t, filtered); !strings.Contains(bar, "Great Blue Heron") {
+		t.Error("the bar omits a pick the filter is hiding; a filter that appeared to " +
+			"discard picks would be worse than one that refused to run")
+	}
+}
+
+// TestPicksSurviveTheDetailRoundTrip is the flow the whole picker rests on:
+// open a bird to look at it, go back, pick something.
+//
+// Two picks, not one: with a single pick, "preserved the set" and "rebuilt a
+// set of one" are indistinguishable. Recorded as a trap in AC-077.
+//
+// Verifies: P-068. Criterion: AC-077.
+func TestPicksSurviveTheDetailRoundTrip(t *testing.T) {
+	s := newTestServer(t)
+	want := []string{"corvus_brachyrhynchos", "calypte_anna"}
+	_, body := get(t, s, "/?species=corvus_brachyrhynchos&species=calypte_anna")
+
+	_, detail := get(t, s, tileHrefs(t, body)[0])
+	back := html.UnescapeString(mustMatch(t, detail,
+		`<p class="back"><a href="([^"]+)"`, "the back link"))
+	u, err := url.Parse(back)
+	if err != nil {
+		t.Fatalf("unparseable back link %q: %v", back, err)
+	}
+	if got := u.Query()["species"]; !slices.Equal(got, want) {
+		t.Errorf("after index -> detail -> back the picks are %v, want %v", got, want)
+	}
+	_, returned := get(t, s, back)
+	if pickBar(t, returned) == "" {
+		t.Error("returning from a detail view left pick mode")
+	}
+}
+
+// TestOnlyClearLeavesPickMode asserts that the picks are sticky against every
+// control except the one meant to drop them.
+//
+// Verifies: P-068. Criterion: AC-077.
+func TestOnlyClearLeavesPickMode(t *testing.T) {
+	s := newTestServer(t)
+	_, body := get(t, s, "/?species=calypte_anna&units=metric")
+
+	clear := html.UnescapeString(mustMatch(t, body,
+		`<a class="btn pickclear" href="([^"]+)"`, "the Clear link"))
+	cu, _ := url.Parse(clear)
+	if _, present := cu.Query()["species"]; present {
+		t.Errorf("Clear leaves a species parameter behind (%q), so it does not leave pick mode",
+			clear)
+	}
+
+	// Every link EXCEPT the ones whose job is to change the picks must keep
+	// them. The pick controls and the bar's chips are exempt by definition --
+	// they are how a reader edits the set — so they are gathered by class and
+	// excluded, leaving the ordinary controls: units, scale, ordering, step,
+	// the family chips and the back-to-index links.
+	edits := map[string]bool{clear: true}
+	for _, h := range pickControls(body) {
+		edits[h] = true
+	}
+	for _, m := range regexp.MustCompile(`<a class="pickchip" href="([^"]+)"`).
+		FindAllStringSubmatch(body, -1) {
+		edits[html.UnescapeString(m[1])] = true
+	}
+	checked := 0
+	for _, m := range regexp.MustCompile(`href="(/\?[^"]*)"`).FindAllStringSubmatch(body, -1) {
+		h := html.UnescapeString(m[1])
+		if edits[h] {
+			continue
+		}
+		checked++
+		u, _ := url.Parse(h)
+		if got := u.Query()["species"]; !slices.Equal(got, []string{"calypte_anna"}) {
+			t.Errorf("control link %q carries species=%v; only Clear may drop the picks", h, got)
+		}
+	}
+	// Guard the guard: if the exclusions ever swallow everything, this test
+	// passes while checking nothing.
+	if checked == 0 {
+		t.Fatal("no ordinary control links were checked; the exclusions have eaten the test")
+	}
+}
+
+// TestUnrecognisedPicksAreDroppedAndNamed asserts the rot handling of P-068
+// and CR-018.
+//
+// The set mixes a good id with a dead one on purpose: with only a dead id,
+// "dropped it and carried on" and "refused the page" look the same.
+//
+// Verifies: P-068. Criterion: AC-077.
+func TestUnrecognisedPicksAreDroppedAndNamed(t *testing.T) {
+	s := newTestServer(t)
+	code, body := get(t, s, "/?species=calypte_anna&species=grus_canadensis")
+	if code != http.StatusOK {
+		t.Fatalf("a set with one dead id gave %d; it should render what it recognises", code)
+	}
+
+	bar := pickBar(t, body)
+	if !strings.Contains(bar, "Anna") {
+		t.Error("the surviving pick is not shown")
+	}
+	if !strings.Contains(bar, "grus_canadensis") {
+		t.Error("the dropped id is not named; a reader cannot tell what the link lost")
+	}
+
+	// And it is gone from every link, so the set repairs itself on the next
+	// click. This is the half that silently failed first time: the notice
+	// rendered while 970 links still carried the dead id.
+	for _, m := range regexp.MustCompile(`href="([^"]+)"`).FindAllStringSubmatch(body, -1) {
+		if strings.Contains(html.UnescapeString(m[1]), "grus_canadensis") {
+			t.Errorf("link %q still carries the dead id; the set does not self-heal", m[1])
+		}
+	}
+}

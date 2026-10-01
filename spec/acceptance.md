@@ -883,11 +883,32 @@ and confirming the picks survive it.
 **names the dead one on the page**, and emits **no link containing it**. Asserted with a mixed set
 because an all-invalid set cannot distinguish dropping from refusing.
 
-**Status: planned.** To be verified by rendering the pick control in browsing mode; by
-implementing it as a change to the tile's own href; by making add and remove non-inverse; by
-dropping the picks from the tile href so the round trip loses them; by adding `family` to the
-href; by hiding filtered-out picks from the bar; by making a control other than Clear drop the
-picks; and by keeping a dead id in the links the page builds.
+**Status: verified 2026-10-01 — passing, and watched failing** ten ways: rendering the pick
+control in browsing mode (5 controls on 5 tiles); implementing it by rewriting the tile's own
+href, which made a tile link to `/?species=` instead of a detail view; prepending instead of
+appending, so add-then-remove returned a different order; dropping `species` from the tile href,
+which emptied the picks across the round trip; dropping `family` from the pick link, which reset
+the filter the reader was picking from; filtering the bar's own list, which hid a pick the family
+filter was hiding; building the index's control links with `species` stripped; stopping Clear
+clearing; treating a bare `species=` as not-picking, which gave 0 controls for 5 tiles; and
+keeping a dead id in the links the page builds.
+
+**The href-weight assertion is in AC-077's sibling test and was watched failing separately**, by
+reverting the tile href to a bare path and by keeping `family` — the latter checked on an index
+that has a filter active, because without one the parameter is not there to leak and the check
+would pass against the bug.
+
+**One of the ten breakages exposed a hole in the test rather than the code.** Rendering the pick
+control in browsing mode produced a control with an *empty* href, and the matcher required
+`href="([^"]+)"` — so it saw nothing and the test passed against a page that visibly had the
+control on every tile. The pattern now accepts an empty href. A control with no destination is
+still a control on the page, and a check that cannot see it is not checking for its absence.
+
+**Self-healing was the half that silently failed first.** The notice naming a dropped id rendered
+correctly while **970 links on the same page still carried it**, because the links were built from
+the raw query and only the bar was built from the resolved set. The request's own query is now
+rewritten before anything is built from it, which is why the criterion asserts on every `href` on
+the page rather than on the bar.
 
 **Vacuity traps already identified, recorded so the checks are not written into them:** searching
 the whole page for the word "picked" matches the tile controls as well as the bar, so the bar must
