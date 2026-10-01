@@ -878,6 +878,18 @@ directly rather than left to review.
 and the bar lists a picked bird that the filter is **currently hiding**. A filter that appeared to
 discard picks silently would be worse than one that refused to run.
 
+**Assertions, the Controls entry point:** the **Compare birds** toggle is off while browsing and
+on while picking; following it from browsing enters pick mode with nothing picked; and following
+it while picking leaves by **the same URL Clear uses**, since they do the same thing and two
+links that could drift would eventually disagree. Checked with another parameter in the query:
+with only `species` present, Clear and a bare `/?` are the same string and the comparison cannot
+tell a shared link from a coincidence.
+
+**Assertions, not moving the reader:** every pick link ends at **its own tile's fragment**, and
+the scroll script checks for a hash. Both halves, because either alone reintroduces the jump —
+an anchor the script immediately overrides, or a stood-down script with nothing to stand down
+for.
+
 **Assertions, leaving:** **Clear** removes every `species` parameter and returns the page to
 browsing mode, and **no other control does** — asserted by following every other link on the page
 and confirming the picks survive it.
@@ -906,6 +918,23 @@ control in browsing mode produced a control with an *empty* href, and the matche
 `href="([^"]+)"` — so it saw nothing and the test passed against a page that visibly had the
 control on every tile. The pattern now accepts an empty href. A control with no destination is
 still a control on the page, and a check that cannot see it is not checking for its absence.
+
+**The Controls toggle and the anchor were added 2026-10-01 and watched failing five ways:** a
+toggle that never reads as on; one that enters pick mode without the bare `species=`, so the mode
+does not hold; one that leaves by a hardcoded URL rather than Clear's; pick links without their
+fragment; and a scroll script that does not check for a hash.
+
+**Following a pick link in a test needs the fragment stripped, as a browser strips it.**
+`httptest.NewRequest` takes its target literally, so `#s-calypte_anna` lands inside `RawQuery`
+and the final species value becomes `calypte_anna#s-calypte_anna` — unresolvable, and quietly
+dropped as a dead id by the very rot handling above. The symptom was an unrelated criterion
+failing; the cause was the harness exercising a request no browser can send. The shared `get`
+helper now drops the fragment.
+
+**The toggle-matches-Clear assertion was vacuous when first written.** Both were `/?` on a URL
+whose only parameter was `species`, so a hardcoded `/?` passed as "the same link as Clear". The
+fixture now carries `units` as well, which is the smallest change that makes the two
+distinguishable.
 
 **Self-healing was the half that silently failed first.** The notice naming a dropped id rendered
 correctly while **970 links on the same page still carried it**, because the links were built from

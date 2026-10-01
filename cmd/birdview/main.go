@@ -245,7 +245,16 @@ type tile struct {
 	// keeps the tile unchanged during ordinary browsing (P-031).
 	PickURL template.URL
 	Picked  bool
+	// Anchor is this tile's fragment id. Picking navigates to it, so the
+	// browser restores the reading position itself during load instead of the
+	// scroll script jumping there after the page has already painted -- which
+	// on a 1.7 MB index is a visible flash (P-038).
+	Anchor string
 }
+
+// tileAnchor is the fragment id of one tile. Declared once because the href
+// and the element's id must agree, and they are written in different files.
+func tileAnchor(id string) string { return "s-" + id }
 
 type sectionView struct {
 	Index    int
@@ -285,6 +294,11 @@ type pageData struct {
 
 	// Bar is the pick-mode furniture of P-068, shared with the detail view.
 	Bar pickBar
+	// CompareToggleURL enters pick mode with nothing picked, or leaves it.
+	// The entry point for a reader who wants to compare before they have a
+	// particular bird in mind; the detail view's control is the one for a
+	// reader who already does.
+	CompareToggleURL template.URL
 }
 
 // pickBar is everything the pick bar needs, built identically for the index
@@ -463,13 +477,24 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 
 	bar, live := s.buildPickBar(r, opt, missingPicks)
 	page.Bar = bar
+	// Leaving is exactly what Clear does, so it is the same URL rather than a
+	// second one that could drift from it.
+	page.CompareToggleURL = bar.ClearURL
+	if !opt.Picking {
+		page.CompareToggleURL = pickURL(r, nil)
+	}
 	pickedSet := map[string]bool{}
 	for _, id := range live {
 		pickedSet[id] = true
 	}
 	pickOf := func(string) template.URL { return "" }
 	if opt.Picking {
-		pickOf = func(id string) template.URL { return pickURL(r, toggled(live, id)) }
+		pickOf = func(id string) template.URL {
+			// Anchored at the tile it came from: the browser scrolls there as
+			// part of loading, rather than painting at the top and then being
+			// moved by the script.
+			return template.URL(string(pickURL(r, toggled(live, id))) + "#" + tileAnchor(id))
+		}
 	}
 	byOrder := map[string]int{}
 	for _, f := range s.fams {
@@ -532,6 +557,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				DetailURL:   detailLink(r, sp.ID),
 				PickURL:     pickOf(sp.ID),
 				Picked:      pickedSet[sp.ID],
+				Anchor:      tileAnchor(sp.ID),
 				WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 				Length:      format(sp.TotalLength.Value, view.ByLength, opt.Metric3),
 				Wing:        format(sp.Wingspan.Value, view.ByWingspan, opt.Metric3),

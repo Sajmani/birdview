@@ -417,6 +417,19 @@ so unpicking the last bird does not silently drop the reader out of the mode mid
 the distinction P-010's family filter already draws between a parameter that is absent and one
 that is explicitly empty, and it is drawn here the same way for the same reason.
 
+That empty state is also an **entry point**. A **Compare birds** toggle in the controls turns
+pick mode on with nothing picked, and off again — the same thing the bar's Clear does, by the
+same link. It is for a reader who wants to compare before they have a particular bird in mind;
+the detail view's control is for one who already does. The toggle shows the mode as well as
+setting it.
+
+**Picking does not move the reader.** A pick link navigates to the picked bird's own tile, so the
+browser restores the reading position itself while loading the page. Every control here is a
+link, so picking reloads an index of 841 inline diagrams; restoring the position in script
+afterwards means painting the top of the list first and moving the reader after, which from deep
+in the list is a long and visible jump. The scroll script stands down whenever the URL names an
+anchor, so the two cannot fight.
+
 **The tile still opens the detail view in both modes.** The pick control is a separate target
 beside it, never a repurposing of the tile, so [P-034](#p-034) holds without exception. A reader
 mid-pick can always open a bird to look at it properly, which is the main thing they will want to

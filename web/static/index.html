@@ -70,6 +70,13 @@
         <dd>Everything is selected when you arrive. Click a family to drop it, an order to drop
           the whole group, or <b>All</b> to clear the lot and start picking. Grouped by taxonomic
           order in checklist sequence &mdash; the order field guides use.</dd></div>
+        <div class="ctrl"><dt>Compare birds</dt>
+        <dd>Turns on <b>picking</b>: every bird gets a <b>+ Pick</b> button, and a bar along the
+          bottom collects what you have picked. <b>Compare</b> then draws them side by side at one
+          shared scale, so their sizes can be read directly against one another &mdash; which the
+          list can only do for birds that land in the same tier. Filtering still works while you
+          pick, so you can narrow to one family and choose from it. Click <b>Compare birds</b>
+          again, or <b>Clear</b> in the bar, to put it away.</dd></div>
       </dl>
   </div>
   <div class="row">
@@ -93,6 +100,12 @@
     {{range $s := (list "5" "10" "15" "20" "30")}}
       <a class="btn{{if eq (printf "%.0f" $.Opt.Step) $s}} on{{end}}" href="{{call $q "step" $s}}">{{$s}}%</a>
     {{end}}
+
+    {{/* On when picking, so the control shows the mode as well as toggling it
+         (P-068). Turning it off is the same link the bar's Clear uses. */}}
+    <a class="btn{{if .Bar.Picking}} on{{end}}" href="{{.CompareToggleURL}}"
+       title="{{if .Bar.Picking}}Leave compare mode and forget the picks{{else}}Pick birds to compare side by side{{end}}"
+       >Compare birds</a>
   </div>
 
   <div class="row chips">
@@ -195,13 +208,18 @@
     /* storage unavailable: panels keep their markup default */
   }
 
-  /* Then the scroll position. */
+  /* Then the scroll position -- unless the URL names an anchor, in which case
+     the browser has already scrolled there itself, as part of loading, and
+     doing it again here would drag the reader somewhere else. Picking a bird
+     navigates to that bird's own tile for exactly this reason: a native
+     fragment scroll happens during load, where this script runs after the
+     page has painted, which on a 1.7 MB index is a visible jump. */
   try {
     var KEY = "birdview.scroll";
     var y = sessionStorage.getItem(KEY);
     if (y !== null) {
       sessionStorage.removeItem(KEY);
-      window.scrollTo(0, parseInt(y, 10) || 0);
+      if (!window.location.hash) window.scrollTo(0, parseInt(y, 10) || 0);
     }
     window.addEventListener("pagehide", function () {
       sessionStorage.setItem(KEY, String(window.scrollY));
@@ -220,7 +238,7 @@
      importantly the tile must keep opening the detail view in both modes
      (P-034). Absent entirely outside pick mode, so ordinary browsing sees the
      tile it always has (P-031). */}}
-<div class="tilewrap">
+<div class="tilewrap" id="{{.Anchor}}">
 <a class="tile" href="{{.DetailURL}}">
   <div class="hd">
     <div class="nameline">

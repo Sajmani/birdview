@@ -133,6 +133,15 @@ func newTestServer(t *testing.T) *server {
 
 func get(t *testing.T, s *server, path string) (int, string) {
 	t.Helper()
+	// Drop the fragment, because a browser does: it is dereferenced on the
+	// client and never sent. httptest.NewRequest takes the target literally,
+	// so without this a pick link's "#s-calypte_anna" lands inside RawQuery
+	// and the last species value becomes "calypte_anna#s-calypte_anna" --
+	// which resolves to nothing and is quietly dropped as a dead id. Following
+	// a pick link in a test would then exercise something no browser can do.
+	if i := strings.IndexByte(path, '#'); i >= 0 {
+		path = path[:i]
+	}
 	w := httptest.NewRecorder()
 	s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
 	return w.Code, w.Body.String()
@@ -579,7 +588,7 @@ func TestHelpCoversEveryControl(t *testing.T) {
 	help = help[:strings.Index(help, "</details>")]
 
 	// The control explanations now sit WITH the controls rather than in the
-	// Presentation panel, so they are checked in their own scope (CR-018).
+	// Presentation panel, so they are checked in their own scope (CR-017).
 	// Scope to the EXPLANATION block, not the whole controls panel. Every
 	// control name also appears as its own button label a few lines below, so a
 	// panel-wide search is satisfied by the control existing rather than by it
@@ -591,7 +600,7 @@ func TestHelpCoversEveryControl(t *testing.T) {
 	}
 	controls := body[hi:]
 	controls = controls[:strings.Index(controls, "</details>")]
-	for _, control := range []string{"Order by", "Scale", "Section step", "Units", "Family"} {
+	for _, control := range []string{"Order by", "Scale", "Section step", "Units", "Family", "Compare birds"} {
 		if !strings.Contains(controls, "<dt>"+control+"</dt>") {
 			t.Errorf("the controls panel does not explain the %q control", control)
 		}
@@ -2334,4 +2343,101 @@ func mustQuery(t *testing.T, href string) url.Values {
 		t.Fatalf("unparseable href %q: %v", href, err)
 	}
 	return u.Query()
+}
+
+// TestCompareBirdsToggle asserts the Controls entry point of P-068: a way into
+// pick mode for a reader who has no particular bird in mind yet.
+//
+// The empty state it enters is only reachable because a bare `species=` holds
+// the mode open, so this control and that decision stand or fall together.
+//
+// Verifies: P-068. Criterion: AC-077.
+func TestCompareBirdsToggle(t *testing.T) {
+	s := newTestServer(t)
+	find := func(body string) (class, href string) {
+		t.Helper()
+		m := regexp.MustCompile(`(?s)<a class="(btn[^"]*)" href="([^"]+)"[^>]*>Compare birds</a>`).
+			FindStringSubmatch(body)
+		if m == nil {
+			t.Fatal("no Compare birds control in the controls row")
+		}
+		return m[1], html.UnescapeString(m[2])
+	}
+
+	// Off while browsing, and it turns the mode on with nothing picked.
+	class, href := find(mustGet(t, s, "/?units=metric"))
+	if strings.Contains(class, "on") {
+		t.Errorf("the toggle reads as on while browsing (class %q)", class)
+	}
+	q := mustQuery(t, href)
+	if v, present := q["species"]; !present || !slices.Equal(v, []string{""}) {
+		t.Errorf("the toggle goes to %q; it should enter pick mode with a bare species=", href)
+	}
+	if q.Get("units") != "metric" {
+		t.Errorf("the toggle dropped the display options: %q", href)
+	}
+	// Following it really does land in pick mode with an empty bar.
+	entered := mustGet(t, s, href)
+	if bar := pickBarOf(t, entered); !strings.Contains(bar, "No birds picked yet") {
+		t.Errorf("following the toggle did not enter pick mode; bar was %q", bar)
+	}
+
+	// On once picking, whether or not anything is picked, and it leaves by
+	// exactly the link Clear uses -- same behavior, so the same URL.
+	// units= matters: with no other parameter, Clear and a hardcoded "/?"
+	// are the same string, and the comparison below cannot tell a shared link
+	// from a coincidence.
+	for _, u := range []string{"/?species=&units=metric", "/?species=calypte_anna&units=metric"} {
+		body := mustGet(t, s, u)
+		class, href = find(body)
+		if !strings.Contains(class, "on") {
+			t.Errorf("%s: the toggle reads as off while picking (class %q)", u, class)
+		}
+		if _, present := mustQuery(t, href)["species"]; present {
+			t.Errorf("%s: the toggle does not leave pick mode: %q", u, href)
+		}
+		clear := html.UnescapeString(mustMatch(t, body,
+			`<a class="btn pickclear" href="([^"]+)"`, "the Clear link"))
+		if href != clear {
+			t.Errorf("%s: the toggle leaves via %q but Clear uses %q; they should be the "+
+				"same link, not two that can drift", u, href, clear)
+		}
+	}
+}
+
+// TestPickLinksAnchorAtTheirTile asserts the fix for the jump that picking used
+// to cause on the index.
+//
+// Every control is a link, so picking reloads a 1.7 MB page with 841 inline
+// diagrams. The scroll script runs after that has painted, so the reader saw
+// the top of the list and was then moved — a long way, since picking happens
+// deep in the list. Navigating to the tile's own fragment makes the browser
+// scroll during load instead, and the script stands down when a hash is
+// present so the two do not fight.
+//
+// Verifies: P-038, P-068. Criterion: AC-077.
+func TestPickLinksAnchorAtTheirTile(t *testing.T) {
+	s := newTestServer(t)
+	body := mustGet(t, s, "/?species=")
+
+	ids := regexp.MustCompile(`<div class="tilewrap" id="([^"]+)"`).FindAllStringSubmatch(body, -1)
+	picks := pickControls(body)
+	if len(ids) == 0 || len(ids) != len(picks) {
+		t.Fatalf("%d tile anchors for %d pick controls", len(ids), len(picks))
+	}
+	for i, h := range picks {
+		want := "#" + ids[i][1]
+		if !strings.HasSuffix(h, want) {
+			t.Errorf("pick link %q does not end at its own tile %q; the browser cannot "+
+				"restore the reading position during load", h, want)
+		}
+	}
+
+	// The script must stand down when a hash is present, or it drags the
+	// reader away from the anchor the browser just scrolled to.
+	script := mustMatch(t, body, `(?s)(<script>.*</script>)`, "the page script")
+	if !strings.Contains(script, "window.location.hash") {
+		t.Error("the scroll script does not check for a hash, so it will override the " +
+			"browser's own fragment scroll and reintroduce the jump")
+	}
 }
