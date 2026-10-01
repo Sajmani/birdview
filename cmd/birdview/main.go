@@ -923,7 +923,11 @@ type massCube struct {
 const massCubeDepth = 0.4
 
 // massLabelGap is how far the mass label's baseline sits below the face.
-const massLabelGap = 12
+//
+// Wider than the footGap the stack under the tail uses, and deliberately: the
+// tail is a hairline and the cube is a solid block, so the same gap that looks
+// airy under one looks cramped under the other.
+const massLabelGap = 18
 
 // massLabelCharWidth approximates one character of the 11px label, used only
 // to stop a small cube's centred label running off the left edge of the
