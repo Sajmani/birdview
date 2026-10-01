@@ -99,6 +99,7 @@ footer a:visited { color: var(--accent-visited); }
 .pickmore, .pickgone { font-size: 11.5px; color: var(--dim); }
 .pickgone code { color: var(--ink); }
 .pickacts { display: flex; gap: 8px; margin-left: auto; }
+.pickaction { margin: 10px 0 0; }
 
 /* The comparison view (P-067). Panels wrap onto as many lines as they need:
    with several birds they cannot fit on one line at a readable size, and a row

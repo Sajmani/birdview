@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -282,21 +283,87 @@ type pageData struct {
 	// prose rather than breaking.
 	Legend *tile
 
-	// The pick bar (P-068). Picking drives the whole mode; Picks are resolved
-	// species so the bar can name them, and comes from the WHOLE dataset, not
-	// the filtered list, so a pick the filter is hiding is still shown.
-	Picking      bool
-	Picks        []pickChip
-	PicksMore    int
-	MissingPicks []string
-	CompareURL   template.URL
-	ClearURL     template.URL
+	// Bar is the pick-mode furniture of P-068, shared with the detail view.
+	Bar pickBar
+}
+
+// pickBar is everything the pick bar needs, built identically for the index
+// and the detail view so the two cannot drift apart (P-068).
+//
+// Picks are resolved against the WHOLE dataset rather than the filtered list,
+// so a bird the family filter is currently hiding is still named here. A
+// filter that appeared to discard picks would be worse than one that refused
+// to run.
+type pickBar struct {
+	Picking    bool
+	Picks      []pickChip
+	PicksMore  int
+	Missing    []string
+	CompareURL template.URL
+	ClearURL   template.URL
 }
 
 // pickChip is one bird in the pick bar, with the link that unpicks it.
 type pickChip struct {
 	Name      string
 	RemoveURL template.URL
+}
+
+// healPicks drops picks that no longer resolve and rewrites the request's own
+// query to the survivors, returning the dead ids so the page can name them.
+//
+// Called before anything is built from the request, which is the whole point:
+// every link the page goes on to build then omits the dead id, and the set
+// repairs itself on the reader's next click (P-068, CR-018). Healing it later
+// produced a correct notice beside 970 links that still carried the dead id.
+func (s *server) healPicks(r *http.Request, opt *options) []string {
+	if !opt.Picking {
+		return nil
+	}
+	found, missing := s.resolvePicks(opt.Picks)
+	if len(missing) == 0 {
+		return nil
+	}
+	live := make([]string, 0, len(found))
+	for _, sp := range found {
+		live = append(live, sp.ID)
+	}
+	opt.Picks = live
+	q := r.URL.Query()
+	q.Del("species")
+	if len(live) == 0 {
+		q.Set("species", "")
+	}
+	for _, id := range live {
+		q.Add("species", id)
+	}
+	r.URL.RawQuery = q.Encode()
+	return missing
+}
+
+// buildPickBar assembles the bar, and returns the live picks so the caller can
+// mark its own tiles. opt.Picks must already have been healed.
+func (s *server) buildPickBar(r *http.Request, opt options, missing []string) (pickBar, []string) {
+	b := pickBar{Picking: opt.Picking, Missing: missing}
+	if !opt.Picking {
+		return b, nil
+	}
+	found, _ := s.resolvePicks(opt.Picks)
+	live := make([]string, 0, len(found))
+	for _, sp := range found {
+		live = append(live, sp.ID)
+	}
+	for i, sp := range found {
+		if i == pickBarNames {
+			b.PicksMore = len(found) - pickBarNames
+			break
+		}
+		b.Picks = append(b.Picks, pickChip{
+			Name: sp.CommonName, RemoveURL: pickURL(r, toggled(live, sp.ID))})
+	}
+	b.CompareURL = compareURL(r, live)
+	b.ClearURL = queryFor(r, "species")()
+	return b, live
 }
 
 // pickBarNames caps how many picks the bar names before collapsing to a count.
@@ -326,27 +393,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	// Done here rather than where the bar is assembled because by then the
 	// links have already been built from the raw query, which is the bug this
 	// prevents: the notice appeared while 970 links still carried the dead id.
-	var missingPicks []string
-	if opt.Picking {
-		found, missing := s.resolvePicks(opt.Picks)
-		if len(missing) > 0 {
-			missingPicks = missing
-			live := make([]string, 0, len(found))
-			for _, sp := range found {
-				live = append(live, sp.ID)
-			}
-			opt.Picks = live
-			q := r.URL.Query()
-			q.Del("species")
-			if len(live) == 0 {
-				q.Set("species", "")
-			}
-			for _, id := range live {
-				q.Add("species", id)
-			}
-			r.URL.RawQuery = q.Encode()
-		}
-	}
+	missingPicks := s.healPicks(r, &opt)
 
 	// A fresh page selects everything; an emptied selection selects nothing.
 	selected := opt.Families
@@ -414,35 +461,15 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	}
 	page.NothingSelected = len(selected) == 0
 
-	// The pick bar (P-068). Resolved against the whole dataset rather than the
-	// filtered list, so a bird the filter is currently hiding is still named
-	// here -- a filter that appeared to discard picks would be worse than one
-	// that refused to run.
-	page.Picking = opt.Picking
+	bar, live := s.buildPickBar(r, opt, missingPicks)
+	page.Bar = bar
 	pickedSet := map[string]bool{}
+	for _, id := range live {
+		pickedSet[id] = true
+	}
 	pickOf := func(string) template.URL { return "" }
 	if opt.Picking {
-		// opt.Picks is already healed above, so everything here is live.
-		found, _ := s.resolvePicks(opt.Picks)
-		live := make([]string, 0, len(found))
-		for _, sp := range found {
-			live = append(live, sp.ID)
-			pickedSet[sp.ID] = true
-		}
 		pickOf = func(id string) template.URL { return pickURL(r, toggled(live, id)) }
-		for i, sp := range found {
-			if i == pickBarNames {
-				page.PicksMore = len(found) - pickBarNames
-				break
-			}
-			page.Picks = append(page.Picks, pickChip{
-				Name: sp.CommonName, RemoveURL: pickURL(r, toggled(live, sp.ID))})
-		}
-		// Every link below is built from `live`, so a dead id named in the URL
-		// is gone the moment the reader clicks anything: the set self-heals.
-		page.MissingPicks = missingPicks
-		page.CompareURL = compareURL(r, live)
-		page.ClearURL = queryFor(r, "species")()
 	}
 	byOrder := map[string]int{}
 	for _, f := range s.fams {
@@ -541,6 +568,17 @@ type detailData struct {
 	TotalLabel    string
 	TotalEst      bool
 	TotalLabelY   float64
+
+	// Bar is the pick-mode furniture (P-068), shared with the index.
+	Bar pickBar
+	// PickURL toggles THIS bird in the comparison, and PickLabel says which of
+	// the three states the control is in: not picking, picking but this bird
+	// is not in the set, or picking and it already is. Offering "add" for a
+	// bird already picked would be a click that silently does nothing, since
+	// the comparison view deduplicates.
+	PickURL   template.URL
+	PickLabel string
+	Picked    bool
 }
 
 // diagramLabel is one annotation: where view put it, what it says, and whether
@@ -562,6 +600,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	opt := parseOptions(r)
+	missingPicks := s.healPicks(r, &opt)
 	// Wider than the tile's 2.6:1 so the labels of P-066 have margin outside the
 	// wingtips. The extra width costs nothing: the scale is already limited by
 	// height for almost every bird, so the bird does not grow, the margin does.
@@ -589,8 +628,21 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	if sp.INatTaxonID > 0 {
 		inatURL = inat.TaxonURL(sp.INatTaxonID)
 	}
+	bar, live := s.buildPickBar(r, opt, missingPicks)
+	picked := slices.Contains(live, sp.ID)
+	// Three states, not two (P-068).
+	pickLabel := "Compare with another bird\u2026"
+	switch {
+	case picked:
+		pickLabel = "\u2713 Picked for comparison \u2014 remove"
+	case opt.Picking:
+		pickLabel = "Pick for comparison"
+	}
+
 	s.render(w, "detail.html", detailData{
 		S: sp, Geom: lt.Geom, Box: lt.Box, Labels: lt.Labels, TopOffset: lt.TopOffset,
+		Bar: bar, Picked: picked, PickLabel: pickLabel,
+		PickURL:    pickURL(r, toggled(live, sp.ID)),
 		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
 		TotalLabel: lt.TotalLabel, TotalEst: lt.TotalEst, TotalLabelY: lt.TotalLabelY,
 		Metrics: rows, Opt: opt, Query: queryFor(r), INatURL: inatURL,

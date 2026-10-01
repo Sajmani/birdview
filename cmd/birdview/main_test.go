@@ -1994,7 +1994,7 @@ func TestTileLinksCarryViewState(t *testing.T) {
 	// link. This is the round trip the picker depends on.
 	_, detail := get(t, s, hrefs[0])
 	back := html.UnescapeString(mustMatch(t, detail,
-		`<p class="back"><a href="([^"]+)"`, "the detail page's back link"))
+		`<a class="backlink" href="([^"]+)"`, "the detail page's back link"))
 	bq, err := url.Parse(back)
 	if err != nil {
 		t.Fatalf("unparseable back link %q: %v", back, err)
@@ -2014,7 +2014,7 @@ func TestTileLinksCarryViewState(t *testing.T) {
 // Matched by its own container rather than by searching the page for "picked":
 // that word is on every tile control too, so a page-wide search would report a
 // bar that is not there. This trap is recorded in AC-077.
-func pickBar(t *testing.T, body string) string {
+func pickBarOf(t *testing.T, body string) string {
 	t.Helper()
 	m := regexp.MustCompile(`(?s)<div class="pickbar">(.*?)</div>\s*</div>`).FindString(body)
 	return m
@@ -2044,7 +2044,7 @@ func TestPickModeIsTheSpeciesParameter(t *testing.T) {
 		t.Errorf("browsing mode shows %d pick controls; the tile a reader sees almost all "+
 			"the time should be unchanged", n)
 	}
-	if pickBar(t, browsing) != "" {
+	if pickBarOf(t, browsing) != "" {
 		t.Error("browsing mode shows the pick bar")
 	}
 
@@ -2054,7 +2054,7 @@ func TestPickModeIsTheSpeciesParameter(t *testing.T) {
 	if n, want := len(pickControls(empty)), len(tileHrefs(t, empty)); n != want {
 		t.Errorf("a bare species= gave %d pick controls for %d tiles", n, want)
 	}
-	if bar := pickBar(t, empty); !strings.Contains(bar, "No birds picked yet") {
+	if bar := pickBarOf(t, empty); !strings.Contains(bar, "No birds picked yet") {
 		t.Errorf("a bare species= does not hold the mode open with an empty bar; got %q", bar)
 	}
 
@@ -2126,7 +2126,7 @@ func TestPickingIsReversibleAndKeepsTheFilter(t *testing.T) {
 				"the reader is picking from", got)
 		}
 	}
-	if bar := pickBar(t, filtered); !strings.Contains(bar, "Great Blue Heron") {
+	if bar := pickBarOf(t, filtered); !strings.Contains(bar, "Great Blue Heron") {
 		t.Error("the bar omits a pick the filter is hiding; a filter that appeared to " +
 			"discard picks would be worse than one that refused to run")
 	}
@@ -2146,7 +2146,7 @@ func TestPicksSurviveTheDetailRoundTrip(t *testing.T) {
 
 	_, detail := get(t, s, tileHrefs(t, body)[0])
 	back := html.UnescapeString(mustMatch(t, detail,
-		`<p class="back"><a href="([^"]+)"`, "the back link"))
+		`<a class="backlink" href="([^"]+)"`, "the back link"))
 	u, err := url.Parse(back)
 	if err != nil {
 		t.Fatalf("unparseable back link %q: %v", back, err)
@@ -2155,7 +2155,7 @@ func TestPicksSurviveTheDetailRoundTrip(t *testing.T) {
 		t.Errorf("after index -> detail -> back the picks are %v, want %v", got, want)
 	}
 	_, returned := get(t, s, back)
-	if pickBar(t, returned) == "" {
+	if pickBarOf(t, returned) == "" {
 		t.Error("returning from a detail view left pick mode")
 	}
 }
@@ -2222,7 +2222,7 @@ func TestUnrecognisedPicksAreDroppedAndNamed(t *testing.T) {
 		t.Fatalf("a set with one dead id gave %d; it should render what it recognises", code)
 	}
 
-	bar := pickBar(t, body)
+	bar := pickBarOf(t, body)
 	if !strings.Contains(bar, "Anna") {
 		t.Error("the surviving pick is not shown")
 	}
@@ -2238,4 +2238,95 @@ func TestUnrecognisedPicksAreDroppedAndNamed(t *testing.T) {
 			t.Errorf("link %q still carries the dead id; the set does not self-heal", m[1])
 		}
 	}
+}
+
+// detailAction returns the detail page's pick control: its label and its href.
+func detailAction(t *testing.T, body string) (label, href string) {
+	t.Helper()
+	m := regexp.MustCompile(`<p class="pickaction"><a class="[^"]*" href="([^"]+)">([^<]+)</a>`).
+		FindStringSubmatch(body)
+	if m == nil {
+		t.Fatal("the detail page has no pick control")
+	}
+	return html.UnescapeString(m[2]), html.UnescapeString(m[1])
+}
+
+// TestDetailPagePickStates asserts the three states of P-068, and that the
+// back link says which mode it is returning to.
+//
+// Three and not two: offering "add" for a bird already in the set would be a
+// click that silently does nothing, because the comparison view deduplicates.
+//
+// Verifies: P-068. Criterion: AC-077.
+func TestDetailPagePickStates(t *testing.T) {
+	s := newTestServer(t)
+
+	// Browsing: the entry point, which seeds a new comparison with this bird.
+	label, href := detailAction(t, mustGet(t, s, "/species/calypte_anna"))
+	if !strings.Contains(label, "Compare with another bird") {
+		t.Errorf("browsing-mode action is %q, want the entry point", label)
+	}
+	if got := mustQuery(t, href)["species"]; !slices.Equal(got, []string{"calypte_anna"}) {
+		t.Errorf("the entry point seeds species=%v, want just this bird", got)
+	}
+
+	// Pick mode, this bird not in the set: add it, keeping the others.
+	body := mustGet(t, s, "/species/calypte_anna?species=corvus_brachyrhynchos")
+	label, href = detailAction(t, body)
+	if !strings.Contains(label, "Pick for comparison") {
+		t.Errorf("pick-mode action is %q, want an add", label)
+	}
+	if got, want := mustQuery(t, href)["species"],
+		[]string{"corvus_brachyrhynchos", "calypte_anna"}; !slices.Equal(got, want) {
+		t.Errorf("adding gave species=%v, want %v — the existing picks must survive", got, want)
+	}
+
+	// Pick mode, already in the set: remove, not a second add.
+	body = mustGet(t, s, "/species/calypte_anna?species=corvus_brachyrhynchos&species=calypte_anna")
+	label, href = detailAction(t, body)
+	if !strings.Contains(label, "remove") {
+		t.Errorf("a bird already picked offers %q; adding it again would silently do nothing, "+
+			"because the comparison view deduplicates", label)
+	}
+	if got, want := mustQuery(t, href)["species"],
+		[]string{"corvus_brachyrhynchos"}; !slices.Equal(got, want) {
+		t.Errorf("removing gave species=%v, want %v", got, want)
+	}
+
+	// The back link names the mode it returns to.
+	for _, c := range []struct{ url, want string }{
+		{"/species/calypte_anna", "back to all birds"},
+		{"/species/calypte_anna?species=corvus_brachyrhynchos", "back to picking birds"},
+	} {
+		got := mustMatch(t, mustGet(t, s, c.url), `class="backlink"[^>]*>(?s)(.*?)</a>`, "the back link")
+		if !strings.Contains(strings.Join(strings.Fields(got), " "), c.want) {
+			t.Errorf("%s: back link reads %q, want %q", c.url, strings.TrimSpace(got), c.want)
+		}
+	}
+
+	// The bar rides along, so Compare is reachable without going back first.
+	if pickBarOf(t, mustGet(t, s, "/species/calypte_anna?species=corvus_brachyrhynchos")) == "" {
+		t.Error("no pick bar on the detail page in pick mode")
+	}
+	if pickBarOf(t, mustGet(t, s, "/species/calypte_anna")) != "" {
+		t.Error("the detail page shows a pick bar while browsing")
+	}
+}
+
+func mustGet(t *testing.T, s *server, path string) string {
+	t.Helper()
+	code, body := get(t, s, path)
+	if code != http.StatusOK {
+		t.Fatalf("GET %s: %d", path, code)
+	}
+	return body
+}
+
+func mustQuery(t *testing.T, href string) url.Values {
+	t.Helper()
+	u, err := url.Parse(href)
+	if err != nil {
+		t.Fatalf("unparseable href %q: %v", href, err)
+	}
+	return u.Query()
 }

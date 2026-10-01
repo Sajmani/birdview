@@ -161,32 +161,7 @@
   <b>every length here is modeled</b>, as are most wingspans. Click any bird to see where each
   number came from and how far to trust it.</p>
 </footer>
-{{if .Picking}}
-{{/* Sticky, because the flow ends in "now compare them" and that action should
-     not require scrolling back through 841 tiles to find it (P-068). */}}
-<div class="pickbar">
-  <div class="pickbar-in">
-    {{if .Picks}}
-      <span class="picklbl">{{len .Picks}}{{if .PicksMore}}+{{end}} picked</span>
-      {{range .Picks}}<a class="pickchip" href="{{.RemoveURL}}"
-         title="Remove {{.Name}}">{{.Name}} &times;</a>{{end}}
-      {{if .PicksMore}}<span class="pickmore">&hellip;and {{.PicksMore}} more</span>{{end}}
-    {{else}}
-      <span class="picklbl">No birds picked yet &mdash; use <b>+ Pick</b> on any bird</span>
-    {{end}}
-    {{if .MissingPicks}}
-    {{/* Named, not silently dropped: ids follow scientific names and this
-         checklist renames them, so a kept link rots (P-068, CR-018). */}}
-    <span class="pickgone">{{len .MissingPicks}} unrecognised and dropped:
-      {{range $i, $m := .MissingPicks}}{{if $i}}, {{end}}<code>{{$m}}</code>{{end}}</span>
-    {{end}}
-    <span class="pickacts">
-      {{if .Picks}}<a class="btn on pickgo" href="{{.CompareURL}}">Compare</a>{{end}}
-      <a class="btn pickclear" href="{{.ClearURL}}">Clear</a>
-    </span>
-  </div>
-</div>
-{{end}}
+{{template "pickbar" .Bar}}
 
 <script>
 /* Keep the page still across navigations.
@@ -343,4 +318,33 @@
         x="{{f1 $g.CX}}" y="{{f1 .TotalLabelY}}">{{.TotalLabel}}{{if .TotalEst}} ~{{end}}</text>
   {{end}}
 </svg>
+{{end}}
+
+{{define "pickbar"}}
+{{if .Picking}}
+{{/* Sticky, because the flow ends in "now compare them" and that action should
+     not require scrolling back through 841 tiles to find it (P-068). */}}
+<div class="pickbar">
+  <div class="pickbar-in">
+    {{if .Picks}}
+      <span class="picklbl">{{len .Picks}}{{if .PicksMore}}+{{end}} picked</span>
+      {{range .Picks}}<a class="pickchip" href="{{.RemoveURL}}"
+         title="Remove {{.Name}}">{{.Name}} &times;</a>{{end}}
+      {{if .PicksMore}}<span class="pickmore">&hellip;and {{.PicksMore}} more</span>{{end}}
+    {{else}}
+      <span class="picklbl">No birds picked yet &mdash; use <b>+ Pick</b> on any bird</span>
+    {{end}}
+    {{if .Missing}}
+    {{/* Named, not silently dropped: ids follow scientific names and this
+         checklist renames them, so a kept link rots (P-068, CR-018). */}}
+    <span class="pickgone">{{len .Missing}} unrecognised and dropped:
+      {{range $i, $m := .Missing}}{{if $i}}, {{end}}<code>{{$m}}</code>{{end}}</span>
+    {{end}}
+    <span class="pickacts">
+      {{if .Picks}}<a class="btn on pickgo" href="{{.CompareURL}}">Compare</a>{{end}}
+      <a class="btn pickclear" href="{{.ClearURL}}">Clear</a>
+    </span>
+  </div>
+</div>
+{{end}}
 {{end}}
