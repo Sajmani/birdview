@@ -1455,6 +1455,8 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | Promote the cube/crossbar clearance invariant from prose into a test over the real dataset. CR-021 invalidated the recorded figure and nothing failed — it was caught by reading ([AC-078](acceptance.md#ac-078)) | — | before the next change that moves lengths |
 | ~~Add a **Sort by** control to the comparison view~~ — built, [AC-079](acceptance.md#ac-079) | Sameer | closed 2026-10-01 |
 | ~~Decide whether mass gets an **equal-mass cube of water** drawn in the diagram~~ — built, [CR-019](#cr-019) | Sameer | closed 2026-10-01 |
+| **Parked:** replace the cube with a mass **line** proportional to mass. Measured and written up in [Mass as a proportional line](#mass-as-a-proportional-line-replacing-the-cube--parked); needs a CR, because it reverses CR-019 | Sameer | parked 2026-10-02 — resume from that section, do not re-derive |
+| Give the mass cube a colour that is not the crossbar's. `#38bdf8` against the wing's `#0ea5e9` makes the one mark that is **not** a length look like the one that is — a defect in what ships today, found while evaluating the line | — | opportunistic; small and independent of the parked work |
 
 ### A cube of water for mass
 
@@ -1496,6 +1498,86 @@ Open if it is taken up: what labels it, whether it appears on index tiles (it sh
 tile is dense by design and this is detail-view furniture, as P-066's labels already are), and
 whether it is drawn solid or dashed for the 10 near-match masses, which P-065's vocabulary already
 answers.
+
+### Mass as a proportional line, replacing the cube — parked
+
+*Evaluated 2026-10-02, owner's idea, parked rather than decided.* Everything measured here is
+still true; pick it up from this section rather than re-deriving it.
+
+**The complaint is correct and is already in the spec.** The cube root flattens: a Bushtit and a
+Common Raven differ in mass by 175× and their cubes by 5.6×. P-066 admits this and answers it with
+the printed number. The proposal was to answer it with the drawing instead — a horizontal line
+below the bird, from the lower-left, ticks at both ends, and the Mass label at the far end as the
+Wingspan label already sits at the end of the crossbar.
+
+**The finding that decides the shape of the work: a line linear in mass cannot be drawn at one
+global scale.** The mass range is **4,258×** (2.6 g – 11,071 g). A 380 px tile has a usable
+dynamic range of roughly **180×**. With the Trumpeter Swan's line at 300 px the Calliope
+Hummingbird's is **0.07 px**.
+
+Nor is there a physically honest way out. The cube's whole elegance is that one gram of water is
+one cubic centimetre *by definition*, so its edge is a true length drawn at the figure's own
+scale and invents no second scale. The line equivalent is a water column of fixed cross-section,
+where length in centimetres equals mass in grams — and the swan's column is **92× its own body
+length**. No choice of cross-section helps, because the range to be spanned exceeds the range a
+tile can draw by 24×.
+
+**So a proportional mass line must be normalized per group, and that is the trade.** Measured
+within the 20 sections at the default 15% step:
+
+| within one length section | |
+| --- | --- |
+| median mass range | **4.0×** |
+| worst section | **20.0×** — 57 species, 31.9–637 g |
+| sections above 50× | **0 of 20** |
+
+Comfortably drawable. Note what is and is not given up: **the bird is already drawn at a
+per-section scale** (P-042), and so is the cube, so a per-section mass scale is not a new kind of
+relativity. What the cube has that a normalized bar would not is that its size *means* something
+absolute — you could measure it against the bird with one ruler. A normalized bar is a bar-chart
+row: very readable, making no physical claim.
+
+**It therefore needs a CR, because it reverses rather than extends CR-019.** P-066 currently
+states that "a disc or bar sized by mass — a second, arbitrary scale — is still refused", and
+P-043's rationale is that a mark on its own convenient scale "looks authoritative and says
+something false". Those are the sentences a CR would have to overturn, not work around.
+
+**The hard case is the comparison view**, where a reader may pick a hummingbird against a swan and
+the lighter line goes sub-pixel. That is arguably the correct message — the cube is precisely what
+hides it — but invisible reads as broken. The mitigation is to draw the origin tick
+unconditionally, so there is always a mark, and to let the number carry the magnitude as P-066
+already says it must.
+
+**Styling, as far as it was worked out:**
+
+- **Solid.** Mass is measured for 831 of 841, and P-065 draws `near-match` solid too.
+- **Not a heavier weight.** Stroke weight carries no meaning in this diagram today, and the
+  heaviest mark on a bird diagram should not be the one that is not the bird.
+- **A different colour, and this is the load-bearing one.** A horizontal solid ticked line will
+  otherwise read as a second crossbar — another length to scale, which is the exact false claim
+  P-043 exists to prevent. Contrast measured against the `#0f172a` background, and against the
+  wing's `#0ea5e9`, because a hue-only difference fails for colour-blind readers:
+
+  | candidate | vs background | vs wing |
+  | --- | ---: | ---: |
+  | lime `#a3e635` | 11.8:1 | **1.8:1** |
+  | emerald `#34d399` | 9.3:1 | 1.4:1 |
+  | fuchsia `#e879f9` | 7.3:1 | 1.1:1 |
+  | violet `#a78bfa` | 6.6:1 | 1.0:1 |
+
+  Lime has the best luminance separation from the crossbar; the others differ by hue alone.
+- **Ticks at both ends** — consistent with the chord-tick vocabulary of P-065.
+- **Label at the far end** — consistent with the wingspan label in P-066.
+
+**Two things found along the way that are worth acting on whether or not this is ever built:**
+
+1. **The cube is `#38bdf8` and the crossbar `#0ea5e9`.** The one mark that is *not* a length is
+   near-identical in colour to the mark whose entire point is that it *is* a length to scale.
+   That is backwards, and it is a defect in what ships today.
+2. **There is no clear band below the bird on a tile.** The tallest bird in each section fills the
+   tile height exactly. The cube works because it occupies the empty lower-left *beside* a narrow
+   figure; a full-width horizontal line would cross the tail unless the tile grows downward, as
+   the detail view's bottom strip already does for P-066's labels.
 
 ### Cervical vertebra counts, and why they are worth chasing
 
