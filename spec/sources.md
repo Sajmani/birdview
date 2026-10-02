@@ -259,7 +259,8 @@ Recorded so nobody re-litigates them annually.
 | **eBird API region species lists** | Would supply scope and geography in AVONET's own taxonomy, but requires an API key and `api.ebird.org/robots.txt` is `Disallow: /`, with the API terms page returning 403. Not evaluated further; a human would need to read the terms. |
 | **AOS / NACC check-list** | Best-shaped data of the three checklists — family, order and subfamily as real columns, plus machine-readable status flags — but covers North *and Middle* America, which is the wrong scope, and carries no license statement anywhere. Absence of a statement is not permission. Re-checked 2026-10-01 against the live CSV: 2,212 species, and filtering to neither accidental nor extinct leaves **1,957** — 1,131 more than the ABA area's 841, because the area runs to Panama and the West Indies. The status flags cannot reconstruct ABA scope; they are relative to a far larger region. |
 | **AviList v2025b** | **CC BY 4.0**, verified on the publisher's own download page 2026-10-01, and the consensus successor to IOC, Clements and BirdLife with the AOS, Cornell, BirdLife, Avibase and the IOU behind it. It would solve names, families and taxonomic sequence outright — 832 of BirdView's 841 match on scientific name. It does **not** solve scope, which is the only thing ABA is actually blocking, and its English names are wrong for this audience. See [below](#why-avilist-does-not-replace-the-aba-checklist). |
-| **iNaturalist species counts** | Would give regional scope plus an abundance signal, but observation counts overstate rarities: a mega-rarity draws every birder in the state, so the signal inverts exactly where it matters. Note the objection is to *counts*: a spread statistic — distinct regions × distinct years — does not invert the same way, since a vagrant is one place in one year. Not evaluated; it would replace a curated authority with a BirdView model. |
+| **iNaturalist species counts** | Would give regional scope plus an abundance signal, but observation counts overstate rarities: a mega-rarity draws every birder in the state, so the signal inverts exactly where it matters. Superseded as a candidate by GBIF below, which carries eBird and is far deeper for birds. |
+| **GBIF — eBird Observation Dataset** | **CC BY 4.0**, verified from GBIF's dataset record 2026-10-01, no key required, 1.07 billion US records. This is *not* the eBird API rejected above: that was blocked by `robots.txt` and unreadable terms, while the same observations published through GBIF are openly licensed. Technically excellent and the only serious candidate for deriving scope. It still does not work — see [below](#why-occurrence-data-cannot-reproduce-the-aba-scope). |
 | **iNaturalist taxonomy** (as a names source) | Distinct from the taxon IDs already adopted, and not covered by them. The `inat-terms` adoption rests on a narrow negative — nothing restricts reusing an *identifier* — while the same terms state the agreement "does not transfer to You any iNaturalist or third party intellectual property", and the CC BY-NC default governs contributor Content, not the taxonomy. No affirmative grant to republish their name list was found. |
 | **Lislevand et al. 2007** | Copyright restrictions: none — genuinely open. Does not contain total length or wingspan, which is what it was originally brought in for. Removed from the project. |
 | **EltonTraits, Amniote DB, BIRDBASE, Dunning** | None carries body length or wingspan. BIRDBASE was checked column by column against a claim that it did. |
@@ -308,3 +309,50 @@ Icteriidae to Icteridae, dissolving a one-species family.
 defines its own scope and owns it — the spread statistic noted above is the only candidate, and
 it trades a curated list for a model. Nothing here changes what is deployed; it is recorded so
 the question is not reopened from scratch.
+
+### Why occurrence data cannot reproduce the ABA scope
+
+*Measured 2026-10-01, against the eBird Observation Dataset on GBIF — CC BY 4.0, 1.07 billion US
+records.* The spread statistic was the last candidate for replacing the ABA codes, so it was
+tried rather than argued about.
+
+**Method.** Facet species by region across **64 regions** — 51 US states and territories plus 13
+Canadian provinces, which is the ABA Area to within St. Pierre et Miquelon. The whole matrix
+takes **39 seconds**, one query per region. Regions are not the hard part; GBIF has them as a
+field.
+
+**Result: no threshold gets close enough to call it a replacement.** Against the ABA's 841:
+
+| Rule | Species | Agree | ABA has, rule misses | Rule adds | F1 |
+| --- | --- | --- | --- | --- | --- |
+| present in ≥2 regions | 1063 | 724 | 117 | 339 | 0.76 |
+| present in ≥3 regions | 931 | 703 | 138 | 228 | 0.79 |
+| present in ≥5 regions | 783 | 643 | 198 | 140 | 0.79 |
+| ≥100 records in ≥1 region | 997 | 771 | 70 | 226 | **0.84** |
+| ≥100 records in ≥2 regions | 772 | 669 | 172 | 103 | 0.83 |
+| ≥100 records in ≥3 regions | 692 | 626 | 215 | 66 | 0.82 |
+
+**The failures are structural, not a tuning problem**, which is why no row wins:
+
+- **It adds escaped cage birds.** The additions are Hyacinth Macaw, six *Amazona* parrots,
+  lovebirds, Mandarin Duck, Red-legged Partridge. eBird faithfully records what people see; the
+  ABA list is a judgment about which populations are *established*. No occurrence statistic
+  separates a self-sustaining population from a steady trickle of escapees, because the
+  observations look identical.
+- **It drops single-region endemics.** Hawaii is one region, so any multi-region rule deletes
+  the Hawaiian avifauna — Millerbird, Laysan Duck, Hawaiian Duck, Mariana Swiftlet — and Hawaii
+  is explicitly inside the ABA Area. Range-restricted mainland birds go the same way: Five-striped
+  Sparrow, Whiskered Auklet.
+- **Some misses are nomenclature, not biology.** *Anarhynchus montanus*, *nivosus* and *wilsonia*
+  and *Amphispizopsis quinquestriata* fail to match because GBIF's backbone has not followed the
+  recent genus moves — the same rot CR-018 handles for links, reappearing as a data-quality
+  problem.
+
+Each of these can be patched — special-case Hawaii, filter on establishment, pin a taxonomy —
+and every patch is one more editorial judgment BirdView would be making and defending. At that
+point the project has written its own checklist, which is a different undertaking from drawing
+birds to scale.
+
+**So the choice is real and narrow:** obtain the ABA's permission, or publish a list that is
+about 84% of theirs, visibly different at the edges, and owned by BirdView. There is no third
+option where the data simply comes from somewhere else.
