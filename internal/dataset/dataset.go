@@ -107,6 +107,11 @@ type Species struct {
 	FamilyText     string `json:"familyTextColor"`
 	Order          string `json:"order"`
 
+	// Regions are the places this species is reported from, as region ids
+	// (P-011). Empty for the one species with too few records to place
+	// anywhere, which the region filter must not silently swallow.
+	Regions []string `json:"regions,omitempty"`
+
 	// INatTaxonID links the detail view to iNaturalist (P-064). Zero means no
 	// confident match, and then no link is shown at all -- not a search URL,
 	// not a guess (CR-012).

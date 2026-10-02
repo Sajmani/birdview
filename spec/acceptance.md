@@ -1310,10 +1310,15 @@ but a missing declaration.
 **Verifies:** P-035 · **Level:** code · **Method:** compare two sets extracted from the rendered
 index — the control labels, and the terms the Controls panel defines
 
-**Assertions:** the set of control labels in the Controls panel and the set of terms its
+**Assertions:** the set of control labels **across every panel** and the set of terms the panels'
 documentation defines are **equal**. Each direction is a separate failure with its own message: a
 control with no entry is undocumented, and an entry with no control is documentation for
 something that no longer exists.
+
+Entries marked `ctrl note` are excluded from the comparison. They explain something that is not a
+control — what a zone is, what pelagic means — and requiring a matching label would force every
+explanation to pretend to be a button. The exclusion is narrow and marked in the markup, so an
+entry cannot drift out of the check by accident.
 
 **Assertions, the comparison can bite:** the documentation block is **located before it is
 sliced**, both sets are non-empty, and the label set contains a control known to be present. A
@@ -1327,7 +1332,8 @@ that depended on the structure under test reported its own failure rather than t
 
 **Status: verified 2026-10-02 — passing, and watched failing** by the live defect it was written
 for: **Names**, added with [P-049](product.md#p-049), was a control with no documentation, and
-this criterion is what caught it. Also watched failing by deleting the Units entry, by adding an
+this criterion is what caught it. **Re-verified after the panel split** ([P-036](product.md#p-036)),
+where it immediately caught the Family documentation left behind in the Controls box. Also watched failing by deleting the Units entry, by adding an
 entry for a control that does not exist, and by breaking the extraction selector so both sets come
 back empty.
 
@@ -1335,6 +1341,30 @@ back empty.
 covered, and had been updated for neither Compare birds nor Names. A list cannot notice what it
 omits — the requirement, the panel and the controls each looked complete on their own. Comparing
 the two sets is the only form of this check that fails when someone adds a control and forgets.
+
+### AC-086 — The region filter selects, groups and composes
+**Verifies:** P-011, P-012 · **Level:** code · **Method:** rendering tests over `?region=`
+
+**Assertions, filtering:** filtering to one region shows species reported there and excludes
+others; no parameter shows all; and an explicitly empty `region=` shows none, the same
+absent-versus-empty distinction the family filter draws.
+
+**Assertions, the selector:** regions are grouped into zones; **Pelagic is the last zone**; each
+zone header toggles its whole group; **All** toggles everything; and each chip carries the
+standard postal abbreviation with the full name beside it.
+
+**Assertions, composition:** region and family narrow together ([P-012](product.md#p-012)), and
+an empty intersection renders the empty state naming **both** filters — which is now reachable
+through the UI, where with one filter it was not.
+
+**Assertions, the sea:** a pelagic species appears under its ocean, and a seabird that also comes
+near shore appears under both its ocean and the states it is seen from. Species with no region at
+all are not silently swallowed.
+
+**Status: verified 2026-10-02 — passing, and watched failing** by ignoring the parameter; by
+treating an empty `region=` as no filter, which is the bug the family filter had first; by moving
+Pelagic out of last place; and by filtering pelagic species out of every region, which hides 53
+birds that have nowhere else to be.
 
 ---
 
@@ -1350,7 +1380,7 @@ the two sets is the only form of this check that fails when someone adds a contr
 | P-006 | AC-014 | |
 | P-007 | AC-015 | |
 | P-010 | AC-056, AC-075 | |
-| P-011, P-012 | — | withdrawn |
+| P-011, P-012 | AC-086 | |
 | P-020, P-021 | AC-020 | |
 | P-022, P-023 | AC-021 | |
 | P-024 | AC-022 | |

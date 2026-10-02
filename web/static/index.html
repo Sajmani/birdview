@@ -78,10 +78,6 @@
           AviList use. They differ for 82 of these birds &mdash; the Dovekie is a Little Auk
           everywhere else. The scientific name, the code in brackets and the address of the page
           never change, so a link still means the same bird whichever you pick.</dd></div>
-        <div class="ctrl"><dt>Family</dt>
-        <dd>Everything is selected when you arrive. Click a family to drop it, an order to drop
-          the whole group, or <b>All</b> to clear the lot and start picking. Grouped by taxonomic
-          order in checklist sequence &mdash; the order field guides use.</dd></div>
         <div class="ctrl"><dt>Compare birds</dt>
         <dd>Turns on <b>picking</b>: every bird gets a <b>+ Pick</b> button, and a bar along the
           bottom collects what you have picked. <b>Compare</b> then draws them side by side at one
@@ -129,6 +125,63 @@
        >{{if .Bar.Picking}}On{{else}}Off{{end}}</a>
   </div>
 
+</details>
+
+<details class="controls" id="regions" open>
+  <summary>Regions</summary>
+  <div class="ctrlhelp">
+      <dl>
+        <div class="ctrl"><dt>Region</dt>
+        <dd>Everywhere is selected when you arrive. Click a state or province to drop it, a zone
+          to drop the whole group, or <b>All</b> to clear the lot and start picking. A bird is
+          listed in a region when it is reported there often enough to be worth looking for,
+          from eBird and iNaturalist records.</dd></div>
+        <div class="ctrl note"><dt>Zones</dt>
+        <dd>Groups for finding your state quickly, nothing more. They cross the border on
+          purpose &mdash; British Columbia belongs with Washington and Oregon. They are
+          <b>not</b> birding regions: measured against the records, the whole east from Maine to
+          Georgia shares about three quarters of its species, so there is no honest way to
+          divide it.</dd></div>
+        <div class="ctrl note"><dt>Pelagic</dt>
+        <dd>Birds of the open sea, which belong to no state at all &mdash; a Bermuda Petrel has
+          hundreds of records off the coast and none on land. They are grouped by ocean, and the
+          boundaries between those are ours and approximate. Seabirds that also come within
+          sight of shore, like the Sooty Shearwater, appear both here and in the states they are
+          seen from.</dd></div>
+      </dl>
+  </div>
+  <div class="row chips">
+    <span class="lbl">Region</span>
+    <a class="btn{{if .AllRegions}} on{{end}}" href="{{.AllRegionsURL}}"
+       title="{{if .AllRegions}}Clear every region{{else}}Select everywhere{{end}}">All</a>
+    <span class="hint">states and provinces, grouped for finding yours</span>
+  </div>
+  <div class="ordergroups">
+    {{range .Zones}}
+    <div class="ogroup">
+      <a class="btn ohdr{{if .Selected}} on{{end}}" href="{{.URL}}"
+         title="{{if .Selected}}Clear{{else}}Select{{end}} every region in {{.Zone}}">{{.Zone}}</a>
+      <div class="ofams">
+        {{range .Regions}}
+        <a class="chip rchip{{if .Selected}} on{{end}}" href="{{.URL}}"
+           title="{{.Name}}">{{.Code}}<em>{{.Name}}</em></a>
+        {{end}}
+      </div>
+    </div>
+    {{end}}
+  </div>
+</details>
+
+<details class="controls" id="families" open>
+  <summary>Families</summary>
+  <div class="ctrlhelp">
+      <dl>
+        <div class="ctrl"><dt>Family</dt>
+        <dd>Everything is selected when you arrive. Click a family to drop it, an order to drop
+          the whole group, or <b>All</b> to clear the lot and start picking. Grouped by taxonomic
+          order in checklist sequence &mdash; the order field guides use.</dd></div>
+      </dl>
+  </div>
   <div class="row chips">
     <span class="lbl">Family</span>
     <a class="btn{{if .AllSelected}} on{{end}}" href="{{.AllURL}}"
@@ -155,8 +208,9 @@
     </div>
     {{end}}
   </div>
-  <p class="count">{{.Shown}} of {{.Total}} species</p>
 </details>
+
+<p class="count">{{.Shown}} of {{.Total}} species</p>
 
 {{range .Sections}}
 <section>

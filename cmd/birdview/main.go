@@ -26,6 +26,7 @@ import (
 
 	"birdview/internal/dataset"
 	"birdview/internal/inat"
+	"birdview/internal/region"
 	"birdview/internal/view"
 	"birdview/web"
 )
@@ -179,7 +180,11 @@ type options struct {
 	// mean opposite things.
 	Families     map[string]bool
 	HasSelection bool
-	Metric3      bool // imperial when false
+	// Regions and HasRegions draw the same distinction for P-011's filter:
+	// absent means everywhere, explicitly empty means nowhere.
+	Regions    map[string]bool
+	HasRegions bool
+	Metric3    bool // imperial when false
 
 	// Locale selects which English name is served (P-049). North American is
 	// the default: this is an ABA-area dataset and Dovekie is what its reader
@@ -202,7 +207,7 @@ func parseOptions(r *http.Request) options {
 	// default that teaches the reader to read a bird wins over the one that
 	// delivers the shock before they can.
 	o := options{Metric: view.ByLength, Step: view.DefaultStepPercent, Scale: view.PerSection,
-		Locale: dataset.LocaleNA, Families: map[string]bool{}}
+		Locale: dataset.LocaleNA, Families: map[string]bool{}, Regions: map[string]bool{}}
 	switch view.Metric(q.Get("by")) {
 	case view.ByWingspan:
 		o.Metric = view.ByWingspan
@@ -241,6 +246,12 @@ func parseOptions(r *http.Request) options {
 	for _, f := range q["family"] {
 		if f != "" {
 			o.Families[f] = true
+		}
+	}
+	_, o.HasRegions = q["region"]
+	for _, g := range q["region"] {
+		if g != "" {
+			o.Regions[g] = true
 		}
 	}
 	return o
@@ -328,10 +339,15 @@ type familyRow struct {
 type pageData struct {
 	Sections []sectionView
 	Groups   []orderGroup
-	Opt      options
-	Total    int
-	Shown    int
-	Query    func(...string) template.URL
+	// Zones is the region selector (P-011), the same shape as Groups.
+	Zones         []zoneGroup
+	AllRegions    bool
+	AllRegionsURL template.URL
+	NoRegion      bool
+	Opt           options
+	Total         int
+	Shown         int
+	Query         func(...string) template.URL
 	// AllSelected is true only when every family is explicitly filtered in --
 	// not when nothing is selected. Both states display the whole dataset, but
 	// they are different selections, and the control reflects the selection.
@@ -386,23 +402,39 @@ type activeFilter struct {
 //
 // Verifies: P-037.
 func describeFilters(fams []familyOption, opt options) []activeFilter {
-	if !opt.HasSelection || len(opt.Families) == 0 || len(opt.Families) == len(fams) {
-		return nil
-	}
-	var picked []string
-	for _, f := range fams {
-		if opt.Families[f.Name] {
-			picked = append(picked, f.Name)
-		}
-	}
 	// Past a handful the names stop being readable and the count is the
 	// useful fact. The threshold is a presentation judgement, not a rule.
 	const nameLimit = 6
-	v := strings.Join(picked, ", ")
-	if len(picked) > nameLimit {
-		v = fmt.Sprintf("%d of %d selected", len(picked), len(fams))
+	describe := func(picked []string, total int) string {
+		if len(picked) > nameLimit {
+			return fmt.Sprintf("%d of %d selected", len(picked), total)
+		}
+		return strings.Join(picked, ", ")
 	}
-	return []activeFilter{{Label: "Family", Value: v}}
+
+	var out []activeFilter
+	// Region first, matching the order the boxes appear in.
+	if opt.HasRegions && len(opt.Regions) > 0 && len(opt.Regions) != region.Len() {
+		var picked []string
+		for _, z := range region.Zones {
+			for _, rg := range region.InZone(z) {
+				if opt.Regions[rg.ID] {
+					picked = append(picked, rg.Name)
+				}
+			}
+		}
+		out = append(out, activeFilter{Label: "Region", Value: describe(picked, region.Len())})
+	}
+	if opt.HasSelection && len(opt.Families) > 0 && len(opt.Families) != len(fams) {
+		var picked []string
+		for _, f := range fams {
+			if opt.Families[f.Name] {
+				picked = append(picked, f.Name)
+			}
+		}
+		out = append(out, activeFilter{Label: "Family", Value: describe(picked, len(fams))})
+	}
+	return out
 }
 
 type pickBar struct {
@@ -514,10 +546,23 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			selected[f.Name] = true
 		}
 	}
+	// Region works the same way, and composes with family (P-012): a bird is
+	// shown when every active filter admits it.
+	inRegion := func(sp *dataset.Species) bool {
+		if !opt.HasRegions {
+			return true
+		}
+		for _, id := range sp.Regions {
+			if opt.Regions[id] {
+				return true
+			}
+		}
+		return false
+	}
 	var filtered []*dataset.Species
 	for i := range s.ds.Species {
 		sp := &s.ds.Species[i]
-		if selected[sp.Family] {
+		if selected[sp.Family] && inRegion(sp) {
 			filtered = append(filtered, sp)
 		}
 	}
@@ -548,7 +593,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	page := pageData{Opt: opt, Total: len(s.ds.Species), Shown: len(filtered),
 		Query:    queryFor(r),
 		Filters:  describeFilters(s.fams, opt),
-		ClearURL: queryFor(r)("family"),
+		ClearURL: queryFor(r)("family", "region"),
 	}
 	if sp := s.legendSpecies(); sp != nil {
 		lt := labelledTile(sp, legendBox, opt.Metric3, opt.Locale)
@@ -573,7 +618,23 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	} else {
 		page.AllURL = s.familyURL(r, every)
 	}
-	page.NothingSelected = len(selected) == 0
+	// Either filter emptied to nothing means nothing is selected: the reader
+	// turned something off, and no bird can satisfy an empty set (P-037).
+	page.NothingSelected = len(selected) == 0 || (opt.HasRegions && len(opt.Regions) == 0)
+
+	// The region selector, and its All control, mirroring the family one.
+	page.Zones = s.regionGroups(r, opt)
+	page.AllRegions = !opt.HasRegions || len(opt.Regions) == region.Len()
+	everyRegion := map[string]bool{}
+	for _, id := range append(region.LandIDs(), region.MarineIDs()...) {
+		everyRegion[id] = true
+	}
+	if page.AllRegions {
+		page.AllRegionsURL = s.regionURL(r, nil)
+	} else {
+		page.AllRegionsURL = s.regionURL(r, everyRegion)
+	}
+	page.NoRegion = opt.HasRegions && len(opt.Regions) == 0
 
 	bar, live := s.buildPickBar(r, opt, missingPicks)
 	page.Bar = bar
@@ -1350,6 +1411,110 @@ func format(v float64, as view.Metric, metric bool) string {
 // needs no family parameter at all; nothing selected is a single empty one.
 // Without that distinction the two would be indistinguishable in the query
 // string while meaning opposite things.
+
+// regionRow is one region chip, and zoneGroup one block of them. They mirror
+// familyRow and orderGroup exactly: zones play the part orders play, so the
+// two selectors share markup, CSS and the wrap criterion (P-011, AC-075).
+type regionRow struct {
+	ID       string
+	Code     string
+	Name     string
+	Selected bool
+	URL      template.URL
+}
+
+type zoneGroup struct {
+	Zone     string
+	Selected bool
+	URL      template.URL
+	Regions  []regionRow
+}
+
+// regionURL builds the link that results from toggling regions, using the
+// same absent / explicitly-empty distinction as familyURL: no parameter means
+// everywhere, `region=` means nowhere.
+func (s *server) regionURL(r *http.Request, want map[string]bool) template.URL {
+	q := r.URL.Query()
+	q.Del("region")
+	switch {
+	case len(want) == region.Len():
+		// default: no parameter
+	case len(want) == 0:
+		q.Set("region", "")
+	default:
+		ids := make([]string, 0, len(want))
+		for id := range want {
+			ids = append(ids, id)
+		}
+		sort.Strings(ids)
+		for _, id := range ids {
+			q.Add("region", id)
+		}
+	}
+	if len(q) == 0 {
+		return "/"
+	}
+	return template.URL("/?" + q.Encode())
+}
+
+// regionGroups builds the region selector: every zone, its regions, and the
+// link each toggle produces.
+func (s *server) regionGroups(r *http.Request, opt options) []zoneGroup {
+	sel := opt.Regions
+	if !opt.HasRegions {
+		sel = make(map[string]bool, region.Len())
+		for _, id := range append(region.LandIDs(), region.MarineIDs()...) {
+			sel[id] = true
+		}
+	}
+	var out []zoneGroup
+	for _, z := range region.Zones {
+		g := zoneGroup{Zone: z, Selected: true}
+		inZone := region.InZone(z)
+		for _, rg := range inZone {
+			if !sel[rg.ID] {
+				g.Selected = false
+			}
+		}
+		// The group toggle clears its zone when the whole zone is on, and
+		// selects it otherwise -- an order header's behaviour exactly.
+		next := map[string]bool{}
+		for k, v := range sel {
+			if v {
+				next[k] = true
+			}
+		}
+		for _, rg := range inZone {
+			if g.Selected {
+				delete(next, rg.ID)
+			} else {
+				next[rg.ID] = true
+			}
+		}
+		g.URL = s.regionURL(r, next)
+
+		for _, rg := range inZone {
+			one := map[string]bool{}
+			for k, v := range sel {
+				if v {
+					one[k] = true
+				}
+			}
+			if sel[rg.ID] {
+				delete(one, rg.ID)
+			} else {
+				one[rg.ID] = true
+			}
+			g.Regions = append(g.Regions, regionRow{
+				ID: rg.ID, Code: rg.Code, Name: rg.Name,
+				Selected: sel[rg.ID], URL: s.regionURL(r, one),
+			})
+		}
+		out = append(out, g)
+	}
+	return out
+}
+
 func (s *server) familyURL(r *http.Request, fams map[string]bool) template.URL {
 	q := r.URL.Query()
 	q.Del("family")

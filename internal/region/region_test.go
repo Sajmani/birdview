@@ -136,3 +136,24 @@ func TestMarineBoxesAreDisjoint(t *testing.T) {
 		}
 	}
 }
+
+// TestPelagicIsTheLastZone pins the ordering P-011 asks for. The sea is the
+// one group that is not somewhere a reader lives, so it sits after the places
+// that are, rather than between them.
+//
+// Verifies: P-011.
+func TestPelagicIsTheLastZone(t *testing.T) {
+	if n := len(Zones); n == 0 || Zones[n-1] != "Pelagic" {
+		t.Fatalf("zones end with %q, want Pelagic last; order is %v", Zones[len(Zones)-1], Zones)
+	}
+	// And it is exactly the marine regions, so no land region hides in it.
+	for _, r := range InZone("Pelagic") {
+		if r.Kind != Marine {
+			t.Errorf("%s is in the Pelagic zone but is a %s region", r.ID, r.Kind)
+		}
+	}
+	if len(InZone("Pelagic")) != len(MarineIDs()) {
+		t.Errorf("the Pelagic zone holds %d regions, there are %d marine ones",
+			len(InZone("Pelagic")), len(MarineIDs()))
+	}
+}

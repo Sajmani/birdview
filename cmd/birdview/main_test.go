@@ -81,6 +81,21 @@ func testDataset() *dataset.Dataset {
 		// pass its own test. Real values: Uria lomvia is a dense diver.
 		mk("thimur", "Thick-billed Murre", "Uria lomvia", "Alcidae", 32, 40, 28, 200, 46, 726, 964, 206, dataset.Measured),
 	}
+	// Regions, so the filter of P-011 has something to filter. Deliberately
+	// uneven: the hummingbird is western only, the murre is a seabird that
+	// also comes ashore, and the heron is in no region at all -- which is the
+	// case the filter must not silently swallow.
+	regionsOf := map[string][]string{
+		"annhum": {"USA.5_1", "USA.38_1"},            // California, Oregon
+		"amerob": {"USA.5_1", "USA.39_1", "CAN.9_1"}, // CA, Pennsylvania, Ontario
+		"amecro": {"USA.39_1", "CAN.9_1"},            // Pennsylvania, Ontario
+		"blasti": {"USA.5_1"},                        // California
+		"thimur": {"USA.2_1", "SEA.PAC"},             // Alaska, and at sea
+	}
+	for i := range sp {
+		sp[i].Regions = regionsOf[sp[i].ID]
+	}
+
 	// One mass is a near-match, as 10 of the 841 real ones are. Without it
 	// every mass square renders solid and the dashed branch of P-065 is never
 	// drawn -- the same gap the crow's modeled wingspan fills for the crossbar,
@@ -444,8 +459,7 @@ func TestFamilyFilter(t *testing.T) {
 
 	// The selector labels each family with both names (P-010): the scientific
 	// name alone makes the user translate before they can choose.
-	sel := all[strings.Index(all, `class="ordergroups"`):]
-	sel = sel[:strings.Index(sel, `<p class="count"`)]
+	sel := box(t, all, "families")
 	for _, want := range []string{"Ardeidae", "Ardeidae family", "Turdidae", "Trochilidae"} {
 		if !strings.Contains(sel, want) {
 			t.Errorf("family selector is missing %q", want)
@@ -454,7 +468,10 @@ func TestFamilyFilter(t *testing.T) {
 	// And carries NO per-control count. One count sits above the list instead,
 	// because a per-chip count is only true while family is the only filter:
 	// add a region and "Parulidae 51" is false in Hawaii (P-010).
-	if strings.Contains(sel, "<b>") {
+	// Look at the chips, not the whole box: the help text above them uses <b>
+	// legitimately. A chip count rendered as "<em>common</em><b>51</b>".
+	chips := sel[strings.Index(sel, `class="ordergroups"`):]
+	if strings.Contains(chips, "</em><b>") {
 		t.Error("the family selector still carries per-entry counts; they belong above the list")
 	}
 	if !strings.Contains(all, `<p class="count">`) {
@@ -655,15 +672,16 @@ func TestHelpCoversEveryControl(t *testing.T) {
 	// panel-wide search is satisfied by the control existing rather than by it
 	// being explained -- which is how the first version of this passed with the
 	// explanations deleted outright.
-	hi := strings.Index(body, `<div class="ctrlhelp">`)
-	if hi < 0 {
-		t.Fatal("the controls panel carries no explanation block")
+	// Each panel documents its own controls (P-035), so this searches all of
+	// them rather than the one that used to hold everything.
+	if !strings.Contains(body, `<div class="ctrlhelp">`) {
+		t.Fatal("no panel carries an explanation block")
 	}
-	controls := body[hi:]
-	controls = controls[:strings.Index(controls, "</details>")]
-	for _, control := range []string{"Order by", "Scale", "Section step", "Units", "Family", "Compare birds"} {
+	controls := body
+	for _, control := range []string{"Order by", "Scale", "Section step", "Units", "Names",
+		"Family", "Region", "Compare birds"} {
 		if !strings.Contains(controls, "<dt>"+control+"</dt>") {
-			t.Errorf("the controls panel does not explain the %q control", control)
+			t.Errorf("no panel explains the %q control", control)
 		}
 	}
 	// And both scale modes, which is the one control a reader cannot discover
@@ -877,23 +895,25 @@ func TestAllToggle(t *testing.T) {
 	s := newTestServer(t)
 
 	_, fresh := get(t, s, "/")
-	clear := html.UnescapeString(mustMatch(t, fresh,
-		`<a class="btn on"[^>]*href="([^"]+)"[^>]*>All`, "the All control on a fresh page"))
+	// The Regions box carries an All control too and comes first on the page,
+	// so this must say which selector it means (P-011).
+	clear := html.UnescapeString(mustMatch(t, box(t, fresh, "families"),
+		`<a class="btn on"[^>]*href="([^"]+)"[^>]*>All`, "the family All control on a fresh page"))
 
 	_, empty := get(t, s, clear)
-	if strings.Count(empty, `class="btn ohdr on"`) != 0 {
+	if strings.Count(box(t, empty, "families"), `class="btn ohdr on"`) != 0 {
 		t.Error("orders still show as selected after clearing")
 	}
-	if strings.Count(empty, `class="chip on"`) != 0 {
+	if strings.Count(box(t, empty, "families"), `class="chip on"`) != 0 {
 		t.Error("families still show as selected after clearing")
 	}
 
 	// Back again: All selects every family, and every order lights up.
-	restore := html.UnescapeString(mustMatch(t, empty,
-		`<a class="btn"[^>]*href="([^"]+)"[^>]*>All`, "the All control on an emptied page"))
+	restore := html.UnescapeString(mustMatch(t, box(t, empty, "families"),
+		`<a class="btn"[^>]*href="([^"]+)"[^>]*>All`, "the family All control on an emptied page"))
 	_, all := get(t, s, restore)
 	_, _, wantOrders := fixtureCounts()
-	if n := strings.Count(all, `class="btn ohdr on"`); n != wantOrders {
+	if n := strings.Count(box(t, all, "families"), `class="btn ohdr on"`); n != wantOrders {
 		t.Errorf("%d of %d orders selected after re-selecting All", n, wantOrders)
 	}
 	if !strings.Contains(all, "Great Blue Heron") {
@@ -908,15 +928,20 @@ func TestAllToggle(t *testing.T) {
 func TestDefaultSelectsEverything(t *testing.T) {
 	s := newTestServer(t)
 	_, body := get(t, s, "/")
-	if !regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(body) {
+	fams := box(t, body, "families")
+	if !regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(fams) {
 		t.Error("All is not selected on a fresh page")
 	}
 	_, wantFams, wantOrders := fixtureCounts()
-	if n := strings.Count(body, `class="btn ohdr on"`); n != wantOrders {
+	if n := strings.Count(fams, `class="btn ohdr on"`); n != wantOrders {
 		t.Errorf("%d of %d orders selected on a fresh page", n, wantOrders)
 	}
-	if n := strings.Count(body, `class="chip on"`); n != wantFams {
+	if n := strings.Count(fams, `class="chip on"`); n != wantFams {
 		t.Errorf("%d of %d families selected on a fresh page", n, wantFams)
+	}
+	// Everywhere is selected on arrival too, and by the same rule (P-011).
+	if !regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(box(t, body, "regions")) {
+		t.Error("All regions is not selected on a fresh page")
 	}
 	if !strings.Contains(body, "Great Blue Heron") {
 		t.Error("fresh page should show every species")
@@ -932,8 +957,8 @@ func TestDefaultSelectsEverything(t *testing.T) {
 func TestClearingEverythingShowsGuidance(t *testing.T) {
 	s := newTestServer(t)
 	_, body := get(t, s, "/")
-	clear := html.UnescapeString(mustMatch(t, body,
-		`<a class="btn on"[^>]*href="([^"]+)"[^>]*>All`, "the All control on a fresh page"))
+	clear := html.UnescapeString(mustMatch(t, box(t, body, "families"),
+		`<a class="btn on"[^>]*href="([^"]+)"[^>]*>All`, "the family All control on a fresh page"))
 
 	_, empty := get(t, s, clear)
 	for _, gone := range []string{"Great Blue Heron", "American Robin", "American Crow"} {
@@ -952,7 +977,7 @@ func TestClearingEverythingShowsGuidance(t *testing.T) {
 		t.Errorf("count line should report nothing shown as %q", want)
 	}
 	// And All must offer the way back.
-	if regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(empty) {
+	if regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(box(t, empty, "families")) {
 		t.Error("All is still marked selected with nothing selected")
 	}
 }
@@ -3020,20 +3045,39 @@ func TestEveryControlIsDocumented(t *testing.T) {
 	// and body[-1:] panics before any assertion below can run -- so a broken
 	// selector would report a crash rather than "the selector is broken",
 	// which is the same confusion AC-075's parser once produced.
-	hi := strings.Index(body, `class="ctrlhelp"`)
-	di := strings.Index(body, "</dl>")
-	if hi < 0 || di < hi {
-		t.Fatalf("cannot locate the Controls documentation block (ctrlhelp=%d, </dl>=%d); "+
-			"the selector is broken, not the page", hi, di)
+	// Every panel documents its own controls (P-035), so both sets are
+	// gathered across the whole page rather than from one box.
+	if !strings.Contains(body, `class="ctrlhelp"`) {
+		t.Fatal("no panel carries a documentation block; the selector is broken, not the page")
 	}
-	help := body[hi:di]
+	var help string
+	for _, part := range strings.Split(body, `class="ctrlhelp"`)[1:] {
+		end := strings.Index(part, "</dl>")
+		if end < 0 {
+			t.Fatal("a documentation block is never closed; the selector is broken, not the page")
+		}
+		help += part[:end]
+	}
+	// An entry marked `ctrl note` explains something that is not a control --
+	// what a zone is, what pelagic means. Those are allowed to have no
+	// matching label, and are dropped before the sets are compared. Entries
+	// not so marked must correspond to a control, which is the half of this
+	// check that catches documentation for a control that was removed.
+	var docs []string
+	for _, part := range strings.Split(help, `<div class="ctrl`)[1:] {
+		if strings.HasPrefix(part, " note") {
+			continue
+		}
+		docs = append(docs, part)
+	}
+	help = strings.Join(docs, "")
 	documented := map[string]bool{}
 	for _, m := range regexp.MustCompile(`<dt>([^<]+)</dt>`).FindAllStringSubmatch(help, -1) {
 		documented[strings.TrimSpace(html.UnescapeString(m[1]))] = true
 	}
 
-	// Control labels live below the help, in the rows themselves.
-	rows := body[di:]
+	// Control labels live in the rows, which sit below each help block.
+	rows := body
 	labels := map[string]bool{}
 	for _, m := range regexp.MustCompile(`<span class="lbl">([^<]+)</span>`).
 		FindAllStringSubmatch(rows, -1) {
@@ -3054,12 +3098,117 @@ func TestEveryControlIsDocumented(t *testing.T) {
 
 	for l := range labels {
 		if !documented[l] {
-			t.Errorf("the %q control has no entry in the Controls documentation (P-035)", l)
+			t.Errorf("the %q control is documented in no panel (P-035)", l)
 		}
 	}
 	for d := range documented {
 		if !labels[d] {
-			t.Errorf("the Controls documentation defines %q, which is not a control on the page", d)
+			t.Errorf("the documentation defines %q, which is not a control on the page", d)
+		}
+	}
+}
+
+// box returns one collapsible panel of the index by its id. The controls were
+// one panel and are now three (P-036), so a test that counts chips or order
+// headers has to say WHICH selector it means -- the family and region
+// selectors share markup and CSS deliberately, so a page-wide count sees both.
+func box(t *testing.T, body, id string) string {
+	t.Helper()
+	open := `<details class="controls" id="` + id + `"`
+	i := strings.Index(body, open)
+	if i < 0 {
+		t.Fatalf("no panel with id %q on the page", id)
+	}
+	rest := body[i:]
+	j := strings.Index(rest, "</details>")
+	if j < 0 {
+		t.Fatalf("panel %q is never closed", id)
+	}
+	return rest[:j]
+}
+
+// TestRegionFilter asserts P-011 and its composition with family (P-012).
+//
+// Verifies: P-011, P-012. Criterion: AC-086.
+func TestRegionFilter(t *testing.T) {
+	s := newTestServer(t)
+
+	// One region shows what is reported there and excludes the rest.
+	_, ca := get(t, s, "/?region=USA.5_1")
+	// Unescaped: the fixture's names carry apostrophes, which the template
+	// writes as &#39; and a raw substring search then misses.
+	tiles := html.UnescapeString(tileArea(t, ca))
+	for _, want := range []string{"Anna's Hummingbird", "American Robin", "Black-necked Stilt"} {
+		if !strings.Contains(tiles, want) {
+			t.Errorf("California omits %s", want)
+		}
+	}
+	for _, gone := range []string{"American Crow", "Thick-billed Murre"} {
+		if strings.Contains(tiles, gone) {
+			t.Errorf("California shows %s, which is not reported there", gone)
+		}
+	}
+
+	// Absent means everywhere; explicitly empty means nowhere. The family
+	// filter draws the same distinction, and conflating them is the bug it
+	// had first.
+	_, all := get(t, s, "/")
+	_, none := get(t, s, "/?region=")
+	if strings.Count(tileArea(t, all), "tilewrap") == 0 {
+		t.Fatal("no species with no region parameter")
+	}
+	if n := strings.Count(tileArea(t, none), "tilewrap"); n != 0 {
+		t.Errorf("an empty region= showed %d species; it must show none", n)
+	}
+
+	// Composition: region and family narrow together, and an empty
+	// intersection names both filters rather than blaming one.
+	_, both := get(t, s, "/?region=USA.5_1&family=Corvidae")
+	if n := strings.Count(tileArea(t, both), "tilewrap"); n != 0 {
+		t.Errorf("California plus Corvidae showed %d species; the crow is not in California", n)
+	}
+	if !strings.Contains(both, "No birds match") {
+		t.Error("an empty intersection does not report a failed match")
+	}
+	for _, want := range []string{"Region", "California", "Family", "Corvidae"} {
+		if !strings.Contains(both, want) {
+			t.Errorf("the empty state does not name %q", want)
+		}
+	}
+
+	// A seabird appears under its ocean as well as the coast it is seen from.
+	_, sea := get(t, s, "/?region=SEA.PAC")
+	if !strings.Contains(html.UnescapeString(tileArea(t, sea)), "Thick-billed Murre") {
+		t.Error("the Pacific shows no murre; a pelagic species has nowhere else to be")
+	}
+	_, ak := get(t, s, "/?region=USA.2_1")
+	if !strings.Contains(html.UnescapeString(tileArea(t, ak)), "Thick-billed Murre") {
+		t.Error("Alaska omits the murre, which is seen from shore there as well as at sea")
+	}
+}
+
+// TestRegionSelectorIsGroupedWithPelagicLast checks the control, not the
+// filtering: zones group the regions and the sea comes last (P-011).
+//
+// Verifies: P-011. Criterion: AC-086.
+func TestRegionSelectorIsGroupedWithPelagicLast(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/")
+	sel := box(t, body, "regions")
+
+	var zones []string
+	for _, m := range regexp.MustCompile(`every region in ([^"]+)"`).FindAllStringSubmatch(sel, -1) {
+		zones = append(zones, html.UnescapeString(m[1]))
+	}
+	if len(zones) < 2 {
+		t.Fatalf("found %d zone toggles; the selector is not grouped", len(zones))
+	}
+	if last := zones[len(zones)-1]; last != "Pelagic" {
+		t.Errorf("the last zone is %q, want Pelagic — the sea is not a place anyone lives", last)
+	}
+	// Chips carry the standard abbreviation and the full name beside it.
+	for _, want := range []string{`>CA<em>California</em>`, `>PA<em>Pennsylvania</em>`} {
+		if !strings.Contains(sel, want) {
+			t.Errorf("the region selector is missing a chip matching %q", want)
 		}
 	}
 }

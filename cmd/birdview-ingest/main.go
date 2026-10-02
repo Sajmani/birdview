@@ -21,6 +21,7 @@ import (
 	"birdview/internal/inat"
 	"birdview/internal/morphology"
 	"birdview/internal/palette"
+	"birdview/internal/region"
 	"birdview/internal/taxonomy"
 	"birdview/internal/wingspan"
 )
@@ -37,6 +38,7 @@ func main() {
 		foxPath  = flag.String("wingspan", "wingspan_fox2026_AppendixS1.xlsx", "Fox et al. wingspan workbook")
 		avlPath  = flag.String("avilist", "AviList-v2025b-10Jun2026-extended.xlsx", "AviList checklist (extended release)")
 		inatPath = flag.String("inat", "data/inat-taxa.tsv", "iNaturalist taxon mapping (built by birdview-inatmap)")
+		regPath  = flag.String("regions", "data/region-presence.tsv", "per-region presence (built by birdview-regions)")
 		outPath  = flag.String("out", "web/data/species.json", "output path (a build artifact)")
 	)
 	flag.Parse()
@@ -56,6 +58,16 @@ func main() {
 		log.Printf("birdview-ingest: WARNING: no iNaturalist links (%v)", err)
 	} else {
 		fmt.Printf("  iNaturalist links: %d of %d species (P-064)\n", linked, len(ds.Species))
+	}
+
+	placed, err := applyRegions(ds, *regPath)
+	if err != nil {
+		// Like the iNaturalist table: an enhancement, loud when absent rather
+		// than fatal, because the dataset is correct without it and silently
+		// shipping an unregioned build is how nobody notices.
+		log.Printf("birdview-ingest: WARNING: no region data (%v)", err)
+	} else {
+		fmt.Printf("  regions          : %d of %d species placed (P-011)\n", placed, len(ds.Species))
 	}
 
 	if err := os.MkdirAll(filepath.Dir(*outPath), 0o755); err != nil {
@@ -420,6 +432,28 @@ func id(sci string) string {
 // A species absent from the table gets no taxon ID and therefore no link, which
 // is the intended outcome for anything iNaturalist has not confidently matched
 // -- usually a split it has not yet followed (CR-012).
+// applyRegions joins the generated presence table onto the dataset (P-011).
+func applyRegions(ds *dataset.Dataset, path string) (int, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+	table, err := region.LoadPresence(f)
+	if err != nil {
+		return 0, err
+	}
+	var n int
+	for i := range ds.Species {
+		rs := table[ds.Species[i].ScientificName]
+		ds.Species[i].Regions = rs
+		if len(rs) > 0 {
+			n++
+		}
+	}
+	return n, nil
+}
+
 func applyINat(ds *dataset.Dataset, path string) (int, error) {
 	f, err := os.Open(path)
 	if err != nil {

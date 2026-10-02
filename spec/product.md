@@ -414,11 +414,18 @@ in the collapsed summary of a filter control, so the two cannot drift apart.
 Subject: `presentation.controls`
 Goals: G-002
 
-The controls panel is collapsible and starts open, like the Presentation panel above it. Once collapsed
-it **stays** collapsed across navigations (P-038).
+The controls are **several collapsible panels**, each starting open and each remembering its own
+state across navigations (P-038): **Controls** for the display toggles, **Regions**, and
+**Families**.
 
-Rationale: the family selector is 91 chips in 25 groups, which pushes the birds well below the
-fold. A reader who has chosen their filter should be able to put it away — and have it stay away.
+They are separate boxes rather than one, because the two filters are large — 90 family chips in
+26 order groups, and 74 regions in 10 zones — and stacking both inside one panel pushes the birds
+a long way below the fold while making "collapse the filter I am done with" impossible. Each
+panel carries the documentation for its own controls (P-035), so an explanation sits with the
+thing it explains.
+
+Rationale: a reader who has chosen their filter should be able to put it away — and have it stay
+away. With two filters that is not one decision but two, and one panel cannot express it.
 
 ### P-035 — The page explains itself
 Subject: `presentation.help`

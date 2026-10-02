@@ -17,7 +17,13 @@
 // Verifies: P-011.
 package region
 
-import "sort"
+import (
+	"bufio"
+	"fmt"
+	"io"
+	"sort"
+	"strings"
+)
 
 // Kind separates a real administrative region from one BirdView drew.
 type Kind string
@@ -46,7 +52,9 @@ type Region struct {
 }
 
 // Zones in the order they are offered. Roughly west to east, then outward,
-// which is how a reader scans for their own state.
+// which is how a reader scans for their own state. **Pelagic is last**: it is
+// the only group that is not a place anyone lives, and a reader looking for
+// their state should not have to scroll past the open ocean to find it.
 var Zones = []string{
 	"Alaska & the North",
 	"Pacific",
@@ -57,7 +65,7 @@ var Zones = []string{
 	"Northeast",
 	"Southeast",
 	"Outlying Islands",
-	"At Sea",
+	"Pelagic",
 }
 
 // Marine boxes. **They are disjoint**, touching only at shared edges, so a
@@ -207,7 +215,7 @@ func init() {
 		{"SEA.ARC", "Arctic", "Arctic Ocean"},
 	}
 	for _, r := range sea {
-		add(r.id, r.code, r.name, Marine, "At Sea")
+		add(r.id, r.code, r.name, Marine, "Pelagic")
 	}
 }
 
@@ -243,4 +251,43 @@ func LandIDs() []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// Presence is the per-species region table built by cmd/birdview-regions:
+// scientific name to the regions that species was reported in.
+type Presence map[string][]string
+
+// LoadPresence reads the generated table. Comment lines carry the region
+// names for a human reading the file and are not parsed back -- the names
+// live in this package, and reading them from the data would let the two
+// disagree without anything noticing.
+func LoadPresence(r io.Reader) (Presence, error) {
+	out := Presence{}
+	sc := bufio.NewScanner(r)
+	sc.Buffer(make([]byte, 0, 64*1024), 1024*1024)
+	line := 0
+	for sc.Scan() {
+		line++
+		t := sc.Text()
+		if t == "" || strings.HasPrefix(t, "#") {
+			continue
+		}
+		name, ids, ok := strings.Cut(t, "\t")
+		if !ok {
+			return nil, fmt.Errorf("region presence line %d: no tab", line)
+		}
+		if ids == "" {
+			out[name] = nil
+			continue
+		}
+		var rs []string
+		for _, id := range strings.Split(ids, ",") {
+			if _, known := Get(id); !known {
+				return nil, fmt.Errorf("region presence line %d: %q is in no region table entry", line, id)
+			}
+			rs = append(rs, id)
+		}
+		out[name] = rs
+	}
+	return out, sc.Err()
 }
