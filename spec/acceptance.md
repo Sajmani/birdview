@@ -1186,6 +1186,39 @@ diagram's palette" and implemented it as a search for three hardcoded literals �
 would have passed through any change to the app's colours whatever. That is why the drift it was
 written to prevent went unnoticed until someone looked.
 
+### AC-082 — Nothing in a tile header can wrap to a second line
+**Verifies:** P-031 · **Level:** code · **Method:** a structural check over the stylesheet, plus
+assertions on the rendered markup — the pattern [AC-075](#ac-075) uses, for the same reason
+
+**Assertions, the name line cannot wrap:** `.nameline` declares `flex-wrap: nowrap`, and the
+common name sits in its own `.cnname` element carrying `white-space: nowrap` with
+`text-overflow: ellipsis`. Both halves are needed: without the element the ellipsis would eat the
+banding code at the end of `.cn`, which is the one part that must survive.
+
+**Assertions, the code never truncates:** `.cn .code` declares `flex: none`, so it keeps its
+width while everything beside it gives way.
+
+**Assertions, the badge cannot wrap:** `.badge` declares `white-space: nowrap` with
+`text-overflow: ellipsis` and a `max-width`, a bare `nowrap` being worse than wrapping — it would
+overflow the tile instead.
+
+**Assertions, markup:** every tile header contains exactly one `.cnname`, and the banding code
+when present is a sibling of it rather than inside it. A code nested in the truncating element is
+the defect this criterion exists to prevent, and it looks identical until a name is long enough.
+
+**Status: verified 2026-10-02 — passing, and watched failing** by removing `flex-wrap: nowrap`
+from `.nameline`, which is the shipped bug; by dropping `white-space: nowrap` from `.cnname`; by
+dropping `flex: none` from `.code`; by moving the code inside `.cnname` in the template, where
+the markup assertion catches what no stylesheet check can see; and by reverting `.badge` to its
+wrapping form.
+
+**Why this is structural and not visual.** Whether text *actually* wraps depends on font metrics
+and the viewport, which this project cannot measure without a browser harness — the gap already
+declared for P-010 and P-030–P-033. What is checkable is that the rules making wrapping
+impossible are present and that the markup gives them something to act on. That is weaker than
+seeing it, and it is what caught the bug's shape: the original defect was not a bad measurement
+but a missing declaration.
+
 ---
 
 ## Traceability
@@ -1204,7 +1237,7 @@ written to prevent went unnoticed until someone looked.
 | P-022, P-023 | AC-021 | |
 | P-024 | AC-022 | |
 | P-030 | AC-054 | |
-| P-031 | AC-055, AC-077 | |
+| P-031 | AC-055, AC-077, AC-082 | |
 | P-032 | AC-057 | |
 | P-033 | AC-056 | |
 | P-034 | AC-043, AC-054, AC-058 | |

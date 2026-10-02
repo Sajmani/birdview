@@ -127,15 +127,39 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .tile:visited { color: inherit; }
 .tile:hover { border-color: var(--accent); }
 .tile.big { width: min(760px, 100%); }
-.nameline { display: flex; align-items: baseline; gap: 10px; }
-.cn { font-size: 13px; font-weight: 700; }
+/* The header is ONE line (P-031), and stays one line at any name length.
+
+   It did not. "Greater Necklaced Laughingthrush (GNLA)" wrapped its banding
+   code onto a second line, which made that tile taller than its neighbours --
+   and because .tiles is a flex row, one tall tile leaves the rest of the row
+   ragged, with the diagrams no longer at a common vertical offset. Comparing
+   down a section is what the index is for, so a tile out of step costs more
+   than a truncated word does. 8 of 841 names are long enough to do it.
+
+   What gives way, in order: the scientific name first, then the common name.
+   The banding code never does. It is six fixed characters, and it is the one
+   part a reader cannot reconstruct from a truncation. */
+.nameline { display: flex; align-items: baseline; gap: 10px; flex-wrap: nowrap; }
+.cn { font-size: 13px; font-weight: 700; display: flex; align-items: baseline;
+  gap: 5px; min-width: 0; flex: 0 1 auto; }
+.cnname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cn .code { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim);
-  font-weight: 500; }
-/* Right-justified on the same line, and the first thing to give up room. */
+  font-weight: 500; flex: none; }
+/* Right-justified on the same line, and the first to give up room: it shrinks
+   twenty times faster than the common name beside it. */
 .sn { font-size: 11.5px; font-style: italic; color: var(--dim); margin-left: auto;
-  text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  flex: 0 20 auto; min-width: 0; }
+/* One line too, and for the same reason as .nameline above: a wrapped badge
+   makes its tile taller and takes the row out of step. The tile's inner width
+   is 374px and the longest badge -- Phasianidae, at 62 characters -- is close
+   enough to it that this is not hypothetical. The family's scientific name
+   leads, so truncation eats the common name, which is the half a reader can
+   do without. */
 .badge { display: inline-block; font-size: 10.5px; font-weight: 600;
-  border-radius: 4px; padding: 1px 6px; margin-top: 4px; }
+  border-radius: 4px; padding: 1px 6px; margin-top: 4px;
+  max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  vertical-align: bottom; }
 .badge em { font-style: normal; font-weight: 400; }
 .badge em::before { content: "\00b7"; margin: 0 4px; }
 .ft { display: flex; gap: 14px; font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;

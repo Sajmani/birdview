@@ -239,6 +239,31 @@ construction a run of birds of similar length.
 
 Tiles wrap to fill the available display width.
 
+**Every tile is the same height, and nothing inside one may wrap to make it taller.** The header
+is one line, the family badge is one line, the diagram has a fixed aspect, and the footer is one
+line — so uniform height is a consequence of the parts rather than something imposed on top of
+them.
+
+Where text does not fit, it **truncates on that one line** rather than taking a second. What
+gives way is ordered, and the order is about what a reader can reconstruct:
+
+| | gives way |
+| --- | --- |
+| scientific name | first, and most readily |
+| family common name, in the badge | next; the family's scientific name leads and survives |
+| common name | last |
+| **four-letter banding code** | **never** |
+
+The banding code is six fixed characters and is the one element that cannot be guessed from a
+truncation, so it is the one element that never truncates.
+
+Rationale: this is a layout rule in service of G-001. A section is a run of birds drawn to one
+scale, and reading down it — comparing diagrams, and comparing mass cubes against each other — is
+what the index is for. A single tile standing taller than its neighbours puts every diagram in
+that row at a different offset, which costs the comparison far more than an abbreviated word
+does. Eight of the 841 common names are long enough to wrap, and the longest family badge comes
+within a few pixels of the tile's inner width; one tile is enough to disturb a whole row.
+
 In pick mode ([P-068](#p-068)) each tile also carries a **pick control**, beside the tile's own
 link rather than inside it. In browsing mode it is absent entirely, so the tile a reader sees
 almost all the time is unchanged.
