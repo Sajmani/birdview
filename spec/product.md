@@ -173,12 +173,56 @@ Checklist sequence is how the ABA checklist, Sibley and every other field guide 
 it is the order a birder already has in their head — and alphabetizing actively discards an
 ordering the source file provides for free.
 
-### P-011 — Filter by location
-Status: **Withdrawn** — no freely redistributable per-region occurrence data exists at useful
-granularity. See [CR-003](decisions.md#cr-003).
+### P-011 — Filter by region
+Subject: `presentation.region_filter`
+Goals: G-002
+
+**Reinstated 2026-10-02**, having been withdrawn because no freely redistributable per-region
+occurrence data existed at useful granularity ([CR-003](decisions.md#cr-003)). It does: GBIF
+serves eBird and iNaturalist under CC BY 4.0 with GADM regions as a queryable field.
+
+The user filters to any subset of **US states and Canadian provinces**, multi-select, exactly as
+the family filter works — everything selected on arrival, an **All** control, and group toggles.
+
+**Membership is per region and relative.** A species belongs to a region when it reaches **1
+record per million** of that region's bird records, in either source. Relative rather than a
+fixed count for two measured reasons: eBird's volume doubled in five years, so any absolute bar
+admits more species over time for no ecological reason; and effort differs enormously between
+regions — California has 114 million records against Hawaii's 2.5 million — so one count cannot
+mean the same thing in both.
+
+**Deciding membership per region is what keeps the endemics.** A continental cut drops them by
+construction: the Millerbird's handful of records is nothing against a billion, and 22 per
+million within Hawaii. The regional rule needs no special case for them.
+
+**Groups are a navigation aid and claim nothing about birds.** States and provinces are gathered
+into geographic zones so a reader can select their area in one click, and zones mix the two
+countries — British Columbia sits with Washington and Oregon, not with Nova Scotia.
+
+They are **not** avifaunal regions, and the spec says so because the data says so. Clustering all
+64 regions by how much their species lists actually overlap produces one 42-member block covering
+the entire east, midwest, plains and maritimes; Maine and Georgia share 0.75 of their species and
+Pennsylvania and Illinois 0.80, against 0.55 for Pennsylvania and Arizona. There is no
+data-driven way to subdivide the east, so any subdivision is for finding your state and must not
+be dressed up as biology.
+
+**Six species belong to no region, and that is structural.** Bermuda Petrel, Desertas Petrel,
+Trindade Petrel, Townsend's Storm-Petrel, Craveri's Murrelet and Guadalupe Murrelet are seen at
+sea, where no land polygon reaches — Bermuda Petrel has 384 records in the ABA Area and **zero**
+in any GADM region. They are not errors and must not be filtered away silently; a pelagic bird is
+still a bird a reader may want.
 
 ### P-012 — Filters compose
-Status: **Withdrawn** with P-011. Family is the only filter in v1.
+Subject: `presentation.filters`
+Goals: G-002
+
+**Reinstated with [P-011](#p-011).** Region and family narrow the list together: what is shown is
+what every active filter admits. Selecting Hawaii and Parulidae shows the warblers of Hawaii, and
+shows nothing if there are none.
+
+An empty intersection is a real outcome and is **not** the same as nothing being selected
+([P-037](#p-037)). The empty state names each filter and what it is set to, because with two
+filters a reader cannot otherwise tell which one emptied the page.
 
 ---
 

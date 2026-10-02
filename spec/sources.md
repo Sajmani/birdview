@@ -192,8 +192,8 @@ accepted* — is exactly what should attract scrutiny rather than escape it.
 | **Import style** | By reference, **queried not vendored** — `cmd/birdview-gbifmap` reads the API and writes the bridge table, which the repository commits |
 | **Scope** | Names only: mapping a GBIF backbone scientific name onto the AviList name for the same taxon |
 | **Geographic scope** | The backbone is worldwide. The species set the bridge covers is scoped to `country=US` and `country=CA` — 1,378 species over 1,238,404,492 records. |
-| **Adopted parts** | Three endpoints: `/occurrence/search` faceted on `speciesKey` to enumerate the species, `/species/{key}` for the accepted name and family, `/species/{key}/synonyms` for the names it absorbed. |
-| **Exclusions** | Occurrence records themselves — no coordinate, date, observer, media or count reaches the dataset. `/species/match` is excluded as unfit, below. **And the occurrence counts are not used for scope:** whether BirdView's species list should come from them is an open product decision, and this adoption deliberately does not settle it. |
+| **Adopted parts** | `/occurrence/search` faceted on `speciesKey` (the bridge) and on `verbatimScientificName` per GADM region (region membership, [P-011](product.md#p-011)); `/species/{key}` for the accepted name and family; `/species/{key}/synonyms` for the names it absorbed. The **iNaturalist research-grade dataset**, `50c9509d-22c7-4a22-a47d-8c48425ef4a7`, is queried the same way and for one reason: eBird withholds sensitive species. |
+| **Exclusions** | Occurrence records themselves — no coordinate, date, observer or media reaches the dataset. `/species/match` is excluded as unfit, below. **The occurrence counts are still not used for scope**, which remains an open product decision; they *are* used for region membership ([P-011](product.md#p-011)), where only the derived list of regions per species is stored, never a count. |
 | **Owner** | GBIF Secretariat |
 | **Status** | **Adopted 2026-10-02** for the name bridge. License verified from the API's own dataset records; coverage measured and recorded below; no criteria in `acceptance.md` yet. |
 

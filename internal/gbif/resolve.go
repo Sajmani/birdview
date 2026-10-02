@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -157,6 +158,90 @@ func (c *Client) SpeciesKeys(ctx context.Context, datasetKey string, countries [
 		offset += len(counts)
 	}
 	return out, total, nil
+}
+
+// RegionRecord is one verbatim name and its occurrence count in a region.
+type RegionRecord struct {
+	// Name is the scientific name AS THE PUBLISHER WROTE IT, lowercased by
+	// the facet. Deliberately not GBIF's matched name: the backbone silently
+	// drops what it cannot resolve, which is how Cooper's Hawk came to have
+	// zero records (sources.md, `gbif`).
+	Name    string
+	Records int64
+}
+
+// NamesIn lists every bird name the dataset reports from one GADM region,
+// with its occurrence count.
+//
+// Faceting on the VERBATIM name rather than on speciesKey is the whole point.
+// A speciesKey facet answers "what does GBIF's backbone think is here", which
+// omits ~0.4% of records outright; this answers "what did the publisher say
+// was here", which is the question scope actually turns on.
+//
+// gadmGid is a level-1 region: "USA.5_1" is California.
+func (c *Client) NamesIn(ctx context.Context, datasetKey, gadmGid string) ([]RegionRecord, error) {
+	var out []RegionRecord
+	seen := map[string]bool{}
+	for offset := 0; ; {
+		q := url.Values{}
+		q.Set("datasetKey", datasetKey)
+		q.Set("gadmGid", gadmGid)
+		q.Set("taxonKey", strconv.Itoa(AvesTaxonKey))
+		q.Set("limit", "0")
+		q.Set("facet", "verbatimScientificName")
+		q.Set("facetLimit", strconv.Itoa(facetPage))
+		q.Set("facetOffset", strconv.Itoa(offset))
+
+		var body facetResponse
+		if err := c.get(ctx, "/occurrence/search?"+q.Encode(), &body); err != nil {
+			return nil, fmt.Errorf("faceting names in %s at offset %d: %w", gadmGid, offset, err)
+		}
+		if len(body.Facets) == 0 || len(body.Facets[0].Counts) == 0 {
+			break
+		}
+		for _, f := range body.Facets[0].Counts {
+			n := strings.ToLower(strings.TrimSpace(f.Name))
+			if n == "" {
+				continue
+			}
+			// As in SpeciesKeys: a repeat means facetOffset is being ignored
+			// and the loop would page forever over one block.
+			if seen[n] {
+				return nil, fmt.Errorf(
+					"facet returned %q twice at offset %d in %s; facetOffset is being ignored",
+					n, offset, gadmGid)
+			}
+			seen[n] = true
+			out = append(out, RegionRecord{Name: n, Records: f.Count})
+		}
+		offset += len(body.Facets[0].Counts)
+	}
+	return out, nil
+}
+
+// RegionName returns the GADM level-1 name for a region id, by reading it off
+// a single occurrence. Empty when the dataset reports nothing there.
+func (c *Client) RegionName(ctx context.Context, datasetKey, gadmGid string) (string, error) {
+	q := url.Values{}
+	q.Set("datasetKey", datasetKey)
+	q.Set("gadmGid", gadmGid)
+	q.Set("limit", "1")
+	var body struct {
+		Results []struct {
+			Gadm struct {
+				Level1 struct {
+					Name string `json:"name"`
+				} `json:"level1"`
+			} `json:"gadm"`
+		} `json:"results"`
+	}
+	if err := c.get(ctx, "/occurrence/search?"+q.Encode(), &body); err != nil {
+		return "", fmt.Errorf("naming %s: %w", gadmGid, err)
+	}
+	if len(body.Results) == 0 {
+		return "", nil
+	}
+	return body.Results[0].Gadm.Level1.Name, nil
 }
 
 type speciesResponse struct {
