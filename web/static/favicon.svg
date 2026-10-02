@@ -6,10 +6,24 @@
     head, plus a bill nub for the palette's amber. The tail is solid rather
     than dashed, because a 5/3 dash pattern is invisible at this size.
 
-    Colors are the diagram's own, chosen for contrast on #0f172a:
-    wing #5ccbfa at 9.67:1, body and head #cbd5e1 at 12.02:1,
-    bill #f59e0b at 8.31:1. The body's own #64748b is 3.75:1 and is not
-    used here.
+    Colors are the diagram's own, and must stay that way (P-048): the icon
+    may use no color that paints no part of the diagram. AC-081 checks this
+    against the stylesheet, so a change there without a change here is caught.
+
+    On #0f172a: wing #4ade80 at 10.25:1, head and body #cbd5e1 at 12.02:1,
+    bill #f59e0b at 8.31:1.
+
+    The crossbar was #5ccbfa until 2026-10-02, which is the interface accent
+    and paints nothing in the diagram at all. It was adopted because the
+    crossbar's own blue was too dark for this icon, which was real evidence
+    that the blue was too dark full stop: it was also failing the 7:1 text
+    floor on the labels sharing it. Fixing the vocabulary rather than this
+    copy of it is what P-048 asks for.
+
+    Two parts are drawn in a color that is not their own, which P-048 allows
+    at this size and which is why AC-081 does not check per-part mapping. The
+    body uses the head's #cbd5e1 because its own #64748b is 3.75:1 and
+    unreadable at 16px, and neck and tail collapse into the same stroke.
 
     Opaque background rather than transparent, so the icon reads the same
     against light and dark browser chrome.
@@ -21,7 +35,7 @@
   <rect width="32" height="32" rx="7" fill="#0f172a"/>
   <g fill="none" stroke-linecap="round">
     <!-- Wings first, so the body crosses in front of them, as in the app. -->
-    <path d="M2.5 14.5 H29.5" stroke="#5ccbfa" stroke-width="3"/>
+    <path d="M2.5 14.5 H29.5" stroke="#4ade80" stroke-width="3"/>
     <path d="M16 3.5 V7" stroke="#f59e0b" stroke-width="2"/>
     <circle cx="16" cy="10" r="3.1" fill="#cbd5e1" stroke="none"/>
     <path d="M16 12.5 V23" stroke="#cbd5e1" stroke-width="4" stroke-linecap="butt"/>

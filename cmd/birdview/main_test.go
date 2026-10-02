@@ -1261,13 +1261,11 @@ func TestFaviconIsServedLocally(t *testing.T) {
 	if probe.ViewBox == "" {
 		t.Error("favicon has no viewBox, so it will not scale to a 16px tab")
 	}
-	// It is drawn with the app's own colors, so a theme change that leaves the
-	// icon behind is visible here rather than only in a browser tab.
-	for _, want := range []string{"#0f172a", "#5ccbfa", "#cbd5e1"} {
-		if !strings.Contains(body, want) {
-			t.Errorf("favicon does not use %s; it should be drawn in the diagram's palette", want)
-		}
-	}
+	// The palette check that used to sit here searched for three hardcoded
+	// literals, one of which (#5ccbfa) appeared nowhere but the favicon -- so
+	// it compared the icon against a copy of itself and could not fail. It is
+	// now derived from the stylesheet in web.TestFaviconUsesTheAppPalette
+	// (P-048, AC-081), which lives where both assets are embedded.
 
 	for _, path := range []string{"/", "/species/ardea_herodias"} {
 		_, page := get(t, s, path)

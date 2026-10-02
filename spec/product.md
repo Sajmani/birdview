@@ -676,9 +676,39 @@ would be the less honest option — the reader sees the neck either way, and onl
 would be missing. Supersedes the condition in [CR-004](decisions.md#cr-004); see
 [CR-007](decisions.md#cr-007).
 
----
+### P-048 — One diagram vocabulary, on every surface that draws one
+Subject: `diagram.vocabulary.shared`
+Goals: G-001, G-002
 
-## Photographs
+Four surfaces draw the diagram: the **favicon**, the **index** (its tiles and its legend), the
+**detail view**, and the **comparison view**. A reader meets the same figure on all four, so the
+figure means the same thing on all four.
+
+**Colour is the shared part, and it is shared exactly.** Each part of the diagram — bill, head,
+neck, body, tail, wing crossbar, mass cube — has one colour, and every surface uses that colour
+for that part. A surface may not pick its own shade of a part, however good its local reason.
+
+**Size-dependent geometry is not shared, and is not expected to be.** Stroke weight, dash pattern
+and which parts appear at all may be tuned per surface, because a 16px icon and a 1000px detail
+diagram are not the same drawing problem: the favicon drops the dashes entirely and collapses
+neck, body and tail into one stroke, and the detail view retunes the body's dash so it stays
+legible at its own scale. Any such divergence carries its reason beside it.
+
+**The mechanism is most of the guarantee.** The index, detail and comparison views cannot diverge:
+one `diagram` template emits the markup and one stylesheet colours it, so there is nowhere for a
+per-page shade to live. The favicon is the exception, and the only one — a standalone asset that
+cannot reference the stylesheet and therefore restates the palette by hand. **It is the restatement
+that has to be checked**, which is what [AC-081](acceptance.md#ac-081) does.
+
+Rationale: this requirement exists because the thing it forbids had already happened. The favicon
+drew its crossbar `#5ccbfa` while the app drew `#0ea5e9` — a hand-lightened variant adopted
+because the app's own blue was too dark to clear the icon's contrast standard. That is the
+failure in miniature: a surface hit a problem with the shared vocabulary and fixed it locally
+instead of fixing the vocabulary. The app's blue was *also* too dark for its own labels (T-023),
+so the local fix concealed a real defect for as long as it stood.
+
+The lesson generalizes past colour. When one surface cannot live with a shared decision, that is
+evidence about the decision, not licence to fork it.
 
 ### P-050 — Species photographs
 Status: **Withdrawn from v1.** See [CR-005](decisions.md#cr-005) for the research and the reasons

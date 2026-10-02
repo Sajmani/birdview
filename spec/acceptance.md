@@ -621,9 +621,14 @@ parsing, and selectors are split into tokens rather than substring-matched.
 **Verifies:** T-002 · **Level:** code · **Method:** assertions over the served asset and both pages
 
 **Assertions:** `/static/favicon.svg` is served with status 200; it **parses as XML** and its root
-element is `svg` with a `viewBox`; it is drawn in the diagram's own palette; both the index and a
-detail page reference it; and `/favicon.ico` returns 404 rather than the index page, which the
-catch-all route makes worth pinning.
+element is `svg` with a `viewBox`; both the index and a detail page reference it; and
+`/favicon.ico` returns 404 rather than the index page, which the catch-all route makes worth
+pinning.
+
+**The palette assertion moved to [AC-081](#ac-081)**, where it is derived from the stylesheet. It
+lived here as a search for three hardcoded literals, one of which existed only in the favicon, so
+it compared the icon against a copy of itself and could not fail. This criterion keeps what it can
+actually see from the server: that the asset is served, parseable and referenced.
 
 **Status: verified 2026-09-23 — passing, and watched failing** by removing the asset while leaving
 the reference, by removing the reference while leaving the asset, by pointing the reference at a
@@ -1139,6 +1144,48 @@ other cannot see, and that is only known because both were tried.
 alone, which is the number the evidence is about. The evidence constrains a slope; the requirement
 constrains a curve.
 
+### AC-081 — The favicon is painted from the app's palette, not its own
+**Verifies:** P-048 · **Level:** code · **Method:** parse both assets out of the embedded FS and
+compare the favicon's colours against the stylesheet's
+
+**Assertions, no invented colours:** every colour literal in `favicon.svg` is one the stylesheet
+declares — as a diagram part's `stroke`/`fill`, or as a surface custom property. A shade that
+exists only in the icon fails, which is the exact drift this criterion exists for.
+
+**Assertions, the parts it does draw:** the favicon contains the **crossbar** colour and the
+**bill** colour, both read from the stylesheet's `.wing` and `.bill` rules rather than written
+here. Change either in the stylesheet alone and this goes red.
+
+**Assertions, the comparison can still bite:** the stylesheet must yield a non-empty palette and
+the favicon a non-empty set of colours, so a parser that silently matches nothing fails loudly
+instead of passing.
+
+**Status: verified 2026-10-02 — passing, and watched failing** three ways:
+
+| breakage | what went red |
+| --- | --- |
+| restore the favicon's old `#5ccbfa` crossbar | **both** assertions — the colour paints no diagram part, *and* the wing colour is absent. The real, shipped drift, not a planted one |
+| change `.wing` in the stylesheet alone, leaving the icon behind | the part assertion, naming the new colour. This is the direction the next drift will come from |
+| rename the `{{define "diagram"}}` block the part set is derived from | `the part set cannot be derived` — a fatal, rather than an empty part set quietly matching nothing |
+
+The third matters because the derivation runs in two steps: the parts come from the template, the
+colours come from the stylesheet rules naming those parts. If step one yields nothing, step two
+yields an empty palette and the check either flags every favicon colour or, just as easily, none.
+It fails loudly instead of choosing one.
+
+**What this does not check.** It verifies the favicon uses *colours from* the palette, not that it
+maps each part to the right one. At 16px the icon has no neck and no separate tail, and it paints
+the body in the head's `#cbd5e1` because the body's own `#64748b` is 3.75:1 and unreadable at that
+size — a size concession P-048 allows. A part-by-part mapping check would have to encode those
+omissions and would break every time the icon was redrawn, so the weaker invariant is deliberate.
+It still catches drift, which is the failure that actually occurred.
+
+**This replaces an assertion that could not fail.** AC-071 claimed the favicon "is drawn in the
+diagram's palette" and implemented it as a search for three hardcoded literals — one of which,
+`#5ccbfa`, appeared nowhere but the favicon. It compared the icon against a copy of itself, so it
+would have passed through any change to the app's colours whatever. That is why the drift it was
+written to prevent went unnoticed until someone looked.
+
 ---
 
 ## Traceability
@@ -1173,6 +1220,7 @@ constrains a curve.
 | P-045 | AC-035, AC-069 | |
 | P-046 | AC-065 | |
 | P-047 | AC-080 | |
+| P-048 | AC-081 | |
 | P-060 (composite) | AC-044 | |
 | P-060 (wingspan model) | AC-045 | |
 | P-050 – P-053 | — | withdrawn |
