@@ -38,6 +38,7 @@ alike. Its entry is kept so the evaluation is not repeated.
 | **Tier** | mandatory (copyright license) |
 | **Import style** | By reference; vendored at `//AVONET Supplementary dataset 1.xlsx` under the location exception in [tech.md](tech.md#location-exception-the-avonet-workbook) |
 | **Scope** | All morphometric traits (P-002, P-003) |
+| **Geographic scope** | **Worldwide** — 10,661 species across 41 orders, every continent. Measured 2026-10-01. |
 | **Adopted parts** | Sheet `AVONET2_eBird` only |
 | **Exclusions** | Supplementary dataset 2 (specimen repeatability data) — carries no species-level rows and neither of the dimensions BirdView needs. Removed from the working tree; re-obtainable from the same deposit. |
 | **Owner** | Tobias et al. / figshare |
@@ -145,7 +146,8 @@ image, which [T-002](tech.md) independently forbids anyway. See
 | **Tier** | mandatory (copyright license) |
 | **Import style** | By reference, vendored — CC BY 4.0 permits it |
 | **Scope** | Empirical wingspan (P-060) |
-| **Adopted parts** | Rows with `needs_prediction = 0` only |
+| **Geographic scope** | **Worldwide** — 10,618 species. Its gaps are functional, not regional: flightless birds (Ostrich, Emu, penguins, kiwi) and Galliformes are absent, while flying birds from every continent are present. Measured 2026-10-01. |
+| **Adopted parts** | Rows with `needs_prediction` false only. The column is a spreadsheet boolean: `FALSE`/`TRUE` as excelize renders it, `0`/`1` in the underlying XML, and the reader accepts both. Matching only `"0"` yields **zero** measured wingspans and looks like a coverage problem rather than a parsing one — see `isEmpirical`. |
 | **Exclusions** | **Predicted wingspans are not ingested as values.** The `wingspan_predicted_*` columns are regressions from AVONET wing chord; taking them as data would reintroduce the modeled-as-measured problem CR-001 resolves. They are used for one other purpose: as the reference BirdView's own fitted model is validated against ([CR-008](decisions.md#cr-008)). Reading them to check our arithmetic is not the same as presenting them as measurements. |
 | **Owner** | Fox, Brunton & Shephard |
 | **Status** | **Adopted 2026-09-21.** Retrieved, hashed, vendored; its MD5 matches figshare's published `computed_md5`. Coverage for BirdView's scope measured and recorded. |
@@ -153,6 +155,11 @@ image, which [T-002](tech.md) independently forbids anyway. See
 Coverage, now measured rather than estimated: of BirdView's 841 in-scope species, **301 (35.8%)
 have an empirical wingspan**, 510 have only a predicted value that this project excludes, and 30
 have no row at all — every one a Galliform, an order the dataset omits entirely.
+
+Worldwide the empirical rate is **1,424 of 10,618 (13.4%)**, so BirdView's current scope is
+served about **2.7× better than the global average**. That is a fact about where ornithology has
+been done, and it is worth knowing before any change of scope: widening beyond North America
+would not break the pipeline, but it would thin the measured wingspans sharply.
 
 ---
 
@@ -246,6 +253,26 @@ The `Version` field above is a **base pin, not an integrity hash**. The project 
 *supposed* to differ from it: it carries a banner, and may carry `[LOCAL]` amendments. A diff
 against the pin should contain the banner and nothing else but `[LOCAL]` rows; anything further
 is drift.
+
+---
+
+## Where geography enters
+
+Only in one place. Recorded because it is the question the ABA decision turns on, and the answer
+is not obvious from the table above.
+
+| Source | Geographic scope |
+| --- | --- |
+| **AVONET** | worldwide — 10,661 species, 41 orders |
+| **Fox wingspan** | worldwide — 10,618 species; gaps are flightless birds and Galliformes, not regions |
+| **iNaturalist taxon IDs** | worldwide taxonomy; BirdView stores one id per in-scope species |
+| **ABA checklist** | **the ABA Area** — North America north of Mexico, plus Hawaii |
+
+So **the ABA checklist is the only thing in BirdView that knows where it is.** Everything else is
+global and merely gets subsetted by whatever species list is in force. Changing scope therefore
+costs nothing in the trait pipeline — no ingest, model or diagram depends on the region — and
+everything in the list itself. The one measurable consequence is coverage: empirical wingspan runs
+at 35.8% inside the current scope against 13.4% worldwide, so a wider list would be a thinner one.
 
 ---
 
