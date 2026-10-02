@@ -33,7 +33,15 @@ import (
 func main() {
 	addr := flag.String("addr", "localhost:8080", "listen address")
 	data := flag.String("data", "web/data/species.json", "compiled dataset (a build artifact)")
+	dev := flag.String("dev", "", "serve templates and static files from this directory instead of the embed, so edits show on reload")
 	flag.Parse()
+
+	if *dev != "" {
+		if err := devAssets(*dev); err != nil {
+			log.Fatalf("birdview: %v", err)
+		}
+		log.Printf("birdview: DEV MODE, assets from %s — the embed is not being used", *dev)
+	}
 
 	ds, err := load(*data)
 	if err != nil {
@@ -72,6 +80,9 @@ type server struct {
 	tmpl *template.Template
 	byID map[string]*dataset.Species
 	fams []familyOption
+	// devDir is empty for a real binary. When set, render re-parses the
+	// templates on every request so an edit shows on reload.
+	devDir string
 }
 
 type familyOption struct {
@@ -96,12 +107,40 @@ type orderGroup struct {
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) { s.mux.ServeHTTP(w, r) }
 
+// assetFS is where templates and static files are read from.
+//
+// Embedded for a real binary, and overridable from disk for development. That
+// exists because the embed has an edge nobody notices until it bites: a
+// running server holds the templates and CSS as they were when it STARTED, so
+// editing one and reloading shows the old page with no sign anything is stale.
+// It cost three wrong observations in one afternoon -- a recalibrated dataset,
+// a recoloured favicon and a footer credit, each reported from a page that no
+// longer matched the repository.
+var assetFS fs.FS = web.Static
+
+// devAssets points the server at the working tree, so an edit shows up on
+// reload. Never used by a deployed binary: the flag defaults off and the
+// embed is what ships.
+func devAssets(dir string) error {
+	sub := os.DirFS(dir)
+	if _, err := fs.Stat(sub, "static/index.html"); err != nil {
+		return fmt.Errorf("-dev %s: no static/index.html below it: %w", dir, err)
+	}
+	assetFS = sub
+	devDir = dir
+	return nil
+}
+
+// devDir is non-empty in dev mode, and is what makes render re-parse.
+var devDir string
+
 func newServer(ds *dataset.Dataset) (*server, error) {
-	tmpl, err := template.New("").Funcs(funcs).ParseFS(web.Static, "static/*.html")
+	tmpl, err := template.New("").Funcs(funcs).ParseFS(assetFS, "static/*.html")
 	if err != nil {
 		return nil, fmt.Errorf("parsing templates: %w", err)
 	}
-	s := &server{mux: http.NewServeMux(), ds: ds, tmpl: tmpl, byID: map[string]*dataset.Species{}}
+	s := &server{mux: http.NewServeMux(), ds: ds, tmpl: tmpl, devDir: devDir,
+		byID: map[string]*dataset.Species{}}
 
 	counts := map[string]int{}
 	for i := range ds.Species {
@@ -118,7 +157,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		})
 	}
 
-	assets, err := fs.Sub(web.Static, "static")
+	assets, err := fs.Sub(assetFS, "static")
 	if err != nil {
 		return nil, err
 	}
@@ -1186,8 +1225,22 @@ func row(label string, m dataset.Metric, as view.Metric, metric bool) metricRow 
 }
 
 func (s *server) render(w http.ResponseWriter, name string, data any) {
+	tmpl := s.tmpl
+	// In dev mode the templates are re-parsed per request, which is the whole
+	// point: parsing once at startup is exactly how an edited template goes on
+	// serving its old self until someone restarts. Serving from a directory
+	// without this fixes the CSS and leaves the HTML stale, which is worse
+	// than not having the flag -- it looks like it works.
+	if s.devDir != "" {
+		t, err := template.New("").Funcs(funcs).ParseFS(assetFS, "static/*.html")
+		if err != nil {
+			log.Printf("birdview: dev re-parse failed, serving the last good templates: %v", err)
+		} else {
+			tmpl = t
+		}
+	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := s.tmpl.ExecuteTemplate(w, name, data); err != nil {
+	if err := tmpl.ExecuteTemplate(w, name, data); err != nil {
 		log.Printf("birdview: rendering %s: %v", name, err)
 	}
 }

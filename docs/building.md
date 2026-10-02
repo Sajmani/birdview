@@ -52,6 +52,20 @@ Send a descriptive `User-Agent` naming who you are ([T-006](../spec/tech.md)) â€
 
 ```
 go run ./cmd/birdview-ingest     # compiles web/data/species.json
+
+**Use `-dev web` while editing the UI.** Templates and static files are embedded with `go:embed`,
+so a running server serves them as they were when it *started*: edit `index.html` or `styles.css`,
+reload, and you see the old page with nothing to say it is stale. `-dev` reads both from the
+working tree and re-parses the templates per request, so an edit shows on reload.
+
+```
+go run ./cmd/birdview -dev web
+```
+
+It is off by default and a deployed binary never uses it; `TestEmbedIsTheDefault` asserts that.
+This flag exists because the embed caught three wrong observations in one afternoon â€” a
+recalibrated dataset, a recoloured favicon and a footer credit, each reported from a page that no
+longer matched the repository.
 go run ./cmd/birdview            # serves http://localhost:8080
 ```
 
