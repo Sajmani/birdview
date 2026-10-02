@@ -633,9 +633,22 @@ func TestHelpCoversEveryControl(t *testing.T) {
 	// Every part of the diagram, since none of it is self-evident. These are now
 	// labels on a rendered example rather than swatches in a list, so each is
 	// matched as the start of its label text.
-	for _, part := range []string{"Bill", "Head", "Neck", "Body", "Tail", "Wingspan", "Wing chord"} {
-		if !strings.Contains(help, ">"+part+" ") {
-			t.Errorf("diagram legend omits %q", part)
+	// Matched against the legend's own LABELS, not against any text in the
+	// panel. The cube carries a <title> tooltip reading "Mass as water: ...",
+	// which satisfied a raw ">Mass " search even with the label blanked --
+	// so the check passed against a legend that labelled nothing.
+	var legendLabels []string
+	for _, m := range regexp.MustCompile(`<text class="dlabel[^"]*"[^>]*>([^<]*)</text>`).
+		FindAllStringSubmatch(help, -1) {
+		legendLabels = append(legendLabels, strings.TrimSpace(html.UnescapeString(m[1])))
+	}
+	// Mass included: it is labelled on the legend like every other metric
+	// (P-066), and it is the one that went missing before.
+	for _, part := range []string{"Bill", "Head", "Neck", "Body", "Tail", "Wingspan", "Wing chord", "Mass"} {
+		if !slices.ContainsFunc(legendLabels, func(l string) bool {
+			return strings.HasPrefix(l, part+" ")
+		}) {
+			t.Errorf("diagram legend omits %q; its labels are %v", part, legendLabels)
 		}
 	}
 	// Two sections, in a stated order (P-035): the thing on screen, then what
@@ -651,6 +664,16 @@ func TestHelpCoversEveryControl(t *testing.T) {
 		if at[i-1] >= 0 && at[i] >= 0 && at[i] < at[i-1] {
 			t.Errorf("help section %q comes before %q; the order is %v",
 				order[i], order[i-1], order)
+		}
+	}
+
+	// The mass cube: a shape with no label of its own, so the panel that
+	// shows it has to say what it is. Checked in the Presentation panel and
+	// not merely in the diagram key, since this is where a reader is taught
+	// to read the drawing (P-035).
+	for _, s := range []string{"mass drawn as water", "cube root"} {
+		if !strings.Contains(help, s) {
+			t.Errorf("the Presentation panel does not explain the mass cube: no %q", s)
 		}
 	}
 

@@ -993,7 +993,13 @@ square**. An unexplained shape beside a bird reads as part of the bird, so the k
 not documentation of the feature, it is the feature. An index tile carries no square: the tile is
 dense by design and this is annotated-diagram furniture, as P-066's labels already are.
 
-**Status: verified 2026-10-01 — passing, and watched failing** by sizing the side on mass rather
+**Assertions, the Presentation panel:** it explains the cube in prose, naming what it is and
+warning that a cube root flattens. The diagram key alone is not enough — the Presentation panel
+is where a reader learns to read the drawing (P-035), and the cube is the one mark that is not a
+length.
+
+**Status: verified 2026-10-01 — passing, and watched failing** by removing that prose; by sizing
+the side on mass rather
 than its cube root; by giving the cube a scale of its own instead of the diagram's px/mm; by
 drawing a near-match mass as measured; by removing the key's description of it; by moving it to
 the lower-right, where it reached x=980 against a bird axis at x=334; by standing the face on the
@@ -1005,6 +1011,14 @@ square this replaced; and by centring the label without the clamp, which clipped
 Every fixture mass was `measured`, so the dashed branch never rendered and drawing a near-match
 square as solid changed nothing. The fixture now gives the stilt a near-match mass, as 10 of the
 841 real ones are — the same gap the crow's modeled wingspan already fills for the crossbar.
+
+**AC-057's legend check was satisfied by a tooltip, and adding the cube is what exposed it.** It
+asserted that each diagram part appears in the Presentation panel as `">Bill "`, `">Mass "` and
+so on — a raw search over the whole panel. The cube carries a `<title>` reading *"Mass as water:
+a cube of water weighing the same"*, which matched `">Mass "` whatever the label did, so blanking
+the legend's mass label entirely left the check green. It now collects the legend's `<text>`
+labels and requires the part to begin one of them. The looser form had been passing for the other
+seven parts on luck: nothing else in the panel happened to contain `">Bill "`.
 
 **The diagram key is one template now, not two.** It was duplicated verbatim in the detail and
 comparison views, and this is the change that would have drifted them: the sentence naming the

@@ -813,6 +813,12 @@ The depth is 0.4 of the side; cabinet projection's conventional 0.5 also clears 
 everywhere, but leaves 14px where this leaves 21, and no unit test can see that margin because
 the fixture holds five birds.
 
+The **Presentation panel explains the cube**, not only the diagram key: that panel is where a
+reader is taught to read the drawing ([P-035](#p-035)), and the cube is the one mark on the
+figure that is not a length. It says what the cube is, that every cube stands on the floor of its
+own diagram so two can be held against each other, and that a cube root flattens — a cube twice
+as wide is a bird eight times as heavy.
+
 **Mass is labeled under its cube, not in the stack under the tail**, so the number sits with the
 shape it describes. On a small cube the label is wider than the face and is held clear of the
 left edge rather than centred past it.
