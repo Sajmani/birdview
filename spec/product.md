@@ -387,9 +387,20 @@ The diagram section is **a real labeled diagram**, the same one the detail view 
 a list of colour swatches: every part named and measured against an actual bird. The numbers
 section explains solid against dashed, the wing chord and its ticks, and the estimate marker.
 
-**The controls explain themselves where they are.** Every control — ordering metric, scale mode,
-section step, units, family filter — is described inside the Controls panel, above the controls
-themselves, in two columns.
+**The controls explain themselves where they are.** Every control is described inside the Controls
+panel, above the controls themselves, in two columns.
+
+**Stated as a rule rather than a list, and the list is why.** This requirement used to enumerate
+the controls it covered — "ordering metric, scale mode, section step, units, family filter" — and
+by the time anyone looked, the panel had gained **Compare birds** and **Names** and the
+enumeration had been updated for neither. An enumeration cannot notice the thing it omits: adding
+a control and forgetting to document it leaves both the control and the requirement looking
+complete. So the rule is that **a control is documented if and only if it exists**, which
+[AC-085](acceptance.md#ac-085) checks by comparing the two sets rather than by looking for names
+written down here.
+
+The "only if" half matters as much. Documentation for a control that has been removed is worse
+than none, because it sends a reader looking for something that is not there.
 
 The help is collapsible and starts open, so a returning user can dismiss it without losing it.
 

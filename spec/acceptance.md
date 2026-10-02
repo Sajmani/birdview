@@ -1306,6 +1306,36 @@ impossible are present and that the markup gives them something to act on. That 
 seeing it, and it is what caught the bug's shape: the original defect was not a bad measurement
 but a missing declaration.
 
+### AC-085 — Every control is documented, and nothing else is
+**Verifies:** P-035 · **Level:** code · **Method:** compare two sets extracted from the rendered
+index — the control labels, and the terms the Controls panel defines
+
+**Assertions:** the set of control labels in the Controls panel and the set of terms its
+documentation defines are **equal**. Each direction is a separate failure with its own message: a
+control with no entry is undocumented, and an entry with no control is documentation for
+something that no longer exists.
+
+**Assertions, the comparison can bite:** the documentation block is **located before it is
+sliced**, both sets are non-empty, and the label set contains a control known to be present. A
+selector that silently matches nothing would make two empty sets compare equal and the check pass
+while verifying nothing.
+
+The locate-before-slice step is not pedantry. The first version indexed straight into the body,
+so breaking the selector panicked on `body[-1:]` before any assertion ran — reporting a crash
+instead of "the selector is broken". That is the same confusion AC-075 records, where a parser
+that depended on the structure under test reported its own failure rather than the defect.
+
+**Status: verified 2026-10-02 — passing, and watched failing** by the live defect it was written
+for: **Names**, added with [P-049](product.md#p-049), was a control with no documentation, and
+this criterion is what caught it. Also watched failing by deleting the Units entry, by adding an
+entry for a control that does not exist, and by breaking the extraction selector so both sets come
+back empty.
+
+**This replaces an enumeration in the requirement itself.** P-035 used to name the controls it
+covered, and had been updated for neither Compare birds nor Names. A list cannot notice what it
+omits — the requirement, the panel and the controls each looked complete on their own. Comparing
+the two sets is the only form of this check that fails when someone adds a control and forgets.
+
 ---
 
 ## Traceability
@@ -1329,7 +1359,7 @@ but a missing declaration.
 | P-032 | AC-057 | |
 | P-033 | AC-056 | |
 | P-034 | AC-043, AC-054, AC-058 | |
-| P-035 | AC-059, AC-078 | |
+| P-035 | AC-059, AC-078, AC-085 | |
 | P-036 | AC-062 | |
 | P-037 | AC-061 | |
 | P-038 | AC-062 | partial — behavior unverifiable without a browser |

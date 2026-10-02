@@ -3002,3 +3002,64 @@ func TestEmptyStateNamesTheFiltersThatEmptiedIt(t *testing.T) {
 		t.Errorf("no selection at all is described as a filter: %+v", d)
 	}
 }
+
+// TestEveryControlIsDocumented asserts P-035's rule: a control is documented
+// if and only if it exists.
+//
+// Written because the requirement used to ENUMERATE the controls it covered,
+// and the enumeration had gone stale twice over -- Compare birds and Names
+// were both live and both undocumented, while the requirement, the panel and
+// the controls each looked complete in isolation. A list cannot notice what it
+// omits, so this compares the two sets instead.
+//
+// Verifies: P-035. Criterion: AC-085.
+func TestEveryControlIsDocumented(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/")
+
+	// Locate before slicing. A missing marker makes strings.Index return -1,
+	// and body[-1:] panics before any assertion below can run -- so a broken
+	// selector would report a crash rather than "the selector is broken",
+	// which is the same confusion AC-075's parser once produced.
+	hi := strings.Index(body, `class="ctrlhelp"`)
+	di := strings.Index(body, "</dl>")
+	if hi < 0 || di < hi {
+		t.Fatalf("cannot locate the Controls documentation block (ctrlhelp=%d, </dl>=%d); "+
+			"the selector is broken, not the page", hi, di)
+	}
+	help := body[hi:di]
+	documented := map[string]bool{}
+	for _, m := range regexp.MustCompile(`<dt>([^<]+)</dt>`).FindAllStringSubmatch(help, -1) {
+		documented[strings.TrimSpace(html.UnescapeString(m[1]))] = true
+	}
+
+	// Control labels live below the help, in the rows themselves.
+	rows := body[di:]
+	labels := map[string]bool{}
+	for _, m := range regexp.MustCompile(`<span class="lbl">([^<]+)</span>`).
+		FindAllStringSubmatch(rows, -1) {
+		labels[strings.TrimSpace(html.UnescapeString(m[1]))] = true
+	}
+
+	// Both sets must be non-empty, or two broken selectors compare equal and
+	// this passes while checking nothing.
+	if len(documented) == 0 {
+		t.Fatal("no <dt> terms found; the documentation selector is broken, not the page")
+	}
+	if len(labels) == 0 {
+		t.Fatal("no control labels found; the control selector is broken, not the page")
+	}
+	if !labels["Scale"] {
+		t.Fatalf("the label set does not contain a control known to exist; it is %v", keysOf(labels))
+	}
+
+	for l := range labels {
+		if !documented[l] {
+			t.Errorf("the %q control has no entry in the Controls documentation (P-035)", l)
+		}
+	}
+	for d := range documented {
+		if !labels[d] {
+			t.Errorf("the Controls documentation defines %q, which is not a control on the page", d)
+		}
+	}
+}
