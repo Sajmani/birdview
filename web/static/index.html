@@ -259,9 +259,11 @@
   </div>
   {{template "diagram" .}}
   <div class="ft">
-    <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>L {{.Length}}</span>
-    <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>W {{.Wing}}</span>
-    <span{{if ne .S.Mass.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>M {{.MassStr}}</span>
+    {{/* Named in full, not L/W/M: the initials cost every reader who has not
+         yet learned them, and the three fit a tile at full width (P-031). */}}
+    <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>Length {{.Length}}</span>
+    <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>Wingspan {{.Wing}}</span>
+    <span{{if ne .S.Mass.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>Mass {{.MassStr}}</span>
   </div>
 </a>
 {{if .PickURL}}<a class="pick{{if .Picked}} on{{end}}" href="{{.PickURL}}"
@@ -360,8 +362,10 @@
     <rect class="mcface" x="{{f1 .X}}" y="{{f1 .Y}}"
           width="{{f1 .Side}}" height="{{f1 .Side}}"/>
   </g>
+  {{if .Label}}
   <text class="dlabel mass{{if .Est}} est{{end}}" text-anchor="middle"
         x="{{f1 .LabelX}}" y="{{f1 .LabelY}}">{{.Label}}{{if .Est}} ~{{end}}</text>
+  {{end}}
   {{end}}{{end}}
   {{range .FootLabels}}
   <text class="dlabel {{.Key}} foot{{if .Est}} est{{end}}" text-anchor="middle"

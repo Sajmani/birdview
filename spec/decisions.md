@@ -1294,6 +1294,43 @@ root. The mitigation is that the number is right beside it and the diagram key n
 square is. If it proves misleading in use, the thing to remove is the square and not the number —
 the number is what P-066 requires.
 
+## CR-020 — The mass cube goes on the index tiles too
+
+**Subject:** `presentation.tile`
+**Kind:** Direct — a later decision reverses a scope an earlier one set
+**Date:** 2026-10-01 · **Decided by:** Sameer
+
+### What changed
+
+[CR-019](#cr-019) put the cube of water on the annotated diagrams and kept it off the index
+tiles, and [AC-078](acceptance.md#ac-078) asserted that exclusion. The tiles now carry it as
+well, in the same lower-left corner, **without the mass label** — a tile carries no labels at all
+([P-031](product.md#p-031)), and the mass is already in its footer.
+
+### Why it reverses
+
+The exclusion rested on two claims. One was crowding: *"the tile is dense by design and this is
+annotated-diagram furniture, as P-066's labels already are."* That reasoning holds for **labels**,
+which need a gutter a third of the width and a leader line to the part they name. It does not
+transfer to the cube, which needs neither: it sits in a corner the drawing does not use, and
+measured across the whole dataset it never reaches the crossbar — the tightest clearance is 7.5px
+on Western Grebe, against 0 overlaps in 841.
+
+The other was that an unexplained shape reads as part of the bird. That was true when the cube was
+introduced and is no longer: the Presentation panel now explains it, and the tile footer names
+mass in full rather than as `M`.
+
+What the exclusion cost is the comparison the index is *for*. Every tile is drawn to a shared
+scale (P-042), so cubes on tiles are directly comparable down a whole section — and the thing the
+cube shows, bulk against elongation, is exactly what a reader scanning a section of similar-length
+birds cannot otherwise see. Confining it to the detail view meant it could only ever be read one
+bird at a time, or two or three on a comparison page assembled by hand.
+
+### What this does not change
+
+The cube stays off the tile in no other way: no label, no leader, no footer row of its own. The
+tile's contract is unchanged apart from the shape itself.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

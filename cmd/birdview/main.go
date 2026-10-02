@@ -557,11 +557,14 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				// used to derive the centering from Box.H itself, which silently
 				// disagreed with this value the moment Box stopped being the
 				// drawing area (P-066's bottom strip).
-				TopOffset:   (tileBox.H - g.TotalHeight()) / 2,
-				DetailURL:   detailLink(r, sp.ID),
-				PickURL:     pickOf(sp.ID),
-				Picked:      pickedSet[sp.ID],
-				Anchor:      tileAnchor(sp.ID),
+				TopOffset: (tileBox.H - g.TotalHeight()) / 2,
+				DetailURL: detailLink(r, sp.ID),
+				PickURL:   pickOf(sp.ID),
+				Picked:    pickedSet[sp.ID],
+				Anchor:    tileAnchor(sp.ID),
+				// Unlabelled: the tile carries no labels and its footer names
+				// the mass already (P-031, CR-020).
+				MassCube:    newMassCube(sp, tileBox.H, g.PxPerMm, ""),
 				WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 				Length:      format(sp.TotalLength.Value, view.ByLength, opt.Metric3),
 				Wing:        format(sp.Wingspan.Value, view.ByWingspan, opt.Metric3),
@@ -1000,8 +1003,35 @@ func massCubeSide(massG float64) float64 {
 	return 10 * math.Cbrt(massG) // cm -> mm
 }
 
-// massCubeMargin insets the square from the corner of the drawing area.
+// massCubeMargin insets the cube from the corner of the drawing area.
 const massCubeMargin = 8
+
+// newMassCube places the cube of water in the lower-left of a drawing area
+// drawH tall, at pxPerMm (P-066, CR-019).
+//
+// label is empty on an index tile, which carries no labels at all and names
+// the mass in its footer instead (P-031, CR-020). Everything else about the
+// cube is identical there, including the face standing on the floor, so the
+// two surfaces cannot drift.
+func newMassCube(sp *dataset.Species, drawH, pxPerMm float64, label string) massCube {
+	side := massCubeSide(sp.Mass.Value) * pxPerMm
+	if side <= 0 {
+		return massCube{}
+	}
+	base := drawH - massCubeMargin
+	c := massCube{
+		X: massCubeMargin, Y: base - side, Side: side, Depth: side * massCubeDepth,
+		Est:   sp.Mass.Prov.Kind != dataset.Measured,
+		Title: "Mass as water: a cube of water weighing the same, to scale",
+	}
+	if label != "" {
+		c.Label = label
+		// Centred under the face, but never far enough left to be clipped.
+		c.LabelX = math.Max(massCubeMargin+side/2, float64(len(label))*massLabelCharWidth/2)
+		c.LabelY = base + massLabelGap
+	}
+	return c
+}
 
 // footStrip is the height n stacked whole-bird labels need.
 func footStrip(n int) float64 {
@@ -1110,21 +1140,8 @@ func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, r
 	// inside the bird's own area. Measured over the whole dataset before this
 	// was built -- the crossbar reaches into that corner for 0 of 841 species,
 	// the tightest clearance being 50px on Western Grebe.
-	if side := massCubeSide(sp.Mass.Value) * g.PxPerMm; side > 0 {
-		base := draw.H - massCubeMargin
-		label := "Mass  " + format(sp.Mass.Value, view.ByMass, metric)
-		t.MassCube = massCube{
-			X: massCubeMargin, Y: base - side, Side: side, Depth: side * massCubeDepth,
-			Label: label,
-			// Centred under the face, but never far enough left to be clipped
-			// by the edge of the drawing.
-			LabelX: math.Max(massCubeMargin+side/2,
-				float64(len(label))*massLabelCharWidth/2),
-			LabelY: base + massLabelGap,
-			Est:    sp.Mass.Prov.Kind != dataset.Measured,
-			Title:  "Mass as water: a cube of water weighing the same, to scale",
-		}
-	}
+	t.MassCube = newMassCube(sp, draw.H, g.PxPerMm,
+		"Mass  "+format(sp.Mass.Value, view.ByMass, metric))
 	return t
 }
 

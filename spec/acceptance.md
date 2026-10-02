@@ -311,8 +311,11 @@ integration test that starts the server and requests `/`
 **Verifies:** P-031 · **Level:** code · **Method:** rendering test
 **Assertions:** every tile shows the common name with its banding code in parentheses, the
 scientific name, a family badge naming both the scientific and common family name, an SVG diagram,
-and the three main metrics.
-**Status: verified 2026-09-22.**
+and the three main metrics **named in full** — `Length`, `Wingspan`, `Mass`, not `L`, `W`, `M`
+([CR-020](decisions.md#cr-020)).
+**Status: verified 2026-10-01 — passing, and watched failing** by restoring the initials.
+Spelling them out also makes the assertion worth something: `"M "` matched almost any sentence on
+the page, so the old check passed whether the tile carried a mass or not.
 
 ### AC-056 — The family filter selects and clears
 **Verifies:** P-010 · **Level:** code · **Method:** rendering test over `?family=`
@@ -990,16 +993,23 @@ requires of every other stroke.
 **Assertions, rendering:** the square reaches both the detail page and the comparison page, the
 diagram key appears **exactly once** on each however many birds are shown, and it **names the
 square**. An unexplained shape beside a bird reads as part of the bird, so the key naming it is
-not documentation of the feature, it is the feature. An index tile carries no square: the tile is
-dense by design and this is annotated-diagram furniture, as P-066's labels already are.
+not documentation of the feature, it is the feature.
+
+**Assertions, the index tiles:** **every** tile carries a cube — counted against the number of
+tiles, not merely found once — and **no tile carries a label of any kind**, the mass being named
+in the footer instead ([CR-020](decisions.md#cr-020)). This reverses what this criterion asserted
+when it was written, which was that tiles carry none; the reasoning is in CR-020. Across the real
+dataset the tile cube never reaches the crossbar either, the tightest clearance being 7.5px on
+Western Grebe against 0 overlaps in 841.
 
 **Assertions, the Presentation panel:** it explains the cube in prose, naming what it is and
 warning that a cube root flattens. The diagram key alone is not enough — the Presentation panel
 is where a reader learns to read the drawing (P-035), and the cube is the one mark that is not a
 length.
 
-**Status: verified 2026-10-01 — passing, and watched failing** by removing that prose; by sizing
-the side on mass rather
+**Status: verified 2026-10-01 — passing, and watched failing** by removing the cube from the
+index tiles, which left 0 across 6; by giving a tile the label too; by removing that prose; by
+sizing the side on mass rather
 than its cube root; by giving the cube a scale of its own instead of the diagram's px/mm; by
 drawing a near-match mass as measured; by removing the key's description of it; by moving it to
 the lower-right, where it reached x=980 against a bird axis at x=334; by standing the face on the

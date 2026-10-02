@@ -222,8 +222,20 @@ Each species is one **tile**, laid out top to bottom:
 1. a header whose first line carries the **common name followed by its four-letter banding code in
    parentheses**, with the **scientific name right-justified on the same line**; and below it the
    **family badge**, showing the family's scientific name and its common name together;
-2. the diagram, **vertically centered** in its area;
-3. the main metrics — **length, wingspan, mass** — in the selected unit system.
+2. the diagram, **vertically centered** in its area, carrying the **mass cube** in its lower-left
+   corner ([CR-020](decisions.md#cr-020)) and **no labels of any kind**;
+3. the main metrics — **length, wingspan, mass** — named in full and in the selected unit system.
+
+The metrics are **spelled out**, not abbreviated to `L`, `W` and `M`. The initials cost a reader
+who has not yet learned them, which is every reader on their first tile, and they save a line of
+nothing: the three fit a tile at full width.
+
+The **cube** is the one mark the tile shares with the annotated diagram. It needs no gutter and
+no leader, only a corner the drawing does not use, so it does not cost the density that keeps
+labels off the tile. It carries no label here — the footer already names the mass — and because
+every tile in a section is drawn to one scale (P-042), the cubes are directly comparable down the
+whole section. That is where bulk against elongation is most worth seeing, since a section is by
+construction a run of birds of similar length.
 
 Tiles wrap to fill the available display width.
 
@@ -823,7 +835,8 @@ as wide is a bird eight times as heavy.
 shape it describes. On a small cube the label is wider than the face and is held clear of the
 left edge rather than centred past it.
 
-It is there for what the rest of the figure cannot say: **bulk against elongation**. Read against
+The **index tiles carry the cube too**, unlabelled ([P-031](#p-031), CR-020). It is there for
+what the rest of the figure cannot say: **bulk against elongation**. Read against
 the bird's own length it is 28–29% of the drawing height for alcids, which are dense divers, and
 10–13% for long-tailed light-bodied species like the Scissor-tailed Flycatcher and the magpie.
 Length and wingspan cannot tell those apart.

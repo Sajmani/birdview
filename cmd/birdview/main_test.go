@@ -224,7 +224,10 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 		"Turdidae",           // family badge, scientific name
 		"Turdidae family",    // family badge, common name alongside it
 		"<svg",               // the diagram
-		"L ", "W ", "M ",     // the three main metrics
+		// The three main metrics, named in full rather than as L/W/M (P-031).
+		// Spelled out they are also worth asserting: "M " matched almost
+		// anything on the page.
+		"Length ", "Wingspan ", "Mass ",
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("tile is missing %q", want)
@@ -2671,11 +2674,18 @@ func TestMassCubeIsRenderedAndExplained(t *testing.T) {
 		}
 	}
 
-	// Not on index tiles: they are dense by design, and this is detail-view
-	// furniture like the labels already are (P-031).
+	// On index tiles too, since CR-020 -- but unlabelled. A tile carries no
+	// labels at all and names the mass in its footer, so the cube appears
+	// with no text of its own.
 	_, index := get(t, s, "/")
-	if strings.Contains(tileArea(t, index), "masscube") {
-		t.Error("index tiles carry the mass square; it belongs to the annotated diagram")
+	tiles := tileArea(t, index)
+	cubes := strings.Count(tiles, `<g class="masscube`)
+	if n := strings.Count(tiles, `<a class="tile"`); cubes != n {
+		t.Errorf("%d mass cubes across %d tiles; every tile should carry one", cubes, n)
+	}
+	if strings.Contains(tiles, `class="dlabel`) {
+		t.Error("an index tile carries a diagram label; the tile has none, and the mass is " +
+			"named in its footer instead")
 	}
 }
 
