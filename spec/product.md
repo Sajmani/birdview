@@ -146,15 +146,24 @@ over the whole set: untoggling it deselects everything and **no birds are displa
 Selection is therefore always literal: what is shown is what is selected, and the controls say so.
 There is no separate "unfiltered" state that happens to look like everything being chosen.
 
-The selector is **grouped by taxonomic order, in the ABA checklist's own sequence** rather than
+The selector is **grouped by taxonomic order, in the checklist's own sequence** rather than
 alphabetically. Each group is headed by a **toggle that selects or clears every family in that
-order**, labeled with the order's scientific name, its common name, and its species count, and
-styled like the other controls rather than like a family chip.
+order**, labeled with the order's scientific name and its common name, and styled like the other
+controls rather than like a family chip.
 
 Order common names are **the project's own editorial labels**. No source BirdView uses publishes
 vernacular names for orders, and several are deliberately loose — Charadriiformes really is
 shorebirds plus gulls plus auks. Nothing is derived from them. Each family is labeled with
-**both its scientific and its common name** and the number of species it contributes.
+**both its scientific and its common name**.
+
+**No control carries a species count.** One count is reported instead, **above the list**, naming
+how many species the current filters match out of the whole dataset.
+
+Rationale for moving it: a per-control count is only true while it is the only filter. The moment
+a second filter exists — a region ([P-011](#p-011)) — "Parulidae 51" is false in Hawaii, and a
+count that lies is worse than no count. Making every chip's count depend on every other filter is
+possible and cheap, but it means 90 numbers that each need re-reading after every click, to answer
+a question the reader asked once. One number above the list answers it once.
 
 Rationale: the selector is where the common name earns its place. A birder looking for nightjars
 should not have to know they are Caprimulgidae to find them, and this is the one surface where
@@ -342,9 +351,20 @@ Goals: G-002
 
 With nothing selected, the display area reads *"Select birds to display in Controls above"*.
 
-Rationale: an empty page is reachable in one click, and "no species match that filter" would be
-untrue and unhelpful — nothing failed to match, the user turned everything off. The message names
-the control that fixes it.
+**When something is selected and nothing matches, the message names the filters that are set.**
+Not "no species match that filter" — that says a thing failed without saying which thing, and
+leaves the reader to go and look. It reads as *"No birds match. Family: Parulidae, Icteridae."*,
+listing each active filter and what it is set to, and offers the link that clears them.
+
+The two messages stay distinct, and the distinction is the point: **nothing selected is not the
+same as nothing matched.** In the first case nothing failed — the reader turned everything off,
+and the fix is to turn something on. In the second the filters are each reasonable and their
+intersection is empty, and the fix is to relax one. A single message cannot say both.
+
+Rationale: an empty page is reachable in one click, and with two filters an empty *intersection*
+is reachable almost as easily — Hawaii and Parulidae is a plausible thing to ask for and a dead
+end to arrive at. The description is built once and used in both places it is needed: here, and
+in the collapsed summary of a filter control, so the two cannot drift apart.
 
 ### P-036 — The controls collapse
 Subject: `presentation.controls`

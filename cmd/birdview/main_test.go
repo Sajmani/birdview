@@ -442,8 +442,8 @@ func TestFamilyFilter(t *testing.T) {
 		t.Error("filtering to Ardeidae dropped the heron")
 	}
 
-	// The selector labels each family with both names and a count (P-010): the
-	// scientific name alone makes the user translate before they can choose.
+	// The selector labels each family with both names (P-010): the scientific
+	// name alone makes the user translate before they can choose.
 	sel := all[strings.Index(all, `class="ordergroups"`):]
 	sel = sel[:strings.Index(sel, `<p class="count"`)]
 	for _, want := range []string{"Ardeidae", "Ardeidae family", "Turdidae", "Trochilidae"} {
@@ -451,8 +451,14 @@ func TestFamilyFilter(t *testing.T) {
 			t.Errorf("family selector is missing %q", want)
 		}
 	}
-	if !strings.Contains(sel, "<b>1</b>") {
-		t.Error("family selector shows no species counts")
+	// And carries NO per-control count. One count sits above the list instead,
+	// because a per-chip count is only true while family is the only filter:
+	// add a region and "Parulidae 51" is false in Hawaii (P-010).
+	if strings.Contains(sel, "<b>") {
+		t.Error("the family selector still carries per-entry counts; they belong above the list")
+	}
+	if !strings.Contains(all, `<p class="count">`) {
+		t.Error("no count above the list, so the counts were removed and not replaced")
 	}
 
 	// Grouped by order, in checklist sequence rather than alphabetically
@@ -2935,5 +2941,64 @@ func TestNameFallsBackToWorldWhenNoNorthAmericanName(t *testing.T) {
 		if got := sp.Name(loc); got != "Only A World Name" {
 			t.Errorf("locale %q: got %q, want the world name as a fallback", loc, got)
 		}
+	}
+}
+
+// TestEmptyStateNamesTheFiltersThatEmptiedIt asserts the half of P-037 that
+// says WHICH filter emptied the page, not merely that one did.
+//
+// The two empty states must stay distinct. "Nothing selected" is not a failed
+// match -- the reader turned everything off -- and saying "no birds match"
+// there blames the data for their click. AC-061 already pins that direction;
+// this pins the other.
+//
+// Verifies: P-037. Criterion: AC-061.
+func TestEmptyStateNamesTheFiltersThatEmptiedIt(t *testing.T) {
+	s := newTestServer(t)
+
+	// A selection that matches nothing: a real family, plus a metric window
+	// no bird falls in. The fixture has no way to empty a family selection on
+	// its own, which is why this needs the second filter to exist at all --
+	// see the note below.
+	_, body := get(t, s, "/?family=Ardeidae&family=Turdidae")
+	if strings.Contains(body, "No birds match") {
+		t.Fatal("a selection with species in it reported no matches")
+	}
+
+	// Nothing selected: the other message, and emphatically not this one.
+	_, none := get(t, s, "/?family=")
+	if !strings.Contains(none, "Select birds to display") {
+		t.Error("an emptied selection does not say how to get birds back")
+	}
+	if strings.Contains(none, "No birds match") {
+		t.Error("an emptied selection reports a failed match; nothing failed, the reader cleared it")
+	}
+
+	// The description itself, which is the new part. Built directly because
+	// the fixture cannot yet reach an empty intersection through the UI: one
+	// filter cannot contradict itself, and the region filter of P-011 does not
+	// exist. When it does, this should become a rendering test.
+	got := describeFilters(s.fams, options{HasSelection: true,
+		Families: map[string]bool{"Ardeidae": true, "Turdidae": true}})
+	if len(got) != 1 || got[0].Label != "Family" {
+		t.Fatalf("describeFilters gave %+v, want one Family entry", got)
+	}
+	for _, want := range []string{"Ardeidae", "Turdidae"} {
+		if !strings.Contains(got[0].Value, want) {
+			t.Errorf("the description %q does not name %q", got[0].Value, want)
+		}
+	}
+
+	// A filter that is not narrowing anything is not described. Naming it
+	// would present the arrival state as a choice the reader made.
+	everything := map[string]bool{}
+	for _, f := range s.fams {
+		everything[f.Name] = true
+	}
+	if d := describeFilters(s.fams, options{HasSelection: true, Families: everything}); d != nil {
+		t.Errorf("every family selected is described as a filter: %+v", d)
+	}
+	if d := describeFilters(s.fams, options{}); d != nil {
+		t.Errorf("no selection at all is described as a filter: %+v", d)
 	}
 }

@@ -90,7 +90,6 @@ type familyOption struct {
 	Color, TextColor string
 	Order            string
 	OrderCommon      string
-	Count            int
 }
 
 // orderGroup is one block of the family selector. Grouping by order in the
@@ -99,7 +98,6 @@ type familyOption struct {
 type orderGroup struct {
 	Order    string
 	Common   string
-	Count    int
 	Selected bool         // every family in the order is filtered in
 	URL      template.URL // toggles the whole group
 	Families []familyRow
@@ -153,7 +151,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	for _, f := range ds.Families {
 		s.fams = append(s.fams, familyOption{
 			Name: f.Name, Common: f.Common, Color: f.Color, TextColor: f.TextColor,
-			Order: f.Order, OrderCommon: f.OrderCommon, Count: counts[f.Name],
+			Order: f.Order, OrderCommon: f.OrderCommon,
 		})
 	}
 
@@ -343,6 +341,12 @@ type pageData struct {
 	// different from "no matches": the user turned everything off.
 	NothingSelected bool
 
+	// Filters describes what is currently narrowing the list, for the empty
+	// state to name (P-037). Empty when nothing is narrowing it.
+	Filters []activeFilter
+	// ClearURL drops every filter, so the dead end has an exit.
+	ClearURL template.URL
+
 	// Legend is the labeled example diagram the help opens with (P-035). Nil
 	// only if no suitable species exists, in which case the help degrades to
 	// prose rather than breaking.
@@ -364,6 +368,43 @@ type pageData struct {
 // so a bird the family filter is currently hiding is still named here. A
 // filter that appeared to discard picks would be worse than one that refused
 // to run.
+// activeFilter is one filter and what it is set to, in words.
+//
+// It exists so the empty state can say WHICH filter emptied the page rather
+// than that one did (P-037). The same description belongs in the collapsed
+// summary of a filter control, which is why it is built once here rather than
+// composed in the template: two places phrasing it separately is two places to
+// drift.
+type activeFilter struct {
+	Label string // "Family"
+	Value string // "Parulidae, Icteridae" or "3 of 90 selected"
+}
+
+// describeFilters lists what is narrowing the view. A filter that is not
+// narrowing anything -- every family selected, which is the arrival state --
+// is deliberately absent: naming it would describe the default as a choice.
+//
+// Verifies: P-037.
+func describeFilters(fams []familyOption, opt options) []activeFilter {
+	if !opt.HasSelection || len(opt.Families) == 0 || len(opt.Families) == len(fams) {
+		return nil
+	}
+	var picked []string
+	for _, f := range fams {
+		if opt.Families[f.Name] {
+			picked = append(picked, f.Name)
+		}
+	}
+	// Past a handful the names stop being readable and the count is the
+	// useful fact. The threshold is a presentation judgement, not a rule.
+	const nameLimit = 6
+	v := strings.Join(picked, ", ")
+	if len(picked) > nameLimit {
+		v = fmt.Sprintf("%d of %d selected", len(picked), len(fams))
+	}
+	return []activeFilter{{Label: "Family", Value: v}}
+}
+
 type pickBar struct {
 	Picking    bool
 	Picks      []pickChip
@@ -505,7 +546,10 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	page := pageData{Opt: opt, Total: len(s.ds.Species), Shown: len(filtered),
-		Query: queryFor(r)}
+		Query:    queryFor(r),
+		Filters:  describeFilters(s.fams, opt),
+		ClearURL: queryFor(r)("family"),
+	}
 	if sp := s.legendSpecies(); sp != nil {
 		lt := labelledTile(sp, legendBox, opt.Metric3, opt.Locale)
 		page.Legend = &lt
@@ -571,7 +615,6 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			byOrder[f.Order] = gi
 		}
 		page.Groups[gi].Families = append(page.Groups[gi].Families, row)
-		page.Groups[gi].Count += f.Count
 	}
 	// An order toggle selects its whole group, or clears it when the group is
 	// already fully selected. Deriving "selected" from the families rather than

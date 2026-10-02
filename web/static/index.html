@@ -126,14 +126,14 @@
   <div class="row chips">
     <span class="lbl">Family</span>
     <a class="btn{{if .AllSelected}} on{{end}}" href="{{.AllURL}}"
-       title="{{if .AllSelected}}Clear every selection{{else}}Select every family{{end}}">All<b>{{.Total}}</b></a>
+       title="{{if .AllSelected}}Clear every selection{{else}}Select every family{{end}}">All</a>
     <span class="hint">grouped by order, in checklist sequence</span>
   </div>
   <div class="ordergroups">
     {{range .Groups}}
     <div class="ogroup">
       <a class="btn ohdr{{if .Selected}} on{{end}}" href="{{.URL}}"
-         title="{{if .Selected}}Clear{{else}}Select{{end}} every family in {{.Order}}">{{.Order}}<em>{{.Common}}</em><b>{{.Count}}</b></a>
+         title="{{if .Selected}}Clear{{else}}Select{{end}} every family in {{.Order}}">{{.Order}}<em>{{.Common}}</em></a>
       {{/* The families sit in their own box so a long list wraps inside the
            column beside the order header, not back to the page margin. Without
            it the chips are siblings of the header in one wrapping flex row, and
@@ -142,7 +142,7 @@
         {{range .Families}}
         <a class="chip{{if .Selected}} on{{end}}" href="{{.URL}}"
            style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">
-          {{.Name}}<em>{{.Common}}</em><b>{{.Count}}</b>
+          {{.Name}}<em>{{.Common}}</em>
         </a>
         {{end}}
       </div>
@@ -162,9 +162,13 @@
 </section>
 {{else}}
   {{if .NothingSelected}}
+    {{/* Nothing FAILED to match here: the reader turned everything off, and
+         saying "no matches" would blame the data for their click (P-037). */}}
     <p class="empty">Select birds to display in <b>Controls</b> above.</p>
   {{else}}
-    <p class="empty">No species match that filter.</p>
+    <p class="empty">No birds match.
+      {{range .Filters}}<span class="fsum"><b>{{.Label}}</b> {{.Value}}</span>{{end}}
+      <a href="{{.ClearURL}}">Clear the filters</a>.</p>
   {{end}}
 {{end}}
 

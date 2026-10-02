@@ -204,6 +204,11 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .t-modeled { background: #cbd5e1; color: #000; }
 .note { color: var(--dim); font-size: 12.5px; max-width: 70ch; margin-top: 18px; }
 .empty { color: var(--dim); padding: 30px 0; }
+/* Each active filter as its own chip in the empty-state sentence, so a reader
+   scanning for "which one did this" finds them without parsing prose (P-037). */
+.fsum { display: inline-block; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 4px; padding: 1px 7px; margin: 0 4px; color: var(--ink); }
+.fsum b { font-weight: 600; margin-right: 5px; }
 
 /* Help (P-035) */
 .help { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;

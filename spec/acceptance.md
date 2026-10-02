@@ -384,13 +384,17 @@ the page, so the old check passed whether the tile carried a mass or not.
 ### AC-056 — The family filter selects and clears
 **Verifies:** P-010 · **Level:** code · **Method:** rendering test over `?family=`
 **Assertions:** filtering to one family shows its species and excludes others; no filter shows
-all; every entry is labeled with its scientific name, its common name and its species count; the
-selector is grouped by taxonomic order; groups appear in checklist sequence rather than
+all; every entry is labeled with its scientific name and its common name; **no entry carries a
+species count**, and a single count sits above the list instead; the selector is grouped by
+taxonomic order; groups appear in checklist sequence rather than
 alphabetically; each family sits inside its own order's group; each order is a working toggle that
 selects or clears **every** family in it, labeled with its common name; and **All** toggles the
 same way over the whole set, clearing the selection when untoggled.
 **Status: verified 2026-09-22 — passing, and watched failing** by alphabetizing the family list,
-and separately by making the order toggle add only its first family.
+and separately by making the order toggle add only its first family. **Counts moved above the
+list 2026-10-02** ([P-010](product.md#p-010)), watched failing by putting a count back on the
+chips — which is the direction the mistake would come from, since the count reads as helpful
+right up until a second filter makes it false.
 
 Two lessons are recorded in the test itself. An earlier version asserted that order labels were
 *inert text*; when the requirement inverted to make them toggles, that check kept passing, because
@@ -462,11 +466,26 @@ rendering test and this catches it exactly.
 ### AC-061 — The empty state guides rather than blames
 **Verifies:** P-037, P-010 · **Level:** code · **Method:** rendering test after clearing every
 selection
-**Assertions:** no species are displayed; the page says how to get them back; it does **not** say
-that nothing matched; the count reports zero; and All is no longer marked selected.
+**Assertions, nothing selected:** no species are displayed; the page says how to get them back; it
+does **not** say that nothing matched; the count reports zero; and All is no longer marked
+selected.
+
+**Assertions, nothing matched:** the message **names each active filter and what it is set to**,
+and offers a link that clears them. A filter that is not narrowing anything — every family
+selected, which is the arrival state — is **absent** from the description, since naming it would
+present the default as a choice the reader made.
+
 **Status: verified 2026-09-22 — passing, and watched failing** both by treating an emptied
 selection as "no filter" (the previous behavior, which showed every bird) and by reverting the
-message to "No species match that filter".
+message to "No species match that filter". **The filter description was added 2026-10-02**
+([P-037](product.md#p-037)) and watched failing by describing a filter that narrows nothing, and
+by making the nothing-selected branch claim a failed match.
+
+**The description is tested through the function, not the page, and that is a gap.** With only a
+family filter the empty-intersection branch is **unreachable through the UI** — one filter cannot
+contradict itself. It becomes reachable when the region filter of [P-011](product.md#p-011)
+lands, and this should become a rendering test then. Recorded rather than left for someone to
+discover the branch was never exercised end to end.
 
 ### AC-062 — The scroll script is embedded and scoped to the index
 **Verifies:** P-038, T-002 · **Level:** code · **Method:** rendering test
