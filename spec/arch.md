@@ -10,10 +10,13 @@ Two commands over a shared set of internal packages.
 ```
 cmd/birdview-ingest   compiles sources into web/data/species.json (a build artifact)
 cmd/birdview          serves it on localhost, rendering HTML server-side
+cmd/birdview-inatmap  builds data/inat-taxa.tsv; run by hand, never by the build
+cmd/birdview-gbifmap  builds data/gbif-taxa.tsv; likewise
 internal/aba          parses the ABA checklist; forward-fills family from section headers
 internal/avonet       reads traits from all three AVONET taxonomy sheets + the crosswalk
 internal/wingspan     empirical wingspans, and the regression fitted from them
 internal/taxonomy     the name mapping: renames vs near-matches
+internal/gbif         the GBIF -> AviList name bridge, and the paced API client
 internal/morphology   the segment models, and the rounding that keeps them summing
 internal/palette      generated family colors under the contrast rule
 internal/dataset      the record and the provenance vocabulary
@@ -74,6 +77,30 @@ The server also computes a *width* reference per group, because a to-scale cross
 wide-winged bird in a section of short ones would otherwise overflow. Both references come from
 the same group, so one scale still serves the whole section.
 
+## The two mapping tools, and why they are not in the ingest
+
+`birdview-inatmap` and `birdview-gbifmap` both resolve BirdView's species against somebody else's
+taxonomy over the network, and both write a committed table rather than running at build time
+(T-022). The reasons are the same in each case: tests make no network request, a build that needs
+the network fails on a plane, and a quarter of an hour of someone else's server time does not
+belong in a `go build`. The tables go stale; a stale row fails visibly and the refresh is one
+command.
+
+They differ in what a miss means. iNaturalist supplies a *link*, so a miss costs a link and
+nothing else, and `inat.Table` simply omits the species. GBIF supplies a *name correspondence*,
+where the set of things that did not resolve is the interesting output — so `gbif.Table` carries
+every species GBIF reported, with a tier saying how it resolved or why it did not.
+
+`gbif.Resolve` tries three tiers and refuses ambiguity at each: the accepted name, then the
+synonyms GBIF files under it, then the epithet within GBIF's family after folding gender agreement
+and Latin case. The last is the only fuzzy one, it contributes three rows out of 1,378, and it is
+scoped and uniqueness-checked because AviList holds 369 (family, folded epithet) buckets with more
+than one species in them.
+
+**Nothing joins against `data/gbif-taxa.tsv` yet.** The bridge exists so that a later decision
+about where species scope comes from can be made on measured ground; making that decision is not
+this code's job.
+
 ## Known rough edges
 
 - **The neck ratio table covers 22 families**; everything else takes the 0.18 default. The
@@ -88,3 +115,9 @@ the same group, so one scale still serves the whole section.
   roughly 7.3% median error against 4.6% for well-covered orders.
 - **The ingest re-reads the 21 MB AVONET workbook three times**, once per taxonomy sheet. It takes
   about four seconds, which has not been worth optimizing.
+- **A resolved row in the GBIF bridge is name-correct and may still be concept-wrong.** Where GBIF
+  has not followed a split, its name maps to whichever half kept the name: GBIF's `Circus cyaneus`
+  maps to the Eurasian Hen Harrier while 3.8 million of those records are Northern Harriers. Nine
+  such lumps are known and are listed in [sources.md](sources.md#gbif); the table cannot express
+  them, because it has one AviList column and a lump needs two. Nothing detects them
+  automatically — they were found by hand, one query per unreached species.

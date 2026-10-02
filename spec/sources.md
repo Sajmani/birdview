@@ -17,6 +17,7 @@ the others can be filled in plausibly from a URL alone.
 | [`fox-wingspan`](#fox-wingspan) | mandatory | by reference, vendored | **adopted** — retrieved, hashed against the publisher's MD5, vendored |
 | [`bohmer-neck`](#bohmer-neck) | mandatory | consulted, not ingested | **adopted** — CC BY 4.0 verified; calibrates one constant, contributes no data |
 | [`avilist`](#avilist) | mandatory | by reference, vendored | **adopted** — CC BY 4.0, vendored and hashed; supplies every name and the species code |
+| [`gbif`](#gbif) | mandatory | by reference, queried, not vendored | **adopted** — CC BY 4.0 verified from the API; supplies the GBIF→AviList name bridge only |
 | [`ricklefs`](#ricklefs) | mandatory | **rejected** | **rejected** — Wiley terms prohibit the use, see CR-002 |
 | [`wiley`](#wiley) | mandatory | quoted only, not vendored | **adopted** — terms read and transcribed; the reason `ricklefs` is rejected |
 | [`wcag`](#wcag) | mandatory | absorbed, partial | **partial** — adopted for two criteria, not vendored |
@@ -24,7 +25,7 @@ the others can be filled in plausibly from a URL alone.
 | [`inat-terms`](#inat-terms) | mandatory | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; almost nothing in it reaches BirdView |
 | [`specman`](#specman) | — (method) | project copy | **adopted** — copied, base pin recorded below |
 
-One of the eleven is not fully adopted, and it does not block v1. `ricklefs` was evaluated and
+One of the twelve is not fully adopted, and it does not block v1. `ricklefs` was evaluated and
 **rejected**: its platform terms prohibit extraction, integration, storage and redistribution
 alike. Its entry is kept so the evaluation is not repeated.
 
@@ -177,6 +178,122 @@ from Cornell's distribution, and nothing here grants access to it.
 
 Recorded explicitly because the shape of it — *the source we rejected, reached through a source we
 accepted* — is exactly what should attract scrutiny rather than escape it.
+
+---
+
+## `gbif`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | <https://api.gbif.org/v1> — the GBIF Backbone Taxonomy, https://doi.org/10.15468/39omei, and the EOD – eBird Observation Dataset, https://doi.org/10.15468/aomfnb |
+| **Version** | Queried 2026-10-02. Backbone dataset record: published 2023-08-28, modified 2023-11-17. EOD record: published 2025-08-08, modified 2025-10-29. The API serves whatever is current; the pin is the retrieval date and the generated table. |
+| **Integrity** | **Not vendored, so no hash here.** What is committed is `//data/gbif-taxa.tsv`, which is the project's own reduction and not a copy of anything GBIF publishes. |
+| **Tier** | mandatory (copyright license) |
+| **Import style** | By reference, **queried not vendored** — `cmd/birdview-gbifmap` reads the API and writes the bridge table, which the repository commits |
+| **Scope** | Names only: mapping a GBIF backbone scientific name onto the AviList name for the same taxon |
+| **Geographic scope** | The backbone is worldwide. The species set the bridge covers is scoped to `country=US` and `country=CA` — 1,378 species over 1,238,404,492 records. |
+| **Adopted parts** | Three endpoints: `/occurrence/search` faceted on `speciesKey` to enumerate the species, `/species/{key}` for the accepted name and family, `/species/{key}/synonyms` for the names it absorbed. |
+| **Exclusions** | Occurrence records themselves — no coordinate, date, observer, media or count reaches the dataset. `/species/match` is excluded as unfit, below. **And the occurrence counts are not used for scope:** whether BirdView's species list should come from them is an open product decision, and this adoption deliberately does not settle it. |
+| **Owner** | GBIF Secretariat |
+| **Status** | **Adopted 2026-10-02** for the name bridge. License verified from the API's own dataset records; coverage measured and recorded below; no criteria in `acceptance.md` yet. |
+
+License: **CC BY 4.0** on both datasets, read from `GET /v1/dataset/{key}` rather than from a web
+page, because `www.gbif.org` answers an agent with a Cloudflare challenge. The committed table
+names both DOIs in its header, which is where the attribution lives while nothing from it is
+served.
+
+**No API terms are transcribed, and the gap is deliberate.** `www.gbif.org/terms` returns HTTP 403
+to an identified client, and [process.md](process.md#import-style) forbids supplying from memory a
+rule that could not be retrieved — a plausible rate limit is indistinguishable from a real one.
+What *was* retrievable is `api.gbif.org/robots.txt`, which disallows one image path and nothing
+else. So the pacing in `cmd/birdview-gbifmap` — 100 ms between requests across four workers, about
+five minutes for a full run — is a courtesy BirdView sets for itself, not a published limit it is
+meeting.
+
+### Why this is not the eBird rejection, and not the GBIF scope rejection either
+
+Two entries in [Considered and not adopted](#considered-and-not-adopted) look like this one and
+are not:
+
+- **eBird / Clements** is rejected because Cornell's terms forbid redistribution. Nothing here
+  comes from Cornell's distribution. The observations reach BirdView through GBIF, openly
+  licensed, and only as a list of names.
+- **GBIF — eBird Observation Dataset** is rejected *as a scope source*, and that rejection stands.
+  This adoption takes the taxonomy and leaves the scope question exactly where it was.
+
+### What the bridge is for, and what it measures
+
+GBIF's backbone lags current taxonomy by several revisions, so the two name sets do not join:
+**62 of BirdView's 839 species have no verbatim match among GBIF's accepted names.** That is a
+join failure, not an absence — GBIF files Cooper's Hawk under `Accipiter cooperii` where AviList
+has `Astur cooperii`.
+
+`/species/match` does not fix it and must not be reached for. It maps an *old* name onto the
+current backbone, which is the opposite direction. Asked for `Astur cooperii` on 2026-10-02 it
+answered `{"matchType":"NONE"}` with `strict=true`, and without it `Aster cooperi (A.Gray)
+Kuntze` — a shrub in the Asteraceae — at `matchType: FUZZY`, confidence 84. Both answers are
+useless and the second is worse than useless.
+
+The backbone's own synonymy does fix it. Measured over the 1,378 species:
+
+| Tier | Resolved | What it is |
+| --- | ---: | --- |
+| exact | 1,301 | GBIF's accepted name is an AviList species name |
+| synonym | 71 | one name GBIF files as a synonym of it is |
+| epithet | 3 | one AviList species in the same family shares the epithet, after folding gender agreement and Latin genitive endings |
+| ambiguous | 1 | more than one corresponded, so none was chosen |
+| none | 2 | nothing corresponded |
+
+**1,375 of 1,378 resolve**, and BirdView's own coverage goes from 777 to 813 of 839. The 26 that
+remain are not name failures: GBIF's species facet holds no taxon for them at all.
+
+### Where a resolved row is name-correct and concept-wrong
+
+**A resolved row says the two authorities use different names for one taxon. It does not say their
+species concepts agree.** Where GBIF has not followed a split, its name maps to whichever half
+kept the name, and the occurrences behind it are mostly the other half.
+
+Nine of these touch BirdView's own species, found by asking GBIF what it makes of each AviList
+name the bridge failed to reach, on 2026-10-02. **Two mechanisms, and the distinction matters:**
+
+**Seven, where GBIF's backbone holds the AviList name as a synonym of the lump** — it has not
+followed the split at all, and `/species/match` says so:
+
+| GBIF taxon | records | the bridge maps it to | the bird those records mostly are |
+| --- | ---: | --- | --- |
+| `Circus cyaneus` | 3,815,109 | `Circus cyaneus` (Hen Harrier) | `Circus hudsonius`, Northern Harrier |
+| `Gallinula chloropus` | 1,474,223 | `Gallinula chloropus` (Eurasian Moorhen) | `Gallinula galeata`, Common Gallinule |
+| `Cistothorus platensis` | 333,113 | `Cistothorus platensis` (Grass Wren) | `Cistothorus stellaris`, Sedge Wren |
+| `Buteo nitidus` | 141,856 | `Buteo nitidus` (Gray-lined Hawk) | `Buteo plagiatus`, Gray Hawk |
+| `Oceanodroma leucorhoa` | 66,497 | `Hydrobates leucorhous` (Leach's Storm-Petrel) | mostly right; subsumes `Hydrobates socorroensis` |
+| `Calonectris diomedea` | 26,230 | `Calonectris diomedea` (Scopoli's Shearwater) | mostly `Calonectris borealis`, Cory's Shearwater |
+| `Gygis alba` | 16,008 | `Gygis alba` (White Tern) | `Gygis candida`, Blue-billed White-Tern |
+
+**Two, where GBIF's backbone accepts both halves and the dataset still reports only the parent.**
+The backbone is not the problem here; what eBird published to GBIF is:
+
+| GBIF taxon | records | the bridge maps it to | the bird those records mostly are | backbone status of the other half |
+| --- | ---: | --- | --- | --- |
+| `Setophaga petechia` | 6,245,227 | `Setophaga petechia` (Mangrove Warbler) | `Setophaga aestiva`, Northern Yellow Warbler | accepted, zero records |
+| `Numenius phaeopus` | 556,569 | `Numenius phaeopus` (Whimbrel) | `Numenius hudsonicus`, Hudsonian Whimbrel | accepted, zero records |
+
+**Six of the nine are the dangerous shape**, and they span both tables: the name the bridge lands
+on belongs to a bird BirdView does not carry — a vagrant in the ABA Area, or absent from it —
+while the bird actually seen gets no row at all. Those are `Circus cyaneus`, `Gallinula
+chloropus`, `Numenius phaeopus`, `Cistothorus platensis`, `Buteo nitidus` and `Gygis alba`,
+carrying 6,336,878 records between them.
+
+In the other three — `Setophaga petechia`, `Oceanodroma leucorhoa`, `Calonectris diomedea` — the
+name does land on a species BirdView carries, so the row is usable and merely absorbs a second
+bird's records: 6,337,954 more. All nine together are 12,674,832 records, 1.02% of the corpus and
+concentrated in common species.
+
+Nine is a floor, not a census. The method finds only lumps that collide with a species BirdView
+already carries; a lump among the 561 GBIF species BirdView does not have would not show up.
+Nothing detects them automatically — it is one query per unreached species, by hand.
+
+Anything that later derives *scope* from these counts has to face this. The bridge only records
+it, because the table has one AviList column and a lump needs two.
 
 ---
 
@@ -352,6 +469,7 @@ is not obvious from the table above.
 | **Fox wingspan** | worldwide — 10,618 species; gaps are flightless birds and Galliformes, not regions |
 | **iNaturalist taxon IDs** | worldwide taxonomy; BirdView stores one id per in-scope species |
 | **ABA checklist** | **the ABA Area** — North America north of Mexico, plus Hawaii |
+| **GBIF name bridge** | US and Canada — but it reaches no page. `data/gbif-taxa.tsv` is scoped by the occurrence filter that built it, and nothing joins against it yet. |
 
 So **the ABA checklist is the only thing in BirdView that knows where it is.** Everything else is
 global and merely gets subsetted by whatever species list is in force. Changing scope therefore
@@ -372,7 +490,7 @@ Recorded so nobody re-litigates them annually.
 | **AOS / NACC check-list** | Best-shaped data of the three checklists — family, order and subfamily as real columns, plus machine-readable status flags — but covers North *and Middle* America, which is the wrong scope, and carries no license statement anywhere. Absence of a statement is not permission. Re-checked 2026-10-01 against the live CSV: 2,212 species, and filtering to neither accidental nor extinct leaves **1,957** — 1,131 more than the ABA area's 841, because the area runs to Panama and the West Indies. The status flags cannot reconstruct ABA scope; they are relative to a far larger region. |
 | **AviList v2025b** | **CC BY 4.0**, verified on the publisher's own download page 2026-10-01, and the consensus successor to IOC, Clements and BirdLife with the AOS, Cornell, BirdLife, Avibase and the IOU behind it. It would solve names, families and taxonomic sequence outright — 832 of BirdView's 841 match on scientific name. It does **not** solve scope, which is the only thing ABA is actually blocking, and its English names are wrong for this audience. See [below](#why-avilist-does-not-replace-the-aba-checklist). |
 | **iNaturalist species counts** | Would give regional scope plus an abundance signal, but observation counts overstate rarities: a mega-rarity draws every birder in the state, so the signal inverts exactly where it matters. Superseded as a candidate by GBIF below, which carries eBird and is far deeper for birds. |
-| **GBIF — eBird Observation Dataset** | **CC BY 4.0**, verified from GBIF's dataset record 2026-10-01, no key required, 1.07 billion US records. This is *not* the eBird API rejected above: that was blocked by `robots.txt` and unreadable terms, while the same observations published through GBIF are openly licensed. Technically excellent and the only serious candidate for deriving scope. It still does not work — see [below](#why-occurrence-data-cannot-reproduce-the-aba-scope). |
+| **GBIF — eBird Observation Dataset** (as a *scope* source) | **CC BY 4.0**, verified from GBIF's dataset record 2026-10-01, no key required, 1.07 billion US records. This is *not* the eBird API rejected above: that was blocked by `robots.txt` and unreadable terms, while the same observations published through GBIF are openly licensed. Technically excellent and the only serious candidate for deriving scope. It still does not work — see [below](#why-occurrence-data-cannot-reproduce-the-aba-scope). **Its taxonomy is a different question and has since been adopted**: [`gbif`](#gbif) above takes the names, not the scope. |
 | **iNaturalist taxonomy** (as a names source) | Distinct from the taxon IDs already adopted, and not covered by them. The `inat-terms` adoption rests on a narrow negative — nothing restricts reusing an *identifier* — while the same terms state the agreement "does not transfer to You any iNaturalist or third party intellectual property", and the CC BY-NC default governs contributor Content, not the taxonomy. No affirmative grant to republish their name list was found. |
 | **Lislevand et al. 2007** | Copyright restrictions: none — genuinely open. Does not contain total length or wingspan, which is what it was originally brought in for. Removed from the project. |
 | **EltonTraits, Amniote DB, BIRDBASE, Dunning** | None carries body length or wingspan. BIRDBASE was checked column by column against a claim that it did. |

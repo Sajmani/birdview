@@ -49,8 +49,9 @@ Violating any of these is a licensing problem, not a style problem.
   are CC BY 4.0. If you are about to add a fourth data file, check
   [spec/sources.md](spec/sources.md) first — most candidates this project evaluated could not be
   redistributed. Two other committed files are
-  deliberate and are not source data: `data/inat-taxa.tsv`, a generated table of iNaturalist taxon
-  IDs (T-022), and the vendored terms snapshots under `spec/sources/`.
+  deliberate and are not source data: the generated tables under `data/` — `inat-taxa.tsv` of
+  iNaturalist taxon IDs (T-022) and `gbif-taxa.tsv` of GBIF-to-AviList name correspondences — and
+  the vendored terms snapshots under `spec/sources/`.
 - **BirdView links to iNaturalist and copies nothing from it** (P-064). Never embed, hotlink or
   cache a photograph: those are contributors' work under their own licenses, frequently CC BY-NC.
   T-002 forbids the mechanism anyway. Taxon IDs are fine — the terms say nothing about the
@@ -72,7 +73,9 @@ go test ./...
 ```
 
 Run all four before declaring work finished (see Project bindings in
-[spec/tech.md](spec/tech.md#project-bindings)).
+[spec/tech.md](spec/tech.md#project-bindings)). The three spec checks —
+`python3 spec/check/goals.py`, `spec/check/pins.py`, `spec/check/refs.py` — go with them whenever
+`spec/` is touched.
 
 ## Working on a change
 
