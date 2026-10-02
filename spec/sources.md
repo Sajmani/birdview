@@ -257,11 +257,54 @@ Recorded so nobody re-litigates them annually.
 | --- | --- |
 | **eBird / Clements taxonomy** | Cornell terms clause 2 forbids reproduction or redistribution without written authorization. Superseded anyway: ABA supplies common names, scientific names and families, so no second taxonomy is needed (P-004). |
 | **eBird API region species lists** | Would supply scope and geography in AVONET's own taxonomy, but requires an API key and `api.ebird.org/robots.txt` is `Disallow: /`, with the API terms page returning 403. Not evaluated further; a human would need to read the terms. |
-| **AOS / NACC check-list** | Best-shaped data of the three checklists — family, order and subfamily as real columns — but covers North *and Middle* America (2,212 species), which is the wrong scope, and carries no license statement anywhere. Absence of a statement is not permission. |
-| **iNaturalist species counts** | Would give regional scope plus an abundance signal, but observation counts overstate rarities: a mega-rarity draws every birder in the state, so the signal inverts exactly where it matters. |
+| **AOS / NACC check-list** | Best-shaped data of the three checklists — family, order and subfamily as real columns, plus machine-readable status flags — but covers North *and Middle* America, which is the wrong scope, and carries no license statement anywhere. Absence of a statement is not permission. Re-checked 2026-10-01 against the live CSV: 2,212 species, and filtering to neither accidental nor extinct leaves **1,957** — 1,131 more than the ABA area's 841, because the area runs to Panama and the West Indies. The status flags cannot reconstruct ABA scope; they are relative to a far larger region. |
+| **AviList v2025b** | **CC BY 4.0**, verified on the publisher's own download page 2026-10-01, and the consensus successor to IOC, Clements and BirdLife with the AOS, Cornell, BirdLife, Avibase and the IOU behind it. It would solve names, families and taxonomic sequence outright — 832 of BirdView's 841 match on scientific name. It does **not** solve scope, which is the only thing ABA is actually blocking, and its English names are wrong for this audience. See [below](#why-avilist-does-not-replace-the-aba-checklist). |
+| **iNaturalist species counts** | Would give regional scope plus an abundance signal, but observation counts overstate rarities: a mega-rarity draws every birder in the state, so the signal inverts exactly where it matters. Note the objection is to *counts*: a spread statistic — distinct regions × distinct years — does not invert the same way, since a vagrant is one place in one year. Not evaluated; it would replace a curated authority with a BirdView model. |
+| **iNaturalist taxonomy** (as a names source) | Distinct from the taxon IDs already adopted, and not covered by them. The `inat-terms` adoption rests on a narrow negative — nothing restricts reusing an *identifier* — while the same terms state the agreement "does not transfer to You any iNaturalist or third party intellectual property", and the CC BY-NC default governs contributor Content, not the taxonomy. No affirmative grant to republish their name list was found. |
 | **Lislevand et al. 2007** | Copyright restrictions: none — genuinely open. Does not contain total length or wingspan, which is what it was originally brought in for. Removed from the project. |
 | **EltonTraits, Amniote DB, BIRDBASE, Dunning** | None carries body length or wingspan. BIRDBASE was checked column by column against a claim that it did. |
 | **Audubon field guide** | Carries exactly the two needed dimensions, in near-parseable form. Terms forbid reproduction, distribution, storage in a retrieval system, and derivative works. |
 | **All About Birds / Birds of the World** | Carries the data; blocks automated retrieval (403) and is subscription-gated respectively. Not assessed further. |
 | **Macaulay Library** | Permits *embedding* for non-commercial use — which BirdView qualifies for — but offers no discovery API, and its media-request path explicitly prunes species lists over 100. Cannot scale to the dataset. Viable later for hand-curated species. |
 | **Wikimedia Commons, iNaturalist, Flickr** | Photo sources, all researched in detail. Out of scope while P-050 is withdrawn; Commons is the recommendation when it returns. |
+
+### Why AviList does not replace the ABA checklist
+
+*Pass run 2026-10-01, after the ABA permission request went unanswered.* The question was whether
+the checklist could be dropped entirely, since redistributing it is what blocks public deployment.
+
+**What ABA actually supplies is three separable things**, and they have different answers:
+
+| | Replaceable? |
+| --- | --- |
+| **Scope** — which 841 species, by rarity codes 1–3 (P-001) | **no open source found** |
+| **Common names**, species and family (P-004) | yes, but at a cost |
+| **Taxonomic sequence** for the order grouping (P-010) | yes |
+
+**Scope is the one that matters and nothing supplies it.** AviList carries a `Range` column, but
+it is free-text prose — *"desert to savanna plains of northeastern Africa, from northern
+Ethiopia…"* — and cannot be filtered on. AOS has real status flags but for the wrong region, as
+measured above. The ABA codes are editorial judgment about one specific area, and that judgment
+is the product. No taxonomy supplies it because it is not taxonomy.
+
+**Names are replaceable, and should not be replaced.** 832 of 841 match AviList on scientific
+name; the 9 that do not are genus reassignments (*Coccothraustes vespertinus*, four *Dryobates*,
+*Icterus bullockii*, *Pica nuttalli*, *Porphyrio poliocephalus*, *Vireo swainsoni*). But **86
+common names change and 55 of 91 family English names change**, and they change *away* from this
+audience: Dovekie becomes Little Auk, Rough-legged Hawk becomes Rough-legged Buzzard, Brant
+becomes Brant Goose, every Scrub-Jay loses its hyphen. AviList is a global consensus list and
+names birds for the world; BirdView's reader is in the ABA Area and calls them what the ABA
+calls them. Adopting it would read as a clean licensing win in this table and be a regression on
+the page. (The extended file carries an `English_name_Clements_v2025` column, which is closer to
+North American usage and is distributed under AviList's own CC BY 4.0 — worth a look if names
+ever do need to move.)
+
+**The taxonomy would also shift.** Four species change order — the three New World vultures move
+from Accipitriformes to a Cathartiformes of their own, which adds an order group to the filter —
+and two change family: the Wrentit to Paradoxornithidae, the Yellow-breasted Chat from
+Icteriidae to Icteridae, dissolving a one-species family.
+
+**Conclusion: the ABA ask cannot be routed around.** Either the permission arrives, or BirdView
+defines its own scope and owns it — the spread statistic noted above is the only candidate, and
+it trades a curated list for a model. Nothing here changes what is deployed; it is recorded so
+the question is not reopened from scratch.

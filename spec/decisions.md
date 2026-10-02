@@ -1340,6 +1340,7 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | Retrieve, hash and vendor `fox-wingspan`; write its `PROVENANCE.md` | — | before ingest reads it |
 | Write `acceptance.md` — Gate 2, before any code | — | now |
 | Ask Ricklefs or ESA for permission to use the measured-length data | Sameer | **after a working demo** |
+| ABA has not replied. Decide between chasing the permission and defining BirdView's own scope — see [sources.md](sources.md#why-avilist-does-not-replace-the-aba-checklist) | Sameer | before public deployment |
 | ~~Ask ABA for written permission to redistribute the checklist~~ — **sent 2026-09-27**, awaiting reply | Sameer | done |
 | ~~Decide the neck's flight posture~~ — done, [CR-011](#cr-011) | Sameer | closed 2026-09-23 |
 | Assess whether a perched/standing toggle is achievable at any honest accuracy ([CR-011](#cr-011)) | — | before it is offered to users |
