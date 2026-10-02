@@ -671,8 +671,12 @@ func TestHelpCoversEveryControl(t *testing.T) {
 	// shows it has to say what it is. Checked in the Presentation panel and
 	// not merely in the diagram key, since this is where a reader is taught
 	// to read the drawing (P-035).
+	// Whitespace-normalised: these are phrases, and the template wraps its
+	// prose, so a reflow that put "cube" and "root" on separate lines would
+	// fail a raw match and look like the explanation had been deleted.
+	flat := strings.Join(strings.Fields(help), " ")
 	for _, s := range []string{"mass drawn as water", "cube root"} {
-		if !strings.Contains(help, s) {
+		if !strings.Contains(flat, s) {
 			t.Errorf("the Presentation panel does not explain the mass cube: no %q", s)
 		}
 	}

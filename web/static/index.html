@@ -25,16 +25,6 @@
       <div class="legenddia">{{template "diagram" .Legend}}</div>
       <p class="hint">{{.Legend.S.CommonName}} &mdash; the same drawing the detail page shows,
       with every part named and measured.</p>
-      <p>The <b>cube</b> in the corner is the one thing on the figure that is not a length. It is
-      the bird's <b>mass drawn as water</b>: a cube of water that weighs exactly what the bird
-      does, at the same scale as the bird beside it. Every cube stands on the floor of its own
-      diagram, so two of them can be held against each other directly.</p>
-      <p>Read against the bird's own length, it says how heavy-set the bird is &mdash; which
-      length and wingspan cannot. A Thick-billed Murre and a Scissor-tailed Flycatcher are within
-      an inch of the same length, and the murre weighs <b>24 times</b> more; put them side by side
-      and the cubes say so at a glance. Be careful of one thing: a cube root flattens big
-      differences, so a cube twice as wide is a bird eight times as heavy. The number under it is
-      what states the mass.</p>
       {{else}}
       <p>Every bird is drawn as a scaled cross, seen from above in flight: a bill, a head, a neck,
       a body and a tail down the middle, with the wingspan as a crossbar at the same scale.</p>
@@ -50,6 +40,12 @@
       measurement reaches. Only the span between the ticks is estimated, and it is drawn dashed
       when it is &mdash; so for two thirds of these birds the wingtips are real and the middle is
       inferred.</p>
+      <p>The <b>cube</b> is the bird's <b>mass drawn as water</b>: a cube of water weighing
+      exactly what the bird does, at the same scale. Every cube stands on the floor of its
+      diagram, so two can be compared directly &mdash; a Thick-billed Murre and a Scissor-tailed
+      Flycatcher are nearly the same length, and the murre's cube dwarfs the flycatcher's.
+      A cube root flattens, though: twice as wide is eight times as heavy, so the number under
+      it is what states the mass.</p>
       <p>A <b class="est-demo">~</b> after a measurement means the same thing in the numbers. Most
       lengths are estimated: no open dataset publishes body length for North American birds, so
       BirdView models it and says so.</p>
