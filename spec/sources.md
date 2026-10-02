@@ -295,6 +295,56 @@ Nothing detects them automatically — it is one query per unreached species, by
 Anything that later derives *scope* from these counts has to face this. The bridge only records
 it, because the table has one AviList column and a lump needs two.
 
+### Two findings that govern any future use of these counts for scope
+
+Measured 2026-10-02, after the bridge, and recorded here because they decide the shape of the
+scope work rather than the bridge's.
+
+**1. The species facet must not be used to enumerate species.** Faceting `/occurrence/search` on
+`speciesKey` silently omits every record GBIF's backbone could not resolve — about **4.7 million
+records, 0.4% of the corpus, filed above species rank**. The casualty list is not marginal: the
+facet reports **zero** US+CA records for Cooper's Hawk.
+
+Querying by `verbatimScientificName`, which is the name **eBird published** rather than the name
+GBIF matched it to, recovers them. Cooper's Hawk returns **4,148,628**. Over BirdView's 839
+species the inverted query finds **827 (98.6%)** against the facet's 777.
+
+So the direction of the question matters: *ask per species by name*, never *ask the taxonomy what
+exists*. The second form fails silently and the failure looks like absence.
+
+*(A first run of this measurement reported ~40 species at zero, including European Starling. That
+was API throttling at concurrency 8 with failures counted as zeros. At concurrency 3 with backoff
+there were no failures. Noted because a rate-limited query returning 0 is indistinguishable from
+an absent bird unless the two paths are kept apart.)*
+
+**2. eBird's export withholds conservation-sensitive species entirely.** The 12 species the
+inverted query still cannot find are not a taxonomy problem. Every one is present in iNaturalist
+and wholly absent from eBird:
+
+| species | eBird | iNaturalist |
+| --- | ---: | ---: |
+| Spotted Owl | **0** | 1,061 |
+| Northern Hawk Owl | **0** | 1,644 |
+| Gyrfalcon | **0** | 511 |
+| Lesser Prairie-Chicken | **0** | 228 |
+| Gunnison Sage-Grouse | **0** | 110 |
+| Akohekohe, Maui Parrotbill, Puaiohi | **0** | 7, 10, 21 |
+| Blue-billed White-Tern | **0** | 1,445 |
+| *Barred Owl — control, not sensitive* | *1,242,780* | *55,832* |
+
+The control is what makes it legible: Barred Owl is in both, and its sensitive congener Spotted
+Owl is in neither GBIF index while iNaturalist holds a thousand records. The pattern reads as
+eBird's sensitive-species policy — raptors and grouse vulnerable at known sites, plus critically
+endangered Hawaiian endemics. *(Inference from the pattern and the control. eBird's published
+sensitive-species list was not consulted, and `www.gbif.org/terms` is unreachable to an
+identified client, so this is not confirmed from a source.)*
+
+It is **systematic and adverse**: an eBird-only list omits precisely the rare and protected birds
+a reader is most likely to look up, with no signal that anything is missing.
+
+**eBird ∪ iNaturalist covers 839 of 839.** Which revises this manifest's own judgement below that
+iNaturalist is superseded — see that entry.
+
 ---
 
 ## `fox-wingspan`
@@ -489,7 +539,7 @@ Recorded so nobody re-litigates them annually.
 | **eBird API region species lists** | Would supply scope and geography in AVONET's own taxonomy, but requires an API key and `api.ebird.org/robots.txt` is `Disallow: /`, with the API terms page returning 403. Not evaluated further; a human would need to read the terms. |
 | **AOS / NACC check-list** | Best-shaped data of the three checklists — family, order and subfamily as real columns, plus machine-readable status flags — but covers North *and Middle* America, which is the wrong scope, and carries no license statement anywhere. Absence of a statement is not permission. Re-checked 2026-10-01 against the live CSV: 2,212 species, and filtering to neither accidental nor extinct leaves **1,957** — 1,131 more than the ABA area's 841, because the area runs to Panama and the West Indies. The status flags cannot reconstruct ABA scope; they are relative to a far larger region. |
 | **AviList v2025b** | **CC BY 4.0**, verified on the publisher's own download page 2026-10-01, and the consensus successor to IOC, Clements and BirdLife with the AOS, Cornell, BirdLife, Avibase and the IOU behind it. It would solve names, families and taxonomic sequence outright — 832 of BirdView's 841 match on scientific name. It does **not** solve scope, which is the only thing ABA is actually blocking, and its English names are wrong for this audience. See [below](#why-avilist-does-not-replace-the-aba-checklist). |
-| **iNaturalist species counts** | Would give regional scope plus an abundance signal, but observation counts overstate rarities: a mega-rarity draws every birder in the state, so the signal inverts exactly where it matters. Superseded as a candidate by GBIF below, which carries eBird and is far deeper for birds. |
+| **iNaturalist species counts** | **Partly reinstated 2026-10-02, and this entry was wrong.** The original objection stands on its own terms — counts overstate rarities, and for birds iNaturalist is about **80× shallower** than eBird (13.4M US bird records against 1.07 billion), so it cannot rank anything. But "superseded by GBIF" does not follow, and was refuted by measurement: eBird's export **withholds conservation-sensitive species entirely**, and iNaturalist is the only open source measured that has them. Spotted Owl: 0 in eBird, 1,061 in iNaturalist. It is not a replacement for eBird; it is the complement that makes eBird usable. See [`gbif`](#gbif). |
 | **GBIF — eBird Observation Dataset** (as a *scope* source) | **CC BY 4.0**, verified from GBIF's dataset record 2026-10-01, no key required, 1.07 billion US records. This is *not* the eBird API rejected above: that was blocked by `robots.txt` and unreadable terms, while the same observations published through GBIF are openly licensed. Technically excellent and the only serious candidate for deriving scope. It still does not work — see [below](#why-occurrence-data-cannot-reproduce-the-aba-scope). **Its taxonomy is a different question and has since been adopted**: [`gbif`](#gbif) above takes the names, not the scope. |
 | **iNaturalist taxonomy** (as a names source) | Distinct from the taxon IDs already adopted, and not covered by them. The `inat-terms` adoption rests on a narrow negative — nothing restricts reusing an *identifier* — while the same terms state the agreement "does not transfer to You any iNaturalist or third party intellectual property", and the CC BY-NC default governs contributor Content, not the taxonomy. No affirmative grant to republish their name list was found. |
 | **Lislevand et al. 2007** | Copyright restrictions: none — genuinely open. Does not contain total length or wingspan, which is what it was originally brought in for. Removed from the project. |
@@ -586,3 +636,19 @@ birds to scale.
 **So the choice is real and narrow:** obtain the ABA's permission, or publish a list that is
 about 84% of theirs, visibly different at the edges, and owned by BirdView. There is no third
 option where the data simply comes from somewhere else.
+
+**Update, 2026-10-02 — the conclusion stands and the framing does not.** The owner chose the
+second branch: stop waiting on the ABA, publish a list BirdView owns. Two things above are now
+misleading to read as current.
+
+*The target was wrong.* Every F1 here measures agreement with the ABA's editorial judgement,
+which is no longer the goal. A rule that admits the Red-crowned Parrot — 89,723 records, an
+established population a birder in Texas will certainly see — is not 'wrong' because the ABA
+treats it differently. The new question is whether BirdView's own rule can be stated in one
+sentence and defended, not how closely it imitates someone else's.
+
+*The method was unsafe.* These numbers come from the **species facet**, which was later found to
+drop every record GBIF's backbone cannot resolve — including all of Cooper's Hawk. The agreement
+figures are therefore depressed by an unknown amount, and the 70 'ABA has, rule misses' includes
+species that were present all along. Re-measure with the inverted query before quoting any of
+them; see [`gbif`](#gbif).
