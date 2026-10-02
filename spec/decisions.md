@@ -1457,6 +1457,7 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | ~~Decide whether mass gets an **equal-mass cube of water** drawn in the diagram~~ — built, [CR-019](#cr-019) | Sameer | closed 2026-10-01 |
 | **Parked:** replace the cube with a mass **line** proportional to mass. Measured and written up in [Mass as a proportional line](#mass-as-a-proportional-line-replacing-the-cube--parked); needs a CR, because it reverses CR-019 | Sameer | parked 2026-10-02 — resume from that section, do not re-derive |
 | ~~Give the mass cube a colour that is not the crossbar's~~ — resolved the other way round: the **crossbar** moved to green `#4ade80`, because the cube's blue depicts the water and should keep it. The recolour also fixed a live 7:1 violation, the labels sharing that colour being text | Sameer | closed 2026-10-02 |
+| Mass units switch at 16 oz, so one section can print `14.5 oz` beside `1.2 lb` for birds of the same length — a comparison the reader has to do arithmetic for, on the page whose whole purpose is comparison. Decide whether a section should hold one unit | — | opportunistic; found in a rendered screenshot, not by any check |
 | Delete the dead `.sw.*` swatch rules in `styles.css`. [CR-017](#cr-017) replaced the swatch legend with a labelled diagram and no template has emitted `class="sw …"` since; the rules survived and were still being colour-matched by hand in 2026-10-02 | — | opportunistic; cosmetic, but they read as live |
 
 ### A cube of water for mass
@@ -1510,6 +1511,36 @@ Common Raven differ in mass by 175× and their cubes by 5.6×. P-066 admits this
 the printed number. The proposal was to answer it with the drawing instead — a horizontal line
 below the bird, from the lower-left, ticks at both ends, and the Mass label at the far end as the
 Wingspan label already sits at the end of the crossbar.
+
+**Then the owner looked at a rendered section and reported the opposite: the cubes draw the eye to
+the heavier birds, and work.** That is evidence, and it is worth more than the argument above, so
+it is recorded first. Measured on the section in that screenshot — #9, 51 species:
+
+| | |
+| --- | --- |
+| length spread | **1.15×** (272–312 mm), by construction |
+| mass spread | **8.3×** — Mangrove Cuckoo 63.9 g to Pigeon Guillemot 530 g |
+| cube edge spread | **2.02×** |
+| apparent area spread | **4.10×** |
+
+A cube twice as wide as its neighbour, in a row of birds that are all the same length, is not
+subtle. **The cube root is mild compression over the range a reader actually compares across.**
+
+That reframes the Bushtit-and-Raven example this section opens with. Those two differ 175× in
+mass — and they are 11 sections apart, never drawn side by side at a shared scale. The complaint
+is strongest exactly where the comparison is not being made, and weakest where it is. Per-section
+scale is the default (P-042), so the common case is the favourable one.
+
+**It also rescues a comparison the numbers break.** In that same section the Pigeon Guillemot's
+mass prints as `1.2 lb` and the Eared Grebe's as `14.5 oz`, because the formatter switches unit at
+16 oz. Two birds of the same length, one third heavier, in units a reader has to convert before
+comparing. The cubes are directly comparable where the labels are not — an argument for the shape
+that nobody made when CR-019 adopted it.
+
+**Where that leaves the line.** The case for it is weaker than when this section was written: it
+would buy proportionality over a range where the cube is already legible, and pay the price set
+out below. Not closed — the measurements stand and the design is worked out — but anyone picking
+it up should start by disagreeing with the screenshot.
 
 **The finding that decides the shape of the work: a line linear in mass cannot be drawn at one
 global scale.** The mass range is **4,258×** (2.6 g – 11,071 g). A 380 px tile has a usable
