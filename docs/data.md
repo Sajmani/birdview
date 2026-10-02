@@ -42,7 +42,7 @@ it borrowed from. Four of those splits are still awaiting a taxonomic check
 | **Mass** | **measured** — 831 direct, 10 near-match | AVONET `Mass` |
 | **Wingspan** | **301 measured**, 7 near-match, **533 modeled** | Fox et al. 2026 where empirical; otherwise a fitted regression |
 | **Head** | **modeled, unvalidated** — all 841 | `7.5 × mass^(1/3)` |
-| **Body** | **modeled, unvalidated** — all 841 | `18 × mass^0.31` |
+| **Body** | **modeled, calibrated** — all 841 | `14.0329 × mass^0.37` |
 | **Neck** | **modeled, invented** — all 841 | a per-family ratio × the trunk |
 | **Total length** | **modeled** — all 841 | `bill + head + neck + body + tail` |
 
@@ -104,10 +104,19 @@ never does that.
 
 ### The three modeled segments, in descending order of confidence
 
-**Body (trunk) — `18 × mass^0.31`.** An allometric relation. Mass is the only whole-animal
-measurement AVONET carries, so the trunk is derived from it rather than from a linear trait. The
-exponent is in the plausible range for a linear dimension against mass, but the relation is
-**unvalidated** — there is no dataset of avian trunk lengths to fit against.
+**Body (trunk) — `14.0329 × mass^0.37`.** An allometric relation. Mass is the only whole-animal
+measurement AVONET carries, so the trunk is derived from it rather than from a linear trait.
+
+There is still no dataset of avian trunk lengths to fit against, so this is not a fit. But the
+exponent is no longer guessed: it is **calibrated** against measured skeletons. Three independent
+dimensions agree on how a linear measure grows with mass — wingspan 0.368 (n=301), neck length
+0.380 and total leg length 0.364 (n=103, Böhmer et al. 2019) — and the model must sit inside the
+interval those imply. The coefficient follows from holding a 63.4 g bird fixed, so the
+recalibration changes proportion across the size range rather than overall scale.
+
+The previous `18 × mass^0.31` was invented, and too shallow: it drew the largest birds in the set
+about 1.65× too short relative to the smallest. What this still does not have is a measured
+*trunk* — the evidence comes from necks and legs.
 
 **Head (cranium) — `7.5 × mass^(1/3)`.** Isometric: a linear dimension scales as the cube root of
 mass. The coefficient is chosen to put a 20 g passerine near 20 mm. It is a shape function, not a
@@ -204,10 +213,15 @@ In rough order of how much it would change the picture:
    they visibly drive the silhouette of every long-necked family. Three families have been
    corrected by eye so far — Aramidae and Pelecanidae after a reader noticed a short-necked
    Limpkin, then Sulidae on review — which says the table has a slow error signal rather than that
-   it is converging. **Cervical vertebra count** is the most promising anchor for fixing it
-   properly, and is logged under Work arising in [spec/decisions.md](../spec/decisions.md).
-2. **The head and body models are unvalidated.** Both are plausible shape functions fitted against
-   nothing. If either coefficient is off, every length is off in the same direction.
+   it is converging. Böhmer et al. 2019 measures neck length across 68 families and is the most
+   promising anchor for fixing it properly; it is logged under Work arising in
+   [spec/decisions.md](../spec/decisions.md). (Cervical vertebra *counts* were the long-standing
+   candidate and turn out not to work: a count is dimensionless, so it can give proportions but
+   never millimetres.)
+2. **The head model is unvalidated, and the body model is calibrated but not fitted.** The
+   cranium's coefficient is a shape function fitted against nothing. The trunk's exponent is now
+   pinned to measured skeletons, but to *necks and legs* — nobody has published trunk lengths at
+   this coverage. If either coefficient is off, every length is off in the same direction.
 3. **Lengths are not comparable to published lengths.** They are internally consistent, which is
    what the tool needs, but do not quote them.
 4. **Two thirds of wingspans are modeled** — accurately, with a stated error, but modeled.

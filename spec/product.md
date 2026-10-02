@@ -615,6 +615,47 @@ Known limitation: because both cranium and trunk scale on mass, birds of similar
 heads. Within a size tier the head therefore differentiates little — the shape signal there comes
 from bill, tail, neck and wingspan, which are measured or family-specific.
 
+**The cube root is deliberately left alone by [CR-021](decisions.md#cr-021)**, which raised the
+*trunk's* exponent on the evidence of measured skeletons. The same evidence supports isometry for
+a cranium: single skeletal elements scale at 0.314–0.325, where chains of them scale higher. The
+head is one element and keeps 1/3; the trunk is a chain and does not. See [P-047](#p-047).
+
+Still open, and recorded because it is the one place the head model is visibly wrong: an Ostrich
+draws a 360 mm cranium against a real skull of roughly 200 mm, which implies bird heads scale with
+*negative* allometry rather than isometry. No head dataset exists at this coverage to fit against
+— the one large skull collection is passerines-only — so the coefficient stands unvalidated. It
+costs nothing inside the ABA scope, where the heaviest bird is 11 kg rather than 111 kg.
+
+### P-047 — The trunk is modeled allometrically from mass
+Subject: `diagram.trunk_model`
+Value: `14.0329 x mass^0.37`
+Goals: G-001, G-003
+
+Trunk length scales with body mass by a power law. Like every modeled value it names its function
+(P-062) and claims no measurement.
+
+The **exponent is calibrated against measured skeletons** rather than chosen. It must lie inside
+the 95% confidence interval that published skeletal data give for a *multi-element* linear
+dimension ([`bohmer-neck`](sources.md#bohmer-neck)) — **0.338 to 0.401**, the intersection of the
+intervals for neck length and total leg length. The distinction matters: single bones scale near
+isometry, chains of them scale higher, and a trunk is a chain.
+
+The **coefficient is a consequence, not a second free parameter.** It is set so the model is
+unchanged at **63.4 g**, the median mass of the ABA dataset when the exponent was calibrated.
+Recalibration is therefore a change of *proportion* across the size range rather than of overall
+scale: birds near the middle are drawn as they were, small birds slightly shorter, large birds
+substantially longer.
+
+That anchor is a **fixed constant, not a value read from the dataset at build time.** If scope
+changes the median moves, and the drawing must not move with it silently; re-anchoring would be a
+decision, recorded as one.
+
+Rationale: three of the five segments are driven by mass, so this exponent governs how much longer
+a big bird is drawn than a small one — which is the one thing G-001 exists to convey. The original
+0.31 was an unvalidated constant and it was **too shallow**, understating the large end of the
+current scope by about 1.65×. See [CR-021](decisions.md#cr-021) for the measurement, and for what
+it does not establish.
+
 ### P-045 — The neck/body split is a named per-family model
 Subject: `diagram.neck_ratio`
 Value: `per-family modeling function`
@@ -837,9 +878,13 @@ left edge rather than centred past it.
 
 The **index tiles carry the cube too**, unlabelled ([P-031](#p-031), CR-020). It is there for
 what the rest of the figure cannot say: **bulk against elongation**. Read against
-the bird's own length it is 28–29% of the drawing height for alcids, which are dense divers, and
-10–13% for long-tailed light-bodied species like the Scissor-tailed Flycatcher and the magpie.
-Length and wingspan cannot tell those apart.
+the bird's own length it is about **27%** of the drawing height for alcids, which are dense
+divers, and **10–13%** for long-tailed light-bodied species like the Scissor-tailed Flycatcher
+and the magpie. Length and wingspan cannot tell those apart.
+
+*(Re-measured after [CR-021](decisions.md#cr-021), which lengthened heavy birds and so shrank the
+cube's share of them; the alcid figure was 28–29%. The ratio is scale-invariant, so it is the same
+under either mode of P-042.)*
 
 **The cube compresses, and the number is there because it does.** A Bushtit and a Common Raven
 differ in mass by **175×** and their cubes differ by 5.6×, which is correct for equal-volume cubes

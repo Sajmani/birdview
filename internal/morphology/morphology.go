@@ -110,11 +110,55 @@ const headCoefficient = 7.5
 //
 // Modeled. Mass is the only whole-animal measurement AVONET carries, which is
 // why the trunk is derived from it rather than from a linear trait.
+//
+// The exponent is NOT a free parameter. It is calibrated against measured
+// skeletons and must stay inside the interval P-047 names; see trunkExponent.
+//
+// Verifies: P-047.
 func BodyLength(massG float64) (float64, string) {
 	m := math.Max(massG, 1.0)
-	v := 18.0 * math.Pow(m, 0.31)
-	return v, "trunk modeled as 18 x mass^0.31 (allometric, unvalidated)"
+	v := trunkCoefficient * math.Pow(m, trunkExponent)
+	return v, fmt.Sprintf("trunk modeled as %g x mass^%g (allometric, calibrated against skeletal data)",
+		trunkCoefficient, trunkExponent)
 }
+
+// trunkExponent is how fast the trunk grows with mass.
+//
+// It replaces an invented 0.31 that was too shallow, understating the large end
+// of the ABA scope by about 1.65x (CR-021). Three independent measurements of
+// how a linear dimension scales with mass agree far above it: measured wingspan
+// 0.368 (n=301, Fox), neck length 0.380 and total leg length 0.364 (n=103,
+// Bohmer et al. 2019). 0.37 is the round value nearest the mean of the two that
+// carry no aerodynamic confound.
+//
+// The distinction that makes this evidence usable: SINGLE bones scale near
+// isometry -- femur 0.325, central cervical vertebra 0.314 -- while CHAINS of
+// them scale higher. A trunk is a chain. This is also why the cranium of P-046
+// keeps its cube root and was deliberately left alone.
+//
+// P-047 requires this to lie in [0.338, 0.401]. Do not retune it by eye; that
+// is what produced the value it replaced.
+const trunkExponent = 0.37
+
+// trunkCoefficient follows from trunkExponent and is not independently chosen.
+//
+// It is set so the model is unchanged at anchorMassG, which keeps the
+// recalibration a change of proportion across the size range rather than a
+// change of overall scale: the median bird is drawn as it was, small birds a
+// little shorter, large birds substantially longer.
+//
+// Derivation: 18.0 * 63.4^0.31 / 63.4^0.37 = 14.0329. Carried to four decimals
+// because AC-080 checks the anchor to 0.01 mm and 14.03 misses it by 0.013.
+const trunkCoefficient = 14.0329
+
+// anchorMassG is the mass at which the recalibration of CR-021 is a no-op: the
+// median of the 841 ABA species when the exponent was calibrated.
+//
+// It is a FIXED CONSTANT, deliberately not recomputed from the dataset at build
+// time. If scope changes the median moves, and the whole drawing must not move
+// with it silently -- re-anchoring is a decision, and P-047 says it has to be
+// recorded as one.
+const anchorMassG = 63.4
 
 // NeckLength models the exposed neck as a share of the trunk.
 //

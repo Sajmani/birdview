@@ -999,8 +999,13 @@ not documentation of the feature, it is the feature.
 tiles, not merely found once — and **no tile carries a label of any kind**, the mass being named
 in the footer instead ([CR-020](decisions.md#cr-020)). This reverses what this criterion asserted
 when it was written, which was that tiles carry none; the reasoning is in CR-020. Across the real
-dataset the tile cube never reaches the crossbar either, the tightest clearance being 7.5px on
-Western Grebe against 0 overlaps in 841.
+dataset the tile cube never reaches the crossbar either: **0 overlaps in 841**, re-verified after
+[CR-021](decisions.md#cr-021) moved every length. CR-020 records why the companion clearance
+figure is not comparable across that change.
+
+**This number is prose, and it rotted the moment lengths moved.** It is a geometric invariant over
+the real dataset, so it belongs in a test rather than in a sentence — nothing failed when CR-021
+invalidated it, and it was caught by reading rather than by running. Logged as work arising.
 
 **Assertions, the Presentation panel:** it explains the cube in prose, naming what it is and
 warning that a cube root flattens. The diagram key alone is not enough — the Presentation panel
@@ -1064,6 +1069,51 @@ being shorter and narrower-winged — the one species for which the metrics disa
 asserts up front that length and mass sort the set differently, so if that property is ever lost
 the test says so instead of quietly passing.
 
+### AC-080 — The trunk scales the way measured skeletons do, and is anchored where it was
+**Verifies:** P-047 · **Level:** code · **Method:** recover the model's own exponent by regression
+over the real mass range, then check it against an interval taken from published measurement
+
+**Assertions, the exponent:** fitting log trunk on log mass across the dataset's mass range
+recovers an exponent inside **0.338 – 0.401** — the intersection of the 95% confidence intervals
+[`bohmer-neck`](sources.md#bohmer-neck) reports for neck length and total leg length, the two
+multi-element dimensions it measures.
+
+**Assertions, the interval actually discriminates:** the superseded exponent **0.310 lies outside
+that interval**, and so does an exaggerated 0.45. A band wide enough to admit the value it
+replaced would be a check that cannot fail, which is the specific failure this project keeps
+finding; the test asserts the band's sharpness rather than trusting it.
+
+**Assertions, the anchor:** at **63.4 g** the trunk equals what `18.0 × mass^0.31` gave, within
+0.01 mm. This pins the coefficient, which the exponent assertion alone cannot see — a model with
+the right exponent and a doubled coefficient passes every scaling check while drawing every bird
+wrong.
+
+**Assertions, the direction:** relative to the superseded model, species lighter than the anchor
+get shorter trunks and species heavier than it get longer ones, with the ratio increasing
+monotonically in mass. This is what "a change of proportion, not of scale" means, and it is the
+claim P-047's rationale actually makes.
+
+**Status: verified 2026-10-02 — passing, and watched failing** four ways:
+
+| breakage | what went red |
+| --- | --- |
+| restore the superseded model whole — `18.0 × mass^0.31` | exponent and direction. **The anchor assertion passed.** |
+| keep 0.37, restore the 18.0 coefficient | anchor and direction. **The exponent assertion passed.** |
+| overcorrect the exponent to 0.45 | exponent, anchor and direction together |
+| widen the band to 0.30 – 0.45 | sharpness, before any model is evaluated |
+
+**The first two rows are the point, and the first one corrected a wrong guess.** This criterion
+was drafted claiming the restored old model would fail the exponent *and* anchor assertions. It
+does not: at the anchor the superseded model trivially equals itself, so the anchor check is
+silent and only the exponent catches it. Which means the anchor assertion's own value could only
+be demonstrated by the second breakage — right exponent, wrong coefficient, which scales
+perfectly while drawing every bird 28% too long. Each assertion is load-bearing for a failure the
+other cannot see, and that is only known because both were tried.
+
+**The anchor assertion nearly was not written at all.** The first draft checked the exponent
+alone, which is the number the evidence is about. The evidence constrains a slope; the requirement
+constrains a curve.
+
 ---
 
 ## Traceability
@@ -1097,6 +1147,7 @@ the test says so instead of quietly passing.
 | P-044 | AC-034 | |
 | P-045 | AC-035, AC-069 | |
 | P-046 | AC-065 | |
+| P-047 | AC-080 | |
 | P-060 (composite) | AC-044 | |
 | P-060 (wingspan model) | AC-045 | |
 | P-050 – P-053 | — | withdrawn |

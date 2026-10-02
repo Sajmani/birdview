@@ -121,6 +121,113 @@ func TestHeadScalesWithMass(t *testing.T) {
 	}
 }
 
+// Böhmer et al. 2019 measured 103 skeletons across 34 orders. Regressing log
+// dimension on log mass gives, for the two MULTI-ELEMENT dimensions it reports:
+//
+//	neck length       0.380, 95% CI 0.338 - 0.421
+//	total leg length  0.364, 95% CI 0.328 - 0.401
+//
+// P-047 requires the trunk exponent to lie in the intersection. These bounds
+// come from the published data, not from this package -- do not "fix" a failure
+// by widening them.
+const (
+	minTrunkExponent = 0.338
+	maxTrunkExponent = 0.401
+)
+
+// supersededExponent and supersededCoefficient are the invented constants
+// CR-021 replaced. Kept because two assertions below are about them: that the
+// calibrated band excludes the old exponent, and that the new curve still
+// passes through the old one at the anchor.
+const (
+	supersededExponent    = 0.31
+	supersededCoefficient = 18.0
+)
+
+// TestTrunkScalesLikeMeasuredSkeletons recovers the trunk model's own exponent
+// by regression and checks it against an interval taken from measurement.
+//
+// The point of fitting rather than reading the constant is that this tests the
+// function's behavior: a model that stopped being a clean power law, or that
+// clamped, would fail here while a direct comparison against trunkExponent
+// would still pass.
+//
+// Verifies: P-047. Criterion: AC-080.
+func TestTrunkScalesLikeMeasuredSkeletons(t *testing.T) {
+	// The band must actually discriminate. A criterion whose bounds admit the
+	// value it replaced cannot fail, which is the failure mode this project
+	// keeps rediscovering -- so assert the band's sharpness before using it.
+	if supersededExponent >= minTrunkExponent {
+		t.Fatalf("the calibrated band [%g, %g] admits the superseded exponent %g, so it cannot discriminate",
+			minTrunkExponent, maxTrunkExponent, supersededExponent)
+	}
+	if exaggerated := 0.45; exaggerated <= maxTrunkExponent {
+		t.Fatalf("the calibrated band [%g, %g] admits %g, so it is too loose to catch an overcorrection",
+			minTrunkExponent, maxTrunkExponent, exaggerated)
+	}
+
+	// Recover the exponent over the real ABA mass range: Calliope Hummingbird
+	// at 2.6 g to Trumpeter Swan at 11071 g.
+	var xs, ys []float64
+	for i := 0; i <= 200; i++ {
+		lm := math.Log(2.6) + (math.Log(11071)-math.Log(2.6))*float64(i)/200
+		mass := math.Exp(lm)
+		trunk, _ := BodyLength(mass)
+		xs = append(xs, lm)
+		ys = append(ys, math.Log(trunk))
+	}
+	got := slope(xs, ys)
+	if got < minTrunkExponent || got > maxTrunkExponent {
+		t.Errorf("trunk scales as mass^%.4f, outside the measured interval [%g, %g] P-047 requires",
+			got, minTrunkExponent, maxTrunkExponent)
+	}
+
+	// The anchor pins the coefficient, which no scaling assertion can see: the
+	// right exponent with a wrong coefficient draws every bird wrong while
+	// scaling perfectly.
+	wantAtAnchor := supersededCoefficient * math.Pow(anchorMassG, supersededExponent)
+	if gotAtAnchor, _ := BodyLength(anchorMassG); math.Abs(gotAtAnchor-wantAtAnchor) > 0.01 {
+		t.Errorf("at the %g g anchor the trunk is %.3f mm, want %.3f mm — the recalibration is "+
+			"supposed to change proportion, not overall scale",
+			anchorMassG, gotAtAnchor, wantAtAnchor)
+	}
+
+	// Direction: lighter birds shrink, heavier birds grow, monotonically.
+	prev := 0.0
+	for _, mass := range []float64{2.6, 10, 30, anchorMassG, 150, 800, 4000, 11071} {
+		now, _ := BodyLength(mass)
+		was := supersededCoefficient * math.Pow(mass, supersededExponent)
+		ratio := now / was
+		if ratio <= prev {
+			t.Errorf("at %g g the new/old trunk ratio is %.4f, not greater than the previous %.4f; "+
+				"the correction must grow with mass", mass, ratio, prev)
+		}
+		switch {
+		case mass < anchorMassG && ratio >= 1:
+			t.Errorf("at %g g, below the anchor, the trunk grew (ratio %.4f)", mass, ratio)
+		case mass > anchorMassG && ratio <= 1:
+			t.Errorf("at %g g, above the anchor, the trunk shrank (ratio %.4f)", mass, ratio)
+		}
+		prev = ratio
+	}
+}
+
+// slope returns the ordinary least-squares slope of y on x.
+func slope(x, y []float64) float64 {
+	n := float64(len(x))
+	var mx, my float64
+	for i := range x {
+		mx += x[i] / n
+		my += y[i] / n
+	}
+	var sxy, sxx float64
+	for i := range x {
+		sxy += (x[i] - mx) * (y[i] - my)
+		sxx += (x[i] - mx) * (x[i] - mx)
+	}
+	return sxy / sxx
+}
+
 // TestModelsAreDescribed checks every model function returns a non-empty
 // description. A modeled value with an empty model string would satisfy the
 // schema while telling the reader nothing (P-062).

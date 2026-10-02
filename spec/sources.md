@@ -15,6 +15,7 @@ the others can be filled in plausibly from a URL alone.
 | [`avonet`](#avonet) | mandatory | by reference, vendored | **adopted** — pinned, vendored, hashed; no criteria yet |
 | [`aba`](#aba) | mandatory | by reference, **not** vendored | **partial** — terms read and quoted, pinned by hash; redistribution refused, so fetched at build |
 | [`fox-wingspan`](#fox-wingspan) | mandatory | by reference, vendored | **adopted** — retrieved, hashed against the publisher's MD5, vendored |
+| [`bohmer-neck`](#bohmer-neck) | mandatory | consulted, not ingested | **adopted** — CC BY 4.0 verified; calibrates one constant, contributes no data |
 | [`ricklefs`](#ricklefs) | mandatory | **rejected** | **rejected** — Wiley terms prohibit the use, see CR-002 |
 | [`wiley`](#wiley) | mandatory | quoted only, not vendored | **adopted** — terms read and transcribed; the reason `ricklefs` is rejected |
 | [`wcag`](#wcag) | mandatory | absorbed, partial | **partial** — adopted for two criteria, not vendored |
@@ -22,7 +23,7 @@ the others can be filled in plausibly from a URL alone.
 | [`inat-terms`](#inat-terms) | mandatory | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; almost nothing in it reaches BirdView |
 | [`specman`](#specman) | — (method) | project copy | **adopted** — copied, base pin recorded below |
 
-One of the nine is not fully adopted, and it does not block v1. `ricklefs` was evaluated and
+One of the ten is not fully adopted, and it does not block v1. `ricklefs` was evaluated and
 **rejected**: its platform terms prohibit extraction, integration, storage and redistribution
 alike. Its entry is kept so the evaluation is not repeated.
 
@@ -160,6 +161,47 @@ Worldwide the empirical rate is **1,424 of 10,618 (13.4%)**, so BirdView's curre
 served about **2.7× better than the global average**. That is a fact about where ornithology has
 been done, and it is worth knowing before any change of scope: widening beyond North America
 would not break the pipeline, but it would thin the measured wingspans sharply.
+
+---
+
+## `bohmer-neck`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | https://doi.org/10.1098/rsos.181588 — data at https://doi.org/10.6084/m9.figshare.8025971 |
+| **Version** | figshare v1, file `rsos181588_si_001.docx`, 706,190 bytes |
+| **Integrity** | **Not vendored, so no hash here.** The figshare DOI pins the version, and the file is re-downloadable. |
+| **Tier** | mandatory (copyright license) |
+| **Import style** | **Consulted, not ingested.** No value from it enters the dataset. |
+| **Scope** | Calibration evidence only: the mass exponent of [P-047](product.md#p-047) |
+| **Geographic scope** | Worldwide — 103 species across 68 families and 34 orders, MNHN Paris skeletal collection, one specimen per species |
+| **Adopted parts** | Table S4's published scaling, used to choose one constant. Nothing is joined to BirdView's species. |
+| **Exclusions** | Everything else. In particular the per-species neck lengths are **not** used as BirdView's neck values — Böhmer measures the full cervical column, including the part inside the body contour, where [P-045](product.md#p-045) models the *exposed* neck of a silhouette. The two are different quantities and must not be equated; see [CR-021](decisions.md#cr-021). |
+| **Owner** | Böhmer, Rössner, Fabre et al. |
+| **Status** | **Adopted 2026-10-02 as calibration evidence.** CC BY 4.0 verified from the figshare API record itself, not inferred from the article. |
+
+Why it is a source at all when no number from it is stored: [CR-021](decisions.md#cr-021) changes a
+constant in the trunk model, and the evidence for that constant has to be citable. A source entry
+is the honest place for it. The alternative — a magic number in a code comment saying "measured
+elsewhere" — is exactly what this manifest exists to prevent.
+
+What was measured from it, by regressing each log₁₀ dimension on log₁₀ body mass (n = 103):
+
+| dimension | exponent | 95% CI |
+| --- | ---: | :---: |
+| neck length | 0.380 | 0.338 – 0.421 |
+| total leg length | 0.364 | 0.328 – 0.401 |
+| tibiotarsus | 0.356 | 0.321 – 0.391 |
+| tarsometatarsus | 0.419 | 0.360 – 0.477 |
+| femur | 0.325 | 0.297 – 0.352 |
+| central cervical vertebra | 0.314 | 0.280 – 0.348 |
+
+**Single bones scale near isometry; multi-element chains scale with positive allometry.** That
+split is the finding, and total length is a chain.
+
+Units in the supplement are unstated. They are kilograms and metres, recovered two independent
+ways — *Amazona amazonica* gives (10^−0.13874)³ = 0.383 kg and a 67.6 mm neck. The fit does not
+depend on that recovery being right: a slope is invariant under a change of units.
 
 ---
 

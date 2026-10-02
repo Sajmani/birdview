@@ -1277,11 +1277,14 @@ to carry the magnitude — the mass label was added in the same breath, so the n
 ### What the cube earns its place with
 
 It shows the one thing a length-and-wingspan diagram cannot: **bulk against elongation.** Read
-against the bird's own length, the largest cubes in the set belong to alcids — Thick-billed
-Murre, Parakeet Auklet, Crested Auklet, Marbled Murrelet, dense diving birds at 28–29% of the
+against the bird's own length, the largest cubes in the set belong to alcids — Least Auklet,
+Marbled Murrelet, Whiskered Auklet, Parakeet Auklet, dense diving birds at about 27% of the
 drawing height — and the smallest to long-tailed, light-bodied species: Fork-tailed Flycatcher,
 Scissor-tailed Flycatcher and Black-billed Magpie, at 10–13%. Nothing else on the figure
 distinguishes a bird that is long from a bird that is heavy.
+
+*(Re-measured after [CR-021](#cr-021): the alcid end read 28–29% before heavy birds lengthened.
+The comparison and its direction are unchanged.)*
 
 Measured before it was built, at the detail view's geometry: 28 px smallest, 52 px median, 80 px
 largest, in a drawing area 668 × 281. In the lower-left corner at an 8 px margin the crossbar
@@ -1313,8 +1316,15 @@ The exclusion rested on two claims. One was crowding: *"the tile is dense by des
 annotated-diagram furniture, as P-066's labels already are."* That reasoning holds for **labels**,
 which need a gutter a third of the width and a leader line to the part they name. It does not
 transfer to the cube, which needs neither: it sits in a corner the drawing does not use, and
-measured across the whole dataset it never reaches the crossbar — the tightest clearance is 7.5px
-on Western Grebe, against 0 overlaps in 841.
+measured across the whole dataset it never reaches the crossbar — **0 overlaps in 841**, which is
+the claim that matters and which [CR-021](#cr-021) re-verified after every length moved.
+
+The accompanying figure was "the tightest clearance is 7.5px on Western Grebe". Re-measuring at
+per-section scale as the vertical gap between the cube's top vertex and the crossbar, over the
+tiles where the two share any horizontal extent, gives **23.6px on Least Grebe** — and gives
+16.8px on Eared Grebe for the *old* dataset, where the original method gave 7.5px on a different
+bird. The two methods therefore do not measure the same gap, and the numbers should not be read
+as a before and after. The invariant both support is the one stated above.
 
 The other was that an unexplained shape reads as part of the bird. That was true when the cube was
 introduced and is no longer: the Presentation panel now explains it, and the tile footer names
@@ -1331,6 +1341,101 @@ bird at a time, or two or three on a comparison page assembled by hand.
 The cube stays off the tile in no other way: no label, no leader, no footer row of its own. The
 tile's contract is unchanged apart from the shape itself.
 
+## CR-021 — The trunk's mass exponent is calibrated against skeletons, not invented
+
+**Subject:** `diagram.trunk_model`
+**Kind:** Direct — a measurement contradicts a constant the project chose by eye
+**Date:** 2026-10-02 · **Decided by:** Sameer
+
+### What changed
+
+`BodyLength` modeled the trunk as `18.0 x mass^0.31`, an unvalidated constant carried since the
+first ingest. It is now **`14.0329 x mass^0.37`**, and the exponent is pinned to published skeletal
+measurement by [P-047](product.md#p-047) and [AC-080](acceptance.md#ac-080).
+
+### Why
+
+The question was raised by an Ostrich. Measuring what a worldwide scope would do to the models
+produced a bird with a 360 mm head on a 119 mm neck and a total length of 1,539 mm against a real
+2.1–2.75 m, which prompted the right follow-up: *is the model also wrong for the 841 we already
+have?*
+
+It is, and the evidence converged from three independent directions. Regressing log dimension on
+log mass:
+
+| dimension | n | exponent | 95% CI |
+| --- | ---: | ---: | :---: |
+| measured wingspan ([`fox-wingspan`](sources.md#fox-wingspan)) | 301 | 0.368 | — |
+| neck length ([`bohmer-neck`](sources.md#bohmer-neck)) | 103 | **0.380** | 0.338 – 0.421 |
+| total leg length ([`bohmer-neck`](sources.md#bohmer-neck)) | 103 | **0.364** | 0.328 – 0.401 |
+| | | | |
+| *BirdView trunk, as shipped* | — | *0.310* | — |
+| *BirdView composite total length* | — | *0.302* | — |
+
+**The wingspan result alone was not enough, and was nearly discarded.** Large birds are
+disproportionately long-winged — the heaviest species with measured spans are albatrosses, condors
+and pelicans — so 0.368 looked inflated by an aerodynamic confound, and the first verdict was
+"inconclusive, sits at the bottom of the plausible range". Necks and legs settle it: neither is an
+airfoil, neither is under selection for span, and both land in the same band. Three dimensions
+agreeing at 0.364–0.380 is a biological signal, not an artifact of flight.
+
+0.310 falls **below** the 95% interval of neck, total leg and tibiotarsus alike. It sits inside
+the interval only for the two single-element measures — femur 0.325, central cervical vertebra
+0.314 — which is exactly where isometry is expected, and exactly what a total length is not.
+
+Within the current scope's 4,258× mass range, the gap understated the large end by **1.65×**.
+
+### Why 0.37, and why the coefficient moved with it
+
+0.37 is the round value nearest the mean of the two non-aerodynamic estimates (0.372), and the
+wingspan estimate at 0.368 corroborates it. It sits comfortably inside the band P-047 requires.
+
+Raising the exponent alone would have lengthened every bird, which is not what the evidence says
+— the evidence is about *relative* size across the range. The coefficient is therefore re-anchored
+so the model is unchanged at the median mass of 63.4 g:
+
+| species | mass g | before | after | change |
+| --- | ---: | ---: | ---: | ---: |
+| Calliope Hummingbird | 3 | 24.2 | 20.0 | 0.83× |
+| Redpoll | 13 | 39.9 | 36.2 | 0.91× |
+| American Robin | 78 | 69.6 | 70.5 | **1.01×** |
+| Mallard | 843 | 145.3 | 169.7 | 1.17× |
+| California Condor | 8,443 | 296.8 | 398.1 | 1.34× |
+| Trumpeter Swan | 11,071 | 322.8 | 440.0 | 1.36× |
+
+### What this does *not* establish
+
+Recorded at length, because the temptation to over-read it is strong.
+
+**Böhmer never measured a trunk.** The inference runs neck + leg → trunk, and a trunk is not
+obviously like either: it houses the flight apparatus and may be more conserved. This is the
+weakest link in the argument, and the thing a better source would most repay.
+
+**The direct species-level comparison is not evidence, in either direction.** Joining Böhmer's
+taxa to BirdView gives 19 exact matches, on which BirdView's modeled neck is a median 29% of
+Böhmer's measured neck. That is expected: Böhmer sums cervical centrum lengths, including the part
+inside the body contour, where [P-045](product.md#p-045) models the *exposed* neck of a
+silhouette. A raven's cervical column is 106 mm; its visible neck is not. The apparent mass trend
+in that join (+0.115, CI +0.001 to +0.229) points the opposite way from the exponent argument and
+is an artifact of which families were sampled — its large taxa sit in long-neck families (Anatidae
+0.70, Phoenicopteridae 0.95, Gaviidae 0.50), its small ones in short-neck families (Alcedinidae
+0.10). The family table drives it, not biology.
+
+The decision rests only on the pure scaling fits, which involve no BirdView model at all.
+
+**The head model is untouched** ([P-046](product.md#p-046)). Single-element data supports isometry
+for a cranium, so the cube root stays — along with its own unresolved problem, recorded there.
+
+**Total length is still `modeled`.** A better exponent is not a measurement. [CR-001](#cr-001) and
+[P-062](product.md#p-062) are unaffected, and every length stays dashed and marked.
+
+### What it costs
+
+Every length in the dataset moves, so section boundaries, the global scale anchor and the ordering
+within sections all shift. That churn is why this lands as its own commit, ahead of the AviList
+names work rather than beside it: two large dataset changes at once would be impossible to tell
+apart in review or in a screenshot.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
@@ -1344,8 +1449,11 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | ~~Ask ABA for written permission to redistribute the checklist~~ — **sent 2026-09-27**, awaiting reply | Sameer | done |
 | ~~Decide the neck's flight posture~~ — done, [CR-011](#cr-011) | Sameer | closed 2026-09-23 |
 | Assess whether a perched/standing toggle is achievable at any honest accuracy ([CR-011](#cr-011)) | — | before it is offered to users |
-| Investigate cervical vertebra counts as an anchor for the neck model (P-045) | — | opportunistic; the biggest available win on the weakest model |
-| Add a **Sort by** control to the comparison view — length, wingspan, mass, the index's three — reordering the panels | — | queued 2026-10-01, owner's request |
+| ~~Investigate cervical vertebra counts as an anchor for the neck model~~ — answered: counts are dimensionless and the trunk's are conserved, so they cannot do it. [`bohmer-neck`](sources.md#bohmer-neck) measures neck *lengths* instead and now calibrates [P-047](product.md#p-047) | — | closed 2026-10-02, [CR-021](#cr-021) |
+| Replace the hand-written `NeckRatios` table with values derived from [`bohmer-neck`](sources.md#bohmer-neck), which covers 68 families against the table's 25 — and review the table against the full family list, which is the only thing that will catch the next missing entry | — | opportunistic; still the weakest model, and CR-021 did not touch it |
+| Find a source that measures a **trunk**. CR-021's exponent is inferred from neck and leg, and that is its weakest link | — | opportunistic; would upgrade a calibration to a fit |
+| Promote the cube/crossbar clearance invariant from prose into a test over the real dataset. CR-021 invalidated the recorded figure and nothing failed — it was caught by reading ([AC-078](acceptance.md#ac-078)) | — | before the next change that moves lengths |
+| ~~Add a **Sort by** control to the comparison view~~ — built, [AC-079](acceptance.md#ac-079) | Sameer | closed 2026-10-01 |
 | ~~Decide whether mass gets an **equal-mass cube of water** drawn in the diagram~~ — built, [CR-019](#cr-019) | Sameer | closed 2026-10-01 |
 
 ### A cube of water for mass
