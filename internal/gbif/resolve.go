@@ -219,6 +219,44 @@ func (c *Client) NamesIn(ctx context.Context, datasetKey, gadmGid string) ([]Reg
 	return out, nil
 }
 
+// CountFor returns how many records the dataset holds for one verbatim name
+// in the given countries. Used to measure what share of a species' records
+// fall outside every land region, which is what makes a bird pelagic.
+func (c *Client) CountFor(ctx context.Context, datasetKey, name string, countries []string) (int64, error) {
+	q := url.Values{}
+	q.Set("datasetKey", datasetKey)
+	for _, country := range countries {
+		q.Add("country", country)
+	}
+	q.Set("verbatimScientificName", name)
+	q.Set("limit", "0")
+	var body facetResponse
+	if err := c.get(ctx, "/occurrence/search?"+q.Encode(), &body); err != nil {
+		return 0, fmt.Errorf("counting %q: %w", name, err)
+	}
+	return body.Count, nil
+}
+
+// CountInBox returns how many records for one verbatim name fall inside a
+// coordinate box. Used to decide which ocean a pelagic species belongs to.
+func (c *Client) CountInBox(ctx context.Context, datasetKey, name string,
+	countries []string, minLat, maxLat, minLon, maxLon float64) (int64, error) {
+	q := url.Values{}
+	q.Set("datasetKey", datasetKey)
+	for _, country := range countries {
+		q.Add("country", country)
+	}
+	q.Set("verbatimScientificName", name)
+	q.Set("decimalLatitude", fmt.Sprintf("%g,%g", minLat, maxLat))
+	q.Set("decimalLongitude", fmt.Sprintf("%g,%g", minLon, maxLon))
+	q.Set("limit", "0")
+	var body facetResponse
+	if err := c.get(ctx, "/occurrence/search?"+q.Encode(), &body); err != nil {
+		return 0, fmt.Errorf("counting %q in box: %w", name, err)
+	}
+	return body.Count, nil
+}
+
 // RegionName returns the GADM level-1 name for a region id, by reading it off
 // a single occurrence. Empty when the dataset reports nothing there.
 func (c *Client) RegionName(ctx context.Context, datasetKey, gadmGid string) (string, error) {

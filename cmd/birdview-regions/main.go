@@ -35,6 +35,7 @@ import (
 	"time"
 
 	"birdview/internal/gbif"
+	"birdview/internal/region"
 )
 
 // iNatDatasetKey is the iNaturalist research-grade observations dataset.
@@ -44,15 +45,14 @@ const iNatDatasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7"
 // in alphabetical order, so the ids are generated rather than listed; each
 // one's real name is read back from the data and written into the table, so a
 // wrong id shows up as a wrong name rather than as silence.
-const (
-	usStates    = 51 // 50 plus the District of Columbia
-	caProvinces = 13 // 10 provinces, 3 territories
-	// GADM files the Northwestern Hawaiian Islands under United States Minor
-	// Outlying Islands, not under Hawaii, so Laysan Duck and Laysan Finch land
-	// in no state and were left unplaced until this was added. A unit that
-	// names nothing is skipped, so over-asking is free.
-	umiUnits = 10
-)
+// minPelagicShare is how much of a species' records must fall outside EVERY
+// land region before it is treated as a bird of the open sea.
+//
+// The measure separates cleanly, which is why a single threshold works:
+// Bermuda Petrel 100%, Craveri's Murrelet 98.9%, Sooty Shearwater 79.1%,
+// Tufted Puffin 53.9% -- against American Robin 0.9% and Herring Gull 1.1%.
+// There is nothing between 54% and 1%, so the exact cut is not load-bearing.
+const minPelagicShare = 0.5
 
 // minPPM is the presence bar: a species counts as present in a region when it
 // reaches this share of that region's bird records.
@@ -89,21 +89,14 @@ func main() {
 	c.Concurrency = 2
 	c.Interval = 400 * time.Millisecond
 	ctx := context.Background()
+	countries := []string{"US", "CA"}
 
-	var gids []string
-	for i := 1; i <= usStates; i++ {
-		gids = append(gids, fmt.Sprintf("USA.%d_1", i))
-	}
-	for i := 1; i <= caProvinces; i++ {
-		gids = append(gids, fmt.Sprintf("CAN.%d_1", i))
-	}
-	for i := 1; i <= umiUnits; i++ {
-		gids = append(gids, fmt.Sprintf("UMI.%d_1", i))
-	}
+	gids := region.LandIDs()
 
 	type result struct {
 		gid, name string
 		present   map[string]bool
+		counts    map[string]int64
 		err       error
 	}
 	results := make([]result, len(gids))
@@ -115,7 +108,7 @@ func main() {
 			defer wg.Done()
 			sem <- struct{}{}
 			defer func() { <-sem }()
-			r := result{gid: gid, present: map[string]bool{}}
+			r := result{gid: gid, present: map[string]bool{}, counts: map[string]int64{}}
 			r.name, r.err = c.RegionName(ctx, gbif.EBirdDatasetKey, gid)
 			if r.err != nil {
 				results[i] = r
@@ -135,6 +128,7 @@ func main() {
 					continue
 				}
 				for _, rec := range recs {
+					r.counts[rec.Name] += rec.Records
 					if float64(rec.Records)/float64(total)*1e6 >= minPPM {
 						r.present[rec.Name] = true
 					}
@@ -164,6 +158,62 @@ func main() {
 				regionsOf[sp] = append(regionsOf[sp], r.gid)
 			}
 		}
+	}
+
+	// How much of each species sits outside every land region. A land bird is
+	// near zero; a petrel is near one. The denominator is the species' whole
+	// ABA-area count, which the land facets cannot supply.
+	landTotal := map[string]int64{}
+	for _, r := range results {
+		for _, sp := range ds {
+			landTotal[sp] += r.counts[strings.ToLower(sp)]
+		}
+	}
+
+	log.Printf("birdview-regions: measuring how much of each species is at sea")
+	var pelagic []string
+	var pmu sync.Mutex
+	var pwg sync.WaitGroup
+	psem := make(chan struct{}, c.Concurrency)
+	for _, sp := range ds {
+		pwg.Add(1)
+		go func(sp string) {
+			defer pwg.Done()
+			psem <- struct{}{}
+			defer func() { <-psem }()
+			total, err := c.CountFor(ctx, gbif.EBirdDatasetKey, strings.ToLower(sp), countries)
+			if err != nil || total == 0 {
+				return
+			}
+			if 1-float64(landTotal[sp])/float64(total) >= minPelagicShare {
+				pmu.Lock()
+				pelagic = append(pelagic, sp)
+				pmu.Unlock()
+			}
+		}(sp)
+	}
+	pwg.Wait()
+	sort.Strings(pelagic)
+	log.Printf("birdview-regions: %d species are mostly at sea", len(pelagic))
+
+	// Which ocean. Tested in the order internal/region declares, Arctic first,
+	// because it is a latitude band that overlaps both oceans in longitude.
+	for _, sp := range pelagic {
+		for _, id := range region.MarineIDs() {
+			minLat, maxLat, minLon, maxLon, _ := region.MarineBox(id)
+			n, err := c.CountInBox(ctx, gbif.EBirdDatasetKey, strings.ToLower(sp),
+				countries, minLat, maxLat, minLon, maxLon)
+			if err != nil {
+				log.Fatalf("birdview-regions: %s in %s: %v", sp, id, err)
+			}
+			if n > 0 {
+				regionsOf[sp] = append(regionsOf[sp], id)
+			}
+		}
+	}
+	for _, id := range region.MarineIDs() {
+		r, _ := region.Get(id)
+		names[id] = r.Name
 	}
 
 	placed := 0
