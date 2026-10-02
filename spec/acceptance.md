@@ -574,6 +574,16 @@ the stylesheet **as embedded in the binary**, not off disk
 **7:1** against both `--bg` and `--panel`. Rules that also set a `background` are excluded, being
 self-contained and governed by T-010.
 
+**Assertions, SVG text:** every `fill` a rule declares **on a text element** clears the same 7:1
+against both surfaces. Which rules those are is derived rather than listed: a class token that any
+rule gives a font property to is a text token, and any rule naming one is styling text. So
+`.dlabel { font-size: 11px }` makes `dlabel` a text token, and the `fill` on `.dlabel.chord` is a
+text color. A `fill` on a shape — the head oval, the mass cube — is untouched, being a graphical
+object under WCAG 1.4.11's 3:1 instead.
+
+Deriving it is the point. An explicit list of text selectors would need maintaining by the same
+person who just added an unchecked one, which is the failure this assertion exists to fix.
+
 **Assertions, structural:** the stylesheet carries top-level `a` and `a:visited` rules, so no link
 can fall back to the browser default.
 
@@ -582,6 +592,21 @@ can fall back to the browser default.
 `#551A8B`, by picking a link color that clears AA at 4.90:1 but misses 7:1, and — after the floor
 rose to 7:1 for everything ([CR-014](decisions.md)) — by restoring the previous `--dim` and
 `--accent`, which fail at 5.71:1 and 6.83:1 on a panel.
+
+**SVG text assertion added 2026-10-02 — and it caught a live defect on its first run**, not a
+planted one: `.dlabel.chord, .dlabel.span` was painting the wing chord and wingspan labels
+`#0ea5e9`, 6.44:1 and 5.28:1. Watched failing three ways:
+
+| breakage | what happened |
+| --- | --- |
+| restore `#0ea5e9` on the label fill | both surfaces flagged — this *is* the shipped bug |
+| set a shape fill (`.mcface`) to near-black `#010203` | **not** flagged, correctly: a cube face is a graphical object, so the check is selective rather than indiscriminate |
+| drop `font-size` from `.dlabel`, so `dlabel` stops being a text token | `checked == 0` fires and the test fails outright |
+
+The third is the one worth having. Removing the font property makes the derivation cover nothing
+at all, and without that guard the check would go quietly green while protecting zero labels —
+the exact shape of failure this project keeps finding. A check that cannot report "I am no longer
+checking anything" is not a check.
 
 The structural assertion is the one that would have caught the bug. A measured check sees only
 colors that were declared, and the defect was a color nobody declared — the link inherited

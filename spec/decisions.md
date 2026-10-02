@@ -1456,7 +1456,8 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | ~~Add a **Sort by** control to the comparison view~~ — built, [AC-079](acceptance.md#ac-079) | Sameer | closed 2026-10-01 |
 | ~~Decide whether mass gets an **equal-mass cube of water** drawn in the diagram~~ — built, [CR-019](#cr-019) | Sameer | closed 2026-10-01 |
 | **Parked:** replace the cube with a mass **line** proportional to mass. Measured and written up in [Mass as a proportional line](#mass-as-a-proportional-line-replacing-the-cube--parked); needs a CR, because it reverses CR-019 | Sameer | parked 2026-10-02 — resume from that section, do not re-derive |
-| Give the mass cube a colour that is not the crossbar's. `#38bdf8` against the wing's `#0ea5e9` makes the one mark that is **not** a length look like the one that is — a defect in what ships today, found while evaluating the line | — | opportunistic; small and independent of the parked work |
+| ~~Give the mass cube a colour that is not the crossbar's~~ — resolved the other way round: the **crossbar** moved to green `#4ade80`, because the cube's blue depicts the water and should keep it. The recolour also fixed a live 7:1 violation, the labels sharing that colour being text | Sameer | closed 2026-10-02 |
+| Delete the dead `.sw.*` swatch rules in `styles.css`. [CR-017](#cr-017) replaced the swatch legend with a labelled diagram and no template has emitted `class="sw …"` since; the rules survived and were still being colour-matched by hand in 2026-10-02 | — | opportunistic; cosmetic, but they read as live |
 
 ### A cube of water for mass
 

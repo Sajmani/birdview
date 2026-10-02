@@ -133,6 +133,99 @@ func TestStylesheetContrast(t *testing.T) {
 	t.Logf("%d color/surface pairs checked", checked)
 }
 
+// reFill matches a fill declaration, which is how SVG text is painted. SVG
+// elements ignore `color` entirely, so the check above cannot see a diagram
+// label at all.
+var (
+	reFill = regexp.MustCompile(`(?:^|[;\s])fill:\s*([^;]+)`)
+	reFont = regexp.MustCompile(`(?:^|[;\s])font-(?:size|weight|family|style):`)
+	reTok  = regexp.MustCompile(`\.([A-Za-z][-\w]*)`)
+)
+
+// TestSVGTextContrast holds diagram labels to the same floor as every other run
+// of text (T-023).
+//
+// The bug: `.dlabel.chord, .dlabel.span` painted the wing chord and wingspan
+// labels #0ea5e9, which is 6.44:1 on the page background and 5.28:1 on a panel
+// against a 7:1 floor. It shipped, and TestStylesheetContrast could not see it,
+// because that check matches `color:` and SVG text has no `color`.
+//
+// Which rules style text is DERIVED, not listed: a class token that any rule
+// gives a font property to is a text token, and a rule naming one is styling
+// text. An explicit allowlist would have to be maintained by whoever just added
+// the selector it is missing, which is the failure being fixed rather than a
+// fix for it.
+//
+// Verifies: T-023, `wcag/1.4.6`. Criterion: AC-070.
+func TestSVGTextContrast(t *testing.T) {
+	css := stripComments(string(mustReadStyles(t)))
+
+	vars := map[string]string{}
+	for _, m := range reVar.FindAllStringSubmatch(css, -1) {
+		vars[m[1]] = m[2]
+	}
+
+	// Pass one: which class tokens does the stylesheet treat as text?
+	textTokens := map[string]bool{}
+	for _, rule := range reRule.FindAllStringSubmatch(css, -1) {
+		if !reFont.MatchString(rule[2]) {
+			continue
+		}
+		for _, m := range reTok.FindAllStringSubmatch(rule[1], -1) {
+			textTokens[m[1]] = true
+		}
+	}
+	if len(textTokens) == 0 {
+		t.Fatal("no text tokens found; the parser is broken, not the stylesheet")
+	}
+
+	// Pass two: every fill on a rule naming one of them is a text color.
+	var checked int
+	for _, rule := range reRule.FindAllStringSubmatch(css, -1) {
+		sel, body := strings.TrimSpace(rule[1]), rule[2]
+		if strings.HasPrefix(sel, "@") || strings.Contains(sel, ":root") {
+			continue
+		}
+		fm := reFill.FindStringSubmatch(body)
+		if fm == nil {
+			continue
+		}
+		isText := false
+		for _, m := range reTok.FindAllStringSubmatch(sel, -1) {
+			if textTokens[m[1]] {
+				isText = true
+				break
+			}
+		}
+		if !isText {
+			continue // a shape: WCAG 1.4.11's 3:1, not this floor
+		}
+		var fg string
+		if m := regexp.MustCompile(`var\((--[a-z-]+)\)`).FindStringSubmatch(fm[1]); m != nil {
+			fg = vars[m[1]]
+		} else if h := reHex.FindString(fm[1]); h != "" {
+			fg = h
+		}
+		if fg == "" || len(fg) == 9 { // none/inherit, or #rrggbbaa -- a tint, not text
+			continue
+		}
+		fr, fg2, fb := hexRGB(t, fg)
+		lfg := palette.RelativeLuminance(fr, fg2, fb)
+		for _, v := range surfaceVars {
+			br, bgc, bb := hexRGB(t, vars[v])
+			if got := palette.Contrast(lfg, palette.RelativeLuminance(br, bgc, bb)); got < textFloor {
+				t.Errorf("%-30s fill %s on %s is %.2f:1, below the %.1f:1 floor",
+					sel, fg, v, got, textFloor)
+			}
+			checked++
+		}
+	}
+	if checked == 0 {
+		t.Fatal("no SVG text fills were checked; the derivation found nothing, so it cannot bite")
+	}
+	t.Logf("%d fill/surface pairs checked across %d text tokens", checked, len(textTokens))
+}
+
 // TestNoLinkUsesTheBrowserDefault is the other half, and the half that would
 // have caught the actual bug.
 //

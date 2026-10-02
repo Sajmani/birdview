@@ -152,7 +152,20 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .body { stroke: #64748b; stroke-width: 5; stroke-linecap: butt; }
 .tail { stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 5 3; }
 .junction { stroke: #cbd5e1; stroke-width: 1.5; }
-.wing { stroke: #0ea5e9; stroke-width: 2.5; stroke-linecap: round; }
+/* The crossbar is GREEN, not blue, and both halves of that matter.
+
+   Blue belongs to the mass cube, where it reads as the water it depicts. The
+   crossbar was #0ea5e9 and the cube #38bdf8 -- near-identical hue and
+   luminance -- so the one mark that is NOT a length looked like a matched set
+   with the mark whose entire point is that it IS a length to scale (P-043).
+   This colour is dE 86 from the cube and 92 from the amber bill.
+
+   #0ea5e9 was also 6.44:1 on the page and 5.28:1 on a panel, and this colour
+   is used as TEXT: the chord and wingspan labels below take their fill from
+   the same vocabulary. That shipped under a 7:1 floor (T-023) because the
+   contrast check matched `color:` and SVG text has no `color`. See
+   TestSVGTextContrast. */
+.wing { stroke: #4ade80; stroke-width: 2.5; stroke-linecap: round; }
 
 .back a, .back a:visited { color: var(--accent); text-decoration: none; }
 .prov { border-collapse: collapse; margin-top: 8px; max-width: 100ch; }
@@ -193,7 +206,7 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .sw.neck { border-color: #cbd5e1; }
 .sw.body { border-color: #64748b; border-top-width: 5px; }
 .sw.tail { border-color: #94a3b8; border-top-style: dashed; }
-.sw.wing { border-color: #0ea5e9; }
+.sw.wing { border-color: #4ade80; }
 .help .est-demo { color: var(--accent); }
 .seealso { margin: 14px 0 0; }
 
@@ -205,7 +218,7 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
    -- which absorbs the whole model error -- is dashed.
 
    The body takes the crossbar's treatment: 2.5px, 6/3 dash, round caps, with
-   colour alone separating them (body #64748b, wing #0ea5e9).
+   colour alone separating them (body #64748b, wing #4ade80).
 
    The NECK keeps a finer 3/2 pattern on butt caps, and that is not an
    inconsistency to tidy away. Round caps extend every dash by half the stroke
@@ -224,7 +237,7 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .dia .body     { stroke-width: 2.5; stroke-dasharray: 6 3; stroke-linecap: round; }
 .dia .tail     { stroke-dasharray: none; }
 .dia .wing.est { stroke-dasharray: 6 3; }
-.chordtick          { stroke: #0ea5e9; stroke-width: 1.5; opacity: .85; }
+.chordtick          { stroke: #4ade80; stroke-width: 1.5; opacity: .85; }
 .diagramkey { margin-top: 16px; max-width: 80ch; }
 
 /* Detail-diagram labels (P-066). The leader is faint because it is scaffolding;
@@ -241,7 +254,7 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .mcside { fill: #38bdf81f; }
 .masscube.est polygon, .masscube.est rect { stroke-dasharray: 4 3; }
 .dlabel { fill: var(--ink); font-size: 11px; }
-.dlabel.chord, .dlabel.span { fill: #0ea5e9; }
+.dlabel.chord, .dlabel.span { fill: #4ade80; }
 /* No ::after here: generated content produces no box on an SVG <text>, so the
    rule that used to sit on this line was inert and every modeled value on the
    diagram drew exactly like a measured one. The ~ is emitted in the markup

@@ -167,6 +167,16 @@ Every text color the stylesheet declares for text on a bare surface clears **7:1
 SC 1.4.6, Contrast Enhanced) against **both** the page background and the panel background. Links
 and ordinary text are held to the same floor, which is also the floor T-010 holds badges to.
 
+**"Text color" means `fill` as well as `color`.** SVG text is painted with `fill`, so a diagram
+label is text and is held to this floor exactly like a paragraph. Shapes are not: a stroke or a
+fill on a line, a polygon or the mass cube is a graphical object, governed by WCAG 1.4.11's 3:1
+rather than by this requirement. What separates the two is whether the rule styles a text element,
+which the stylesheet already declares by giving that element a font property.
+
+That distinction went unwritten, and the check read `color` alone. The wing chord and wingspan
+labels of [P-066](product.md#p-066) shipped painted `#0ea5e9` — **6.44:1 on the page background
+and 5.28:1 on a panel** — and nothing saw them, because SVG text does not use `color`.
+
 Rules that set their own background are excluded and governed by T-010 instead: badges and chips
 pair a generated background with a matching text color, and the pair is what has to clear 7:1.
 
