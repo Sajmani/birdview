@@ -16,6 +16,7 @@ the others can be filled in plausibly from a URL alone.
 | [`aba`](#aba) | mandatory | by reference, **not** vendored | **partial** — terms read and quoted, pinned by hash; redistribution refused, so fetched at build |
 | [`fox-wingspan`](#fox-wingspan) | mandatory | by reference, vendored | **adopted** — retrieved, hashed against the publisher's MD5, vendored |
 | [`bohmer-neck`](#bohmer-neck) | mandatory | consulted, not ingested | **adopted** — CC BY 4.0 verified; calibrates one constant, contributes no data |
+| [`avilist`](#avilist) | mandatory | by reference, vendored | **adopted** — CC BY 4.0, vendored and hashed; supplies every name and the species code |
 | [`ricklefs`](#ricklefs) | mandatory | **rejected** | **rejected** — Wiley terms prohibit the use, see CR-002 |
 | [`wiley`](#wiley) | mandatory | quoted only, not vendored | **adopted** — terms read and transcribed; the reason `ricklefs` is rejected |
 | [`wcag`](#wcag) | mandatory | absorbed, partial | **partial** — adopted for two criteria, not vendored |
@@ -23,7 +24,7 @@ the others can be filled in plausibly from a URL alone.
 | [`inat-terms`](#inat-terms) | mandatory | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; almost nothing in it reaches BirdView |
 | [`specman`](#specman) | — (method) | project copy | **adopted** — copied, base pin recorded below |
 
-One of the ten is not fully adopted, and it does not block v1. `ricklefs` was evaluated and
+One of the eleven is not fully adopted, and it does not block v1. `ricklefs` was evaluated and
 **rejected**: its platform terms prohibit extraction, integration, storage and redistribution
 alike. Its entry is kept so the evaluation is not repeated.
 
@@ -134,6 +135,48 @@ copies are in the tree: anyone can search them and check.
 Photographs stay on iNaturalist. BirdView links; it never copies, caches, hotlinks or embeds an
 image, which [T-002](tech.md) independently forbids anyway. See
 [CR-012](decisions.md) for the adoption reasoning and what was rejected.
+
+---
+
+## `avilist`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | https://doi.org/10.2173/avilist.v2025b |
+| **Version** | v2025b, published 2026-06-11, **extended** release |
+| **Integrity** | [spec/sources/avilist/PROVENANCE.md](sources/avilist/PROVENANCE.md) |
+| **Tier** | mandatory (copyright license) |
+| **Import style** | By reference, vendored — CC BY 4.0 permits it, and that permission is the point |
+| **Scope** | Every English name, family and order name, and the eBird species code (P-004, P-049) |
+| **Geographic scope** | Worldwide — 11,131 species, 252 families |
+| **Adopted parts** | `Taxon_rank`, `Scientific_name`, `English_name_Clements_v2025`, `English_name_AviList`, `Species_code_Cornell_Lab`, `Family`, `Family_English_name`, `Order`. The **extended** release is required: the short one omits the Clements name and the species code. |
+| **Exclusions** | `Range`, which looks like a scope source and is not — empty for **4,992 of 11,131** species, including Ruddy Duck and Tundra Swan, because it is populated only on an exact Clements concept match. |
+| **Owner** | AviList Core Team |
+| **Status** | **Adopted 2026-10-02**, replacing the ABA checklist for names ([CR-022](decisions.md#cr-022)). Retrieved, hashed, vendored. |
+
+**This is the source that unblocks deployment.** The ABA checklist is all-rights-reserved and
+serving BirdView reproduces it, so going public was blocked on a permission that has not arrived.
+AviList supplies the same four things under CC BY 4.0 and may therefore be served.
+
+It also answers the objection that defeated it a day earlier. AviList's own English names are IOC
+usage — Little Auk for Dovekie — which is wrong for this audience. But the extended release
+**also carries the Clements name**, which *is* this audience's usage: measured over BirdView's
+scope, the Clements column reproduces the ABA name for **827 of 827** species where both exist,
+the only five differences being ABA's own `X (alternate)` notation. One file, both vocabularies,
+which is what makes [P-049](product.md#p-049) possible rather than aspirational.
+
+### Why the Clements and Cornell columns are usable
+
+"Considered and not adopted" below rejects eBird/Clements because Cornell's terms forbid
+redistribution without written authorization. **That rejection stands, and this is not it.**
+
+AviList is a separate publication by a consortium — the AOS, Cornell, BirdLife, Avibase and the
+IOU — with Cornell staff on its core team, released CC BY 4.0 in its entirety. BirdView takes
+these columns from AviList, under AviList's license, with AviList's attribution. Nothing is taken
+from Cornell's distribution, and nothing here grants access to it.
+
+Recorded explicitly because the shape of it — *the source we rejected, reached through a source we
+accepted* — is exactly what should attract scrutiny rather than escape it.
 
 ---
 

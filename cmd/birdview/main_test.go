@@ -30,7 +30,16 @@ func testDataset() *dataset.Dataset {
 			return dataset.Metric{Value: v, Prov: dataset.Provenance{Kind: dataset.Modeled, Model: s}}
 		}
 		sp := dataset.Species{
-			ID: id, CommonName: common, BandingCode: code(common), ScientificName: sci, Family: fam,
+			// The id IS the eBird code in production (P-049), so the fixture
+			// mirrors that rather than keeping the scientific-name slug it
+			// used to carry. The slug argument survives only as a readable
+			// label in the table below.
+			ID: code(common),
+			Names: map[dataset.Locale]string{
+				dataset.LocaleNA:    common,
+				dataset.LocaleWorld: worldName(common),
+			},
+			SpeciesCode: code(common), ScientificName: sci, Family: fam,
 			FamilyCommon: fam + " family", FamilyColor: "#86efac",
 			TotalLength: mod(bill+head+neck+body+tail, "sum of the five diagram segments"),
 			Wingspan:    dataset.Metric{Value: span, Prov: dataset.Provenance{Kind: k, Source: "Fox et al. 2026", SourceTaxon: "Other species"}},
@@ -59,25 +68,25 @@ func testDataset() *dataset.Dataset {
 	// solid and the split of P-065 is never exercised. Every chord is shorter
 	// than its own half-span, as it is for all 841 real species.
 	sp := []dataset.Species{
-		mk("calypte_anna", "Anna's Hummingbird", "Calypte anna", "Trochilidae", 18, 12, 6, 40, 26, 120, 4, 49, dataset.Measured),
-		mk("turdus_migratorius", "American Robin", "Turdus migratorius", "Turdidae", 20, 18, 12, 90, 85, 390, 77, 130, dataset.Measured),
-		mk("corvus_brachyrhynchos", "American Crow", "Corvus brachyrhynchos", "Corvidae", 50, 30, 22, 170, 180, 1000, 450, 330, dataset.Modeled),
-		mk("himantopus_mexicanus", "Black-necked Stilt", "Himantopus mexicanus", "Recurvirostridae", 66.6, 42.1, 40.3, 89.5, 73.6, 750, 176.8, 230, dataset.NearMatch),
-		mk("ardea_herodias", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, 466.4, dataset.NearMatch),
+		mk("annhum", "Anna's Hummingbird", "Calypte anna", "Trochilidae", 18, 12, 6, 40, 26, 120, 4, 49, dataset.Measured),
+		mk("amerob", "American Robin", "Turdus migratorius", "Turdidae", 20, 18, 12, 90, 85, 390, 77, 130, dataset.Measured),
+		mk("amecro", "American Crow", "Corvus brachyrhynchos", "Corvidae", 50, 30, 22, 170, 180, 1000, 450, 330, dataset.Modeled),
+		mk("blasti", "Black-necked Stilt", "Himantopus mexicanus", "Recurvirostridae", 66.6, 42.1, 40.3, 89.5, 73.6, 750, 176.8, 230, dataset.NearMatch),
+		mk("greblu", "Great Blue Heron", "Ardea herodias", "Ardeidae", 140, 40, 200, 300, 180, 1825, 2400, 466.4, dataset.NearMatch),
 		// The murre is heavier than the crow while being shorter and
 		// narrower-winged, and it is the only species here for which the
 		// three metrics disagree. Without it the fixture is monotonic in
 		// length, wingspan and mass alike, so every sort produces the same
 		// order and a Sort by control that ignored its metric entirely would
 		// pass its own test. Real values: Uria lomvia is a dense diver.
-		mk("uria_lomvia", "Thick-billed Murre", "Uria lomvia", "Alcidae", 32, 40, 28, 200, 46, 726, 964, 206, dataset.Measured),
+		mk("thimur", "Thick-billed Murre", "Uria lomvia", "Alcidae", 32, 40, 28, 200, 46, 726, 964, 206, dataset.Measured),
 	}
 	// One mass is a near-match, as 10 of the 841 real ones are. Without it
 	// every mass square renders solid and the dashed branch of P-065 is never
 	// drawn -- the same gap the crow's modeled wingspan fills for the crossbar,
 	// and it was found by breaking the code and watching the check not fail.
 	for i := range sp {
-		if sp[i].ID == "himantopus_mexicanus" {
+		if sp[i].ID == "blasti" {
 			sp[i].Mass.Prov = dataset.Provenance{Kind: dataset.NearMatch,
 				Source: "AVONET v7, sheet AVONET2_eBird", SourceTaxon: "Himantopus himantopus"}
 		}
@@ -87,8 +96,8 @@ func testDataset() *dataset.Dataset {
 	// both branches of the detail view are exercised: a species iNaturalist has
 	// not confidently matched must show no link at all.
 	inat := map[string]int{
-		"calypte_anna": 5305, "turdus_migratorius": 12727,
-		"corvus_brachyrhynchos": 8021, "ardea_herodias": 4956,
+		"annhum": 5305, "amerob": 12727,
+		"amecro": 8021, "greblu": 4956,
 	}
 	for i := range sp {
 		sp[i].INatTaxonID = inat[sp[i].ID]
@@ -127,17 +136,42 @@ func fixtureCounts() (species, families, orders int) {
 	return len(ds.Species), len(ds.Families), orders
 }
 
-// code builds a plausible four-letter alpha code from a common name, so the
+// code builds a plausible eBird species code from a common name, so the
 // fixture exercises the same rendering path as real data.
+//
+// Lower case and SIX characters where the name allows, matching the real
+// shape: "American Robin" gives "amerob". Real codes run 4 to 8 characters,
+// which is why nothing may assume a width.
 func code(common string) string {
 	var out []byte
 	for _, w := range strings.Fields(common) {
-		out = append(out, strings.ToUpper(w[:1])...)
+		for len(w) < 3 {
+			w += "x"
+		}
+		out = append(out, strings.ToLower(w[:3])...)
+		if len(out) >= 6 {
+			break
+		}
 	}
-	for len(out) < 4 {
-		out = append(out, 'X')
+	for len(out) < 6 {
+		out = append(out, 'x')
 	}
-	return string(out[:4])
+	return string(out[:6])
+}
+
+// worldName gives the fixture a world name that is different from its North
+// American one AND is not a superstring of it, so "the page does not contain
+// the other locale's name" is a check that can actually fail.
+//
+// The first version appended " (world)", which contains the NA name whole --
+// so the world page trivially contained both and the negative assertion was
+// vacuous. Reversing the words avoids it: "American Robin" / "Robin American".
+func worldName(common string) string {
+	w := strings.Fields(common)
+	for i, j := 0, len(w)-1; i < j; i, j = i+1, j-1 {
+		w[i], w[j] = w[j], w[i]
+	}
+	return strings.Join(w, " ")
 }
 
 func newTestServer(t *testing.T) *server {
@@ -153,8 +187,8 @@ func get(t *testing.T, s *server, path string) (int, string) {
 	t.Helper()
 	// Drop the fragment, because a browser does: it is dereferenced on the
 	// client and never sent. httptest.NewRequest takes the target literally,
-	// so without this a pick link's "#s-calypte_anna" lands inside RawQuery
-	// and the last species value becomes "calypte_anna#s-calypte_anna" --
+	// so without this a pick link's "#s-annhum" lands inside RawQuery
+	// and the last species value becomes "annhum#s-annhum" --
 	// which resolves to nothing and is quietly dropped as a dead id. Following
 	// a pick link in a test would then exercise something no browser can do.
 	if i := strings.IndexByte(path, '#'); i >= 0 {
@@ -169,7 +203,7 @@ func get(t *testing.T, s *server, path string) (int, string) {
 func TestRoutesServe(t *testing.T) {
 	s := newTestServer(t)
 	for _, path := range []string{
-		"/", "/static/styles.css", "/species/ardea_herodias",
+		"/", "/static/styles.css", "/species/greblu",
 		"/?family=Ardeidae", "/?by=mass&scale=global&units=metric&step=30",
 	} {
 		if code, body := get(t, s, path); code != http.StatusOK {
@@ -206,7 +240,7 @@ var externalSubresource = regexp.MustCompile(
 // Verifies: T-002. Criterion: AC-051.
 func TestNoExternalResources(t *testing.T) {
 	s := newTestServer(t)
-	for _, path := range []string{"/", "/species/ardea_herodias"} {
+	for _, path := range []string{"/", "/species/greblu"} {
 		_, body := get(t, s, path)
 		if m := externalSubresource.FindAllString(body, -1); len(m) > 0 {
 			t.Errorf("%s fetches external resources: %v", path, m)
@@ -219,7 +253,7 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/")
 	for _, want := range []string{
 		"American Robin",     // common name
-		"(ARXX)",             // banding code, in parentheses after it
+		"(amerob)",           // eBird species code, in parentheses after it
 		"Turdus migratorius", // scientific name
 		"Turdidae",           // family badge, scientific name
 		"Turdidae family",    // family badge, common name alongside it
@@ -369,7 +403,7 @@ func TestDiagramIsVerticallyCentered(t *testing.T) {
 //
 // Verifies: P-034, P-063. Criterion: AC-043.
 func TestDetailShowsEverySegmentWithProvenance(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/species/ardea_herodias")
+	_, body := get(t, newTestServer(t), "/species/greblu")
 	for _, label := range []string{"Total length", "Wingspan", "Mass",
 		"Bill", "Head", "Neck", "Body", "Tail"} {
 		if !strings.Contains(body, ">"+label+"<") {
@@ -575,9 +609,9 @@ func TestDetailDrawsFullScale(t *testing.T) {
 	// The hummingbird is the smallest fixture bird, so it is the one that would
 	// be reduced to nothing if the index's scale leaked through.
 	for _, path := range []string{
-		"/species/calypte_anna",
-		"/species/calypte_anna?scale=global",
-		"/species/calypte_anna?scale=section",
+		"/species/annhum",
+		"/species/annhum?scale=global",
+		"/species/annhum?scale=section",
 	} {
 		_, body := get(t, s, path)
 		m := regexp.MustCompile(`translate\(0,([0-9.]+)\)`).FindStringSubmatch(body)
@@ -944,7 +978,7 @@ func TestScrollRestorationIsInlineAndSelfContained(t *testing.T) {
 		t.Error("script is not scoped to the index; a detail page would eat the saved scroll")
 	}
 	// The detail view ships no script at all.
-	_, detail := get(t, s, "/species/ardea_herodias")
+	_, detail := get(t, s, "/species/greblu")
 	if strings.Contains(detail, "<script") {
 		t.Error("detail view carries a script; only the index needs one")
 	}
@@ -1059,6 +1093,8 @@ func TestAttributionIsComplete(t *testing.T) {
 		"Fox",                                 // wingspan creator
 		"10.6084/m9.figshare.32089083",        // wingspan source
 		"creativecommons.org/licenses/by/4.0", // the license itself
+		"AviList",                             // every name on the page comes from it
+		"10.2173/avilist.v2025b",              // AviList source
 		"American Birding Association",        // the non-CC source still needs credit
 		"ABA Checklist",
 	} {
@@ -1071,7 +1107,7 @@ func TestAttributionIsComplete(t *testing.T) {
 		t.Error("footer does not disclose that lengths are modeled")
 	}
 	// The detail view is a shareable URL of its own, so it carries credit too.
-	_, detail := get(t, s2(t), "/species/ardea_herodias")
+	_, detail := get(t, s2(t), "/species/greblu")
 	if !strings.Contains(detail, "creativecommons.org/licenses/by/4.0") {
 		t.Error("detail view carries no license attribution")
 	}
@@ -1093,7 +1129,7 @@ func s2(t *testing.T) *server { t.Helper(); return newTestServer(t) }
 //
 // Verifies: G-004. Criterion: AC-064.
 func TestNoUnearnedPermissionClaim(t *testing.T) {
-	for _, page := range []string{"/", "/species/ardea_herodias"} {
+	for _, page := range []string{"/", "/species/greblu"} {
 		_, body := get(t, newTestServer(t), page)
 		for _, claim := range []string{"used by permission", "with permission", "licensed from", "under licence", "under license"} {
 			if strings.Contains(strings.ToLower(body), claim) {
@@ -1153,7 +1189,7 @@ func TestFoldedNeckRendersAsAnArc(t *testing.T) {
 
 	// The metric is untouched: the heron's neck is 200 mm in the fixture, and
 	// the detail view must say so rather than the 12.7 cm the S spans.
-	_, det := get(t, s, "/species/ardea_herodias?units=metric")
+	_, det := get(t, s, "/species/greblu?units=metric")
 	if got := neckRow(t, det); got != "20.0 cm" {
 		t.Errorf("detail view reports the neck as %q, want the full modeled 20.0 cm -- the "+
 			"fold has leaked out of the drawing and into the data", got)
@@ -1179,7 +1215,7 @@ func boolToInt(b bool) int {
 func TestINatLinkOnlyForAConfidentMatch(t *testing.T) {
 	s := newTestServer(t)
 
-	_, matched := get(t, s, "/species/ardea_herodias")
+	_, matched := get(t, s, "/species/greblu")
 	href := mustMatch(t, matched, `<a href="(https://www\.inaturalist\.org/taxa/[0-9]+)"`, "the iNaturalist link")
 	if href != "https://www.inaturalist.org/taxa/4956" {
 		t.Errorf("link points at %q, want the heron's taxon page", href)
@@ -1190,7 +1226,7 @@ func TestINatLinkOnlyForAConfidentMatch(t *testing.T) {
 	}
 
 	// The unmatched species must show no iNaturalist reference of any kind.
-	_, unmatched := get(t, s, "/species/himantopus_mexicanus")
+	_, unmatched := get(t, s, "/species/blasti")
 	if strings.Contains(unmatched, "inaturalist.org") {
 		t.Error("a species with no confident match still mentions iNaturalist; it should show nothing")
 	}
@@ -1214,7 +1250,7 @@ func TestINatLinkOnlyForAConfidentMatch(t *testing.T) {
 //
 // Verifies: P-064. Criterion: AC-068.
 func TestNoINaturalistImagesAreEmbedded(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/species/ardea_herodias")
+	_, body := get(t, newTestServer(t), "/species/greblu")
 	for _, bad := range []string{
 		`src="https://static.inaturalist.org`,
 		`src="https://inaturalist-open-data`,
@@ -1267,7 +1303,7 @@ func TestFaviconIsServedLocally(t *testing.T) {
 	// now derived from the stylesheet in web.TestFaviconUsesTheAppPalette
 	// (P-048, AC-081), which lives where both assets are embedded.
 
-	for _, path := range []string{"/", "/species/ardea_herodias"} {
+	for _, path := range []string{"/", "/species/greblu"} {
 		_, page := get(t, s, path)
 		if !strings.Contains(page, `href="/static/favicon.svg"`) {
 			t.Errorf("%s does not reference the favicon", path)
@@ -1294,8 +1330,8 @@ func TestCrossbarSplitsAtTheChord(t *testing.T) {
 		id, name    string
 		spanModeled bool
 	}{
-		{"ardea_herodias", "Great Blue Heron", false},
-		{"corvus_brachyrhynchos", "American Crow", true},
+		{"greblu", "Great Blue Heron", false},
+		{"amecro", "American Crow", true},
 	}
 	for _, c := range cases {
 		_, body := get(t, s, "/species/"+c.id)
@@ -1332,7 +1368,7 @@ func TestCrossbarSplitsAtTheChord(t *testing.T) {
 // Verifies: P-065. Criterion: AC-072.
 func TestBothPagesExplainTheStrokeCode(t *testing.T) {
 	s := newTestServer(t)
-	for _, path := range []string{"/", "/species/ardea_herodias"} {
+	for _, path := range []string{"/", "/species/greblu"} {
 		_, body := get(t, s, path)
 		low := strings.ToLower(body)
 		for _, want := range []string{"solid", "dashed", "tick", "chord"} {
@@ -1353,7 +1389,7 @@ func TestBothPagesExplainTheStrokeCode(t *testing.T) {
 //
 // Verifies: P-066. Criterion: AC-073.
 func TestDetailDiagramIsLabeled(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/species/ardea_herodias?units=metric")
+	_, body := get(t, newTestServer(t), "/species/greblu?units=metric")
 
 	// Matches a segment label, dashed or not, but deliberately NOT the chord:
 	// that one is checked separately below, and folding it in here would let a
@@ -1448,7 +1484,7 @@ func TestWingLabelsClearTheColumn(t *testing.T) {
 		g := view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, inner)
 		end := g.CX + g.CrossbarHalfWidth + 8 + spanLabelWidth
 		if gap := columnX - end; gap < worst {
-			worst, worstName = gap, sp.CommonName
+			worst, worstName = gap, sp.Name(dataset.LocaleNA)
 		}
 	}
 	if worst < 0 {
@@ -1499,7 +1535,7 @@ func TestEveryControlEntryIsWrapped(t *testing.T) {
 //
 // Verifies: P-066. Criterion: AC-073.
 func TestDiagramTextPaintsOverLines(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/species/ardea_herodias")
+	_, body := get(t, newTestServer(t), "/species/greblu")
 	svg := mustMatch(t, body, `(?s)(<svg class="dia".*?</svg>)`, "the detail diagram")
 
 	lastLine := strings.LastIndex(svg, "<line")
@@ -1570,7 +1606,7 @@ func keysOf(m map[string]bool) []string {
 //
 // Verifies: P-066. Criterion: AC-074.
 func TestDetailDiagramLabelsTotalLength(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/species/ardea_herodias?units=metric")
+	_, body := get(t, newTestServer(t), "/species/greblu?units=metric")
 
 	el := mustMatch(t, body, `(<text class="dlabel total[^"]*"[^>]*>[^<]+</text>)`,
 		"the total length label")
@@ -1587,7 +1623,7 @@ func TestDetailDiagramLabelsTotalLength(t *testing.T) {
 	// Centred on the BIRD's axis, not the box's. The two differ by half the
 	// label gutter, so a label centred on the box sits well to the right of the
 	// bird it names.
-	lt := labelledTile(findSpecies(t, "ardea_herodias"), view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, true)
+	lt := labelledTile(findSpecies(t, "greblu"), view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, true, dataset.LocaleNA)
 	if x := attrF(t, el, "x"); math.Abs(x-lt.Geom.CX) > 0.05 {
 		t.Errorf("total length label at x=%.1f; the bird's axis is %.1f (box centre is %.1f)",
 			x, lt.Geom.CX, lt.Box.W/2)
@@ -1657,9 +1693,9 @@ func TestTotalLengthLabelStaysInTheBox(t *testing.T) {
 	ds := testDataset()
 	for i := range ds.Species {
 		sp := &ds.Species[i]
-		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, true)
+		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, true, dataset.LocaleNA)
 		if len(lt.FootLabels) == 0 {
-			t.Fatalf("%s: no whole-bird labels at all", sp.CommonName)
+			t.Fatalf("%s: no whole-bird labels at all", sp.Name(dataset.LocaleNA))
 		}
 		// Two things hang below the drawing and the strip must clear whichever
 		// reaches lower: the stack under the tail, and the mass label under
@@ -1671,7 +1707,7 @@ func TestTotalLengthLabelStaysInTheBox(t *testing.T) {
 		}{{last.Text, last.Y}, {lt.MassCube.Label, lt.MassCube.LabelY}} {
 			if c.y+descender > lt.Box.H {
 				t.Errorf("%s: %q baseline at %.1f (+%d descender) overruns the %.1f box",
-					sp.CommonName, c.what, c.y, descender, lt.Box.H)
+					sp.Name(dataset.LocaleNA), c.what, c.y, descender, lt.Box.H)
 			}
 		}
 	}
@@ -1814,7 +1850,7 @@ func TestCompareSharesOneScale(t *testing.T) {
 	// Unfolded families only. A folded neck draws shorter than the bird is
 	// long (CR-011), so its height is deliberately NOT proportional and would
 	// make this test wrong rather than strict.
-	const q = "/compare?units=metric&species=calypte_anna&species=turdus_migratorius&species=corvus_brachyrhynchos"
+	const q = "/compare?units=metric&species=annhum&species=amerob&species=amecro"
 	_, body := get(t, s, q)
 
 	got := drawnSpans(t, body)
@@ -1849,12 +1885,12 @@ func TestCompareSharesOneScale(t *testing.T) {
 	// every panel at half scale would pass it too. The largest bird pins it --
 	// at ref = max it is drawn exactly as it is on its own detail page, where
 	// it is laid out against itself.
-	big := findSpecies(t, "corvus_brachyrhynchos")
-	_, solo := get(t, s2(t), "/species/corvus_brachyrhynchos?units=metric")
+	big := findSpecies(t, "amecro")
+	_, solo := get(t, s2(t), "/species/amecro?units=metric")
 	soloH := drawnSpans(t, solo)[0].Height
 	var bigH float64
 	for _, p := range got {
-		if p.Name == big.CommonName {
+		if p.Name == big.Name(dataset.LocaleNA) {
 			bigH = p.Height
 		}
 	}
@@ -1864,7 +1900,7 @@ func TestCompareSharesOneScale(t *testing.T) {
 	}
 	// And every other bird must be strictly smaller, or the scale is per-panel.
 	for _, p := range got {
-		if p.Name != big.CommonName && p.Height >= bigH {
+		if p.Name != big.Name(dataset.LocaleNA) && p.Height >= bigH {
 			t.Errorf("%s is drawn %.1fpx, not smaller than the largest bird's %.1fpx",
 				p.Name, p.Height, bigH)
 		}
@@ -1877,7 +1913,7 @@ func findSpeciesByName(t *testing.T, common string) *dataset.Species {
 	t.Helper()
 	ds := testDataset()
 	for i := range ds.Species {
-		if ds.Species[i].CommonName == common {
+		if ds.Species[i].Name(dataset.LocaleNA) == common {
 			return &ds.Species[i]
 		}
 	}
@@ -1893,7 +1929,7 @@ func TestCompareSelectsAndExplainsItself(t *testing.T) {
 	s := newTestServer(t)
 
 	// Named order is the reader's and is preserved.
-	_, body := get(t, s, "/compare?species=ardea_herodias&species=calypte_anna")
+	_, body := get(t, s, "/compare?species=greblu&species=annhum")
 	names := []string{}
 	for _, p := range drawnSpans(t, body) {
 		names = append(names, p.Name)
@@ -1902,20 +1938,20 @@ func TestCompareSelectsAndExplainsItself(t *testing.T) {
 		t.Errorf("panels are %v, want %v in the order named", names, want)
 	}
 	// Reversing the URL reverses the page, or the order is not being honored.
-	_, rev := get(t, s, "/compare?species=calypte_anna&species=ardea_herodias")
+	_, rev := get(t, s, "/compare?species=annhum&species=greblu")
 	if first := drawnSpans(t, rev)[0].Name; first != "Anna's Hummingbird" {
 		t.Errorf("reversing the URL gave %q first; the page is imposing its own order", first)
 	}
 
 	// A bird named twice is drawn once.
-	_, dup := get(t, s, "/compare?species=calypte_anna&species=calypte_anna")
+	_, dup := get(t, s, "/compare?species=annhum&species=annhum")
 	if n := len(drawnSpans(t, dup)); n != 1 {
 		t.Errorf("a species named twice drew %d panels, want 1", n)
 	}
 
 	// An unrecognised id is dropped and named, not refused (CR-018). Checked
 	// with a mixed set: an all-invalid one cannot tell dropping from refusing.
-	code, msg := get(t, s, "/compare?species=calypte_anna&species=no_such_bird")
+	code, msg := get(t, s, "/compare?species=annhum&species=no_such_bird")
 	if code != http.StatusOK {
 		t.Errorf("a set with one dead id gave %d; it should render what it recognises", code)
 	}
@@ -1942,8 +1978,8 @@ func TestCompareSelectsAndExplainsItself(t *testing.T) {
 
 	// The diagram key is a page-level explanation: once, however many birds.
 	for _, q := range []string{
-		"/compare?species=calypte_anna",
-		"/compare?species=calypte_anna&species=turdus_migratorius&species=ardea_herodias",
+		"/compare?species=annhum",
+		"/compare?species=annhum&species=amerob&species=greblu",
 	} {
 		_, b := get(t, s, q)
 		if n := strings.Count(b, `class="note diagramkey"`); n != 1 {
@@ -1952,11 +1988,11 @@ func TestCompareSelectsAndExplainsItself(t *testing.T) {
 	}
 
 	// No provenance table: P-067 trades it for a link to each detail view.
-	_, three := get(t, s, "/compare?species=calypte_anna&species=turdus_migratorius")
+	_, three := get(t, s, "/compare?species=annhum&species=amerob")
 	if strings.Contains(three, `class="prov"`) {
 		t.Error("the compare page carries a provenance table; P-067 defers that to the detail view")
 	}
-	for _, id := range []string{"calypte_anna", "turdus_migratorius"} {
+	for _, id := range []string{"annhum", "amerob"} {
 		if !strings.Contains(three, `href="/species/`+id) {
 			t.Errorf("no link to /species/%s; that link is what makes omitting the table honest", id)
 		}
@@ -1983,8 +2019,8 @@ func TestCompareSelectsAndExplainsItself(t *testing.T) {
 // Verifies: P-067, P-068, P-038. Criterion: AC-076.
 func TestCompareBackLinkKeepsTheComparison(t *testing.T) {
 	s := newTestServer(t)
-	want := []string{"calypte_anna", "ardea_herodias"}
-	_, body := get(t, s, "/compare?units=metric&scale=global&species=calypte_anna&species=ardea_herodias")
+	want := []string{"annhum", "greblu"}
+	_, body := get(t, s, "/compare?units=metric&scale=global&species=annhum&species=greblu")
 
 	href := html.UnescapeString(mustMatch(t, body,
 		`<a class="backlink" href="([^"]+)"`, "the back link"))
@@ -2032,7 +2068,7 @@ func TestTileLinksCarryViewState(t *testing.T) {
 	s := newTestServer(t)
 	// A filter is active, so `family` is present and would leak if carried.
 	const q = "/?units=metric&by=wingspan&scale=global&step=30" +
-		"&family=Trochilidae&family=Turdidae&species=corvus_brachyrhynchos"
+		"&family=Trochilidae&family=Turdidae&species=amecro"
 	_, body := get(t, s, q)
 
 	hrefs := tileHrefs(t, body)
@@ -2050,7 +2086,7 @@ func TestTileLinksCarryViewState(t *testing.T) {
 		got := u.Query()
 		for k, want := range map[string]string{
 			"units": "metric", "by": "wingspan", "scale": "global", "step": "30",
-			"species": "corvus_brachyrhynchos",
+			"species": "amecro",
 		} {
 			if got.Get(k) != want {
 				t.Errorf("tile href %q: %s=%q, want %q", h, k, got.Get(k), want)
@@ -2073,7 +2109,7 @@ func TestTileLinksCarryViewState(t *testing.T) {
 	}
 	for k, want := range map[string]string{
 		"units": "metric", "by": "wingspan", "scale": "global", "step": "30",
-		"species": "corvus_brachyrhynchos",
+		"species": "amecro",
 	} {
 		if bq.Query().Get(k) != want {
 			t.Errorf("back link %q lost %s (got %q, want %q)", back, k, bq.Query().Get(k), want)
@@ -2131,7 +2167,7 @@ func TestPickModeIsTheSpeciesParameter(t *testing.T) {
 	}
 
 	// Populated: a control on every tile, and the picked one says so.
-	_, picking := get(t, s, "/?species=calypte_anna")
+	_, picking := get(t, s, "/?species=annhum")
 	if n, want := len(pickControls(picking)), len(tileHrefs(t, picking)); n != want {
 		t.Errorf("%d pick controls for %d tiles; every tile needs one", n, want)
 	}
@@ -2158,7 +2194,7 @@ func TestPickingIsReversibleAndKeepsTheFilter(t *testing.T) {
 	s := newTestServer(t)
 
 	// Add, then remove, returns the original set in the original order.
-	start := "/?species=corvus_brachyrhynchos&species=calypte_anna"
+	start := "/?species=amecro&species=annhum"
 	_, body := get(t, s, start)
 	var addURL string
 	for _, h := range pickControls(body) {
@@ -2185,12 +2221,12 @@ func TestPickingIsReversibleAndKeepsTheFilter(t *testing.T) {
 	}
 	back, _ := url.Parse(removeURL)
 	if got, want := back.Query()["species"],
-		[]string{"corvus_brachyrhynchos", "calypte_anna"}; !slices.Equal(got, want) {
+		[]string{"amecro", "annhum"}; !slices.Equal(got, want) {
 		t.Errorf("add then remove gave %v, want the original %v in the original order", got, want)
 	}
 
 	// The filter survives a pick, and the bar names a pick the filter hides.
-	_, filtered := get(t, s, "/?family=Trochilidae&species=ardea_herodias")
+	_, filtered := get(t, s, "/?family=Trochilidae&species=greblu")
 	for _, h := range pickControls(filtered) {
 		u, _ := url.Parse(h)
 		if got := u.Query()["family"]; !slices.Equal(got, []string{"Trochilidae"}) {
@@ -2213,8 +2249,8 @@ func TestPickingIsReversibleAndKeepsTheFilter(t *testing.T) {
 // Verifies: P-068. Criterion: AC-077.
 func TestPicksSurviveTheDetailRoundTrip(t *testing.T) {
 	s := newTestServer(t)
-	want := []string{"corvus_brachyrhynchos", "calypte_anna"}
-	_, body := get(t, s, "/?species=corvus_brachyrhynchos&species=calypte_anna")
+	want := []string{"amecro", "annhum"}
+	_, body := get(t, s, "/?species=amecro&species=annhum")
 
 	_, detail := get(t, s, tileHrefs(t, body)[0])
 	back := html.UnescapeString(mustMatch(t, detail,
@@ -2238,7 +2274,7 @@ func TestPicksSurviveTheDetailRoundTrip(t *testing.T) {
 // Verifies: P-068. Criterion: AC-077.
 func TestOnlyClearLeavesPickMode(t *testing.T) {
 	s := newTestServer(t)
-	_, body := get(t, s, "/?species=calypte_anna&units=metric")
+	_, body := get(t, s, "/?species=annhum&units=metric")
 
 	clear := html.UnescapeString(mustMatch(t, body,
 		`<a class="btn pickclear" href="([^"]+)"`, "the Clear link"))
@@ -2269,7 +2305,7 @@ func TestOnlyClearLeavesPickMode(t *testing.T) {
 		}
 		checked++
 		u, _ := url.Parse(h)
-		if got := u.Query()["species"]; !slices.Equal(got, []string{"calypte_anna"}) {
+		if got := u.Query()["species"]; !slices.Equal(got, []string{"annhum"}) {
 			t.Errorf("control link %q carries species=%v; only Clear may drop the picks", h, got)
 		}
 	}
@@ -2289,7 +2325,7 @@ func TestOnlyClearLeavesPickMode(t *testing.T) {
 // Verifies: P-068. Criterion: AC-077.
 func TestUnrecognisedPicksAreDroppedAndNamed(t *testing.T) {
 	s := newTestServer(t)
-	code, body := get(t, s, "/?species=calypte_anna&species=grus_canadensis")
+	code, body := get(t, s, "/?species=annhum&species=grus_canadensis")
 	if code != http.StatusOK {
 		t.Fatalf("a set with one dead id gave %d; it should render what it recognises", code)
 	}
@@ -2334,41 +2370,41 @@ func TestDetailPagePickStates(t *testing.T) {
 	s := newTestServer(t)
 
 	// Browsing: the entry point, which seeds a new comparison with this bird.
-	label, href := detailAction(t, mustGet(t, s, "/species/calypte_anna"))
+	label, href := detailAction(t, mustGet(t, s, "/species/annhum"))
 	if !strings.Contains(label, "Compare with another bird") {
 		t.Errorf("browsing-mode action is %q, want the entry point", label)
 	}
-	if got := mustQuery(t, href)["species"]; !slices.Equal(got, []string{"calypte_anna"}) {
+	if got := mustQuery(t, href)["species"]; !slices.Equal(got, []string{"annhum"}) {
 		t.Errorf("the entry point seeds species=%v, want just this bird", got)
 	}
 
 	// Pick mode, this bird not in the set: add it, keeping the others.
-	body := mustGet(t, s, "/species/calypte_anna?species=corvus_brachyrhynchos")
+	body := mustGet(t, s, "/species/annhum?species=amecro")
 	label, href = detailAction(t, body)
 	if !strings.Contains(label, "Pick for comparison") {
 		t.Errorf("pick-mode action is %q, want an add", label)
 	}
 	if got, want := mustQuery(t, href)["species"],
-		[]string{"corvus_brachyrhynchos", "calypte_anna"}; !slices.Equal(got, want) {
+		[]string{"amecro", "annhum"}; !slices.Equal(got, want) {
 		t.Errorf("adding gave species=%v, want %v — the existing picks must survive", got, want)
 	}
 
 	// Pick mode, already in the set: remove, not a second add.
-	body = mustGet(t, s, "/species/calypte_anna?species=corvus_brachyrhynchos&species=calypte_anna")
+	body = mustGet(t, s, "/species/annhum?species=amecro&species=annhum")
 	label, href = detailAction(t, body)
 	if !strings.Contains(label, "remove") {
 		t.Errorf("a bird already picked offers %q; adding it again would silently do nothing, "+
 			"because the comparison view deduplicates", label)
 	}
 	if got, want := mustQuery(t, href)["species"],
-		[]string{"corvus_brachyrhynchos"}; !slices.Equal(got, want) {
+		[]string{"amecro"}; !slices.Equal(got, want) {
 		t.Errorf("removing gave species=%v, want %v", got, want)
 	}
 
 	// The back link names the mode it returns to.
 	for _, c := range []struct{ url, want string }{
-		{"/species/calypte_anna", "back to all birds"},
-		{"/species/calypte_anna?species=corvus_brachyrhynchos", "back to picking birds"},
+		{"/species/annhum", "back to all birds"},
+		{"/species/annhum?species=amecro", "back to picking birds"},
 	} {
 		got := mustMatch(t, mustGet(t, s, c.url), `class="backlink"[^>]*>(?s)(.*?)</a>`, "the back link")
 		if !strings.Contains(strings.Join(strings.Fields(got), " "), c.want) {
@@ -2377,10 +2413,10 @@ func TestDetailPagePickStates(t *testing.T) {
 	}
 
 	// The bar rides along, so Compare is reachable without going back first.
-	if pickBarOf(t, mustGet(t, s, "/species/calypte_anna?species=corvus_brachyrhynchos")) == "" {
+	if pickBarOf(t, mustGet(t, s, "/species/annhum?species=amecro")) == "" {
 		t.Error("no pick bar on the detail page in pick mode")
 	}
-	if pickBarOf(t, mustGet(t, s, "/species/calypte_anna")) != "" {
+	if pickBarOf(t, mustGet(t, s, "/species/annhum")) != "" {
 		t.Error("the detail page shows a pick bar while browsing")
 	}
 }
@@ -2458,7 +2494,7 @@ func TestCompareBirdsToggle(t *testing.T) {
 	// units= matters: with no other parameter, Clear and a hardcoded "/?"
 	// are the same string, and the comparison below cannot tell a shared link
 	// from a coincidence.
-	for _, u := range []string{"/?species=&units=metric", "/?species=calypte_anna&units=metric"} {
+	for _, u := range []string{"/?species=&units=metric", "/?species=annhum&units=metric"} {
 		body := mustGet(t, s, u)
 		class, href = find(body)
 		if !strings.Contains(class, "on") {
@@ -2525,7 +2561,7 @@ func TestPickLinksAnchorAtTheirTile(t *testing.T) {
 // Verifies: P-066. Criterion: AC-073.
 func TestEveryReportedMetricIsLabelled(t *testing.T) {
 	for _, units := range []string{"metric", "imperial"} {
-		body := mustGet(t, newTestServer(t), "/species/ardea_herodias?units="+units)
+		body := mustGet(t, newTestServer(t), "/species/greblu?units="+units)
 
 		rows := regexp.MustCompile(
 			`<th>([^<]+)</th>\s*<td class="v">([^<]+)</td>`).FindAllStringSubmatch(body, -1)
@@ -2586,7 +2622,7 @@ func TestMassCubeIsWaterToScale(t *testing.T) {
 
 	for i := range ds.Species {
 		sp := &ds.Species[i]
-		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, false)
+		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, false, dataset.LocaleNA)
 
 		// One gram of water is one cubic centimetre, so the cube of water
 		// weighing massG grams has side cbrt(massG) cm = 10*cbrt(massG) mm.
@@ -2594,7 +2630,7 @@ func TestMassCubeIsWaterToScale(t *testing.T) {
 		if math.Abs(lt.MassCube.Side-want) > 0.05 {
 			t.Errorf("%s: mass square side %.2f px, want %.2f — it must be the cube of water "+
 				"that weighs the same, at the diagram's own scale",
-				sp.CommonName, lt.MassCube.Side, want)
+				sp.Name(dataset.LocaleNA), lt.MassCube.Side, want)
 		}
 		// The face's base sits on the floor of the drawing area, at the same
 		// place in EVERY diagram. That fixed corner is the whole point of the
@@ -2605,34 +2641,34 @@ func TestMassCubeIsWaterToScale(t *testing.T) {
 			massLabelGap+footDescender)
 		if base, want := lt.MassCube.Y+lt.MassCube.Side, drawH-massCubeMargin; math.Abs(base-want) > 0.01 {
 			t.Errorf("%s: the cube's face stands at y=%.2f, want %.2f in every diagram",
-				sp.CommonName, base, want)
+				sp.Name(dataset.LocaleNA), base, want)
 		}
 		if lt.MassCube.X != massCubeMargin {
 			t.Errorf("%s: the cube's face starts at x=%.2f, want %d in every diagram",
-				sp.CommonName, lt.MassCube.X, massCubeMargin)
+				sp.Name(dataset.LocaleNA), lt.MassCube.X, massCubeMargin)
 		}
 		// The projection grows up and right, and must stay in the drawing and
 		// clear of the bird.
 		if topY := lt.MassCube.Y - lt.MassCube.Depth; topY < 0 {
-			t.Errorf("%s: the cube's top reaches y=%.1f, above the drawing", sp.CommonName, topY)
+			t.Errorf("%s: the cube's top reaches y=%.1f, above the drawing", sp.Name(dataset.LocaleNA), topY)
 		}
 		if right := lt.MassCube.X + lt.MassCube.Side + lt.MassCube.Depth; right >= lt.Geom.CX {
 			t.Errorf("%s: the cube reaches x=%.1f, past the bird's axis at %.1f",
-				sp.CommonName, right, lt.Geom.CX)
+				sp.Name(dataset.LocaleNA), right, lt.Geom.CX)
 		}
 		if lt.MassCube.Depth <= 0 {
-			t.Errorf("%s: the cube has no depth, so it is a square", sp.CommonName)
+			t.Errorf("%s: the cube has no depth, so it is a square", sp.Name(dataset.LocaleNA))
 		}
 		// Its label must be centred under the face without being clipped --
 		// a Scissor-tailed Flycatcher's 29px cube once rendered "ass 1.4 oz".
 		if left := lt.MassCube.LabelX - float64(len(lt.MassCube.Label))*massLabelCharWidth/2; left < -0.01 {
 			t.Errorf("%s: the mass label %q starts at x=%.1f and is clipped",
-				sp.CommonName, lt.MassCube.Label, left)
+				sp.Name(dataset.LocaleNA), lt.MassCube.Label, left)
 		}
 		// Measured mass draws solid, near-match dashed (P-065).
 		if want := sp.Mass.Prov.Kind != dataset.Measured; lt.MassCube.Est != want {
 			t.Errorf("%s: mass square Est=%v but provenance is %q",
-				sp.CommonName, lt.MassCube.Est, sp.Mass.Prov.Kind)
+				sp.Name(dataset.LocaleNA), lt.MassCube.Est, sp.Mass.Prov.Kind)
 		}
 	}
 }
@@ -2647,8 +2683,8 @@ func TestMassCubeIsWaterToScale(t *testing.T) {
 func TestMassCubeIsRenderedAndExplained(t *testing.T) {
 	s := newTestServer(t)
 	for _, u := range []string{
-		"/species/ardea_herodias",
-		"/compare?species=ardea_herodias&species=calypte_anna",
+		"/species/greblu",
+		"/compare?species=greblu&species=annhum",
 	} {
 		body := mustGet(t, s, u)
 		class, x, _, side, ok := massCubeOf(t, body)
@@ -2723,8 +2759,8 @@ func TestCompareSortReordersTheURL(t *testing.T) {
 	// The murre must be in the set: it is the only fixture species for which
 	// the three metrics disagree, so without it every sort yields the same
 	// order and this test cannot tell one metric from another.
-	const start = "/compare?units=metric&species=ardea_herodias&species=calypte_anna" +
-		"&species=corvus_brachyrhynchos&species=uria_lomvia"
+	const start = "/compare?units=metric&species=greblu&species=annhum" +
+		"&species=amecro&species=thimur"
 	body := mustGet(t, s, start)
 
 	opts := sortControls(t, body)
@@ -2767,7 +2803,7 @@ func TestCompareSortReordersTheURL(t *testing.T) {
 			}
 			if m.Value(cur) < m.Value(prev) {
 				t.Errorf("%s: %s (%.1f) is ordered before %s (%.1f); the sort is ascending",
-					o.Label, cur.CommonName, m.Value(cur), prev.CommonName, m.Value(prev))
+					o.Label, cur.Name(dataset.LocaleNA), m.Value(cur), prev.Name(dataset.LocaleNA), m.Value(prev))
 			}
 		}
 
@@ -2804,9 +2840,100 @@ func TestCompareSortReordersTheURL(t *testing.T) {
 	}
 
 	// Below two birds there is nothing to sort.
-	for _, u := range []string{"/compare?species=calypte_anna", "/compare?species="} {
+	for _, u := range []string{"/compare?species=annhum", "/compare?species="} {
 		if n := len(sortControls(t, mustGet(t, s, u))); n != 0 {
 			t.Errorf("%s offers %d sort options; there is nothing to sort", u, n)
+		}
+	}
+}
+
+// TestNameLocaleTogglesNamesAndNothingElse asserts P-049's central claim: the
+// reader picks a vocabulary and the identifiers stay put.
+//
+// The fixture gives every species a world name that differs from its North
+// American one (see worldName), so a toggle that serves the same string both
+// ways fails here rather than passing on data that cannot tell them apart.
+//
+// Verifies: P-049. Criterion: AC-083.
+func TestNameLocaleTogglesNamesAndNothingElse(t *testing.T) {
+	s := newTestServer(t)
+	sp := findSpecies(t, "amerob")
+	na, world := sp.Name(dataset.LocaleNA), sp.Name(dataset.LocaleWorld)
+	if na == world {
+		t.Fatalf("fixture gives %q the same name in both locales; the check cannot bite", na)
+	}
+
+	for _, c := range []struct{ query, want, notWant string }{
+		{"", na, world},
+		{"?names=na", na, world},
+		{"?names=world", world, na},
+	} {
+		_, body := get(t, s, "/species/"+sp.ID+c.query)
+		if !strings.Contains(body, c.want) {
+			t.Errorf("/species/%s%s omits %q", sp.ID, c.query, c.want)
+		}
+		if strings.Contains(body, c.notWant) {
+			t.Errorf("/species/%s%s shows %q, the other locale's name", sp.ID, c.query, c.notWant)
+		}
+		// The identifier must not move with the vocabulary. This is the
+		// property an alpha code could not have had: it was derived from the
+		// English name, so it would have changed with it.
+		if !strings.Contains(body, sp.SpeciesCode) {
+			t.Errorf("/species/%s%s does not show the code %q", sp.ID, c.query, sp.SpeciesCode)
+		}
+
+	}
+}
+
+// TestNameLocaleControlOffersBothAndMarksTheActive checks the control itself,
+// not just the effect. A toggle that renders and does nothing looks identical
+// to one that works until you follow it.
+//
+// Verifies: P-049. Criterion: AC-083.
+func TestNameLocaleControlOffersBothAndMarksTheActive(t *testing.T) {
+	s := newTestServer(t)
+	for _, c := range []struct{ query, onHref string }{
+		{"/", "names=na"},
+		{"/?names=world", "names=world"},
+	} {
+		_, body := get(t, s, c.query)
+		for _, want := range []string{`"names" "na"`, `"names" "world"`} {
+			_ = want // the template renders these through the query helper
+		}
+		if !strings.Contains(body, "names=na") || !strings.Contains(body, "names=world") {
+			t.Errorf("%s: the Names control does not offer both locales", c.query)
+		}
+		// The active one is marked. Located by finding the on-state button
+		// whose href carries this locale.
+		re := regexp.MustCompile(`<a class="btn on"[^>]*href="([^"]*)"`)
+		var onHrefs []string
+		for _, m := range re.FindAllStringSubmatch(body, -1) {
+			onHrefs = append(onHrefs, html.UnescapeString(m[1]))
+		}
+		found := false
+		for _, h := range onHrefs {
+			if strings.Contains(h, c.onHref) {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("%s: no on-state control carries %q; on-states were %v", c.query, c.onHref, onHrefs)
+		}
+	}
+}
+
+// TestNameFallsBackToWorldWhenNoNorthAmericanName covers the five species with
+// no eBird/Clements concept: they must render a bird, not a blank (P-049).
+//
+// Verifies: P-049. Criterion: AC-083.
+func TestNameFallsBackToWorldWhenNoNorthAmericanName(t *testing.T) {
+	sp := dataset.Species{
+		ID:    "nonam",
+		Names: map[dataset.Locale]string{dataset.LocaleWorld: "Only A World Name"},
+	}
+	for _, loc := range []dataset.Locale{dataset.LocaleNA, dataset.LocaleWorld} {
+		if got := sp.Name(loc); got != "Only A World Name" {
+			t.Errorf("locale %q: got %q, want the world name as a fallback", loc, got)
 		}
 	}
 }

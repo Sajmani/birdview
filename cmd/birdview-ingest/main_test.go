@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"math"
+	"net/url"
 	"os"
 	"sort"
 	"strings"
@@ -17,6 +18,7 @@ const (
 	abaFile  = "../../fetched/ABA_Checklist-8.19.csv"
 	avoFile  = "../../AVONET Supplementary dataset 1.xlsx"
 	foxFile  = "../../wingspan_fox2026_AppendixS1.xlsx"
+	avlFile  = "../../AviList-v2025b-10Jun2026-extended.xlsx"
 	inatFile = "../../data/inat-taxa.tsv"
 )
 
@@ -35,7 +37,7 @@ func load(t *testing.T) *dataset.Dataset {
 		// pass silently.
 		t.Skip("skipping: fetched/ABA_Checklist-8.19.csv is absent; run the fetch step first")
 	}
-	ds, _, err := build(abaFile, avoFile, foxFile)
+	ds, _, err := build(abaFile, avoFile, foxFile, avlFile)
 	if err != nil {
 		t.Fatalf("build: %v", err)
 	}
@@ -47,8 +49,11 @@ func load(t *testing.T) *dataset.Dataset {
 func TestScopeIsABACodes1To3(t *testing.T) {
 	ds := load(t)
 	// 841 is counted from ABA Checklist 8.19 itself -- rarity codes 1, 2 and 3
-	// number 490, 258 and 93 -- not from a previous run of this code.
-	const want = 841
+	// number 490, 258 and 93 -- not from a previous run of this code. Two are
+	// then dropped because AviList recognizes neither as a species and every
+	// name now comes from AviList (CR-022), which is why the constant is
+	// written as the arithmetic rather than as 839.
+	const want = 841 - 2
 	if got := len(ds.Species); got != want {
 		t.Errorf("got %d species, want %d for ABA checklist 8.19", got, want)
 	}
@@ -84,18 +89,49 @@ func TestRarityCodeNeverReachesTheDataset(t *testing.T) {
 // the four-letter code, so the ingest must carry it.
 //
 // Verifies: P-004. Criterion: AC-013.
-func TestBandingCodesArePresent(t *testing.T) {
+func TestSpeciesCodesArePresent(t *testing.T) {
 	ds := load(t)
-	var missing int
+	var missing []string
 	for _, s := range ds.Species {
-		if s.BandingCode == "" {
-			missing++
+		if s.SpeciesCode == "" {
+			missing = append(missing, s.ScientificName)
 		}
 	}
-	// A handful of ABA rows genuinely have no alpha code; a large share missing
-	// would mean the column moved.
-	if frac := float64(missing) / float64(len(ds.Species)); frac > 0.05 {
-		t.Errorf("%d of %d species (%.1f%%) have no banding code", missing, len(ds.Species), frac*100)
+	// Exactly three species have no eBird code, and they are named rather
+	// than counted: each is a taxon AviList recognizes and Clements has no
+	// 1:1 counterpart for, so Clements publishes no code. A fourth appearing
+	// means the join moved, not that the world changed.
+	want := map[string]bool{
+		"Oxyura jamaicensis": true, "Pterodroma cervicalis": true, "Tyto furcata": true,
+	}
+	for _, m := range missing {
+		if !want[m] {
+			t.Errorf("%s has no eBird species code and is not one of the three known gaps", m)
+		}
+	}
+	if len(missing) != len(want) {
+		t.Errorf("%d species have no eBird code, want %d: %v", len(missing), len(want), missing)
+	}
+}
+
+// TestSpeciesCodesAreUniqueAndURLSafe guards the thing the code now carries
+// that an alpha code never did: it IS the URL (P-049).
+//
+// Verifies: P-049. Criterion: AC-084.
+func TestSpeciesCodesAreUniqueAndURLSafe(t *testing.T) {
+	ds := load(t)
+	seen := map[string]string{}
+	for _, s := range ds.Species {
+		if other, dup := seen[s.ID]; dup {
+			t.Errorf("%s and %s share the id %q, so they share one URL", other, s.ScientificName, s.ID)
+		}
+		seen[s.ID] = s.ScientificName
+		if s.ID != url.PathEscape(s.ID) {
+			t.Errorf("%s: id %q needs escaping in a URL", s.ScientificName, s.ID)
+		}
+		if s.ID == "" {
+			t.Errorf("%s: empty id", s.ScientificName)
+		}
 	}
 }
 
@@ -104,11 +140,13 @@ func TestNamesArePopulatedNotDefaulted(t *testing.T) {
 	ds := load(t)
 	for _, s := range ds.Species {
 		switch {
-		case s.CommonName == "":
-			t.Errorf("%s: empty common name", s.ScientificName)
+		case s.Name(dataset.LocaleWorld) == "":
+			t.Errorf("%s: empty world name", s.ScientificName)
+		case s.Name(dataset.LocaleNA) == "":
+			t.Errorf("%s: empty North American name, and the world fallback is empty too", s.ScientificName)
 		case s.Family == "" || s.FamilyCommon == "":
 			t.Errorf("%s: empty family (%q / %q)", s.ScientificName, s.Family, s.FamilyCommon)
-		case s.CommonName == s.ScientificName:
+		case s.Name(dataset.LocaleNA) == s.ScientificName:
 			// The tell of a silent fallback: an earlier design shipped this for
 			// every one of its species.
 			t.Errorf("%s: common name equals the scientific name", s.ScientificName)
@@ -182,9 +220,12 @@ func TestProvenanceMatchesTheSourcesUsed(t *testing.T) {
 	}
 	// 301 is the empirical-wingspan count measured against the Fox dataset and
 	// AVONET's crosswalk before this code existed, and recorded in
-	// spec/sources/fox-wingspan/PROVENANCE.md.
-	if measuredSpan != 301 {
-		t.Errorf("measured wingspans: got %d, want 301", measuredSpan)
+	// spec/sources/fox-wingspan/PROVENANCE.md. One of the two species CR-022
+	// dropped had an empirical span, so the expected count is written as the
+	// arithmetic rather than restated as 300.
+	const wantMeasuredSpan = 301 - 1
+	if measuredSpan != wantMeasuredSpan {
+		t.Errorf("measured wingspans: got %d, want %d", measuredSpan, wantMeasuredSpan)
 	}
 	if measuredSpan+nearSpan+modeledSpan != len(ds.Species) {
 		t.Error("wingspan kinds do not partition the dataset")
@@ -232,6 +273,13 @@ func TestNearMatchesAreExactlyTheMappedOnes(t *testing.T) {
 		}
 	}
 	for name := range taxonomy.NearMatches {
+		if _, dropped := taxonomy.NotInAviList[name]; dropped {
+			// The species left the dataset with CR-022, so there is nothing
+			// to label. The mapping stays: it records a real AVONET
+			// relationship and would be needed again if AviList split the
+			// taxon back out.
+			continue
+		}
 		if !got[name] {
 			t.Errorf("%s is mapped as a near-match but its traits are not labeled so", name)
 		}
@@ -323,7 +371,7 @@ func TestINatTableMatchesTheDataset(t *testing.T) {
 	ds := load(t)
 	known := map[string]string{}
 	for i := range ds.Species {
-		known[ds.Species[i].ScientificName] = ds.Species[i].CommonName
+		known[ds.Species[i].ScientificName] = ds.Species[i].Name(dataset.LocaleNA)
 	}
 
 	var stale []string

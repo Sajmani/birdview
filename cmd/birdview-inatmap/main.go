@@ -65,7 +65,7 @@ func main() {
 			log.Printf("interrupted after %d of %d; writing what resolved", i, len(species))
 			break
 		}
-		e, ok, err := c.Lookup(ctx, s.ScientificName, s.CommonName)
+		e, ok, err := c.Lookup(ctx, s.ScientificName, s.Name(dataset.LocaleNA))
 		switch {
 		case err != nil:
 			// A transport error is not a confident non-match, so it must not be

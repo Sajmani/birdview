@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"birdview/internal/aba"
+	"birdview/internal/avilist"
 	"birdview/internal/avonet"
 	"birdview/internal/dataset"
 	"birdview/internal/inat"
@@ -34,12 +35,13 @@ func main() {
 		abaPath  = flag.String("aba", "fetched/ABA_Checklist-8.19.csv", "ABA checklist CSV (fetched, never committed)")
 		avoPath  = flag.String("avonet", "AVONET Supplementary dataset 1.xlsx", "AVONET workbook")
 		foxPath  = flag.String("wingspan", "wingspan_fox2026_AppendixS1.xlsx", "Fox et al. wingspan workbook")
+		avlPath  = flag.String("avilist", "AviList-v2025b-10Jun2026-extended.xlsx", "AviList checklist (extended release)")
 		inatPath = flag.String("inat", "data/inat-taxa.tsv", "iNaturalist taxon mapping (built by birdview-inatmap)")
 		outPath  = flag.String("out", "web/data/species.json", "output path (a build artifact)")
 	)
 	flag.Parse()
 
-	ds, report, err := build(*abaPath, *avoPath, *foxPath)
+	ds, report, err := build(*abaPath, *avoPath, *foxPath, *avlPath)
 	if err != nil {
 		log.Fatalf("birdview-ingest: %v", err)
 	}
@@ -126,7 +128,7 @@ func resolve(sp aba.Species, wb *avonet.Workbook) (resolution, bool) {
 	return resolution{}, false
 }
 
-func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
+func build(abaPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, string, error) {
 	raw, err := os.ReadFile(abaPath)
 	if err != nil {
 		return nil, "", fmt.Errorf("reading the ABA checklist: %w (fetch it to fetched/; it is never committed)", err)
@@ -143,27 +145,65 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
+	avl, err := avilist.Open(avlPath)
+	if err != nil {
+		return nil, "", err
+	}
 
-	// Families in the checklist's own taxonomic sequence, with the order each
-	// belongs to. Order is resolved through the same taxon lookup as traits:
-	// taking it from the ABA name alone leaves Tytonidae unplaced, because
-	// AVONET files that bird as Tyto alba (P-006).
-	var famSeq []string
+	// Every name now comes from AviList, so the ABA checklist supplies only
+	// SCOPE -- which species are in -- and nothing that reaches a page
+	// (CR-022). Resolve each in-scope species to its AviList row first; what
+	// cannot be resolved is dropped, because a bird AviList does not recognize
+	// could only be named from the one source that may not be served.
+	avlOf := map[string]avilist.Species{}
+	var dropped []string
+	for _, sp := range species {
+		sci := sp.ScientificName
+		if alt, ok := taxonomy.AviListRenames[sci]; ok {
+			sci = alt
+		}
+		rec, ok := avl[sci]
+		if !ok {
+			dropped = append(dropped, sp.ScientificName)
+			continue
+		}
+		avlOf[sp.ScientificName] = rec
+	}
+	sort.Strings(dropped)
+	var wantDropped []string
+	for k := range taxonomy.NotInAviList {
+		wantDropped = append(wantDropped, k)
+	}
+	sort.Strings(wantDropped)
+	if strings.Join(dropped, "|") != strings.Join(wantDropped, "|") {
+		return nil, "", fmt.Errorf(
+			"AviList join dropped %v, but taxonomy.NotInAviList expects %v; "+
+				"a species losing its name source silently is how a URL changes under a reader",
+			dropped, wantDropped)
+	}
+
+	// Families in AviList's linear sequence, which is phylogenetic. The order
+	// each belongs to comes from AviList too, so nothing about the grouping
+	// depends on a source that cannot be served.
 	famCommon := map[string]string{}
 	famOrder := map[string]string{}
-	seenFam := map[string]bool{}
+	famFirstSeq := map[string]int{}
 	for _, sp := range species {
-		if !seenFam[sp.Family] {
-			seenFam[sp.Family] = true
-			famSeq = append(famSeq, sp.Family)
-			famCommon[sp.Family] = sp.FamilyCommon
+		rec, ok := avlOf[sp.ScientificName]
+		if !ok {
+			continue
 		}
-		if famOrder[sp.Family] == "" {
-			if r, ok := resolve(sp, wb); ok {
-				famOrder[sp.Family] = wb.OrderOf[r.taxon]
-			}
+		famCommon[rec.Family] = rec.FamilyEnglish
+		famOrder[rec.Family] = rec.Order
+		if cur, seen := famFirstSeq[rec.Family]; !seen || rec.Seq < cur {
+			famFirstSeq[rec.Family] = rec.Seq
 		}
 	}
+	famSeq := make([]string, 0, len(famFirstSeq))
+	for f := range famFirstSeq {
+		famSeq = append(famSeq, f)
+	}
+	sort.Slice(famSeq, func(i, j int) bool { return famFirstSeq[famSeq[i]] < famFirstSeq[famSeq[j]] })
 	for _, f := range famSeq {
 		if famOrder[f] == "" {
 			return nil, "", fmt.Errorf("family %s could not be placed in an order; "+
@@ -200,12 +240,19 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 	)
 
 	for _, sp := range species {
+		avr, inAviList := avlOf[sp.ScientificName]
+		if !inAviList {
+			continue // dropped above, with the reason asserted
+		}
 		res, ok := resolve(sp, wb)
 		if !ok {
-			unmatched = append(unmatched, fmt.Sprintf("%s (%s)", sp.CommonName, sp.ScientificName))
+			unmatched = append(unmatched, fmt.Sprintf("%s (%s)", avr.NameWorld, sp.ScientificName))
 			continue
 		}
 		counts[string(res.kind)]++
+		if avr.Code != "" {
+			counts["coded"]++
+		}
 
 		traitProv := func() dataset.Provenance {
 			return dataset.Provenance{
@@ -218,7 +265,7 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 		// Segments: bill and tail measured, head/neck/body modeled.
 		headV, headModel := morphology.HeadLength(res.traits.Mass)
 		bodyV, bodyModel := morphology.BodyLength(res.traits.Mass)
-		neckV, neckModel := morphology.NeckLength(bodyV, sp.Family)
+		neckV, neckModel := morphology.NeckLength(bodyV, avr.Family)
 		bill, head, neck, body, tail, total := morphology.BalanceToSum(
 			res.traits.Culmen, headV, neckV, bodyV, res.traits.Tail)
 
@@ -226,16 +273,28 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 			return dataset.Provenance{Kind: dataset.Modeled, Model: model}
 		}
 
+		// The eBird code is the id, so a URL is /species/amerob rather than a
+		// genus nobody can spell. Where AviList publishes no code the
+		// scientific-name slug stands in, which keeps every species reachable
+		// and keeps the id stable (P-049, AC-084).
+		sid := avr.Code
+		if sid == "" {
+			sid = id(sp.ScientificName)
+		}
+
 		rec := dataset.Species{
-			ID:             id(sp.ScientificName),
-			CommonName:     sp.CommonName,
-			BandingCode:    sp.Code,
+			ID: sid,
+			Names: map[dataset.Locale]string{
+				dataset.LocaleNA:    avr.NameNA,
+				dataset.LocaleWorld: avr.NameWorld,
+			},
+			SpeciesCode:    avr.Code,
 			ScientificName: sp.ScientificName,
-			Family:         sp.Family,
-			FamilyCommon:   sp.FamilyCommon,
-			FamilyColor:    famColors[sp.Family].Hex,
-			FamilyText:     famColors[sp.Family].Text,
-			Order:          famOrder[sp.Family],
+			Family:         avr.Family,
+			FamilyCommon:   famCommon[avr.Family],
+			FamilyColor:    famColors[avr.Family].Hex,
+			FamilyText:     famColors[avr.Family].Text,
+			Order:          avr.Order,
 			Segments: dataset.Segments{
 				Bill: dataset.Metric{Value: bill, Prov: traitProv()},
 				Head: dataset.Metric{Value: head, Prov: modeled(headModel)},
@@ -307,7 +366,12 @@ func build(abaPath, avoPath, foxPath string) (*dataset.Dataset, string, error) {
 
 	var b strings.Builder
 	fmt.Fprintf(&b, "ABA codes 1-%d: %d species in %d families across %d orders\n",
-		aba.MaxRarityCode, len(species), len(famSeq), len(orderSeq))
+		aba.MaxRarityCode, len(out), len(famSeq), len(orderSeq))
+	fmt.Fprintf(&b, "  names + code      : AviList v2025b, %d of %d with an eBird code\n",
+		counts["coded"], len(out))
+	if len(dropped) > 0 {
+		fmt.Fprintf(&b, "  dropped, no AviList concept: %s\n", strings.Join(dropped, ", "))
+	}
 	fmt.Fprintf(&b, "  traits measured   : %d\n", counts[string(dataset.Measured)])
 	fmt.Fprintf(&b, "  traits near-match : %d\n", counts[string(dataset.NearMatch)])
 	fmt.Fprintf(&b, "  wingspan measured : %d\n", counts["wingspan measured"])

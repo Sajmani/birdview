@@ -116,12 +116,76 @@ editorial judgment, and the project uses them only as a filter.
 **Status: planned.** Trait coverage on `AVONET2_eBird` was measured complete for the target
 families, so any failure means a join or parse bug rather than missing data.
 
-### AC-013 — Names and families are populated from ABA, never defaulted
-**Verifies:** P-004 · **Level:** code · **Method:** property test
-**Assertion:** common name, family scientific name and family common name are all non-empty, and
-**no record's common name equals its scientific name** — the tell of a silent fallback, which an
-earlier design shipped for every one of its species.
-**Status: verified 2026-09-22 — no species falls back to its scientific name as a common name.**
+### AC-013 — Names and families are populated from AviList, never defaulted
+**Verifies:** P-004 · **Level:** code · **Method:** property test over the built dataset
+
+**Assertions, names:** the **world** name is non-empty for every species; the **North American**
+name is non-empty *after* the documented fallback, so a species with no Clements concept shows a
+bird rather than a blank; family scientific and English names are non-empty; and **no record's
+name equals its scientific name** — the tell of a silent fallback, which an earlier design
+shipped for every one of its species.
+
+**Assertions, the code:** exactly **three** species carry no eBird code, and they are **named,
+not counted** — *Oxyura jamaicensis*, *Pterodroma cervicalis*, *Tyto furcata*, each a taxon
+AviList recognizes and Clements has no 1:1 counterpart for. A fourth appearing means the join
+moved, which a percentage threshold would have absorbed in silence.
+
+**Status: verified 2026-10-02 — passing, and watched failing** by blanking the world name, which
+leaves the fallback with nothing to fall back to; and by adding a fourth species to the uncoded
+set, which the named list catches where a percentage threshold would have absorbed it.
+Previously verified 2026-09-22 against the ABA checklist; rewritten for
+[CR-022](decisions.md#cr-022).
+
+### AC-084 — A species id is unique, stable and fit for a URL
+**Verifies:** P-049 · **Level:** code · **Method:** property test over the built dataset, plus
+assertions on the served routes
+
+**Assertions, uniqueness:** no two species share an id. This is not a formality — AviList lumps
+two BirdView species into taxa already in scope, and had they been lumped in place rather than
+dropped, two birds would have shared one URL.
+
+**Assertions, URL fitness:** every id survives `url.PathEscape` unchanged and none is empty, so
+no species needs encoding to be linked.
+
+**Assertions, the fallback:** the three species with no eBird code carry a scientific-name slug
+instead, and are reachable at it.
+
+**Assertions, the routes:** `/species/<code>` resolves, and the comparison view accepts codes in
+`species=` and renders those birds in that order.
+
+**Status: verified 2026-10-02 — passing, and watched failing** by mapping both lumped species
+onto their AviList taxon instead of dropping them, which collides *Vireo swainsoni* onto
+`warvir`, already held by the Eastern Warbling-Vireo; and by blanking the fallback so the three
+uncoded species get an empty id.
+
+**The ingest asserts its own drop list rather than reporting it.** `taxonomy.NotInAviList` names
+the two species that may legitimately fail the AviList join, and the build fails if the set that
+actually failed differs — in either direction. A third species going quiet would otherwise be a
+silent deletion, and a species regaining a concept would leave a dead entry nobody noticed.
+
+### AC-083 — The name locale is a toggle, and only names move
+**Verifies:** P-049 · **Level:** code · **Method:** assertions on the rendered pages under both
+locales
+
+**Assertions, both names are served:** with no parameter the page shows the **North American**
+name; with `names=world` the same URL shows the **world** name. The fixture gives every species a
+world name that differs from its North American one, so a toggle that silently serves the same
+string either way cannot pass.
+
+**Assertions, the id does not move:** the species code and the URL are **identical under both
+locales**. This is the property the whole change rests on, and the one an alpha code could not
+have had.
+
+**Assertions, the control:** the index offers both locales, marks the active one, and the links
+preserve the rest of the view state.
+
+**Assertions, the fallback:** a species with no North American name renders its world name under
+either locale, rather than an empty header.
+
+**Status: verified 2026-10-02 — passing, and watched failing** by serving the North American name
+for both locales; by dropping the `names` parameter from the link builder, so the toggle renders
+and does nothing; by hardcoding the on-state; and by removing the fallback, which blanks five
+headers under the default locale.
 
 ### AC-014 — The join covers every species, and the direct-match rate is monitored
 **Verifies:** P-006 · **Level:** code · **Method:** unit test over ingest
@@ -433,11 +497,15 @@ buttons reversed. It now reads only the controls panel.
 ### AC-064 — Attribution is complete, and claims nothing unearned
 **Verifies:** T-011, G-004 · **Level:** code · **Method:** rendering test over the footer
 **Assertions:** each CC BY source is credited with creator, a link to its deposit and a link to the
-license; the ABA checklist is credited as the species list; the footer discloses that lengths are
-modeled; the detail view carries credit too, being a shareable URL of its own; and **no page claims
-a permission the project does not hold**.
+license — **AVONET, Fox and AviList by name and DOI**; the ABA checklist is credited for the
+species list and *only* that; the footer discloses that lengths are modeled; the detail view
+carries credit too, being a shareable URL of its own; and **no page claims a permission the
+project does not hold**.
 **Status: verified 2026-09-22 — passing, and watched failing** by stripping the license links and
-by reinstating a "used by permission" claim.
+by reinstating a "used by permission" claim. **AviList added 2026-10-02**
+([CR-022](decisions.md#cr-022)) and watched failing by deleting its credit while leaving its names
+on every tile — which is the shape the obligation actually has: CC BY permits the use *because*
+of the attribution, so an unasserted credit is a licence breach waiting to happen.
 
 The second half exists because the first version of this footer said the ABA checklist was "used by
 permission". It is not — that request has not been sent. Claiming a right you have not been granted
@@ -1228,6 +1296,7 @@ but a missing declaration.
 | P-001 | AC-010, AC-011, AC-053 | |
 | P-002, P-003 | AC-012 | |
 | P-004 | AC-013 | |
+| P-049 | AC-083, AC-084 | |
 | P-005 | AC-002, AC-060 | |
 | P-006 | AC-014 | |
 | P-007 | AC-015 | |

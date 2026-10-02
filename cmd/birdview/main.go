@@ -144,6 +144,11 @@ type options struct {
 	HasSelection bool
 	Metric3      bool // imperial when false
 
+	// Locale selects which English name is served (P-049). North American is
+	// the default: this is an ABA-area dataset and Dovekie is what its reader
+	// calls that bird.
+	Locale dataset.Locale
+
 	// Picking is pick mode (P-068): the `species` parameter is present, even
 	// if it is empty. Picks are the ids named in it, deduplicated, in the
 	// order given -- that order is the reader's and no page reorders it.
@@ -160,7 +165,7 @@ func parseOptions(r *http.Request) options {
 	// default that teaches the reader to read a bird wins over the one that
 	// delivers the shock before they can.
 	o := options{Metric: view.ByLength, Step: view.DefaultStepPercent, Scale: view.PerSection,
-		Families: map[string]bool{}}
+		Locale: dataset.LocaleNA, Families: map[string]bool{}}
 	switch view.Metric(q.Get("by")) {
 	case view.ByWingspan:
 		o.Metric = view.ByWingspan
@@ -178,6 +183,11 @@ func parseOptions(r *http.Request) options {
 		o.Step = v
 	}
 	o.Metric3 = q.Get("units") == "metric"
+	// Recognise the non-default, as with scale above: writing this the other
+	// way round disables the toggle the moment the default moves.
+	if dataset.Locale(q.Get("names")) == dataset.LocaleWorld {
+		o.Locale = dataset.LocaleWorld
+	}
 	// Pick mode is the presence of the parameter, not a value in it: a bare
 	// `species=` holds the mode open with nothing picked (P-068). Exactly the
 	// distinction drawn just below for `family`.
@@ -203,7 +213,10 @@ func parseOptions(r *http.Request) options {
 // rather than in the template: a template that does its own arithmetic cannot
 // see the unit toggle, which is exactly how the footer came to ignore it.
 type tile struct {
-	S       *dataset.Species
+	S *dataset.Species
+	// Name is the species' English name in the reader's chosen locale,
+	// resolved once here so no template has to know about locales (P-049).
+	Name    string
 	Geom    view.Geometry
 	Box     view.Box
 	Length  string
@@ -377,7 +390,7 @@ func (s *server) buildPickBar(r *http.Request, opt options, missing []string) (p
 			break
 		}
 		b.Picks = append(b.Picks, pickChip{
-			Name: sp.CommonName, RemoveURL: pickURL(r, toggled(live, sp.ID))})
+			Name: sp.Name(opt.Locale), RemoveURL: pickURL(r, toggled(live, sp.ID))})
 	}
 	b.CompareURL = compareURL(r, live)
 	b.ClearURL = queryFor(r, "species")()
@@ -455,7 +468,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	page := pageData{Opt: opt, Total: len(s.ds.Species), Shown: len(filtered),
 		Query: queryFor(r)}
 	if sp := s.legendSpecies(); sp != nil {
-		lt := labelledTile(sp, legendBox, opt.Metric3)
+		lt := labelledTile(sp, legendBox, opt.Metric3, opt.Locale)
 		page.Legend = &lt
 	}
 
@@ -552,7 +565,8 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		for _, sp := range sec.Species {
 			g := view.Layout(sp, refs[i], spanRefs[i], tileBox)
 			sv.Tiles = append(sv.Tiles, tile{
-				S: sp, Geom: g, Box: tileBox,
+				S:    sp,
+				Name: sp.Name(opt.Locale), Geom: g, Box: tileBox,
 				// Set here rather than recomputed in the template: the template
 				// used to derive the centering from Box.H itself, which silently
 				// disagreed with this value the moment Box stopped being the
@@ -577,7 +591,9 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 }
 
 type detailData struct {
-	S       *dataset.Species
+	S *dataset.Species
+	// Name is the species' English name in the reader's locale (P-049).
+	Name    string
 	Geom    view.Geometry
 	Box     view.Box
 	Metrics []metricRow
@@ -653,7 +669,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		row("Body", sp.Segments.Body, view.ByLength, opt.Metric3),
 		row("Tail", sp.Segments.Tail, view.ByLength, opt.Metric3),
 	}
-	lt := labelledTile(sp, box, opt.Metric3)
+	lt := labelledTile(sp, box, opt.Metric3, opt.Locale)
 
 	// Only a confident match gets a link; zero means none was found (P-064).
 	var inatURL string
@@ -672,7 +688,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.render(w, "detail.html", detailData{
-		S: sp, Geom: lt.Geom, Box: lt.Box, Labels: lt.Labels, TopOffset: lt.TopOffset,
+		S: sp, Name: lt.Name, Geom: lt.Geom, Box: lt.Box, Labels: lt.Labels, TopOffset: lt.TopOffset,
 		Bar: bar, Picked: picked, PickLabel: pickLabel,
 		PickURL:    pickURL(r, toggled(live, sp.ID)),
 		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
@@ -746,7 +762,7 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 	panels := make([]comparePanel, 0, len(chosen))
 	for _, sp := range chosen {
 		panels = append(panels, comparePanel{
-			tile:      labelledTileAt(sp, box, opt.Metric3, refLength, refWingspan),
+			tile:      labelledTileAt(sp, box, opt.Metric3, refLength, refWingspan, opt.Locale),
 			DetailURL: detailLink(r, sp.ID),
 			RemoveURL: compareWithout(r, sp.ID),
 		})
@@ -1067,8 +1083,8 @@ func (s *server) legendSpecies() *dataset.Species {
 // labelledTile builds the annotated diagram for a bird drawn at its own scale:
 // the detail view and the help legend, each of which shows one bird with
 // nothing to measure it against (P-034).
-func labelledTile(sp *dataset.Species, box view.Box, metric bool) tile {
-	return labelledTileAt(sp, box, metric, sp.TotalLength.Value, sp.Wingspan.Value)
+func labelledTile(sp *dataset.Species, box view.Box, metric bool, loc dataset.Locale) tile {
+	return labelledTileAt(sp, box, metric, sp.TotalLength.Value, sp.Wingspan.Value, loc)
 }
 
 // labelledTileAt is the same diagram laid out against an EXTERNAL reference, so
@@ -1079,7 +1095,7 @@ func labelledTile(sp *dataset.Species, box view.Box, metric bool) tile {
 // a comparison mean something. Getting the argument wrong yields a page that
 // looks entirely correct and compares nothing, which is why AC-076 asserts
 // drawn heights against the length ratio rather than asserting on the markup.
-func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, refWingspan float64) tile {
+func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, refWingspan float64, loc dataset.Locale) tile {
 	// draw is the area the bird gets; the emitted box is that plus the strip the
 	// total length label sits in, so the label costs the bird nothing. Going the
 	// other way -- keeping the box and shrinking the bird into it -- would take
@@ -1113,7 +1129,7 @@ func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, r
 		"bill": sp.Segments.Bill, "head": sp.Segments.Head, "neck": sp.Segments.Neck,
 		"body": sp.Segments.Body, "tail": sp.Segments.Tail,
 	}
-	t := tile{S: sp, Geom: g, Box: box, TopOffset: top,
+	t := tile{S: sp, Name: sp.Name(loc), Geom: g, Box: box, TopOffset: top,
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled}
 	// draw, not box: the segment label column belongs in the drawing area, and
 	// must not spill into the strip the total length label owns.

@@ -2,11 +2,11 @@
 
 **How big is that bird, really?**
 
-BirdView draws every bird on the ABA checklist as a scaled schematic — bill, head, neck, body,
+BirdView draws North American birds as a scaled schematic — bill, head, neck, body,
 tail, and a wing crossbar — at one shared scale, so you can *see* the difference in size instead of
 reading it off a number and trying to imagine it.
 
-It covers **841 species across 91 families and 25 orders**: everything on
+It covers **839 species across 90 families and 26 orders**: everything on
 [ABA Checklist 8.19](https://www.aba.org/aba-checklist/) at rarity codes 1–3, which is to say every
 bird you have a realistic chance of seeing in North America.
 
@@ -33,7 +33,7 @@ No openly licensed dataset publishes body length for North American birds. The o
 does is under terms that forbid us using it ([CR-002](spec/decisions.md)), so **every length
 in BirdView is a model** — built from measured parts, with each part labeled. Of the three numbers
 on a tile, mass is measured for almost every species, wingspan is measured for about a third, and
-length is modeled for all 841.
+length is modeled for all 839.
 
 That is why every value carries its own provenance — `measured`, `near-match` or `modeled` — and
 why clicking any bird shows you the source or the formula behind each individual number.
@@ -45,9 +45,11 @@ why clicking any bird shows you the source or the formula behind each individual
 
 Runs locally; **not deployed publicly**, and blocked from being so.
 
-Serving BirdView reproduces the ABA checklist to every visitor, and the checklist is
-all-rights-reserved. A written permission request is drafted and unsent. Until it is granted, the
-app stays local. See [spec/sources.md](spec/sources.md#aba) and the Work arising table in
+Every **name** now comes from [AviList](spec/sources.md#avilist), which is CC BY 4.0, so the ABA
+checklist no longer reaches a page through naming. One thing still comes from it: **scope**, the
+choice of which 839 species are in. The ABA was asked for permission on 2026-09-27 and has not replied,
+so the next step is a species list BirdView derives and owns. See
+[CR-022](spec/decisions.md) and the Work arising table in
 [spec/decisions.md](spec/decisions.md).
 
 ---

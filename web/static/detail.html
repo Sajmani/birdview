@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>{{.S.CommonName}} &mdash; BirdView</title>
+<title>{{.Name}} &mdash; BirdView</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="stylesheet" href="/static/styles.css">
@@ -14,7 +14,7 @@
 <div class="tile big">
   <div class="hd">
     <div class="nameline">
-      <span class="cn"><span class="cnname">{{.S.CommonName}}</span>{{with .S.BandingCode}}<span class="code">({{.}})</span>{{end}}</span>
+      <span class="cn"><span class="cnname">{{.Name}}</span>{{with .S.SpeciesCode}}<span class="code">({{.}})</span>{{end}}</span>
       <span class="sn">{{.S.ScientificName}}</span>
     </div>
     <span class="badge" style="background:{{.S.FamilyColor}};color:{{.S.FamilyText}}">{{.S.Family}}
@@ -45,7 +45,7 @@
 </table>
 
 {{if .INatURL}}
-<p class="seealso">See <a href="{{.INatURL}}" rel="noopener noreferrer">{{.S.CommonName}} on
+<p class="seealso">See <a href="{{.INatURL}}" rel="noopener noreferrer">{{.Name}} on
 iNaturalist</a> for photographs, range and observations. BirdView links rather than copying;
 each photograph there carries its own license.</p>
 {{end}}

@@ -71,6 +71,49 @@ var AwaitingTaxonomicCheck = []string{
 	"Astur atricapillus", "Ardea ibis", "Gygis candida", "Tyto furcata",
 }
 
+// AviListRenames maps the name BirdView carries onto the name AviList files
+// the SAME taxon under. These are one-to-one renamings -- a genus move or a
+// corrected epithet -- so the name, code and family resolved through them
+// belong to this bird and nothing is borrowed (CR-022).
+//
+// This is a second synonym table and not an extension of Renames above,
+// because the two point in opposite directions: Renames reaches BACKWARD from
+// a current name to the older label AVONET measured under, while this reaches
+// FORWARD from BirdView's name to a newer label AviList adopted. Merging them
+// would make the direction of each entry a matter of memory.
+//
+// Verifies: P-004.
+var AviListRenames = map[string]string{
+	"Coccothraustes vespertinus": "Hesperiphona vespertina",
+	"Dryobates albolarvatus":     "Leuconotopicus albolarvatus",
+	"Dryobates arizonae":         "Leuconotopicus arizonae",
+	"Dryobates borealis":         "Leuconotopicus borealis",
+	"Dryobates villosus":         "Leuconotopicus villosus",
+	"Icterus bullockii":          "Icterus bullockiorum",
+	"Pica nuttalli":              "Pica nuttallii",
+}
+
+// NotInAviList lists species AviList does not recognize at all, because it
+// lumps them into a taxon BirdView already carries. They are DROPPED from the
+// dataset rather than kept under an ABA name (CR-022).
+//
+// That follows from the decision itself: if AviList supplies the names, it
+// supplies the species concepts too, and keeping a bird AviList does not
+// recognize would mean keeping the one name the project may not redistribute.
+//
+// Lumping them in place is not an option. Vireo swainsoni would resolve to
+// Vireo gilvus, which is already in scope as the Eastern Warbling-Vireo, so
+// two BirdView species would share the code warvir and therefore one URL.
+//
+// Listed rather than inferred, so the ingest asserts the count and a third
+// species going quiet is a build failure rather than a silent deletion.
+//
+// Verifies: P-004.
+var NotInAviList = map[string]string{
+	"Porphyrio poliocephalus": "AviList lumps it into Porphyrio porphyrio, which is out of scope",
+	"Vireo swainsoni":         "AviList lumps it into Vireo gilvus, already in scope as warvir",
+}
+
 // OrderCommonNames gives each order an English label for the family selector.
 //
 // **These are the project's own editorial labels, not sourced data.** No input
@@ -87,7 +130,7 @@ var OrderCommonNames = map[string]string{
 	"Galliformes":         "Gamebirds",
 	"Phoenicopteriformes": "Flamingos",
 	"Podicipediformes":    "Grebes",
-	"Pteroclidiformes":    "Sandgrouse",
+	"Pterocliformes":      "Sandgrouse",
 	"Columbiformes":       "Pigeons and Doves",
 	"Cuculiformes":        "Cuckoos",
 	"Caprimulgiformes":    "Nightjars",
@@ -100,12 +143,16 @@ var OrderCommonNames = map[string]string{
 	"Ciconiiformes":       "Storks",
 	"Suliformes":          "Boobies, Cormorants, and Allies",
 	"Pelecaniformes":      "Pelicans, Herons, and Ibises",
-	"Accipitriformes":     "Hawks, Eagles, and Vultures",
-	"Strigiformes":        "Owls",
-	"Trogoniformes":       "Trogons",
-	"Coraciiformes":       "Kingfishers and Allies",
-	"Piciformes":          "Woodpeckers",
-	"Falconiformes":       "Falcons",
-	"Psittaciformes":      "Parrots",
-	"Passeriformes":       "Perching Birds",
+	"Accipitriformes":     "Hawks and Eagles",
+	// AviList separates the New World vultures into their own order, where
+	// ABA and AVONET had them among the hawks (CR-022). Accipitriformes is
+	// relabelled to match: it no longer contains a vulture.
+	"Cathartiformes": "New World Vultures",
+	"Strigiformes":   "Owls",
+	"Trogoniformes":  "Trogons",
+	"Coraciiformes":  "Kingfishers and Allies",
+	"Piciformes":     "Woodpeckers",
+	"Falconiformes":  "Falcons",
+	"Psittaciformes": "Parrots",
+	"Passeriformes":  "Perching Birds",
 }

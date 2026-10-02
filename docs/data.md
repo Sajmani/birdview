@@ -41,10 +41,10 @@ it borrowed from. Four of those splits are still awaiting a taxonomic check
 | **Tail** | **measured** — 831 direct, 10 near-match | AVONET `Tail.Length` |
 | **Mass** | **measured** — 831 direct, 10 near-match | AVONET `Mass` |
 | **Wingspan** | **301 measured**, 7 near-match, **533 modeled** | Fox et al. 2026 where empirical; otherwise a fitted regression |
-| **Head** | **modeled, unvalidated** — all 841 | `7.5 × mass^(1/3)` |
-| **Body** | **modeled, calibrated** — all 841 | `14.0329 × mass^0.37` |
-| **Neck** | **modeled, invented** — all 841 | a per-family ratio × the trunk |
-| **Total length** | **modeled** — all 841 | `bill + head + neck + body + tail` |
+| **Head** | **modeled, unvalidated** — all 839 | `7.5 × mass^(1/3)` |
+| **Body** | **modeled, calibrated** — all 839 | `14.0329 × mass^0.37` |
+| **Neck** | **modeled, invented** — all 839 | a per-family ratio × the trunk |
+| **Total length** | **modeled** — all 839 | `bill + head + neck + body + tail` |
 
 Those five — bill, head, neck, body, tail — are the diagram's segments, and they are what total
 length is built from. Mass and wingspan are drawn or reported but are not part of the sum.
@@ -193,9 +193,18 @@ covers contributors' work and not the taxonomy we take an identifier from.
 
 ## Scope
 
-**841 species**: ABA Checklist 8.19, rarity codes 1–3. Codes 4 and 5 — casuals and accidentals —
-are excluded, and rarity is used once at build time as a filter and then discarded, so it never
-reaches the dataset or the UI.
+**839 species**: ABA Checklist 8.19, rarity codes 1–3, less two. Codes 4 and 5 — casuals and
+accidentals — are excluded, and rarity is used once at build time as a filter and then discarded,
+so it never reaches the dataset or the UI.
+
+The two are Gray-headed Swamphen and Western Warbling-Vireo, ABA splits that AviList does not
+recognize. Every name BirdView serves comes from AviList, so a bird AviList has no concept for
+has no name this project may publish.
+
+**Names** come from AviList v2025b, in two vocabularies: eBird/Clements (Dovekie) by default and
+AviList/IOC (Little Auk) on request. The **species id in the URL is the eBird code** — `amerob`,
+not `turdus_migratorius` — which does not change when you switch vocabulary, because it is
+assigned rather than derived from the English name.
 
 **Galliformes have no empirical wingspan at all.** All 30 in-scope species are absent from the Fox
 dataset, so every one is modeled.

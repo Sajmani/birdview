@@ -47,19 +47,33 @@ ingested until the cranium model left bill depth for mass. `Tarsus.Length` made 
 trip — excluded as unused, ingested when the diagram gained legs, then dropped again when the
 flight premise removed them ([CR-010](decisions.md#cr-010)).
 
-### P-004 — Names and families come from the ABA checklist
+### P-004 — Names come from AviList
 Subject: `dataset.names.source`
-Value: `ABA Checklist`
+Value: `AviList v2025b`
 Goals: G-002
 
-English common name, scientific name, the **four-letter banding code**, family scientific name
-and family common name all come from the ABA checklist. Its section-header rows are formatted
-`Sandpipers and Allies (Scolopacidae)`, supplying both halves of the family name; the banding code
-is a per-species column.
+English common names in **both locales** ([P-049](#p-049)), the **eBird species code**, family
+scientific and English names, the order, and the family **sequence** all come from
+[AviList](sources.md#avilist). Scientific names come from the scope list, and are the join key.
 
-Rationale: one source for all naming, rather than joining a second taxonomy for common names
-alone. AVONET carries no common name at all, and no English-name column exists on any of its
-sheets.
+Rationale: **licensing, and nothing else.** The ABA checklist supplied all of this and supplied it
+well, but it is all rights reserved — serving BirdView reproduces whatever names it, so the
+checklist blocked public deployment outright ([CR-022](decisions.md#cr-022)). AviList is CC BY 4.0
+and carries the same four things, so it can be served.
+
+That it is *also* the consensus successor to IOC, Clements and BirdLife is a bonus, not the
+reason.
+
+**AviList recognizes 7 of BirdView's species under a different name and 2 not at all.** The seven
+are one-to-one renamings and resolve through a synonym table. The two — Gray-headed Swamphen and
+Western Warbling-Vireo, both ABA splits AviList lumps — are **dropped from the dataset**. That
+follows from the decision rather than qualifying it: if AviList supplies the names it supplies the
+species concepts, and keeping a bird AviList does not recognize would mean keeping the one name
+the project may not redistribute.
+
+Both tables are recorded in the code with this requirement cited beside them, and the ingest
+**asserts the drop list** rather than discovering it: a species losing its name source quietly
+would change its URL under a reader ([P-049](#p-049)).
 
 ### P-005 — Family badge colors are generated
 Subject: `badge.color.derivation`
@@ -219,7 +233,7 @@ Goals: G-001, G-002, G-003
 
 Each species is one **tile**, laid out top to bottom:
 
-1. a header whose first line carries the **common name followed by its four-letter banding code in
+1. a header whose first line carries the **common name followed by its eBird species code in
    parentheses**, with the **scientific name right-justified on the same line**; and below it the
    **family badge**, showing the family's scientific name and its common name together;
 2. the diagram, **vertically centered** in its area, carrying the **mass cube** in its lower-left
@@ -252,10 +266,11 @@ gives way is ordered, and the order is about what a reader can reconstruct:
 | scientific name | first, and most readily |
 | family common name, in the badge | next; the family's scientific name leads and survives |
 | common name | last |
-| **four-letter banding code** | **never** |
+| **eBird species code** | **never** |
 
-The banding code is six fixed characters and is the one element that cannot be guessed from a
-truncation, so it is the one element that never truncates.
+The species code is short — 4 to 8 characters, **not the fixed six its name suggests** — and it is
+the one element that cannot be guessed from a truncation, so it is the one element that never
+truncates. Nothing laying it out may assume a width.
 
 Rationale: this is a layout rule in service of G-001. A section is a run of birds drawn to one
 scale, and reading down it — comparing diagrams, and comparing mass cubes against each other — is
@@ -734,6 +749,54 @@ so the local fix concealed a real defect for as long as it stood.
 
 The lesson generalizes past colour. When one surface cannot live with a shared decision, that is
 evidence about the decision, not licence to fork it.
+
+### P-049 — The reader chooses which English name, and the URL does not change
+Subject: `presentation.names.locale`
+Value: `na (default) | world`
+Goals: G-001, G-002
+
+English bird names are regional. The same bird is **Dovekie** to a North American birder and
+**Little Auk** to everyone else, and neither is a mistake. BirdView serves both, as a toggle
+beside Units and Scale:
+
+| locale | source | *Alle alle* |
+| --- | --- | --- |
+| **`na`**, the default | eBird/Clements | Dovekie |
+| `world` | AviList, following IOC | Little Auk |
+
+**North American is the default**, this being an ABA-area dataset whose reader calls that bird a
+Dovekie. Over the current scope the two differ for **82 species**, most of them hyphenation; the
+genuine vocabulary changes are a much smaller set.
+
+Both names are compiled into the dataset, because the locale is a request-time choice and
+re-ingesting per locale would be absurd. Five species have no eBird/Clements concept and so no
+North American name; they **fall back to the world name** rather than rendering blank.
+
+**Family English names are not localized.** AviList publishes one per family, so "Fringilline and
+Cardueline Finches and Allies" becomes "Finches, Euphonias, and Allies" in either locale.
+Accepted: a family label is a reading aid, not an identifier.
+
+#### The species id is the eBird code, and is locale-independent
+
+A species' URL is `/species/amerob`, and the comparison view names its birds the same way:
+`/compare?species=amerob&species=doveki`. The id is the **eBird species code** from
+[P-004](#p-004).
+
+**This is what makes the locale toggle possible at all.** The four-letter alpha code it replaced
+was *derived from the English name*, so under the world locale `DOVE` would have to become
+`LIAU` — and an identifier that moves when a display preference moves is not an identifier. The
+eBird code is assigned rather than derived, so `doveki` is `doveki` under both names.
+
+It is also simply better as a URL: `/species/amerob` over `/species/turdus_migratorius` is
+shorter, typable, and survives a genus move — and genus moves are common, with seven in this
+dataset alone.
+
+Three species have no eBird code. They keep a **scientific-name slug** as their id, which is the
+old scheme surviving where the new one has nothing to offer.
+
+**Ids must be unique and stable across rebuilds.** Uniqueness is not automatic: AviList lumps two
+BirdView species into taxa already in scope, and lumping them in place rather than dropping them
+would have given two birds one URL. That is one of the two reasons P-004 drops them.
 
 ### P-050 — Species photographs
 Status: **Withdrawn from v1.** See [CR-005](decisions.md#cr-005) for the research and the reasons

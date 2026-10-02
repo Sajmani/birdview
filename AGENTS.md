@@ -45,9 +45,10 @@ Violating any of these is a licensing problem, not a style problem.
   prohibit AI tools from ingesting it and prohibit automated access to the site, and the source is
   rejected ([CR-002](spec/decisions.md#cr-002)). Do not try to revive it as a length source.
 - **Never commit the built dataset** (T-005). It carries values derived from those inputs.
-- **Only AVONET and the Fox wingspan data may be committed as source *data*.** Both are CC BY 4.0.
-  If you are about to add a third data file, check [spec/sources.md](spec/sources.md) first — most
-  candidates this project evaluated could not be redistributed. Two other committed files are
+- **Only AVONET, the Fox wingspan data and AviList may be committed as source *data*.** All three
+  are CC BY 4.0. If you are about to add a fourth data file, check
+  [spec/sources.md](spec/sources.md) first — most candidates this project evaluated could not be
+  redistributed. Two other committed files are
   deliberate and are not source data: `data/inat-taxa.tsv`, a generated table of iNaturalist taxon
   IDs (T-022), and the vendored terms snapshots under `spec/sources/`.
 - **BirdView links to iNaturalist and copies nothing from it** (P-064). Never embed, hotlink or

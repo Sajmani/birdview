@@ -56,7 +56,7 @@ go run ./cmd/birdview            # serves http://localhost:8080
 ```
 
 The ingest prints a coverage summary — species in scope, how many traits and wingspans are
-measured, near-match or modeled. Expect **841 species in 91 families across 25 orders**.
+measured, near-match or modeled. Expect **839 species in 90 families across 26 orders**.
 
 Flags, should you need them:
 
@@ -85,7 +85,7 @@ values derived from the ABA checklist.
 ingest joins against it offline; nothing fetches it at build or run time (T-022).
 
 ```
-go run ./cmd/birdview-inatmap        # ~15 minutes: 841 species at 1 request/second
+go run ./cmd/birdview-inatmap        # ~15 minutes: 839 species at 1 request/second
 ```
 
 The pace is what iNaturalist asks for (`inat-api/R1`) and is not negotiable downward. Run it when

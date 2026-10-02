@@ -69,14 +69,37 @@ type Segments struct {
 	Tail Metric `json:"tail"`
 }
 
+// Locale selects which English name is served (P-049).
+type Locale string
+
+const (
+	// LocaleNA is eBird/Clements usage -- Dovekie. The default, this being an
+	// ABA-area dataset.
+	LocaleNA Locale = "na"
+	// LocaleWorld is AviList/IOC usage -- Little Auk.
+	LocaleWorld Locale = "world"
+)
+
 // Species is one compiled record.
 type Species struct {
-	ID         string `json:"id"`
-	CommonName string `json:"commonName"`
-	// BandingCode is the ABA four-letter alpha code, e.g. AMRO. Not to be
-	// confused with the ABA rarity code, which is a scope filter and is
-	// deliberately discarded (P-001).
-	BandingCode    string `json:"bandingCode,omitempty"`
+	// ID is the eBird species code where AviList supplies one -- "amerob" --
+	// and otherwise the scientific-name slug. It is the species URL and must
+	// be stable across rebuilds (P-049, AC-084).
+	ID string `json:"id"`
+
+	// Names carries BOTH English names, keyed by Locale, because the locale is
+	// a request-time choice and re-ingesting per locale would be absurd. The
+	// world name is always present; the North American one is absent for the
+	// five species with no Clements concept.
+	Names map[Locale]string `json:"names"`
+
+	// SpeciesCode is the eBird code, e.g. "amerob", shown beside the name. It
+	// replaced the ABA four-letter alpha code, which was locale-DEPENDENT --
+	// derived from the English name, so Dovekie's DOVE would have to become
+	// LIAU under the world locale (CR-022).
+	//
+	// Not fixed-width despite the name: 4 to 8 characters in practice.
+	SpeciesCode    string `json:"speciesCode,omitempty"`
 	ScientificName string `json:"scientificName"`
 	Family         string `json:"family"`
 	FamilyCommon   string `json:"familyCommon"`
@@ -105,6 +128,18 @@ type Species struct {
 
 	// Shown in the detail view (P-034).
 	Segments Segments `json:"segments"`
+}
+
+// Name returns the English name for a locale, falling back to the world name.
+//
+// The fallback is not decoration: five species have no Clements concept and so
+// no North American name, and a reader who asked for NA names must still see a
+// bird rather than a blank (P-049).
+func (s *Species) Name(l Locale) string {
+	if n := s.Names[l]; n != "" {
+		return n
+	}
+	return s.Names[LocaleWorld]
 }
 
 // AllMetrics returns every metric the interface may present, so that checks

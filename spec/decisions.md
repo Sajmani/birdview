@@ -1436,6 +1436,91 @@ within sections all shift. That churn is why this lands as its own commit, ahead
 names work rather than beside it: two large dataset changes at once would be impossible to tell
 apart in review or in a screenshot.
 
+## CR-022 — AviList replaces the ABA checklist for names, and the eBird code becomes the URL
+
+**Subject:** `dataset.names.source`
+**Kind:** Direct — a licensing constraint forces a source change, which then enables a feature
+**Date:** 2026-10-02 · **Decided by:** Sameer
+
+### What changed
+
+Every name BirdView serves now comes from [AviList](sources.md#avilist) (CC BY 4.0) instead of
+the ABA checklist (all rights reserved): both English names, the family scientific and English
+names, the order, and the family sequence. The four-letter alpha code is replaced by the **eBird
+species code**, which also becomes the **species id and URL**.
+
+### Why
+
+**To unblock deployment.** Serving BirdView reproduces whatever supplies its names, so an
+all-rights-reserved checklist made a public instance a redistribution the project has no grant
+for. The ABA was asked on 2026-09-27 and has not replied. This removes the dependency rather than
+waiting on it.
+
+The objection that defeated AviList a day earlier was that its English names are IOC usage —
+Little Auk for Dovekie — and wrong for this audience. The extended release answers it: it carries
+the **Clements** name as well, which is this audience's usage. Measured over BirdView's scope, the
+Clements column reproduces the ABA name for **827 of 827** species where both exist, the only
+five differences being ABA's own `X (alternate)` notation. One file, both vocabularies — which is
+what turned a loss into [P-049](product.md#p-049).
+
+### Why the code changed too, which was not the original plan
+
+The alpha code was going to be dropped: it comes from the ABA checklist, and the IBP list it
+otherwise lives in publishes **no licence statement at all**, which is the same reason AOS was
+rejected. The owner asked whether eBird's code could replace it, and the measurement made it
+close to forced:
+
+| | |
+| --- | --- |
+| coverage over scope | **829 of 832** matched species, and 836 of 839 after the synonym table |
+| collisions | **zero** |
+| licence | the same AviList file — no new source, no new permission |
+| worldwide | **11,118 of 11,131 (99.9%)**, where IBP alpha codes do not exist outside the AOS area |
+
+The decisive argument is none of those. **An alpha code is derived from the English name**, so
+under the world locale `DOVE` would have to become `LIAU`. Adding localization is precisely what
+breaks a name-derived code and leaves an assigned one intact. The feature and the identifier
+could not both be had the old way.
+
+Making it the URL follows: `/species/amerob` beats `/species/turdus_migratorius` for typing and
+for stability, since a genus move no longer moves the URL — and this dataset contains seven genus
+moves.
+
+### What it costs
+
+**Two species leave the dataset**, 841 → 839. AviList lumps Gray-headed Swamphen into *Porphyrio
+porphyrio* and Western Warbling-Vireo into *Vireo gilvus*, and both lumps land on taxa already in
+scope. Keeping them would mean keeping an ABA name — the one thing this change exists to remove —
+and lumping them in place would give two birds one URL, because *Vireo gilvus* is already
+BirdView's Eastern Warbling-Vireo. Dropping them is the only option consistent with the decision:
+if AviList supplies the names, it supplies the species concepts.
+
+**Every species URL changes.** Nothing links to BirdView yet, so this is free now and would not
+be later — which is an argument for doing it now rather than after a deployment.
+
+**55 of 90 family English names change**, accepted by the owner in advance. Two family scientific
+names change (Sylviidae → Paradoxornithidae, Icteriidae → Icteridae) and four orders, including
+three vultures moving to **Cathartiformes** — which is why Accipitriformes is relabelled "Hawks
+and Eagles": it no longer holds a vulture.
+
+**The family sequence is now AviList's**, not the ABA's, so the family selector and the section
+order both reshuffle. Taking the names from one source and the ordering from another would have
+left the ordering as the last thing the ABA still supplied.
+
+### What this does *not* do
+
+**It does not unblock deployment on its own.** The ABA checklist is still read at build time for
+**scope** — which 841 species are in — and scope is the remaining dependency. T-004 already
+permits fetching it at build; what it does not permit is serving it. The next step is a list
+BirdView derives and owns.
+
+**It does not touch any measurement.** AVONET and Fox are unaffected, every provenance record is
+unchanged, and no number moved.
+
+**It is not a route into Cornell's data.** [sources.md](sources.md#avilist) records why the
+Clements and Cornell columns are usable here when eBird/Clements itself is rejected: AviList is a
+separate CC BY 4.0 publication, and nothing is taken from Cornell's own distribution.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
@@ -1445,7 +1530,8 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | Retrieve, hash and vendor `fox-wingspan`; write its `PROVENANCE.md` | — | before ingest reads it |
 | Write `acceptance.md` — Gate 2, before any code | — | now |
 | Ask Ricklefs or ESA for permission to use the measured-length data | Sameer | **after a working demo** |
-| ABA has not replied. Decide between chasing the permission and publishing a derived list at ~84% agreement — both routes measured in [sources.md](sources.md#why-occurrence-data-cannot-reproduce-the-aba-scope) | Sameer | before public deployment |
+| ~~ABA has not replied. Decide between chasing the permission and publishing a derived list~~ — decided: stop waiting, use public data. Names moved to AviList ([CR-022](#cr-022)); **scope is what remains** | Sameer | decided 2026-10-02 |
+| Replace ABA **scope** with a list BirdView derives and owns. The last thing the ABA checklist supplies, and the last blocker to deploying. GBIF/eBird occurrence data reaches F1 0.84 and cannot be improved by filtering escapees — the eBird dataset on GBIF carries no establishment fields at all, measured 2026-10-02 | Sameer | **blocks public deployment** |
 | ~~Ask ABA for written permission to redistribute the checklist~~ — **sent 2026-09-27**, awaiting reply | Sameer | done |
 | ~~Decide the neck's flight posture~~ — done, [CR-011](#cr-011) | Sameer | closed 2026-09-23 |
 | Assess whether a perched/standing toggle is achievable at any honest accuracy ([CR-011](#cr-011)) | — | before it is offered to users |

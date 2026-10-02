@@ -23,7 +23,7 @@
       {{if .Legend}}
       <p>Every bird is drawn as a scaled cross, seen from above in flight. This is a real one:</p>
       <div class="legenddia">{{template "diagram" .Legend}}</div>
-      <p class="hint">{{.Legend.S.CommonName}} &mdash; the same drawing the detail page shows,
+      <p class="hint">{{.Legend.Name}} &mdash; the same drawing the detail page shows,
       with every part named and measured.</p>
       {{else}}
       <p>Every bird is drawn as a scaled cross, seen from above in flight: a bill, a head, a neck,
@@ -102,6 +102,12 @@
     <a class="btn{{if not .Opt.Metric3}} on{{end}}" href="{{call $q "units" "imperial"}}">in / g</a>
     <a class="btn{{if .Opt.Metric3}} on{{end}}" href="{{call $q "units" "metric"}}">cm / g</a>
 
+    <span class="lbl">Names</span>
+    <a class="btn{{if eq .Opt.Locale "na"}} on{{end}}" href="{{call $q "names" "na"}}"
+       title="North American usage, as eBird and the ABA have it - Dovekie">N. America</a>
+    <a class="btn{{if eq .Opt.Locale "world"}} on{{end}}" href="{{call $q "names" "world"}}"
+       title="World usage, as the IOC and AviList have it - Little Auk">World</a>
+
     <span class="lbl">Section step</span>
     {{range $s := (list "5" "10" "15" "20" "30")}}
       <a class="btn{{if eq (printf "%.0f" $.Opt.Step) $s}} on{{end}}" href="{{call $q "step" $s}}">{{$s}}%</a>
@@ -175,9 +181,16 @@
       <a href="https://doi.org/10.6084/m9.figshare.32089083">doi:10.6084/m9.figshare.32089083</a>,
       licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
       Only empirically reported wingspans are used; the rest are modeled here.</li>
-    <li><b>Species list, common names and banding codes</b> &mdash;
+    <li><b>Names, families and species codes</b> &mdash; AviList Core Team (2026).
+      <i>AviList: The Global Avian Checklist, v2025b.</i>
+      <a href="https://doi.org/10.2173/avilist.v2025b">doi:10.2173/avilist.v2025b</a>,
+      licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      English names are shown in eBird/Clements usage by default and AviList&rsquo;s own
+      on request.</li>
+    <li><b>Species list</b> &mdash;
       <a href="https://www.aba.org/aba-checklist/">ABA Checklist</a> 8.19 (January 2026),
-      &copy; American Birding Association, Inc. All rights reserved.</li>
+      &copy; American Birding Association, Inc. All rights reserved. Used at build time to
+      choose which species appear, and for nothing else.</li>
   </ul>
   <p class="caveat">No published source gives body length for North American birds, so
   <b>every length here is modeled</b>, as are most wingspans. Click any bird to see where each
@@ -251,7 +264,7 @@
 <a class="tile" href="{{.DetailURL}}">
   <div class="hd">
     <div class="nameline">
-      <span class="cn"><span class="cnname">{{.S.CommonName}}</span>{{with .S.BandingCode}}<span class="code">({{.}})</span>{{end}}</span>
+      <span class="cn"><span class="cnname">{{.Name}}</span>{{with .S.SpeciesCode}}<span class="code">({{.}})</span>{{end}}</span>
       <span class="sn">{{.S.ScientificName}}</span>
     </div>
     <span class="badge" style="background:{{.S.FamilyColor}};color:{{.S.FamilyText}}">{{.S.Family}}
@@ -275,7 +288,7 @@
 {{define "diagram"}}
 {{$g := .Geom}}{{$b := .Box}}
 <svg class="dia" viewBox="0 0 {{f1 $b.W}} {{f1 $b.H}}" preserveAspectRatio="xMidYMid meet" role="img"
-     aria-label="scaled outline of {{.S.CommonName}}">
+     aria-label="scaled outline of {{.Name}}">
   {{/* .TopOffset, not a formula over $b.H: the box is taller than the drawing
        area by the total-length strip, so recomputing the centering here put the
        bird 12px low and disagreed with the labels, which use .TopOffset. */}}
