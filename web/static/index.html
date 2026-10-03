@@ -234,7 +234,11 @@
   {{end}}
 </details>
 
-<p class="count">{{.Shown}} of {{.Total}} species</p>
+{{/* The active filters sit on the count line, not only in the empty state:
+     what is narrowing the list is worth knowing while it still has birds in
+     it (P-037). When nothing matches, "No birds match" follows immediately
+     below and reads as a continuation of this line. */}}
+<p class="count">{{.Shown}} of {{.Total}} species{{range .Filters}}<span class="fsum"><b>{{.Label}}</b> {{.Value}}</span>{{end}}</p>
 
 {{range .Sections}}
 <section>
@@ -250,9 +254,10 @@
          saying "no matches" would blame the data for their click (P-037). */}}
     <p class="empty">Select birds to display in <b>Controls</b> above.</p>
   {{else}}
-    <p class="empty">No birds match.
-      {{range .Filters}}<span class="fsum"><b>{{.Label}}</b> {{.Value}}</span>{{end}}
-      <a href="{{.ClearURL}}">Clear the filters</a>.</p>
+    {{/* The filters are already named on the count line directly above, so
+         this does not repeat them -- it only says the intersection is
+         empty and offers the way out (P-037). */}}
+    <p class="empty">No birds match. <a href="{{.ClearURL}}">Clear the filters</a>.</p>
   {{end}}
 {{end}}
 

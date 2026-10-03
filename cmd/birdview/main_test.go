@@ -3405,3 +3405,54 @@ func TestTileCarriesExactlyOneBadge(t *testing.T) {
 		}
 	}
 }
+
+// TestFiltersAreNamedOnTheCountLine asserts the half of P-037 that applies
+// while the list still has birds in it: what is narrowing the view is stated
+// next to the count, not only once nothing matches.
+//
+// This is the rendering test AC-061 recorded as missing. It was unreachable
+// when only the family filter existed -- one filter cannot contradict itself
+// -- and the region filter of P-011 made the empty intersection reachable.
+//
+// Verifies: P-037. Criterion: AC-061.
+func TestFiltersAreNamedOnTheCountLine(t *testing.T) {
+	s := newTestServer(t)
+
+	countLine := func(body string) string {
+		t.Helper()
+		return mustMatch(t, body, `<p class="count">(.*?)</p>`, "the species count line")
+	}
+
+	// Arrival: nothing is narrowing anything, so nothing is named. Saying
+	// "Family: all 6" here would present the default as a choice.
+	if got := countLine(mustGet(t, s, "/")); strings.Contains(got, "fsum") {
+		t.Errorf("the arrival page names a filter on the count line: %q", got)
+	}
+
+	// One filter set, and birds still matching: named anyway.
+	full := mustGet(t, s, "/?family=Ardeidae")
+	line := countLine(full)
+	if !strings.Contains(line, "Ardeidae") {
+		t.Errorf("a narrowed list does not name its filter on the count line: %q", line)
+	}
+	if !strings.Contains(full, "Great Blue Heron") {
+		t.Fatal("the fixture no longer matches; this case is meant to have birds in it")
+	}
+
+	// Two filters whose intersection is empty: the count line still names
+	// both, and the empty message does not repeat them.
+	empty := mustGet(t, s, "/?family=Ardeidae&region=AK")
+	line = countLine(empty)
+	for _, want := range []string{"Ardeidae", "Alaska"} {
+		if !strings.Contains(html.UnescapeString(line), want) {
+			t.Errorf("the count line omits %q when the intersection is empty: %q", want, line)
+		}
+	}
+	if !strings.Contains(empty, "No birds match") {
+		t.Fatal("an empty intersection does not report a failed match")
+	}
+	if n := strings.Count(empty, `class="fsum"`); n != 2 {
+		t.Errorf("the page carries %d filter chips, want 2 — the empty state is "+
+			"repeating what the count line already said", n)
+	}
+}

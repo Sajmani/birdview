@@ -1755,6 +1755,62 @@ common.
 ([P-031](product.md#p-031)); groupings beyond family are navigation. Every tile is one height
 and a second badge costs a line on all of them.
 
+## CR-026 — A family may be in two birder groups, and that is not a route to habitat
+
+**Subject:** `presentation.family_filter.groups`
+**Kind:** Direct — [P-014](product.md#p-014) required a partition, and one family has two
+honest homes
+**Date:** 2026-10-03 · **Decided by:** Sameer
+
+### What changed
+
+The birder grouping **covers** the families instead of partitioning them. The owls
+(Strigidae, Tytonidae) are now under **Birds of Prey** as well as **Owls & Nightbirds**.
+
+### Why
+
+Owls sit on the seam in the whole scheme: some groups name what a bird *is* — Birds of Prey,
+Waterfowl — and some name when or where you *meet* it — Shorebirds, Seabirds. Owls are
+unambiguously birds of prey, and owling is unambiguously its own activity at its own hour. Both
+sentences are true, and picking one made the grouping half wrong whichever way it went.
+
+### The limit, which is the important half of this decision
+
+Overlap looks like it reopens habitat: tag a family with *every* habitat its species use and
+nothing is excluded. **Measured, that is worse, not better.** It does not remove the error, it
+inverts it — from excluding birds that belong to including birds that do not:
+
+| Select | Species returned | Actually that habitat | Precision |
+| --- | --- | --- | --- |
+| Land | 641 | 531 | 83% |
+| Fresh Water | 378 | 145 | **38%** |
+| Salt Water | 321 | 142 | **44%** |
+
+Asking for freshwater birds would return every New World Warbler, because one warbler is a
+wetland species. The single-assignment version misfiled 9% of species; this misfires on nearly
+two-thirds of what it returns.
+
+**So the rule is not "overlap is allowed" but "a tag must be true of the whole family."** Every
+owl is a bird of prey, so Strigidae carries both tags honestly. Only 27 of 50 sandpipers are
+freshwater birds, so no family-level habitat tag is honest in either direction. A property that
+varies within a family is a **species** trait, and the place for it is a species filter — which
+remains Work arising and is unaffected by this change.
+
+*Waders versus floaters* was raised as a middle case and is a genuinely better axis than
+habitat — 12 of 18 waterbird families are uniform on swims-versus-walks — but it fails where it
+costs most. **Anatidae is the largest family in the dataset at 61 species and is 67/33 split**,
+because geese walk and graze while ducks float; Rallidae splits the same way, coots against
+rails. An axis that is wrong about ducks is not worth a row of chips.
+
+### What it costs
+
+**A group toggle now moves another group's header.** Clearing Birds of Prey leaves Owls &
+Nightbirds showing as not fully selected, because the owls it holds have gone. That is correct
+and it is also surprising, and it is the price of the overlap. With one overlapping family it
+is explicable; with several axes it would be unpredictable, which is why
+[AC-089](acceptance.md#ac-089) caps the number of duplicated placements rather than trusting
+restraint.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

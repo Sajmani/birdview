@@ -470,10 +470,20 @@ selection
 does **not** say that nothing matched; the count reports zero; and All is no longer marked
 selected.
 
-**Assertions, nothing matched:** the message **names each active filter and what it is set to**,
-and offers a link that clears them. A filter that is not narrowing anything — every family
-selected, which is the arrival state — is **absent** from the description, since naming it would
-present the default as a choice the reader made.
+**Assertions, filters named while the list is full:** the **count line names each active filter
+and what it is set to**, whenever any is set — not only once nothing matches. A filter that is
+not narrowing anything, every family selected being the arrival state, is **absent**, since
+naming it would present the default as a choice the reader made.
+
+**Assertions, nothing matched:** the message says the intersection is empty and offers a link
+that clears the filters. It does **not** repeat the filter names, which the count line
+immediately above already carries; a test pins that they appear once on the page, not twice.
+
+**Status: the count-line half verified 2026-10-03 — passing, and watched failing** by removing
+the filter list from the count line, and by leaving it in the empty state as well, which puts
+four filter chips on a page that should carry two. The rendering gap recorded below is now
+closed: the region filter made an empty intersection reachable through the UI, and
+`TestFiltersAreNamedOnTheCountLine` exercises it end to end.
 
 **Status: verified 2026-09-22 — passing, and watched failing** both by treating an emptied
 selection as "no filter" (the previous behavior, which showed every bird) and by reverting the
@@ -1446,11 +1456,17 @@ it is recorded here because "watched failing" meant watching a panic, not a red 
 **Verifies:** P-014, P-031 · **Level:** code · **Method:** unit tests over the grouping table
 against the compiled dataset, plus a rendering test over the selector and a tile
 
-**Assertions, the partition:** within each grouping, every family of the dataset sits in
-exactly one group, and every group holds at least one family. Checked **against the compiled
-dataset, not a fixture** — the family list comes from AviList, which renamed 55 of 90 English
-family names in [CR-022](decisions.md#cr-022), so a family that is added or renamed must fail
-a test rather than silently vanish from the control.
+**Assertions, coverage:** within each grouping, every family of the dataset sits in at least
+one group, and every group holds at least one family. Checked **against the compiled dataset,
+not a fixture** — the family list comes from AviList, which renamed 55 of 90 English family
+names in [CR-022](decisions.md#cr-022), so a family that is added or renamed must fail a test
+rather than silently vanish from the control.
+
+Coverage, not a partition: a family may be in two birder groups on purpose
+([CR-026](decisions.md#cr-026)). What remains an error is a family in **no** group, or the same
+family listed twice in **one** group, which panics at init. A separate assertion caps the
+number of duplicated placements, because overlap is for the family that genuinely belongs twice
+and not a general licence — unbounded, the block stops being a grouping and becomes a tag cloud.
 
 **Assertions, distinctness:** the two groupings genuinely disagree. Two identical groupings
 would satisfy every other assertion here and tell the reader nothing, and the whole case for
@@ -1468,8 +1484,9 @@ It is a count, not a list of forbidden badges, because a list invites one more e
 **Status: verified 2026-10-03 — passing, and watched failing** by moving Corvidae out of the
 table, which reports both the orphaned family and the count mismatch; by making the birder
 grouping return `f.Order`, so the two blocks become the same grouping twice; by rendering
-Taxonomic order first; and by adding an order badge beside the family badge, which makes 6 birds
-carry 12 badges.
+Taxonomic order first; by adding an order badge beside the family badge, which makes 6 birds
+carry 12 badges; by dropping Strigidae from both of its groups, leaving it unreachable; and by
+tagging eight more families twice, which trips the cap on duplicated placements at 20.
 
 The partition check **skips** rather than fails when `web/data/species.json` is absent, since
 the dataset is a build artifact and is not committed (T-005). That is a real gap: on a machine

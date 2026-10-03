@@ -50,7 +50,14 @@ var Groups = []struct {
 		"Sulidae", "Phalacrocoracidae", "Pelecanidae", "Fregatidae", "Anhingidae", "Phaethontidae"}},
 	{"Herons, Ibises & Storks", []string{
 		"Ardeidae", "Threskiornithidae", "Ciconiidae", "Phoenicopteridae"}},
-	{"Birds of Prey", []string{"Accipitridae", "Pandionidae", "Falconidae", "Cathartidae"}},
+	// The owls appear here **and** under Owls & Nightbirds. They are birds of
+	// prey by any definition, and a reader who wants to compare a Great
+	// Horned Owl against a Red-tailed Hawk should not have to know that this
+	// project filed them by hour rather than by trade. See the note on Owls
+	// & Nightbirds for the other half of the argument; both are true, so the
+	// grouping stops insisting on exactly one (CR-026).
+	{"Birds of Prey", []string{
+		"Accipitridae", "Pandionidae", "Falconidae", "Cathartidae", "Strigidae", "Tytonidae"}},
 	{"Rails & Cranes", []string{"Rallidae", "Gruidae", "Aramidae"}},
 	{"Shorebirds", []string{"Scolopacidae", "Charadriidae", "Haematopodidae", "Recurvirostridae"}},
 	{"Gulls, Terns & Auks", []string{"Laridae", "Stercorariidae", "Alcidae"}},
@@ -61,16 +68,16 @@ var Groups = []struct {
 	// were first filed beside: "what you look for after dark" is a group a
 	// birder has, and "mid-sized landbirds that fit nowhere else" is not.
 	//
-	// **Owls are not filed with the birds of prey**, though they plainly are
-	// birds of prey. In practice "raptor" means the diurnal ones -- a hawk
-	// watch counts hawks, eagles, falcons and vultures, and nobody reports
-	// six raptors meaning owls. Owling is its own activity at its own hour,
-	// and nightjars are what else it turns up.
+	// **The owls are also under Birds of Prey**, and that is the point. In
+	// practice "raptor" means the diurnal ones -- a hawk watch counts hawks,
+	// eagles, falcons and vultures, and nobody reports six raptors meaning
+	// owls -- while owling is its own activity at its own hour, and
+	// nightjars are what else it turns up. Both are true.
 	//
-	// This is the seam in the whole grouping: some names say what a bird is
-	// (Birds of Prey, Waterfowl) and some say when or where you meet it
-	// (Shorebirds, Seabirds). Owls sit exactly on it, which is why the
-	// question has two defensible answers and this comment exists.
+	// Owls sit on the seam in the whole scheme: some names say what a bird
+	// is (Birds of Prey, Waterfowl) and some say when or where you meet it
+	// (Shorebirds, Seabirds). Rather than pick a side and be half wrong,
+	// they are in both (CR-026).
 	{"Owls & Nightbirds", []string{"Strigidae", "Tytonidae", "Caprimulgidae"}},
 	// Swifts go with swallows, not with the hummingbirds they are actually
 	// related to. "Swift or swallow?" is the question a bird overhead
@@ -119,30 +126,34 @@ var Groups = []struct {
 	{"Finches & Waxbills", []string{"Fringillidae", "Estrildidae"}},
 }
 
-// groupOf is the reverse index, built once. A family listed in two groups is
-// a programming error that would make one of them unreachable, so it panics
-// here rather than letting the selector quietly disagree with itself.
-var groupOf = map[string]string{}
+// groupsOf is the reverse index, built once.
+//
+// **A family may be in more than one group.** The groups cover every family
+// but do not partition them: an owl is a bird of prey and a bird of the
+// night, and a reader looking under either should find it (CR-026). The
+// duplication is deliberate and rare, so the index is a slice rather than a
+// single value, and a family listed twice in the *same* group is still a
+// mistake and still panics.
+var groupsOf = map[string][]string{}
 
 func init() {
 	for _, g := range Groups {
 		for _, f := range g.Families {
-			if other, dup := groupOf[f]; dup {
-				panic("family: " + f + " is in both " + other + " and " + g.Name)
+			for _, already := range groupsOf[f] {
+				if already == g.Name {
+					panic("family: " + f + " is listed twice in " + g.Name)
+				}
 			}
-			groupOf[f] = g.Name
+			groupsOf[f] = append(groupsOf[f], g.Name)
 		}
 	}
 }
 
-// GroupOf returns the birder group a family belongs to, and whether the table
-// knows the family at all. An unknown family is reported rather than filed
-// under a default: AviList can add one, and a bird that silently disappears
-// from the selector is worse than a failing test (AC-089).
-func GroupOf(scientificName string) (string, bool) {
-	g, ok := groupOf[scientificName]
-	return g, ok
-}
+// GroupsOf returns every birder group a family belongs to, in offer order.
+// An unknown family returns nothing rather than being filed under a default:
+// AviList can add one, and a bird that silently disappears from the selector
+// is worse than a failing test (AC-089).
+func GroupsOf(scientificName string) []string { return groupsOf[scientificName] }
 
 // Names lists the groups in offer order.
 func Names() []string {
@@ -165,5 +176,6 @@ func InGroup(group string) []string {
 	return nil
 }
 
-// Len is how many families the table files.
-func Len() int { return len(groupOf) }
+// Len is how many distinct families the table files -- not how many
+// placements it makes, which is larger wherever a family is in two groups.
+func Len() int { return len(groupsOf) }

@@ -41,27 +41,34 @@ func datasetFamilies(t *testing.T) map[string]string {
 	return out
 }
 
-// TestEveryFamilyIsInExactlyOneGroup is the invariant the selector needs: the
-// birder groups partition the families. A family in no group is unreachable
-// from that block; one in two groups appears twice and its toggle fights
-// itself.
+// TestEveryFamilyIsInAtLeastOneGroup is the invariant the selector needs:
+// the birder groups **cover** the families. A family in no group is
+// unreachable from that block.
+//
+// It is coverage, not a partition. A family may be in two groups on purpose
+// — the owls are birds of prey and birds of the night, and a reader looking
+// under either should find them (CR-026). What would be wrong is a family in
+// *no* group, or the same family listed twice in one group, which panics at
+// init.
 //
 // Checked against the dataset in both directions. A family AviList adds and
 // the table has not been told about fails here, which is the point — the
 // alternative is a bird quietly missing from a control nobody is watching.
 //
 // Verifies: P-014. Criterion: AC-089.
-func TestEveryFamilyIsInExactlyOneGroup(t *testing.T) {
+func TestEveryFamilyIsInAtLeastOneGroup(t *testing.T) {
 	ds := datasetFamilies(t)
 
 	for name, common := range ds {
-		g, ok := GroupOf(name)
-		if !ok {
+		gs := GroupsOf(name)
+		if len(gs) == 0 {
 			t.Errorf("%s (%s) is in the dataset but in no birder group", name, common)
 			continue
 		}
-		if g == "" {
-			t.Errorf("%s (%s) is filed under an empty group name", name, common)
+		for _, g := range gs {
+			if g == "" {
+				t.Errorf("%s (%s) is filed under an empty group name", name, common)
+			}
 		}
 	}
 	for _, g := range Groups {
@@ -105,6 +112,21 @@ func TestGroupNamesAreUniqueAndOrdered(t *testing.T) {
 				i, names[i], g.Name)
 		}
 	}
+	// A family in two groups is deliberate but must be rare; if it became
+	// common the block would be a tag cloud rather than a grouping.
+	multi := 0
+	for _, g := range Groups {
+		for _, f := range g.Families {
+			if len(GroupsOf(f)) > 1 {
+				multi++
+			}
+		}
+	}
+	if multi > 6 {
+		t.Errorf("%d placements are duplicates; overlap is for the rare family that "+
+			"genuinely belongs twice, not a general licence", multi)
+	}
+
 	// InGroup round-trips, and reports nothing for a group that does not exist.
 	for _, g := range Groups {
 		got := InGroup(g.Name)
@@ -155,26 +177,24 @@ func TestBirderGroupsDisagreeWithTaxonomy(t *testing.T) {
 	groupsOfOrder := map[string]map[string]bool{}
 	ordersOfGroup := map[string]map[string]bool{}
 	for _, f := range d.Families {
-		g, ok := GroupOf(f.Name)
-		if !ok {
-			continue
+		for _, g := range GroupsOf(f.Name) {
+			if groupsOfOrder[f.Order] == nil {
+				groupsOfOrder[f.Order] = map[string]bool{}
+			}
+			if ordersOfGroup[g] == nil {
+				ordersOfGroup[g] = map[string]bool{}
+			}
+			groupsOfOrder[f.Order][g] = true
+			ordersOfGroup[g][f.Order] = true
 		}
-		if groupsOfOrder[f.Order] == nil {
-			groupsOfOrder[f.Order] = map[string]bool{}
-		}
-		if ordersOfGroup[g] == nil {
-			ordersOfGroup[g] = map[string]bool{}
-		}
-		groupsOfOrder[f.Order][g] = true
-		ordersOfGroup[g][f.Order] = true
 	}
 	same := 0
 	for _, f := range d.Families {
-		g, ok := GroupOf(f.Name)
-		if !ok {
-			continue
+		gs := GroupsOf(f.Name)
+		if len(gs) != 1 {
+			continue // a family in two groups is by construction not filed "the same way"
 		}
-		if len(groupsOfOrder[f.Order]) == 1 && len(ordersOfGroup[g]) == 1 {
+		if len(groupsOfOrder[f.Order]) == 1 && len(ordersOfGroup[gs[0]]) == 1 {
 			same++
 		}
 	}

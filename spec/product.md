@@ -270,8 +270,26 @@ Subject: `presentation.family_filter.groups`
 Goals: G-002
 
 The family selector offers **two groupings** of the same families
-([CR-025](decisions.md#cr-025)), each a **partition**: every family sits in exactly one group
-of each, appears exactly twice in the selector, and is unreachable from neither.
+([CR-025](decisions.md#cr-025)). Every family sits in at least one group of each, so none is
+unreachable.
+
+**Taxonomic order is a partition.** A family has one order.
+
+**Birder groups need not be**, because a reader's categories overlap: an owl is a bird of prey
+and a bird of the night, and whoever looks under either should find it
+([CR-026](decisions.md#cr-026)). A family may therefore appear in more than one birder group.
+
+**Overlap is permitted only where the tag is true of the whole family.** The test is whether
+*every* member of the family is the thing the group names — every owl is a bird of prey, so
+Strigidae carries both tags honestly. Where the property varies between a family's species, no
+family-level tag is honest in either direction: assigning one misfiles the rest, and assigning
+all of them makes the filter return birds that are not what was asked for. Measured, tagging
+families with every habitat any of their species use drops the precision of "Fresh Water" to
+**38%** — every warbler arrives because one is a wetland bird. Such a property is a **species**
+trait and belongs on a species filter, never on a group.
+
+Overlap must therefore stay **rare**, and a test caps it: a grouping where many families carry
+several tags is a tag cloud, not a grouping.
 
 **Birder groups** is hand-drawn and offered **first** — Shorebirds, Birds of Prey, Owls &
 Nightbirds, the names a field guide uses. **Taxonomic order** is AviList's, and is second.
@@ -475,10 +493,17 @@ Goals: G-002
 
 With nothing selected, the display area reads *"Select birds to display in Controls above"*.
 
-**When something is selected and nothing matches, the message names the filters that are set.**
-Not "no species match that filter" — that says a thing failed without saying which thing, and
-leaves the reader to go and look. It reads as *"No birds match. Family: Parulidae, Icteridae."*,
-listing each active filter and what it is set to, and offers the link that clears them.
+**The active filters are named on the species-count line, whenever any are set.** What is
+narrowing the list is worth knowing while the list still has birds in it, not only once it is
+empty — a reader who has forgotten that a region is still selected should not have to open a
+control to find out. A filter that is narrowing nothing is absent, because naming the arrival
+state would describe a default as a choice.
+
+**When something is selected and nothing matches, the message says so and no more.** Not "no
+species match that filter" — that says a thing failed without saying which thing. The filters
+are already named on the count line immediately above, so the two read as one statement:
+*"0 of 839 species · Region Hawaii · Family Parulidae"* then *"No birds match."*, with the link
+that clears them.
 
 The two messages stay distinct, and the distinction is the point: **nothing selected is not the
 same as nothing matched.** In the first case nothing failed — the reader turned everything off,
@@ -487,8 +512,11 @@ intersection is empty, and the fix is to relax one. A single message cannot say 
 
 Rationale: an empty page is reachable in one click, and with two filters an empty *intersection*
 is reachable almost as easily — Hawaii and Parulidae is a plausible thing to ask for and a dead
-end to arrive at. The description is built once and used in both places it is needed: here, and
-in the collapsed summary of a filter control, so the two cannot drift apart.
+end to arrive at. The description is **built once** and rendered on the count line, so the
+filled and empty states cannot describe the same filters differently. An earlier version of
+this requirement claimed the description was also used in the collapsed summary of a filter
+control; it never was, and the claim is withdrawn rather than left as a spec describing
+something that does not exist.
 
 ### P-036 — The controls collapse
 Subject: `presentation.controls`

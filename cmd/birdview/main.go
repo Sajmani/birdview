@@ -116,17 +116,22 @@ type familyGroupingBlock struct {
 	Groups []orderGroup
 }
 
+// groupKey names one group a family belongs to, and the group's subtitle.
+type groupKey struct{ Name, Common string }
+
 // groupFamilies gathers family rows into one block's groups.
 //
-// `keyOf` names the group a family belongs to and its subtitle. `order` fixes
-// the sequence groups are offered in; passing nil keeps the order families
-// first appear in, which for the taxonomic block is checklist sequence.
+// `keyOf` names **every** group a family belongs to: a birder group may hold
+// a family that another birder group also holds, since an owl is both a bird
+// of prey and a bird of the night (P-014, CR-026). `order` fixes the sequence
+// groups are offered in; passing nil keeps the order families first appear
+// in, which for the taxonomic block is checklist sequence.
 //
-// A family whose group is unknown -- one AviList added that the birder table
-// has not been told about -- is gathered under the empty name rather than
-// dropped, so it stays reachable and AC-089 reports it.
+// A family the table does not know -- one AviList added that the birder table
+// has not been told about -- yields no groups and is gathered under the empty
+// name rather than dropped, so it stays reachable and AC-089 reports it.
 func (s *server) groupFamilies(r *http.Request, selected map[string]bool, rows []familyRow,
-	order []string, keyOf func(familyOption) (string, string)) []orderGroup {
+	order []string, keyOf func(familyOption) []groupKey) []orderGroup {
 
 	var out []orderGroup
 	at := map[string]int{}
@@ -144,9 +149,14 @@ func (s *server) groupFamilies(r *http.Request, selected map[string]bool, rows [
 		ensure(name, "")
 	}
 	for _, row := range rows {
-		name, common := keyOf(row.familyOption)
-		i := ensure(name, common)
-		out[i].Families = append(out[i].Families, row)
+		keys := keyOf(row.familyOption)
+		if len(keys) == 0 {
+			keys = []groupKey{{}} // unknown family: visible under the empty name
+		}
+		for _, k := range keys {
+			i := ensure(k.Name, k.Common)
+			out[i].Families = append(out[i].Families, row)
+		}
 	}
 	// Drop groups no family landed in, which only happens for a seeded name
 	// the dataset has no families for.
@@ -769,13 +779,18 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		// before the one where 43 of 90 families share a label (P-014).
 		{Name: family.ByBirders, Note: family.Note,
 			Groups: s.groupFamilies(r, selected, rows, family.Names(),
-				func(f familyOption) (string, string) {
-					g, _ := family.GroupOf(f.Name)
-					return g, ""
+				func(f familyOption) []groupKey {
+					var out []groupKey
+					for _, g := range family.GroupsOf(f.Name) {
+						out = append(out, groupKey{Name: g})
+					}
+					return out
 				})},
 		{Name: "Taxonomic order", Note: "AviList's taxonomy, in checklist sequence — the order a field guide runs in.",
 			Groups: s.groupFamilies(r, selected, rows, nil,
-				func(f familyOption) (string, string) { return f.Order, f.OrderCommon })},
+				func(f familyOption) []groupKey {
+					return []groupKey{{Name: f.Order, Common: f.OrderCommon}}
+				})},
 	}
 	for i, sec := range secs {
 		sv := sectionView{Index: i + 1, Count: len(sec.Species),
