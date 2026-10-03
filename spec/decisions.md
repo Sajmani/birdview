@@ -1592,6 +1592,64 @@ file, so a regeneration can move them. [AC-087](acceptance.md#ac-087) recomputes
 that table rather than pinning the names, so a drift that makes the grouping dishonest fails a
 test instead of going unnoticed.
 
+## CR-024 — A region's URL is its postal code, or its name, never an invented code
+
+**Subject:** `presentation.region_filter.url`
+**Kind:** Direct — the URL carried an internal database key, and the obvious fix would have
+required inventing identifiers the project has no authority to mint
+**Date:** 2026-10-03 · **Decided by:** Sameer
+
+### What changed
+
+A region in a URL was its GADM id — `?region=USA.5_1`. It is now its **postal abbreviation**
+where one exists (`?region=CA`), and its **name in PascalCase** where none does
+(`?region=JohnstonAtoll`, `?region=GulfOfMexico`). The ten regions with no postal code now show
+**no code at all** on their chip, just their name.
+
+GADM ids remain the internal key: they key `data/region-presence.tsv` and they are the `gadmGid`
+value sent to GBIF. Only the URL and the chip changed.
+
+### Why not keep the GADM id
+
+It is a database key doing a user's job. `?region=USA.5_1` cannot be typed, guessed or read, and
+a single zone toggle enumerates seventy of them — the index page carries **198 KB** of region
+hrefs, with a mean URL of 1,125 characters.
+
+The argument for keeping it was real and was tested rather than assumed. GADM's own metadata
+says *"The GID codes are persistent after version 3.6… If an area changes, for example if it
+splits into two new areas, two new codes will be assigned, and the old code will not be used any
+more."* So the ids are stable, and the stability case for changing them collapsed. What did not
+survive is the readability case: the id is still a key, and a shareable `?region=TX` is worth
+more than a stable string nobody can read.
+
+### Why not invent two-letter codes, which was the first proposal
+
+Because **the four obvious abbreviations are already taken**: Midway cannot be `MI` (Michigan),
+Navassa cannot be `NV` (Nevada), Palmyra cannot be `PA` (Pennsylvania), Wake cannot be `WA`
+(Washington). A complete two-letter scheme was found — `JA MW NI PM WK` and `NP CP NA GM AO`,
+all ten clear of the 64 codes in use and of the eleven USPS codes outside the set — but every
+one of the four forced codes is deliberately *not* what a reader would guess, chosen only to
+dodge a collision.
+
+That is the project minting identifiers in a namespace it does not own, and putting them beside
+64 codes that are USPS and Canada Post standards, where nothing on screen distinguishes the
+invented from the official. The owner rejected it. **A name is longer and invents nothing.**
+
+### What it costs
+
+**The ten chips lose their code.** An ocean chip read `N Pacific`, which was self-evidently not
+a state; it now reads `North Pacific`. The only remaining cues that it is not a state are the
+name itself and the Pelagic zone it sits in. That is accepted.
+
+**Three marine names were shortened.** `North Pacific, off the west coast` would have slugged to
+`NorthPacificOffTheWestCoast`, so the clarifier moved to a separate gloss shown in the chip's
+tooltip, leaving the name proper. The slug is **derived** from the name rather than stored, so a
+renamed region cannot keep a stale URL ([AC-088](acceptance.md#ac-088)).
+
+**Old URLs break, and no alias is kept.** Nothing links to BirdView yet, so this is free now and
+would not be later — the same argument [CR-022](#cr-022) made for species URLs. Accepting both
+forms would mean two identifiers for one region and a second thing to keep in step.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

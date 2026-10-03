@@ -16,6 +16,7 @@ import (
 	"testing"
 
 	"birdview/internal/dataset"
+	"birdview/internal/region"
 	"birdview/internal/view"
 	"birdview/web"
 )
@@ -3134,7 +3135,7 @@ func TestRegionFilter(t *testing.T) {
 	s := newTestServer(t)
 
 	// One region shows what is reported there and excludes the rest.
-	_, ca := get(t, s, "/?region=USA.5_1")
+	_, ca := get(t, s, "/?region=CA")
 	// Unescaped: the fixture's names carry apostrophes, which the template
 	// writes as &#39; and a raw substring search then misses.
 	tiles := html.UnescapeString(tileArea(t, ca))
@@ -3163,7 +3164,7 @@ func TestRegionFilter(t *testing.T) {
 
 	// Composition: region and family narrow together, and an empty
 	// intersection names both filters rather than blaming one.
-	_, both := get(t, s, "/?region=USA.5_1&family=Corvidae")
+	_, both := get(t, s, "/?region=CA&family=Corvidae")
 	if n := strings.Count(tileArea(t, both), "tilewrap"); n != 0 {
 		t.Errorf("California plus Corvidae showed %d species; the crow is not in California", n)
 	}
@@ -3177,11 +3178,11 @@ func TestRegionFilter(t *testing.T) {
 	}
 
 	// A seabird appears under its ocean as well as the coast it is seen from.
-	_, sea := get(t, s, "/?region=SEA.PAC")
+	_, sea := get(t, s, "/?region=NorthPacific")
 	if !strings.Contains(html.UnescapeString(tileArea(t, sea)), "Thick-billed Murre") {
 		t.Error("the Pacific shows no murre; a pelagic species has nowhere else to be")
 	}
-	_, ak := get(t, s, "/?region=USA.2_1")
+	_, ak := get(t, s, "/?region=AK")
 	if !strings.Contains(html.UnescapeString(tileArea(t, ak)), "Thick-billed Murre") {
 		t.Error("Alaska omits the murre, which is seen from shore there as well as at sea")
 	}
@@ -3245,5 +3246,48 @@ func TestRegionSelectorIsGroupedWithPelagicLast(t *testing.T) {
 	if !strings.Contains(sel, `<div class="ghdr">Common birds<em>`) ||
 		!strings.Contains(sel, `<div class="ghdr">Geographic<em>`) {
 		t.Error("the selector does not offer both a measured and a hand-drawn grouping")
+	}
+}
+
+// TestRegionURLsCarrySlugsNotGADMIDs checks what the reader actually gets:
+// links built from postal codes and names, with the internal key nowhere in
+// sight (CR-024).
+//
+// Verifies: P-011. Criterion: AC-088.
+func TestRegionURLsCarrySlugsNotGADMIDs(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/")
+	sel := box(t, body, "regions")
+
+	// No GADM id anywhere in a link. Checked against the real table rather
+	// than a pattern, so a new id shape cannot slip past.
+	for _, id := range append(region.LandIDs(), region.MarineIDs()...) {
+		if strings.Contains(sel, "region="+id) {
+			t.Errorf("the GADM id %q appears in a URL; it is a database key", id)
+		}
+	}
+	for _, want := range []string{"region=CA", "region=GulfOfMexico", "region=JohnstonAtoll"} {
+		if !strings.Contains(html.UnescapeString(sel), want) {
+			t.Errorf("no link carries %q", want)
+		}
+	}
+
+	// A coded region shows code then name; an uncoded one shows the name
+	// alone, with no empty <em> for the stylesheet to put a separator before.
+	if !strings.Contains(sel, `>CA<em>California</em>`) {
+		t.Error("California's chip does not show its postal code beside its name")
+	}
+	for _, uncoded := range []string{"Johnston Atoll", "Gulf of Mexico", "North Pacific"} {
+		if strings.Contains(sel, `<em>`+uncoded+`</em>`) {
+			t.Errorf("%q renders inside <em>, which means an empty code precedes it "+
+				"and the stylesheet will open the chip with a stray separator", uncoded)
+		}
+		if !strings.Contains(sel, ">"+uncoded+"</a>") {
+			t.Errorf("%q does not render as a bare chip label", uncoded)
+		}
+	}
+
+	// The ocean gloss survives, in the tooltip rather than the label.
+	if !strings.Contains(sel, `title="North Pacific, off the west coast"`) {
+		t.Error("the North Pacific chip lost the gloss saying which water it means")
 	}
 }

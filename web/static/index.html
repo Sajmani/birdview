@@ -168,8 +168,12 @@
            title="{{if .Selected}}Clear{{else}}Select{{end}} every region in {{.Zone}}">{{.Zone}}</a>
         <div class="ofams">
           {{range .Regions}}
+          {{/* A region with no standard abbreviation shows its name alone.
+               Rendering an empty code would still emit the <em>, and the
+               stylesheet puts a separator before it -- ten chips would open
+               with a stray middot (CR-024). */}}
           <a class="chip rchip{{if .Selected}} on{{end}}" href="{{.URL}}"
-             title="{{.Name}}">{{.Code}}<em>{{.Name}}</em></a>
+             title="{{.Title}}">{{if .Code}}{{.Code}}<em>{{.Name}}</em>{{else}}{{.Name}}{{end}}</a>
           {{end}}
         </div>
       </div>

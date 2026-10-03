@@ -199,6 +199,19 @@ million within Hawaii. The regional rule needs no special case for them.
 the two countries — British Columbia sits with Washington and Oregon, not with Nova Scotia. What
 a zone *means* is [P-013](#p-013).
 
+**A region appears in a URL as its postal abbreviation, or as its name** — `?region=CA`,
+`?region=GulfOfMexico` ([CR-024](decisions.md#cr-024)). Where a standard abbreviation exists it
+is used, and where none does the name is used in PascalCase. **No code is invented**: the four
+obvious ones are already taken, since Midway cannot be `MI` and Palmyra cannot be `PA`, and a
+code chosen only to dodge a collision would sit beside 64 official ones with nothing marking it
+as this project's guess. A region with no standard code therefore shows **no code** on its chip,
+only its name.
+
+The GADM id stays the internal key — it keys the presence table and is what GBIF is queried
+with — but it is a database key and does not belong in a URL. The slug is **derived** from the
+code or the name rather than stored alongside them, so a renamed region cannot keep a URL that
+no longer describes it.
+
 **Six species belong to no region, and that is structural.** Bermuda Petrel, Desertas Petrel,
 Trindade Petrel, Townsend's Storm-Petrel, Craveri's Murrelet and Guadalupe Murrelet are seen at
 sea, where no land polygon reaches — Bermuda Petrel has 384 records in the ABA Area and **zero**

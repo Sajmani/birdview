@@ -54,14 +54,25 @@ const (
 // Region is one filterable place.
 type Region struct {
 	// ID is GADM's own id for a land region ("USA.5_1"), or a SEA.* id for a
-	// marine one. It is what appears in a URL and in the presence table.
+	// marine one. It keys the presence table and is the gadmGid sent to
+	// GBIF. It is **not** what appears in a URL: it is a database key, and
+	// Slug is the reader's handle (CR-024).
 	ID string
-	// Code is the short label on a chip: the standard postal abbreviation
-	// where one exists, a short name where none does.
+	// Code is the standard postal abbreviation, or **empty** where no
+	// standard exists. It is deliberately left empty for the islands and the
+	// oceans: the obvious abbreviations are taken -- Midway cannot be MI,
+	// Navassa cannot be NV, Palmyra cannot be PA, Wake cannot be WA -- and a
+	// code invented to dodge a collision would sit beside 64 official ones
+	// with nothing marking it as this project's guess (CR-024).
 	Code string
-	// Name is the full name, shown beside the code.
+	// Name is the full name, shown beside the code, or alone where there is
+	// no code.
 	Name string
-	Kind Kind
+	// Gloss clarifies a name that needs it -- which stretch of ocean a box
+	// covers, in practice. It is shown in the chip's tooltip and never
+	// enters the slug.
+	Gloss string
+	Kind  Kind
 	// zones maps a grouping to this region's zone within it. Unexported so
 	// that every region is built by this package and the partition invariant
 	// has somewhere to hold.
@@ -71,6 +82,30 @@ type Region struct {
 // Zone returns this region's zone within a grouping, or "" if the grouping is
 // not one this package offers.
 func (r Region) Zone(grouping string) string { return r.zones[grouping] }
+
+// Slug is how this region appears in a URL: its postal abbreviation where it
+// has one, otherwise its name in PascalCase -- "CA", "GulfOfMexico".
+//
+// **Derived, never stored.** A stored slug can outlive the name it was made
+// from, leaving a URL that describes a region BirdView no longer has; deriving
+// it means renaming a region renames its URL, which is the honest behavior
+// even though it breaks the old link.
+func (r Region) Slug() string {
+	if r.Code != "" {
+		return r.Code
+	}
+	var b strings.Builder
+	for _, word := range strings.Fields(r.Name) {
+		for i, ch := range word {
+			if i == 0 {
+				b.WriteString(strings.ToUpper(string(ch)))
+				continue
+			}
+			b.WriteRune(ch)
+		}
+	}
+	return b.String()
+}
 
 // Grouping is one way of carving the regions up. Each is a partition: every
 // region sits in exactly one of its zones (P-013).
@@ -184,9 +219,9 @@ func MarineIDs() []string {
 // else names them.
 var all = map[string]Region{}
 
-func add(id, code, name string, kind Kind, birds, geo string) {
+func add(id, code, name, gloss string, kind Kind, birds, geo string) {
 	all[id] = Region{
-		ID: id, Code: code, Name: name, Kind: kind,
+		ID: id, Code: code, Name: name, Gloss: gloss, Kind: kind,
 		zones: map[string]string{ByBirds: birds, ByGeography: geo},
 	}
 }
@@ -278,29 +313,53 @@ func init() {
 		// other: Midway's closest neighbour anywhere is Hawaii at 0.378, and
 		// it is in the Hawaiian chain; Johnston, Palmyra and Wake match each
 		// other at 0.44 to 0.55; Navassa shares zero species with any of them.
-		{"UMI.4_1", "Johnston", "Johnston Atoll", "Tropical Pacific Atolls", "Outlying Islands"},
-		{"UMI.6_1", "Midway", "Midway Atoll", "Hawaiian Islands", "Outlying Islands"},
-		{"UMI.7_1", "Navassa", "Navassa Island", "Caribbean", "Outlying Islands"},
-		{"UMI.8_1", "Palmyra", "Palmyra Atoll", "Tropical Pacific Atolls", "Outlying Islands"},
-		{"UMI.9_1", "Wake", "Wake Island", "Tropical Pacific Atolls", "Outlying Islands"},
+		{"UMI.4_1", "", "Johnston Atoll", "Tropical Pacific Atolls", "Outlying Islands"},
+		{"UMI.6_1", "", "Midway Atoll", "Hawaiian Islands", "Outlying Islands"},
+		{"UMI.7_1", "", "Navassa Island", "Caribbean", "Outlying Islands"},
+		{"UMI.8_1", "", "Palmyra Atoll", "Tropical Pacific Atolls", "Outlying Islands"},
+		{"UMI.9_1", "", "Wake Island", "Tropical Pacific Atolls", "Outlying Islands"},
 	}
 	for _, r := range land {
-		add(r.id, r.code, r.name, Land, r.birds, r.geo)
+		add(r.id, r.code, r.name, "", Land, r.birds, r.geo)
 	}
 
-	sea := []struct{ id, code, name string }{
-		{"SEA.PAC", "N Pacific", "North Pacific, off the west coast"},
-		{"SEA.CPA", "C Pacific", "Central Pacific, around Hawaii"},
-		{"SEA.ATL", "N Atlantic", "North Atlantic, off the east coast"},
-		{"SEA.GULF", "Gulf", "Gulf of Mexico"},
-		{"SEA.ARC", "Arctic", "Arctic Ocean"},
+	// The oceans have no code either, and their names are kept short enough
+	// to slug: "North Pacific, off the west coast" would have become
+	// NorthPacificOffTheWestCoast, so the clarifier is a gloss instead.
+	sea := []struct{ id, name, gloss string }{
+		{"SEA.PAC", "North Pacific", "off the west coast"},
+		{"SEA.CPA", "Central Pacific", "around Hawaii"},
+		{"SEA.ATL", "North Atlantic", "off the east coast"},
+		{"SEA.GULF", "Gulf of Mexico", ""},
+		{"SEA.ARC", "Arctic Ocean", ""},
 	}
 	for _, r := range sea {
 		// The open ocean is Pelagic under both groupings. Clustering the
 		// marine regions would be clustering BirdView's own boxes.
-		add(r.id, r.code, r.name, Marine, "Pelagic", "Pelagic")
+		add(r.id, "", r.name, r.gloss, Marine, "Pelagic", "Pelagic")
+	}
+
+	// Index by slug once, from the same method the links use. Panics on a
+	// collision rather than letting one region quietly shadow another and
+	// become unreachable from every chip.
+	for _, r := range all {
+		if other, dup := bySlug[r.Slug()]; dup {
+			panic(fmt.Sprintf("region: %s and %s share the slug %q",
+				other.ID, r.ID, r.Slug()))
+		}
+		bySlug[r.Slug()] = r
 	}
 }
+
+// BySlug resolves a URL token to a region. The lookup is built once from the
+// same Slug method the links are rendered with, so a slug that renders always
+// resolves.
+func BySlug(slug string) (Region, bool) {
+	r, ok := bySlug[slug]
+	return r, ok
+}
+
+var bySlug = map[string]Region{}
 
 // ZonesOf lists a grouping's zones in offer order, or nil if no such grouping
 // exists.

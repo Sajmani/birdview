@@ -250,8 +250,11 @@ func parseOptions(r *http.Request) options {
 	}
 	_, o.HasRegions = q["region"]
 	for _, g := range q["region"] {
-		if g != "" {
-			o.Regions[g] = true
+		// A URL carries slugs ("CA", "GulfOfMexico"); everything downstream
+		// works in GADM ids, so translate here and nowhere else (CR-024).
+		// An unknown slug is dropped rather than guessed at.
+		if rg, ok := region.BySlug(g); ok {
+			o.Regions[rg.ID] = true
 		}
 	}
 	return o
@@ -1420,9 +1423,12 @@ func format(v float64, as view.Metric, metric bool) string {
 // familyRow and orderGroup exactly: zones play the part orders play, so the
 // two selectors share markup, CSS and the wrap criterion (P-011, AC-075).
 type regionRow struct {
-	ID       string
-	Code     string
-	Name     string
+	ID   string
+	Code string
+	Name string
+	// Title is the tooltip: the name, plus the gloss where a name needs one
+	// to say which stretch of ocean it means.
+	Title    string
 	Selected bool
 	URL      template.URL
 }
@@ -1455,13 +1461,18 @@ func (s *server) regionURL(r *http.Request, want map[string]bool) template.URL {
 	case len(want) == 0:
 		q.Set("region", "")
 	default:
-		ids := make([]string, 0, len(want))
+		// `want` is keyed by GADM id; the URL carries slugs (CR-024).
+		slugs := make([]string, 0, len(want))
 		for id := range want {
-			ids = append(ids, id)
+			rg, ok := region.Get(id)
+			if !ok {
+				continue
+			}
+			slugs = append(slugs, rg.Slug())
 		}
-		sort.Strings(ids)
-		for _, id := range ids {
-			q.Add("region", id)
+		sort.Strings(slugs)
+		for _, s := range slugs {
+			q.Add("region", s)
 		}
 	}
 	if len(q) == 0 {
@@ -1525,8 +1536,12 @@ func (s *server) regionGroups(r *http.Request, opt options) []groupingBlock {
 				} else {
 					one[rg.ID] = true
 				}
+				title := rg.Name
+				if rg.Gloss != "" {
+					title += ", " + rg.Gloss
+				}
 				g.Regions = append(g.Regions, regionRow{
-					ID: rg.ID, Code: rg.Code, Name: rg.Name,
+					ID: rg.ID, Code: rg.Code, Name: rg.Name, Title: title,
 					Selected: sel[rg.ID], URL: s.regionURL(r, one),
 				})
 			}

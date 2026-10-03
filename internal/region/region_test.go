@@ -1,6 +1,7 @@
 package region
 
 import (
+	"net/url"
 	"regexp"
 	"strings"
 	"testing"
@@ -80,26 +81,43 @@ func TestGroupingsAreDistinct(t *testing.T) {
 	}
 }
 
-// TestCodesAreUniqueAndShort checks the chip labels. Two regions sharing a
-// code is indistinguishable on screen, and a long one breaks the grid the
-// family filter already set the width of.
+// TestCodesAreStandardOrAbsent checks the chip labels. A code is a postal
+// abbreviation and is therefore exactly two letters, or it is absent — there
+// is no third case, and **absent is the assertion that matters**: it is what
+// stops an invented code being slipped in beside 64 official ones to make a
+// tidier chip (CR-024).
+//
+// Two regions sharing a code would be indistinguishable on screen, so
+// non-empty codes must still be unique. Empty ones collide by design.
 //
 // Verifies: P-011.
-func TestCodesAreUniqueAndShort(t *testing.T) {
+func TestCodesAreStandardOrAbsent(t *testing.T) {
 	seen := map[string]string{}
+	coded := 0
 	for _, id := range append(LandIDs(), MarineIDs()...) {
 		r, _ := Get(id)
+		if r.Name == "" {
+			t.Errorf("%s has no name", id)
+		}
+		if r.Code == "" {
+			continue
+		}
+		coded++
 		if other, dup := seen[r.Code]; dup {
 			t.Errorf("%s and %s share the code %q", other, id, r.Code)
 		}
 		seen[r.Code] = id
-		if r.Code == "" || r.Name == "" {
-			t.Errorf("%s has an empty code or name", id)
-		}
-		if len(r.Code) > 10 {
-			t.Errorf("%s has a %d-character code %q; chips are sized for short ones",
+		if len(r.Code) != 2 {
+			t.Errorf("%s has the %d-character code %q; a postal abbreviation is two "+
+				"letters, and anything else is this project inventing one",
 				id, len(r.Code), r.Code)
 		}
+	}
+	// The ten islands and oceans have no standard abbreviation, so exactly
+	// the 64 states and provinces may carry a code.
+	if want := Len() - 10; coded != want {
+		t.Errorf("%d regions carry a code, want %d; only the states and provinces "+
+			"have a postal standard to cite", coded, want)
 	}
 }
 
@@ -195,6 +213,96 @@ func TestPelagicIsTheLastZone(t *testing.T) {
 		if n := len(InZone(g.Name, "Pelagic")); n != len(MarineIDs()) {
 			t.Errorf("%s: the Pelagic zone holds %d regions, there are %d marine ones",
 				g.Name, n, len(MarineIDs()))
+		}
+	}
+}
+
+// TestSlugsAreUniqueAndResolve is the invariant every region link rests on.
+// Two regions sharing a slug makes one unreachable from every chip, and the
+// collision is silent: the page still renders, the wrong birds appear.
+//
+// Verifies: P-011. Criterion: AC-088.
+func TestSlugsAreUniqueAndResolve(t *testing.T) {
+	seen := map[string]string{}
+	for _, id := range append(LandIDs(), MarineIDs()...) {
+		r, _ := Get(id)
+		slug := r.Slug()
+		if slug == "" {
+			t.Errorf("%s has an empty slug", id)
+			continue
+		}
+		if other, dup := seen[slug]; dup {
+			t.Errorf("%s and %s share the slug %q", other, id, slug)
+		}
+		seen[slug] = id
+
+		// URL-safe without escaping: a slug that needs encoding is a slug
+		// that will be mis-typed and mis-copied.
+		if url.QueryEscape(slug) != slug {
+			t.Errorf("%s has the slug %q, which does not survive a URL unescaped", id, slug)
+		}
+		if !regexp.MustCompile(`^[A-Za-z]+$`).MatchString(slug) {
+			t.Errorf("%s has the slug %q; want letters only", id, slug)
+		}
+
+		// Round-trip: what is rendered must resolve, and to the same region.
+		back, ok := BySlug(slug)
+		if !ok {
+			t.Errorf("%s renders the slug %q, which resolves to nothing", id, slug)
+			continue
+		}
+		if back.ID != id {
+			t.Errorf("slug %q round-trips to %s, not %s", slug, back.ID, id)
+		}
+	}
+	if len(seen) != Len() {
+		t.Errorf("%d distinct slugs for %d regions", len(seen), Len())
+	}
+}
+
+// TestSlugIsCodeOrPascalName pins the rule itself, so the two halves cannot
+// drift into one another: a postal code where there is one, the name in
+// PascalCase where there is not (CR-024).
+//
+// Verifies: P-011. Criterion: AC-088.
+func TestSlugIsCodeOrPascalName(t *testing.T) {
+	for _, tc := range []struct{ id, want string }{
+		{"USA.5_1", "CA"},            // a state uses its postal code
+		{"CAN.2_1", "BC"},            // so does a province
+		{"UMI.4_1", "JohnstonAtoll"}, // an island has none, so the name
+		{"SEA.GULF", "GulfOfMexico"}, // and the small word is capitalized too
+		{"SEA.PAC", "NorthPacific"},  // the gloss stays out of the slug
+	} {
+		r, ok := Get(tc.id)
+		if !ok {
+			t.Fatalf("%s is not a region", tc.id)
+		}
+		if got := r.Slug(); got != tc.want {
+			t.Errorf("%s (%s) slugs to %q, want %q", tc.id, r.Name, got, tc.want)
+		}
+	}
+
+	// Derived, not stored: a region renamed in the table must take a new
+	// slug rather than keeping one that no longer describes it.
+	renamed := Region{Name: "Palmyra Atoll"}
+	if got := renamed.Slug(); got != "PalmyraAtoll" {
+		t.Errorf("an uncoded region slugs to %q, want PalmyraAtoll", got)
+	}
+	renamed.Name = "Palmyra"
+	if got := renamed.Slug(); got != "Palmyra" {
+		t.Errorf("renaming did not change the slug; it is stored, not derived (got %q)", got)
+	}
+}
+
+// TestGADMIDsAreNotSlugs guards the thing CR-024 removed. The GADM id stays
+// the internal key, so it is still in the table and still easy to reach for;
+// what must never happen is it reaching a URL again.
+//
+// Verifies: P-011. Criterion: AC-088.
+func TestGADMIDsAreNotSlugs(t *testing.T) {
+	for _, id := range append(LandIDs(), MarineIDs()...) {
+		if _, ok := BySlug(id); ok {
+			t.Errorf("the GADM id %q resolves as a slug; ids are keys, not URLs", id)
 		}
 	}
 }

@@ -1410,6 +1410,37 @@ Mid-Atlantic and Alaska under Gulf Coast (both caught per region, Alaska at 0.44
 for regions at large). The earlier per-zone form of the check was watched **passing** under the
 Hawaii break, which is why it was replaced.
 
+### AC-088 — A region's URL is readable, unique, and round-trips
+**Verifies:** P-011 · **Level:** code · **Method:** unit tests over the region table, plus a
+rendering test over the selector
+
+**Assertions, the slug:** every region's slug is its postal code where it has one and its
+PascalCase name where it has none; slugs are **unique across all 74 regions**, and every slug is
+URL-safe without escaping. Uniqueness is the load-bearing one — two regions sharing a slug makes
+one of them unreachable, and the collision would be silent.
+
+**Assertions, round-trip:** resolving a region's own slug returns that same region, for every
+region. A slug that renders but does not resolve is a dead link on every chip.
+
+**Assertions, no invented codes:** every non-empty code is two characters, and the ten regions
+with no standard abbreviation carry an **empty** code rather than a made-up one
+([CR-024](decisions.md#cr-024)). This is the assertion that stops the rejected proposal being
+reintroduced quietly.
+
+**Assertions, rendering:** region links carry slugs and **no GADM id appears in any URL**; a
+chip with a code shows code and name, and a chip without one shows the name alone — not an
+empty code slot, which the stylesheet would precede with a stray separator.
+
+**Status: verified 2026-10-03 — passing, and watched failing** by returning a stored slug
+instead of deriving it, so a renamed region kept its old URL; by emitting GADM ids in links
+again; by giving Palmyra the code `PM`, which the no-invented-code assertion rejects; and by
+rendering the empty code, which puts a leading separator on ten chips.
+
+Giving two regions the same slug does not reach an assertion: the index is built once at
+startup and **panics** there, naming both regions. That is deliberate — a collision makes a
+region silently unreachable, so it should stop the binary rather than wait for a test run — and
+it is recorded here because "watched failing" meant watching a panic, not a red assertion.
+
 ---
 
 ## Traceability
@@ -1424,7 +1455,7 @@ Hawaii break, which is why it was replaced.
 | P-006 | AC-014 | |
 | P-007 | AC-015 | |
 | P-010 | AC-056, AC-075 | |
-| P-011, P-012 | AC-086 | |
+| P-011, P-012 | AC-086, AC-088 | |
 | P-013 | AC-086, AC-087 | |
 | P-020, P-021 | AC-020 | |
 | P-022, P-023 | AC-021 | |
