@@ -60,6 +60,17 @@ var Groups = []struct {
 	// Nightjars belong with the owls, not with the pigeons and cuckoos they
 	// were first filed beside: "what you look for after dark" is a group a
 	// birder has, and "mid-sized landbirds that fit nowhere else" is not.
+	//
+	// **Owls are not filed with the birds of prey**, though they plainly are
+	// birds of prey. In practice "raptor" means the diurnal ones -- a hawk
+	// watch counts hawks, eagles, falcons and vultures, and nobody reports
+	// six raptors meaning owls. Owling is its own activity at its own hour,
+	// and nightjars are what else it turns up.
+	//
+	// This is the seam in the whole grouping: some names say what a bird is
+	// (Birds of Prey, Waterfowl) and some say when or where you meet it
+	// (Shorebirds, Seabirds). Owls sit exactly on it, which is why the
+	// question has two defensible answers and this comment exists.
 	{"Owls & Nightbirds", []string{"Strigidae", "Tytonidae", "Caprimulgidae"}},
 	// Swifts go with swallows, not with the hummingbirds they are actually
 	// related to. "Swift or swallow?" is the question a bird overhead
@@ -91,13 +102,21 @@ var Groups = []struct {
 		"Pycnonotidae", "Cettiidae", "Phylloscopidae", "Acrocephalidae",
 		"Leiothrichidae", "Zosteropidae"}},
 	{"New World Warblers", []string{"Parulidae", "Peucedramidae"}},
-	// Larks join the longspurs and Snow Bunting they flock with in winter
-	// stubble, rather than the swallows they merely share open country with.
-	{"Sparrows, Buntings & Larks", []string{
-		"Passerellidae", "Calcariidae", "Emberizidae", "Passeridae", "Alaudidae"}},
+	// The small brown birds of open ground, which is a confusion set rather
+	// than a lineage. Larks join the longspurs and Snow Bunting they flock
+	// with in winter stubble rather than the swallows they merely share open
+	// country with, and the pipits join them for the same reason -- they had
+	// been filed with the finches, which is wrong twice over: a pipit is an
+	// insectivore that walks, and a finch is a seedeater in a tree.
+	{"Sparrows, Larks & Pipits", []string{
+		"Passerellidae", "Calcariidae", "Emberizidae", "Passeridae", "Alaudidae", "Motacillidae"}},
 	{"Cardinals & Tanagers", []string{"Cardinalidae", "Thraupidae", "Spindalidae"}},
 	{"Blackbirds & Orioles", []string{"Icteridae"}},
-	{"Finches, Waxbills & Pipits", []string{"Fringillidae", "Estrildidae", "Motacillidae"}},
+	// Not merged with the sparrows, though eight families would be no larger
+	// than Seabirds' ten. "Finches" and "Sparrows" are two of the strongest
+	// names a birder has, and lumping them trades two words people say for
+	// one they do not.
+	{"Finches & Waxbills", []string{"Fringillidae", "Estrildidae"}},
 }
 
 // groupOf is the reverse index, built once. A family listed in two groups is
