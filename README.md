@@ -60,7 +60,7 @@ so the next step is a species list BirdView derives and owns. See
 | --- | --- | --- |
 | [AVONET](https://doi.org/10.6084/m9.figshare.16586228.v7) (Tobias et al. 2022) | CC BY 4.0 | morphology traits; vendored in this repo |
 | [Fox et al. 2026 wingspan database](https://doi.org/10.6084/m9.figshare.32089083) | CC BY 4.0 | empirical wingspan; vendored in this repo |
-| [ABA Checklist 8.19](https://www.aba.org/aba-checklist/) | **all rights reserved** | species list, names, families; **fetched at build, never committed** |
+| [ABA Checklist 8.19](https://www.aba.org/aba-checklist/) | **all rights reserved** | which species are in scope, and nothing else; **fetched at build, never committed** |
 | [iNaturalist](https://www.inaturalist.org) | terms vendored; taxon IDs are facts | one taxon ID per species, to link the detail page out for photographs |
 
 The two CC BY sources are redistributed here under their license, with attribution. The ABA

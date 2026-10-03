@@ -235,3 +235,33 @@ The file is a 21.5 MB build input read by the ingest command, not a rules docume
 reader. Burying a build input inside the spec bundle would misrepresent what it is. The source
 directory exists and names the out-of-place path, so nobody helpfully copies the workbook into it
 and creates a second copy to drift.
+
+### T-024 — What the project says about itself stays true
+Subject: `docs.currency`
+Goals: G-003
+
+**Every CC BY source whose output appears on a page is credited on that page.** This is a licence
+condition, not a courtesy: AviList, AVONET and Fox are all CC BY 4.0, and attribution is the
+thing they ask for in return.
+
+It was not being met. The index page carried full credits, while **`detail.html` and
+`compare.html` credited AVONET, Fox and the ABA and omitted AviList** — on pages whose every
+English name, scientific name, family and species code comes from AviList. A reader could use
+BirdView for an hour and never see the source of the words on the screen.
+
+**User-facing documentation describes the project as it is, not as it was.** `README.md` and
+`docs/` are read before the code and are the first thing a new reader trusts, so a stale claim
+there is worse than no claim. Two kinds of staleness are forbidden:
+
+- **A count that no longer matches the dataset.** `docs/data.md` claimed 841 species after
+  [CR-022](decisions.md#cr-022) cut the list to 839.
+- **A source credited for something it no longer supplies.** `README.md` listed the ABA Checklist
+  as the source of "species list, names, families" after CR-022 moved names and families to
+  AviList. The ABA checklist supplies **scope** and nothing else.
+
+**Before any public deployment, the docs are checked against the spec**, since a release is the
+moment the claims become promises to strangers rather than notes to ourselves.
+
+The check is mechanical where it can be — counts and credits are comparable against the dataset
+and the page — and a reading task where it cannot. [AC-090](acceptance.md#ac-090) does the
+mechanical part, and records plainly that prose accuracy is not something a test can hold.

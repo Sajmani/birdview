@@ -29,7 +29,7 @@ Both are vendored with provenance and hashes under [`spec/sources/`](../spec/sou
 
 ### You must fetch (all rights reserved, never committed)
 
-The **ABA Checklist 8.19** supplies the species list, common names and families.
+The **ABA Checklist 8.19** supplies which species are in scope, and nothing else. Names, families and species codes come from AviList, which is CC BY 4.0 and is already in the repo (CR-022).
 
 ```
 mkdir -p fetched

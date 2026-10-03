@@ -1492,6 +1492,63 @@ The partition check **skips** rather than fails when `web/data/species.json` is 
 the dataset is a build artifact and is not committed (T-005). That is a real gap: on a machine
 that has never run the ingest, this criterion is silent.
 
+### AC-090 — Credits are complete and the docs are not stale
+**Verifies:** T-024 · **Level:** code · **Method:** tests over the rendered pages and over
+`README.md` and `docs/`, against the compiled dataset
+
+**Assertions, credits:** **every page that shows a CC BY source's output credits that source on
+that page.** Checked per page rather than site-wide, because that is how the obligation works
+and because the gap this criterion was written for was exactly a per-page one — the index
+credited AviList and `detail.html` and `compare.html` did not, while showing AviList names,
+families and species codes throughout.
+
+**Assertions, counts:** every species or family count stated in `README.md` or `docs/` matches
+the compiled dataset. `docs/data.md` said 841 species after [CR-022](decisions.md#cr-022) cut
+the list to 839.
+
+**Assertions, attribution claims:** no document credits a source for something it no longer
+supplies. `README.md` listed the ABA Checklist as the source of "species list, names, families"
+after names and families moved to AviList.
+
+**What this cannot check, stated so nobody assumes otherwise:** whether the prose is *true*. A
+test can compare a number against the dataset and a credit against a page; it cannot read
+`docs/using.md` and notice that the control it describes was redesigned. That remains a reading
+task before release, and [T-024](tech.md#t-024) requires it as a release gate rather than
+pretending a test covers it.
+
+**Counts are checked only where a claim is about the whole dataset** — "N species across M
+families", and a bolded "**N species**". Every number before the word "species" is deliberately
+not checked: "533 species without an empirical wingspan" is a subset, "442 of 841 species"
+records a measurement taken when the dataset was that size, and Böhmer's "68 families" is
+someone else's study. A check that flagged those would be switched off within a week.
+
+**Status: verified 2026-10-03 — passing, having first failed against the real defects**: the
+missing AviList credit on `detail.html` and `compare.html`, and `README.md` and
+`docs/building.md` crediting the ABA Checklist with names and families. Then watched failing
+again after the fixes, by removing the AviList credit, by restoring the 841 count, and by
+re-crediting the ABA.
+
+Two of the checks were wrong before they were right, and both were caught by watching them
+fail rather than by reading them. The count check first flagged three legitimate numbers. The
+attribution check flagged **its own correction**, because "names come from AviList, not the ABA"
+contains both the source and the word; scoping it to the sentence fixed that, and then the
+sentence splitter broke on the "." in "ABA Checklist 8.19" and silently stopped catching
+anything — visible only because the deliberate break failed to go red.
+
+### AC-091 — Every category on the detail page says where it came from
+**Verifies:** P-069 · **Level:** code · **Method:** rendering test over the detail view
+
+**Assertions:** the detail page lists the bird's family, order, regions, habitat and niche, and
+any group it is in; **each carries a provenance of published, derived or ours**; and a published
+one names its source. A category rendered with no provenance fails, which is the whole point —
+the failure mode is an opinion of ours sitting unlabelled beside a published fact.
+
+**Assertions, links:** where provenance is an algorithm, the cell names the rule and links to a
+document **served by BirdView**, not to an external host. A link whose target the server does
+not serve fails, so a fabricated repository URL cannot pass.
+
+**Status: _pending_.**
+
 ---
 
 ## Traceability
@@ -1509,6 +1566,7 @@ that has never run the ingest, this criterion is silent.
 | P-011, P-012 | AC-086, AC-088 | |
 | P-013 | AC-086, AC-087 | |
 | P-014 | AC-089 | |
+| P-069 | AC-091 | |
 | P-020, P-021 | AC-020 | |
 | P-022, P-023 | AC-021 | |
 | P-024 | AC-022 | |
@@ -1549,6 +1607,7 @@ that has never run the ingest, this criterion is silent.
 | T-006 | AC-052 | |
 | T-010 | AC-002 | |
 | T-023 | AC-070 | |
+| T-024 | AC-090 | |
 | T-011 | AC-064 | partial — the non-commercial posture itself is still untestable |
 | T-020, T-021 | AC-001, AC-003, AC-004 | |
 | `wcag/1.4.6` | AC-002 | |

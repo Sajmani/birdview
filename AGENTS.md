@@ -23,7 +23,7 @@ the code is live: `birdview-ingest` builds 841 species across 91 families, and `
 them. A behavior change still goes spec first, then the criterion, then the code — see
 [spec/process.md](spec/process.md) and "Working on a change" below.
 
-Not done: no README, no deployment plumbing, and public deployment is **blocked** until the ABA
+Not done: no deployment plumbing, and public deployment is **blocked** until the ABA
 grants written permission to redistribute its checklist (Work arising in
 [spec/decisions.md](spec/decisions.md)). Serving the app reproduces that checklist to every
 visitor, so this is not a formality.

@@ -1277,3 +1277,34 @@ and a birder who cares enough to click deserves the difference.
 
 Showing the segments individually is what makes the diagram auditable. Without it, the drawing
 asserts five proportions and explains none of them.
+
+### P-069 — The detail view lists every category the bird is in, and where each came from
+Subject: `presentation.detail.categories`
+Goals: G-001, G-004
+
+[P-063](#p-063) does this for numbers. A bird is also **sorted**, and the sorting is as much a
+claim as a measurement is: its family and order, the regions it is listed in, its habitat and
+its niche, and any group BirdView puts it in. Each is a statement about the bird that someone or
+something decided, and the detail view **names every one of them and says where it came from**.
+
+Three provenances, and the UI distinguishes them:
+
+- **Published** — the source said so. AviList gives the family; AVONET gives the habitat.
+- **Derived** — BirdView computed it from published data by a stated rule. A region comes from
+  the 1-ppm presence rule over GBIF records; a zone comes from clustering those lists.
+- **Ours** — BirdView decided it, and no source says it. A supplementary habitat added because
+  AVONET records only a primary one, for instance.
+
+**An unmarked category is the failure this exists to prevent.** A page that lists "Habitat:
+Wetland" beside "Habitat: Coastal" without saying the first is AVONET's and the second is ours
+presents an opinion as a finding, which is the same error [P-060](#p-060) forbids for numbers.
+
+**Where the explanation is an algorithm, link to it rather than inline it.** "Clustered on
+Jaccard similarity of species lists, cut at k=26, each remaining region assigned to its nearest
+seed" does not belong in a table cell. The rule is named in one line and links to the fuller
+account in `docs/`.
+
+Those documents are **served by BirdView itself**, not linked off to a code host. The project
+has no public repository to link to, and inventing a URL for one would be a fabricated citation;
+[T-002](tech.md#t-002) also requires the running server to be self-contained, so a provenance
+link that needs the network is a provenance link that breaks.
