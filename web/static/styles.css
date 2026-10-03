@@ -231,8 +231,12 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .fsum b { font-weight: 600; margin-right: 5px; }
 
 /* Help (P-035) */
+/* Same box metrics as .controls, and the same bottom margin: the Presentation
+   panel sits in the same stack, so a different margin here made the first gap
+   16px against 24px for the rest. Margins collapse, so it is the larger of the
+   two neighbours that shows. */
 .help { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
-  padding: 10px 14px; margin: 16px 0 0; }
+  padding: 10px 14px; margin: 16px 0 24px; }
 .help summary { cursor: pointer; font-size: 12px; text-transform: uppercase;
   letter-spacing: .05em; color: var(--accent); }
 /* Two columns, each half the page: the diagram needs the room, and three

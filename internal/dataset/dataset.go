@@ -28,6 +28,38 @@ const (
 // Provenance records where one specific value came from.
 //
 // Verifies: P-062.
+// Origin says who decided a categorical assignment. Deliberately a separate
+// vocabulary from Kind, which grades a *number*: "measured" and "published"
+// are not the same claim, and one word for both would blur the only
+// distinction P-069 exists to draw.
+type Origin string
+
+const (
+	// Published: a source says so, and Source names it.
+	Published Origin = "published"
+	// Derived: BirdView computed it from published data by a stated rule.
+	Derived Origin = "derived"
+	// Ours: BirdView decided it and no source says it.
+	Ours Origin = "ours"
+)
+
+// Assignment is one category a species is in, with its origin. The zero
+// Origin is invalid: an unmarked category is an opinion wearing a finding's
+// clothes, which is the failure P-069 exists to prevent.
+type Assignment struct {
+	Value  string `json:"value"`
+	Origin Origin `json:"origin"`
+	// Source names the publication, for Published.
+	Source string `json:"source,omitempty"`
+	// Why is one line saying how the value was arrived at, for Derived and
+	// Ours. Long explanations belong in a document, not here.
+	Why string `json:"why,omitempty"`
+	// Doc is a path BirdView itself serves, e.g. "data". There is no public
+	// repository to link to, and a provenance link that needs the network is
+	// one that breaks (P-069, T-002).
+	Doc string `json:"doc,omitempty"`
+}
+
 type Provenance struct {
 	Kind Kind `json:"kind"`
 
@@ -130,6 +162,13 @@ type Species struct {
 	// Measured, and the input to the modeled wingspan (CR-008). Drawn as the
 	// solid outer portion of the crossbar (P-065).
 	WingChord Metric `json:"wingChord,omitempty"`
+
+	// Habitats and Niches are the categorical assignments of P-015, each
+	// carrying where it came from. Several are possible: AVONET records one
+	// primary value, and BirdView may add its own, which is marked Ours and
+	// never silently mixed in with the published one (P-069).
+	Habitats []Assignment `json:"habitats,omitempty"`
+	Niches   []Assignment `json:"niches,omitempty"`
 
 	// Shown in the detail view (P-034).
 	Segments Segments `json:"segments"`

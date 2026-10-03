@@ -39,6 +39,14 @@ type Traits struct {
 	WingChord float64 // Wing.Length, mm -- folded wing, NOT wingspan
 	Secondary float64 // Secondary1, mm
 	Mass      float64 // grams
+
+	// Habitat and Niche are AVONET's own categorical classifiers, taken
+	// verbatim. They are **primary** values: AVONET records the one habitat
+	// and the one feeding niche a species mostly uses, not every one it
+	// uses. Anything BirdView adds beyond them is its own and is marked as
+	// such (P-069).
+	Habitat string // Habitat: Forest, Wetland, Marine, Grassland, ...
+	Niche   string // Trophic.Niche: Invertivore, Aquatic predator, ...
 }
 
 // Workbook holds the trait rows of each taxonomy, keyed by that taxonomy's
@@ -120,12 +128,28 @@ func (wb *Workbook) readTraits(f *excelize.File, sheet, spCol, famCol, ordCol st
 		if name == "" {
 			continue
 		}
+		// A categorical column is optional: AVONET's raw-data sheet has
+		// none, and a missing one must leave the field empty rather than
+		// fail the read.
+		cat := func(col string) string {
+			i, ok := idx[col]
+			if !ok {
+				return ""
+			}
+			v := strings.TrimSpace(at(cells, i))
+			if v == "NA" {
+				return ""
+			}
+			return v
+		}
 		into[name] = Traits{
 			Culmen:    num(at(cells, idx["Beak.Length_Culmen"])),
 			Tail:      num(at(cells, idx["Tail.Length"])),
 			WingChord: num(at(cells, idx["Wing.Length"])),
 			Secondary: num(at(cells, idx["Secondary1"])),
 			Mass:      num(at(cells, idx["Mass"])),
+			Habitat:   cat("Habitat"),
+			Niche:     cat("Trophic.Niche"),
 		}
 		if fams != nil {
 			if i, ok := idx[famCol]; ok {
