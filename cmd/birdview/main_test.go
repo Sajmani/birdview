@@ -19,6 +19,7 @@ import (
 	"birdview/internal/region"
 	"birdview/internal/trait"
 	"birdview/internal/view"
+	"birdview/spec"
 	"birdview/web"
 )
 
@@ -3611,4 +3612,88 @@ func TestDetailListsEveryCategoryWithItsOrigin(t *testing.T) {
 // stripTags removes markup so a cell's text can be compared.
 func stripTags(s string) string {
 	return html.UnescapeString(regexp.MustCompile(`<[^>]+>`).ReplaceAllString(s, ""))
+}
+
+// TestServedDocumentsHaveNoBrokenLinks walks every document BirdView serves
+// and fetches every internal link in it.
+//
+// The bug it was written for: the guides link to the spec as
+// `../spec/product.md`, correct in a repository checkout and a 404 in a
+// browser. Nothing noticed, because AC-091 only checks the `/docs/` links
+// on a species page, and these are links between documents.
+//
+// Verifies: P-069. Criterion: AC-091.
+func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
+	s := newTestServer(t)
+	seen := map[string]bool{}
+	var visit func(path string)
+	visit = func(path string) {
+		if seen[path] {
+			return
+		}
+		seen[path] = true
+		code, body := get(t, s, path)
+		if code != http.StatusOK {
+			t.Errorf("%s answers %d", path, code)
+			return
+		}
+		for _, m := range regexp.MustCompile(`href="(/[^"]*)"`).FindAllStringSubmatch(body, -1) {
+			href := m[1]
+			if i := strings.IndexByte(href, '#'); i >= 0 {
+				href = href[:i] // fragments are within the page
+			}
+			if href == "" || strings.HasPrefix(href, "/static/") {
+				continue
+			}
+			// Follow document links; merely check anything else resolves.
+			if strings.HasPrefix(href, "/docs") || strings.HasPrefix(href, "/spec") {
+				visit(href)
+				continue
+			}
+			if c, _ := get(t, s, href); c != http.StatusOK {
+				t.Errorf("%s links to %s, which answers %d", path, href, c)
+			}
+		}
+	}
+	visit("/docs/")
+	visit("/spec/")
+	if len(seen) < 10 {
+		t.Errorf("only walked %d documents; the indexes are not listing the set", len(seen))
+	}
+}
+
+// TestVendoredTermsAreNotServed is a licensing check, not a routing one.
+//
+// spec/sources/ holds snapshots of other people's terms — the ABA
+// checklist's, Wiley's, iNaturalist's — kept for hashing and provenance.
+// They are quoted for a record, not ours to republish, so the embed must
+// not reach them and no path may serve them (T-004).
+//
+// Verifies: T-004. Criterion: AC-091.
+func TestVendoredTermsAreNotServed(t *testing.T) {
+	s := newTestServer(t)
+	for _, path := range []string{
+		"/spec/sources/aba", "/spec/sources/wiley", "/spec/sources/inat-terms",
+		"/spec/check", "/docs/../README", "/spec/../README",
+	} {
+		if code, _ := get(t, s, path); code == http.StatusOK {
+			t.Errorf("%s is served; vendored terms and non-documents must not be", path)
+		}
+	}
+	// And the embed itself does not carry them. Checked by walking what is
+	// embedded rather than probing one path: a probe only catches the file
+	// it names, and the risk is the whole directory arriving at once.
+	entries, err := spec.Files.ReadDir(".")
+	if err != nil {
+		t.Fatalf("reading the spec embed: %v", err)
+	}
+	for _, e := range entries {
+		if e.IsDir() {
+			t.Errorf("the spec embed carries the directory %q; *.md must match "+
+				"documents only, and sources/ holds other people's terms", e.Name())
+		}
+		if !strings.HasSuffix(e.Name(), ".md") {
+			t.Errorf("the spec embed carries %q, which is not a document", e.Name())
+		}
+	}
 }

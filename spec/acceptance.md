@@ -1547,9 +1547,21 @@ and must not be shown as placed nowhere by a rule.
 document **served by BirdView**, not to an external host. Every `/docs/` link on the page is
 fetched and must answer 200, so a fabricated citation cannot pass.
 
+**Assertions, between documents:** every internal link in every served document resolves. The
+guides cite the spec as `../spec/product.md`, which is right in a checkout and a 404 in a
+browser, and the per-species link check could not see it because these are links between
+documents rather than on a species page.
+
+**Assertions, what is not served:** the embed carries documents only. `spec/sources/` holds
+other people's terms and must not be reachable, so the check walks what is embedded rather
+than probing one path — a probe catches the file it names, and the risk is the whole directory
+arriving at once ([T-004](tech.md#t-004)).
+
 **Status: verified 2026-10-03 — passing, and watched failing** by giving each region its own
-row; by rendering a category with an empty origin; and by citing `/docs/regions`, a document
-the server does not serve, which the link check answers with 404.
+row; by rendering a category with an empty origin; by citing `/docs/regions`, a document the
+server does not serve; by sending the spec's sibling links to `/docs`, which 404s eight
+requirement documents; and by widening the embed to `*.md sources`, which pulls in the
+vendored terms.
 
 ### AC-092 — Habitat and diet filter per species, and say where each value came from
 **Verifies:** P-015 · **Level:** code · **Method:** unit tests over the trait table against the

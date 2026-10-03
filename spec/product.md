@@ -319,12 +319,16 @@ is marine and Neotropic Cormorant is not, Apapane sips nectar while American Gol
 seeds, and an Anhinga is a swamp bird whatever its relatives do. The same data at species level
 is right about all of them.
 
-**AVONET records one primary value, and BirdView may add a second.** A bird that genuinely uses
-two habitats gets one from AVONET. Where that hides something a reader filtering by habitat
-would plainly expect — a Great Blue Heron on a tidal flat — BirdView adds the second and marks
-it **`birdview`**, never merged into the published value ([P-069](#p-069)). Such additions are kept
-few: a long list would be this project quietly substituting its own classification for a
-published one.
+**AVONET records one primary value per species; BirdView may add others.** A bird that uses two
+habitats, or eats two things, gets one of each from AVONET. BirdView adds **as many further
+habitats and diets as apply** — there is no limit of one — and tags each **`birdview`**, never
+merged into the published value ([P-069](#p-069)).
+
+What keeps this honest is not scarcity but **provenance plus evidence**. Every addition is
+visibly this project's, and every addition must rest on something stateable: a different
+AVONET taxonomy sheet that says so, or a fact derivable from BirdView's own data. An addition
+whose only support is that it seemed right to whoever typed it is the failure
+[CR-025](decisions.md#cr-025) was written about, and is not permitted however it is tagged.
 
 **Counts beside each option are of the whole dataset, not the current view.** How many birds
 there are of a kind is a fact about the data; how many are still showing is what the species
@@ -1325,3 +1329,16 @@ Those documents are **served by BirdView itself**, not linked off to a code host
 has no public repository to link to, and inventing a URL for one would be a fabricated citation;
 [T-002](tech.md#t-002) also requires the running server to be self-contained, so a provenance
 link that needs the network is a provenance link that breaks.
+
+**Both sets are served: the guides at `/docs` and the requirement documents at `/spec`.** The
+guides cite the spec constantly, and a citation to a 404 is worse than no citation.
+
+**Links are rewritten when the document is rendered, never in the file.** `../spec/product.md`
+is the correct link in a repository checkout and `/spec/product` is the correct one in a
+browser; editing the file would fix the second by breaking the first, and these documents are
+served precisely because they are the files the repository carries.
+
+**`spec/sources/` is not served.** It holds vendored snapshots of other people's terms — the
+ABA checklist's, Wiley's, iNaturalist's — kept so a provenance record can be hashed and
+checked. They are quoted for a record, not ours to republish, and serving them would be the
+redistribution [T-004](tech.md#t-004) exists to prevent.

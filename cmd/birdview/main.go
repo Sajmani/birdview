@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"slices"
 	"sort"
 	"strconv"
@@ -30,12 +31,20 @@ import (
 	"github.com/yuin/goldmark/extension"
 	goldmarkhtml "github.com/yuin/goldmark/renderer/html"
 
+	"embed"
+
+	goldmarkast "github.com/yuin/goldmark/ast"
+	goldmarkparser "github.com/yuin/goldmark/parser"
+	goldmarktext "github.com/yuin/goldmark/text"
+	goldmarkutil "github.com/yuin/goldmark/util"
+
 	"birdview/docs"
 	"birdview/internal/dataset"
 	"birdview/internal/inat"
 	"birdview/internal/region"
 	"birdview/internal/trait"
 	"birdview/internal/view"
+	"birdview/spec"
 	"birdview/web"
 )
 
@@ -260,7 +269,12 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		return nil, err
 	}
 	s.mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(assets))))
-	s.mux.HandleFunc("/docs/", s.docs)
+	for _, set := range []string{"/docs", "/spec"} {
+		// Both the exact path and the subtree, so the bare name serves the
+		// index instead of a 301 to it.
+		s.mux.HandleFunc(set, s.document)
+		s.mux.HandleFunc(set+"/", s.document)
+	}
 	s.mux.HandleFunc("/compare", s.compare)
 	s.mux.HandleFunc("/species/", s.detail)
 	s.mux.HandleFunc("/", s.index)
@@ -1930,36 +1944,68 @@ func (s *server) categories(sp *dataset.Species) []categoryRow {
 	return out
 }
 
-// docs serves the repository's user-facing documentation, which provenance
-// citations link to (P-069). Served rather than linked: there is no public
-// repository, and T-002 wants the running server self-contained.
-//
-// Rendered with goldmark rather than by hand. A documentation page uses
-// headings, tables, lists, code fences and links, and a hand-rolled
-// renderer would be subtly wrong about several of them -- which is the same
-// argument this project keeps making about taxonomies and postal codes.
-func (s *server) docs(w http.ResponseWriter, r *http.Request) {
-	name := strings.TrimPrefix(r.URL.Path, "/docs/")
-	// Only the documents that are embedded, by bare name. No path, so no
-	// traversal to reason about.
-	if name == "" || strings.ContainsAny(name, "/.") {
+// served names the two document sets BirdView publishes: the user-facing
+// guides and the normative spec. Both are embedded, so a provenance
+// citation resolves without the network (P-069, T-002).
+var served = map[string]struct {
+	fs   embed.FS
+	kind string
+}{
+	"docs": {docs.Files, "documentation"},
+	"spec": {spec.Files, "requirement"},
+}
+
+// document serves one embedded Markdown file, rendered.
+func (s *server) document(w http.ResponseWriter, r *http.Request) {
+	set, rest, _ := strings.Cut(strings.TrimPrefix(r.URL.Path, "/"), "/")
+	src, ok := served[set]
+	if !ok {
 		http.NotFound(w, r)
 		return
 	}
-	src, err := docs.Files.ReadFile(name + ".md")
+	if rest == "" {
+		s.documentIndex(w, set)
+		return
+	}
+	// Bare names only, so there is no traversal to reason about.
+	if strings.ContainsAny(rest, "/.") {
+		http.NotFound(w, r)
+		return
+	}
+	body, err := src.fs.ReadFile(rest + ".md")
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
-
-	title := name
-	if i := bytes.IndexByte(src, '\n'); i > 0 {
-		title = strings.TrimSpace(strings.TrimPrefix(string(src[:i]), "#"))
+	title := rest
+	if i := bytes.IndexByte(body, '\n'); i > 0 {
+		title = strings.TrimSpace(strings.TrimPrefix(string(body[:i]), "#"))
 	}
+	s.renderMarkdown(w, set, title, body)
+}
 
+// documentIndex lists a set, so /spec and /docs are not dead ends.
+func (s *server) documentIndex(w http.ResponseWriter, set string) {
+	src := served[set]
+	entries, _ := src.fs.ReadDir(".")
+	var b bytes.Buffer
+	fmt.Fprintf(&b, "# BirdView %s documents\n\n", src.kind)
+	for _, e := range entries {
+		name := strings.TrimSuffix(e.Name(), ".md")
+		line, _ := src.fs.ReadFile(e.Name())
+		title := name
+		if i := bytes.IndexByte(line, '\n'); i > 0 {
+			title = strings.TrimSpace(strings.TrimPrefix(string(line[:i]), "#"))
+		}
+		fmt.Fprintf(&b, "- [%s](/%s/%s)\n", title, set, name)
+	}
+	s.renderMarkdown(w, set, "BirdView "+src.kind+" documents", b.Bytes())
+}
+
+func (s *server) renderMarkdown(w http.ResponseWriter, set, title string, src []byte) {
 	var buf bytes.Buffer
-	if err := markdown.Convert(src, &buf); err != nil {
-		log.Printf("birdview: rendering %s: %v", name, err)
+	if err := markdown[set].Convert(src, &buf); err != nil {
+		log.Printf("birdview: rendering %q: %v", title, err)
 		http.Error(w, "could not render that document", http.StatusInternalServerError)
 		return
 	}
@@ -1969,13 +2015,64 @@ func (s *server) docs(w http.ResponseWriter, r *http.Request) {
 	}{title, template.HTML(buf.String())})
 }
 
+// repoLinks rewrites the repository-relative links these documents carry
+// into the paths BirdView serves them at.
+//
+// **Rewritten at render time, not in the files.** `../spec/product.md` is
+// the correct link in a repository checkout and `/spec/product` is the
+// correct one in a browser; editing the files would fix the second by
+// breaking the first, and these are served precisely because they are the
+// files the repository carries.
+//
+// The `base` is the set the document being rendered belongs to, because a
+// bare sibling link means different things in each: `product.md` inside
+// spec/ is a requirement document, and the same link inside docs/ is a
+// guide. Rewriting both to /docs/ was the first attempt and sent half the
+// spec to a 404.
+type repoLinks struct{ base string }
+
+var repoLink = regexp.MustCompile(`^(?:\.\./)?(spec|docs)(?:/([a-z-]+?)(?:\.md)?)?(#.*)?$`)
+
+func (t repoLinks) Transform(doc *goldmarkast.Document, reader goldmarktext.Reader, _ goldmarkparser.Context) {
+	_ = goldmarkast.Walk(doc, func(n goldmarkast.Node, entering bool) (goldmarkast.WalkStatus, error) {
+		link, ok := n.(*goldmarkast.Link)
+		if !entering || !ok {
+			return goldmarkast.WalkContinue, nil
+		}
+		m := repoLink.FindStringSubmatch(string(link.Destination))
+		if m == nil {
+			// A bare sibling document, as docs/ links to its neighbours.
+			if sib := regexp.MustCompile(`^([a-z-]+)\.md(#.*)?$`).
+				FindStringSubmatch(string(link.Destination)); sib != nil {
+				link.Destination = []byte("/" + t.base + "/" + sib[1] + sib[2])
+			}
+			return goldmarkast.WalkContinue, nil
+		}
+		dest := "/" + m[1] + "/"
+		if m[2] != "" {
+			dest += m[2]
+		}
+		link.Destination = []byte(dest + m[3])
+		return goldmarkast.WalkContinue, nil
+	})
+}
+
 // markdown renders the served documents. GFM tables are enabled because the
 // documents use them heavily -- the source tables and the work-arising list
 // are tables -- and without the extension they render as runs of pipes.
 //
 // Raw HTML in the source is NOT passed through: these files are ours, but a
 // renderer that emits whatever HTML it is given is a habit worth not having.
-var markdown = goldmark.New(
-	goldmark.WithExtensions(extension.Table, extension.Strikethrough, extension.Linkify),
-	goldmark.WithRendererOptions(goldmarkhtml.WithHardWraps()),
-)
+var markdown = map[string]goldmark.Markdown{
+	"docs": newMarkdown("docs"),
+	"spec": newMarkdown("spec"),
+}
+
+func newMarkdown(base string) goldmark.Markdown {
+	return goldmark.New(
+		goldmark.WithExtensions(extension.Table, extension.Strikethrough, extension.Linkify),
+		goldmark.WithParserOptions(goldmarkparser.WithASTTransformers(
+			goldmarkutil.Prioritized(repoLinks{base}, 100))),
+		goldmark.WithRendererOptions(goldmarkhtml.WithHardWraps()),
+	)
+}
