@@ -119,15 +119,32 @@ type Grouping struct {
 	Zones []string
 }
 
-// Groupings in the order the selector offers them. The derived one comes
-// first: it is the one that answers a question about birds, which is what
-// this app is for.
+// Groupings in the order the selector offers them. The hand-drawn one comes
+// first: a reader arrives looking for their own state, and finds it fastest
+// on the map they already carry. The derived grouping is the more interesting
+// answer, but it is the one you go looking for, not the one you need first.
 //
 // Within each, zones run roughly west to east and then outward, which is how
 // a reader scans for their own state. **Pelagic is last** in both: it is the
 // only group that is not a place anyone lives, and a reader looking for their
 // state should not have to scroll past the open ocean to find it.
 var Groupings = []Grouping{
+	{
+		Name: ByGeography,
+		Note: "The usual map, for finding your state quickly. Drawn by hand, not measured.",
+		Zones: []string{
+			"Alaska & the North",
+			"Pacific",
+			"Mountain West",
+			"Southwest",
+			"Great Plains",
+			"Midwest",
+			"Northeast",
+			"Southeast",
+			"Outlying Islands",
+			"Pelagic",
+		},
+	},
 	{
 		Name: ByBirds,
 		Note: "Grouped by how much their bird lists actually overlap, measured from the records.",
@@ -148,22 +165,6 @@ var Groupings = []Grouping{
 			"Mid-Atlantic",
 			"New England & the Maritimes",
 			"Caribbean",
-			"Pelagic",
-		},
-	},
-	{
-		Name: ByGeography,
-		Note: "The usual map, for finding your state quickly. Drawn by hand, not measured.",
-		Zones: []string{
-			"Alaska & the North",
-			"Pacific",
-			"Mountain West",
-			"Southwest",
-			"Great Plains",
-			"Midwest",
-			"Northeast",
-			"Southeast",
-			"Outlying Islands",
 			"Pelagic",
 		},
 	},

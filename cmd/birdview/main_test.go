@@ -3242,10 +3242,15 @@ func TestRegionSelectorIsGroupedWithPelagicLast(t *testing.T) {
 		}
 	}
 
-	// The two must actually be the two P-013 names, not the same one twice.
+	// The two must actually be the two P-013 names, not the same one twice,
+	// and the hand-drawn one is rendered first: a reader arrives looking for
+	// their own state, not for a cluster analysis.
 	if !strings.Contains(sel, `<div class="ghdr">Common birds<em>`) ||
 		!strings.Contains(sel, `<div class="ghdr">Geographic<em>`) {
 		t.Error("the selector does not offer both a measured and a hand-drawn grouping")
+	}
+	if first := html.UnescapeString(sel[blocks[0][2]:blocks[0][3]]); first != "Geographic" {
+		t.Errorf("the first grouping rendered is %q, want Geographic", first)
 	}
 }
 

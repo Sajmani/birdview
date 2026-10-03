@@ -252,6 +252,10 @@ grouping scatters the Arctic — Alaska with the Pacific Northwest, Yukon and th
 Territories with the Prairies, Nunavut alone — which is true of the birds and useless for
 navigation.
 
+**Geographic is offered first.** A reader arrives wanting their own state, and finds it fastest
+on the map they already know; the derived grouping is the more interesting answer, but it is
+the one you go looking for rather than the one you need on arrival.
+
 **Neither grouping may be presented as the other.** The UI labels which is which, because a
 hand-drawn grouping shown as measurement is the failure [CR-023](decisions.md#cr-023) was
 written to correct: the previous zones were defended with a statistic that turned out to be an

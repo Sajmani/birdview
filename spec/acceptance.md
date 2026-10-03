@@ -1350,7 +1350,8 @@ others; no parameter shows all; and an explicitly empty `region=` shows none, th
 absent-versus-empty distinction the family filter draws.
 
 **Assertions, the selector:** the box offers **both groupings** of [P-013](product.md#p-013),
-each labelled and each carrying a note saying whether it is measured or drawn; within each,
+each labelled and each carrying a note saying whether it is measured or drawn, with
+**Geographic first**; within each,
 regions are grouped into zones, **Pelagic is the last zone**, and every region is present, each
 grouping being a partition. Each zone header toggles its whole group; **All** toggles
 everything; and each chip carries the standard postal abbreviation with the full name beside it.

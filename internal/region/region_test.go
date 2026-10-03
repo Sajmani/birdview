@@ -76,6 +76,13 @@ func TestGroupingsAreDistinct(t *testing.T) {
 			t.Errorf("grouping %q has no note saying whether it is measured or drawn", g.Name)
 		}
 	}
+	// The hand-drawn grouping is offered first: a reader arrives looking for
+	// their own state, not for a cluster analysis.
+	if Groupings[0].Name != ByGeography {
+		t.Errorf("the first grouping offered is %q, want %q — the map a reader "+
+			"already carries comes before the derived one",
+			Groupings[0].Name, ByGeography)
+	}
 	if ZonesOf("no such grouping") != nil {
 		t.Error("ZonesOf invented a grouping that does not exist")
 	}
