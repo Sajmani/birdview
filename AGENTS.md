@@ -77,6 +77,30 @@ Run all four before declaring work finished (see Project bindings in
 `python3 spec/check/goals.py`, `spec/check/pins.py`, `spec/check/refs.py` — go with them whenever
 `spec/` is touched.
 
+### Leave a server running, every turn
+
+**End every turn with a freshly built server on <http://localhost:8080>**, whether or not
+anything changed, so the owner can reload and see the current state without asking. Rebuild
+first — the point is that a reload shows *this* turn's work.
+
+```
+go build -o /tmp/birdview-serve ./cmd/birdview && pkill -f /tmp/birdview-serve
+/tmp/birdview-serve            # background it, FROM THE REPO ROOT
+```
+
+Three ways this goes wrong, all already paid for:
+
+- **It must run from the repo root.** `-data` defaults to the relative
+  `web/data/species.json`, so started anywhere else it exits with
+  `open web/data/species.json: no such file or directory`.
+- **`kill %1` does not reap `go run`'s child.** The parent exits, the server keeps the port, and
+  the next start fails with `address already in use` while the old process still answers.
+  Build to a path and `pkill -f` that path.
+- **A stale `-dev` server is worse than no server.** `-dev` reads templates from disk per
+  request but the Go binary is frozen at start, so a new template field reports
+  `can't evaluate field X` against the old struct — a template bug that is really a stale
+  process. Rebuild and restart before believing any dev-mode error.
+
 ## Working on a change
 
 Changes follow the loop in [spec/process.md](spec/process.md): spec first, then acceptance
