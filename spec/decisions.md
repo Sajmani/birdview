@@ -1650,12 +1650,88 @@ renamed region cannot keep a stale URL ([AC-088](acceptance.md#ac-088)).
 would not be later — the same argument [CR-022](#cr-022) made for species URLs. Accepting both
 forms would mean two identifiers for one region and a second thing to keep in step.
 
+## CR-025 — Families are grouped two ways, and habitat is not one of them
+
+**Subject:** `presentation.family_filter.groups`
+**Kind:** Direct — the taxonomic grouping is unusable for navigation, and the obvious
+replacement turned out to be unsupportable
+**Date:** 2026-10-03 · **Decided by:** Sameer
+
+### What changed
+
+The family selector offers **two groupings**. **Birder groups** is hand-drawn and offered
+first — Shorebirds, Birds of Prey, Owls & Nightbirds. **Taxonomic order** is the existing
+grouping from AviList. A family sits in exactly one group of each, so it appears twice in the
+selector, exactly as a region now does ([CR-023](#cr-023)).
+
+### Why the taxonomic grouping needed company
+
+It is not wrong, it is lopsided. **43 of 90 families sit in Passeriformes**, rendered as one
+chip block labelled "Perching Birds", while **15 orders hold exactly one family**. For 25 of
+26 orders the taxonomic name is perfectly intuitive — Waterfowl, Owls, Tubenoses, Grebes — so
+the whole navigation problem is one order, and no relabelling fixes it.
+
+### Why not habitat, which was the first idea
+
+AVONET carries a `Habitat` field per species, is already vendored under CC BY 4.0, and is
+already read by the ingest — so this was free, and it failed anyway. **Habitat is a property of
+a species, not of a family.** Assigning each family the habitat most of its species use
+misfiles:
+
+| Buckets | Species misfiled |
+| --- | --- |
+| AVONET's 12 habitats | 289/818 (35%) |
+| collapsed to 5 | 202 (25%) |
+| collapsed to 4 | 191 (23%) |
+| collapsed to 3 — Land / Fresh Water / Coast & Ocean | 73 (9%) |
+
+The breakage is worst in the families a reader cares most about: Gulls and Terns split Marine
+18 / Coastal 18, a dead tie; New World Sparrows spread over five habitats; Sandpipers Wetland
+27, Grassland 12, Coastal 7. Even Ducks, Swans and Geese is only 72% Wetland.
+
+Nor is this a quirk of habitat. Across every AVONET trait, families large enough to matter are
+almost never homogeneous — **only 12% of families with ten or more species share one habitat**
+(16% for migration, 24% for lifestyle, 36% for trophic niche), and **81% of species sit in a
+family that is mixed**. The families that look pure are mostly the 23 that hold a single
+species. Three buckets is the only honest cut and its shape is Land 60 / Fresh Water 15 /
+Coast & Ocean 14, which is true and not worth a row of chips.
+
+**A hand-drawn grouping escapes this entirely, because it claims nothing about the birds.**
+"Shorebirds" says Scolopacidae is a family birders call a shorebird. It does not say every
+sandpiper lives on a shore, so there is nothing to misfile.
+
+### Why this is not merely taxonomy relabelled
+
+The two groupings disagree for **76 of 90 families (84%)**; only 14 are filed the same way by
+both. Perching Birds splits across twelve birder groups; Birds of Prey draws from three orders
+(Hawks and Eagles, Falcons, New World Vultures); Herons, Ibises & Storks from three. Selecting
+in one grouping and watching the selection scatter in the other is the point, as it is for
+regions.
+
+### What it costs
+
+**Every family chip renders twice**, once per grouping, as region chips already do.
+
+**The grouping is this project's editorial opinion**, and the UI says so where it says the
+Geographic region grouping is hand-drawn. It is not a measurement and must never be presented
+as one.
+
+**The table is keyed on the scientific family name.** [CR-022](#cr-022) renamed **55 of 90**
+English family names and only **2** scientific ones, so the English name is the fragile key.
+
+### What it does not do
+
+**It adds no badge to a tile.** The tile carries the family badge alone
+([P-031](product.md#p-031)); groupings beyond family are navigation. Every tile is one height
+and a second badge costs a line on all of them.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
 
 | Item | Owner | Gate |
 | --- | --- | --- |
+| Group families by **what is seen together**: crawl eBird checklists and cluster families by co-occurrence, as a third grouping ([CR-025](#cr-025)). This is the honest version of the habitat idea — co-occurrence is natively a *family*-level property, so nothing is averaged and nothing is misfiled. Two findings make it tractable, both measured 2026-10-03: GBIF's eBird export carries **no `eventID`**, but a checklist reconstructs from `recordedBy` + `eventDate` + rounded coordinates **only from a complete slice** — a 0.1% sample of a state-month gives 96% singleton checklists, while one county-day (1–3k records) gives real ones, median 19 species. A 602-checklist probe already separated waterbirds, woodland songbirds, open country, feeder birds and **town birds** (pigeons, House Sparrows, starlings), leaving hawks and crows unattached because they occur with everything. Expect the rare pelagic and Hawaiian families to be unplaceable, as the atolls were | Sameer | opportunistic; needs a stratified crawl of ~400–800 county-days into a committed table |
 | Retrieve, hash and vendor `fox-wingspan`; write its `PROVENANCE.md` | — | before ingest reads it |
 | Write `acceptance.md` — Gate 2, before any code | — | now |
 | Ask Ricklefs or ESA for permission to use the measured-length data | Sameer | **after a working demo** |

@@ -265,6 +265,37 @@ Zone membership is **presentation only**. It changes which chips a group toggle 
 nothing about which birds a region contains — that is [P-011](#p-011)'s 1-ppm rule, and it is
 computed per region, never per zone.
 
+### P-014 — Families are grouped two ways
+Subject: `presentation.family_filter.groups`
+Goals: G-002
+
+The family selector offers **two groupings** of the same families
+([CR-025](decisions.md#cr-025)), each a **partition**: every family sits in exactly one group
+of each, appears exactly twice in the selector, and is unreachable from neither.
+
+**Birder groups** is hand-drawn and offered **first** — Shorebirds, Birds of Prey, Owls &
+Nightbirds, the names a field guide uses. **Taxonomic order** is AviList's, and is second.
+
+**Birder groups exist because the taxonomic grouping cannot navigate.** It is not wrong, it is
+lopsided: 43 of 90 families sit in Passeriformes under one label, and 15 orders hold exactly
+one family. For the other 25 orders the taxonomic name is already intuitive, so the whole
+problem is one order and no relabelling fixes it.
+
+**The grouping is editorial and claims nothing about the birds, and the UI says so.** This is
+not modesty, it is the only thing that makes the grouping defensible: "Shorebirds" says
+Scolopacidae is a family birders call a shorebird, not that every sandpiper lives on a shore.
+
+**Grouping families by an ecological trait is forbidden**, having been measured and rejected.
+Habitat is a property of a species, not a family: only 12% of families with ten or more
+species share one habitat, 81% of species sit in a family that is mixed, and assigning each
+family its majority habitat misfiles 23–35% of birds. A grouping that files a quarter of the
+birds under a habitat they do not use is the kind of claim this project does not make. The
+honest form of that idea is co-occurrence, which is natively a family-level property; it is
+Work arising, not this.
+
+Group membership is **presentation only**. It changes which chips a group toggle selects and
+nothing about which birds a family contains.
+
 ---
 
 ## Ordering and sectioning
@@ -333,6 +364,14 @@ Each species is one **tile**, laid out top to bottom:
 2. the diagram, **vertically centered** in its area, carrying the **mass cube** in its lower-left
    corner ([CR-020](decisions.md#cr-020)) and **no labels of any kind**;
 3. the main metrics — **length, wingspan, mass** — named in full and in the selected unit system.
+
+**The family badge is the only badge, and the count is the rule.** A family is the one grouping
+a tile names. The others — the birder groups and the taxonomic order of [P-014](#p-014), and any
+later grouping such as co-occurrence — are **navigation, and never appear on a tile**. Two
+reasons, both already load-bearing elsewhere: every tile is one height and a second badge costs
+a line on all of them, and the badge is part of the single diagram vocabulary
+[P-048](#p-048) holds the UI to. Stated as a count rather than a list because a list invites
+one more entry.
 
 The metrics are **spelled out**, not abbreviated to `L`, `W` and `M`. The initials cost a reader
 who has not yet learned them, which is every reader on their first tile, and they save a line of

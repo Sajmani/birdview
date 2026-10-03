@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"birdview/internal/dataset"
+	"birdview/internal/family"
 	"birdview/internal/inat"
 	"birdview/internal/region"
 	"birdview/internal/view"
@@ -93,15 +94,96 @@ type familyOption struct {
 	OrderCommon      string
 }
 
-// orderGroup is one block of the family selector. Grouping by order in the
-// checklist's taxonomic sequence matches how every field guide is arranged,
-// and it is what lets family colors repeat across orders (P-010, P-005).
+// orderGroup is one group of families inside a block of the selector --
+// historically an order, now either an order or a birder group (P-014).
+// Grouping by order in the checklist's taxonomic sequence matches how every
+// field guide is arranged, and it is what lets family colors repeat across
+// orders (P-010, P-005).
 type orderGroup struct {
 	Order    string
-	Common   string
-	Selected bool         // every family in the order is filtered in
+	Common   string       // the order's English name; empty for a birder group
+	Selected bool         // every family in the group is filtered in
 	URL      template.URL // toggles the whole group
 	Families []familyRow
+}
+
+// familyGroupingBlock is one way of carving the families up, rendered as its
+// own labelled block (P-014). The same shape as the region selector's
+// groupingBlock, and it reuses that CSS.
+type familyGroupingBlock struct {
+	Name   string
+	Note   string
+	Groups []orderGroup
+}
+
+// groupFamilies gathers family rows into one block's groups.
+//
+// `keyOf` names the group a family belongs to and its subtitle. `order` fixes
+// the sequence groups are offered in; passing nil keeps the order families
+// first appear in, which for the taxonomic block is checklist sequence.
+//
+// A family whose group is unknown -- one AviList added that the birder table
+// has not been told about -- is gathered under the empty name rather than
+// dropped, so it stays reachable and AC-089 reports it.
+func (s *server) groupFamilies(r *http.Request, selected map[string]bool, rows []familyRow,
+	order []string, keyOf func(familyOption) (string, string)) []orderGroup {
+
+	var out []orderGroup
+	at := map[string]int{}
+	ensure := func(name, common string) int {
+		if i, ok := at[name]; ok {
+			return i
+		}
+		out = append(out, orderGroup{Order: name, Common: common})
+		at[name] = len(out) - 1
+		return len(out) - 1
+	}
+	// Seed in the requested order, so an empty group still holds its place
+	// and the sequence does not depend on which families happen to exist.
+	for _, name := range order {
+		ensure(name, "")
+	}
+	for _, row := range rows {
+		name, common := keyOf(row.familyOption)
+		i := ensure(name, common)
+		out[i].Families = append(out[i].Families, row)
+	}
+	// Drop groups no family landed in, which only happens for a seeded name
+	// the dataset has no families for.
+	kept := out[:0]
+	for _, g := range out {
+		if len(g.Families) > 0 {
+			kept = append(kept, g)
+		}
+	}
+	out = kept
+
+	// A group toggle selects its whole group, or clears it when the group is
+	// already fully selected. Deriving "selected" from the families rather
+	// than tracking it separately means the two can never disagree.
+	for i := range out {
+		g := &out[i]
+		g.Selected = true
+		for _, f := range g.Families {
+			if !selected[f.Name] {
+				g.Selected = false
+				break
+			}
+		}
+		next := map[string]bool{}
+		for k := range selected {
+			next[k] = true
+		}
+		for _, f := range g.Families {
+			if g.Selected {
+				delete(next, f.Name)
+			} else {
+				next[f.Name] = true
+			}
+		}
+		g.URL = s.familyURL(r, next)
+	}
+	return out
 }
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) { s.mux.ServeHTTP(w, r) }
@@ -341,7 +423,9 @@ type familyRow struct {
 
 type pageData struct {
 	Sections []sectionView
-	Groups   []orderGroup
+	// FamilyGroupings is the family selector (P-014): two groupings of the
+	// same families, each a labelled block of groups, birder groups first.
+	FamilyGroupings []familyGroupingBlock
 	// RegionGroupings is the region selector (P-011): two groupings of the
 	// same regions (P-013), each a labelled block of zones.
 	RegionGroupings []groupingBlock
@@ -664,7 +748,10 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			return template.URL(string(pickURL(r, toggled(live, id))) + "#" + tileAnchor(id))
 		}
 	}
-	byOrder := map[string]int{}
+	// One row per family, independent of grouping: a family's own toggle does
+	// the same thing whichever block it is clicked in. The rows are then
+	// grouped twice (P-014).
+	rows := make([]familyRow, 0, len(s.fams))
 	for _, f := range s.fams {
 		next := map[string]bool{}
 		for k := range selected {
@@ -675,39 +762,20 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		} else {
 			next[f.Name] = true
 		}
-		row := familyRow{familyOption: f, Selected: selected[f.Name], URL: s.familyURL(r, next)}
-		gi, ok := byOrder[f.Order]
-		if !ok {
-			page.Groups = append(page.Groups, orderGroup{Order: f.Order, Common: f.OrderCommon})
-			gi = len(page.Groups) - 1
-			byOrder[f.Order] = gi
-		}
-		page.Groups[gi].Families = append(page.Groups[gi].Families, row)
+		rows = append(rows, familyRow{familyOption: f, Selected: selected[f.Name], URL: s.familyURL(r, next)})
 	}
-	// An order toggle selects its whole group, or clears it when the group is
-	// already fully selected. Deriving "selected" from the families rather than
-	// tracking it separately means the two can never disagree.
-	for i := range page.Groups {
-		g := &page.Groups[i]
-		g.Selected = true
-		for _, f := range g.Families {
-			if !selected[f.Name] {
-				g.Selected = false
-				break
-			}
-		}
-		next := map[string]bool{}
-		for k := range selected {
-			next[k] = true
-		}
-		for _, f := range g.Families {
-			if g.Selected {
-				delete(next, f.Name)
-			} else {
-				next[f.Name] = true
-			}
-		}
-		g.URL = s.familyURL(r, next)
+	page.FamilyGroupings = []familyGroupingBlock{
+		// Birder groups first: a reader meets the grouping they can read
+		// before the one where 43 of 90 families share a label (P-014).
+		{Name: family.ByBirders, Note: family.Note,
+			Groups: s.groupFamilies(r, selected, rows, family.Names(),
+				func(f familyOption) (string, string) {
+					g, _ := family.GroupOf(f.Name)
+					return g, ""
+				})},
+		{Name: "Taxonomic order", Note: "AviList's taxonomy, in checklist sequence — the order a field guide runs in.",
+			Groups: s.groupFamilies(r, selected, rows, nil,
+				func(f familyOption) (string, string) { return f.Order, f.OrderCommon })},
 	}
 	for i, sec := range secs {
 		sv := sectionView{Index: i + 1, Count: len(sec.Species),

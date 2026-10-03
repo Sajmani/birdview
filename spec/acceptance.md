@@ -1442,6 +1442,39 @@ startup and **panics** there, naming both regions. That is deliberate — a coll
 region silently unreachable, so it should stop the binary rather than wait for a test run — and
 it is recorded here because "watched failing" meant watching a panic, not a red assertion.
 
+### AC-089 — The family groupings partition, differ, and stay off the tile
+**Verifies:** P-014, P-031 · **Level:** code · **Method:** unit tests over the grouping table
+against the compiled dataset, plus a rendering test over the selector and a tile
+
+**Assertions, the partition:** within each grouping, every family of the dataset sits in
+exactly one group, and every group holds at least one family. Checked **against the compiled
+dataset, not a fixture** — the family list comes from AviList, which renamed 55 of 90 English
+family names in [CR-022](decisions.md#cr-022), so a family that is added or renamed must fail
+a test rather than silently vanish from the control.
+
+**Assertions, distinctness:** the two groupings genuinely disagree. Two identical groupings
+would satisfy every other assertion here and tell the reader nothing, and the whole case for
+[P-014](product.md#p-014) is that they disagree for 76 of 90 families — *Birds of Prey* draws
+from three orders, *Perching Birds* scatters across twelve birder groups.
+
+**Assertions, order:** birder groups render first. A reader meets the grouping they can read
+before the one that is lopsided.
+
+**Assertions, the tile:** a tile carries **exactly one badge**. This is the assertion that
+keeps [P-031](product.md#p-031) true when a third grouping arrives: without a count, "the other
+groupings need no badge" is a sentence in a decision record rather than a property of the code.
+It is a count, not a list of forbidden badges, because a list invites one more entry.
+
+**Status: verified 2026-10-03 — passing, and watched failing** by moving Corvidae out of the
+table, which reports both the orphaned family and the count mismatch; by making the birder
+grouping return `f.Order`, so the two blocks become the same grouping twice; by rendering
+Taxonomic order first; and by adding an order badge beside the family badge, which makes 6 birds
+carry 12 badges.
+
+The partition check **skips** rather than fails when `web/data/species.json` is absent, since
+the dataset is a build artifact and is not committed (T-005). That is a real gap: on a machine
+that has never run the ingest, this criterion is silent.
+
 ---
 
 ## Traceability
@@ -1458,11 +1491,12 @@ it is recorded here because "watched failing" meant watching a panic, not a red 
 | P-010 | AC-056, AC-075 | |
 | P-011, P-012 | AC-086, AC-088 | |
 | P-013 | AC-086, AC-087 | |
+| P-014 | AC-089 | |
 | P-020, P-021 | AC-020 | |
 | P-022, P-023 | AC-021 | |
 | P-024 | AC-022 | |
 | P-030 | AC-054 | |
-| P-031 | AC-055, AC-077, AC-082 | |
+| P-031 | AC-055, AC-077, AC-082, AC-089 | |
 | P-032 | AC-057 | |
 | P-033 | AC-056 | |
 | P-034 | AC-043, AC-054, AC-058 | |

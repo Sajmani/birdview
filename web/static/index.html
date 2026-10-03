@@ -188,37 +188,50 @@
   <div class="ctrlhelp">
       <dl>
         <div class="ctrl"><dt>Family</dt>
-        <dd>Everything is selected when you arrive. Click a family to drop it, an order to drop
-          the whole group, or <b>All</b> to clear the lot and start picking. Grouped by taxonomic
-          order in checklist sequence &mdash; the order field guides use.</dd></div>
+        <dd>Everything is selected when you arrive. Click a family to drop it, a group to drop
+          the whole lot of them, or <b>All</b> to clear everything and start picking.</dd></div>
+        <div class="ctrl note"><dt>Groups</dt>
+        <dd>The same families, grouped two ways; pick from either. <b>Birder groups</b> are the
+          names a field guide uses &mdash; Shorebirds, Birds of Prey, Owls &amp; Nightbirds.
+          They are drawn by hand and say how birders talk, <b>not</b> where a bird lives:
+          &ldquo;Shorebirds&rdquo; means the sandpipers are a family birders call shorebirds,
+          not that every sandpiper is on a beach. <b>Taxonomic order</b> is AviList's, in
+          checklist sequence. The two disagree for most families, which is the interesting
+          part &mdash; Birds of Prey draws from three orders, and the 43 families of Perching
+          Birds scatter across a dozen birder groups.</dd></div>
       </dl>
   </div>
   <div class="row chips">
     <span class="lbl">Family</span>
     <a class="btn{{if .AllSelected}} on{{end}}" href="{{.AllURL}}"
        title="{{if .AllSelected}}Clear every selection{{else}}Select every family{{end}}">All</a>
-    <span class="hint">grouped by order, in checklist sequence</span>
+    <span class="hint">grouped two ways</span>
   </div>
-  <div class="ordergroups">
-    {{range .Groups}}
-    <div class="ogroup">
-      <a class="btn ohdr{{if .Selected}} on{{end}}" href="{{.URL}}"
-         title="{{if .Selected}}Clear{{else}}Select{{end}} every family in {{.Order}}">{{.Order}}<em>{{.Common}}</em></a>
-      {{/* The families sit in their own box so a long list wraps inside the
-           column beside the order header, not back to the page margin. Without
-           it the chips are siblings of the header in one wrapping flex row, and
-           Passeriformes' second line starts under the header. */}}
-      <div class="ofams">
-        {{range .Families}}
-        <a class="chip{{if .Selected}} on{{end}}" href="{{.URL}}"
-           style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">
-          {{.Name}}<em>{{.Common}}</em>
-        </a>
-        {{end}}
+  {{range .FamilyGroupings}}
+  <div class="grouping">
+    <div class="ghdr">{{.Name}}<em>{{.Note}}</em></div>
+    <div class="ordergroups">
+      {{range .Groups}}
+      <div class="ogroup">
+        <a class="btn ohdr{{if .Selected}} on{{end}}" href="{{.URL}}"
+           title="{{if .Selected}}Clear{{else}}Select{{end}} every family in {{.Order}}">{{.Order}}{{if .Common}}<em>{{.Common}}</em>{{end}}</a>
+        {{/* The families sit in their own box so a long list wraps inside the
+             column beside the group header, not back to the page margin. Without
+             it the chips are siblings of the header in one wrapping flex row, and
+             Passeriformes' second line starts under the header. */}}
+        <div class="ofams">
+          {{range .Families}}
+          <a class="chip{{if .Selected}} on{{end}}" href="{{.URL}}"
+             style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">
+            {{.Name}}<em>{{.Common}}</em>
+          </a>
+          {{end}}
+        </div>
       </div>
+      {{end}}
     </div>
-    {{end}}
   </div>
+  {{end}}
 </details>
 
 <p class="count">{{.Shown}} of {{.Total}} species</p>

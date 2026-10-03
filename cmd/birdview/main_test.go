@@ -914,7 +914,8 @@ func TestAllToggle(t *testing.T) {
 		`<a class="btn"[^>]*href="([^"]+)"[^>]*>All`, "the family All control on an emptied page"))
 	_, all := get(t, s, restore)
 	_, _, wantOrders := fixtureCounts()
-	if n := strings.Count(box(t, all, "families"), `class="btn ohdr on"`); n != wantOrders {
+	taxo := grouping(t, box(t, all, "families"), "Taxonomic order")
+	if n := strings.Count(taxo, `class="btn ohdr on"`); n != wantOrders {
 		t.Errorf("%d of %d orders selected after re-selecting All", n, wantOrders)
 	}
 	if !strings.Contains(all, "Great Blue Heron") {
@@ -934,10 +935,11 @@ func TestDefaultSelectsEverything(t *testing.T) {
 		t.Error("All is not selected on a fresh page")
 	}
 	_, wantFams, wantOrders := fixtureCounts()
-	if n := strings.Count(fams, `class="btn ohdr on"`); n != wantOrders {
+	taxo := grouping(t, fams, "Taxonomic order")
+	if n := strings.Count(taxo, `class="btn ohdr on"`); n != wantOrders {
 		t.Errorf("%d of %d orders selected on a fresh page", n, wantOrders)
 	}
-	if n := strings.Count(fams, `class="chip on"`); n != wantFams {
+	if n := strings.Count(taxo, `class="chip on"`); n != wantFams {
 		t.Errorf("%d of %d families selected on a fresh page", n, wantFams)
 	}
 	// Everywhere is selected on arrival too, and by the same rule (P-011).
@@ -3128,6 +3130,26 @@ func box(t *testing.T, body, id string) string {
 	return rest[:j]
 }
 
+// grouping narrows a panel to one of its grouping blocks, by heading.
+//
+// Both selectors now render every chip twice, once per grouping (P-013,
+// P-014), so a count taken over a whole panel counts each thing twice and an
+// assertion about "the groups" is really an assertion about two groupings at
+// once. Scoping is what keeps those counts meaningful.
+func grouping(t *testing.T, panel, name string) string {
+	t.Helper()
+	open := `<div class="ghdr">` + name + `<em>`
+	i := strings.Index(panel, open)
+	if i < 0 {
+		t.Fatalf("no grouping headed %q in this panel", name)
+	}
+	rest := panel[i+len(open):]
+	if k := strings.Index(rest, `<div class="ghdr">`); k >= 0 {
+		return rest[:k] // stop at the next grouping
+	}
+	return rest
+}
+
 // TestRegionFilter asserts P-011 and its composition with family (P-012).
 //
 // Verifies: P-011, P-012. Criterion: AC-086.
@@ -3294,5 +3316,92 @@ func TestRegionURLsCarrySlugsNotGADMIDs(t *testing.T) {
 	// The ocean gloss survives, in the tooltip rather than the label.
 	if !strings.Contains(sel, `title="North Pacific, off the west coast"`) {
 		t.Error("the North Pacific chip lost the gloss saying which water it means")
+	}
+}
+
+// TestFamilySelectorOffersBothGroupings checks the control: two labelled
+// blocks, birder groups first, each holding every family (P-014).
+//
+// Verifies: P-014. Criterion: AC-089.
+func TestFamilySelectorOffersBothGroupings(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/")
+	fams := box(t, body, "families")
+
+	blocks := regexp.MustCompile(`<div class="ghdr">([^<]+)<em>([^<]*)</em>`).
+		FindAllStringSubmatch(fams, -1)
+	if len(blocks) != 2 {
+		t.Fatalf("found %d grouping blocks in the family selector, want the two of P-014",
+			len(blocks))
+	}
+	if first := html.UnescapeString(blocks[0][1]); first != "Birder groups" {
+		t.Errorf("the first family grouping is %q, want Birder groups — a reader meets the "+
+			"grouping they can read before the lopsided one", first)
+	}
+	for _, b := range blocks {
+		if strings.TrimSpace(b[2]) == "" {
+			t.Errorf("grouping %q carries no note; a hand-drawn grouping must say so", b[1])
+		}
+	}
+
+	// Each block is a partition, so every family appears in both.
+	nFams, _, _ := 0, 0, 0
+	for _, name := range []string{"Birder groups", "Taxonomic order"} {
+		blk := grouping(t, fams, name)
+		n := strings.Count(blk, `class="chip on"`)
+		if nFams == 0 {
+			nFams = n
+		}
+		if n != nFams {
+			t.Errorf("grouping %q holds %d families, the other holds %d; "+
+				"each grouping must be a partition of the same families", name, n, nFams)
+		}
+		if strings.Count(blk, `class="btn ohdr on"`) == 0 {
+			t.Errorf("grouping %q has no group toggles", name)
+		}
+	}
+
+	// The note must not claim the hand-drawn grouping measures anything.
+	birder := grouping(t, fams, "Birder groups")
+	if !strings.Contains(fams, "Birder groups") || !strings.Contains(birder, "Shorebirds") {
+		t.Error("the birder grouping does not offer the groups P-014 describes")
+	}
+}
+
+// TestTileCarriesExactlyOneBadge pins P-031's count. The family is the one
+// grouping a tile names; the birder group, the order, and any grouping added
+// later are navigation and stay in the controls.
+//
+// A count rather than a list of forbidden badges, because a list invites one
+// more entry — and because every tile is one height, so a second badge costs
+// a line on all of them (AC-082).
+//
+// Verifies: P-031. Criterion: AC-089.
+func TestTileCarriesExactlyOneBadge(t *testing.T) {
+	s := newTestServer(t)
+	for _, path := range []string{"/", "/species/greblu", "/compare?species=greblu&species=annhum"} {
+		code, body := get(t, s, path)
+		if code != http.StatusOK {
+			t.Fatalf("%s: HTTP %d", path, code)
+		}
+		badges := strings.Count(body, `class="badge"`)
+		if badges == 0 {
+			t.Errorf("%s: no family badge at all", path)
+			continue
+		}
+		// One badge per bird shown. On the index that is one per tile; on
+		// the detail and compare pages it is one per species panel.
+		var want int
+		switch path {
+		case "/":
+			want = strings.Count(body, `<a class="tile" href=`)
+		case "/species/greblu":
+			want = 1
+		default:
+			want = 2
+		}
+		if badges != want {
+			t.Errorf("%s: %d birds shown but %d badges; P-031 allows the family badge and "+
+				"no other, so a grouping has leaked onto the tile", path, want, badges)
+		}
 	}
 }
