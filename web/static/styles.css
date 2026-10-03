@@ -56,6 +56,16 @@ footer a:visited { color: var(--accent-visited); }
    heading and subtitle instead of as one run of text. */
 .ghdr em { display: block; margin-top: 4px; font-size: 10.5px; font-style: italic;
            font-weight: 400; color: var(--dim); }
+/* A categorical control (P-015): one row per option, each carrying its count
+   and the publisher's definition. A list rather than chips because the
+   definition is the point -- "Coastal" means something specific and a chip
+   has nowhere to say it. */
+.traits { list-style: none; padding: 0; margin: 6px 0 0; }
+.traits li { display: grid; grid-template-columns: 170px 44px 1fr; align-items: baseline;
+  gap: 8px; padding: 2px 0; }
+.thdr { font-size: 11.5px; }
+.tcount { color: var(--dim); font-size: 11.5px; text-align: right; font-variant-numeric: tabular-nums; }
+.tdesc { color: var(--dim); font-size: 11.5px; }
 .ordergroups { display: flex; flex-direction: column; gap: 7px; margin-top: 6px; }
 /* Two columns: the order toggle, then the families. A grid rather than one
    wrapping flex row, because as siblings of the header the chips wrap back to

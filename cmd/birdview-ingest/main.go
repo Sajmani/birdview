@@ -23,6 +23,7 @@ import (
 	"birdview/internal/palette"
 	"birdview/internal/region"
 	"birdview/internal/taxonomy"
+	"birdview/internal/trait"
 	"birdview/internal/wingspan"
 )
 
@@ -307,6 +308,10 @@ func build(abaPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, string,
 			FamilyColor:    famColors[avr.Family].Hex,
 			FamilyText:     famColors[avr.Family].Text,
 			Order:          avr.Order,
+			// Categorical assignments (P-015). AVONET's primary value, plus
+			// anything BirdView adds, each marked with its origin (P-069).
+			Habitats: trait.HabitatsFor(sp.ScientificName, res.traits.Habitat),
+			Niches:   trait.NichesFor(sp.ScientificName, res.traits.Niche),
 			Segments: dataset.Segments{
 				Bill: dataset.Metric{Value: bill, Prov: traitProv()},
 				Head: dataset.Metric{Value: head, Prov: modeled(headModel)},

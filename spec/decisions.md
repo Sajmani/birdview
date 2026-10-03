@@ -1811,6 +1811,71 @@ is explicable; with several axes it would be unpredictable, which is why
 [AC-089](acceptance.md#ac-089) caps the number of duplicated placements rather than trusting
 restraint.
 
+## CR-027 — Habitat and diet become species-level filters, and the birder grouping is retired
+
+**Subject:** `presentation.trait_filter`
+**Kind:** Reversal — [P-014](product.md#p-014)'s hand-drawn family grouping is withdrawn and
+replaced by published per-species classifiers
+**Date:** 2026-10-03 · **Decided by:** Sameer
+
+### What changed
+
+Two new filters, **Habitat** and **Diet**, taken from AVONET and assigned per species. The
+hand-drawn **Birder groups** are deleted, and `internal/family` with them. Taxonomic order
+stays; the panel is renamed **Species**, families being groups of species already.
+
+### Why the birder grouping had to go
+
+It was a family-level answer to a species-level question, and it failed in exactly that shape
+every time. The errors found by review, in order: pigeons bundled with cuckoos; swifts with
+hummingbirds rather than swallows; Old World warblers folded into the thrushes; the Anhinga — a
+freshwater swamp bird — under *Seabirds*; the Phainopepla, a frugivore, among insect-eating
+flycatchers; Fringillidae called seed-eaters when **only 13 of its 37 species eat seeds**,
+the rest being Hawaiian honeycreepers that sip nectar and probe bark.
+
+Patching each in turn was the wrong move, and the owner named why: **the grouping should sort
+species, not families.** At species level the same AVONET data gets every one of those cases
+right, because the information was never at the family level to begin with.
+
+### Why AVONET's classification rather than our own
+
+Measured earlier and recorded in CR-025: **only 12% of families with ten or more species share
+one habitat, and 81% of species sit in a family that is mixed.** That killed habitat as a
+family grouping. It says nothing against habitat as a *species* trait, which is what AVONET
+publishes and what is adopted here.
+
+Coverage is **839 of 839** through the ingest's existing name resolution — an earlier figure of
+97.5% was an artifact of matching AviList names verbatim instead of using that path.
+
+Three axes were considered. Habitat (2.83 bits) and Trophic Niche (2.49) are adopted;
+**Primary Lifestyle is held back** — 5 options, a third of all birds in `Insessorial`, and a
+`Generalist` bucket of 121 species that tells a reader nothing. Mutual information between the
+axes is 0.66–0.83 bits, so none is redundant; lifestyle is simply the weakest and the most
+jargon-laden.
+
+### What BirdView adds, and the limit on it
+
+AVONET records **one** primary value per species. Five supplementary assignments are added where
+that hides something obvious — American White Pelican on the coast, Double-crested Cormorant
+inland, Great Blue Heron on tidal flats, Osprey over salt water, American Herring Gull at
+landfill. Each is marked **ours** with a reason, never merged into AVONET's.
+
+**Two of the first five did nothing at all**, keyed on `Phalacrocorax auritus` and
+`Larus argentatus` where AviList says `Nannopterum auritum` and `Larus smithsonianus`. A map
+lookup that misses is silent, so [AC-092](acceptance.md#ac-092) now checks every key against the
+dataset.
+
+### What it costs
+
+**The familiar birding vocabulary is gone from the controls.** "Shorebirds", "Sparrows" and
+"Finches" are not habitats or diets, and AVONET has no vocabulary for them. A reader wanting
+the shorebirds selects four families in the taxonomic block. That is the real price of this
+change, and it is accepted because a grouping that is *wrong* about the Anhinga is worse than
+one that is merely less convenient.
+
+**One value per species is still a simplification**, and the control says so rather than
+implying completeness.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

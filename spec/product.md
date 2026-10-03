@@ -265,54 +265,64 @@ Zone membership is **presentation only**. It changes which chips a group toggle 
 nothing about which birds a region contains — that is [P-011](#p-011)'s 1-ppm rule, and it is
 computed per region, never per zone.
 
-### P-014 — Families are grouped two ways
+### P-014 — Families are grouped by taxonomic order
 Subject: `presentation.family_filter.groups`
 Goals: G-002
 
-The family selector offers **two groupings** of the same families
-([CR-025](decisions.md#cr-025)). Every family sits in at least one group of each, so none is
+The family selector groups families by **AviList's taxonomic order**, in checklist sequence.
+Every family has exactly one order, so the grouping is a partition and no family is
 unreachable.
 
-**Taxonomic order is a partition.** A family has one order.
+**It is lopsided, and that is tolerated.** 43 of 90 families sit in Passeriformes under one
+label and 15 orders hold exactly one family. For the other 25 orders the taxonomic name is
+already what a birder would say — Waterfowl, Owls, Tubenoses, Grebes — so the whole awkwardness
+is one order.
 
-**Birder groups need not be**, because a reader's categories overlap: an owl is a bird of prey
-and a bird of the night, and whoever looks under either should find it
-([CR-026](decisions.md#cr-026)). A family may therefore appear in more than one birder group.
+**A hand-drawn "birder groups" grouping was built to fix that, and withdrawn**
+([CR-027](decisions.md#cr-027)). It was a family-level answer to a species-level question and
+failed in that shape repeatedly: an Anhinga filed under seabirds, a frugivorous Phainopepla
+among insect-eating flycatchers, a finch family called seed-eaters when only 13 of its 37
+species eat seeds. The job it was trying to do — let a reader ask for birds of a kind — is done
+per species by [P-015](#p-015), where the data supports it.
 
-**Overlap is permitted only where the tag is true of the whole family.** The test is whether
-*every* member of the family is the thing the group names — every owl is a bird of prey, so
-Strigidae carries both tags honestly. Where the property varies between a family's species, no
-family-level tag is honest in either direction: assigning one misfiles the rest, and assigning
-all of them makes the filter return birds that are not what was asked for. Measured, tagging
-families with every habitat any of their species use drops the precision of "Fresh Water" to
-**38%** — every warbler arrives because one is a wetland bird. Such a property is a **species**
-trait and belongs on a species filter, never on a group.
+**What survives is the lesson.** A category attached to a family must be true of *every*
+species in it. Where the property varies within the family, no family-level tag is honest in
+either direction: assigning one misfiles the rest, and assigning all of them makes the filter
+return birds that were not asked for — tagging families with every habitat their species use
+drops the precision of "Fresh Water" to **38%**, because one wetland warbler brings all fifty.
+Such a property is a species trait and belongs on a species filter.
 
-Overlap must therefore stay **rare**, and a test caps it: a grouping where many families carry
-several tags is a tag cloud, not a grouping.
+### P-015 — Filter by habitat and by diet
+Subject: `presentation.trait_filter`
+Goals: G-002
 
-**Birder groups** is hand-drawn and offered **first** — Shorebirds, Birds of Prey, Owls &
-Nightbirds, the names a field guide uses. **Taxonomic order** is AviList's, and is second.
+Two more filters, **assigned per species**: where a bird mostly lives and what it mostly eats.
+Both are multi-select and compose with region and family ([P-012](#p-012)). Selecting two
+options shows birds in **either**, because picking two places asks for the birds of both places
+and not for the birds that use both.
 
-**Birder groups exist because the taxonomic grouping cannot navigate.** It is not wrong, it is
-lopsided: 43 of 90 families sit in Passeriformes under one label, and 15 orders hold exactly
-one family. For the other 25 orders the taxonomic name is already intuitive, so the whole
-problem is one order and no relabelling fixes it.
+**The classification is AVONET's, taken verbatim, and the definitions are quoted.** The values
+are AVONET's own strings; the control shows a plain-English label beside each — "Eats insects"
+for `Invertivore` — and AVONET's own definition as the description. Translating the word while
+keeping the classification is a far lighter liberty than inventing the classification, and this
+project's record on inventing classifications is [CR-025](decisions.md#cr-025).
 
-**The grouping is editorial and claims nothing about the birds, and the UI says so.** This is
-not modesty, it is the only thing that makes the grouping defensible: "Shorebirds" says
-Scolopacidae is a family birders call a shorebird, not that every sandpiper lives on a shore.
+**Per species is why this works where a family grouping did not.** A family-level habitat
+misfiles 23–35% of birds, because habitat is a property of a species: Double-crested Cormorant
+is marine and Neotropic Cormorant is not, Apapane sips nectar while American Goldfinch eats
+seeds, and an Anhinga is a swamp bird whatever its relatives do. The same data at species level
+is right about all of them.
 
-**Grouping families by an ecological trait is forbidden**, having been measured and rejected.
-Habitat is a property of a species, not a family: only 12% of families with ten or more
-species share one habitat, 81% of species sit in a family that is mixed, and assigning each
-family its majority habitat misfiles 23–35% of birds. A grouping that files a quarter of the
-birds under a habitat they do not use is the kind of claim this project does not make. The
-honest form of that idea is co-occurrence, which is natively a family-level property; it is
-Work arising, not this.
+**AVONET records one primary value, and BirdView may add a second.** A bird that genuinely uses
+two habitats gets one from AVONET. Where that hides something a reader filtering by habitat
+would plainly expect — a Great Blue Heron on a tidal flat — BirdView adds the second and marks
+it **ours**, never merged into the published value ([P-069](#p-069)). Such additions are kept
+few: a long list would be this project quietly substituting its own classification for a
+published one.
 
-Group membership is **presentation only**. It changes which chips a group toggle selects and
-nothing about which birds a family contains.
+**Counts beside each option are of the whole dataset, not the current view.** How many birds
+there are of a kind is a fact about the data; how many are still showing is what the species
+count above the list already says.
 
 ---
 

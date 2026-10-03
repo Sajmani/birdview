@@ -1452,43 +1452,37 @@ startup and **panics** there, naming both regions. That is deliberate — a coll
 region silently unreachable, so it should stop the binary rather than wait for a test run — and
 it is recorded here because "watched failing" meant watching a panic, not a red assertion.
 
-### AC-089 — The family groupings partition, differ, and stay off the tile
-**Verifies:** P-014, P-031 · **Level:** code · **Method:** unit tests over the grouping table
-against the compiled dataset, plus a rendering test over the selector and a tile
+### AC-089 — The family grouping covers every family, and stays off the tile
+**Verifies:** P-014, P-031 · **Level:** code · **Method:** unit tests over the grouping against
+the compiled dataset, plus a rendering test over the selector and a tile
 
-**Assertions, coverage:** within each grouping, every family of the dataset sits in at least
-one group, and every group holds at least one family. Checked **against the compiled dataset,
-not a fixture** — the family list comes from AviList, which renamed 55 of 90 English family
-names in [CR-022](decisions.md#cr-022), so a family that is added or renamed must fail a test
-rather than silently vanish from the control.
+**Assertions, coverage:** every family of the dataset sits in exactly one taxonomic order, and
+every order holds at least one family. Checked **against the compiled dataset, not a fixture** —
+the family list comes from AviList, which renamed 55 of 90 English family names in
+[CR-022](decisions.md#cr-022), so a family that is added or renamed must fail a test rather
+than silently vanish from the control.
 
-Coverage, not a partition: a family may be in two birder groups on purpose
-([CR-026](decisions.md#cr-026)). What remains an error is a family in **no** group, or the same
-family listed twice in **one** group, which panics at init. A separate assertion caps the
-number of duplicated placements, because overlap is for the family that genuinely belongs twice
-and not a general licence — unbounded, the block stops being a grouping and becomes a tag cloud.
-
-**Assertions, distinctness:** the two groupings genuinely disagree. Two identical groupings
-would satisfy every other assertion here and tell the reader nothing, and the whole case for
-[P-014](product.md#p-014) is that they disagree for 76 of 90 families — *Birds of Prey* draws
-from three orders, *Perching Birds* scatters across twelve birder groups.
-
-**Assertions, order:** birder groups render first. A reader meets the grouping they can read
-before the one that is lopsided.
+**The hand-drawn birder grouping this criterion also covered is gone**, retired by
+[CR-027](decisions.md#cr-027) in favour of the per-species filters of
+[P-015](product.md#p-015). Its distinctness and ordering assertions went with it, and so did
+[CR-026](decisions.md#cr-026)'s cap on duplicate placements — there is no hand-drawn grouping
+left for a family to be placed in twice.
 
 **Assertions, the tile:** a tile carries **exactly one badge**. This is the assertion that
 keeps [P-031](product.md#p-031) true when a third grouping arrives: without a count, "the other
 groupings need no badge" is a sentence in a decision record rather than a property of the code.
 It is a count, not a list of forbidden badges, because a list invites one more entry.
 
-**Status: verified 2026-10-03 — passing, and watched failing** by moving Corvidae out of the
-table, which reports both the orphaned family and the count mismatch; by making the birder
-grouping return `f.Order`, so the two blocks become the same grouping twice; by rendering
-Taxonomic order first; by adding an order badge beside the family badge, which makes 6 birds
-carry 12 badges; by dropping Strigidae from both of its groups, leaving it unreachable; and by
-tagging eight more families twice, which trips the cap on duplicated placements at 20.
+**Status: verified 2026-10-03 — passing, and watched failing** by adding an order badge beside
+the family badge, which makes 6 birds carry 12 badges.
 
-The partition check **skips** rather than fails when `web/data/species.json` is absent, since
+Its earlier breaks — moving Corvidae out of the table, collapsing the two groupings into one,
+reversing their order, orphaning Strigidae, tripping the duplicate cap — were all against the
+hand-drawn grouping and went when [CR-027](decisions.md#cr-027) retired it. They are recorded
+here rather than deleted, because a criterion that quietly loses most of its assertions should
+say so.
+
+The coverage check **skips** rather than fails when `web/data/species.json` is absent, since
 the dataset is a build artifact and is not committed (T-005). That is a real gap: on a machine
 that has never run the ingest, this criterion is silent.
 
@@ -1549,6 +1543,35 @@ not serve fails, so a fabricated repository URL cannot pass.
 
 **Status: _pending_.**
 
+### AC-092 — Habitat and diet filter per species, and say where each value came from
+**Verifies:** P-015 · **Level:** code · **Method:** unit tests over the trait table against the
+compiled dataset, plus rendering tests over the controls
+
+**Assertions, the vocabulary:** every value assigned to a species is one the control offers, so
+a bird cannot carry a category nobody can select; every option has a label and a quoted
+definition; and the jargon terms — `Invertivore`, `Vertivore`, `Granivore` and the rest — are
+never shown untranslated.
+
+**Assertions, origin:** every assignment carries an origin. A published one names its source,
+an ours one gives its reason. An assignment with no origin fails: that is the
+opinion-as-finding failure [P-069](product.md#p-069) exists to prevent.
+
+**Assertions, the supplementary table:** **every key is a species in the dataset.** This is the
+assertion the table most needs — a key AviList does not use misses silently, adds nothing, and
+leaves the table looking correct. A second assertion counts the assignments that actually reach
+the dataset against the number the table defines, so a miss surfaces as a number rather than as
+nothing at all.
+
+**Assertions, the control:** the Species panel offers Habitat and Diet before the taxonomic
+family list, each option carrying its count and its definition, and the retired birder grouping
+is not rendered.
+
+**Status: verified 2026-10-03 — passing, and watched failing** by the two supplementary keys
+that were dead on arrival: `Phalacrocorax auritus` and `Larus argentatus`, where AviList says
+`Nannopterum auritum` and `Larus smithsonianus`. They produced no assignment and no error, and
+the only symptom was the count being 3 where the table defines 5 — which is exactly why the
+count assertion exists beside the key assertion.
+
 ---
 
 ## Traceability
@@ -1566,6 +1589,7 @@ not serve fails, so a fabricated repository URL cannot pass.
 | P-011, P-012 | AC-086, AC-088 | |
 | P-013 | AC-086, AC-087 | |
 | P-014 | AC-089 | |
+| P-015 | AC-092 | |
 | P-069 | AC-091 | |
 | P-020, P-021 | AC-020 | |
 | P-022, P-023 | AC-021 | |

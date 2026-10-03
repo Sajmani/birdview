@@ -17,9 +17,41 @@ import (
 
 	"birdview/internal/dataset"
 	"birdview/internal/region"
+	"birdview/internal/trait"
 	"birdview/internal/view"
 	"birdview/web"
 )
+
+// fixtureHabitat and fixtureNiche give each fixture family a plausible
+// AVONET value, spread across the vocabulary so the controls have more than
+// one option and the "hidden when empty" rule is exercised rather than
+// assumed. Ardeidae gets a second, ours-marked habitat so the origin
+// distinction appears in the fixture too.
+func fixtureHabitat(fam string) dataset.Assignment {
+	switch fam {
+	case "Ardeidae", "Recurvirostridae":
+		return trait.Published("Wetland")
+	case "Alcidae":
+		return trait.Published("Marine")
+	case "Corvidae":
+		return trait.Published("Human Modified")
+	default:
+		return trait.Published("Forest")
+	}
+}
+
+func fixtureNiche(fam string) dataset.Assignment {
+	switch fam {
+	case "Ardeidae", "Alcidae", "Recurvirostridae":
+		return trait.Published("Aquatic predator")
+	case "Trochilidae":
+		return trait.Published("Nectarivore")
+	case "Corvidae":
+		return trait.Published("Omnivore")
+	default:
+		return trait.Published("Invertivore")
+	}
+}
 
 func testDataset() *dataset.Dataset {
 	mk := func(id, common, sci, fam string, bill, head, neck, body, tail, span, mass, chord float64, k dataset.Kind) dataset.Species {
@@ -50,6 +82,12 @@ func testDataset() *dataset.Dataset {
 				Bill: m(bill), Head: mod(head, "cranial vault model"), Neck: mod(neck, "neck ratio for "+fam),
 				Body: mod(body, "trunk model"), Tail: m(tail),
 			},
+			// Habitat and diet (P-015). The fixture carries real AVONET
+			// values so the trait controls have something to offer: an
+			// option no fixture species holds is correctly hidden, and a
+			// fixture with no assignments renders an empty control.
+			Habitats: []dataset.Assignment{fixtureHabitat(fam)},
+			Niches:   []dataset.Assignment{fixtureNiche(fam)},
 		}
 		return sp
 	}
@@ -460,7 +498,7 @@ func TestFamilyFilter(t *testing.T) {
 
 	// The selector labels each family with both names (P-010): the scientific
 	// name alone makes the user translate before they can choose.
-	sel := box(t, all, "families")
+	sel := box(t, all, "species")
 	for _, want := range []string{"Ardeidae", "Ardeidae family", "Turdidae", "Trochilidae"} {
 		if !strings.Contains(sel, want) {
 			t.Errorf("family selector is missing %q", want)
@@ -898,23 +936,24 @@ func TestAllToggle(t *testing.T) {
 	_, fresh := get(t, s, "/")
 	// The Regions box carries an All control too and comes first on the page,
 	// so this must say which selector it means (P-011).
-	clear := html.UnescapeString(mustMatch(t, box(t, fresh, "families"),
+	clear := html.UnescapeString(mustMatch(t, grouping(t, box(t, fresh, "species"), "Taxonomic order"),
 		`<a class="btn on"[^>]*href="([^"]+)"[^>]*>All`, "the family All control on a fresh page"))
 
 	_, empty := get(t, s, clear)
-	if strings.Count(box(t, empty, "families"), `class="btn ohdr on"`) != 0 {
+	taxoEmpty := grouping(t, box(t, empty, "species"), "Taxonomic order")
+	if strings.Count(taxoEmpty, `class="btn ohdr on"`) != 0 {
 		t.Error("orders still show as selected after clearing")
 	}
-	if strings.Count(box(t, empty, "families"), `class="chip on"`) != 0 {
+	if strings.Count(taxoEmpty, `class="chip on"`) != 0 {
 		t.Error("families still show as selected after clearing")
 	}
 
 	// Back again: All selects every family, and every order lights up.
-	restore := html.UnescapeString(mustMatch(t, box(t, empty, "families"),
+	restore := html.UnescapeString(mustMatch(t, box(t, empty, "species"),
 		`<a class="btn"[^>]*href="([^"]+)"[^>]*>All`, "the family All control on an emptied page"))
 	_, all := get(t, s, restore)
 	_, _, wantOrders := fixtureCounts()
-	taxo := grouping(t, box(t, all, "families"), "Taxonomic order")
+	taxo := grouping(t, box(t, all, "species"), "Taxonomic order")
 	if n := strings.Count(taxo, `class="btn ohdr on"`); n != wantOrders {
 		t.Errorf("%d of %d orders selected after re-selecting All", n, wantOrders)
 	}
@@ -930,7 +969,7 @@ func TestAllToggle(t *testing.T) {
 func TestDefaultSelectsEverything(t *testing.T) {
 	s := newTestServer(t)
 	_, body := get(t, s, "/")
-	fams := box(t, body, "families")
+	fams := box(t, body, "species")
 	if !regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(fams) {
 		t.Error("All is not selected on a fresh page")
 	}
@@ -960,7 +999,10 @@ func TestDefaultSelectsEverything(t *testing.T) {
 func TestClearingEverythingShowsGuidance(t *testing.T) {
 	s := newTestServer(t)
 	_, body := get(t, s, "/")
-	clear := html.UnescapeString(mustMatch(t, box(t, body, "families"),
+	// Scoped to the family block. The Species panel now opens with the
+	// habitat and diet controls, each with its own All, so an unscoped
+	// first-match grabs the wrong one and clears nothing (P-015).
+	clear := html.UnescapeString(mustMatch(t, grouping(t, box(t, body, "species"), "Taxonomic order"),
 		`<a class="btn on"[^>]*href="([^"]+)"[^>]*>All`, "the family All control on a fresh page"))
 
 	_, empty := get(t, s, clear)
@@ -979,8 +1021,11 @@ func TestClearingEverythingShowsGuidance(t *testing.T) {
 	if want := fmt.Sprintf("0 of %d species", nSpecies); !strings.Contains(empty, want) {
 		t.Errorf("count line should report nothing shown as %q", want)
 	}
-	// And All must offer the way back.
-	if regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(box(t, empty, "families")) {
+	// And All must offer the way back. Scoped to the family block: the
+	// habitat and diet controls are untouched by clearing families, so
+	// their All buttons are legitimately still on (P-015).
+	if regexp.MustCompile(`<a class="btn on"[^>]*>All`).
+		MatchString(grouping(t, box(t, empty, "species"), "Taxonomic order")) {
 		t.Error("All is still marked selected with nothing selected")
 	}
 }
@@ -3319,51 +3364,63 @@ func TestRegionURLsCarrySlugsNotGADMIDs(t *testing.T) {
 	}
 }
 
-// TestFamilySelectorOffersBothGroupings checks the control: two labelled
-// blocks, birder groups first, each holding every family (P-014).
+// TestSpeciesPanelOffersTraitsAndTaxonomy checks the control after CR-027:
+// habitat and diet, assigned per species, then the taxonomic family list.
 //
-// Verifies: P-014. Criterion: AC-089.
-func TestFamilySelectorOffersBothGroupings(t *testing.T) {
+// The hand-drawn birder grouping is gone. It was a family-level answer to a
+// species-level question, and every error found in it -- the Anhinga among
+// seabirds, the Phainopepla among flycatchers, the honeycreepers among
+// seed-eating finches -- came from that mismatch.
+//
+// Verifies: P-015, P-014. Criterion: AC-092.
+func TestSpeciesPanelOffersTraitsAndTaxonomy(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/")
-	fams := box(t, body, "families")
+	panel := box(t, body, "species")
 
-	blocks := regexp.MustCompile(`<div class="ghdr">([^<]+)<em>([^<]*)</em>`).
-		FindAllStringSubmatch(fams, -1)
-	if len(blocks) != 2 {
-		t.Fatalf("found %d grouping blocks in the family selector, want the two of P-014",
-			len(blocks))
-	}
-	if first := html.UnescapeString(blocks[0][1]); first != "Birder groups" {
-		t.Errorf("the first family grouping is %q, want Birder groups — a reader meets the "+
-			"grouping they can read before the lopsided one", first)
-	}
-	for _, b := range blocks {
-		if strings.TrimSpace(b[2]) == "" {
-			t.Errorf("grouping %q carries no note; a hand-drawn grouping must say so", b[1])
+	var names []string
+	for _, m := range regexp.MustCompile(`<div class="ghdr">([^<]+)<em>([^<]*)</em>`).
+		FindAllStringSubmatch(panel, -1) {
+		names = append(names, html.UnescapeString(m[1]))
+		if strings.TrimSpace(m[2]) == "" {
+			t.Errorf("block %q carries no note", m[1])
 		}
 	}
-
-	// Each block is a partition, so every family appears in both.
-	nFams, _, _ := 0, 0, 0
-	for _, name := range []string{"Birder groups", "Taxonomic order"} {
-		blk := grouping(t, fams, name)
-		n := strings.Count(blk, `class="chip on"`)
-		if nFams == 0 {
-			nFams = n
+	want := []string{"Habitat", "Diet", "Taxonomic order"}
+	if len(names) != len(want) {
+		t.Fatalf("Species panel has blocks %v, want %v", names, want)
+	}
+	for i := range want {
+		if names[i] != want[i] {
+			t.Errorf("block %d is %q, want %q", i, names[i], want[i])
 		}
-		if n != nFams {
-			t.Errorf("grouping %q holds %d families, the other holds %d; "+
-				"each grouping must be a partition of the same families", name, n, nFams)
-		}
-		if strings.Count(blk, `class="btn ohdr on"`) == 0 {
-			t.Errorf("grouping %q has no group toggles", name)
-		}
+	}
+	if strings.Contains(panel, "Birder groups") {
+		t.Error("the retired birder grouping is still rendered")
 	}
 
-	// The note must not claim the hand-drawn grouping measures anything.
-	birder := grouping(t, fams, "Birder groups")
-	if !strings.Contains(fams, "Birder groups") || !strings.Contains(birder, "Shorebirds") {
-		t.Error("the birder grouping does not offer the groups P-014 describes")
+	// Each trait option carries AVONET's definition and a count, which is
+	// the whole reason these are rows and not chips. The fixture's families
+	// span four habitats and four diets.
+	for _, want := range []string{"Marsh and lake", "Open sea", "Hunts in water", "Drinks nectar"} {
+		if !strings.Contains(panel, ">"+want+"</a>") {
+			t.Errorf("the trait controls do not offer %q", want)
+		}
+	}
+	rows := regexp.MustCompile(`class="tcount">(\d+)</span>\s*<span class="tdesc">([^<]*)`).
+		FindAllStringSubmatch(panel, -1)
+	if len(rows) == 0 {
+		t.Fatal("no trait rows rendered at all")
+	}
+	if n := strings.Count(panel, `btn thdr`); n != len(rows) {
+		t.Errorf("%d trait toggles but %d carry a count and a description", n, len(rows))
+	}
+	for _, m := range rows {
+		if m[1] == "0" {
+			t.Error("an option with no species is offered; clicking it returns an empty page")
+		}
+		if strings.TrimSpace(m[2]) == "" {
+			t.Error("a trait option carries no definition")
+		}
 	}
 }
 

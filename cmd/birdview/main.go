@@ -25,9 +25,9 @@ import (
 	"strings"
 
 	"birdview/internal/dataset"
-	"birdview/internal/family"
 	"birdview/internal/inat"
 	"birdview/internal/region"
+	"birdview/internal/trait"
 	"birdview/internal/view"
 	"birdview/web"
 )
@@ -276,7 +276,16 @@ type options struct {
 	// absent means everywhere, explicitly empty means nowhere.
 	Regions    map[string]bool
 	HasRegions bool
-	Metric3    bool // imperial when false
+	// Habitats and Niches are P-015's categorical filters, and draw the same
+	// absent-versus-empty distinction. A species matches when ANY of its
+	// assignments is selected: a bird of two habitats is in both, and
+	// requiring all of them would mean selecting two habitats returned only
+	// birds that use both, which is not what picking two places asks for.
+	Habitats    map[string]bool
+	HasHabitats bool
+	Niches      map[string]bool
+	HasNiches   bool
+	Metric3     bool // imperial when false
 
 	// Locale selects which English name is served (P-049). North American is
 	// the default: this is an ABA-area dataset and Dovekie is what its reader
@@ -299,7 +308,8 @@ func parseOptions(r *http.Request) options {
 	// default that teaches the reader to read a bird wins over the one that
 	// delivers the shock before they can.
 	o := options{Metric: view.ByLength, Step: view.DefaultStepPercent, Scale: view.PerSection,
-		Locale: dataset.LocaleNA, Families: map[string]bool{}, Regions: map[string]bool{}}
+		Locale: dataset.LocaleNA, Families: map[string]bool{}, Regions: map[string]bool{},
+		Habitats: map[string]bool{}, Niches: map[string]bool{}}
 	switch view.Metric(q.Get("by")) {
 	case view.ByWingspan:
 		o.Metric = view.ByWingspan
@@ -338,6 +348,18 @@ func parseOptions(r *http.Request) options {
 	for _, f := range q["family"] {
 		if f != "" {
 			o.Families[f] = true
+		}
+	}
+	_, o.HasHabitats = q["habitat"]
+	for _, v := range q["habitat"] {
+		if v != "" {
+			o.Habitats[v] = true
+		}
+	}
+	_, o.HasNiches = q["niche"]
+	for _, v := range q["niche"] {
+		if v != "" {
+			o.Niches[v] = true
 		}
 	}
 	_, o.HasRegions = q["region"]
@@ -433,9 +455,13 @@ type familyRow struct {
 
 type pageData struct {
 	Sections []sectionView
-	// FamilyGroupings is the family selector (P-014): two groupings of the
-	// same families, each a labelled block of groups, birder groups first.
+	// FamilyGroupings is the family selector (P-014): families grouped by
+	// taxonomic order.
 	FamilyGroupings []familyGroupingBlock
+	// Traits are the categorical controls of P-015: habitat and niche,
+	// assigned per species rather than per family, which is why they can be
+	// right where a family-level grouping could not (CR-027).
+	Traits []traitBlock
 	// RegionGroupings is the region selector (P-011): two groupings of the
 	// same regions (P-013), each a labelled block of zones.
 	RegionGroupings []groupingBlock
@@ -535,6 +561,23 @@ func describeFilters(fams []familyOption, opt options) []activeFilter {
 		}
 		out = append(out, activeFilter{Label: "Family", Value: describe(picked, len(fams))})
 	}
+	// Habitat and diet, in the order the controls appear (P-015). Labels
+	// rather than AVONET's terms: the reader picked "Eats insects" and
+	// should be told "Eats insects", not "Invertivore".
+	cat := func(label string, terms []trait.Term, sel map[string]bool, active bool) {
+		if !active || len(sel) == 0 || len(sel) == len(terms) {
+			return
+		}
+		var picked []string
+		for _, t := range terms {
+			if sel[t.Value] {
+				picked = append(picked, t.Label)
+			}
+		}
+		out = append(out, activeFilter{Label: label, Value: describe(picked, len(terms))})
+	}
+	cat("Habitat", trait.Habitats, opt.Habitats, opt.HasHabitats)
+	cat("Diet", trait.Niches, opt.Niches, opt.HasNiches)
 	return out
 }
 
@@ -660,10 +703,27 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		}
 		return false
 	}
+	// Habitat and niche compose the same way (P-015, P-012). A species
+	// matches when ANY of its assignments is selected, and the assignment's
+	// origin is irrelevant here: a habitat BirdView added is still a habitat
+	// the bird uses, and filtering it out would make the addition pointless.
+	anyAssigned := func(as []dataset.Assignment, want map[string]bool, active bool) bool {
+		if !active {
+			return true
+		}
+		for _, a := range as {
+			if want[a.Value] {
+				return true
+			}
+		}
+		return false
+	}
 	var filtered []*dataset.Species
 	for i := range s.ds.Species {
 		sp := &s.ds.Species[i]
-		if selected[sp.Family] && inRegion(sp) {
+		if selected[sp.Family] && inRegion(sp) &&
+			anyAssigned(sp.Habitats, opt.Habitats, opt.HasHabitats) &&
+			anyAssigned(sp.Niches, opt.Niches, opt.HasNiches) {
 			filtered = append(filtered, sp)
 		}
 	}
@@ -774,18 +834,15 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		}
 		rows = append(rows, familyRow{familyOption: f, Selected: selected[f.Name], URL: s.familyURL(r, next)})
 	}
+	page.Traits = []traitBlock{
+		s.traitControl(r, "Habitat", "Where the bird mostly lives. AVONET's classification, quoted; BirdView adds a second habitat for a few birds and marks those as its own.",
+			"habitat", trait.Habitats, opt.Habitats, opt.HasHabitats,
+			func(sp *dataset.Species) []dataset.Assignment { return sp.Habitats }),
+		s.traitControl(r, "Diet", "What the bird mostly eats. AVONET's classification, quoted.",
+			"niche", trait.Niches, opt.Niches, opt.HasNiches,
+			func(sp *dataset.Species) []dataset.Assignment { return sp.Niches }),
+	}
 	page.FamilyGroupings = []familyGroupingBlock{
-		// Birder groups first: a reader meets the grouping they can read
-		// before the one where 43 of 90 families share a label (P-014).
-		{Name: family.ByBirders, Note: family.Note,
-			Groups: s.groupFamilies(r, selected, rows, family.Names(),
-				func(f familyOption) []groupKey {
-					var out []groupKey
-					for _, g := range family.GroupsOf(f.Name) {
-						out = append(out, groupKey{Name: g})
-					}
-					return out
-				})},
 		{Name: "Taxonomic order", Note: "AviList's taxonomy, in checklist sequence — the order a field guide runs in.",
 			Groups: s.groupFamilies(r, selected, rows, nil,
 				func(f familyOption) []groupKey {
@@ -1661,4 +1718,130 @@ var funcs = template.FuncMap{
 	"sub":  func(a, b float64) float64 { return a - b },
 	"div":  func(a, b float64) float64 { return a / b },
 	"list": func(v ...string) []string { return v },
+}
+
+// traitRow is one option of a categorical control: its label, AVONET's
+// definition, how many species carry it, and the link that toggles it
+// (P-015).
+type traitRow struct {
+	Value       string
+	Label       string
+	Description string
+	Count       int
+	Selected    bool
+	URL         template.URL
+}
+
+// traitBlock is one categorical control -- habitat or niche.
+type traitBlock struct {
+	Name   string
+	Note   string
+	Param  string
+	All    bool
+	AllURL template.URL
+	Rows   []traitRow
+}
+
+// traitURL builds the link for a categorical filter, with the same
+// absent-versus-empty distinction every other filter uses: no parameter
+// means all, `habitat=` means none.
+func (s *server) traitURL(r *http.Request, param string, want map[string]bool, total int) template.URL {
+	q := r.URL.Query()
+	q.Del(param)
+	switch {
+	case len(want) == total:
+		// default: no parameter
+	case len(want) == 0:
+		q.Set(param, "")
+	default:
+		vals := make([]string, 0, len(want))
+		for v := range want {
+			vals = append(vals, v)
+		}
+		sort.Strings(vals)
+		for _, v := range vals {
+			q.Add(param, v)
+		}
+	}
+	if len(q) == 0 {
+		return "/"
+	}
+	return template.URL("/?" + q.Encode())
+}
+
+// traitControl builds one categorical block.
+//
+// **Counts are over the whole dataset, not the current view.** A count that
+// moved with the other filters would be telling the reader how many birds
+// they would still see, which the species count above the list already
+// says; what this answers is "how many birds are there of this kind", which
+// is a fact about the data and should not shift underfoot.
+func (s *server) traitControl(r *http.Request, name, note, param string,
+	terms []trait.Term, sel map[string]bool, active bool,
+	get func(*dataset.Species) []dataset.Assignment) traitBlock {
+
+	count := map[string]int{}
+	for i := range s.ds.Species {
+		seen := map[string]bool{}
+		for _, a := range get(&s.ds.Species[i]) {
+			if !seen[a.Value] {
+				seen[a.Value] = true
+				count[a.Value]++
+			}
+		}
+	}
+
+	on := func(v string) bool {
+		if !active {
+			return true // arrival: everything is selected
+		}
+		return sel[v]
+	}
+
+	// An option no bird carries is a dead control: it renders a row, offers
+	// a click, and returns an empty page. AVONET's vocabulary is worldwide
+	// and this dataset is one continent's worth, so Desert has no ABA-area
+	// species at all. Offer only what is there.
+	offered := terms[:0:0]
+	for _, t := range terms {
+		if count[t.Value] > 0 {
+			offered = append(offered, t)
+		}
+	}
+	terms = offered
+
+	cur := map[string]bool{}
+	for _, t := range terms {
+		if on(t.Value) {
+			cur[t.Value] = true
+		}
+	}
+
+	b := traitBlock{Name: name, Note: note, Param: param, All: len(cur) == len(terms)}
+	if b.All {
+		b.AllURL = s.traitURL(r, param, nil, len(terms))
+	} else {
+		every := map[string]bool{}
+		for _, t := range terms {
+			every[t.Value] = true
+		}
+		b.AllURL = s.traitURL(r, param, every, len(terms))
+	}
+	for _, t := range terms {
+		next := map[string]bool{}
+		for k := range cur {
+			next[k] = true
+		}
+		if next[t.Value] {
+			delete(next, t.Value)
+		} else {
+			next[t.Value] = true
+		}
+		b.Rows = append(b.Rows, traitRow{
+			Value: t.Value, Label: t.Label, Description: t.Description,
+			Count: count[t.Value], Selected: on(t.Value),
+			URL: s.traitURL(r, param, next, len(terms)),
+		})
+	}
+	return b
 }
