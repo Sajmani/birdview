@@ -1719,6 +1719,36 @@ as one.
 **The table is keyed on the scientific family name.** [CR-022](#cr-022) renamed **55 of 90**
 English family names and only **2** scientific ones, so the English name is the fragile key.
 
+### What review changed, and the rule that came out of it
+
+The first draft had 27 groups and the owner's review cut it to **25** and fixed three groups.
+One failure mode produced all three, and it is worth naming because it recurred after being
+pointed out twice:
+
+> **A group must be something a birder says, not what is left over.**
+
+- *Pigeons, Cuckoos & Nightbirds* bundled three unrelated families because they were mid-sized
+  landbirds that fit nowhere else. Split: pigeons and cuckoos stand alone, and nightjars join
+  **Owls & Nightbirds**, which is a real category — what you look for after dark.
+- *Old World Warblers & Babblers* was to be folded into the thrushes and mimids on the reasoning
+  that both are Old World passerines. That is a taxonomic observation, not a birder's thought.
+  Kept separate as **Old World Songbirds** — nine birds of Eurasian lineage, which in this scope
+  means Hawaii's introductions and a couple of Alaskan strays — and the **Wrentit** moved out to
+  Chickadees, Nuthatches & Wrens, since a west-coast chaparral resident is not something anyone
+  looks for under "Old World".
+- *Swifts & Hummingbirds* paired the two because they share an order. **Swifts & Swallows** is
+  the pairing that helps: "swift or swallow?" is the question a bird overhead provokes, and
+  nobody has had to tell a hummingbird from a swift. Hummingbirds stand alone.
+
+Two merges were approved on the same principle: **Seabirds** (tubenoses with boobies,
+cormorants and pelicans) and **Waterfowl, Loons & Grebes**. Larks left the swallows for
+**Sparrows, Buntings & Larks**, joining the longspurs and Snow Bunting they flock with in winter
+stubble rather than the swallows they merely share open country with.
+
+The lesson generalizes past this grouping: where a hand-drawn category is doing the work, the
+test is whether a reader would say the name out loud, not whether the members have something in
+common.
+
 ### What it does not do
 
 **It adds no badge to a tile.** The tile carries the family badge alone

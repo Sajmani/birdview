@@ -43,11 +43,10 @@ var Groups = []struct {
 	Name     string
 	Families []string
 }{
-	{"Waterfowl", []string{"Anatidae"}},
+	{"Waterfowl, Loons & Grebes", []string{"Anatidae", "Gaviidae", "Podicipedidae"}},
 	{"Game Birds", []string{"Phasianidae", "Odontophoridae", "Cracidae", "Pteroclidae"}},
-	{"Loons & Grebes", []string{"Gaviidae", "Podicipedidae"}},
-	{"Tubenoses", []string{"Procellariidae", "Hydrobatidae", "Oceanitidae", "Diomedeidae"}},
-	{"Boobies, Cormorants & Pelicans", []string{
+	{"Seabirds", []string{
+		"Procellariidae", "Hydrobatidae", "Oceanitidae", "Diomedeidae",
 		"Sulidae", "Phalacrocoracidae", "Pelecanidae", "Fregatidae", "Anhingidae", "Phaethontidae"}},
 	{"Herons, Ibises & Storks", []string{
 		"Ardeidae", "Threskiornithidae", "Ciconiidae", "Phoenicopteridae"}},
@@ -62,23 +61,40 @@ var Groups = []struct {
 	// were first filed beside: "what you look for after dark" is a group a
 	// birder has, and "mid-sized landbirds that fit nowhere else" is not.
 	{"Owls & Nightbirds", []string{"Strigidae", "Tytonidae", "Caprimulgidae"}},
-	{"Swifts & Hummingbirds", []string{"Apodidae", "Trochilidae"}},
+	// Swifts go with swallows, not with the hummingbirds they are actually
+	// related to. "Swift or swallow?" is the question a bird overhead
+	// provokes; nobody has ever had to tell a hummingbird from a swift. The
+	// shared order is a taxonomic fact, and the taxonomic grouping is where
+	// a reader should find taxonomic facts.
+	{"Swifts & Swallows", []string{"Apodidae", "Hirundinidae"}},
+	{"Hummingbirds", []string{"Trochilidae"}},
 	{"Woodpeckers, Kingfishers & Trogons", []string{"Picidae", "Alcedinidae", "Trogonidae"}},
 	{"Flycatchers, Vireos & Shrikes", []string{
 		"Tyrannidae", "Vireonidae", "Laniidae", "Monarchidae", "Tityridae", "Ptiliogonatidae"}},
 	{"Jays & Crows", []string{"Corvidae"}},
-	{"Swallows & Larks", []string{"Hirundinidae", "Alaudidae"}},
+	// The Wrentit sits here, not with the Old World songbirds its family
+	// belongs to. It is a resident of west-coast chaparral that a birder
+	// meets alongside bushtits and wrens, and Paradoxornithidae is next to
+	// Aegithalidae in checklist sequence anyway -- so this costs nothing
+	// taxonomically and saves a familiar bird from a label nobody would
+	// look for it under.
 	{"Chickadees, Nuthatches & Wrens", []string{
 		"Paridae", "Troglodytidae", "Sittidae", "Polioptilidae", "Regulidae",
-		"Certhiidae", "Remizidae", "Aegithalidae"}},
+		"Certhiidae", "Remizidae", "Aegithalidae", "Paradoxornithidae"}},
 	{"Thrushes, Mimids & Starlings", []string{
 		"Turdidae", "Mimidae", "Muscicapidae", "Cinclidae", "Bombycillidae", "Sturnidae"}},
-	{"Old World Warblers & Babblers", []string{
+	// Nine birds of Eurasian lineage, which in this scope means Hawaii's
+	// introductions and a couple of Alaskan strays. They are their own group
+	// rather than being folded in with the thrushes: "both are Old World
+	// passerines" is not something a birder thinks, it is what is left over.
+	{"Old World Songbirds", []string{
 		"Pycnonotidae", "Cettiidae", "Phylloscopidae", "Acrocephalidae",
-		"Leiothrichidae", "Paradoxornithidae", "Zosteropidae"}},
+		"Leiothrichidae", "Zosteropidae"}},
 	{"New World Warblers", []string{"Parulidae", "Peucedramidae"}},
-	{"Sparrows & Buntings", []string{
-		"Passerellidae", "Calcariidae", "Emberizidae", "Passeridae"}},
+	// Larks join the longspurs and Snow Bunting they flock with in winter
+	// stubble, rather than the swallows they merely share open country with.
+	{"Sparrows, Buntings & Larks", []string{
+		"Passerellidae", "Calcariidae", "Emberizidae", "Passeridae", "Alaudidae"}},
 	{"Cardinals & Tanagers", []string{"Cardinalidae", "Thraupidae", "Spindalidae"}},
 	{"Blackbirds & Orioles", []string{"Icteridae"}},
 	{"Finches, Waxbills & Pipits", []string{"Fringillidae", "Estrildidae", "Motacillidae"}},
