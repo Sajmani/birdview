@@ -1521,6 +1521,77 @@ unchanged, and no number moved.
 Clements and Cornell columns are usable here when eBird/Clements itself is rejected: AviList is a
 separate CC BY 4.0 publication, and nothing is taken from Cornell's own distribution.
 
+## CR-023 — Regions are grouped two ways: by shared birds, and by geography
+
+**Subject:** `presentation.region_filter.zones`
+**Kind:** Reversal — [P-011](product.md#p-011) said zones "claim nothing about birds". They now
+claim something about birds, because a corrected measurement says they can.
+**Date:** 2026-10-03 · **Decided by:** Sameer
+
+### What changed
+
+The region selector offers **two groupings** instead of one. **Common birds** is derived by
+clustering regions on how much their species lists overlap. **Geographic** is the existing
+hand-made grouping, kept as a convenience. A region sits in exactly one zone of each, so it
+appears twice in the selector.
+
+### Why the old claim was wrong
+
+P-011 said there was "no data-driven way to subdivide the east", citing a 42-member block
+covering everything from Maine to Georgia. **That measurement was an artifact.** It came from
+faceting GBIF's `/occurrence/search` on `speciesKey`, which silently drops records whose names
+the backbone cannot resolve — the same trap recorded in [sources.md](sources.md#gbif), which
+reports **zero** US and Canadian records for Cooper's Hawk.
+
+Redone against `data/region-presence.tsv` — built from **verbatim** names, which is the table the
+app already serves — the east subdivides cleanly into four groups. The old claim was a statement
+about a broken query, not about birds, and is withdrawn.
+
+### How the bird zones are derived
+
+Average-linkage agglomerative clustering on Jaccard distance over each region's species set, cut
+at k=26 while the groups are still sharp; every cluster of two or more becomes a seed, and each
+remaining region joins the seed it most resembles.
+
+**Cutting high and then assigning, rather than simply cutting lower, is forced by chaining.** At
+k=10 average linkage has collapsed the Pacific into the Southwest; by the time Texas has company,
+the distinctions worth keeping are gone. Cutting at k=26 and assigning afterwards keeps both.
+
+Accepted placements run **0.652 to 0.825** similarity — a tight band, so none is marginal. Four
+regions fall outside it and are left alone rather than forced into a group:
+
+| Region | Best match | Why it stands apart |
+| --- | --- | --- |
+| Hawaii | 0.239 | Nothing on the mainland is close; the next-lowest accepted is 0.440 |
+| Nunavut | 0.440 | High arctic, below the floor |
+| Navassa | 0.010 | 4 species, sharing **zero** with any other island |
+| the atolls | ≤0.077 | Johnston, Palmyra and Wake match each other at 0.44–0.55, the mainland at noise |
+
+Midway joins Hawaii at 0.378, which is right: Midway is in the Hawaiian chain. So the old
+"Outlying Islands" zone splits three ways under this grouping — Hawaiian Islands, Tropical
+Pacific Atolls, Caribbean — which the owner authorized in advance.
+
+### Why keep the geographic grouping at all
+
+Because the two answer different questions, and the earlier framing wrongly treated them as
+rivals. A reader looking for their state wants the grouping they already carry in their head; a
+reader asking which areas share birds wants the measured one. The clustering scatters the Arctic
+— Alaska to the Pacific Northwest, Yukon and the Northwest Territories to the Prairies, Nunavut
+alone — which is defensible on birds and useless for finding Alaska. Offering both costs one
+extra block of chips and settles the question without overriding the data.
+
+### What it costs
+
+**A region is no longer in one zone.** `Region.Zone` becomes a zone per grouping, and the
+invariant weakens from "exactly one zone" to "exactly one zone **per grouping**" — still a
+partition, still testable, but it is a real weakening and anything relying on the old shape
+breaks loudly.
+
+**The bird zones are only as good as the presence table.** They are derived from a generated
+file, so a regeneration can move them. [AC-087](acceptance.md#ac-087) recomputes cohesion from
+that table rather than pinning the names, so a drift that makes the grouping dishonest fails a
+test instead of going unnoticed.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

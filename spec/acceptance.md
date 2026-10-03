@@ -1349,9 +1349,16 @@ the two sets is the only form of this check that fails when someone adds a contr
 others; no parameter shows all; and an explicitly empty `region=` shows none, the same
 absent-versus-empty distinction the family filter draws.
 
-**Assertions, the selector:** regions are grouped into zones; **Pelagic is the last zone**; each
-zone header toggles its whole group; **All** toggles everything; and each chip carries the
-standard postal abbreviation with the full name beside it.
+**Assertions, the selector:** the box offers **both groupings** of [P-013](product.md#p-013),
+each labelled and each carrying a note saying whether it is measured or drawn; within each,
+regions are grouped into zones, **Pelagic is the last zone**, and every region is present, each
+grouping being a partition. Each zone header toggles its whole group; **All** toggles
+everything; and each chip carries the standard postal abbreviation with the full name beside it.
+
+Checking each grouping **separately** is the point. Reading the zone toggles across the whole
+box and checking only the final one passed on the hand-drawn grouping alone and left the derived
+grouping's ordering unchecked — one of the whole-page assertions this file keeps having to
+scope.
 
 **Assertions, composition:** region and family narrow together ([P-012](product.md#p-012)), and
 an empty intersection renders the empty state naming **both** filters — which is now reachable
@@ -1361,10 +1368,47 @@ through the UI, where with one filter it was not.
 near shore appears under both its ocean and the states it is seen from. Species with no region at
 all are not silently swallowed.
 
-**Status: verified 2026-10-02 — passing, and watched failing** by ignoring the parameter; by
+**Status: verified 2026-10-03 — passing, and watched failing** by ignoring the parameter; by
 treating an empty `region=` as no filter, which is the bug the family filter had first; by moving
-Pelagic out of last place; and by filtering pelagic species out of every region, which hides 53
-birds that have nowhere else to be.
+Pelagic out of last place; by filtering pelagic species out of every region, which hides 53
+birds that have nowhere else to be; by rendering only the first grouping, which the per-block
+split catches and the old whole-box read did not; and by blanking the hand-drawn grouping's
+note, which leaves the two indistinguishable.
+
+### AC-087 — The derived zones answer to the data
+**Verifies:** P-013 · **Level:** code · **Method:** recomputation over `data/region-presence.tsv`
+
+The "Common birds" grouping is a **claim about the records**, so it is checked against the
+records — the same committed table the filter itself uses, not a fixture, because a fixture
+would let the shipped grouping and the shipped data drift apart.
+
+**It does not re-run the clustering.** Re-running the algorithm would compare it against itself
+and ratify whatever it produced. What is checked is the property the grouping is *sold* on.
+
+**Assertions, per region:** every region resembles its own zone-mates more than it resembles
+regions at large. Per region, not per zone: a per-zone average hides an intruder, and the first
+version of this check — comparing a zone's internal similarity against its surroundings —
+**passed with Hawaii filed under Great Lakes**. The bar is zero rather than a fitted number,
+because "resembles its zone-mates more than regions at large" is what belonging to a group
+means; any positive threshold would record what this data happened to do.
+
+**Assertions, against the baseline:** the derived grouping beats the hand-drawn one both on mean
+within-zone similarity and on the **worst region's own-zone rank**. Both are comparative, so
+neither carries a fitted threshold, and the hand-drawn grouping is a real baseline rather than
+an invented one. Rank is the measure with teeth: mean cohesion barely moves when one region is
+misfiled, but a misfiled region drags its new zone-mates down everyone's ranking.
+
+**What is deliberately not asserted:** that every region's own zone is its best match. That is
+false here, and recording it as a target would be dishonest. Nine regions sit closer to a
+neighbouring zone than to their own, by margins as small as 0.001; reassigning them iteratively
+does **not** converge but cycles, five regions moving every sweep. The mainland is a smooth
+gradient and any cut is a choice of where to slice ([CR-023](decisions.md#cr-023)).
+
+**Status: verified 2026-10-03 — passing, and watched failing** by filing Hawaii under Great
+Lakes and Texas under New England (both caught on rank), and by filing Navassa under
+Mid-Atlantic and Alaska under Gulf Coast (both caught per region, Alaska at 0.446 against 0.465
+for regions at large). The earlier per-zone form of the check was watched **passing** under the
+Hawaii break, which is why it was replaced.
 
 ---
 
@@ -1381,6 +1425,7 @@ birds that have nowhere else to be.
 | P-007 | AC-015 | |
 | P-010 | AC-056, AC-075 | |
 | P-011, P-012 | AC-086 | |
+| P-013 | AC-086, AC-087 | |
 | P-020, P-021 | AC-020 | |
 | P-022, P-023 | AC-021 | |
 | P-024 | AC-022 | |

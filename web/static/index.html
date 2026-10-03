@@ -137,11 +137,13 @@
           listed in a region when it is reported there often enough to be worth looking for,
           from eBird and iNaturalist records.</dd></div>
         <div class="ctrl note"><dt>Zones</dt>
-        <dd>Groups for finding your state quickly, nothing more. They cross the border on
-          purpose &mdash; British Columbia belongs with Washington and Oregon. They are
-          <b>not</b> birding regions: measured against the records, the whole east from Maine to
-          Georgia shares about three quarters of its species, so there is no honest way to
-          divide it.</dd></div>
+        <dd>The same regions, grouped two ways; pick from either. <b>Common birds</b> is
+          measured &mdash; regions are clustered by how much their species lists actually
+          overlap, which puts Arizona with New Mexico and Texas. <b>Geographic</b> is the usual
+          map, drawn by hand, so that someone looking for Alaska finds it under Alaska; the
+          measured grouping files Alaska with British Columbia. Both cross the border on
+          purpose. A few places join nothing: Hawaii is too unlike the mainland, and Navassa
+          shares no species at all with the other islands.</dd></div>
         <div class="ctrl note"><dt>Pelagic</dt>
         <dd>Birds of the open sea, which belong to no state at all &mdash; a Bermuda Petrel has
           hundreds of records off the coast and none on land. They are grouped by ocean, and the
@@ -154,22 +156,27 @@
     <span class="lbl">Region</span>
     <a class="btn{{if .AllRegions}} on{{end}}" href="{{.AllRegionsURL}}"
        title="{{if .AllRegions}}Clear every region{{else}}Select everywhere{{end}}">All</a>
-    <span class="hint">states and provinces, grouped for finding yours</span>
+    <span class="hint">states and provinces, grouped two ways</span>
   </div>
-  <div class="ordergroups">
-    {{range .Zones}}
-    <div class="ogroup">
-      <a class="btn ohdr{{if .Selected}} on{{end}}" href="{{.URL}}"
-         title="{{if .Selected}}Clear{{else}}Select{{end}} every region in {{.Zone}}">{{.Zone}}</a>
-      <div class="ofams">
-        {{range .Regions}}
-        <a class="chip rchip{{if .Selected}} on{{end}}" href="{{.URL}}"
-           title="{{.Name}}">{{.Code}}<em>{{.Name}}</em></a>
-        {{end}}
+  {{range .RegionGroupings}}
+  <div class="grouping">
+    <div class="ghdr">{{.Name}}<em>{{.Note}}</em></div>
+    <div class="ordergroups">
+      {{range .Zones}}
+      <div class="ogroup">
+        <a class="btn ohdr{{if .Selected}} on{{end}}" href="{{.URL}}"
+           title="{{if .Selected}}Clear{{else}}Select{{end}} every region in {{.Zone}}">{{.Zone}}</a>
+        <div class="ofams">
+          {{range .Regions}}
+          <a class="chip rchip{{if .Selected}} on{{end}}" href="{{.URL}}"
+             title="{{.Name}}">{{.Code}}<em>{{.Name}}</em></a>
+          {{end}}
+        </div>
       </div>
+      {{end}}
     </div>
-    {{end}}
   </div>
+  {{end}}
 </details>
 
 <details class="controls" id="families" open>

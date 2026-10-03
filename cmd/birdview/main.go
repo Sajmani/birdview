@@ -339,15 +339,16 @@ type familyRow struct {
 type pageData struct {
 	Sections []sectionView
 	Groups   []orderGroup
-	// Zones is the region selector (P-011), the same shape as Groups.
-	Zones         []zoneGroup
-	AllRegions    bool
-	AllRegionsURL template.URL
-	NoRegion      bool
-	Opt           options
-	Total         int
-	Shown         int
-	Query         func(...string) template.URL
+	// RegionGroupings is the region selector (P-011): two groupings of the
+	// same regions (P-013), each a labelled block of zones.
+	RegionGroupings []groupingBlock
+	AllRegions      bool
+	AllRegionsURL   template.URL
+	NoRegion        bool
+	Opt             options
+	Total           int
+	Shown           int
+	Query           func(...string) template.URL
 	// AllSelected is true only when every family is explicitly filtered in --
 	// not when nothing is selected. Both states display the whole dataset, but
 	// they are different selections, and the control reflects the selection.
@@ -416,8 +417,11 @@ func describeFilters(fams []familyOption, opt options) []activeFilter {
 	// Region first, matching the order the boxes appear in.
 	if opt.HasRegions && len(opt.Regions) > 0 && len(opt.Regions) != region.Len() {
 		var picked []string
-		for _, z := range region.Zones {
-			for _, rg := range region.InZone(z) {
+		// Any grouping enumerates every region exactly once, being a
+		// partition; the geographic one is used because its order is the one
+		// a reader scans a list of place names in.
+		for _, z := range region.ZonesOf(region.ByGeography) {
+			for _, rg := range region.InZone(region.ByGeography, z) {
 				if opt.Regions[rg.ID] {
 					picked = append(picked, rg.Name)
 				}
@@ -623,7 +627,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	page.NothingSelected = len(selected) == 0 || (opt.HasRegions && len(opt.Regions) == 0)
 
 	// The region selector, and its All control, mirroring the family one.
-	page.Zones = s.regionGroups(r, opt)
+	page.RegionGroupings = s.regionGroups(r, opt)
 	page.AllRegions = !opt.HasRegions || len(opt.Regions) == region.Len()
 	everyRegion := map[string]bool{}
 	for _, id := range append(region.LandIDs(), region.MarineIDs()...) {
@@ -1430,6 +1434,15 @@ type zoneGroup struct {
 	Regions  []regionRow
 }
 
+// groupingBlock is one way of carving the regions up, rendered as its own
+// labelled block of chips (P-013). The Note is not decoration: it is where
+// the derived grouping and the hand-drawn one are told apart.
+type groupingBlock struct {
+	Name  string
+	Note  string
+	Zones []zoneGroup
+}
+
 // regionURL builds the link that results from toggling regions, using the
 // same absent / explicitly-empty distinction as familyURL: no parameter means
 // everywhere, `region=` means nowhere.
@@ -1457,9 +1470,11 @@ func (s *server) regionURL(r *http.Request, want map[string]bool) template.URL {
 	return template.URL("/?" + q.Encode())
 }
 
-// regionGroups builds the region selector: every zone, its regions, and the
-// link each toggle produces.
-func (s *server) regionGroups(r *http.Request, opt options) []zoneGroup {
+// regionGroups builds the region selector: each grouping, its zones, their
+// regions, and the link each toggle produces. A region appears once per
+// grouping, so the same chip is rendered twice with two different URLs —
+// which is correct, since toggling it from either place does the same thing.
+func (s *server) regionGroups(r *http.Request, opt options) []groupingBlock {
 	sel := opt.Regions
 	if !opt.HasRegions {
 		sel = make(map[string]bool, region.Len())
@@ -1467,50 +1482,56 @@ func (s *server) regionGroups(r *http.Request, opt options) []zoneGroup {
 			sel[id] = true
 		}
 	}
-	var out []zoneGroup
-	for _, z := range region.Zones {
-		g := zoneGroup{Zone: z, Selected: true}
-		inZone := region.InZone(z)
-		for _, rg := range inZone {
-			if !sel[rg.ID] {
-				g.Selected = false
-			}
-		}
-		// The group toggle clears its zone when the whole zone is on, and
-		// selects it otherwise -- an order header's behaviour exactly.
-		next := map[string]bool{}
-		for k, v := range sel {
-			if v {
-				next[k] = true
-			}
-		}
-		for _, rg := range inZone {
-			if g.Selected {
-				delete(next, rg.ID)
-			} else {
-				next[rg.ID] = true
-			}
-		}
-		g.URL = s.regionURL(r, next)
-
-		for _, rg := range inZone {
-			one := map[string]bool{}
-			for k, v := range sel {
-				if v {
-					one[k] = true
+	var out []groupingBlock
+	for _, grouping := range region.Groupings {
+		block := groupingBlock{Name: grouping.Name, Note: grouping.Note}
+		out = append(out, block)
+	}
+	for bi, grouping := range region.Groupings {
+		for _, z := range grouping.Zones {
+			g := zoneGroup{Zone: z, Selected: true}
+			inZone := region.InZone(grouping.Name, z)
+			for _, rg := range inZone {
+				if !sel[rg.ID] {
+					g.Selected = false
 				}
 			}
-			if sel[rg.ID] {
-				delete(one, rg.ID)
-			} else {
-				one[rg.ID] = true
+			// The group toggle clears its zone when the whole zone is on, and
+			// selects it otherwise -- an order header's behaviour exactly.
+			next := map[string]bool{}
+			for k, v := range sel {
+				if v {
+					next[k] = true
+				}
 			}
-			g.Regions = append(g.Regions, regionRow{
-				ID: rg.ID, Code: rg.Code, Name: rg.Name,
-				Selected: sel[rg.ID], URL: s.regionURL(r, one),
-			})
+			for _, rg := range inZone {
+				if g.Selected {
+					delete(next, rg.ID)
+				} else {
+					next[rg.ID] = true
+				}
+			}
+			g.URL = s.regionURL(r, next)
+
+			for _, rg := range inZone {
+				one := map[string]bool{}
+				for k, v := range sel {
+					if v {
+						one[k] = true
+					}
+				}
+				if sel[rg.ID] {
+					delete(one, rg.ID)
+				} else {
+					one[rg.ID] = true
+				}
+				g.Regions = append(g.Regions, regionRow{
+					ID: rg.ID, Code: rg.Code, Name: rg.Name,
+					Selected: sel[rg.ID], URL: s.regionURL(r, one),
+				})
+			}
+			out[bi].Zones = append(out[bi].Zones, g)
 		}
-		out = append(out, g)
 	}
 	return out
 }

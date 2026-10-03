@@ -195,16 +195,9 @@ mean the same thing in both.
 construction: the Millerbird's handful of records is nothing against a billion, and 22 per
 million within Hawaii. The regional rule needs no special case for them.
 
-**Groups are a navigation aid and claim nothing about birds.** States and provinces are gathered
-into geographic zones so a reader can select their area in one click, and zones mix the two
-countries — British Columbia sits with Washington and Oregon, not with Nova Scotia.
-
-They are **not** avifaunal regions, and the spec says so because the data says so. Clustering all
-64 regions by how much their species lists actually overlap produces one 42-member block covering
-the entire east, midwest, plains and maritimes; Maine and Georgia share 0.75 of their species and
-Pennsylvania and Illinois 0.80, against 0.55 for Pennsylvania and Arizona. There is no
-data-driven way to subdivide the east, so any subdivision is for finding your state and must not
-be dressed up as biology.
+**Regions are gathered into zones so a reader can select an area in one click**, and zones mix
+the two countries — British Columbia sits with Washington and Oregon, not with Nova Scotia. What
+a zone *means* is [P-013](#p-013).
 
 **Six species belong to no region, and that is structural.** Bermuda Petrel, Desertas Petrel,
 Trindade Petrel, Townsend's Storm-Petrel, Craveri's Murrelet and Guadalupe Murrelet are seen at
@@ -223,6 +216,37 @@ shows nothing if there are none.
 An empty intersection is a real outcome and is **not** the same as nothing being selected
 ([P-037](#p-037)). The empty state names each filter and what it is set to, because with two
 filters a reader cannot otherwise tell which one emptied the page.
+
+### P-013 — Regions are grouped two ways
+Subject: `presentation.region_filter.zones`
+Goals: G-002
+
+The selector offers **two groupings** of the same regions, and the reader picks from either
+([CR-023](decisions.md#cr-023)). Each is a **partition**: every region sits in exactly one zone
+of each grouping, so a region appears exactly twice in the selector and no region is unreachable
+from either.
+
+**Common birds** is derived, not drawn. Regions are clustered on how much their species lists
+overlap, from the same presence table the filter itself uses. Four regions are left alone
+because nothing is close enough to group them with — Hawaii's best match is 0.239 where every
+accepted placement is at least 0.652, and Navassa shares *zero* species with any other island.
+Leaving them alone is part of the honesty: a grouping that swallows a region it cannot place is
+claiming a similarity it did not measure.
+
+**Geographic** is drawn, not derived, and says so. It is the grouping a reader already carries
+in their head, there so that someone looking for Alaska finds it under Alaska. The derived
+grouping scatters the Arctic — Alaska with the Pacific Northwest, Yukon and the Northwest
+Territories with the Prairies, Nunavut alone — which is true of the birds and useless for
+navigation.
+
+**Neither grouping may be presented as the other.** The UI labels which is which, because a
+hand-drawn grouping shown as measurement is the failure [CR-023](decisions.md#cr-023) was
+written to correct: the previous zones were defended with a statistic that turned out to be an
+artifact of a broken query.
+
+Zone membership is **presentation only**. It changes which chips a group toggle selects and
+nothing about which birds a region contains — that is [P-011](#p-011)'s 1-ppm rule, and it is
+computed per region, never per zone.
 
 ---
 

@@ -3188,27 +3188,62 @@ func TestRegionFilter(t *testing.T) {
 }
 
 // TestRegionSelectorIsGroupedWithPelagicLast checks the control, not the
-// filtering: zones group the regions and the sea comes last (P-011).
+// filtering: both groupings are offered, each groups the regions, and each
+// ends with the sea (P-011, P-013).
 //
-// Verifies: P-011. Criterion: AC-086.
+// The per-grouping split matters here. Before it, this test read the zone
+// toggles across the whole box and checked only the final one — which the
+// hand-drawn grouping satisfied on its own, leaving the derived grouping's
+// ordering unchecked.
+//
+// Verifies: P-011, P-013. Criterion: AC-086.
 func TestRegionSelectorIsGroupedWithPelagicLast(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/")
 	sel := box(t, body, "regions")
 
-	var zones []string
-	for _, m := range regexp.MustCompile(`every region in ([^"]+)"`).FindAllStringSubmatch(sel, -1) {
-		zones = append(zones, html.UnescapeString(m[1]))
+	// Split the box into its grouping blocks, so each is checked on its own.
+	blocks := regexp.MustCompile(`<div class="ghdr">([^<]+)<em>([^<]*)</em>`).
+		FindAllStringSubmatchIndex(sel, -1)
+	if len(blocks) != 2 {
+		t.Fatalf("found %d grouping blocks, want the two of P-013", len(blocks))
 	}
-	if len(zones) < 2 {
-		t.Fatalf("found %d zone toggles; the selector is not grouped", len(zones))
-	}
-	if last := zones[len(zones)-1]; last != "Pelagic" {
-		t.Errorf("the last zone is %q, want Pelagic — the sea is not a place anyone lives", last)
-	}
-	// Chips carry the standard abbreviation and the full name beside it.
-	for _, want := range []string{`>CA<em>California</em>`, `>PA<em>Pennsylvania</em>`} {
-		if !strings.Contains(sel, want) {
-			t.Errorf("the region selector is missing a chip matching %q", want)
+	for i, b := range blocks {
+		name := html.UnescapeString(sel[b[2]:b[3]])
+		note := html.UnescapeString(sel[b[4]:b[5]])
+		end := len(sel)
+		if i+1 < len(blocks) {
+			end = blocks[i+1][0]
 		}
+		part := sel[b[0]:end]
+
+		if note == "" {
+			t.Errorf("grouping %q carries no note; a derived grouping and a "+
+				"hand-drawn one must not look alike (P-013)", name)
+		}
+		var zones []string
+		for _, m := range regexp.MustCompile(`every region in ([^"]+)"`).
+			FindAllStringSubmatch(part, -1) {
+			zones = append(zones, html.UnescapeString(m[1]))
+		}
+		if len(zones) < 2 {
+			t.Fatalf("grouping %q has %d zone toggles; it is not grouped", name, len(zones))
+		}
+		if last := zones[len(zones)-1]; last != "Pelagic" {
+			t.Errorf("grouping %q ends with zone %q, want Pelagic — "+
+				"the sea is not a place anyone lives", name, last)
+		}
+		// Every region is reachable from every grouping, each being a
+		// partition: a region missing from one block is unreachable there.
+		for _, want := range []string{`>CA<em>California</em>`, `>PA<em>Pennsylvania</em>`} {
+			if !strings.Contains(part, want) {
+				t.Errorf("grouping %q is missing a chip matching %q", name, want)
+			}
+		}
+	}
+
+	// The two must actually be the two P-013 names, not the same one twice.
+	if !strings.Contains(sel, `<div class="ghdr">Common birds<em>`) ||
+		!strings.Contains(sel, `<div class="ghdr">Geographic<em>`) {
+		t.Error("the selector does not offer both a measured and a hand-drawn grouping")
 	}
 }

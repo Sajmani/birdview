@@ -7,14 +7,19 @@
 // at all: Bermuda Petrel has 384 records in the ABA Area and zero inside any
 // land polygon (P-011).
 //
-// Zones group regions for navigation and claim nothing about birds. Clustering
-// all 64 land regions by how much their species lists overlap produces one
-// 42-member block covering the whole east — Maine and Georgia share 0.75 of
-// their species — so there is no data-driven way to subdivide it. Any
-// subdivision is for finding your state quickly, and this package says so
-// rather than dressing it up.
+// Zones group regions, two ways (P-013). **Common birds** is derived by
+// clustering regions on how much their species lists overlap; **Geographic**
+// is drawn by hand so that a reader looking for Alaska finds it under Alaska.
+// Each grouping is a partition, so a region appears exactly once in each and
+// exactly twice overall.
 //
-// Verifies: P-011.
+// An earlier version of this file said there was no data-driven way to
+// subdivide the east. That was an artifact of faceting GBIF on `speciesKey`,
+// which drops what its backbone cannot resolve; redone against the verbatim
+// names in data/region-presence.tsv, the east subdivides into four groups.
+// See CR-023.
+//
+// Verifies: P-011, P-013.
 package region
 
 import (
@@ -36,6 +41,16 @@ const (
 	Marine Kind = "marine"
 )
 
+// The two groupings. Names are exported because the server and its tests name
+// them, and a typo in a string literal should not silently produce an empty
+// selector.
+const (
+	// ByBirds is the grouping derived from the presence table.
+	ByBirds = "Common birds"
+	// ByGeography is the hand-drawn grouping.
+	ByGeography = "Geographic"
+)
+
 // Region is one filterable place.
 type Region struct {
 	// ID is GADM's own id for a land region ("USA.5_1"), or a SEA.* id for a
@@ -47,25 +62,76 @@ type Region struct {
 	// Name is the full name, shown beside the code.
 	Name string
 	Kind Kind
-	// Zone is the navigation group this sits in.
-	Zone string
+	// zones maps a grouping to this region's zone within it. Unexported so
+	// that every region is built by this package and the partition invariant
+	// has somewhere to hold.
+	zones map[string]string
 }
 
-// Zones in the order they are offered. Roughly west to east, then outward,
-// which is how a reader scans for their own state. **Pelagic is last**: it is
-// the only group that is not a place anyone lives, and a reader looking for
-// their state should not have to scroll past the open ocean to find it.
-var Zones = []string{
-	"Alaska & the North",
-	"Pacific",
-	"Mountain West",
-	"Southwest",
-	"Great Plains",
-	"Midwest",
-	"Northeast",
-	"Southeast",
-	"Outlying Islands",
-	"Pelagic",
+// Zone returns this region's zone within a grouping, or "" if the grouping is
+// not one this package offers.
+func (r Region) Zone(grouping string) string { return r.zones[grouping] }
+
+// Grouping is one way of carving the regions up. Each is a partition: every
+// region sits in exactly one of its zones (P-013).
+type Grouping struct {
+	// Name is both the identifier and the UI label.
+	Name string
+	// Note is the one line the UI shows under the label. A derived grouping
+	// and a hand-drawn one must not look alike, so each says which it is.
+	Note string
+	// Zones in the order they are offered.
+	Zones []string
+}
+
+// Groupings in the order the selector offers them. The derived one comes
+// first: it is the one that answers a question about birds, which is what
+// this app is for.
+//
+// Within each, zones run roughly west to east and then outward, which is how
+// a reader scans for their own state. **Pelagic is last** in both: it is the
+// only group that is not a place anyone lives, and a reader looking for their
+// state should not have to scroll past the open ocean to find it.
+var Groupings = []Grouping{
+	{
+		Name: ByBirds,
+		Note: "Grouped by how much their bird lists actually overlap, measured from the records.",
+		Zones: []string{
+			"Hawaiian Islands",
+			"Tropical Pacific Atolls",
+			"Pacific Northwest",
+			"California & the Great Basin",
+			"Northern Rockies",
+			"Southwest Borderlands",
+			"Southern Plains",
+			"Prairies & the Boreal",
+			"The High Arctic",
+			"Great Lakes",
+			"Ohio & Mississippi Valleys",
+			"Gulf Coast",
+			"South Atlantic",
+			"Mid-Atlantic",
+			"New England & the Maritimes",
+			"Caribbean",
+			"Pelagic",
+		},
+	},
+	{
+		Name: ByGeography,
+		Note: "The usual map, for finding your state quickly. Drawn by hand, not measured.",
+		Zones: []string{
+			"Alaska & the North",
+			"Pacific",
+			"Mountain West",
+			"Southwest",
+			"Great Plains",
+			"Midwest",
+			"Northeast",
+			"Southeast",
+			"Outlying Islands",
+			"Pelagic",
+		},
+	},
 }
 
 // Marine boxes. **They are disjoint**, touching only at shared edges, so a
@@ -118,93 +184,108 @@ func MarineIDs() []string {
 // else names them.
 var all = map[string]Region{}
 
-func add(id, code, name string, kind Kind, zone string) {
-	all[id] = Region{ID: id, Code: code, Name: name, Kind: kind, Zone: zone}
+func add(id, code, name string, kind Kind, birds, geo string) {
+	all[id] = Region{
+		ID: id, Code: code, Name: name, Kind: kind,
+		zones: map[string]string{ByBirds: birds, ByGeography: geo},
+	}
 }
 
 func init() {
-	land := []struct{ id, code, name, zone string }{
-		// Alaska & the North
-		{"USA.2_1", "AK", "Alaska", "Alaska & the North"},
-		{"CAN.13_1", "YT", "Yukon", "Alaska & the North"},
-		{"CAN.6_1", "NT", "Northwest Territories", "Alaska & the North"},
-		{"CAN.8_1", "NU", "Nunavut", "Alaska & the North"},
+	// Two zone columns: the derived grouping, then the hand-drawn one. The
+	// `birds` column is transcribed from the clustering described in CR-023
+	// and is re-derived by AC-087, so a hand edit here that the data does not
+	// support fails a test.
+	land := []struct{ id, code, name, birds, geo string }{
+		// Alaska & the North (geographic). The clustering splits these four:
+		// Alaska goes to the Pacific Northwest at 0.685, Yukon and the
+		// Northwest Territories to the Prairies, and Nunavut matches nothing
+		// above the floor. That split is why the geographic grouping exists.
+		{"USA.2_1", "AK", "Alaska", "Pacific Northwest", "Alaska & the North"},
+		{"CAN.13_1", "YT", "Yukon", "Prairies & the Boreal", "Alaska & the North"},
+		{"CAN.6_1", "NT", "Northwest Territories", "Prairies & the Boreal", "Alaska & the North"},
+		{"CAN.8_1", "NU", "Nunavut", "The High Arctic", "Alaska & the North"},
 		// Pacific
-		{"CAN.2_1", "BC", "British Columbia", "Pacific"},
-		{"USA.48_1", "WA", "Washington", "Pacific"},
-		{"USA.38_1", "OR", "Oregon", "Pacific"},
-		{"USA.5_1", "CA", "California", "Pacific"},
-		{"USA.12_1", "HI", "Hawaii", "Pacific"},
+		{"CAN.2_1", "BC", "British Columbia", "Pacific Northwest", "Pacific"},
+		{"USA.48_1", "WA", "Washington", "Pacific Northwest", "Pacific"},
+		{"USA.38_1", "OR", "Oregon", "Pacific Northwest", "Pacific"},
+		{"USA.5_1", "CA", "California", "California & the Great Basin", "Pacific"},
+		{"USA.12_1", "HI", "Hawaii", "Hawaiian Islands", "Pacific"},
 		// Mountain West
-		{"CAN.1_1", "AB", "Alberta", "Mountain West"},
-		{"USA.13_1", "ID", "Idaho", "Mountain West"},
-		{"USA.27_1", "MT", "Montana", "Mountain West"},
-		{"USA.51_1", "WY", "Wyoming", "Mountain West"},
-		{"USA.29_1", "NV", "Nevada", "Mountain West"},
-		{"USA.45_1", "UT", "Utah", "Mountain West"},
-		{"USA.6_1", "CO", "Colorado", "Mountain West"},
+		{"CAN.1_1", "AB", "Alberta", "Northern Rockies", "Mountain West"},
+		{"USA.13_1", "ID", "Idaho", "Northern Rockies", "Mountain West"},
+		{"USA.27_1", "MT", "Montana", "Northern Rockies", "Mountain West"},
+		{"USA.51_1", "WY", "Wyoming", "Northern Rockies", "Mountain West"},
+		{"USA.29_1", "NV", "Nevada", "California & the Great Basin", "Mountain West"},
+		{"USA.45_1", "UT", "Utah", "California & the Great Basin", "Mountain West"},
+		{"USA.6_1", "CO", "Colorado", "Southern Plains", "Mountain West"},
 		// Southwest
-		{"USA.3_1", "AZ", "Arizona", "Southwest"},
-		{"USA.32_1", "NM", "New Mexico", "Southwest"},
-		{"USA.44_1", "TX", "Texas", "Southwest"},
-		{"USA.37_1", "OK", "Oklahoma", "Southwest"},
+		{"USA.3_1", "AZ", "Arizona", "Southwest Borderlands", "Southwest"},
+		{"USA.32_1", "NM", "New Mexico", "Southwest Borderlands", "Southwest"},
+		{"USA.44_1", "TX", "Texas", "Southwest Borderlands", "Southwest"},
+		{"USA.37_1", "OK", "Oklahoma", "Southern Plains", "Southwest"},
 		// Great Plains
-		{"CAN.12_1", "SK", "Saskatchewan", "Great Plains"},
-		{"CAN.3_1", "MB", "Manitoba", "Great Plains"},
-		{"USA.35_1", "ND", "North Dakota", "Great Plains"},
-		{"USA.42_1", "SD", "South Dakota", "Great Plains"},
-		{"USA.28_1", "NE", "Nebraska", "Great Plains"},
-		{"USA.17_1", "KS", "Kansas", "Great Plains"},
+		{"CAN.12_1", "SK", "Saskatchewan", "Prairies & the Boreal", "Great Plains"},
+		{"CAN.3_1", "MB", "Manitoba", "Prairies & the Boreal", "Great Plains"},
+		{"USA.35_1", "ND", "North Dakota", "Prairies & the Boreal", "Great Plains"},
+		{"USA.42_1", "SD", "South Dakota", "Prairies & the Boreal", "Great Plains"},
+		{"USA.28_1", "NE", "Nebraska", "Southern Plains", "Great Plains"},
+		{"USA.17_1", "KS", "Kansas", "Southern Plains", "Great Plains"},
 		// Midwest
-		{"CAN.9_1", "ON", "Ontario", "Midwest"},
-		{"USA.24_1", "MN", "Minnesota", "Midwest"},
-		{"USA.50_1", "WI", "Wisconsin", "Midwest"},
-		{"USA.23_1", "MI", "Michigan", "Midwest"},
-		{"USA.16_1", "IA", "Iowa", "Midwest"},
-		{"USA.26_1", "MO", "Missouri", "Midwest"},
-		{"USA.14_1", "IL", "Illinois", "Midwest"},
-		{"USA.15_1", "IN", "Indiana", "Midwest"},
-		{"USA.36_1", "OH", "Ohio", "Midwest"},
+		{"CAN.9_1", "ON", "Ontario", "Great Lakes", "Midwest"},
+		{"USA.24_1", "MN", "Minnesota", "Great Lakes", "Midwest"},
+		{"USA.50_1", "WI", "Wisconsin", "Great Lakes", "Midwest"},
+		{"USA.23_1", "MI", "Michigan", "Great Lakes", "Midwest"},
+		{"USA.16_1", "IA", "Iowa", "Ohio & Mississippi Valleys", "Midwest"},
+		{"USA.26_1", "MO", "Missouri", "Ohio & Mississippi Valleys", "Midwest"},
+		{"USA.14_1", "IL", "Illinois", "Ohio & Mississippi Valleys", "Midwest"},
+		{"USA.15_1", "IN", "Indiana", "Ohio & Mississippi Valleys", "Midwest"},
+		{"USA.36_1", "OH", "Ohio", "Ohio & Mississippi Valleys", "Midwest"},
 		// Northeast
-		{"CAN.11_1", "QC", "Québec", "Northeast"},
-		{"CAN.4_1", "NB", "New Brunswick", "Northeast"},
-		{"CAN.7_1", "NS", "Nova Scotia", "Northeast"},
-		{"CAN.10_1", "PE", "Prince Edward Island", "Northeast"},
-		{"CAN.5_1", "NL", "Newfoundland and Labrador", "Northeast"},
-		{"USA.20_1", "ME", "Maine", "Northeast"},
-		{"USA.30_1", "NH", "New Hampshire", "Northeast"},
-		{"USA.46_1", "VT", "Vermont", "Northeast"},
-		{"USA.33_1", "NY", "New York", "Northeast"},
-		{"USA.22_1", "MA", "Massachusetts", "Northeast"},
-		{"USA.40_1", "RI", "Rhode Island", "Northeast"},
-		{"USA.7_1", "CT", "Connecticut", "Northeast"},
-		{"USA.31_1", "NJ", "New Jersey", "Northeast"},
-		{"USA.39_1", "PA", "Pennsylvania", "Northeast"},
+		{"CAN.11_1", "QC", "Québec", "New England & the Maritimes", "Northeast"},
+		{"CAN.4_1", "NB", "New Brunswick", "New England & the Maritimes", "Northeast"},
+		{"CAN.7_1", "NS", "Nova Scotia", "New England & the Maritimes", "Northeast"},
+		{"CAN.10_1", "PE", "Prince Edward Island", "New England & the Maritimes", "Northeast"},
+		{"CAN.5_1", "NL", "Newfoundland and Labrador", "New England & the Maritimes", "Northeast"},
+		{"USA.20_1", "ME", "Maine", "New England & the Maritimes", "Northeast"},
+		{"USA.30_1", "NH", "New Hampshire", "New England & the Maritimes", "Northeast"},
+		{"USA.46_1", "VT", "Vermont", "New England & the Maritimes", "Northeast"},
+		{"USA.33_1", "NY", "New York", "New England & the Maritimes", "Northeast"},
+		{"USA.22_1", "MA", "Massachusetts", "New England & the Maritimes", "Northeast"},
+		{"USA.40_1", "RI", "Rhode Island", "Mid-Atlantic", "Northeast"},
+		{"USA.7_1", "CT", "Connecticut", "Mid-Atlantic", "Northeast"},
+		{"USA.31_1", "NJ", "New Jersey", "Mid-Atlantic", "Northeast"},
+		{"USA.39_1", "PA", "Pennsylvania", "Mid-Atlantic", "Northeast"},
 		// Southeast
-		{"USA.18_1", "KY", "Kentucky", "Southeast"},
-		{"USA.43_1", "TN", "Tennessee", "Southeast"},
-		{"USA.49_1", "WV", "West Virginia", "Southeast"},
-		{"USA.47_1", "VA", "Virginia", "Southeast"},
-		{"USA.21_1", "MD", "Maryland", "Southeast"},
-		{"USA.8_1", "DE", "Delaware", "Southeast"},
-		{"USA.9_1", "DC", "District of Columbia", "Southeast"},
-		{"USA.34_1", "NC", "North Carolina", "Southeast"},
-		{"USA.41_1", "SC", "South Carolina", "Southeast"},
-		{"USA.11_1", "GA", "Georgia", "Southeast"},
-		{"USA.10_1", "FL", "Florida", "Southeast"},
-		{"USA.1_1", "AL", "Alabama", "Southeast"},
-		{"USA.25_1", "MS", "Mississippi", "Southeast"},
-		{"USA.4_1", "AR", "Arkansas", "Southeast"},
-		{"USA.19_1", "LA", "Louisiana", "Southeast"},
-		// Outlying Islands -- no postal code exists, so the code is a short name.
-		{"UMI.4_1", "Johnston", "Johnston Atoll", "Outlying Islands"},
-		{"UMI.6_1", "Midway", "Midway Atoll", "Outlying Islands"},
-		{"UMI.7_1", "Navassa", "Navassa Island", "Outlying Islands"},
-		{"UMI.8_1", "Palmyra", "Palmyra Atoll", "Outlying Islands"},
-		{"UMI.9_1", "Wake", "Wake Island", "Outlying Islands"},
+		{"USA.18_1", "KY", "Kentucky", "Ohio & Mississippi Valleys", "Southeast"},
+		{"USA.43_1", "TN", "Tennessee", "Ohio & Mississippi Valleys", "Southeast"},
+		{"USA.49_1", "WV", "West Virginia", "Ohio & Mississippi Valleys", "Southeast"},
+		{"USA.47_1", "VA", "Virginia", "Mid-Atlantic", "Southeast"},
+		{"USA.21_1", "MD", "Maryland", "Mid-Atlantic", "Southeast"},
+		{"USA.8_1", "DE", "Delaware", "Mid-Atlantic", "Southeast"},
+		{"USA.9_1", "DC", "District of Columbia", "Mid-Atlantic", "Southeast"},
+		{"USA.34_1", "NC", "North Carolina", "South Atlantic", "Southeast"},
+		{"USA.41_1", "SC", "South Carolina", "South Atlantic", "Southeast"},
+		{"USA.11_1", "GA", "Georgia", "South Atlantic", "Southeast"},
+		{"USA.10_1", "FL", "Florida", "South Atlantic", "Southeast"},
+		{"USA.1_1", "AL", "Alabama", "Gulf Coast", "Southeast"},
+		{"USA.25_1", "MS", "Mississippi", "Gulf Coast", "Southeast"},
+		{"USA.4_1", "AR", "Arkansas", "Ohio & Mississippi Valleys", "Southeast"},
+		{"USA.19_1", "LA", "Louisiana", "Gulf Coast", "Southeast"},
+		// Outlying Islands -- no postal code exists, so the code is a short
+		// name. Too small to place against the mainland (4 to 128 species,
+		// against a mainland floor of 182), they are grouped against each
+		// other: Midway's closest neighbour anywhere is Hawaii at 0.378, and
+		// it is in the Hawaiian chain; Johnston, Palmyra and Wake match each
+		// other at 0.44 to 0.55; Navassa shares zero species with any of them.
+		{"UMI.4_1", "Johnston", "Johnston Atoll", "Tropical Pacific Atolls", "Outlying Islands"},
+		{"UMI.6_1", "Midway", "Midway Atoll", "Hawaiian Islands", "Outlying Islands"},
+		{"UMI.7_1", "Navassa", "Navassa Island", "Caribbean", "Outlying Islands"},
+		{"UMI.8_1", "Palmyra", "Palmyra Atoll", "Tropical Pacific Atolls", "Outlying Islands"},
+		{"UMI.9_1", "Wake", "Wake Island", "Tropical Pacific Atolls", "Outlying Islands"},
 	}
 	for _, r := range land {
-		add(r.id, r.code, r.name, Land, r.zone)
+		add(r.id, r.code, r.name, Land, r.birds, r.geo)
 	}
 
 	sea := []struct{ id, code, name string }{
@@ -215,8 +296,21 @@ func init() {
 		{"SEA.ARC", "Arctic", "Arctic Ocean"},
 	}
 	for _, r := range sea {
-		add(r.id, r.code, r.name, Marine, "Pelagic")
+		// The open ocean is Pelagic under both groupings. Clustering the
+		// marine regions would be clustering BirdView's own boxes.
+		add(r.id, r.code, r.name, Marine, "Pelagic", "Pelagic")
 	}
+}
+
+// ZonesOf lists a grouping's zones in offer order, or nil if no such grouping
+// exists.
+func ZonesOf(grouping string) []string {
+	for _, g := range Groupings {
+		if g.Name == grouping {
+			return g.Zones
+		}
+	}
+	return nil
 }
 
 // Get returns a region by id.
@@ -228,12 +322,11 @@ func Get(id string) (Region, bool) {
 // Len is how many regions exist.
 func Len() int { return len(all) }
 
-// InZone lists a zone's regions, in the order they were declared for land and
-// in test order for the sea.
-func InZone(zone string) []Region {
+// InZone lists the regions of one zone within one grouping, by name.
+func InZone(grouping, zone string) []Region {
 	var out []Region
 	for _, r := range all {
-		if r.Zone == zone {
+		if r.zones[grouping] == zone {
 			out = append(out, r)
 		}
 	}
