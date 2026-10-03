@@ -50,7 +50,12 @@ footer a:visited { color: var(--accent-visited); }
 .grouping { margin-top: 10px; }
 .grouping + .grouping { border-top: 1px solid var(--line); padding-top: 9px; }
 .ghdr { font-size: 11.5px; font-weight: 600; }
-.ghdr em { color: var(--dim); font-style: italic; font-weight: 400; margin-left: 7px; }
+/* The note sits on its own line under the grouping name rather than running on
+   from it: inline, a full sentence crowds the label it is explaining and wraps
+   back under it anyway. Smaller and dimmer than the name, so the two read as
+   heading and subtitle instead of as one run of text. */
+.ghdr em { display: block; margin-top: 4px; font-size: 10.5px; font-style: italic;
+           font-weight: 400; color: var(--dim); }
 .ordergroups { display: flex; flex-direction: column; gap: 7px; margin-top: 6px; }
 /* Two columns: the order toggle, then the families. A grid rather than one
    wrapping flex row, because as siblings of the header the chips wrap back to
