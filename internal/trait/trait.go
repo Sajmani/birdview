@@ -10,7 +10,7 @@
 // What BirdView adds is a plain-English **label** for each term and, for a
 // few species, a **second** habitat or niche AVONET has no room for. AVONET
 // records one primary value per species; a bird that genuinely lives in two
-// places gets one of them. Those additions are marked Ours and are listed in
+// places gets one of them. Those additions are marked BirdView and are listed in
 // Supplementary below, each with a reason (P-069).
 //
 // Verifies: P-015, P-069.
@@ -87,7 +87,7 @@ type extra struct {
 // only when AVONET's single value hides something a reader filtering by
 // habitat would certainly expect to find.
 //
-// Every entry is rendered as Ours, never merged into AVONET's (P-069).
+// Every entry is rendered as BirdView, never merged into AVONET's (P-069).
 var Supplementary = map[string][]extra{
 	// AVONET codes these by where they nest or mainly feed, but each is a
 	// bird a reader filtering for the other habitat would expect to see.
@@ -103,10 +103,10 @@ func Published(value string) dataset.Assignment {
 	return dataset.Assignment{Value: value, Origin: dataset.Published, Source: Source}
 }
 
-// Ours builds the assignment for a value BirdView adds, with its reason and
+// BirdView builds the assignment for a value BirdView adds, with its reason and
 // a pointer to the document that explains the practice.
-func Ours(value, why string) dataset.Assignment {
-	return dataset.Assignment{Value: value, Origin: dataset.Ours, Why: why, Doc: "data"}
+func BirdView(value, why string) dataset.Assignment {
+	return dataset.Assignment{Value: value, Origin: dataset.BirdView, Why: why, Doc: "data"}
 }
 
 // HabitatsFor returns every habitat assigned to a species: AVONET's primary
@@ -118,7 +118,7 @@ func HabitatsFor(scientificName, avonetHabitat string) []dataset.Assignment {
 	}
 	for _, e := range Supplementary[scientificName] {
 		if e.Habitat != "" && e.Habitat != avonetHabitat {
-			out = append(out, Ours(e.Habitat, e.Why))
+			out = append(out, BirdView(e.Habitat, e.Why))
 		}
 	}
 	return out
@@ -132,7 +132,7 @@ func NichesFor(scientificName, avonetNiche string) []dataset.Assignment {
 	}
 	for _, e := range Supplementary[scientificName] {
 		if e.Niche != "" && e.Niche != avonetNiche {
-			out = append(out, Ours(e.Niche, e.Why))
+			out = append(out, BirdView(e.Niche, e.Why))
 		}
 	}
 	return out

@@ -64,13 +64,13 @@ func TestSupplementaryReachesTheDataset(t *testing.T) {
 	got := 0
 	for _, s := range sp {
 		for _, a := range append(append([]dataset.Assignment{}, s.Habitats...), s.Niches...) {
-			if a.Origin == dataset.Ours {
+			if a.Origin == dataset.BirdView {
 				got++
 			}
 		}
 	}
 	if got != want {
-		t.Errorf("%d assignments are marked Ours, the table defines %d", got, want)
+		t.Errorf("%d assignments are marked BirdView, the table defines %d", got, want)
 	}
 }
 
@@ -108,9 +108,9 @@ func checkAssignment(t *testing.T, sci, what string, a dataset.Assignment, vocab
 		if a.Source == "" {
 			t.Errorf("%s: published %s %q names no source", sci, what, a.Value)
 		}
-	case dataset.Ours:
+	case dataset.BirdView:
 		if a.Why == "" {
-			t.Errorf("%s: %s %q is ours but gives no reason", sci, what, a.Value)
+			t.Errorf("%s: %s %q is birdview's but gives no reason", sci, what, a.Value)
 		}
 	case dataset.Derived:
 		if a.Why == "" {

@@ -39,8 +39,8 @@ const (
 	Published Origin = "published"
 	// Derived: BirdView computed it from published data by a stated rule.
 	Derived Origin = "derived"
-	// Ours: BirdView decided it and no source says it.
-	Ours Origin = "ours"
+	// BirdView: this project decided it and no source says it.
+	BirdView Origin = "birdview"
 )
 
 // Assignment is one category a species is in, with its origin. The zero
@@ -52,7 +52,7 @@ type Assignment struct {
 	// Source names the publication, for Published.
 	Source string `json:"source,omitempty"`
 	// Why is one line saying how the value was arrived at, for Derived and
-	// Ours. Long explanations belong in a document, not here.
+	// BirdView. Long explanations belong in a document, not here.
 	Why string `json:"why,omitempty"`
 	// Doc is a path BirdView itself serves, e.g. "data". There is no public
 	// repository to link to, and a provenance link that needs the network is
@@ -165,7 +165,7 @@ type Species struct {
 
 	// Habitats and Niches are the categorical assignments of P-015, each
 	// carrying where it came from. Several are possible: AVONET records one
-	// primary value, and BirdView may add its own, which is marked Ours and
+	// primary value, and BirdView may add its own, which is marked BirdView and
 	// never silently mixed in with the published one (P-069).
 	Habitats []Assignment `json:"habitats,omitempty"`
 	Niches   []Assignment `json:"niches,omitempty"`

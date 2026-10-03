@@ -322,7 +322,7 @@ is right about all of them.
 **AVONET records one primary value, and BirdView may add a second.** A bird that genuinely uses
 two habitats gets one from AVONET. Where that hides something a reader filtering by habitat
 would plainly expect — a Great Blue Heron on a tidal flat — BirdView adds the second and marks
-it **ours**, never merged into the published value ([P-069](#p-069)). Such additions are kept
+it **`birdview`**, never merged into the published value ([P-069](#p-069)). Such additions are kept
 few: a long list would be this project quietly substituting its own classification for a
 published one.
 
@@ -1308,7 +1308,8 @@ Three provenances, and the UI distinguishes them:
 - **Published** — the source said so. AviList gives the family; AVONET gives the habitat.
 - **Derived** — BirdView computed it from published data by a stated rule. A region comes from
   the 1-ppm presence rule over GBIF records; a zone comes from clustering those lists.
-- **Ours** — BirdView decided it, and no source says it. A supplementary habitat added because
+- **`birdview`** — this project decided it, and no source says it. Labelled with the
+  project's name rather than "ours", which on a public page has no clear referent. A supplementary habitat added because
   AVONET records only a primary one, for instance.
 
 **An unmarked category is the failure this exists to prevent.** A page that lists "Habitat:

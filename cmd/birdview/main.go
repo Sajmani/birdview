@@ -24,6 +24,12 @@ import (
 	"strconv"
 	"strings"
 
+	"bytes"
+
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+	goldmarkhtml "github.com/yuin/goldmark/renderer/html"
+
 	"birdview/docs"
 	"birdview/internal/dataset"
 	"birdview/internal/inat"
@@ -1927,6 +1933,11 @@ func (s *server) categories(sp *dataset.Species) []categoryRow {
 // docs serves the repository's user-facing documentation, which provenance
 // citations link to (P-069). Served rather than linked: there is no public
 // repository, and T-002 wants the running server self-contained.
+//
+// Rendered with goldmark rather than by hand. A documentation page uses
+// headings, tables, lists, code fences and links, and a hand-rolled
+// renderer would be subtly wrong about several of them -- which is the same
+// argument this project keeps making about taxonomies and postal codes.
 func (s *server) docs(w http.ResponseWriter, r *http.Request) {
 	name := strings.TrimPrefix(r.URL.Path, "/docs/")
 	// Only the documents that are embedded, by bare name. No path, so no
@@ -1935,14 +1946,36 @@ func (s *server) docs(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	body, err := docs.Files.ReadFile(name + ".md")
+	src, err := docs.Files.ReadFile(name + ".md")
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
+
 	title := name
-	if i := strings.IndexByte(string(body), '\n'); i > 0 {
-		title = strings.TrimSpace(strings.TrimPrefix(string(body)[:i], "#"))
+	if i := bytes.IndexByte(src, '\n'); i > 0 {
+		title = strings.TrimSpace(strings.TrimPrefix(string(src[:i]), "#"))
 	}
-	s.render(w, "docs.html", struct{ Title, Body string }{title, string(body)})
+
+	var buf bytes.Buffer
+	if err := markdown.Convert(src, &buf); err != nil {
+		log.Printf("birdview: rendering %s: %v", name, err)
+		http.Error(w, "could not render that document", http.StatusInternalServerError)
+		return
+	}
+	s.render(w, "docs.html", struct {
+		Title string
+		Body  template.HTML
+	}{title, template.HTML(buf.String())})
 }
+
+// markdown renders the served documents. GFM tables are enabled because the
+// documents use them heavily -- the source tables and the work-arising list
+// are tables -- and without the extension they render as runs of pipes.
+//
+// Raw HTML in the source is NOT passed through: these files are ours, but a
+// renderer that emits whatever HTML it is given is a habit worth not having.
+var markdown = goldmark.New(
+	goldmark.WithExtensions(extension.Table, extension.Strikethrough, extension.Linkify),
+	goldmark.WithRendererOptions(goldmarkhtml.WithHardWraps()),
+)

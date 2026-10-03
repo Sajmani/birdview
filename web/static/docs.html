@@ -9,14 +9,14 @@
 </head>
 <body class="docs">
 <p class="back"><a class="backlink" href="/">&larr; back to all birds</a></p>
-<h1>{{.Title}}</h1>
-{{/* Served as the Markdown it is, rather than rendered. Rendering would mean
-     a Markdown dependency for four documents, and the source is already
-     written to be read: this is the same file the repository carries, which
-     is the point of citing it (P-069). */}}
-<pre class="doc">{{.Body}}</pre>
-<p class="note">This is the document as it lives in the repository. BirdView serves
-  it rather than linking out, so a provenance citation does not depend on the
-  network.</p>
+{{/* No heading here: every document opens with its own H1, and adding one
+     would print the title twice. The Title is still used for <title>. */}}
+{{/* Rendered from the Markdown the repository carries. Served rather than
+     linked out: there is no public repository, and a provenance citation
+     that needs the network is one that breaks (P-069, T-002). */}}
+<article class="doc">{{.Body}}</article>
+<p class="note">This is the document as it lives in the repository, rendered.
+  BirdView serves it rather than linking out, so a provenance citation does not
+  depend on the network.</p>
 </body>
 </html>{{end}}

@@ -1561,7 +1561,7 @@ definition; and the jargon terms — `Invertivore`, `Vertivore`, `Granivore` and
 never shown untranslated.
 
 **Assertions, origin:** every assignment carries an origin. A published one names its source,
-an ours one gives its reason. An assignment with no origin fails: that is the
+a `birdview` one gives its reason. An assignment with no origin fails: that is the
 opinion-as-finding failure [P-069](product.md#p-069) exists to prevent.
 
 **Assertions, the supplementary table:** **every key is a species in the dataset.** This is the

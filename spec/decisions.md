@@ -1858,7 +1858,7 @@ jargon-laden.
 AVONET records **one** primary value per species. Five supplementary assignments are added where
 that hides something obvious — American White Pelican on the coast, Double-crested Cormorant
 inland, Great Blue Heron on tidal flats, Osprey over salt water, American Herring Gull at
-landfill. Each is marked **ours** with a reason, never merged into AVONET's.
+landfill. Each is marked **`birdview`** with a reason, never merged into AVONET's.
 
 **Two of the first five did nothing at all**, keyed on `Phalacrocorax auritus` and
 `Larus argentatus` where AviList says `Nannopterum auritum` and `Larus smithsonianus`. A map

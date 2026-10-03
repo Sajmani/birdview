@@ -3559,7 +3559,7 @@ func TestDetailListsEveryCategoryWithItsOrigin(t *testing.T) {
 			if detail == "" {
 				t.Errorf("%s: published but names no source", label)
 			}
-		case "derived", "ours":
+		case "derived", "birdview":
 			if detail == "" {
 				t.Errorf("%s: %s but states no rule or reason", label, origin)
 			}
