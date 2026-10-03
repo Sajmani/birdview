@@ -233,7 +233,23 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .t-measured { background: #86efac; color: #000; }
 .t-near-match { background: #fde047; color: #000; }
 .t-modeled { background: #cbd5e1; color: #000; }
+/* Origins (P-069). Published is the same green as a measured number -- both
+   mean "a source says so" -- while ours is amber: not wrong, but this
+   project's own call and worth the reader's eye. */
+.t-published { background: #86efac; color: #000; }
+.t-derived { background: #cbd5e1; color: #000; }
+.t-ours { background: #fdba74; color: #000; }
+/* A continuation row carries a second value for the entry above it, so it
+   drops the rule that would otherwise read as a new fact. */
+.cats .cont th, .cats .cont td { border-top: none; padding-top: 0; }
+.cats .v { white-space: normal; max-width: 52ch; }
 .note { color: var(--dim); font-size: 12.5px; max-width: 70ch; margin-top: 18px; }
+/* A served document (P-069). Shown as the Markdown it is: wrapping it keeps
+   long prose readable, and the monospace says plainly that this is a file,
+   not a page written for the browser. */
+.doc { white-space: pre-wrap; max-width: 100ch; font: 12.5px/1.6 ui-monospace, SFMono-Regular,
+  Menlo, monospace; color: var(--ink); background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; padding: 14px; overflow-x: auto; }
 .empty { color: var(--dim); padding: 30px 0; }
 /* Each active filter as its own chip in the empty-state sentence, so a reader
    scanning for "which one did this" finds them without parsing prose (P-037). */

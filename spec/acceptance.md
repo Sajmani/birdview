@@ -1537,11 +1537,19 @@ any group it is in; **each carries a provenance of published, derived or ours**;
 one names its source. A category rendered with no provenance fails, which is the whole point —
 the failure mode is an opinion of ours sitting unlabelled beside a published fact.
 
-**Assertions, links:** where provenance is an algorithm, the cell names the rule and links to a
-document **served by BirdView**, not to an external host. A link whose target the server does
-not serve fails, so a fabricated repository URL cannot pass.
+**Assertions, regions:** the regions a bird is listed in are **one row**, not a row apiece.
+They share a single rule, so sixty copies of one sentence would bury the habitat rows where
+BirdView sometimes differs from AVONET. A bird in no region gets **no** Regions row rather than
+an empty one — six species are at sea where no land polygon reaches ([P-011](product.md#p-011))
+and must not be shown as placed nowhere by a rule.
 
-**Status: _pending_.**
+**Assertions, links:** where provenance is an algorithm, the cell names the rule and links to a
+document **served by BirdView**, not to an external host. Every `/docs/` link on the page is
+fetched and must answer 200, so a fabricated citation cannot pass.
+
+**Status: verified 2026-10-03 — passing, and watched failing** by giving each region its own
+row; by rendering a category with an empty origin; and by citing `/docs/regions`, a document
+the server does not serve, which the link check answers with 404.
 
 ### AC-092 — Habitat and diet filter per species, and say where each value came from
 **Verifies:** P-015 · **Level:** code · **Method:** unit tests over the trait table against the

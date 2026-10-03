@@ -31,7 +31,7 @@
 {{template "diagramkey"}}
 
 <h2>Measurements, and where each comes from</h2>
-<table class="prov">
+<table class="prov metrics">
   <tbody>
   {{range .Metrics}}
     <tr class="k-{{.Kind}}">
@@ -39,6 +39,26 @@
       <td class="v">{{.Value}}</td>
       <td class="k"><span class="tag t-{{.Kind}}">{{.Kind}}</span></td>
       <td class="d">{{.Detail}}</td>
+    </tr>
+  {{end}}
+  </tbody>
+</table>
+
+<h2>Categories, and where each comes from</h2>
+{{/* The categorical twin of the measurements table (P-069). Every group this
+     bird is sorted into, and whether a source said so, BirdView derived it,
+     or BirdView decided it. Regions are one row: they share a single rule,
+     and sixty copies of that sentence would bury the habitat rows where
+     BirdView sometimes differs from AVONET. */}}
+<table class="prov cats">
+  <tbody>
+  {{range .Categories}}
+    <tr class="k-{{.Origin}}{{if not .Label}} cont{{end}}">
+      <th>{{.Label}}</th>
+      <td class="v">{{.Value}}</td>
+      <td class="k"><span class="tag t-{{.Origin}}">{{.Origin}}</span></td>
+      <td class="d">{{.Detail}}{{if .Doc}} &mdash;
+        <a href="{{.Doc}}">{{.DocLabel}}</a>{{end}}</td>
     </tr>
   {{end}}
   </tbody>

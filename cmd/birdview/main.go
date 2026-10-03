@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"strings"
 
+	"birdview/docs"
 	"birdview/internal/dataset"
 	"birdview/internal/inat"
 	"birdview/internal/region"
@@ -253,6 +254,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		return nil, err
 	}
 	s.mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(assets))))
+	s.mux.HandleFunc("/docs/", s.docs)
 	s.mux.HandleFunc("/compare", s.compare)
 	s.mux.HandleFunc("/species/", s.detail)
 	s.mux.HandleFunc("/", s.index)
@@ -887,8 +889,11 @@ type detailData struct {
 	Geom    view.Geometry
 	Box     view.Box
 	Metrics []metricRow
-	Opt     options
-	Query   func(...string) template.URL
+	// Categories is every group the bird is sorted into, with who decided
+	// each (P-069).
+	Categories []categoryRow
+	Opt        options
+	Query      func(...string) template.URL
 
 	// INatURL is empty when no confident iNaturalist match exists, and the
 	// template then renders nothing at all rather than a placeholder (P-064).
@@ -983,7 +988,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		PickURL:    pickURL(r, toggled(live, sp.ID)),
 		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
 		FootLabels: lt.FootLabels, MassCube: lt.MassCube,
-		Metrics: rows, Opt: opt, Query: queryFor(r), INatURL: inatURL,
+		Metrics: rows, Categories: s.categories(sp), Opt: opt, Query: queryFor(r), INatURL: inatURL,
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 	})
 }
@@ -1844,4 +1849,100 @@ func (s *server) traitControl(r *http.Request, name, note, param string,
 		})
 	}
 	return b
+}
+
+// categoryRow is one line of the detail view's category table (P-069): what
+// the bird is sorted as, and who decided.
+type categoryRow struct {
+	// Label is blank on a continuation row, so two habitats read as one
+	// entry with two values rather than as two unrelated facts.
+	Label  string
+	Value  string
+	Origin string
+	Detail string
+	// Doc, when set, is a document BirdView serves that explains the rule.
+	Doc, DocLabel string
+}
+
+// categories lists every category a species is in, with its provenance.
+//
+// **Regions are one row, not sixty.** Every region a bird is listed in was
+// decided by the same rule over the same data, so a row apiece would repeat
+// one sentence sixty times and bury the two facts that differ -- habitat and
+// diet, where BirdView sometimes disagrees with AVONET. The regions
+// themselves are listed inline by their postal codes.
+func (s *server) categories(sp *dataset.Species) []categoryRow {
+	out := []categoryRow{
+		{Label: "Family", Value: sp.Family + " — " + sp.FamilyCommon,
+			Origin: string(dataset.Published), Detail: "AviList v2025b, CC BY 4.0"},
+		{Label: "Order", Value: sp.Order,
+			Origin: string(dataset.Published), Detail: "AviList v2025b, CC BY 4.0"},
+	}
+
+	add := func(label string, as []dataset.Assignment, terms []trait.Term) {
+		for i, a := range as {
+			row := categoryRow{Value: trait.LabelOf(terms, a.Value), Origin: string(a.Origin)}
+			if i == 0 {
+				row.Label = label
+			}
+			switch a.Origin {
+			case dataset.Published:
+				row.Detail = a.Source + ", as " + a.Value
+			default:
+				row.Detail = a.Why
+			}
+			if a.Doc != "" {
+				row.Doc, row.DocLabel = "/docs/"+a.Doc, "how BirdView adds one"
+			}
+			out = append(out, row)
+		}
+	}
+	add("Habitat", sp.Habitats, trait.Habitats)
+	add("Diet", sp.Niches, trait.Niches)
+
+	// One row for every region, sharing the one rule that put them all there.
+	if len(sp.Regions) > 0 {
+		codes := make([]string, 0, len(sp.Regions))
+		for _, id := range sp.Regions {
+			if rg, ok := region.Get(id); ok {
+				codes = append(codes, rg.Code)
+				if rg.Code == "" {
+					codes[len(codes)-1] = rg.Name
+				}
+			}
+		}
+		sort.Strings(codes)
+		out = append(out, categoryRow{
+			Label:  fmt.Sprintf("Regions (%d)", len(codes)),
+			Value:  strings.Join(codes, " "),
+			Origin: string(dataset.Derived),
+			Detail: "reported there in at least 1 record per million, from eBird and " +
+				"iNaturalist records via GBIF",
+			Doc: "/docs/data", DocLabel: "how regions are decided",
+		})
+	}
+	return out
+}
+
+// docs serves the repository's user-facing documentation, which provenance
+// citations link to (P-069). Served rather than linked: there is no public
+// repository, and T-002 wants the running server self-contained.
+func (s *server) docs(w http.ResponseWriter, r *http.Request) {
+	name := strings.TrimPrefix(r.URL.Path, "/docs/")
+	// Only the documents that are embedded, by bare name. No path, so no
+	// traversal to reason about.
+	if name == "" || strings.ContainsAny(name, "/.") {
+		http.NotFound(w, r)
+		return
+	}
+	body, err := docs.Files.ReadFile(name + ".md")
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	title := name
+	if i := strings.IndexByte(string(body), '\n'); i > 0 {
+		title = strings.TrimSpace(strings.TrimPrefix(string(body)[:i], "#"))
+	}
+	s.render(w, "docs.html", struct{ Title, Body string }{title, string(body)})
 }

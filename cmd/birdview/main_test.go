@@ -2642,8 +2642,13 @@ func TestEveryReportedMetricIsLabelled(t *testing.T) {
 	for _, units := range []string{"metric", "imperial"} {
 		body := mustGet(t, newTestServer(t), "/species/greblu?units="+units)
 
+		// Scoped to the measurements table. The detail page now carries a
+		// second provenance table for categories (P-069), whose rows are
+		// not metrics and are not drawn in the diagram.
+		metrics := body[strings.Index(body, `<table class="prov metrics">`):]
+		metrics = metrics[:strings.Index(metrics, "</table>")]
 		rows := regexp.MustCompile(
-			`<th>([^<]+)</th>\s*<td class="v">([^<]+)</td>`).FindAllStringSubmatch(body, -1)
+			`<th>([^<]+)</th>\s*<td class="v">([^<]+)</td>`).FindAllStringSubmatch(metrics, -1)
 		if len(rows) < 9 {
 			t.Fatalf("%s: only %d rows in the provenance table; the fixture cannot show that "+
 				"EVERY reported metric is labelled", units, len(rows))
@@ -3523,4 +3528,87 @@ func TestFiltersAreNamedOnTheCountLine(t *testing.T) {
 		t.Errorf("the page carries %d filter chips, want 2 — the empty state is "+
 			"repeating what the count line already said", n)
 	}
+}
+
+// TestDetailListsEveryCategoryWithItsOrigin asserts P-069: the detail page
+// names every group the bird is sorted into and says who decided.
+//
+// Verifies: P-069. Criterion: AC-091.
+func TestDetailListsEveryCategoryWithItsOrigin(t *testing.T) {
+	s := newTestServer(t)
+	// The robin, which has regions. The heron is deliberately in none, and
+	// is checked below as its own case.
+	body := mustGet(t, s, "/species/amerob")
+
+	tbl := mustMatch(t, body, `(?s)<table class="prov cats">(.*?)</table>`, "the category table")
+	rows := regexp.MustCompile(
+		`(?s)<th>([^<]*)</th>\s*<td class="v">(.*?)</td>.*?t-([a-z]+)">[^<]*</span></td>\s*<td class="d">(.*?)</td>`).
+		FindAllStringSubmatch(tbl, -1)
+	if len(rows) < 4 {
+		t.Fatalf("only %d category rows; want at least family, order, habitat and diet", len(rows))
+	}
+
+	labels := map[string]bool{}
+	for _, r := range rows {
+		label := strings.TrimSpace(html.UnescapeString(r[1]))
+		origin, detail := r[3], strings.TrimSpace(stripTags(r[4]))
+		labels[strings.Fields(label + " ")[0]] = true
+
+		switch origin {
+		case "published":
+			if detail == "" {
+				t.Errorf("%s: published but names no source", label)
+			}
+		case "derived", "ours":
+			if detail == "" {
+				t.Errorf("%s: %s but states no rule or reason", label, origin)
+			}
+		default:
+			t.Errorf("%s: origin %q — an unmarked category is an opinion presented "+
+				"as a finding (P-069)", label, origin)
+		}
+	}
+	for _, want := range []string{"Family", "Order", "Habitat", "Diet", "Regions"} {
+		if !labels[want] {
+			t.Errorf("the category table omits %q", want)
+		}
+	}
+
+	// Regions are ONE row carrying every region, not a row apiece: they
+	// share a single rule, and repeating it per region would bury the
+	// habitat rows where BirdView differs from AVONET.
+	if n := strings.Count(tbl, `>Regions`); n != 1 {
+		t.Errorf("%d region rows; the regions share one provenance and take one row", n)
+	}
+	regionRow := mustMatch(t, tbl, `(?s)<th>(Regions[^<]*)</th>\s*<td class="v">(.*?)</td>`,
+		"the regions row")
+	if len(strings.Fields(regionRow)) < 2 {
+		t.Error("the regions row lists no regions")
+	}
+
+	// A bird in no region gets no Regions row at all, rather than an empty
+	// one claiming it was placed nowhere by a rule. Six species are at sea
+	// where no land polygon reaches (P-011), and the fixture heron stands
+	// for them.
+	heron := mustMatch(t, mustGet(t, s, "/species/greblu"),
+		`(?s)<table class="prov cats">(.*?)</table>`, "the heron's category table")
+	if strings.Contains(heron, ">Regions") {
+		t.Error("a bird in no region still shows a Regions row")
+	}
+	if !strings.Contains(heron, ">Habitat") {
+		t.Error("the heron lost its other categories along with its regions")
+	}
+
+	// Every doc a provenance cites must be one this server serves. A
+	// citation pointing at a page that 404s is a fabricated citation.
+	for _, m := range regexp.MustCompile(`href="(/docs/[^"]+)"`).FindAllStringSubmatch(body, -1) {
+		if code, _ := get(t, s, m[1]); code != http.StatusOK {
+			t.Errorf("provenance cites %s, which the server answers with %d", m[1], code)
+		}
+	}
+}
+
+// stripTags removes markup so a cell's text can be compared.
+func stripTags(s string) string {
+	return html.UnescapeString(regexp.MustCompile(`<[^>]+>`).ReplaceAllString(s, ""))
 }

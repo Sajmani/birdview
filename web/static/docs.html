@@ -1,0 +1,22 @@
+{{define "docs.html"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{.Title}} &mdash; BirdView</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="docs">
+<p class="back"><a class="backlink" href="/">&larr; back to all birds</a></p>
+<h1>{{.Title}}</h1>
+{{/* Served as the Markdown it is, rather than rendered. Rendering would mean
+     a Markdown dependency for four documents, and the source is already
+     written to be read: this is the same file the repository carries, which
+     is the point of citing it (P-069). */}}
+<pre class="doc">{{.Body}}</pre>
+<p class="note">This is the document as it lives in the repository. BirdView serves
+  it rather than linking out, so a provenance citation does not depend on the
+  network.</p>
+</body>
+</html>{{end}}
