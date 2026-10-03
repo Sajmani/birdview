@@ -3697,3 +3697,33 @@ func TestVendoredTermsAreNotServed(t *testing.T) {
 		}
 	}
 }
+
+// TestDocumentTitlesAreHeadings pins the title rule: a document is listed
+// and titled by its first top-level heading, not by its first line.
+//
+// spec/process.md opens with an HTML comment recording where the file came
+// from, and reading line one listed it in the index as "<!--".
+//
+// Verifies: P-069. Criterion: AC-091.
+func TestDocumentTitlesAreHeadings(t *testing.T) {
+	s := newTestServer(t)
+	for _, set := range []string{"/docs", "/spec"} {
+		body := mustGet(t, s, set)
+		for _, m := range regexp.MustCompile(`<li><a href="[^"]*">([^<]*)</a>`).
+			FindAllStringSubmatch(body, -1) {
+			title := html.UnescapeString(m[1])
+			if strings.ContainsAny(title, "<>") || strings.TrimSpace(title) == "" {
+				t.Errorf("%s lists a document titled %q; a title is a heading, "+
+					"not whatever is on line one", set, title)
+			}
+		}
+	}
+	// The document whose heading is not on its first line.
+	body := mustGet(t, s, "/spec/process")
+	if !strings.Contains(body, "<title>Spec-driven development") {
+		t.Error("spec/process is not titled by its heading")
+	}
+	if !strings.Contains(mustGet(t, s, "/spec"), ">Spec-driven development</a>") {
+		t.Error("the spec index does not list process.md by its heading")
+	}
+}

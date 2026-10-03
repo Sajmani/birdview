@@ -1552,6 +1552,10 @@ guides cite the spec as `../spec/product.md`, which is right in a checkout and a
 browser, and the per-species link check could not see it because these are links between
 documents rather than on a species page.
 
+**Assertions, titles:** a document is titled and indexed by its **first top-level heading**,
+not by its first line. `spec/process.md` opens with an HTML comment recording where the file
+came from, and reading line one listed it in the index as `<!--`.
+
 **Assertions, what is not served:** the embed carries documents only. `spec/sources/` holds
 other people's terms and must not be reachable, so the check walks what is embedded rather
 than probing one path — a probe catches the file it names, and the risk is the whole directory
@@ -1560,8 +1564,8 @@ arriving at once ([T-004](tech.md#t-004)).
 **Status: verified 2026-10-03 — passing, and watched failing** by giving each region its own
 row; by rendering a category with an empty origin; by citing `/docs/regions`, a document the
 server does not serve; by sending the spec's sibling links to `/docs`, which 404s eight
-requirement documents; and by widening the embed to `*.md sources`, which pulls in the
-vendored terms.
+requirement documents; by widening the embed to `*.md sources`, which pulls in the vendored
+terms; and by reading the title from line one again, which puts `<!--` back in the index.
 
 ### AC-092 — Habitat and diet filter per species, and say where each value came from
 **Verifies:** P-015 · **Level:** code · **Method:** unit tests over the trait table against the

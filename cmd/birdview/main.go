@@ -1977,11 +1977,7 @@ func (s *server) document(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	title := rest
-	if i := bytes.IndexByte(body, '\n'); i > 0 {
-		title = strings.TrimSpace(strings.TrimPrefix(string(body[:i]), "#"))
-	}
-	s.renderMarkdown(w, set, title, body)
+	s.renderMarkdown(w, set, markdownTitle(body, rest), body)
 }
 
 // documentIndex lists a set, so /spec and /docs are not dead ends.
@@ -1992,14 +1988,25 @@ func (s *server) documentIndex(w http.ResponseWriter, set string) {
 	fmt.Fprintf(&b, "# BirdView %s documents\n\n", src.kind)
 	for _, e := range entries {
 		name := strings.TrimSuffix(e.Name(), ".md")
-		line, _ := src.fs.ReadFile(e.Name())
-		title := name
-		if i := bytes.IndexByte(line, '\n'); i > 0 {
-			title = strings.TrimSpace(strings.TrimPrefix(string(line[:i]), "#"))
-		}
-		fmt.Fprintf(&b, "- [%s](/%s/%s)\n", title, set, name)
+		body, _ := src.fs.ReadFile(e.Name())
+		fmt.Fprintf(&b, "- [%s](/%s/%s)\n", markdownTitle(body, name), set, name)
 	}
 	s.renderMarkdown(w, set, "BirdView "+src.kind+" documents", b.Bytes())
+}
+
+// markdownTitle is a document's first top-level heading, falling back to
+// its file name.
+//
+// **The first heading, not the first line.** spec/process.md opens with an
+// HTML comment recording where the file came from, and reading line one
+// listed it in the index as "<!--".
+func markdownTitle(src []byte, fallback string) string {
+	for _, line := range strings.Split(string(src), "\n") {
+		if t, ok := strings.CutPrefix(line, "# "); ok {
+			return strings.TrimSpace(t)
+		}
+	}
+	return fallback
 }
 
 func (s *server) renderMarkdown(w http.ResponseWriter, set, title string, src []byte) {
