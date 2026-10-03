@@ -3406,7 +3406,11 @@ func TestSpeciesPanelOffersTraitsAndTaxonomy(t *testing.T) {
 			t.Errorf("the trait controls do not offer %q", want)
 		}
 	}
-	rows := regexp.MustCompile(`class="tcount">(\d+)</span>\s*<span class="tdesc">([^<]*)`).
+	// Each description leads with AVONET's own term in bold, which is also
+	// the value the URL carries -- ?niche=Invertivore -- so the control
+	// explains its own query string (P-015).
+	rows := regexp.MustCompile(
+		`class="tcount">(\d+)</span>\s*<span class="tdesc"><b>([^<]+)</b>: ([^<]*)`).
 		FindAllStringSubmatch(panel, -1)
 	if len(rows) == 0 {
 		t.Fatal("no trait rows rendered at all")
@@ -3419,8 +3423,15 @@ func TestSpeciesPanelOffersTraitsAndTaxonomy(t *testing.T) {
 			t.Error("an option with no species is offered; clicking it returns an empty page")
 		}
 		if strings.TrimSpace(m[2]) == "" {
+			t.Error("a trait option does not name the AVONET term its definition belongs to")
+		}
+		if strings.TrimSpace(m[3]) == "" {
 			t.Error("a trait option carries no definition")
 		}
+	}
+	// The term shown must be the one the URL uses, not the friendly label.
+	if !strings.Contains(panel, `<b>Invertivore</b>: Species obtaining`) {
+		t.Error(`the "Eats insects" option does not lead its definition with Invertivore`)
 	}
 }
 

@@ -303,7 +303,13 @@ and not for the birds that use both.
 
 **The classification is AVONET's, taken verbatim, and the definitions are quoted.** The values
 are AVONET's own strings; the control shows a plain-English label beside each — "Eats insects"
-for `Invertivore` — and AVONET's own definition as the description. Translating the word while
+for `Invertivore` — and AVONET's own definition as the description, **led by AVONET's own term
+in bold**: *Invertivore: Species obtaining at least 60% of food resources from invertebrates…*
+
+Naming the term does two jobs at once. It attributes the definition to the word it belongs to,
+rather than letting a quoted sentence look like BirdView's own prose. And the term **is the
+value in the URL** — `?niche=Invertivore` — so the control explains its own query string
+without a separate note about it. Translating the word while
 keeping the classification is a far lighter liberty than inventing the classification, and this
 project's record on inventing classifications is [CR-025](decisions.md#cr-025).
 

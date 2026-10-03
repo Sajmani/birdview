@@ -220,7 +220,11 @@
       <li><a class="btn thdr{{if .Selected}} on{{end}}" href="{{.URL}}"
              title="{{if .Selected}}Clear{{else}}Select{{end}} {{.Label}}">{{.Label}}</a>
         <span class="tcount">{{.Count}}</span>
-        <span class="tdesc">{{.Description}}</span></li>
+        {{/* AVONET's own term leads the definition. It is the word the
+             definition belongs to, and it is also the value in the URL --
+             ?niche=Invertivore -- so showing it explains the query string
+             without a separate note (P-015). */}}
+        <span class="tdesc"><b>{{.Value}}</b>: {{.Description}}</span></li>
       {{end}}
     </ul>
   </div>
