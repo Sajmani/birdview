@@ -857,12 +857,12 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		rows = append(rows, familyRow{familyOption: f, Selected: selected[f.Name], URL: s.familyURL(r, next)})
 	}
 	page.Traits = []traitBlock{
-		s.traitControl(r, "Habitat", "Where the bird mostly lives. AVONET's classification, quoted; BirdView adds a second habitat for a few birds and marks those as its own.",
-			"habitat", trait.Habitats, opt.Habitats, opt.HasHabitats,
-			func(sp *dataset.Species) []dataset.Assignment { return sp.Habitats }),
 		s.traitControl(r, "Diet", "What the bird mostly eats. AVONET's classification, quoted — except Drinks sap, which is BirdView's own: AVONET has no category for birds that live off tree sap.",
 			"niche", trait.Niches, opt.Niches, opt.HasNiches,
 			func(sp *dataset.Species) []dataset.Assignment { return sp.Niches }),
+		s.traitControl(r, "Habitat", "Where the bird mostly lives. AVONET's classification, quoted; BirdView adds a second habitat for a few birds and marks those as its own.",
+			"habitat", trait.Habitats, opt.Habitats, opt.HasHabitats,
+			func(sp *dataset.Species) []dataset.Assignment { return sp.Habitats }),
 	}
 	page.FamilyGroupings = []familyGroupingBlock{
 		{Name: "Taxonomic order", Note: "AviList's taxonomy, in checklist sequence — the order a field guide runs in.",

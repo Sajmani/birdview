@@ -183,27 +183,25 @@
   {{end}}
 </details>
 
-<details class="controls" id="species" open>
-  <summary>Species</summary>
+<details class="controls" id="traits" open>
+  <summary>Diet and Habitat</summary>
   <div class="ctrlhelp">
       <dl>
-        <div class="ctrl"><dt>Habitat</dt>
-        <dd>Where a bird mostly lives, from <b>AVONET</b>, whose definition is quoted beside
-          each option. Assigned <b>per species</b>, not per family: a Double-crested Cormorant
-          and a Neotropic Cormorant need not share one, and an Anhinga is a bird of swamps
-          whatever its relatives do. Counts are of all 839 birds, not of what is shown.</dd></div>
         <div class="ctrl"><dt>Diet</dt>
-        <dd>What a bird mostly eats, also from AVONET and also per species. Selecting two
-          options shows birds in <b>either</b>, as the region and family filters do.</dd></div>
+        <dd>What a bird mostly eats, from <b>AVONET</b>, whose definition is quoted beside each
+          option. Selecting two options shows birds in <b>either</b>, as the region and family
+          filters do.</dd></div>
+        <div class="ctrl"><dt>Habitat</dt>
+        <dd>Where a bird mostly lives, also from AVONET. Both are assigned <b>per species</b>,
+          not per family: a Double-crested Cormorant and a Neotropic Cormorant need not share a
+          habitat, and an Anhinga is a bird of swamps whatever its relatives do. Counts are of
+          all 839 birds, not of what is currently shown.</dd></div>
         <div class="ctrl note"><dt>One value from AVONET, more from us</dt>
         <dd>AVONET records the <b>one</b> habitat and the one diet a species mainly uses, so a
           bird that lives in two places or eats two things is filed under one. BirdView adds
           whatever further habitats and diets apply &mdash; a Great Blue Heron on a tidal flat,
           a gull at a landfill &mdash; and tags each <b>birdview</b> rather than AVONET&rsquo;s.
           The detail page for every bird lists each category with who assigned it.</dd></div>
-        <div class="ctrl"><dt>Family</dt>
-        <dd>Everything is selected when you arrive. Click a family to drop it, an order to drop
-          the whole group, or <b>All</b> to clear everything and start picking.</dd></div>
       </dl>
   </div>
 
@@ -229,6 +227,17 @@
     </ul>
   </div>
   {{end}}
+</details>
+
+<details class="controls" id="families" open>
+  <summary>Families</summary>
+  <div class="ctrlhelp">
+      <dl>
+        <div class="ctrl"><dt>Family</dt>
+        <dd>Everything is selected when you arrive. Click a family to drop it, an order to drop
+          the whole group, or <b>All</b> to clear everything and start picking.</dd></div>
+      </dl>
+  </div>
 
   {{range .FamilyGroupings}}
   <div class="grouping">
