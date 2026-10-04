@@ -749,6 +749,16 @@ func TestGetRetriesServerErrorsButNotClientErrors(t *testing.T) {
 		t.Errorf("recovered taxon = %q, want Phalacrocorax auritus", tx.Name)
 	}
 
+	// A 404 IS retried, and this assertion used to say the opposite.
+	//
+	// It read "it will never become a 200", which was a belief rather than a
+	// measurement, and GBIF disproved it: a status run failed on `mimus
+	// polyglottos` in Florida -- 1,370,398 records -- which answered 404
+	// mid-run and 200 on the identical query a minute later. Two species in
+	// 1,429 failed that way in a single run, and the run was abandoned.
+	//
+	// So a persistent 404 must still be an error, and must still stop, but
+	// only after the retries have shown it is persistent.
 	var misses int
 	srv2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		misses++
@@ -759,10 +769,30 @@ func TestGetRetriesServerErrorsButNotClientErrors(t *testing.T) {
 	c2 := NewClient()
 	c2.BaseURL, c2.Interval, c2.Backoff, c2.HTTP = srv2.URL, 0, time.Millisecond, srv2.Client()
 	if _, err := c2.Taxon(context.Background(), 1, 0); err == nil {
-		t.Error("a 404 produced no error")
+		t.Error("a persistent 404 produced no error")
 	}
-	if misses != 1 {
-		t.Errorf("a 404 cost %d requests; it will never become a 200", misses)
+	if misses != maxAttempts {
+		t.Errorf("a 404 cost %d requests, want %d: GBIF's 404s are not all permanent, "+
+			"and giving up on the first one abandoned a 1,429-species run", misses, maxAttempts)
+	}
+
+	// The transient case, which is the one that cost a run: 404 then 200.
+	var flaky int
+	srv3 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		flaky++
+		if flaky == 1 {
+			http.Error(w, "spurious", http.StatusNotFound)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, cormorantJSON)
+	}))
+	defer srv3.Close()
+
+	c3 := NewClient()
+	c3.BaseURL, c3.Interval, c3.Backoff, c3.HTTP = srv3.URL, 0, time.Millisecond, srv3.Client()
+	if _, err := c3.Taxon(context.Background(), 2481875, 0); err != nil {
+		t.Errorf("a 404 followed by a 200 should succeed, got %v after %d requests", err, flaky)
 	}
 }
 

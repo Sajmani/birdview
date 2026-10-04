@@ -7,6 +7,12 @@ import (
 
 // days expands an ISO start date and a list of day offsets into dates. The
 // offsets state the shape being tested; writing the dates out hides it.
+// since is the recency cutoff these cases are judged against. Fixed and early
+// enough that every fixture below counts as recent, so the cases about
+// episodes are about episodes; TestHistoricalRecordsAreNotPresence is where
+// the cutoff itself is the subject.
+var since = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+
 func days(start string, offsets ...int) []time.Time {
 	t0, err := time.Parse("2006-01-02", start)
 	if err != nil {
@@ -52,7 +58,7 @@ func TestKnownVagrantsClassifyAsVagrant(t *testing.T) {
 		{"LucysWarbler/VA", 53, days("2016-12-31", 0, 1, 2, 3, 5, 6)},
 	}
 	for _, tt := range tests {
-		got := Classify(Measure(tt.records, tt.dates, false))
+		got := Classify(Measure(tt.records, tt.dates, false), since)
 		if got != Vagrant {
 			t.Errorf("%s: got %q, want %q -- one arrival is not recurrence, "+
 				"however many observers it drew", tt.name, got, Vagrant)
@@ -76,7 +82,7 @@ func TestScarceButRecurringIsEstablished(t *testing.T) {
 	if s.Episodes != 20 {
 		t.Fatalf("episodes = %d, want 20 -- sightings a year apart are separate arrivals", s.Episodes)
 	}
-	if got := Classify(s); got != Established {
+	if got := Classify(s, since); got != Established {
 		t.Errorf("got %q, want %q -- 20 arrivals across 20 years is recurrence", got, Established)
 	}
 }
@@ -109,7 +115,7 @@ func TestTruncatedFacetIsEstablished(t *testing.T) {
 		t.Fatalf("episodes = %d, want 1 -- the fixture must be one unbroken run "+
 			"or it would pass for the wrong reason", s.Episodes)
 	}
-	if got := Classify(s); got != Established {
+	if got := Classify(s, since); got != Established {
 		t.Errorf("got %q, want %q -- a truncated facet means more dates than a page holds",
 			got, Established)
 	}
@@ -120,12 +126,12 @@ func TestTruncatedFacetIsEstablished(t *testing.T) {
 // record exists", which P-071 handles by declaration, while Vagrant is a
 // measurement.
 func TestNoDatesIsAbsent(t *testing.T) {
-	if got := Classify(Measure(0, nil, false)); got != Absent {
+	if got := Classify(Measure(0, nil, false), since); got != Absent {
 		t.Errorf("got %q, want %q", got, Absent)
 	}
 	// Records with no usable date are still Absent for this purpose: that is
 	// Akohekohe, 7 iNaturalist records and not one parseable date.
-	if got := Classify(Measure(7, nil, false)); got != Absent {
+	if got := Classify(Measure(7, nil, false), since); got != Absent {
 		t.Errorf("records but no dates: got %q, want %q", got, Absent)
 	}
 }
@@ -180,5 +186,41 @@ func TestRepeatedDatesCollapse(t *testing.T) {
 	}
 	if s.Episodes != 1 {
 		t.Errorf("episodes = %d, want 1", s.Episodes)
+	}
+}
+
+// A bird nobody has seen in a century recurs beautifully, and is not present.
+//
+// GBIF carries museum specimens under their collection dates, so recurrence
+// alone cannot tell an extinct species from a resident. Passenger Pigeon has
+// 237 records on 213 distinct dates in the ABA Area, every one of them
+// between 1802 and 1902 -- 89 episodes across 52 years, which clears every
+// bar in this package.
+//
+// Watched fail: deleting the LastSeen arm from Classify returns established
+// for the pigeon and this reports it.
+func TestHistoricalRecordsAreNotPresence(t *testing.T) {
+	// Fifty-two years of sightings, ending in 1902.
+	var offsets []int
+	for y := 0; y < 52; y++ {
+		offsets = append(offsets, y*365)
+	}
+	pigeon := Measure(237, days("1850-05-18", offsets...), false)
+	if pigeon.Episodes < EstablishedEpisodes || pigeon.Years < EstablishedYears {
+		t.Fatalf("the fixture must clear the established bars or it proves nothing: "+
+			"episodes=%d years=%d", pigeon.Episodes, pigeon.Years)
+	}
+	if got := Classify(pigeon, since); got != Historical {
+		t.Errorf("got %q, want %q -- it recurs across half a century and the last "+
+			"record is from 1902", got, Historical)
+	}
+	if Historical.InScope() {
+		t.Error("historical must be out of scope: the bird is gone")
+	}
+	// The same shape, recent, is established -- so the cutoff is doing the
+	// work and not the episode counts.
+	live := Measure(237, days("1990-05-18", offsets...), false)
+	if got := Classify(live, since); got != Established {
+		t.Errorf("the same shape ending recently got %q, want %q", got, Established)
 	}
 }

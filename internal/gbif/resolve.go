@@ -417,6 +417,22 @@ func (c *Client) Taxa(ctx context.Context, keys []SpeciesCount) ([]Taxon, error)
 	return out, nil
 }
 
+// retryable reports whether a status is worth another attempt.
+//
+// 5xx and 429 are the obvious ones. **404 is here on evidence**: GBIF's
+// occurrence search returns a spurious one under load. A full status run
+// failed on `mimus polyglottos` in Florida -- Northern Mockingbird, 1,370,398
+// records -- which answered 404 mid-run and 200 when the identical query was
+// repeated a minute later. Two of 1,429 species failed that way in one run.
+//
+// The cost of being wrong in this direction is bounded and small: a genuine
+// 404, which a malformed name does produce, now takes four attempts and about
+// 35 seconds before it is reported. The cost of the other direction is an
+// abandoned run, which is what happened.
+func retryable(code int) bool {
+	return code >= 500 || code == http.StatusTooManyRequests || code == http.StatusNotFound
+}
+
 // get performs one paced, identified request and decodes the JSON body.
 //
 // Each attempt carries its own context deadline, which is belt and braces
@@ -471,8 +487,7 @@ func (c *Client) attempt(ctx context.Context, path string, into any, last *error
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		*last = fmt.Errorf("GET %s: %s", path, resp.Status)
-		// 4xx other than 429 will not improve on a retry.
-		if resp.StatusCode < 500 && resp.StatusCode != http.StatusTooManyRequests {
+		if !retryable(resp.StatusCode) {
 			return *last
 		}
 		return nil

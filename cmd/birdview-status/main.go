@@ -173,21 +173,26 @@ func main() {
 	// laptop's sleep had killed, and everything it had already measured was
 	// in memory and lost. Each species is appended as it completes, so a
 	// rerun pays only for what is missing.
-	done := map[string]map[string]status.Shape{}
+	// The cache holds RAW DATES, not computed shapes, so that changing how a
+	// shape is measured or classified costs nothing. It was shapes, and the
+	// first change to the model -- adding LastSeen, once extinct birds turned
+	// up classified as established -- would have meant fetching all 1,429
+	// species a third time. Fetching is expensive and cacheable; measuring is
+	// cheap and still being argued about. They belong apart.
+	done := map[string]map[string]map[string]int64{}
+	trunc := map[string]map[string]bool{}
 	if f, err := os.Open(*progress); err == nil {
 		dec := json.NewDecoder(f)
 		for {
-			var rec struct {
-				Name   string                  `json:"n"`
-				Shapes map[string]status.Shape `json:"s"`
-			}
+			var rec cacheRec
 			if err := dec.Decode(&rec); err != nil {
 				break
 			}
-			done[rec.Name] = rec.Shapes
+			done[rec.Name] = rec.Dates
+			trunc[rec.Name] = rec.Trunc
 		}
 		f.Close()
-		log.Printf("birdview-status: resuming, %d species already measured", len(done))
+		log.Printf("birdview-status: %d species already fetched", len(done))
 	}
 	pf, err := os.OpenFile(*progress, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
@@ -198,13 +203,8 @@ func main() {
 
 	log.Printf("birdview-status: pass 2, %d species x up to %d regions", len(names), topRegions)
 	for i, n := range names {
-		if sh, ok := done[n]; ok {
-			var sts []status.Status
-			for _, s := range sh {
-				sts = append(sts, status.Classify(s))
-			}
-			results[i] = result{n, sh, status.Best(sts)}
-			continue
+		if _, ok := done[n]; ok {
+			continue // already fetched; measured below, once the cutoff is known
 		}
 		wg.Add(1)
 		go func(i int, n string) {
@@ -224,35 +224,47 @@ func main() {
 			if len(ps) > topRegions {
 				ps = ps[:topRegions]
 			}
-			shapes := map[string]status.Shape{}
-			var sts []status.Status
+			dates := map[string]map[string]int64{}
+			tr := map[string]bool{}
+			partial := false
 			for _, p := range ps {
 				if p.records < minRecords {
 					continue
 				}
-				sh, err := shapeOf(ctx, c, p)
+				d, t, err := datesOf(ctx, c, p)
 				if err != nil {
 					// Collected, not fatal. The first run died in a goroutine
 					// on one unqueryable name and discarded ninety seconds of
 					// completed work; a failure here is refused at the end
 					// instead, where the whole list can be shown at once.
+					partial = true
 					mu.Lock()
 					failed2 = append(failed2, err.Error())
 					mu.Unlock()
 					continue
 				}
-				shapes[p.gid] = sh
-				sts = append(sts, status.Classify(sh))
+				dates[p.gid] = d
+				tr[p.gid] = t
 			}
-			results[i] = result{n, shapes, status.Best(sts)}
+
+			// A species missing one of its regions is NOT recorded as done.
+			//
+			// It was, and that quietly defeated the refusal above: the run
+			// stopped without writing a table, but the three species whose
+			// Florida or Alberta query had failed were already in the
+			// progress file with the other two regions, so the resume took
+			// them as measured and wrote the table anyway. Refusing at the
+			// end and checkpointing partial work are only consistent if the
+			// checkpoint holds complete species.
+			if partial {
+				return
+			}
 			// Recorded under the same lock as failed2, which also serializes
 			// the encoder: two goroutines writing a JSON line at once would
 			// interleave and make the file unreadable on resume.
 			mu.Lock()
-			if err := penc.Encode(struct {
-				Name   string                  `json:"n"`
-				Shapes map[string]status.Shape `json:"s"`
-			}{n, shapes}); err != nil {
+			done[n], trunc[n] = dates, tr
+			if err := penc.Encode(cacheRec{n, dates, tr}); err != nil {
 				log.Printf("birdview-status: progress write: %v", err)
 			}
 			nDone++
@@ -272,6 +284,35 @@ func main() {
 			len(failed2), strings.Join(failed2, "\n  "))
 	}
 
+	// Measure, now that every species is fetched. The recency cutoff is
+	// anchored to the LATEST DATE IN THE CORPUS, not to time.Now(): the data
+	// has its own end -- eBird's export runs to the end of 2024 -- and
+	// anchoring to the clock would make the same inputs classify differently
+	// next year, with no new evidence behind the change.
+	var latest time.Time
+	for n := range done {
+		for gid, dates := range done[n] {
+			sh := measure(dates, trunc[n][gid])
+			if sh.LastSeen.After(latest) {
+				latest = sh.LastSeen
+			}
+		}
+	}
+	since := latest.AddDate(-status.RecentYears, 0, 0)
+	log.Printf("birdview-status: corpus ends %s; counting records since %s",
+		latest.Format("2006-01-02"), since.Format("2006-01-02"))
+
+	for i, n := range names {
+		shapes := map[string]status.Shape{}
+		var sts []status.Status
+		for gid, dates := range done[n] {
+			sh := measure(dates, trunc[n][gid])
+			shapes[gid] = sh
+			sts = append(sts, status.Classify(sh, since))
+		}
+		results[i] = result{n, shapes, status.Best(sts)}
+	}
+
 	if err := os.MkdirAll(filepath.Dir(*outPath), 0o755); err != nil {
 		log.Fatalf("birdview-status: %v", err)
 	}
@@ -286,7 +327,11 @@ func main() {
 	fmt.Fprintf(f, "# Status is recurrence, not abundance: a species is established where its\n")
 	fmt.Fprintf(f, "# records fall in repeated episodes across years, however few they are.\n")
 	fmt.Fprintf(f, "# Sources: EOD - eBird Observation Dataset, doi:10.15468/aomfnb, and the\n")
-	fmt.Fprintf(f, "# iNaturalist research-grade dataset. Both CC BY 4.0.\n")
+	fmt.Fprintf(f, "# iNaturalist research-grade dataset. Both CC BY 4.0.\n#\n")
+	fmt.Fprintf(f, "# Corpus ends %s. A species last recorded before %s is historical,\n",
+		latest.Format("2006-01-02"), since.Format("2006-01-02"))
+	fmt.Fprintf(f, "# not present: GBIF carries museum specimens under their collection dates,\n")
+	fmt.Fprintf(f, "# and Passenger Pigeon recurs across a century of them.\n")
 
 	tally := map[status.Status]int{}
 	for _, r := range results {
@@ -294,12 +339,13 @@ func main() {
 			continue
 		}
 		tally[r.best]++
-		gid, sh := bestRegion(r.shapes)
+		gid, sh := bestRegion(r.shapes, since)
 		fmt.Fprintf(f, "%s\t%s\t%s\t%d\t%d\t%d\n",
 			r.name, r.best, gid, sh.Episodes, sh.Years, sh.Records)
 	}
 	log.Printf("birdview-status: wrote %s", *outPath)
-	for _, s := range []status.Status{status.Established, status.Rare, status.Vagrant, status.Absent} {
+	for _, s := range []status.Status{status.Established, status.Rare, status.Vagrant,
+		status.Historical, status.Absent} {
 		log.Printf("birdview-status:   %-12s %d", s, tally[s])
 	}
 
@@ -309,12 +355,13 @@ func main() {
 			log.Fatalf("birdview-status: %v", err)
 		}
 		defer d.Close()
-		fmt.Fprintf(d, "name\tgid\trecords\tdates\tepisodes\tyears\tspan\ttruncated\tstatus\n")
+		fmt.Fprintf(d, "name\tgid\trecords\tdates\tepisodes\tyears\tspan\tlastseen\ttruncated\tstatus\n")
 		for _, r := range results {
 			for gid, sh := range r.shapes {
-				fmt.Fprintf(d, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%v\t%s\n",
+				fmt.Fprintf(d, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%v\t%s\n",
 					r.name, gid, sh.Records, sh.Dates, sh.Episodes, sh.Years,
-					sh.SpanDays, sh.Truncated, status.Classify(sh))
+					sh.SpanDays, sh.LastSeen.Format("2006-01-02"), sh.Truncated,
+					status.Classify(sh, since))
 			}
 		}
 		log.Printf("birdview-status: wrote %s", *dump)
@@ -362,45 +409,57 @@ func toBinomials(in map[string]map[string]int64) map[string]map[string]int64 {
 	return out
 }
 
-// shapeOf asks both datasets for the dates behind one (species, region) pair
-// and measures the union. The union is right because the two datasets record
+// cacheRec is one species' raw fetch: the dates each region reported, and
+// whether that region's facet was truncated.
+type cacheRec struct {
+	Name  string                      `json:"n"`
+	Dates map[string]map[string]int64 `json:"d"`
+	Trunc map[string]bool             `json:"t"`
+}
+
+// datesOf asks both datasets for the dates behind one (species, region) pair
+// and unions them. The union is right because the two datasets record
 // different observers, not the same ones twice: a day either had a sighting
 // or it did not.
-func shapeOf(ctx context.Context, c *gbif.Client, p pair) (status.Shape, error) {
+func datesOf(ctx context.Context, c *gbif.Client, p pair) (map[string]int64, bool, error) {
 	all := map[string]int64{}
-	var total int64
 	var trunc bool
 	for _, ds := range []string{gbif.EBirdDatasetKey, iNatDatasetKey} {
-		dates, n, t, err := c.DatesIn(ctx, ds, p.gid, p.name)
+		dates, _, t, err := c.DatesIn(ctx, ds, p.gid, p.name)
 		if err != nil {
-			return status.Shape{}, fmt.Errorf("dates for %q in %s: %w", p.name, p.gid, err)
+			return nil, false, fmt.Errorf("dates for %q in %s: %w", p.name, p.gid, err)
 		}
 		for d, k := range dates {
 			all[d] += k
 		}
-		total += n
 		trunc = trunc || t
 	}
+	return all, trunc, nil
+}
+
+// measure turns one region's cached dates into a Shape.
+func measure(dates map[string]int64, truncated bool) status.Shape {
 	var ts []time.Time
-	for d := range all {
+	var records int64
+	for d, n := range dates {
 		t, err := time.Parse("2006-01-02", d)
 		if err != nil {
-			continue // a range rather than a day; DatesIn filters these already
+			continue
 		}
 		ts = append(ts, t)
+		records += n
 	}
-	return status.Measure(total, ts, trunc), nil
+	return status.Measure(records, ts, truncated)
 }
 
 // bestRegion names the region behind a species' status, so the table carries
 // its own evidence and a verdict can be argued with.
-func bestRegion(shapes map[string]status.Shape) (string, status.Shape) {
+func bestRegion(shapes map[string]status.Shape, since time.Time) (string, status.Shape) {
 	var bg string
 	var bs status.Shape
-	rank := map[status.Status]int{status.Absent: 0, status.Vagrant: 1, status.Rare: 2, status.Established: 3}
 	for gid, sh := range shapes {
-		if bg == "" || rank[status.Classify(sh)] > rank[status.Classify(bs)] ||
-			(rank[status.Classify(sh)] == rank[status.Classify(bs)] && sh.Episodes > bs.Episodes) {
+		if bg == "" || status.Rank(status.Classify(sh, since)) > status.Rank(status.Classify(bs, since)) ||
+			(status.Rank(status.Classify(sh, since)) == status.Rank(status.Classify(bs, since)) && sh.Episodes > bs.Episodes) {
 			bg, bs = gid, sh
 		}
 	}
