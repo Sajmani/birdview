@@ -58,15 +58,81 @@ var NeckRatios = map[string]float64{
 	"Charadriidae":     0.30,
 	"Recurvirostridae": 0.45,
 	"Laridae":          0.35,
-	"Rallidae":         0.35,
-	"Burhinidae":       0.35,
-	"Haematopodidae":   0.30,
+	// Jaegers and skuas are gulls in build, in the same order, and were
+	// taking the default: a 474 mm Pomarine Jaeger drew a 28.4 mm neck where
+	// a 474 mm California Gull drew 55.0 mm. That gap was an omission from
+	// this table, not a judgement about birds, so this matches Laridae.
+	"Stercorariidae": 0.35,
+	"Rallidae":       0.35,
+	"Burhinidae":     0.35,
+	"Haematopodidae": 0.30,
 	// Compact: the neck is barely exposed.
 	"Strigidae":   0.08,
 	"Tytonidae":   0.08,
 	"Trochilidae": 0.12,
 	"Alcedinidae": 0.10,
 	"Picidae":     0.14,
+	// Auks are the stubby extreme of Charadriiformes -- "no neck" is the
+	// field impression of a murre going past -- which puts them with the
+	// kingfishers rather than with their own order's gulls.
+	"Alcidae": 0.10,
+	// New World vultures soar with the small bare head drawn back against
+	// the shoulders, so almost nothing projects. AviList gave them an order
+	// of their own (CR-022) and they were among the families never reviewed
+	// against this table.
+	"Cathartidae": 0.10,
+
+	// Seabirds that fly neck-extended, between the compact group above and
+	// the waders at the top.
+	//
+	// A frigatebird's long slender neck is part of what identifies it in the
+	// air, just below the gannet's cigar. An albatross projects its head and
+	// neck well ahead of the wings -- more than a shearwater, less than a
+	// gannet -- and Procellariidae stays on the default because a shearwater
+	// does not.
+	"Fregatidae":  0.40,
+	"Diomedeidae": 0.30,
+}
+
+// NeckDefaultReviewed names the families looked at and left on
+// DefaultNeckRatio, so "not in NeckRatios" stops meaning two different things
+// at once: considered and found unremarkable, or never considered.
+//
+// This exists because the table's own comment admitted the gap and could only
+// hope someone would close it -- "only a review of the table against the full
+// family list will catch the next one". TestEveryFamilyHasBeenReviewed turns
+// that hope into a build failure: a family in neither map fails, so the next
+// one AviList adds has to be looked at rather than quietly drawing 0.18.
+//
+// **Passeriformes is exempt as an order**, and that is not laziness. All 43
+// of its families here are small compact songbirds with no exposed neck, the
+// default is a short stub, and writing the same sentence 43 times would bury
+// the families where the question is live. The exemption is the claim being
+// made: a new passerine family needs no review, a new family in any other
+// order does.
+//
+// Verifies: P-045.
+var NeckDefaultReviewed = map[string]string{
+	// Landbirds with no exposed neck to speak of. The default is a short
+	// stub, which is what these are.
+	"Accipitridae":   "head projects modestly in flight; the default is right",
+	"Pandionidae":    "built as an Accipitridae for this purpose",
+	"Falconidae":     "compact; the head barely clears the shoulders",
+	"Apodidae":       "no exposed neck at all",
+	"Caprimulgidae":  "no exposed neck at all",
+	"Columbidae":     "compact",
+	"Cuculidae":      "compact",
+	"Psittacidae":    "compact",
+	"Psittaculidae":  "compact",
+	"Pteroclidae":    "compact",
+	"Trogonidae":     "compact",
+	"Cracidae":       "gamebird; short neck, and the tail carries the silhouette",
+	"Odontophoridae": "gamebird; short neck",
+	"Phasianidae":    "gamebird; short neck",
+	"Phaethontidae":  "moderate, between a gull and a shearwater; the tail streamers identify it, not the neck",
+	"Procellariidae": "shearwaters and petrels fly head-close; unlike the albatrosses",
+	"Hydrobatidae":   "too small for a neck to read at any scale this project draws",
+	"Oceanitidae":    "too small for a neck to read at any scale this project draws",
 }
 
 // NeckRatio returns the ratio for a family and whether it was explicitly

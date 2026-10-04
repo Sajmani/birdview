@@ -1,8 +1,12 @@
 package morphology
 
 import (
+	"encoding/json"
 	"math"
 	"math/rand"
+	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -240,4 +244,76 @@ func TestModelsAreDescribed(t *testing.T) {
 			t.Errorf("%s model returned an empty description", name)
 		}
 	}
+}
+
+// Every non-passerine family must be either given a neck ratio or explicitly
+// recorded as reviewed and left on the default.
+//
+// The table used to say the quiet part itself: "only a review of the table
+// against the full family list will catch the next one". It was right, and
+// it caught nothing -- Stercorariidae drew half a gull's neck for however
+// long, and Cathartidae was never looked at after AviList gave the New World
+// vultures an order of their own. Absence from NeckRatios meant two
+// different things, "considered and unremarkable" and "never considered",
+// and nothing could tell them apart.
+//
+// Passeriformes is exempt as an order; see NeckDefaultReviewed.
+//
+// Watched fail: deleting Stercorariidae from NeckRatios reports it as
+// unreviewed; so does removing Procellariidae from NeckDefaultReviewed.
+//
+// Verifies: P-045. Criterion: AC-095.
+func TestEveryFamilyHasBeenReviewed(t *testing.T) {
+	ds := realFamilies(t)
+	var missing []string
+	for fam, order := range ds {
+		if order == "Passeriformes" {
+			continue
+		}
+		if _, ok := NeckRatios[fam]; ok {
+			continue
+		}
+		if _, ok := NeckDefaultReviewed[fam]; ok {
+			continue
+		}
+		missing = append(missing, fam+" ("+order+")")
+	}
+	sort.Strings(missing)
+	if len(missing) > 0 {
+		t.Errorf("%d families have neither a neck ratio nor a recorded review, so they "+
+			"draw 0.18 because nobody looked:\n  %s", len(missing), strings.Join(missing, "\n  "))
+	}
+
+	// A family cannot be in both: the two maps mean opposite things.
+	for fam := range NeckDefaultReviewed {
+		if _, ok := NeckRatios[fam]; ok {
+			t.Errorf("%s is both given a ratio and recorded as left on the default", fam)
+		}
+	}
+	// Every reviewed entry must carry a reason, or it records nothing.
+	for fam, why := range NeckDefaultReviewed {
+		if strings.TrimSpace(why) == "" {
+			t.Errorf("%s is recorded as reviewed with no reason given", fam)
+		}
+	}
+}
+
+// realFamilies maps family to order from the compiled dataset, or skips.
+func realFamilies(t *testing.T) map[string]string {
+	t.Helper()
+	b, err := os.ReadFile(filepath.Join("..", "..", "web", "data", "species.json"))
+	if err != nil {
+		t.Skipf("no compiled dataset; run birdview-ingest first")
+	}
+	var d struct {
+		Species []struct{ Family, Order string } `json:"species"`
+	}
+	if err := json.Unmarshal(b, &d); err != nil {
+		t.Fatalf("reading the dataset: %v", err)
+	}
+	out := map[string]string{}
+	for _, s := range d.Species {
+		out[s.Family] = s.Order
+	}
+	return out
 }

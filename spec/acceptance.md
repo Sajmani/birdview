@@ -1752,3 +1752,28 @@ which was found in a screenshot rather than by any check.
 largest mass instead of the smallest — a 27 g House Sparrow beside a Trumpeter Swan then
 renders `0.1 lb`, one significant figure for a whole bird — and by reverting the index to a
 per-value unit, which makes sections 36, 37 and 38 render both `oz` and `lb`.
+
+### AC-095 — Every family's neck ratio has been looked at
+**Verifies:** [P-045](product.md#p-045) · **Level:** code · **Method:** test over the compiled
+dataset against `internal/morphology`
+
+**Assertions:** every family in the dataset that is **not** in Passeriformes appears either in
+`NeckRatios`, with a ratio, or in `NeckDefaultReviewed`, with a written reason for leaving it on
+the default. A family in both fails, since the two mean opposite things, and a reviewed entry
+with an empty reason fails, since it records nothing.
+
+**Why the order-level exemption is sound:** all 43 Passeriformes families here are small compact
+songbirds with no exposed neck, so the default is a short stub and correct for every one. Writing
+the same sentence 43 times would bury the families where the question is live. The exemption is
+itself the claim: a new passerine family needs no review, a new family in any other order does.
+
+**What this replaces:** the table's own comment conceded that "only a review of the table against
+the full family list will catch the next one", and nothing made that happen. Absence from
+`NeckRatios` meant two different things — considered and unremarkable, or never considered — and
+nothing could tell them apart. It cost a Limpkin drawn with a stub neck, a Pomarine Jaeger drawn
+with half a gull's, and a Cathartidae nobody revisited after AviList gave the New World vultures
+their own order.
+
+**Status: verified 2026-10-04 — passing, and watched failing** by removing Stercorariidae from
+`NeckRatios`, by removing Procellariidae from `NeckDefaultReviewed`, and by listing Alcidae in
+both.
