@@ -162,8 +162,25 @@ var Groupings = []Grouping{
 			"Ohio & Mississippi Valleys",
 			"Gulf Coast",
 			"South Atlantic",
-			"Mid-Atlantic",
-			"New England & the Maritimes",
+			// Both names say "Southern" or "Northern" on purpose. Connecticut
+			// and Rhode Island cluster with the coastal plain, not with the
+			// states they share a region with, and a label reading plain
+			// "Mid-Atlantic" made that look like a mistake.
+			//
+			// It is not. Rhode Island's single closest region anywhere is
+			// Delaware, ahead of Connecticut and New Hampshire. Connecticut
+			// is the genuinely marginal one -- its three nearest neighbours
+			// are all in New England -- but it still loses the group
+			// comparison, because the northern group reaches Newfoundland
+			// (0.800 from Connecticut) and Prince Edward Island (0.742) and
+			// its mean is dragged down by them.
+			//
+			// Moving the two was measured and is worse: mean within-zone
+			// cohesion over the pair falls from 0.8257 to 0.8239. Splitting
+			// the northern group is worse still, leaving five regions nearer
+			// some other group than their own. The names were the defect.
+			"Mid-Atlantic & Southern New England",
+			"Northern New England & the Maritimes",
 			"Caribbean",
 			"Pelagic",
 		},
@@ -278,28 +295,28 @@ func init() {
 		{"USA.15_1", "IN", "Indiana", "Ohio & Mississippi Valleys", "Midwest"},
 		{"USA.36_1", "OH", "Ohio", "Ohio & Mississippi Valleys", "Midwest"},
 		// Northeast
-		{"CAN.11_1", "QC", "Québec", "New England & the Maritimes", "Northeast"},
-		{"CAN.4_1", "NB", "New Brunswick", "New England & the Maritimes", "Northeast"},
-		{"CAN.7_1", "NS", "Nova Scotia", "New England & the Maritimes", "Northeast"},
-		{"CAN.10_1", "PE", "Prince Edward Island", "New England & the Maritimes", "Northeast"},
-		{"CAN.5_1", "NL", "Newfoundland and Labrador", "New England & the Maritimes", "Northeast"},
-		{"USA.20_1", "ME", "Maine", "New England & the Maritimes", "Northeast"},
-		{"USA.30_1", "NH", "New Hampshire", "New England & the Maritimes", "Northeast"},
-		{"USA.46_1", "VT", "Vermont", "New England & the Maritimes", "Northeast"},
-		{"USA.33_1", "NY", "New York", "New England & the Maritimes", "Northeast"},
-		{"USA.22_1", "MA", "Massachusetts", "New England & the Maritimes", "Northeast"},
-		{"USA.40_1", "RI", "Rhode Island", "Mid-Atlantic", "Northeast"},
-		{"USA.7_1", "CT", "Connecticut", "Mid-Atlantic", "Northeast"},
-		{"USA.31_1", "NJ", "New Jersey", "Mid-Atlantic", "Northeast"},
-		{"USA.39_1", "PA", "Pennsylvania", "Mid-Atlantic", "Northeast"},
+		{"CAN.11_1", "QC", "Québec", "Northern New England & the Maritimes", "Northeast"},
+		{"CAN.4_1", "NB", "New Brunswick", "Northern New England & the Maritimes", "Northeast"},
+		{"CAN.7_1", "NS", "Nova Scotia", "Northern New England & the Maritimes", "Northeast"},
+		{"CAN.10_1", "PE", "Prince Edward Island", "Northern New England & the Maritimes", "Northeast"},
+		{"CAN.5_1", "NL", "Newfoundland and Labrador", "Northern New England & the Maritimes", "Northeast"},
+		{"USA.20_1", "ME", "Maine", "Northern New England & the Maritimes", "Northeast"},
+		{"USA.30_1", "NH", "New Hampshire", "Northern New England & the Maritimes", "Northeast"},
+		{"USA.46_1", "VT", "Vermont", "Northern New England & the Maritimes", "Northeast"},
+		{"USA.33_1", "NY", "New York", "Northern New England & the Maritimes", "Northeast"},
+		{"USA.22_1", "MA", "Massachusetts", "Northern New England & the Maritimes", "Northeast"},
+		{"USA.40_1", "RI", "Rhode Island", "Mid-Atlantic & Southern New England", "Northeast"},
+		{"USA.7_1", "CT", "Connecticut", "Mid-Atlantic & Southern New England", "Northeast"},
+		{"USA.31_1", "NJ", "New Jersey", "Mid-Atlantic & Southern New England", "Northeast"},
+		{"USA.39_1", "PA", "Pennsylvania", "Mid-Atlantic & Southern New England", "Northeast"},
 		// Southeast
 		{"USA.18_1", "KY", "Kentucky", "Ohio & Mississippi Valleys", "Southeast"},
 		{"USA.43_1", "TN", "Tennessee", "Ohio & Mississippi Valleys", "Southeast"},
 		{"USA.49_1", "WV", "West Virginia", "Ohio & Mississippi Valleys", "Southeast"},
-		{"USA.47_1", "VA", "Virginia", "Mid-Atlantic", "Southeast"},
-		{"USA.21_1", "MD", "Maryland", "Mid-Atlantic", "Southeast"},
-		{"USA.8_1", "DE", "Delaware", "Mid-Atlantic", "Southeast"},
-		{"USA.9_1", "DC", "District of Columbia", "Mid-Atlantic", "Southeast"},
+		{"USA.47_1", "VA", "Virginia", "Mid-Atlantic & Southern New England", "Southeast"},
+		{"USA.21_1", "MD", "Maryland", "Mid-Atlantic & Southern New England", "Southeast"},
+		{"USA.8_1", "DE", "Delaware", "Mid-Atlantic & Southern New England", "Southeast"},
+		{"USA.9_1", "DC", "District of Columbia", "Mid-Atlantic & Southern New England", "Southeast"},
 		{"USA.34_1", "NC", "North Carolina", "South Atlantic", "Southeast"},
 		{"USA.41_1", "SC", "South Carolina", "South Atlantic", "Southeast"},
 		{"USA.11_1", "GA", "Georgia", "South Atlantic", "Southeast"},

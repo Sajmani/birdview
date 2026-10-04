@@ -1580,6 +1580,34 @@ reader asking which areas share birds wants the measured one. The clustering sca
 alone — which is defensible on birds and useless for finding Alaska. Offering both costs one
 extra block of chips and settles the question without overriding the data.
 
+### A zone name must not promise a boundary the birds do not keep
+
+Reported 2026-10-04: selecting the geographic *Northeast* showed Connecticut and Rhode Island
+in the derived *Mid-Atlantic* group rather than with the rest of New England, which reads as an
+error. It is not one, and the investigation is worth keeping because the conclusion was the
+opposite of the obvious fix.
+
+**Rhode Island is a genuine finding.** Its single closest region anywhere is **Delaware**
+(0.866), ahead of Connecticut (0.862) and New Hampshire (0.861). Southern New England shares
+its avifauna with the coastal plain, not with the boreal north.
+
+**Connecticut is marginal and lands there for a structural reason.** Its three nearest
+neighbours are New Hampshire, Massachusetts and Rhode Island — all New England — but assignment
+compares a region against a group's **mean**, and the northern group reaches Newfoundland (0.800
+from Connecticut) and Prince Edward Island (0.742). Those drag its average below the compact
+coastal-plain group's. Same artifact class as the islands earlier in this CR: a group's spread
+distorting what joins it.
+
+**Both repairs were measured and both lose.** Moving the two drops mean within-zone cohesion
+over the pair from **0.8257 to 0.8239**. Splitting the northern group leaves five regions nearer
+some other group than their own — Québec, New Brunswick and Nova Scotia all closer to New
+England than to each other, Vermont closer to the Maritimes.
+
+So the data was right and the **names** were wrong: "Mid-Atlantic" is a geographic label on what
+is really the mild Atlantic coastal plain from Virginia to Rhode Island. They are now
+**Mid-Atlantic & Southern New England** and **Northern New England & the Maritimes**, which
+describe what they contain. A derived group earns its name from its members, not from the map.
+
 ### What it costs
 
 **A region is no longer in one zone.** `Region.Zone` becomes a zone per grouping, and the
