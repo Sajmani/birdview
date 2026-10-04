@@ -3620,11 +3620,24 @@ func TestDetailListsEveryCategoryWithItsOrigin(t *testing.T) {
 		t.Error("the heron lost its other categories along with its regions")
 	}
 
-	// Every doc a provenance cites must be one this server serves. A
-	// citation pointing at a page that 404s is a fabricated citation.
-	for _, m := range regexp.MustCompile(`href="(/docs/[^"]+)"`).FindAllStringSubmatch(body, -1) {
-		if code, _ := get(t, s, m[1]); code != http.StatusOK {
+	// Every doc a provenance cites must be one this server serves, **and
+	// the section it names must exist**. A link to the right document and
+	// the wrong anchor resolves with a 200 and lands the reader nowhere
+	// near the explanation, which is how the regions row came to cite a
+	// document that said nothing about regions.
+	for _, m := range regexp.MustCompile(`href="(/docs/[^"#]+)(#[^"]*)?"`).
+		FindAllStringSubmatch(body, -1) {
+		code, doc := get(t, s, m[1])
+		if code != http.StatusOK {
 			t.Errorf("provenance cites %s, which the server answers with %d", m[1], code)
+			continue
+		}
+		if m[2] == "" {
+			continue
+		}
+		if anchor := `id="` + strings.TrimPrefix(m[2], "#") + `"`; !strings.Contains(doc, anchor) {
+			t.Errorf("provenance cites %s%s, and %s has no such section",
+				m[1], m[2], m[1])
 		}
 	}
 }

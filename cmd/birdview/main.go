@@ -1943,7 +1943,7 @@ func (s *server) categories(sp *dataset.Species) []categoryRow {
 			Origin: string(dataset.Derived),
 			Detail: "reported there in at least 1 record per million, from eBird and " +
 				"iNaturalist records via GBIF",
-			Doc: "/docs/data", DocLabel: "how regions are decided",
+			Doc: "/docs/data#regions", DocLabel: "how regions are decided",
 		})
 	}
 	return out
@@ -2083,8 +2083,13 @@ var markdown = map[string]goldmark.Markdown{
 func newMarkdown(base string) goldmark.Markdown {
 	return goldmark.New(
 		goldmark.WithExtensions(extension.Table, extension.Strikethrough, extension.Linkify),
-		goldmark.WithParserOptions(goldmarkparser.WithASTTransformers(
-			goldmarkutil.Prioritized(repoLinks{base}, 100))),
+		goldmark.WithParserOptions(
+			// Heading ids, so a provenance citation can point at the
+			// section that answers it rather than at the whole document
+			// and a hope (P-069).
+			goldmarkparser.WithAutoHeadingID(),
+			goldmarkparser.WithASTTransformers(
+				goldmarkutil.Prioritized(repoLinks{base}, 100))),
 		goldmark.WithRendererOptions(goldmarkhtml.WithHardWraps()),
 	)
 }

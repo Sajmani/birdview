@@ -212,6 +212,83 @@ dataset, so every one is modeled.
 Taxonomy is ABA's, which is the AOS checklist. Where AVONET's BirdLife taxonomy disagrees, ABA
 wins, and the join is bridged by an explicit synonym table rather than by fuzzy matching.
 
+## Regions
+
+Which regions a bird is listed in is **derived**, not published. No source states "this species
+occurs in Pennsylvania" at a licence BirdView can serve, so the list is computed from occurrence
+records and the rule is stated here rather than implied by the result.
+
+**Regions are GADM level-1 units** — US states, Canadian provinces and the outlying islands —
+plus five ocean boxes that are BirdView's own and are described below.
+
+**A species is listed in a region when it reaches 1 record per million of that region's bird
+records, in either eBird or iNaturalist**, both via GBIF under CC BY 4.0.
+
+**Relative rather than a fixed count**, for two measured reasons. eBird's volume doubled in five
+years, so any absolute bar admits more species over time for no ecological reason. And effort
+differs enormously between regions — California has 114 million bird records against Hawaii's
+2.5 million — so one count cannot mean the same thing in both.
+
+**Both sources, because one is not enough.** eBird's GBIF export **withholds
+conservation-sensitive species entirely**: Spotted Owl, Gyrfalcon, Northern Hawk Owl and the
+critically endangered Hawaiian endemics have zero eBird records and hundreds in iNaturalist. An
+eBird-only table would omit exactly the birds a reader is most likely to look up.
+
+**Names are matched verbatim**, as the publisher wrote them, not through GBIF's taxonomic
+backbone. The backbone silently drops what it cannot resolve and reports **zero** US and
+Canadian records for Cooper's Hawk, which is a bird that exists.
+
+**Six species belong to no region, and that is not an error.** Bermuda Petrel, Desertas Petrel,
+Trindade Petrel, Townsend's Storm-Petrel, Craveri's Murrelet and Guadalupe Murrelet are seen at
+sea, where no land polygon reaches. Bermuda Petrel has hundreds of records in the ABA Area and
+none inside any GADM region. They are given ocean regions instead, and their detail pages show
+no Regions row rather than a row claiming a rule placed them nowhere.
+
+**The five ocean boxes are BirdView's own and approximate.** They are coordinate rectangles,
+disjoint so a record falls in at most one, chosen to separate the birds rather than to reproduce
+any published maritime limit.
+
+### What is wrong with this, and it is known
+
+**The rule counts records, not birds, and a popular rarity outscores a quiet resident.** The more
+surprising a bird is, the more people travel to see it, and every one of them files a checklist.
+
+Two examples that are in the data as shipped. **American Flamingo is listed in Pennsylvania** on
+931 records — one or two birds at a single pond over thirteen days in September 2023, after
+Hurricane Idalia scattered flamingos up the eastern seaboard. **Lucy's Warbler, a Sonoran desert
+bird, is listed in Virginia** on 53 records from one location over six days around New Year
+2016–17.
+
+So **a region list is a list of places a bird has been reported often enough to clear the bar,
+not a range map**, and at the margin it contains birds that turned up once and drew a crowd.
+A fix is being worked on and is harder than it looks: every simple test that removes the
+flamingo also removes a Hawaiian endemic, because a critically endangered bird with four records
+and a vagrant with four records are the same shape in the data.
+
+## Habitat and diet
+
+Both come from **AVONET**, assigned per species, with AVONET's own definitions quoted in the
+control. AVONET records **one** primary habitat and one primary diet per species, so a bird that
+uses two of either is filed under one.
+
+BirdView adds further ones where that hides something, and **every addition is marked** — as
+`birdview` where this project decided it, or `derived` where it follows from AVONET's own data
+by a stated rule. Everything BirdView adds is listed together at [/added](/added).
+
+**The derived rule reads AVONET against itself.** AVONET records a trophic *level* as well as a
+trophic *niche*. Where the level is `Omnivore` but the niche names one specific food, AVONET is
+saying the diet is mixed and the niche only names the larger half. For a seed-eater the other
+half is invertebrates, which is forced; for an insect-eater the plant half is a reading of the
+family, and so is tagged `birdview` rather than `derived`.
+
+**One category is BirdView's own invention.** AVONET's ten niches have no term for exudates, so
+the four sapsuckers — a genus named for drilling and tending sap wells — were filed under
+`Invertivore` or `Omnivore` with the thing they are known for missing. `Sap` fills that gap. The
+bar for coining a term is that **no** AVONET term fits, not that none fits well: a bird that eats
+berries is a `Frugivore` even if the word is clumsy. Birds that merely drink from sapsucker
+wells — chickadees, nuthatches, kinglets, several warblers — are **not** given it; sap is a
+supplement to them and a livelihood to the sapsuckers.
+
 ---
 
 ## Where this is most likely to be wrong

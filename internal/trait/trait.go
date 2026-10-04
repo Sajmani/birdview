@@ -213,7 +213,7 @@ func MixedDietNiche(scientificName, family, niche, level string) (value string, 
 // Derived builds the assignment for a value computed from published data by
 // a stated rule.
 func Derived(value, why string) dataset.Assignment {
-	return dataset.Assignment{Value: value, Origin: dataset.Derived, Why: why, Doc: "data"}
+	return dataset.Assignment{Value: value, Origin: dataset.Derived, Why: why, Doc: "data#habitat-and-diet"}
 }
 
 // Published builds the assignment for a value AVONET supplies.
@@ -224,7 +224,7 @@ func Published(value string) dataset.Assignment {
 // BirdView builds the assignment for a value BirdView adds, with its reason and
 // a pointer to the document that explains the practice.
 func BirdView(value, why string) dataset.Assignment {
-	return dataset.Assignment{Value: value, Origin: dataset.BirdView, Why: why, Doc: "data"}
+	return dataset.Assignment{Value: value, Origin: dataset.BirdView, Why: why, Doc: "data#habitat-and-diet"}
 }
 
 // HabitatsFor returns every habitat assigned to a species: AVONET's primary

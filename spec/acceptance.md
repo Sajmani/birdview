@@ -1545,7 +1545,10 @@ and must not be shown as placed nowhere by a rule.
 
 **Assertions, links:** where provenance is an algorithm, the cell names the rule and links to a
 document **served by BirdView**, not to an external host. Every `/docs/` link on the page is
-fetched and must answer 200, so a fabricated citation cannot pass.
+fetched and must answer 200, so a fabricated citation cannot pass — **and where the link names
+a section, that section must exist**. A link to the right document and a wrong anchor resolves
+with a 200 and lands the reader nowhere near the explanation, which is how the regions row came
+to cite a document that said nothing whatever about regions.
 
 **Assertions, between documents:** every internal link in every served document resolves. The
 guides cite the spec as `../spec/product.md`, which is right in a checkout and a 404 in a
@@ -1563,7 +1566,8 @@ arriving at once ([T-004](tech.md#t-004)).
 
 **Status: verified 2026-10-03 — passing, and watched failing** by giving each region its own
 row; by rendering a category with an empty origin; by citing `/docs/regions`, a document the
-server does not serve; by sending the spec's sibling links to `/docs`, which 404s eight
+server does not serve; by citing `#how-regions-work`, a section that does not exist; by
+renaming the section the citation names; by sending the spec's sibling links to `/docs`, which 404s eight
 requirement documents; by widening the embed to `*.md sources`, which pulls in the vendored
 terms; and by reading the title from line one again, which puts `<!--` back in the index.
 
