@@ -133,7 +133,11 @@ footer a:visited { color: var(--accent-visited); }
 .cmprow { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
 .cmppanel { flex: 1 1 640px; max-width: 760px; }
 .cmptitle { font-size: 20px; margin: 0 0 4px; }
-.cmpsort { margin: 12px 0 2px; }
+/* The gap below the sort row is the gap .cmprow puts between panels, so the
+   controls stand off the grid by the same measure the grid uses inside it. At
+   the 2px it shipped with, the buttons sat on the first panel's top border and
+   read as part of that panel rather than as controls over all of them. */
+.cmpsort { margin: 12px 0 16px; }
 .cmpnote { margin-top: 4px; }
 .cmplinks { display: flex; gap: 16px; margin: 6px 0 0; font-size: 12.5px; }
 .cmpdrop { margin-left: auto; }
