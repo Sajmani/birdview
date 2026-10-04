@@ -146,6 +146,7 @@ func main() {
 		log.Printf("birdview-status: pass 1 done, %d names, cached to %s", len(counts), *cache)
 	}
 
+	counts = toBinomials(counts)
 	names := make([]string, 0, len(counts))
 	for n := range counts {
 		names = append(names, n)
@@ -162,6 +163,7 @@ func main() {
 		best   status.Status
 	}
 	results := make([]result, len(names))
+	var failed2 []string
 	log.Printf("birdview-status: pass 2, %d species x up to %d regions", len(names), topRegions)
 	for i, n := range names {
 		wg.Add(1)
@@ -190,7 +192,14 @@ func main() {
 				}
 				sh, err := shapeOf(ctx, c, p)
 				if err != nil {
-					log.Fatalf("birdview-status: %v", err)
+					// Collected, not fatal. The first run died in a goroutine
+					// on one unqueryable name and discarded ninety seconds of
+					// completed work; a failure here is refused at the end
+					// instead, where the whole list can be shown at once.
+					mu.Lock()
+					failed2 = append(failed2, err.Error())
+					mu.Unlock()
+					continue
 				}
 				shapes[p.gid] = sh
 				sts = append(sts, status.Classify(sh))
@@ -198,10 +207,18 @@ func main() {
 			results[i] = result{n, shapes, status.Best(sts)}
 		}(i, n)
 		if i%200 == 0 && i > 0 {
-			log.Printf("birdview-status:   %d/%d", i, len(names))
+			log.Printf("birdview-status:   %d/%d queued", i, len(names))
 		}
 	}
 	wg.Wait()
+	if len(failed2) > 0 {
+		// Same reason as pass 1: a species whose dates never arrived would be
+		// filed as a vagrant on no evidence, which is indistinguishable in the
+		// output from a measured one.
+		log.Fatalf("birdview-status: %d date queries failed, refusing to write "+
+			"a table that would call them vagrants:\n  %s",
+			len(failed2), strings.Join(failed2, "\n  "))
+	}
 
 	if err := os.MkdirAll(filepath.Dir(*outPath), 0o755); err != nil {
 		log.Fatalf("birdview-status: %v", err)
@@ -250,6 +267,47 @@ func main() {
 		}
 		log.Printf("birdview-status: wrote %s", *dump)
 	}
+}
+
+// toBinomials reduces the verbatim facet to species.
+//
+// iNaturalist publishes each identification at the rank the observer reached,
+// so the facet mixes binomials with subspecies trinomials, domestic forms,
+// hybrids and bare genera. eBird does not — every one of its 1,382 ABA-area
+// names is already a binomial — so this only ever touches the iNaturalist
+// side.
+//
+// Hybrids are dropped because they are not one species, and a bare genus
+// because it was never identified to one. Anything longer is truncated to its
+// first two tokens, which folds `setophaga coronata auduboni` into its
+// species and `columba livia domestica` into Rock Pigeon.
+//
+// Measured 2026-10-04: 97.1% of iNaturalist's ABA-area records are already
+// bare binomials, 2.6% sit under trinomials, 0.2% are hybrids and 0.1% are
+// genus-only. Only 7 species have records exclusively under a trinomial and
+// the largest has 6, so nothing here can change a classification. The dates
+// query below asks for the binomial alone and therefore misses that 2.6%;
+// that is accepted, because those records can only ever make an established
+// bird look more established.
+func toBinomials(in map[string]map[string]int64) map[string]map[string]int64 {
+	out := map[string]map[string]int64{}
+	for name, regions := range in {
+		if strings.ContainsRune(name, '×') {
+			continue
+		}
+		f := strings.Fields(name)
+		if len(f) < 2 {
+			continue
+		}
+		k := f[0] + " " + f[1]
+		if out[k] == nil {
+			out[k] = map[string]int64{}
+		}
+		for gid, n := range regions {
+			out[k][gid] += n
+		}
+	}
+	return out
 }
 
 // shapeOf asks both datasets for the dates behind one (species, region) pair
