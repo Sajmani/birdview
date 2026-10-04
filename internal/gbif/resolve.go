@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -82,6 +83,33 @@ type Client struct {
 
 	mu   sync.Mutex
 	last time.Time
+	// gap is the live interval. It starts at Interval and only ever widens,
+	// in response to GBIF saying the rate is too high.
+	gap time.Duration
+}
+
+// MaxInterval caps how far throttling can widen the gap. Past this the run is
+// not worth continuing unattended.
+const MaxInterval = 4 * time.Second
+
+// slowDown widens the pacing after a 429.
+//
+// The number was guessed twice and measured once. At 250ms across two workers
+// GBIF throttled hard enough to drop a run from 32 species a minute to 4,
+// almost all of it spent in backoff; at 500ms and at 1s, twenty and twelve
+// consecutive requests went through untouched. Rather than pick one and hope
+// it holds -- GBIF accepted 250ms earlier the same morning -- the client
+// treats a 429 as the authority it is and widens until the throttling stops.
+func (c *Client) slowDown() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.gap == 0 {
+		c.gap = c.Interval
+	}
+	if c.gap < MaxInterval {
+		c.gap = min(c.gap*3/2+100*time.Millisecond, MaxInterval)
+		log.Printf("gbif: throttled; pacing widened to %v", c.gap)
+	}
 }
 
 // NewClient returns a client with the courtesy defaults above.
@@ -445,6 +473,11 @@ func (c *Client) get(ctx context.Context, path string, into any) error {
 	var last error
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 		if attempt > 0 {
+			// Said out loud. A retry costs seconds of backoff, and a run that
+			// spends them silently looks merely slow: the first run after 404
+			// became retryable dropped from 32 species a minute to 4, and
+			// nothing in the log said why.
+			log.Printf("gbif: retry %d/%d after %v", attempt, maxAttempts-1, last)
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
@@ -487,6 +520,9 @@ func (c *Client) attempt(ctx context.Context, path string, into any, last *error
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		*last = fmt.Errorf("GET %s: %s", path, resp.Status)
+		if resp.StatusCode == http.StatusTooManyRequests {
+			c.slowDown()
+		}
 		if !retryable(resp.StatusCode) {
 			return *last
 		}
@@ -510,8 +546,11 @@ func (c *Client) pace() {
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if c.gap == 0 {
+		c.gap = c.Interval
+	}
 	if !c.last.IsZero() {
-		if wait := c.Interval - time.Since(c.last); wait > 0 {
+		if wait := c.gap - time.Since(c.last); wait > 0 {
 			time.Sleep(wait)
 		}
 	}

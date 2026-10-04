@@ -81,12 +81,12 @@ func main() {
 
 	ctx := context.Background()
 	c := gbif.NewClient()
-	// Gentler than the package defaults. These are whole-region facets over a
-	// billion records, not taxon lookups, and GBIF sheds load on them: at the
-	// default 100ms across three workers the first run took a 429 that
-	// outlasted all four retries. The courtesy is ours to set, not a limit
-	// GBIF publishes.
-	c.Interval = 250 * time.Millisecond
+	// Gentler than the package defaults, and a starting point rather than a
+	// setting: these are whole-region facets over a billion records, not
+	// taxon lookups, and GBIF sheds load on them. 250ms throttled hard enough
+	// to spend a run in backoff; 500ms measured clean over twenty consecutive
+	// requests. The client widens this itself when GBIF says to (slowDown).
+	c.Interval = 500 * time.Millisecond
 	c.Backoff = 5 * time.Second
 	gids := region.LandIDs()
 

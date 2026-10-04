@@ -832,3 +832,45 @@ func TestTaxaFailsTheBatchOnATransportError(t *testing.T) {
 		t.Errorf("got %d taxa alongside the error; a partial batch must not reach the table", len(taxa))
 	}
 }
+
+// A 429 must widen the pacing, not just trigger a retry at the same rate.
+//
+// The failure this is for: at 250ms across two workers GBIF throttled, every
+// request burned 5 to 35 seconds of backoff, and the run slowed from 32
+// species a minute to 4 while retrying at exactly the rate that caused it.
+// Backing off per request and leaving the rate alone is not backing off.
+//
+// Watched fail: removing the c.slowDown() call leaves gap at its initial
+// value and this reports no widening.
+func TestThrottlingWidensThePacing(t *testing.T) {
+	var hits int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		hits++
+		if hits <= 2 {
+			http.Error(w, "slow down", http.StatusTooManyRequests)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, cormorantJSON)
+	}))
+	defer srv.Close()
+
+	c := NewClient()
+	c.BaseURL, c.Backoff, c.HTTP = srv.URL, time.Millisecond, srv.Client()
+	c.Interval = time.Millisecond // small, so the test does not sleep for real
+
+	if _, err := c.Taxon(context.Background(), 2481875, 0); err != nil {
+		t.Fatalf("two 429s then a 200 should succeed: %v", err)
+	}
+	c.mu.Lock()
+	gap := c.gap
+	c.mu.Unlock()
+	if gap <= c.Interval {
+		t.Errorf("after two 429s the gap is %v, no wider than the initial %v: "+
+			"retrying at the rate that caused the throttling is not backing off",
+			gap, c.Interval)
+	}
+	if gap > MaxInterval {
+		t.Errorf("gap %v exceeds the cap %v", gap, MaxInterval)
+	}
+}
