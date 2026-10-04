@@ -860,7 +860,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		s.traitControl(r, "Habitat", "Where the bird mostly lives. AVONET's classification, quoted; BirdView adds a second habitat for a few birds and marks those as its own.",
 			"habitat", trait.Habitats, opt.Habitats, opt.HasHabitats,
 			func(sp *dataset.Species) []dataset.Assignment { return sp.Habitats }),
-		s.traitControl(r, "Diet", "What the bird mostly eats. AVONET's classification, quoted.",
+		s.traitControl(r, "Diet", "What the bird mostly eats. AVONET's classification, quoted — except Drinks sap, which is BirdView's own: AVONET has no category for birds that live off tree sap.",
 			"niche", trait.Niches, opt.Niches, opt.HasNiches,
 			func(sp *dataset.Species) []dataset.Assignment { return sp.Niches }),
 	}
@@ -1867,7 +1867,7 @@ func (s *server) traitControl(r *http.Request, name, note, param string,
 			next[t.Value] = true
 		}
 		b.Rows = append(b.Rows, traitRow{
-			Value: t.Value, Label: t.Label, Description: t.Description, Coined: t.Coined,
+			Value: t.Value, Label: t.Label, Description: t.Description,
 			Count: count[t.Value], Selected: on(t.Value),
 			URL: s.traitURL(r, param, next, len(terms)),
 		})

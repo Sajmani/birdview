@@ -328,9 +328,17 @@ merged into the published value ([P-069](#p-069)).
 none that fits at all.** Not "none that fits well" — a bird that eats berries is a `Frugivore`
 even if the word is clumsy. The case this exists for is **sap**: AVONET's ten niches have no
 category for exudates, so the four sapsuckers are filed under `Invertivore` or `Omnivore` and
-the thing the genus is named for disappears. A coined term is marked as BirdView's in the
-control, defines itself rather than quoting AVONET, and can only ever be assigned with origin
-`birdview` — a category this project invented cannot be published by anyone. A test caps how
+the thing the genus is named for disappears. A coined term **defines itself rather than quoting AVONET**, is excepted by name where the
+control claims AVONET's classification, and can only ever be assigned with origin `birdview` —
+a category this project invented cannot be published by anyone. It carries no badge: the
+definition already says whose category it is, and a tag on one row of a list reads as a defect
+rather than as provenance.
+
+The threshold is **the bird's own living**, not contact with the food. Sapsuckers excavate
+wells and defend them; chickadees, nuthatches, kinglets and several warblers are documented
+drinking from those wells opportunistically, and they are **not** given this category. Sap is a
+supplement to them and a livelihood to Sphyrapicus, and a category that cannot tell those apart
+is not worth having — the same ≥60% standard AVONET holds its own niches to. A test caps how
 many exist, because the difference between a gap and a habit is counted, not promised.
 
 What keeps this honest is not scarcity but **provenance plus evidence**. Every addition is
