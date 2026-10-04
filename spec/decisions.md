@@ -1909,7 +1909,7 @@ implying completeness.
 **Subject:** `dataset.scope`
 **Kind:** Replacement — [P-001](product.md#p-001)'s ABA rarity-code filter is withdrawn in favor
 of a status vocabulary BirdView derives from open occurrence data and owns
-**Date:** 2026-10-04 · **Decided by:** *proposed, not yet decided*
+**Date:** 2026-10-04 · **Decided by:** Sameer
 
 ### What changes
 
@@ -2023,21 +2023,38 @@ held back rather than abandoned, pending the full per-region run.
   Akohekohe has 7 iNaturalist records and *zero* parseable dates. Recurrence is unmeasurable for
   precisely the species eBird withholds. Spotted Owl is better but thin — 517 records on 22
   dates.
-- **Origin is not an occurrence property.** Nothing in either dataset separates a self-sustaining
-  Graylag Goose population from a steady trickle of escapees; the records look identical. If
-  BirdView labels a species `exotic`, that label is a declared editorial list, not a measurement,
-  and must say so.
+- **Origin is not an occurrence property, and recurrence does not rescue it.** This is the one
+  bias recurrence does *not* fix, and the example is already shipped: **Indian Peafowl in New
+  York** — 255 records on 215 distinct dates, 47 episodes across 33 years. Every recurrence
+  measure reads *established*, because ornamental birds on estates and farms are continuously
+  replenished by people, and a maintained population is indistinguishable from a wild one in
+  occurrence data. Compare the genuine feral population in Florida: 23,029 records, 11 years.
+  Recurrence is robust to **observer** bias and blind to **origin** bias. If BirdView labels a
+  species `exotic`, that label is a declared editorial list, not a measurement, and must say so.
 
 These three need a short declared exceptions table, owned and documented. That is a far smaller
 editorial surface than the weighted model this CR was asked for.
 
-### Open, and why this is not yet decided
+### Settled on approval
 
-1. The status vocabulary itself — the proposal is `established`, `rare`, `vagrant`, `absent`,
-   with `withheld` and `exotic` as orthogonal flags rather than statuses.
-2. Where the boundary between `established` and `rare` falls, which is a declared coefficient.
-3. Whether the ~96,000-query run is acceptable, and whether it is narrowed by only querying the
-   pairs [`data/region-presence.tsv`](../data/region-presence.tsv) already reports as present.
+**The vocabulary** is `established`, `rare`, `vagrant` and `absent`, with `withheld` and
+`exotic` as orthogonal flags rather than statuses — a bird can be withheld *and* established,
+and the peafowl is exotic *and* recurring, so folding either into the status would lose one of
+the two facts.
+
+**The run is ~1,400 queries, not ~96,000.** Querying every species against every region was the
+wrong shape. Scope asks whether a species recurs *somewhere*, so the cheap form is two passes:
+
+1. One `verbatimScientificName` facet per region — 64 queries — which yields the record count
+   for every (species, region) pair at once. This is what
+   [`birdview-regions`](../cmd/birdview-regions) already does.
+2. An `eventDate` facet for each species in its **top three regions by record count** — about
+   4,100 queries. If a species does not recur where it is seen most, it does not recur anywhere.
+
+**The established/rare boundary is set after the run, not before.** Picking it now would be
+inventing a coefficient and then finding data to justify it; the honest order is to measure the
+distribution first and then declare the cut with a written reason. This is the one piece of the
+model still owed a number.
 
 ## Work arising
 

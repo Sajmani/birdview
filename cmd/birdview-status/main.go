@@ -1,0 +1,301 @@
+// Command birdview-status derives BirdView's own occurrence status for every
+// species the ABA Area reports, and writes the committed status table.
+//
+// It replaces the ABA rarity codes, which supplied scope until 2026-10-04 and
+// could not be redistributed (P-001, CR-028). What it measures is not how
+// MANY times a bird was seen but whether the sightings RECUR: a record count
+// tracks observer effort, so it under-reports pelagic species and island
+// endemics and over-reports vagrants, and those biases pull in opposite
+// directions. Recurrence is insensitive to both.
+//
+// Two passes, which is what keeps the run small:
+//
+//  1. One verbatimScientificName facet per region — about 70 queries — giving
+//     the record count for every (species, region) pair at once.
+//  2. An eventDate facet for each species in its top regions by record count.
+//     If a species does not recur where it is seen most, it does not recur
+//     anywhere, so there is no reason to ask about the other sixty.
+//
+// Both eBird and iNaturalist are queried, because eBird withholds
+// conservation-sensitive species outright and iNaturalist is the only open
+// source that has them (sources.md, `gbif`).
+//
+// Nothing queries the network at build or test time; the output is committed
+// (T-005's sibling rule for generated tables, as for data/gbif-taxa.tsv).
+//
+// Verifies: P-001, P-070, T-006.
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"flag"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+	"sync"
+	"time"
+
+	"birdview/internal/gbif"
+	"birdview/internal/region"
+	"birdview/internal/status"
+)
+
+// iNatDatasetKey is the iNaturalist research-grade observations dataset.
+const iNatDatasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7"
+
+// topRegions is how many of a species' regions get the date query, ordered by
+// record count.
+//
+// Three, not one: the region where a species has the most records is usually
+// where it is most established, but not always — a bird can be commonest in
+// the state with the most birders rather than the state it breeds in. Three
+// covers that without multiplying the run by sixty.
+const topRegions = 3
+
+// minRecords is the floor below which a date query is not worth making. A
+// species with fewer than this in a region cannot reach MinEpisodes however
+// its dates fall, so the query would only confirm a vagrant.
+const minRecords = 3
+
+type pair struct {
+	name    string // verbatim scientific name, lowercased
+	gid     string
+	records int64
+}
+
+func main() {
+	var (
+		outPath = flag.String("out", "data/status.tsv", "output table (committed)")
+		dump    = flag.String("dump", "", "also write the raw per-region shapes here, for calibration")
+		limit   = flag.Int("limit", 0, "stop after this many species (0 = all), for a smoke run")
+		cache   = flag.String("cache", "/tmp/birdview-status-pass1.json", "pass 1 cache; reused if present")
+		workers = flag.Int("workers", 2, "concurrent requests")
+	)
+	flag.Parse()
+
+	ctx := context.Background()
+	c := gbif.NewClient()
+	// Gentler than the package defaults. These are whole-region facets over a
+	// billion records, not taxon lookups, and GBIF sheds load on them: at the
+	// default 100ms across three workers the first run took a 429 that
+	// outlasted all four retries. The courtesy is ours to set, not a limit
+	// GBIF publishes.
+	c.Interval = 250 * time.Millisecond
+	c.Backoff = 5 * time.Second
+	gids := region.LandIDs()
+
+	// Pass 1: record counts for every (species, region) pair, both datasets.
+	// Cached to disk because it is the slow half, and a throttle in the
+	// fortieth region should not discard the first thirty-nine.
+	counts := map[string]map[string]int64{} // name -> gid -> records
+	if b, err := os.ReadFile(*cache); err == nil {
+		if err := json.Unmarshal(b, &counts); err != nil {
+			log.Fatalf("birdview-status: cache %s: %v", *cache, err)
+		}
+		log.Printf("birdview-status: pass 1 read from %s, %d names", *cache, len(counts))
+	}
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, *workers)
+	if len(counts) == 0 {
+		log.Printf("birdview-status: pass 1, %d regions x 2 datasets", len(gids))
+		var failed []string
+		for _, gid := range gids {
+			for _, ds := range []string{gbif.EBirdDatasetKey, iNatDatasetKey} {
+				wg.Add(1)
+				go func(gid, ds string) {
+					defer wg.Done()
+					sem <- struct{}{}
+					defer func() { <-sem }()
+					recs, err := c.NamesIn(ctx, ds, gid)
+					mu.Lock()
+					defer mu.Unlock()
+					if err != nil {
+						// Collected rather than fatal: dying here throws away
+						// every region that did answer.
+						failed = append(failed, gid+": "+err.Error())
+						return
+					}
+					for _, r := range recs {
+						if counts[r.Name] == nil {
+							counts[r.Name] = map[string]int64{}
+						}
+						counts[r.Name][gid] += r.Records
+					}
+				}(gid, ds)
+			}
+		}
+		wg.Wait()
+		if len(failed) > 0 {
+			// A missing region silently shrinks every species' evidence, so a
+			// partial pass is refused rather than written out looking whole.
+			log.Fatalf("birdview-status: %d region queries failed, refusing to write "+
+				"a partial table:\n  %s", len(failed), strings.Join(failed, "\n  "))
+		}
+		b, err := json.Marshal(counts)
+		if err != nil {
+			log.Fatalf("birdview-status: %v", err)
+		}
+		if err := os.WriteFile(*cache, b, 0o644); err != nil {
+			log.Fatalf("birdview-status: %v", err)
+		}
+		log.Printf("birdview-status: pass 1 done, %d names, cached to %s", len(counts), *cache)
+	}
+
+	names := make([]string, 0, len(counts))
+	for n := range counts {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	if *limit > 0 && *limit < len(names) {
+		names = names[:*limit]
+	}
+
+	// Pass 2: dates for each species in its top regions.
+	type result struct {
+		name   string
+		shapes map[string]status.Shape
+		best   status.Status
+	}
+	results := make([]result, len(names))
+	log.Printf("birdview-status: pass 2, %d species x up to %d regions", len(names), topRegions)
+	for i, n := range names {
+		wg.Add(1)
+		go func(i int, n string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			var ps []pair
+			for gid, recs := range counts[n] {
+				ps = append(ps, pair{n, gid, recs})
+			}
+			sort.Slice(ps, func(a, b int) bool {
+				if ps[a].records != ps[b].records {
+					return ps[a].records > ps[b].records
+				}
+				return ps[a].gid < ps[b].gid // stable, so a rerun matches
+			})
+			if len(ps) > topRegions {
+				ps = ps[:topRegions]
+			}
+			shapes := map[string]status.Shape{}
+			var sts []status.Status
+			for _, p := range ps {
+				if p.records < minRecords {
+					continue
+				}
+				sh, err := shapeOf(ctx, c, p)
+				if err != nil {
+					log.Fatalf("birdview-status: %v", err)
+				}
+				shapes[p.gid] = sh
+				sts = append(sts, status.Classify(sh))
+			}
+			results[i] = result{n, shapes, status.Best(sts)}
+		}(i, n)
+		if i%200 == 0 && i > 0 {
+			log.Printf("birdview-status:   %d/%d", i, len(names))
+		}
+	}
+	wg.Wait()
+
+	if err := os.MkdirAll(filepath.Dir(*outPath), 0o755); err != nil {
+		log.Fatalf("birdview-status: %v", err)
+	}
+	f, err := os.Create(*outPath)
+	if err != nil {
+		log.Fatalf("birdview-status: %v", err)
+	}
+	defer f.Close()
+	fmt.Fprintf(f, "# BirdView's own occurrence status, derived from GBIF (P-001, CR-028).\n")
+	fmt.Fprintf(f, "# Generated by cmd/birdview-status. Not a copy of anything published.\n")
+	fmt.Fprintf(f, "# verbatim name<TAB>status<TAB>best region<TAB>episodes<TAB>years<TAB>records\n#\n")
+	fmt.Fprintf(f, "# Status is recurrence, not abundance: a species is established where its\n")
+	fmt.Fprintf(f, "# records fall in repeated episodes across years, however few they are.\n")
+	fmt.Fprintf(f, "# Sources: EOD - eBird Observation Dataset, doi:10.15468/aomfnb, and the\n")
+	fmt.Fprintf(f, "# iNaturalist research-grade dataset. Both CC BY 4.0.\n")
+
+	tally := map[status.Status]int{}
+	for _, r := range results {
+		if r.name == "" {
+			continue
+		}
+		tally[r.best]++
+		gid, sh := bestRegion(r.shapes)
+		fmt.Fprintf(f, "%s\t%s\t%s\t%d\t%d\t%d\n",
+			r.name, r.best, gid, sh.Episodes, sh.Years, sh.Records)
+	}
+	log.Printf("birdview-status: wrote %s", *outPath)
+	for _, s := range []status.Status{status.Established, status.Rare, status.Vagrant, status.Absent} {
+		log.Printf("birdview-status:   %-12s %d", s, tally[s])
+	}
+
+	if *dump != "" {
+		d, err := os.Create(*dump)
+		if err != nil {
+			log.Fatalf("birdview-status: %v", err)
+		}
+		defer d.Close()
+		fmt.Fprintf(d, "name\tgid\trecords\tdates\tepisodes\tyears\tspan\ttruncated\tstatus\n")
+		for _, r := range results {
+			for gid, sh := range r.shapes {
+				fmt.Fprintf(d, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%v\t%s\n",
+					r.name, gid, sh.Records, sh.Dates, sh.Episodes, sh.Years,
+					sh.SpanDays, sh.Truncated, status.Classify(sh))
+			}
+		}
+		log.Printf("birdview-status: wrote %s", *dump)
+	}
+}
+
+// shapeOf asks both datasets for the dates behind one (species, region) pair
+// and measures the union. The union is right because the two datasets record
+// different observers, not the same ones twice: a day either had a sighting
+// or it did not.
+func shapeOf(ctx context.Context, c *gbif.Client, p pair) (status.Shape, error) {
+	all := map[string]int64{}
+	var total int64
+	var trunc bool
+	for _, ds := range []string{gbif.EBirdDatasetKey, iNatDatasetKey} {
+		dates, n, t, err := c.DatesIn(ctx, ds, p.gid, p.name)
+		if err != nil {
+			return status.Shape{}, fmt.Errorf("dates for %q in %s: %w", p.name, p.gid, err)
+		}
+		for d, k := range dates {
+			all[d] += k
+		}
+		total += n
+		trunc = trunc || t
+	}
+	var ts []time.Time
+	for d := range all {
+		t, err := time.Parse("2006-01-02", d)
+		if err != nil {
+			continue // a range rather than a day; DatesIn filters these already
+		}
+		ts = append(ts, t)
+	}
+	return status.Measure(total, ts, trunc), nil
+}
+
+// bestRegion names the region behind a species' status, so the table carries
+// its own evidence and a verdict can be argued with.
+func bestRegion(shapes map[string]status.Shape) (string, status.Shape) {
+	var bg string
+	var bs status.Shape
+	rank := map[status.Status]int{status.Absent: 0, status.Vagrant: 1, status.Rare: 2, status.Established: 3}
+	for gid, sh := range shapes {
+		if bg == "" || rank[status.Classify(sh)] > rank[status.Classify(bs)] ||
+			(rank[status.Classify(sh)] == rank[status.Classify(bs)] && sh.Episodes > bs.Episodes) {
+			bg, bs = gid, sh
+		}
+	}
+	if bg == "" {
+		return "-", status.Shape{}
+	}
+	return bg, bs
+}

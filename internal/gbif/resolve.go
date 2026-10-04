@@ -237,6 +237,51 @@ func (c *Client) CountFor(ctx context.Context, datasetKey, name string, countrie
 	return body.Count, nil
 }
 
+// DatesIn returns the distinct calendar dates on which one verbatim name was
+// recorded in one GADM region, with the records on each, plus the region's
+// total for that name and whether the facet was truncated.
+//
+// The eventDate facet is what makes a recurrence rule measurable at all. A
+// page of occurrence records is a contiguous slice of GBIF's own ordering
+// rather than a sample -- all 300 American Robin records for Pennsylvania
+// fell in January 2024 -- so dates read off one are not a distribution. A
+// facet covers every record behind the query.
+//
+// Truncation is reported rather than paged away. A species with more distinct
+// dates than a facet page is established by inspection, so the extra pages
+// would buy nothing; what matters is that the caller never reads a floor as a
+// count (internal/status.Shape.Truncated).
+//
+// Verifies: P-001, T-006.
+func (c *Client) DatesIn(ctx context.Context, datasetKey, gadmGid, name string) (
+	dates map[string]int64, total int64, truncated bool, err error) {
+	q := url.Values{}
+	q.Set("datasetKey", datasetKey)
+	q.Set("gadmGid", gadmGid)
+	q.Set("verbatimScientificName", name)
+	q.Set("limit", "0")
+	q.Set("facet", "eventDate")
+	q.Set("facetLimit", strconv.Itoa(facetPage))
+
+	var body facetResponse
+	if err := c.get(ctx, "/occurrence/search?"+q.Encode(), &body); err != nil {
+		return nil, 0, false, fmt.Errorf("faceting dates for %q in %s: %w", name, gadmGid, err)
+	}
+	dates = map[string]int64{}
+	if len(body.Facets) > 0 {
+		for _, f := range body.Facets[0].Counts {
+			// GBIF answers the eventDate facet with an interval field, whose
+			// values are plain ISO dates where the record carried one and a
+			// range where it did not. Only a single day is usable.
+			if len(f.Name) == 10 {
+				dates[f.Name] = f.Count
+			}
+		}
+		truncated = len(body.Facets[0].Counts) >= facetPage
+	}
+	return dates, body.Count, truncated, nil
+}
+
 // CountInBox returns how many records for one verbatim name fall inside a
 // coordinate box. Used to decide which ocean a pelagic species belongs to.
 func (c *Client) CountInBox(ctx context.Context, datasetKey, name string,

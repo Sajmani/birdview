@@ -9,20 +9,75 @@ IDs are permanent. Withdrawn requirements stay in place so references to them st
 
 ## Dataset and taxonomy
 
-### P-001 — Scope is the regularly occurring ABA Area avifauna
+### P-001 — Scope is the ABA Area avifauna that recurs, by BirdView's own measure
 Subject: `dataset.scope`
-Value: `ABA Area, rarity codes 1-3`
+Value: `ABA Area, status established or rare`
 Goals: G-001, G-002
 
-The dataset is the species of the ABA Area — North America north of Mexico, plus Hawaii —
-restricted to ABA rarity codes 1 through 3, which is 841 of the 1,161 species in ABA Checklist
-8.19.
+The dataset is the species of the ABA Area — North America north of Mexico, plus Hawaii — whose
+observations **recur** there: a species is in scope when, in at least one region, its records
+fall in repeated episodes across multiple years. Status is derived by
+[`birdview-status`](../cmd/birdview-status) and committed to
+[`data/status.tsv`](../data/status.tsv); `established` and `rare` are in scope, `vagrant` and
+`absent` are not. See [CR-028](decisions.md#cr-028).
 
-Rationale: codes 4–6 are casual, accidental, extinct or extirpated — 320 species a birder will
-essentially never encounter, many of them Old World strays whose presence among the common birds
-makes the comparison less useful, not more. The rarity column is read at ingest purely as a scope
-filter; it is not carried into the dataset and not shown in the UI (see P-002 for why that
-distinction matters to the license).
+Rationale: a bird a reader will actually meet is one that keeps turning up, and **recurrence
+measures that where a record count cannot**. Occurrence counts measure observer effort, so they
+under-report pelagic species and remote-island endemics — nobody is there — and over-report
+vagrants, because a twitchable rarity draws a crowd. Those biases pull in opposite directions
+and no single threshold corrects both. Recurrence is insensitive to both: Akikiki has 376
+records across 45 years and is a resident; the 2023 American Flamingo in Pennsylvania has 931
+records across 13 days and is not.
+
+**This replaces the ABA rarity codes**, which supplied scope until 2026-10-04 and could not be
+redistributed. The codes were never a scope rule in their own right — they are a status
+vocabulary, of which P-001 used three values as a cutoff — so what replaces them is BirdView's
+own status vocabulary, published rather than hidden ([P-070](#p-070)).
+
+**Two limits are declared rather than measured**, because occurrence data cannot express them.
+Species with no open record at all are listed by hand, and so are species whose presence is
+maintained by people rather than self-sustaining; see [P-071](#p-071). Nothing in either dataset
+separates a feral population from a steady trickle of escapees.
+
+### P-070 — Status is published, not just used
+Subject: `dataset.status`
+Value: `established | rare | vagrant | absent, plus withheld and exotic flags`
+Goals: G-001, G-002
+
+Each species carries the status [P-001](#p-001) derives, and it is shown and filterable
+alongside Habitat and Diet ([CR-027](decisions.md#cr-027)) rather than consumed silently at
+ingest. The flags `withheld` — eBird suppresses the species, so the evidence is iNaturalist's —
+and `exotic` are orthogonal to the status, because a bird can be withheld *and* established.
+
+Rationale: the ABA codes were read at ingest and discarded, which was right while they were
+someone else's data under a license that forbade republishing them. BirdView's own status is
+neither, and hiding it would waste the most useful thing the derivation produces: the reader
+who wants to exclude vagrants, or to see only them, can say so. It also makes the judgement
+auditable — a status shown next to the evidence that produced it invites correction in a way an
+invisible ingest filter does not.
+
+This is the first BirdView output that is a dataset in its own right rather than an input to a
+drawing.
+
+### P-071 — Where the data cannot speak, the exception is declared and named
+Subject: `dataset.status.exceptions`
+Value: `declared table, each entry with a written reason`
+Goals: G-002, G-004
+
+Species whose status cannot be derived carry a declared one instead, from a committed table in
+which every entry names its reason. Two classes qualify, and no others:
+
+- **No open record exists.** Laysan Duck, Laysan Finch, Bermuda Petrel and Desertas Petrel have
+  zero records in both eBird and iNaturalist; eBird withholds some sensitive species outright
+  and iNaturalist obscures dates for others, so Akohekohe has 7 records and no parseable date.
+- **Presence is maintained by people.** Indian Peafowl in New York recurs on every measure — 47
+  episodes across 33 years — because ornamental birds are continuously replenished. Recurrence
+  is robust to observer bias and blind to origin.
+
+Rationale: an exception that is declared and visible can be argued with. The failure this
+guards against is the one [CR-028](decisions.md#cr-028) rejected for the model as a whole —
+quietly tuning a coefficient until the output looks right, which hides the judgement inside a
+number. A short table of named exceptions is a larger admission and a smaller lie.
 
 ### P-002 — Morphometric traits come from AVONET
 Subject: `dataset.traits.source`
