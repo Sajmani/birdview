@@ -791,7 +791,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		ClearURL: queryFor(r)("family", "region"),
 	}
 	if sp := s.legendSpecies(); sp != nil {
-		lt := labelledTile(sp, legendBox, opt.Metric3, opt.Locale)
+		lt := labelledTile(sp, legendBox, unitsFor(opt.Metric3, sp.Mass.Value), opt.Locale)
 		page.Legend = &lt
 	}
 
@@ -883,9 +883,28 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 					return []groupKey{{Name: f.Order, Common: f.OrderCommon}}
 				})},
 	}
+	// The unit scope follows the SCALE setting, because that is what the page
+	// is claiming to compare (P-073). Per section, each section shares a unit;
+	// globally, so does the whole set.
+	var globalUnits units
+	if opt.Scale == view.Global {
+		all := make([]float64, 0, len(filtered))
+		for _, sp := range filtered {
+			all = append(all, sp.Mass.Value)
+		}
+		globalUnits = unitsFor(opt.Metric3, all...)
+	}
 	for i, sec := range secs {
+		u := globalUnits
+		if opt.Scale != view.Global {
+			ms := make([]float64, 0, len(sec.Species))
+			for _, sp := range sec.Species {
+				ms = append(ms, sp.Mass.Value)
+			}
+			u = unitsFor(opt.Metric3, ms...)
+		}
 		sv := sectionView{Index: i + 1, Count: len(sec.Species),
-			Min: format(sec.Min, opt.Metric, opt.Metric3), Max: format(sec.Max, opt.Metric, opt.Metric3)}
+			Min: u.format(sec.Min, opt.Metric), Max: u.format(sec.Max, opt.Metric)}
 		for _, sp := range sec.Species {
 			g := view.Layout(sp, refs[i], spanRefs[i], tileBox)
 			sv.Tiles = append(sv.Tiles, tile{
@@ -904,9 +923,9 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				// the mass already (P-031, CR-020).
 				MassCube:    newMassCube(sp, tileBox.H, g.PxPerMm, ""),
 				WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
-				Length:      format(sp.TotalLength.Value, view.ByLength, opt.Metric3),
-				Wing:        format(sp.Wingspan.Value, view.ByWingspan, opt.Metric3),
-				MassStr:     format(sp.Mass.Value, view.ByMass, opt.Metric3),
+				Length:      u.format(sp.TotalLength.Value, view.ByLength),
+				Wing:        u.format(sp.Wingspan.Value, view.ByWingspan),
+				MassStr:     u.format(sp.Mass.Value, view.ByMass),
 			})
 		}
 		page.Sections = append(page.Sections, sv)
@@ -985,18 +1004,21 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	// pixels tall by design, and carrying that into the one view devoted to
 	// that single bird would leave nothing to look at (P-034).
 
+	// A detail page compares nothing, so the bird is its own scope and the
+	// unit is whichever suits it.
+	one := unitsFor(opt.Metric3, sp.Mass.Value)
 	rows := []metricRow{
-		row("Total length", sp.TotalLength, view.ByLength, opt.Metric3),
-		row("Wingspan", sp.Wingspan, view.ByWingspan, opt.Metric3),
-		row("Wing chord", sp.WingChord, view.ByLength, opt.Metric3),
-		row("Mass", sp.Mass, view.ByMass, opt.Metric3),
-		row("Bill", sp.Segments.Bill, view.ByLength, opt.Metric3),
-		row("Head", sp.Segments.Head, view.ByLength, opt.Metric3),
-		row("Neck", sp.Segments.Neck, view.ByLength, opt.Metric3),
-		row("Body", sp.Segments.Body, view.ByLength, opt.Metric3),
-		row("Tail", sp.Segments.Tail, view.ByLength, opt.Metric3),
+		row("Total length", sp.TotalLength, view.ByLength, one),
+		row("Wingspan", sp.Wingspan, view.ByWingspan, one),
+		row("Wing chord", sp.WingChord, view.ByLength, one),
+		row("Mass", sp.Mass, view.ByMass, one),
+		row("Bill", sp.Segments.Bill, view.ByLength, one),
+		row("Head", sp.Segments.Head, view.ByLength, one),
+		row("Neck", sp.Segments.Neck, view.ByLength, one),
+		row("Body", sp.Segments.Body, view.ByLength, one),
+		row("Tail", sp.Segments.Tail, view.ByLength, one),
 	}
-	lt := labelledTile(sp, box, opt.Metric3, opt.Locale)
+	lt := labelledTile(sp, box, one, opt.Locale)
 
 	// Only a confident match gets a link; zero means none was found (P-064).
 	var inatURL string
@@ -1080,16 +1102,23 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 	// as a section does (P-042). Laying each panel out against its own length
 	// would fill every panel equally and compare nothing.
 	var refLength, refWingspan float64
+	masses := make([]float64, 0, len(chosen))
 	for _, sp := range chosen {
 		refLength = math.Max(refLength, sp.TotalLength.Value)
 		refWingspan = math.Max(refWingspan, sp.Wingspan.Value)
+		masses = append(masses, sp.Mass.Value)
 	}
+	// One unit for the whole set, for the same reason there is one scale
+	// (P-073). The set named in the address IS the scope here -- comparing a
+	// swan with a sparrow must not print "4.2 lb" beside "0.9 oz", which is
+	// two scales in the one place the page exists to put birds on one.
+	u := unitsFor(opt.Metric3, masses...)
 
 	box := view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}
 	panels := make([]comparePanel, 0, len(chosen))
 	for _, sp := range chosen {
 		panels = append(panels, comparePanel{
-			tile:      labelledTileAt(sp, box, opt.Metric3, refLength, refWingspan, opt.Locale),
+			tile:      labelledTileAt(sp, box, u, refLength, refWingspan, opt.Locale),
 			DetailURL: detailLink(r, sp.ID),
 			RemoveURL: compareWithout(r, sp.ID),
 		})
@@ -1410,8 +1439,8 @@ func (s *server) legendSpecies() *dataset.Species {
 // labelledTile builds the annotated diagram for a bird drawn at its own scale:
 // the detail view and the help legend, each of which shows one bird with
 // nothing to measure it against (P-034).
-func labelledTile(sp *dataset.Species, box view.Box, metric bool, loc dataset.Locale) tile {
-	return labelledTileAt(sp, box, metric, sp.TotalLength.Value, sp.Wingspan.Value, loc)
+func labelledTile(sp *dataset.Species, box view.Box, u units, loc dataset.Locale) tile {
+	return labelledTileAt(sp, box, u, sp.TotalLength.Value, sp.Wingspan.Value, loc)
 }
 
 // labelledTileAt is the same diagram laid out against an EXTERNAL reference, so
@@ -1422,7 +1451,7 @@ func labelledTile(sp *dataset.Species, box view.Box, metric bool, loc dataset.Lo
 // a comparison mean something. Getting the argument wrong yields a page that
 // looks entirely correct and compares nothing, which is why AC-076 asserts
 // drawn heights against the length ratio rather than asserting on the markup.
-func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, refWingspan float64, loc dataset.Locale) tile {
+func labelledTileAt(sp *dataset.Species, box view.Box, u units, refLength, refWingspan float64, loc dataset.Locale) tile {
 	// draw is the area the bird gets; the emitted box is that plus the strip the
 	// total length label sits in, so the label costs the bird nothing. Going the
 	// other way -- keeping the box and shrinking the bird into it -- would take
@@ -1438,7 +1467,7 @@ func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, r
 	// drawing is shorter than the bird (CR-011), and the label names the bird.
 	foot := []footLabel{{
 		Key:  "total",
-		Text: "Total length  " + format(sp.TotalLength.Value, view.ByLength, metric),
+		Text: "Total length  " + u.format(sp.TotalLength.Value, view.ByLength),
 		Est:  sp.TotalLength.Prov.Kind != dataset.Measured,
 	}}
 
@@ -1464,14 +1493,14 @@ func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, r
 		m := segOf[l.Key]
 		t.Labels = append(t.Labels, diagramLabel{
 			Label: l,
-			Text:  strings.ToUpper(l.Key[:1]) + l.Key[1:] + "  " + format(m.Value, view.ByLength, metric),
+			Text:  strings.ToUpper(l.Key[:1]) + l.Key[1:] + "  " + u.format(m.Value, view.ByLength),
 			Est:   m.Prov.Kind == dataset.Modeled,
 		})
 	}
 	if sp.WingChord.Value > 0 {
-		t.ChordLabel = "Wing chord  " + format(sp.WingChord.Value, view.ByLength, metric)
+		t.ChordLabel = "Wing chord  " + u.format(sp.WingChord.Value, view.ByLength)
 	}
-	t.WingspanLabel = "Wingspan  " + format(sp.Wingspan.Value, view.ByWingspan, metric)
+	t.WingspanLabel = "Wingspan  " + u.format(sp.Wingspan.Value, view.ByWingspan)
 	t.WingspanEst = sp.Wingspan.Prov.Kind == dataset.Modeled
 	for i := range foot {
 		foot[i].Y = top + g.YTailTip + footGap + float64(i)*footLine
@@ -1484,14 +1513,14 @@ func labelledTileAt(sp *dataset.Species, box view.Box, metric bool, refLength, r
 	// was built -- the crossbar reaches into that corner for 0 of 841 species,
 	// the tightest clearance being 50px on Western Grebe.
 	t.MassCube = newMassCube(sp, draw.H, g.PxPerMm,
-		"Mass  "+format(sp.Mass.Value, view.ByMass, metric))
+		"Mass  "+u.format(sp.Mass.Value, view.ByMass))
 	return t
 }
 
 // row turns a metric into a display line, stating its provenance in plain
 // language (P-063).
-func row(label string, m dataset.Metric, as view.Metric, metric bool) metricRow {
-	r := metricRow{Label: label, Value: format(m.Value, as, metric), Kind: string(m.Prov.Kind)}
+func row(label string, m dataset.Metric, as view.Metric, u units) metricRow {
+	r := metricRow{Label: label, Value: u.format(m.Value, as), Kind: string(m.Prov.Kind)}
 	switch m.Prov.Kind {
 	case dataset.Measured:
 		r.Detail = "measured, from " + m.Prov.Source
@@ -1507,7 +1536,7 @@ func row(label string, m dataset.Metric, as view.Metric, metric bool) metricRow 
 	}
 	if m.Min > 0 && m.Max > 0 {
 		r.Detail += fmt.Sprintf(" Reported range %s\u2013%s.",
-			format(m.Min, as, metric), format(m.Max, as, metric))
+			u.format(m.Min, as), u.format(m.Max, as))
 	}
 	return r
 }
@@ -1563,27 +1592,79 @@ func queryFor(r *http.Request, drop ...string) func(...string) template.URL {
 // Mass in imperial means ounces and pounds. An earlier version returned
 // kilograms above a kilogram regardless of the toggle, so "imperial" showed a
 // metric unit for exactly the birds where it mattered most.
-func format(v float64, as view.Metric, metric bool) string {
+// gramsPerOunce converts to the avoirdupois ounce.
+const gramsPerOunce = 28.349523125
+
+// units fixes how every number in one comparison is written.
+//
+// The mass unit is a property of the SCOPE, not of the value. Chosen per
+// value, a section could print "14.5 oz" beside "1.2 lb" for two birds of
+// the same length -- arithmetic the reader has to do, on the page whose
+// whole purpose is comparison. Length never switches, so only mass needs
+// this.
+//
+// The scope is what the page is comparing: a section or the whole set on the
+// index, depending on the scale setting, and the birds named in the address
+// on the comparison page. A detail page compares nothing, so its scope is
+// the one bird.
+type units struct {
+	// metric selects centimetres and grams over inches and ounces.
+	metric bool
+	// big selects kilograms or pounds over grams or ounces.
+	big bool
+}
+
+// unitsFor picks the unit a scope shares.
+//
+// The SMALLEST mass decides, so a scope holding one small bird is written in
+// the small unit throughout: a swan beside a sparrow reads as "4.2 lb" and
+// "0.9 oz" otherwise, and the two cannot be compared by eye at all. Writing
+// the swan as 67 oz keeps one scale across the set, which is the point.
+// Taking the largest instead would round every small bird to 0.0 lb.
+func unitsFor(metric bool, masses ...float64) units {
+	u := units{metric: metric, big: true}
+	seen := false
+	for _, m := range masses {
+		if m <= 0 {
+			continue // no mass recorded; it cannot decide the unit
+		}
+		seen = true
+		if metric && m < 1000 {
+			u.big = false
+		}
+		if !metric && m/gramsPerOunce < 16 {
+			u.big = false
+		}
+	}
+	if !seen {
+		u.big = false
+	}
+	return u
+}
+
+func (u units) format(v float64, as view.Metric) string {
 	if as == view.ByMass {
-		if metric {
-			if v >= 1000 {
+		if u.metric {
+			if u.big {
 				return fmt.Sprintf("%.2f kg", v/1000)
 			}
 			return fmt.Sprintf("%.0f g", v)
 		}
-		oz := v / 28.349523125
+		oz := v / gramsPerOunce
 		switch {
-		case oz >= 16:
+		case u.big:
 			return fmt.Sprintf("%.1f lb", oz/16)
 		case oz >= 1:
 			return fmt.Sprintf("%.1f oz", oz)
 		default:
 			// A 3 g hummingbird is 0.11 oz; one decimal would erase the
-			// difference between the smallest birds entirely.
+			// difference between the smallest birds entirely. This is a
+			// precision choice within one unit, not a second unit, so it
+			// stays per value.
 			return fmt.Sprintf("%.2f oz", oz)
 		}
 	}
-	if metric {
+	if u.metric {
 		return fmt.Sprintf("%.1f cm", v/10)
 	}
 	return fmt.Sprintf("%.1f in", v/25.4)

@@ -661,6 +661,30 @@ reader wanting one zone must first clear all, then find their zone: two steps, a
 empties the page. Narrowing to one group is the common case and was the only one that took more
 than a click.
 
+### P-073 — One unit across whatever is being compared
+Subject: `presentation.units`
+Value: `mass unit fixed per comparison scope, smallest bird decides`
+Goals: G-001, G-002
+
+Mass is written in **one unit across everything a page is comparing**. The scope is what the
+page claims to compare: on the index, a section or the whole set, following the **scale**
+setting ([P-042](#p-042)); on the comparison page, the birds named in the address; on a detail
+page, the one bird, which compares nothing.
+
+**The smallest bird in the scope chooses the unit.** A scope holding one small bird is written
+in the small unit throughout, so a Trumpeter Swan beside a House Sparrow reads `384 oz` and
+`0.93 oz` rather than `24.0 lb` and `0.93 oz`.
+
+Rationale: a unit chosen per value prints `14.5 oz` beside `1.2 lb` for two birds in the same
+section — arithmetic the reader has to do, on the page whose whole purpose is comparison, and
+the one thing this project exists to spare them. Taking the *largest* bird instead would crush
+every small one to a single figure — a 27 g House Sparrow becomes `0.1 lb` — which is worse: a
+number with no precision left beats one that merely needs converting.
+
+Length never switches unit, so only mass is affected. The decimal places within a unit still
+vary by value — a 3 g hummingbird is `0.11 oz` and one decimal would erase the differences
+among the smallest birds — because that is precision, not a second scale.
+
 ### P-035 — The page explains itself
 Subject: `presentation.help`
 Goals: G-001, G-002, G-003

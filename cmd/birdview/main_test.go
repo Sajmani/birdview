@@ -643,10 +643,11 @@ func TestMassUnitsBySystem(t *testing.T) {
 		{2400, "5.3 lb", "2.40 kg"}, // heron
 	}
 	for _, c := range cases {
-		if got := format(c.g, view.ByMass, false); got != c.imperial {
+		// One bird is its own scope, which is the old per-value behaviour.
+		if got := unitsFor(false, c.g).format(c.g, view.ByMass); got != c.imperial {
 			t.Errorf("%.0f g imperial: got %q, want %q", c.g, got, c.imperial)
 		}
-		if got := format(c.g, view.ByMass, true); got != c.metric {
+		if got := unitsFor(true, c.g).format(c.g, view.ByMass); got != c.metric {
 			t.Errorf("%.0f g metric: got %q, want %q", c.g, got, c.metric)
 		}
 	}
@@ -1731,7 +1732,7 @@ func TestDetailDiagramLabelsTotalLength(t *testing.T) {
 	// Centred on the BIRD's axis, not the box's. The two differ by half the
 	// label gutter, so a label centred on the box sits well to the right of the
 	// bird it names.
-	lt := labelledTile(findSpecies(t, "greblu"), view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, true, dataset.LocaleNA)
+	lt := labelledTile(findSpecies(t, "greblu"), view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{metric: true}, dataset.LocaleNA)
 	if x := attrF(t, el, "x"); math.Abs(x-lt.Geom.CX) > 0.05 {
 		t.Errorf("total length label at x=%.1f; the bird's axis is %.1f (box centre is %.1f)",
 			x, lt.Geom.CX, lt.Box.W/2)
@@ -1801,7 +1802,7 @@ func TestTotalLengthLabelStaysInTheBox(t *testing.T) {
 	ds := testDataset()
 	for i := range ds.Species {
 		sp := &ds.Species[i]
-		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, true, dataset.LocaleNA)
+		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{metric: true}, dataset.LocaleNA)
 		if len(lt.FootLabels) == 0 {
 			t.Fatalf("%s: no whole-bird labels at all", sp.Name(dataset.LocaleNA))
 		}
@@ -2735,7 +2736,7 @@ func TestMassCubeIsWaterToScale(t *testing.T) {
 
 	for i := range ds.Species {
 		sp := &ds.Species[i]
-		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, false, dataset.LocaleNA)
+		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{}, dataset.LocaleNA)
 
 		// One gram of water is one cubic centimetre, so the cube of water
 		// weighing massG grams has side cbrt(massG) cm = 10*cbrt(massG) mm.
@@ -3948,7 +3949,7 @@ func TestUnitButtonsNameTheUnitsRendered(t *testing.T) {
 		// A small bird's mass: format() switches to pounds and kilograms
 		// further up, so the base unit the button names is the one a
 		// sparrow-sized mass renders in.
-		rendered := format(25, view.ByMass, tc.metric3)
+		rendered := unitsFor(tc.metric3, 25).format(25, view.ByMass)
 		unit := strings.TrimLeft(rendered, "0123456789.,  ~")
 		unit = strings.TrimSpace(unit)
 
@@ -4073,6 +4074,95 @@ func TestTileCubeNeverReachesTheCrossbar(t *testing.T) {
 			}
 			t.Logf("scale=%-7s metric=%-8s %d species, tightest clearance %.1fpx (%s)",
 				scale, metric, checked, minClear, tightest)
+		}
+	}
+}
+
+// The smallest bird in a scope chooses the unit, so a comparison never mixes
+// two (P-073).
+//
+// Expected values are computed from the definition -- 1 oz = 28.349523125 g,
+// 16 oz = 1 lb -- not read off a run.
+//
+// Watched fail: choosing the unit from the largest mass instead of the
+// smallest renders the 27 g sparrow as "0.1 lb" -- one significant figure
+// for a bird, against "0.95 oz".
+//
+// Verifies: P-073. Criterion: AC-094.
+func TestUnitsForTakesTheSmallestBird(t *testing.T) {
+	const sparrow, swan = 27.0, 10886.0 // g: House Sparrow, Trumpeter Swan
+
+	// Mixed scope: the small bird pulls everything into ounces.
+	u := unitsFor(false, swan, sparrow)
+	if got, want := u.format(sparrow, view.ByMass), "0.95 oz"; got != want {
+		t.Errorf("sparrow in a mixed scope: got %q, want %q", got, want)
+	}
+	if got, want := u.format(swan, view.ByMass), "384.0 oz"; got != want {
+		t.Errorf("swan in a mixed scope: got %q, want %q -- the scope holds a bird "+
+			"that cannot be written in pounds", got, want)
+	}
+
+	// All-large scope keeps pounds: the rule is "the smallest decides", not
+	// "always ounces".
+	if got, want := unitsFor(false, swan, 5000).format(swan, view.ByMass), "24.0 lb"; got != want {
+		t.Errorf("swan in an all-large scope: got %q, want %q", got, want)
+	}
+	// The same, metric.
+	if got, want := unitsFor(true, swan, sparrow).format(swan, view.ByMass), "10886 g"; got != want {
+		t.Errorf("swan in a mixed metric scope: got %q, want %q", got, want)
+	}
+	if got, want := unitsFor(true, swan, 5000).format(swan, view.ByMass), "10.89 kg"; got != want {
+		t.Errorf("swan in an all-large metric scope: got %q, want %q", got, want)
+	}
+	// No recorded mass must not pick the large unit on no evidence.
+	if u := unitsFor(false); u.big {
+		t.Error("an empty scope chose pounds with nothing to justify it")
+	}
+	if u := unitsFor(false, 0, 0); u.big {
+		t.Error("a scope of unrecorded masses chose pounds with nothing to justify it")
+	}
+}
+
+// No section and no comparison may render two mass units at once, over the
+// real dataset.
+//
+// This is the assertion that would have caught the original defect: one
+// section printing "14.5 oz" beside "1.2 lb" for birds of the same length,
+// found in a screenshot and by no check.
+//
+// Watched fail: reverting the index to a per-value unit makes sections
+// render both oz and lb.
+//
+// Verifies: P-073. Criterion: AC-094.
+func TestNoSectionMixesMassUnits(t *testing.T) {
+	ds := realDataset(t)
+	srv, err := newServer(ds)
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
+	}
+	unit := regexp.MustCompile(`\b\d[\d.,]*\s*(oz|lb|kg|g)\b`)
+
+	for _, q := range []string{
+		"/?by=mass&scale=section", "/?by=mass&scale=global",
+		"/?by=length&scale=section", "/?by=length&scale=global",
+		"/?by=mass&scale=section&units=metric",
+	} {
+		_, body := get(t, srv, q)
+		// Each section is a <section> block; check them one at a time, since
+		// two sections may legitimately differ from each other.
+		secs := regexp.MustCompile(`(?s)<section\b.*?</section>`).FindAllString(body, -1)
+		if len(secs) == 0 {
+			t.Fatalf("%s: no sections found; the test proves nothing", q)
+		}
+		for i, sec := range secs {
+			seen := map[string]bool{}
+			for _, m := range unit.FindAllStringSubmatch(sec, -1) {
+				seen[m[1]] = true
+			}
+			if (seen["oz"] && seen["lb"]) || (seen["g"] && seen["kg"]) {
+				t.Errorf("%s: section %d mixes mass units %v -- a reader has to "+
+					"convert to compare two birds in one section", q, i+1, keysOf(seen))
+			}
 		}
 	}
 }

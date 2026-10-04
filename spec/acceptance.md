@@ -1728,3 +1728,27 @@ selections produce the same Only target for the same group.
 current selection rather than from the group (the two starting selections then disagree), and by
 pointing a trait's Only at both trait parameters instead of its own (the habitat selection is
 then cleared by a diet click).
+
+### AC-094 — Mass is written in one unit across a comparison
+**Verifies:** [P-073](product.md#p-073) · **Level:** code · **Method:** unit tests over
+`unitsFor`, plus rendering tests over the index and comparison pages
+
+**Assertions, the rule:** the smallest mass in a scope chooses the unit, so a scope spanning the
+switch point is written in the smaller one throughout. A scope entirely above it keeps the large
+unit — the rule is "the smallest decides", not "always ounces". A scope with no recorded mass
+does not crash and does not pick the large unit on no evidence.
+
+**Assertions, the scopes:** on the index the scope follows the **scale** setting — per section
+under a per-section scale, the whole shown set under a global one — and a section's own
+`Min`–`Max` header is written in that section's unit, not a per-value one. On the comparison
+page the scope is the set named in the address: adding a small bird to a set of large ones
+rewrites the large ones.
+
+**Assertions, no mixing:** over the real dataset, no section and no comparison renders two
+different mass units at once. This is the assertion that would have caught the original defect,
+which was found in a screenshot rather than by any check.
+
+**Status: verified 2026-10-04 — passing, and watched failing** by choosing the unit from the
+largest mass instead of the smallest — a 27 g House Sparrow beside a Trumpeter Swan then
+renders `0.1 lb`, one significant figure for a whole bird — and by reverting the index to a
+per-value unit, which makes sections 36, 37 and 38 render both `oz` and `lb`.
