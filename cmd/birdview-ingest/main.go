@@ -311,7 +311,7 @@ func build(abaPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, string,
 			// Categorical assignments (P-015). AVONET's primary value, plus
 			// anything BirdView adds, each marked with its origin (P-069).
 			Habitats: trait.HabitatsFor(sp.ScientificName, res.traits.Habitat),
-			Niches:   trait.NichesFor(sp.ScientificName, res.traits.Niche),
+			Niches:   trait.NichesFor(sp.ScientificName, avr.Family, res.traits.Niche, res.traits.Level),
 			Segments: dataset.Segments{
 				Bill: dataset.Metric{Value: bill, Prov: traitProv()},
 				Head: dataset.Metric{Value: head, Prov: modeled(headModel)},

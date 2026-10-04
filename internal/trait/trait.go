@@ -16,7 +16,11 @@
 // Verifies: P-015, P-069.
 package trait
 
-import "birdview/internal/dataset"
+import (
+	"strings"
+
+	"birdview/internal/dataset"
+)
 
 // Source is cited on every published assignment.
 const Source = "AVONET v7 (Tobias et al. 2022), CC BY 4.0"
@@ -108,8 +112,20 @@ var Supplementary = map[string][]extra{
 	"Pelecanus erythrorhynchos": {{Habitat: "Coastal", Why: "winters on sheltered coasts and estuaries, though AVONET codes its primary habitat as inland wetland"}},
 	"Nannopterum auritum":       {{Habitat: "Wetland", Why: "abundant on inland lakes and rivers, though AVONET codes its primary habitat as marine"}},
 	"Ardea herodias":            {{Habitat: "Coastal", Why: "forages on tidal flats and estuaries as readily as on fresh water"}},
-	"Pandion haliaetus":         {{Habitat: "Coastal", Why: "fishes estuaries and sheltered salt water as well as fresh"}},
-	"Larus smithsonianus":       {{Habitat: "Human Modified", Why: "feeds routinely at landfill, docks and town rooftops"}},
+	"Pandion haliaetus": {
+		{Habitat: "Coastal", Why: "fishes estuaries and sheltered salt water as well as fresh"},
+		{Habitat: "Human Modified", Why: "nests routinely on poles, pylons and purpose-built platforms"},
+	},
+	"Larus smithsonianus": {{Habitat: "Human Modified", Why: "feeds routinely at landfill, docks and town rooftops"}},
+
+	// Birds whose everyday haunt is not the one AVONET records. Chimney
+	// Swift and Barn Swallow were on this list too and came off it: AVONET
+	// already codes both Human Modified, and an addition that restates the
+	// published value adds nothing.
+	"Branta canadensis":  {{Habitat: "Human Modified", Why: "parks, playing fields and golf courses are now its commonest North American habitat"}},
+	"Anas platyrhynchos": {{Habitat: "Human Modified", Why: "town ponds and park lakes throughout the range"}},
+	"Columba livia":      {{Habitat: "Rock", Why: "a cliff-nester by ancestry, still using cliffs and quarries away from towns"}},
+	"Falco peregrinus":   {{Habitat: "Human Modified", Why: "city buildings and bridges are a primary nest site"}},
 
 	// The sapsuckers. AVONET files them under Invertivore or Omnivore,
 	// which is true and misses the point: Sphyrapicus drills wells and
@@ -118,6 +134,86 @@ var Supplementary = map[string][]extra{
 	"Sphyrapicus nuchalis":   {{Niche: "Sap", Why: "drills and tends sap wells; AVONET has no niche for exudates"}},
 	"Sphyrapicus ruber":      {{Niche: "Sap", Why: "drills and tends sap wells; AVONET has no niche for exudates"}},
 	"Sphyrapicus thyroideus": {{Niche: "Sap", Why: "drills and tends sap wells; AVONET has no niche for exudates"}},
+}
+
+// mixedDiet holds the two rules that read AVONET's own disagreement with
+// itself.
+//
+// AVONET records `Trophic.Level` as well as `Trophic.Niche`. Where the level
+// is **Omnivore** but the niche names one specific food, AVONET is saying
+// the diet is mixed and the niche only names the larger half. That happens
+// for 64 of the 839 species here, and they are the seasonal switchers: nine
+// chickadees and titmice, seven thrushes, the sparrows and longspurs.
+//
+// The rules are written as rules, not as a list of 64 species keys. A typed
+// list would need every scientific name to be right, and the first five
+// hand-typed entries in Supplementary had two names AviList does not use
+// (AC-092).
+
+// plantFoodOf names the plant half for a family AVONET codes Invertivore at
+// an Omnivore level. **That there is a plant half is AVONET's statement;
+// which one it is, is BirdView's**, so these arrive tagged birdview.
+var plantFoodOf = map[string]string{
+	// Cachers and seed-takers.
+	"Paridae":       "Granivore", // chickadees and titmice, through winter
+	"Sittidae":      "Granivore", // nuthatches cache seeds and nuts
+	"Passerellidae": "Granivore", // Cassin's, Grasshopper, Nelson's Sparrow
+	"Phasianidae":   "Granivore", // Lesser Prairie-Chicken
+	// Berry-takers.
+	"Turdidae":          "Frugivore", // robins and thrushes switch to fruit
+	"Mimidae":           "Frugivore", // catbird and thrashers
+	"Vireonidae":        "Frugivore", // Red-eyed Vireo is strongly frugivorous in autumn
+	"Tyrannidae":        "Frugivore", // Great Crested, Scissor-tailed
+	"Parulidae":         "Frugivore", // Cape May, Bay-breasted, Black-throated Green
+	"Paradoxornithidae": "Frugivore", // Wrentit
+	"Cardinalidae":      "Frugivore", // Flame-colored Tanager
+}
+
+// plantFoodOfSpecies overrides the family where a family does not agree
+// with itself. Icteridae splits -- orioles take fruit, the meadowlark and
+// the blackbirds take grain -- and Picidae splits between fruit-takers and
+// Williamson's Sapsucker, which takes sap and is handled by its own
+// category rather than filed under fruit.
+var plantFoodOfSpecies = map[string]string{
+	"Icterus galbula":        "Frugivore", // Baltimore Oriole
+	"Icterus pectoralis":     "Frugivore", // Spot-breasted Oriole
+	"Molothrus bonariensis":  "Granivore", // Shiny Cowbird
+	"Agelaius tricolor":      "Granivore", // Tricolored Blackbird
+	"Sturnella neglecta":     "Granivore", // Western Meadowlark
+	"Colaptes chrysoides":    "Frugivore", // Gilded Flicker
+	"Melanerpes lewis":       "Frugivore", // Lewis's Woodpecker
+	"Sphyrapicus thyroideus": "",          // Williamson's Sapsucker: sap, not fruit
+}
+
+// MixedDietNiche returns the niche AVONET's two diet columns imply but do
+// not state, and whether BirdView decided which it is.
+//
+// Returns "" when the columns agree, which is the usual case.
+func MixedDietNiche(scientificName, family, niche, level string) (value string, ours bool) {
+	if level != "Omnivore" || niche == "Omnivore" || niche == "" {
+		return "", false
+	}
+	switch niche {
+	case "Granivore":
+		// The animal half of a small seed-eater's mixed diet is
+		// invertebrates: it is not taking carrion or vertebrates. Forced by
+		// AVONET's own definitions, so this one is derived, not ours.
+		return "Invertivore", false
+	case "Invertivore":
+		if v, ok := plantFoodOfSpecies[scientificName]; ok {
+			return v, v != ""
+		}
+		if v, ok := plantFoodOf[family]; ok {
+			return v, true
+		}
+	}
+	return "", false
+}
+
+// Derived builds the assignment for a value computed from published data by
+// a stated rule.
+func Derived(value, why string) dataset.Assignment {
+	return dataset.Assignment{Value: value, Origin: dataset.Derived, Why: why, Doc: "data"}
 }
 
 // Published builds the assignment for a value AVONET supplies.
@@ -146,11 +242,26 @@ func HabitatsFor(scientificName, avonetHabitat string) []dataset.Assignment {
 	return out
 }
 
-// NichesFor is HabitatsFor for the feeding niche.
-func NichesFor(scientificName, avonetNiche string) []dataset.Assignment {
+// NichesFor is HabitatsFor for the feeding niche, plus the mixed-diet rule.
+func NichesFor(scientificName, family, avonetNiche, avonetLevel string) []dataset.Assignment {
 	var out []dataset.Assignment
 	if avonetNiche != "" {
 		out = append(out, Published(avonetNiche))
+	}
+	if v, ours := MixedDietNiche(scientificName, family, avonetNiche, avonetLevel); v != "" {
+		why := "AVONET's trophic level is Omnivore though its niche names " +
+			strings.ToLower(LabelOf(Niches, avonetNiche)[5:]) + ", so the diet is mixed"
+		if ours {
+			why += "; which plant food is BirdView's reading of the family"
+		} else {
+			why += ", and the other half of a seed-eater's diet is invertebrates"
+		}
+		out = append(out, func() dataset.Assignment {
+			if ours {
+				return BirdView(v, why)
+			}
+			return Derived(v, why)
+		}())
 	}
 	for _, e := range Supplementary[scientificName] {
 		if e.Niche != "" && e.Niche != avonetNiche {

@@ -52,25 +52,78 @@ func TestSupplementaryKeysExist(t *testing.T) {
 }
 
 // TestSupplementaryReachesTheDataset closes the loop: the entries are not
-// only well-keyed, they actually arrive as assignments marked Ours.
+// only well-keyed, each one actually arrives as an assignment.
+//
+// Checked **per entry**, not by a total. A total was the first version and
+// broke the moment BirdView gained a second source of its own assignments
+// — the mixed-diet rule — because it assumed every `birdview` tag came
+// from this table. Per entry says what is actually meant: this row did
+// something.
 //
 // Verifies: P-015, P-069. Criterion: AC-092.
 func TestSupplementaryReachesTheDataset(t *testing.T) {
-	sp := loadSpecies(t)
-	want := 0
-	for _, extras := range Supplementary {
-		want += len(extras)
+	byName := map[string]dataset.Species{}
+	for _, s := range loadSpecies(t) {
+		byName[s.ScientificName] = s
 	}
-	got := 0
-	for _, s := range sp {
-		for _, a := range append(append([]dataset.Assignment{}, s.Habitats...), s.Niches...) {
-			if a.Origin == dataset.BirdView {
-				got++
+	for name, extras := range Supplementary {
+		sp, ok := byName[name]
+		if !ok {
+			continue // reported by TestSupplementaryKeysExist
+		}
+		for _, e := range extras {
+			if e.Habitat != "" && !carries(sp.Habitats, e.Habitat) {
+				t.Errorf("%s: the table adds habitat %q and the dataset does not have it",
+					name, e.Habitat)
+			}
+			if e.Niche != "" && !carries(sp.Niches, e.Niche) {
+				t.Errorf("%s: the table adds niche %q and the dataset does not have it",
+					name, e.Niche)
 			}
 		}
 	}
-	if got != want {
-		t.Errorf("%d assignments are marked BirdView, the table defines %d", got, want)
+}
+
+func carries(as []dataset.Assignment, value string) bool {
+	for _, a := range as {
+		if a.Value == value && a.Origin == dataset.BirdView {
+			return true
+		}
+	}
+	return false
+}
+
+// TestMixedDietRuleReachesTheDataset covers BirdView's other source of
+// assignments: the rule that reads AVONET's trophic level against its
+// niche. The rule is written as a rule rather than as 52 species keys, so
+// what needs checking is that it fires and that both of its branches do.
+//
+// Verifies: P-015. Criterion: AC-092.
+func TestMixedDietRuleReachesTheDataset(t *testing.T) {
+	var derived, ours int
+	for _, s := range loadSpecies(t) {
+		for _, a := range s.Niches {
+			if !strings.Contains(a.Why, "trophic level is Omnivore") {
+				continue
+			}
+			switch a.Origin {
+			case dataset.Derived:
+				derived++
+			case dataset.BirdView:
+				ours++
+			default:
+				t.Errorf("%s: mixed-diet niche %q has origin %q", s.ScientificName, a.Value, a.Origin)
+			}
+		}
+	}
+	// Both branches must fire: the forced one, where a seed-eater's other
+	// half is invertebrates, and the judged one, where BirdView picks which
+	// plant food a family takes.
+	if derived == 0 {
+		t.Error("the derived branch of the mixed-diet rule reaches nothing")
+	}
+	if ours == 0 {
+		t.Error("the judged branch of the mixed-diet rule reaches nothing")
 	}
 }
 

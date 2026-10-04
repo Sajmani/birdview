@@ -135,6 +135,19 @@ func testDataset() *dataset.Dataset {
 	for i := range sp {
 		sp[i].Regions = regionsOf[sp[i].ID]
 	}
+	// One assignment of each non-published origin, so the fixture exercises
+	// what BirdView adds rather than only what AVONET publishes. Without
+	// these the /added page renders empty and its test proves nothing.
+	for i := range sp {
+		switch sp[i].ID {
+		case "greblu": // heron: AVONET's wetland, plus the tidal flats it also works
+			sp[i].Habitats = append(sp[i].Habitats,
+				trait.BirdView("Coastal", "forages on tidal flats as readily as on fresh water"))
+		case "amecro": // crow: level says mixed, niche names one food
+			sp[i].Niches = append(sp[i].Niches,
+				trait.Derived("Invertivore", "AVONET's trophic level is Omnivore though its niche names seeds"))
+		}
+	}
 
 	// One mass is a near-match, as 10 of the 841 real ones are. Without it
 	// every mass square renders solid and the dashed branch of P-065 is never
@@ -3732,5 +3745,53 @@ func TestDocumentTitlesAreHeadings(t *testing.T) {
 	}
 	if !strings.Contains(mustGet(t, s, "/spec"), ">Spec-driven development</a>") {
 		t.Error("the spec index does not list process.md by its heading")
+	}
+}
+
+// TestAddedListsEveryUnpublishedAssignment checks the one page that answers
+// "what has this project decided on its own account".
+//
+// The detail pages answer it bird by bird, which is a different question.
+// Somebody auditing BirdView wants the whole of it at once, and a claim
+// that is only discoverable one species at a time is not really disclosed.
+//
+// Verifies: P-069. Criterion: AC-091.
+func TestAddedListsEveryUnpublishedAssignment(t *testing.T) {
+	s := newTestServer(t)
+	body := mustGet(t, s, "/added")
+
+	rows := regexp.MustCompile(`<tr>\s*<td>(Habitat|Diet)</td>`).FindAllString(body, -1)
+
+	// Count what the dataset actually carries, and insist the page shows
+	// all of it: a page that quietly lists a subset is worse than none.
+	want := 0
+	for i := range s.ds.Species {
+		sp := &s.ds.Species[i]
+		for _, a := range append(append([]dataset.Assignment{}, sp.Habitats...), sp.Niches...) {
+			if a.Origin != dataset.Published {
+				want++
+			}
+		}
+	}
+	if want == 0 {
+		t.Fatal("the fixture has no unpublished assignment; this proves nothing")
+	}
+	if len(rows) != want {
+		t.Errorf("the page lists %d assignments, the dataset has %d that are not published",
+			len(rows), want)
+	}
+	// Published ones are excluded: they are AVONET's and there are 1,678.
+	if strings.Contains(body, "<code>published</code>") {
+		t.Error("the page lists published assignments, which are not BirdView's to claim")
+	}
+	// Every row says who and why.
+	for _, m := range regexp.MustCompile(
+		`<td><code>(\w+)</code></td>\s*<td>([^<]*)</td>`).FindAllStringSubmatch(body, -1) {
+		if m[1] != "derived" && m[1] != "birdview" {
+			t.Errorf("row origin %q is neither derived nor birdview", m[1])
+		}
+		if strings.TrimSpace(m[2]) == "" {
+			t.Errorf("a %s row gives no reason", m[1])
+		}
 	}
 }

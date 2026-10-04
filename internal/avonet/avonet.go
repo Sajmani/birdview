@@ -47,6 +47,11 @@ type Traits struct {
 	// such (P-069).
 	Habitat string // Habitat: Forest, Wetland, Marine, Grassland, ...
 	Niche   string // Trophic.Niche: Invertivore, Aquatic predator, ...
+	// Level is Trophic.Level: Herbivore, Carnivore, Omnivore, Scavenger.
+	// Read because it disagrees with Niche usefully -- an Omnivore level
+	// beside a specific niche is AVONET saying the diet is mixed and the
+	// niche only names the larger half (P-015).
+	Level string
 }
 
 // Workbook holds the trait rows of each taxonomy, keyed by that taxonomy's
@@ -150,6 +155,7 @@ func (wb *Workbook) readTraits(f *excelize.File, sheet, spCol, famCol, ordCol st
 			Mass:      num(at(cells, idx["Mass"])),
 			Habitat:   cat("Habitat"),
 			Niche:     cat("Trophic.Niche"),
+			Level:     cat("Trophic.Level"),
 		}
 		if fams != nil {
 			if i, ok := idx[famCol]; ok {

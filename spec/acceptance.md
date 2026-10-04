@@ -1590,6 +1590,11 @@ nothing at all.
 family list, each option carrying its count and its definition, and the retired birder grouping
 is not rendered.
 
+**Assertions, the additions page:** `/added` lists **every** assignment that is not published,
+counted against the dataset rather than eyeballed — a page that quietly lists a subset is worse
+than no page. It lists no published assignment, those being AVONET's rather than BirdView's to
+claim, and every row names its origin and its reason.
+
 **Assertions, coined terms:** a term BirdView added where AVONET has none says so in its own
 definition and is marked in the control; it can only be assigned with origin `birdview`, since
 a category this project invented cannot be published by anyone; and the number of them is

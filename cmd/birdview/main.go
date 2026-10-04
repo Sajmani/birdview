@@ -269,6 +269,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		return nil, err
 	}
 	s.mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(assets))))
+	s.mux.HandleFunc("/added", s.added)
 	for _, set := range []string{"/docs", "/spec"} {
 		// Both the exact path and the subtree, so the bare name serves the
 		// index instead of a 301 to it.
@@ -2086,4 +2087,57 @@ func newMarkdown(base string) goldmark.Markdown {
 			goldmarkutil.Prioritized(repoLinks{base}, 100))),
 		goldmark.WithRendererOptions(goldmarkhtml.WithHardWraps()),
 	)
+}
+
+// added lists every category BirdView assigned itself, in one place.
+//
+// The detail pages already say it bird by bird, which answers "why is this
+// robin a frugivore" and not "what has this project decided on its own
+// account". Those are different questions, and the second is the one
+// somebody auditing the project would ask. Published assignments are
+// excluded: there are 1,678 of them and they are AVONET's, not news.
+func (s *server) added(w http.ResponseWriter, r *http.Request) {
+	type row struct{ kind, species, value, origin, why string }
+	var rows []row
+	for i := range s.ds.Species {
+		sp := &s.ds.Species[i]
+		for _, a := range sp.Habitats {
+			if a.Origin != dataset.Published {
+				rows = append(rows, row{"Habitat", sp.Name(dataset.LocaleNA),
+					trait.LabelOf(trait.Habitats, a.Value), string(a.Origin), a.Why})
+			}
+		}
+		for _, a := range sp.Niches {
+			if a.Origin != dataset.Published {
+				rows = append(rows, row{"Diet", sp.Name(dataset.LocaleNA),
+					trait.LabelOf(trait.Niches, a.Value), string(a.Origin), a.Why})
+			}
+		}
+	}
+	sort.Slice(rows, func(i, j int) bool {
+		if rows[i].kind != rows[j].kind {
+			return rows[i].kind > rows[j].kind // Habitat before Diet
+		}
+		if rows[i].origin != rows[j].origin {
+			return rows[i].origin < rows[j].origin
+		}
+		return rows[i].species < rows[j].species
+	})
+
+	var b bytes.Buffer
+	b.WriteString("# What BirdView adds to its sources\n\n")
+	fmt.Fprintf(&b, "Every category on this site comes from a published source except the %d below. "+
+		"These are BirdView's own, listed here so they can be read in one place rather than "+
+		"found one bird at a time. Each also appears on that bird's own page.\n\n", len(rows))
+	b.WriteString("`derived` means BirdView computed it from published data by a stated rule. " +
+		"`birdview` means BirdView decided it and no source says it.\n\n")
+	b.WriteString("Everything else — habitat, diet, family, order — is AVONET's or AviList's, " +
+		"unchanged. The regions each bird is listed in are derived in bulk from GBIF records " +
+		"and are described in [the data document](/docs/data) rather than repeated here.\n\n")
+	b.WriteString("| | Species | Category | Origin | Why |\n|---|---|---|---|---|\n")
+	for _, r := range rows {
+		fmt.Fprintf(&b, "| %s | %s | %s | `%s` | %s |\n",
+			r.kind, r.species, r.value, r.origin, r.why)
+	}
+	s.renderMarkdown(w, "docs", "What BirdView adds to its sources", b.Bytes())
 }

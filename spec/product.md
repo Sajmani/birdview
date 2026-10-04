@@ -341,6 +341,12 @@ supplement to them and a livelihood to Sphyrapicus, and a category that cannot t
 is not worth having — the same ≥60% standard AVONET holds its own niches to. A test caps how
 many exist, because the difference between a gap and a habit is counted, not promised.
 
+**Everything BirdView adds is listed in one place, at `/added`.** The detail pages say it bird
+by bird, which answers *why is this robin a frugivore*; this answers *what has this project
+decided on its own account*, which is the question someone auditing it would ask. A claim that
+can only be found one species at a time is not really disclosed. Published assignments are
+excluded — there are 1,678 and they are AVONET's.
+
 What keeps this honest is not scarcity but **provenance plus evidence**. Every addition is
 visibly this project's, and every addition must rest on something stateable: a different
 AVONET taxonomy sheet that says so, or a fact derivable from BirdView's own data. An addition
