@@ -69,11 +69,13 @@ type pair struct {
 
 func main() {
 	var (
-		outPath = flag.String("out", "data/status.tsv", "output table (committed)")
-		dump    = flag.String("dump", "", "also write the raw per-region shapes here, for calibration")
-		limit   = flag.Int("limit", 0, "stop after this many species (0 = all), for a smoke run")
-		cache   = flag.String("cache", "/tmp/birdview-status-pass1.json", "pass 1 cache; reused if present")
-		workers = flag.Int("workers", 2, "concurrent requests")
+		outPath  = flag.String("out", "data/status.tsv", "output table (committed)")
+		dump     = flag.String("dump", "", "also write the raw per-region shapes here, for calibration")
+		limit    = flag.Int("limit", 0, "stop after this many species (0 = all), for a smoke run")
+		cache    = flag.String("cache", "/tmp/birdview-status-pass1.json", "pass 1 cache; reused if present")
+		workers  = flag.Int("workers", 2, "concurrent requests")
+		progress = flag.String("progress", "/tmp/birdview-status-pass2.jsonl",
+			"pass 2 progress log; completed species are skipped on a rerun")
 	)
 	flag.Parse()
 
@@ -164,8 +166,46 @@ func main() {
 	}
 	results := make([]result, len(names))
 	var failed2 []string
+	nDone := 0
+
+	// Pass 2 is resumable, for the same reason pass 1 is cached and then
+	// some: an overnight run hung for nine hours in a read on a socket the
+	// laptop's sleep had killed, and everything it had already measured was
+	// in memory and lost. Each species is appended as it completes, so a
+	// rerun pays only for what is missing.
+	done := map[string]map[string]status.Shape{}
+	if f, err := os.Open(*progress); err == nil {
+		dec := json.NewDecoder(f)
+		for {
+			var rec struct {
+				Name   string                  `json:"n"`
+				Shapes map[string]status.Shape `json:"s"`
+			}
+			if err := dec.Decode(&rec); err != nil {
+				break
+			}
+			done[rec.Name] = rec.Shapes
+		}
+		f.Close()
+		log.Printf("birdview-status: resuming, %d species already measured", len(done))
+	}
+	pf, err := os.OpenFile(*progress, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	if err != nil {
+		log.Fatalf("birdview-status: %v", err)
+	}
+	defer pf.Close()
+	penc := json.NewEncoder(pf)
+
 	log.Printf("birdview-status: pass 2, %d species x up to %d regions", len(names), topRegions)
 	for i, n := range names {
+		if sh, ok := done[n]; ok {
+			var sts []status.Status
+			for _, s := range sh {
+				sts = append(sts, status.Classify(s))
+			}
+			results[i] = result{n, sh, status.Best(sts)}
+			continue
+		}
 		wg.Add(1)
 		go func(i int, n string) {
 			defer wg.Done()
@@ -205,10 +245,22 @@ func main() {
 				sts = append(sts, status.Classify(sh))
 			}
 			results[i] = result{n, shapes, status.Best(sts)}
+			// Recorded under the same lock as failed2, which also serializes
+			// the encoder: two goroutines writing a JSON line at once would
+			// interleave and make the file unreadable on resume.
+			mu.Lock()
+			if err := penc.Encode(struct {
+				Name   string                  `json:"n"`
+				Shapes map[string]status.Shape `json:"s"`
+			}{n, shapes}); err != nil {
+				log.Printf("birdview-status: progress write: %v", err)
+			}
+			nDone++
+			if nDone%100 == 0 {
+				log.Printf("birdview-status:   %d/%d measured", nDone, len(names)-len(done))
+			}
+			mu.Unlock()
 		}(i, n)
-		if i%200 == 0 && i > 0 {
-			log.Printf("birdview-status:   %d/%d queued", i, len(names))
-		}
 	}
 	wg.Wait()
 	if len(failed2) > 0 {

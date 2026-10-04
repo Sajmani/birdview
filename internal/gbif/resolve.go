@@ -59,6 +59,11 @@ const maxAttempts = 4
 // DefaultBackoff is the first retry delay; each further attempt doubles it.
 const DefaultBackoff = time.Second
 
+// DefaultRequestTimeout bounds a single attempt. It is deliberately generous:
+// a facet over a billion records is slow, and the thing this guards against
+// is not slowness but a connection that will never answer at all.
+const DefaultRequestTimeout = 120 * time.Second
+
 // Client is a paced, identified, read-only GBIF API client. It sends no
 // credential: GBIF's open endpoints need none.
 type Client struct {
@@ -70,7 +75,10 @@ type Client struct {
 	// doubling thereafter. A field rather than a constant so a test can
 	// exercise the retry path without waiting fifteen seconds for it.
 	Backoff time.Duration
-	HTTP    *http.Client
+	// RequestTimeout bounds one attempt, through the request's context.
+	// Zero means DefaultRequestTimeout.
+	RequestTimeout time.Duration
+	HTTP           *http.Client
 
 	mu   sync.Mutex
 	last time.Time
@@ -79,12 +87,13 @@ type Client struct {
 // NewClient returns a client with the courtesy defaults above.
 func NewClient() *Client {
 	return &Client{
-		BaseURL:     DefaultBaseURL,
-		UserAgent:   UserAgent,
-		Interval:    MinInterval,
-		Concurrency: DefaultConcurrency,
-		Backoff:     DefaultBackoff,
-		HTTP:        &http.Client{Timeout: 120 * time.Second},
+		BaseURL:        DefaultBaseURL,
+		UserAgent:      UserAgent,
+		Interval:       MinInterval,
+		Concurrency:    DefaultConcurrency,
+		Backoff:        DefaultBackoff,
+		RequestTimeout: DefaultRequestTimeout,
+		HTTP:           &http.Client{Timeout: DefaultRequestTimeout},
 	}
 }
 
@@ -409,6 +418,13 @@ func (c *Client) Taxa(ctx context.Context, keys []SpeciesCount) ([]Taxon, error)
 }
 
 // get performs one paced, identified request and decodes the JSON body.
+//
+// Each attempt carries its own context deadline, which is belt and braces
+// over http.Client.Timeout and is here because the braces failed. A run left
+// going overnight hung for nine hours in a TLS read on a socket whose peer
+// had gone away while the laptop slept: one goroutine stuck in the netpoller
+// with 955 queued behind it on the worker semaphore, and the client timeout
+// never fired. A context deadline cancels the read through a separate path.
 func (c *Client) get(ctx context.Context, path string, into any) error {
 	var last error
 	for attempt := 0; attempt < maxAttempts; attempt++ {
@@ -421,35 +437,51 @@ func (c *Client) get(ctx context.Context, path string, into any) error {
 		}
 		c.pace()
 
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+path, nil)
-		if err != nil {
+		if err := c.attempt(ctx, path, into, &last); err != nil {
 			return err
+		} else if last == nil {
+			return nil
 		}
-		req.Header.Set("User-Agent", c.UserAgent)
-		req.Header.Set("Accept", "application/json")
+	}
+	return last
+}
 
-		resp, err := c.HTTP.Do(req)
-		if err != nil {
-			last = err
-			continue
-		}
-		if resp.StatusCode != http.StatusOK {
-			resp.Body.Close()
-			last = fmt.Errorf("GET %s: %s", path, resp.Status)
-			// 4xx other than 429 will not improve on a retry.
-			if resp.StatusCode < 500 && resp.StatusCode != http.StatusTooManyRequests {
-				return last
-			}
-			continue
-		}
-		err = json.NewDecoder(resp.Body).Decode(into)
-		resp.Body.Close()
-		if err != nil {
-			return fmt.Errorf("GET %s: %w", path, err)
+// attempt makes one request. It returns a non-nil error only when the caller
+// must stop retrying; a retryable failure is reported through last.
+func (c *Client) attempt(ctx context.Context, path string, into any, last *error) error {
+	timeout := c.RequestTimeout
+	if timeout <= 0 {
+		timeout = DefaultRequestTimeout
+	}
+	rctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(rctx, http.MethodGet, c.BaseURL+path, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("User-Agent", c.UserAgent)
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := c.HTTP.Do(req)
+	if err != nil {
+		*last = err
+		return nil
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		*last = fmt.Errorf("GET %s: %s", path, resp.Status)
+		// 4xx other than 429 will not improve on a retry.
+		if resp.StatusCode < 500 && resp.StatusCode != http.StatusTooManyRequests {
+			return *last
 		}
 		return nil
 	}
-	return last
+	if err := json.NewDecoder(resp.Body).Decode(into); err != nil {
+		return fmt.Errorf("GET %s: %w", path, err)
+	}
+	*last = nil
+	return nil
 }
 
 // pace holds every worker to one request per Interval.
