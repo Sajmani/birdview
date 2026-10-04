@@ -1128,14 +1128,20 @@ not documentation of the feature, it is the feature.
 **Assertions, the index tiles:** **every** tile carries a cube — counted against the number of
 tiles, not merely found once — and **no tile carries a label of any kind**, the mass being named
 in the footer instead ([CR-020](decisions.md#cr-020)). This reverses what this criterion asserted
-when it was written, which was that tiles carry none; the reasoning is in CR-020. Across the real
-dataset the tile cube never reaches the crossbar either: **0 overlaps in 841**, re-verified after
-[CR-021](decisions.md#cr-021) moved every length. CR-020 records why the companion clearance
-figure is not comparable across that change.
+when it was written, which was that tiles carry none; the reasoning is in CR-020.
 
-**This number is prose, and it rotted the moment lengths moved.** It is a geometric invariant over
-the real dataset, so it belongs in a test rather than in a sentence — nothing failed when CR-021
-invalidated it, and it was caught by reading rather than by running. Logged as work arising.
+**Assertions, clearance:** across the real dataset the tile cube never reaches the crossbar, at
+every scale and metric the index offers — 839 species × 6 combinations, asserted rather than
+recorded. This was prose, **"0 overlaps in 841"**, and it rotted the moment lengths moved:
+[CR-021](decisions.md#cr-021) invalidated the figure and nothing failed, because nothing ran. It
+was caught by reading.
+
+What is asserted is a **clearance greater than zero**, taken from the requirement; the tightest
+margin measured is logged rather than asserted, so a change that halves it is visible without
+pinning today's number as a rule. A boolean overlap check proved a poor guard — the cube sits
+bottom-left and the crossbar crosses the upper middle, so floating the cube to the top of the
+tile, sliding it 120px right, tripling the projection depth and scaling it by 1.6 all leave it
+technically clear while moving the margin a long way.
 
 **Assertions, the Presentation panel:** it explains the cube in prose, naming what it is and
 warning that a cube root flattens. The diagram key alone is not enough — the Presentation panel

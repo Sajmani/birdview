@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"sort"
@@ -3957,6 +3958,121 @@ func TestUnitButtonsNameTheUnitsRendered(t *testing.T) {
 		if !strings.Contains(label, unit) {
 			t.Errorf("the %s button is labelled %q, but %s masses render as %q (unit %q)",
 				tc.param, label, tc.param, rendered, unit)
+		}
+	}
+}
+
+// realDataset loads the compiled dataset, or skips. Tests make no network
+// request and the dataset is not committed (T-005), so a check over the real
+// data is a check that runs when the data is there.
+func realDataset(t *testing.T) *dataset.Dataset {
+	t.Helper()
+	ds, err := load(filepath.Join("..", "..", "web", "data", "species.json"))
+	if err != nil {
+		t.Skipf("no compiled dataset; run birdview-ingest first (%v)", err)
+	}
+	return ds
+}
+
+// The tile cube must never reach the crossbar, over every species at every
+// scale and metric the index offers.
+//
+// AC-078 recorded this as "0 overlaps in 841" in prose. It is a geometric
+// invariant over the real dataset, and prose cannot be run: CR-021 moved
+// every length in the project and nothing failed, because nothing checked.
+// It was caught by reading. This is that sentence turned into a test.
+//
+// It asserts a CLEARANCE rather than a boolean overlap, and reports the
+// tightest case. A yes/no check turned out to be a poor guard: the cube sits
+// bottom-left and the crossbar crosses the upper middle, so the two
+// conditions are ANDed and the vertical separation dominates. Floating the
+// cube to the top of the tile, sliding it 120px right, tripling the
+// projection depth and scaling the whole cube by 1.6 all leave it clear.
+// Only the margin moves under those, which is exactly what a regression
+// needs to see.
+//
+// The floor asserted is zero, taken from the requirement -- the cube must
+// not reach the crossbar -- and not a figure read off a run. The measured
+// minimum is logged instead of asserted, so a change that halves it is
+// visible without pinning today's number as a rule.
+//
+// Watched fail: sizing the side on raw mass instead of its cube root --
+// AC-078's own mutation for the arithmetic -- overlaps on 785 of 839 species
+// by length, 730 by wingspan and 790 by mass.
+//
+// Verifies: P-066. Criterion: AC-078.
+func TestTileCubeNeverReachesTheCrossbar(t *testing.T) {
+	ds := realDataset(t)
+	all := make([]*dataset.Species, 0, len(ds.Species))
+	for i := range ds.Species {
+		all = append(all, &ds.Species[i])
+	}
+
+	for _, scale := range []view.ScaleMode{view.PerSection, view.Global} {
+		for _, metric := range []view.Metric{view.ByLength, view.ByWingspan, view.ByMass} {
+			secs := view.Sections(all, metric, view.DefaultStepPercent)
+			refs := view.Scales(secs, scale)
+
+			spanRefs := make([]float64, len(secs))
+			var globalSpan float64
+			for i, sec := range secs {
+				for _, sp := range sec.Species {
+					if w := sp.Wingspan.Value; w > spanRefs[i] {
+						spanRefs[i] = w
+					}
+				}
+				if spanRefs[i] > globalSpan {
+					globalSpan = spanRefs[i]
+				}
+			}
+			if scale == view.Global {
+				for i := range spanRefs {
+					spanRefs[i] = globalSpan
+				}
+			}
+
+			checked, overlaps := 0, 0
+			minClear, tightest, worst := math.Inf(1), "", ""
+			for i, sec := range secs {
+				for _, sp := range sec.Species {
+					g := view.Layout(sp, refs[i], spanRefs[i], tileBox)
+					c := newMassCube(sp, tileBox.H, g.PxPerMm, "")
+					if c.Side <= 0 {
+						continue // no mass, no cube
+					}
+					checked++
+					// The crossbar is a horizontal line at YShoulder running
+					// CX +/- CrossbarHalfWidth. The cube is its front face
+					// plus the projection to the right. They are clear if the
+					// bar passes above the cube, or begins to its right;
+					// the clearance is whichever separation is larger.
+					vertical := c.Y - g.YShoulder
+					horizontal := (g.CX - g.CrossbarHalfWidth) - (c.X + c.Side + c.Depth)
+					clear := math.Max(vertical, horizontal)
+					if clear < minClear {
+						minClear, tightest = clear, sp.ScientificName
+					}
+					if clear <= 0 {
+						overlaps++
+						if worst == "" {
+							worst = fmt.Sprintf("%s: cube x[%.1f,%.1f] y[%.1f,%.1f], "+
+								"crossbar y=%.1f from x=%.1f",
+								sp.ScientificName, c.X, c.X+c.Side+c.Depth, c.Y, c.Y+c.Side,
+								g.YShoulder, g.CX-g.CrossbarHalfWidth)
+						}
+					}
+				}
+			}
+			if checked == 0 {
+				t.Fatalf("scale=%s metric=%s: no cubes checked; the test proves nothing",
+					scale, metric)
+			}
+			if overlaps > 0 {
+				t.Errorf("scale=%s metric=%s: the cube reaches the crossbar on %d of %d species. %s",
+					scale, metric, overlaps, checked, worst)
+			}
+			t.Logf("scale=%-7s metric=%-8s %d species, tightest clearance %.1fpx (%s)",
+				scale, metric, checked, minClear, tightest)
 		}
 	}
 }
