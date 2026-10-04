@@ -324,6 +324,15 @@ habitats, or eats two things, gets one of each from AVONET. BirdView adds **as m
 habitats and diets as apply** — there is no limit of one — and tags each **`birdview`**, never
 merged into the published value ([P-069](#p-069)).
 
+**BirdView may also add a term to the vocabulary, under a narrower rule: only where AVONET has
+none that fits at all.** Not "none that fits well" — a bird that eats berries is a `Frugivore`
+even if the word is clumsy. The case this exists for is **sap**: AVONET's ten niches have no
+category for exudates, so the four sapsuckers are filed under `Invertivore` or `Omnivore` and
+the thing the genus is named for disappears. A coined term is marked as BirdView's in the
+control, defines itself rather than quoting AVONET, and can only ever be assigned with origin
+`birdview` — a category this project invented cannot be published by anyone. A test caps how
+many exist, because the difference between a gap and a habit is counted, not promised.
+
 What keeps this honest is not scarcity but **provenance plus evidence**. Every addition is
 visibly this project's, and every addition must rest on something stateable: a different
 AVONET taxonomy sheet that says so, or a fact derivable from BirdView's own data. An addition

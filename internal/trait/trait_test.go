@@ -151,3 +151,68 @@ func TestLabelsAreNotJargon(t *testing.T) {
 		}
 	}
 }
+
+// TestCoinedTermsAreRareAndSaySo guards the one place BirdView adds to
+// AVONET's vocabulary rather than to its assignments.
+//
+// The bar is **no AVONET term fits**, not "none fits well". A bird that
+// eats berries is a Frugivore even if the word is clumsy; a bird that
+// drinks tree sap is nothing in AVONET's list at all. Without that limit
+// the vocabulary drifts from a published classification into this
+// project's own, which is the habit CR-025 was written about — so the
+// count is capped and a coined term must declare itself.
+//
+// Verifies: P-015. Criterion: AC-092.
+func TestCoinedTermsAreRareAndSaySo(t *testing.T) {
+	coined := 0
+	for _, set := range [][]Term{Habitats, Niches} {
+		for _, term := range set {
+			if !term.Coined {
+				continue
+			}
+			coined++
+			if !strings.Contains(term.Description, "BirdView") {
+				t.Errorf("%q is BirdView's own but its definition does not say so", term.Value)
+			}
+		}
+	}
+	if coined == 0 {
+		t.Error("no coined term; this check is not exercising anything")
+	}
+	if coined > 2 {
+		t.Errorf("%d coined terms; adding to a published vocabulary is for the gap no "+
+			"term fills, not a habit", coined)
+	}
+}
+
+// TestCoinedTermsAreNeverPublished closes the loop: a category of ours must
+// never reach a species as though a source had said it.
+//
+// Verifies: P-015, P-069. Criterion: AC-092.
+func TestCoinedTermsAreNeverPublished(t *testing.T) {
+	ours := map[string]bool{}
+	for _, set := range [][]Term{Habitats, Niches} {
+		for _, term := range set {
+			if term.Coined {
+				ours[term.Value] = true
+			}
+		}
+	}
+	seen := 0
+	for _, s := range loadSpecies(t) {
+		for _, a := range append(append([]dataset.Assignment{}, s.Habitats...), s.Niches...) {
+			if !ours[a.Value] {
+				continue
+			}
+			seen++
+			if a.Origin != dataset.BirdView {
+				t.Errorf("%s carries the coined category %q with origin %q; a category "+
+					"BirdView invented cannot be published by anyone",
+					s.ScientificName, a.Value, a.Origin)
+			}
+		}
+	}
+	if seen == 0 {
+		t.Error("no species carries a coined category; the term exists but reaches nothing")
+	}
+}

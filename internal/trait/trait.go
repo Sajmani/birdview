@@ -23,6 +23,13 @@ const Source = "AVONET v7 (Tobias et al. 2022), CC BY 4.0"
 
 // Term is one option in a vocabulary.
 type Term struct {
+	// Coined marks a term BirdView added because AVONET has none that fits.
+	// **The bar is "no term fits", not "no term fits well".** A bird that
+	// eats berries is a Frugivore even if the word is clumsy; a bird that
+	// drinks tree sap is nothing in AVONET's list at all. Without that
+	// limit the vocabulary drifts from a published classification into this
+	// project's own, which is what CR-025 was written about.
+	Coined bool
 	// Value is AVONET's own string, as it appears in the data. It is the
 	// filter's value and must not be prettified -- the data is the key.
 	Value string
@@ -42,32 +49,39 @@ type Term struct {
 // then fresh water, then salt. A reader scanning for "where would I be
 // standing" moves along one axis rather than hopping.
 var Habitats = []Term{
-	{"Desert", "Desert", "Drylands and other open arid habitats, often sandy with very sparse vegetation."},
-	{"Rock", "Rock and scree", "Rocky substrate typically with no or very little vegetation, including rocky outcrops, rocky coastlines, arid stony steppes, rocky mountaintops and mountain slopes."},
-	{"Grassland", "Grassland", "Open dry to moist grass-dominated landscapes, at all elevations."},
-	{"Shrubland", "Shrubland", "Low stature bushy habitats, included thornscrub, thorny or arid savanna, caatinga, xerophytic shrubland and coastal scrub."},
-	{"Woodland", "Woodland", "Medium stature tree-dominated habitats, including Acacia woodland, riparian woodlands, mangrove forests, forest edges, also more open parkland with scattered taller trees."},
-	{"Forest", "Forest", "Tall tree-dominated vegetation with more or less closed canopy, including palm forest."},
-	{"Human Modified", "Towns and farmland", "Urban landscapes, intensive agriculture, gardens."},
-	{"Wetland", "Marsh and lake", "Wide range of freshwater aquatic habitats including lakes, marshes, swamps and reedbeds."},
-	{"Riverine", "River and stream", "Associated with rivers and streams at all elevations."},
-	{"Coastal", "Shore and estuary", "Intertidal zones within immediate vicinity of beaches, estuaries, brackish to salty marshes, including mudflats, lagoons, alkaline wetlands, coastal dunes and harbours."},
-	{"Marine", "Open sea", "Pelagic, on sea near coasts, including species in the intertidal zone on beaches, and those pelagic species nesting near the sea on cliffs, islets and islands."},
+	{Value: "Desert", Label: "Desert", Description: "Drylands and other open arid habitats, often sandy with very sparse vegetation."},
+	{Value: "Rock", Label: "Rock and scree", Description: "Rocky substrate typically with no or very little vegetation, including rocky outcrops, rocky coastlines, arid stony steppes, rocky mountaintops and mountain slopes."},
+	{Value: "Grassland", Label: "Grassland", Description: "Open dry to moist grass-dominated landscapes, at all elevations."},
+	{Value: "Shrubland", Label: "Shrubland", Description: "Low stature bushy habitats, included thornscrub, thorny or arid savanna, caatinga, xerophytic shrubland and coastal scrub."},
+	{Value: "Woodland", Label: "Woodland", Description: "Medium stature tree-dominated habitats, including Acacia woodland, riparian woodlands, mangrove forests, forest edges, also more open parkland with scattered taller trees."},
+	{Value: "Forest", Label: "Forest", Description: "Tall tree-dominated vegetation with more or less closed canopy, including palm forest."},
+	{Value: "Human Modified", Label: "Towns and farmland", Description: "Urban landscapes, intensive agriculture, gardens."},
+	{Value: "Wetland", Label: "Marsh and lake", Description: "Wide range of freshwater aquatic habitats including lakes, marshes, swamps and reedbeds."},
+	{Value: "Riverine", Label: "River and stream", Description: "Associated with rivers and streams at all elevations."},
+	{Value: "Coastal", Label: "Shore and estuary", Description: "Intertidal zones within immediate vicinity of beaches, estuaries, brackish to salty marshes, including mudflats, lagoons, alkaline wetlands, coastal dunes and harbours."},
+	{Value: "Marine", Label: "Open sea", Description: "Pelagic, on sea near coasts, including species in the intertidal zone on beaches, and those pelagic species nesting near the sea on cliffs, islets and islands."},
 }
 
 // Niches in the order the control offers them: plant food, then animal food,
 // then the two that are neither.
 var Niches = []Term{
-	{"Granivore", "Eats seeds", "Species obtaining at least 60% of food resources from seeds or nuts."},
-	{"Frugivore", "Eats fruit", "Species obtaining at least 60% of food resources from fruit."},
-	{"Nectarivore", "Drinks nectar", "Species obtaining at least 60% of food resources from nectar."},
-	{"Herbivore terrestrial", "Eats plants", "Species obtaining at least 60% of food resources from other plant materials in non-aquatic systems, including leaves, buds, whole flowers etc."},
-	{"Herbivore aquatic", "Eats water plants", "Species obtaining at least 60% of food resources from plant materials in aquatic systems, including algae and aquatic plant leaves."},
-	{"Invertivore", "Eats insects", "Species obtaining at least 60% of food resources from invertebrates in terrestrial systems, including insects, worms, arachnids, etc."},
-	{"Vertivore", "Hunts animals", "Species obtaining at least 60% of food resources from vertebrate animals in terrestrial systems, including mammals, birds, reptiles etc."},
-	{"Aquatic predator", "Hunts in water", "Species obtaining at least 60% of food resources from vertebrate and invertebrate animals in aquatic systems, including fish, crustacea, molluscs, etc."},
-	{"Scavenger", "Scavenges", "Species obtaining at least 60% of food resources from carrion, offal or refuse."},
-	{"Omnivore", "Eats anything", "Species using multiple niches, within or across trophic levels, in relatively equal proportions."},
+	{Value: "Granivore", Label: "Eats seeds", Description: "Species obtaining at least 60% of food resources from seeds or nuts."},
+	{Value: "Frugivore", Label: "Eats fruit", Description: "Species obtaining at least 60% of food resources from fruit."},
+	{Value: "Nectarivore", Label: "Drinks nectar", Description: "Species obtaining at least 60% of food resources from nectar."},
+	{Value: "Herbivore terrestrial", Label: "Eats plants", Description: "Species obtaining at least 60% of food resources from other plant materials in non-aquatic systems, including leaves, buds, whole flowers etc."},
+	{Value: "Herbivore aquatic", Label: "Eats water plants", Description: "Species obtaining at least 60% of food resources from plant materials in aquatic systems, including algae and aquatic plant leaves."},
+	{Value: "Invertivore", Label: "Eats insects", Description: "Species obtaining at least 60% of food resources from invertebrates in terrestrial systems, including insects, worms, arachnids, etc."},
+	{Value: "Vertivore", Label: "Hunts animals", Description: "Species obtaining at least 60% of food resources from vertebrate animals in terrestrial systems, including mammals, birds, reptiles etc."},
+	{Value: "Aquatic predator", Label: "Hunts in water", Description: "Species obtaining at least 60% of food resources from vertebrate and invertebrate animals in aquatic systems, including fish, crustacea, molluscs, etc."},
+	{Value: "Scavenger", Label: "Scavenges", Description: "Species obtaining at least 60% of food resources from carrion, offal or refuse."},
+	{Value: "Omnivore", Label: "Eats anything", Description: "Species using multiple niches, within or across trophic levels, in relatively equal proportions."},
+	// BirdView's own. AVONET's ten niches have no category for exudates, so
+	// the four sapsuckers -- a genus named for this -- are filed under
+	// Invertivore or Omnivore and the thing they are known for disappears.
+	{Value: "Sap", Label: "Drinks sap", Coined: true,
+		Description: "Species obtaining a large part of its food from tree sap, drilling and " +
+			"maintaining wells in bark and returning to them. AVONET has no niche for exudates, " +
+			"so this category is BirdView's own."},
 }
 
 // extra is one assignment BirdView adds beyond AVONET's primary value.
@@ -96,6 +110,14 @@ var Supplementary = map[string][]extra{
 	"Ardea herodias":            {{Habitat: "Coastal", Why: "forages on tidal flats and estuaries as readily as on fresh water"}},
 	"Pandion haliaetus":         {{Habitat: "Coastal", Why: "fishes estuaries and sheltered salt water as well as fresh"}},
 	"Larus smithsonianus":       {{Habitat: "Human Modified", Why: "feeds routinely at landfill, docks and town rooftops"}},
+
+	// The sapsuckers. AVONET files them under Invertivore or Omnivore,
+	// which is true and misses the point: Sphyrapicus drills wells and
+	// lives off sap, and the genus is named for it.
+	"Sphyrapicus varius":     {{Niche: "Sap", Why: "drills and tends sap wells; AVONET has no niche for exudates"}},
+	"Sphyrapicus nuchalis":   {{Niche: "Sap", Why: "drills and tends sap wells; AVONET has no niche for exudates"}},
+	"Sphyrapicus ruber":      {{Niche: "Sap", Why: "drills and tends sap wells; AVONET has no niche for exudates"}},
+	"Sphyrapicus thyroideus": {{Niche: "Sap", Why: "drills and tends sap wells; AVONET has no niche for exudates"}},
 }
 
 // Published builds the assignment for a value AVONET supplies.

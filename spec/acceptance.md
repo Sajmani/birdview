@@ -1590,7 +1590,14 @@ nothing at all.
 family list, each option carrying its count and its definition, and the retired birder grouping
 is not rendered.
 
-**Status: verified 2026-10-03 — passing, and watched failing** by the two supplementary keys
+**Assertions, coined terms:** a term BirdView added where AVONET has none says so in its own
+definition and is marked in the control; it can only be assigned with origin `birdview`, since
+a category this project invented cannot be published by anyone; and the number of them is
+**capped**, because the difference between filling a gap and acquiring a habit is a count.
+
+**Status: verified 2026-10-03 — passing, and watched failing** by coining two further terms
+for niches AVONET already covers, which trips the cap; by assigning the coined `Sap` category
+with origin `published`; and by the two supplementary keys
 that were dead on arrival: `Phalacrocorax auritus` and `Larus argentatus`, where AviList says
 `Nannopterum auritum` and `Larus smithsonianus`. They produced no assignment and no error, and
 the only symptom was the count being 3 where the table defines 5 — which is exactly why the

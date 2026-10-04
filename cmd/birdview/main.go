@@ -1752,9 +1752,13 @@ type traitRow struct {
 	Value       string
 	Label       string
 	Description string
-	Count       int
-	Selected    bool
-	URL         template.URL
+	// Coined marks a category BirdView added where AVONET has none. The
+	// control says so: every other row leads with AVONET's term, and a
+	// term of ours must not borrow that authority (P-015).
+	Coined   bool
+	Count    int
+	Selected bool
+	URL      template.URL
 }
 
 // traitBlock is one categorical control -- habitat or niche.
@@ -1863,7 +1867,7 @@ func (s *server) traitControl(r *http.Request, name, note, param string,
 			next[t.Value] = true
 		}
 		b.Rows = append(b.Rows, traitRow{
-			Value: t.Value, Label: t.Label, Description: t.Description,
+			Value: t.Value, Label: t.Label, Description: t.Description, Coined: t.Coined,
 			Count: count[t.Value], Selected: on(t.Value),
 			URL: s.traitURL(r, param, next, len(terms)),
 		})
