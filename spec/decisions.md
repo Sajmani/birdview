@@ -1904,6 +1904,141 @@ one that is merely less convenient.
 **One value per species is still a simplification**, and the control says so rather than
 implying completeness.
 
+## CR-028 — Scope becomes a consequence of a derived status label, and recurrence replaces abundance
+
+**Subject:** `dataset.scope`
+**Kind:** Replacement — [P-001](product.md#p-001)'s ABA rarity-code filter is withdrawn in favor
+of a status vocabulary BirdView derives from open occurrence data and owns
+**Date:** 2026-10-04 · **Decided by:** *proposed, not yet decided*
+
+### What changes
+
+Two things, and the second is the point.
+
+**Scope stops being a threshold.** Every attempt to derive scope from a *volume* of
+observations has failed, and the next one would fail too. What replaces it is **recurrence**:
+a species is in scope when its records in at least one region recur across years, however few
+of them there are.
+
+**Status becomes a product.** The ABA codes 1–6 that P-001 filters on are not a scope rule at
+all — they are a *status vocabulary*, and P-001 uses three of its values as a cutoff. BirdView
+deriving its own status labels makes scope a consequence of labeling rather than a knife-edge,
+and the labels themselves become a navigation facet alongside Habitat and Diet
+([CR-027](#cr-027)). A vagrant is no longer *excluded*; it is *labeled*, and the default view
+does not show it. That turns the hardest judgement in the project into a filter the reader
+controls.
+
+This is the first piece of BirdView that is a dataset in its own right rather than an input to
+the drawing: a derived table of species, status and the evidence behind it.
+
+### Why abundance cannot be rescued
+
+Occurrence counts measure **detection effort × detectability × observer behavior**, not
+presence. The three failures recorded in Work arising are one failure:
+
+- Pelagic species, remote-island endemics and cryptic or nocturnal birds are **under**-recorded,
+  because observers are not where they are.
+- Vagrants are **over**-recorded, because observers go to where vagrants are.
+
+Those pull in opposite directions, so no single threshold can correct both — which is why the
+four-year window, the distinct-places threshold, the local-against-continental ratio and the
+two-dataset ppm rule each fixed one end and broke the other. At 2 ppm the best abundance rule
+drops 43 species structurally: 32 pelagic seabirds and 11 remote-island endemics.
+
+Two further biases are visible in BirdView's own measurements and were not in the original list:
+19,214 iNaturalist records are identified only to genus, concentrated in the hard-to-identify
+groups (*Empidonax*, peeps, gulls); and iNaturalist is photograph-driven, so nocturnal and
+skulking birds are under-counted independently of how many there are.
+
+### What recurrence measures instead
+
+`GET /occurrence/search?facet=eventDate` returns **exact calendar dates with counts, over all
+records**. That is what makes this measurable at all: the Work arising caveat warned that a page
+of ≤300 records is a contiguous slice of GBIF's ordering rather than a sample, and this is the
+facet it said any real rule would need.
+
+Per species per region, dates are grouped into **episodes** — runs separated by more than 30
+days, so one arrival is one episode however many people came to see it. Measured 2026-10-04:
+
+| species / region | records | dates | span | years | reads as |
+| --- | ---: | ---: | ---: | ---: | --- |
+| American Flamingo / PA | 931 | 13 | 13 days | 1 | vagrant |
+| Lucy's Warbler / VA | 53 | 6 | 7 days | 2 | vagrant |
+| Wood Stork / NS | 21 | 9 | 17 days | 1 | vagrant |
+| Akikiki / HI | 376 | 268 | 50 years | 45 | established |
+| Whiskered Auklet / AK | 1,123 | 478 | 93 years | 49 | established |
+| American Robin / PA | 1,498,010 | 1,200+ | 13 years | 13 | established |
+
+**Recurrence is effort-independent in the way abundance is not.** A bird that is really there
+gets recorded occasionally across decades however few observers pass by; a bird that is not gets
+recorded in one burst. Akikiki has *fewer* records than the Pennsylvania flamingo and is
+unmistakably the resident of the two. Lucy's Warbler in Virginia spans 2016-12-31 to 2017-01-06
+and so defeated the four-year-window rule by straddling a boundary; its 7-day span does not care.
+
+### What the probe corrected
+
+**The signal only works per region.** Over the whole ABA Area it collapses: Fork-tailed
+Flycatcher, a genuine accidental, shows 1,182 dates in 150 episodes across 65 years, because
+accidentals accumulate independent events continent-wide. Only a species seen literally once
+separates — Slender-billed Curlew, 1 record, 1925-10-01. So the generator must run per region,
+which is the cost the caveat predicted: roughly 1,378 species × 70 regions.
+
+**A truncated facet is a floor, not a measurement.** Facets cap at 1,200 values, so any abundant
+pair reports exactly 1,200 dates. Truncation must be read as *established* and never as a date
+count — the same shape as the vacuous checks this project has caught before.
+
+**Pelagic species need the `SEA.*` regions**, which [`region`](../internal/region/region.go)
+already defines. A query for Black-capped Petrel against North Carolina's land polygon returns
+6 records; the species has 13,601 in the ABA Area, nearly all offshore.
+
+### Why the weights are declared and never fitted
+
+The obvious way to build this is to fit coefficients so the output reproduces the ABA's 839.
+**That is rejected.** It would re-target exactly what [`sources.md`](sources.md#why-occurrence-data-cannot-reproduce-the-aba-scope)
+disclaimed when the owner chose to own the list, and it would launder the ABA's editorial
+judgement into model weights — a list that is theirs in substance and ours in format is not a
+list BirdView owns. There is no other labeled training signal available, so there is no
+supervised version of this model that is not that one.
+
+Everything here is therefore either **measured** (episodes, dates, spans) or **declared** — a
+stated coefficient with a written reason, as [`OrderCommonNames`](../internal/taxonomy/mapping.go)
+and the neck ratios already are. A declared weight can be defended in prose; a fitted one cannot.
+
+### The bias-weighting model may not be needed, and that is the finding
+
+This change was proposed as a per-habitat and per-family correction for under-reporting. The
+probe suggests **the correction is unnecessary**, because recurrence is already insensitive to
+the bias it would correct: the pelagics and endemics that an abundance rule drops score as
+established on episodes without any adjustment for how rarely they are seen.
+
+That is the better outcome. Every declared weight is an editorial judgement that has to be
+defended, so a model that needs none is stronger than one that needs twelve. The weighting is
+held back rather than abandoned, pending the full per-region run.
+
+### What the data cannot do, and what must be declared instead
+
+- **Four species have no open record at all** — Laysan Duck, Laysan Finch, Bermuda Petrel,
+  Desertas Petrel. No statistic recovers them.
+- **iNaturalist obscures dates for sensitive taxa**, which is where it was adopted to help:
+  Akohekohe has 7 iNaturalist records and *zero* parseable dates. Recurrence is unmeasurable for
+  precisely the species eBird withholds. Spotted Owl is better but thin — 517 records on 22
+  dates.
+- **Origin is not an occurrence property.** Nothing in either dataset separates a self-sustaining
+  Graylag Goose population from a steady trickle of escapees; the records look identical. If
+  BirdView labels a species `exotic`, that label is a declared editorial list, not a measurement,
+  and must say so.
+
+These three need a short declared exceptions table, owned and documented. That is a far smaller
+editorial surface than the weighted model this CR was asked for.
+
+### Open, and why this is not yet decided
+
+1. The status vocabulary itself — the proposal is `established`, `rare`, `vagrant`, `absent`,
+   with `withheld` and `exotic` as orthogonal flags rather than statuses.
+2. Where the boundary between `established` and `rare` falls, which is a declared coefficient.
+3. Whether the ~96,000-query run is acceptable, and whether it is narrowed by only querying the
+   pairs [`data/region-presence.tsv`](../data/region-presence.tsv) already reports as present.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
@@ -1916,7 +2051,7 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | ~~Write `acceptance.md` — Gate 2, before any code~~ — done: 68 criteria, and Gate 2 passed long before the current work | — | closed 2026-10-04 |
 | Ask Ricklefs or ESA for permission to use the measured-length data | Sameer | **after a working demo** |
 | ~~ABA has not replied. Decide between chasing the permission and publishing a derived list~~ — decided: stop waiting, use public data. Names moved to AviList ([CR-022](#cr-022)); **scope is what remains** | Sameer | decided 2026-10-02 |
-| Replace ABA **scope** with a list BirdView derives and owns. The last thing the ABA checklist supplies, and the last blocker to deploying. GBIF/eBird occurrence data reaches F1 0.84 and cannot be improved by filtering escapees — the eBird dataset on GBIF carries no establishment fields at all, measured 2026-10-02 | Sameer | **blocks public deployment** |
+| Replace ABA **scope** with a list BirdView derives and owns. The last thing the ABA checklist supplies, and the last blocker to deploying. GBIF/eBird occurrence data reaches F1 0.84 and cannot be improved by filtering escapees — the eBird dataset on GBIF carries no establishment fields at all, measured 2026-10-02. **[CR-028](#cr-028) proposes the replacement**: abandon abundance entirely and derive a status label from *recurrence* — episodes of observation per region, from `facet=eventDate`. Four species have no open record under any rule (Laysan Duck, Laysan Finch, Bermuda Petrel, Desertas Petrel) and need a declared exceptions table | Sameer | **blocks public deployment** |
 | ~~Ask ABA for written permission to redistribute the checklist~~ — **sent 2026-09-27**, awaiting reply | Sameer | done |
 | ~~Decide the neck's flight posture~~ — done, [CR-011](#cr-011) | Sameer | closed 2026-09-23 |
 | Assess whether a perched/standing toggle is achievable at any honest accuracy ([CR-011](#cr-011)) | — | before it is offered to users |
