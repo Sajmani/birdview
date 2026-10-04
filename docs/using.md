@@ -50,16 +50,19 @@ Switching between the three is the fastest way to see how differently birds are 
 Harrier and a Cooper's Hawk sort close together by length and far apart by mass; sorting by
 wingspan separates soaring birds from flapping ones almost cleanly.
 
-### Scale — global or per section
+### Scale — per section or global
 
 This is the important one.
 
-- **Global** (the default) draws everything at one scale across the whole filtered set. A kinglet
-  really is a speck beside a swan. This is the honest view, and the reason the site exists.
-- **Per section** rescales each section to itself, so every bird fills its tile. Shape is easier to
-  compare within a group, but the size gap *between* groups disappears.
+- **Per section** (the default) rescales each section to itself, so every bird is big enough to
+  read. Shape is easy to compare within a group, but the size gap *between* groups disappears.
+- **Global** draws everything at one scale across the whole filtered set. A kinglet really is a
+  speck beside a swan. This is the honest view across families, and the reason the site exists.
 
-Use Global to be surprised; use Per section to study a family.
+Use Global to be surprised; use Per section to study a family. Global is one click away and not
+the default because at global scale a median bird is a couple of pixels tall, and none of the
+diagram's vocabulary — the dashed modeled segments, the chord ticks, the labels — is legible
+there.
 
 ### Section step
 
@@ -71,15 +74,55 @@ than the smallest one in it.
 
 ### Units
 
-Inches and ounces, or centimeters and grams.
+Inches and ounces, or centimeters and grams. Large birds switch up to pounds and kilograms.
 
-### Family and order selector
+### Names
 
-Everything is selected when you arrive.
+**N. America** uses the names a birder here would say — Dovekie, Brant, Rough-legged Hawk.
+**World** uses AviList's global names for the same birds — Little Auk, Brant Goose, Rough-legged
+Buzzard.
 
-- Click a **family** to drop it.
-- Click an **order** to drop that whole group.
-- Click **All** to clear everything and start picking.
+## The filters
+
+Three boxes narrow which birds are drawn: **Regions**, **Diet and Habitat**, and **Families**.
+Each arrives closed, with a one-line note saying what it holds; open the one you want. They
+combine, and the count line always names what is currently on.
+
+Everything is selected when you arrive, so every filter is a way of *dropping* birds:
+
+- Click one thing — a family, a region, a diet — to drop it.
+- Click a **group** heading to drop that whole group.
+- Click **Only** beside a group to go the other way: keep that group and drop everything else in
+  that box. From the arrival state this is the fast path, and it is one click.
+- Click **All** to clear the box and start picking.
+
+**Only** stays inside its own box. Only on a diet leaves your habitat and region choices alone.
+
+### Regions
+
+States, provinces, and stretches of open sea. A bird is listed in a region when it is reported
+there often enough to be worth looking for, from eBird and iNaturalist records.
+
+The same regions are offered **grouped two ways**, and you can pick from either. **Geographic**
+is the usual map, drawn by hand, so someone looking for Alaska finds it under Alaska. **Common
+birds** is measured — regions are clustered by how much their species lists actually overlap,
+which puts Arizona with New Mexico and Texas, and Alaska with British Columbia.
+
+Birds of the open sea belong to no state at all, so they are grouped by ocean. Seabirds that also
+come within sight of shore appear both there and in the states they are seen from.
+
+### Diet and Habitat
+
+What a bird mostly eats and where it mostly lives, from **AVONET**, assigned **per species** and
+not per family — a Double-crested Cormorant and a Neotropic Cormorant need not share a habitat,
+and an Anhinga is a bird of swamps whatever its relatives do.
+
+AVONET records *one* value per species. BirdView adds further habitats and diets where that hides
+something obvious — a Great Blue Heron on a tidal flat, a gull at a landfill — and marks those as
+its own rather than AVONET's. Every bird's detail page lists each category with who assigned it,
+and [everything BirdView adds](/added) is listed in one place.
+
+### Families
 
 Families are grouped by taxonomic order in **checklist sequence** — the order field guides use, not
 alphabetical — so related birds sit together and the list reads the way you already think.
@@ -87,6 +130,19 @@ alphabetical — so related birds sit together and the list reads the way you al
 Each family chip carries both its scientific and common name plus a count, and each family has its
 own color, shaded by order: families in the same order get related hues, so you can pick out an
 order at a glance while still telling its families apart.
+
+---
+
+## Comparing a few birds side by side
+
+Picking birds puts them on one page at one shared scale, which is the comparison the index can
+only approximate across sections.
+
+Click **Compare birds** in Controls to start picking, then click the birds you want. The compare
+page draws them together, largest setting the scale, and lets you sort the set by length,
+wingspan or mass. Each panel links to that bird's own page, where every number names its source.
+
+The birds you picked live in the URL, so a comparison is a link you can keep or send.
 
 ---
 
@@ -109,10 +165,21 @@ It is a size and proportion tool, not a field guide.
 
 - **No plumage, color or markings.** Tile colors encode taxonomy, nothing about the bird's
   appearance.
-- **No range, season or behavior.** Rarity codes are used once, at build time, to pick the species
-  list, and then discarded.
+- **No range map, season or behavior.** You can filter by region, but that is a list of where a
+  bird is reported often enough to be worth looking for — not a range map, not a migration, and
+  not a date. Rarity codes are used once, at build time, to pick the species list, and then
+  discarded.
 - **No perched or standing view.** The diagrams are flight silhouettes only. A perched view would
   need leg and posture data that does not exist at this coverage.
 - **No individual variation.** One figure per species, not a range.
 
 For identification, use a field guide. For "wait, is a Merlin really that small?", use this.
+
+---
+
+## Where the numbers come from
+
+Every bird's detail page names the source or formula behind each number it shows. Beyond that,
+[docs/data.md](data.md) describes each input and how the dataset is built, and BirdView serves
+its own requirements at [/spec](/spec) — the product and technical specifications, the decision
+record, and the acceptance criteria that check them.

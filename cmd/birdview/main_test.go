@@ -3923,3 +3923,40 @@ func onlyZone(t *testing.T, grouping, zone string) string {
 	}
 	return rest
 }
+
+// The unit buttons must name the units the page actually renders. They did
+// not: imperial was labelled "in / g" while every imperial mass on the page
+// was in ounces, so the control advertised a combination the site never
+// produced.
+//
+// Derived from the renderer, not from the button: format() is what decides
+// the suffix, so asking it is asking the thing the label is about. Reading
+// the expectation off the button would make this test agree with itself.
+//
+// Watched fail: restoring "in / g" reports that the imperial label says g
+// where the page renders oz.
+//
+// Verifies: P-023. Criterion: AC-063.
+func TestUnitButtonsNameTheUnitsRendered(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/")
+
+	for _, tc := range []struct {
+		metric3 bool
+		param   string
+	}{{false, "imperial"}, {true, "metric"}} {
+		// A small bird's mass: format() switches to pounds and kilograms
+		// further up, so the base unit the button names is the one a
+		// sparrow-sized mass renders in.
+		rendered := format(25, view.ByMass, tc.metric3)
+		unit := strings.TrimLeft(rendered, "0123456789.,  ~")
+		unit = strings.TrimSpace(unit)
+
+		label := mustMatch(t, body,
+			`href="[^"]*units=`+tc.param+`[^"]*">([^<]+)</a>`,
+			"the "+tc.param+" units button")
+		if !strings.Contains(label, unit) {
+			t.Errorf("the %s button is labelled %q, but %s masses render as %q (unit %q)",
+				tc.param, label, tc.param, rendered, unit)
+		}
+	}
+}

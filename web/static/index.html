@@ -101,7 +101,10 @@
        title="One scale across everything shown - small birds become very small">Global</a>
 
     <span class="lbl">Units</span>
-    <a class="btn{{if not .Opt.Metric3}} on{{end}}" href="{{call $q "units" "imperial"}}">in / g</a>
+    {{/* Ounces, not grams. The imperial button read "in / g" from the day it
+         shipped while the pages it switched rendered "0.93 oz", so the label
+         named a unit the setting never produced. */}}
+    <a class="btn{{if not .Opt.Metric3}} on{{end}}" href="{{call $q "units" "imperial"}}">in / oz</a>
     <a class="btn{{if .Opt.Metric3}} on{{end}}" href="{{call $q "units" "metric"}}">cm / g</a>
 
     <span class="lbl">Names</span>
@@ -323,6 +326,13 @@
       licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
       English names are shown in eBird/Clements usage by default and AviList&rsquo;s own
       on request.</li>
+    <li><b>Where each bird is found</b> &mdash; occurrence records from
+      <a href="https://www.gbif.org">GBIF</a>: the EOD &mdash; eBird Observation Dataset,
+      <a href="https://doi.org/10.15468/aomfnb">doi:10.15468/aomfnb</a>, and the iNaturalist
+      research-grade observations, both licensed
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      Only the derived list of regions per species is kept; no record, coordinate, date or
+      observer reaches this site.</li>
     <li><b>Species list</b> &mdash;
       <a href="https://www.aba.org/aba-checklist/">ABA Checklist</a> 8.19 (January 2026),
       &copy; American Birding Association, Inc. All rights reserved. Used at build time to

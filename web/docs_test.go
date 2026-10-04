@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -64,12 +65,27 @@ func datasetCounts(t *testing.T) (species, families int) {
 // the marker that counts as crediting it. Attribution is the licence
 // condition these sources ask for in return, so a page that shows their work
 // and omits the credit is a licence breach, not a styling lapse (T-024).
+//
+// `pages` names the pages a source's output actually reaches; nil means all
+// of them. GBIF is the reason this field exists: region membership is derived
+// from its occurrence records and is shown on the index and the detail page,
+// but compare.html shows no regions, and demanding a credit there would be
+// asking for attribution for something the page does not use.
+//
+// This list is hand-maintained, which is its weakness: it cannot catch a
+// source nobody added to it. GBIF supplied served data from the day P-011
+// shipped and was missing here until 2026-10-04, so the test passed while the
+// obligation went unmet. Adding a source that reaches a page is part of
+// adopting it, not a later tidy-up.
 var ccBySources = []struct {
 	name, marker, shows string
+	pages               []string
 }{
-	{"AviList", "AviList", "every English name, scientific name, family and species code"},
-	{"AVONET", "AVONET", "mass, wing chord and the measured segments"},
-	{"Fox et al.", "Fox", "empirical wingspans"},
+	{"AviList", "AviList", "every English name, scientific name, family and species code", nil},
+	{"AVONET", "AVONET", "mass, wing chord and the measured segments", nil},
+	{"Fox et al.", "Fox", "empirical wingspans", nil},
+	{"GBIF", "GBIF", "which regions each bird is found in",
+		[]string{"index.html", "detail.html"}},
 }
 
 // TestEveryPageCreditsWhatItShows asserts the licence half of T-024.
@@ -88,6 +104,9 @@ func TestEveryPageCreditsWhatItShows(t *testing.T) {
 		}
 		body := string(b)
 		for _, src := range ccBySources {
+			if src.pages != nil && !slices.Contains(src.pages, page) {
+				continue
+			}
 			if !strings.Contains(body, src.marker) {
 				t.Errorf("%s does not credit %s, which supplies %s — "+
 					"CC BY 4.0 asks for attribution in return",
