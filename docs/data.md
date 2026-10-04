@@ -209,8 +209,13 @@ assigned rather than derived from the English name.
 **Galliformes have no empirical wingspan at all.** All 30 in-scope species are absent from the Fox
 dataset, so every one is modeled.
 
-Taxonomy is ABA's, which is the AOS checklist. Where AVONET's BirdLife taxonomy disagrees, ABA
-wins, and the join is bridged by an explicit synonym table rather than by fuzzy matching.
+**Taxonomy is AviList's** — names, families, and the sequence families are listed in
+([CR-022](../spec/decisions.md#cr-022)). Where AVONET's BirdLife taxonomy disagrees, AviList
+wins, and the join is bridged by explicit synonym tables rather than by fuzzy matching. The
+tables run in both directions and are kept apart on purpose: one reaches *backward* from a
+current name to the older label AVONET measured under, the other *forward* from BirdView's name
+to a newer label AviList adopted, and merging them would make the direction of each entry a
+matter of memory.
 
 ## Regions
 
@@ -261,9 +266,18 @@ bird, is listed in Virginia** on 53 records from one location over six days arou
 
 So **a region list is a list of places a bird has been reported often enough to clear the bar,
 not a range map**, and at the margin it contains birds that turned up once and drew a crowd.
-A fix is being worked on and is harder than it looks: every simple test that removes the
-flamingo also removes a Hawaiian endemic, because a critically endangered bird with four records
-and a vagrant with four records are the same shape in the data.
+
+**The fix is designed and measured, and it is not a better threshold.** Every rule that counts
+*how many* records a bird has fails the same way, because a count measures observer effort:
+pelagic species and remote-island endemics are under-reported, since nobody is where they are,
+while vagrants are over-reported, since everyone goes to where they are. Those pull in opposite
+directions, so no single threshold corrects both — a critically endangered endemic with four
+records and a vagrant with four records really are the same shape.
+
+What separates them is **recurrence**: not how many records, but whether they repeat across
+years. The 2023 flamingo has 931 records inside thirteen days; Akikiki, a Hawaiian endemic, has
+376 across forty-five years and is unmistakably the resident of the two. That is
+[CR-028](../spec/decisions.md#cr-028), in progress.
 
 ## Habitat and diet
 

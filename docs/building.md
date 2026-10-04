@@ -1,7 +1,8 @@
 # Building, running and changing BirdView
 
-A single Go module with two commands: an ingest that compiles the dataset from published sources,
-and a server that embeds and serves the web UI. No database, no runtime data fetch, no JavaScript
+A single Go module. Two commands do the everyday work — an ingest that compiles the dataset from
+published sources, and a server that embeds and serves the web UI — and four generators build
+the committed lookup tables those two read. No database, no runtime data fetch, no JavaScript
 framework.
 
 ---
@@ -52,6 +53,8 @@ Send a descriptive `User-Agent` naming who you are ([T-006](../spec/tech.md)) �
 
 ```
 go run ./cmd/birdview-ingest     # compiles web/data/species.json
+go run ./cmd/birdview            # serves http://localhost:8080
+```
 
 **Use `-dev web` while editing the UI.** Templates and static files are embedded with `go:embed`,
 so a running server serves them as they were when it *started*: edit `index.html` or `styles.css`,
@@ -66,8 +69,6 @@ It is off by default and a deployed binary never uses it; `TestEmbedIsTheDefault
 This flag exists because the embed caught three wrong observations in one afternoon — a
 recalibrated dataset, a recoloured favicon and a footer credit, each reported from a page that no
 longer matched the repository.
-go run ./cmd/birdview            # serves http://localhost:8080
-```
 
 The ingest prints a coverage summary — species in scope, how many traits and wingspans are
 measured, near-match or modeled. Expect **839 species in 90 families across 26 orders**.
@@ -77,12 +78,15 @@ Flags, should you need them:
 | Command | Flag | Default |
 | --- | --- | --- |
 | `birdview-ingest` | `-aba` | `fetched/ABA_Checklist-8.19.csv` |
+| | `-avilist` | `AviList-v2025b-10Jun2026-extended.xlsx` |
 | | `-avonet` | `AVONET Supplementary dataset 1.xlsx` |
 | | `-wingspan` | `wingspan_fox2026_AppendixS1.xlsx` |
-| | `-out` | `web/data/species.json` |
 | | `-inat` | `data/inat-taxa.tsv` |
+| | `-regions` | `data/region-presence.tsv` |
+| | `-out` | `web/data/species.json` |
 | `birdview` | `-addr` | `localhost:8080` |
 | | `-data` | `web/data/species.json` |
+| | `-dev` | off |
 
 > **Gotcha that has bitten twice:** the server reads `species.json` **once, at startup**. After
 > re-running the ingest you must restart the server, or you will spend a while debugging stale
@@ -93,19 +97,32 @@ values derived from the ABA checklist.
 
 ---
 
-## Refreshing the iNaturalist mapping
+## The generators, and why they are separate commands
 
-`data/inat-taxa.tsv` maps each species to an iNaturalist taxon ID, and is **committed**. The
-ingest joins against it offline; nothing fetches it at build or run time (T-022).
+Four commands build committed lookup tables under `data/`. None of them runs as part of the
+ingest, and that is deliberate (T-022): between them a full run is thousands of requests to
+someone else's server, **tests make no network request**, and a build that needs the network is
+a build that fails on a plane. Each is run by hand when its source moves, its output is read as
+a diff, and the diff is committed.
 
-```
-go run ./cmd/birdview-inatmap        # ~15 minutes: 839 species at 1 request/second
-```
+| Command | Writes | Cost |
+| --- | --- | --- |
+| `birdview-inatmap` | `data/inat-taxa.tsv` — one iNaturalist taxon ID per species | ~15 min, 1 request/second |
+| `birdview-gbifmap` | `data/gbif-taxa.tsv` — GBIF backbone name → AviList name | ~5 min, ~2,800 requests |
+| `birdview-regions` | `data/region-presence.tsv` — which regions each species occurs in | one facet per region |
+| `birdview-status` | `data/status.tsv` — BirdView's own occurrence status per species | two passes, resumable |
 
-The pace is what iNaturalist asks for (`inat-api/R1`) and is not negotiable downward. Run it when
-the taxonomy moves — annually, alongside the source refresh — read the diff, and commit it. A
-species that does not resolve confidently is left out on purpose, and its detail page then shows no
-link.
+The iNaturalist pace is what that API asks for (`inat-api/R1`) and is not negotiable downward.
+The GBIF pace is a courtesy BirdView sets for itself, and the client widens it further whenever
+GBIF answers 429 — a run that ignores the throttling spends its time in backoff rather than
+working.
+
+`birdview-status` caches raw fetches and skips what it already has, so an interrupted run
+resumes instead of starting over. It refuses to write a partial table: a species whose dates
+never arrived would otherwise be filed as a vagrant on no evidence.
+
+A species that does not resolve confidently is left out on purpose, and its detail page then
+shows no iNaturalist link.
 
 ## Standing checks
 
@@ -134,18 +151,30 @@ not that it is right.
 ## Repository layout
 
 ```
-cmd/birdview-ingest/   builds species.json from the three sources
+cmd/birdview-ingest/   builds species.json from the sources and the data/ tables
 cmd/birdview/          the server; embeds web/ and serves it
-internal/aba/          the checklist parser (scope filter, names, families)
-internal/avonet/       the trait workbook reader
+cmd/birdview-inatmap/  generator: iNaturalist taxon IDs
+cmd/birdview-gbifmap/  generator: GBIF backbone -> AviList name bridge
+cmd/birdview-regions/  generator: per-region presence
+cmd/birdview-status/   generator: BirdView's own occurrence status
+internal/aba/          the checklist parser (scope filter only; names moved to AviList)
+internal/avilist/      the AviList workbook reader — names, families, codes, sequence
+internal/avonet/       the trait workbook reader, including habitat and trophic niche
 internal/wingspan/     the Fox dataset + the fitted wingspan regression
-internal/taxonomy/     ABA <-> BirdLife synonym table
+internal/taxonomy/     the synonym tables, in both directions, and the order labels
+internal/trait/        the habitat and diet vocabularies and BirdView's additions
 internal/morphology/   the segment models (head, body, neck) and rounding
+internal/region/       the regions, their two groupings, and their ids
+internal/gbif/         the paced GBIF client and the name bridge
+internal/inat/         the iNaturalist taxon lookup
+internal/status/       recurrence: episodes, and the status they imply
 internal/view/         ordering, sectioning, diagram geometry — pure, no HTML
 internal/dataset/      the serialized types and the provenance kinds
 internal/palette/      family and order colors, with contrast guarantees
+data/                  the committed generated tables the ingest reads
 web/static/            templates and CSS, embedded into the binary
-spec/                  the requirements bundle — normative
+docs/                  this documentation, also served at /docs
+spec/                  the requirements bundle — normative, also served at /spec
 ```
 
 `internal/view` is deliberately free of HTML and HTTP so the layout rules can be property-tested
@@ -228,9 +257,11 @@ Violating any of these is a licensing problem, not a style problem.
 - **Never read or process Wiley Online Library material**, including Ricklefs (2017). Its terms
   prohibit AI tools ingesting it and prohibit automated access, and the source is formally rejected
   ([CR-002](../spec/decisions.md)). Do not try to revive it as a length source.
-- **Only AVONET and the Fox wingspan data may be committed as inputs.** Both are CC BY 4.0. Before
-  adding a third data file, read [`sources.md`](../spec/sources.md) — most candidates this project
-  evaluated could not be redistributed.
+- **Only AVONET, the Fox wingspan data and AviList may be committed as source data.** All three
+  are CC BY 4.0. Before adding a fourth, read [`sources.md`](../spec/sources.md) — most candidates
+  this project evaluated could not be redistributed. The generated tables under `data/` are not
+  source data: they are the project's own reductions, and they carry their provenance in their
+  own headers.
 - **Never present a modeled value as a measurement** ([P-060](../spec/product.md), P-061). This is
   the decision the whole measurement design rests on ([CR-001](../spec/decisions.md)).
 
@@ -243,8 +274,17 @@ Violating any of these is a licensing problem, not a style problem.
 **BirdView is not deployed publicly, and cannot be yet.**
 
 Serving it reproduces the ABA checklist to every visitor, and the checklist is all-rights-reserved
-with no license permitting that. A written permission request to the ABA is drafted and unsent; the
-app stays local until it is granted. See the Work arising table in
+with no license permitting that.
+
+Permission was **requested on 2026-09-27 and never answered**, so the project stopped waiting.
+Names, families and species codes already moved to AviList, which is CC BY 4.0
+([CR-022](../spec/decisions.md#cr-022)), and **scope is the last thing the checklist supplies**.
+Replacing it is [CR-028](../spec/decisions.md#cr-028), in progress: scope becomes a question of
+whether a species' records **recur** — repeated episodes across years, in at least one region —
+rather than how often it is reported, because a record count measures observer effort and
+over-reports exactly the birds a reader will never meet.
+
+Until that lands the app stays local. See the Work arising table in
 [`decisions.md`](../spec/decisions.md).
 
 Nothing else blocks it. There is no deployment tooling yet — no container image, and the server
