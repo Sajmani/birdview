@@ -874,3 +874,54 @@ func TestThrottlingWidensThePacing(t *testing.T) {
 		t.Errorf("gap %v exceeds the cap %v", gap, MaxInterval)
 	}
 }
+
+// Widening must not be a ratchet. One burst of throttling early in a long
+// run should not leave it crawling for hours after the server recovers: the
+// first adaptive run pinned itself at the 4s cap and would have turned a
+// one-hour job into eight.
+//
+// Watched fail: deleting the c.speedUp() call leaves the gap at its widened
+// value and this reports that it never came back.
+func TestPacingRecoversAfterACleanStreak(t *testing.T) {
+	var hits int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		hits++
+		if hits == 1 {
+			http.Error(w, "slow down", http.StatusTooManyRequests)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, cormorantJSON)
+	}))
+	defer srv.Close()
+
+	c := NewClient()
+	c.BaseURL, c.Backoff, c.HTTP = srv.URL, time.Millisecond, srv.Client()
+	c.Interval = time.Microsecond
+	c.CleanRun = 5 // the default is 200, which makes this test twenty seconds
+
+	ctx := context.Background()
+	if _, err := c.Taxon(ctx, 2481875, 0); err != nil {
+		t.Fatalf("a 429 then a 200 should succeed: %v", err)
+	}
+	c.mu.Lock()
+	widened := c.gap
+	c.mu.Unlock()
+	if widened <= c.Interval {
+		t.Fatalf("the fixture must widen the gap first or it proves nothing: %v", widened)
+	}
+
+	// Enough clean requests to earn a step back.
+	for i := 0; i < c.CleanRun+2; i++ {
+		if _, err := c.Taxon(ctx, 2481875, 0); err != nil {
+			t.Fatalf("clean request %d failed: %v", i, err)
+		}
+	}
+	c.mu.Lock()
+	after := c.gap
+	c.mu.Unlock()
+	if after >= widened {
+		t.Errorf("after %d clean requests the gap is still %v (was %v): widening "+
+			"without a way back pins a long run at the cap", c.CleanRun, after, widened)
+	}
+}

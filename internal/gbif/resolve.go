@@ -83,9 +83,14 @@ type Client struct {
 
 	mu   sync.Mutex
 	last time.Time
-	// gap is the live interval. It starts at Interval and only ever widens,
-	// in response to GBIF saying the rate is too high.
+	// gap is the live interval, between Interval and MaxInterval. It widens
+	// when GBIF throttles and narrows again on a long clean streak.
 	gap time.Duration
+	// CleanRun overrides DefaultCleanRun. A field for the same reason Backoff
+	// is one: at the default this test waits twenty seconds.
+	CleanRun int
+	// clean counts consecutive successes since the last 429.
+	clean int
 }
 
 // MaxInterval caps how far throttling can widen the gap. Past this the run is
@@ -106,10 +111,39 @@ func (c *Client) slowDown() {
 	if c.gap == 0 {
 		c.gap = c.Interval
 	}
+	c.clean = 0
 	if c.gap < MaxInterval {
 		c.gap = min(c.gap*3/2+100*time.Millisecond, MaxInterval)
 		log.Printf("gbif: throttled; pacing widened to %v", c.gap)
 	}
+}
+
+// DefaultCleanRun is how many consecutive successes earn a step back toward
+// the configured interval.
+//
+// Widening without a way back is a ratchet: one burst of throttling early in
+// a long run leaves it crawling for hours after the server has recovered. The
+// first run to widen sat at the 4s cap for the rest of its life, which would
+// have turned a one-hour job into eight. Narrowing is deliberately slower
+// than widening -- 200 clean requests to win back a step that one 429 takes
+// away -- so the response to real throttling is still immediate.
+const DefaultCleanRun = 200
+
+// speedUp narrows the pacing after a long run without throttling.
+func (c *Client) speedUp() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	run := c.CleanRun
+	if run <= 0 {
+		run = DefaultCleanRun
+	}
+	c.clean++
+	if c.clean < run || c.gap <= c.Interval {
+		return
+	}
+	c.clean = 0
+	c.gap = max(c.gap*2/3, c.Interval)
+	log.Printf("gbif: %d clean requests; pacing narrowed to %v", run, c.gap)
 }
 
 // NewClient returns a client with the courtesy defaults above.
@@ -531,6 +565,7 @@ func (c *Client) attempt(ctx context.Context, path string, into any, last *error
 	if err := json.NewDecoder(resp.Body).Decode(into); err != nil {
 		return fmt.Errorf("GET %s: %w", path, err)
 	}
+	c.speedUp()
 	*last = nil
 	return nil
 }
