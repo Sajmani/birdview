@@ -28,6 +28,15 @@ footer a:visited { color: var(--accent-visited); }
 .controls > summary { cursor: pointer; font-size: 12px; text-transform: uppercase;
   letter-spacing: .05em; color: var(--accent); }
 .controls[open] > summary { margin-bottom: 10px; }
+
+/* Every box arrives closed, so the summary line is all a new reader has to go
+   on. The description says what opening it gets them; it is redundant once
+   the box is open and the contents say it better, so it goes away then.
+   Lower case and not letter-spaced, against the uppercase title: it is a
+   sentence, not a second label. */
+.sumdesc { margin-left: 10px; color: var(--dim); font-size: 11.5px;
+  text-transform: none; letter-spacing: 0; font-weight: 400; }
+details[open] > summary .sumdesc { display: none; }
 .row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
 .lbl { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .05em;
   margin: 0 4px 0 14px; }
@@ -61,7 +70,10 @@ footer a:visited { color: var(--accent-visited); }
    definition is the point -- "Coastal" means something specific and a chip
    has nowhere to say it. */
 .traits { list-style: none; padding: 0; margin: 6px 0 0; }
-.traits li { display: grid; grid-template-columns: 170px 44px 1fr; align-items: baseline;
+/* Four columns, not three: the Only button sits between the toggle and the
+   count. A new child of a grid with three named columns would have wrapped to
+   the next row's first column instead of taking a place on this one. */
+.traits li { display: grid; grid-template-columns: 170px auto 44px 1fr; align-items: baseline;
   gap: 8px; padding: 2px 0; }
 .thdr { font-size: 11.5px; }
 .tcount { color: var(--dim); font-size: 11.5px; text-align: right; font-variant-numeric: tabular-nums; }
@@ -73,7 +85,15 @@ footer a:visited { color: var(--accent-visited); }
    the page margin -- Passeriformes' 44 families started under the header on
    every line but the first. The families get their own wrapping box, so all
    their lines begin at the first family instead. */
-.ogroup { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 5px; }
+.ogroup { display: grid; grid-template-columns: auto auto 1fr; align-items: baseline; gap: 5px; }
+
+/* Only narrows to one group in a click, where the plain toggle adds to or
+   removes from whatever is already on. It is quieter than the toggle beside
+   it on purpose: the toggle is the ordinary action and this is the shortcut,
+   so it reads as secondary until hovered. */
+.only { font-size: 11px; padding: 2px 7px; color: var(--dim); border-style: dashed; }
+.only:visited { color: var(--dim); }
+.only:hover { color: var(--ink); border-color: var(--accent); border-style: solid; }
 .ofams { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; }
 /* Plain text on the page background. Anything chip-shaped reads as clickable,
    and these are labels. */

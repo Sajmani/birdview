@@ -362,15 +362,19 @@ func TestOrderGroupsIndentWrappedFamilies(t *testing.T) {
 		t.Errorf(".ogroup is not a grid, so the families have no column to wrap inside "+
 			"and a wrapped line returns to the page margin. Got %q", strings.TrimSpace(g[1]))
 	}
-	// Two tracks: the order toggle, then the families. One track would stack
-	// them, and three would leave a gap the chips could wrap into.
+	// Three tracks: the order toggle, the Only button (P-072), then the
+	// families. Fewer would push a child onto its own row, and the last track
+	// must stay the flexible one or the chips get a fixed width to wrap in.
 	cols := regexp.MustCompile(`grid-template-columns:\s*([^;}]+)`).FindStringSubmatch(g[1])
 	if cols == nil {
 		t.Fatalf(".ogroup sets no grid-template-columns; got %q", strings.TrimSpace(g[1]))
 	}
-	if n := len(strings.Fields(cols[1])); n != 2 {
-		t.Errorf(".ogroup has %d grid columns (%q), want 2: the order header and the families",
-			n, strings.TrimSpace(cols[1]))
+	if fields := strings.Fields(cols[1]); len(fields) != 3 {
+		t.Errorf(".ogroup has %d grid columns (%q), want 3: the order header, Only, and the families",
+			len(fields), strings.TrimSpace(cols[1]))
+	} else if fields[2] != "1fr" {
+		t.Errorf(".ogroup's last column is %q, want 1fr: the families take the slack, "+
+			"and a fixed last track gives wrapped chips the wrong width", fields[2])
 	}
 
 	// The families' own box must wrap, or a long list overflows the column

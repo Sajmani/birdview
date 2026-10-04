@@ -116,10 +116,12 @@ type familyOption struct {
 // field guide is arranged, and it is what lets family colors repeat across
 // orders (P-010, P-005).
 type orderGroup struct {
-	Order    string
+	Order    string       // the order's name
 	Common   string       // the order's English name; empty for a birder group
 	Selected bool         // every family in the group is filtered in
 	URL      template.URL // toggles the whole group
+	// OnlyURL selects this group's families and nothing else.
+	OnlyURL  template.URL
 	Families []familyRow
 }
 
@@ -208,6 +210,15 @@ func (s *server) groupFamilies(r *http.Request, selected map[string]bool, rows [
 			}
 		}
 		g.URL = s.familyURL(r, next)
+
+		// Only: exactly this group's families. Built from the group alone,
+		// not from the current selection, so it lands on the same page
+		// whatever was on before.
+		only := make(map[string]bool, len(g.Families))
+		for _, f := range g.Families {
+			only[f.Name] = true
+		}
+		g.OnlyURL = s.familyURL(r, only)
 	}
 	return out
 }
@@ -1603,7 +1614,12 @@ type zoneGroup struct {
 	Zone     string
 	Selected bool
 	URL      template.URL
-	Regions  []regionRow
+	// OnlyURL selects this zone's regions and nothing else. The plain URL
+	// toggles the zone against whatever is already on, which is the right
+	// default and a slow way to get to one zone from everywhere -- the
+	// reader would have to clear all, then pick. Only is that in one click.
+	OnlyURL template.URL
+	Regions []regionRow
 }
 
 // groupingBlock is one way of carving the regions up, rendered as its own
@@ -1690,6 +1706,16 @@ func (s *server) regionGroups(r *http.Request, opt options) []groupingBlock {
 			}
 			g.URL = s.regionURL(r, next)
 
+			// Only: exactly this zone's regions, whatever was on before.
+			// Built from inZone alone rather than from sel, so it does not
+			// depend on the current selection and one zone is reachable from
+			// any state of the page in a single click.
+			only := make(map[string]bool, len(inZone))
+			for _, rg := range inZone {
+				only[rg.ID] = true
+			}
+			g.OnlyURL = s.regionURL(r, only)
+
 			for _, rg := range inZone {
 				one := map[string]bool{}
 				for k, v := range sel {
@@ -1760,6 +1786,9 @@ type traitRow struct {
 	Count    int
 	Selected bool
 	URL      template.URL
+	// OnlyURL selects this value alone within its axis. Habitat and diet are
+	// separate axes and separate parameters, so this never touches the other.
+	OnlyURL template.URL
 }
 
 // traitBlock is one categorical control -- habitat or niche.
@@ -1871,6 +1900,9 @@ func (s *server) traitControl(r *http.Request, name, note, param string,
 			Value: t.Value, Label: t.Label, Description: t.Description,
 			Count: count[t.Value], Selected: on(t.Value),
 			URL: s.traitURL(r, param, next, len(terms)),
+			// Only: this value alone within its axis. Habitat and diet carry
+			// separate parameters, so narrowing one leaves the other whole.
+			OnlyURL: s.traitURL(r, param, map[string]bool{t.Value: true}, len(terms)),
 		})
 	}
 	return b

@@ -15,8 +15,8 @@
   and use the Controls to configure the view. Contact birdview at ajmani dot net with feedback.</p>
 </header>
 
-<details class="help" id="presentation" open>
-  <summary>Presentation</summary>
+<details class="help" id="presentation">
+  <summary>Presentation<span class="sumdesc">what the diagrams show, and what they do not</span></summary>
   <div class="helpgrid">
     <section>
       <h3>The diagram</h3>
@@ -55,8 +55,8 @@
   </div>
 </details>
 
-<details class="controls" id="controls" open>
-  <summary>Controls</summary>
+<details class="controls" id="controls">
+  <summary>Controls<span class="sumdesc">order, scale, units and how birds are named</span></summary>
   <div class="ctrlhelp">
       <dl>
         <div class="ctrl"><dt>Order by</dt>
@@ -127,8 +127,8 @@
 
 </details>
 
-<details class="controls" id="regions" open>
-  <summary>Regions</summary>
+<details class="controls" id="regions">
+  <summary>Regions<span class="sumdesc">narrow to states, provinces or stretches of open sea</span></summary>
   <div class="ctrlhelp">
       <dl>
         <div class="ctrl"><dt>Region</dt>
@@ -166,6 +166,8 @@
       <div class="ogroup">
         <a class="btn ohdr{{if .Selected}} on{{end}}" href="{{.URL}}"
            title="{{if .Selected}}Clear{{else}}Select{{end}} every region in {{.Zone}}">{{.Zone}}</a>
+        <a class="btn only" href="{{.OnlyURL}}"
+           title="Show only {{.Zone}}, dropping every other region">Only</a>
         <div class="ofams">
           {{range .Regions}}
           {{/* A region with no standard abbreviation shows its name alone.
@@ -183,8 +185,8 @@
   {{end}}
 </details>
 
-<details class="controls" id="traits" open>
-  <summary>Diet and Habitat</summary>
+<details class="controls" id="traits">
+  <summary>Diet and Habitat<span class="sumdesc">narrow by what a bird eats and where it lives</span></summary>
   <div class="ctrlhelp">
       <dl>
         <div class="ctrl"><dt>Diet</dt>
@@ -205,7 +207,9 @@
       </dl>
   </div>
 
-  {{range .Traits}}
+  {{/* Bound as $t because the Only button inside the row loop names the axis
+       it narrows, and `$` there is the page, not this block. */}}
+  {{range $t := .Traits}}
   <div class="grouping">
     <div class="ghdr">{{.Name}}<em>{{.Note}}</em></div>
     <div class="row chips">
@@ -217,6 +221,8 @@
       {{range .Rows}}
       <li><a class="btn thdr{{if .Selected}} on{{end}}" href="{{.URL}}"
              title="{{if .Selected}}Clear{{else}}Select{{end}} {{.Label}}">{{.Label}}</a>
+        <a class="btn only" href="{{.OnlyURL}}"
+           title="Show only {{.Label}}, dropping every other {{$t.Name}}">Only</a>
         <span class="tcount">{{.Count}}</span>
         {{/* AVONET's own term leads the definition. It is the word the
              definition belongs to, and it is also the value in the URL --
@@ -229,8 +235,8 @@
   {{end}}
 </details>
 
-<details class="controls" id="families" open>
-  <summary>Families</summary>
+<details class="controls" id="families">
+  <summary>Families<span class="sumdesc">narrow to families, or to whole orders at once</span></summary>
   <div class="ctrlhelp">
       <dl>
         <div class="ctrl"><dt>Family</dt>
@@ -252,6 +258,8 @@
       <div class="ogroup">
         <a class="btn ohdr{{if .Selected}} on{{end}}" href="{{.URL}}"
            title="{{if .Selected}}Clear{{else}}Select{{end}} every family in {{.Order}}">{{.Order}}{{if .Common}}<em>{{.Common}}</em>{{end}}</a>
+        <a class="btn only" href="{{.OnlyURL}}"
+           title="Show only {{.Order}}, dropping every other family">Only</a>
         {{/* The families sit in their own box so a long list wraps inside the
              column beside the group header, not back to the page margin. */}}
         <div class="ofams">

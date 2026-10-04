@@ -620,18 +620,46 @@ something that does not exist.
 Subject: `presentation.controls`
 Goals: G-002
 
-The controls are **several collapsible panels**, each starting open and each remembering its own
-state across navigations (P-038): **Controls** for the display toggles, **Regions**, and
-**Families**.
+The controls are **several collapsible panels**, each starting **closed** and each remembering its
+own state across navigations (P-038): **Controls** for the display toggles, **Regions**, **Diet
+and Habitat**, and **Families**.
 
-They are separate boxes rather than one, because the two filters are large — 90 family chips in
-26 order groups, and 74 regions in 10 zones — and stacking both inside one panel pushes the birds
+They are separate boxes rather than one, because the filters are large — 90 family chips in
+26 order groups, and 74 regions in 10 zones — and stacking them inside one panel pushes the birds
 a long way below the fold while making "collapse the filter I am done with" impossible. Each
 panel carries the documentation for its own controls (P-035), so an explanation sits with the
 thing it explains.
 
-Rationale: a reader who has chosen their filter should be able to put it away — and have it stay
-away. With two filters that is not one decision but two, and one panel cannot express it.
+**A closed panel names what it holds.** Its summary carries a one-line description of what
+opening it gets the reader — *narrow to states, provinces or stretches of open sea* — shown only
+while closed, since once open the contents say it better. Without it a column of five bare words
+asks the reader to open each in turn to find out which one they wanted.
+
+Rationale: the birds are the product, and four open panels put them below the fold before a
+reader has chosen anything. Opening a panel is one click and is remembered, so the cost falls on
+the reader who wants a filter rather than on every reader who does not. A reader who has chosen
+their filter should also be able to put it away and have it stay away; with several filters that
+is not one decision but several, and one panel cannot express it.
+
+### P-072 — Every group offers "Only"
+Subject: `presentation.filter_only`
+Goals: G-002
+
+Beside each group selector in **Regions**, **Diet and Habitat** and **Families** sits an
+**Only** control that selects that group and deselects everything else **within its own
+section**. Clicking Only beside *The High Arctic* leaves Nunavut selected and every other region
+dropped; Only beside *Waterfowl* leaves that order's families and no others. Diet and habitat
+are separate sections, so narrowing one leaves the other whole.
+
+It is a link like every other control (P-037), carrying the resulting selection in the URL, and
+its target is built from the group alone rather than from what is currently selected — so it
+lands on the same page whatever was on before, and is as shareable as any other view.
+
+Rationale: the group toggle adds to or removes from the current selection, which is the right
+default and a slow way to reach one group. From everything selected — the arrival state — a
+reader wanting one zone must first clear all, then find their zone: two steps, and the first
+empties the page. Narrowing to one group is the common case and was the only one that took more
+than a click.
 
 ### P-035 — The page explains itself
 Subject: `presentation.help`

@@ -502,10 +502,13 @@ discover the branch was never exercised end to end.
 **Assertions:** the index carries the script inline, never via `src`; it is scoped to `/` so a
 detail page cannot consume the saved position; the detail view ships no script; the controls carry
 an `id` so `#controls` works as a fallback target; both panels carry ids so their collapsed state
-can be keyed on; both still default to open; and panel state is restored **before** the scroll.
-**Status: verified 2026-09-22 — passing, and watched failing** by externalizing the script, by
-removing its path guard, by dropping a panel's id, and by reordering the restores so the scroll
-runs first.
+can be keyed on; every panel defaults to **closed** and carries a one-line description in its
+summary ([P-036](product.md#p-036)); and panel state is restored **before** the scroll.
+**Status: verified 2026-09-22, amended 2026-10-04 — passing, and watched failing** by
+externalizing the script, by removing its path guard, by dropping a panel's id, and by reordering
+the restores so the scroll runs first. The default was *open* until P-036 changed it; the
+amended check was watched failing by restoring `open` to the markup and by deleting a summary
+description.
 
 **This does not check that scrolling works.** That needs a browser, which this project does not
 have. The criterion covers presence, self-containment and scoping only, and the behavior itself is
@@ -1696,3 +1699,26 @@ Honest gaps, rather than criteria that would not bite:
 All `planned` criteria. The project has no code, so none of them has been watched going red. As
 each is implemented, break its subject deliberately and record the result here — a check believed
 but never seen failing is worse than no check.
+
+### AC-093 — "Only" narrows to one group and leaves other sections alone
+**Verifies:** [P-072](product.md#p-072) · **Level:** code · **Method:** rendering tests over the
+index, following each control's own URL
+
+**Assertions:** every group selector in Regions, Diet and Habitat and Families is followed by an
+**Only** link. Following one leaves exactly that group's members selected within its section and
+nothing else: Only beside a region zone selects that zone's regions and drops every other
+region; Only beside an order selects that order's families and drops every other family.
+
+**Assertions, section independence:** Only on a diet value leaves the habitat selection
+untouched, and the reverse. Only on a region touches neither families nor traits. This is the
+assertion that matters — a narrowing control that quietly empties a neighbouring filter returns
+an empty page and looks like a data bug.
+
+**Assertions, independence from current state:** the target is built from the group, not from
+what is selected, so the same Only link appears whatever else is on. Two different starting
+selections produce the same Only target for the same group.
+
+**Status: verified 2026-10-04 — passing, and watched failing** by building the target from the
+current selection rather than from the group (the two starting selections then disagree), and by
+pointing a trait's Only at both trait parameters instead of its own (the habitat selection is
+then cleared by a diet click).

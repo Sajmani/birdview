@@ -1108,10 +1108,21 @@ func TestCollapsiblePanelsPersist(t *testing.T) {
 	if p, s := strings.Index(body, "birdview.open."), strings.Index(body, "birdview.scroll"); p > s {
 		t.Error("scroll is restored before the panels; collapsing one would then shift the page")
 	}
-	// Both panels still default to open for a first-time reader.
-	for _, want := range []string{`class="help" id="presentation" open`, `class="controls" id="controls" open`} {
-		if !strings.Contains(body, want) {
-			t.Errorf("panel does not default to open: expected %q", want)
+	// Every panel defaults to CLOSED (P-036): four open panels put the birds
+	// below the fold before the reader has chosen anything.
+	for _, id := range []string{"presentation", "controls", "regions", "traits", "families"} {
+		open := regexp.MustCompile(`<details[^>]*id="` + id + `"[^>]*\bopen\b`)
+		if open.MatchString(body) {
+			t.Errorf("panel %q defaults to open; P-036 says closed", id)
+		}
+	}
+	// A closed panel is a bare word unless it says what it holds, so each
+	// summary carries a one-line description.
+	for _, id := range []string{"presentation", "controls", "regions", "traits", "families"} {
+		sum := mustMatch(t, body, `(?s)<details[^>]*id="`+id+`">\s*<summary>(.*?)</summary>`,
+			"the "+id+" summary")
+		if !strings.Contains(sum, `class="sumdesc"`) {
+			t.Errorf("panel %q has no description in its summary: %q", id, sum)
 		}
 	}
 }
@@ -1662,7 +1673,10 @@ func TestHeaderNamesThePanelsThatExist(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/")
 	intro := mustMatch(t, body, `(?s)<p class="sub">(.*?)</p>`, "the header intro")
 
-	titles := regexp.MustCompile(`<summary>([^<]+)</summary>`).FindAllStringSubmatch(body, -1)
+	// The title is the text before any markup: a summary now also carries a
+	// <span class="sumdesc"> describing what the panel holds (P-036), so
+	// anchoring on </summary> matches nothing.
+	titles := regexp.MustCompile(`<summary>([^<]+)`).FindAllStringSubmatch(body, -1)
 	have := map[string]bool{}
 	for _, m := range titles {
 		have[strings.TrimSpace(m[1])] = true
@@ -3807,4 +3821,105 @@ func TestAddedListsEveryUnpublishedAssignment(t *testing.T) {
 			t.Errorf("a %s row gives no reason", m[1])
 		}
 	}
+}
+
+// onlyLink pulls the Only href that follows a given group toggle, scoped to
+// one grouping so the same zone name in the other grouping is not matched.
+func onlyLink(t *testing.T, scope, afterLabel string) string {
+	t.Helper()
+	i := strings.Index(scope, ">"+afterLabel)
+	if i < 0 {
+		t.Fatalf("no group toggle labelled %q in this scope", afterLabel)
+	}
+	m := regexp.MustCompile(`<a class="btn only" href="([^"]+)"`).FindStringSubmatch(scope[i:])
+	if m == nil {
+		t.Fatalf("no Only link after %q", afterLabel)
+	}
+	return html.UnescapeString(m[1])
+}
+
+// Only narrows to one group in a click, and must not disturb the sections
+// beside it (P-072).
+//
+// Watched fail: building OnlyURL from the current selection instead of from
+// the group makes the two starting selections disagree; pointing a trait's
+// Only at both trait parameters clears the habitat selection on a diet click.
+//
+// Verifies: P-072. Criterion: AC-093.
+func TestOnlyNarrowsToOneGroup(t *testing.T) {
+	s := newTestServer(t)
+	_, body := get(t, s, "/")
+
+	// A region zone: its regions stay, every other region goes.
+	regions := box(t, body, "regions")
+	geo := grouping(t, regions, "Geographic")
+	zone := mustMatch(t, geo, `<a class="btn ohdr[^"]*" href="[^"]*"\s*\n?\s*title="[^"]*">([^<]+)</a>`,
+		"the first zone in the Geographic grouping")
+	href := onlyLink(t, geo, zone)
+
+	u, err := url.Parse(href)
+	if err != nil {
+		t.Fatalf("Only href %q does not parse: %v", href, err)
+	}
+	q := u.Query()
+	if _, ok := q["region"]; !ok {
+		t.Fatalf("Only for zone %q sets no region parameter: %q", zone, href)
+	}
+	// It must not reach into the other filters at all.
+	for _, p := range []string{"family", "habitat", "niche"} {
+		if _, ok := q[p]; ok {
+			t.Errorf("Only on a region set %q=%v; regions and %s are different sections",
+				p, q[p], p)
+		}
+	}
+
+	// Following it leaves exactly that zone's regions on, and nothing else.
+	_, after := get(t, s, href)
+	ar := box(t, after, "regions")
+	onChips := regexp.MustCompile(`<a class="chip rchip on"`).FindAllString(
+		grouping(t, ar, "Geographic"), -1)
+	zoneChips := regexp.MustCompile(`<a class="chip rchip[^"]*"`).FindAllString(
+		onlyZone(t, grouping(t, ar, "Geographic"), zone), -1)
+	if len(onChips) != len(zoneChips) {
+		t.Errorf("after Only on %q, %d regions are selected page-wide but the zone holds %d",
+			zone, len(onChips), len(zoneChips))
+	}
+
+	// A trait value: its own axis narrows, the other axis is untouched.
+	traits := box(t, body, "traits")
+	diet := grouping(t, traits, "Diet")
+	val := mustMatch(t, diet, `<a class="btn thdr[^"]*" href="[^"]*"\s*\n?\s*title="[^"]*">([^<]+)</a>`,
+		"the first diet value")
+	dh := onlyLink(t, diet, val)
+	du, err := url.Parse(dh)
+	if err != nil {
+		t.Fatalf("Only href %q does not parse: %v", dh, err)
+	}
+	if _, ok := du.Query()["habitat"]; ok {
+		t.Errorf("Only on a diet value set habitat=%v; diet and habitat are separate sections "+
+			"and narrowing one must leave the other whole", du.Query()["habitat"])
+	}
+
+	// Independence from the current selection: the same group yields the same
+	// Only target from a different starting state.
+	_, narrowed := get(t, s, "/?region=CA")
+	g2 := grouping(t, box(t, narrowed, "regions"), "Geographic")
+	if h2 := onlyLink(t, g2, zone); h2 != href {
+		t.Errorf("Only for %q differs by starting selection:\n  from all: %s\n  from CA:  %s",
+			zone, href, h2)
+	}
+}
+
+// onlyZone narrows a grouping to one zone's block.
+func onlyZone(t *testing.T, grouping, zone string) string {
+	t.Helper()
+	i := strings.Index(grouping, ">"+zone)
+	if i < 0 {
+		t.Fatalf("no zone %q", zone)
+	}
+	rest := grouping[i:]
+	if k := strings.Index(rest, `<div class="ogroup">`); k >= 0 {
+		return rest[:k]
+	}
+	return rest
 }
