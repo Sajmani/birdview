@@ -389,7 +389,7 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 	}
 
 	var b strings.Builder
-	fmt.Fprintf(&b, "recurring in the ABA Area: %d species in %d families across %d orders\n",
+	fmt.Fprintf(&b, "recurring in BirdView's regions: %d species in %d families across %d orders\n",
 		len(out), len(famSeq), len(orderSeq))
 	fmt.Fprintf(&b, "  scope             : %s\n", status.Source)
 	fmt.Fprintf(&b, "  declared by hand  : %d (P-071)\n", len(status.Declared))

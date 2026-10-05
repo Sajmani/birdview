@@ -1,5 +1,5 @@
 // Command birdview-status derives BirdView's own occurrence status for every
-// species the ABA Area reports, and writes the committed status table.
+// species its regions report, and writes the committed status table.
 //
 // It replaces the ABA rarity codes, which supplied scope until 2026-10-04 and
 // could not be redistributed (P-001, CR-028). What it measures is not how

@@ -2124,8 +2124,14 @@ func (s *server) categories(sp *dataset.Species) []categoryRow {
 // the share as one-in-N, and the full sentence as a tooltip.
 type shareCell struct {
 	// Where names the scope the share is over, already prefixed with "in":
-	// the one region when exactly one is on, the ABA Area when all are, and
-	// "the selected regions" for any set in between.
+	// the one region when exactly one is on, "every region" when all are,
+	// and "the selected regions" for any set in between.
+	//
+	// Not "the ABA Area", which this is not. That area includes St-Pierre
+	// et Miquelon, which BirdView has no region for, and excludes Johnston,
+	// Palmyra, Wake and Navassa, which it has regions for. Naming someone
+	// else's boundary would also re-attribute BirdView's scope to the
+	// authority CR-028 just removed it from. The selection describes itself.
 	Where string
 	OneIn string
 	Title string
@@ -2188,7 +2194,7 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 			}
 		}
 	} else if all {
-		where, scope = "in the ABA Area", "the ABA Area"
+		where, scope = "across every region", "every region BirdView covers"
 	}
 	return &shareCell{
 		Where: where,

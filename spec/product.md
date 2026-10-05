@@ -9,14 +9,26 @@ IDs are permanent. Withdrawn requirements stay in place so references to them st
 
 ## Dataset and taxonomy
 
-### P-001 — Scope is the ABA Area avifauna that recurs, by BirdView's own measure
+### P-001 — Scope is the recurring avifauna of the regions BirdView covers
 Subject: `dataset.scope`
-Value: `ABA Area, status established or rare`
+Value: `BirdView's regions, status established or rare`
 Goals: G-001, G-002
 
-The dataset is the species of the ABA Area — North America north of Mexico, plus Hawaii — whose
-observations **recur** there: a species is in scope when, in at least one region, its records
-fall in repeated episodes across multiple years. Status is derived by
+The dataset is the species whose observations **recur** in the regions BirdView covers: a
+species is in scope when, in at least one of them, its records fall in repeated episodes across
+multiple years.
+
+**Those regions are BirdView's own list, not the ABA Area**, and the two are not the same.
+[`region`](../internal/region/region.go) holds 51 US states and the District of Columbia, 13
+Canadian provinces and territories, 5 US Minor Outlying Islands, and 5 stretches of open sea.
+The ABA Area additionally includes **St-Pierre et Miquelon**, for which BirdView has no region;
+BirdView additionally covers **Johnston Atoll, Palmyra Atoll, Wake Island and Navassa Island**,
+which lie well outside it.
+
+Calling the union "the ABA Area" was therefore wrong in both directions, and wrong in a second
+way: it attributes BirdView's geography to the authority [CR-028](decisions.md#cr-028) removed
+it from. Nothing in the product names that boundary now — the page says *across every region*,
+which describes itself. Status is derived by
 [`birdview-status`](../cmd/birdview-status) and committed to
 [`data/status.tsv`](../data/status.tsv); `established` and `rare` are in scope, `vagrant` and
 `absent` are not. See [CR-028](decisions.md#cr-028).
@@ -269,7 +281,7 @@ no longer describes it.
 
 **Six species belong to no region, and that is structural.** Bermuda Petrel, Desertas Petrel,
 Trindade Petrel, Townsend's Storm-Petrel, Craveri's Murrelet and Guadalupe Murrelet are seen at
-sea, where no land polygon reaches — Bermuda Petrel has 384 records in the ABA Area and **zero**
+sea, where no land polygon reaches — Bermuda Petrel has 384 records offshore and **zero**
 in any GADM region. They are not errors and must not be filtered away silently; a pelagic bird is
 still a bird a reader may want.
 
@@ -553,7 +565,7 @@ One toggle switches the whole interface between:
 
 **Every** displayed number honors it — tile footers, section headers and the detail view alike.
 
-Rationale: the ABA Area audience is predominantly US; the toggle serves Canadian users and anyone
+Rationale: the audience is predominantly US; the toggle serves Canadian users and anyone
 who thinks in centimeters. Ounces below one are shown to two decimals, because a 3 g hummingbird
 and a 12 g kinglet both round to 0.1 oz otherwise, erasing the distinction at exactly the size
 where the app is trying to make it.
@@ -693,12 +705,12 @@ Goals: G-001, G-002
 Every species says what share of the bird records in view it accounts for, as **one in N**.
 
 **On the index the scope is the regions currently selected**, so the figure follows the filter:
-a Gyrfalcon is 1 in 3,631,056 bird records across the ABA Area and 1 in 82,946 in Alaska. That
+a Gyrfalcon is 1 in 3,631,056 bird records across every region and 1 in 82,946 in Alaska. That
 is the question a filtered page poses — *of what people record where I am looking, how much is
 this bird* — and it is why the index does not instead show where in North America the bird
 peaks. Narrowing to Arizona and being told about Yukon answers something nobody asked.
 
-**On the detail page the scope is the whole ABA Area**, and the page also names the region where
+**On the detail page the scope is every region at once**, and the page also names the one where
 the species peaks, with the records on both sides of the ratio. One bird has no filter to
 follow, and where it is commonest is worth knowing once you are looking at it.
 

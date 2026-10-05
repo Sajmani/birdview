@@ -7,8 +7,10 @@ tail, and a wing crossbar — at one shared scale, so you can *see* the differen
 reading it off a number and trying to imagine it.
 
 It covers **1083 species across 99 families and 27 orders**: every bird whose records **recur**
-in the ABA Area — repeated episodes across years, in at least one region — by a rule BirdView
-derives and owns.
+in the regions it covers — repeated episodes across years, in at least one region — by a rule
+BirdView derives and owns. Those regions are the US states, the Canadian provinces, five US
+outlying islands and five stretches of open sea; they are BirdView's own list and not the ABA
+Area, which includes St-Pierre et Miquelon and excludes four of the islands.
 
 The diagrams are deliberately abstract. They are a **top-down view of a bird in flight**, and they
 carry only what the data supports: no plumage, no posture, no shape the sources cannot justify.

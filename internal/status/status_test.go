@@ -193,7 +193,8 @@ func TestRepeatedDatesCollapse(t *testing.T) {
 //
 // GBIF carries museum specimens under their collection dates, so recurrence
 // alone cannot tell an extinct species from a resident. Passenger Pigeon has
-// 237 records on 213 distinct dates in the ABA Area, every one of them
+// 237 records on 213 distinct dates across the regions BirdView covers,
+// every one of them
 // between 1802 and 1902 -- 89 episodes across 52 years, which clears every
 // bar in this package.
 //

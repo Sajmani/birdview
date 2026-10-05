@@ -193,8 +193,11 @@ covers contributors' work and not the taxonomy we take an identifier from.
 
 ## Scope
 
-**1083 species**: every bird whose records recur in the ABA Area, by BirdView’s own rule — not
-by anyone else’s checklist. A species is in when, in at least one region, its observations fall
+**1083 species**: every bird whose records recur in the regions BirdView covers, by its own
+rule — not by anyone else’s checklist. Those regions are 51 US states and DC, 13 Canadian
+provinces and territories, 5 US outlying islands and 5 stretches of open sea. **They are not
+the ABA Area**: that includes St-Pierre et Miquelon, which BirdView has no region for, and
+excludes Johnston, Palmyra, Wake and Navassa, which BirdView covers. A species is in when, in at least one region, its observations fall
 in repeated episodes across years. Nine more are kept by hand because the open record cannot
 speak for them, each named with its reason.
 
@@ -246,7 +249,7 @@ Canadian records for Cooper's Hawk, which is a bird that exists.
 
 **Six species belong to no region, and that is not an error.** Bermuda Petrel, Desertas Petrel,
 Trindade Petrel, Townsend's Storm-Petrel, Craveri's Murrelet and Guadalupe Murrelet are seen at
-sea, where no land polygon reaches. Bermuda Petrel has hundreds of records in the ABA Area and
+sea, where no land polygon reaches. Bermuda Petrel has hundreds of records offshore and
 none inside any GADM region. They are given ocean regions instead, and their detail pages show
 no Regions row rather than a row claiming a rule placed them nowhere.
 
@@ -285,12 +288,12 @@ years. The 2023 flamingo has 931 records inside thirteen days; Akikiki, a Hawaii
 Each bird says what share of the bird records in view it accounts for, as **one in N**.
 
 **On the index the scope is whatever regions you have selected**, so the figure follows your
-filter. A Gyrfalcon is 1 in 3,631,056 bird records across the ABA Area and 1 in 82,946 in
+filter. A Gyrfalcon is 1 in 3,631,056 bird records across every region and 1 in 82,946 in
 Alaska — forty-four times commoner where it actually lives. Select a region the bird is absent
 from and its share falls, because those records join the denominator and none join the
 numerator; a bird is a smaller part of a wider world.
 
-**On the detail page** the scope is the whole ABA Area, and the page also names the region where
+**On the detail page** the scope is every region at once, and the page also names the one where
 the species peaks: *Commonest in Yukon — 1 in 250 records there.*
 
 ### Share, not record count

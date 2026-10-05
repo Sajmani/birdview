@@ -4,7 +4,7 @@
 // states, Canadian provinces and the outlying islands — identified by GADM's
 // own id and labeled with the standard postal abbreviation. **Marine** regions
 // are BirdView's own, and exist because six species belong to no land region
-// at all: Bermuda Petrel has 384 records in the ABA Area and zero inside any
+// at all: Bermuda Petrel has 384 records offshore and zero inside any
 // land polygon (P-011).
 //
 // Zones group regions, two ways (P-013). **Common birds** is derived by

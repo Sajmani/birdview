@@ -7,7 +7,7 @@
 //
 // Two sources, because one is not enough:
 //
-//   - eBird, for depth: 1.24 billion records across the ABA Area.
+//   - eBird, for depth: 1.24 billion records across the US and Canada.
 //   - iNaturalist, because eBird's export WITHHOLDS conservation-sensitive
 //     species entirely. Spotted Owl, Gyrfalcon, Northern Hawk Owl and the
 //     critically endangered Hawaiian endemics have zero eBird records and

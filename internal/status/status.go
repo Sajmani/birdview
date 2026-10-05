@@ -185,7 +185,7 @@ func Rank(s Status) int {
 }
 
 // Best returns the strongest status among a species' regions, which is what
-// decides scope: a bird resident anywhere in the ABA Area is in scope, even
+// decides scope: a bird resident in any region BirdView covers is in scope, even
 // where it is a vagrant everywhere else. An American Flamingo is a vagrant in
 // Pennsylvania and a resident in Florida, and belongs in the dataset.
 func Best(ss []Status) Status {

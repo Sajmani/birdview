@@ -94,7 +94,8 @@ var AviListRenames = map[string]string{
 }
 
 // LumpedInto maps a name the OCCURRENCE DATA publishes onto the AviList
-// species whose birds those records actually are, in the ABA Area.
+// species whose birds those records actually are, in the regions BirdView
+// covers.
 //
 // eBird has not followed these splits and files everything under the older
 // name; iNaturalist has, and files everything under the newer one. The two

@@ -169,10 +169,11 @@ var Declared = map[string]string{
 		"open record for the same reason",
 	"Hydrobates socorroensis": "Townsend's Storm-Petrel: breeds on Mexican islands and is seen " +
 		"off California; the open record carries no dated ABA-area occurrence",
-	"Pterodroma cahow": "Bermuda Petrel: breeds on Bermuda, which is in the ABA Area and " +
-		"outside the US/CA country filter the derivation runs under",
-	"Pterodroma deserta": "Desertas Petrel: ranges into ABA-area waters from a Madeiran " +
-		"breeding colony, outside the country filter",
+	"Pterodroma cahow": "Bermuda Petrel: breeds on Bermuda and ranges into waters " +
+		"BirdView covers, but Bermuda is outside the US/CA country filter the " +
+		"derivation runs under, so the open record holds nothing for it here",
+	"Pterodroma deserta": "Desertas Petrel: ranges into waters BirdView covers from a " +
+		"Madeiran breeding colony, which is outside the country filter",
 	"Pelagodroma marina": "White-faced Storm-Petrel: a pelagic the derivation sees in one " +
 		"episode because almost nobody is on the water where it is",
 	"Pterodroma cervicalis": "White-necked Petrel: the same, two episodes",
