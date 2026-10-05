@@ -93,6 +93,42 @@ var AviListRenames = map[string]string{
 	"Pica nuttalli":              "Pica nuttallii",
 }
 
+// LumpedInto maps a name the OCCURRENCE DATA publishes onto the AviList
+// species whose birds those records actually are, in the ABA Area.
+//
+// eBird has not followed these splits and files everything under the older
+// name; iNaturalist has, and files everything under the newer one. The two
+// databases disagree completely rather than partially -- eBird holds **zero**
+// records under `Numenius hudsonicus` and iNaturalist **zero** under `Gygis
+// alba` -- so these are not two populations. They are one set of birds
+// recorded twice under two labels.
+//
+// eBird is the deeper and better-curated source and supplies the evidence;
+// AviList supplies the names (CR-022). This table is where the two meet, and
+// it does for lumps what AviListRenames does for genus moves.
+//
+// **Why these two and not every lump.** Both names here are also the AVONET
+// donor for the species BirdView carries -- see NearMatches -- so admitting
+// them as species of their own would draw the same bird twice, with byte-
+// identical length and mass, while implying there are two. That is not extra
+// information; it reads as a bug. Where both halves have measurements of
+// their own, both are kept.
+//
+// **Setophaga petechia is deliberately absent.** eBird's ABA-area records
+// under it are overwhelmingly Setophaga aestiva, but Mangrove Yellow Warbler
+// is a species BirdView carries with an AVONET row of its own, so merging
+// would delete a real bird. The misattribution does not change either one's
+// scope -- both clear the bar on their own records -- so it is recorded and
+// left alone rather than fixed by guesswork. The same holds for Trogon:
+// BirdView carries elegans, AviList splits ambiguus off it, and both would
+// have their own measurements.
+//
+// Verifies: P-001.
+var LumpedInto = map[string]string{
+	"Numenius phaeopus": "Numenius hudsonicus",
+	"Gygis alba":        "Gygis candida",
+}
+
 // NotInAviList lists species AviList does not recognize at all, because it
 // lumps them into a taxon BirdView already carries. They are DROPPED from the
 // dataset rather than kept under an ABA name (CR-022).

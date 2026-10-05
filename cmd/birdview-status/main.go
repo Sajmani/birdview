@@ -42,6 +42,7 @@ import (
 	"birdview/internal/gbif"
 	"birdview/internal/region"
 	"birdview/internal/status"
+	"birdview/internal/taxonomy"
 )
 
 // iNatDatasetKey is the iNaturalist research-grade observations dataset.
@@ -148,7 +149,7 @@ func main() {
 		log.Printf("birdview-status: pass 1 done, %d names, cached to %s", len(counts), *cache)
 	}
 
-	counts = toBinomials(counts)
+	counts = prepare(counts)
 	names := make([]string, 0, len(counts))
 	for n := range counts {
 		names = append(names, n)
@@ -368,6 +369,43 @@ func main() {
 	}
 }
 
+// prepare turns the raw verbatim facet into the species the run classifies.
+//
+// One function rather than two calls at the point of use, so a test can
+// exercise what main actually runs. The first version of the lump test called
+// mergeLumps directly and passed happily with the call removed from main --
+// it verified the function and not the pipeline, which is the shape of a
+// check that tests nothing.
+func prepare(in map[string]map[string]int64) map[string]map[string]int64 {
+	return mergeLumps(toBinomials(in))
+}
+
+// mergeLumps folds a name the occurrence data publishes into the AviList
+// species whose birds those records are (taxonomy.LumpedInto).
+//
+// Without it the run admits both halves of a lump as separate species. eBird
+// holds 556,569 records under Numenius phaeopus and none under hudsonicus;
+// iNaturalist holds 17,923 under hudsonicus and nine under phaeopus. Merged,
+// that is one Whimbrel. Left apart it is two -- and because the lump name is
+// also hudsonicus's AVONET donor, the two would draw identically.
+func mergeLumps(in map[string]map[string]int64) map[string]map[string]int64 {
+	for lump, into := range taxonomy.LumpedInto {
+		l, i := strings.ToLower(lump), strings.ToLower(into)
+		regions, ok := in[l]
+		if !ok {
+			continue
+		}
+		if in[i] == nil {
+			in[i] = map[string]int64{}
+		}
+		for gid, n := range regions {
+			in[i][gid] += n
+		}
+		delete(in, l)
+	}
+	return in
+}
+
 // toBinomials reduces the verbatim facet to species.
 //
 // iNaturalist publishes each identification at the rank the observer reached,
@@ -424,17 +462,39 @@ type cacheRec struct {
 func datesOf(ctx context.Context, c *gbif.Client, p pair) (map[string]int64, bool, error) {
 	all := map[string]int64{}
 	var trunc bool
-	for _, ds := range []string{gbif.EBirdDatasetKey, iNatDatasetKey} {
-		dates, _, t, err := c.DatesIn(ctx, ds, p.gid, p.name)
-		if err != nil {
-			return nil, false, fmt.Errorf("dates for %q in %s: %w", p.name, p.gid, err)
+	for _, name := range gbifNames(p.name) {
+		for _, ds := range []string{gbif.EBirdDatasetKey, iNatDatasetKey} {
+			dates, _, t, err := c.DatesIn(ctx, ds, p.gid, name)
+			if err != nil {
+				return nil, false, fmt.Errorf("dates for %q in %s: %w", name, p.gid, err)
+			}
+			for d, k := range dates {
+				all[d] += k
+			}
+			trunc = trunc || t
 		}
-		for d, k := range dates {
-			all[d] += k
-		}
-		trunc = trunc || t
 	}
 	return all, trunc, nil
+}
+
+// gbifNames lists every name the occurrence data files this species under:
+// its own, plus any lump the databases still publish it as.
+//
+// Merging the pass-1 counts is not enough on its own, and the first attempt
+// did only that. It changed which regions were queried and left pass 2
+// asking GBIF for "numenius hudsonicus" -- a name eBird holds **zero**
+// records under -- so the merged species came back with iNaturalist's 169
+// and none of eBird's half-million. The records exist only under the lump,
+// and can only be fetched under it.
+func gbifNames(species string) []string {
+	out := []string{species}
+	for lump, into := range taxonomy.LumpedInto {
+		if strings.EqualFold(into, species) {
+			out = append(out, strings.ToLower(lump))
+		}
+	}
+	sort.Strings(out) // stable, so a rerun matches
+	return out
 }
 
 // measure turns one region's cached dates into a Shape.

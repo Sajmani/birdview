@@ -2064,13 +2064,28 @@ three pairs as separate species:
 | `Gygis alba` | 2,481 | `Gygis candida` | 22 |
 | `Setophaga petechia` | 243,939 | `Setophaga aestiva` | 116 |
 
-A table written from this would list Whimbrel twice. Two of the three are unambiguous —
-`Numenius phaeopus` and `Gygis alba` name birds BirdView does not carry, so the lump name is
-suppressed and its records credited to the other half. **`Setophaga petechia` is not**: Mangrove
-Yellow Warbler is a species BirdView carries in its own right, so the name must stay while its
-ABA-area eBird records are overwhelmingly the other bird's. Crediting them wholesale would
-overstate aestiva; leaving them overstates petechia. That one needs a decision before
-`data/status.tsv` is committed.
+A table written from this would list Whimbrel twice. **Resolved 2026-10-04** on two stated
+principles: extra species beat omission, and eBird is the more authoritative source.
+
+Those settle it once separated. eBird is authoritative for **evidence** — it is eighty times
+deeper and better curated — while AviList is already the authority for **names** (CR-022). So
+eBird's records are credited to the AviList name whose birds they are, which is what
+`AviListRenames` does for genus moves; `taxonomy.LumpedInto` now does it for lumps.
+
+"Extra beats omission" holds everywhere except where the extra is the **same drawing twice**.
+`Numenius phaeopus` and `Gygis alba` are the AVONET donors for the halves BirdView carries, so
+admitting them adds two entries with byte-identical length and mass — no information, and it
+reads as a bug. They are merged away. `Setophaga petechia` is **not**: Mangrove Yellow Warbler
+is carried with an AVONET row of its own, and both halves clear the bar on their own records, so
+the misattribution changes no outcome and is recorded rather than guessed at. Trogon is the same
+shape.
+
+**Merging the counts was not enough**, and the first attempt did only that. It changed which
+regions were queried and left pass 2 asking GBIF for `numenius hudsonicus`, a name eBird holds
+**zero** records under, so the merged species came back with iNaturalist's 169 and none of
+eBird's half-million. The dates exist only under the lump and must be fetched under it. With
+both names queried, Whimbrel reads 82 episodes across 40 years on 25,961 records where it read
+37 and 169.
 
 ### Settled on approval
 
