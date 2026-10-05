@@ -685,41 +685,52 @@ Length never switches unit, so only mass is affected. The decimal places within 
 vary by value — a 3 g hummingbird is `0.11 oz` and one decimal would erase the differences
 among the smallest birds — because that is precision, not a second scale.
 
-### P-074 — Each bird says where it is the biggest part of what people see
-Subject: `presentation.commonest`
-Value: `peak share of a region's bird records, as one-in-N`
+### P-074 — Each bird says how much of what people record it is
+Subject: `presentation.share`
+Value: `species records over all bird records, for the scope in view`
 Goals: G-001, G-002
 
-Every species names the region where it makes up the **largest share of the bird records that
-region holds**, and how large: *Commonest in Yukon — 1 in 250 records there.* It appears on the
-tile and, with the evidence behind it, on the detail page.
+Every species says what share of the bird records in view it accounts for, as **one in N**.
 
-**Share, not record count.** The two disagree for 564 of 1,081 species, and a count says only
-where the birdwatchers are: California holds 35× the Sharp-shinned Hawk records of Yukon and
-118× the birdwatching, so the hawk is 1 record in 250 in Yukon and 1 in 835 in California.
-Dividing by the region's own total cancels out how hard anyone was looking — the same
-normalization that stops an escaped Budgerigar outranking an American Robin. The Millerbird
-decides it: by count its home reads *Hawaii*, by share it reads Nihoa, the island it lives on.
+**On the index the scope is the regions currently selected**, so the figure follows the filter:
+a Gyrfalcon is 1 in 3,631,056 bird records across the ABA Area and 1 in 82,946 in Alaska. That
+is the question a filtered page poses — *of what people record where I am looking, how much is
+this bird* — and it is why the index does not instead show where in North America the bird
+peaks. Narrowing to Arizona and being told about Yukon answers something nobody asked.
+
+**On the detail page the scope is the whole ABA Area**, and the page also names the region where
+the species peaks, with the records on both sides of the ratio. One bird has no filter to
+follow, and where it is commonest is worth knowing once you are looking at it.
+
+**Share, not record count.** A count says where the birdwatchers are: California holds 35× the
+Sharp-shinned Hawk records of Yukon and 118× the birdwatching, so the hawk is 1 in 250 there
+and 1 in 835 in California. Dividing by the region's own total cancels out how hard anyone was
+looking — the same normalization that stops an escaped Budgerigar outranking an American Robin.
 
 **One in N, not a percentage.** The share runs from 1 in 2 to 1 in 117 million; as percentages
 that is 50% to 0.000001%, and the bottom quarter of the dataset rounds to nothing readable.
 
-**Both numbers are kept, not the ratio.** The detail page gives the species' records and the
-region's total, so a share resting on nine records says so. That is deliberate: the alternative
-is a minimum-evidence cutoff, and 50 of 1,083 species have a peak region below ten records.
+**Selecting a region a bird is absent from lowers its share**, because that region's records
+join the denominator and none join the numerator. That is correct rather than a rounding
+artifact: a bird is a smaller part of a wider world.
 
-Rationale: a reader asking "how rare is this bird" has had no answer at all. This is the
+Rationale: a reader asking "how common is this bird" has had no answer at all. This is the
 closest honest one open data supports — it measures how often a bird is **reported** relative
 to other birds reported in the same place, which is not abundance. Two distortions are known
 and uncorrected: species eBird withholds look rarer than they are, and a bird that draws a
 crowd is over-reported against a quiet resident. [`docs/data.md`](../docs/data.md) says both.
 
-**It is not a rarity tag and must not become one.** No threshold divides common from rare here;
-the number is shown and the reader judges. Vagrancy stays a status ([P-070](#p-070)), because
-the metric that would express it does not work: the share of a species' records falling in one
+**It is not a rarity tag and must not become one.** No threshold divides common from rare; the
+number is shown and the reader judges. Vagrancy stays a status ([P-070](#p-070)), because the
+metric that would express it does not work: the share of a species' records falling in one
 arrival reads 73% for the Hawaiian peafowl and 75% for the 2023 Florida flamingo irruption, and
 61% of per-region date facets are truncated, so any episode-derived number would be a floor for
 most of the dataset rather than a count.
+
+**Nothing is precomputed per selection, and nothing needs to be.** The figure is a ratio of two
+sums over the regions in view, and sums compose from their parts, so 69 regions do not imply
+2^69 subaggregates — the per-region counts already are the subaggregate, and any selection is
+one pass over them.
 
 ### P-035 — The page explains itself
 Subject: `presentation.help`

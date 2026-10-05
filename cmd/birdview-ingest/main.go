@@ -453,14 +453,25 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 		return 0, err
 	}
 	defer f.Close()
-	table, err := region.LoadPresence(f)
+	table, totals, err := region.LoadPresence(f)
 	if err != nil {
 		return 0, err
 	}
+	ds.RegionTotals = totals
 	var n int
 	for i := range ds.Species {
 		rs := table[ds.Species[i].ScientificName]
-		ds.Species[i].Regions = rs
+		// Ids and counts travel as parallel slices rather than as a map:
+		// the ids were already a list and every consumer walks them in
+		// order, where a map would repeat each key as a JSON string across
+		// 27,646 entries. TestRegionCountsLineUp pins the two lengths.
+		ids := make([]string, len(rs))
+		counts := make([]int64, len(rs))
+		for j, r := range rs {
+			ids[j], counts[j] = r.ID, r.Records
+		}
+		ds.Species[i].Regions = ids
+		ds.Species[i].RegionCounts = counts
 		if len(rs) > 0 {
 			n++
 		}

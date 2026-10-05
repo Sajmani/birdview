@@ -21,6 +21,7 @@ const (
 	foxFile    = "../../wingspan_fox2026_AppendixS1.xlsx"
 	avlFile    = "../../AviList-v2025b-10Jun2026-extended.xlsx"
 	inatFile   = "../../data/inat-taxa.tsv"
+	regFile    = "../../data/region-presence.tsv"
 )
 
 // built caches the compiled dataset across tests: the AVONET workbook is 21 MB
@@ -39,6 +40,14 @@ func load(t *testing.T) *dataset.Dataset {
 	ds, _, err := build(statusFile, avoFile, foxFile, avlFile)
 	if err != nil {
 		t.Fatalf("build: %v", err)
+	}
+	// main() applies these after build() -- both are enhancements it warns
+	// about rather than dies on -- so a test loading only build() sees a
+	// dataset no reader ever gets. Composed here the same way, and fatal
+	// here because a test silently checking an unregioned dataset proves
+	// nothing about the one that ships.
+	if _, err := applyRegions(ds, regFile); err != nil {
+		t.Fatalf("applyRegions: %v", err)
 	}
 	built = ds
 	return ds
@@ -466,5 +475,59 @@ func TestINatTableMatchesTheDataset(t *testing.T) {
 		t.Errorf("%d of %d species have no iNaturalist link; coverage must be total. "+
 			"Re-run cmd/birdview-inatmap, and if any still fail, diagnose why before "+
 			"accepting the gap: %v", len(missing), len(ds.Species), missing)
+	}
+}
+
+// Region ids and their record counts travel as parallel slices, so the
+// invariant that they line up has to be asserted rather than assumed.
+//
+// A map would make this impossible to get wrong and was rejected for size:
+// it repeats each region id as a JSON string across 27,646 entries. That
+// trade is only sound if the pairing is checked.
+//
+// Watched fail: appending one extra count in applyRegions reports the
+// mismatch and names the species.
+//
+// Verifies: P-074. Criterion: AC-096.
+func TestRegionCountsLineUp(t *testing.T) {
+	ds := load(t)
+	var withCounts int
+	for _, sp := range ds.Species {
+		if len(sp.Regions) != len(sp.RegionCounts) {
+			t.Errorf("%s has %d regions and %d counts", sp.ScientificName,
+				len(sp.Regions), len(sp.RegionCounts))
+		}
+		for i, n := range sp.RegionCounts {
+			if n <= 0 {
+				t.Errorf("%s is listed in %s with %d records; presence means it was "+
+					"reported there", sp.ScientificName, sp.Regions[i], n)
+			}
+		}
+		if len(sp.RegionCounts) > 0 {
+			withCounts++
+		}
+	}
+	if withCounts == 0 {
+		t.Fatal("no species carries region counts; the share cannot be computed and " +
+			"this test is checking nothing")
+	}
+
+	// Every region a species is placed in must have a total to divide by,
+	// or its share is silently uncomputable.
+	if len(ds.RegionTotals) == 0 {
+		t.Fatal("the dataset carries no region totals")
+	}
+	for _, sp := range ds.Species {
+		for i, id := range sp.Regions {
+			total, ok := ds.RegionTotals[id]
+			if !ok {
+				t.Errorf("%s is in %s, which has no total", sp.ScientificName, id)
+				continue
+			}
+			if sp.RegionCounts[i] > total {
+				t.Errorf("%s has %d records in %s, more than the %d the region holds",
+					sp.ScientificName, sp.RegionCounts[i], id, total)
+			}
+		}
 	}
 }

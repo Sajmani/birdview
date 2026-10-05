@@ -1788,11 +1788,14 @@ walk of every anchored citation the site emits
 differ for 564 of 1,081 species. Both halves of the ratio reach the dataset, so the detail page
 can show the evidence a thin share rests on.
 
-**Assertions, the tile:** the share line renders on **every** tile, including the species with
-no commonest region, because a line that appears on some tiles and not others makes those tiles
-shorter and takes the whole flex row out of step. The footer stays one line
-([P-031](product.md#p-031)) — a fourth cell there wrapped it, which is why the share has its
-own line.
+**Assertions, the tile:** the share **follows the region filter** — the same bird reads
+differently under `?region=AK` than across everything, and narrowing to where it is densest
+raises its share. Region ids and their counts travel as parallel slices, so their lengths are
+pinned, no count exceeds its region's total, and every region a species is placed in has a
+total to divide by. The line renders on **every** tile, em dash and all, because a line that
+appears on some tiles and not others makes those tiles shorter and takes the whole flex row out
+of step. The footer stays one line ([P-031](product.md#p-031)) — a fourth cell there wrapped it,
+which is why the share has its own line.
 
 **Assertions, the citation:** every `#fragment` the site emits resolves to a heading in the
 document it points at. This is the assertion that matters most, and it did not exist: the
@@ -1804,7 +1807,9 @@ in the bundle, which `spec/check/refs.py` validates in the *markdown*, rendered 
 `#p-001--scope-is-the-aba-area-avifauna-that-recurs-by-birdviews-own-measure` and landed every
 reader at the top of the document. Headings opening with a requirement id now anchor on the id.
 
-**Status: verified 2026-10-05 — passing, and watched failing** by removing the heading-id
+**Status: verified 2026-10-05 — passing, and watched failing** by ignoring the region filter in
+`shareOf`, which makes the Alaska and everywhere figures identical; by appending one extra count
+in `applyRegions`, which desyncs the parallel slices; by removing the heading-id
 transformer, which reports `#p-001` and `#cr-022` dangling, and by renaming the `Commonest`
 heading in `docs/data.md`. The rename needed the fixture to carry a commonest region first:
 without it no citation rendered and the check passed over nothing, which is the same vacuous

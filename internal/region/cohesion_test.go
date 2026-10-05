@@ -19,17 +19,17 @@ func regionSpecies(t *testing.T) map[string]map[string]bool {
 		t.Fatalf("opening the presence table: %v", err)
 	}
 	defer f.Close()
-	p, err := LoadPresence(f)
+	p, _, err := LoadPresence(f)
 	if err != nil {
 		t.Fatalf("reading the presence table: %v", err)
 	}
 	out := map[string]map[string]bool{}
-	for sp, ids := range p {
-		for _, id := range ids {
-			if out[id] == nil {
-				out[id] = map[string]bool{}
+	for sp, reported := range p {
+		for _, r := range reported {
+			if out[r.ID] == nil {
+				out[r.ID] = map[string]bool{}
 			}
-			out[id][sp] = true
+			out[r.ID][sp] = true
 		}
 	}
 	return out

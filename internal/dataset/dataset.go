@@ -164,6 +164,15 @@ type Species struct {
 	// anywhere, which the region filter must not silently swallow.
 	Regions []string `json:"regions,omitempty"`
 
+	// RegionCounts is how many records put the species in each of Regions,
+	// in the same order and of the same length.
+	//
+	// Parallel to Regions rather than a map: the ids were already a list,
+	// every consumer walks them in order, and a map would repeat each key as
+	// a JSON string across 27,646 entries. The invariant that the two line
+	// up is asserted, not assumed.
+	RegionCounts []int64 `json:"regionCounts,omitempty"`
+
 	// Commonest is where this species makes up the biggest SHARE of the bird
 	// records a region holds, with both halves of the ratio kept (P-074).
 	//
@@ -250,6 +259,12 @@ type Family struct {
 
 // Dataset is the whole compiled output.
 type Dataset struct {
+	// RegionTotals is every bird record a region holds, over every species
+	// including those BirdView does not draw. It is the denominator when a
+	// page says what share of the birds recorded in the regions on screen
+	// are one species (P-074).
+	RegionTotals map[string]int64 `json:"regionTotals,omitempty"`
+
 	// SourceVersions pins what this build was made from, so a served dataset
 	// can be traced back to its inputs (G-004).
 	SourceVersions map[string]string `json:"sourceVersions"`

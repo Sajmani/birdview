@@ -142,8 +142,13 @@ func main() {
 
 	// regionsOf maps a species' lowercased scientific name to the regions it
 	// was reported in.
-	regionsOf := map[string][]string{}
+	regionsOf := map[string][]region.Reported{}
 	names := map[string]string{}
+	// Every bird record a region holds, over every species including the
+	// ones BirdView does not draw. This is the denominator of the share a
+	// page shows (P-074): dividing by all the birds the same observers saw
+	// in the same place is what cancels out how hard they were looking.
+	totals := map[string]int64{}
 	for _, r := range results {
 		if r.err != nil {
 			log.Fatalf("birdview-regions: %s: %v", r.gid, r.err)
@@ -153,9 +158,13 @@ func main() {
 			continue
 		}
 		names[r.gid] = r.name
+		for _, n := range r.counts {
+			totals[r.gid] += n
+		}
 		for _, sp := range ds {
-			if r.present[strings.ToLower(sp)] {
-				regionsOf[sp] = append(regionsOf[sp], r.gid)
+			if lc := strings.ToLower(sp); r.present[lc] {
+				regionsOf[sp] = append(regionsOf[sp], region.Reported{
+					ID: r.gid, Records: r.counts[lc]})
 			}
 		}
 	}
@@ -207,7 +216,10 @@ func main() {
 				log.Fatalf("birdview-regions: %s in %s: %v", sp, id, err)
 			}
 			if n > 0 {
-				regionsOf[sp] = append(regionsOf[sp], id)
+				// A sea region's own total is the sum of what is found
+				// there, as a land region's is.
+				regionsOf[sp] = append(regionsOf[sp], region.Reported{ID: id, Records: n})
+				totals[id] += n
 			}
 		}
 	}
@@ -224,7 +236,7 @@ func main() {
 	}
 	log.Printf("birdview-regions: %d of %d species placed in at least one region", placed, len(ds))
 
-	if err := write(*outPath, ds, regionsOf, names); err != nil {
+	if err := write(*outPath, ds, regionsOf, names, totals); err != nil {
 		log.Fatalf("birdview-regions: %v", err)
 	}
 	log.Printf("birdview-regions: wrote %s", *outPath)
@@ -252,7 +264,8 @@ func loadSpecies(path string) ([]string, error) {
 	return out, nil
 }
 
-func write(path string, species []string, regionsOf map[string][]string, names map[string]string) error {
+func write(path string, species []string, regionsOf map[string][]region.Reported,
+	names map[string]string, totals map[string]int64) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
@@ -269,11 +282,23 @@ func write(path string, species []string, regionsOf map[string][]string, names m
 	for _, g := range gids {
 		fmt.Fprintf(&b, "#region\t%s\t%s\n", g, names[g])
 	}
-	fmt.Fprintf(&b, "#\n# scientific name\tregion ids, comma separated\n")
+	// A region's own total, over every bird recorded there. Written as data
+	// rather than as another comment: it is the denominator of the share
+	// pages show, and a number a reader depends on should not live in a line
+	// the parser skips.
+	fmt.Fprintf(&b, "#\n# total\tregion id\tevery bird record there\n")
+	for _, g := range gids {
+		fmt.Fprintf(&b, "total\t%s\t%d\n", g, totals[g])
+	}
+	fmt.Fprintf(&b, "#\n# scientific name\tregion:records, comma separated\n")
 	for _, sp := range species {
 		rs := regionsOf[sp]
-		sort.Strings(rs)
-		fmt.Fprintf(&b, "%s\t%s\n", sp, strings.Join(rs, ","))
+		sort.Slice(rs, func(i, j int) bool { return rs[i].ID < rs[j].ID })
+		parts := make([]string, len(rs))
+		for i, r := range rs {
+			parts[i] = fmt.Sprintf("%s:%d", r.ID, r.Records)
+		}
+		fmt.Fprintf(&b, "%s\t%s\n", sp, strings.Join(parts, ","))
 	}
 	return os.WriteFile(path, []byte(b.String()), 0o644)
 }

@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -424,15 +425,31 @@ func LandIDs() []string {
 }
 
 // Presence is the per-species region table built by cmd/birdview-regions:
-// scientific name to the regions that species was reported in.
-type Presence map[string][]string
+// scientific name to the regions that species was reported in, with how many
+// records put it there.
+type Presence map[string][]Reported
+
+// Reported is one region a species was reported in, and its record count
+// there. The count is what lets a page say what share of the birds recorded
+// in the regions on screen are this one (P-074).
+type Reported struct {
+	ID      string
+	Records int64
+}
+
+// Totals is every bird record a region holds, over every species including
+// the ones BirdView does not draw. It is the denominator of that share: a
+// species' records divided by all the birds seen in the same place by the
+// same observers, which is what cancels out how hard anyone was looking.
+type Totals map[string]int64
 
 // LoadPresence reads the generated table. Comment lines carry the region
 // names for a human reading the file and are not parsed back -- the names
 // live in this package, and reading them from the data would let the two
 // disagree without anything noticing.
-func LoadPresence(r io.Reader) (Presence, error) {
+func LoadPresence(r io.Reader) (Presence, Totals, error) {
 	out := Presence{}
+	totals := Totals{}
 	sc := bufio.NewScanner(r)
 	sc.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 	line := 0
@@ -442,22 +459,54 @@ func LoadPresence(r io.Reader) (Presence, error) {
 		if t == "" || strings.HasPrefix(t, "#") {
 			continue
 		}
-		name, ids, ok := strings.Cut(t, "\t")
+		name, rest, ok := strings.Cut(t, "\t")
 		if !ok {
-			return nil, fmt.Errorf("region presence line %d: no tab", line)
+			return nil, nil, fmt.Errorf("region presence line %d: no tab", line)
 		}
-		if ids == "" {
+		// A "total" row carries a region's own count, over every bird
+		// recorded there. No species name collides: they are binomials.
+		if name == "total" {
+			gid, n, ok := strings.Cut(rest, "\t")
+			if !ok {
+				return nil, nil, fmt.Errorf("region presence line %d: total row needs a region and a count", line)
+			}
+			v, err := strconv.ParseInt(strings.TrimSpace(n), 10, 64)
+			if err != nil {
+				return nil, nil, fmt.Errorf("region presence line %d: %w", line, err)
+			}
+			if _, known := Get(gid); !known {
+				return nil, nil, fmt.Errorf("region presence line %d: %q is in no region table entry", line, gid)
+			}
+			totals[gid] = v
+			continue
+		}
+		if rest == "" {
 			out[name] = nil
 			continue
 		}
-		var rs []string
-		for _, id := range strings.Split(ids, ",") {
-			if _, known := Get(id); !known {
-				return nil, fmt.Errorf("region presence line %d: %q is in no region table entry", line, id)
+		var rs []Reported
+		for _, pair := range strings.Split(rest, ",") {
+			id, n, ok := strings.Cut(pair, ":")
+			if !ok {
+				return nil, nil, fmt.Errorf("region presence line %d: %q is not region:records", line, pair)
 			}
-			rs = append(rs, id)
+			if _, known := Get(id); !known {
+				return nil, nil, fmt.Errorf("region presence line %d: %q is in no region table entry", line, id)
+			}
+			v, err := strconv.ParseInt(n, 10, 64)
+			if err != nil {
+				return nil, nil, fmt.Errorf("region presence line %d: %w", line, err)
+			}
+			rs = append(rs, Reported{ID: id, Records: v})
 		}
 		out[name] = rs
 	}
-	return out, sc.Err()
+	if err := sc.Err(); err != nil {
+		return nil, nil, err
+	}
+	if len(totals) == 0 {
+		return nil, nil, fmt.Errorf("region presence has no total rows; the share of a " +
+			"region's records cannot be computed without its denominator")
+	}
+	return out, totals, nil
 }

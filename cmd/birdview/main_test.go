@@ -144,8 +144,19 @@ func testDataset() *dataset.Dataset {
 		"blasti": {Region: "USA.5_1", Records: 90, RegionRecords: 1000000},
 		"thimur": {Region: "USA.2_1", Records: 5000, RegionRecords: 6055121},
 	}
+	// Records per region, parallel to Regions, and the regions' own totals.
+	// Uneven on purpose: the robin is dense in Ontario and thin in
+	// California, so narrowing the filter to Ontario must raise its share.
+	countsOf := map[string][]int64{
+		"annhum": {4000, 900},
+		"amerob": {9000, 21000, 73005},
+		"amecro": {1200, 40000},
+		"blasti": {90},
+		"thimur": {5000, 300},
+	}
 	for i := range sp {
 		sp[i].Regions = regionsOf[sp[i].ID]
+		sp[i].RegionCounts = countsOf[sp[i].ID]
 		sp[i].Commonest = commonestOf[sp[i].ID]
 	}
 	// One assignment of each non-published origin, so the fixture exercises
@@ -198,7 +209,14 @@ func testDataset() *dataset.Dataset {
 			OrderCommon: orders[sp[i].Family] + " (group)",
 		})
 	}
-	return &dataset.Dataset{Families: fams, Species: sp}
+	// Every bird record each region holds, over all species. The denominator
+	// of the share a tile shows: dividing by what the same observers saw in
+	// the same place is what cancels out how hard they were looking.
+	totals := map[string]int64{
+		"USA.5_1": 1000000, "USA.38_1": 200000, "USA.39_1": 480000,
+		"CAN.9_1": 1817968, "USA.2_1": 6055121, "SEA.PAC": 90000,
+	}
+	return &dataset.Dataset{Families: fams, Species: sp, RegionTotals: totals}
 }
 
 // fixtureCounts reports how many species, families and orders testDataset
@@ -4302,4 +4320,62 @@ func TestCitedAnchorsResolve(t *testing.T) {
 	if checked == 0 {
 		t.Error("no anchored citations found; this test is checking nothing")
 	}
+}
+
+// The share on a tile is the share of what the regions ON SCREEN record,
+// and it must move when the selection moves.
+//
+// This replaced a fixed "commonest in Yukon" line, which answered a
+// question a filtered index does not pose: narrow to Arizona and be told
+// about Yukon. The figure is now a ratio of two sums over the selection,
+// which is also why nothing is precomputed -- sums compose, so 69 regions
+// do not imply 2^69 subaggregates.
+//
+// Watched fail: ignoring opt.Regions in shareOf and always summing every
+// region makes the one-region and all-region shares identical.
+//
+// Verifies: P-074. Criterion: AC-096.
+func TestTileShareFollowsTheRegionFilter(t *testing.T) {
+	s := newTestServer(t)
+
+	// The fixture robin: 73,005 records in Ontario of 1,817,968 there.
+	oneIn := func(path, bird string) string {
+		_, body := get(t, s, path)
+		i := strings.Index(body, ">"+bird)
+		if i < 0 {
+			t.Fatalf("%s: %s is not on the page", path, bird)
+		}
+		seg := body[i:]
+		if j := strings.Index(seg, "</div></a>"); j > 0 {
+			seg = seg[:j]
+		}
+		m := regexp.MustCompile(`<b>1 in ([\d,]+)</b>`).FindStringSubmatch(seg)
+		if m == nil {
+			t.Fatalf("%s: no share on %s's tile", path, bird)
+		}
+		return m[1]
+	}
+
+	all := oneIn("/", "American Robin")
+	ontario := oneIn("/?region=ON", "American Robin")
+	if all == ontario {
+		t.Errorf("the robin's share is %q both across every region and in Ontario "+
+			"alone; the figure is not following the filter", all)
+	}
+	// Ontario is where the fixture robin is densest, so narrowing to it must
+	// make the bird a LARGER share -- a smaller "1 in N".
+	a, o := atoiComma(t, all), atoiComma(t, ontario)
+	if o >= a {
+		t.Errorf("robin is 1 in %d across everything and 1 in %d in Ontario alone; "+
+			"narrowing to where it is densest must raise its share", a, o)
+	}
+}
+
+func atoiComma(t *testing.T, s string) int {
+	t.Helper()
+	n, err := strconv.Atoi(strings.ReplaceAll(s, ",", ""))
+	if err != nil {
+		t.Fatalf("not a number: %q", s)
+	}
+	return n
 }

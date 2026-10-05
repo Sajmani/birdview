@@ -280,12 +280,22 @@ years. The 2023 flamingo has 931 records inside thirteen days; Akikiki, a Hawaii
 376 across forty-five years and is unmistakably the resident of the two. That is
 [CR-028](../spec/decisions.md#cr-028), in progress.
 
-## Commonest
+## How common a bird is
 
-Each bird names the region where it makes up the **biggest share of what gets recorded** there,
-and how big that share is: *Commonest in Yukon — 1 in 250 records there.*
+Each bird says what share of the bird records in view it accounts for, as **one in N**.
 
-**Share, not record count, and the two disagree for more than half the dataset.** California
+**On the index the scope is whatever regions you have selected**, so the figure follows your
+filter. A Gyrfalcon is 1 in 3,631,056 bird records across the ABA Area and 1 in 82,946 in
+Alaska — forty-four times commoner where it actually lives. Select a region the bird is absent
+from and its share falls, because those records join the denominator and none join the
+numerator; a bird is a smaller part of a wider world.
+
+**On the detail page** the scope is the whole ABA Area, and the page also names the region where
+the species peaks: *Commonest in Yukon — 1 in 250 records there.*
+
+### Share, not record count
+
+**The two disagree for more than half the dataset.** California
 holds 35 times the Sharp-shinned Hawk records of Yukon — and 118 times the birdwatching. One
 bird record in 250 from Yukon is a Sharp-shinned Hawk; in California it is one in 835. The hawk
 is a bigger part of what you see in Yukon, even though far more have been logged in California.
