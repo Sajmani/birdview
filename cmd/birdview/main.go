@@ -1851,6 +1851,34 @@ var funcs = template.FuncMap{
 	"sub":  func(a, b float64) float64 { return a - b },
 	"div":  func(a, b float64) float64 { return a / b },
 	"list": func(v ...string) []string { return v },
+	// whynot explains, in a tooltip, why a value is not this bird's own
+	// measurement. The three footer cells used to say "estimated" for
+	// anything not measured, which is false for a near-match and said so
+	// right beside a stroke P-065 draws SOLID because it IS a measurement.
+	"whynot": whyNotMeasured,
+}
+
+// whyNotMeasured turns a provenance into a short tooltip.
+//
+// It names the donor for a near-match, because that is the fact a reader can
+// act on: two tiles showing an identical mass are not a coincidence when one
+// of them borrowed it from the other, and nothing else on the index says so.
+//
+// Verifies: P-062, P-065.
+func whyNotMeasured(p dataset.Provenance) string {
+	switch p.Kind {
+	case dataset.NearMatch:
+		if p.SourceTaxon != "" {
+			return "measured, but on " + p.SourceTaxon + " \u2014 not this species"
+		}
+		return "measured on a related species, not this one"
+	case dataset.Modeled:
+		if p.Model != "" {
+			return "estimated: " + p.Model
+		}
+		return "estimated"
+	}
+	return "estimated"
 }
 
 // traitRow is one option of a categorical control: its label, AVONET's

@@ -425,10 +425,18 @@
   {{template "diagram" .}}
   <div class="ft">
     {{/* Named in full, not L/W/M: the initials cost every reader who has not
-         yet learned them, and the three fit a tile at full width (P-031). */}}
-    <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>Length {{.Length}}</span>
-    <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>Wingspan {{.Wing}}</span>
-    <span{{if ne .S.Mass.Prov.Kind "measured"}} class="est" title="estimated"{{end}}>Mass {{.MassStr}}</span>
+         yet learned them, and the three fit a tile at full width (P-031).
+
+         `whynot` supplies the tooltip. All three used to say "estimated" for
+         anything not measured, which was false for a near-match: that is a
+         real measurement with callipers, of a sibling taxon, and P-065 draws
+         it SOLID for exactly that reason. The footer calling it an estimate
+         contradicted the stroke beside it, and named no reason a reader
+         could act on -- the Chihuahuan Meadowlark's mass is the Eastern
+         Meadowlark's, which is worth saying out loud. */}}
+    <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="{{whynot .S.TotalLength.Prov}}"{{end}}>Length {{.Length}}</span>
+    <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="{{whynot .S.Wingspan.Prov}}"{{end}}>Wingspan {{.Wing}}</span>
+    <span{{if ne .S.Mass.Prov.Kind "measured"}} class="est" title="{{whynot .S.Mass.Prov}}"{{end}}>Mass {{.MassStr}}</span>
   </div>
 </a>
 {{if .PickURL}}<a class="pick{{if .Picked}} on{{end}}" href="{{.PickURL}}"

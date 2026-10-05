@@ -4166,3 +4166,40 @@ func TestNoSectionMixesMassUnits(t *testing.T) {
 		}
 	}
 }
+
+// A near-match is a measurement, of the wrong bird. The tile must say that
+// rather than call it an estimate.
+//
+// All three footer cells used to carry title="estimated" for anything not
+// measured, which is false for a near-match and contradicted the stroke
+// beside it: P-065 draws near-match SOLID precisely because callipers
+// touched a real bird. It also told the reader nothing they could act on --
+// the Chihuahuan Meadowlark and the Eastern Meadowlark render identical
+// length, wingspan and mass, and the only thing on the index distinguishing
+// them was one tilde labelled with the wrong reason.
+//
+// Watched fail: returning "estimated" from whyNotMeasured for NearMatch
+// reports the donor missing.
+//
+// Verifies: P-062, P-065. Criterion: AC-057.
+func TestNearMatchTooltipNamesTheDonor(t *testing.T) {
+	near := dataset.Provenance{Kind: dataset.NearMatch, SourceTaxon: "Sturnella magna"}
+	got := whyNotMeasured(near)
+	if !strings.Contains(got, "Sturnella magna") {
+		t.Errorf("near-match tooltip = %q, want it to name the donor: two tiles showing "+
+			"an identical mass are not a coincidence when one borrowed it", got)
+	}
+	if strings.HasPrefix(got, "estimated") {
+		t.Errorf("near-match tooltip = %q, but a near-match is measured, with callipers, "+
+			"on a sibling taxon (P-065 draws it solid for that reason)", got)
+	}
+	// A modeled value is still an estimate, and still says so.
+	mod := dataset.Provenance{Kind: dataset.Modeled, Model: "cranium modeled as 7.5 x mass^(1/3)"}
+	if m := whyNotMeasured(mod); !strings.HasPrefix(m, "estimated") {
+		t.Errorf("modeled tooltip = %q, want it to lead with estimated", m)
+	}
+	// A near-match with no donor recorded must not claim one.
+	if m := whyNotMeasured(dataset.Provenance{Kind: dataset.NearMatch}); strings.Contains(m, "Sturnella") {
+		t.Errorf("a near-match with no source taxon invented one: %q", m)
+	}
+}
