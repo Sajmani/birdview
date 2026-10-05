@@ -2328,12 +2328,74 @@ four are 95–100% at sea with real marine records. The reason as written states
 that was never made; **at minimum the wording is wrong**, and whether those species would clear
 the bar on their own is unknown until a box form of the date facet exists. Tracked below.
 
+### Experiment — is there a distance from shore that cleans up the boxes?
+
+*Run 2026-10-05 against live GBIF, at the owner's request, to see whether the seas could be
+tightened enough to carry a share after all.* **They can, and the instrument is not distance.**
+
+**Distance from shore is not expressible in GBIF, and does not need to be.** A record on land
+carries a GADM country; a record on water carries none. `facet=gadmLevel0Gid` therefore splits
+any query into on-land and off-land, and the split is exactly the coastline — sharper than any
+buffer we could declare, and it needs no coastline dataset. It is also **free**: the facet
+response carries the unfiltered `count` alongside the facet rows, so one request yields both
+halves. Adopting this costs **zero extra requests**.
+
+**There is no gradient to tune.** Longitude bands at 35–40°N, walking east from the coast:
+
+| band | km out | records | off land | top species |
+| --- | --- | --- | --- | --- |
+| −75.5 to −75 | 0–44 | 13,135,500 | 6.0% | Northern Cardinal, American Robin, Canada Goose |
+| −75 to −74 | 44–133 | 13,707,437 | 4.9% | American Herring Gull, Northern Cardinal, Mourning Dove |
+| **−74 to −73** | **133–222** | **42,227** | **100.0%** | **Wilson's Storm-Petrel, Great Shearwater, Audubon's Shearwater** |
+| −73 to −71 | 222–400 | 33,047 | 100.0% | the same four tubenoses |
+| −71 to −67 | 400–756 | 12,921 | 100.0% | the same |
+| −67 to −60 | 756–1,378 | 154 | 100.0% | the same |
+
+The bands measure longitude, not true distance — the 44–133 band still holds New York City,
+which is why it is 4.9% off land. That is the finding: composition does not taper with
+distance, it **flips between the band that contains coastline and the band that does not**.
+A declared distance threshold would have nothing to interpolate between.
+
+**The honest denominator, per sea:**
+
+| sea | box | on land | off land | today's figure |
+| --- | --- | --- | --- | --- |
+| North Atlantic | 413,188,208 | 400,201,694 | **12,986,514** (3.1%) | 429,535 |
+| North Pacific | 233,491,816 | 222,883,645 | **10,608,171** (4.5%) | 1,596,171 |
+| Gulf of Mexico | 111,327,757 | 107,876,458 | **3,451,299** (3.1%) | 24,897 |
+
+So the correction is **about 30×**, not the 962× quoted earlier against the whole box — the
+whole box was never the right denominator either.
+
+**What the rule reattributes**, as a share of each species' Atlantic-box records that sit on
+land: Audubon's Shearwater 0.4%, Black-capped Petrel 1.0%, Cory's Shearwater 11.6%, Wilson's
+Storm-Petrel 14.7%, Great Shearwater 20.2%, **Atlantic Puffin 53.2%, Northern Gannet 66.8%**.
+The spread looks alarming and is not a loss: a gannet seen from a Massachusetts beach belongs
+to Massachusetts, and keeps that record there. Even the gannet retains 142,000 records at sea.
+
+**The residual is estuaries, not shore.** Water inside a bay has no GADM country either —
+Chesapeake Bay reads 8.8% off land, Pamlico Sound 8.5%, Long Island Sound 4.1%. Those three
+contribute on the order of 400,000 records against the Atlantic's 12.99 million, so the rule
+delivers *on water* rather than *at sea*, overstating by roughly 3%. GBIF does accept a WKT
+`geometry` polygon and combines it with facets (verified), so carving the open ocean by hand
+is available later — but it chases a 3% effect against a 30× one, and the boxes are declared
+approximations already.
+
+**Consequence: [P-074](product.md#p-074) could get its share back at sea.** "Of the records on
+water in this box, how much is this bird" is a real quantity, comparable in kind to the land
+figure and computable for free. That would reverse the part of option A that declines a marine
+share — and would need a CR of its own, a regenerated `region-presence.tsv`, and a decision on
+whether "on water" may be labelled with an ocean's name. Tracked below; nothing is changed on
+the strength of this experiment alone.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
 
 | Item | Owner | Gate |
 | --- | --- | --- |
+| **Restore the share at sea on an off-land denominator** — [CR-030's experiment](#experiment--is-there-a-distance-from-shore-that-cleans-up-the-boxes) found the instrument. A record on land carries a GADM country and a record on water carries none, so `facet=gadmLevel0Gid` splits any query at the coastline exactly, and the facet response carries the unfiltered count beside the facet rows — so it costs **zero extra requests**. The honest denominators are 12,986,514 for the North Atlantic, 10,608,171 for the North Pacific and 3,451,299 for the Gulf, about 30× today's. This would reverse the half of option A that declines a marine share. Needs its own CR, a regenerated `region-presence.tsv`, and a decision on whether *on water* may be labelled with an ocean's name — it still includes estuaries, by roughly 3% | Sameer | next, if the share at sea is wanted back |
+| ~~**Is there a distance from shore that tightens the marine boxes?**~~ — **answered 2026-10-05**, no: distance is the wrong instrument and there is no gradient to tune. Composition does not taper offshore, it flips between the band holding coastline and the band that does not — 4.9% off land and Northern Cardinal at one step, 100% off land and pure tubenoses at the next. GADM membership does the job exactly and for free. Written up under [CR-030](#cr-030) | Sameer | closed 2026-10-05 |
 | **Decide how a marine region's share is defined, or that it has none** — [CR-030](#cr-030). The index inflates every marine share by 15–4,472× because a sea's denominator sums only the pelagic species, where a land region's counts every bird. Option A (presence at sea, no share) is recommended and costs almost nothing; option B costs a regenerated `region-presence.tsv` and `status.tsv` plus a coordinate-box form of the `eventDate` facet. **Until this lands the index is wrong for any marine selection** | Sameer | next — it is live and misleading |
 | ~~**Reword the four pelagic exceptions in [P-071](product.md#p-071)**~~ — **done 2026-10-05** with [CR-030](#cr-030). They said the derivation sees these birds rarely "because almost nobody is on the water where it is", which stated a measurement nobody made: the recurrence test runs on `gadmGid`, GBIF has no `gadmGid` for open ocean, and `DatesIn` has no coordinate-box form, so pass 2 has never asked the water anything. Each now says the records are at sea *where the test cannot yet look*, and names what the derivation does see on land. **The exceptions stand** — whether these species would clear the bar unaided remains unknown, and that is now what the table says | Sameer | closed 2026-10-05 |
 | **Give the recurrence test a coordinate-box form, and find out whether the pelagics clear the bar on their own.** `DatesIn` filters by `gadmGid`; GBIF assigns none to open ocean, so no pelagic's at-sea records have ever been tested for recurrence. Four [P-071](product.md#p-071) exceptions exist in that blind spot, and [CR-028](#cr-028)'s claim that recurrence is insensitive to observer effort has never been tested where observers are scarcest. The `eventDate` facet does accept a lat/lon box — probed 2026-10-05 — so the client method is small; the cost is a re-run of `birdview-status` against live GBIF. Note the boxes overlap the coast ([CR-030](#cr-030)), so a naive run would count shore records as sea | Sameer | opportunistic; it could retire hand-declared exceptions |
