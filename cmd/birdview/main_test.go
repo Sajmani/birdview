@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"encoding/xml"
 	"fmt"
 	"html"
+	"io"
 	"math"
 	"net/http"
 	"net/http/httptest"
@@ -5016,5 +5019,112 @@ func TestInterfaceNeverSaysShare(t *testing.T) {
 	}
 	if checked < 11 {
 		t.Fatalf("only %d pages fetched", checked)
+	}
+}
+
+// TestResponsesCompressWhenAsked asserts T-026, which exists for one reason:
+// the index inlines an SVG per species and is megabytes of markup, and egress
+// is the only axis of a serverless deployment that costs real money.
+//
+// Verifies: T-026. Criterion: AC-101.
+func TestResponsesCompressWhenAsked(t *testing.T) {
+	s := newTestServer(t)
+	fetch := func(path string, gzipOK bool) (*http.Response, []byte) {
+		t.Helper()
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		if gzipOK {
+			req.Header.Set("Accept-Encoding", "gzip")
+		}
+		w := httptest.NewRecorder()
+		s.ServeHTTP(w, req)
+		res := w.Result()
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("%s: %v", path, err)
+		}
+		return res, body
+	}
+
+	for _, path := range []string{"/", "/species/greblu", "/static/styles.css", "/docs/data"} {
+		plainRes, plain := fetch(path, false)
+		gzRes, packed := fetch(path, true)
+
+		// Vary on BOTH, or a cache that stored the uncompressed reply would
+		// go on serving it to clients that asked for gzip -- and worse, the
+		// reverse, handing a gzip stream to a client that cannot read one.
+		for _, res := range []*http.Response{plainRes, gzRes} {
+			if v := res.Header.Get("Vary"); !strings.Contains(v, "Accept-Encoding") {
+				t.Errorf("%s: Vary is %q, missing Accept-Encoding", path, v)
+			}
+		}
+		if enc := plainRes.Header.Get("Content-Encoding"); enc != "" {
+			t.Errorf("%s: compressed for a client that did not ask (%q)", path, enc)
+		}
+		if enc := gzRes.Header.Get("Content-Encoding"); enc != "gzip" {
+			t.Errorf("%s: Content-Encoding %q, want gzip", path, enc)
+			continue
+		}
+		// Content-Length describing the uncompressed body would make the
+		// response unreadable; it must be gone, not merely wrong.
+		if cl := gzRes.Header.Get("Content-Length"); cl != "" && cl != strconv.Itoa(len(packed)) {
+			t.Errorf("%s: Content-Length %s against %d bytes sent", path, cl, len(packed))
+		}
+
+		zr, err := gzip.NewReader(bytes.NewReader(packed))
+		if err != nil {
+			t.Errorf("%s: body is not a gzip stream: %v", path, err)
+			continue
+		}
+		got, err := io.ReadAll(zr)
+		if err != nil {
+			t.Errorf("%s: truncated gzip stream: %v", path, err)
+			continue
+		}
+		if !bytes.Equal(got, plain) {
+			t.Errorf("%s: decompressed body differs from the plain one (%d vs %d bytes)",
+				path, len(got), len(plain))
+		}
+		// Logged, not asserted at a figure read off a run. The floor is loose
+		// on purpose: what must not regress is that compression happens at
+		// all, and markup this repetitive cannot fail to halve.
+		saved := 100 - 100*float64(len(packed))/float64(len(plain))
+		if saved < 50 {
+			t.Errorf("%s: only %.0f%% saved (%d -> %d); markup this repetitive should "+
+				"compress far better, so something is not being compressed",
+				path, saved, len(plain), len(packed))
+		}
+		t.Logf("%-20s %8d -> %7d bytes, %.0f%% saved", path, len(plain), len(packed), saved)
+	}
+
+	// A status code set before the body must survive the wrapper, and the
+	// body must still be readable: P-075's page is a 404 WITH content, which
+	// is exactly the shape a careless wrapper turns into an empty reply.
+	res, packed := fetch("/species/paspig", true)
+	if res.StatusCode != http.StatusNotFound {
+		t.Errorf("undrawn species: status %d through the compressor, want 404", res.StatusCode)
+	}
+	// The header, asserted BEFORE the body. A handler that calls WriteHeader
+	// itself commits the header map before the first Write, so a compressor
+	// that labels from Write sends a gzip body with no Content-Encoding and
+	// the browser renders binary. Reading the body with gzip.NewReader does
+	// not catch that -- the stream is valid, it is simply unannounced -- so
+	// checking the body first would pass over exactly this bug. It did.
+	if enc := res.Header.Get("Content-Encoding"); enc != "gzip" {
+		t.Errorf("the 404 page is compressed but labelled %q; a browser would "+
+			"render the gzip stream as binary", enc)
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(packed))
+	if err != nil {
+		t.Fatalf("404 body is not a gzip stream: %v", err)
+	}
+	body, _ := io.ReadAll(zr)
+	if !strings.Contains(string(body), "Passenger Pigeon") {
+		t.Error("the 404 page lost its body through the compressor")
+	}
+
+	// A status that may carry no body must not carry a gzip header either.
+	plainRes, _ := fetch("/", false)
+	if plainRes.Header.Get("Content-Encoding") != "" {
+		t.Error("an unasked-for response is labelled compressed")
 	}
 }

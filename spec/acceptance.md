@@ -1990,3 +1990,39 @@ returns every administrative level at once — a record in Virginia counted unde
 `USA.47_1` and `USA.47_13` alike — and measured against the real API the Atlantic box's rows
 summed to 1,175,397,927 against the 413,188,208 it holds. Without the guard that is a negative
 off-land count, silently stored.
+
+### AC-101 — Responses compress, and say that they did
+**Verifies:** [T-026](tech.md#t-026) · **Level:** code · **Method:** handler test over a page,
+a detail view, a static file and a served document
+
+**Assertions:**
+
+1. With `Accept-Encoding: gzip`, the response carries `Content-Encoding: gzip` and the body is
+   a valid gzip stream that decompresses **byte-for-byte** to the uncompressed response.
+2. Without it, no `Content-Encoding` and the plain body.
+3. `Vary: Accept-Encoding` on **both**.
+4. No `Content-Length` describing the uncompressed body survives.
+5. A [P-075](product.md#p-075) 404 keeps its status **and** its `Content-Encoding`.
+6. Each page saves at least 50%, with the real figure logged rather than asserted.
+
+**The header is asserted before the body, and that order is the criterion.** Reading the body
+with `gzip.NewReader` does not catch an unlabelled response — the stream is perfectly valid,
+it is simply unannounced — so a check that looks at the body first passes over the exact bug
+this was written during. It did: the first version of the middleware set `Content-Encoding`
+from `Write`, which is too late for any handler that calls `WriteHeader` itself, and the
+static files and all 328 undrawn-species pages went out as compressed bodies labelled as HTML.
+Confirmed live before the fix: `HTTP/1.1 404`, no `Content-Encoding`, `file` reporting
+`gzip compressed data`.
+
+**Why 50% and not a measured figure.** What must not regress is that compression happens;
+pinning 94% would fail the first time a template gained a paragraph. The measured savings are
+logged on every run — 94% for the index, 70% for a detail page, 67% for the stylesheet, 62%
+for a served document.
+
+**Status: verified 2026-10-05 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| label from `Write` rather than `WriteHeader` — the shipped bug | `Content-Encoding "", want gzip` on three of four pages |
+| compress regardless of `Accept-Encoding` | `compressed for a client that did not ask` |
+| drop the `Vary` header | `Vary is "", missing Accept-Encoding` |

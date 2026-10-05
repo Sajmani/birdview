@@ -9,10 +9,12 @@
 package main
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"html/template"
+	"io"
 	"io/fs"
 	"log"
 	"math"
@@ -24,6 +26,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"bytes"
@@ -244,7 +247,103 @@ func (s *server) groupFamilies(r *http.Request, selected map[string]bool, rows [
 	return out
 }
 
-func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) { s.mux.ServeHTTP(w, r) }
+func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	compressed(s.mux).ServeHTTP(w, r)
+}
+
+// gzipPool reuses compressors. A gzip.Writer carries a ~64 KiB window and a
+// hash table, so allocating one per request is the kind of garbage a server
+// should not make.
+var gzipPool = sync.Pool{New: func() any { return gzip.NewWriter(io.Discard) }}
+
+// gzipResponse compresses what a handler writes.
+//
+// The headers are decided in WriteHeader, not at the first Write, and that
+// ordering is the whole of the type. Setting Content-Encoding from Write is
+// too late for any handler that calls WriteHeader itself -- the header map is
+// already committed -- so the body goes out compressed and unlabelled, and a
+// browser renders binary. Both of BirdView's static files and every page of
+// P-075's 404 did exactly that in the first version of this.
+type gzipResponse struct {
+	http.ResponseWriter
+	gz *gzip.Writer
+	// on is false for a status that may not carry a body, where emitting a
+	// gzip stream would be a protocol error rather than a saving.
+	on      bool
+	started bool
+}
+
+func (g *gzipResponse) start(code int) {
+	if g.started {
+		return
+	}
+	g.started = true
+	// 204 and 304 carry no body. Compressing nothing would produce the
+	// twenty-byte header of an empty gzip stream where the protocol says
+	// there must be no bytes at all.
+	if code == http.StatusNoContent || code == http.StatusNotModified {
+		g.ResponseWriter.WriteHeader(code)
+		return
+	}
+	g.on = true
+	// Content-Length describes the uncompressed body and is now a lie.
+	// Deleted rather than corrected: the compressed length is not known
+	// until the stream closes, and Go will chunk happily without it.
+	g.Header().Del("Content-Length")
+	g.Header().Set("Content-Encoding", "gzip")
+	g.ResponseWriter.WriteHeader(code)
+}
+
+func (g *gzipResponse) WriteHeader(code int) { g.start(code) }
+
+func (g *gzipResponse) Write(b []byte) (int, error) {
+	g.start(http.StatusOK)
+	if !g.on {
+		return g.ResponseWriter.Write(b)
+	}
+	return g.gz.Write(b)
+}
+
+func (g *gzipResponse) Flush() {
+	if g.on {
+		g.gz.Flush()
+	}
+	if f, ok := g.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
+// compressed gzips a response when the client asks for it (T-026).
+//
+// Worth doing here and not left to a CDN, because the pages are enormous and
+// the saving is on the one axis that costs money to serve. The index inlines
+// an SVG diagram per species -- 3.3 MB of markup for 1,083 birds -- and
+// compresses to 270 KB, a 92% saving. Against Cloud Run's 1 GiB of free
+// monthly egress that is the difference between about 320 index loads and
+// about 3,980.
+//
+// Vary is set on every response, not only compressed ones: a cache that
+// stored the uncompressed reply without it would go on serving that reply to
+// clients that asked for gzip, and worse, the reverse.
+func compressed(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Vary", "Accept-Encoding")
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			h.ServeHTTP(w, r)
+			return
+		}
+		gz := gzipPool.Get().(*gzip.Writer)
+		defer gzipPool.Put(gz)
+		gz.Reset(w)
+		g := &gzipResponse{ResponseWriter: w, gz: gz}
+		h.ServeHTTP(g, r)
+		if g.on {
+			// Close only a stream that was opened. Closing an unused writer
+			// emits a gzip header for a body nobody wrote.
+			gz.Close()
+		}
+	})
+}
 
 // assetFS is where templates and static files are read from.
 //

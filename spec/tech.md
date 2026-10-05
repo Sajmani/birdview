@@ -297,3 +297,34 @@ blocked.
 **This extends to addresses that are not ours.** The source manifest recorded a source owner's
 mailbox, which the served spec then republished to every visitor. A provenance record names who
 owns a source; it does not need to hand out their mail.
+
+### T-026 — Responses are compressed when the client asks
+Subject: `http.content_encoding`
+Value: `gzip on Accept-Encoding, Vary on every response`
+Goals: G-001, G-004
+
+Every response is gzipped when the request carries `Accept-Encoding: gzip`, and every response
+carries `Vary: Accept-Encoding` whether or not it was compressed.
+
+Rationale: the index inlines a full SVG diagram for each of 1,083 species, which is **3.3 MB of
+markup compressing to 270 KB — a 92% saving**. Nothing else BirdView could do moves a number
+that far. It matters beyond politeness because egress is the one axis of a serverless
+deployment that bills: against 1 GiB of free monthly transfer, this is the difference between
+about **320 index loads and about 3,980**.
+
+**Done in the application, not left to a CDN or a load balancer**, because the saving should
+not depend on which of several deployment shapes is chosen, and because the shape is not chosen
+yet.
+
+**`Vary` goes on uncompressed responses too.** Without it a cache that stored the plain reply
+would serve it to clients asking for gzip, and — the damaging direction — hand a gzip stream to
+a client that cannot read one.
+
+**The headers are decided at `WriteHeader`, not at the first `Write`.** Any handler that sets a
+status itself has already committed the header map by the time a byte is written, so a
+compressor that labels from `Write` emits a correctly compressed body with no
+`Content-Encoding` and the browser renders binary. Both static files and every
+[P-075](product.md#p-075) 404 shipped that way in the first draft of this.
+
+**A status that may carry no body — 204, 304 — is not compressed at all**, an empty gzip
+stream's twenty-byte header being bytes the protocol says must not be there.
