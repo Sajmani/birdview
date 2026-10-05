@@ -2205,7 +2205,7 @@ most of them onto strictly more evidence; **no species changed status, and scope
 **Subject:** `presentation.share`, `dataset.region.totals`
 **Kind:** Derived / emergent — [P-074](product.md#p-074) and [P-011](product.md#p-011) are each
 satisfiable alone; the defect is in a ratio computed across both
-**Date:** 2026-10-05 · **Decided by:** open — this record states the finding and the options
+**Date:** 2026-10-05 · **Decided by:** Sameer — **option A**, and no commonest sea
 **Found by:** the owner, reading `/species/yenalb2?region=NorthAtlantic` against
 `/?region=NorthAtlantic` and noticing the two pages disagreed about where the bird is commonest
 
@@ -2286,8 +2286,37 @@ region that is not really a region, and that P-074 already refuses to publish a 
 cannot stand behind. A pelagic's detail page can still say *recorded in the North Atlantic*
 without claiming a ratio.
 
-If A is taken, (b) stops being a defect and becomes a definition — but `RegionTotals` must then
-stop carrying marine entries at all, so no caller can divide by one.
+### Decision — A, and no commonest sea
+
+**A.** The share is over land regions, and the pages say so. `RegionTotals` stops carrying
+marine entries at all, so no caller can divide by one, and `shareIn` skips any region the
+totals have no entry for — which keeps the numerator and the denominator over one set of
+regions **by construction** rather than by two matching conditions that can drift apart. The
+detail page's row is relabelled **Commonest land region**.
+
+The cost is accepted and should be stated: a pelagic's index share is now computed from its
+land records alone, so a Black-capped Petrel — 13,262 of its 13,601 records inside the Atlantic
+box — reads as the vanishingly rare land bird it is. That is true as far as it goes, and this
+project prefers a true narrow number to a wide one it cannot defend.
+
+**No commonest sea.** This was asked and is rejected on a measurement. The boxes **overlap**
+the land regions rather than abutting them: all 6 of the Black-capped Petrel's North Carolina
+records fall inside the Atlantic box, confirmed against GBIF on 2026-10-05. A coastal record is
+a marine record. For a true pelagic the contamination is negligible — 6 in 13,262 here — but
+the Pacific box spans −150° to −115° and so contains most of coastal California, and the
+Atlantic box the entire eastern seaboard. For anything short of a true pelagic, "commonest
+sea" would name the coast the bird is watched from, which the land regions already say without
+ambiguity.
+
+The tempting middle — rank a bird's own marine records across the five seas, which needs no
+cross-species denominator and so escapes defect (b) — fails on the same overlap. The boxes are
+mutually disjoint, so sea-versus-sea ranking is safe from *each other*; it is not safe from the
+coasts inside them, and a bird common on one shore would be ranked into the ocean beside it.
+The metric would be sound only for a subset a reader cannot identify from the page.
+
+**39 of the 55 species with marine records occur in two or more seas**, so this does decline a
+real answer rather than a redundant one. It is declined anyway, because the answer would be
+right for the 25 species that are ≥90% at sea and quietly wrong for the 29 that are not.
 
 ### Not yet established
 
@@ -2306,7 +2335,8 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | Item | Owner | Gate |
 | --- | --- | --- |
 | **Decide how a marine region's share is defined, or that it has none** — [CR-030](#cr-030). The index inflates every marine share by 15–4,472× because a sea's denominator sums only the pelagic species, where a land region's counts every bird. Option A (presence at sea, no share) is recommended and costs almost nothing; option B costs a regenerated `region-presence.tsv` and `status.tsv` plus a coordinate-box form of the `eventDate` facet. **Until this lands the index is wrong for any marine selection** | Sameer | next — it is live and misleading |
-| **Reword the four pelagic exceptions in [P-071](product.md#p-071).** White-faced Storm-Petrel, White-necked Petrel, Trindade Petrel and Townsend's Storm-Petrel are declared in scope because the derivation "sees [them] in one episode because almost nobody is on the water where it is". All four are 95–100% at sea with real marine records, and the recurrence test has never queried the water: `DatesIn` takes a `gadmGid` and there is no box form. The stated reason asserts a measurement nobody made. Whether they would clear the bar unaided is **unknown**, so the exceptions stand — only the reason is wrong | Sameer | with CR-030 |
+| ~~**Reword the four pelagic exceptions in [P-071](product.md#p-071)**~~ — **done 2026-10-05** with [CR-030](#cr-030). They said the derivation sees these birds rarely "because almost nobody is on the water where it is", which stated a measurement nobody made: the recurrence test runs on `gadmGid`, GBIF has no `gadmGid` for open ocean, and `DatesIn` has no coordinate-box form, so pass 2 has never asked the water anything. Each now says the records are at sea *where the test cannot yet look*, and names what the derivation does see on land. **The exceptions stand** — whether these species would clear the bar unaided remains unknown, and that is now what the table says | Sameer | closed 2026-10-05 |
+| **Give the recurrence test a coordinate-box form, and find out whether the pelagics clear the bar on their own.** `DatesIn` filters by `gadmGid`; GBIF assigns none to open ocean, so no pelagic's at-sea records have ever been tested for recurrence. Four [P-071](product.md#p-071) exceptions exist in that blind spot, and [CR-028](#cr-028)'s claim that recurrence is insensitive to observer effort has never been tested where observers are scarcest. The `eventDate` facet does accept a lat/lon box — probed 2026-10-05 — so the client method is small; the cost is a re-run of `birdview-status` against live GBIF. Note the boxes overlap the coast ([CR-030](#cr-030)), so a naive run would count shore records as sea | Sameer | opportunistic; it could retire hand-declared exceptions |
 | **Assert that `Commonest` is the largest share.** Nothing does. The server fixture hardcodes `commonestOf` and every test renders it back, so [P-074](product.md#p-074)'s central claim has never met data — which is why [CR-030](#cr-030)(a) shipped. The check belongs over the real dataset, as [AC-098](acceptance.md#ac-098)'s id-collision half is | — | with CR-030 |
 | **Region membership counts records, so a one-off vagrant can outscore a resident.** [P-011](product.md#p-011)'s 1-ppm rule is anti-correlated with what it measures: the more surprising a bird, the bigger the crowd, the more records. **Two examples are in the data as shipped** — American Flamingo in Pennsylvania (931 records, one pond, thirteen days, post-Idalia) and **Lucy's Warbler, a Sonoran desert bird, in Virginia** (53 records, one location, six days). **Three candidate remedies have been tried and all three fail; they are recorded so the next attempt does not repeat them.** *(1) Records in ≥2 of 3 four-year windows* — Lucy's Warbler walks through it, present 2016-12-31 to 2017-01-06, so one continuous event straddles a window boundary and scores 2/3. *(2) A threshold on distinct places* — cannot work at any value: Akohekohe, a Hawaiian endemic, has 4 places and Wood Stork in Nova Scotia, a vagrant, has 7. A critically endangered endemic with four records and a vagrant with four records are the same shape. *(3) Local abundance against continental abundance* — Flamingo/PA scores 1.61, above several birds that must be kept, because flamingos are rare everywhere so the baseline is tiny. A composite — drop if ≥20 records **and** (≤2 places **or** ≤1 year) — keeps every endemic and withheld species correctly and catches Lucy's and the flamingo, but still misses Wood Stork/NS, Spoonbill/ME, Fork-tailed Flycatcher/DE and Baltimore Oriole/NT. **Measurement caveat for whoever resumes**: these figures came from one GBIF page of ≤300 records, which is a *contiguous slice in GBIF's own ordering, not a random sample* — all 300 American Robin records for Pennsylvania fell in January 2024, and a page-derived year count read 1 where the true count is 60. Any real rule must take both signals from facets over all records, which raises the cost. Costs a regenerated `data/region-presence.tsv` and dataset. **Knock-on: the "Common birds" zones were clustered *from* that table ([CR-023](#cr-023)), so they must be re-derived rather than left as a stale snapshot.** Documented for readers meanwhile under [Regions](../docs/data.md) | Sameer | deferred 2026-10-04; before anyone reads a region list as a range map |
 | Group families by **what is seen together**: crawl eBird checklists and cluster families by co-occurrence, as a third grouping ([CR-025](#cr-025)). This is the honest version of the habitat idea — co-occurrence is natively a *family*-level property, so nothing is averaged and nothing is misfiled. Two findings make it tractable, both measured 2026-10-03: GBIF's eBird export carries **no `eventID`**, but a checklist reconstructs from `recordedBy` + `eventDate` + rounded coordinates **only from a complete slice** — a 0.1% sample of a state-month gives 96% singleton checklists, while one county-day (1–3k records) gives real ones, median 19 species. A 602-checklist probe already separated waterbirds, woodland songbirds, open country, feeder birds and **town birds** (pigeons, House Sparrows, starlings), leaving hawks and crows unattached because they occur with everything. Expect the rare pelagic and Hawaiian families to be unplaceable, as the atolls were | Sameer | opportunistic; needs a stratified crawl of ~400–800 county-days into a committed table |

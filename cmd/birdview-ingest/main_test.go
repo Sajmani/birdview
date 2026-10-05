@@ -11,6 +11,7 @@ import (
 
 	"birdview/internal/dataset"
 	"birdview/internal/inat"
+	"birdview/internal/region"
 	"birdview/internal/status"
 	"birdview/internal/taxonomy"
 )
@@ -488,7 +489,7 @@ func TestINatTableMatchesTheDataset(t *testing.T) {
 // Watched fail: appending one extra count in applyRegions reports the
 // mismatch and names the species.
 //
-// Verifies: P-074. Criterion: AC-096.
+// Verifies: P-074, CR-030. Criterion: AC-096, AC-099.
 func TestRegionCountsLineUp(t *testing.T) {
 	ds := load(t)
 	var withCounts int
@@ -512,15 +513,36 @@ func TestRegionCountsLineUp(t *testing.T) {
 			"this test is checking nothing")
 	}
 
-	// Every region a species is placed in must have a total to divide by,
-	// or its share is silently uncomputable.
+	// Every LAND region a species is placed in must have a total to divide
+	// by, or its share is silently uncomputable.
+	//
+	// This covered every region until CR-030 reversed it for the seas. A
+	// marine total summed only the species already judged pelagic, where a
+	// land total counts every bird, so dividing by one inflated the share by
+	// 15x in the Arctic and 4,472x in the Gulf. The dataset now carries no
+	// marine total at all, which is what makes "no share at sea" true at the
+	// source rather than a rule each divider must remember.
+	//
+	// So for a sea the ABSENCE is the invariant, and both directions are
+	// asserted: checking only that land regions have totals would let a
+	// later ingest quietly start emitting marine ones again, which is how
+	// the bug got in.
 	if len(ds.RegionTotals) == 0 {
 		t.Fatal("the dataset carries no region totals")
+	}
+	for _, id := range region.MarineIDs() {
+		if n, ok := ds.RegionTotals[id]; ok {
+			t.Errorf("%s carries a total of %d; a sea's figure sums only the pelagic "+
+				"species and is not the same quantity as a land total (CR-030)", id, n)
+		}
 	}
 	for _, sp := range ds.Species {
 		for i, id := range sp.Regions {
 			total, ok := ds.RegionTotals[id]
 			if !ok {
+				if rg, known := region.Get(id); known && rg.Kind == region.Marine {
+					continue // deliberate: presence at sea, no share
+				}
 				t.Errorf("%s is in %s, which has no total", sp.ScientificName, id)
 				continue
 			}

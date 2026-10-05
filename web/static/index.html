@@ -449,8 +449,12 @@
        it. Rendered on EVERY tile, em dash and all, because a line that
        appears on some tiles and not others makes those tiles shorter and
        takes the whole flex row out of step. */}}
-  <div class="share">{{with .Commonest}}<span title="{{.Title}}"><b>1 in {{.OneIn}}</b>
+  {{/* A cell either divides or explains (CR-030). Selecting only seas is a
+       different answer from having too few records, and the em-dash's
+       tooltip would be a lie for it. */}}
+  <div class="share">{{with .Commonest}}{{if .OneIn}}<span title="{{.Title}}"><b>1 in {{.OneIn}}</b>
     bird records {{.Where}}</span>{{else}}<span class="nodata"
+    title="{{.Title}}">{{.Note}}</span>{{end}}{{else}}<span class="nodata"
     title="too few records here to give a share">&mdash;</span>{{end}}</div>
 </a>
 {{if .PickURL}}<a class="pick{{if .Picked}} on{{end}}" href="{{.PickURL}}"

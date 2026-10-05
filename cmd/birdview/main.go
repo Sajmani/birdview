@@ -2254,14 +2254,22 @@ func (s *server) categories(sp *dataset.Species) []categoryRow {
 			where = rg.Name
 		}
 		out = append(out, categoryRow{
-			Label:  "Commonest in",
+			// "Commonest land region", not "Commonest in". The seas carry
+			// presence and no share (CR-030), so this row ranges over land
+			// only -- and a label that did not say so invited exactly the
+			// reading that found the bug: an albatross reported commonest in
+			// Maine looks wrong until you know what the row is over.
+			Label:  "Commonest land region",
 			Value:  fmt.Sprintf("%s — 1 in %s bird records there", where, comma(int64(c.OneIn()))),
 			Origin: string(dataset.Derived),
 			// Both halves of the contrast, because the first on its own only
 			// says what the number is NOT. A share is where the bird is.
 			Detail: fmt.Sprintf("%s of the %s bird records from %s, in eBird and iNaturalist "+
 				"via GBIF. A share of what is recorded there, not a count of this bird: "+
-				"a count says where the birdwatchers are, a share says where the bird is.",
+				"a count says where the birdwatchers are, a share says where the bird is. "+
+				"Land regions only: the marine regions are coordinate boxes that take in "+
+				"the coast as well as the water, so no share over one of them would mean "+
+				"what is recorded at sea.",
 				comma(c.Records), comma(c.RegionRecords), where),
 			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "what this measures",
 		})
@@ -2284,6 +2292,11 @@ type shareCell struct {
 	Where string
 	OneIn string
 	Title string
+	// Note replaces the ratio when there is a reason rather than a number:
+	// the reader selected only seas, which carry presence and no share
+	// (P-074, CR-030). Empty whenever OneIn is set, and the two are never
+	// both populated -- a cell either divides or explains.
+	Note string
 }
 
 // shareIn gives a species' share of the bird records held by the regions
@@ -2301,9 +2314,25 @@ type shareCell struct {
 // A region the reader selected where the species was not reported adds to
 // the denominator and nothing to the numerator, which is correct: widening
 // the selection to places a bird is absent from should lower its share.
+//
+// **A region with no entry in totals contributes to NEITHER side** (CR-030).
+// That is the whole guard, and it replaces a pair of conditions that drifted:
+// the numerator ranged over the species' regions and the denominator over the
+// totals, so when the marine regions turned out to have counts on one side
+// and no honest denominator on the other, every pelagic's share was computed
+// as sea records over land records. Deriving both sides from "is there a
+// denominator for this region" makes that mismatch unrepresentable rather
+// than merely fixed, which matters because the two loops read as a matching
+// pair and were not one.
 func shareIn(sp *dataset.Species, totals map[string]int64, sel map[string]bool, all bool) (num, den int64) {
+	counted := func(id string) bool {
+		if _, ok := totals[id]; !ok {
+			return false
+		}
+		return all || sel[id]
+	}
 	for i, id := range sp.Regions {
-		if !all && !sel[id] {
+		if !counted(id) {
 			continue
 		}
 		if i < len(sp.RegionCounts) {
@@ -2311,7 +2340,7 @@ func shareIn(sp *dataset.Species, totals map[string]int64, sel map[string]bool, 
 		}
 	}
 	for id, n := range totals {
-		if all || sel[id] {
+		if counted(id) {
 			den += n
 		}
 	}
@@ -2332,10 +2361,22 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 		return nil // nothing selected; the page shows no birds anyway
 	}
 	num, den := shareIn(sp, totals, opt.Regions, all)
-	if num == 0 || den == 0 {
+	// No denominator at all means every region on screen is a sea. Those
+	// carry presence and no share (CR-030), and saying so is not the same
+	// answer as the em-dash, which means "too few records here".
+	if den == 0 {
+		return &shareCell{
+			Note: "no share at sea",
+			Title: "The marine regions are latitude and longitude boxes that take in the " +
+				"coastlines as well as the water, so no count over one of them means " +
+				"\u201cwhat is recorded at sea\u201d. BirdView reports presence there and " +
+				"no share. Select a land region for a figure.",
+		}
+	}
+	if num == 0 {
 		return nil
 	}
-	where, scope := "in the selected regions", "the selected regions"
+	where, scope := "in the selected land regions", "the selected land regions"
 	if !all && len(opt.Regions) == 1 {
 		for id := range opt.Regions {
 			if rg, ok := region.Get(id); ok {
@@ -2343,7 +2384,7 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 			}
 		}
 	} else if all {
-		where, scope = "across every region", "every region BirdView covers"
+		where, scope = "across every land region", "every land region BirdView covers"
 	}
 	return &shareCell{
 		Where: where,

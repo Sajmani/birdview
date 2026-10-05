@@ -1885,3 +1885,40 @@ way to write it, and it silently republishes the nine [P-071](product.md#p-071) 
 birds that are in scope *with* an out-of-scope status — as epitaphs for birds the index is
 drawing. Three guards caught it independently, which is the right number for an invariant that
 decides what a URL means.
+
+### AC-099 — The commonest region is the largest share, and the seas are out of the ratio
+**Verifies:** [P-074](product.md#p-074), [CR-030](decisions.md#cr-030) · **Level:** code ·
+**Method:** dataset test over all 1,083 species, plus rendering tests for the wording
+
+**Assertions:**
+
+1. For every species carrying a `commonest`, **no land region it occupies has a larger share**.
+   This is P-074's central claim and nothing asserted it before.
+2. `RegionTotals` carries **no marine entry**, so nothing can divide by one.
+3. A species' share is computed over regions the totals have an entry for, on **both** sides:
+   no region contributes to the numerator without contributing to the denominator.
+4. The detail page names the row **Commonest land region**, not "Commonest in".
+5. Selecting only marine regions yields **no share**, and the page says why rather than
+   rendering a blank cell or a division by zero.
+
+**Why assertion 1 is over the real dataset.** The server fixture hardcodes `commonestOf` and
+every test renders it back, so the claim has only ever been checked against a value the test
+itself supplied. That is how [CR-030](decisions.md#cr-030)(a) shipped: a value the fixture
+provides is a value no fixture test can falsify.
+
+**Why assertion 3 is stated as an invariant and not as a region list.** The numerator and the
+denominator used to be two separate loops with two separate conditions — `sel[id]` over the
+species' regions, `all || sel[id]` over the totals — which is exactly how they came to range
+over different sets. Deriving both from "does this region have a denominator" makes the
+mismatch unrepresentable rather than merely absent today.
+
+**Status: verified 2026-10-05 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| `shareIn` back to two independent loops | `Anous ceruleus: numerator 192 over every region, want 51 from land alone` |
+| a sea-only selection falls back to the em-dash | "selecting only seas renders the em-dash, whose tooltip says *too few records here*" |
+| the ingest carries the marine totals again — the shipped bug | **105 violations** of assertion 1, headed by `Ardenna bulleri`: page says Alaska at 1 in 11,171, North Pacific is 1 in 37. `TestRegionCountsLineUp` names all five seas |
+
+The third is the one to keep: it restores exactly the state that shipped, and the check that
+now catches it is the check nobody had written.

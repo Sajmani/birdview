@@ -547,7 +547,20 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	ds.RegionTotals = totals
+	// Marine totals are dropped rather than carried (CR-030). A sea's figure
+	// in region-presence.tsv sums only the species already judged pelagic,
+	// where a land region's counts every bird, so the two are different
+	// quantities -- dividing by one inflated every marine share by between
+	// 15x in the Arctic and 4,472x in the Gulf of Mexico. Withholding the
+	// number at the source is what makes P-074's "no share at sea" true
+	// everywhere, rather than a rule each divider has to remember.
+	ds.RegionTotals = make(map[string]int64, len(totals))
+	for id, v := range totals {
+		if rg, ok := region.Get(id); ok && rg.Kind == region.Marine {
+			continue
+		}
+		ds.RegionTotals[id] = v
+	}
 	var n int
 	for i := range ds.Species {
 		rs := table[ds.Species[i].ScientificName]

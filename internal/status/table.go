@@ -223,15 +223,24 @@ var Declared = map[string]string{
 	"Myadestes palmeri": "Puaiohi: critically endangered Kauai endemic, one episode in the " +
 		"open record for the same reason",
 	"Hydrobates socorroensis": "Townsend's Storm-Petrel: breeds on Mexican islands and is seen " +
-		"off California; the open record carries no dated ABA-area occurrence",
+		"off California; the open record carries no dated occurrence on land, and its " +
+		"records at sea are not yet reachable by the recurrence test (CR-030)",
 	"Pterodroma cahow": "Bermuda Petrel: breeds on Bermuda and ranges into waters " +
 		"BirdView covers, but Bermuda is outside the US/CA country filter the " +
 		"derivation runs under, so the open record holds nothing for it here",
 	"Pterodroma deserta": "Desertas Petrel: ranges into waters BirdView covers from a " +
 		"Madeiran breeding colony, which is outside the country filter",
-	"Pelagodroma marina": "White-faced Storm-Petrel: a pelagic the derivation sees in one " +
-		"episode because almost nobody is on the water where it is",
-	"Pterodroma cervicalis": "White-necked Petrel: the same, two episodes",
-	"Pterodroma arminjoniana": "Trindade Petrel: the same, and its records are old enough " +
-		"to read as historical",
+	// The three below said the derivation sees these birds rarely "because
+	// almost nobody is on the water where it is". That stated a measurement
+	// nobody had made: the recurrence test runs on gadmGid and GBIF has no
+	// gadmGid for open ocean, so pass 2 has never asked the water anything
+	// (CR-030). All three are 95-100% pelagic with thousands of records at
+	// sea. Whether they would clear the bar unaided is unknown, so the
+	// exceptions stand and only the reason is corrected.
+	"Pelagodroma marina": "White-faced Storm-Petrel: a pelagic whose records are almost all " +
+		"at sea, where the recurrence test cannot yet look; on land the derivation sees " +
+		"one episode",
+	"Pterodroma cervicalis": "White-necked Petrel: the same, two episodes on land",
+	"Pterodroma arminjoniana": "Trindade Petrel: the same, and its land records are old " +
+		"enough to read as historical",
 }

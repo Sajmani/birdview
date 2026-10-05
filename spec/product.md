@@ -700,20 +700,40 @@ among the smallest birds — because that is precision, not a second scale.
 
 ### P-074 — Each bird says how much of what people record it is
 Subject: `presentation.share`
-Value: `species records over all bird records, for the scope in view`
+Value: `species records over all bird records, for the land regions in view`
 Goals: G-001, G-002
 
 Every species says what share of the bird records in view it accounts for, as **one in N**.
 
-**On the index the scope is the regions currently selected**, so the figure follows the filter:
-a Gyrfalcon is 1 in 3,631,056 bird records across every region and 1 in 82,946 in Alaska. That
-is the question a filtered page poses — *of what people record where I am looking, how much is
-this bird* — and it is why the index does not instead show where in North America the bird
-peaks. Narrowing to Arizona and being told about Yukon answers something nobody asked.
+**The share is over land regions only, and the page says so** ([CR-030](decisions.md#cr-030)).
+The five marine regions carry presence and no share: they are latitude/longitude rectangles
+that contain the coastlines as well as the water — the Pacific box holds most of coastal
+California and the Atlantic box the whole eastern seaboard — so no denominator over one of
+them means *what is recorded at sea*. A region BirdView cannot supply an honest denominator for
+contributes to **neither** side of the ratio, which keeps the numerator and the denominator
+over one set of regions by construction.
 
-**On the detail page the scope is every region at once**, and the page also names the one where
-the species peaks, with the records on both sides of the ratio. One bird has no filter to
-follow, and where it is commonest is worth knowing once you are looking at it.
+**On the index the scope is the land regions currently selected**, so the figure follows the
+filter: a Gyrfalcon is 1 in 3,631,056 bird records across every land region and 1 in 82,946 in
+Alaska. That is the question a filtered page poses — *of what people record where I am
+looking, how much is this bird* — and it is why the index does not instead show where in North
+America the bird peaks. Narrowing to Arizona and being told about Yukon answers something
+nobody asked. Select only seas and there is no share to show, which the page states rather than
+leaving blank.
+
+**On the detail page the scope is every land region at once**, and the page also names the one
+where the species peaks — **the commonest land region**, named as such. One bird has no filter
+to follow, and where it is commonest is worth knowing once you are looking at it.
+
+**There is no commonest *sea*.** It was considered and rejected on measurement, not taste. The
+boxes overlap the land regions rather than abutting them: all six of the Black-capped Petrel's
+North Carolina records fall inside the Atlantic box, so a record on the coast is counted as a
+record at sea. For a true pelagic that contamination is negligible — 6 in 13,262 for this bird
+— but for anything less it is not, and most coastal records of any seabird sit inside a box. A
+"commonest sea" would therefore report which coast a bird is watched from, which the land
+regions already say without ambiguity. The metric would be sound only for a subset a reader
+cannot identify from the page, and that is the kind of number this requirement exists to
+refuse.
 
 **Share, not record count: a count says where the birdwatchers are, a share says where the bird
 is.** California holds 35× the Sharp-shinned Hawk records of Yukon and 118× the birdwatching,

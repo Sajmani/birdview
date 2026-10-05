@@ -4649,3 +4649,133 @@ func TestAbsentSpeciesCarryNoEvidence(t *testing.T) {
 	}
 	t.Logf("rejected: %v", seen)
 }
+
+// TestCommonestIsTheLargestLandShare asserts P-074's central claim over the
+// real dataset: the region a species page names is the land region where the
+// bird really is the biggest share of what gets recorded.
+//
+// Nothing asserted this before, which is how CR-030 shipped. Every other
+// test of the share renders `commonestOf` straight back out of the fixture,
+// so the claim had only ever been checked against a value the test itself
+// supplied -- and a value the fixture provides is a value no fixture test
+// can falsify. It has to run over the compiled dataset or it proves nothing.
+//
+// Land only, deliberately (CR-030). The marine regions are coordinate boxes
+// that take in the coast as well as the water -- all six of the Black-capped
+// Petrel's North Carolina records fall inside the Atlantic box -- so there is
+// no honest denominator over one, and `RegionTotals` carries none. This test
+// uses exactly the regions that have a denominator, which is the same rule
+// shareIn applies.
+//
+// Verifies: P-074, CR-030. Criterion: AC-099.
+func TestCommonestIsTheLargestLandShare(t *testing.T) {
+	ds := realDataset(t)
+	var checked, skipped int
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		c := sp.Commonest
+		if c == nil || c.Records == 0 || c.RegionRecords == 0 {
+			skipped++
+			continue
+		}
+		checked++
+		claimed := float64(c.Records) / float64(c.RegionRecords)
+		for j, id := range sp.Regions {
+			total, ok := ds.RegionTotals[id]
+			if !ok || total == 0 || j >= len(sp.RegionCounts) {
+				continue // a sea: no denominator, so not in the ranking
+			}
+			if got := float64(sp.RegionCounts[j]) / float64(total); got > claimed {
+				t.Errorf("%s: page says commonest in %s (1 in %d), but %s is 1 in %d",
+					sp.ScientificName, c.Region, c.RegionRecords/c.Records,
+					id, total/sp.RegionCounts[j])
+			}
+		}
+	}
+	if checked < len(ds.Species)/2 {
+		t.Fatalf("only %d of %d species carry a commonest region; the check is "+
+			"passing over most of the dataset", checked, len(ds.Species))
+	}
+	t.Logf("%d species checked, %d with no commonest region", checked, skipped)
+}
+
+// TestNoShareIsComputedOverASea asserts the two halves of CR-030 that keep a
+// sea out of the ratio: the dataset supplies no marine denominator, and
+// shareIn will not take a numerator from a region it has no denominator for.
+//
+// The second half is the one that matters. The numerator and the denominator
+// used to be two separate loops with two separate conditions, which is
+// exactly how they came to range over different sets of regions -- sea
+// records over land records, for every pelagic. Asserting the invariant
+// rather than today's region list makes the mismatch unrepresentable.
+//
+// Verifies: P-074, CR-030. Criterion: AC-099.
+func TestNoShareIsComputedOverASea(t *testing.T) {
+	ds := realDataset(t)
+	for _, id := range region.MarineIDs() {
+		if n, ok := ds.RegionTotals[id]; ok {
+			t.Errorf("%s carries a total of %d; a sea's figure sums only the pelagic "+
+				"species, so dividing by it inflates every marine share", id, n)
+		}
+	}
+
+	// A species with records in both kinds, so the numerator has something
+	// to wrongly include.
+	var sp *dataset.Species
+	for i := range ds.Species {
+		var land, sea bool
+		for _, id := range ds.Species[i].Regions {
+			if _, ok := ds.RegionTotals[id]; ok {
+				land = true
+			} else {
+				sea = true
+			}
+		}
+		if land && sea {
+			sp = &ds.Species[i]
+			break
+		}
+	}
+	if sp == nil {
+		t.Fatal("no species has records both on land and at sea; the check cannot " +
+			"tell a numerator that includes a sea from one that does not")
+	}
+
+	// Everything selected: the numerator must be the land records alone.
+	num, den := shareIn(sp, ds.RegionTotals, nil, true)
+	var wantNum int64
+	for j, id := range sp.Regions {
+		if _, ok := ds.RegionTotals[id]; ok {
+			wantNum += sp.RegionCounts[j]
+		}
+	}
+	if num != wantNum {
+		t.Errorf("%s: numerator %d over every region, want %d from land alone — "+
+			"a sea contributed records to a ratio whose denominator excludes it",
+			sp.ScientificName, num, wantNum)
+	}
+	if den == 0 {
+		t.Fatalf("%s: no denominator at all", sp.ScientificName)
+	}
+
+	// Seas only: nothing to divide, and shareOf must say so rather than
+	// render the em-dash, which means something else.
+	seas := map[string]bool{}
+	for _, id := range region.MarineIDs() {
+		seas[id] = true
+	}
+	if n, d := shareIn(sp, ds.RegionTotals, seas, false); n != 0 || d != 0 {
+		t.Errorf("%s: selecting only seas gives %d/%d, want 0/0", sp.ScientificName, n, d)
+	}
+	cell := shareOf(sp, ds.RegionTotals, options{HasRegions: true, Regions: seas})
+	if cell == nil {
+		t.Fatal("selecting only seas renders the em-dash, whose tooltip says " +
+			"\"too few records here\" — a different and untrue answer")
+	}
+	if cell.OneIn != "" {
+		t.Errorf("a sea-only selection produced a ratio of 1 in %s", cell.OneIn)
+	}
+	if cell.Note == "" {
+		t.Error("a sea-only selection explains nothing")
+	}
+}
