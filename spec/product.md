@@ -1234,6 +1234,19 @@ Stroke style carries provenance. A **solid** stroke is a measured length; a **da
 modeled one. `near-match` draws solid: it is a real measurement, of a real bird, taken with
 callipers — of a sibling taxon, which the detail view says and the drawing does not.
 
+**That holds even where two tiles come out identical, which was asked and settled 2026-10-05.**
+Nine species carry a near-match value and three have their donor on screen beside them, so
+Chihuahuan Meadowlark and Eastern Meadowlark, Cocos Booby and Brown Booby, Siberian Pipit and
+American Pipit each render the same length, wingspan and mass. A birder who knows a Chihuahuan
+Meadowlark is the smaller bird will notice. The index still says nothing: the detail page names
+the donor on every affected row — *"measured on Sturnella magna, a different species this one
+was split from — no measurement exists for it"* — and a marker on the tile would explain an
+oddity to the three readers who can see it while adding a mark to six who cannot.
+
+What a tile must not do is say something **false** about it. All three footer cells once
+labelled any unmeasured value `estimated`, which contradicted the solid stroke beside it; a
+near-match now names its donor in the tooltip ([P-062](#p-062)).
+
 That gives, for every species: **bill and tail solid**, **neck and body dashed**, and the **head
 drawn hollow** — an unfilled outline, because dash is meaningless on a closed shape and absence of
 fill says the same thing.
