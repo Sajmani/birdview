@@ -1777,3 +1777,35 @@ their own order.
 **Status: verified 2026-10-04 — passing, and watched failing** by removing Stercorariidae from
 `NeckRatios`, by removing Procellariidae from `NeckDefaultReviewed`, and by listing Alcidae in
 both.
+
+### AC-096 — The commonest-region share is a share, and its citation resolves
+**Verifies:** [P-074](product.md#p-074), [P-069](product.md#p-069) · **Level:** code ·
+**Method:** unit tests over the metric, rendering tests over the tile and detail page, and a
+walk of every anchored citation the site emits
+
+**Assertions, the metric:** the region chosen is the one where the species is the largest
+**share** of that region's bird records, not the one holding the most of its records — the two
+differ for 564 of 1,081 species. Both halves of the ratio reach the dataset, so the detail page
+can show the evidence a thin share rests on.
+
+**Assertions, the tile:** the share line renders on **every** tile, including the species with
+no commonest region, because a line that appears on some tiles and not others makes those tiles
+shorter and takes the whole flex row out of step. The footer stays one line
+([P-031](product.md#p-031)) — a fourth cell there wrapped it, which is why the share has its
+own line.
+
+**Assertions, the citation:** every `#fragment` the site emits resolves to a heading in the
+document it points at. This is the assertion that matters most, and it did not exist: the
+link-walking check drops the fragment first — *"fragments are within the page"* — so it verified
+`/docs/data` and never `#commonest`. Writing the row before the section left the suite green.
+
+Walking it found **176 broken cross-references in the served spec**: every `(product.md#p-001)`
+in the bundle, which `spec/check/refs.py` validates in the *markdown*, rendered as
+`#p-001--scope-is-the-aba-area-avifauna-that-recurs-by-birdviews-own-measure` and landed every
+reader at the top of the document. Headings opening with a requirement id now anchor on the id.
+
+**Status: verified 2026-10-05 — passing, and watched failing** by removing the heading-id
+transformer, which reports `#p-001` and `#cr-022` dangling, and by renaming the `Commonest`
+heading in `docs/data.md`. The rename needed the fixture to carry a commonest region first:
+without it no citation rendered and the check passed over nothing, which is the same vacuous
+shape it was written to catch.

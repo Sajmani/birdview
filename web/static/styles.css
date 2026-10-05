@@ -220,6 +220,19 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .ft { display: flex; gap: 14px; font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
   color: var(--dim); border-top: 1px solid var(--line); padding-top: 7px; margin-top: 4px; }
 .ft .est::after { content: "~"; color: var(--accent); margin-left: 2px; }
+/* The share: where the bird is the biggest part of what a region records
+   (P-074). Right of the family badge, dim, and in the footer's monospace so
+   the digits line up down a column of tiles. It is not a measurement of the
+   bird, and should not read like one. */
+/* The share line (P-074): where the bird is the biggest part of what a
+   region records. Below the three measurements, because it is not one -- it
+   is a fact about how often the bird is reported. Monospace to match the
+   footer, truncated rather than wrapped, since a wrapped tile is a taller
+   tile and one tall tile leaves its whole row ragged. */
+.share { font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim);
+  margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.share b { font-weight: 600; color: var(--ink); }
+.share .nodata { opacity: .6; }
 
 .dia { display: block; width: 100%; height: auto; margin: 8px 0; }
 .tile.big .nameline { gap: 16px; }

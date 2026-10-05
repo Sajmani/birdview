@@ -159,6 +159,7 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 		return nil, "", err
 	}
 	species := status.Scope(rows)
+	commonest := status.CommonestBy(rows)
 	wb, err := avonet.Open(avoPath)
 	if err != nil {
 		return nil, "", err
@@ -307,6 +308,7 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 				dataset.LocaleWorld: avr.NameWorld,
 			},
 			SpeciesCode:    avr.Code,
+			Commonest:      commonest[sci],
 			ScientificName: sci,
 			Family:         avr.Family,
 			FamilyCommon:   famCommon[avr.Family],

@@ -280,6 +280,44 @@ years. The 2023 flamingo has 931 records inside thirteen days; Akikiki, a Hawaii
 376 across forty-five years and is unmistakably the resident of the two. That is
 [CR-028](../spec/decisions.md#cr-028), in progress.
 
+## Commonest
+
+Each bird names the region where it makes up the **biggest share of what gets recorded** there,
+and how big that share is: *Commonest in Yukon — 1 in 250 records there.*
+
+**Share, not record count, and the two disagree for more than half the dataset.** California
+holds 35 times the Sharp-shinned Hawk records of Yukon — and 118 times the birdwatching. One
+bird record in 250 from Yukon is a Sharp-shinned Hawk; in California it is one in 835. The hawk
+is a bigger part of what you see in Yukon, even though far more have been logged in California.
+Dividing by the region's own total cancels out how hard anyone was looking.
+
+Counting records instead would just point at wherever the birders are. The Millerbird settles
+it: 28 of its records are filed under Hawaii and 22 under Nihoa, so by count its home reads
+"Hawaii" — a state with 2.6 million bird records, where the Millerbird is 1 in 93,090. Nihoa has
+49,102 records and the bird is 1 in 2,231 of them. Nihoa is the island it actually lives on.
+
+**Why "1 in N" and not a percentage.** Across the dataset the share runs from 1 in 2 to 1 in 117
+million. As percentages that is 50% down to 0.000001%; the median bird is 0.19% and the bottom
+quarter rounds to nothing a reader can read. "1 in 514" stays legible the whole way down.
+
+**Both numbers are kept, not just the ratio.** The detail page gives the species' records and
+the region's total, so a share resting on nine records says so. That is deliberate: the
+alternative is a minimum-evidence cutoff, which is one more arbitrary threshold, and 50 of 1,083
+species have a peak region resting on fewer than ten records.
+
+### What this is not
+
+It is **not abundance**, and it is not a rarity rank. It measures how often a bird is *reported*
+relative to other birds reported in the same place — which is the closest honest thing to
+"how often would I see this" that open data supports, and still not the same claim.
+
+Two distortions are known and uncorrected. Species whose records eBird **withholds** — Spotted
+Owl, Gyrfalcon, Northern Hawk Owl and nine others — look rarer than they are, because the
+denominator counts observers whose sightings of that species were suppressed. And a bird that
+draws a crowd when it appears is over-reported relative to a quiet resident, which is the same
+observer-behavior bias that kept record counts out of the scope rule entirely; see
+[Scope](#scope).
+
 ## Habitat and diet
 
 Both come from **AVONET**, assigned per species, with AVONET's own definitions quoted in the

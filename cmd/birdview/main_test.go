@@ -133,8 +133,20 @@ func testDataset() *dataset.Dataset {
 		"blasti": {"USA.5_1"},                        // California
 		"thimur": {"USA.2_1", "SEA.PAC"},             // Alaska, and at sea
 	}
+	// Where each is the biggest share of what its region records (P-074).
+	// The heron is left without one on purpose: it is in no region either,
+	// and the tile must render the em-dash line rather than a shorter tile
+	// that takes its row out of step.
+	commonestOf := map[string]*dataset.Commonest{
+		"annhum": {Region: "USA.5_1", Records: 4000, RegionRecords: 1000000},
+		"amerob": {Region: "CAN.9_1", Records: 73005, RegionRecords: 1817968},
+		"amecro": {Region: "USA.39_1", Records: 1200, RegionRecords: 480000},
+		"blasti": {Region: "USA.5_1", Records: 90, RegionRecords: 1000000},
+		"thimur": {Region: "USA.2_1", Records: 5000, RegionRecords: 6055121},
+	}
 	for i := range sp {
 		sp[i].Regions = regionsOf[sp[i].ID]
+		sp[i].Commonest = commonestOf[sp[i].ID]
 	}
 	// One assignment of each non-published origin, so the fixture exercises
 	// what BirdView adds rather than only what AVONET publishes. Without
@@ -4212,5 +4224,82 @@ func TestNearMatchTooltipNamesTheDonor(t *testing.T) {
 	// A near-match with no donor recorded must not claim one.
 	if m := whyNotMeasured(dataset.Provenance{Kind: dataset.NearMatch}); strings.Contains(m, "Sturnella") {
 		t.Errorf("a near-match with no source taxon invented one: %q", m)
+	}
+}
+
+// Every `#fragment` a page cites must resolve to a heading in the document
+// it points at.
+//
+// TestServedDocumentsHaveNoBrokenLinks walks document links but drops the
+// fragment first -- "fragments are within the page" -- so it checks that
+// /docs/data exists and never that #commonest does. Nothing else looked
+// either. The provenance rows on a detail page cite by anchor precisely so
+// a reader lands on the rule and not the top of a 300-line document, and a
+// citation that silently lands at the top is the failure that makes the
+// anchor pointless.
+//
+// Caught for real: this test was written after adding a row citing
+// /docs/data#commonest, with no such heading in the file, and the whole
+// suite stayed green.
+//
+// Watched fail: renaming the "Commonest" heading in docs/data.md to
+// anything else reports the dangling citation.
+//
+// Verifies: P-069. Criterion: AC-091.
+func TestCitedAnchorsResolve(t *testing.T) {
+	s := newTestServer(t)
+
+	// The ids goldmark actually emitted, per served document.
+	ids := map[string]map[string]bool{}
+	headingID := regexp.MustCompile(`<h[1-6][^>]*\bid="([^"]+)"`)
+	for _, set := range []string{"/docs/", "/spec/"} {
+		index := mustGet(t, s, set)
+		for _, m := range regexp.MustCompile(`href="(`+set+`[^"#]+)"`).
+			FindAllStringSubmatch(index, -1) {
+			doc := m[1]
+			if ids[doc] != nil {
+				continue
+			}
+			ids[doc] = map[string]bool{}
+			for _, h := range headingID.FindAllStringSubmatch(mustGet(t, s, doc), -1) {
+				ids[doc][h[1]] = true
+			}
+		}
+	}
+	if len(ids) < 8 {
+		t.Fatalf("only found %d served documents; the indexes are not listing the set", len(ids))
+	}
+	var withIDs int
+	for _, set := range ids {
+		if len(set) > 0 {
+			withIDs++
+		}
+	}
+	if withIDs == 0 {
+		t.Fatal("no document emitted a heading id, so every citation would pass vacuously")
+	}
+
+	// Every anchored citation anywhere on the site.
+	cite := regexp.MustCompile(`href="((?:/docs|/spec)/[^"#]+)#([^"]+)"`)
+	checked := 0
+	for _, page := range []string{"/", "/species/greblu", "/species/amerob", "/added",
+		"/docs/", "/spec/", "/docs/data", "/docs/using", "/spec/product"} {
+		body := mustGet(t, s, page)
+		for _, m := range cite.FindAllStringSubmatch(body, -1) {
+			doc, frag := m[1], m[2]
+			known, ok := ids[doc]
+			if !ok {
+				t.Errorf("%s cites %s#%s, but %s is not a served document", page, doc, frag, doc)
+				continue
+			}
+			checked++
+			if !known[frag] {
+				t.Errorf("%s cites %s#%s, and %s has no such heading; the reader lands "+
+					"at the top of the document instead of on the rule", page, doc, frag, doc)
+			}
+		}
+	}
+	if checked == 0 {
+		t.Error("no anchored citations found; this test is checking nothing")
 	}
 }

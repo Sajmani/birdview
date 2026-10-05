@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"birdview/internal/dataset"
 	"birdview/internal/taxonomy"
 )
 
@@ -24,6 +25,23 @@ type Row struct {
 	Episodes,
 	Years int
 	Records int64
+
+	// Commonest is the region where the species makes up the biggest SHARE
+	// of what is recorded there, with both halves of the ratio kept.
+	//
+	// Share, not record count, and the two disagree for 564 of 1,081
+	// species: a count says where the birdwatchers are. California holds 35x
+	// the Sharp-shinned Hawk records of Yukon and 118x the birdwatching, so
+	// the hawk is one record in 250 in Yukon against one in 835 in
+	// California. The Millerbird settles it -- by count its home reads
+	// "Hawaii", by share it reads Nihoa, the island it actually lives on.
+	//
+	// Both numbers are carried rather than the ratio so that a share resting
+	// on nine records can say so, which is what a minimum-evidence threshold
+	// would otherwise have to do.
+	Commonest string
+	CommonestRecords,
+	CommonestRegionRecords int64
 }
 
 // Read parses the committed table written by cmd/birdview-status.
@@ -38,8 +56,8 @@ func Read(r io.Reader) ([]Row, error) {
 			continue
 		}
 		f := strings.Split(line, "\t")
-		if len(f) != 6 {
-			return nil, fmt.Errorf("status: line %d has %d fields, want 6: %q", ln, len(f), line)
+		if len(f) != 9 {
+			return nil, fmt.Errorf("status: line %d has %d fields, want 9: %q", ln, len(f), line)
 		}
 		var row Row
 		row.Name = strings.ToLower(strings.TrimSpace(f[0]))
@@ -47,6 +65,11 @@ func Read(r io.Reader) ([]Row, error) {
 		row.Region = f[2]
 		if _, err := fmt.Sscanf(f[3]+" "+f[4]+" "+f[5], "%d %d %d",
 			&row.Episodes, &row.Years, &row.Records); err != nil {
+			return nil, fmt.Errorf("status: line %d: %w", ln, err)
+		}
+		row.Commonest = f[6]
+		if _, err := fmt.Sscanf(f[7]+" "+f[8], "%d %d",
+			&row.CommonestRecords, &row.CommonestRegionRecords); err != nil {
 			return nil, fmt.Errorf("status: line %d: %w", ln, err)
 		}
 		switch row.Status {
@@ -82,6 +105,28 @@ func Scope(rows []Row) []string {
 		out = append(out, n)
 	}
 	sort.Strings(out)
+	return out
+}
+
+// CommonestBy keys each row's peak share by AviList name, so the ingest can
+// attach it without redoing the namespace mapping.
+//
+// Rows with no usable peak are left out rather than given a zero: a species
+// with nothing to divide has no "commonest" region, and an entry saying one
+// in zero would be worse than silence.
+func CommonestBy(rows []Row) map[string]*dataset.Commonest {
+	out := make(map[string]*dataset.Commonest, len(rows))
+	for _, r := range rows {
+		if r.Commonest == "" || r.Commonest == "-" ||
+			r.CommonestRecords == 0 || r.CommonestRegionRecords == 0 {
+			continue
+		}
+		out[aviListName(r.Name)] = &dataset.Commonest{
+			Region:        r.Commonest,
+			Records:       r.CommonestRecords,
+			RegionRecords: r.CommonestRegionRecords,
+		}
+	}
 	return out
 }
 

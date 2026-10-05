@@ -685,6 +685,42 @@ Length never switches unit, so only mass is affected. The decimal places within 
 vary by value — a 3 g hummingbird is `0.11 oz` and one decimal would erase the differences
 among the smallest birds — because that is precision, not a second scale.
 
+### P-074 — Each bird says where it is the biggest part of what people see
+Subject: `presentation.commonest`
+Value: `peak share of a region's bird records, as one-in-N`
+Goals: G-001, G-002
+
+Every species names the region where it makes up the **largest share of the bird records that
+region holds**, and how large: *Commonest in Yukon — 1 in 250 records there.* It appears on the
+tile and, with the evidence behind it, on the detail page.
+
+**Share, not record count.** The two disagree for 564 of 1,081 species, and a count says only
+where the birdwatchers are: California holds 35× the Sharp-shinned Hawk records of Yukon and
+118× the birdwatching, so the hawk is 1 record in 250 in Yukon and 1 in 835 in California.
+Dividing by the region's own total cancels out how hard anyone was looking — the same
+normalization that stops an escaped Budgerigar outranking an American Robin. The Millerbird
+decides it: by count its home reads *Hawaii*, by share it reads Nihoa, the island it lives on.
+
+**One in N, not a percentage.** The share runs from 1 in 2 to 1 in 117 million; as percentages
+that is 50% to 0.000001%, and the bottom quarter of the dataset rounds to nothing readable.
+
+**Both numbers are kept, not the ratio.** The detail page gives the species' records and the
+region's total, so a share resting on nine records says so. That is deliberate: the alternative
+is a minimum-evidence cutoff, and 50 of 1,083 species have a peak region below ten records.
+
+Rationale: a reader asking "how rare is this bird" has had no answer at all. This is the
+closest honest one open data supports — it measures how often a bird is **reported** relative
+to other birds reported in the same place, which is not abundance. Two distortions are known
+and uncorrected: species eBird withholds look rarer than they are, and a bird that draws a
+crowd is over-reported against a quiet resident. [`docs/data.md`](../docs/data.md) says both.
+
+**It is not a rarity tag and must not become one.** No threshold divides common from rare here;
+the number is shown and the reader judges. Vagrancy stays a status ([P-070](#p-070)), because
+the metric that would express it does not work: the share of a species' records falling in one
+arrival reads 73% for the Hawaiian peafowl and 75% for the 2023 Florida flamingo irruption, and
+61% of per-region date facets are truncated, so any episode-derived number would be a floor for
+most of the dataset rather than a count.
+
 ### P-035 — The page explains itself
 Subject: `presentation.help`
 Goals: G-001, G-002, G-003

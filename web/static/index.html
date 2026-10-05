@@ -438,6 +438,15 @@
     <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="{{whynot .S.Wingspan.Prov}}"{{end}}>Wingspan {{.Wing}}</span>
     <span{{if ne .S.Mass.Prov.Kind "measured"}} class="est" title="{{whynot .S.Mass.Prov}}"{{end}}>Mass {{.MassStr}}</span>
   </div>
+  {{/* Where the bird is the biggest share of what a region records (P-074).
+       Its own line, not a fourth cell in the footer: the footer holds the
+       three measurements, P-031 keeps it to one line, and a fourth wrapped
+       it. Rendered on EVERY tile, em dash and all, because a line that
+       appears on some tiles and not others makes those tiles shorter and
+       takes the whole flex row out of step. */}}
+  <div class="share">{{with .Commonest}}<span title="{{.Title}}">Commonest in {{.Name}}
+    <b>1 in {{.OneIn}}</b> records there</span>{{else}}<span class="nodata"
+    title="too few records to say where it is commonest">Commonest in &mdash;</span>{{end}}</div>
 </a>
 {{if .PickURL}}<a class="pick{{if .Picked}} on{{end}}" href="{{.PickURL}}"
    title="{{if .Picked}}Remove from the comparison{{else}}Pick for comparison{{end}}"

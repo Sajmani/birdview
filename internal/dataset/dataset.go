@@ -112,6 +112,26 @@ const (
 	LocaleWorld Locale = "world"
 )
 
+// Commonest records where a species is the largest share of what a region
+// reports, and the evidence that share rests on (P-074).
+type Commonest struct {
+	// Region is a region id, as Species.Regions uses.
+	Region string `json:"region"`
+	// Records is this species' records there; RegionRecords is every bird
+	// record the region holds. The ratio is the share.
+	Records       int64 `json:"records"`
+	RegionRecords int64 `json:"regionRecords"`
+}
+
+// OneIn is the share expressed the way it is shown: one record in N. Zero
+// when there is nothing to divide.
+func (c *Commonest) OneIn() int {
+	if c == nil || c.Records == 0 {
+		return 0
+	}
+	return int(c.RegionRecords / c.Records)
+}
+
 // Species is one compiled record.
 type Species struct {
 	// ID is the eBird species code where AviList supplies one -- "amerob" --
@@ -143,6 +163,16 @@ type Species struct {
 	// (P-011). Empty for the one species with too few records to place
 	// anywhere, which the region filter must not silently swallow.
 	Regions []string `json:"regions,omitempty"`
+
+	// Commonest is where this species makes up the biggest SHARE of the bird
+	// records a region holds, with both halves of the ratio kept (P-074).
+	//
+	// Share rather than record count, because a count says where the
+	// birdwatchers are: California holds 35x the Sharp-shinned Hawk records
+	// of Yukon and 118x the birdwatching, so the hawk is one record in 250
+	// in Yukon and one in 835 in California. Both numbers are carried, not
+	// the ratio, so a share resting on nine records can say so.
+	Commonest *Commonest `json:"commonest,omitempty"`
 
 	// INatTaxonID links the detail view to iNaturalist (P-064). Zero means no
 	// confident match, and then no link is shown at all -- not a search URL,

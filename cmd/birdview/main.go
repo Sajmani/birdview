@@ -421,6 +421,9 @@ type tile struct {
 	Length  string
 	Wing    string
 	MassStr string
+	// Commonest is the share line: where the bird is the biggest part of
+	// what gets recorded, and how big a part (P-074). Nil when unknown.
+	Commonest *shareCell
 
 	// WingModeled drives the crossbar split: the inner span is dashed only when
 	// the wingspan is modeled (P-065).
@@ -926,6 +929,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				Length:      u.format(sp.TotalLength.Value, view.ByLength),
 				Wing:        u.format(sp.Wingspan.Value, view.ByWingspan),
 				MassStr:     u.format(sp.Mass.Value, view.ByMass),
+				Commonest:   shareOf(sp),
 			})
 		}
 		page.Sections = append(page.Sections, sv)
@@ -2087,7 +2091,80 @@ func (s *server) categories(sp *dataset.Species) []categoryRow {
 			Doc: "/docs/data#regions", DocLabel: "how regions are decided",
 		})
 	}
+
+	// Where the bird is the biggest share of what gets recorded (P-074).
+	//
+	// Stated as "1 in N bird records there" rather than as a percentage: the
+	// share runs from 1 in 2 to 1 in 117 million across the dataset, and a
+	// percentage is 0.000001% at that end and unreadable well before it.
+	// The records it rests on are shown so a thin number discloses itself
+	// instead of needing a minimum-evidence cutoff.
+	if c := sp.Commonest; c != nil && c.OneIn() > 0 {
+		where := c.Region
+		if rg, ok := region.Get(c.Region); ok {
+			where = rg.Name
+		}
+		out = append(out, categoryRow{
+			Label:  "Commonest in",
+			Value:  fmt.Sprintf("%s — 1 in %s bird records there", where, comma(int64(c.OneIn()))),
+			Origin: string(dataset.Derived),
+			Detail: fmt.Sprintf("%s of the %s bird records from %s, in eBird and iNaturalist "+
+				"via GBIF. Share, not record count: a count says where the birdwatchers are.",
+				comma(c.Records), comma(c.RegionRecords), where),
+			Doc: "/docs/data#commonest", DocLabel: "what this measures",
+		})
+	}
 	return out
+}
+
+// shareCell is the tile's share line, pre-rendered: the region's short code,
+// the share as one-in-N, and the full sentence as a tooltip.
+type shareCell struct {
+	Name  string
+	OneIn string
+	Title string
+}
+
+// shareOf builds the tile's share line, or nil when there is nothing to say.
+func shareOf(sp *dataset.Species) *shareCell {
+	c := sp.Commonest
+	if c == nil || c.OneIn() == 0 {
+		return nil
+	}
+	name, code := c.Region, c.Region
+	if rg, ok := region.Get(c.Region); ok {
+		name = rg.Name
+		if rg.Code != "" {
+			code = rg.Code
+		} else {
+			code = rg.Name
+		}
+	}
+	_ = code
+	return &shareCell{
+		Name:  name,
+		OneIn: comma(int64(c.OneIn())),
+		Title: fmt.Sprintf("Commonest in %s: %s of the %s bird records from there. "+
+			"A share, not a count \u2014 a count says where the birdwatchers are.",
+			name, comma(c.Records), comma(c.RegionRecords)),
+	}
+}
+
+// comma groups an integer with thousands separators. The shares reach the
+// hundred millions, where an ungrouped run of digits cannot be read at all.
+func comma(n int64) string {
+	s := strconv.FormatInt(n, 10)
+	if len(s) <= 3 {
+		return s
+	}
+	var b strings.Builder
+	for i, c := range s {
+		if i > 0 && (len(s)-i)%3 == 0 {
+			b.WriteByte(',')
+		}
+		b.WriteRune(c)
+	}
+	return b.String()
 }
 
 // served names the two document sets BirdView publishes: the user-facing
@@ -2216,6 +2293,40 @@ func (t repoLinks) Transform(doc *goldmarkast.Document, reader goldmarktext.Read
 //
 // Raw HTML in the source is NOT passed through: these files are ours, but a
 // renderer that emits whatever HTML it is given is a habit worth not having.
+// idAnchors gives a heading whose text begins with a requirement id -- "P-001
+// — Scope is ..." -- the id alone as its anchor.
+//
+// Every cross-reference in the spec is written `(product.md#p-001)`, and
+// spec/check/refs.py checks those resolve. It checks the MARKDOWN. Served,
+// goldmark's auto id turned that heading into
+// `p-001--scope-is-the-aba-area-avifauna-that-recurs-by-birdviews-own-measure`,
+// so all 176 anchored cross-references in the rendered spec landed at the top
+// of the document instead of on the requirement they cite. Nothing noticed,
+// because the link-walking test drops the fragment before checking anything.
+//
+// Runs after WithAutoHeadingID, replacing the generated id where a heading
+// opens with an id token and leaving every other heading alone.
+//
+// Verifies: P-069.
+type idAnchors struct{}
+
+// idToken matches a leading requirement id: P-001, T-024, AC-091, CR-028, G-004.
+var idToken = regexp.MustCompile(`^(?:P|T|AC|CR|G)-\d+\b`)
+
+func (idAnchors) Transform(doc *goldmarkast.Document, reader goldmarktext.Reader, _ goldmarkparser.Context) {
+	src := reader.Source()
+	_ = goldmarkast.Walk(doc, func(n goldmarkast.Node, entering bool) (goldmarkast.WalkStatus, error) {
+		h, ok := n.(*goldmarkast.Heading)
+		if !entering || !ok {
+			return goldmarkast.WalkContinue, nil
+		}
+		if m := idToken.Find(h.Text(src)); m != nil {
+			h.SetAttribute([]byte("id"), []byte(strings.ToLower(string(m))))
+		}
+		return goldmarkast.WalkContinue, nil
+	})
+}
+
 var markdown = map[string]goldmark.Markdown{
 	"docs": newMarkdown("docs"),
 	"spec": newMarkdown("spec"),
@@ -2230,7 +2341,8 @@ func newMarkdown(base string) goldmark.Markdown {
 			// and a hope (P-069).
 			goldmarkparser.WithAutoHeadingID(),
 			goldmarkparser.WithASTTransformers(
-				goldmarkutil.Prioritized(repoLinks{base}, 100))),
+				goldmarkutil.Prioritized(repoLinks{base}, 100),
+				goldmarkutil.Prioritized(idAnchors{}, 200))),
 		goldmark.WithRendererOptions(goldmarkhtml.WithHardWraps()),
 	)
 }
