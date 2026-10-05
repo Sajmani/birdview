@@ -2120,7 +2120,10 @@ func (s *server) categories(sp *dataset.Species) []categoryRow {
 // shareCell is the tile's share line, pre-rendered: the region's short code,
 // the share as one-in-N, and the full sentence as a tooltip.
 type shareCell struct {
-	Where string // "here", or the one region's name when exactly one is on
+	// Where names the scope the share is over, already prefixed with "in":
+	// the one region when exactly one is on, the ABA Area when all are, and
+	// "the selected regions" for any set in between.
+	Where string
 	OneIn string
 	Title string
 }
@@ -2174,7 +2177,7 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 	if num == 0 || den == 0 {
 		return nil
 	}
-	where, scope := "here", "the regions shown"
+	where, scope := "in the selected regions", "the selected regions"
 	if !all && len(opt.Regions) == 1 {
 		for id := range opt.Regions {
 			if rg, ok := region.Get(id); ok {
