@@ -2376,8 +2376,17 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 	// zero.
 	if den == 0 {
 		return &shareCell{
-			Note:  "No share for this selection",
-			Title: "BirdView has no record total for the regions selected, so there is nothing to divide by.",
+			// NOT "no records here". The bird may have plenty: this fires
+			// when BirdView lacks the REGION's total, and the numerator is
+			// zero only because a region with no denominator is skipped on
+			// both sides. Buller's Shearwater has 39,143 records in the
+			// North Pacific, and would land here reading "no records" if
+			// that sea's total ever went missing again -- which is a
+			// statement about the bird, and false.
+			Note: "No data for these regions yet",
+			Title: "BirdView does not know how many birds have been recorded in the regions " +
+				"selected, so it cannot say what part of them this one is. That is a gap in " +
+				"BirdView's data, not a statement about the bird.",
 		}
 	}
 	where, scope := "in the selected regions", "the selected regions"

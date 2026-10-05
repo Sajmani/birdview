@@ -4903,3 +4903,67 @@ func TestCommonestRoundTripsThroughTheIndex(t *testing.T) {
 	}
 	t.Logf("%d species round-tripped, %d of them peaking at sea", checked, atSea)
 }
+
+// TestMissingTotalsDoNotClaimTheBirdIsAbsent pins the distinction between the
+// two empty answers, which read alike and mean opposite things.
+//
+//   - "0 in 1,225,176,035" is a finding about the BIRD: it was not recorded
+//     in the regions on screen, and the denominator says how hard anyone
+//     looked before concluding that.
+//   - "No data for these regions yet" is a gap in BIRDVIEW: the region's own
+//     record total is missing, so there is nothing to divide by.
+//
+// The second must never be worded as the first. A region with no total is
+// skipped on BOTH sides of the ratio, so the numerator comes back zero too --
+// and that zero is an artifact of the skip, not a count. Buller's Shearwater
+// has 39,143 records in the North Pacific and would be reported as having
+// none if that sea's total went missing, which is what the marine regions
+// did for months.
+//
+// Verifies: P-074, CR-031. Criterion: AC-099.
+func TestMissingTotalsDoNotClaimTheBirdIsAbsent(t *testing.T) {
+	ds := realDataset(t)
+	var sp *dataset.Species
+	var id string
+	var really int64
+	for i := range ds.Species {
+		for j, r := range ds.Species[i].Regions {
+			if ds.Species[i].RegionCounts[j] > 1000 {
+				sp, id, really = &ds.Species[i], r, ds.Species[i].RegionCounts[j]
+				break
+			}
+		}
+		if sp != nil {
+			break
+		}
+	}
+	if sp == nil {
+		t.Fatal("no species has a region with over a thousand records")
+	}
+
+	// Withhold that region's total, as the seas were withheld.
+	cell := shareOf(sp, map[string]int64{}, options{
+		HasRegions: true, Regions: map[string]bool{id: true}})
+	if cell == nil {
+		t.Fatal("a missing total renders nothing at all")
+	}
+	if cell.Ratio != "" {
+		t.Errorf("a missing total produced a ratio of %q, dividing by a denominator "+
+			"BirdView does not have", cell.Ratio)
+	}
+	for _, wrong := range []string{"No records", "no records", "0 in", "not recorded", "absent"} {
+		if strings.Contains(cell.Note+" "+cell.Title, wrong) {
+			t.Errorf("a missing total is reported as %q, which says %q — but %s has %d "+
+				"records in %s. That is a gap in BirdView's data stated as a fact about "+
+				"the bird", cell.Note, wrong, sp.ScientificName, really, id)
+		}
+	}
+	if cell.Note == "" {
+		t.Error("a missing total explains nothing")
+	}
+	// And the word the owner found unintuitive is gone from the short label.
+	if strings.Contains(cell.Note, "share") {
+		t.Errorf("the label still reads %q; \"share\" is jargon on a one-line cell, and "+
+			"the tooltips that do use it define it in the same sentence", cell.Note)
+	}
+}

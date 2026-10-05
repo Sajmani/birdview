@@ -1924,6 +1924,14 @@ mismatch unrepresentable rather than merely absent today.
 | the ingest carries the marine totals again — the shipped bug | **105 violations** of assertion 1, headed by `Ardenna bulleri`: page says Alaska at 1 in 11,171, North Pacific is 1 in 37. `TestRegionCountsLineUp` names all five seas |
 | the zero branch collapses back to a nil cell | 29 tiles on the unfiltered index lose their figure; `TestShareStatesZeroRatherThanDashing` names them |
 | the ratio is computed before the zero is checked | **a divide-by-zero panic** taking `TestRoutesServe` with it — which is how this was found, rather than by reading the diff |
+| the no-denominator label worded as `No records in selected regions` | `Acanthis flammea has 234408 records in CAN.11_1` — a gap in BirdView stated as a fact about the bird |
+| the same label left reading `No share for this selection` | the jargon check, `"share" is jargon on a one-line cell` |
+
+**A mutation that does not apply is not a mutation.** The first attempt at the two above
+replaced `Note:  "..."` with two spaces, which `gofmt` had already collapsed to one, so the
+edit silently no-opped and both "mutations" passed. The anchor is now asserted before the
+substitution. This is the same failure shape as a vacuous check, one level up: the test was
+fine and the thing testing the test was broken.
 
 The third is the one to keep: it restores exactly the state that shipped, and the check that
 now catches it is the check nobody had written.

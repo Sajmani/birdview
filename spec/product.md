@@ -734,10 +734,12 @@ figure, and it threw away the half of the answer that carries the weight: *how h
 looked before concluding the bird was not there.* Zero in a billion records is a finding; zero
 in nine hundred is not, and only the stated denominator distinguishes them.
 
-**Having no denominator at all is a different message**: **`No share for this selection`**.
-No selection reaches it today, every region having a total; it exists because a region added
-ahead of its data would otherwise divide by zero, which is exactly how the seas behaved before
-[CR-031](decisions.md#cr-031) measured one.
+**Having no denominator at all is a different message**: **`No data for these regions yet`**.
+It reports a gap in BirdView, not a fact about the bird, and must never be worded as one. A
+region with no total is skipped on **both** sides of the ratio, so the numerator comes back
+zero as an artifact of the skip — Buller's Shearwater has 39,143 records in the North Pacific
+and would read "no records" there if that sea's total went missing, which is what the marine
+regions did for months. No selection reaches this today, every region having a total.
 
 **On the detail page the scope is every region at once**, and the page also names the one
 where the species peaks — **the commonest region**. One bird has no filter to follow, and
