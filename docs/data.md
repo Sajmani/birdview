@@ -177,8 +177,8 @@ They say nothing about the bird.
 The detail page links out to the species on iNaturalist, because BirdView has no photographs.
 
 The link is only shown where the match is **confident**: iNaturalist's scientific name matched
-ours exactly, *and* the common name it returns agrees with ABA's once punctuation and case are
-normalized. Requiring both means a taxonomic revision on either side drops the link rather than
+ours exactly, *and* the common name it returns agrees with the one BirdView shows once
+punctuation and case are normalized. Requiring both means a taxonomic revision on either side drops the link rather than
 quietly repointing it at the wrong bird. Species that fail either test show no link at all — not a
 search URL, which would never 404 and would therefore always look like it had worked.
 
@@ -201,9 +201,10 @@ excludes Johnston, Palmyra, Wake and Navassa, which BirdView covers. A species i
 in repeated episodes across years. Nine more are kept by hand because the open record cannot
 speak for them, each named with its reason.
 
-The two are Gray-headed Swamphen and Western Warbling-Vireo, ABA splits that AviList does not
-recognize. Every name BirdView serves comes from AviList, so a bird AviList has no concept for
-has no name this project may publish.
+Two species the occurrence data names are dropped: Gray-headed Swamphen and Western
+Warbling-Vireo, both of which eBird splits and AviList lumps into a bird already in the list.
+Every name BirdView serves comes from AviList, so one AviList has no concept for has no name
+this project can publish.
 
 **Names** come from AviList v2025b, in two vocabularies: eBird/Clements (Dovekie) by default and
 AviList/IOC (Little Auk) on request. The **species id in the URL is the eBird code** — `amerob`,
