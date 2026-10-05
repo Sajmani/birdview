@@ -146,6 +146,19 @@ The birds you picked live in the URL, so a comparison is a link you can keep or 
 
 ---
 
+## A link to a bird BirdView stopped drawing
+
+BirdView's list of species is derived from occurrence records and re-derived when those records
+are refreshed, so it can change. If a bird leaves the list, its page does not vanish into
+`404 page not found`: it tells you which bird you asked for and why it is no longer drawn —
+seen but not repeatedly, repeatedly but not lately, or with too little in the open record to
+judge. Try `/species/paspig`.
+
+The address still answers *not found* rather than *gone*, because the list is re-derived and a
+bird can come back.
+
+---
+
 ## Some things to try
 
 - **Sort by mass, scale Global.** Mass is a cube of a linear dimension, so the range is brutal in a

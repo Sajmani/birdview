@@ -380,6 +380,15 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 
 	sort.Slice(out, func(i, j int) bool { return out[i].ScientificName < out[j].ScientificName })
 
+	// The birds the derivation rejected, so /species/<id> can say why rather
+	// than 404 into silence (P-075, CR-029). They get names and ids by the
+	// same route a drawn species does, because the point is that a URL which
+	// worked yesterday still resolves.
+	undrawn, err := rejected(status.OutOfScope(rows), avl, out)
+	if err != nil {
+		return nil, "", err
+	}
+
 	if frac := float64(len(unmatched)) / float64(len(species)); frac > maxUnmatchedFraction {
 		return nil, "", fmt.Errorf(
 			"%d of %d species (%.1f%%) could not be joined to trait data, above the %.0f%% threshold.\n"+
@@ -410,6 +419,12 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 	}
 	fmt.Fprintf(&b, "  awaiting taxonomic check (CR-006): %s\n",
 		strings.Join(taxonomy.AwaitingTaxonomicCheck, ", "))
+	byVerdict := map[string]int{}
+	for _, u := range undrawn {
+		byVerdict[u.Status]++
+	}
+	fmt.Fprintf(&b, "  classified, not drawn: %d (%d vagrant, %d historical, %d absent) -- P-075\n",
+		len(undrawn), byVerdict["vagrant"], byVerdict["historical"], byVerdict["absent"])
 
 	fams := make([]dataset.Family, 0, len(famSeq))
 	for _, f := range famSeq {
@@ -428,13 +443,88 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 
 	return &dataset.Dataset{
 		Families: fams,
+		// What this build actually read. The "aba" line that stood here
+		// outlived the thing it pinned: CR-028 removed the checklist from the
+		// build, and this provenance record went on naming it for a release
+		// in which nothing read it. A pin to an input you do not consume is
+		// worse than no pin, because it is checkable and wrong (G-004).
 		SourceVersions: map[string]string{
-			"aba":          "ABA Checklist 8.19 (January 2026)",
 			"avonet":       "AVONET v7, doi:10.6084/m9.figshare.16586228",
 			"fox-wingspan": "Fox et al. 2026 v1, doi:10.6084/m9.figshare.32089083",
+			"avilist":      "AviList v2025b (10 June 2026), extended release",
+			"status":       status.Source,
 		},
 		Species: out,
+		Undrawn: undrawn,
 	}, b.String(), nil
+}
+
+// rejected turns the out-of-scope rows into servable records: a name, an id
+// and the evidence behind the verdict (P-075).
+//
+// Two refusals, both deliberate:
+//
+// A species AviList does not recognize is skipped silently rather than given
+// a scientific-name page. It has no English name and no stable id, so the
+// page would be an apology for a binomial -- and the six that qualify are all
+// Old World birds the occurrence data mentions in passing, not birds anyone
+// bookmarked.
+//
+// An id collision with a drawn species is fatal. The server looks here only
+// after missing the drawn index, so a collision cannot hide a live page
+// today; it is fatal because the lookup order is an implementation detail and
+// the invariant is not. A build that quietly ships two meanings for one URL
+// has already lost the property the ids exist for (AC-084).
+func rejected(rows map[string]status.Row, avl avilist.Table,
+	drawn []dataset.Species) ([]dataset.Undrawn, error) {
+
+	taken := make(map[string]string, len(drawn))
+	for _, sp := range drawn {
+		taken[sp.ID] = sp.ScientificName
+	}
+
+	out := make([]dataset.Undrawn, 0, len(rows))
+	for sci, r := range rows {
+		avr, ok := avl[sci]
+		if !ok {
+			continue
+		}
+		uid := avr.Code
+		if uid == "" {
+			uid = id(sci)
+		}
+		if other, clash := taken[uid]; clash {
+			return nil, fmt.Errorf(
+				"id %q belongs to both %s (drawn) and %s (not drawn); "+
+					"one URL cannot mean two birds", uid, other, sci)
+		}
+		taken[uid] = sci
+
+		u := dataset.Undrawn{
+			ID: uid,
+			Names: map[dataset.Locale]string{
+				dataset.LocaleNA:    avr.NameNA,
+				dataset.LocaleWorld: avr.NameWorld,
+			},
+			ScientificName: sci,
+			Status:         string(r.Status),
+		}
+		// Evidence only where there is some. `absent` means the derivation
+		// never ran a date query for this bird, so its episode, year and
+		// record columns are zeros standing for "not measured" -- and a page
+		// printing "0 episodes across 0 years" would read as a measurement
+		// of absence rather than an absence of measurement.
+		if r.Status != status.Absent {
+			u.Region = r.Region
+			u.Episodes, u.Years, u.Records = r.Episodes, r.Years, r.Records
+			if !r.LastSeen.IsZero() {
+				u.LastSeen = r.LastSeen.Format(status.DateLayout)
+			}
+		}
+		out = append(out, u)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ScientificName < out[j].ScientificName })
+	return out, nil
 }
 
 func id(sci string) string {

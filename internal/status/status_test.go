@@ -1,6 +1,7 @@
 package status
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -223,5 +224,56 @@ func TestHistoricalRecordsAreNotPresence(t *testing.T) {
 	live := Measure(237, days("1990-05-18", offsets...), false)
 	if got := Classify(live, since); got != Established {
 		t.Errorf("the same shape ending recently got %q, want %q", got, Established)
+	}
+}
+
+// TestReadParsesTheLastSeenColumn asserts the tenth column round-trips, and
+// that a row missing it is refused rather than read short.
+//
+// The refusal is the half that matters. Read split on tabs and indexed
+// positionally, so a nine-field line left over from before the column
+// existed would have parsed happily and left every LastSeen zero -- which
+// reads as "never recorded" and is exactly the state an `absent` species is
+// in. A stale table would then have turned every historical bird into an
+// absent one silently, on a page whose whole job is to say which.
+//
+// Watched fail: relaxing the field count to `< 9` accepts the short row and
+// reports a zero date for Passenger Pigeon; dropping the time.Parse call
+// leaves the date zero on the full row too.
+//
+// Verifies: P-075.
+func TestReadParsesTheLastSeenColumn(t *testing.T) {
+	const full = "# a comment\n" +
+		"ectopistes migratorius\thistorical\tCAN.9_1\t89\t52\t145\tCAN.6_1\t4\t303189\t1902-05-18\n" +
+		"agapornis lilianae\tabsent\t-\t0\t0\t0\tUSA.44_1\t1\t70979374\t-\n"
+
+	rows, err := Read(strings.NewReader(full))
+	if err != nil {
+		t.Fatalf("Read: %v", err)
+	}
+	if len(rows) != 2 {
+		t.Fatalf("read %d rows, want 2", len(rows))
+	}
+	want := time.Date(1902, 5, 18, 0, 0, 0, 0, time.UTC)
+	if !rows[0].LastSeen.Equal(want) {
+		t.Errorf("Passenger Pigeon last seen %v, want %v; the date is the whole "+
+			"content of a historical verdict", rows[0].LastSeen, want)
+	}
+	if !rows[1].LastSeen.IsZero() {
+		t.Errorf("an absent species has a last-seen date of %v; `-` means the "+
+			"derivation measured none", rows[1].LastSeen)
+	}
+
+	// A table from before the column existed must be refused, not read short.
+	short := "ectopistes migratorius\thistorical\tCAN.9_1\t89\t52\t145\tCAN.6_1\t4\t303189\n"
+	if _, err := Read(strings.NewReader(short)); err == nil {
+		t.Error("a nine-field row was accepted; every date would silently read as " +
+			"never-recorded, which is the state `absent` means")
+	}
+
+	// And a date that is not one is an error, not a zero.
+	bad := "ectopistes migratorius\thistorical\tCAN.9_1\t89\t52\t145\tCAN.6_1\t4\t303189\tMay 1902\n"
+	if _, err := Read(strings.NewReader(bad)); err == nil {
+		t.Error("an unparseable date was accepted as no date at all")
 	}
 }

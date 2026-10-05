@@ -24,6 +24,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"bytes"
 
@@ -42,6 +43,7 @@ import (
 	"birdview/internal/dataset"
 	"birdview/internal/inat"
 	"birdview/internal/region"
+	"birdview/internal/status"
 	"birdview/internal/trait"
 	"birdview/internal/view"
 	"birdview/spec"
@@ -109,7 +111,11 @@ type server struct {
 	ds   *dataset.Dataset
 	tmpl *template.Template
 	byID map[string]*dataset.Species
-	fams []familyOption
+	// undrawnByID holds the species the derivation classified and rejected.
+	// Consulted only after byID misses, so a URL that stopped working can say
+	// why instead of 404ing into silence (P-075).
+	undrawnByID map[string]*dataset.Undrawn
+	fams        []familyOption
 	// devDir is empty for a real binary. When set, render re-parses the
 	// templates on every request so an edit shows on reload.
 	devDir string
@@ -273,7 +279,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		return nil, fmt.Errorf("parsing templates: %w", err)
 	}
 	s := &server{mux: http.NewServeMux(), ds: ds, tmpl: tmpl, devDir: devDir,
-		byID: map[string]*dataset.Species{}}
+		byID: map[string]*dataset.Species{}, undrawnByID: map[string]*dataset.Undrawn{}}
 
 	counts := map[string]int{}
 	for i := range ds.Species {
@@ -281,8 +287,19 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		s.byID[sp.ID] = sp
 		counts[sp.Family]++
 	}
-	// ds.Families is already in ABA taxonomic sequence; preserve it rather than
-	// alphabetizing, which is what the checklist and every field guide use.
+	for i := range ds.Undrawn {
+		u := &ds.Undrawn[i]
+		// The ingest refuses to emit a collision, so one here means the
+		// dataset on disk was not built by it. Dropping the undrawn record is
+		// the safe direction: a drawn bird keeps its page.
+		if _, drawn := s.byID[u.ID]; drawn {
+			return nil, fmt.Errorf("id %q is both drawn and not drawn; "+
+				"one URL cannot mean two birds (P-075)", u.ID)
+		}
+		s.undrawnByID[u.ID] = u
+	}
+	// ds.Families is already in AviList's taxonomic sequence; preserve it
+	// rather than alphabetizing, which is the order every field guide uses.
 	for _, f := range ds.Families {
 		s.fams = append(s.fams, familyOption{
 			Name: f.Name, Common: f.Common, Color: f.Color, TextColor: f.TextColor,
@@ -1012,8 +1029,17 @@ type metricRow struct {
 }
 
 func (s *server) detail(w http.ResponseWriter, r *http.Request) {
-	sp, ok := s.byID[strings.TrimPrefix(r.URL.Path, "/species/")]
+	wanted := strings.TrimPrefix(r.URL.Path, "/species/")
+	sp, ok := s.byID[wanted]
 	if !ok {
+		// A bird the derivation classified and left out of scope gets a page
+		// naming it and the measured reason, at 404 (P-075, CR-029). Anything
+		// else gets the bare 404: this page is for a bird BirdView knows of
+		// and chose not to draw, and it would be a fabrication for a typo.
+		if u, known := s.undrawnByID[wanted]; known {
+			s.undrawn(w, r, u)
+			return
+		}
 		http.NotFound(w, r)
 		return
 	}
@@ -1069,6 +1095,109 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		Metrics: rows, Categories: s.categories(sp), Opt: opt, Query: queryFor(r), INatURL: inatURL,
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 	})
+}
+
+// undrawnData is the page for a bird the derivation rejected (P-075).
+//
+// The prose is assembled in Go rather than branched in the template, because
+// the three verdicts say genuinely different things and a template that tries
+// to interleave them ends up asserting the intersection — which for `absent`
+// would be counts that were never measured.
+type undrawnData struct {
+	Feedback string
+	Query    func(...string) template.URL
+	Opt      options
+
+	Name string
+	// AlsoCalled is the other locale's English name, present only when it
+	// differs. A reader who followed a stale link may have it under the other
+	// one (P-049).
+	AlsoCalled string
+	U          *dataset.Undrawn
+	// Verdict is the one-line answer, and Why the paragraph behind it.
+	Verdict string
+	Why     string
+	// Evidence is the measured sentence, empty for `absent` — where there is
+	// no measurement, and printing the zeros would present the absence of a
+	// measurement as a measurement of absence.
+	Evidence string
+}
+
+// undrawn renders the page for a species the status table classified and
+// scope rejected, at 404 (P-075, CR-029).
+//
+// 404 and not 410: scope is regenerated from live occurrence data, so a bird
+// that misses the recurrence bar on one run can clear it on the next, and
+// "gone permanently" is a claim this derivation does not support.
+//
+// Verifies: P-075.
+func (s *server) undrawn(w http.ResponseWriter, r *http.Request, u *dataset.Undrawn) {
+	opt := parseOptions(r)
+	name := u.Name(opt.Locale)
+	other := u.Names[dataset.LocaleNA]
+	if opt.Locale == dataset.LocaleNA {
+		other = u.Names[dataset.LocaleWorld]
+	}
+	if other == name {
+		other = ""
+	}
+
+	where := u.Region
+	if rg, ok := region.Get(u.Region); ok {
+		where = rg.Name
+	}
+	// Both thresholds are read from the derivation rather than written out
+	// here. A page quoting "three episodes across three years" beside a rule
+	// that had moved to four would be a confident, checkable lie.
+	bar := fmt.Sprintf("%d episodes across %d years", status.MinEpisodes, status.MinYears)
+	recurs := fmt.Sprintf("%s episodes across %s years in %s, from %s records",
+		comma(int64(u.Episodes)), comma(int64(u.Years)), where, comma(u.Records))
+
+	d := undrawnData{
+		Feedback: s.feedback, Query: queryFor(r), Opt: opt,
+		Name: name, AlsoCalled: other, U: u,
+	}
+	switch u.Status {
+	case string(status.Vagrant):
+		d.Verdict = "it has turned up, but it does not come back"
+		d.Evidence = "Recorded in " + recurs + "."
+		d.Why = "BirdView draws the birds whose records recur: repeated arrivals, across " +
+			"several years, somewhere in the regions it covers. The bar is " + bar +
+			", and this bird has not reached it. A crowd of records is not evidence " +
+			"against that — a twitchable rarity draws observers, so a single arrival can " +
+			"out-record a resident."
+	case string(status.Historical):
+		d.Verdict = "its records recur, but they stopped"
+		d.Evidence = "Recorded in " + recurs + ", the last of them on " + prettyDate(u.LastSeen) + "."
+		d.Why = fmt.Sprintf("Recurrence alone cannot tell a resident from an extinct bird. "+
+			"GBIF carries museum specimens and old sight records under their original "+
+			"collection dates, so a species can satisfy every test for coming back and "+
+			"still not have been seen in a lifetime. A bird last recorded more than %d "+
+			"years before the occurrence data ends is filed as historical rather than "+
+			"present.", status.RecentYears)
+	default:
+		d.Verdict = "the open record holds nothing that can be measured"
+		d.Why = "BirdView decides scope from the dates on which a species was recorded, " +
+			"and for this bird there are too few of them anywhere it covers to ask the " +
+			"question. No episode count is shown because none was computed: there are " +
+			"no zeros here that were measured. The name is known at all only because " +
+			"the occurrence data mentions it in passing."
+	}
+
+	// The body says what the status code says, and the status code is set
+	// before a byte of it is written.
+	w.WriteHeader(http.StatusNotFound)
+	s.render(w, "undrawn.html", d)
+}
+
+// prettyDate turns an ISO date from the dataset into one a reader reads.
+// Falls back to the input, which is already legible, rather than to a blank.
+func prettyDate(iso string) string {
+	t, err := time.Parse("2006-01-02", iso)
+	if err != nil {
+		return iso
+	}
+	return t.Format("2 January 2006")
 }
 
 // comparePanel is one bird on the comparison page: the same annotated diagram

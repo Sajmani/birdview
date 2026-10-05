@@ -1837,3 +1837,51 @@ was the wrong fix, because the spec is a page readers reach.
 
 **Status: verified 2026-10-05 — passing, and watched failing** by restoring the old header
 sentence, which reports it on every page that renders the header.
+
+### AC-098 — A species left out of scope is named and explained, at 404
+**Verifies:** [P-075](product.md#p-075), [CR-029](decisions.md#cr-029) · **Level:** code ·
+**Method:** handler test over the real dataset, plus an ingest test over the real status table
+
+**Assertions:**
+
+1. `GET /species/<id>` for an out-of-scope species returns **404** and a body naming the bird,
+   its scientific name and its status. Not 200 and not 410.
+2. The body carries the evidence the status rests on — episodes, years and records for
+   `vagrant` and `historical` — and for `historical` the **date last recorded**.
+3. For `absent` the body carries **no counts at all**, because none were measured.
+4. An id matching nothing gets the bare `404 page not found`, with no bird named.
+5. The ingest carries every classified-but-not-drawn species into the dataset, and **no id
+   collides with a drawn species'**. A collision would hide a living page behind an epitaph.
+
+**Why it is checked over the real dataset and not a fixture:** assertion 5 is a statement about
+1,411 real ids produced by one AviList join, and a fixture asserts it over whichever handful the
+fixture holds. The fixture tests cover the rendering; the dataset tests cover the claim.
+
+**Three tests, because the assertions sit at different levels.**
+`TestUndrawnSpeciesNamesItselfAt404` renders all three verdicts and the typo case against the
+fixture; `TestNoIDIsBothDrawnAndNot` and `TestAbsentSpeciesCarryNoEvidence` run over the
+compiled dataset. The second of those asserts **both halves** — absent species carry no
+evidence, and every other verdict does — because a check written one way round is satisfied by
+an ingest that publishes no evidence at all.
+
+**Status: verified 2026-10-05 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| `detail` restored to a bare `http.NotFound` | all three verdicts, "no verdict on the page" |
+| the handler writes 200 | "the address serves no bird, and 200 would tell every cache otherwise" |
+| the handler writes 410 | both the status assertion and the CR-029 one |
+| the historical sentence drops `LastSeen` | `page does not say "18 May 1902"` |
+| the `absent` branch is given the evidence sentence | four separate count-shaped strings on the page |
+| an unmatched id is handed a synthesized record | "unknown id gets the named page" |
+| the region prints as its GADM id | missing `Ontario` and `Alaska`, present `CAN.9_1` |
+| `status.OutOfScope` filters on `InScope` rather than complementing `Scope` | **the ingest refuses the build**, naming `leastp5` as both drawn and not; with the ingest guard also removed, the dataset test names seven colliding ids, and the server refuses to start |
+| the ingest publishes the `absent` species' unmeasured zeros | 167 species reported |
+| the ingest withholds evidence from every verdict | the other half, on episodes and region |
+
+**The eighth mutation is the one worth keeping.** It is not a hypothetical: deriving the
+rejected set from `Status.InScope()` instead of from the complement of `Scope()` is the obvious
+way to write it, and it silently republishes the nine [P-071](product.md#p-071) exceptions —
+birds that are in scope *with* an out-of-scope status — as epitaphs for birds the index is
+drawing. Three guards caught it independently, which is the right number for an invariant that
+decides what a URL means.

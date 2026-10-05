@@ -18,6 +18,7 @@ import (
 
 	"birdview/internal/dataset"
 	"birdview/internal/region"
+	"birdview/internal/status"
 	"birdview/internal/trait"
 	"birdview/internal/view"
 	"birdview/spec"
@@ -216,7 +217,44 @@ func testDataset() *dataset.Dataset {
 		"USA.5_1": 1000000, "USA.38_1": 200000, "USA.39_1": 480000,
 		"CAN.9_1": 1817968, "USA.2_1": 6055121, "SEA.PAC": 90000,
 	}
-	return &dataset.Dataset{Families: fams, Species: sp, RegionTotals: totals}
+	return &dataset.Dataset{Families: fams, Species: sp, RegionTotals: totals,
+		Undrawn: undrawnFixture()}
+}
+
+// undrawnFixture holds one bird of each verdict the derivation can reject a
+// species with (P-075).
+//
+// All three, because the page says genuinely different things for each, and
+// the one that matters is `absent`: it is the verdict whose counts were never
+// measured, so it is the only case that can catch a page printing zeros as
+// though they were a result. A fixture carrying the two measured verdicts
+// would render correctly and prove nothing about the third.
+//
+// The figures are the real ones, so the prose read while developing is the
+// prose a reader gets: Passenger Pigeon really does recur across 89 episodes
+// in 52 years, and really does stop on 1902-05-18.
+func undrawnFixture() []dataset.Undrawn {
+	names := func(na string) map[dataset.Locale]string {
+		return map[dataset.Locale]string{
+			dataset.LocaleNA: na, dataset.LocaleWorld: worldName(na)}
+	}
+	return []dataset.Undrawn{{
+		ID: "paspig", Names: names("Passenger Pigeon"),
+		ScientificName: "Ectopistes migratorius", Status: "historical",
+		Region: "CAN.9_1", Episodes: 89, Years: 52, Records: 145,
+		LastSeen: "1902-05-18",
+	}, {
+		ID: "sedwar1", Names: names("Sedge Warbler"),
+		ScientificName: "Acrocephalus schoenobaenus", Status: "vagrant",
+		Region: "USA.2_1", Episodes: 2, Years: 2, Records: 4,
+		LastSeen: "2018-10-04",
+	}, {
+		// No region, no counts, no date -- which is exactly what the ingest
+		// emits for `absent`, the derivation never having run a date query
+		// for this bird.
+		ID: "lillov1", Names: names("Lilian's Lovebird"),
+		ScientificName: "Agapornis lilianae", Status: "absent",
+	}}
 }
 
 // fixtureCounts reports how many species, families and orders testDataset
@@ -4430,4 +4468,184 @@ func TestNoPersonalAddressIsPublished(t *testing.T) {
 			}
 		}
 	}
+}
+
+// TestUndrawnSpeciesNamesItselfAt404 asserts that a URL for a bird the
+// derivation classified and rejected says which bird and why, rather than
+// answering `404 page not found`.
+//
+// What each verdict must carry is different, and the differences are the
+// point:
+//
+//   - `historical` turns entirely on WHEN. Passenger Pigeon satisfies every
+//     test for recurrence -- 89 episodes across 52 years -- and the only fact
+//     that reconciles that with not drawing it is that the records stop in
+//     1902. A page asserting "historical" without the date states a verdict
+//     and withholds its evidence.
+//   - `vagrant` turns on the bar, which is read from the derivation rather
+//     than written into the page, so the two cannot drift apart.
+//   - `absent` must print NO counts. The zeros in those columns mean "not
+//     measured", and a page rendering "0 episodes across 0 years" would turn
+//     an absence of measurement into a measurement of absence.
+//
+// And the status code is asserted three ways -- 404, not 200, not 410 -- so
+// that a change to any one of them is caught. 200 would tell caches an
+// address serving no bird is fine; 410 would claim a permanence that a scope
+// regenerated from live data does not have (CR-029).
+//
+// Verifies: P-075, CR-029. Criterion: AC-098.
+func TestUndrawnSpeciesNamesItselfAt404(t *testing.T) {
+	s := newTestServer(t)
+
+	for _, tc := range []struct {
+		id      string
+		want    []string
+		absent  []string
+		verdict string
+	}{{
+		id:      "paspig",
+		verdict: "historical",
+		want: []string{"Passenger Pigeon", "Ectopistes migratorius", "historical",
+			// The evidence, and the date that is the whole of the verdict.
+			"89 episodes", "52 years", "145 records", "18 May 1902",
+			// The region the verdict came from, as a name and not a GADM id.
+			"Ontario"},
+		absent: []string{"CAN.9_1"},
+	}, {
+		id:      "sedwar1",
+		verdict: "vagrant",
+		want: []string{"Sedge Warbler", "Acrocephalus schoenobaenus", "vagrant",
+			"2 episodes", "2 years", "4 records", "Alaska",
+			// The bar it did not clear, derived from the thresholds rather
+			// than spelled out here.
+			fmt.Sprintf("%d episodes across %d years", status.MinEpisodes, status.MinYears)},
+	}, {
+		id:      "lillov1",
+		verdict: "absent",
+		want:    []string{"Lilian&#39;s Lovebird", "Agapornis lilianae", "absent"},
+		// Nothing that reads as a count, in any of the forms the other two
+		// verdicts render one.
+		absent: []string{"0 episodes", "episodes across", "records.", "Recorded in"},
+	}} {
+		t.Run(tc.id, func(t *testing.T) {
+			code, body := get(t, s, "/species/"+tc.id)
+			if code != http.StatusNotFound {
+				t.Errorf("status %d, want %d: the address serves no bird, and "+
+					"200 would tell every cache otherwise", code, http.StatusNotFound)
+			}
+			if code == http.StatusGone {
+				t.Errorf("status 410 claims the bird is permanently gone; scope is "+
+					"re-derived from live data and %s can come back (CR-029)", tc.id)
+			}
+			if !strings.Contains(body, "BirdView does not draw this bird") {
+				t.Fatalf("no verdict on the page; body:\n%s", body)
+			}
+			for _, w := range tc.want {
+				if !strings.Contains(body, w) {
+					t.Errorf("page does not say %q", w)
+				}
+			}
+			for _, a := range tc.absent {
+				if strings.Contains(body, a) {
+					t.Errorf("page says %q, which it has no measurement for", a)
+				}
+			}
+		})
+	}
+
+	// An id that matches no species at all keeps the terse answer. The named
+	// page is for a bird BirdView knows of and chose not to draw, and
+	// inventing one to apologise for would be worse than saying nothing.
+	code, body := get(t, s, "/species/nosuchbird")
+	if code != http.StatusNotFound {
+		t.Errorf("unknown id: status %d, want 404", code)
+	}
+	if strings.Contains(body, "BirdView does not draw this bird") {
+		t.Errorf("unknown id gets the named page; it names no bird, so the page "+
+			"would be an explanation of nothing:\n%s", body)
+	}
+}
+
+// TestNoIDIsBothDrawnAndNot asserts over the real dataset that the drawn and
+// rejected sets do not share an id.
+//
+// Over the real data and not the fixture, because the claim is about 1,411
+// ids produced by one AviList join, and a fixture asserts it over whichever
+// handful the fixture holds. The two sets are built the same way -- eBird
+// code, scientific-name slug if there is none -- so nothing structural stops
+// a collision; what prevents it is that AviList gives each species one row.
+// That is a property of an input file, which is exactly the kind of thing
+// that changes under you.
+//
+// A collision is not cosmetic. The server reads byID first, so the drawn bird
+// would win and the rejected one would be unreachable -- but reverse the
+// lookup order, which is an implementation detail nothing pins, and a live
+// species page becomes an epitaph.
+//
+// Verifies: P-075. Criterion: AC-098.
+func TestNoIDIsBothDrawnAndNot(t *testing.T) {
+	ds := realDataset(t)
+	if len(ds.Undrawn) == 0 {
+		t.Fatal("the dataset carries no rejected species, so this check tests nothing; " +
+			"re-run birdview-ingest")
+	}
+	drawn := make(map[string]string, len(ds.Species))
+	for _, sp := range ds.Species {
+		drawn[sp.ID] = sp.ScientificName
+	}
+	for _, u := range ds.Undrawn {
+		if other, clash := drawn[u.ID]; clash {
+			t.Errorf("id %q is both %s (drawn) and %s (not drawn)", u.ID, other, u.ScientificName)
+		}
+		if u.ID == "" || u.ScientificName == "" || u.Status == "" {
+			t.Errorf("%+v: a rejected species needs an id, a name and a verdict "+
+				"before it can explain itself", u)
+		}
+		if u.Name(dataset.LocaleWorld) == "" {
+			t.Errorf("%s has no English name, so its page would apologise for a binomial",
+				u.ScientificName)
+		}
+	}
+	t.Logf("%d drawn, %d classified and not drawn, no shared id",
+		len(ds.Species), len(ds.Undrawn))
+}
+
+// TestAbsentSpeciesCarryNoEvidence asserts over the real dataset that the
+// ingest withheld the counts for every `absent` species, and kept them for
+// every other verdict.
+//
+// Both halves. The first is the honesty rule of P-075; the second is what
+// stops it being satisfied by an ingest that emits no evidence at all, which
+// would pass a check written only one way round.
+//
+// Verifies: P-075. Criterion: AC-098.
+func TestAbsentSpeciesCarryNoEvidence(t *testing.T) {
+	ds := realDataset(t)
+	seen := map[string]int{}
+	for _, u := range ds.Undrawn {
+		seen[u.Status]++
+		switch u.Status {
+		case "absent":
+			if u.Measured() || u.Episodes != 0 || u.Years != 0 || u.Records != 0 || u.LastSeen != "" {
+				t.Errorf("%s is absent but carries evidence %+v; those columns mean "+
+					"NOT MEASURED, and publishing them makes an absence of "+
+					"measurement look like a measurement of absence", u.ScientificName, u)
+			}
+		default:
+			if !u.Measured() {
+				t.Errorf("%s is %s but names no region, so the page can state the "+
+					"verdict and not show it", u.ScientificName, u.Status)
+			}
+			if u.Episodes == 0 {
+				t.Errorf("%s is %s with zero episodes, which no measured verdict is",
+					u.ScientificName, u.Status)
+			}
+		}
+	}
+	for _, want := range []string{"vagrant", "historical", "absent"} {
+		if seen[want] == 0 {
+			t.Errorf("no %s species in the dataset, so that branch is unchecked", want)
+		}
+	}
+	t.Logf("rejected: %v", seen)
 }

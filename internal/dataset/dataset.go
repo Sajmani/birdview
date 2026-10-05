@@ -241,10 +241,59 @@ func (s *Species) AllMetrics() map[string]*Metric {
 	}
 }
 
+// Undrawn is a species the status derivation classified and left out of
+// scope: it has a URL and no drawing (P-075, CR-029).
+//
+// Deliberately NOT a Species with empty metrics. A Species is the input to
+// every drawing function in the program, and 334 of them carrying zero mass
+// and no family color would be 334 chances for one of those functions to
+// divide by nothing. The two types answer different questions -- what to draw,
+// and what to say instead -- and the compiler should know which it has.
+type Undrawn struct {
+	// ID and Names are resolved exactly as a Species' are, so a URL that
+	// worked before the species left scope still reaches this record.
+	ID             string            `json:"id"`
+	Names          map[Locale]string `json:"names"`
+	ScientificName string            `json:"scientificName"`
+
+	// Status is the verdict: vagrant, historical or absent. A string rather
+	// than the status package's own type because that package imports this
+	// one, and the dependency may not run both ways.
+	Status string `json:"status"`
+
+	// The evidence behind the verdict, from the region that decided it.
+	//
+	// All four are omitted together for `absent`, where the derivation never
+	// measured any dates: writing the zeros would present "not measured" as
+	// "measured zero", which is the confusion Provenance exists to prevent.
+	Region   string `json:"region,omitempty"`
+	Episodes int    `json:"episodes,omitempty"`
+	Years    int    `json:"years,omitempty"`
+	Records  int64  `json:"records,omitempty"`
+	// LastSeen is an ISO date, and the whole content of a `historical`
+	// verdict: Passenger Pigeon recurs across 89 episodes in 52 years, all of
+	// which end on 1902-05-18.
+	LastSeen string `json:"lastSeen,omitempty"`
+}
+
+// Measured reports whether the derivation has evidence to show for this
+// verdict. False for `absent`, whose counts are absences of measurement
+// rather than measurements of absence.
+func (u *Undrawn) Measured() bool { return u.Region != "" }
+
+// Name returns the English name for a locale, falling back to the world name,
+// on the same rule as Species.Name.
+func (u *Undrawn) Name(l Locale) string {
+	if n := u.Names[l]; n != "" {
+		return n
+	}
+	return u.Names[LocaleWorld]
+}
+
 // Family is one taxonomic family, with the colors its badge uses.
 //
-// Families are listed in the ABA checklist's own taxonomic sequence, which is
-// the order every field guide arranges birds in -- and which alphabetizing
+// Families are listed in AviList's linear sequence, which is phylogenetic --
+// the order every field guide arranges birds in, and which alphabetizing
 // discards.
 type Family struct {
 	Name        string `json:"name"`        // scientific, e.g. Anatidae
@@ -268,7 +317,13 @@ type Dataset struct {
 	// SourceVersions pins what this build was made from, so a served dataset
 	// can be traced back to its inputs (G-004).
 	SourceVersions map[string]string `json:"sourceVersions"`
-	// Families in ABA taxonomic sequence, grouped implicitly by Order.
+	// Families in AviList's taxonomic sequence, grouped implicitly by Order.
 	Families []Family  `json:"families"`
 	Species  []Species `json:"species"`
+
+	// Undrawn are the species the derivation classified and rejected, so a
+	// URL that stops working can say why rather than 404 into silence
+	// (P-075). Not species: nothing here is drawn, filtered, counted or
+	// compared.
+	Undrawn []Undrawn `json:"undrawn,omitempty"`
 }

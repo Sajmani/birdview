@@ -2108,6 +2108,98 @@ inventing a coefficient and then finding data to justify it; the honest order is
 distribution first and then declare the cut with a written reason. This is the one piece of the
 model still owed a number.
 
+## CR-029 — A species URL outlives the species, but does not keep its 200
+
+**Subject:** `presentation.unknown_species_id`
+**Kind:** Conditional — [CR-018](#cr-018)(b) set this subject for `/compare`, and the detail
+view resolves it the same way in substance and the opposite way in status code
+**Date:** 2026-10-05 · **Decided by:** Sameer
+
+### The question CR-018 left open
+
+CR-018(b) decided that an unrecognised species id in `/compare` is **dropped and named**, not a
+404: *"render what is recognised and name what is not."* `/species/<id>` was never revisited, and
+it still calls `http.NotFound`, which writes `404 page not found` and nothing else.
+
+That was harmless while scope came from a checklist nobody intended to change. It stopped being
+harmless with [CR-028](#cr-028): scope is now **derived from live occurrence data and
+regenerated**, so the set of species URLs that work is a function of a GBIF query, and a future
+run can take `/species/<code>` away from a bird that has one today.
+
+### Why it is not simply CR-018 again
+
+CR-018's answer has two halves — *render what you can* and *name what you cannot* — and only
+the second half survives the move. A comparison of four birds minus one is still a comparison
+of three; a detail page minus its one bird is nothing. There is no partial page to render.
+
+That difference decides the status code, which is the only point on which this record departs
+from CR-018. `/compare` returns **200** because it delivered a comparison and merely delivered
+a smaller one than was asked for. `/species/<id>` has delivered **no bird at all**, and
+returning 200 would tell every cache and crawler that an address which serves nothing is fine.
+
+### Options considered
+
+| | Status | What the reader sees | Why not |
+| --- | --- | --- | --- |
+| Keep `http.NotFound` | 404 | `404 page not found` | Throws away a measured verdict the derivation already holds. This is the status quo being changed |
+| Redirect to the index | 302 | The index, no explanation | Loses the question. The reader asked about one bird and is handed 1,083 |
+| **Named 404** | **404** | The bird, its status, its evidence | **Chosen** |
+| Named 410 Gone | 410 | The same page | Overclaims. 410 asserts the resource is permanently gone and should be de-indexed; scope is regenerated, and a bird that fails the recurrence bar on one run can clear it on the next. Three of the nine [P-071](product.md#p-071) exceptions exist precisely because sparse evidence moves |
+| Serve the bird anyway, marked out of scope | 200 | A drawing | Rejected outright. [P-001](product.md#p-001) decides what BirdView draws, and a page that draws a bird the dataset excludes makes the scope rule a suggestion |
+
+### Decision
+
+[P-075](product.md#p-075): **404 with a page that names the bird and gives the measured reason.**
+`410` is rejected for overclaiming, `200` for lying to caches, and a redirect for losing the
+question.
+
+**An id matching no classified species keeps the bare 404.** The named page requires a row in
+the status table; without one BirdView has nothing to say, and inventing a bird to apologise
+for would be worse than the terse answer.
+
+### What it costs
+
+The out-of-scope species have to reach the server, which means the ingest carries them into
+`species.json` — 328 entries of id, names, status and evidence, 58 KB against a 4.3 MB file.
+They are not
+`Species` records: they have no measurements, no family colors and no diagram, and giving them
+a half-filled `Species` would put 328 birds with zero mass inside the type every drawing
+function consumes.
+
+It also costs a **tenth column in `data/status.tsv`**, the date each species was last recorded.
+The table carried episodes, years and records but not *when*, so "historical" could be stated
+and not shown. For the 37 historical species that date is the whole explanation, and a verdict
+whose evidence is withheld is the shape this project keeps rejecting elsewhere.
+
+### What regenerating the table found
+
+**`data/status.tsv` was not a function of its inputs.** Rebuilding it from the cached fetches —
+same records, same dates, no network — produced a table that differed from the committed one,
+and differed again on the next run. `bestRegion` ranked candidate regions on status and episode
+count and then walked a Go map, so any tie was broken by iteration order. **Fifteen rows named a
+different region on each run** and carried their episode, year, record and now last-seen
+figures with them: Cooper's Hawk recurs in 39 episodes in both Alaska and Arizona, and the
+table reported 24 years and 216,391 records one run and 18 and 119,194 the next.
+
+Harmless while nothing read the region column; not harmless once [P-075](product.md#p-075)
+prints the date on a page as the reason a bird is not drawn. A reason that changes when nothing
+changed is not a reason.
+
+The tiebreak is now declared rather than incidental: status, then episodes, then **years, then
+records, then the region id**. Years before records because the model is recurrence and not
+abundance ([CR-028](#cr-028)) — between two regions a bird recurs in equally often, the one it
+came back to across more years is the better evidence, whatever the crowds did. The id settles
+what nothing else can: arbitrary, but the same arbitrary answer every run. Fifteen rows moved,
+most of them onto strictly more evidence; **no species changed status, and scope is unchanged at
+1,083.**
+
+### Status of requirements touched
+
+- [P-001](product.md#p-001) — Active; amended to name `historical` in the out-of-scope list,
+  which it had omitted, and to point at P-075.
+- [P-075](product.md#p-075) — Active, new.
+- [CR-018](#cr-018)(b) — stands unchanged for `/compare`.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
@@ -2119,7 +2211,7 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | ~~Retrieve, hash and vendor `fox-wingspan`; write its `PROVENANCE.md`~~ — done: `spec/sources/fox-wingspan/PROVENANCE.md` exists, `spec/check/pins.py` verifies the hash, and the ingest reads it for 300 measured wingspans | — | closed 2026-10-04 |
 | ~~Write `acceptance.md` — Gate 2, before any code~~ — done: 68 criteria, and Gate 2 passed long before the current work | — | closed 2026-10-04 |
 | **Publish the BirdView dataset as a source in its own right.** The project consumes four published datasets and credits each by DOI; it now derives work worth the same treatment — the occurrence status ([CR-028](#cr-028)), the region presence and shares, the supplementary habitat and diet assignments, the neck and trunk models, and the wingspan regression. None of it is reachable except by scraping the app. **What the shape should be is the open question, not whether.** `web/data/species.json` is a serving artifact, not a publication: it nests provenance inside every metric, repeats source strings across 1,083 species, and carries presentation fields — `familyColor`, `familyTextColor`, `id` — that mean nothing outside this app. A publication probably wants CSV, one table per thing, keys that join: `species.csv` (the identity columns), `measurements.csv` (one row per species per metric, with its kind, source and model, so provenance is a column rather than a nest), `categories.csv` (habitat and diet with origin), `regions.csv` (species, region, records), `status.csv` (what `data/status.tsv` already is). Plus the thing none of our own sources gave us and all of them needed: a `PROVENANCE.md` stating the version, the license, what is measured against what is modeled, and the known distortions — eBird withholding sensitive species, crowd-driven over-reporting, the 4 species with no AVONET row. **Licensing needs deciding first**: the derived values are built from CC BY 4.0 inputs, so attribution flows through, and BirdView should pick its own license rather than leave it implied | Sameer | after the repo exists |
-| **Decide what happens to a URL when the derived scope changes.** `data/status.tsv` is regenerated from live GBIF data, so a future run can drop a species and take `/species/<code>` with it. [CR-018](#cr-018) already settled the shape of the answer for comparison links — drop and name, rather than 404 — because a link is made to be kept. Nothing equivalent exists for a species page that stops existing, and a public deployment is the moment that starts mattering | Sameer | before public deployment |
+| ~~**Decide what happens to a URL when the derived scope changes.**~~ — **done 2026-10-05**, [CR-029](#cr-029) and [P-075](product.md#p-075). `/species/<id>` for a bird the status table classified but left out of scope now answers **404 with the bird named and its measured reason**, covering **328 of the 334 species** the derivation rejected — 124 vagrant, 167 absent, 37 historical; the other six have no AviList row, so no name and no stable id. CR-018's *name what was lost* carries over; its **200 does not**, because a comparison minus one bird is still a comparison and a detail page minus its bird is nothing. 410 was rejected for overclaiming: scope is regenerated, so a bird out today can be in after the next run. Cost a tenth column in `data/status.tsv` — the date last recorded — without which "historical" could be asserted and not shown | Sameer | closed 2026-10-05 |
 | Ask Ricklefs or ESA for permission to use the measured-length data | Sameer | **after a working demo** |
 | ~~ABA has not replied. Decide between chasing the permission and publishing a derived list~~ — decided: stop waiting, use public data. Names moved to AviList ([CR-022](#cr-022)); **scope is what remains** | Sameer | decided 2026-10-02 |
 | ~~Replace ABA **scope** with a list BirdView derives and owns~~ — **done 2026-10-05, and this was the deployment blocker.** [CR-028](#cr-028): scope is recurrence, not abundance. `birdview-ingest` reads the committed [`data/status.tsv`](../data/status.tsv); `internal/aba` is deleted; nothing reads `fetched/`; the ABA credit is gone from all three footers because nothing on a page comes from it. **1,083 species in 99 families**, up from 839 — 830 of the old list kept on measured evidence, 9 kept by hand under [P-071](product.md#p-071), and the rest admitted because they recur. Every input the build reads is now CC BY 4.0 or the project's own work | Sameer | closed 2026-10-05 |

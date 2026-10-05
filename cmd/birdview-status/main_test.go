@@ -2,7 +2,9 @@ package main
 
 import (
 	"testing"
+	"time"
 
+	"birdview/internal/status"
 	"birdview/internal/taxonomy"
 )
 
@@ -122,5 +124,66 @@ func TestLumpsMergeIntoTheSpeciesBirdViewCarries(t *testing.T) {
 	// with their own AVONET rows, and merging would delete Mangrove Warbler.
 	if _, ok := taxonomy.LumpedInto["Setophaga petechia"]; ok {
 		t.Error("Setophaga petechia must not be merged; it is a species BirdView carries")
+	}
+}
+
+// TestBestRegionIsDeterministic asserts that the region a verdict is
+// attributed to does not depend on Go's map iteration order.
+//
+// The bug: bestRegion ranked on (status, episodes) and walked the shapes map
+// directly, so two regions tied on both were separated by whichever came out
+// first. Fifteen rows of the committed table named a different region on
+// every run and carried their episode, year, record and last-seen figures
+// with them. Cooper's Hawk recurs in 39 episodes in both Alaska and Arizona,
+// and the table reported 24 years and 216,391 records on one run and 18 and
+// 119,194 on the next -- a generated table two runs over identical inputs
+// disagree about.
+//
+// It matters more now that the table carries a date: P-075 puts that date on
+// a page as the reason a bird is not drawn, and a reason that changes when
+// nothing changed is not a reason.
+//
+// Watched fail: restoring the bare map walk reports several different
+// regions across the runs below. One run cannot catch it -- a single call is
+// self-consistent whatever order it saw -- which is why this calls many
+// times and compares.
+//
+// Verifies: P-075, CR-028.
+func TestBestRegionIsDeterministic(t *testing.T) {
+	since := time.Date(2001, 1, 1, 0, 0, 0, 0, time.UTC)
+	recent := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
+
+	// Three regions the old rule could not separate: same status, same
+	// episode count. Years and records differ, so the declared tiebreak has
+	// a defensible answer -- the region it recurred in across the most years
+	// -- rather than merely a stable one.
+	shapes := map[string]status.Shape{
+		"USA.2_1":  {Records: 216391, Dates: 300, Episodes: 39, Years: 24, LastSeen: recent},
+		"USA.3_1":  {Records: 119194, Dates: 300, Episodes: 39, Years: 18, LastSeen: recent},
+		"USA.5_1":  {Records: 900000, Dates: 300, Episodes: 39, Years: 24, LastSeen: recent},
+		"CAN.13_1": {Records: 12, Dates: 9, Episodes: 2, Years: 2, LastSeen: recent},
+	}
+
+	gid, sh := bestRegion(shapes, since)
+	for i := 0; i < 200; i++ {
+		g, s := bestRegion(shapes, since)
+		if g != gid || s != sh {
+			t.Fatalf("run %d chose %s (%d years, %d records), run 0 chose %s (%d years, %d records); "+
+				"the committed table is not a function of its inputs",
+				i, g, s.Years, s.Records, gid, sh.Years, sh.Records)
+		}
+	}
+
+	// And the answer is the declared one, not merely a repeatable one.
+	// Years before records, because the model is recurrence and not
+	// abundance: USA.5_1 ties USA.2_1 on episodes and years and has four
+	// times the records, so records is what separates them.
+	if gid != "USA.5_1" {
+		t.Errorf("chose %s; want USA.5_1 -- highest status, most episodes, most "+
+			"years, and the most records among those tied", gid)
+	}
+	if sh.Years != 24 {
+		t.Errorf("chose a region with %d years; a region recurring across fewer "+
+			"years is weaker evidence whatever its record count", sh.Years)
 	}
 }

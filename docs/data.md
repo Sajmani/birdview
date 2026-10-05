@@ -37,14 +37,14 @@ it borrowed from. Four of those splits are still awaiting a taxonomic check
 
 | Part | Status | Where it comes from |
 | --- | --- | --- |
-| **Bill** | **measured** — 831 direct, 10 near-match | AVONET `Beak.Length_Culmen` |
-| **Tail** | **measured** — 831 direct, 10 near-match | AVONET `Tail.Length` |
-| **Mass** | **measured** — 831 direct, 10 near-match | AVONET `Mass` |
-| **Wingspan** | **301 measured**, 7 near-match, **533 modeled** | Fox et al. 2026 where empirical; otherwise a fitted regression |
-| **Head** | **modeled, unvalidated** — all 839 | `7.5 × mass^(1/3)` |
-| **Body** | **modeled, calibrated** — all 839 | `14.0329 × mass^0.37` |
-| **Neck** | **modeled, invented** — all 839 | a per-family ratio × the trunk |
-| **Total length** | **modeled** — all 839 | `bill + head + neck + body + tail` |
+| **Bill** | **measured** — 1074 direct, 9 near-match | AVONET `Beak.Length_Culmen` |
+| **Tail** | **measured** — 1074 direct, 9 near-match | AVONET `Tail.Length` |
+| **Mass** | **measured** — 1074 direct, 9 near-match | AVONET `Mass` |
+| **Wingspan** | **391 measured**, 7 near-match, **685 modeled** | Fox et al. 2026 where empirical; otherwise a fitted regression |
+| **Head** | **modeled, unvalidated** — all 1083 | `7.5 × mass^(1/3)` |
+| **Body** | **modeled, calibrated** — all 1083 | `14.0329 × mass^0.37` |
+| **Neck** | **modeled, invented** — all 1083 | a per-family ratio × the trunk |
+| **Total length** | **modeled** — all 1083 | `bill + head + neck + body + tail` |
 
 Those five — bill, head, neck, body, tail — are the diagram's segments, and they are what total
 length is built from. Mass and wingspan are drawn or reported but are not part of the sum.
@@ -205,6 +205,18 @@ Two species the occurrence data names are dropped: Gray-headed Swamphen and West
 Warbling-Vireo, both of which eBird splits and AviList lumps into a bird already in the list.
 Every name BirdView serves comes from AviList, so one AviList has no concept for has no name
 this project can publish.
+
+**The birds that did not make it still have a page.** The derivation classifies 1426 species
+and draws 1083; the other 334 were judged `vagrant`, `historical` or `absent`. Ask for one of
+them by URL — `/species/paspig` — and you get a 404 whose body names the bird and gives the
+measured reason, rather than `404 page not found`. Passenger Pigeon recurs across 89 episodes
+in 52 years in Ontario and every one of those records ends on 18 May 1902; the page says so.
+An `absent` species shows no counts at all, because none were measured — the derivation never
+ran a date query for it, and the zeros in its row mean *not measured*, not *measured zero*.
+
+It is 404 rather than 410 on purpose. Scope is re-derived from live occurrence records, so a
+bird that misses the bar on one run can clear it on the next as more observations are
+published. "Gone permanently" is not a claim this derivation supports.
 
 **Names** come from AviList v2025b, in two vocabularies: eBird/Clements (Dovekie) by default and
 AviList/IOC (Little Auk) on request. The **species id in the URL is the eBird code** — `amerob`,

@@ -6,6 +6,7 @@ import (
 	"io"
 	"sort"
 	"strings"
+	"time"
 
 	"birdview/internal/dataset"
 	"birdview/internal/taxonomy"
@@ -42,7 +43,22 @@ type Row struct {
 	Commonest string
 	CommonestRecords,
 	CommonestRegionRecords int64
+
+	// LastSeen is the most recent date the species was recorded on in Region,
+	// and the zero time where no date was measured at all.
+	//
+	// Carried because it is the entire content of a `historical` verdict.
+	// Without it the table can say Passenger Pigeon recurs across 89 episodes
+	// in 52 years AND that it is historical, but not the one fact that
+	// reconciles them -- that every one of those records ends in 1902. A
+	// verdict whose evidence is withheld is not checkable (P-075).
+	LastSeen time.Time
 }
+
+// DateLayout is how LastSeen is written in the table: a plain ISO date, or
+// "-" where the derivation measured none. Dates are what this table is about,
+// so a missing one is written the way the file writes every other blank.
+const DateLayout = "2006-01-02"
 
 // Read parses the committed table written by cmd/birdview-status.
 func Read(r io.Reader) ([]Row, error) {
@@ -56,8 +72,8 @@ func Read(r io.Reader) ([]Row, error) {
 			continue
 		}
 		f := strings.Split(line, "\t")
-		if len(f) != 9 {
-			return nil, fmt.Errorf("status: line %d has %d fields, want 9: %q", ln, len(f), line)
+		if len(f) != 10 {
+			return nil, fmt.Errorf("status: line %d has %d fields, want 10: %q", ln, len(f), line)
 		}
 		var row Row
 		row.Name = strings.ToLower(strings.TrimSpace(f[0]))
@@ -71,6 +87,13 @@ func Read(r io.Reader) ([]Row, error) {
 		if _, err := fmt.Sscanf(f[7]+" "+f[8], "%d %d",
 			&row.CommonestRecords, &row.CommonestRegionRecords); err != nil {
 			return nil, fmt.Errorf("status: line %d: %w", ln, err)
+		}
+		if d := strings.TrimSpace(f[9]); d != "" && d != "-" {
+			t, err := time.Parse(DateLayout, d)
+			if err != nil {
+				return nil, fmt.Errorf("status: line %d: last seen %q: %w", ln, d, err)
+			}
+			row.LastSeen = t
 		}
 		switch row.Status {
 		case Established, Rare, Vagrant, Historical, Absent:
@@ -105,6 +128,38 @@ func Scope(rows []Row) []string {
 		out = append(out, n)
 	}
 	sort.Strings(out)
+	return out
+}
+
+// OutOfScope returns the rejected species, keyed by AviList name: everything
+// the table classified that Scope did not take.
+//
+// It is the complement of Scope over the same rows and in the same namespace,
+// computed from Scope rather than from InScope, so the two cannot drift. The
+// difference is not academic -- the nine declared exceptions of P-071 are in
+// scope with an out-of-scope status, and a complement built on InScope alone
+// would publish an epitaph for a bird the index is drawing.
+//
+// Where two occurrence names fold onto one AviList name, the strongest
+// verdict wins, on the same rule as Best.
+//
+// Verifies: P-075.
+func OutOfScope(rows []Row) map[string]Row {
+	in := map[string]bool{}
+	for _, n := range Scope(rows) {
+		in[n] = true
+	}
+	out := map[string]Row{}
+	for _, r := range rows {
+		n := aviListName(r.Name)
+		if in[n] {
+			continue
+		}
+		if cur, seen := out[n]; seen && Rank(cur.Status) >= Rank(r.Status) {
+			continue
+		}
+		out[n] = r
+	}
 	return out
 }
 

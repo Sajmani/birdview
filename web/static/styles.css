@@ -332,6 +332,24 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .help .est-demo { color: var(--accent); }
 .seealso { margin: 14px 0 0; }
 
+/* The page for a bird BirdView classified and does not draw (P-075).
+
+   The badge carries the verdict where a drawn bird's carries its family, and
+   it declares its own background for the same reason the family badge does:
+   the stylesheet contrast check skips a self-contained pair, and #f8fafc on
+   #0b1220 is ~18:1, well clear of the 7:1 floor. Status is distinguished by
+   the border, which is not text and carries no contrast duty -- the word
+   itself is inside the badge. */
+.badge.st-vagrant, .badge.st-historical, .badge.st-absent {
+  background: #0b1220; color: #f8fafc; border: 1px solid var(--line);
+  text-transform: uppercase; letter-spacing: .05em; }
+.badge.st-vagrant { border-color: #f0b429; }
+.badge.st-historical { border-color: #94a3b8; }
+.badge.st-absent { border-color: #64748b; }
+.tile.undrawn .verdict { margin: 12px 0 0; font-size: 14.5px; }
+.tile.undrawn .verdict b { color: #f8fafc; }
+.evidence { max-width: 70ch; margin: 0 0 10px; }
+
 /* Stroke style carries provenance (P-065): solid measured, dashed modeled.
 
    Head, neck and body are modeled for ALL 841 species, so that signal is

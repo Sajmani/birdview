@@ -30,8 +30,9 @@ way: it attributes BirdView's geography to the authority [CR-028](decisions.md#c
 it from. Nothing in the product names that boundary now — the page says *across every region*,
 which describes itself. Status is derived by
 [`birdview-status`](../cmd/birdview-status) and committed to
-[`data/status.tsv`](../data/status.tsv); `established` and `rare` are in scope, `vagrant` and
-`absent` are not. See [CR-028](decisions.md#cr-028).
+[`data/status.tsv`](../data/status.tsv); `established` and `rare` are in scope, `vagrant`,
+`historical` and `absent` are not. A species the table classifies but leaves out still has a
+page saying so ([P-075](#p-075)). See [CR-028](decisions.md#cr-028).
 
 Rationale: a bird a reader will actually meet is one that keeps turning up, and **recurrence
 measures that where a record count cannot**. Occurrence counts measure observer effort, so they
@@ -744,6 +745,46 @@ most of the dataset rather than a count.
 sums over the regions in view, and sums compose from their parts, so 69 regions do not imply
 2^69 subaggregates — the per-region counts already are the subaggregate, and any selection is
 one pass over them.
+
+### P-075 — A species BirdView does not draw still answers for itself
+Subject: `presentation.species_url.out_of_scope`
+Value: `404 with a named bird and its measured reason`
+Goals: G-001, G-002, G-004
+
+`/species/<id>` for a bird the derivation classified but left out of scope returns **404 with a
+page that names the bird and says why it is not drawn**, rather than the bare "404 page not
+found" an unknown path gets.
+
+The page carries both English names, the scientific name, the status [P-001](#p-001) derived,
+and the evidence that status rests on:
+
+- **vagrant** — the episodes, years and records in the region that decided it, against the bar
+  it did not clear.
+- **historical** — the same, plus **the date it was last recorded**, which is what makes the
+  verdict checkable. Passenger Pigeon recurs across 89 episodes in 52 years and every one of
+  them ends in 1902.
+- **absent** — no counts at all. The derivation never measured this bird's dates, so printing
+  its zeros as though they were a result would be the error [P-062](#p-062) exists to prevent.
+  The page says the open record held nothing it could measure, and stops.
+
+**404, not 410.** Scope is regenerated from live occurrence data, so a bird that is out today
+can be in after the next run; "gone permanently" is a claim the derivation does not support.
+404 says the server has nothing at this address now, which is exactly true.
+
+**An id belonging to no species at all still gets the bare 404.** This page is for a bird
+BirdView knows of and chose not to draw, and it would be a fabrication for a typo. The same
+applies to the six rejected species AviList does not recognize: with no English name and no
+stable id, the page would be an apology for a binomial, so none is served.
+
+Rationale: the status table classifies far more species than the dataset holds — 1,426 against
+1,083 — so the derivation already knows the answer to *where did this bird go* for 334 of the
+birds it rejected, 328 of which AviList can also name. Throwing that away at the door and answering `404 page not found` discards a
+measured result in favor of nothing. [CR-018](decisions.md#cr-018) settled the same question
+for comparison links — name what was lost rather than refuse the page — and the reasoning
+carries: a link is made to be kept, and a reader who kept one is owed the reason it stopped
+working rather than left to wonder whether they mistyped.
+[CR-029](decisions.md#cr-029) records why the status code nevertheless differs from
+`/compare`'s.
 
 ### P-035 — The page explains itself
 Subject: `presentation.help`
