@@ -703,7 +703,20 @@ Subject: `presentation.share`
 Value: `species records over all bird records, for the land regions in view`
 Goals: G-001, G-002
 
-Every species says what share of the bird records in view it accounts for, as **one in N**.
+Every species says how much of what people record in view is that bird, as **one in N**.
+
+**The interface never uses the word “share”**, and neither does
+[`docs/`](../docs/data.md). It is the right technical term and it is this requirement's
+subject, so this document and [`decisions.md`](decisions.md) keep it — but a reader meeting
+`1 in 282,315 bird records in North Atlantic` does not need a noun for the concept, and the
+one word that was on screen, in a one-line cell with no room to define it, read as jargon. The
+pages say what the number *is* instead: *how much of what people record there is this bird, not
+how many of them are out there.*
+
+The exemption for this bundle is narrower than it looks and does not follow
+[AC-097](acceptance.md#ac-097)'s precedent, where exempting the spec was the wrong fix. An
+address published anywhere is harm wherever it appears; a defined term inside the document
+that defines it is not.
 
 **The share ranges over every region, land and sea** ([CR-031](decisions.md#cr-031)). A
 sea's denominator is every bird record on **open water** inside its box: GADM covers land, so

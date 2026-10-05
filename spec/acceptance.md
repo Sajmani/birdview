@@ -1898,8 +1898,11 @@ decides what a URL means.
 3. A species' share is computed over regions the totals have an entry for, on **both** sides:
    no region contributes to the numerator without contributing to the denominator.
 4. The detail page names the row **Commonest land region**, not "Commonest in".
-5. Selecting only marine regions yields **no share**, and the cell reads
-   `No land regions selected` rather than a blank, a dash, or a division by zero.
+5. A selection whose regions have no record total reads `No data for these regions yet` —
+   never anything of the form *no records*, which would state a gap in BirdView's data as a
+   fact about the bird.
+7. **No page of the interface, and no guide under `/docs`, uses the word "share"** as the
+   name of the metric. The normative documents under `/spec` are exempt; they define it.
 6. A species with no records in the regions on screen reads **`0 in <denominator>`** in the
    same sentence every other tile uses — never an em-dash. The denominator is stated, because
    zero in a billion records and zero in nine hundred are different findings.
@@ -1926,6 +1929,14 @@ mismatch unrepresentable rather than merely absent today.
 | the ratio is computed before the zero is checked | **a divide-by-zero panic** taking `TestRoutesServe` with it — which is how this was found, rather than by reading the diff |
 | the no-denominator label worded as `No records in selected regions` | `Acanthis flammea has 234408 records in CAN.11_1` — a gap in BirdView stated as a fact about the bird |
 | the same label left reading `No share for this selection` | the jargon check, `"share" is jargon on a one-line cell` |
+
+| the tile tooltip reads `A share of what is recorded` again | `/ says "A share"` |
+| `docs/data.md` reads `what share of the bird records` again | `/docs/data says "what share"` |
+
+**The vocabulary check matches the noun, not the verb.** `Bookmark it, share it`, `need not
+share a habitat` and `one shared scale` are ordinary English in a different sense and stay;
+the metric always appears as *share of* or behind a determiner. Four such lines survive in
+`docs/using.md` unflagged, which is the check working rather than the rule being loose.
 
 **A mutation that does not apply is not a mutation.** The first attempt at the two above
 replaced `Note:  "..."` with two spaces, which `gofmt` had already collapsed to one, so the

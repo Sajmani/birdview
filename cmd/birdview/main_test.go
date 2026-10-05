@@ -4967,3 +4967,54 @@ func TestMissingTotalsDoNotClaimTheBirdIsAbsent(t *testing.T) {
 			"the tooltips that do use it define it in the same sentence", cell.Note)
 	}
 }
+
+// TestInterfaceNeverSaysShare asserts the vocabulary rule of P-074: the word
+// is the right technical term and belongs in the spec, and a reader meeting
+// a one-line cell has nowhere to learn it.
+//
+// Over the app's own pages AND the guides under /docs, because a guide is
+// where a confused reader goes next and finding the jargon there teaches
+// nothing. The normative documents under /spec are exempt: they define the
+// term, and `presentation.share` is the subject this requirement is filed
+// under.
+//
+// That exemption deliberately does not follow AC-097's precedent, where
+// exempting the spec was found to be the wrong fix. An address published
+// anywhere is harm wherever it appears; a defined term inside the document
+// that defines it is not the same thing.
+//
+// Matches the NOUN, not the verb. "Bookmark it, share it", "need not share
+// a habitat" and "one shared scale" are ordinary English in a different
+// sense and are correct where they stand; the metric always appears as
+// "share of" or behind a determiner, which is what this looks for.
+//
+// Verifies: P-074. Criterion: AC-099.
+func TestInterfaceNeverSaysShare(t *testing.T) {
+	s := newTestServer(t)
+	pages := []string{
+		"/", "/?region=AK", "/?by=mass&scale=global",
+		"/species/greblu", "/species/amerob", "/species/thimur",
+		"/compare?species=amerob&species=greblu", "/added", "/docs/",
+	}
+	for _, m := range regexp.MustCompile(`href="(/docs/[^"#]+)"`).
+		FindAllStringSubmatch(mustGet(t, s, "/docs/"), -1) {
+		pages = append(pages, m[1])
+	}
+	if len(pages) < 11 {
+		t.Fatalf("only %d pages to check; /docs/ is not listing its guides", len(pages))
+	}
+
+	noun := regexp.MustCompile(`(?i)\b(?:a|the|its|what|every|no|this|marine)\s+shares?\b|\bshares?\s+of\b`)
+	var checked int
+	for _, p := range pages {
+		body := mustGet(t, s, p)
+		checked++
+		for _, m := range noun.FindAllString(body, -1) {
+			t.Errorf("%s says %q; the interface explains the number instead of naming it (P-074)",
+				p, strings.Join(strings.Fields(m), " "))
+		}
+	}
+	if checked < 11 {
+		t.Fatalf("only %d pages fetched", checked)
+	}
+}

@@ -2264,8 +2264,8 @@ func (s *server) categories(sp *dataset.Species) []categoryRow {
 			// Both halves of the contrast, because the first on its own only
 			// says what the number is NOT. A share is where the bird is.
 			Detail: fmt.Sprintf("%s of the %s bird records from %s, in eBird and iNaturalist "+
-				"via GBIF. A share of what is recorded there, not a count of this bird: "+
-				"a count says where the birdwatchers are, a share says where the bird is. "+
+				"via GBIF. That is how much of what people record there is this bird, not "+
+				"how many of them there are: a plain count says where the birdwatchers are. "+
 				"A sea's records are those on open water inside its box, so a bird watched "+
 				"from the shore counts to the shore.",
 				comma(c.Records), comma(c.RegionRecords), where),
@@ -2351,7 +2351,7 @@ func shareIn(sp *dataset.Species, totals map[string]int64, sel map[string]bool, 
 	return num, den
 }
 
-// shareOf builds the tile's share line for the regions currently on screen,
+// shareOf builds the tile's "1 in N" line for the regions currently on
 // or nil when there is nothing to divide.
 //
 // It deliberately does NOT reuse the detail page's "commonest in" figure.
@@ -2410,7 +2410,8 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 		Where: where,
 		Ratio: ratio,
 		Title: fmt.Sprintf("%s of the %s bird records from %s are this species. "+
-			"A share of what is recorded, not an abundance.",
+			"That is how much of what people record is this bird, not how many of them "+
+			"are out there.",
 			detail, comma(den), scope),
 	}
 }

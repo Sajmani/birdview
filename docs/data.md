@@ -298,21 +298,21 @@ years. The 2023 flamingo has 931 records inside thirteen days; Akikiki, a Hawaii
 
 ## How common a bird is
 
-Each bird says what share of the bird records in view it accounts for, as **one in N**.
+Each bird says how much of what people record in view is that bird, as **one in N**.
 
 **On the index the scope is whatever regions you have selected**, so the figure follows
 your filter. A Gyrfalcon is 1 in 3,631,056 bird records across every region and 1 in
 82,946 in Alaska — forty-four times commoner where it actually lives. Select a region the bird
-is absent from and its share falls, because those records join the denominator and none join
+is absent from and the figure falls, because those records join the denominator and none join
 the numerator; a bird is a smaller part of a wider world.
 
 **On the detail page** the scope is every region at once, and the page also names the one
 where the species peaks: *Commonest region: Yukon — 1 in 250 records there.* A bird with
-no records in the regions on screen reads *0 in 1,225,176,035 bird records across every land
+no records in the regions on screen reads *0 in 1,225,176,035 bird records across every
 region* — a stated zero against a stated denominator, because zero in a billion records and
 zero in nine hundred are different findings.
 
-**Birds at sea get a share too, measured on open water.** The five marine regions are
+**Birds at sea get a figure too, measured on open water.** The five marine regions are
 latitude/longitude boxes, and they take in the coastlines along with the water: the Pacific box
 spans 150°W to 115°W, which is most of coastal California. So a sea counts only the records
 inside it that fall on **no land at all** — GADM covers land, so a record on a beach carries a
@@ -329,15 +329,15 @@ The figure is **on water** rather than strictly **at sea**: bay water carries no
 either, so Chesapeake Bay reads 8.8% off land and the open ocean is overstated by roughly 3%.
 
 Until 2026-10-05 a sea's denominator summed only the species already judged pelagic, while a
-land region's counted every bird, and the two were divided alike — so every marine share shown
-was inflated, by 962× in the North Atlantic. Where a bird was commonest came from a different
+land region's counted every bird, and the two were divided alike — so every marine figure
+shown was inflated, by 962× in the North Atlantic. Where a bird was commonest came from a different
 table again, built from a land-only pass, so no bird could peak at sea and the detail page
 could name a region the index did not list it in. See [CR-030](/spec/decisions#cr-030) and
 [CR-031](/spec/decisions#cr-031).
 
-### Share, not record count
+### A proportion, not a count
 
-**A count says where the birdwatchers are; a share says where the bird is.** The two disagree
+**A count says where the birdwatchers are; a proportion says where the bird is.** The two disagree
 for more than half the dataset. California
 holds 35 times the Sharp-shinned Hawk records of Yukon — and 118 times the birdwatching. One
 bird record in 250 from Yukon is a Sharp-shinned Hawk; in California it is one in 835. The hawk
@@ -349,12 +349,12 @@ it: 28 of its records are filed under Hawaii and 22 under Nihoa, so by count its
 "Hawaii" — a state with 2.6 million bird records, where the Millerbird is 1 in 93,090. Nihoa has
 49,102 records and the bird is 1 in 2,231 of them. Nihoa is the island it actually lives on.
 
-**Why "1 in N" and not a percentage.** Across the dataset the share runs from 1 in 2 to 1 in 117
-million. As percentages that is 50% down to 0.000001%; the median bird is 0.19% and the bottom
+**Why "1 in N" and not a percentage.** Across the dataset the figure runs from 1 in 2 to 1 in
+117 million. As percentages that is 50% down to 0.000001%; the median bird is 0.19% and the bottom
 quarter rounds to nothing a reader can read. "1 in 514" stays legible the whole way down.
 
 **Both numbers are kept, not just the ratio.** The detail page gives the species' records and
-the region's total, so a share resting on nine records says so. That is deliberate: the
+the region's total, so a figure resting on nine records says so. That is deliberate: the
 alternative is a minimum-evidence cutoff, which is one more arbitrary threshold, and 50 of 1,083
 species have a peak region resting on fewer than ten records.
 
