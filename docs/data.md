@@ -307,7 +307,10 @@ is absent from and its share falls, because those records join the denominator a
 the numerator; a bird is a smaller part of a wider world.
 
 **On the detail page** the scope is every land region at once, and the page also names the one
-where the species peaks: *Commonest land region: Yukon — 1 in 250 records there.*
+where the species peaks: *Commonest land region: Yukon — 1 in 250 records there.* A bird with
+no records in the regions on screen reads *0 in 1,225,176,035 bird records across every land
+region* — a stated zero against a stated denominator, because zero in a billion records and
+zero in nine hundred are different findings.
 
 **There is no share at sea, and no commonest sea.** The five marine regions are
 latitude/longitude boxes, and they take in the coastlines along with the water: the Pacific box

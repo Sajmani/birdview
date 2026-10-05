@@ -718,8 +718,18 @@ filter: a Gyrfalcon is 1 in 3,631,056 bird records across every land region and 
 Alaska. That is the question a filtered page poses — *of what people record where I am
 looking, how much is this bird* — and it is why the index does not instead show where in North
 America the bird peaks. Narrowing to Arizona and being told about Yukon answers something
-nobody asked. Select only seas and there is no share to show, which the page states rather than
-leaving blank.
+nobody asked.
+
+**Absence is a number, not a dash.** A bird with no records in the regions on screen reads
+**`0 in 1,225,176,035 bird records across every land region`** — the same sentence as every
+other tile, with a zero in it. The em-dash this replaced could not be told apart from a missing
+figure, and it threw away the half of the answer that carries the weight: *how hard anyone
+looked before concluding the bird was not there.* Zero in a billion records is a finding; zero
+in nine hundred is not, and only the stated denominator distinguishes them.
+
+**Having no denominator at all is a different message**, and names the selection rather than
+the sea: **`No land regions selected`**. The reader selected only marine regions, and the thing
+they can act on is the selection.
 
 **On the detail page the scope is every land region at once**, and the page also names the one
 where the species peaks — **the commonest land region**, named as such. One bird has no filter

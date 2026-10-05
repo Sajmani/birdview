@@ -210,12 +210,20 @@ func testDataset() *dataset.Dataset {
 			OrderCommon: orders[sp[i].Family] + " (group)",
 		})
 	}
-	// Every bird record each region holds, over all species. The denominator
-	// of the share a tile shows: dividing by what the same observers saw in
-	// the same place is what cancels out how hard they were looking.
+	// Every bird record each LAND region holds, over all species. The
+	// denominator of the share a tile shows: dividing by what the same
+	// observers saw in the same place is what cancels out how hard they
+	// were looking.
+	//
+	// SEA.PAC is deliberately absent, matching what the ingest now emits
+	// (CR-030): a sea carries presence and no denominator. The murre is
+	// still placed there, so the fixture keeps exercising the case that
+	// matters -- a species with records in a region the totals have no
+	// entry for, which is the shape that used to divide sea records by
+	// land records.
 	totals := map[string]int64{
 		"USA.5_1": 1000000, "USA.38_1": 200000, "USA.39_1": 480000,
-		"CAN.9_1": 1817968, "USA.2_1": 6055121, "SEA.PAC": 90000,
+		"CAN.9_1": 1817968, "USA.2_1": 6055121,
 	}
 	return &dataset.Dataset{Families: fams, Species: sp, RegionTotals: totals,
 		Undrawn: undrawnFixture()}
@@ -4769,13 +4777,62 @@ func TestNoShareIsComputedOverASea(t *testing.T) {
 	}
 	cell := shareOf(sp, ds.RegionTotals, options{HasRegions: true, Regions: seas})
 	if cell == nil {
-		t.Fatal("selecting only seas renders the em-dash, whose tooltip says " +
-			"\"too few records here\" — a different and untrue answer")
+		t.Fatal("selecting only seas renders the bare em-dash, which says nothing")
 	}
-	if cell.OneIn != "" {
-		t.Errorf("a sea-only selection produced a ratio of 1 in %s", cell.OneIn)
+	if cell.Ratio != "" {
+		t.Errorf("a sea-only selection produced a ratio of %q", cell.Ratio)
 	}
-	if cell.Note == "" {
-		t.Error("a sea-only selection explains nothing")
+	if cell.Note != "No land regions selected" {
+		t.Errorf("a sea-only selection says %q; it should name the thing the reader "+
+			"can act on, which is the selection", cell.Note)
+	}
+}
+
+// TestShareStatesZeroRatherThanDashing asserts that a bird with no records in
+// the regions on screen says so with a number, and that having no denominator
+// at all is a different message naming the selection.
+//
+// The em-dash this replaced lost the half of the answer that carries the
+// weight. "0 in 1,225,176,035 bird records across every land region" and "0
+// in 900" are different findings, and only the stated denominator tells them
+// apart -- a dash says neither, and cannot even be told from a figure that
+// failed to render.
+//
+// Verifies: P-074. Criterion: AC-099.
+func TestShareStatesZeroRatherThanDashing(t *testing.T) {
+	s := newTestServer(t)
+
+	// The fixture heron is in no region at all, so it has nothing in any
+	// selection and is the zero case on every view.
+	_, body := get(t, s, "/")
+	if strings.Contains(body, "&mdash;</span></div>") {
+		t.Error("a share cell still renders a bare em-dash; absence is stated as a number")
+	}
+	if !regexp.MustCompile(`<b>0 in [\d,]+</b>`).MatchString(body) {
+		t.Fatalf("no tile reads \"0 in N\"; the fixture heron is in no region and must")
+	}
+
+	// The denominator is the point, so it has to be the real one and not a
+	// zero or a placeholder.
+	m := regexp.MustCompile(`<b>0 in ([\d,]+)</b>`).FindStringSubmatch(body)
+	if n, err := strconv.Atoi(strings.ReplaceAll(m[1], ",", "")); err != nil || n <= 0 {
+		t.Errorf("zero share quotes a denominator of %q; it must say how hard anyone "+
+			"looked before concluding the bird was absent", m[1])
+	}
+
+	// Seas only: a different message, naming the selection rather than
+	// reporting a count of nothing.
+	seas := make([]string, 0, 5)
+	for _, id := range region.MarineIDs() {
+		if rg, ok := region.Get(id); ok {
+			seas = append(seas, "region="+rg.Slug())
+		}
+	}
+	_, body = get(t, s, "/?"+strings.Join(seas, "&"))
+	if !strings.Contains(body, "No land regions selected") {
+		t.Error("selecting only seas does not say which selection is the problem")
+	}
+	if regexp.MustCompile(`<b>[01] in `).MatchString(body) {
+		t.Error("a sea-only selection still prints a ratio; there is no denominator for one")
 	}
 }

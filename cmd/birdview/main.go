@@ -2290,12 +2290,18 @@ type shareCell struct {
 	// else's boundary would also re-attribute BirdView's scope to the
 	// authority CR-028 just removed it from. The selection describes itself.
 	Where string
-	OneIn string
+	// Ratio is the whole left-hand phrase, "1 in 883,328" or "0 in
+	// 1,225,176,035". Both forms are spelled out rather than the second
+	// collapsing to an em-dash: a dash makes a reader wonder whether the
+	// number is missing or the bird is, where "0 in 1,225,176,035 bird
+	// records across every land region" says which, and says how hard anyone
+	// looked before concluding it.
+	Ratio string
 	Title string
-	// Note replaces the ratio when there is a reason rather than a number:
-	// the reader selected only seas, which carry presence and no share
-	// (P-074, CR-030). Empty whenever OneIn is set, and the two are never
-	// both populated -- a cell either divides or explains.
+	// Note replaces the ratio when there is nothing to divide by at all --
+	// the reader has selected only seas, which carry presence and no share
+	// (P-074, CR-030). Empty whenever Ratio is set, and never both: a cell
+	// either divides or explains.
 	Note string
 }
 
@@ -2361,20 +2367,18 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 		return nil // nothing selected; the page shows no birds anyway
 	}
 	num, den := shareIn(sp, totals, opt.Regions, all)
-	// No denominator at all means every region on screen is a sea. Those
-	// carry presence and no share (CR-030), and saying so is not the same
-	// answer as the em-dash, which means "too few records here".
+	// No denominator at all means nothing on screen is a land region --
+	// in practice, the reader has selected only seas, which carry presence
+	// and no share (CR-030). Named for the selection rather than for the
+	// sea, because that is the thing the reader can act on.
 	if den == 0 {
 		return &shareCell{
-			Note: "no share at sea",
-			Title: "The marine regions are latitude and longitude boxes that take in the " +
-				"coastlines as well as the water, so no count over one of them means " +
-				"\u201cwhat is recorded at sea\u201d. BirdView reports presence there and " +
-				"no share. Select a land region for a figure.",
+			Note: "No land regions selected",
+			Title: "A share is over land regions only. The marine regions are latitude " +
+				"and longitude boxes that take in the coastlines as well as the water, " +
+				"so no count over one of them means \u201cwhat is recorded at sea\u201d. " +
+				"Select a land region for a figure.",
 		}
-	}
-	if num == 0 {
-		return nil
 	}
 	where, scope := "in the selected land regions", "the selected land regions"
 	if !all && len(opt.Regions) == 1 {
@@ -2386,12 +2390,19 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 	} else if all {
 		where, scope = "across every land region", "every land region BirdView covers"
 	}
+	// Zero is stated, not dashed. "0 in 1,225,176,035 bird records across
+	// every land region" carries the effort behind the absence; an em-dash
+	// left a reader unable to tell a missing figure from a missing bird.
+	ratio, detail := "0 in "+comma(den), "None"
+	if num > 0 {
+		ratio, detail = "1 in "+comma(den/num), comma(num)
+	}
 	return &shareCell{
 		Where: where,
-		OneIn: comma(den / num),
+		Ratio: ratio,
 		Title: fmt.Sprintf("%s of the %s bird records from %s are this species. "+
 			"A share of what is recorded, not an abundance.",
-			comma(num), comma(den), scope),
+			detail, comma(den), scope),
 	}
 }
 

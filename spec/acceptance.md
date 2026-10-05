@@ -1898,8 +1898,11 @@ decides what a URL means.
 3. A species' share is computed over regions the totals have an entry for, on **both** sides:
    no region contributes to the numerator without contributing to the denominator.
 4. The detail page names the row **Commonest land region**, not "Commonest in".
-5. Selecting only marine regions yields **no share**, and the page says why rather than
-   rendering a blank cell or a division by zero.
+5. Selecting only marine regions yields **no share**, and the cell reads
+   `No land regions selected` rather than a blank, a dash, or a division by zero.
+6. A species with no records in the regions on screen reads **`0 in <denominator>`** in the
+   same sentence every other tile uses — never an em-dash. The denominator is stated, because
+   zero in a billion records and zero in nine hundred are different findings.
 
 **Why assertion 1 is over the real dataset.** The server fixture hardcodes `commonestOf` and
 every test renders it back, so the claim has only ever been checked against a value the test
@@ -1919,6 +1922,8 @@ mismatch unrepresentable rather than merely absent today.
 | `shareIn` back to two independent loops | `Anous ceruleus: numerator 192 over every region, want 51 from land alone` |
 | a sea-only selection falls back to the em-dash | "selecting only seas renders the em-dash, whose tooltip says *too few records here*" |
 | the ingest carries the marine totals again — the shipped bug | **105 violations** of assertion 1, headed by `Ardenna bulleri`: page says Alaska at 1 in 11,171, North Pacific is 1 in 37. `TestRegionCountsLineUp` names all five seas |
+| the zero branch collapses back to a nil cell | 29 tiles on the unfiltered index lose their figure; `TestShareStatesZeroRatherThanDashing` names them |
+| the ratio is computed before the zero is checked | **a divide-by-zero panic** taking `TestRoutesServe` with it — which is how this was found, rather than by reading the diff |
 
 The third is the one to keep: it restores exactly the state that shipped, and the check that
 now catches it is the check nobody had written.
