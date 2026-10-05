@@ -1814,3 +1814,26 @@ transformer, which reports `#p-001` and `#cr-022` dangling, and by renaming the 
 heading in `docs/data.md`. The rename needed the fixture to carry a commonest region first:
 without it no citation rendered and the check passed over nothing, which is the same vacuous
 shape it was written to catch.
+
+### AC-097 — No served page publishes a contact address
+**Verifies:** [T-025](tech.md#t-025) · **Level:** code · **Method:** rendering test over every
+served page, including every document the two indexes list
+
+**Assertions:** no page matches a plain address, the spelled-out obfuscation, or a mail link.
+The feedback link appears only when the tracker URL is configured, and an unset one renders
+nothing rather than an empty href.
+
+**Why it matches the obfuscation and not just the at-sign:** the address that shipped was
+spelled out in words and contains no at-sign at all. A check for one would have passed over the
+exact string it exists to catch.
+
+**It is deliberately not limited to the owner's address.** Run the first time it failed twice.
+Once on a source owner's mailbox in the served manifest, republished by BirdView because the
+provenance table recorded it — a provenance record names who owns a source without handing out
+their mail. And once on this bundle: the requirement and this criterion both quoted the address
+as an example, and the spec is served, so they republished on `/spec/tech` and
+`/spec/acceptance` precisely what the rule forbids. Neither quotes it now. Exempting the spec
+was the wrong fix, because the spec is a page readers reach.
+
+**Status: verified 2026-10-05 — passing, and watched failing** by restoring the old header
+sentence, which reports it on every page that renders the header.

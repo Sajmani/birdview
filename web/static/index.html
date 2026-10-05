@@ -12,7 +12,8 @@
   <h1>BirdView</h1>
   <p class="sub">BirdView helps you understand the relative size of birds across families by
   providing abstract diagrams based on public and modeled data. Read Presentation for details,
-  and use the Controls to configure the view. Contact birdview at ajmani dot net with feedback.</p>
+  and use the Controls to configure the view.{{with .Feedback}}
+  Found something wrong? <a href="{{.}}">Report it</a>.{{end}}</p>
 </header>
 
 <details class="help" id="presentation">

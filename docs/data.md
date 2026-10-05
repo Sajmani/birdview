@@ -390,4 +390,5 @@ contribution anyone could make. Adopting a source is a defined process, not an a
 [spec/sources.md](../spec/sources.md) and the source-adoption path in
 [docs/building.md](building.md).
 
-Corrections: **birdview at ajmani dot net**.
+Corrections are welcome, and corrections to the biology especially: the models in this document
+are where BirdView is most likely to be wrong. Report them on the project's issue tracker.

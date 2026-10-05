@@ -265,3 +265,35 @@ moment the claims become promises to strangers rather than notes to ourselves.
 The check is mechanical where it can be — counts and credits are comparable against the dataset
 and the page — and a reading task where it cannot. [AC-090](acceptance.md#ac-090) does the
 mechanical part, and records plainly that prose accuracy is not something a test can hold.
+
+### T-025 — No personal address is published
+Subject: `deploy.contact`
+Goals: G-004
+
+No page BirdView serves carries a contact address. Reader feedback goes to the project's issue
+tracker, whose URL is a deployment setting (`-feedback`) rather than a constant in the markup.
+
+**Unset publishes nothing**, not a dead link. A site may legitimately go up before its tracker
+exists; what it must not do is invite a reader somewhere that does not.
+
+Rationale: the header carried the owner's personal mailbox for the project's whole life, spelled
+out in words rather than written plainly. **That obfuscation is the argument against it.** It
+was written that way because a plain address on a public page is a harvested mailbox — which is
+a reason not to publish the address at all, not a reason to spell it oddly. Beyond the spam, an
+issue tracker is the better channel: a bug report in public can be read, searched, corrected by
+someone else and closed, where mail to one person is none of those things. The owner's personal
+mailbox is not the project's contact point.
+
+*(This requirement does not quote the address it removed, and that is not squeamishness. The
+spec is served, so a quotation here would republish on `/spec/tech` exactly what the rule
+forbids — which is how [AC-097](acceptance.md#ac-097) first failed.)*
+
+**The `User-Agent` contact stays, and is a different thing.** [T-006](#t-006) requires outbound
+requests to name a contact, and iNaturalist's API guidance asks for it specifically. That
+address reaches a handful of API operators who may need to reach whoever is making the requests;
+it is not published to visitors. Removing it would be discourteous and risks the project being
+blocked.
+
+**This extends to addresses that are not ours.** The source manifest recorded a source owner's
+mailbox, which the served spec then republished to every visitor. A provenance record names who
+owns a source; it does not need to hand out their mail.

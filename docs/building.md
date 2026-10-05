@@ -285,4 +285,4 @@ binds `localhost` by default, so a real deployment needs `-addr` pointed at `0.0
 
 ## Contact
 
-**birdview at ajmani dot net**
+Through the project's issue tracker.

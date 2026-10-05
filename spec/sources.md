@@ -67,7 +67,7 @@ data for all birds. *Ecology Letters* 25: 581–597.
 | **Scope** | *(formerly)* species list, common and scientific names, families, rarity filter |
 | **Adopted parts** | None. |
 | **Exclusions** | Everything. |
-| **Owner** | American Birding Association, `info@aba.org` |
+| **Owner** | American Birding Association |
 | **Status** | **Retired 2026-10-05, and this is the entry that unblocked deployment.** Names, families and sequence moved to AviList ([CR-022](decisions.md#cr-022)); scope moved to BirdView's own derivation ([CR-028](decisions.md#cr-028)). `internal/aba` is deleted and nothing fetches the file. The entry stays because the record of why a source was adopted and then dropped is worth more than the space it takes — and because anyone re-reading the terms below should see at the top that they no longer bind this project. |
 
 License, quoted verbatim from row 0 of the CSV itself:

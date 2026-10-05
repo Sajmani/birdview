@@ -89,7 +89,7 @@ the committed inputs in one command.
 
 ## Contact
 
-Feedback: **birdview at ajmani dot net**.
+Feedback and corrections: please open an issue.
 
 Corrections to the biology are especially welcome — see
 [docs/data.md](docs/data.md#where-this-is-most-likely-to-be-wrong) for where the models are

@@ -4379,3 +4379,55 @@ func atoiComma(t *testing.T, s string) int {
 	}
 	return n
 }
+
+// No page BirdView serves may publish a personal address, in any of the
+// forms that reach a reader (T-025).
+//
+// "birdview at ajmani dot net" was in the header for the project's whole
+// life. The obfuscation is the tell: it was written that way because a
+// plain mailto on a public page is a harvested mailbox, which is an
+// argument against publishing the address rather than for spelling it
+// oddly. Feedback belongs on a tracker, and the owner's personal mail is
+// not the project's contact point.
+//
+// The spaced-out form is why this matches on the DOMAIN rather than on an
+// `@`: "ajmani dot net" contains no at-sign and a check for one would have
+// passed over the thing it exists to catch.
+//
+// Watched fail: putting the old sentence back in the header reports it on
+// every page that renders the header.
+//
+// Verifies: T-025. Criterion: AC-097.
+func TestNoPersonalAddressIsPublished(t *testing.T) {
+	s := newTestServer(t)
+	pages := []string{"/", "/species/greblu", "/species/amerob", "/added",
+		"/compare?species=amerob&species=blujay", "/docs/", "/spec/"}
+	for _, set := range []string{"/docs/", "/spec/"} {
+		for _, m := range regexp.MustCompile(`href="(`+set+`[^"#]+)"`).
+			FindAllStringSubmatch(mustGet(t, s, set), -1) {
+			pages = append(pages, m[1])
+		}
+	}
+	if len(pages) < 12 {
+		t.Fatalf("only %d pages to check; the document indexes are not listing the set", len(pages))
+	}
+
+	// Both the plain form and the spelled-out obfuscation.
+	patterns := []*regexp.Regexp{
+		regexp.MustCompile(`[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}`),
+		regexp.MustCompile(`(?i)\b[a-z0-9]+\s+(?:at|AT)\s+[a-z0-9]+\s+dot\s+[a-z]{2,}\b`),
+		regexp.MustCompile(`(?i)mailto:`),
+	}
+	for _, p := range pages {
+		body := mustGet(t, s, p)
+		// The User-Agent constants are a different thing and are not served;
+		// if one ever leaks onto a page, this catches it too.
+		for _, re := range patterns {
+			if m := re.FindString(body); m != "" {
+				t.Errorf("%s publishes a contact address %q; feedback goes to the "+
+					"issue tracker, and a personal mailbox on a public page is "+
+					"harvested within the week", p, m)
+			}
+		}
+	}
+}

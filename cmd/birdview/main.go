@@ -52,6 +52,15 @@ func main() {
 	addr := flag.String("addr", "localhost:8080", "listen address")
 	data := flag.String("data", "web/data/species.json", "compiled dataset (a build artifact)")
 	dev := flag.String("dev", "", "serve templates and static files from this directory instead of the embed, so edits show on reload")
+	// Where readers are asked to send feedback. A URL, not an address: a
+	// mailto on a public page is a mailbox harvested within the week, and
+	// the owner's personal address is not the project's contact point
+	// (T-025).
+	//
+	// Empty by default, and an empty value publishes NOTHING rather than a
+	// dead link -- a site can go up before its tracker exists, but it must
+	// not invite a reader to a page that does not.
+	feedback := flag.String("feedback", "", "issue tracker URL for reader feedback; omitted from the page when unset")
 	flag.Parse()
 
 	if *dev != "" {
@@ -67,6 +76,9 @@ func main() {
 			"and is not committed (T-005).", err)
 	}
 	srv, err := newServer(ds)
+	if err == nil {
+		srv.feedback = *feedback
+	}
 	if err != nil {
 		log.Fatalf("birdview: %v", err)
 	}
@@ -101,6 +113,9 @@ type server struct {
 	// devDir is empty for a real binary. When set, render re-parses the
 	// templates on every request so an edit shows on reload.
 	devDir string
+	// feedback is the issue tracker readers are pointed at, or empty, in
+	// which case no page says anything about feedback at all (T-025).
+	feedback string
 }
 
 type familyOption struct {
@@ -491,6 +506,11 @@ type familyRow struct {
 }
 
 type pageData struct {
+	// Feedback is the issue tracker URL, or empty. Empty publishes nothing
+	// (T-025): a site may go up before its tracker exists, but must not
+	// invite a reader somewhere that does not.
+	Feedback string
+
 	Sections []sectionView
 	// FamilyGroupings is the family selector (P-014): families grouped by
 	// taxonomic order.
@@ -788,7 +808,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	page := pageData{Opt: opt, Total: len(s.ds.Species), Shown: len(filtered),
+	page := pageData{Feedback: s.feedback, Opt: opt, Total: len(s.ds.Species), Shown: len(filtered),
 		Query:    queryFor(r),
 		Filters:  describeFilters(s.fams, opt),
 		ClearURL: queryFor(r)("family", "region"),
