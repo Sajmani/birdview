@@ -2035,6 +2035,43 @@ held back rather than abandoned, pending the full per-region run.
 These three need a short declared exceptions table, owned and documented. That is a far smaller
 editorial surface than the weighted model this CR was asked for.
 
+### Measured 2026-10-04, and one defect the run exposed
+
+The first complete run classified **1,424 species**: 956 established, 131 rare, 131 vagrant,
+38 historical, 173 absent. Against BirdView's current 839 it **keeps 830 and drops 9**, where
+the best abundance rule dropped 59. The nine are the declared-exception cases of
+[P-071](product.md#p-071) and nothing else: three with no open record at all (Maui Parrotbill,
+Akohekohe, Townsend's Storm-Petrel), two outside the US/CA filter (Bermuda and Desertas
+Petrel), and four single-episode seabirds and Hawaiian endemics.
+
+**`historical` earns its place.** It caught 38, headed by Passenger Pigeon — 89 episodes across
+52 years, every record between 1802 and 1902 — with Carolina Parakeet, Ivory-billed Woodpecker,
+Eskimo Curlew, Bachman's Warbler and three extinct Hawaiian endemics behind it.
+
+**The scope bar is not sensitive where it matters.** From 2/2 to 6/6 the number of currently
+listed species kept stays between 826 and 831. What the bar moves is how many *new* species come
+in — 300 at 2/2, 183 at 6/6 — so it is a dial on inclusiveness, not on whether real birds
+survive. There is no natural break to anchor it to: 61% of species truncate the date facet and
+are established by inspection, and the remaining 491 shade smoothly from 1 to 70 episodes.
+
+**The defect: the lumps are not corrected, so three species are counted twice.** The generator
+does not apply the correction this CR records above, and the run admitted both halves of all
+three pairs as separate species:
+
+| eBird publishes | records | BirdView carries | records |
+| --- | ---: | --- | ---: |
+| `Numenius phaeopus` | 25,946 | `Numenius hudsonicus` | 169 |
+| `Gygis alba` | 2,481 | `Gygis candida` | 22 |
+| `Setophaga petechia` | 243,939 | `Setophaga aestiva` | 116 |
+
+A table written from this would list Whimbrel twice. Two of the three are unambiguous —
+`Numenius phaeopus` and `Gygis alba` name birds BirdView does not carry, so the lump name is
+suppressed and its records credited to the other half. **`Setophaga petechia` is not**: Mangrove
+Yellow Warbler is a species BirdView carries in its own right, so the name must stay while its
+ABA-area eBird records are overwhelmingly the other bird's. Crediting them wholesale would
+overstate aestiva; leaving them overstates petechia. That one needs a decision before
+`data/status.tsv` is committed.
+
 ### Settled on approval
 
 **The vocabulary** is `established`, `rare`, `vagrant` and `absent`, with `withheld` and
