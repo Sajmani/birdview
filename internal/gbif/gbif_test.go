@@ -919,3 +919,55 @@ func TestPacingRecoversAfterACleanStreak(t *testing.T) {
 			"without a way back pins a long run at the cap", c.CleanRun, after, widened)
 	}
 }
+
+// TestCountOffLandInBoxSubtractsTheLand checks the measurement CR-031 rests
+// on: a box's records minus those GADM places in a country are the records on
+// water.
+//
+// And it checks the guard, which is the half worth having. Faceting plain
+// `gadmGid` instead of `gadmLevel0Gid` returns every administrative level at
+// once, so a single record in Virginia is counted under USA, USA.47_1 and
+// USA.47_13 alike and the rows sum to several times the box. Subtracting
+// that gives a NEGATIVE off-land count, which would otherwise be clamped or
+// silently stored. Measured live before this was written: the Atlantic box
+// holds 413,188,208 records and a plain gadmGid facet summed to
+// 1,175,397,927 of them.
+//
+// Verifies: T-006, CR-031.
+func TestCountOffLandInBoxSubtractsTheLand(t *testing.T) {
+	const onePerLevel = `{"count":1000,"facets":[{"field":"GADM_LEVEL_0_GID",
+	  "counts":[{"name":"USA","count":700},{"name":"CAN","count":200}]}]}`
+	srv, _, agents := fakeAPI(t, map[string]string{"/occurrence/search": onePerLevel})
+	c := NewClient()
+	c.BaseURL = srv.URL
+	c.Interval = 0
+
+	off, total, err := c.CountOffLandInBox(context.Background(), EBirdDatasetKey,
+		"pterodroma hasitata", []string{"US", "CA"}, 10, 66, -80, -40)
+	if err != nil {
+		t.Fatalf("CountOffLandInBox: %v", err)
+	}
+	if total != 1000 {
+		t.Errorf("total %d, want 1000", total)
+	}
+	if off != 100 {
+		t.Errorf("off land %d, want 100 — 1000 in the box less 700 in the USA and 200 in Canada", off)
+	}
+	if len(*agents) == 0 || (*agents)[0] == "" {
+		t.Error("no User-Agent sent (T-006)")
+	}
+
+	// Multi-level facet rows sum past the box: refuse, do not clamp.
+	const allLevels = `{"count":1000,"facets":[{"field":"GADM_GID",
+	  "counts":[{"name":"USA","count":700},{"name":"USA.47_1","count":400},
+	            {"name":"USA.47_13","count":120}]}]}`
+	srv2, _, _ := fakeAPI(t, map[string]string{"/occurrence/search": allLevels})
+	c2 := NewClient()
+	c2.BaseURL = srv2.URL
+	c2.Interval = 0
+	if off, _, err := c2.CountOffLandInBox(context.Background(), EBirdDatasetKey,
+		"x", nil, 10, 66, -80, -40); err == nil {
+		t.Errorf("rows summing past the box returned %d and no error; a facet over every "+
+			"GADM level must be refused, not turned into a negative count", off)
+	}
+}

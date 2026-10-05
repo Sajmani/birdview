@@ -71,6 +71,8 @@ func main() {
 	var (
 		dataPath = flag.String("data", "web/data/species.json", "compiled dataset, for the species to look up")
 		outPath  = flag.String("out", "data/region-presence.tsv", "output table (committed)")
+		marine   = flag.Bool("marine-only", false,
+			"recompute only the sea rows and sea totals in -out, leaving the land half untouched")
 	)
 	flag.Parse()
 
@@ -79,6 +81,17 @@ func main() {
 		log.Fatalf("birdview-regions: %v", err)
 	}
 	log.Printf("birdview-regions: %d species to place", len(ds))
+
+	// A sea-only refresh costs about 300 requests against the full run's
+	// several thousand, and leaves every land row byte-identical -- so the
+	// diff of a change to the marine rule is the marine rule, which is the
+	// only way to review one (CR-031).
+	if *marine {
+		if err := refreshMarine(*outPath, ds); err != nil {
+			log.Fatalf("birdview-regions: %v", err)
+		}
+		return
+	}
 
 	c := gbif.NewClient()
 	// Gentler than the bridge's defaults. These facet queries are far heavier
@@ -301,4 +314,193 @@ func write(path string, species []string, regionsOf map[string][]region.Reported
 		fmt.Fprintf(&b, "%s\t%s\n", sp, strings.Join(parts, ","))
 	}
 	return os.WriteFile(path, []byte(b.String()), 0o644)
+}
+
+// refreshMarine recomputes the five sea rows and sea totals in place,
+// leaving every land row exactly as it was (CR-031).
+//
+// Two things change from what the full run writes today, and they are the
+// whole of the fix:
+//
+//  1. A species' count in a sea becomes its OFF-LAND count in that box,
+//     not its count in the box. The boxes overlap the coast -- all six of
+//     the Black-capped Petrel's North Carolina records fall inside the
+//     Atlantic box -- so the old number counted shore records as sea.
+//
+//  2. A sea's total becomes every bird record on water in that box, not the
+//     sum over the species already judged pelagic. That sum was a
+//     denominator over a restricted species set, which made a marine share
+//     a different quantity from a land share while the pages divided by
+//     both alike.
+//
+// The pelagic SET is taken from the table as it stands rather than
+// re-measured, which is what keeps this cheap. A species that has newly
+// become pelagic will not appear until the next full run; that is a
+// deliberate trade and not an oversight, because re-measuring it costs a
+// CountFor for every species in the dataset.
+func refreshMarine(path string, species []string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("reading the existing table: %w (run without -marine-only first)", err)
+	}
+	table, totals, err := region.LoadPresence(f)
+	f.Close()
+	if err != nil {
+		return err
+	}
+
+	isSea := map[string]bool{}
+	for _, id := range region.MarineIDs() {
+		isSea[id] = true
+	}
+	// Who to ask about: whoever the table already places at sea.
+	var pelagic []string
+	for _, sp := range species {
+		for _, r := range table[sp] {
+			if isSea[r.ID] {
+				pelagic = append(pelagic, sp)
+				break
+			}
+		}
+	}
+	sort.Strings(pelagic)
+	if len(pelagic) == 0 {
+		return fmt.Errorf("no species is placed in a sea, so there is nothing to refresh; " +
+			"run without -marine-only to build the marine rows first")
+	}
+	log.Printf("birdview-regions: refreshing %d sea-going species across %d seas",
+		len(pelagic), len(isSea))
+
+	c := gbif.NewClient()
+	c.Concurrency = 2
+	c.Interval = 400 * time.Millisecond
+	ctx := context.Background()
+	countries := []string{"US", "CA"}
+
+	// Each sea's own denominator: every bird record on water in the box,
+	// over all species rather than the pelagic ones.
+	for _, id := range region.MarineIDs() {
+		minLat, maxLat, minLon, maxLon, _ := region.MarineBox(id)
+		off, total, err := c.CountOffLandInBox(ctx, gbif.EBirdDatasetKey, "",
+			countries, minLat, maxLat, minLon, maxLon)
+		if err != nil {
+			return fmt.Errorf("%s total: %w", id, err)
+		}
+		if off == 0 {
+			return fmt.Errorf("%s holds no off-land bird records at all, which cannot be "+
+				"right for an ocean; the gadmLevel0Gid facet has probably changed shape", id)
+		}
+		log.Printf("birdview-regions:   %-9s %12d on water of %12d in box (%.1f%%)",
+			id, off, total, 100*float64(off)/float64(total))
+		totals[id] = off
+	}
+
+	// Per species, off land, one request each.
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, c.Concurrency)
+	errs := map[string]error{}
+	found := map[string][]region.Reported{}
+	for _, sp := range pelagic {
+		wg.Add(1)
+		go func(sp string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			var rs []region.Reported
+			for _, id := range region.MarineIDs() {
+				minLat, maxLat, minLon, maxLon, _ := region.MarineBox(id)
+				off, _, err := c.CountOffLandInBox(ctx, gbif.EBirdDatasetKey,
+					strings.ToLower(sp), countries, minLat, maxLat, minLon, maxLon)
+				if err != nil {
+					mu.Lock()
+					errs[sp] = err
+					mu.Unlock()
+					return
+				}
+				if off > 0 {
+					rs = append(rs, region.Reported{ID: id, Records: off})
+				}
+			}
+			mu.Lock()
+			found[sp] = rs
+			mu.Unlock()
+		}(sp)
+	}
+	wg.Wait()
+	// Refuse the whole table rather than write one where a failed request is
+	// indistinguishable from a bird that is not there -- the same rule
+	// birdview-status applies to its date queries.
+	if len(errs) > 0 {
+		var lines []string
+		for sp, err := range errs {
+			lines = append(lines, fmt.Sprintf("%s: %v", sp, err))
+		}
+		sort.Strings(lines)
+		return fmt.Errorf("%d species failed, refusing to write a table that would "+
+			"report them absent from every sea:\n  %s", len(errs), strings.Join(lines, "\n  "))
+	}
+
+	// Swap the sea rows, keep the land ones.
+	var dropped, kept int
+	for sp, rs := range found {
+		var merged []region.Reported
+		for _, r := range table[sp] {
+			if !isSea[r.ID] {
+				merged = append(merged, r)
+			}
+		}
+		merged = append(merged, rs...)
+		if len(rs) == 0 {
+			dropped++
+		} else {
+			kept += len(rs)
+		}
+		table[sp] = merged
+	}
+	log.Printf("birdview-regions: %d sea placements kept, %d species left no sea at all",
+		kept, dropped)
+
+	// Land names are carried over verbatim rather than regenerated. The full
+	// run reads each one back out of the occurrence data, which is how a
+	// wrong GADM id surfaces as a wrong name instead of as silence;
+	// substituting BirdView's own names here would quietly disarm that check
+	// and rewrite five outlying-island rows as a side effect of touching the
+	// seas.
+	names, err := readRegionNames(path)
+	if err != nil {
+		return err
+	}
+	for _, id := range region.MarineIDs() {
+		if rg, ok := region.Get(id); ok {
+			names[id] = rg.Name // nobody else names an ocean for us
+		}
+	}
+	return write(path, species, table, names, totals)
+}
+
+// readRegionNames recovers the `#region` header lines from the table on disk.
+// They are comments, so LoadPresence skips them, and they are the only record
+// of the name GBIF reported for each region.
+func readRegionNames(path string) (map[string]string, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	out := map[string]string{}
+	for _, line := range strings.Split(string(b), "\n") {
+		rest, ok := strings.CutPrefix(line, "#region\t")
+		if !ok {
+			continue
+		}
+		id, name, ok := strings.Cut(rest, "\t")
+		if !ok {
+			return nil, fmt.Errorf("malformed #region line: %q", line)
+		}
+		out[id] = name
+	}
+	if len(out) == 0 {
+		return nil, fmt.Errorf("%s carries no #region lines to preserve", path)
+	}
+	return out, nil
 }

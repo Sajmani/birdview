@@ -1927,3 +1927,47 @@ mismatch unrepresentable rather than merely absent today.
 
 The third is the one to keep: it restores exactly the state that shipped, and the check that
 now catches it is the check nobody had written.
+
+### AC-100 — The peak region and the index share are one calculation
+**Verifies:** [P-074](product.md#p-074), [CR-031](decisions.md#cr-031) · **Level:** code ·
+**Method:** dataset test over every placed species, plus a client test for the measurement
+
+**Assertions:**
+
+1. For every species carrying a peak, **selecting that one region on the index reproduces the
+   detail page's figure exactly.**
+2. The peak is always **a region the species is listed in**. The old figure could name one the
+   reader would not find in the filter at all.
+3. At least one species peaks at sea, or the case CR-031 exists for is unexercised. (45 do.)
+4. Every region has a record total, seas included.
+5. A sea's total **exceeds the sum of the species placed there**. A denominator built out of
+   its own numerators is the shape of the CR-030 bug, and the only part of it a test can see
+   without the network.
+6. `CountOffLandInBox` subtracts the land, and **refuses** a facet whose rows sum past the box
+   rather than returning a negative count.
+
+**Why assertion 1 is the one that matters.** The bug the owner reported was not in either
+page's logic — it was that nothing compared them. The peak came from `data/status.tsv` and the
+share from `data/region-presence.tsv`, two tables with different denominators and different
+membership rules, and each was tested against its own source. A check can only catch that by
+asserting the pairing.
+
+**Why assertion 5 names a margin and not a number.** A sea's total runs 8× to 200× the sum of
+what BirdView places there, the tightest being the North Pacific at 11.9%. Land is exempt:
+there the drawn species really are almost all the records — 98–100%, and Navassa is 6 of 6 —
+so no margin exists to assert.
+
+**Status: verified 2026-10-05 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| `Commonest` taken from `status.tsv` again — the reported bug, exactly | **380 violations**, both kinds: peaks naming regions the bird is not listed in, and denominators disagreeing by small amounts (`Accipiter nisus`: detail page 1 in 263,247, index 1 in 263,266) |
+| `CountOffLandInBox` returns the box count instead of the off-land count | `off land 1000, want 100` |
+| the multi-GADM-level guard removed | `returned -220 and no error` |
+| the ingest drops marine totals again | every sea reported as having no total |
+
+**The second mutation is the live one.** Faceting plain `gadmGid` rather than `gadmLevel0Gid`
+returns every administrative level at once — a record in Virginia counted under `USA`,
+`USA.47_1` and `USA.47_13` alike — and measured against the real API the Atlantic box's rows
+summed to 1,175,397,927 against the 413,188,208 it holds. Without the guard that is a negative
+off-land count, silently stored.

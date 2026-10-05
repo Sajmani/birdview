@@ -2254,12 +2254,11 @@ func (s *server) categories(sp *dataset.Species) []categoryRow {
 			where = rg.Name
 		}
 		out = append(out, categoryRow{
-			// "Commonest land region", not "Commonest in". The seas carry
-			// presence and no share (CR-030), so this row ranges over land
-			// only -- and a label that did not say so invited exactly the
-			// reading that found the bug: an albatross reported commonest in
-			// Maine looks wrong until you know what the row is over.
-			Label:  "Commonest land region",
+			// "Commonest region", not the bare "Commonest in" this started
+			// as. The row ranges over every region including the seas again
+			// (CR-031), and it is now the same arithmetic the index does --
+			// selecting this one region there reproduces the figure (AC-100).
+			Label:  "Commonest region",
 			Value:  fmt.Sprintf("%s — 1 in %s bird records there", where, comma(int64(c.OneIn()))),
 			Origin: string(dataset.Derived),
 			// Both halves of the contrast, because the first on its own only
@@ -2267,9 +2266,8 @@ func (s *server) categories(sp *dataset.Species) []categoryRow {
 			Detail: fmt.Sprintf("%s of the %s bird records from %s, in eBird and iNaturalist "+
 				"via GBIF. A share of what is recorded there, not a count of this bird: "+
 				"a count says where the birdwatchers are, a share says where the bird is. "+
-				"Land regions only: the marine regions are coordinate boxes that take in "+
-				"the coast as well as the water, so no share over one of them would mean "+
-				"what is recorded at sea.",
+				"A sea's records are those on open water inside its box, so a bird watched "+
+				"from the shore counts to the shore.",
 				comma(c.Records), comma(c.RegionRecords), where),
 			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "what this measures",
 		})
@@ -2371,16 +2369,18 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 	// in practice, the reader has selected only seas, which carry presence
 	// and no share (CR-030). Named for the selection rather than for the
 	// sea, because that is the thing the reader can act on.
+	// No denominator for anything selected. Unreachable from the UI today,
+	// every region having a total -- but it is how the marine regions
+	// behaved for months before CR-031 measured one, so a region added to
+	// internal/region ahead of its data lands here rather than dividing by
+	// zero.
 	if den == 0 {
 		return &shareCell{
-			Note: "No land regions selected",
-			Title: "A share is over land regions only. The marine regions are latitude " +
-				"and longitude boxes that take in the coastlines as well as the water, " +
-				"so no count over one of them means \u201cwhat is recorded at sea\u201d. " +
-				"Select a land region for a figure.",
+			Note:  "No share for this selection",
+			Title: "BirdView has no record total for the regions selected, so there is nothing to divide by.",
 		}
 	}
-	where, scope := "in the selected land regions", "the selected land regions"
+	where, scope := "in the selected regions", "the selected regions"
 	if !all && len(opt.Regions) == 1 {
 		for id := range opt.Regions {
 			if rg, ok := region.Get(id); ok {
@@ -2388,7 +2388,7 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 			}
 		}
 	} else if all {
-		where, scope = "across every land region", "every land region BirdView covers"
+		where, scope = "across every region", "every region BirdView covers"
 	}
 	// Zero is stated, not dashed. "0 in 1,225,176,035 bird records across
 	// every land region" carries the effort behind the absence; an em-dash

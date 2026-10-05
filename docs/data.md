@@ -300,31 +300,40 @@ years. The 2023 flamingo has 931 records inside thirteen days; Akikiki, a Hawaii
 
 Each bird says what share of the bird records in view it accounts for, as **one in N**.
 
-**On the index the scope is whatever land regions you have selected**, so the figure follows
-your filter. A Gyrfalcon is 1 in 3,631,056 bird records across every land region and 1 in
+**On the index the scope is whatever regions you have selected**, so the figure follows
+your filter. A Gyrfalcon is 1 in 3,631,056 bird records across every region and 1 in
 82,946 in Alaska — forty-four times commoner where it actually lives. Select a region the bird
 is absent from and its share falls, because those records join the denominator and none join
 the numerator; a bird is a smaller part of a wider world.
 
-**On the detail page** the scope is every land region at once, and the page also names the one
-where the species peaks: *Commonest land region: Yukon — 1 in 250 records there.* A bird with
+**On the detail page** the scope is every region at once, and the page also names the one
+where the species peaks: *Commonest region: Yukon — 1 in 250 records there.* A bird with
 no records in the regions on screen reads *0 in 1,225,176,035 bird records across every land
 region* — a stated zero against a stated denominator, because zero in a billion records and
 zero in nine hundred are different findings.
 
-**There is no share at sea, and no commonest sea.** The five marine regions are
+**Birds at sea get a share too, measured on open water.** The five marine regions are
 latitude/longitude boxes, and they take in the coastlines along with the water: the Pacific box
-spans 150°W to 115°W, which is most of coastal California, and the Atlantic box covers the
-whole eastern seaboard. All six of the Black-capped Petrel's North Carolina records fall inside
-the Atlantic box. So a count over one of those boxes does not mean *what is recorded at sea*,
-and no honest denominator exists for it — BirdView reports that a bird occurs in the North
-Atlantic and declines to say what fraction of anything it is. Select only seas and the share
-column says so rather than showing a number.
+spans 150°W to 115°W, which is most of coastal California. So a sea counts only the records
+inside it that fall on **no land at all** — GADM covers land, so a record on a beach carries a
+country and a record on the water carries none, and the difference is the water. All six of the
+Black-capped Petrel's North Carolina records sit inside the Atlantic box and stay with North
+Carolina.
 
-This was not always true. Until 2026-10-05 a sea's denominator summed only the species already
-judged pelagic, while a land region's counted every bird, and the two were divided alike — so
-every marine share shown was inflated, by 15× in the Arctic and 4,472× in the Gulf of Mexico.
-See [CR-030](/spec/decisions#cr-030).
+That makes a sea's denominator the same kind of number as a state's — every bird record there
+— so the two can be compared, and 45 species turn out to be commonest at sea. The two kinds
+never overlap, one being *inside a GADM region* and the other *inside none*, so selecting both
+double-counts nothing.
+
+The figure is **on water** rather than strictly **at sea**: bay water carries no GADM country
+either, so Chesapeake Bay reads 8.8% off land and the open ocean is overstated by roughly 3%.
+
+Until 2026-10-05 a sea's denominator summed only the species already judged pelagic, while a
+land region's counted every bird, and the two were divided alike — so every marine share shown
+was inflated, by 962× in the North Atlantic. Where a bird was commonest came from a different
+table again, built from a land-only pass, so no bird could peak at sea and the detail page
+could name a region the index did not list it in. See [CR-030](/spec/decisions#cr-030) and
+[CR-031](/spec/decisions#cr-031).
 
 ### Share, not record count
 

@@ -373,6 +373,73 @@ func (c *Client) CountInBox(ctx context.Context, datasetKey, name string,
 	return body.Count, nil
 }
 
+// CountOffLandInBox returns how many records inside a coordinate box fall on
+// no land at all, and how many the box holds in total.
+//
+// This is what makes a marine region mean something. GADM covers land, so a
+// record on a beach carries a country and a record on the water carries
+// none; faceting the box by gadmLevel0Gid and subtracting gives exactly the
+// off-land half, with the coastline itself as the boundary. No distance
+// threshold is involved, and none would help: measured east of Cape Hatteras,
+// composition does not taper with distance, it flips between the band that
+// holds coastline (4.9% off land, led by Northern Cardinal) and the band that
+// does not (100% off land, led by Wilson's Storm-Petrel). See CR-031.
+//
+// One request for both numbers: a facet response carries the unfiltered count
+// beside the facet rows, so this costs exactly what the plain count it
+// replaces did.
+//
+// An empty name counts every bird instead of one species, which is how a
+// sea's own denominator is measured.
+//
+// What it does NOT exclude is water inside a bay: an estuary has no GADM
+// country either, so Chesapeake Bay reads 8.8% off land. The result is
+// therefore "on water", not "at sea", and overstates the open ocean by
+// roughly 3%. GBIF would accept a WKT geometry that carves the coast off
+// properly, which is the refinement available if that 3% ever matters.
+func (c *Client) CountOffLandInBox(ctx context.Context, datasetKey, name string,
+	countries []string, minLat, maxLat, minLon, maxLon float64) (offLand, total int64, err error) {
+
+	q := url.Values{}
+	q.Set("datasetKey", datasetKey)
+	for _, country := range countries {
+		q.Add("country", country)
+	}
+	if name != "" {
+		q.Set("verbatimScientificName", name)
+	} else {
+		q.Set("taxonKey", strconv.Itoa(AvesTaxonKey))
+	}
+	q.Set("decimalLatitude", fmt.Sprintf("%g,%g", minLat, maxLat))
+	q.Set("decimalLongitude", fmt.Sprintf("%g,%g", minLon, maxLon))
+	q.Set("limit", "0")
+	q.Set("facet", "gadmLevel0Gid")
+	// Level 0 is the country, and one row per country is all there is to
+	// page: faceting plain gadmGid returns every level at once and the rows
+	// then sum to more than the box holds, because a record in Virginia is
+	// counted under USA, USA.47_1 and USA.47_13 alike. That mistake reads as
+	// a NEGATIVE off-land count, which is at least loud.
+	q.Set("facetLimit", "100")
+
+	var body facetResponse
+	if err := c.get(ctx, "/occurrence/search?"+q.Encode(), &body); err != nil {
+		return 0, 0, fmt.Errorf("counting %q off land in box: %w", name, err)
+	}
+	total = body.Count
+	var onLand int64
+	if len(body.Facets) > 0 {
+		for _, f := range body.Facets[0].Counts {
+			onLand += f.Count
+		}
+	}
+	if onLand > total {
+		return 0, 0, fmt.Errorf(
+			"counting %q off land in box: %d records on land exceeds the %d in the box; "+
+				"the facet is returning more than one GADM level", name, onLand, total)
+	}
+	return total - onLand, total, nil
+}
+
 // RegionName returns the GADM level-1 name for a region id, by reading it off
 // a single occurrence. Empty when the dataset reports nothing there.
 func (c *Client) RegionName(ctx context.Context, datasetKey, gadmGid string) (string, error) {

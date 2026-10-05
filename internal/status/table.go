@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"birdview/internal/dataset"
 	"birdview/internal/taxonomy"
 )
 
@@ -159,28 +158,6 @@ func OutOfScope(rows []Row) map[string]Row {
 			continue
 		}
 		out[n] = r
-	}
-	return out
-}
-
-// CommonestBy keys each row's peak share by AviList name, so the ingest can
-// attach it without redoing the namespace mapping.
-//
-// Rows with no usable peak are left out rather than given a zero: a species
-// with nothing to divide has no "commonest" region, and an entry saying one
-// in zero would be worse than silence.
-func CommonestBy(rows []Row) map[string]*dataset.Commonest {
-	out := make(map[string]*dataset.Commonest, len(rows))
-	for _, r := range rows {
-		if r.Commonest == "" || r.Commonest == "-" ||
-			r.CommonestRecords == 0 || r.CommonestRegionRecords == 0 {
-			continue
-		}
-		out[aviListName(r.Name)] = &dataset.Commonest{
-			Region:        r.Commonest,
-			Records:       r.CommonestRecords,
-			RegionRecords: r.CommonestRegionRecords,
-		}
 	}
 	return out
 }

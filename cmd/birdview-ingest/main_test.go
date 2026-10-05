@@ -513,36 +513,22 @@ func TestRegionCountsLineUp(t *testing.T) {
 			"this test is checking nothing")
 	}
 
-	// Every LAND region a species is placed in must have a total to divide
-	// by, or its share is silently uncomputable.
+	// Every region a species is placed in must have a total to divide by,
+	// or its share is silently uncomputable.
 	//
-	// This covered every region until CR-030 reversed it for the seas. A
-	// marine total summed only the species already judged pelagic, where a
-	// land total counts every bird, so dividing by one inflated the share by
-	// 15x in the Arctic and 4,472x in the Gulf. The dataset now carries no
-	// marine total at all, which is what makes "no share at sea" true at the
-	// source rather than a rule each divider must remember.
-	//
-	// So for a sea the ABSENCE is the invariant, and both directions are
-	// asserted: checking only that land regions have totals would let a
-	// later ingest quietly start emitting marine ones again, which is how
-	// the bug got in.
+	// This briefly excluded the seas, under CR-030, because a sea's figure
+	// summed only the species already judged pelagic -- a denominator built
+	// out of its own numerators, which is not the quantity a land total is.
+	// CR-031 fixed the number rather than hiding it: a sea's total is now
+	// every bird record on open water in its box. So the assertion reverts,
+	// and a second one below pins the thing that was actually wrong.
 	if len(ds.RegionTotals) == 0 {
 		t.Fatal("the dataset carries no region totals")
-	}
-	for _, id := range region.MarineIDs() {
-		if n, ok := ds.RegionTotals[id]; ok {
-			t.Errorf("%s carries a total of %d; a sea's figure sums only the pelagic "+
-				"species and is not the same quantity as a land total (CR-030)", id, n)
-		}
 	}
 	for _, sp := range ds.Species {
 		for i, id := range sp.Regions {
 			total, ok := ds.RegionTotals[id]
 			if !ok {
-				if rg, known := region.Get(id); known && rg.Kind == region.Marine {
-					continue // deliberate: presence at sea, no share
-				}
 				t.Errorf("%s is in %s, which has no total", sp.ScientificName, id)
 				continue
 			}
@@ -550,6 +536,36 @@ func TestRegionCountsLineUp(t *testing.T) {
 				t.Errorf("%s has %d records in %s, more than the %d the region holds",
 					sp.ScientificName, sp.RegionCounts[i], id, total)
 			}
+		}
+	}
+
+	// A sea's denominator must not be the sum of its own numerators.
+	//
+	// This is the shape of the CR-030 bug, and it is the only part a test
+	// can see offline. A sea's total is every bird on that water, while the
+	// species BirdView places at sea are a few dozen specialists, so the
+	// total runs 8x to 200x the sum -- the tightest is the North Pacific at
+	// 11.9%. Equality means the pelagic-only sum is back, and equality is
+	// exactly what the old table had, by construction.
+	//
+	// Land is deliberately exempt: there the drawn species really are
+	// almost all the records (98-100%, and Navassa is 6 of 6), so no
+	// margin exists to assert.
+	summed := map[string]int64{}
+	for _, sp := range ds.Species {
+		for i, id := range sp.Regions {
+			summed[id] += sp.RegionCounts[i]
+		}
+	}
+	for _, id := range region.MarineIDs() {
+		total, ok := ds.RegionTotals[id]
+		if !ok || summed[id] == 0 {
+			continue
+		}
+		if total <= summed[id] {
+			t.Errorf("%s totals %d against %d summed over the species placed there; "+
+				"a sea's denominator is every bird on that water, not a sum of the "+
+				"birds we happen to draw (CR-031)", id, total, summed[id])
 		}
 	}
 }

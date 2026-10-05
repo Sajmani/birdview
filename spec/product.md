@@ -705,16 +705,23 @@ Goals: G-001, G-002
 
 Every species says what share of the bird records in view it accounts for, as **one in N**.
 
-**The share is over land regions only, and the page says so** ([CR-030](decisions.md#cr-030)).
-The five marine regions carry presence and no share: they are latitude/longitude rectangles
-that contain the coastlines as well as the water — the Pacific box holds most of coastal
-California and the Atlantic box the whole eastern seaboard — so no denominator over one of
-them means *what is recorded at sea*. A region BirdView cannot supply an honest denominator for
-contributes to **neither** side of the ratio, which keeps the numerator and the denominator
-over one set of regions by construction.
+**The share ranges over every region, land and sea** ([CR-031](decisions.md#cr-031)). A
+sea's denominator is every bird record on **open water** inside its box: GADM covers land, so
+a record on a beach carries a country and a record on the water carries none, and the
+difference is the water. That is the same quantity a land region's total is, so the two may be
+compared and summed.
 
-**On the index the scope is the land regions currently selected**, so the figure follows the
-filter: a Gyrfalcon is 1 in 3,631,056 bird records across every land region and 1 in 82,946 in
+The two are also **disjoint by construction** — one is *inside GADM region X*, the other is
+*inside no GADM region at all* — so a selection mixing them double-counts nothing and the
+sums still compose.
+
+A region BirdView cannot supply a denominator for contributes to **neither** side of the
+ratio. No region is in that state today; the rule stands because the numerator and the
+denominator were once two separate conditions that drifted apart, and deriving both from
+*does this region have a denominator* makes that unrepresentable rather than merely fixed.
+
+**On the index the scope is the regions currently selected**, so the figure follows the
+filter: a Gyrfalcon is 1 in 3,631,056 bird records across every region and 1 in 82,946 in
 Alaska. That is the question a filtered page poses — *of what people record where I am
 looking, how much is this bird* — and it is why the index does not instead show where in North
 America the bird peaks. Narrowing to Arizona and being told about Yukon answers something
@@ -727,23 +734,31 @@ figure, and it threw away the half of the answer that carries the weight: *how h
 looked before concluding the bird was not there.* Zero in a billion records is a finding; zero
 in nine hundred is not, and only the stated denominator distinguishes them.
 
-**Having no denominator at all is a different message**, and names the selection rather than
-the sea: **`No land regions selected`**. The reader selected only marine regions, and the thing
-they can act on is the selection.
+**Having no denominator at all is a different message**: **`No share for this selection`**.
+No selection reaches it today, every region having a total; it exists because a region added
+ahead of its data would otherwise divide by zero, which is exactly how the seas behaved before
+[CR-031](decisions.md#cr-031) measured one.
 
-**On the detail page the scope is every land region at once**, and the page also names the one
-where the species peaks — **the commonest land region**, named as such. One bird has no filter
-to follow, and where it is commonest is worth knowing once you are looking at it.
+**On the detail page the scope is every region at once**, and the page also names the one
+where the species peaks — **the commonest region**. One bird has no filter to follow, and
+where it is commonest is worth knowing once you are looking at it.
 
-**There is no commonest *sea*.** It was considered and rejected on measurement, not taste. The
-boxes overlap the land regions rather than abutting them: all six of the Black-capped Petrel's
-North Carolina records fall inside the Atlantic box, so a record on the coast is counted as a
-record at sea. For a true pelagic that contamination is negligible — 6 in 13,262 for this bird
-— but for anything less it is not, and most coastal records of any seabird sit inside a box. A
-"commonest sea" would therefore report which coast a bird is watched from, which the land
-regions already say without ambiguity. The metric would be sound only for a subset a reader
-cannot identify from the page, and that is the kind of number this requirement exists to
-refuse.
+**The peak and the index share are one calculation, not two that agree.** Both come from the
+same per-region counts and the same totals, so selecting the named region on the index
+reproduces the detail page's figure exactly, and the peak is always a region the bird is
+listed in. They were two tables with two denominators until
+[CR-031](decisions.md#cr-031), and the pages contradicted each other in public.
+
+**A bird watched from the shore counts to the shore.** The boxes overlap the land regions
+rather than abutting them — all six of the Black-capped Petrel's North Carolina records fall
+inside the Atlantic box — so a sea counts only what is on open water inside it, and the
+coastal record stays with the coast. **45 species peak at sea** under that rule, and the
+Atlantic Yellow-nosed Albatross is 1 in 282,315 in the North Atlantic rather than 1 in
+1,177,757 in Maine, which was never where it lived.
+
+What this does not reach is the estuaries: bay water carries no GADM country either, so the
+figure is *on water* rather than *at sea* and overstates the open ocean by roughly 3%
+([CR-031](decisions.md#cr-031)). [`docs/data.md`](../docs/data.md) says so.
 
 **Share, not record count: a count says where the birdwatchers are, a share says where the bird
 is.** California holds 35× the Sharp-shinned Hawk records of Yukon and 118× the birdwatching,

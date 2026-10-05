@@ -2388,13 +2388,92 @@ share — and would need a CR of its own, a regenerated `region-presence.tsv`, a
 whether "on water" may be labelled with an ocean's name. Tracked below; nothing is changed on
 the strength of this experiment alone.
 
+## CR-031 — A sea gets an honest denominator, and its share back
+
+**Subject:** `presentation.share`, `dataset.region.totals`
+**Kind:** Reversal — [CR-030](#cr-030)'s option A declined a marine share; the measurement it
+declined for turns out to be available
+**Date:** 2026-10-05 · **Decided by:** Sameer
+
+### What changed
+
+[CR-030](#cr-030) withheld the share at sea because no honest denominator existed for a sea.
+Its own [experiment](#experiment--is-there-a-distance-from-shore-that-cleans-up-the-boxes),
+run immediately afterwards, found one. GADM covers land, so **a record on a beach carries a
+country and a record on the water carries none**: faceting a box by `gadmLevel0Gid` and
+subtracting gives the off-land half exactly, with the coastline as the boundary. The facet
+response carries the unfiltered count beside the facet rows, so it costs **no extra requests**.
+
+A sea's total is now every bird record on open water inside its box, over all species — the
+same quantity a land region's total is, measured the same way. `RegionTotals` carries all 74
+regions again, and [P-074](product.md#p-074)'s share ranges over every one.
+
+| sea | was | now |
+| --- | --- | --- |
+| North Atlantic | 429,535 | **12,986,514** |
+| North Pacific | 1,596,171 | **10,608,171** |
+| Gulf of Mexico | 24,897 | **3,451,299** |
+| Central Pacific | 19,586 | **127,341** |
+| Arctic Ocean | 50,758 | **126,158** |
+
+### The second half: where a bird is commonest now comes from one table
+
+The peak region used to come from `data/status.tsv` and the index share from
+`data/region-presence.tsv`. Two tables, two denominators, two membership rules — which is the
+whole of the bug the owner reported. `/species/yenalb2` said *commonest in Maine* while
+`/?region=NorthAtlantic` said something that read as a flat contradiction, and **nothing
+compared them**, each being tested against its own source.
+
+Worse, the status table's land-only pass meant no species could ever peak at sea, and its
+peak could name a region the index does not list the bird in at all: Maine holds 12 albatross
+records against 14 million, below [P-011](product.md#p-011)'s one-per-million presence bar, so
+the page named a place a reader could not then find in the filter.
+
+`Commonest` is now computed in the ingest from `Regions`, `RegionCounts` and `RegionTotals` —
+the same numbers the index divides. The two pages are the same arithmetic by construction, and
+[AC-100](acceptance.md#ac-100) asserts the round trip over all 1,059 placed species.
+`status.CommonestBy` is deleted.
+
+**The Atlantic Yellow-nosed Albatross now reads 1 in 282,315 in the North Atlantic**, which is
+where the owner expected it, arrived at honestly rather than by the inflated figure that
+originally seemed to show it. **45 species peak at sea.**
+
+### What this does not fix
+
+The result is **on water**, not **at sea**. An estuary has no GADM country either, so
+Chesapeake Bay reads 8.8% off land, Pamlico Sound 8.5%, Long Island Sound 4.1% — roughly a 3%
+overstatement of the open ocean against a 30× error corrected. GBIF accepts a WKT `geometry`
+polygon alongside facets (verified), so carving the coast off properly is available if that 3%
+ever matters. The boxes are declared approximations already and [P-074](product.md#p-074) says
+what the figure counts.
+
+**"No land regions selected" is retired**, one turn after being added. Its condition no longer
+occurs: every region has a denominator, so selecting seas yields a figure like anywhere else.
+The branch survives with generic wording — *No share for this selection* — because a region
+added to `internal/region` ahead of its data lands there, which is precisely how the marine
+regions behaved for months.
+
+**The pelagic set is frozen between full runs.** `birdview-regions -marine-only` refreshes the
+sea rows for the species the table already places at sea, at about 300 requests against the
+full run's several thousand, and leaves every land row byte-identical — so the diff of a change
+to the marine rule is the marine rule. A species newly become pelagic waits for a full run.
+That is a deliberate trade: re-measuring it costs a `CountFor` for every species in the dataset.
+
+### Status of requirements touched
+
+- [P-074](product.md#p-074) — Active; amended, the share ranges over every region again.
+- [CR-030](#cr-030) — option A's *no share at sea* half is superseded here. Its structural
+  guard is not: `shareIn` still takes both sides of the ratio from one test, and
+  [AC-099](acceptance.md#ac-099) still asserts it. What was wrong there was the number, and
+  what was right was the shape.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
 
 | Item | Owner | Gate |
 | --- | --- | --- |
-| **Restore the share at sea on an off-land denominator** — [CR-030's experiment](#experiment--is-there-a-distance-from-shore-that-cleans-up-the-boxes) found the instrument. A record on land carries a GADM country and a record on water carries none, so `facet=gadmLevel0Gid` splits any query at the coastline exactly, and the facet response carries the unfiltered count beside the facet rows — so it costs **zero extra requests**. The honest denominators are 12,986,514 for the North Atlantic, 10,608,171 for the North Pacific and 3,451,299 for the Gulf, about 30× today's. This would reverse the half of option A that declines a marine share. Needs its own CR, a regenerated `region-presence.tsv`, and a decision on whether *on water* may be labelled with an ocean's name — it still includes estuaries, by roughly 3% | Sameer | next, if the share at sea is wanted back |
+| ~~**Restore the share at sea on an off-land denominator**~~ — **done 2026-10-05**, [CR-031](#cr-031). Sea totals are now every bird on open water in the box: North Atlantic 12,986,514 against the 429,535 shipped. `Commonest` moved onto the same table the index divides, so the two pages cannot disagree again, and **45 species peak at sea**. Remaining: the figure is *on water* rather than *at sea*, overstating by ~3% through estuaries, and a WKT polygon would fix that if it ever matters | Sameer | closed 2026-10-05 |
 | ~~**Is there a distance from shore that tightens the marine boxes?**~~ — **answered 2026-10-05**, no: distance is the wrong instrument and there is no gradient to tune. Composition does not taper offshore, it flips between the band holding coastline and the band that does not — 4.9% off land and Northern Cardinal at one step, 100% off land and pure tubenoses at the next. GADM membership does the job exactly and for free. Written up under [CR-030](#cr-030) | Sameer | closed 2026-10-05 |
 | **Decide how a marine region's share is defined, or that it has none** — [CR-030](#cr-030). The index inflates every marine share by 15–4,472× because a sea's denominator sums only the pelagic species, where a land region's counts every bird. Option A (presence at sea, no share) is recommended and costs almost nothing; option B costs a regenerated `region-presence.tsv` and `status.tsv` plus a coordinate-box form of the `eventDate` facet. **Until this lands the index is wrong for any marine selection** | Sameer | next — it is live and misleading |
 | ~~**Reword the four pelagic exceptions in [P-071](product.md#p-071)**~~ — **done 2026-10-05** with [CR-030](#cr-030). They said the derivation sees these birds rarely "because almost nobody is on the water where it is", which stated a measurement nobody made: the recurrence test runs on `gadmGid`, GBIF has no `gadmGid` for open ocean, and `DatesIn` has no coordinate-box form, so pass 2 has never asked the water anything. Each now says the records are at sea *where the test cannot yet look*, and names what the derivation does see on land. **The exceptions stand** — whether these species would clear the bar unaided remains unknown, and that is now what the table says | Sameer | closed 2026-10-05 |

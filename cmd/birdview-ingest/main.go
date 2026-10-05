@@ -159,7 +159,6 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 		return nil, "", err
 	}
 	species := status.Scope(rows)
-	commonest := status.CommonestBy(rows)
 	wb, err := avonet.Open(avoPath)
 	if err != nil {
 		return nil, "", err
@@ -308,7 +307,6 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 				dataset.LocaleWorld: avr.NameWorld,
 			},
 			SpeciesCode:    avr.Code,
-			Commonest:      commonest[sci],
 			ScientificName: sci,
 			Family:         avr.Family,
 			FamilyCommon:   famCommon[avr.Family],
@@ -547,20 +545,13 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	// Marine totals are dropped rather than carried (CR-030). A sea's figure
-	// in region-presence.tsv sums only the species already judged pelagic,
-	// where a land region's counts every bird, so the two are different
-	// quantities -- dividing by one inflated every marine share by between
-	// 15x in the Arctic and 4,472x in the Gulf of Mexico. Withholding the
-	// number at the source is what makes P-074's "no share at sea" true
-	// everywhere, rather than a rule each divider has to remember.
-	ds.RegionTotals = make(map[string]int64, len(totals))
-	for id, v := range totals {
-		if rg, ok := region.Get(id); ok && rg.Kind == region.Marine {
-			continue
-		}
-		ds.RegionTotals[id] = v
-	}
+	// Every region's total is carried, seas included (CR-031). A sea's
+	// figure is now every bird record ON WATER inside its box, measured the
+	// same way a land region's is -- over all species, not the pelagic ones
+	// -- so the two are the same quantity and a share may range over both.
+	// CR-030 dropped them because they were not; the fix was to the number,
+	// not to who may see it.
+	ds.RegionTotals = totals
 	var n int
 	for i := range ds.Species {
 		rs := table[ds.Species[i].ScientificName]
@@ -575,11 +566,57 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 		}
 		ds.Species[i].Regions = ids
 		ds.Species[i].RegionCounts = counts
+		ds.Species[i].Commonest = peakShare(ids, counts, totals)
 		if len(rs) > 0 {
 			n++
 		}
 	}
 	return n, nil
+}
+
+// peakShare picks the region where a species is the largest fraction of what
+// gets recorded, out of the same table the index divides by (P-074, CR-031).
+//
+// Computed here rather than carried over from data/status.tsv, where it used
+// to come from, for two reasons that are really one.
+//
+// The status table is built from a land-only pass, so no species could ever
+// peak at sea -- which is the bug the owner found, an Atlantic Yellow-nosed
+// Albatross reported commonest in Maine. And the two tables have different
+// denominators and different membership rules, so the detail page could name
+// a region the index does not list the bird in at all: Maine holds 12
+// albatross records against 14 million, below the one-per-million presence
+// bar, so the page named a peak the reader could not then find in the filter.
+//
+// Deriving it from Regions and RegionTotals makes the detail page and the
+// index the same arithmetic: the peak is always a region the bird is listed
+// in, and selecting that one region on the index reproduces the figure
+// exactly. AC-100 asserts that round trip over the whole dataset.
+//
+// Compared by cross-multiplication rather than by dividing: the products
+// stay far inside int64 -- the largest is about 1e17 against a 9.2e18 limit
+// -- so the ranking is exact and carries no rounding. Float division would
+// in fact work here, the tightest real share being 1.59e-08 (Black Rail in
+// Texas), well above where float64 loses resolution; exactness is a cheap
+// property to keep, not a bug being averted.
+//
+// Ties go to the first region in id order, which is stable across rebuilds.
+func peakShare(ids []string, counts []int64, totals region.Totals) *dataset.Commonest {
+	var best *dataset.Commonest
+	for i, id := range ids {
+		total, ok := totals[id]
+		if !ok || total == 0 || counts[i] == 0 {
+			// No denominator means no share. A species with nothing to
+			// divide has no commonest region, and an entry reading "one in
+			// zero" would be worse than silence.
+			continue
+		}
+		if best != nil && counts[i]*best.RegionRecords <= best.Records*total {
+			continue
+		}
+		best = &dataset.Commonest{Region: id, Records: counts[i], RegionRecords: total}
+	}
+	return best
 }
 
 func applyINat(ds *dataset.Dataset, path string) (int, error) {
