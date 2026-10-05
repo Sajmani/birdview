@@ -702,10 +702,11 @@ peaks. Narrowing to Arizona and being told about Yukon answers something nobody 
 the species peaks, with the records on both sides of the ratio. One bird has no filter to
 follow, and where it is commonest is worth knowing once you are looking at it.
 
-**Share, not record count.** A count says where the birdwatchers are: California holds 35× the
-Sharp-shinned Hawk records of Yukon and 118× the birdwatching, so the hawk is 1 in 250 there
-and 1 in 835 in California. Dividing by the region's own total cancels out how hard anyone was
-looking — the same normalization that stops an escaped Budgerigar outranking an American Robin.
+**Share, not record count: a count says where the birdwatchers are, a share says where the bird
+is.** California holds 35× the Sharp-shinned Hawk records of Yukon and 118× the birdwatching,
+so the hawk is 1 in 250 there and 1 in 835 in California. Dividing by the region's own total
+cancels out how hard anyone was looking — the same normalization that stops an escaped
+Budgerigar outranking an American Robin.
 
 **One in N, not a percentage.** The share runs from 1 in 2 to 1 in 117 million; as percentages
 that is 50% to 0.000001%, and the bottom quarter of the dataset rounds to nothing readable.

@@ -2108,8 +2108,11 @@ func (s *server) categories(sp *dataset.Species) []categoryRow {
 			Label:  "Commonest in",
 			Value:  fmt.Sprintf("%s — 1 in %s bird records there", where, comma(int64(c.OneIn()))),
 			Origin: string(dataset.Derived),
+			// Both halves of the contrast, because the first on its own only
+			// says what the number is NOT. A share is where the bird is.
 			Detail: fmt.Sprintf("%s of the %s bird records from %s, in eBird and iNaturalist "+
-				"via GBIF. Share, not record count: a count says where the birdwatchers are.",
+				"via GBIF. A share of what is recorded there, not a count of this bird: "+
+				"a count says where the birdwatchers are, a share says where the bird is.",
 				comma(c.Records), comma(c.RegionRecords), where),
 			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "what this measures",
 		})

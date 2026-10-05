@@ -295,7 +295,8 @@ the species peaks: *Commonest in Yukon — 1 in 250 records there.*
 
 ### Share, not record count
 
-**The two disagree for more than half the dataset.** California
+**A count says where the birdwatchers are; a share says where the bird is.** The two disagree
+for more than half the dataset. California
 holds 35 times the Sharp-shinned Hawk records of Yukon — and 118 times the birdwatching. One
 bird record in 250 from Yukon is a Sharp-shinned Hawk; in California it is one in 835. The hawk
 is a bigger part of what you see in Yukon, even though far more have been logged in California.
