@@ -19,7 +19,7 @@ That is all. The one dependency is `excelize`, for reading the source workbooks.
 
 ## Getting the data
 
-Three inputs. Two are in the repo; one you must fetch yourself.
+Everything the build needs is in the repository.
 
 ### Already here (CC BY 4.0, redistributable)
 
@@ -28,24 +28,17 @@ Three inputs. Two are in the repo; one you must fetch yourself.
 
 Both are vendored with provenance and hashes under [`spec/sources/`](../spec/sources).
 
-### You must fetch (all rights reserved, never committed)
+### Nothing to fetch
 
-The **ABA Checklist 8.19** supplies which species are in scope, and nothing else. Names, families and species codes come from AviList, which is CC BY 4.0 and is already in the repo (CR-022).
+There used to be a step here. The **ABA Checklist** supplied which species were in scope, was
+all-rights-reserved, and had to be downloaded by hand into `fetched/` and never committed — and
+because serving BirdView reproduced that list to every visitor, it was also what blocked public
+deployment.
 
-```
-mkdir -p fetched
-curl -A 'your-name/1.0 (contact: you@example.com)' \
-  -o fetched/ABA_Checklist-8.19.csv.zip \
-  https://www.aba.org/wp-content/uploads/2026/03/ABA_Checklist-8.19.csv.zip
-unzip -o -d fetched fetched/ABA_Checklist-8.19.csv.zip
-```
-
-Send a descriptive `User-Agent` naming who you are ([T-006](../spec/tech.md)) — a default
-`Go-http-client/1.1` earns a 403 from some hosts and is discourteous everywhere.
-
-> **This file is copyrighted and must never be committed or redistributed.** Its own first row says
-> so. `/fetched/` is gitignored and that is not a bug to fix. If you plan to serve BirdView to
-> anyone but yourself, read [Deployment](#deployment) first — it is genuinely blocked.
+It is gone. Names, families and sequence come from AviList
+([CR-022](../spec/decisions.md#cr-022)) and scope is now BirdView's own, derived from open
+occurrence records ([CR-028](../spec/decisions.md#cr-028)) and committed as `data/status.tsv`.
+Every input the build reads is either CC BY 4.0 or the project's own work.
 
 ---
 
@@ -71,13 +64,13 @@ recalibrated dataset, a recoloured favicon and a footer credit, each reported fr
 longer matched the repository.
 
 The ingest prints a coverage summary — species in scope, how many traits and wingspans are
-measured, near-match or modeled. Expect **839 species in 90 families across 26 orders**.
+measured, near-match or modeled. Expect **1083 species in 99 families across 27 orders**.
 
 Flags, should you need them:
 
 | Command | Flag | Default |
 | --- | --- | --- |
-| `birdview-ingest` | `-aba` | `fetched/ABA_Checklist-8.19.csv` |
+| `birdview-ingest` | `-status` | `data/status.tsv` |
 | | `-avilist` | `AviList-v2025b-10Jun2026-extended.xlsx` |
 | | `-avonet` | `AVONET Supplementary dataset 1.xlsx` |
 | | `-wingspan` | `wingspan_fox2026_AppendixS1.xlsx` |
@@ -92,8 +85,9 @@ Flags, should you need them:
 > re-running the ingest you must restart the server, or you will spend a while debugging stale
 > data that is already fixed on disk.
 
-The built dataset is a build artifact and is gitignored ([T-005](../spec/tech.md)) — it carries
-values derived from the ABA checklist.
+The built dataset is a build artifact and is gitignored ([T-005](../spec/tech.md)) — not for
+licensing reasons any more, but because it is reproducible from the committed inputs in one
+command and a stale copy in the tree is worse than none.
 
 ---
 
@@ -157,7 +151,6 @@ cmd/birdview-inatmap/  generator: iNaturalist taxon IDs
 cmd/birdview-gbifmap/  generator: GBIF backbone -> AviList name bridge
 cmd/birdview-regions/  generator: per-region presence
 cmd/birdview-status/   generator: BirdView's own occurrence status
-internal/aba/          the checklist parser (scope filter only; names moved to AviList)
 internal/avilist/      the AviList workbook reader — names, families, codes, sequence
 internal/avonet/       the trait workbook reader, including habitat and trophic niche
 internal/wingspan/     the Fox dataset + the fitted wingspan regression
@@ -252,8 +245,8 @@ twins masked the very bug it was written for. Every one looked fine in review.
 
 Violating any of these is a licensing problem, not a style problem.
 
-- **Never commit anything under `fetched/`.** The ABA checklist is all-rights-reserved.
-- **Never commit the built dataset.** It carries values derived from that checklist.
+- **Never commit the built dataset.** It is reproducible from the committed inputs, and a stale
+  copy in the tree is worse than none.
 - **Never read or process Wiley Online Library material**, including Ricklefs (2017). Its terms
   prohibit AI tools ingesting it and prohibit automated access, and the source is formally rejected
   ([CR-002](../spec/decisions.md)). Do not try to revive it as a length source.
@@ -273,18 +266,16 @@ Violating any of these is a licensing problem, not a style problem.
 
 **BirdView is not deployed publicly, and cannot be yet.**
 
-Serving it reproduces the ABA checklist to every visitor, and the checklist is all-rights-reserved
-with no license permitting that.
+**The licensing blocker is gone as of 2026-10-05.** Serving BirdView used to reproduce the ABA
+checklist to every visitor, and that checklist is all-rights-reserved with no license permitting
+it. Permission was requested on 2026-09-27 and never answered, so the project stopped waiting:
+names moved to AviList ([CR-022](../spec/decisions.md#cr-022)) and scope to BirdView's own
+derivation ([CR-028](../spec/decisions.md#cr-028)). Nothing all-rights-reserved is read at build
+time, so nothing of anyone else's is served.
 
-Permission was **requested on 2026-09-27 and never answered**, so the project stopped waiting.
-Names, families and species codes already moved to AviList, which is CC BY 4.0
-([CR-022](../spec/decisions.md#cr-022)), and **scope is the last thing the checklist supplies**.
-Replacing it is [CR-028](../spec/decisions.md#cr-028), in progress: scope becomes a question of
-whether a species' records **recur** — repeated episodes across years, in at least one region —
-rather than how often it is reported, because a record count measures observer effort and
-over-reports exactly the birds a reader will never meet.
-
-Until that lands the app stays local. See the Work arising table in
+What remains before a public deployment is ordinary engineering rather than permission: there is
+no deployment plumbing, no host, and no answer yet to what happens when the derived scope
+changes under a reader's bookmark. See the Work arising table in
 [`decisions.md`](../spec/decisions.md).
 
 Nothing else blocks it. There is no deployment tooling yet — no container image, and the server

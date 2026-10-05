@@ -92,6 +92,17 @@ var NeckRatios = map[string]float64{
 	// does not.
 	"Fregatidae":  0.40,
 	"Diomedeidae": 0.30,
+
+	// Arrived with the derived scope (CR-028).
+	//
+	// The Emu is the odd one in this whole table: it does not fly, so the
+	// flight silhouette every other bird is drawn in is a convention here
+	// rather than a posture. Its neck is still the defining half of its
+	// outline and is drawn as such.
+	"Casuariidae": 0.55,
+	// Jacanas are built like rails on long toes; the neck reads as a
+	// shorebird's rather than a heron's.
+	"Jacanidae": 0.30,
 }
 
 // NeckDefaultReviewed names the families looked at and left on
@@ -132,7 +143,11 @@ var NeckDefaultReviewed = map[string]string{
 	"Phaethontidae":  "moderate, between a gull and a shearwater; the tail streamers identify it, not the neck",
 	"Procellariidae": "shearwaters and petrels fly head-close; unlike the albatrosses",
 	"Hydrobatidae":   "too small for a neck to read at any scale this project draws",
-	"Oceanitidae":    "too small for a neck to read at any scale this project draws",
+	// Also arrived with the derived scope (CR-028).
+	"Cacatuidae":   "compact, as the other parrots are",
+	"Numididae":    "gamebird; short neck, as Phasianidae",
+	"Ramphastidae": "compact; the bill carries the silhouette, not the neck",
+	"Oceanitidae":  "too small for a neck to read at any scale this project draws",
 }
 
 // NeckRatio returns the ratio for a family and whether it was explicitly

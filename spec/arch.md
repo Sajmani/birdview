@@ -12,7 +12,7 @@ cmd/birdview-ingest   compiles sources into web/data/species.json (a build artif
 cmd/birdview          serves it on localhost, rendering HTML server-side
 cmd/birdview-inatmap  builds data/inat-taxa.tsv; run by hand, never by the build
 cmd/birdview-gbifmap  builds data/gbif-taxa.tsv; likewise
-internal/aba          parses the ABA checklist; forward-fills family from section headers
+internal/status       recurrence: episodes, the status they imply, and the committed table
 internal/avonet       reads traits from all three AVONET taxonomy sheets + the crosswalk
 internal/wingspan     empirical wingspans, and the regression fitted from them
 internal/taxonomy     the name mapping: renames vs near-matches

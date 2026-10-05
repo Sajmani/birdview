@@ -6,9 +6,9 @@ BirdView draws North American birds as a scaled schematic — bill, head, neck, 
 tail, and a wing crossbar — at one shared scale, so you can *see* the difference in size instead of
 reading it off a number and trying to imagine it.
 
-It covers **839 species across 90 families and 26 orders**: everything on
-[ABA Checklist 8.19](https://www.aba.org/aba-checklist/) at rarity codes 1–3, which is to say every
-bird you have a realistic chance of seeing in North America.
+It covers **1083 species across 99 families and 27 orders**: every bird whose records **recur**
+in the ABA Area — repeated episodes across years, in at least one region — by a rule BirdView
+derives and owns.
 
 The diagrams are deliberately abstract. They are a **top-down view of a bird in flight**, and they
 carry only what the data supports: no plumage, no posture, no shape the sources cannot justify.
@@ -33,7 +33,7 @@ No openly licensed dataset publishes body length for North American birds. The o
 does is under terms that forbid us using it ([CR-002](spec/decisions.md)), so **every length
 in BirdView is a model** — built from measured parts, with each part labeled. Of the three numbers
 on a tile, mass is measured for almost every species, wingspan is measured for about a third, and
-length is modeled for all 839.
+length is modeled for all 1083.
 
 That is why every value carries its own provenance — `measured`, `near-match` or `modeled` — and
 why clicking any bird shows you the source or the formula behind each individual number.
@@ -43,19 +43,21 @@ why clicking any bird shows you the source or the formula behind each individual
 
 ## Status
 
-Runs locally; **not deployed publicly**, and blocked from being so.
+Runs locally. **The licensing blocker is gone**: nothing all-rights-reserved is read at build
+time any more, so serving BirdView reproduces nobody else's work.
 
-Every **name** now comes from [AviList](spec/sources.md#avilist), which is CC BY 4.0, so the ABA
-checklist no longer reaches a page through naming. One thing still comes from it: **scope**, the
-choice of which 839 species are in. The ABA was asked for permission on 2026-09-27 and has not
-replied, so BirdView is deriving a species list it owns.
+Names, families and taxonomic sequence come from [AviList](spec/sources.md#avilist)
+([CR-022](spec/decisions.md#cr-022)), and **scope is now BirdView's own**
+([CR-028](spec/decisions.md#cr-028)). The ABA was asked for permission on 2026-09-27 and never
+replied, so the project stopped waiting and derived a list it owns.
 
-That replacement is [CR-028](spec/decisions.md#cr-028), and it is in progress. Scope stops being
-a threshold on how *often* a bird is recorded — a count that measures observer effort, and so
-under-reports pelagic species and island endemics while over-reporting vagrants — and becomes a
-question of whether its records **recur**: repeated episodes across years, in at least one
-region. See [CR-022](spec/decisions.md#cr-022) and the Work arising table in
-[spec/decisions.md](spec/decisions.md).
+What replaced the checklist is not a better threshold on how *often* a bird is recorded. A record
+count measures observer effort: it under-reports pelagic species and remote-island endemics,
+because nobody is where they are, and over-reports vagrants, because everybody goes to where they
+are. Those pull in opposite directions and no single cutoff corrects both. Scope instead asks
+whether a species' records **recur** — repeated episodes across years, in at least one region —
+which is insensitive to both. Akikiki has 376 records across 45 years and is a resident; the 2023
+American Flamingo in Pennsylvania has 931 inside 13 days and is not.
 
 ---
 
@@ -65,19 +67,21 @@ region. See [CR-022](spec/decisions.md#cr-022) and the Work arising table in
 | --- | --- | --- |
 | [AVONET](https://doi.org/10.6084/m9.figshare.16586228.v7) (Tobias et al. 2022) | CC BY 4.0 | morphology traits; vendored in this repo |
 | [Fox et al. 2026 wingspan database](https://doi.org/10.6084/m9.figshare.32089083) | CC BY 4.0 | empirical wingspan; vendored in this repo |
-| [ABA Checklist 8.19](https://www.aba.org/aba-checklist/) | **all rights reserved** | which species are in scope, and nothing else; **fetched at build, never committed** |
 | [GBIF](https://www.gbif.org) — [eBird Observation Dataset](https://doi.org/10.15468/aomfnb) and iNaturalist research-grade | CC BY 4.0 | which regions each bird is found in; only the derived list is kept, never a record |
 | [iNaturalist](https://www.inaturalist.org) | terms vendored; taxon IDs are facts | one taxon ID per species, to link the detail page out for photographs |
 
-The two CC BY sources are redistributed here under their license, with attribution. The ABA
-checklist is not redistributed at all — you fetch your own copy, and `.gitignore` enforces that.
+Every source above is CC BY 4.0 and is redistributed here under its license, with attribution.
+**No all-rights-reserved input remains.** The ABA Checklist supplied scope until 2026-10-05 and
+was never committed; it is no longer read at all.
 
 BirdView **links** to iNaturalist and copies nothing from it: no photograph is embedded, cached
 or hotlinked, so no contributor's license is engaged. See
 [CR-012](spec/decisions.md).
 
-BirdView's own code is in this repository; the built dataset (`web/data/species.json`) is a build
-artifact and is not committed, because it carries values derived from the checklist.
+BirdView's own code is in this repository, along with the tables it derives under `data/` —
+the occurrence status, the region presence, and the two name bridges. The built dataset
+(`web/data/species.json`) stays a build artifact and is not committed: it is reproducible from
+the committed inputs in one command.
 
 ---
 

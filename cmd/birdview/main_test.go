@@ -1201,11 +1201,22 @@ func TestAttributionIsComplete(t *testing.T) {
 		"creativecommons.org/licenses/by/4.0", // the license itself
 		"AviList",                             // every name on the page comes from it
 		"10.2173/avilist.v2025b",              // AviList source
-		"American Birding Association",        // the non-CC source still needs credit
-		"ABA Checklist",
+		"GBIF",                                // the occurrence records behind regions and scope
+		"10.15468/aomfnb",                     // the eBird Observation Dataset
+		"iNaturalist",                         // the other occurrence dataset
 	} {
 		if !strings.Contains(f, want) {
 			t.Errorf("attribution is missing %q", want)
+		}
+	}
+	// The ABA checklist must NOT be credited: CR-028 replaced the one thing
+	// it supplied, and crediting a source for nothing is its own kind of
+	// false statement -- it tells a reader the page reproduces something it
+	// does not, which is what blocked deployment in the first place.
+	for _, gone := range []string{"American Birding Association", "ABA Checklist"} {
+		if strings.Contains(f, gone) {
+			t.Errorf("the footer still credits %q, but nothing on the page comes from it "+
+				"since scope was derived (CR-028)", gone)
 		}
 	}
 	// And the honesty note that the numbers are mostly modeled.

@@ -127,7 +127,37 @@ var AviListRenames = map[string]string{
 var LumpedInto = map[string]string{
 	"Numenius phaeopus": "Numenius hudsonicus",
 	"Gygis alba":        "Gygis candida",
+
+	// This one runs the other way: AviList LUMPS where eBird splits.
+	// Stejneger's Stonechat has no AviList concept of its own -- AviList
+	// carries Saxicola maurus and nothing else in that complex -- so its 95
+	// eBird and 28 iNaturalist records are maurus's under the taxonomy
+	// BirdView uses. Without this the species is dropped for having no name
+	// BirdView may publish, and maurus is left with the two records filed
+	// under it directly, which is below any bar.
+	//
+	// The mechanism is identical to the pair above even though the direction
+	// is reversed: the occurrence data's name is not AviList's, and the
+	// records belong to the AviList species.
+	"Saxicola stejnegeri": "Saxicola maurus",
 }
+
+// AviListRenamedFrom is AviListRenames inverted: the name AVONET and the
+// occurrence data use, given the AviList name BirdView carries.
+//
+// Scope now arrives already mapped into AviList's namespace, so the AVONET
+// lookup sees "Pica nuttallii" where the workbook has "Pica nuttalli" and
+// finds nothing. It is the same bird; only the label moved forward, so a
+// value resolved through here is still `measured`.
+//
+// Verifies: P-006.
+var AviListRenamedFrom = func() map[string]string {
+	m := make(map[string]string, len(AviListRenames))
+	for from, to := range AviListRenames {
+		m[to] = from
+	}
+	return m
+}()
 
 // NotInAviList lists species AviList does not recognize at all, because it
 // lumps them into a taxon BirdView already carries. They are DROPPED from the
@@ -162,6 +192,10 @@ var NotInAviList = map[string]string{
 // Anything displayed from this table is a convenience label. Nothing is derived
 // from it, and no measurement depends on it (G-004).
 var OrderCommonNames = map[string]string{
+	// Arrived with the derived scope (CR-028): one feral Emu population
+	// recurs often enough to qualify. Named for the family a reader would
+	// recognize rather than for the order's full worldwide content.
+	"Casuariiformes":      "Emus and Cassowaries",
 	"Anseriformes":        "Waterfowl",
 	"Galliformes":         "Gamebirds",
 	"Phoenicopteriformes": "Flamingos",

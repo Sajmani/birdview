@@ -23,10 +23,10 @@ the code is live: `birdview-ingest` builds 841 species across 91 families, and `
 them. A behavior change still goes spec first, then the criterion, then the code — see
 [spec/process.md](spec/process.md) and "Working on a change" below.
 
-Not done: no deployment plumbing, and public deployment is **blocked** until the ABA
-grants written permission to redistribute its checklist (Work arising in
-[spec/decisions.md](spec/decisions.md)). Serving the app reproduces that checklist to every
-visitor, so this is not a formality.
+**The licensing blocker is gone as of 2026-10-05.** Scope was the last thing the ABA checklist
+supplied, and [CR-028](spec/decisions.md#cr-028) replaced it with BirdView's own derivation from
+open occurrence records. `internal/aba` is deleted and nothing reads `fetched/`. What remains
+before a public deployment is plumbing, not permission.
 
 **A criterion you have not watched fail is not a criterion.** Break the code deliberately, confirm
 each new check goes red, and record in the criterion how you broke it before marking it verified.
@@ -38,9 +38,10 @@ a test that survived the reversal of its own requirement.
 
 Violating any of these is a licensing problem, not a style problem.
 
-- **Never commit anything under `fetched/`** (T-004). The ABA checklist is all-rights-reserved
-  and says so in the first row of its own CSV. It is fetched onto the building machine, used, and
-  never redistributed. `.gitignore` covers this — do not "fix" it.
+- **Never reintroduce the ABA checklist.** It is all-rights-reserved and says so in the first row
+  of its own CSV, and reproducing it to every visitor is what blocked deployment for weeks. Scope
+  is now derived ([CR-028](spec/decisions.md#cr-028)); `fetched/` stays gitignored so a stray copy
+  cannot creep back in.
 - **Never read or process Wiley Online Library material**, including Ricklefs 2017. Its terms
   prohibit AI tools from ingesting it and prohibit automated access to the site, and the source is
   rejected ([CR-002](spec/decisions.md#cr-002)). Do not try to revive it as a length source.
@@ -125,10 +126,12 @@ Cite requirement IDs in comments using the literal token, so one search covers t
 - **The wing crossbar is to scale with the vertical axis** (P-043), which is why tiles are wide.
   A crossbar on its own convenient scale looks authoritative and says something false.
 - **AVONET has no common names and no body length or wingspan.** Three separate designs have
-  foundered on assuming otherwise. Common names come from the ABA checklist (P-004); length and
+  foundered on assuming otherwise. Common names come from AviList (P-004, CR-022); length and
   wingspan are handled by P-060.
-- **Rarity codes are an ingest-time filter only** (P-001). They are read to select codes 1–3 and
-  then discarded — they never enter the dataset.
+- **Scope is recurrence, not abundance** (P-001, CR-028). A species is in when its records fall
+  in repeated episodes across years in some region — not when it has enough of them. A record
+  count measures observer effort, which under-reports pelagics and island endemics and
+  over-reports vagrants, and no threshold on it corrects both at once.
 - **Identify the client on outbound requests** (T-006). Go's default `Go-http-client/1.1` earns a
   403 from Wikimedia and is discourteous everywhere else.
 

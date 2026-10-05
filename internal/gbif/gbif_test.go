@@ -11,15 +11,15 @@ import (
 	"testing"
 	"time"
 
-	"birdview/internal/aba"
 	"birdview/internal/avilist"
+	"birdview/internal/status"
 	"birdview/internal/taxonomy"
 )
 
 const (
-	tableFile = "../../data/gbif-taxa.tsv"
-	avlFile   = "../../AviList-v2025b-10Jun2026-extended.xlsx"
-	abaFile   = "../../fetched/ABA_Checklist-8.19.csv"
+	tableFile  = "../../data/gbif-taxa.tsv"
+	avlFile    = "../../AviList-v2025b-10Jun2026-extended.xlsx"
+	statusFile = "../../data/status.tsv"
 )
 
 // testIndex is a hand-written slice of AviList: the species each case below
@@ -446,34 +446,28 @@ func TestCommittedTableIsExactlyWhatWriteProduces(t *testing.T) {
 //
 // Verifies: T-021.
 func TestCommittedTableCoversBirdViewsSpecies(t *testing.T) {
-	if _, err := os.Stat(abaFile); err != nil {
-		t.Skip("skipping: fetched/ABA_Checklist-8.19.csv is absent; run the fetch step first")
-	}
-	raw, err := os.ReadFile(abaFile)
+	// BirdView's species, from the committed status table rather than from
+	// the ABA checklist (CR-028). This used to skip on a clean checkout
+	// because the checklist is never committed; it no longer can.
+	sf, err := os.Open(statusFile)
 	if err != nil {
-		t.Fatalf("reading the checklist: %v", err)
+		t.Fatalf("opening the status table: %v", err)
 	}
-	species, err := aba.Parse(strings.NewReader(string(raw)))
+	rows, err := status.Read(sf)
+	sf.Close()
 	if err != nil {
-		t.Fatalf("aba.Parse: %v", err)
+		t.Fatalf("reading the status table: %v", err)
 	}
-
-	// BirdView's species, under the names AviList files them under: the same
-	// two steps the ingest takes (CR-022).
 	birdview := map[string]bool{}
-	for _, sp := range species {
-		name := sp.ScientificName
-		if alt, ok := taxonomy.AviListRenames[name]; ok {
-			name = alt
-		}
-		if _, dropped := taxonomy.NotInAviList[sp.ScientificName]; dropped {
+	for _, name := range status.Scope(rows) {
+		if _, dropped := taxonomy.NotInAviList[name]; dropped {
 			continue
 		}
 		birdview[name] = true
 	}
-	const wantBirdView = 841 - 2 // ABA codes 1-3, less the two AviList does not recognize
-	if len(birdview) != wantBirdView {
-		t.Fatalf("reconstructed %d BirdView species, want %d", len(birdview), wantBirdView)
+	if len(birdview) < 1000 {
+		t.Fatalf("reconstructed only %d BirdView species; the derived scope is larger, "+
+			"so this looks like a stale list", len(birdview))
 	}
 
 	f, err := os.Open(tableFile)

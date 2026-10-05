@@ -11,15 +11,16 @@ import (
 
 	"birdview/internal/dataset"
 	"birdview/internal/inat"
+	"birdview/internal/status"
 	"birdview/internal/taxonomy"
 )
 
 const (
-	abaFile  = "../../fetched/ABA_Checklist-8.19.csv"
-	avoFile  = "../../AVONET Supplementary dataset 1.xlsx"
-	foxFile  = "../../wingspan_fox2026_AppendixS1.xlsx"
-	avlFile  = "../../AviList-v2025b-10Jun2026-extended.xlsx"
-	inatFile = "../../data/inat-taxa.tsv"
+	statusFile = "../../data/status.tsv"
+	avoFile    = "../../AVONET Supplementary dataset 1.xlsx"
+	foxFile    = "../../wingspan_fox2026_AppendixS1.xlsx"
+	avlFile    = "../../AviList-v2025b-10Jun2026-extended.xlsx"
+	inatFile   = "../../data/inat-taxa.tsv"
 )
 
 // built caches the compiled dataset across tests: the AVONET workbook is 21 MB
@@ -31,13 +32,11 @@ func load(t *testing.T) *dataset.Dataset {
 	if built != nil {
 		return built
 	}
-	if _, err := os.Stat(abaFile); err != nil {
-		// The ABA checklist is all rights reserved and never committed (T-004),
-		// so a clean checkout legitimately lacks it. Skip loudly rather than
-		// pass silently.
-		t.Skip("skipping: fetched/ABA_Checklist-8.19.csv is absent; run the fetch step first")
-	}
-	ds, _, err := build(abaFile, avoFile, foxFile, avlFile)
+	// The status table IS committed, unlike the ABA checklist it replaced
+	// (CR-028), so this no longer skips on a clean checkout. That is the
+	// point of the change: the build depends on nothing it may not
+	// redistribute.
+	ds, _, err := build(statusFile, avoFile, foxFile, avlFile)
 	if err != nil {
 		t.Fatalf("build: %v", err)
 	}
@@ -45,19 +44,51 @@ func load(t *testing.T) *dataset.Dataset {
 	return ds
 }
 
+// Scope is now every species the status table says recurs, plus the declared
+// exceptions, less what cannot be named or measured (P-001, CR-028).
+//
+// The expected count is derived from those inputs rather than from a run:
+// count the in-scope rows, add the declared, subtract the names AviList has
+// no concept for. Writing the total as a literal would make this test agree
+// with whatever the code last produced.
+//
 // Verifies: P-001. Criterion: AC-010.
-func TestScopeIsABACodes1To3(t *testing.T) {
+func TestScopeIsWhatTheStatusTableSaysRecurs(t *testing.T) {
 	ds := load(t)
-	// 841 is counted from ABA Checklist 8.19 itself -- rarity codes 1, 2 and 3
-	// number 490, 258 and 93 -- not from a previous run of this code. Two are
-	// then dropped because AviList recognizes neither as a species and every
-	// name now comes from AviList (CR-022), which is why the constant is
-	// written as the arithmetic rather than as 839.
-	const want = 841 - 2
+	f, err := os.Open(statusFile)
+	if err != nil {
+		t.Fatalf("opening the status table: %v", err)
+	}
+	defer f.Close()
+	rows, err := status.Read(f)
+	if err != nil {
+		t.Fatalf("reading the status table: %v", err)
+	}
+	want := len(status.Scope(rows)) - len(taxonomy.NotInAviList) - unmeasurable
 	if got := len(ds.Species); got != want {
-		t.Errorf("got %d species, want %d for ABA checklist 8.19", got, want)
+		t.Errorf("got %d species, want %d (in scope, less %d with no AviList concept "+
+			"and %d with no AVONET measurement)",
+			got, want, len(taxonomy.NotInAviList), unmeasurable)
+	}
+	// The scope must actually be the derived one, not a leftover list.
+	if len(ds.Species) < 1000 {
+		t.Errorf("only %d species: the ABA checklist carried 839 and the derived "+
+			"scope is larger, so this looks like the old list", len(ds.Species))
 	}
 }
+
+// unmeasurable counts the in-scope species AVONET has no row for, in any of
+// its three taxonomies, under any name internal/taxonomy knows. They are
+// named rather than counted silently, because each is a bird BirdView admits
+// and cannot draw.
+var unmeasurableNames = []string{
+	"Anarhynchus collaris",  // Collared Plover
+	"Coloeus monedula",      // Western Jackdaw
+	"Daptrius chimachima",   // Yellow-headed Caracara
+	"Periporphyrus celaeno", // Crimson-collared Grosbeak
+}
+
+const unmeasurable = 4
 
 // TestRarityCodeNeverReachesTheDataset checks the ABA rarity code is used as a
 // scope filter and then discarded (P-001).
@@ -218,14 +249,34 @@ func TestProvenanceMatchesTheSourcesUsed(t *testing.T) {
 			modeledSpan++
 		}
 	}
-	// 301 is the empirical-wingspan count measured against the Fox dataset and
-	// AVONET's crosswalk before this code existed, and recorded in
-	// spec/sources/fox-wingspan/PROVENANCE.md. One of the two species CR-022
-	// dropped had an empirical span, so the expected count is written as the
-	// arithmetic rather than restated as 300.
-	const wantMeasuredSpan = 301 - 1
-	if measuredSpan != wantMeasuredSpan {
-		t.Errorf("measured wingspans: got %d, want %d", measuredSpan, wantMeasuredSpan)
+	// There used to be an absolute count here -- 301 less one, measured
+	// against the Fox dataset for the ABA checklist's scope and recorded in
+	// spec/sources/fox-wingspan/PROVENANCE.md. CR-028 replaced that scope, so
+	// the number is a fact about a species list that no longer exists, and
+	// restating it as whatever this run produces would be reading the
+	// expectation off the code under test.
+	//
+	// What survives the change is the PROPERTY, which is what P-060 actually
+	// requires: a wingspan is `measured` only if an empirical one was found,
+	// and an empirical one is only ever Fox's. A regression that modeled a
+	// span and called it measured fails here however many species are in
+	// scope.
+	for _, sp := range ds.Species {
+		p := sp.Wingspan.Prov
+		switch p.Kind {
+		case dataset.Measured, dataset.NearMatch:
+			if !strings.Contains(p.Source, "Fox") {
+				t.Errorf("%s: wingspan is %s but cites %q; the only empirical "+
+					"wingspans are Fox's", sp.ScientificName, p.Kind, p.Source)
+			}
+		case dataset.Modeled:
+			if p.Model == "" {
+				t.Errorf("%s: wingspan is modeled and names no model", sp.ScientificName)
+			}
+		}
+	}
+	if measuredSpan == 0 {
+		t.Error("no measured wingspans at all; the Fox join has broken")
 	}
 	if measuredSpan+nearSpan+modeledSpan != len(ds.Species) {
 		t.Error("wingspan kinds do not partition the dataset")

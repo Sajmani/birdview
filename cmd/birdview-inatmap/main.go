@@ -24,6 +24,7 @@ import (
 
 	"birdview/internal/dataset"
 	"birdview/internal/inat"
+	"birdview/internal/taxonomy"
 )
 
 func main() {
@@ -66,6 +67,16 @@ func main() {
 			break
 		}
 		e, ok, err := c.Lookup(ctx, s.ScientificName, s.Name(dataset.LocaleNA))
+		// iNaturalist predates AviList's renames, as AVONET and the GBIF
+		// occurrence data both do: it has no Pica nuttallii and no Icterus
+		// bullockiorum, only the spellings those were renamed from. Retry
+		// under the older label rather than record a confident non-match,
+		// which is what two of 1,083 species got on the first full run.
+		if err == nil && !ok {
+			if from, renamed := taxonomy.AviListRenamedFrom[s.ScientificName]; renamed {
+				e, ok, err = c.Lookup(ctx, from, s.Name(dataset.LocaleNA))
+			}
+		}
 		switch {
 		case err != nil:
 			// A transport error is not a confident non-match, so it must not be

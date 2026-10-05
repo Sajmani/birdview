@@ -63,12 +63,12 @@ data for all birds. *Ecology Letters* 25: 581–597.
 | **Version** | 8.19, January 2026 |
 | **Integrity** | [spec/sources/aba/PROVENANCE.md](sources/aba/PROVENANCE.md) |
 | **Tier** | mandatory (copyright) |
-| **Import style** | By reference, **deliberately not vendored** — fetched at build per T-004 |
-| **Scope** | Species list, common and scientific names, families, rarity filter (P-001, P-004) |
-| **Adopted parts** | Main checklist only. Provisional Lists A and B are not used. |
-| **Exclusions** | Rarity codes are not carried into the dataset or the UI; they are read at ingest as a scope filter and discarded. |
+| **Import style** | **Retired 2026-10-05.** Not read at build, not vendored, not referenced by any code. |
+| **Scope** | *(formerly)* species list, common and scientific names, families, rarity filter |
+| **Adopted parts** | None. |
+| **Exclusions** | Everything. |
 | **Owner** | American Birding Association, `info@aba.org` |
-| **Status** | **Adopted.** Retrieved and hashed 2026-09-21; terms read and quoted; redistribution refused by those terms, so the file is fetched at build and never committed. |
+| **Status** | **Retired 2026-10-05, and this is the entry that unblocked deployment.** Names, families and sequence moved to AviList ([CR-022](decisions.md#cr-022)); scope moved to BirdView's own derivation ([CR-028](decisions.md#cr-028)). `internal/aba` is deleted and nothing fetches the file. The entry stays because the record of why a source was adopted and then dropped is worth more than the space it takes — and because anyone re-reading the terms below should see at the top that they no longer bind this project. |
 
 License, quoted verbatim from row 0 of the CSV itself:
 

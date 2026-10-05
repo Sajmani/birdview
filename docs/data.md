@@ -193,9 +193,10 @@ covers contributors' work and not the taxonomy we take an identifier from.
 
 ## Scope
 
-**839 species**: ABA Checklist 8.19, rarity codes 1–3, less two. Codes 4 and 5 — casuals and
-accidentals — are excluded, and rarity is used once at build time as a filter and then discarded,
-so it never reaches the dataset or the UI.
+**1083 species**: every bird whose records recur in the ABA Area, by BirdView’s own rule — not
+by anyone else’s checklist. A species is in when, in at least one region, its observations fall
+in repeated episodes across years. Nine more are kept by hand because the open record cannot
+speak for them, each named with its reason.
 
 The two are Gray-headed Swamphen and Western Warbling-Vireo, ABA splits that AviList does not
 recognize. Every name BirdView serves comes from AviList, so a bird AviList has no concept for
