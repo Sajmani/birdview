@@ -482,7 +482,7 @@
     <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="{{whynot .S.Wingspan.Prov}}"{{end}}>Wingspan {{.Wing}}</span>
     <span{{if ne .S.Mass.Prov.Kind "measured"}} class="est" title="{{whynot .S.Mass.Prov}}"{{end}}>Mass {{.MassStr}}</span>
   </div>
-  {{/* How much of the bird observations held by the regions currently on screen
+  {{/* How much of the species observations held by the regions currently on screen
        on screen (P-074). It answers the question the filtered page is
        posing; "commonest in Yukon" answers one the reader did not ask and
        stays on the detail page.
@@ -498,7 +498,7 @@
        a reader unable to tell a missing figure from a missing bird. The
        explaining form is for having no denominator at all. */}}
   <div class="share">{{with .Commonest}}{{if .Ratio}}<span title="{{.Title}}"><b>{{.Ratio}}</b>
-    bird observations {{.Where}}</span>{{with .Shared}}<span class="seam"
+    species observations {{.Where}}</span>{{with .Shared}}<span class="seam"
     title="{{$.Commonest.SharedTitle}}">{{.}}</span>{{end}}{{else}}<span class="nodata"
     title="{{.Title}}">{{.Note}}</span>{{end}}{{else}}<span class="nodata"
     title="no regions are selected">&mdash;</span>{{end}}</div>

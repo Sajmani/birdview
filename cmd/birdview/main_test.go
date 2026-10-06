@@ -4419,6 +4419,73 @@ func TestTileShareFollowsTheRegionFilter(t *testing.T) {
 	}
 }
 
+// TestTheUnitSaysSpeciesAndNotBird asserts the noun the "1 in N" figure is
+// counted in, on the tile and in the tooltip that explains it.
+//
+// The denominator counts species on checklists and deliberately ignores how
+// many individuals each one saw -- twelve sparrows is one, and so is a flock
+// of fifty thousand Snow Geese. "bird observations" named the one quantity
+// the figure is NOT, so a reader taking 1 in 32 to mean one bird in
+// thirty-two misread nothing except the unit, and the unit was the only
+// thing that could have told them (P-074).
+//
+// It reads the tile's own cell rather than searching the page: the word
+// appears in the docs and the help text too, so a whole-page search would
+// pass with the figure missing from every tile, which is the shape of a
+// check that tests nothing.
+//
+// Watched fail: see AC-107.
+//
+// Verifies: P-074. Criterion: AC-107.
+func TestTheUnitSaysSpeciesAndNotBird(t *testing.T) {
+	s := newTestServer(t)
+	_, body := get(t, s, "/")
+	i := strings.Index(body, ">American Robin")
+	if i < 0 {
+		t.Fatal("the robin is not on the index")
+	}
+	seg := body[i:]
+	if j := strings.Index(seg, "</div></a>"); j > 0 {
+		seg = seg[:j]
+	}
+	// The figure and its unit have to be in the same cell, or this asserts
+	// that the words appear somewhere near a bird's name.
+	unit := regexp.MustCompile(`<b>1 in [\d,]+</b>\s*([a-z ]*observations)`).FindStringSubmatch(seg)
+	if unit == nil {
+		t.Fatalf("no \"1 in N <unit> observations\" on the robin's tile: %q", seg)
+	}
+	if got := strings.TrimSpace(unit[1]); got != "species observations" {
+		t.Errorf("the tile counts in %q, want \"species observations\": the denominator "+
+			"is species on checklists, and naming it in birds asserts the individual "+
+			"count the figure deliberately does not read", got)
+	}
+
+	// And the tooltip that spells the figure out agrees with the cell. Two
+	// nouns for one quantity is worse than the wrong one used consistently.
+	ds := realDataset(t)
+	var sp *dataset.Species
+	for i := range ds.Species {
+		if len(ds.Species[i].Regions) > 0 {
+			sp = &ds.Species[i]
+			break
+		}
+	}
+	if sp == nil {
+		t.Fatal("no species has a region")
+	}
+	cell := shareOf(sp, ds.RegionTotals, options{})
+	if cell == nil {
+		t.Fatal("no share cell for a species with regions")
+	}
+	if !strings.Contains(cell.Title, "species observations") {
+		t.Errorf("the tooltip reads %q, which does not count in species observations "+
+			"as the cell beside it does", cell.Title)
+	}
+	if strings.Contains(cell.Title, "bird observations") {
+		t.Errorf("the tooltip still counts in bird observations: %q", cell.Title)
+	}
+}
+
 func atoiComma(t *testing.T, s string) int {
 	t.Helper()
 	n, err := strconv.Atoi(strings.ReplaceAll(s, ",", ""))

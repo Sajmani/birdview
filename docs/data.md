@@ -248,7 +248,7 @@ records, in either eBird or iNaturalist**, both via GBIF under CC BY 4.0.
 
 **Relative rather than a fixed count**, for two measured reasons. eBird's volume doubled in five
 years, so any absolute bar admits more species over time for no ecological reason. And effort
-differs enormously between regions — California has 114 million bird observations against Hawaii's
+differs enormously between regions — California has 114 million species observations against Hawaii's
 2.5 million — so one count cannot mean the same thing in both.
 
 **Both sources, because one is not enough.** eBird's GBIF export **withholds
@@ -332,7 +332,7 @@ exact — a bird on a fraction *f* of checklists holds *f/S* of the observations
 county-days, the typical checklist runs **12 to 19 species** (means 15.6 and 19.1,
 reconstructed from observer, date and place, because GBIF's eBird export carries no checklist
 id). So the robin is on something like **half to two-thirds of New York outings** — which is
-what a birder would recognise, and not what *1 in 32* sounds like.
+what a birder would recognize, and not what *1 in 32* sounds like.
 
 It cuts the other way where fewer species are about: the same *1 in N* means a larger fraction
 of outings when checklists are short. The ordering is unaffected, being the same division by the
@@ -346,14 +346,14 @@ is how this measurement goes wrong. Two county-days is a measurement; sixty-nine
 crawl.
 
 **On the index the scope is whatever regions you have selected**, so the figure follows
-your filter. A Gyrfalcon is 1 in 3,631,056 bird observations (all regions) and 1 in
+your filter. A Gyrfalcon is 1 in 3,631,056 species observations (all regions) and 1 in
 82,946 in Alaska — forty-four times commoner where it actually lives. Select a region the bird
 is absent from and the figure falls, because those records join the denominator and none join
 the numerator; a bird is a smaller part of a wider world.
 
 **On the detail page** the scope is every region at once, and the page also names the one
 where the species peaks: *Top region: Yukon — 1 in 250 observations there.* A bird with
-no records in the regions on screen reads *0 in 1,225,176,035 bird observations across every
+no records in the regions on screen reads *0 in 1,225,176,035 species observations across every
 region* — a stated zero against a stated denominator, because zero in a billion records and
 zero in nine hundred are different findings.
 
@@ -411,7 +411,7 @@ Dividing by the region's own total cancels out how hard anyone was looking.
 
 Counting records instead would just point at wherever the birders are. The Millerbird settles
 it: 28 of its records are filed under Hawaii and 22 under Nihoa, so by count its home reads
-"Hawaii" — a state with 2.6 million bird observations, where the Millerbird is 1 in 93,090. Nihoa has
+"Hawaii" — a state with 2.6 million species observations, where the Millerbird is 1 in 93,090. Nihoa has
 49,102 records and the bird is 1 in 2,231 of them. Nihoa is the island it actually lives on.
 
 **Why "1 in N" and not a percentage.** Across the dataset the figure runs from 1 in 2 to 1 in

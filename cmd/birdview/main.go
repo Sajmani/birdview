@@ -2466,7 +2466,7 @@ func (s *server) categories(sp *dataset.Species, loc dataset.Locale) []categoryR
 
 	// Where the bird is the biggest share of what gets recorded (P-074).
 	//
-	// Stated as "1 in N bird observations there" rather than as a percentage: the
+	// Stated as "1 in N species observations there" rather than as a percentage: the
 	// share runs from 1 in 2 to 1 in 117 million across the dataset, and a
 	// percentage is 0.000001% at that end and unreadable well before it.
 	// The records it rests on are shown so a thin number discloses itself
@@ -2486,11 +2486,11 @@ func (s *server) categories(sp *dataset.Species, loc dataset.Locale) []categoryR
 			// figure the index shows, which selecting this one region there
 			// reproduces exactly (AC-100).
 			Label:  "Top region",
-			Value:  fmt.Sprintf("%s — 1 in %s bird observations there", where, comma(int64(c.OneIn()))),
+			Value:  fmt.Sprintf("%s — 1 in %s species observations there", where, comma(int64(c.OneIn()))),
 			Origin: string(dataset.Derived),
 			// Both halves of the contrast, because the first on its own only
 			// says what the number is NOT. A share is where the bird is.
-			Detail: fmt.Sprintf("%s of the %s bird observations from %s, in eBird and iNaturalist "+
+			Detail: fmt.Sprintf("%s of the %s species observations from %s, in eBird and iNaturalist "+
 				"via GBIF. That is how much of what people record there is this bird, not "+
 				"how many of them there are: a plain count says where the birdwatchers are. "+
 				"A sea's records are those on open water inside its box, so a bird watched "+
@@ -2537,7 +2537,7 @@ type shareCell struct {
 	SharedTitle string
 }
 
-// shareIn gives a species' share of the bird observations held by the regions
+// shareIn gives a species' share of the species observations held by the regions
 // currently on screen: its records there, over every bird observation from the
 // same regions.
 //
@@ -2633,7 +2633,7 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 	} else if all {
 		where, scope = "(all regions)", "every region BirdView covers"
 	}
-	// Zero is stated, not dashed. "0 in 1,225,176,035 bird observations across
+	// Zero is stated, not dashed. "0 in 1,225,176,035 species observations across
 	// every land region" carries the effort behind the absence; an em-dash
 	// left a reader unable to tell a missing figure from a missing bird.
 	ratio, detail := "0 in "+comma(den), "None"
@@ -2643,7 +2643,7 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 	return &shareCell{
 		Where: where,
 		Ratio: ratio,
-		Title: fmt.Sprintf("%s of the %s bird observations from %s are this species. "+
+		Title: fmt.Sprintf("%s of the %s species observations from %s are this species. "+
 			"That is how much of what people record is this bird, not how many of them "+
 			"are out there.",
 			detail, comma(den), scope),

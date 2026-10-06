@@ -719,7 +719,7 @@ among the smallest birds — because that is precision, not a second scale.
 
 ### P-074 — Each bird says how much of what people record it is
 Subject: `presentation.share`
-Value: `species records over all bird observations, for the land regions in view`
+Value: `one species' observations over all species observations, for the regions in view`
 Goals: G-001, G-002
 
 Every species says how much of what people record in view is that bird, as **one in N**.
@@ -732,17 +732,32 @@ bird is *logged* rather than how many there are, and it is the sharpest statemen
 "not abundance" caveat below — a species seen in twos on every list outranks one that appears
 rarely in vast flocks.
 
-**The unit also makes *1 in N* read smaller than the thing a birder recognises.** Divide the
+**The unit also makes *1 in N* read smaller than the thing a birder recognizes.** Divide the
 average checklist length by N and you get the fraction of outings the bird is on: American
 Robin at 1 in 32 in New York, where a checklist runs 12 to 19 species, is on roughly half to
 two-thirds of them. BirdView does not publish that figure — the checklist id is absent from
 GBIF's eBird export, so checklist length is reconstructable but not known per region — and
 [`docs/data.md`](../docs/data.md) gives readers the arithmetic instead.
 
+**The unit on screen is “species observations”, not “bird observations”.** The denominator
+counts *species on checklists*, and "bird" names the wrong thing in the one way a reader is
+most likely to get wrong: it reads as a count of individual birds, which is exactly the
+quantity the paragraph above says is carried and deliberately ignored. Someone who takes
+`1 in 32` to mean one bird in thirty-two has not misread the number, they have misread the
+unit, and the unit is the only place that can tell them. "Species" also makes the denominator
+self-describing — a region where observers list thirty kinds a visit contributes more to it
+than one where they list five — which is otherwise a fact available only in
+[`docs/data.md`](../docs/data.md).
+
+Preferred over the alternatives on the same grounds as the sort-direction wording
+([CR-032](decisions.md#cr-032)): *records* is this project's internal word and says nothing to
+a birder, *checklist entries* is accurate but names a mechanism the interface never shows, and
+*sightings* re-opens the individuals ambiguity it is meant to close.
+
 **The interface never uses the word “share”**, and neither does
 [`docs/`](../docs/data.md). It is the right technical term and it is this requirement's
 subject, so this document and [`decisions.md`](decisions.md) keep it — but a reader meeting
-`1 in 282,315 bird observations in North Atlantic` does not need a noun for the concept, and the
+`1 in 282,315 species observations in North Atlantic` does not need a noun for the concept, and the
 one word that was on screen, in a one-line cell with no room to define it, read as jargon. The
 pages say what the number *is* instead: *how much of what people record there is this bird, not
 how many of them are out there.*
@@ -768,14 +783,14 @@ denominator were once two separate conditions that drifted apart, and deriving b
 *does this region have a denominator* makes that unrepresentable rather than merely fixed.
 
 **On the index the scope is the regions currently selected**, so the figure follows the
-filter: a Gyrfalcon is 1 in 3,631,056 bird observations (all regions) and 1 in 82,946 in
+filter: a Gyrfalcon is 1 in 3,631,056 species observations (all regions) and 1 in 82,946 in
 Alaska. That is the question a filtered page poses — *of what people record where I am
 looking, how much is this bird* — and it is why the index does not instead show where in North
 America the bird peaks. Narrowing to Arizona and being told about Yukon answers something
 nobody asked.
 
 **Absence is a number, not a dash.** A bird with no records in the regions on screen reads
-**`0 in 1,225,176,035 bird observations across every land region`** — the same sentence as every
+**`0 in 1,225,176,035 species observations across every land region`** — the same sentence as every
 other tile, with a zero in it. The em-dash this replaced could not be told apart from a missing
 figure, and it threw away the half of the answer that carries the weight: *how hard anyone
 looked before concluding the bird was not there.* Zero in a billion records is a finding; zero

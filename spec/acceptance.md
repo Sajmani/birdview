@@ -2183,3 +2183,33 @@ species and every one is declared.**
 and the test "passed" — the same no-op trap that caught me earlier in this session, two hours
 after I wrote the rule into `AGENTS.md` telling myself to assert that the mutation landed.
 Re-run with the anchor asserted, it fails as above.
+
+### AC-107 — The figure says what it counts, and it is not individual birds
+**Verifies:** [P-074](product.md#p-074) · **Level:** code · **Method:** unit test over the
+rendered tile cell and the tooltip beside it
+
+**Assertions:**
+
+1. The index tile's `1 in N` is followed, **in the same cell**, by the unit `species
+   observations`.
+2. The tooltip that spells the figure out counts in the same noun, and no longer in `bird
+   observations`.
+
+**The noun was wrong in the one way a reader would not catch.** The denominator counts species
+on checklists and deliberately ignores how many individuals each entry saw — twelve
+White-throated Sparrows is one observation, and so is a flock of fifty thousand Snow Geese.
+"bird observations" names precisely the quantity the figure is *not*, so someone reading
+`1 in 32` as one bird in thirty-two has misread nothing except the unit, and the unit is the
+only thing on the tile that could have told them.
+
+**The cell, not the page.** `species observations` also appears in the help text and in
+[`docs/data.md`](../docs/data.md), so a whole-page search would pass with the figure absent
+from every tile. The assertion matches the number and its unit as one pattern inside the
+robin's own tile — the vacuous-check shape this project has now paid for about a dozen times.
+
+**Status: verified 2026-10-06 — passing, and watched failing** under both of:
+
+| Mutation | What went red |
+| --- | --- |
+| the tile template reverts to `bird observations` | `the tile counts in "bird observations", want "species observations"` |
+| the tooltip reverts while the tile does not | `the tooltip reads "912,542 of the 1,252,475,518 bird observations from every region BirdView covers …", which does not count in species observations as the cell beside it does` |
