@@ -441,7 +441,9 @@ often the bird is recorded ([P-076](#p-076), [CR-032](decisions.md#cr-032)).
 Goals: G-001
 
 Species are sorted ascending by the selected metric, **and the page says which way that
-runs**: *smallest first* under length, wingspan and mass, *commonest first* under Frequency.
+runs**: *smallest first* under length, wingspan and mass, *most common first* under
+Frequency, captioned under each group of controls rather than one caption that follows the
+selection.
 
 The direction is stated for all four rather than only for the one that departs. Frequency
 ascends a reciprocal — *1 in N* rises as the bird gets scarcer — so ascending the printed

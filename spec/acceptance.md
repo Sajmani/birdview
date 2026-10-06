@@ -2044,8 +2044,9 @@ for a served document.
 7. Scale defaults to **global** under Frequency and **per-section** under the size metrics
    ([CR-033](decisions.md#cr-033)), and **both** values remain selectable under both.
 8. The Order by row **states its direction for every metric** — *smallest first* under the
-   three size metrics, *commonest first* under Frequency. Labelling only the one that departs
-   would read as an apology for it, and the inversion is only safe while it is visible.
+   three size metrics, *most common first* under Frequency, captioned under each group. Both
+   stand on every view: a caption that followed the selection would report what the reader had
+   just chosen, where two standing captions say the controls differ before they are clicked.
 
 **Assertion 2 is the one with teeth, and it was added after the first version passed a
 mutation it should have caught.** The header is written by `frequencyBand` and the banding done
@@ -2063,7 +2064,8 @@ failures — `tier "1 in 10 – 1 in 99" holds 102 species; 23 have a frequency 
 | restore `Inf >= Inf` in `SectionsBy` | `24 sections for the birds with no records; want exactly one` |
 | name a tier `Common — 1 in …` | `a tier header says "common"` |
 | drop the metric-dependent scale default | `/?by=frequency: scale "section", want "global"`, and the control showing Per section active |
-| label the direction only under Frequency, not all four | `/: the Order by row states no direction`, on every size metric |
+| move Frequency into the size metrics' group | `1 button groups, want 2 — the size metrics and Frequency` |
+| one caption that follows the selection instead of two standing ones | `1 direction captions, want 2` |
 | recognise only the non-default scale value, as the parser did before | `/?by=frequency&scale=section: scale "global", want "section"` — *Per section* is a dead button |
 
 **The last of those is why both scale values are now parsed explicitly.** The old code read

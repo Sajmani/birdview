@@ -5462,43 +5462,58 @@ func TestSharedNamesAreDisclosed(t *testing.T) {
 }
 
 // TestOrderByStatesItsDirection asserts P-021's second half: the page says
-// which way the ordering runs, for every metric and not only for the one
-// that departs.
+// which way each ordering runs, and says it for both groups at once.
 //
 // Frequency ascends a reciprocal — "1 in N" rises as the bird gets scarcer
-// — so it runs commonest-first while the three size metrics run
-// smallest-first. Three renames were proposed to resolve that and all three
-// were declined (CR-032): every frequency-polarity name points the wrong
-// way, every scarcity-polarity name overclaims, and the one word that is
-// right on both counts is a word readers stumble over. What is shipped
-// instead is the direction, said out loud.
+// — so it runs most-common-first while the three size metrics run
+// smallest-first. Three renames were proposed to dissolve that and all
+// three were declined (CR-032): every frequency-polarity name points the
+// wrong way, every scarcity-polarity name overclaims, and the one word
+// right on both counts is one readers stumble over. What ships instead is
+// the direction, captioned under each group.
 //
-// Asserted on all four because labelling only the odd one out reads as an
-// apology for it, and because the inconsistency is only safe while it is
-// visible.
+// Both captions are present on every view, whichever metric is selected. A
+// caption that changed with the selection would tell a reader what they had
+// already chosen; two standing captions tell them the controls behave
+// differently before they click, which is the thing worth knowing.
 //
 // Verifies: P-021, P-076. Criterion: AC-102.
 func TestOrderByStatesItsDirection(t *testing.T) {
 	s := newTestServer(t)
-	for _, tc := range []struct{ query, want, reject string }{
-		{"/", "smallest first", "commonest first"},
-		{"/?by=length", "smallest first", "commonest first"},
-		{"/?by=wingspan", "smallest first", "commonest first"},
-		{"/?by=mass", "smallest first", "commonest first"},
-		{"/?by=frequency", "commonest first", "smallest first"},
-	} {
-		_, body := get(t, s, tc.query)
-		i := strings.Index(body, `class="hint dirn"`)
+	for _, query := range []string{"/", "/?by=length", "/?by=mass", "/?by=frequency"} {
+		_, body := get(t, s, query)
+		i := strings.Index(body, `class="lbl">Order by`)
 		if i < 0 {
-			t.Errorf("%s: the Order by row states no direction", tc.query)
+			t.Fatalf("%s: no Order by row; the selector is broken, not the page", query)
+		}
+		row := body[i:min(i+2000, len(body))]
+
+		groups := strings.Split(row, `class="dirbtns"`)
+		if len(groups) != 3 {
+			t.Errorf("%s: %d button groups, want 2 — the size metrics and Frequency",
+				query, len(groups)-1)
 			continue
 		}
-		cell := body[i:min(i+80, len(body))]
-		if !strings.Contains(cell, tc.want) {
-			t.Errorf("%s: direction reads %q, want %q", tc.query, cell, tc.want)
+		// The three size metrics share one caption; Frequency has its own.
+		// Asserted by COUNTING buttons per group, so a metric silently
+		// moving between them fails rather than passing on the strings.
+		if n := strings.Count(groups[1][:strings.Index(groups[1], "</span>")], `class="btn`); n != 3 {
+			t.Errorf("%s: first group holds %d buttons, want 3", query, n)
 		}
-		if strings.Contains(cell, tc.reject) {
-			t.Errorf("%s: direction reads %q, which is the other metric's", tc.query, tc.reject)
+		if n := strings.Count(groups[2][:strings.Index(groups[2], "</span>")], `class="btn`); n != 1 {
+			t.Errorf("%s: second group holds %d buttons, want 1", query, n)
+		}
+
+		caps := regexp.MustCompile(`class="dirn">([^<]+)<`).FindAllStringSubmatch(row, -1)
+		if len(caps) != 2 {
+			t.Errorf("%s: %d direction captions, want 2", query, len(caps))
+			continue
+		}
+		if got := strings.TrimSpace(caps[0][1]); got != "smallest first" {
+			t.Errorf("%s: size metrics captioned %q", query, got)
+		}
+		if got := strings.TrimSpace(caps[1][1]); got != "most common first" {
+			t.Errorf("%s: Frequency captioned %q", query, got)
 		}
 	}
 }

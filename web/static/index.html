@@ -63,7 +63,7 @@
         <div class="ctrl"><dt>Order by</dt>
         <dd>Sort every bird by total length, wingspan or mass, and group them into sections of
           similar size. <b>Frequency</b> orders by how much of what people record is that bird,
-          commonest first, and groups by powers of ten &mdash; one tier for the birds that are
+          most common first, and groups by powers of ten &mdash; one tier for the birds that are
           one record in a thousand, the next for one in ten thousand, and so on. Those tier
           edges do not move when you change the region filter, so the same tier means the same
           thing on every view.</dd></div>
@@ -100,18 +100,28 @@
   <div class="row">
     <span class="lbl">Order by</span>
     {{$q := .Query}}
-    <a class="btn{{if eq .Opt.Metric "length"}} on{{end}}" href="{{call $q "by" "length"}}">Length</a>
-    <a class="btn{{if eq .Opt.Metric "wingspan"}} on{{end}}" href="{{call $q "by" "wingspan"}}">Wingspan</a>
-    <a class="btn{{if eq .Opt.Metric "mass"}} on{{end}}" href="{{call $q "by" "mass"}}">Mass</a>
-    <a class="btn{{if eq .Opt.Metric "frequency"}} on{{end}}" href="{{call $q "by" "frequency"}}"
-       title="How much of what people record is this bird, commonest first">Frequency</a>
-    {{/* The direction, stated for every metric rather than inferred from
-         three of them. Frequency runs the other way -- "1 in N" is a
-         reciprocal, so ascending the printed number descends abundance --
-         and a reader who has learned "smallest first" from the other three
-         will read that as a bug unless the page says otherwise. Labelling
-         all four turns an implicit inconsistency into an explicit one. */}}
-    <span class="hint dirn">{{if eq .Opt.Metric "frequency"}}commonest first{{else}}smallest first{{end}}</span>
+    {{/* Two labelled groups, both captioned at once rather than one caption
+         that changes with the selection. Frequency ascends a reciprocal --
+         "1 in N" rises as the bird gets scarcer -- so it runs the opposite
+         way from the three size metrics, and a reader who has learned
+         "smallest first" from those would read the fourth as a defect. The
+         rule under each group makes the two directions a visible fact about
+         the controls rather than something discovered by clicking. */}}
+    <span class="dirgroup">
+      <span class="dirbtns">
+        <a class="btn{{if eq .Opt.Metric "length"}} on{{end}}" href="{{call $q "by" "length"}}">Length</a>
+        <a class="btn{{if eq .Opt.Metric "wingspan"}} on{{end}}" href="{{call $q "by" "wingspan"}}">Wingspan</a>
+        <a class="btn{{if eq .Opt.Metric "mass"}} on{{end}}" href="{{call $q "by" "mass"}}">Mass</a>
+      </span>
+      <span class="dirn">smallest first</span>
+    </span>
+    <span class="dirgroup">
+      <span class="dirbtns">
+        <a class="btn{{if eq .Opt.Metric "frequency"}} on{{end}}" href="{{call $q "by" "frequency"}}"
+           title="How much of what people record is this bird, most common first">Frequency</a>
+      </span>
+      <span class="dirn">most common first</span>
+    </span>
 
     <span class="lbl">Scale</span>
     <a class="btn{{if eq .Opt.Scale "section"}} on{{end}}" href="{{call $q "scale" "section"}}"

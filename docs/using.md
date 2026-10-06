@@ -162,7 +162,7 @@ bird can come back.
 ## Sorting by how often a bird is recorded
 
 **Order by → Frequency** arranges the page by how much of what people record is that bird,
-commonest first, using the figure already on every tile.
+most common first, using the figure already on every tile.
 
 The tiers are powers of ten: one for the birds that are about one record in a thousand, the
 next for one in ten thousand, and so on — nine of them across the whole list. **Section step**

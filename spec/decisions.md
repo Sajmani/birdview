@@ -2785,7 +2785,7 @@ exactly the one the requirement forbids. The felt inversion is the price of not 
 rarity tag, and it is worth paying.
 
 **What is done instead is to say the direction rather than imply it:** the Sort by control
-carries *commonest first*, the help repeats it, and the first tier on the page reads
+carries *most common first*, the help repeats it, and the first tier on the page reads
 `1 in 10 – 1 in 99`. Naming the tiers — "the birds you see most" — was considered and rejected
 on the same grounds as every other tier name ([CR-032](#cr-032)).
 
@@ -2834,11 +2834,16 @@ quantity, **Rarity** is wrong about it, **Observations** names the unit instead,
 ### What is done instead of renaming
 
 The inversion is **stated rather than removed**. The Order by row now carries the direction for
-every metric — *smallest first* under the three size metrics, *commonest first* under
-Frequency — so a reader who has learned the pattern from three of them is told where the
-fourth departs, instead of inferring a bug. Labelling all four is what turns an implicit
-inconsistency into an explicit one; labelling only the odd one out would have read as an
-apology for it.
+every metric — *smallest first* ruled under the three size metrics, *most common first*
+under Frequency — so a reader who has learned the pattern from three of them is told where
+the fourth departs, instead of inferring a bug.
+
+**Both captions stand on every view**, whichever metric is selected. One caption that changed
+with the choice would tell a reader what they had just clicked; two standing captions tell
+them the controls behave differently *before* they click, which is the thing worth knowing.
+Each sits under its own group behind a thin rule the width of the wider of the buttons or the
+text — an inline-flex column sizes to its widest child, so the Frequency rule tracks its own
+caption without anything being measured.
 
 ## Work arising
 
