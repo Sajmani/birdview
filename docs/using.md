@@ -177,6 +177,13 @@ states the number and leaves the judgement to you, which is why no tier is calle
 Birds with no records in the regions you have selected are kept, in a last section of their
 own, rather than dropped from the page.
 
+**Scale switches to Global here, and that is deliberate.** Everywhere else each section is
+rescaled to its own largest bird, which is safe because a section spans birds of similar size.
+A frequency tier does not — it holds whatever happens to be about as often recorded, from
+hummingbirds to swans — so rescaling tier by tier would draw the one 140 mm bird in the last
+tier at the height of a 1,201 mm Trumpeter Swan six tiers above. One scale across the whole
+page is the honest way to read this view. Per section is still one click away.
+
 ---
 
 ## Some things to try

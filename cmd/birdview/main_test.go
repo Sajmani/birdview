@@ -5319,3 +5319,45 @@ func TestFrequencyTiersAreNotNamed(t *testing.T) {
 		}
 	}
 }
+
+// TestFrequencyDefaultsToGlobalScale asserts CR-033: the scale default
+// depends on the ordering, and BOTH scale values stay selectable under it.
+//
+// The second half is the one that bites. The parser used to recognise only
+// the non-default value, with a comment warning that this silently disables
+// the toggle whenever the default moves -- which is what happened when
+// CR-017 moved it. A default that varies by metric is the same bug arriving
+// by a different road: read only Global, and "Per section" is a dead button
+// under Frequency.
+//
+// Verifies: P-042, CR-033. Criterion: AC-102.
+func TestFrequencyDefaultsToGlobalScale(t *testing.T) {
+	for _, tc := range []struct {
+		query string
+		want  view.ScaleMode
+	}{
+		{"/", view.PerSection},
+		{"/?by=mass", view.PerSection},
+		{"/?by=frequency", view.Global},
+		// Both directions explicit, under both orderings.
+		{"/?by=frequency&scale=section", view.PerSection},
+		{"/?by=frequency&scale=global", view.Global},
+		{"/?by=length&scale=global", view.Global},
+		{"/?by=length&scale=section", view.PerSection},
+	} {
+		req := httptest.NewRequest(http.MethodGet, tc.query, nil)
+		if got := parseOptions(req).Scale; got != tc.want {
+			t.Errorf("%s: scale %q, want %q", tc.query, got, tc.want)
+		}
+	}
+
+	// And it reaches the page: under Frequency the control must show Global
+	// as the active one without the reader having asked.
+	_, body := get(t, newTestServer(t), "/?by=frequency")
+	global := regexp.MustCompile(`<a class="btn on"[^>]*scale=global`)
+	if !global.MatchString(body) {
+		section := regexp.MustCompile(`<a class="btn on"[^>]*scale=section`)
+		t.Errorf("the scale control does not show Global active under Frequency "+
+			"(Per section active: %v)", section.MatchString(body))
+	}
+}

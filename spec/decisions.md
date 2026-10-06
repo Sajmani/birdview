@@ -2541,14 +2541,17 @@ other metric.
 and dropping them would silently shorten the page by 24 birds nationally and more under a
 filter.
 
-### A known consequence, accepted
+### A known consequence — and this got it wrong
 
 Under the size metrics a section holds birds of similar size, so
 [P-042](product.md#p-042)'s per-section scale is both honest and legible. Frequency does not
-correlate with size, so a frequency tier can hold a hummingbird and a swan and the hummingbird
-will be small. That is the per-section scale working as specified rather than a new defect, and
-it is no worse than Global, which draws the hummingbird just as small. Noted because a reader
-meeting it will wonder.
+correlate with size, so a frequency tier can hold a hummingbird and a swan.
+
+*This record originally concluded that was "no worse than Global, which draws the hummingbird
+just as small". That is false, and [CR-033](#cr-033) corrects it with the measurements:
+per-section rescales each tier by its own largest bird, which across the nine tiers swings by
+0.15× to 1.36×, so a 140 mm parrotbill is drawn the height of a 1,201 mm swan six tiers up.
+Global is the default under Frequency now.*
 
 ### Status of requirements touched
 
@@ -2556,6 +2559,67 @@ meeting it will wonder.
 - [P-022](product.md#p-022) — Active; scoped to the size metrics, pointing at P-076.
 - [P-023](product.md#p-023) — Active; scoped likewise.
 - [P-076](product.md#p-076) — Active, new.
+
+## CR-033 — Frequency defaults to global scale, because per-section has nothing to stand on there
+
+**Subject:** `diagram.scale.mode`
+**Kind:** Conditional — [P-042](product.md#p-042)'s default is right for the three size metrics
+and unsupported under the fourth
+**Date:** 2026-10-05 · **Decided by:** Sameer, who picked Global by hand and said so
+
+### What [CR-032](#cr-032) got wrong
+
+That record said per-section scaling under Frequency was "the per-section scale working as
+specified rather than a new defect, and it is no worse than Global". **The second half is
+false**, and the owner found it by preferring Global without being told to.
+
+[P-022](product.md#p-022) justifies per-section scaling in one sentence: *"because a section is
+by construction no more than N% wide, [it] makes the per-section scale of P-042 honest."* That
+guarantee is the entire basis for rescaling between sections, and **a frequency tier does not
+have it** — tiers are banded by how often a bird is recorded, which is uncorrelated with size,
+so one tier spans 72 mm to 1,201 mm.
+
+### Measured
+
+Each tier is drawn against its own largest bird. Across the nine tiers that reference is:
+
+| tier | largest bird | scale vs. previous tier |
+| --- | --- | --- |
+| 1 in 10 – 99 | Great Blue Heron, 882 mm | — |
+| 1 in 100 – 999 | American White Pelican, 1,198 mm | 1.36× |
+| 1 in 1,000 – 9,999 | Trumpeter Swan, 1,201 mm | 1.00× |
+| 1 in 10,000 – 99,999 | Whooping Crane, 1,134 mm | 0.94× |
+| 1 in 100,000 – 999,999 | Whooper Swan, 1,135 mm | 1.00× |
+| 1 in 1,000,000 – 9,999,999 | Great White Pelican, 1,400 mm | 1.23× |
+| 1 in 10,000,000 – 99,999,999 | Emu, 1,789 mm | 1.28× |
+| 1 in 100,000,000 – 999,999,999 | Scarlet Macaw, 912 mm | **0.51×** |
+| 1 in 1,000,000,000 and beyond | Maui Parrotbill, 140 mm | **0.15×** |
+
+The last tier holds one bird, a **140 mm** parrotbill, drawn to fill the box — the same height
+on screen as the 1,201 mm Trumpeter Swan six tiers up. **An 8.6× lie between two sections of
+one page**, and precisely the confusion [P-042](product.md#p-042) exists to prevent.
+
+### Decision
+
+**Global is the default when Order by is Frequency.** Per-section remains the default for
+length, wingspan and mass, where a section really is at most N% wide and the rescaling is
+honest. Either choice stays one click away under both.
+
+The reader loses legibility, which is what [CR-017](#cr-017) moved the default *to* per-section
+for. That cost is accepted here because the alternative is not a less legible drawing but a
+wrong one: under Frequency, per-section scaling answers "how big is this bird" differently in
+adjacent tiers for no reason the reader can see.
+
+**Both scale values are now recognised explicitly in parsing.** With a default that varies by
+metric, reading only the non-default would leave *Per section* a dead button under Frequency —
+the exact trap the comment on that code already warned about, written when CR-017 moved the
+default the other way.
+
+### Status of requirements touched
+
+- [P-042](product.md#p-042) — Active; the default is per-section for the size metrics and
+  global for frequency.
+- [CR-032](#cr-032) — its "no worse than Global" aside is withdrawn, above.
 
 ## Work arising
 

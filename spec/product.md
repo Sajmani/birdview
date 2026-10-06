@@ -1135,11 +1135,19 @@ comparability is unaffected. See [CR-011](decisions.md#cr-011).
 
 ### P-042 — Scale is a user toggle, defaulting to per-section
 Subject: `diagram.scale.mode`
-Value: `per-section (default) | global`
+Value: `per-section (default) | global; global is the default under Frequency`
 Goals: G-001, G-002
 
 The user switches between a single scale across the entire filtered set, and a scale shared by all
 species within a section. **Per-section is the default, and is listed first.**
+
+**Except under Frequency, where global is the default** ([CR-033](decisions.md#cr-033)).
+Per-section scaling is justified by [P-022](#p-022) guaranteeing a section is at most N% wide,
+and a frequency tier has no such bound — it is banded by how often a bird is recorded, which
+is uncorrelated with size, so one tier runs from 72 mm to 1,201 mm. Each tier would be drawn
+against its own largest bird, and across the nine tiers that reference swings by 0.15× to
+1.36×: the single 140 mm bird in the last tier would be drawn the height of the 1,201 mm
+Trumpeter Swan six tiers above it. Both choices stay one click away under either ordering.
 
 Whichever is chosen, the scale is set by the largest total length in the group. Since the segments
 sum to total length (P-041) and nothing is drawn outside them, that is the whole vertical extent.

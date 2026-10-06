@@ -492,12 +492,24 @@ func parseOptions(r *http.Request) options {
 	case view.ByFrequency:
 		o.Metric = view.ByFrequency
 	}
-	// Recognise the NON-default explicitly. Written the other way round this
-	// parses only the value that is already the default, so flipping the
-	// default silently disables the toggle -- which is exactly what happened
-	// when CR-017 moved it.
-	if view.ScaleMode(q.Get("scale")) == view.Global {
+	// Frequency defaults to global (CR-033). Per-section scaling rests on
+	// P-022's guarantee that a section is at most N% wide, and a frequency
+	// tier has no such bound: it would draw the one 140 mm bird in the last
+	// tier at the height of a 1,201 mm swan six tiers up.
+	if o.Metric == view.ByFrequency {
 		o.Scale = view.Global
+	}
+	// BOTH values recognised, not just the non-default. The old comment here
+	// warned that reading only the non-default silently disables the toggle
+	// when the default moves -- which is what happened when CR-017 moved it.
+	// With a default that now varies by metric, reading only Global would
+	// leave "Per section" dead under Frequency, which is the same bug
+	// arriving by a different road.
+	switch view.ScaleMode(q.Get("scale")) {
+	case view.Global:
+		o.Scale = view.Global
+	case view.PerSection:
+		o.Scale = view.PerSection
 	}
 	// One `step` parameter, read differently by the two sectioning rules
 	// (CR-032). Under Frequency the control offers band widths in orders of

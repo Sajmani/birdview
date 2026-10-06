@@ -2041,6 +2041,8 @@ for a served document.
 5. **Every tier edge under a region filter also appears unfiltered** — the property the whole
    design exists for.
 6. No tier header contains `common`, `scarce`, `rare`, `abundant`, `uncommon` or `everyday`.
+7. Scale defaults to **global** under Frequency and **per-section** under the size metrics
+   ([CR-033](decisions.md#cr-033)), and **both** values remain selectable under both.
 
 **Assertion 2 is the one with teeth, and it was added after the first version passed a
 mutation it should have caught.** The header is written by `frequencyBand` and the banding done
@@ -2057,3 +2059,10 @@ failures — `tier "1 in 10 – 1 in 99" holds 102 species; 23 have a frequency 
 | band proportionally (`min × 10`) rather than by decade | five tiers with the wrong membership, plus `100x gave 9 sections against 10x's 9` |
 | restore `Inf >= Inf` in `SectionsBy` | `24 sections for the birds with no records; want exactly one` |
 | name a tier `Common — 1 in …` | `a tier header says "common"` |
+| drop the metric-dependent scale default | `/?by=frequency: scale "section", want "global"`, and the control showing Per section active |
+| recognise only the non-default scale value, as the parser did before | `/?by=frequency&scale=section: scale "global", want "section"` — *Per section* is a dead button |
+
+**The last of those is why both scale values are now parsed explicitly.** The old code read
+only the non-default, with a comment warning that this disables the toggle whenever the
+default moves — which is what happened when [CR-017](decisions.md#cr-017) moved it. A default
+that varies by metric is the same bug by a different road.
