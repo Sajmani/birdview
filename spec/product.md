@@ -443,7 +443,8 @@ Goals: G-001
 Species are sorted ascending by the selected metric, **and the page says which way that
 runs**: *smallest first* under length, wingspan and mass, *most common first* under
 Frequency, captioned under each group of controls rather than one caption that follows the
-selection.
+selection. The row aligns on the text baseline, so the heading and every button stay on one
+line and only the captions hang below.
 
 The direction is stated for all four rather than only for the one that departs. Frequency
 ascends a reciprocal — *1 in N* rises as the bird gets scarcer — so ascending the printed

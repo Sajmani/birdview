@@ -5535,3 +5535,46 @@ func TestOrderByStatesItsDirection(t *testing.T) {
 		}
 	}
 }
+
+// TestOrderingRowAlignsOnTheBaseline pins the one declaration that keeps the
+// captioned groups from dragging their row out of line.
+//
+// The groups are two lines tall and everything else on that row is one, so
+// under the stylesheet's default `align-items: center` the row's height
+// follows the captions and ORDER BY sits level with the rules instead of
+// with the buttons. Baseline alignment puts the label, the three size
+// buttons and the Frequency button on one line and lets the captions hang
+// below it.
+//
+// Asserted because it is invisible to every other check here: the markup is
+// identical either way, the contrast tests do not read layout, and nothing
+// renders pixels. A one-line CSS deletion would put it back and no test
+// would notice.
+//
+// Verifies: P-021. Criterion: AC-102.
+func TestOrderingRowAlignsOnTheBaseline(t *testing.T) {
+	b, err := web.Static.ReadFile("static/styles.css")
+	if err != nil {
+		t.Fatalf("reading the stylesheet: %v", err)
+	}
+	css := string(b)
+	if !regexp.MustCompile(`\.row\.ordering\s*\{[^}]*align-items:\s*baseline`).MatchString(css) {
+		t.Error("the ordering row does not align on the baseline; its two-line groups will " +
+			"drag ORDER BY down level with the rules")
+	}
+	// And the row has to carry the class, or the rule applies to nothing.
+	_, body := get(t, newTestServer(t), "/")
+	if !strings.Contains(body, `class="row ordering"`) {
+		t.Error("no row carries the ordering class, so the alignment rule matches nothing")
+	}
+	// The caption still hangs below its own group rather than floating in
+	// the row: it must be inside a .dirgroup, not a sibling of the buttons.
+	i := strings.Index(body, `class="dirgroup"`)
+	if i < 0 {
+		t.Fatal("no direction group on the page")
+	}
+	group := body[i:min(i+700, len(body))]
+	if strings.Index(group, `class="dirbtns"`) > strings.Index(group, `class="dirn"`) {
+		t.Error("the caption precedes its buttons; it should hang below them")
+	}
+}

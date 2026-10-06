@@ -2049,7 +2049,10 @@ for a served document.
 6. No tier header contains `common`, `scarce`, `rare`, `abundant`, `uncommon` or `everyday`.
 7. Scale defaults to **global** under Frequency and **per-section** under the size metrics
    ([CR-033](decisions.md#cr-033)), and **both** values remain selectable under both.
-8. The Order by row **states its direction for every metric** — *smallest first* under the
+8. The Order by row **aligns on the text baseline**, so the label, the size buttons and the
+   Frequency button sit on one line with the captions hanging below. Both the declaration and
+   the class that carries it are asserted: either alone matches nothing.
+9. The Order by row **states its direction for every metric** — *smallest first* under the
    three size metrics, *most common first* under Frequency, captioned under each group. Both
    stand on every view: a caption that followed the selection would report what the reader had
    just chosen, where two standing captions say the controls differ before they are clicked.
@@ -2072,6 +2075,8 @@ failures — `tier "1 in 10 – 1 in 99" holds 102 species; 23 have a frequency 
 | drop the metric-dependent scale default | `/?by=frequency: scale "section", want "global"`, and the control showing Per section active |
 | move Frequency into the size metrics' group | `1 button groups, want 2 — the size metrics and Frequency` |
 | one caption that follows the selection instead of two standing ones | `1 direction captions, want 2` |
+| drop `align-items: baseline` from the ordering row | `does not align on the baseline; its two-line groups will drag ORDER BY down level with the rules` |
+| drop the `ordering` class from the row | `no row carries the ordering class, so the alignment rule matches nothing` |
 | recognise only the non-default scale value, as the parser did before | `/?by=frequency&scale=section: scale "global", want "section"` — *Per section* is a dead button |
 
 **The last of those is why both scale values are now parsed explicitly.** The old code read

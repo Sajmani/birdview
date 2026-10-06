@@ -431,6 +431,14 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
    width of whichever is wider, the buttons or the caption -- a column sizes
    to its widest child, so the Frequency group's rule tracks its own text
    without either being measured. */
+/* Baseline, not centre, on the row that carries the captioned groups. The
+   groups are two lines tall and everything else is one, so centring makes
+   the row's height follow the captions and drags ORDER BY down level with
+   the rules. Aligning on the text baseline puts the label, the buttons and
+   the Frequency button all on one line and lets the captions hang below.
+   A baseline rather than a padding nudge because it self-corrects: the
+   label is 11px and a button 12.5px, and no offset has to be maintained. */
+.row.ordering { align-items: baseline; }
 .dirgroup { display: inline-flex; flex-direction: column; }
 /* Centred, so a single button narrower than its caption sits over the
    middle of the rule rather than at its left edge. */
