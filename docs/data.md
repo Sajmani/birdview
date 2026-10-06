@@ -301,7 +301,7 @@ years. The 2023 flamingo has 931 records inside thirteen days; Akikiki, a Hawaii
 Each bird says how much of what people record in view is that bird, as **one in N**.
 
 **On the index the scope is whatever regions you have selected**, so the figure follows
-your filter. A Gyrfalcon is 1 in 3,631,056 bird records across every region and 1 in
+your filter. A Gyrfalcon is 1 in 3,631,056 bird records (all regions) and 1 in
 82,946 in Alaska — forty-four times commoner where it actually lives. Select a region the bird
 is absent from and the figure falls, because those records join the denominator and none join
 the numerator; a bird is a smaller part of a wider world.

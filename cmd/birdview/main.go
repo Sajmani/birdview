@@ -2573,7 +2573,7 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 			}
 		}
 	} else if all {
-		where, scope = "across every region", "every region BirdView covers"
+		where, scope = "(all regions)", "every region BirdView covers"
 	}
 	// Zero is stated, not dashed. "0 in 1,225,176,035 bird records across
 	// every land region" carries the effort behind the absence; an em-dash

@@ -27,7 +27,7 @@ which lie well outside it.
 
 Calling the union "the ABA Area" was therefore wrong in both directions, and wrong in a second
 way: it attributes BirdView's geography to the authority [CR-028](decisions.md#cr-028) removed
-it from. Nothing in the product names that boundary now — the page says *across every region*,
+it from. Nothing in the product names that boundary now — the page says *(all regions)*,
 which describes itself. Status is derived by
 [`birdview-status`](../cmd/birdview-status) and committed to
 [`data/status.tsv`](../data/status.tsv); `established` and `rare` are in scope, `vagrant`,
@@ -743,7 +743,7 @@ denominator were once two separate conditions that drifted apart, and deriving b
 *does this region have a denominator* makes that unrepresentable rather than merely fixed.
 
 **On the index the scope is the regions currently selected**, so the figure follows the
-filter: a Gyrfalcon is 1 in 3,631,056 bird records across every region and 1 in 82,946 in
+filter: a Gyrfalcon is 1 in 3,631,056 bird records (all regions) and 1 in 82,946 in
 Alaska. That is the question a filtered page poses — *of what people record where I am
 looking, how much is this bird* — and it is why the index does not instead show where in North
 America the bird peaks. Narrowing to Arizona and being told about Yukon answers something

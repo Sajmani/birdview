@@ -4406,7 +4406,7 @@ func TestTileShareFollowsTheRegionFilter(t *testing.T) {
 	all := oneIn("/", "American Robin")
 	ontario := oneIn("/?region=ON", "American Robin")
 	if all == ontario {
-		t.Errorf("the robin's share is %q both across every region and in Ontario "+
+		t.Errorf("the robin's figure is %q both with all regions and in Ontario "+
 			"alone; the figure is not following the filter", all)
 	}
 	// Ontario is where the fixture robin is densest, so narrowing to it must
