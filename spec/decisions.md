@@ -2789,6 +2789,34 @@ carries *commonest first*, the help repeats it, and the first tier on the page r
 `1 in 10 – 1 in 99`. Naming the tiers — "the birds you see most" — was considered and rejected
 on the same grounds as every other tier name ([CR-032](#cr-032)).
 
+### Two renames proposed and declined
+
+Both were put forward to resolve the inversion. Each fails in its own way, and the three
+candidates fail at different levels, which is why none of them is free.
+
+**Rarity.** It would genuinely fix the direction: ascending rarity *is* commonest first, so
+the name would finally agree with the order. It is declined because the figure is a
+**reporting rate, not scarcity**, and the two come apart by orders of magnitude for the
+eleven species eBird withholds. Labelled Rarity, Spotted Owl reads as the 927th rarest bird of
+1,062 at 1 in 3,219,731 — while its own page says eBird suppresses it and the counts are
+iNaturalist's alone. The label would contradict the disclosure. "Rarity" is also a term of art
+in birding, and the word claims on its own whatever the project intends.
+
+**Observations.** Accurate about the ordering: within one selection every species divides by
+the same denominator, so ranking by share and ranking by raw count are **provably the same
+order** — verified over all regions and over New York. It is declined because *observations*
+is the **unit, not the quantity**. Length is measured in millimetres and the control does not
+say "Millimetres"; mass is in grams and it does not say "Grams". Having just standardised
+*observation* as the unit on every tile ([P-074](product.md#p-074)), reusing it as the axis
+name would conflate the two.
+
+On direction the second proposal is a wash and was offered as such: ascending *Observations*
+would mean fewest-first, exactly the inversion it was meant to cure.
+
+So the three candidates miss in three different places — **Frequency** is vague about the
+quantity, **Rarity** is wrong about it, **Observations** names the unit instead. Frequency is
+the least wrong, and the inversion stays.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
