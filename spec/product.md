@@ -714,6 +714,14 @@ Goals: G-001, G-002
 
 Every species says how much of what people record in view is that bird, as **one in N**.
 
+**A record is one species on one checklist**, which is eBird's own unit of observation and
+iNaturalist's. A list of thirty species is thirty records. The individual count a record
+carries is **deliberately not read**: twelve White-throated Sparrows is one record, and so is
+a flock of fifty thousand Snow Geese. That is precisely why the figure measures how often a
+bird is *logged* rather than how many there are, and it is the sharpest statement of the
+"not abundance" caveat below — a species seen in twos on every list outranks one that appears
+rarely in vast flocks. [`docs/data.md`](../docs/data.md) says so to readers.
+
 **The interface never uses the word “share”**, and neither does
 [`docs/`](../docs/data.md). It is the right technical term and it is this requirement's
 subject, so this document and [`decisions.md`](decisions.md) keep it — but a reader meeting

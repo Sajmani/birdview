@@ -300,6 +300,27 @@ years. The 2023 flamingo has 931 records inside thirteen days; Akikiki, a Hawaii
 
 Each bird says how much of what people record in view is that bird, as **one in N**.
 
+### What a record is
+
+**One record is one species on one checklist** — what eBird calls an observation. A birder who
+submits a list of thirty species produces thirty records, each with its own id. iNaturalist's
+unit is the same: one observation of one species.
+
+**The number of birds is carried and deliberately ignored.** A record notes how many
+individuals were seen, and BirdView does not read it. Twelve White-throated Sparrows on one
+list is one record, exactly like a single Northern Cardinal. A flock of fifty thousand Snow
+Geese is one record.
+
+That is what makes *1 in N* a measure of **how often a bird is logged**, not of how many birds
+there are, and the two come apart in a way worth knowing: a species seen in ones and twos but
+on nearly every list outranks one that turns up rarely in enormous flocks. Waterfowl and
+blackbirds are the birds this understates; chickadees and cardinals the ones it flatters.
+
+It also means the denominator grows with how *many kinds* of bird people report, not with how
+many birds are out there. A region where observers list thirty species a visit contributes
+more records per visit than one where they list five, and dividing by that region's own total
+is what cancels it out.
+
 **On the index the scope is whatever regions you have selected**, so the figure follows
 your filter. A Gyrfalcon is 1 in 3,631,056 bird records (all regions) and 1 in
 82,946 in Alaska — forty-four times commoner where it actually lives. Select a region the bird
