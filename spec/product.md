@@ -431,10 +431,11 @@ count above the list already says.
 
 ### P-020 — One primary metric, user-selected
 Subject: `ordering.metric`
-Value: `length | mass | wingspan`
+Value: `length | mass | wingspan | frequency`
 Goals: G-001, G-002
 
-The user chooses whether the dataset is ordered by total length, body mass, or wingspan.
+The user chooses whether the dataset is ordered by total length, body mass, wingspan, or how
+often the bird is recorded ([P-076](#p-076), [CR-032](decisions.md#cr-032)).
 
 ### P-021 — Ascending order
 Goals: G-001
@@ -444,6 +445,10 @@ Species are sorted ascending by the selected metric.
 ### P-022 — Sections break at N% above the section minimum
 Subject: `sectioning.rule`
 Goals: G-001, G-002
+
+**For the three size metrics.** Frequency is banded by decade instead
+([P-076](#p-076), [CR-032](decisions.md#cr-032)): this rule would give it 128 sections, and its
+bands would move whenever the region filter did.
 
 A new section begins at the first species more than N% larger than the **minimum** species of the
 previous section.
@@ -460,6 +465,10 @@ Goals: G-002
 
 Offered values run from 5% to 30%. Every value the control offers must be one the server accepts,
 or the control silently falls back to the default.
+
+**Under Frequency the same control selects a band width in orders of magnitude**, `10×` or
+`100×` ([P-076](#p-076)). The percentages are not shown there because they would misdescribe
+the rule: one decade is +900%, and a button reading "900%" explains nothing.
 
 ### P-024 — Section headers state range and count
 Goals: G-001
@@ -845,6 +854,36 @@ carries: a link is made to be kept, and a reader who kept one is owed the reason
 working rather than left to wonder whether they mistyped.
 [CR-029](decisions.md#cr-029) records why the status code nevertheless differs from
 `/compare`'s.
+
+### P-076 — Birds can be ordered by how often they are recorded
+Subject: `ordering.frequency`
+Value: `ascending by one-in-N, banded by decade`
+Goals: G-001, G-002
+
+**Frequency** is a fourth ordering, over the number every tile already shows
+([P-074](#p-074)). Species run from the most often recorded to the least — ascending by the
+printed N, so *1 in 43* comes before *1 in 1,252,475,518*, consistent with
+[P-021](#p-021) ordering ascending by what is displayed.
+
+**Sections are decades, anchored at powers of ten**: `1 in 10 – 99`, `1 in 100 – 999`, and so
+on, nine of them over the whole dataset. Anchored absolutely rather than to the data, so a
+tier means the same thing under every filter — the number follows the region selection, and a
+band starting at whichever bird happens to be commonest today would make *1 in 1,000–9,999*
+denote one thing nationally and another in Alaska. See [CR-032](decisions.md#cr-032) for the
+measurements.
+
+**No tier carries a name.** Not "Common", not "Scarce". [P-074](#p-074) refuses to let this
+number become a rarity tag, and a named band is that threshold with a label on it. Headers
+state the range, exactly as [P-024](#p-024) requires for every other metric.
+
+**Birds with no records in the selection are kept**, in a final section headed *No records in
+the regions selected*. They have no ratio and so no tier; dropping them would silently shorten
+the page, and the whole point of [P-074](#p-074)'s stated zero is that absence is a finding.
+
+Rationale: the share has been on every tile since [P-074](#p-074) and there was no way to
+arrange the page by it — a reader could see that a bird was 1 in 282,315 but not ask *what else
+is about that common*. Size answers "how big", and this answers the question a birder actually
+starts with.
 
 ### P-035 — The page explains itself
 Subject: `presentation.help`

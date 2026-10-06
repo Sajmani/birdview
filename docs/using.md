@@ -159,6 +159,26 @@ bird can come back.
 
 ---
 
+## Sorting by how often a bird is recorded
+
+**Order by → Frequency** arranges the page by how much of what people record is that bird,
+commonest first, using the figure already on every tile.
+
+The tiers are powers of ten: one for the birds that are about one record in a thousand, the
+next for one in ten thousand, and so on — nine of them across the whole list. **Section step**
+switches between a tier per power of ten and tiers twice as wide.
+
+Two things worth knowing. The tier edges are fixed, not fitted to whatever is on screen, so
+*1 in 1,000 – 1 in 9,999* means the same thing with Alaska selected as it does with everything
+selected — you can compare two views directly. And a tier is not a rarity label: BirdView
+states the number and leaves the judgement to you, which is why no tier is called "common" or
+"scarce".
+
+Birds with no records in the regions you have selected are kept, in a last section of their
+own, rather than dropped from the page.
+
+---
+
 ## Some things to try
 
 - **Sort by mass, scale Global.** Mass is a cube of a linear dimension, so the range is brutal in a

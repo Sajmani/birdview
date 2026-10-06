@@ -5128,3 +5128,194 @@ func TestResponsesCompressWhenAsked(t *testing.T) {
 		t.Error("an unasked-for response is labelled compressed")
 	}
 }
+
+// TestFrequencyOrdersAndBandsByDecade asserts P-076 over the real dataset:
+// Frequency is a fourth ordering, commonest first, in tiers of powers of ten.
+//
+// Verifies: P-076, CR-032. Criterion: AC-102.
+func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
+	ds := realDataset(t)
+	srv, err := newServer(ds)
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
+	}
+	heads := func(query string) []string {
+		t.Helper()
+		_, body := get(t, srv, query)
+		var out []string
+		for _, m := range regexp.MustCompile(`(?s)<h2>(.*?)</h2>`).FindAllStringSubmatch(body, -1) {
+			txt := regexp.MustCompile(`<[^>]+>`).ReplaceAllString(m[1], " ")
+			out = append(out, strings.Join(strings.Fields(html.UnescapeString(txt)), " "))
+		}
+		return out
+	}
+
+	got := heads("/?by=frequency")
+	if len(got) < 5 {
+		t.Fatalf("only %d sections; frequency spans 7.5 decades and should band into "+
+			"about nine: %v", len(got), got)
+	}
+	// Every tier edge is a power of ten, and the tiers ascend. Checked by
+	// reading the headers rather than the internals, because a reader who
+	// cannot see the boundary in the header gets no benefit from it.
+	edge := regexp.MustCompile(`1 in (\d[\d,]*) – 1 in (\d[\d,]*)`)
+	var prev int64
+	var banded int
+	for _, h := range got {
+		m := edge.FindStringSubmatch(h)
+		if m == nil {
+			continue
+		}
+		banded++
+		lo := mustComma(t, m[1])
+		hi := mustComma(t, m[2])
+		if !isPowerOfTen(lo) {
+			t.Errorf("tier starts at 1 in %s, which is not a power of ten: %q", m[1], h)
+		}
+		if !isPowerOfTen(hi + 1) {
+			t.Errorf("tier ends at 1 in %s, which is not one below a power of ten: %q", m[2], h)
+		}
+		if lo <= prev {
+			t.Errorf("tier starting at %d does not follow one starting at %d", lo, prev)
+		}
+		prev = lo
+	}
+	if banded < 5 {
+		t.Fatalf("only %d banded tiers parsed from %v", banded, got)
+	}
+
+	// Membership, not just labels. The header is written by one function and
+	// the banding done by another, so a tier can be labelled "1 in 1,000 -
+	// 1 in 9,999" while holding whatever the sectioning rule actually put
+	// there. Replacing the decade rule with a proportional one left every
+	// label a tidy power of ten and only the tier COUNT gave it away.
+	//
+	// So: recompute each species' frequency here, independently, and check
+	// that the birds in a tier are exactly the birds whose frequency falls
+	// in the band the header claims.
+	want := map[string]int{}
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		num, den := shareIn(sp, ds.RegionTotals, nil, true)
+		if num == 0 || den == 0 {
+			continue
+		}
+		n := den / num
+		lo := int64(1)
+		for lo*10 <= n {
+			lo *= 10
+		}
+		want[fmt.Sprintf("1 in %s – 1 in %s", comma(lo), comma(lo*10-1))]++
+	}
+	counts := regexp.MustCompile(`(1 in [\d,]+ – 1 in [\d,]+) (\d+) species`)
+	var verified int
+	for _, h := range got {
+		m := counts.FindStringSubmatch(h)
+		if m == nil {
+			continue
+		}
+		verified++
+		n, _ := strconv.Atoi(m[2])
+		if want[m[1]] != n {
+			t.Errorf("tier %q holds %d species; %d have a frequency in that band",
+				m[1], n, want[m[1]])
+		}
+	}
+	if verified < 5 {
+		t.Fatalf("only %d tiers had their membership checked", verified)
+	}
+
+	// The birds with no ratio are kept, in ONE final section. They each had
+	// a section of their own in the first version: Decade(+Inf) is +Inf and
+	// Inf >= Inf, so every one of them started a new band.
+	var noRatio int
+	for _, h := range got {
+		if strings.Contains(h, "No records in the regions selected") {
+			noRatio++
+		}
+	}
+	if noRatio != 1 {
+		t.Errorf("%d sections for the birds with no records; want exactly one", noRatio)
+	}
+
+	// 100x halves the tier count, and the same control under a size metric
+	// still means percent.
+	if wide := heads("/?by=frequency&step=100"); len(wide) >= len(got) {
+		t.Errorf("100x gave %d sections against 10x's %d; it should be coarser",
+			len(wide), len(got))
+	}
+
+	// THE property the whole design is for: a tier edge is the same number
+	// under every filter. A data-anchored band would start at whichever bird
+	// is commonest in the selection, and "1 in 1,000 – 9,999" would denote
+	// one set nationally and another in Alaska.
+	ak := heads("/?by=frequency&region=AK")
+	national := map[string]bool{}
+	for _, h := range got {
+		if m := edge.FindStringSubmatch(h); m != nil {
+			national[m[0]] = true
+		}
+	}
+	var checked int
+	for _, h := range ak {
+		m := edge.FindStringSubmatch(h)
+		if m == nil {
+			continue
+		}
+		checked++
+		if !national[m[0]] {
+			t.Errorf("Alaska has a tier %q that does not appear nationally; tier edges "+
+				"must not move with the filter", m[0])
+		}
+	}
+	if checked == 0 {
+		t.Fatal("no banded tier under the Alaska filter; the check compared nothing")
+	}
+	t.Logf("%d tiers nationally, %d under Alaska, all edges shared", banded, checked)
+}
+
+func isPowerOfTen(n int64) bool {
+	for n > 1 {
+		if n%10 != 0 {
+			return false
+		}
+		n /= 10
+	}
+	return n == 1
+}
+
+func mustComma(t *testing.T, s string) int64 {
+	t.Helper()
+	n, err := strconv.ParseInt(strings.ReplaceAll(s, ",", ""), 10, 64)
+	if err != nil {
+		t.Fatalf("parsing %q: %v", s, err)
+	}
+	return n
+}
+
+// TestFrequencyTiersAreNotNamed holds P-074's refusal in place: the metric is
+// not a rarity tag, and a named tier is that threshold with a label on it.
+//
+// Cheap to write, and the thing most likely to be added later by someone
+// trying to be helpful.
+//
+// Verifies: P-076, P-074. Criterion: AC-102.
+func TestFrequencyTiersAreNotNamed(t *testing.T) {
+	ds := realDataset(t)
+	srv, err := newServer(ds)
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
+	}
+	_, body := get(t, srv, "/?by=frequency")
+	heads := regexp.MustCompile(`(?s)<h2>(.*?)</h2>`).FindAllString(body, -1)
+	if len(heads) == 0 {
+		t.Fatal("no section headers")
+	}
+	joined := strings.ToLower(strings.Join(heads, " "))
+	for _, word := range []string{"common", "scarce", "rare", "abundant", "uncommon", "everyday"} {
+		if strings.Contains(joined, word) {
+			t.Errorf("a tier header says %q; P-074 keeps this a number and not a rarity "+
+				"tag, and a named band is the threshold it refuses", word)
+		}
+	}
+}

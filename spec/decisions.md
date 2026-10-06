@@ -2467,6 +2467,96 @@ That is a deliberate trade: re-measuring it costs a `CountFor` for every species
   [AC-099](acceptance.md#ac-099) still asserts it. What was wrong there was the number, and
   what was right was the shape.
 
+## CR-032 — Frequency joins the metrics, and brings a second sectioning rule with it
+
+**Subject:** `ordering.metric`, `sectioning.rule`, `sectioning.step_percent`
+**Kind:** Direct — a fourth ordering does not fit the value [P-020](product.md#p-020) fixes, and
+cannot be sectioned by the rule [P-022](product.md#p-022) fixes
+**Date:** 2026-10-05 · **Decided by:** Sameer
+
+### What changed
+
+[P-074](product.md#p-074) put a number on every tile — *1 in 282,315 bird records in North
+Atlantic* — and the index could not order by it. It can now: **Frequency** is a fourth choice
+under Sort by.
+
+Three subjects move:
+
+- `ordering.metric` gains `frequency`.
+- `sectioning.rule` gains a **second** rule, used only by frequency.
+- `sectioning.step_percent` means something else under frequency, and the control shows it.
+
+### Why the proportional rule cannot section frequency
+
+[P-022](product.md#p-022)'s rule is already multiplicative — a section ends at `min × (1 + N/100)`
+— so on the face of it 15% should work. It does not, for two reasons measured on the data.
+
+**It produces 128 sections.** Frequency spans **1 in 43 to 1 in 1,252,475,518**, which is 7.5
+decades. At 15% that is `log(1.25e9/43) / log(1.15)` ≈ 128 bands of a few hundred species each.
+Length at 15% produces a page a reader can scroll.
+
+**Its boundaries move when the filter does.** P-022 anchors each band to the data — the first
+section starts at the smallest bird present. Frequency follows the region filter
+([P-074](product.md#p-074)), so a data-anchored band would start at 1 in 43 nationally and
+somewhere else entirely in Alaska, and *the same tier would mean a different thing on two
+pages of the same site.* Size does not have this problem because a Gyrfalcon is the same
+length wherever you select.
+
+### The rule for frequency: decades, anchored at powers of ten
+
+A section runs from `1 in 10^k` to `1 in 10^(k+1) − 1`. Measured over the whole dataset that
+gives **nine sections**, and a distribution that is close to bell-shaped:
+
+| tier | species |
+| --- | --- |
+| 1 in 10 – 99 | 23 |
+| 1 in 100 – 999 | 174 |
+| 1 in 1,000 – 9,999 | **267** |
+| 1 in 10,000 – 99,999 | 223 |
+| 1 in 100,000 – 999,999 | 163 |
+| 1 in 1,000,000 – 9,999,999 | 125 |
+| 1 in 10,000,000 – 99,999,999 | 74 |
+| 1 in 100,000,000 – 999,999,999 | 9 |
+| 1 in 1,000,000,000 and beyond | 1 |
+
+Powers of ten rather than quantiles or a fitted break, because the tier boundary is then **the
+same fact in every view**: 1 in 1,000–9,999 means that in Alaska and nationally alike. It also
+matches the form the number is already printed in, so a reader can place a tile in its tier by
+reading it.
+
+**Section step becomes a band width**: `10×` (nine sections, the default) or `100×` (five). The
+percentages are hidden under Frequency because they would be lies — 10× is +900%, and a
+control reading "900%" explains nothing.
+
+### What is deliberately NOT done
+
+**No tier is given a name.** Not "Common", not "Scarce". [P-074](product.md#p-074) says the
+metric "is not a rarity tag and must not become one — no threshold divides common from rare;
+the number is shown and the reader judges", and a named band is exactly that threshold wearing
+a label. The headers state the range, as [P-024](product.md#p-024) already requires of every
+other metric.
+
+**Species with no records in the selection are kept, in a final section of their own**, headed
+*No records in the regions selected*. They cannot be placed in a tier — there is no ratio —
+and dropping them would silently shorten the page by 24 birds nationally and more under a
+filter.
+
+### A known consequence, accepted
+
+Under the size metrics a section holds birds of similar size, so
+[P-042](product.md#p-042)'s per-section scale is both honest and legible. Frequency does not
+correlate with size, so a frequency tier can hold a hummingbird and a swan and the hummingbird
+will be small. That is the per-section scale working as specified rather than a new defect, and
+it is no worse than Global, which draws the hummingbird just as small. Noted because a reader
+meeting it will wonder.
+
+### Status of requirements touched
+
+- [P-020](product.md#p-020) — Active; value gains `frequency`.
+- [P-022](product.md#p-022) — Active; scoped to the size metrics, pointing at P-076.
+- [P-023](product.md#p-023) — Active; scoped likewise.
+- [P-076](product.md#p-076) — Active, new.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

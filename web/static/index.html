@@ -61,8 +61,12 @@
   <div class="ctrlhelp">
       <dl>
         <div class="ctrl"><dt>Order by</dt>
-        <dd>Sort every bird by total length, wingspan or mass. Birds are then grouped into
-          sections of similar size.</dd></div>
+        <dd>Sort every bird by total length, wingspan or mass, and group them into sections of
+          similar size. <b>Frequency</b> orders by how much of what people record is that bird,
+          commonest first, and groups by powers of ten &mdash; one tier for the birds that are
+          one record in a thousand, the next for one in ten thousand, and so on. Those tier
+          edges do not move when you change the region filter, so the same tier means the same
+          thing on every view.</dd></div>
         <div class="ctrl"><dt>Scale</dt>
         <dd><b>Per section</b> rescales each section to itself, so every bird is big enough to
           read. This is the default. <b>Global</b> draws everything shown at one scale instead
@@ -70,7 +74,9 @@
           families; per section is the better one for comparing shape within a group.</dd></div>
         <div class="ctrl"><dt>Section step</dt>
         <dd>How much larger a bird must be to start a new section. Smaller values give more,
-          tighter sections.</dd></div>
+          tighter sections. Under <b>Frequency</b> it sets how wide a tier is instead:
+          <b>10&times;</b> gives a tier per power of ten, <b>100&times;</b> gives half as
+          many, twice as wide.</dd></div>
         <div class="ctrl"><dt>Units</dt>
         <dd>Inches and ounces, or centimeters and grams.</dd></div>
         <div class="ctrl"><dt>Names</dt>
@@ -94,6 +100,8 @@
     <a class="btn{{if eq .Opt.Metric "length"}} on{{end}}" href="{{call $q "by" "length"}}">Length</a>
     <a class="btn{{if eq .Opt.Metric "wingspan"}} on{{end}}" href="{{call $q "by" "wingspan"}}">Wingspan</a>
     <a class="btn{{if eq .Opt.Metric "mass"}} on{{end}}" href="{{call $q "by" "mass"}}">Mass</a>
+    <a class="btn{{if eq .Opt.Metric "frequency"}} on{{end}}" href="{{call $q "by" "frequency"}}"
+       title="How much of what people record is this bird, commonest first">Frequency</a>
 
     <span class="lbl">Scale</span>
     <a class="btn{{if eq .Opt.Scale "section"}} on{{end}}" href="{{call $q "scale" "section"}}"
@@ -115,8 +123,19 @@
        title="World usage, as the IOC and AviList have it - Little Auk">World</a>
 
     <span class="lbl">Section step</span>
-    {{range $s := (list "5" "10" "15" "20" "30")}}
-      <a class="btn{{if eq (printf "%.0f" $.Opt.Step) $s}} on{{end}}" href="{{call $q "step" $s}}">{{$s}}%</a>
+    {{/* Under Frequency the same control picks a band width in orders of
+         magnitude (CR-032). The percentages are not shown there because they
+         would misdescribe the rule: one decade is +900%, and a button
+         reading "900%" explains nothing. */}}
+    {{if eq .Opt.Metric "frequency"}}
+      <a class="btn{{if eq .Opt.Decades 1}} on{{end}}" href="{{call $q "step" "10"}}"
+         title="Each tier spans one order of magnitude">10&times;</a>
+      <a class="btn{{if eq .Opt.Decades 2}} on{{end}}" href="{{call $q "step" "100"}}"
+         title="Each tier spans two orders of magnitude">100&times;</a>
+    {{else}}
+      {{range $s := (list "5" "10" "15" "20" "30")}}
+        <a class="btn{{if eq (printf "%.0f" $.Opt.Step) $s}} on{{end}}" href="{{call $q "step" $s}}">{{$s}}%</a>
+      {{end}}
     {{end}}
 
     {{/* Its own labelled control set, not a trailing button: beside the
@@ -289,7 +308,11 @@
 
 {{range .Sections}}
 <section>
-  <h2><span class="tier">Tier {{.Index}}</span> {{.Min}} &ndash; {{.Max}}
+  {{/* Three shapes, because a frequency tier is not always a range
+       (P-076): a closed band, an open last band, and the birds with no
+       ratio at all, which have no band to state. */}}
+  <h2><span class="tier">Tier {{.Index}}</span>
+      {{if .Note}}{{.Note}}{{else if .Max}}{{.Min}} &ndash; {{.Max}}{{else}}{{.Min}} and beyond{{end}}
       <span class="n">{{.Count}} species</span></h2>
   <div class="tiles">
     {{range .Tiles}}{{template "tile" .}}{{end}}

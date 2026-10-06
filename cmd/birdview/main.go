@@ -428,8 +428,16 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 // that any view is a shareable URL.
 type options struct {
 	Metric view.Metric
-	Step   float64
-	Scale  view.ScaleMode
+	// Step is P-023's section-step percentage, used by the three size
+	// metrics. Frequency ignores it and bands by Decades instead.
+	Step float64
+	// Decades is how many orders of magnitude a frequency section spans
+	// (P-076): 1 for "1 in 100 to 1 in 999", 2 for a band four times wider.
+	// A separate field rather than an overloaded Step, because one float
+	// meaning "15 percent" in three views and "one decade" in a fourth is
+	// the kind of thing that reads fine and divides wrong.
+	Decades int
+	Scale   view.ScaleMode
 	// Families holds the explicitly named families. HasSelection distinguishes
 	// a fresh page, where nothing is named and everything is selected, from an
 	// explicitly emptied selection, where nothing is named and nothing is
@@ -472,7 +480,8 @@ func parseOptions(r *http.Request) options {
 	// dashed for modeled, the chord ticks, the labels -- is legible there. The
 	// default that teaches the reader to read a bird wins over the one that
 	// delivers the shock before they can.
-	o := options{Metric: view.ByLength, Step: view.DefaultStepPercent, Scale: view.PerSection,
+	o := options{Metric: view.ByLength, Step: view.DefaultStepPercent, Decades: 1,
+		Scale:  view.PerSection,
 		Locale: dataset.LocaleNA, Families: map[string]bool{}, Regions: map[string]bool{},
 		Habitats: map[string]bool{}, Niches: map[string]bool{}}
 	switch view.Metric(q.Get("by")) {
@@ -480,6 +489,8 @@ func parseOptions(r *http.Request) options {
 		o.Metric = view.ByWingspan
 	case view.ByMass:
 		o.Metric = view.ByMass
+	case view.ByFrequency:
+		o.Metric = view.ByFrequency
 	}
 	// Recognise the NON-default explicitly. Written the other way round this
 	// parses only the value that is already the default, so flipping the
@@ -488,7 +499,16 @@ func parseOptions(r *http.Request) options {
 	if view.ScaleMode(q.Get("scale")) == view.Global {
 		o.Scale = view.Global
 	}
-	if v, err := strconv.ParseFloat(q.Get("step"), 64); err == nil && v >= 2 && v <= 100 {
+	// One `step` parameter, read differently by the two sectioning rules
+	// (CR-032). Under Frequency the control offers band widths in orders of
+	// magnitude, so the value is 10 or 100 rather than a percentage -- and
+	// 10 is a legal percentage too, which is why the metric decides first
+	// instead of the range of the number.
+	if o.Metric == view.ByFrequency {
+		if v := q.Get("step"); v == "100" {
+			o.Decades = 2
+		}
+	} else if v, err := strconv.ParseFloat(q.Get("step"), 64); err == nil && v >= 2 && v <= 100 {
 		o.Step = v
 	}
 	o.Metric3 = q.Get("units") == "metric"
@@ -611,6 +631,36 @@ type sectionView struct {
 	Min, Max string
 	Count    int
 	Tiles    []tile
+	// Note replaces the range where there is no range to state: the birds
+	// with no records in the regions selected have no ratio and so no tier
+	// (P-076).
+	Note string
+}
+
+// frequencyBand labels a decade section (P-076).
+//
+// The label states the BAND, not the extremes of the birds in it: a tier
+// reading "1 in 1,000 - 1 in 9,999" means the same thing on every page,
+// where "1 in 1,184 - 1 in 9,781" would be a different pair of numbers under
+// every region filter and would invite a reader to compare two tiers that
+// are not the same tier. P-024 asks for the range the section covers, and
+// under this rule the band IS that range.
+func frequencyBand(min, max float64, decades int) (lo, hi, note string) {
+	if math.IsInf(min, 1) {
+		return "", "", "No records in the regions selected"
+	}
+	k := int(math.Floor(math.Log10(min)))
+	if decades > 1 {
+		k -= ((k % decades) + decades) % decades
+	}
+	start := math.Pow(10, float64(k))
+	end := view.Decade(min, decades) - 1
+	// The last band runs off the end of the data rather than to a boundary
+	// nothing reaches, so it says so instead of naming an empty ceiling.
+	if math.IsInf(max, 1) || end > 1e12 {
+		return "1 in " + comma(int64(start)), "", ""
+	}
+	return "1 in " + comma(int64(start)), "1 in " + comma(int64(end)), ""
 }
 
 // familyRow is one filter chip, with the URL that toggles it already built:
@@ -900,7 +950,31 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			filtered = append(filtered, sp)
 		}
 	}
-	secs := view.Sections(filtered, opt.Metric, opt.Step)
+	// Frequency is not a property of a bird, it is a ratio over the regions
+	// the reader has selected (P-074), so it is computed once here for the
+	// current selection rather than read off the species. Once per species,
+	// not once per comparison: the sort would otherwise walk every region
+	// 1,083 log 1,083 times.
+	var secs []view.Section
+	freq := map[*dataset.Species]float64{}
+	if opt.Metric == view.ByFrequency {
+		all := !opt.HasRegions || len(opt.Regions) == region.Len()
+		for _, sp := range filtered {
+			num, den := shareIn(sp, s.ds.RegionTotals, opt.Regions, all)
+			if num == 0 || den == 0 {
+				// No ratio at all. +Inf sorts them last and keeps them in
+				// one final section rather than one section each (P-076).
+				freq[sp] = math.Inf(1)
+				continue
+			}
+			freq[sp] = float64(den) / float64(num)
+		}
+		secs = view.SectionsBy(filtered,
+			func(sp *dataset.Species) float64 { return freq[sp] },
+			func(min float64) float64 { return view.Decade(min, opt.Decades) })
+	} else {
+		secs = view.Sections(filtered, opt.Metric, opt.Step)
+	}
 	refs := view.Scales(secs, opt.Scale)
 
 	// The width reference must span the whole scale group too, or the crossbar
@@ -1044,6 +1118,9 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		}
 		sv := sectionView{Index: i + 1, Count: len(sec.Species),
 			Min: u.format(sec.Min, opt.Metric), Max: u.format(sec.Max, opt.Metric)}
+		if opt.Metric == view.ByFrequency {
+			sv.Min, sv.Max, sv.Note = frequencyBand(sec.Min, sec.Max, opt.Decades)
+		}
 		for _, sp := range sec.Species {
 			g := view.Layout(sp, refs[i], spanRefs[i], tileBox)
 			sv.Tiles = append(sv.Tiles, tile{

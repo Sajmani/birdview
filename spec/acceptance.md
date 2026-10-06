@@ -2026,3 +2026,34 @@ for a served document.
 | label from `Write` rather than `WriteHeader` — the shipped bug | `Content-Encoding "", want gzip` on three of four pages |
 | compress regardless of `Accept-Encoding` | `compressed for a client that did not ask` |
 | drop the `Vary` header | `Vary is "", missing Accept-Encoding` |
+
+### AC-102 — Frequency orders commonest first, in tiers of powers of ten
+**Verifies:** [P-076](product.md#p-076), [CR-032](decisions.md#cr-032) · **Level:** code ·
+**Method:** rendering test over the real dataset, reading the section headers
+
+**Assertions:**
+
+1. `?by=frequency` produces about nine sections, ascending, every edge a power of ten.
+2. **Each tier holds exactly the species whose frequency falls in the band its header claims**,
+   recomputed independently in the test.
+3. The birds with no records in the selection are kept in **exactly one** final section.
+4. `step=100` is strictly coarser than `step=10`.
+5. **Every tier edge under a region filter also appears unfiltered** — the property the whole
+   design exists for.
+6. No tier header contains `common`, `scarce`, `rare`, `abundant`, `uncommon` or `everyday`.
+
+**Assertion 2 is the one with teeth, and it was added after the first version passed a
+mutation it should have caught.** The header is written by `frequencyBand` and the banding done
+by `SectionsBy`, so a tier can be labelled `1 in 1,000 – 1 in 9,999` while holding whatever the
+sectioning rule actually put in it. Replacing the decade rule with a proportional one left
+every label a tidy power of ten; only the tier *count* gave it away, and only because
+`step=100` then stopped changing anything. Checking membership turns that into five explicit
+failures — `tier "1 in 10 – 1 in 99" holds 102 species; 23 have a frequency in that band`.
+
+**Status: verified 2026-10-05 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| band proportionally (`min × 10`) rather than by decade | five tiers with the wrong membership, plus `100x gave 9 sections against 10x's 9` |
+| restore `Inf >= Inf` in `SectionsBy` | `24 sections for the birds with no records; want exactly one` |
+| name a tier `Common — 1 in …` | `a tier header says "common"` |
