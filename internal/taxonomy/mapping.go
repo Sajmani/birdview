@@ -227,3 +227,87 @@ var OrderCommonNames = map[string]string{
 	"Psittaciformes": "Parrots",
 	"Passeriformes":  "Perching Birds",
 }
+
+// SharedNames records a binomial that ONE occurrence source uses for what
+// AviList treats as TWO species BirdView draws.
+//
+// This is a third kind of disagreement, and the dangerous one. An alias
+// (AviListRenames) fails by missing: the join finds nothing and a species
+// shows zero, which is visible. A name AviList does not carry (LumpedInto)
+// fails the same way. A shared name **fails by matching** -- the string is
+// identical on both sides, the join succeeds, and every record lands on
+// whichever daughter inherited the name.
+//
+// No name-matching check can catch it. data/gbif-taxa.tsv already files
+// `Setophaga petechia -> Setophaga petechia` as tier `exact`, and it is
+// exact: the strings agree and denote different birds. Finding these took a
+// sweep of all 1,083 species against both databases, comparing what each
+// reports under each name (CR-034).
+//
+// The records are NOT divided between the two species. eBird distinguishes
+// none of them, so any division would be invented -- 6,245,227 records for
+// the warblers alone, growing by about 827,000 a year. Both species carry
+// the shared count and both say whose it also is (P-077, G-005, G-006).
+//
+// Verifies: P-077.
+type SharedName struct {
+	// Source is the binomial the occurrence data publishes.
+	Source string
+	// Covers are the AviList species it spans, in the order AviList lists
+	// them. Both are drawn; neither owns the records alone.
+	Covers [2]string
+	// Why names the database and the disagreement, for the page to show.
+	Why string
+}
+
+var SharedNames = []SharedName{{
+	Source: "Setophaga petechia",
+	Covers: [2]string{"Setophaga aestiva", "Setophaga petechia"},
+	Why: "eBird has not adopted AviList's split of the Yellow Warbler and files both the " +
+		"northern and the mangrove bird under Setophaga petechia, the pre-split name. It " +
+		"holds no record at all under Setophaga aestiva, and filed 827,098 under the shared " +
+		"name in 2024 alone.",
+}, {
+	Source: "Trogon elegans",
+	Covers: [2]string{"Trogon ambiguus", "Trogon elegans"},
+	Why: "eBird treats the Coppery-tailed Trogon as part of the Elegant Trogon and files " +
+		"both under Trogon elegans. It holds no record under Trogon ambiguus; iNaturalist, " +
+		"which follows the split, holds 1,180.",
+}}
+
+// SharedWith returns the other AviList species a shared name covers, and the
+// reason, for an AviList name. Empty when the species' records are its own.
+func SharedWith(aviList string) (other string, source string, why string, ok bool) {
+	for _, s := range SharedNames {
+		switch aviList {
+		case s.Covers[0]:
+			return s.Covers[1], s.Source, s.Why, true
+		case s.Covers[1]:
+			return s.Covers[0], s.Source, s.Why, true
+		}
+	}
+	return "", "", "", false
+}
+
+// WithheldByEBird are species eBird suppresses entirely rather than names
+// differently (CR-034).
+//
+// Kept apart from the naming tables because the two are indistinguishable in
+// the data -- eBird returns zero for both -- and opposite in meaning. Every
+// one below was confirmed by querying each plausible alias and finding
+// nothing: these records are suppressed, not relabelled, and a page telling
+// a reader to look for another name would send them after one that does not
+// exist.
+//
+// Verifies: P-077.
+var WithheldByEBird = map[string]string{
+	"Strix occidentalis":         "Spotted Owl",
+	"Falco rusticolus":           "Gyrfalcon",
+	"Surnia ulula":               "Northern Hawk Owl",
+	"Tympanuchus pallidicinctus": "Lesser Prairie-Chicken",
+	"Centrocercus minimus":       "Gunnison Sage-Grouse",
+	"Myadestes palmeri":          "Puaiohi",
+	"Pseudonestor xanthophrys":   "Maui Parrotbill",
+	"Palmeria dolei":             "Akohekohe",
+	"Pterodroma deserta":         "Desertas Petrel",
+}

@@ -335,6 +335,26 @@ table again, built from a land-only pass, so no bird could peak at sea and the d
 could name a region the index did not list it in. See [CR-030](/spec/decisions#cr-030) and
 [CR-031](/spec/decisions#cr-031).
 
+### When the sources disagree about a name
+
+BirdView serves AviList's names; the records come from eBird and iNaturalist, and the three do
+not always agree. Where that happens the species page says so, because the alternative is a
+number that looks ordinary and is not.
+
+**One name, two birds.** eBird has not adopted AviList's split of the Yellow Warbler: it files
+both the northern and the mangrove bird under *Setophaga petechia*, and holds no record at all
+under *Setophaga aestiva*. So its 6,245,227 records cover two species, and **nobody knows how
+they divide.** BirdView does not guess — both birds show the shared count, and both say whose
+it also is. The Elegant and Coppery-tailed Trogons are the same case.
+
+**eBird withholds some species entirely**, as it does for birds vulnerable to disturbance —
+Spotted Owl, Gyrfalcon, Northern Hawk Owl, Lesser Prairie-Chicken, Gunnison Sage-Grouse and
+four more. Their counts here are iNaturalist's alone and far below the real record. That is a
+gap in what BirdView can see, not a statement about the bird, and the page says which.
+
+These look identical in the data — eBird returns nothing either way — so each was checked by
+querying every plausible alternative name. See [CR-034](/spec/decisions#cr-034).
+
 ### A proportion, not a count
 
 **A count says where the birdwatchers are; a proportion says where the bird is.** The two disagree

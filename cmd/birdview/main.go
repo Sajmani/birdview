@@ -47,6 +47,7 @@ import (
 	"birdview/internal/inat"
 	"birdview/internal/region"
 	"birdview/internal/status"
+	"birdview/internal/taxonomy"
 	"birdview/internal/trait"
 	"birdview/internal/view"
 	"birdview/spec"
@@ -114,6 +115,9 @@ type server struct {
 	ds   *dataset.Dataset
 	tmpl *template.Template
 	byID map[string]*dataset.Species
+	// idOf maps an AviList scientific name to the served id, so a page can
+	// name another species without searching the slice (P-077).
+	idOf map[string]string
 	// undrawnByID holds the species the derivation classified and rejected.
 	// Consulted only after byID misses, so a URL that stopped working can say
 	// why instead of 404ing into silence (P-075).
@@ -378,12 +382,14 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		return nil, fmt.Errorf("parsing templates: %w", err)
 	}
 	s := &server{mux: http.NewServeMux(), ds: ds, tmpl: tmpl, devDir: devDir,
-		byID: map[string]*dataset.Species{}, undrawnByID: map[string]*dataset.Undrawn{}}
+		byID: map[string]*dataset.Species{}, undrawnByID: map[string]*dataset.Undrawn{},
+		idOf: map[string]string{}}
 
 	counts := map[string]int{}
 	for i := range ds.Species {
 		sp := &ds.Species[i]
 		s.byID[sp.ID] = sp
+		s.idOf[sp.ScientificName] = sp.ID
 		counts[sp.Family]++
 	}
 	for i := range ds.Undrawn {
@@ -1154,7 +1160,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				Length:      u.format(sp.TotalLength.Value, view.ByLength),
 				Wing:        u.format(sp.Wingspan.Value, view.ByWingspan),
 				MassStr:     u.format(sp.Mass.Value, view.ByMass),
-				Commonest:   shareOf(sp, s.ds.RegionTotals, opt),
+				Commonest:   s.shareWithSeams(sp, opt),
 			})
 		}
 		page.Sections = append(page.Sections, sv)
@@ -1280,7 +1286,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		PickURL:    pickURL(r, toggled(live, sp.ID)),
 		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
 		FootLabels: lt.FootLabels, MassCube: lt.MassCube,
-		Metrics: rows, Categories: s.categories(sp), Opt: opt, Query: queryFor(r), INatURL: inatURL,
+		Metrics: rows, Categories: s.categories(sp, opt.Locale), Opt: opt, Query: queryFor(r), INatURL: inatURL,
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 	})
 }
@@ -2378,7 +2384,7 @@ type categoryRow struct {
 // one sentence sixty times and bury the two facts that differ -- habitat and
 // diet, where BirdView sometimes disagrees with AVONET. The regions
 // themselves are listed inline by their postal codes.
-func (s *server) categories(sp *dataset.Species) []categoryRow {
+func (s *server) categories(sp *dataset.Species, loc dataset.Locale) []categoryRow {
 	out := []categoryRow{
 		{Label: "Family", Value: sp.Family + " — " + sp.FamilyCommon,
 			Origin: string(dataset.Published), Detail: "AviList v2025b, CC BY 4.0"},
@@ -2426,6 +2432,35 @@ func (s *server) categories(sp *dataset.Species) []categoryRow {
 			Detail: "reported there in at least 1 record per million, from eBird and " +
 				"iNaturalist records via GBIF",
 			Doc: "/docs/data#regions", DocLabel: "how regions are decided",
+		})
+	}
+
+	// Which names the records were filed under, where a source disagrees
+	// with AviList (P-077). Placed before the count rows deliberately: it
+	// changes how the numbers below should be read.
+	if other, src, why, ok := taxonomy.SharedWith(sp.ScientificName); ok {
+		name := other
+		if o := s.byID[s.idOf[other]]; o != nil {
+			name = fmt.Sprintf("%s (%s)", o.Name(loc), other)
+		}
+		out = append(out, categoryRow{
+			Label:  "Recorded as",
+			Value:  src + " — a name covering two species",
+			Origin: string(dataset.Derived),
+			Detail: why + " The counts on this page are therefore shared with " + name +
+				", and BirdView does not divide them: no source says how they divide.",
+			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "how names are joined",
+		})
+	} else if common, held := taxonomy.WithheldByEBird[sp.ScientificName]; held {
+		out = append(out, categoryRow{
+			Label:  "Recorded as",
+			Value:  "withheld by eBird",
+			Origin: string(dataset.Derived),
+			Detail: "eBird suppresses " + common + " from its public export, as it does for " +
+				"species vulnerable to disturbance. The counts here are iNaturalist's alone, " +
+				"so they are far lower than the bird's actual record. This is a gap in what " +
+				"BirdView can see, not a statement about the bird.",
+			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "how names are joined",
 		})
 	}
 
@@ -2489,6 +2524,13 @@ type shareCell struct {
 	// (P-074, CR-030). Empty whenever Ratio is set, and never both: a cell
 	// either divides or explains.
 	Note string
+	// Shared marks a figure that cannot be attributed to this bird alone,
+	// because an occurrence source files two BirdView species under one
+	// name (P-077, CR-034). It accompanies the Ratio rather than replacing
+	// it: suppressing the count would hide 6.2 million records and leave a
+	// reader unable to tell that from a bird genuinely absent (G-006).
+	Shared      string
+	SharedTitle string
 }
 
 // shareIn gives a species' share of the bird records held by the regions
@@ -2602,6 +2644,33 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 			"are out there.",
 			detail, comma(den), scope),
 	}
+}
+
+// shareWithSeams is shareOf plus the disclosure of P-077: where an
+// occurrence source files two BirdView species under one name, the tile says
+// so rather than presenting the count as this bird's alone.
+//
+// On the tile and not only on the detail page, because the index is where
+// the misreading happens. A Caribbean mangrove resident ranked 51st
+// most-recorded in North America looks like a fact until you open it.
+func (s *server) shareWithSeams(sp *dataset.Species, opt options) *shareCell {
+	cell := shareOf(sp, s.ds.RegionTotals, opt)
+	if cell == nil || cell.Ratio == "" {
+		return cell
+	}
+	other, src, _, ok := taxonomy.SharedWith(sp.ScientificName)
+	if !ok {
+		return cell
+	}
+	name := other
+	if o := s.byID[s.idOf[other]]; o != nil {
+		name = o.Name(opt.Locale)
+	}
+	cell.Shared = "shared with " + name
+	cell.SharedTitle = fmt.Sprintf("This count is not this bird's alone. The occurrence data "+
+		"files both it and %s under %s, and does not separate them, so BirdView does not "+
+		"divide the records either.", name, src)
+	return cell
 }
 
 // comma groups an integer with thousands separators. The shares reach the

@@ -416,3 +416,9 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
    which is exactly what happened to "Section step". */
 .ctrlhelp .ctrl { break-inside: avoid; }
 .ctrlhelp .ctrl:first-child dt { margin-top: 0; }
+
+/* A count that covers two species, because a source does not separate them
+   (P-077). Marked on the tile, not only on the detail page: the index is
+   where the misreading happens. Amber on the tile's own surface, checked
+   against the 7:1 floor like every other text colour. */
+.seam { display: block; color: #f0b429; font-size: 10.5px; font-style: italic; }

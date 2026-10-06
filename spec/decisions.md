@@ -2621,12 +2621,87 @@ default the other way.
   global for frequency.
 - [CR-032](#cr-032) — its "no worse than Global" aside is withdrawn, above.
 
+## CR-034 — A count that covers two species is shown on both, and says so
+
+**Subject:** `presentation.share`, `dataset.name_provenance`
+**Kind:** Derived / emergent — no requirement is violated alone; the defect is in what a tile
+means when the occurrence sources and AviList disagree about what a name denotes
+**Date:** 2026-10-05 · **Decided by:** Sameer
+**Found by:** the owner, asking why `manwar1` outranked `yelwar1` in New York
+
+### The rejected fix, and why
+
+The first proposal was to reassign eBird's 6,245,227 `Setophaga petechia` records to
+*Setophaga aestiva*, on the grounds that nearly every Yellow Warbler in the US and Canada is
+the northern bird. **The owner stopped it.** That is true and it is also a division nobody has
+measured: eBird has not adopted AviList's split and distinguishes none of those records.
+Attributing them all to one daughter replaces a wrong answer with a confident guess, which is
+the trade this project refuses everywhere else.
+
+### The sweep
+
+Every one of the 1,083 drawn species was queried against both databases under the AviList
+binomial BirdView serves (2,166 requests, 2026-10-05). **18 have zero eBird records under that
+name**, and they fall into two groups that look identical in the data and mean opposite things:
+
+**Name disagreement — the records exist under another name.** Nine species, all but one
+already covered by `AviListRenames` or `LumpedInto`:
+
+| BirdView draws | eBird files it as | eBird records |
+| --- | --- | --- |
+| *Leuconotopicus villosus* (Hairy Woodpecker) | *Dryobates villosus* | 7,310,342 |
+| *Setophaga aestiva* (N. Yellow Warbler) | *Setophaga petechia* | 6,245,227 |
+| *Icterus bullockiorum* (Bullock's Oriole) | *Icterus bullockii* | 881,936 |
+| *Hesperiphona vespertina* (Evening Grosbeak) | *Coccothraustes vespertinus* | 838,952 |
+| *Numenius hudsonicus* (Whimbrel) | *Numenius phaeopus* | 556,578 |
+| *Pica nuttallii* (Yellow-billed Magpie) | *Pica nuttalli* | 129,969 |
+| **_Trogon ambiguus_ (Coppery-tailed Trogon)** | ***Trogon elegans*** | **34,913** |
+| *Leuconotopicus albolarvatus*, *borealis*, *arizonae* | *Dryobates* | 3,576 / 2,007 / 1,545 |
+
+**eBird withholds the species.** Nine more — Spotted Owl, Gyrfalcon, Northern Hawk Owl, Lesser
+Prairie-Chicken, Gunnison Sage-Grouse, Puaiohi, Maui Parrotbill, Akohekohe, Desertas Petrel.
+Confirmed by querying every plausible alias: *Strix occidentalis* and *Falco rusticolus* return
+zero under any name. Their records are suppressed, not renamed, and
+[P-077](product.md#p-077) must not say otherwise.
+
+**Two of the name disagreements are SHARED names**, where one eBird binomial covers two species
+BirdView draws: *Setophaga petechia* (Northern + Mangrove Yellow Warbler) and *Trogon elegans*
+(Elegant + Coppery-tailed Trogon). The Trogon case was guessed at in a code comment and is now
+measured.
+
+**One apparent finding was not one.** *Sternula albifrons* showed zero in both databases, but
+its 106 records are on Midway, whose country code is `UM` — excluded by the sweep's own
+`country=US,CA` filter. A blind spot in the measurement, not in the data.
+
+### Decision
+
+**A count covering two species is shown on both, labelled.** Not reassigned to one, not
+withheld from both. The tile prints the figure it has and names the species it is shared with;
+the detail page says which source does not separate them and how many records are involved.
+
+The alternative considered was showing no figure on either, which is defensible under
+[G-005](goals.md#g-005) alone — a number we cannot attribute is a number we cannot stand
+behind. **[G-006](goals.md#g-006) decides it the other way**: suppressing the figure hides
+6.2 million records and one of the commonest warblers in North America, and a reader has no way
+to tell that view from a bird genuinely absent. Showing the count with its seam named tells the
+reader strictly more, and nothing it tells them is false.
+
+### What this does not do
+
+It does not make the Frequency ordering right for Mangrove Yellow Warbler, which will still
+sit in a tier its own records do not earn. That is the honest consequence of eBird not
+separating the two: the records are real, the tier is real, and the attribution is the part
+nobody knows. The label is what keeps the page from asserting the part nobody knows.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
 
 | Item | Owner | Gate |
 | --- | --- | --- |
+| **`birdview-regions` applies neither `AviListRenames` nor `LumpedInto`**, so it matches raw GBIF facet names against AviList names and drops whatever does not match. Measured 2026-10-05: Hairy Woodpecker holds 52,392 records where eBird has **7,310,342**, Bullock's Oriole and Yellow-billed Magpie are in **no region at all**, and Whimbrel and Evening Grosbeak are short by 45x and 68x. `birdview-status` normalizes and `birdview-regions` does not, so the two committed tables use different taxonomies. Fix is ~10 lines plus a full run (~10-20 min against live GBIF); it does **not** touch the shared-name cases, which [CR-034](#cr-034) handles separately | Sameer | next — it is live and wrong for 10 species |
+| **Nothing reads `data/gbif-taxa.tsv`.** It is generated by `cmd/birdview-gbifmap`, committed, and consumed by no code. It carries a GBIF-to-AviList name bridge with an `ambiguous` tier that would be the natural home for [CR-034](#cr-034)'s shared names — except that it files `Setophaga petechia -> Setophaga petechia` as `exact`, correctly, which is why the bridge could not find them. Either wire it in or retire it | — | opportunistic |
+| **The name sweep is a throwaway and should not be.** Finding [CR-034](#cr-034)'s cases took 2,166 queries comparing what each database reports under each AviList binomial — the only method that catches a name whose strings match and whose meanings differ. It ran once from a scratch binary. As a committed command it would catch the next split the week it lands, rather than when a reader notices a mangrove warbler in Ontario. Note its blind spot: a `country=US,CA` filter hides the outlying islands, which is why *Sternula albifrons* looked like a finding and was not | Sameer | before the next AviList release |
 | ~~**Restore the share at sea on an off-land denominator**~~ — **done 2026-10-05**, [CR-031](#cr-031). Sea totals are now every bird on open water in the box: North Atlantic 12,986,514 against the 429,535 shipped. `Commonest` moved onto the same table the index divides, so the two pages cannot disagree again, and **45 species peak at sea**. Remaining: the figure is *on water* rather than *at sea*, overstating by ~3% through estuaries, and a WKT polygon would fix that if it ever matters | Sameer | closed 2026-10-05 |
 | ~~**Is there a distance from shore that tightens the marine boxes?**~~ — **answered 2026-10-05**, no: distance is the wrong instrument and there is no gradient to tune. Composition does not taper offshore, it flips between the band holding coastline and the band that does not — 4.9% off land and Northern Cardinal at one step, 100% off land and pure tubenoses at the next. GADM membership does the job exactly and for free. Written up under [CR-030](#cr-030) | Sameer | closed 2026-10-05 |
 | **Decide how a marine region's share is defined, or that it has none** — [CR-030](#cr-030). The index inflates every marine share by 15–4,472× because a sea's denominator sums only the pelagic species, where a land region's counts every bird. Option A (presence at sea, no share) is recommended and costs almost nothing; option B costs a regenerated `region-presence.tsv` and `status.tsv` plus a coordinate-box form of the `eventDate` facet. **Until this lands the index is wrong for any marine selection** | Sameer | next — it is live and misleading |

@@ -67,6 +67,23 @@ sources cannot be reconciled, the page says they cannot, rather than picking one
 smoothly. A number that is quietly wrong costs more than a gap that is loudly honest, because
 only one of them can be checked.
 
+### G-006 — Nothing disappears quietly
+
+BirdView does not silently drop data. Every omission, merge or filter that hides information is
+stated where a reader would otherwise be misled by its absence.
+
+The three ways data goes missing here are a species filtered out of scope, two sources merged
+under one name, and a source that withholds records outright — and all three are invisible by
+construction. A reader cannot see a bird that is not drawn, cannot tell that one tile's count
+covers two species, and cannot distinguish a bird nobody records from a bird eBird refuses to
+publish. Absence leaves no mark unless something marks it.
+
+This is the operational half of [G-005](#g-005). That goal says show the data as it is; this one
+says the gaps are part of the data. It is why a species out of scope keeps a page saying why
+([P-075](product.md#p-075)), why a zero is printed against its denominator rather than dashed
+([P-074](product.md#p-074)), and why a count covering two species says so on both
+([P-077](product.md#p-077)).
+
 ---
 
 ## Non-goals

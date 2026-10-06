@@ -2066,3 +2066,32 @@ failures — `tier "1 in 10 – 1 in 99" holds 102 species; 23 have a frequency 
 only the non-default, with a comment warning that this disables the toggle whenever the
 default moves — which is what happened when [CR-017](decisions.md#cr-017) moved it. A default
 that varies by metric is the same bug by a different road.
+
+### AC-103 — A count covering two species says so, on the tile and on the page
+**Verifies:** [P-077](product.md#p-077), [CR-034](decisions.md#cr-034) · **Level:** code ·
+**Method:** rendering test over the real dataset, both members of every declared shared name
+
+**Assertions:**
+
+1. For **both** species a shared name covers, the detail page carries a *Recorded as* row
+   naming the source binomial and the other species.
+2. The **index tile** carries the marker too, naming the other bird.
+3. A species eBird **withholds** says so, and is **not** reported as a naming disagreement.
+4. An ordinary species carries none of it.
+
+**Why the index and not just the detail page.** The bug that prompted this was visible as a
+ranking — a Caribbean mangrove resident sitting 51st most-recorded in North America — and a
+note on a page nobody opened would not have caught it. The marker goes where the misreading
+happens.
+
+**Why assertion 3 is separate.** Withholding and renaming are indistinguishable in the data:
+eBird returns zero for both. They are opposite in meaning, and conflating them would tell a
+reader that eBird calls the Spotted Owl something else, sending them after a name that does
+not exist. Nine species are in that state.
+
+**Status: verified 2026-10-05 — passing, and watched failing** under both of:
+
+| Mutation | What went red |
+| --- | --- |
+| the tile marker is suppressed, leaving only the detail page | `the index tile for yelwar1 (Setophaga aestiva) carries no shared-count marker` |
+| a withheld species is labelled as a shared name | `/species/gyrfal (Gyrfalcon) does not say eBird withholds it` **and** `is withheld, not shared, but is reported as shared` |

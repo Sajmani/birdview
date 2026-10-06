@@ -888,7 +888,7 @@ starts with.
 ### P-077 — A species says which names its records were filed under
 Subject: `presentation.name_provenance`
 Value: `per-source binomial and count, shown where the sources disagree`
-Goals: G-004, G-005
+Goals: G-004, G-005, G-006
 
 Where the occurrence sources do not use the name BirdView serves, the species page says so,
 naming **each source's binomial and how many records it holds under it**.
@@ -912,8 +912,16 @@ binomial is worse still: that is how Mangrove Yellow Warbler, a Caribbean mangro
 came to be the 51st most-recorded bird in a North American dataset, credited with 532,470
 records in Ontario.
 
-Rationale: [G-005](goals.md#g-005). A reader who can see that two sources disagree can discount
-the figure appropriately; a reader shown a reconciled number cannot. The disagreement is also
+**A source that withholds a species is NOT a name disagreement, and must not be reported as
+one.** The two are indistinguishable in the data — eBird returns zero either way — and mean
+opposite things. eBird holds no record under *Strix occidentalis* because it suppresses
+conservation-sensitive species, not because it calls the Spotted Owl something else; telling a
+reader to look for another name would send them after one that does not exist. Nine species are
+in that state, and the page says the source withholds them.
+
+Rationale: [G-005](goals.md#g-005) and [G-006](goals.md#g-006). A reader who can see that two
+sources disagree can discount the figure appropriately; a reader shown a reconciled number
+cannot, and a reader shown nothing cannot even know to ask. The disagreement is also
 not a transient to be waited out — eBird filed 827,098 records under the shared name in 2024
 alone, so this grows by roughly that much a year.
 

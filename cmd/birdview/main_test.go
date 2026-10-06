@@ -22,6 +22,7 @@ import (
 	"birdview/internal/dataset"
 	"birdview/internal/region"
 	"birdview/internal/status"
+	"birdview/internal/taxonomy"
 	"birdview/internal/trait"
 	"birdview/internal/view"
 	"birdview/spec"
@@ -5359,5 +5360,103 @@ func TestFrequencyDefaultsToGlobalScale(t *testing.T) {
 		section := regexp.MustCompile(`<a class="btn on"[^>]*scale=section`)
 		t.Errorf("the scale control does not show Global active under Frequency "+
 			"(Per section active: %v)", section.MatchString(body))
+	}
+}
+
+// TestSharedNamesAreDisclosed asserts P-077 over the real dataset: where one
+// occurrence name covers two species BirdView draws, both say so, and the
+// disclosure reaches the index as well as the detail page.
+//
+// On the index too, because that is where the misreading happens. The bug
+// that prompted this was visible as a ranking — a Caribbean mangrove
+// resident sitting 51st most-recorded in North America — and a note on a
+// page nobody opened would not have caught it.
+//
+// Verifies: P-077, CR-034. Criterion: AC-103.
+func TestSharedNamesAreDisclosed(t *testing.T) {
+	ds := realDataset(t)
+	srv, err := newServer(ds)
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
+	}
+	if len(taxonomy.SharedNames) == 0 {
+		t.Fatal("no shared names declared; this check has nothing to assert")
+	}
+
+	for _, sn := range taxonomy.SharedNames {
+		for _, sci := range sn.Covers {
+			id := srv.idOf[sci]
+			if id == "" {
+				t.Errorf("%s is declared as sharing %s but is not drawn", sci, sn.Source)
+				continue
+			}
+			other := sn.Covers[0]
+			if other == sci {
+				other = sn.Covers[1]
+			}
+
+			// The detail page names the source binomial and the other bird.
+			_, body := get(t, srv, "/species/"+id)
+			for _, want := range []string{"Recorded as", sn.Source, "covering two species"} {
+				if !strings.Contains(body, want) {
+					t.Errorf("/species/%s (%s) does not say %q", id, sci, want)
+				}
+			}
+			if !strings.Contains(body, other) {
+				t.Errorf("/species/%s does not name the species it shares with (%s)", id, other)
+			}
+
+			// And the index tile carries the seam, with the other bird's
+			// common name in reach of a reader who never opens the page.
+			_, idx := get(t, srv, "/")
+			i := strings.Index(idx, id)
+			if i < 0 {
+				t.Errorf("%s is not on the index at all", id)
+				continue
+			}
+			// The share cell sits after the tile's inline SVG, which runs to
+			// thousands of characters, so seek to the cell rather than
+			// guessing a window.
+			rest := idx[i:]
+			c := strings.Index(rest, `class="share"`)
+			if c < 0 {
+				t.Errorf("no share cell after %s on the index", id)
+				continue
+			}
+			cell := rest[c:min(c+600, len(rest))]
+			if !strings.Contains(cell, `class="seam"`) {
+				t.Errorf("the index tile for %s (%s) carries no shared-count marker", id, sci)
+			}
+			if !strings.Contains(cell, "shared with") {
+				t.Errorf("the marker on %s's tile does not say what it is shared with", id)
+			}
+		}
+	}
+
+	// A withheld species is NOT reported as a naming disagreement. The two
+	// are indistinguishable in the data and opposite in meaning: telling a
+	// reader eBird calls the Spotted Owl something else would send them
+	// after a name that does not exist.
+	for sci, common := range taxonomy.WithheldByEBird {
+		id := srv.idOf[sci]
+		if id == "" {
+			continue // out of scope is fine; several are declared exceptions
+		}
+		_, body := get(t, srv, "/species/"+id)
+		if !strings.Contains(body, "withheld by eBird") {
+			t.Errorf("/species/%s (%s) does not say eBird withholds it", id, common)
+		}
+		if strings.Contains(body, "covering two species") {
+			t.Errorf("/species/%s (%s) is withheld, not shared, but is reported as shared",
+				id, common)
+		}
+	}
+
+	// An ordinary species carries neither, or the disclosure means nothing.
+	_, plain := get(t, srv, "/species/amerob")
+	for _, unwanted := range []string{"Recorded as", "covering two species", "withheld by eBird"} {
+		if strings.Contains(plain, unwanted) {
+			t.Errorf("American Robin's page says %q; its records are its own", unwanted)
+		}
 	}
 }
