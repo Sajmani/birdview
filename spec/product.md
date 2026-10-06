@@ -788,7 +788,7 @@ and would read "no records" there if that sea's total went missing, which is wha
 regions did for months. No selection reaches this today, every region having a total.
 
 **On the detail page the scope is every region at once**, and the page also names the one
-where the species peaks — **the commonest region**. One bird has no filter to follow, and
+where the species peaks, labelled **Top region**. One bird has no filter to follow, and
 where it is commonest is worth knowing once you are looking at it.
 
 **The peak and the index share are one calculation, not two that agree.** Both come from the

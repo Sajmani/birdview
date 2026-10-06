@@ -1958,6 +1958,11 @@ now catches it is the check nobody had written.
 2. The peak is always **a region the species is listed in**. The old figure could name one the
    reader would not find in the filter at all.
 3. At least one species peaks at sea, or the case CR-031 exists for is unexercised. (45 do.)
+4. The row is labelled **Top region**, and none of its superseded names survives — not
+   `Commonest in`, not `Commonest land region`. Rejecting the old forms as well as requiring
+   the new one is what would have caught `Commonest land region` outliving
+   [CR-031](decisions.md#cr-031), which gave the seas the denominator that qualifier existed
+   for.
 4. Every region has a record total, seas included.
 5. A sea's total **exceeds the sum of the species placed there**. A denominator built out of
    its own numerators is the shape of the CR-030 bug, and the only part of it a test can see
@@ -1984,6 +1989,7 @@ so no margin exists to assert.
 | `CountOffLandInBox` returns the box count instead of the off-land count | `off land 1000, want 100` |
 | the multi-GADM-level guard removed | `returned -220 and no error` |
 | the ingest drops marine totals again | every sea reported as having no total |
+| the row relabelled `Commonest land region` | `does not label the peak row "Top region"` **and** `still says "Commonest land region"` |
 
 **The second mutation is the live one.** Faceting plain `gadmGid` rather than `gadmLevel0Gid`
 returns every administrative level at once — a record in Virginia counted under `USA`,

@@ -4905,6 +4905,24 @@ func TestCommonestRoundTripsThroughTheIndex(t *testing.T) {
 	if atSea == 0 {
 		t.Error("no species peaks at sea, so the case CR-031 exists for is unexercised")
 	}
+
+	// The row's label, pinned. It has been three things -- "Commonest in",
+	// then "Commonest land region" while the seas had no honest denominator
+	// (CR-030), now "Top region" -- and nothing asserted any of them, so
+	// each rename was unverified. The superseded forms are rejected as well
+	// as the current one required: a stale qualifier is how "Commonest land
+	// region" would have survived CR-031 giving the seas a denominator.
+	// amerob, not greblu: the fixture heron is deliberately in no region and
+	// carries no peak, so its page has no such row to label.
+	_, page := get(t, newTestServer(t), "/species/amerob")
+	if !strings.Contains(page, "Top region") {
+		t.Error("the detail page does not label the peak row \"Top region\"")
+	}
+	for _, stale := range []string{"Commonest in", "Commonest land region", "Commonest region"} {
+		if strings.Contains(page, stale) {
+			t.Errorf("the detail page still says %q", stale)
+		}
+	}
 	t.Logf("%d species round-tripped, %d of them peaking at sea", checked, atSea)
 }
 

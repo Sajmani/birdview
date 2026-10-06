@@ -2477,11 +2477,15 @@ func (s *server) categories(sp *dataset.Species, loc dataset.Locale) []categoryR
 			where = rg.Name
 		}
 		out = append(out, categoryRow{
-			// "Commonest region", not the bare "Commonest in" this started
-			// as. The row ranges over every region including the seas again
-			// (CR-031), and it is now the same arithmetic the index does --
-			// selecting this one region there reproduces the figure (AC-100).
-			Label:  "Commonest region",
+			// "Top region". It began as the bare "Commonest in", which said
+			// nothing about what it ranged over, and spent a while as
+			// "Commonest land region" while the seas had no honest
+			// denominator (CR-030). They have one now (CR-031), so the row
+			// ranges over everything again and the qualifier went -- and
+			// "top" says plainly that this is the maximum of the same
+			// figure the index shows, which selecting this one region there
+			// reproduces exactly (AC-100).
+			Label:  "Top region",
 			Value:  fmt.Sprintf("%s — 1 in %s bird observations there", where, comma(int64(c.OneIn()))),
 			Origin: string(dataset.Derived),
 			// Both halves of the contrast, because the first on its own only

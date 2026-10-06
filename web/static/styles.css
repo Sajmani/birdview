@@ -432,6 +432,8 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
    to its widest child, so the Frequency group's rule tracks its own text
    without either being measured. */
 .dirgroup { display: inline-flex; flex-direction: column; }
-.dirbtns { display: flex; gap: 6px; }
+/* Centred, so a single button narrower than its caption sits over the
+   middle of the rule rather than at its left edge. */
+.dirbtns { display: flex; gap: 6px; justify-content: center; }
 .dirn { margin-top: 4px; padding-top: 3px; border-top: 1px solid var(--dim);
   text-align: center; color: var(--dim); font-size: 11px; font-style: italic; }

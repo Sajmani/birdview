@@ -352,7 +352,7 @@ is absent from and the figure falls, because those records join the denominator 
 the numerator; a bird is a smaller part of a wider world.
 
 **On the detail page** the scope is every region at once, and the page also names the one
-where the species peaks: *Commonest region: Yukon — 1 in 250 records there.* A bird with
+where the species peaks: *Top region: Yukon — 1 in 250 observations there.* A bird with
 no records in the regions on screen reads *0 in 1,225,176,035 bird observations across every
 region* — a stated zero against a stated denominator, because zero in a billion records and
 zero in nine hundred are different findings.
