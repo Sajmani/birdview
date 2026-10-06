@@ -105,6 +105,13 @@
     <a class="btn{{if eq .Opt.Metric "mass"}} on{{end}}" href="{{call $q "by" "mass"}}">Mass</a>
     <a class="btn{{if eq .Opt.Metric "frequency"}} on{{end}}" href="{{call $q "by" "frequency"}}"
        title="How much of what people record is this bird, commonest first">Frequency</a>
+    {{/* The direction, stated for every metric rather than inferred from
+         three of them. Frequency runs the other way -- "1 in N" is a
+         reciprocal, so ascending the printed number descends abundance --
+         and a reader who has learned "smallest first" from the other three
+         will read that as a bug unless the page says otherwise. Labelling
+         all four turns an implicit inconsistency into an explicit one. */}}
+    <span class="hint dirn">{{if eq .Opt.Metric "frequency"}}commonest first{{else}}smallest first{{end}}</span>
 
     <span class="lbl">Scale</span>
     <a class="btn{{if eq .Opt.Scale "section"}} on{{end}}" href="{{call $q "scale" "section"}}"

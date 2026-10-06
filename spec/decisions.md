@@ -2813,9 +2813,32 @@ name would conflate the two.
 On direction the second proposal is a wash and was offered as such: ascending *Observations*
 would mean fewest-first, exactly the inversion it was meant to cure.
 
-So the three candidates miss in three different places — **Frequency** is vague about the
-quantity, **Rarity** is wrong about it, **Observations** names the unit instead. Frequency is
-the least wrong, and the inversion stays.
+**Infrequency.** Proposed third, and it is the only candidate correct on **both** axes at
+once. Ascending infrequency *is* commonest first, so the direction agrees with the printed
+number — and unlike *Rarity* it keeps the right referent, naming how seldom a bird is
+**recorded** rather than asserting how scarce the bird is. It therefore escapes the trap the
+other two fall into, that every frequency-polarity name points the wrong way and every
+scarcity-polarity name overclaims.
+
+It is declined on usability alone, which is the honest reason. *Infrequency* is a real English
+word and an uncommon one, and it would sit in a row of four buttons beside Length, Wingspan
+and Mass — three everyday nouns and one that makes a reader stop. The project has made this
+trade before and in the same direction: [P-074](product.md#p-074) prints *1 in N* rather than
+a percentage because 0.000001% is unreadable, choosing the legible form over the conventional
+one. Here the legible form is the vaguer one.
+
+So the four candidates miss in four different places — **Frequency** is vague about the
+quantity, **Rarity** is wrong about it, **Observations** names the unit instead, and
+**Infrequency** is right about everything except the reader. Frequency is the least wrong.
+
+### What is done instead of renaming
+
+The inversion is **stated rather than removed**. The Order by row now carries the direction for
+every metric — *smallest first* under the three size metrics, *commonest first* under
+Frequency — so a reader who has learned the pattern from three of them is told where the
+fourth departs, instead of inferring a bug. Labelling all four is what turns an implicit
+inconsistency into an explicit one; labelling only the odd one out would have read as an
+apology for it.
 
 ## Work arising
 

@@ -422,3 +422,8 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
    where the misreading happens. Amber on the tile's own surface, checked
    against the 7:1 floor like every other text colour. */
 .seam { display: block; color: #f0b429; font-size: 10.5px; font-style: italic; }
+
+/* The ordering direction, beside the Order by buttons. Frequency runs the
+   opposite way from the three size metrics, so the direction is stated for
+   all four rather than left to be inferred from the majority. */
+.dirn { margin-left: 4px; align-self: center; }

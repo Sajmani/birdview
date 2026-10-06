@@ -440,7 +440,14 @@ often the bird is recorded ([P-076](#p-076), [CR-032](decisions.md#cr-032)).
 ### P-021 — Ascending order
 Goals: G-001
 
-Species are sorted ascending by the selected metric.
+Species are sorted ascending by the selected metric, **and the page says which way that
+runs**: *smallest first* under length, wingspan and mass, *commonest first* under Frequency.
+
+The direction is stated for all four rather than only for the one that departs. Frequency
+ascends a reciprocal — *1 in N* rises as the bird gets scarcer — so ascending the printed
+number descends abundance, and a reader who has learned "smallest first" from three metrics
+would otherwise read the fourth as a defect. See
+[CR-032](decisions.md#cr-032) for why renaming it was declined three times.
 
 ### P-022 — Sections break at N% above the section minimum
 Subject: `sectioning.rule`

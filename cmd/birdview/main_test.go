@@ -5460,3 +5460,45 @@ func TestSharedNamesAreDisclosed(t *testing.T) {
 		}
 	}
 }
+
+// TestOrderByStatesItsDirection asserts P-021's second half: the page says
+// which way the ordering runs, for every metric and not only for the one
+// that departs.
+//
+// Frequency ascends a reciprocal — "1 in N" rises as the bird gets scarcer
+// — so it runs commonest-first while the three size metrics run
+// smallest-first. Three renames were proposed to resolve that and all three
+// were declined (CR-032): every frequency-polarity name points the wrong
+// way, every scarcity-polarity name overclaims, and the one word that is
+// right on both counts is a word readers stumble over. What is shipped
+// instead is the direction, said out loud.
+//
+// Asserted on all four because labelling only the odd one out reads as an
+// apology for it, and because the inconsistency is only safe while it is
+// visible.
+//
+// Verifies: P-021, P-076. Criterion: AC-102.
+func TestOrderByStatesItsDirection(t *testing.T) {
+	s := newTestServer(t)
+	for _, tc := range []struct{ query, want, reject string }{
+		{"/", "smallest first", "commonest first"},
+		{"/?by=length", "smallest first", "commonest first"},
+		{"/?by=wingspan", "smallest first", "commonest first"},
+		{"/?by=mass", "smallest first", "commonest first"},
+		{"/?by=frequency", "commonest first", "smallest first"},
+	} {
+		_, body := get(t, s, tc.query)
+		i := strings.Index(body, `class="hint dirn"`)
+		if i < 0 {
+			t.Errorf("%s: the Order by row states no direction", tc.query)
+			continue
+		}
+		cell := body[i:min(i+80, len(body))]
+		if !strings.Contains(cell, tc.want) {
+			t.Errorf("%s: direction reads %q, want %q", tc.query, cell, tc.want)
+		}
+		if strings.Contains(cell, tc.reject) {
+			t.Errorf("%s: direction reads %q, which is the other metric's", tc.query, tc.reject)
+		}
+	}
+}
