@@ -2127,3 +2127,32 @@ written into the `-marine-only` path. `TestRegionCountsLineUp` failed on all fiv
 *"a sea's denominator is every bird on that water, not a sum of the birds we happen to draw"* —
 before the table was committed. Both paths now compute it the same way. This is the clearest
 return the project has had on a check written to assert an invariant rather than a value.
+
+### AC-105 — Every species the two sources disagree about is declared
+**Verifies:** [T-028](tech.md#t-028) · **Level:** code · **Method:** offline test over the
+committed correspondence table
+
+**Assertions:**
+
+1. Every drawn species has a row; the table is refused if it holds fewer than 1,000.
+2. A species whose eBird:iNaturalist ratio falls outside **1×–1000×**, or which one source
+   reports and the other does not, **must be declared** — in `AviListRenames`, `LumpedInto`,
+   `SharedNames`, `WithheldByEBird` or `DomesticForms`.
+3. The failure message names which of those five the species probably belongs in.
+
+**Why a band and not an exact list.** Listing the known outliers would pass forever and catch
+nothing new; the band is what notices the *next* AviList split. The measured distribution is
+far tighter than the band — median 48×, p5 10.7×, p95 148× — because iNaturalist is uniformly
+shallower than eBird rather than differently distributed, so 1×–1000× is looking for two
+orders of magnitude, not for ordinary variation.
+
+**The expected set is derived, not re-listed.** It is built from the five mechanism tables, so
+adding a rename does not mean remembering to add it here too — the commonest way a check of
+this shape rots.
+
+**Known blind spot, stated rather than hidden.** The sweep filters on country US and CA, so
+the outlying islands (code `UM`) are invisible: Little Tern reads zero in both databases while
+the region table holds 106 records of it on Midway. A species both sources report as zero is
+therefore skipped rather than flagged.
+
+**Status: pending — the correspondence table is being generated.**

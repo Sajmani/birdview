@@ -30,9 +30,20 @@ before a public deployment is plumbing, not permission.
 
 **A criterion you have not watched fail is not a criterion.** Break the code deliberately, confirm
 each new check goes red, and record in the criterion how you broke it before marking it verified.
-This has caught roughly seven checks that passed vacuously — whole-page string searches matching
-the help text rather than the control, fixtures too small to exercise the behavior under test, and
-a test that survived the reversal of its own requirement.
+This has caught roughly ten checks that passed vacuously — whole-page string searches matching
+the help text rather than the control, fixtures too small to exercise the behavior under test, a
+test that survived the reversal of its own requirement, one that read a response body before the
+header that was wrong, and one that asserted a label written by a different function from the
+code under test.
+
+**Assert that the mutation applied.** Twice now a "mutation" was a no-op and the check "passed"
+— once because `gofmt` had collapsed the whitespace the edit was anchored on. A substitution
+that silently matches nothing proves the opposite of what it looks like. Make the edit fail
+loudly when its anchor is missing.
+
+**Watch it fail for the right reason.** Read the failure message, not just the red. A frequency
+check failed under its mutation on a secondary assertion while the primary one — the thing the
+test was for — passed over the bug untouched; only the message showed it.
 
 ## Hard rules
 

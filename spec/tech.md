@@ -357,3 +357,41 @@ including its own, and the bird showed 0.7% of its own record.
 
 **The bar is a fraction of records, not a count of names.** A new vagrant adds a name and six
 records; a genus move adds one name and seven million.
+
+### T-028 — How each source names a species is measured, not assumed
+Subject: `build.name_correspondence`
+Value: `committed per-source record counts; a declared ratio band`
+Goals: G-004, G-005, G-006
+
+A committed table records how many records each occurrence source holds for every species
+BirdView draws, under the name BirdView serves. A species far outside the usual ratio between
+the two sources is reported, and every exception is declared with a reason.
+
+Rationale: a name can fail to join in two ways and only one is visible. A name that **misses**
+leaves a species at zero, which somebody eventually notices — Bullock's Oriole in no region at
+all. A name that **matches the wrong concept** joins cleanly and stays wrong: eBird's
+*Setophaga petechia* is AviList's Mangrove Yellow Warbler by string and the undivided Yellow
+Warbler by meaning, and **no name-matching check can see it** —
+[`data/gbif-taxa.tsv`](../data/gbif-taxa.tsv) files that pair as `exact`, correctly.
+
+What separates them is asking each database how many records it holds. The ratio is
+unexpectedly stable — **median 48×, 5th percentile 10.7×, 95th 148×** — because iNaturalist is
+uniformly shallower than eBird rather than differently distributed. Every kind of disagreement
+shows as an outlier, and in opposite directions:
+
+| shape | signature |
+| --- | --- |
+| a rename or lump | eBird ≈ 0; its records are under another name |
+| a shared name | ratio enormous — *Setophaga petechia* is **117,834×** |
+| a withheld species | eBird ≈ 0 under *every* name, iNaturalist normal |
+| a domestic form | ratio large — Rock Pigeon 11,809×, iNaturalist filing under a trinomial |
+
+**Only 7 of 1,019 species fall outside 1×–1000×, and every one is a real finding.** Measured
+2026-10-05, the band immediately caught two species nothing had recorded as withheld —
+**Great Gray Owl** (eBird 1, iNaturalist 2,859) and **Black Rail** (16 against 101) — and
+exposed an error in [`sources.md`](sources.md), which listed Blue-billed White-Tern among the
+withheld when eBird holds 16,008 records of it under *Gygis alba*.
+
+**The declared exceptions are the point, not an escape hatch.** Each names which of the four
+shapes it is, so the table reads as a statement about taxonomy rather than a list of numbers
+to ignore.

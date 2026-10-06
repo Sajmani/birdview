@@ -317,9 +317,16 @@ was API throttling at concurrency 8 with failures counted as zeros. At concurren
 there were no failures. Noted because a rate-limited query returning 0 is indistinguishable from
 an absent bird unless the two paths are kept apart.)*
 
-**2. eBird's export withholds conservation-sensitive species entirely.** The 12 species the
-inverted query still cannot find are not a taxonomy problem. Every one is present in iNaturalist
-and wholly absent from eBird:
+**2. eBird's export withholds conservation-sensitive species entirely.** The species the
+inverted query cannot find are not a taxonomy problem. Every one is present in iNaturalist and
+all but absent from eBird:
+
+*(Corrected 2026-10-05 by [T-028](tech.md#t-028)'s ratio band. This said **12 species** and
+listed nine, and one of the nine was wrong: **Blue-billed White-Tern is not withheld** — eBird
+holds 16,008 records of it under *Gygis alba*, a lump, not a suppression. The band also found
+two the table missed, because neither reads as zero: **Great Gray Owl**, eBird 1 against
+iNaturalist's 2,859, and **Black Rail**, 16 against 101. Eleven species are withheld, and
+`taxonomy.WithheldByEBird` is the list.)*
 
 | species | eBird | iNaturalist |
 | --- | ---: | ---: |
@@ -329,7 +336,8 @@ and wholly absent from eBird:
 | Lesser Prairie-Chicken | **0** | 228 |
 | Gunnison Sage-Grouse | **0** | 110 |
 | Akohekohe, Maui Parrotbill, Puaiohi | **0** | 7, 10, 21 |
-| Blue-billed White-Tern | **0** | 1,445 |
+| *Great Gray Owl* | *1* | *2,859* |
+| *Black Rail* | *16* | *101* |
 | *Barred Owl — control, not sensitive* | *1,242,780* | *55,832* |
 
 The control is what makes it legible: Barred Owl is in both, and its sensitive congener Spotted

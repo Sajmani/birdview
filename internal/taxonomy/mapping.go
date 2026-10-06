@@ -303,6 +303,14 @@ func SharedWith(aviList string) (other string, source string, why string, ok boo
 //
 // Verifies: P-077.
 var WithheldByEBird = map[string]string{
+	// Found by the ratio band of T-028, not by the zero-record sweep that
+	// built the rest of this list: eBird holds 1 record of the owl and 16
+	// of the rail, so neither reads as absent. Against iNaturalist's 2,859
+	// and 101 they are plainly suppressed, and a filter looking for zero
+	// walked straight past them.
+	"Strix nebulosa":         "Great Gray Owl",
+	"Laterallus jamaicensis": "Black Rail",
+
 	"Strix occidentalis":         "Spotted Owl",
 	"Falco rusticolus":           "Gyrfalcon",
 	"Surnia ulula":               "Northern Hawk Owl",
@@ -335,4 +343,17 @@ func Occurrence(name string) string {
 		return strings.ToLower(alt)
 	}
 	return lower
+}
+
+// DomesticForms are species whose record counts are skewed because
+// iNaturalist files the feral or domestic population under a trinomial and
+// eBird does not (T-028).
+//
+// Not a naming disagreement to fix: both databases are right about their own
+// records, and BirdView draws the wild species. Declared so the ratio check
+// reads as a statement about taxonomy rather than a list of numbers to
+// ignore.
+var DomesticForms = map[string]string{
+	"Columba livia":    "iNaturalist files feral Rock Pigeons under Columba livia domestica",
+	"Cairina moschata": "iNaturalist files domestic Muscovy Ducks under Cairina moschata domestica",
 }
