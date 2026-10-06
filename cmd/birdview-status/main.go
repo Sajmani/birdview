@@ -456,37 +456,30 @@ func mergeLumps(in map[string]map[string]int64) map[string]map[string]int64 {
 	return in
 }
 
-// toBinomials reduces the verbatim facet to species.
+// toBinomials reduces the verbatim facet to species, by taxonomy.Binomial —
+// the same rule birdview-regions now applies through taxonomy.Occurrence.
 //
-// iNaturalist publishes each identification at the rank the observer reached,
-// so the facet mixes binomials with subspecies trinomials, domestic forms,
-// hybrids and bare genera. eBird does not — every one of its 1,382 ABA-area
-// names is already a binomial — so this only ever touches the iNaturalist
-// side.
+// The rule lived here and only here until 2026-10-06, which is why the
+// region pass never applied it: the last of the three normalization
+// asymmetries CR-035 found. What stays in this function is the part that is
+// this command's own. A name identifying no species is DROPPED here, because
+// this pass classifies species and a hybrid has no status to carry;
+// birdview-regions keeps it instead, because a hybrid is still a bird
+// somebody saw and still occupies a region's denominator.
 //
-// Hybrids are dropped because they are not one species, and a bare genus
-// because it was never identified to one. Anything longer is truncated to its
-// first two tokens, which folds `setophaga coronata auduboni` into its
-// species and `columba livia domestica` into Rock Pigeon.
-//
-// Measured 2026-10-04: 97.1% of iNaturalist's ABA-area records are already
-// bare binomials, 2.6% sit under trinomials, 0.2% are hybrids and 0.1% are
-// genus-only. Only 7 species have records exclusively under a trinomial and
-// the largest has 6, so nothing here can change a classification. The dates
-// query below asks for the binomial alone and therefore misses that 2.6%;
-// that is accepted, because those records can only ever make an established
-// bird look more established.
+// Only 7 species have records exclusively under a trinomial and the largest
+// has 6, so folding them cannot change a classification. The dates query
+// below asks for the binomial alone and therefore misses the 2.6% of
+// iNaturalist records filed under trinomials; that is accepted, because
+// those records can only ever make an established bird look more
+// established.
 func toBinomials(in map[string]map[string]int64) map[string]map[string]int64 {
 	out := map[string]map[string]int64{}
 	for name, regions := range in {
-		if strings.ContainsRune(name, '×') {
+		k, ok := taxonomy.Binomial(name)
+		if !ok {
 			continue
 		}
-		f := strings.Fields(name)
-		if len(f) < 2 {
-			continue
-		}
-		k := f[0] + " " + f[1]
 		if out[k] == nil {
 			out[k] = map[string]int64{}
 		}

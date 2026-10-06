@@ -358,6 +358,20 @@ including its own, and the bird showed 0.7% of its own record.
 **The bar is a fraction of records, not a count of names.** A new vagrant adds a name and six
 records; a genus move adds one name and seven million.
 
+**Normalizing is part of the join, not a step before it.** Two commands read the occurrence
+data, and the loss above was not a missing table entry — every entry already existed — but a
+second reader that never consulted them. So every reader normalizes through **one function**,
+and a criterion asserts the two agree on the species rather than asserting either in isolation
+([AC-106](acceptance.md#ac-106)). The three gaps [CR-035](decisions.md#cr-035) found surfaced
+one at a time over two days precisely because nothing compared the readers, so each fix left
+the next one standing: no rename, then no lump, then no reduction of rank.
+
+**Rank is reduced before any name is looked up**, the naming tables being keyed on binomials
+that `dryobates villosus harrisi` matches none of. The ordering that is load-bearing the other
+way is the hybrid test, which runs *before* the truncation: cut to two tokens, `larus
+smithsonianus × hyperboreus` is an ordinary species name that joins cleanly and credits a real
+bird with records of something that is not it.
+
 ### T-028 — How each source names a species is measured, not assumed
 Subject: `build.name_correspondence`
 Value: `committed per-source record counts; a declared ratio band`

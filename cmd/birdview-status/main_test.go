@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -185,5 +186,107 @@ func TestBestRegionIsDeterministic(t *testing.T) {
 	if sh.Years != 24 {
 		t.Errorf("chose a region with %d years; a region recurring across fewer "+
 			"years is weaker evidence whatever its record count", sh.Years)
+	}
+}
+
+// TestBothReadersOfTheOccurrenceDataAgreeOnTheSpecies asserts the invariant
+// CR-035 turned out to be three separate violations of: a verbatim
+// occurrence name reaches the SAME AviList species whichever command reads
+// it.
+//
+// The three asymmetries were found one at a time over two days, because
+// each was invisible from inside the command that had it right. Nothing
+// compared the two readers, so each fix left the next gap in place:
+// birdview-regions applied neither AviListRenames nor LumpedInto, and then,
+// once it did, still did not reduce a trinomial to its species. This checks
+// the property the three share instead of the three bugs, so a fourth
+// reader, or a fourth table, cannot open the same hole again.
+//
+// It deliberately spans the two namespaces end to end -- prepare and then
+// status.Scope on one side, taxonomy.Occurrence on the other -- because the
+// two commands are required to agree on the name a join finally uses, not
+// at every step on the way there. birdview-status resolves the genus move
+// when it reads the table and birdview-regions when it writes one; that is
+// a real difference and not a defect, and a check pinned to an intermediate
+// value would call it one.
+//
+// Watched fail: see AC-106.
+//
+// Verifies: P-011, P-074, T-027. Criterion: AC-106.
+func TestBothReadersOfTheOccurrenceDataAgreeOnTheSpecies(t *testing.T) {
+	// One verbatim name of each shape the facet actually contains, with the
+	// species each is a record of.
+	cases := map[string]string{
+		"turdus migratorius":          "turdus migratorius",      // nothing to do
+		"dryobates villosus":          "leuconotopicus villosus", // a genus move
+		"dryobates villosus harrisi":  "leuconotopicus villosus", // ... filed under a subspecies
+		"setophaga coronata auduboni": "setophaga coronata",      // a subspecies needing no rename
+		"columba livia domestica":     "columba livia",           // a domestic form
+		"numenius phaeopus":           "numenius hudsonicus",     // a lump
+		"icterus bullockii":           "icterus bullockiorum",    // in no region at all before CR-035
+	}
+
+	// Scope returns the declared P-071 exceptions whatever it is given, so
+	// the species a row actually contributes is the difference. Subtracted
+	// rather than filtered by name, so this stays correct when the
+	// exceptions change.
+	declared := map[string]bool{}
+	for _, n := range status.Scope(nil) {
+		declared[n] = true
+	}
+
+	for verbatim, want := range cases {
+		// What birdview-status ends up joining on: the reduction in
+		// prepare, then the AviList resolution in Scope.
+		in := map[string]map[string]int64{verbatim: {"USA.5_1": 1000}}
+		var rows []status.Row
+		for k := range prepare(in) {
+			rows = append(rows, status.Row{Name: k, Status: status.Established})
+		}
+		var added []string
+		for _, n := range status.Scope(rows) {
+			if !declared[n] {
+				added = append(added, strings.ToLower(n))
+			}
+		}
+		if len(added) != 1 {
+			t.Errorf("birdview-status turned %q into %v, want exactly one species",
+				verbatim, added)
+			continue
+		}
+		// What birdview-regions ends up joining on, from the same name.
+		fromRegions := taxonomy.Occurrence(verbatim)
+
+		if added[0] != want {
+			t.Errorf("birdview-status files %q under %q, want %q",
+				verbatim, added[0], want)
+		}
+		if fromRegions != want {
+			t.Errorf("birdview-regions files %q under %q, want %q",
+				verbatim, fromRegions, want)
+		}
+		if added[0] != fromRegions {
+			t.Errorf("the two readers disagree about %q: birdview-status says %q, "+
+				"birdview-regions says %q. One of the two tables is in a taxonomy "+
+				"the other cannot join on, which is how 7,310,342 Hairy Woodpecker "+
+				"records came to belong to no species (CR-035)",
+				verbatim, added[0], fromRegions)
+		}
+	}
+
+	// The one place the two may differ, and why. A hybrid carries no status,
+	// so birdview-status drops it; it is still a bird somebody saw, and so
+	// still part of what a region's share is divided by, so birdview-regions
+	// keeps it. What neither may do is call it a species -- truncated to two
+	// tokens it reads as one, and these records are not that bird's.
+	const hybrid = "larus smithsonianus × hyperboreus"
+	if got := prepare(map[string]map[string]int64{hybrid: {"USA.5_1": 1000}}); len(got) != 0 {
+		t.Errorf("birdview-status kept %v from a hybrid; it has no status to carry", keys(got))
+	}
+	if got := taxonomy.Occurrence(hybrid); got != hybrid {
+		t.Errorf("birdview-regions turned the hybrid into %q, want it left verbatim: "+
+			"folded to its first parent it credits the American Herring Gull with "+
+			"records of a bird that is not one, and dropped outright it leaves the "+
+			"region's denominator short of birds that were genuinely seen", got)
 	}
 }

@@ -322,6 +322,41 @@ var WithheldByEBird = map[string]string{
 	"Pterodroma deserta":         "Desertas Petrel",
 }
 
+// Binomial reduces a name the occurrence data publishes to the species it
+// identifies, and reports whether it identifies one at all.
+//
+// iNaturalist publishes each identification at the rank the observer reached,
+// so its facet mixes binomials with subspecies trinomials, domestic forms,
+// hybrids and bare genera. eBird does not — every one of its 1,382 ABA-area
+// names is already a binomial — so this only ever changes the iNaturalist
+// side.
+//
+// A hybrid is not one species and a bare genus was never identified to one,
+// so neither reduces. Anything longer is truncated to its first two tokens,
+// which folds `setophaga coronata auduboni` into its species and `columba
+// livia domestica` into Rock Pigeon.
+//
+// **The hybrid test runs before the truncation, and must.** Truncated to two
+// tokens, `larus smithsonianus × hyperboreus` reads as a species BirdView
+// draws, and would credit the American Herring Gull with records of a bird
+// that is demonstrably not one.
+//
+// Measured 2026-10-04 over the ABA area: 97.1% of iNaturalist's records are
+// already bare binomials, 2.6% sit under trinomials, 0.2% are hybrids and
+// 0.1% are genus-only.
+//
+// Verifies: P-011, T-027.
+func Binomial(name string) (string, bool) {
+	if strings.ContainsRune(name, '×') {
+		return "", false
+	}
+	f := strings.Fields(name)
+	if len(f) < 2 {
+		return "", false
+	}
+	return f[0] + " " + f[1], true
+}
+
 // Occurrence maps a name the occurrence data publishes onto the AviList name
 // BirdView serves, lowercased for joining.
 //
@@ -332,17 +367,32 @@ var WithheldByEBird = map[string]string{
 // discarded, leaving the Hairy Woodpecker with iNaturalist's 0.7% of its own
 // record (CR-035).
 //
+// The three steps run in one order and it is not arbitrary. Rank first, so a
+// trinomial is a species before any table is consulted — both tables are
+// keyed on binomials and would walk straight past `dryobates villosus
+// harrisi`. Then the genus move, then the lump, each of which is keyed on
+// the name the occurrence data publishes rather than on the other's output.
+//
 // Verifies: P-011, P-074.
 func Occurrence(name string) string {
 	lower := strings.ToLower(strings.TrimSpace(name))
-	t := strings.ToUpper(lower[:1]) + lower[1:]
+	b, ok := Binomial(lower)
+	if !ok {
+		// A hybrid or a bare genus is a bird somebody saw and no species
+		// BirdView draws, so it belongs in the region's denominator and in
+		// nobody's numerator. Returned verbatim rather than dropped: that
+		// keeps it counted, and puts it in birdview-regions' orphan report
+		// under a name a reader can recognize as the deliberate loss it is.
+		return lower
+	}
+	t := strings.ToUpper(b[:1]) + b[1:]
 	if alt, ok := AviListRenames[t]; ok {
 		return strings.ToLower(alt)
 	}
 	if alt, ok := LumpedInto[t]; ok {
 		return strings.ToLower(alt)
 	}
-	return lower
+	return b
 }
 
 // DomesticForms are species whose record counts are skewed because

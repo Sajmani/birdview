@@ -71,16 +71,24 @@ const minPPM = 1.0
 // maxOrphanFraction is how much of the occurrence record may belong to
 // names matching no drawn species before the run refuses to write a table.
 //
-// Measured after CR-035: **0.0431%**, under 1,754 names, and every one
-// inspected is an iNaturalist hybrid (`larus smithsonianus × hyperboreus`),
-// a subspecies trinomial (`setophaga coronata coronata × auduboni`) or a
-// domestic form. Hybrids must never match a species. Trinomials should fold
-// into theirs and do not yet: birdview-status reduces them with
-// toBinomials and this pass does not, which is the last of the three
-// normalization asymmetries CR-035 found. Folding them would cut this
-// figure further.
+// Measured 2026-10-05, BEFORE the rank fold below: **0.0431%**, under 1,754
+// names, every one inspected an iNaturalist hybrid (`larus smithsonianus ×
+// hyperboreus`), a subspecies trinomial (`leuconotopicus villosus
+// terraenovae`) or a domestic form (`melopsittacus undulatus domesticus`).
 //
-// The bar is 0.1%, which is **2.3x the current residue**, not a hair above
+// The trinomials fold as of 2026-10-06, which closes the last of the three
+// normalization asymmetries CR-035 found: taxonomy.Occurrence reduces rank
+// before it consults either naming table, so this pass and birdview-status
+// apply one rule rather than two. What stays orphaned is hybrids, which
+// must never match a species, and subspecies of birds BirdView does not
+// draw, which have no species here to fold into.
+//
+// The figure above therefore overstates the residue, and the fold can only
+// shrink it — a trinomial either joins a drawn species or stays exactly
+// where it was. It is left as the last number actually measured rather than
+// replaced by an estimate; the run prints the current one every time.
+//
+// The bar is 0.1%, which is **2.3x the measured residue**, not a hair above
 // it. A bar set at the measured value fails the next time iNaturalist gains
 // a subspecies, and a check that cries wolf gets deleted. What it exists to
 // catch is the other order of magnitude: before CR-035 this was 0.81%, and

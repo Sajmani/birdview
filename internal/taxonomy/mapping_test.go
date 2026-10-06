@@ -49,3 +49,59 @@ func TestOccurrenceNormalizesEveryKnownName(t *testing.T) {
 		t.Fatal("the naming tables are nearly empty; this check is asserting almost nothing")
 	}
 }
+
+// TestBinomialReducesRankWithoutInventingSpecies asserts the rank reduction
+// both readers of the occurrence data share, and the one ordering rule
+// inside it that is load-bearing.
+//
+// iNaturalist publishes at the rank the observer reached, so 2.6% of its
+// ABA-area records sit under a trinomial and 0.2% under a hybrid. Folding
+// the first is the point. Folding the second is a bug that cannot be seen
+// downstream: truncated to two tokens a hybrid becomes a perfectly ordinary
+// species name, joins cleanly, and credits a real bird with records of
+// something that is not it.
+//
+// Watched fail: see AC-106.
+//
+// Verifies: P-011, T-027. Criterion: AC-106.
+func TestBinomialReducesRankWithoutInventingSpecies(t *testing.T) {
+	species := map[string]string{
+		"turdus migratorius":                "turdus migratorius",
+		"setophaga coronata auduboni":       "setophaga coronata",
+		"columba livia domestica":           "columba livia",
+		"dryobates villosus harrisi":        "dryobates villosus",
+		"junco hyemalis oreganus something": "junco hyemalis",
+	}
+	for in, want := range species {
+		got, ok := Binomial(in)
+		if !ok {
+			t.Errorf("Binomial(%q) identified no species, want %q", in, want)
+			continue
+		}
+		if got != want {
+			t.Errorf("Binomial(%q) = %q, want %q", in, got, want)
+		}
+	}
+
+	// Each of these identifies no species, and the assertion is NOT that
+	// the name survives -- it is that no species appears. A hybrid rejected
+	// too late survives as its first parent, which is the failure that
+	// matters and the one a check for the hybrid's own name walks past.
+	notSpecies := map[string]string{
+		"larus smithsonianus × hyperboreus":      "larus smithsonianus",
+		"setophaga coronata coronata × auduboni": "setophaga coronata",
+		"anas acuta × mareca americana":          "anas acuta",
+		"selasphorus":                            "",
+		"":                                       "",
+	}
+	for in, parent := range notSpecies {
+		got, ok := Binomial(in)
+		if ok {
+			t.Errorf("Binomial(%q) = %q, want no species: it identifies none", in, got)
+		}
+		if parent != "" && got == parent {
+			t.Errorf("Binomial(%q) = %q -- the hybrid test runs after the truncation, "+
+				"so these records would be filed as %s's", in, got, parent)
+		}
+	}
+}

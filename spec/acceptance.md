@@ -2184,6 +2184,52 @@ and the test "passed" — the same no-op trap that caught me earlier in this ses
 after I wrote the rule into `AGENTS.md` telling myself to assert that the mutation landed.
 Re-run with the anchor asserted, it fails as above.
 
+### AC-106 — Both readers of the occurrence data land on the same species
+**Verifies:** [T-027](tech.md#t-027), [CR-035](decisions.md#cr-035) · **Level:** code ·
+**Method:** unit test over the two pipelines, from one verbatim name to the name each joins on
+
+**Assertions:**
+
+1. For a verbatim occurrence name of each shape the facet actually contains — plain binomial,
+   genus move, subspecies, subspecies *of* a genus move, domestic form, lump — the AviList
+   species `birdview-status` files it under and the one `birdview-regions` files it under are
+   the same name.
+2. `taxonomy.Binomial` reduces a trinomial to its species and reports a hybrid and a bare
+   genus as identifying none.
+3. A hybrid is **not** reduced to its first parent — the rejection runs before the truncation.
+4. The two commands' one permitted difference holds: `birdview-status` drops a name that
+   identifies no species, and `birdview-regions` keeps it verbatim.
+
+**Why the property and not the three bugs.** [CR-035](decisions.md#cr-035) was three
+asymmetries found one at a time over two days, each invisible from inside the command that had
+it right: `birdview-regions` applied neither `AviListRenames` nor `LumpedInto`, and once it did,
+still did not reduce a trinomial. Nothing compared the two readers, so every fix left the next
+gap standing. Asserting that they agree closes the shape rather than the instances.
+
+**Why it spans both namespaces end to end.** `birdview-status` resolves a genus move when it
+*reads* its table and `birdview-regions` when it *writes* one. That is a real difference and
+not a defect, so the criterion compares the name each finally joins on — a check pinned to an
+intermediate value would report the difference as a bug every run.
+
+**Why a hybrid is kept rather than dropped.** It is a bird somebody saw, so it belongs in the
+denominator of [P-074](product.md#p-074)'s figure; it is no species BirdView draws, so it
+belongs in nobody's numerator. Kept verbatim it is both, and it appears in the orphan report
+under a name a reader recognizes as the deliberate loss it is.
+
+**Status: verified 2026-10-06 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| `Occurrence` does not reduce rank — the state before this change | the two readers disagree about three of the seven names, `"columba livia domestica"` / `"dryobates villosus harrisi"` / `"setophaga coronata auduboni"` each filed under itself |
+| `Occurrence` consults the tables *before* reducing rank | only the renamed subspecies, `birdview-regions files "dryobates villosus harrisi" under "dryobates villosus", want "leuconotopicus villosus"` |
+| the hybrid guard is removed from `Binomial` | `the hybrid test runs after the truncation, so these records would be filed as larus smithsonianus's`, plus `TestToBinomialsReducesTheFacetToSpecies` on the pintail |
+| `Occurrence` drops a hybrid instead of keeping it | `birdview-regions turned the hybrid into "", want it left verbatim … it leaves the region's denominator short of birds that were genuinely seen` |
+
+**A fifth mutation never applied**, and the harness said so instead of reporting a pass — the
+anchor had been written against comment text that wrapped differently. That is the third time
+this session a mutation silently matched nothing, and the first time the rule in `AGENTS.md`
+caught it before it cost anything.
+
 ### AC-107 — The figure says what it counts, and it is not individual birds
 **Verifies:** [P-074](product.md#p-074) · **Level:** code · **Method:** unit test over the
 rendered tile cell and the tooltip beside it
