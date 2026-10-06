@@ -33,8 +33,9 @@ is why scale is a user choice rather than a fixed decision (P-042).
 BirdView honors the terms of every source it uses, credits them, and never presents someone
 else's work as its own or as better-grounded than it is.
 
-Almost nothing in BirdView is BirdView's. The measurements are AVONET's, the species list is the
-ABA's, the wingspans are Fox et al.'s. Each arrives with conditions — attribution, non-commercial
+Almost nothing in BirdView is BirdView's. The measurements are AVONET's, the names are
+AviList's, the wingspans are Fox et al.'s, and the occurrence records are eBird's and
+iNaturalist's through GBIF. Each arrives with conditions — attribution, non-commercial
 use, no redistribution — and honoring them is a condition of the project existing at all, not
 overhead on top of it. This goal is why the project rejected a dataset it wanted
 ([CR-002](decisions.md#cr-002)), fetches one source at build rather than committing it (T-004),
@@ -49,6 +50,22 @@ Proportion is visible at a glance: which birds are long-billed, long-necked, lon
 
 Size alone would make a dowitcher and a robin of equal length look identical, and in the field
 they look nothing alike. Shape is what makes the comparison recognizable rather than abstract.
+
+### G-005 — The data as it is, not as it would be tidier
+
+BirdView shows what its sources actually record — including where they disagree with each
+other — and declines to smooth it over.
+
+Every convenience here is a small lie that compounds. A rarity label puts somebody's threshold
+where a number the reader could have judged belongs. Merging records across a taxonomic split
+asserts a division nobody measured. Dropping a name the sources disagree about makes the
+disagreement invisible rather than settled. The honest move is the same in each case: show the
+figure, name the disagreement, and let the reader see the seam.
+
+The hard half is that this sometimes means **publishing a worse-looking answer**. Where the
+sources cannot be reconciled, the page says they cannot, rather than picking one and reading
+smoothly. A number that is quietly wrong costs more than a gap that is loudly honest, because
+only one of them can be checked.
 
 ---
 

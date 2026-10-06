@@ -885,6 +885,38 @@ arrange the page by it — a reader could see that a bird was 1 in 282,315 but n
 is about that common*. Size answers "how big", and this answers the question a birder actually
 starts with.
 
+### P-077 — A species says which names its records were filed under
+Subject: `presentation.name_provenance`
+Value: `per-source binomial and count, shown where the sources disagree`
+Goals: G-004, G-005
+
+Where the occurrence sources do not use the name BirdView serves, the species page says so,
+naming **each source's binomial and how many records it holds under it**.
+
+Three kinds of disagreement, and they are not interchangeable:
+
+- **An alias.** A source files the same concept under another binomial — eBird's *Dryobates
+  villosus* for AviList's *Leuconotopicus villosus*. The records are this species'. The page
+  names the alias so a reader can find the bird in the source.
+- **A name AviList does not carry.** eBird's *Saxicola stejnegeri* has no AviList concept; its
+  records are *Saxicola maurus*'s under the taxonomy BirdView uses.
+- **A shared name.** A source uses one binomial for what AviList treats as **two** species —
+  eBird's *Setophaga petechia* covers both Northern and Mangrove Yellow Warbler, because eBird
+  has not adopted the split. **The records cannot be divided**, and BirdView does not divide
+  them. Both species say so, and both name the other.
+
+**The third case is the one this requirement exists for.** Attributing those records to either
+daughter would assert a division nobody has measured — eBird holds 6,245,227 of them in the US
+and Canada and distinguishes none. Silently leaving them on whichever daughter inherited the
+binomial is worse still: that is how Mangrove Yellow Warbler, a Caribbean mangrove resident,
+came to be the 51st most-recorded bird in a North American dataset, credited with 532,470
+records in Ontario.
+
+Rationale: [G-005](goals.md#g-005). A reader who can see that two sources disagree can discount
+the figure appropriately; a reader shown a reconciled number cannot. The disagreement is also
+not a transient to be waited out — eBird filed 827,098 records under the shared name in 2024
+alone, so this grows by roughly that much a year.
+
 ### P-035 — The page explains itself
 Subject: `presentation.help`
 Goals: G-001, G-002, G-003
