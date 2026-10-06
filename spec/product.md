@@ -253,7 +253,7 @@ The user filters to any subset of **US states and Canadian provinces**, multi-se
 the family filter works — everything selected on arrival, an **All** control, and group toggles.
 
 **Membership is per region and relative.** A species belongs to a region when it reaches **1
-record per million** of that region's bird records, in either source. Relative rather than a
+record per million** of that region's bird observations, in either source. Relative rather than a
 fixed count for two measured reasons: eBird's volume doubled in five years, so any absolute bar
 admits more species over time for no ecological reason; and effort differs enormously between
 regions — California has 114 million records against Hawaii's 2.5 million — so one count cannot
@@ -709,23 +709,30 @@ among the smallest birds — because that is precision, not a second scale.
 
 ### P-074 — Each bird says how much of what people record it is
 Subject: `presentation.share`
-Value: `species records over all bird records, for the land regions in view`
+Value: `species records over all bird observations, for the land regions in view`
 Goals: G-001, G-002
 
 Every species says how much of what people record in view is that bird, as **one in N**.
 
-**A record is one species on one checklist**, which is eBird's own unit of observation and
-iNaturalist's. A list of thirty species is thirty records. The individual count a record
-carries is **deliberately not read**: twelve White-throated Sparrows is one record, and so is
-a flock of fifty thousand Snow Geese. That is precisely why the figure measures how often a
+**An observation is one species on one checklist** — both sources' own unit, and their own
+word for it: eBird's id is `OBS1912782147`, iNaturalist's `inaturalist.org/observations/…`. A list of thirty species is thirty observations. The
+individual count each carries is **deliberately not read**: twelve White-throated Sparrows is
+one observation, and so is a flock of fifty thousand Snow Geese. That is precisely why the figure measures how often a
 bird is *logged* rather than how many there are, and it is the sharpest statement of the
 "not abundance" caveat below — a species seen in twos on every list outranks one that appears
-rarely in vast flocks. [`docs/data.md`](../docs/data.md) says so to readers.
+rarely in vast flocks.
+
+**The unit also makes *1 in N* read smaller than the thing a birder recognises.** Divide the
+average checklist length by N and you get the fraction of outings the bird is on: American
+Robin at 1 in 32 in New York, where a checklist runs 12 to 19 species, is on roughly half to
+two-thirds of them. BirdView does not publish that figure — the checklist id is absent from
+GBIF's eBird export, so checklist length is reconstructable but not known per region — and
+[`docs/data.md`](../docs/data.md) gives readers the arithmetic instead.
 
 **The interface never uses the word “share”**, and neither does
 [`docs/`](../docs/data.md). It is the right technical term and it is this requirement's
 subject, so this document and [`decisions.md`](decisions.md) keep it — but a reader meeting
-`1 in 282,315 bird records in North Atlantic` does not need a noun for the concept, and the
+`1 in 282,315 bird observations in North Atlantic` does not need a noun for the concept, and the
 one word that was on screen, in a one-line cell with no room to define it, read as jargon. The
 pages say what the number *is* instead: *how much of what people record there is this bird, not
 how many of them are out there.*
@@ -736,7 +743,7 @@ address published anywhere is harm wherever it appears; a defined term inside th
 that defines it is not.
 
 **The share ranges over every region, land and sea** ([CR-031](decisions.md#cr-031)). A
-sea's denominator is every bird record on **open water** inside its box: GADM covers land, so
+sea's denominator is every bird observation on **open water** inside its box: GADM covers land, so
 a record on a beach carries a country and a record on the water carries none, and the
 difference is the water. That is the same quantity a land region's total is, so the two may be
 compared and summed.
@@ -751,14 +758,14 @@ denominator were once two separate conditions that drifted apart, and deriving b
 *does this region have a denominator* makes that unrepresentable rather than merely fixed.
 
 **On the index the scope is the regions currently selected**, so the figure follows the
-filter: a Gyrfalcon is 1 in 3,631,056 bird records (all regions) and 1 in 82,946 in
+filter: a Gyrfalcon is 1 in 3,631,056 bird observations (all regions) and 1 in 82,946 in
 Alaska. That is the question a filtered page poses — *of what people record where I am
 looking, how much is this bird* — and it is why the index does not instead show where in North
 America the bird peaks. Narrowing to Arizona and being told about Yukon answers something
 nobody asked.
 
 **Absence is a number, not a dash.** A bird with no records in the regions on screen reads
-**`0 in 1,225,176,035 bird records across every land region`** — the same sentence as every
+**`0 in 1,225,176,035 bird observations across every land region`** — the same sentence as every
 other tile, with a zero in it. The em-dash this replaced could not be told apart from a missing
 figure, and it threw away the half of the answer that carries the weight: *how hard anyone
 looked before concluding the bird was not there.* Zero in a billion records is a finding; zero

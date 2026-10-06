@@ -248,7 +248,7 @@ records, in either eBird or iNaturalist**, both via GBIF under CC BY 4.0.
 
 **Relative rather than a fixed count**, for two measured reasons. eBird's volume doubled in five
 years, so any absolute bar admits more species over time for no ecological reason. And effort
-differs enormously between regions — California has 114 million bird records against Hawaii's
+differs enormously between regions — California has 114 million bird observations against Hawaii's
 2.5 million — so one count cannot mean the same thing in both.
 
 **Both sources, because one is not enough.** eBird's GBIF export **withholds
@@ -300,16 +300,17 @@ years. The 2023 flamingo has 931 records inside thirteen days; Akikiki, a Hawaii
 
 Each bird says how much of what people record in view is that bird, as **one in N**.
 
-### What a record is
+### What an observation is
 
-**One record is one species on one checklist** — what eBird calls an observation. A birder who
-submits a list of thirty species produces thirty records, each with its own id. iNaturalist's
-unit is the same: one observation of one species.
+**One observation is one species on one checklist.** That is both sources' own unit and their
+own word for it: eBird's id is `OBS1912782147`, iNaturalist's is
+`inaturalist.org/observations/333181443`. A birder who submits a list of thirty species makes
+thirty observations, each with its own id.
 
-**The number of birds is carried and deliberately ignored.** A record notes how many
+**The number of birds is carried and deliberately ignored.** An observation notes how many
 individuals were seen, and BirdView does not read it. Twelve White-throated Sparrows on one
-list is one record, exactly like a single Northern Cardinal. A flock of fifty thousand Snow
-Geese is one record.
+list is one observation, exactly like a single Northern Cardinal. A flock of fifty thousand
+Snow Geese is one observation.
 
 That is what makes *1 in N* a measure of **how often a bird is logged**, not of how many birds
 there are, and the two come apart in a way worth knowing: a species seen in ones and twos but
@@ -321,15 +322,38 @@ many birds are out there. A region where observers list thirty species a visit c
 more records per visit than one where they list five, and dividing by that region's own total
 is what cancels it out.
 
+### Turning *1 in N* into *how often you would see it*
+
+**Divide the average checklist length by N.** If the typical outing logs *S* species, a bird
+that is 1 in *N* of all observations appears on roughly *S/N* of outings. The arithmetic is
+exact — a bird on a fraction *f* of checklists holds *f/S* of the observations — so *f = S/N*.
+
+**American Robin is 1 in 32 observations in New York.** Measured on two complete New York
+county-days, the typical checklist runs **12 to 19 species** (means 15.6 and 19.1,
+reconstructed from observer, date and place, because GBIF's eBird export carries no checklist
+id). So the robin is on something like **half to two-thirds of New York outings** — which is
+what a birder would recognise, and not what *1 in 32* sounds like.
+
+It cuts the other way where fewer species are about: the same *1 in N* means a larger fraction
+of outings when checklists are short. The ordering is unaffected, being the same division by the
+same denominator everywhere, but the *feel* of the number is not.
+
+BirdView does not publish the per-outing figure, because it does not know the checklist length
+for every region. GBIF's eBird export omits the checklist id, so each one must be
+reconstructed from observer, date and rounded coordinates over a complete slice — and a
+reconstruction from a partial slice reports almost every checklist as a single species, which
+is how this measurement goes wrong. Two county-days is a measurement; sixty-nine regions is a
+crawl.
+
 **On the index the scope is whatever regions you have selected**, so the figure follows
-your filter. A Gyrfalcon is 1 in 3,631,056 bird records (all regions) and 1 in
+your filter. A Gyrfalcon is 1 in 3,631,056 bird observations (all regions) and 1 in
 82,946 in Alaska — forty-four times commoner where it actually lives. Select a region the bird
 is absent from and the figure falls, because those records join the denominator and none join
 the numerator; a bird is a smaller part of a wider world.
 
 **On the detail page** the scope is every region at once, and the page also names the one
 where the species peaks: *Commonest region: Yukon — 1 in 250 records there.* A bird with
-no records in the regions on screen reads *0 in 1,225,176,035 bird records across every
+no records in the regions on screen reads *0 in 1,225,176,035 bird observations across every
 region* — a stated zero against a stated denominator, because zero in a billion records and
 zero in nine hundred are different findings.
 
@@ -341,7 +365,7 @@ country and a record on the water carries none, and the difference is the water.
 Black-capped Petrel's North Carolina records sit inside the Atlantic box and stay with North
 Carolina.
 
-That makes a sea's denominator the same kind of number as a state's — every bird record there
+That makes a sea's denominator the same kind of number as a state's — every bird observation there
 — so the two can be compared, and 45 species turn out to be commonest at sea. The two kinds
 never overlap, one being *inside a GADM region* and the other *inside none*, so selecting both
 double-counts nothing.
@@ -381,13 +405,13 @@ querying every plausible alternative name. See [CR-034](/spec/decisions#cr-034).
 **A count says where the birdwatchers are; a proportion says where the bird is.** The two disagree
 for more than half the dataset. California
 holds 35 times the Sharp-shinned Hawk records of Yukon — and 118 times the birdwatching. One
-bird record in 250 from Yukon is a Sharp-shinned Hawk; in California it is one in 835. The hawk
+bird observation in 250 from Yukon is a Sharp-shinned Hawk; in California it is one in 835. The hawk
 is a bigger part of what you see in Yukon, even though far more have been logged in California.
 Dividing by the region's own total cancels out how hard anyone was looking.
 
 Counting records instead would just point at wherever the birders are. The Millerbird settles
 it: 28 of its records are filed under Hawaii and 22 under Nihoa, so by count its home reads
-"Hawaii" — a state with 2.6 million bird records, where the Millerbird is 1 in 93,090. Nihoa has
+"Hawaii" — a state with 2.6 million bird observations, where the Millerbird is 1 in 93,090. Nihoa has
 49,102 records and the bird is 1 in 2,231 of them. Nihoa is the island it actually lives on.
 
 **Why "1 in N" and not a percentage.** Across the dataset the figure runs from 1 in 2 to 1 in
