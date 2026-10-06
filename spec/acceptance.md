@@ -2134,25 +2134,35 @@ committed correspondence table
 
 **Assertions:**
 
-1. Every drawn species has a row; the table is refused if it holds fewer than 1,000.
-2. A species whose eBird:iNaturalist ratio falls outside **1×–1000×**, or which one source
-   reports and the other does not, **must be declared** — in `AviListRenames`, `LumpedInto`,
-   `SharedNames`, `WithheldByEBird` or `DomesticForms`.
-3. The failure message names which of those five the species probably belongs in.
+1. Every drawn species has a row; the table is refused below 1,000 of them.
+2. A species the two sources disagree about **must be declared** — in `AviListRenames`,
+   `LumpedInto`, `SharedNames`, `WithheldByEBird` or `DomesticForms`.
+3. The failure message names which of those five it probably belongs in.
 
-**Why a band and not an exact list.** Listing the known outliers would pass forever and catch
-nothing new; the band is what notices the *next* AviList split. The measured distribution is
-far tighter than the band — median 48×, p5 10.7×, p95 148× — because iNaturalist is uniformly
-shallower than eBird rather than differently distributed, so 1×–1000× is looking for two
-orders of magnitude, not for ordinary variation.
+**The rule is asymmetric, because the sources are not peers.** iNaturalist is uniformly about
+48× shallower than eBird, so what counts as surprising differs by direction:
 
-**The expected set is derived, not re-listed.** It is built from the five mechanism tables, so
-adding a rename does not mean remembering to add it here too — the commonest way a check of
-this shape rots.
+| direction | rule | why |
+| --- | --- | --- |
+| iNaturalist out-records eBird | iNat ≥ 20 **and** 3× eBird | always wrong whichever name is at fault; a 48× expectation inverted threefold is a 144× departure |
+| eBird dwarfs iNaturalist | eBird ≥ 10,000 **and** ratio > 1000× | ordinary at every scale, so it signals only with volume behind it |
 
-**Known blind spot, stated rather than hidden.** The sweep filters on country US and CA, so
-the outlying islands (code `UM`) are invisible: Little Tern reads zero in both databases while
-the region table holds 106 records of it on Midway. A species both sources report as zero is
-therefore skipped rather than flagged.
+**The floors are what make this a check rather than a noise generator.** The first version used
+a plain 1×–1000× band and fired on **45 species, 43 of them vagrants** with a handful of
+records where the shallower database happened to hold none — Plum-headed Parakeet at eBird 5,
+iNaturalist 0, which at a 48× ratio is exactly what you would predict. Lesser Frigatebird sat
+at 26 against 27 and "out-recorded" eBird by a single sighting. With the floors it flags **21
+species and every one is declared.**
 
-**Status: pending — the correspondence table is being generated.**
+**Status: verified 2026-10-05 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| drop Great Gray Owl from `WithheldByEBird` | `the two sources disagree about this name and nothing says why` |
+| drop *Dryobates villosus* from `AviListRenames` | the same, on *Leuconotopicus villosus* |
+| drop the Trogon entry from `SharedNames` | both halves at once — `Trogon ambiguus` 0/1,180 and `Trogon elegans` 34,913/0 |
+
+**The third mutation is the one worth recording.** Its first attempt silently failed to apply
+and the test "passed" — the same no-op trap that caught me earlier in this session, two hours
+after I wrote the rule into `AGENTS.md` telling myself to assert that the mutation landed.
+Re-run with the anchor asserted, it fails as above.

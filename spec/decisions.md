@@ -2753,6 +2753,42 @@ The shared names of [CR-034](#cr-034). *Setophaga petechia* and *Trogon elegans*
 species exactly — they are not orphans and never were, which is why this audit does not list
 them and why that one needed a different instrument entirely.
 
+### Frequency sorts the other way from size, and that is a reciprocal, not a mistake
+
+*Raised by the owner 2026-10-05, evaluated, nothing changed.* Length, wingspan and mass put the
+smallest bird first; Frequency puts the commonest first. The quality being ordered therefore
+runs **least → most** under three metrics and **most → least** under the fourth, which reads as
+an inconsistency.
+
+It is one, and it cannot be fixed by reversing the sort. **"1 in N" is a reciprocal**: N rises
+as the bird gets scarcer, so ascending the printed number descends abundance. Every ordering
+here obeys [P-021](product.md#p-021) — ascending the selected metric — and the metric itself is
+inverted relative to the other three.
+
+Reversing it would move the inconsistency rather than remove it:
+
+| | printed numbers | the bird quality |
+| --- | --- | --- |
+| **as built** — commonest first | **ascend**, 1 in 43 → 1 in 1,252,475,518 | descends |
+| reversed — rarest first | descend | ascends, matching size |
+
+The deciding argument is that **the order as built is visible and the reversed one is not.** A
+reader scrolling sees the printed figure climb monotonically; nothing has to be inferred or
+explained. Reversed, the numbers would count *down* under a control that ascends everywhere
+else, and the justification — *we ascend abundance, which descends the printed number* — is
+nowhere on the page.
+
+The root of the tension is a decision taken for other reasons and still right:
+[P-074](product.md#p-074) shows a scarcity-shaped number and refuses to call it rarity. If the
+control were named for the shape of the figure the tension would vanish, and that name is
+exactly the one the requirement forbids. The felt inversion is the price of not shipping a
+rarity tag, and it is worth paying.
+
+**What is done instead is to say the direction rather than imply it:** the Sort by control
+carries *commonest first*, the help repeats it, and the first tier on the page reads
+`1 in 10 – 1 in 99`. Naming the tiers — "the birds you see most" — was considered and rejected
+on the same grounds as every other tier name ([CR-032](#cr-032)).
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.

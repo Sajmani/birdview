@@ -24,12 +24,30 @@ import (
 //
 // Verifies: T-028. Criterion: AC-105.
 func TestSourceNamesAgree(t *testing.T) {
-	// 1x to 1000x. The measured distribution is far tighter -- median 48x,
-	// 95th percentile 148x -- so the band is deliberately loose: it is
-	// looking for the two orders of magnitude that mean a taxonomy
-	// disagreement, not for ordinary variation between a deep database and
-	// a shallow one.
-	const lo, hi = 1.0, 1000.0
+	// Two asymmetric rules, because the two databases are not peers:
+	// iNaturalist is uniformly about 48x shallower than eBird, so what
+	// counts as surprising differs by direction.
+	//
+	//   - iNaturalist OUT-recording eBird is always wrong, whichever name
+	//     is at fault. A 3x margin is required because a 48x expectation
+	//     inverted threefold is a 144x departure, where 27 against 26 is
+	//     two vagrant sightings and means nothing. Lesser Frigatebird sits
+	//     exactly there and is correctly ignored.
+	//
+	//   - eBird DWARFING iNaturalist is ordinary at every scale, so it only
+	//     signals with volume behind it: 10,000 records, where iNaturalist
+	//     should hold about 200.
+	//
+	// The floors are what make this a check rather than a noise generator.
+	// Without them it fires on 45 species, 43 of which are vagrants with a
+	// handful of records apiece where the shallower database happens to
+	// hold none -- and a check that cries wolf gets deleted.
+	const (
+		minINat   = 20
+		iNatMulti = 3
+		minEBird  = 10000
+		maxRatio  = 1000.0
+	)
 
 	f, err := os.Open("../../data/source-names.tsv")
 	if err != nil {
@@ -76,15 +94,12 @@ func TestSourceNamesAgree(t *testing.T) {
 		in, _ := strconv.ParseInt(p[3], 10, 64)
 		checked++
 
-		// A species absent from one source entirely, or wildly lopsided, is
-		// a disagreement about what the name denotes.
 		var odd bool
 		switch {
-		case eb == 0 || in == 0:
-			odd = eb+in > 0 // both zero is a bird neither source has, which is fine
-		default:
-			r := float64(eb) / float64(in)
-			odd = r < lo || r > hi
+		case in >= minINat && eb*iNatMulti < in:
+			odd = true
+		case eb >= minEBird && (in == 0 || float64(eb)/float64(in) > maxRatio):
+			odd = true
 		}
 		if !odd {
 			continue
@@ -109,5 +124,5 @@ func TestSourceNamesAgree(t *testing.T) {
 			"withholds it (WithheldByEBird), or iNaturalist files a domestic form "+
 			"separately (DomesticForms). T-028.", s)
 	}
-	t.Logf("%d species, %d outside the %.0fx-%.0fx band, all declared", checked, flagged, lo, hi)
+	t.Logf("%d species, %d flagged as a source disagreement, all declared", checked, flagged)
 }
