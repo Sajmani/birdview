@@ -2127,9 +2127,11 @@ build · **Method:** unit test over the shared normalization, plus a bounded rep
 4. `birdview-regions` lists every name matching no drawn species with its record count, and
    **refuses to write** above `maxOrphanFraction`.
 
-**Why the bar is 0.1% and not the measured 0.0431%.** A bar set at the measured value fails
-the next time iNaturalist gains a subspecies, and a check that cries wolf gets deleted. 0.1%
-is 2.3× the residue — enough room for it to grow, far below the 0.81% this exists to catch.
+**Why the bar is 0.1% and not the measured residue.** A bar set at the measured value fails
+the next time iNaturalist gains a subspecies, and a check that cries wolf gets deleted. The
+residue was 0.0431% when this was written and is **0.0113%** since the rank fold of
+[AC-106](#ac-106), so 0.1% is now 8.8× it — room to grow, far below the 0.81% this exists to
+catch.
 
 **Status: verified 2026-10-05 — passing, and watched failing** under both of:
 
@@ -2229,6 +2231,21 @@ under a name a reader recognizes as the deliberate loss it is.
 anchor had been written against comment text that wrapped differently. That is the third time
 this session a mutation silently matched nothing, and the first time the rule in `AGENTS.md`
 caught it before it cost anything.
+
+**What the fold actually did**, from the full run of 2026-10-06. The unmatched residue fell
+from **0.0431% under 1,754 names to 0.0113% under 727**, and every one of the twenty largest
+survivors is a hybrid, which is what should be left. **387,515 records moved into 430
+species**, and **114 species-region presences were added with none removed** — the only shape
+the change can have, since a trinomial either joins a drawn species or stays exactly where it
+was. Region totals came back byte-identical, which is the independent confirmation that this
+reattributes records rather than altering what they are divided by.
+
+**The beneficiaries divide in two, and both were already the declared rule.** Genuine
+subspecies identifications rejoining their species — Yellow-rumped Warbler +30,274 from
+`coronata` and `auduboni`, Mallard +43,031, Red-tailed Hawk +14,973 — and domestic forms
+rejoining their wild species, feral Rock Pigeon +109,401 and Muscovy Duck +37,470.
+`birdview-status` had folded both since it was written; this is `birdview-regions` catching
+up, not a new decision about either.
 
 ### AC-107 — The figure says what it counts, and it is not individual birds
 **Verifies:** [P-074](product.md#p-074) · **Level:** code · **Method:** unit test over the

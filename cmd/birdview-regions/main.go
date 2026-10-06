@@ -71,28 +71,26 @@ const minPPM = 1.0
 // maxOrphanFraction is how much of the occurrence record may belong to
 // names matching no drawn species before the run refuses to write a table.
 //
-// Measured 2026-10-05, BEFORE the rank fold below: **0.0431%**, under 1,754
-// names, every one inspected an iNaturalist hybrid (`larus smithsonianus ×
-// hyperboreus`), a subspecies trinomial (`leuconotopicus villosus
-// terraenovae`) or a domestic form (`melopsittacus undulatus domesticus`).
+// Measured 2026-10-06: **0.0113%**, under 727 names, down from 0.0431%
+// under 1,754 once taxonomy.Occurrence began reducing rank before it
+// consults either naming table. Every one of the twenty largest is now a
+// hybrid — `larus smithsonianus × hyperboreus`, `baeolophus bicolor ×
+// atricristatus` — which is what should be left: a hybrid must never match
+// a species, and what remains besides is subspecies of birds BirdView does
+// not draw, which have no species here to fold into.
 //
-// The trinomials fold as of 2026-10-06, which closes the last of the three
-// normalization asymmetries CR-035 found: taxonomy.Occurrence reduces rank
-// before it consults either naming table, so this pass and birdview-status
-// apply one rule rather than two. What stays orphaned is hybrids, which
-// must never match a species, and subspecies of birds BirdView does not
-// draw, which have no species here to fold into.
+// The fold moved **387,515 records into 430 species** and added 114
+// species-region presences while removing none, which is the shape the
+// change has to have: a trinomial either joins a drawn species or stays
+// exactly where it was, so nothing can lose by it. Region totals came back
+// byte-identical, confirming this reattributes records rather than
+// changing what they are divided by.
 //
-// The figure above therefore overstates the residue, and the fold can only
-// shrink it — a trinomial either joins a drawn species or stays exactly
-// where it was. It is left as the last number actually measured rather than
-// replaced by an estimate; the run prints the current one every time.
-//
-// The bar is 0.1%, which is **2.3x the measured residue**, not a hair above
-// it. A bar set at the measured value fails the next time iNaturalist gains
-// a subspecies, and a check that cries wolf gets deleted. What it exists to
-// catch is the other order of magnitude: before CR-035 this was 0.81%, and
-// 9,954,362 of those records belonged to ten species BirdView draws.
+// The bar is 0.1%, now **8.8x the measured residue**. A bar set at the
+// measured value fails the next time iNaturalist gains a subspecies, and a
+// check that cries wolf gets deleted. What it exists to catch is the other
+// order of magnitude: before CR-035 this was 0.81%, and 9,954,362 of those
+// records belonged to ten species BirdView draws.
 //
 // Deliberately a fraction of records rather than a count of names. A new
 // vagrant adds a name and six records; a genus move adds one name and seven

@@ -372,6 +372,15 @@ way is the hybrid test, which runs *before* the truncation: cut to two tokens, `
 smithsonianus × hyperboreus` is an ordinary species name that joins cleanly and credits a real
 bird with records of something that is not it.
 
+Measured 2026-10-06, the region pass's unmatched residue fell from **0.0431% under 1,754
+names to 0.0113% under 727**, moving **387,515 records into 430 species**. Region totals came
+back byte-identical, so this reattributes records rather than changing what they are divided
+by, and **114 species-region presences were added and none removed** — the only shape the
+change can have, since a trinomial either joins a drawn species or stays where it was. The
+largest single beneficiaries are the two declared domestic forms, feral Rock Pigeon
+(+109,401) and Muscovy Duck (+37,470), and one genuine subspecies recovery, Yellow-rumped
+Warbler (+30,274) from `coronata` and `auduboni`.
+
 ### T-028 — How each source names a species is measured, not assumed
 Subject: `build.name_correspondence`
 Value: `committed per-source record counts; a declared ratio band`
