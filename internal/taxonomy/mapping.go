@@ -14,6 +14,8 @@
 // Verifies: P-006, P-007.
 package taxonomy
 
+import "strings"
+
 // Renames map a current name to the pre-revision names AVONET files the same
 // taxon under, in any of its three taxonomies. The specimens are the right
 // birds; only the label moved, so values resolved this way stay `measured`.
@@ -310,4 +312,27 @@ var WithheldByEBird = map[string]string{
 	"Pseudonestor xanthophrys":   "Maui Parrotbill",
 	"Palmeria dolei":             "Akohekohe",
 	"Pterodroma deserta":         "Desertas Petrel",
+}
+
+// Occurrence maps a name the occurrence data publishes onto the AviList name
+// BirdView serves, lowercased for joining.
+//
+// One function so that every reader of the occurrence data normalizes the
+// same way. birdview-status did this and birdview-regions did not, which is
+// how the two committed tables came to use different taxonomies: eBird's
+// 7,310,342 Dryobates villosus records matched no drawn species and were
+// discarded, leaving the Hairy Woodpecker with iNaturalist's 0.7% of its own
+// record (CR-035).
+//
+// Verifies: P-011, P-074.
+func Occurrence(name string) string {
+	lower := strings.ToLower(strings.TrimSpace(name))
+	t := strings.ToUpper(lower[:1]) + lower[1:]
+	if alt, ok := AviListRenames[t]; ok {
+		return strings.ToLower(alt)
+	}
+	if alt, ok := LumpedInto[t]; ok {
+		return strings.ToLower(alt)
+	}
+	return lower
 }

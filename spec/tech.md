@@ -328,3 +328,32 @@ compressor that labels from `Write` emits a correctly compressed body with no
 
 **A status that may carry no body — 204, 304 — is not compressed at all**, an empty gzip
 stream's twenty-byte header being bytes the protocol says must not be there.
+
+### T-027 — Every join reports what it dropped
+Subject: `build.join_loss`
+Value: `named and counted on every run; a declared bar above which the run refuses`
+Goals: G-004, G-006
+
+Every join between two datasets reports the records it could not match: how many, under what
+names, and whether the loss was intended. Where a loss can be bounded, the bar is declared and
+the run **refuses to write** rather than exceed it.
+
+Rationale: [G-006](goals.md#g-006) at the point where data actually disappears. A join is the
+one place in this pipeline where a record can cease to exist without anyone deciding it should,
+and the failure is invisible on both sides — the input still has the record, the output simply
+never mentions it.
+
+**The ingest's joins already did this and the region pass did not**, which is exactly where the
+loss was. `birdview-ingest` prints what the AviList join dropped and asserts it against a
+declared list, prints what AVONET could not match and fails above a threshold, and requires
+iNaturalist coverage to be total. `birdview-regions` matched raw facet names against AviList
+names and discarded the rest in silence: **37 names, 10,015,688 records, of which 9,954,362
+belonged to ten species BirdView draws** ([CR-035](decisions.md#cr-035)).
+
+**A discarded record is worse than absent, because it still counts.** Every one of those names
+reached the denominator of [P-074](product.md#p-074)'s share and no species' numerator — so
+Hairy Woodpecker's 7,310,342 eBird records were counted as *some other bird* on every tile
+including its own, and the bird showed 0.7% of its own record.
+
+**The bar is a fraction of records, not a count of names.** A new vagrant adds a name and six
+records; a genus move adds one name and seven million.

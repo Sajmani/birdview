@@ -2693,13 +2693,74 @@ sit in a tier its own records do not earn. That is the honest consequence of eBi
 separating the two: the records are real, the tier is real, and the attribution is the part
 nobody knows. The label is what keeps the page from asserting the part nobody knows.
 
+## CR-035 — The region join normalizes names, and says what it drops
+
+**Subject:** `build.join_loss`, `dataset.region.counts`
+**Kind:** Direct — `birdview-status` and `birdview-regions` read the same facets under
+different taxonomies, so the two committed tables disagree about what a name means
+**Date:** 2026-10-05 · **Decided by:** Sameer
+**Found by:** the owner, asking why the Hairy Woodpecker's count looked wrong, then asking for
+an audit of everything lost through joins
+
+### The audit
+
+Every verbatim name eBird publishes for the US and Canada, against the species BirdView draws.
+**1,402 names, 1,238,404,492 records:**
+
+| | names | records | |
+| --- | --- | --- | --- |
+| match a drawn species | 1,062 | 1,228,366,591 | 99.19% |
+| match a species BirdView rejects | 303 | 22,213 | correctly excluded |
+| **match nothing** | **37** | **10,015,688** | **0.81%, silently dropped** |
+
+Of the 10,015,688: **9,954,362 belong to ten species BirdView draws**, every one of them
+already covered by `AviListRenames` or `LumpedInto` — tables `birdview-regions` never called.
+The remaining 61,326, under 27 names, are birds BirdView deliberately does not draw.
+
+| name eBird uses | records | |
+| --- | --- | --- |
+| *Dryobates villosus* | **7,310,342** | Hairy Woodpecker |
+| *Icterus bullockii* | 868,123 | Bullock's Oriole |
+| *Coccothraustes vespertinus* | 838,952 | Evening Grosbeak |
+| *Numenius phaeopus* | 556,569 | Whimbrel |
+| *Pica nuttalli* | 125,766 | Yellow-billed Magpie |
+| *Dryobates albolarvatus / arizonae / borealis* | 238,503 | three woodpeckers |
+| *Gygis alba*, *Saxicola stejnegeri* | 16,107 | two lumps |
+
+**0.81% of records overall; 99.3% of the records of the species affected.** The aggregate is
+trivial and the per-species damage is near-total, which is why no summary statistic caught it.
+
+### Why it was invisible
+
+A discarded record still counts. `totals[gid]` sums **every** facet name, while a species'
+count takes only names matching its own — so those 7.3 million Hairy Woodpecker records sat in
+the denominator of every share on the site and in no numerator at all, including the Hairy
+Woodpecker's. The bird showed 0.7% of its own record and nothing anywhere reported a loss.
+
+### Two changes
+
+**One normalization, shared.** `taxonomy.Occurrence` applies `AviListRenames` and `LumpedInto`
+and is now what both readers of the occurrence data call. The bug was not a missing table
+entry — every entry already existed — but a second reader that did not consult them.
+
+**The join reports.** `birdview-regions` lists every name that matched no drawn species with
+its record count, and **refuses to write** above `maxOrphanFraction` = 0.05%, a bar set just
+above the 61,326 records of legitimate residue. Before this change the figure was 0.81%.
+
+### What this does not touch
+
+The shared names of [CR-034](#cr-034). *Setophaga petechia* and *Trogon elegans* match a drawn
+species exactly — they are not orphans and never were, which is why this audit does not list
+them and why that one needed a different instrument entirely.
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
 
 | Item | Owner | Gate |
 | --- | --- | --- |
-| **`birdview-regions` applies neither `AviListRenames` nor `LumpedInto`**, so it matches raw GBIF facet names against AviList names and drops whatever does not match. Measured 2026-10-05: Hairy Woodpecker holds 52,392 records where eBird has **7,310,342**, Bullock's Oriole and Yellow-billed Magpie are in **no region at all**, and Whimbrel and Evening Grosbeak are short by 45x and 68x. `birdview-status` normalizes and `birdview-regions` does not, so the two committed tables use different taxonomies. Fix is ~10 lines plus a full run (~10-20 min against live GBIF); it does **not** touch the shared-name cases, which [CR-034](#cr-034) handles separately | Sameer | next — it is live and wrong for 10 species |
+| **`birdview-regions` does not fold iNaturalist trinomials**, where `birdview-status` does via `toBinomials`. The last of the three normalization asymmetries [CR-035](#cr-035) found: 0.0431% of records, 1,754 names, all hybrids (`larus smithsonianus × hyperboreus`, correctly dropped) or subspecies (`setophaga coronata coronata × auduboni`, which should fold into their species). Moving `toBinomials` into `taxonomy.Occurrence` would make the normalization complete and shrink the orphan residue; it costs a full run | Sameer | opportunistic |
+| ~~**`birdview-regions` applies neither `AviListRenames` nor `LumpedInto`**~~ — **done 2026-10-05**, [CR-035](#cr-035). Both readers of the occurrence data now call `taxonomy.Occurrence`, and the join reports every name it could not match, refusing to write above 0.05% of records. The audit that justified it: 1,402 eBird names, 37 matching nothing, 9,954,362 recoverable records across ten species | Sameer | closed 2026-10-05 |
 | **Nothing reads `data/gbif-taxa.tsv`.** It is generated by `cmd/birdview-gbifmap`, committed, and consumed by no code. It carries a GBIF-to-AviList name bridge with an `ambiguous` tier that would be the natural home for [CR-034](#cr-034)'s shared names — except that it files `Setophaga petechia -> Setophaga petechia` as `exact`, correctly, which is why the bridge could not find them. Either wire it in or retire it | — | opportunistic |
 | **The name sweep is a throwaway and should not be.** Finding [CR-034](#cr-034)'s cases took 2,166 queries comparing what each database reports under each AviList binomial — the only method that catches a name whose strings match and whose meanings differ. It ran once from a scratch binary. As a committed command it would catch the next split the week it lands, rather than when a reader notices a mangrove warbler in Ontario. Note its blind spot: a `country=US,CA` filter hides the outlying islands, which is why *Sternula albifrons* looked like a finding and was not | Sameer | before the next AviList release |
 | ~~**Restore the share at sea on an off-land denominator**~~ — **done 2026-10-05**, [CR-031](#cr-031). Sea totals are now every bird on open water in the box: North Atlantic 12,986,514 against the 429,535 shipped. `Commonest` moved onto the same table the index divides, so the two pages cannot disagree again, and **45 species peak at sea**. Remaining: the figure is *on water* rather than *at sea*, overstating by ~3% through estuaries, and a WKT polygon would fix that if it ever matters | Sameer | closed 2026-10-05 |

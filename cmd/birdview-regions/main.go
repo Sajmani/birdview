@@ -36,6 +36,7 @@ import (
 
 	"birdview/internal/gbif"
 	"birdview/internal/region"
+	"birdview/internal/taxonomy"
 )
 
 // iNatDatasetKey is the iNaturalist research-grade observations dataset.
@@ -66,6 +67,29 @@ const minPelagicShare = 0.5
 // 1 ppm gives roughly 600 species for California, 390 for Pennsylvania and
 // 267 for Hawaii, which are the right orders of magnitude for a state list.
 const minPPM = 1.0
+
+// maxOrphanFraction is how much of the occurrence record may belong to
+// names matching no drawn species before the run refuses to write a table.
+//
+// Measured after CR-035: **0.0431%**, under 1,754 names, and every one
+// inspected is an iNaturalist hybrid (`larus smithsonianus × hyperboreus`),
+// a subspecies trinomial (`setophaga coronata coronata × auduboni`) or a
+// domestic form. Hybrids must never match a species. Trinomials should fold
+// into theirs and do not yet: birdview-status reduces them with
+// toBinomials and this pass does not, which is the last of the three
+// normalization asymmetries CR-035 found. Folding them would cut this
+// figure further.
+//
+// The bar is 0.1%, which is **2.3x the current residue**, not a hair above
+// it. A bar set at the measured value fails the next time iNaturalist gains
+// a subspecies, and a check that cries wolf gets deleted. What it exists to
+// catch is the other order of magnitude: before CR-035 this was 0.81%, and
+// 9,954,362 of those records belonged to ten species BirdView draws.
+//
+// Deliberately a fraction of records rather than a count of names. A new
+// vagrant adds a name and six records; a genus move adds one name and seven
+// million.
+const maxOrphanFraction = 0.001
 
 func main() {
 	var (
@@ -141,9 +165,14 @@ func main() {
 					continue
 				}
 				for _, rec := range recs {
-					r.counts[rec.Name] += rec.Records
+					// Normalized to the AviList name BEFORE matching, by the
+					// same function birdview-status uses. Matching the raw
+					// facet name is how eBird's 7,310,342 Dryobates villosus
+					// records came to belong to no species at all (CR-035).
+					n := taxonomy.Occurrence(rec.Name)
+					r.counts[n] += rec.Records
 					if float64(rec.Records)/float64(total)*1e6 >= minPPM {
-						r.present[rec.Name] = true
+						r.present[n] = true
 					}
 				}
 			}
@@ -156,6 +185,13 @@ func main() {
 	// regionsOf maps a species' lowercased scientific name to the regions it
 	// was reported in.
 	regionsOf := map[string][]region.Reported{}
+	// orphan counts records under names that match no drawn species, so the
+	// join can say what it discarded instead of discarding it quietly.
+	orphan := map[string]int64{}
+	drawnName := make(map[string]bool, len(ds))
+	for _, sp := range ds {
+		drawnName[strings.ToLower(sp)] = true
+	}
 	names := map[string]string{}
 	// Every bird record a region holds, over every species including the
 	// ones BirdView does not draw. This is the denominator of the share a
@@ -178,6 +214,15 @@ func main() {
 			if lc := strings.ToLower(sp); r.present[lc] {
 				regionsOf[sp] = append(regionsOf[sp], region.Reported{
 					ID: r.gid, Records: r.counts[lc]})
+			}
+		}
+		// Every name that reached the denominator and no species. These are
+		// records counted as "some other bird" on every tile, which is
+		// correct for a bird BirdView does not draw and a silent loss for
+		// one it does (G-006, T-027).
+		for n, c := range r.counts {
+			if !drawnName[n] {
+				orphan[n] += c
 			}
 		}
 	}
@@ -220,19 +265,34 @@ func main() {
 
 	// Which ocean. Tested in the order internal/region declares, Arctic first,
 	// because it is a latitude band that overlaps both oceans in longitude.
+	// A sea counts only what is on OPEN WATER inside its box (CR-031). The
+	// boxes overlap the coast, so a plain box count attributes a bird
+	// watched from the shore to the sea; GADM covers land, so a record
+	// off land carries no country and the difference is the water.
+	//
+	// This logic lived only in the -marine-only path at first, and the full
+	// run quietly reverted it -- caught by TestRegionCountsLineUp, which
+	// asserts a sea's denominator is not the sum of its own numerators.
+	// Both paths compute it the same way now.
+	for _, id := range region.MarineIDs() {
+		minLat, maxLat, minLon, maxLon, _ := region.MarineBox(id)
+		off, _, err := c.CountOffLandInBox(ctx, gbif.EBirdDatasetKey, "",
+			countries, minLat, maxLat, minLon, maxLon)
+		if err != nil {
+			log.Fatalf("birdview-regions: %s total: %v", id, err)
+		}
+		totals[id] = off
+	}
 	for _, sp := range pelagic {
 		for _, id := range region.MarineIDs() {
 			minLat, maxLat, minLon, maxLon, _ := region.MarineBox(id)
-			n, err := c.CountInBox(ctx, gbif.EBirdDatasetKey, strings.ToLower(sp),
+			n, _, err := c.CountOffLandInBox(ctx, gbif.EBirdDatasetKey, strings.ToLower(sp),
 				countries, minLat, maxLat, minLon, maxLon)
 			if err != nil {
 				log.Fatalf("birdview-regions: %s in %s: %v", sp, id, err)
 			}
 			if n > 0 {
-				// A sea region's own total is the sum of what is found
-				// there, as a land region's is.
 				regionsOf[sp] = append(regionsOf[sp], region.Reported{ID: id, Records: n})
-				totals[id] += n
 			}
 		}
 	}
@@ -248,6 +308,46 @@ func main() {
 		}
 	}
 	log.Printf("birdview-regions: %d of %d species placed in at least one region", placed, len(ds))
+
+	// What the join discarded, named and counted (T-027).
+	//
+	// A record under a name matching no drawn species still reaches the
+	// denominator of every share, so it is never absent from the data --
+	// only from any numerator. That is right for a bird BirdView does not
+	// draw and a total loss for one it does, and the two are
+	// indistinguishable unless the join says which names it dropped.
+	//
+	// Measured before this existed: 37 names, 10,015,688 records, of which
+	// 9,954,362 belonged to ten species BirdView draws. Hairy Woodpecker
+	// alone was 7,310,342 of them, leaving the bird showing 0.7% of its own
+	// record (CR-035).
+	var orphans []string
+	var orphanTotal, everything int64
+	for _, n := range totals {
+		everything += n
+	}
+	for n, c := range orphan {
+		orphans = append(orphans, fmt.Sprintf("%-32s %12d", n, c))
+		orphanTotal += c
+	}
+	sort.Slice(orphans, func(i, j int) bool { return orphans[i][32:] > orphans[j][32:] })
+	log.Printf("birdview-regions: %d names matched no drawn species, %d records (%.2f%% of all)",
+		len(orphans), orphanTotal, 100*float64(orphanTotal)/float64(everything))
+	for i, o := range orphans {
+		if i == 20 {
+			log.Printf("birdview-regions:   ... and %d more", len(orphans)-20)
+			break
+		}
+		log.Printf("birdview-regions:   %s", o)
+	}
+	if f := float64(orphanTotal) / float64(everything); f > maxOrphanFraction {
+		log.Fatalf("birdview-regions: %.2f%% of records match no drawn species, above the "+
+			"%.2f%% bar. Every one of those is counted in the denominator of every share "+
+			"and in no species' numerator. A name the occurrence data uses and "+
+			"taxonomy.Occurrence does not know about belongs in AviListRenames or "+
+			"LumpedInto; refusing to write a table that loses them quietly (T-027).",
+			f*100, maxOrphanFraction*100)
+	}
 
 	if err := write(*outPath, ds, regionsOf, names, totals); err != nil {
 		log.Fatalf("birdview-regions: %v", err)

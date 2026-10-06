@@ -2095,3 +2095,35 @@ not exist. Nine species are in that state.
 | --- | --- |
 | the tile marker is suppressed, leaving only the detail page | `the index tile for yelwar1 (Setophaga aestiva) carries no shared-count marker` |
 | a withheld species is labelled as a shared name | `/species/gyrfal (Gyrfalcon) does not say eBird withholds it` **and** `is withheld, not shared, but is reported as shared` |
+
+### AC-104 — The region join normalizes names, and reports what it could not match
+**Verifies:** [T-027](tech.md#t-027), [CR-035](decisions.md#cr-035) · **Level:** code and
+build · **Method:** unit test over the shared normalization, plus a bounded report on every run
+
+**Assertions:**
+
+1. `taxonomy.Occurrence` maps **every** entry of `AviListRenames` and `LumpedInto` onto its
+   AviList name, from the lowercased form the occurrence data actually supplies.
+2. A name in neither table passes through unchanged.
+3. A **shared** name ([CR-034](decisions.md#cr-034)) is *not* folded — those are disclosed,
+   not reassigned, and folding one would assert a division nobody measured.
+4. `birdview-regions` lists every name matching no drawn species with its record count, and
+   **refuses to write** above `maxOrphanFraction`.
+
+**Why the bar is 0.1% and not the measured 0.0431%.** A bar set at the measured value fails
+the next time iNaturalist gains a subspecies, and a check that cries wolf gets deleted. 0.1%
+is 2.3× the residue — enough room for it to grow, far below the 0.81% this exists to catch.
+
+**Status: verified 2026-10-05 — passing, and watched failing** under both of:
+
+| Mutation | What went red |
+| --- | --- |
+| `Occurrence` skips `AviListRenames` — the shipped bug | `Occurrence("Coccothraustes vespertinus") = "coccothraustes vespertinus", want "hesperiphona vespertina"` |
+| `Occurrence` folds the shared name into *aestiva* | `folded a shared name to "setophaga aestiva"; CR-034 discloses those, it does not reassign them` |
+
+**And one it caught unprompted.** The full `birdview-regions` run reverted
+[CR-031](decisions.md#cr-031)'s off-land marine denominators, because that fix had only been
+written into the `-marine-only` path. `TestRegionCountsLineUp` failed on all five seas —
+*"a sea's denominator is every bird on that water, not a sum of the birds we happen to draw"* —
+before the table was committed. Both paths now compute it the same way. This is the clearest
+return the project has had on a check written to assert an invariant rather than a value.
