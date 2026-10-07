@@ -5645,3 +5645,93 @@ func TestOrderingRowAlignsOnTheBaseline(t *testing.T) {
 		t.Error("the caption precedes its buttons; it should hang below them")
 	}
 }
+
+// TestTheDetailPageSaysEverythingTheTileSays asserts P-034's superset rule
+// on the one field that broke it: the frequency figure.
+//
+// P-034 has always described the detail view as a larger version of the
+// tile "plus" three additions. That was read as permission to add to the
+// detail page rather than as a floor under it, so when P-074's figure went
+// onto every tile it never reached the detail page at all. A reader saw
+// `1 in 23,393 species observations (all regions)` on the Northern Yellow
+// Warbler's tile, opened the bird, and found `Top region -- 1 in 2,986
+// there`: a different number, in the same unit, for a scope they had not
+// asked about.
+//
+// It runs under two scopes because the figure follows the region filter.
+// Carrying the figure but not the selection would be the worse bug of the
+// two -- a number that silently changes what it ranges over between one
+// page and the next, with nothing on either page revealing the swap.
+//
+// Watched fail: see AC-108.
+//
+// Verifies: P-034, P-074. Criterion: AC-108.
+func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
+	s, err := newServer(realDataset(t))
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
+	}
+	norm := func(h string) string {
+		return strings.Join(strings.Fields(stripTags(h)), " ")
+	}
+	tile := regexp.MustCompile(`(?s)id="s-([a-z0-9]+)".*?<div class="share">(.*?)</div>`)
+
+	seen := map[string]string{}
+	// min is per scope: unfiltered is the whole dataset, Alaska a large
+	// subset of it. A single floor would have to be the smaller of the two
+	// and would stop guarding the bigger case.
+	for _, scope := range []struct {
+		query, want string
+		min         int
+	}{
+		{"", "(all regions)", 1000},
+		{"?region=AK", "in Alaska", 300},
+	} {
+		_, index := get(t, s, "/"+scope.query)
+		tiles := tile.FindAllStringSubmatch(index, -1)
+		// A parse that silently matched nothing would make every assertion
+		// below vacuous, which is the shape this project keeps paying for.
+		if len(tiles) < scope.min {
+			t.Fatalf("%q: parsed %d tiles off the index, want at least %d",
+				scope.query, len(tiles), scope.min)
+		}
+		checked := 0
+		for i, m := range tiles {
+			if i%40 != 0 {
+				continue
+			}
+			id, figure := m[1], norm(m[2])
+			if figure == "" {
+				t.Errorf("%s: tile carries no figure at all", id)
+				continue
+			}
+			_, page := get(t, s, "/species/"+id+scope.query)
+			body := norm(page)
+			if !strings.Contains(body, figure) {
+				t.Errorf("%s%s: the tile says %q and the detail page does not. "+
+					"P-034 makes the detail view a superset of the tile: a reader "+
+					"who opens a bird to learn more must not find less",
+					id, scope.query, figure)
+			}
+			// And it is reported under the scope the reader selected, not
+			// quietly swapped for a different one.
+			if !strings.Contains(figure, scope.want) {
+				t.Errorf("%s: tile figure %q does not name the scope %q",
+					id, figure, scope.want)
+			}
+			if i == 0 {
+				seen[scope.query] = figure
+			}
+			checked++
+		}
+		if checked < 10 {
+			t.Fatalf("%q: checked only %d species", scope.query, checked)
+		}
+	}
+	// The two scopes must actually differ, or both halves above could be
+	// satisfied by a page ignoring the filter entirely.
+	if seen[""] == seen["?region=AK"] {
+		t.Errorf("the same bird reads %q unfiltered and in Alaska; the figure "+
+			"is not following the region selection on either page", seen[""])
+	}
+}

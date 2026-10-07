@@ -1017,6 +1017,25 @@ whatever scale the index is using**, plus:
   otherwise be the one length visible in the drawing with no row explaining it;
 - the **provenance of every metric shown**, main metrics and segments alike (P-063).
 
+**The detail view is a superset of the tile, and that is binding.** Every piece of information
+a tile carries about a species appears on that species' detail page — not merely the header,
+diagram and main metrics named above, but anything a tile ever gains. A reader who notices
+something on a tile and opens the bird to learn more must never find less, and the page that
+exists to be the complete record of a bird cannot be missing something the summary of it
+shows.
+
+Stated as an invariant rather than a list because the list is what failed. The *plus* above
+was read as permission to add to the detail view and not as a floor under it, so when
+[P-074](#p-074)'s frequency figure was put on every tile it was never added to the detail
+page: a reader could see `1 in 23,393 species observations (all regions)` on the Northern
+Yellow Warbler's tile, open it, and find only `Top region — 1 in 2,986 there`. A different
+number, in the same unit, for a scope they had not asked about.
+
+**Where the tile's figure depends on the region selection, the detail page carries that
+selection and reports the same scope.** A figure that silently changes what it ranges over
+between one page and the next is worse than one that is absent, because nothing on either
+page reveals the substitution.
+
 Rationale: the tile is deliberately dense, because it exists to be compared against dozens of
 others at a glance. That leaves no room to say where each number came from. Keeping the detail
 view the *same* layout at a larger size means the user is reading a familiar thing with more of it

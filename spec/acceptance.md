@@ -2276,3 +2276,48 @@ robin's own tile — the vacuous-check shape this project has now paid for about
 | --- | --- |
 | the tile template reverts to `bird observations` | `the tile counts in "bird observations", want "species observations"` |
 | the tooltip reverts while the tile does not | `the tooltip reads "912,542 of the 1,252,475,518 bird observations from every region BirdView covers …", which does not count in species observations as the cell beside it does` |
+
+### AC-108 — The detail page says everything the tile says
+**Verifies:** [P-034](product.md#p-034), [P-074](product.md#p-074) · **Level:** code ·
+**Method:** property test comparing rendered tiles against rendered detail pages, under two
+region scopes
+
+**Assertions:**
+
+1. For a sample of species across the index, the figure printed on the tile appears verbatim
+   on that species' detail page.
+2. It appears **under the scope the reader selected** — `(all regions)` unfiltered, `in
+   Alaska` under `?region=AK` — not quietly swapped for another.
+3. The same bird's figure **differs** between the two scopes, or both assertions above could
+   be satisfied by a pair of pages that ignore the filter entirely.
+4. The index parse is floored per scope — 1,000 tiles unfiltered, 300 in Alaska — so a regex
+   that silently matched nothing cannot make the rest vacuous.
+
+**The gap this closes.** [P-034](product.md#p-034) described the detail view as a larger
+version of the tile "plus" three additions, and the *plus* was read as permission to add to
+the detail page rather than as a floor under it. So when [P-074](product.md#p-074)'s figure
+went onto every tile it never reached the detail page: a reader saw `1 in 23,393 species
+observations (all regions)` on the Northern Yellow Warbler's tile, opened the bird, and found
+only `Top region — 1 in 2,986 there`. A different number, in the same unit, for a scope they
+had not asked about.
+
+**The scope half is the sharper of the two.** A figure that is absent is visibly absent. A
+figure that silently changes what it ranges over between one page and the next is a wrong
+answer with nothing on either page to reveal the substitution — which is why assertion 2
+exists and why the row is built by `shareWithSeams`, the same function the tile calls, rather
+than recomputed. Two call sites deriving one number from the same inputs is exactly how the
+index and the detail page came to disagree about where a bird is commonest
+([CR-031](decisions.md#cr-031)).
+
+**Status: verified 2026-10-07 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| the `Frequency` row is not emitted — the state before this change | `calhum: the tile says "1 in 6,707 species observations (all regions)" and the detail page does not` |
+| the row is built from `options{}`, ignoring the reader's selection | only the filtered scope: `coshum?region=AK: the tile says "1 in 38,567 species observations in Alaska" and the detail page does not` |
+| the value drops `cell.Where`, printing the number without its scope | `the tile says "1 in 6,707 species observations (all regions)" and the detail page does not` |
+
+**A fourth attempt was abandoned as uninformative**: swapping `shareWithSeams` for `shareOf`
+produces an identical `Ratio` and `Where`, so it cannot fail this criterion. That is a true
+statement about the two functions — they differ only in the seam disclosure, which
+[AC-103](#ac-103) covers — and not a hole here.

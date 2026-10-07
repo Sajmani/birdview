@@ -1286,7 +1286,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		PickURL:    pickURL(r, toggled(live, sp.ID)),
 		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
 		FootLabels: lt.FootLabels, MassCube: lt.MassCube,
-		Metrics: rows, Categories: s.categories(sp, opt.Locale), Opt: opt, Query: queryFor(r), INatURL: inatURL,
+		Metrics: rows, Categories: s.categories(sp, opt), Opt: opt, Query: queryFor(r), INatURL: inatURL,
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 	})
 }
@@ -2384,7 +2384,8 @@ type categoryRow struct {
 // one sentence sixty times and bury the two facts that differ -- habitat and
 // diet, where BirdView sometimes disagrees with AVONET. The regions
 // themselves are listed inline by their postal codes.
-func (s *server) categories(sp *dataset.Species, loc dataset.Locale) []categoryRow {
+func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
+	loc := opt.Locale
 	out := []categoryRow{
 		{Label: "Family", Value: sp.Family + " — " + sp.FamilyCommon,
 			Origin: string(dataset.Published), Detail: "AviList v2025b, CC BY 4.0"},
@@ -2461,6 +2462,36 @@ func (s *server) categories(sp *dataset.Species, loc dataset.Locale) []categoryR
 				"so they are far lower than the bird's actual record. This is a gap in what " +
 				"BirdView can see, not a statement about the bird.",
 			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "how names are joined",
+		})
+	}
+
+	// The figure the tile showed, for the regions the reader had selected
+	// when they clicked it (P-034).
+	//
+	// Built by shareWithSeams, the same function the tile calls, rather
+	// than recomputed here. Two call sites deriving one number from the
+	// same inputs is how the index and the detail page came to disagree
+	// about where a bird is commonest (CR-031); one function cannot.
+	//
+	// It is NOT the row below. "Top region" is where the bird peaks, which
+	// is a different scope and usually a smaller N, and a reader who saw
+	// 1 in 23,393 on the tile and found only 1 in 2,986 here had no way to
+	// tell that the page had changed the question.
+	if cell := s.shareWithSeams(sp, opt); cell != nil {
+		value, detail := cell.Note, cell.Title
+		if cell.Ratio != "" {
+			value = cell.Ratio + " species observations " + cell.Where
+			detail = cell.Title
+			if cell.Shared != "" {
+				detail += " " + cell.SharedTitle
+			}
+		}
+		out = append(out, categoryRow{
+			Label:  "Frequency",
+			Value:  value,
+			Origin: string(dataset.Derived),
+			Detail: detail,
+			Doc:    "/docs/data#how-common-a-bird-is", DocLabel: "what this measures",
 		})
 	}
 
