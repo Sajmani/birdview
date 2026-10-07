@@ -2845,6 +2845,131 @@ Each sits under its own group behind a thin rule the width of the wider of the b
 text — an inline-flex column sizes to its widest child, so the Frequency rule tracks its own
 caption without anything being measured.
 
+## CR-036 — A month is present when the bird is, not when somebody was looking
+
+**Subject:** `presentation.region_filter`, `dataset.region.counts`
+**Kind:** Direct — [P-011](product.md#p-011) decides membership per region and says nothing
+about when in the year, and extending the filter to months needs a rule it does not have
+**Date:** 2026-10-07 · **Decided by:** Sameer
+**Found by:** the owner, asking what it would take to add a Months control beside Regions
+
+### The decision
+
+The Regions control becomes **Regions and months**. Months filter **which species are drawn**,
+not only the figure on the tile, because that is how every other filter in BirdView behaves
+and a control that silently worked differently would be the worse surprise.
+
+A species is present in a region **in a month** when
+
+```
+    (its records that month / all bird records that month)
+  ÷ (its records that year  / all bird records that year )   >=  0.2
+```
+
+and it is present in that region at all by [P-011](product.md#p-011)'s annual rule, which is
+unchanged.
+
+### Why not recurrence, which is the model everywhere else
+
+[P-001](product.md#p-001) decides scope by **recurrence** — records falling in repeated
+episodes across years — and that is the right instrument for "is this bird really here". It
+cannot be had per month at an acceptable price. The `eventDate` facet caps at 1,000 distinct
+dates and truncates for every common species, so months read off it would be whichever dates
+GBIF returned first; and asking per month properly means faceting `year` under each of twelve
+`month` filters, which is twelve times the slowest run in the project.
+
+So the monthly rule works from **counts**, and this is a real departure from the model
+recorded here rather than hidden in a threshold constant.
+
+### Why the ratio, and not the share
+
+Dividing by the region-month's own total is not optional. New York records **20.9%** of its
+birding in May and **4.8%** in December, so a raw share would make every bird a May bird. The
+ratio asks a different question — *is this species a bigger or smaller part of what people
+record this month than it is across the year* — and 1.0 means exactly as present as usual.
+
+It is [P-074](product.md#p-074)'s own logic at month granularity, not a new concept.
+
+### The measurements, 2026-10-07, eBird via GBIF
+
+New York (62,467,434 records) and Hawaii (2,507,087). Each species' ratio, by month:
+
+| species | behavior | months at or above 0.2 | correct? |
+| --- | --- | --- | --- |
+| Northern Cardinal | resident | all twelve (0.6–1.3) | yes |
+| American Robin | partial migrant | all twelve (0.48–1.06) | yes — robins winter in NY |
+| Dark-eyed Junco | winter visitor | all but August (Aug 0.18) | yes |
+| Blackpoll Warbler | long-distance migrant | May, Jun, Sep, Oct | yes |
+| Bobolink | breeder | May–Sep | yes |
+| Semipalmated Sandpiper | passage shorebird | May–Oct | yes |
+| Snow Bunting | winter visitor | Oct–Mar | yes |
+| Warbling White-eye (HI) | resident | all twelve | yes |
+| **Pacific Golden-Plover (HI)** | **breeds in Alaska** | **absent May–Jul** | **yes** |
+| Nēnē (HI) | resident | all twelve | yes |
+
+**The threshold is not load-bearing.** Across both regions the passing ratios cluster at
+**0.31 and above** and the failing ones at **0.17 and below**. Nothing lands between, so any
+cut from 0.2 to 0.3 gives the same answer — the property that made
+[`minPelagicShare`](../cmd/birdview-regions/main.go) defensible for the same reason.
+
+**The Pacific Golden-Plover is the result worth keeping.** It leaves Hawaii in late April to
+breed in Alaska and returns in August, and the rule recovered exactly that from record counts,
+with nothing about the species, its migration or its breeding range encoded anywhere.
+
+### Where the rule abstains, and why it must
+
+Millerbird has **28 records** in Hawaii, all of them in March, April, August, September and
+October. It is a Nihoa resident, present every month of the year. What those records show is
+**when anyone last got to Nihoa**.
+
+So below an evidence floor the month filter **abstains**: the species is shown in every
+selected month, and the page says why. Hiding it from June would be a statement about the
+bird, when the only fact available is a statement about the survey — the same distinction
+[P-075](product.md#p-075) draws for a species with no records, and the one
+`No data for these regions yet` draws for a region with no denominator.
+
+The floor is calibrated against the distribution of per-region record counts during
+implementation rather than guessed here. It is a floor on **evidence**, so it counts the
+species' records in that region, not the region's total.
+
+### What the interface says when it abstains
+
+The tile marks the figure, as [P-077](product.md#p-077)'s shared-name seam does, and the
+detail page carries the same disclosure, as [P-034](product.md#p-034) requires of anything a
+tile shows. The marker names the reason rather than the mechanism: too few records to tell
+the months the bird is here from the months nobody looked, so it is shown in all of them.
+
+### Consequences
+
+- All twelve months selected must reproduce the annual figures **exactly**. Every record
+  carries a month — 65,504,204 checked across both sources, none missing — so this is a check
+  and not an assumption.
+- `birdview-regions` goes from about 140 queries to about 2,300, one to three hours, and
+  therefore needs checkpoint and resume before it is run at all.
+- The committed table carries twelve counts per species-region cell and per region total.
+
+### Rejected
+
+**A fixed record count per month.** [P-011](product.md#p-011) already rejected absolute bars
+for region membership — eBird's volume doubled in five years, so any fixed count admits more
+species over time for nothing — and a month is the same argument twelve times over.
+
+**One in a million, applied to the region-month.** The bar degenerates where it is most
+needed: Hawaii records roughly 208,000 birds a month, so one per million is 0.2 records and
+any single sighting would read as presence.
+
+**Season groups, named.** Rejected on [P-076](product.md#p-076)'s existing rule — state the
+range, do not name the band. "Winter" is wrong for Hawaii, Palmyra, Navassa, Wake and
+Johnston whatever the hemisphere, and the Central Pacific box spans −10° to 40° and crosses
+the equator. The twelve months stand unlabeled and ungrouped.
+
+**A "This month" control.** Dropped by the owner: clicking **All** when every month is
+selected clears them, so the current month is two clicks away and a dedicated control buys
+one. It would also have made the index time-dependent, breaking
+[AC-110](acceptance.md#ac-110)'s invariant that a page is a pure function of its build and
+its URL.
+
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
