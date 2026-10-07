@@ -14,7 +14,10 @@
 // Verifies: P-006, P-007.
 package taxonomy
 
-import "strings"
+import (
+	"sort"
+	"strings"
+)
 
 // Renames map a current name to the pre-revision names AVONET files the same
 // taxon under, in any of its three taxonomies. The specimens are the right
@@ -95,27 +98,43 @@ var AviListRenames = map[string]string{
 	"Pica nuttalli":              "Pica nuttallii",
 }
 
-// LumpedInto maps a name the OCCURRENCE DATA publishes onto the AviList
-// species whose birds those records actually are, in the regions BirdView
-// covers.
+// Counted is one binomial the OCCURRENCE DATA publishes whose records are,
+// under the taxonomy BirdView serves, a different AviList species' birds.
+type Counted struct {
+	// Published is the binomial eBird or iNaturalist files them under.
+	Published string
+	// Species is the AviList species whose birds those records are.
+	Species string
+	// Why names the databases and says which way the disagreement runs,
+	// for the page to show. Per entry, because the direction is not the
+	// same in all of them.
+	Why string
+}
+
+// CountedAs holds the names whose records BirdView counts as another
+// species, because the sources and AviList draw the species boundary in
+// different places.
 //
-// eBird has not followed these splits and files everything under the older
-// name; iNaturalist has, and files everything under the newer one. The two
-// databases disagree completely rather than partially -- eBird holds **zero**
-// records under `Numenius hudsonicus` and iNaturalist **zero** under `Gygis
-// alba` -- so these are not two populations. They are one set of birds
-// recorded twice under two labels.
+// **Not "lumps", and the word is avoided deliberately.** A lump is a formal
+// taxonomic act, the merging of two species into one, and only the third
+// entry below is one — AviList declines to recognize Stejneger's Stonechat.
+// The other two are the reverse: AviList SPLIT a species and eBird has not
+// adopted the split, so eBird goes on filing the daughter's birds under the
+// parent's name. Calling all three lumps names the wrong event for two of
+// them, and calling the table LumpedInto said so in the code for months.
+//
+// What they share is not the taxonomy but the arithmetic: a name the
+// occurrence data publishes, and an AviList species whose records those are.
 //
 // eBird is the deeper and better-curated source and supplies the evidence;
-// AviList supplies the names (CR-022). This table is where the two meet, and
-// it does for lumps what AviListRenames does for genus moves.
+// AviList supplies the names (CR-022). This table is where the two meet.
 //
-// **Why these two and not every lump.** Both names here are also the AVONET
-// donor for the species BirdView carries -- see NearMatches -- so admitting
-// them as species of their own would draw the same bird twice, with byte-
-// identical length and mass, while implying there are two. That is not extra
-// information; it reads as a bug. Where both halves have measurements of
-// their own, both are kept.
+// **Why these and not every boundary disagreement.** The first two published
+// names are also the AVONET donor for the species BirdView carries -- see
+// NearMatches -- so admitting them as species of their own would draw the
+// same bird twice, with byte-identical length and mass, while implying there
+// are two. That is not extra information; it reads as a bug. Where both
+// halves have measurements of their own, both are kept.
 //
 // **Setophaga petechia is deliberately absent.** eBird's ABA-area records
 // under it are overwhelmingly Setophaga aestiva, but Mangrove Yellow Warbler
@@ -126,23 +145,57 @@ var AviListRenames = map[string]string{
 // BirdView carries elegans, AviList splits ambiguus off it, and both would
 // have their own measurements.
 //
-// Verifies: P-001.
-var LumpedInto = map[string]string{
-	"Numenius phaeopus": "Numenius hudsonicus",
-	"Gygis alba":        "Gygis candida",
+// Verifies: P-001, P-077.
+var CountedAs = []Counted{{
+	Published: "Numenius phaeopus",
+	Species:   "Numenius hudsonicus",
+	Why: "AviList splits the Whimbrel and eBird has not adopted the split: eBird files " +
+		"556,569 of these birds under Numenius phaeopus, the name AviList keeps for the " +
+		"Eurasian bird, and holds none at all under Numenius hudsonicus. iNaturalist " +
+		"follows the split, with 17,923 records under hudsonicus and nine under phaeopus.",
+}, {
+	Published: "Gygis alba",
+	Species:   "Gygis candida",
+	Why: "AviList treats Gygis candida as a species separate from Gygis alba and eBird " +
+		"does not: eBird files 16,008 of these birds under Gygis alba and holds none " +
+		"under candida, while iNaturalist follows AviList and holds 1,445 under candida.",
+}, {
+	// This one runs the other way: AviList lumps where both databases split.
+	// Without it the species is dropped for having no name BirdView may
+	// publish, and maurus is left with the two records filed under it
+	// directly, which is below any bar.
+	Published: "Saxicola stejnegeri",
+	Species:   "Saxicola maurus",
+	Why: "AviList does not recognize Stejneger's Stonechat as a species separate from the " +
+		"Siberian Stonechat, and both databases do: eBird holds 95 records under Saxicola " +
+		"stejnegeri and iNaturalist 28, against two and none under Saxicola maurus. Under " +
+		"AviList's taxonomy those are maurus's birds.",
+}}
 
-	// This one runs the other way: AviList LUMPS where eBird splits.
-	// Stejneger's Stonechat has no AviList concept of its own -- AviList
-	// carries Saxicola maurus and nothing else in that complex -- so its 95
-	// eBird and 28 iNaturalist records are maurus's under the taxonomy
-	// BirdView uses. Without this the species is dropped for having no name
-	// BirdView may publish, and maurus is left with the two records filed
-	// under it directly, which is below any bar.
-	//
-	// The mechanism is identical to the pair above even though the direction
-	// is reversed: the occurrence data's name is not AviList's, and the
-	// records belong to the AviList species.
-	"Saxicola stejnegeri": "Saxicola maurus",
+// SpeciesCountedAs returns the AviList species whose birds the records under
+// a published binomial are. The key is matched case-insensitively, because
+// the occurrence data arrives lowercased.
+func SpeciesCountedAs(published string) (species, why string, ok bool) {
+	for _, c := range CountedAs {
+		if strings.EqualFold(c.Published, published) {
+			return c.Species, c.Why, true
+		}
+	}
+	return "", "", false
+}
+
+// CountedInto returns the published names whose records are counted as an
+// AviList species, for the page to disclose. Sorted, because map order is
+// not an order and a page that reshuffles between runs records nothing.
+func CountedInto(aviList string) []Counted {
+	var out []Counted
+	for _, c := range CountedAs {
+		if c.Species == aviList {
+			out = append(out, c)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Published < out[j].Published })
+	return out
 }
 
 // AviListRenamedFrom is AviListRenames inverted: the name AVONET and the
@@ -235,7 +288,7 @@ var OrderCommonNames = map[string]string{
 //
 // This is a third kind of disagreement, and the dangerous one. An alias
 // (AviListRenames) fails by missing: the join finds nothing and a species
-// shows zero, which is visible. A name AviList does not carry (LumpedInto)
+// shows zero, which is visible. A name AviList does not carry (CountedAs)
 // fails the same way. A shared name **fails by matching** -- the string is
 // identical on both sides, the join succeeds, and every record lands on
 // whichever daughter inherited the name.
@@ -389,7 +442,7 @@ func Occurrence(name string) string {
 	if alt, ok := AviListRenames[t]; ok {
 		return strings.ToLower(alt)
 	}
-	if alt, ok := LumpedInto[t]; ok {
+	if alt, _, ok := SpeciesCountedAs(t); ok {
 		return strings.ToLower(alt)
 	}
 	return b

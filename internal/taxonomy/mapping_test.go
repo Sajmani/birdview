@@ -27,7 +27,8 @@ func TestOccurrenceNormalizesEveryKnownName(t *testing.T) {
 			t.Errorf("Occurrence(%q) = %q, want %q", strings.ToLower(from), got, strings.ToLower(to))
 		}
 	}
-	for from, to := range LumpedInto {
+	for _, c := range CountedAs {
+		from, to := c.Published, c.Species
 		if got := Occurrence(strings.ToLower(from)); got != strings.ToLower(to) {
 			t.Errorf("Occurrence(%q) = %q, want %q", from, got, strings.ToLower(to))
 		}
@@ -45,7 +46,7 @@ func TestOccurrenceNormalizesEveryKnownName(t *testing.T) {
 		t.Errorf("Occurrence folded a shared name to %q; CR-034 discloses those, "+
 			"it does not reassign them", got)
 	}
-	if len(AviListRenames)+len(LumpedInto) < 5 {
+	if len(AviListRenames)+len(CountedAs) < 5 {
 		t.Fatal("the naming tables are nearly empty; this check is asserting almost nothing")
 	}
 }

@@ -427,19 +427,21 @@ func main() {
 // it verified the function and not the pipeline, which is the shape of a
 // check that tests nothing.
 func prepare(in map[string]map[string]int64) map[string]map[string]int64 {
-	return mergeLumps(toBinomials(in))
+	return mergeCounted(toBinomials(in))
 }
 
-// mergeLumps folds a name the occurrence data publishes into the AviList
-// species whose birds those records are (taxonomy.LumpedInto).
+// mergeCounted folds a name the occurrence data publishes into the AviList
+// species whose birds those records are (taxonomy.CountedAs).
 //
-// Without it the run admits both halves of a lump as separate species. eBird
-// holds 556,569 records under Numenius phaeopus and none under hudsonicus;
-// iNaturalist holds 17,923 under hudsonicus and nine under phaeopus. Merged,
-// that is one Whimbrel. Left apart it is two -- and because the lump name is
-// also hudsonicus's AVONET donor, the two would draw identically.
-func mergeLumps(in map[string]map[string]int64) map[string]map[string]int64 {
-	for lump, into := range taxonomy.LumpedInto {
+// Without it the run admits both sides of a boundary disagreement as
+// separate species. eBird holds 556,569 records under Numenius phaeopus and
+// none under hudsonicus; iNaturalist holds 17,923 under hudsonicus and nine
+// under phaeopus. Merged, that is one Whimbrel. Left apart it is two -- and
+// because the published name is also hudsonicus's AVONET donor, the two
+// would draw identically.
+func mergeCounted(in map[string]map[string]int64) map[string]map[string]int64 {
+	for _, c := range taxonomy.CountedAs {
+		lump, into := c.Published, c.Species
 		l, i := strings.ToLower(lump), strings.ToLower(into)
 		regions, ok := in[l]
 		if !ok {
@@ -531,9 +533,9 @@ func datesOf(ctx context.Context, c *gbif.Client, p pair) (map[string]int64, boo
 // and can only be fetched under it.
 func gbifNames(species string) []string {
 	out := []string{species}
-	for lump, into := range taxonomy.LumpedInto {
-		if strings.EqualFold(into, species) {
-			out = append(out, strings.ToLower(lump))
+	for _, c := range taxonomy.CountedAs {
+		if strings.EqualFold(c.Species, species) {
+			out = append(out, strings.ToLower(c.Published))
 		}
 	}
 	sort.Strings(out) // stable, so a rerun matches

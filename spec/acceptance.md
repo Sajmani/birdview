@@ -2119,7 +2119,7 @@ build · **Method:** unit test over the shared normalization, plus a bounded rep
 
 **Assertions:**
 
-1. `taxonomy.Occurrence` maps **every** entry of `AviListRenames` and `LumpedInto` onto its
+1. `taxonomy.Occurrence` maps **every** entry of `AviListRenames` and `CountedAs` onto its
    AviList name, from the lowercased form the occurrence data actually supplies.
 2. A name in neither table passes through unchanged.
 3. A **shared** name ([CR-034](decisions.md#cr-034)) is *not* folded — those are disclosed,
@@ -2155,7 +2155,7 @@ committed correspondence table
 
 1. Every drawn species has a row; the table is refused below 1,000 of them.
 2. A species the two sources disagree about **must be declared** — in `AviListRenames`,
-   `LumpedInto`, `SharedNames`, `WithheldByEBird` or `DomesticForms`.
+   `CountedAs`, `SharedNames`, `WithheldByEBird` or `DomesticForms`.
 3. The failure message names which of those five it probably belongs in.
 
 **The rule is asymmetric, because the sources are not peers.** iNaturalist is uniformly about
@@ -2204,7 +2204,7 @@ Re-run with the anchor asserted, it fails as above.
 
 **Why the property and not the three bugs.** [CR-035](decisions.md#cr-035) was three
 asymmetries found one at a time over two days, each invisible from inside the command that had
-it right: `birdview-regions` applied neither `AviListRenames` nor `LumpedInto`, and once it did,
+it right: `birdview-regions` applied neither `AviListRenames` nor `CountedAs`, and once it did,
 still did not reduce a trinomial. Nothing compared the two readers, so every fix left the next
 gap standing. Asserting that they agree closes the shape rather than the instances.
 
@@ -2328,7 +2328,7 @@ five naming tables and the rendered detail pages
 
 **Assertions:**
 
-1. Every drawn species in `AviListRenames`, `LumpedInto`, `SharedNames`, `DomesticForms` or
+1. Every drawn species in `AviListRenames`, `CountedAs`, `SharedNames`, `DomesticForms` or
    `WithheldByEBird` carries a `Recorded as` row.
 2. The row names the specific thing: the alias for a rename, the published binomial for a
    lump, the covering name for a shared name, `domestic and feral` for a form,
@@ -2439,10 +2439,20 @@ which failed on the genus-move rows: those name the genus and the epithet separa
 the full AviList string, because the full string is the page heading two inches above. Writing
 the stricter rule would have forced repetition to satisfy a check rather than a reader.
 
-**Status: verified 2026-10-07 — passing, and watched failing** under both of:
+**A boundary disagreement names both databases, and only calls itself a lump when it is one.**
+`CountedAs` holds three entries and they are not the same taxonomic event: AviList **split**
+the Whimbrel and the white terns and eBird has not adopted either split, while AviList
+**declines to split** the Siberian Stonechat where both databases do. One sentence covering all
+three named the wrong event for two of them, and asserted that AviList "does not carry"
+*Numenius phaeopus* — which it does, as the Eurasian bird. The reason is therefore carried per
+entry, and the criterion asserts each row names eBird *and* iNaturalist, says `lump` only for
+*Saxicola maurus*, and says `does not carry` only where that is true.
+
+**Status: verified 2026-10-07 — passing, and watched failing** under all of:
 
 | Mutation | What went red |
 | --- | --- |
+| a boundary entry reverts to one vague sentence calling itself a lump | three at once — `does not say what iNaturalist holds`, `calls itself a lump, but AviList SPLIT this species`, and `says AviList does not carry Numenius phaeopus, which it does` |
 | the link points back at `#how-common-a-bird-is` | `Hesperiphona vespertina: the row links somewhere other than #when-the-sources-disagree-about-a-name; its own label says "how names are joined"` |
 | the epithet case reverts to the single "moved" sentence | `Pica nuttallii: same genus (Pica) and the text says "moved"` **and** `differs from Pica nuttalli only in the epithet (nuttallii against nuttalli) and the text never says so, which reads as the same name printed twice` |
 

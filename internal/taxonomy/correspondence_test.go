@@ -62,7 +62,8 @@ func TestSourceNamesAgree(t *testing.T) {
 	for _, to := range AviListRenames {
 		expected[to] = "eBird files it under its pre-rename name"
 	}
-	for _, to := range LumpedInto {
+	for _, c := range CountedAs {
+		to := c.Species
 		expected[to] = "eBird files it under a name AviList does not carry"
 	}
 	for _, sn := range SharedNames {
@@ -120,7 +121,7 @@ func TestSourceNamesAgree(t *testing.T) {
 	for _, s := range surprises {
 		t.Errorf("the two sources disagree about this name and nothing says why:\n    %s\n"+
 			"    Either eBird files it under another name (add to AviListRenames or "+
-			"LumpedInto), it shares a name with another species (SharedNames), eBird "+
+			"CountedAs), it shares a name with another species (SharedNames), eBird "+
 			"withholds it (WithheldByEBird), or iNaturalist files a domestic form "+
 			"separately (DomesticForms). T-028.", s)
 	}

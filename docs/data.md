@@ -414,12 +414,25 @@ corrections neither database uses AviList's form. So the page names **eBird**, w
 thing true of every case: it holds nothing under the AviList name, which is why the join needs
 the older one at all.
 
-**Two names, one bird.** Three species are the reverse: a name the occurrence data publishes
-that AviList does not carry as a species of its own. eBird holds 556,569 Whimbrel records under
-*Numenius phaeopus* and none under *hudsonicus*; iNaturalist holds 17,923 under *hudsonicus* and
-nine under *phaeopus*. The two disagree completely rather than partially, so these are not two
-populations — they are one set of birds recorded twice under two labels, and BirdView **adds**
-them rather than choosing. The page names the other label.
+**Where the species boundary falls.** Three species are filed by eBird under a name that, in
+AviList's taxonomy, belongs to a different species. **These are not all the same event, and the
+page says which each one is.**
+
+Two are splits eBird has not adopted. AviList separates the Hudsonian Whimbrel from the
+Eurasian, and eBird still files North American birds under *Numenius phaeopus* — 556,569 of
+them, against none under *hudsonicus*. iNaturalist follows the split, with 17,923 under
+*hudsonicus* and nine under *phaeopus*. The same holds for *Gygis candida* against *Gygis
+alba*.
+
+The third runs the other way, and is the only one here that is a **lump** in the taxonomic
+sense: AviList declines to recognize Stejneger's Stonechat as separate from the Siberian
+Stonechat, where both databases do. Its 95 eBird and 28 iNaturalist records are *Saxicola
+maurus*'s birds under the taxonomy BirdView serves.
+
+In each case the two databases disagree completely rather than partially — each holds almost
+nothing under the other's name — so these are not two populations but one set of birds recorded
+twice. BirdView **adds** the records rather than choosing, and names the other label on the
+page.
 
 **Feral and domestic birds.** iNaturalist files feral Rock Pigeons under *Columba livia
 domestica* and domestic Muscovy Ducks under *Cairina moschata domestica*, below the species

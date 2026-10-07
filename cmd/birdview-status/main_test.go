@@ -123,7 +123,7 @@ func TestLumpsMergeIntoTheSpeciesBirdViewCarries(t *testing.T) {
 	}
 	// Setophaga is deliberately NOT merged: both halves are carried species
 	// with their own AVONET rows, and merging would delete Mangrove Warbler.
-	if _, ok := taxonomy.LumpedInto["Setophaga petechia"]; ok {
+	if _, _, ok := taxonomy.SpeciesCountedAs("Setophaga petechia"); ok {
 		t.Error("Setophaga petechia must not be merged; it is a species BirdView carries")
 	}
 }
@@ -197,7 +197,7 @@ func TestBestRegionIsDeterministic(t *testing.T) {
 // The three asymmetries were found one at a time over two days, because
 // each was invisible from inside the command that had it right. Nothing
 // compared the two readers, so each fix left the next gap in place:
-// birdview-regions applied neither AviListRenames nor LumpedInto, and then,
+// birdview-regions applied neither AviListRenames nor CountedAs, and then,
 // once it did, still did not reduce a trinomial to its species. This checks
 // the property the three share instead of the three bugs, so a fourth
 // reader, or a fourth table, cannot open the same hole again.

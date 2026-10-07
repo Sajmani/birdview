@@ -2070,7 +2070,7 @@ principles: extra species beat omission, and eBird is the more authoritative sou
 Those settle it once separated. eBird is authoritative for **evidence** — it is eighty times
 deeper and better curated — while AviList is already the authority for **names** (CR-022). So
 eBird's records are credited to the AviList name whose birds they are, which is what
-`AviListRenames` does for genus moves; `taxonomy.LumpedInto` now does it for lumps.
+`AviListRenames` does for genus moves; `taxonomy.CountedAs` now does it where the sources draw the boundary elsewhere.
 
 "Extra beats omission" holds everywhere except where the extra is the **same drawing twice**.
 `Numenius phaeopus` and `Gygis alba` are the AVONET donors for the halves BirdView carries, so
@@ -2645,7 +2645,7 @@ binomial BirdView serves (2,166 requests, 2026-10-05). **18 have zero eBird reco
 name**, and they fall into two groups that look identical in the data and mean opposite things:
 
 **Name disagreement — the records exist under another name.** Nine species, all but one
-already covered by `AviListRenames` or `LumpedInto`:
+already covered by `AviListRenames` or `CountedAs`:
 
 | BirdView draws | eBird files it as | eBird records |
 | --- | --- | --- |
@@ -2714,7 +2714,7 @@ Every verbatim name eBird publishes for the US and Canada, against the species B
 | **match nothing** | **37** | **10,015,688** | **0.81%, silently dropped** |
 
 Of the 10,015,688: **9,954,362 belong to ten species BirdView draws**, every one of them
-already covered by `AviListRenames` or `LumpedInto` — tables `birdview-regions` never called.
+already covered by `AviListRenames` or `CountedAs` — tables `birdview-regions` never called.
 The remaining 61,326, under 27 names, are birds BirdView deliberately does not draw.
 
 | name eBird uses | records | |
@@ -2739,7 +2739,7 @@ Woodpecker's. The bird showed 0.7% of its own record and nothing anywhere report
 
 ### Two changes
 
-**One normalization, shared.** `taxonomy.Occurrence` applies `AviListRenames` and `LumpedInto`
+**One normalization, shared.** `taxonomy.Occurrence` applies `AviListRenames` and `CountedAs`
 and is now what both readers of the occurrence data call. The bug was not a missing table
 entry — every entry already existed — but a second reader that did not consult them.
 
@@ -2852,7 +2852,7 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | Item | Owner | Gate |
 | --- | --- | --- |
 | ~~**`birdview-regions` does not fold iNaturalist trinomials**~~ — **done 2026-10-06**, [AC-106](acceptance.md#ac-106). The rank reduction moved into `taxonomy.Binomial` and runs inside `taxonomy.Occurrence` *before* either naming table is consulted, so `dryobates villosus harrisi` reaches `Leuconotopicus villosus` instead of nothing. The last of the three asymmetries [CR-035](#cr-035) found, and the criterion now asserts the property the three shared — that both readers land on the same AviList species — rather than the three bugs. The orphan residue was 0.0431% before the fold; what stays is hybrids, which must never match a species, and subspecies of birds BirdView does not draw | Sameer | closed 2026-10-06 |
-| ~~**`birdview-regions` applies neither `AviListRenames` nor `LumpedInto`**~~ — **done 2026-10-05**, [CR-035](#cr-035). Both readers of the occurrence data now call `taxonomy.Occurrence`, and the join reports every name it could not match, refusing to write above 0.05% of records. The audit that justified it: 1,402 eBird names, 37 matching nothing, 9,954,362 recoverable records across ten species | Sameer | closed 2026-10-05 |
+| ~~**`birdview-regions` applies neither `AviListRenames` nor `CountedAs`**~~ — **done 2026-10-05**, [CR-035](#cr-035). Both readers of the occurrence data now call `taxonomy.Occurrence`, and the join reports every name it could not match, refusing to write above 0.05% of records. The audit that justified it: 1,402 eBird names, 37 matching nothing, 9,954,362 recoverable records across ten species | Sameer | closed 2026-10-05 |
 | **Three more domestic forms behave like the two that are declared.** The rank fold of [AC-106](acceptance.md#ac-106) moved iNaturalist's trinomials into their wild species, and the proportional gainers were `Gallus gallus` **+11.9%**, `Anser cygnoides` **+20.0%** and `Anser anser` **+6.9%** — the same signature as the declared `Columba livia` (+1.3%) and `Cairina moschata` (+10.0%). `taxonomy.DomesticForms` names only the latter two, so [T-028](tech.md#t-028)'s ratio check reads the other three as undeclared disagreements if it ever flags them. Either declare them or record why the two are special; measuring it needs a `cmd/birdview-names` run | — | opportunistic |
 | **The record counts behind a name disagreement are not on the page.** [P-077](#cr-034) asks for each source's binomial *and how many records it holds under it*, and [AC-109](acceptance.md#ac-109) ships only the binomial. [`data/source-names.tsv`](../data/source-names.tsv) has per-source counts and no reader, but it queries the **AviList** name only — for Hairy Woodpecker it records eBird 0, not the 7,310,342 under *Dryobates villosus*, which is the number a reader wants. Closing it needs `cmd/birdview-names` to query the alias as well, a GBIF run, and the counts plumbed through the ingest | Sameer | opportunistic |
 | **Nothing reads `data/gbif-taxa.tsv`.** It is generated by `cmd/birdview-gbifmap`, committed, and consumed by no code. It carries a GBIF-to-AviList name bridge with an `ambiguous` tier that would be the natural home for [CR-034](#cr-034)'s shared names — except that it files `Setophaga petechia -> Setophaga petechia` as `exact`, correctly, which is why the bridge could not find them. Either wire it in or retire it | — | opportunistic |

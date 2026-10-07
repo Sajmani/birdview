@@ -2619,24 +2619,19 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 				"the counts are unaffected.")
 	}
 
-	// A name AviList does not carry, whose records are this species' under
-	// the taxonomy BirdView uses. Sorted, because map order is not an order
-	// and a page that reshuffles between runs is not a record of anything.
-	var lumps []string
-	for published, into := range taxonomy.LumpedInto {
-		if into == sp.ScientificName {
-			lumps = append(lumps, published)
-		}
-	}
-	sort.Strings(lumps)
-	for _, published := range lumps {
-		seam(published+" — a name whose records are counted here",
-			"The occurrence sources do not agree on where this species ends: one files these "+
-				"birds under "+published+", which AviList does not carry as a species of its "+
-				"own. BirdView adds those records to these rather than choosing between them, "+
-				"because the two sources disagree completely rather than partially -- each "+
-				"holds almost nothing under the other's name, so they are one set of birds "+
-				"recorded twice.")
+	// A name whose records are this species' under the taxonomy BirdView
+	// serves, because the sources draw the boundary somewhere else.
+	//
+	// The reason is carried per entry and not written here, because it is
+	// not the same reason twice: AviList split the Whimbrel and eBird did
+	// not follow, while AviList declined to split the Siberian Stonechat
+	// and both databases did. One sentence covering both named the wrong
+	// taxonomic event for two of the three, and claimed AviList does not
+	// carry Numenius phaeopus, which it does -- as the Eurasian bird.
+	for _, c := range taxonomy.CountedInto(sp.ScientificName) {
+		seam(c.Published+" — the name eBird files these birds under",
+			c.Why+" BirdView follows AviList and counts them as this species, rather "+
+				"than choosing between the two databases or publishing the bird twice.")
 	}
 
 	// A shared name: the one case where the count is not this bird's alone.

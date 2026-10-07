@@ -351,7 +351,7 @@ func main() {
 			"%.2f%% bar. Every one of those is counted in the denominator of every share "+
 			"and in no species' numerator. A name the occurrence data uses and "+
 			"taxonomy.Occurrence does not know about belongs in AviListRenames or "+
-			"LumpedInto; refusing to write a table that loses them quietly (T-027).",
+			"CountedAs; refusing to write a table that loses them quietly (T-027).",
 			f*100, maxOrphanFraction*100)
 	}
 

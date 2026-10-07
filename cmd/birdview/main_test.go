@@ -5766,8 +5766,8 @@ func TestEveryNameDisagreementIsOnThePage(t *testing.T) {
 	for aviList, old := range taxonomy.AviListRenamedFrom {
 		want[aviList] = append(want[aviList], old)
 	}
-	for published, into := range taxonomy.LumpedInto {
-		want[into] = append(want[into], published)
+	for _, c := range taxonomy.CountedAs {
+		want[c.Species] = append(want[c.Species], c.Published)
 	}
 	for _, sn := range taxonomy.SharedNames {
 		for _, covered := range sn.Covers {
@@ -6025,5 +6025,34 @@ func TestTheNameDisclosureExplainsItselfAndLinksSomewhereUseful(t *testing.T) {
 	}
 	if checked < 5 {
 		t.Fatalf("checked only %d renamed species", checked)
+	}
+
+	// A boundary disagreement names BOTH databases, and does not call
+	// itself a lump unless it is one. Two of the three are splits eBird
+	// has not adopted and only Saxicola is a lump in the taxonomic sense,
+	// so one sentence covering all three named the wrong event for two.
+	for _, c := range taxonomy.CountedAs {
+		sid, drawn := id[c.Species]
+		if !drawn {
+			continue
+		}
+		_, page := get(t, s, "/species/"+sid)
+		seam := strings.Join(strings.Fields(stripTags(row.FindString(page))), " ")
+		for _, src := range []string{"eBird", "iNaturalist"} {
+			if !strings.Contains(seam, src) {
+				t.Errorf("%s: the disclosure does not say what %s holds, so a reader "+
+					"cannot tell which database disagrees with which: %s",
+					c.Species, src, seam)
+			}
+		}
+		isLump := c.Species == "Saxicola maurus"
+		if strings.Contains(seam, "lump") && !isLump {
+			t.Errorf("%s: calls itself a lump, but AviList SPLIT this species and eBird "+
+				"did not follow — a lump is the opposite event: %s", c.Species, seam)
+		}
+		if strings.Contains(seam, "does not carry") && c.Published != "Saxicola stejnegeri" {
+			t.Errorf("%s: says AviList does not carry %s, which it does — as a separate "+
+				"species that is not this one: %s", c.Species, c.Published, seam)
+		}
 	}
 }
