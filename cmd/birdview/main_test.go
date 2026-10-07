@@ -5937,3 +5937,93 @@ func TestResponsesCarryAValidator(t *testing.T) {
 			"with a cached copy would keep it", tags["/"])
 	}
 }
+
+// TestTheNameDisclosureExplainsItselfAndLinksSomewhereUseful asserts the two
+// things a reader needs from a `Recorded as` row beyond the bare fact: that
+// the difference between the two names is legible, and that the link under
+// it lands on the section explaining it.
+//
+// Both were wrong. Every row linked to "how common a bird is", the section
+// about the frequency figure, rather than to the one about name
+// disagreements -- the label said "how names are joined" and the anchor
+// went elsewhere. And the rename text read "AviList moved this species to
+// Pica nuttallii and eBird has not followed, so BirdView looks the records
+// up under Pica nuttalli", which for a one-letter difference looks like the
+// same name printed twice, and says "moved" about a species whose genus did
+// not change.
+//
+// Watched fail: see AC-111.
+//
+// Verifies: P-077. Criterion: AC-111.
+func TestTheNameDisclosureExplainsItselfAndLinksSomewhereUseful(t *testing.T) {
+	s, err := newServer(realDataset(t))
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
+	}
+	// The anchor the rows point at must exist in the page they point into.
+	_, docs := get(t, s, "/docs/data")
+	const anchor = "when-the-sources-disagree-about-a-name"
+	if !strings.Contains(docs, `id="`+anchor+`"`) {
+		t.Fatalf("/docs/data has no #%s to land on", anchor)
+	}
+
+	id := map[string]string{}
+	for i := range s.ds.Species {
+		id[s.ds.Species[i].ScientificName] = s.ds.Species[i].ID
+	}
+	row := regexp.MustCompile(`(?s)<th>Recorded as</th>.*?</tr>`)
+	checked := 0
+	for aviList, old := range taxonomy.AviListRenamedFrom {
+		sid, drawn := id[aviList]
+		if !drawn {
+			continue
+		}
+		_, page := get(t, s, "/species/"+sid)
+		seam := stripTags(row.FindString(page))
+		if seam == "" {
+			t.Errorf("%s: no disclosure", aviList)
+			continue
+		}
+		if !strings.Contains(page, "/docs/data#"+anchor) {
+			t.Errorf("%s: the row links somewhere other than #%s; its own label says "+
+				"\"how names are joined\"", aviList, anchor)
+		}
+		// eBird's name in full, because that is the actionable half: it is
+		// what a reader types back into eBird to check. AviList's is the
+		// page heading, so the row names only the part that differs, which
+		// the genus/epithet assertions below cover.
+		if !strings.Contains(seam, old) {
+			t.Errorf("%s: the disclosure never gives eBird's name %q in full, so a "+
+				"reader cannot go and look the bird up", aviList, old)
+		}
+		oldGenus, oldEp, _ := strings.Cut(old, " ")
+		newGenus, newEp, _ := strings.Cut(aviList, " ")
+		switch {
+		case oldGenus == newGenus:
+			// Nothing moved, so the text must not say it did, and it has to
+			// put the two epithets where they can be compared.
+			if strings.Contains(seam, "moved") {
+				t.Errorf("%s: same genus (%s) and the text says \"moved\": %s",
+					aviList, newGenus, strings.Join(strings.Fields(seam), " "))
+			}
+			if !strings.Contains(seam, "epithet") {
+				t.Errorf("%s: differs from %s only in the epithet (%s against %s) and the "+
+					"text never says so, which reads as the same name printed twice",
+					aviList, old, newEp, oldEp)
+			}
+		default:
+			if !strings.Contains(seam, "genus") {
+				t.Errorf("%s: a genus move from %s and the text does not say so",
+					aviList, oldGenus)
+			}
+		}
+		// It says eBird, which is the only claim true of all seven.
+		if !strings.Contains(seam, "eBird") {
+			t.Errorf("%s: the disclosure does not say whose name it is", aviList)
+		}
+		checked++
+	}
+	if checked < 5 {
+		t.Fatalf("checked only %d renamed species", checked)
+	}
+}

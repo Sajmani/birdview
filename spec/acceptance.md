@@ -2404,3 +2404,48 @@ one correctly.
 | no `Cache-Control` is set — the state before this change | `/: Cache-Control is "", want "no-cache"` |
 | the ETag is built from the build alone, ignoring the URL | `/species/yelwar1 and / share the ETag "13b5953…"; a cache would serve one for the other` |
 | the fingerprint is a constant rather than a hash of the build | `the index keeps ETag "bce5905…" after the dataset changed; every reader with a cached copy would keep it` |
+
+### AC-111 — The name disclosure is legible and its link lands on the explanation
+**Verifies:** [P-077](product.md#p-077) · **Level:** code · **Method:** unit test over every
+renamed species' rendered row
+
+**Assertions:**
+
+1. Every `Recorded as` row links to `/docs/data#when-the-sources-disagree-about-a-name`, and
+   that anchor exists in the rendered page.
+2. The row gives eBird's name **in full** — the actionable half, since it is what a reader
+   types back into eBird.
+3. Where the genus is unchanged the text says **epithet** and must not say *moved*.
+4. Where the genus changed the text says **genus**.
+5. The row names eBird.
+
+**Both halves were wrong and both were reported.** Every row linked to *how common a bird is*,
+the section about the frequency figure, while its own label read "how names are joined". And
+the text said *"AviList moved this species to Pica nuttallii and eBird has not followed, so
+BirdView looks the records up under Pica nuttalli"* — which for a one-letter difference looks
+like the same name printed twice, and says *moved* about a species whose genus did not change.
+Five of the seven renames are genus moves; two are corrected epithets, and one sentence was
+being used for both.
+
+**Why the row says eBird and not "the occurrence data".** Naming the sources generically would
+be wrong in both directions, and the committed counts say so: iNaturalist follows AviList for
+all five genus moves — 53,705 Hairy Woodpecker records under *Leuconotopicus villosus* — and
+for the two spelling corrections **neither** database uses AviList's form. eBird is the single
+claim true of all seven, holding nothing under the AviList name, which is why the join needs
+the old one at all.
+
+**Assertion 2 is narrower than it first was.** It began as "both binomials appear in the row",
+which failed on the genus-move rows: those name the genus and the epithet separately and never
+the full AviList string, because the full string is the page heading two inches above. Writing
+the stricter rule would have forced repetition to satisfy a check rather than a reader.
+
+**Status: verified 2026-10-07 — passing, and watched failing** under both of:
+
+| Mutation | What went red |
+| --- | --- |
+| the link points back at `#how-common-a-bird-is` | `Hesperiphona vespertina: the row links somewhere other than #when-the-sources-disagree-about-a-name; its own label says "how names are joined"` |
+| the epithet case reverts to the single "moved" sentence | `Pica nuttallii: same genus (Pica) and the text says "moved"` **and** `differs from Pica nuttalli only in the epithet (nuttallii against nuttalli) and the text never says so, which reads as the same name printed twice` |
+
+**A third mutation never applied** — `gofmt` had realigned the struct field the anchor was
+written against, so the substitution matched nothing. The harness refused instead of
+reporting a pass. That is the second time this session and the same cause as the first.

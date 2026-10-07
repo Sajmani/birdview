@@ -400,6 +400,33 @@ gap in what BirdView can see, not a statement about the bird, and the page says 
 These look identical in the data — eBird returns nothing either way — so each was checked by
 querying every plausible alternative name. See [CR-034](/spec/decisions#cr-034).
 
+**The same bird under another name.** Seven species are filed by eBird under a name AviList has
+since replaced, and the page names both. Five are genus moves — AviList puts the Hairy
+Woodpecker in *Leuconotopicus* and eBird still files its 7,310,342 records under *Dryobates
+villosus*. Two are corrected epithets, where the two names differ by almost nothing: *Pica
+nuttallii* against eBird's *Pica nuttalli*. **No count is affected either way**, and the page
+says so, because a notice that something disagrees without saying what it cost is worse than
+silence.
+
+The databases have not moved together. iNaturalist follows AviList for all five genus moves —
+53,705 Hairy Woodpecker records under *Leuconotopicus villosus* — and for the two spelling
+corrections neither database uses AviList's form. So the page names **eBird**, which is the one
+thing true of every case: it holds nothing under the AviList name, which is why the join needs
+the older one at all.
+
+**Two names, one bird.** Three species are the reverse: a name the occurrence data publishes
+that AviList does not carry as a species of its own. eBird holds 556,569 Whimbrel records under
+*Numenius phaeopus* and none under *hudsonicus*; iNaturalist holds 17,923 under *hudsonicus* and
+nine under *phaeopus*. The two disagree completely rather than partially, so these are not two
+populations — they are one set of birds recorded twice under two labels, and BirdView **adds**
+them rather than choosing. The page names the other label.
+
+**Feral and domestic birds.** iNaturalist files feral Rock Pigeons under *Columba livia
+domestica* and domestic Muscovy Ducks under *Cairina moschata domestica*, below the species
+rank. BirdView folds a form into the species it is a form of, so those birds are counted here —
+109,401 of them for the pigeon and 37,470 for the duck — and the page says so. They are not
+separated, because no source separates them.
+
 ### A proportion, not a count
 
 **A count says where the birdwatchers are; a proportion says where the bird is.** The two disagree

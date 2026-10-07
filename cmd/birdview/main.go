@@ -312,6 +312,44 @@ func (s *server) revalidated(h http.Handler) http.Handler {
 	})
 }
 
+// renamed says how two binomials for one taxon differ: a short noun for the
+// row's own line, and a sentence naming both halves next to each other.
+//
+// Two shapes in AviListRenames and they are not the same event. Five are
+// genus moves, where the epithet is untouched and the eye catches the
+// difference at once. Two are the same genus with a corrected epithet, and
+// there the two names can differ by a single letter -- *Pica nuttalli* and
+// *Pica nuttallii* -- so a sentence that names both without saying what
+// changed reads as though it has printed the same name twice. It was
+// reported as a bug in the page, which is what it looked like.
+//
+// Both halves are therefore put side by side in one clause, because the
+// only way to show a one-letter difference in running text is to make the
+// reader's eye compare two adjacent words.
+//
+// It says eBird and not "the occurrence data", which would be wrong in both
+// directions. iNaturalist follows AviList for all five woodpeckers and the
+// grosbeak -- 53,705 records under *Leuconotopicus villosus* -- and follows
+// neither spelling for *Pica nuttallii*, where both databases hold nothing.
+// eBird is the one thing true of every row: it holds zero under the AviList
+// name in all seven, which is why the join needs the old one at all.
+func renamed(old, current string) (what, how string) {
+	og, oe, _ := strings.Cut(old, " ")
+	ng, ne, _ := strings.Cut(current, " ")
+	switch {
+	case og != ng && oe != ne:
+		return "name", "AviList places this species in the genus " + ng +
+			" and spells the epithet " + ne + "; eBird files it as " + old + "."
+	case og != ng:
+		return "genus", "AviList places this species in the genus " + ng +
+			" and eBird files it under " + og + "."
+	case oe != ne:
+		return "spelling", "AviList spells the epithet " + ne +
+			" and eBird spells it " + oe + "; the genus is the same in both."
+	}
+	return "name", "AviList and eBird differ over this name."
+}
+
 // fingerprint hashes everything a rendered page depends on besides the URL:
 // the dataset, and every template and static file the binary serves.
 //
@@ -2565,7 +2603,8 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 	seam := func(value, detail string) {
 		seams = append(seams, categoryRow{
 			Value: value, Origin: string(dataset.Derived), Detail: detail,
-			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "how names are joined",
+			Doc:      "/docs/data#when-the-sources-disagree-about-a-name",
+			DocLabel: "how names are joined",
 		})
 	}
 
@@ -2573,11 +2612,11 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 	// this says so outright -- a row that merely noted a discrepancy would
 	// leave a reader wondering what it cost.
 	if old, ok := taxonomy.AviListRenamedFrom[sp.ScientificName]; ok {
-		seam(old+" — the name the occurrence data still uses",
-			"AviList moved this species to "+sp.ScientificName+" and eBird has not followed, "+
-				"so BirdView looks the records up under "+old+" and publishes AviList's name. "+
-				"One taxon under two labels: every record here is this bird's, and the counts "+
-				"are unaffected.")
+		what, how := renamed(old, sp.ScientificName)
+		seam(old+" — the "+what+" eBird still uses",
+			how+" BirdView publishes AviList's name and joins on eBird's, so one taxon "+
+				"carries two labels here: every record on this page is this bird's, and "+
+				"the counts are unaffected.")
 	}
 
 	// A name AviList does not carry, whose records are this species' under
