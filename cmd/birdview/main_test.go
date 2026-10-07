@@ -5735,3 +5735,108 @@ func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
 			"is not following the region selection on either page", seen[""])
 	}
 }
+
+// TestEveryNameDisagreementIsOnThePage asserts P-077 over all four kinds,
+// in both directions: every species whose name the occurrence data disputes
+// says so, and no species that nobody disputes says anything.
+//
+// Only two of the four were implemented. A shared name and an eBird
+// suppression reached the page; an alias and a lump did not, though P-077
+// has named the alias case since it was written -- "the page names the
+// alias so a reader can find the bird in the source". A visitor who knows
+// the Hairy Woodpecker as Dryobates villosus and finds a page headed
+// Leuconotopicus villosus could not tell a taxonomic update from a mistake.
+//
+// The second direction is what stops this passing by putting the row on
+// every page. 27 species of 1,083 are in one of these tables, and the other
+// 1,056 must stay silent: a disclosure that fires everywhere says nothing
+// and trains a reader to skip it.
+//
+// Watched fail: see AC-109.
+//
+// Verifies: P-077. Criterion: AC-109.
+func TestEveryNameDisagreementIsOnThePage(t *testing.T) {
+	ds := realDataset(t)
+	s, err := newServer(ds)
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
+	}
+	// What each affected species' page must name, keyed by AviList binomial.
+	want := map[string][]string{}
+	for aviList, old := range taxonomy.AviListRenamedFrom {
+		want[aviList] = append(want[aviList], old)
+	}
+	for published, into := range taxonomy.LumpedInto {
+		want[into] = append(want[into], published)
+	}
+	for _, sn := range taxonomy.SharedNames {
+		for _, covered := range sn.Covers {
+			want[covered] = append(want[covered], sn.Source)
+		}
+	}
+	for aviList := range taxonomy.DomesticForms {
+		want[aviList] = append(want[aviList], "domestic and feral")
+	}
+	for aviList := range taxonomy.WithheldByEBird {
+		want[aviList] = append(want[aviList], "withheld by eBird")
+	}
+	if len(want) < 25 {
+		t.Fatalf("only %d species to check; the tables are nearly empty and this "+
+			"check asserts almost nothing", len(want))
+	}
+
+	id := map[string]string{}
+	for i := range ds.Species {
+		id[ds.Species[i].ScientificName] = ds.Species[i].ID
+	}
+	row := regexp.MustCompile(`(?s)<th>Recorded as</th>.*?</tr>(?:\s*<tr class="[^"]*cont">.*?</tr>)*`)
+
+	checked := 0
+	for aviList, musts := range want {
+		sid, drawn := id[aviList]
+		if !drawn {
+			// In a table but not drawn -- a withheld Hawaiian endemic that
+			// did not make scope. Nothing to assert about a page that does
+			// not exist.
+			continue
+		}
+		_, page := get(t, s, "/species/"+sid)
+		seam := row.FindString(page)
+		if seam == "" {
+			t.Errorf("%s (%s): the occurrence data disputes this name and the page is "+
+				"silent; P-077 requires it to say which name the records were filed under",
+				aviList, sid)
+			continue
+		}
+		for _, must := range musts {
+			if !strings.Contains(stripTags(seam), must) {
+				t.Errorf("%s (%s): the disclosure does not mention %q. It reads: %s",
+					aviList, sid, must, strings.Join(strings.Fields(stripTags(seam)), " "))
+			}
+		}
+		checked++
+	}
+	if checked < 20 {
+		t.Fatalf("checked only %d species", checked)
+	}
+
+	// And the other direction: a bird nobody disputes says nothing. Sampled,
+	// because rendering all 1,056 is a second of nothing useful.
+	quiet := 0
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		if _, disputed := want[sp.ScientificName]; disputed || i%37 != 0 {
+			continue
+		}
+		_, page := get(t, s, "/species/"+sp.ID)
+		if row.MatchString(page) {
+			t.Errorf("%s (%s) is in none of the naming tables and still carries a "+
+				"\"Recorded as\" row; a disclosure that fires on every page says nothing",
+				sp.ScientificName, sp.ID)
+		}
+		quiet++
+	}
+	if quiet < 15 {
+		t.Fatalf("checked only %d undisputed species", quiet)
+	}
+}

@@ -933,7 +933,7 @@ Goals: G-004, G-005, G-006
 Where the occurrence sources do not use the name BirdView serves, the species page says so,
 naming **each source's binomial and how many records it holds under it**.
 
-Three kinds of disagreement, and they are not interchangeable:
+Four kinds of disagreement, and they are not interchangeable:
 
 - **An alias.** A source files the same concept under another binomial — eBird's *Dryobates
   villosus* for AviList's *Leuconotopicus villosus*. The records are this species'. The page
@@ -944,6 +944,15 @@ Three kinds of disagreement, and they are not interchangeable:
   eBird's *Setophaga petechia* covers both Northern and Mangrove Yellow Warbler, because eBird
   has not adopted the split. **The records cannot be divided**, and BirdView does not divide
   them. Both species say so, and both name the other.
+- **A form filed below the species.** iNaturalist records the feral population under a
+  trinomial — *Columba livia domestica* — which BirdView folds into the species it is a form
+  of. The count on the page therefore includes domestic and feral birds, and says so.
+
+**Every kind that applies to a species gets a row, and they are not an either/or.** The first
+implementation was a chain that showed the shared name *or* the withheld note and would have
+shown one of two had both ever applied. No species is in two of these tables today; the rule
+is that the page states each one it is in, because a disclosure silently suppressed by another
+disclosure is the failure [G-006](goals.md#g-006) names.
 
 **The third case is the one this requirement exists for.** Attributing those records to either
 daughter would assert a division nobody has measured — eBird holds 6,245,227 of them in the US
@@ -956,8 +965,8 @@ records in Ontario.
 one.** The two are indistinguishable in the data — eBird returns zero either way — and mean
 opposite things. eBird holds no record under *Strix occidentalis* because it suppresses
 conservation-sensitive species, not because it calls the Spotted Owl something else; telling a
-reader to look for another name would send them after one that does not exist. Nine species are
-in that state, and the page says the source withholds them.
+reader to look for another name would send them after one that does not exist. Eleven species
+are in that state, and the page says the source withholds them.
 
 Rationale: [G-005](goals.md#g-005) and [G-006](goals.md#g-006). A reader who can see that two
 sources disagree can discount the figure appropriately; a reader shown a reconciled number

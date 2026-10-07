@@ -2321,3 +2321,50 @@ index and the detail page came to disagree about where a bird is commonest
 produces an identical `Ratio` and `Where`, so it cannot fail this criterion. That is a true
 statement about the two functions — they differ only in the seam disclosure, which
 [AC-103](#ac-103) covers — and not a hole here.
+
+### AC-109 — Every name the occurrence data disputes is named on the page
+**Verifies:** [P-077](product.md#p-077) · **Level:** code · **Method:** property test over the
+five naming tables and the rendered detail pages
+
+**Assertions:**
+
+1. Every drawn species in `AviListRenames`, `LumpedInto`, `SharedNames`, `DomesticForms` or
+   `WithheldByEBird` carries a `Recorded as` row.
+2. The row names the specific thing: the alias for a rename, the published binomial for a
+   lump, the covering name for a shared name, `domestic and feral` for a form,
+   `withheld by eBird` for a suppression.
+3. **No species outside those tables carries the row.** 27 of 1,083 are affected and the
+   other 1,056 must stay silent.
+4. The expected set is floored at 25 species, so emptying the tables cannot make the rest
+   vacuous.
+
+**Two of the four kinds were never implemented**, though [P-077](product.md#p-077) has named
+the alias case since it was written — *"the page names the alias so a reader can find the bird
+in the source."* A visitor who knows the Hairy Woodpecker as *Dryobates villosus* and finds a
+page headed *Leuconotopicus villosus* could not tell a taxonomic update from a mistake, nor go
+back to eBird and check. That is the reader this requirement exists for.
+
+**Assertion 3 is what makes the other three mean something.** A disclosure satisfied by
+printing it everywhere says nothing and trains a reader to skip it, and a one-directional
+check would accept exactly that.
+
+**The all-rows rule is not reachable by test today.** No species is in two of the five tables,
+so a regression to the previous `if/else-if` chain would still pass. It is recorded in
+[P-077](product.md#p-077) as the required shape rather than asserted here, because the
+alternative — inventing an overlap in the real tables to exercise it — would put a false entry
+in a published taxonomy to satisfy a test.
+
+**Status: verified 2026-10-07 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| the alias row is not emitted — two of the four kinds, as shipped until now | `Pica nuttallii (yebmag): the occurrence data disputes this name and the page is silent` |
+| the lump row is not emitted | `Numenius hudsonicus (whimbr3)`, `Gygis candida (whiter4)`, `Saxicola maurus (y00427)` |
+| a row is emitted for every species | the other direction: `Acanthis flammea (redpol1) is in none of the naming tables and still carries a "Recorded as" row` |
+
+**Still open: the record counts.** [P-077](product.md#p-077) asks for each source's binomial
+**and how many records it holds under it**, and only the binomial is on the page.
+[`data/source-names.tsv`](../data/source-names.tsv) holds per-source counts and nothing reads
+it — but it counts under the *AviList* name only, so for an alias it reports eBird 0 and not
+the 7,310,342 filed under *Dryobates villosus*. Closing this needs `cmd/birdview-names` to
+query the alias too, and a run. Recorded in [decisions.md](decisions.md#work-arising).

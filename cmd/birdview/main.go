@@ -2436,33 +2436,97 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 		})
 	}
 
-	// Which names the records were filed under, where a source disagrees
-	// with AviList (P-077). Placed before the count rows deliberately: it
-	// changes how the numbers below should be read.
+	// Every way this bird's name or record differs between AviList, which
+	// supplies the names, and the occurrence data, which supplies the
+	// evidence (P-077). Placed before the count rows deliberately: all four
+	// change how the numbers below should be read.
+	//
+	// All of them, not the first that matches. This was an if/else-if over
+	// two of the four tables, which would have shown a shared name OR a
+	// withheld note had any species ever been both. None is today, and the
+	// chain was still the wrong shape: a disclosure silently suppressed by
+	// another disclosure is exactly what G-006 forbids.
+	//
+	// Why a reader wants these and not just the number: a visitor who knows
+	// the bird as Dryobates villosus and finds a page headed Leuconotopicus
+	// has no way to tell a taxonomic update from a mistake, and no way to go
+	// back to eBird and check. Naming the alias answers both.
+	var seams []categoryRow
+	seam := func(value, detail string) {
+		seams = append(seams, categoryRow{
+			Value: value, Origin: string(dataset.Derived), Detail: detail,
+			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "how names are joined",
+		})
+	}
+
+	// An alias: one taxon, two labels. No count is affected, which is why
+	// this says so outright -- a row that merely noted a discrepancy would
+	// leave a reader wondering what it cost.
+	if old, ok := taxonomy.AviListRenamedFrom[sp.ScientificName]; ok {
+		seam(old+" — the name the occurrence data still uses",
+			"AviList moved this species to "+sp.ScientificName+" and eBird has not followed, "+
+				"so BirdView looks the records up under "+old+" and publishes AviList's name. "+
+				"One taxon under two labels: every record here is this bird's, and the counts "+
+				"are unaffected.")
+	}
+
+	// A name AviList does not carry, whose records are this species' under
+	// the taxonomy BirdView uses. Sorted, because map order is not an order
+	// and a page that reshuffles between runs is not a record of anything.
+	var lumps []string
+	for published, into := range taxonomy.LumpedInto {
+		if into == sp.ScientificName {
+			lumps = append(lumps, published)
+		}
+	}
+	sort.Strings(lumps)
+	for _, published := range lumps {
+		seam(published+" — a name whose records are counted here",
+			"The occurrence sources do not agree on where this species ends: one files these "+
+				"birds under "+published+", which AviList does not carry as a species of its "+
+				"own. BirdView adds those records to these rather than choosing between them, "+
+				"because the two sources disagree completely rather than partially -- each "+
+				"holds almost nothing under the other's name, so they are one set of birds "+
+				"recorded twice.")
+	}
+
+	// A shared name: the one case where the count is not this bird's alone.
 	if other, src, why, ok := taxonomy.SharedWith(sp.ScientificName); ok {
 		name := other
 		if o := s.byID[s.idOf[other]]; o != nil {
 			name = fmt.Sprintf("%s (%s)", o.Name(loc), other)
 		}
-		out = append(out, categoryRow{
-			Label:  "Recorded as",
-			Value:  src + " — a name covering two species",
-			Origin: string(dataset.Derived),
-			Detail: why + " The counts on this page are therefore shared with " + name +
-				", and BirdView does not divide them: no source says how they divide.",
-			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "how names are joined",
-		})
-	} else if common, held := taxonomy.WithheldByEBird[sp.ScientificName]; held {
-		out = append(out, categoryRow{
-			Label:  "Recorded as",
-			Value:  "withheld by eBird",
-			Origin: string(dataset.Derived),
-			Detail: "eBird suppresses " + common + " from its public export, as it does for " +
-				"species vulnerable to disturbance. The counts here are iNaturalist's alone, " +
-				"so they are far lower than the bird's actual record. This is a gap in what " +
-				"BirdView can see, not a statement about the bird.",
-			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "how names are joined",
-		})
+		seam(src+" — a name covering two species",
+			why+" The counts on this page are therefore shared with "+name+
+				", and BirdView does not divide them: no source says how they divide.")
+	}
+
+	// A form filed below the species. Newly true of the counts rather than
+	// merely of the data: until the rank fold these trinomials matched no
+	// species at all and were discarded, and now they are counted here.
+	if why, ok := taxonomy.DomesticForms[sp.ScientificName]; ok {
+		seam("domestic and feral birds, counted here",
+			why+", below the species rank. BirdView folds a form into the species it is a "+
+				"form of, so the counts on this page include those birds. They are not "+
+				"separated, because no source separates them.")
+	}
+
+	// Withheld is NOT a name disagreement and must not read as one: telling
+	// a reader to look for another name would send them after one that does
+	// not exist (P-077).
+	if common, held := taxonomy.WithheldByEBird[sp.ScientificName]; held {
+		seam("withheld by eBird",
+			"eBird suppresses "+common+" from its public export, as it does for "+
+				"species vulnerable to disturbance. The counts here are iNaturalist's alone, "+
+				"so they are far lower than the bird's actual record. This is a gap in what "+
+				"BirdView can see, not a statement about the bird.")
+	}
+
+	// One label over the group, continuation rows blank, as the trait rows
+	// above do it.
+	if len(seams) > 0 {
+		seams[0].Label = "Recorded as"
+		out = append(out, seams...)
 	}
 
 	// The figure the tile showed, for the regions the reader had selected
