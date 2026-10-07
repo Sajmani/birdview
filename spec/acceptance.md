@@ -2368,3 +2368,39 @@ in a published taxonomy to satisfy a test.
 it — but it counts under the *AviList* name only, so for an alias it reports eBird 0 and not
 the 7,310,342 filed under *Dryobates villosus*. Closing this needs `cmd/birdview-names` to
 query the alias too, and a run. Recorded in [decisions.md](decisions.md#work-arising).
+
+### AC-110 — Every response can be revalidated, and the validator is honest
+**Verifies:** [T-029](tech.md#t-029) · **Level:** code · **Method:** unit test over rendered
+responses, their headers and their conditional round trip
+
+**Assertions:**
+
+1. Every response — pages and static files alike — carries an `ETag` and
+   `Cache-Control: no-cache`.
+2. Two different URLs never share an `ETag`.
+3. Re-requesting with the returned `ETag` yields **304 with an empty body**, so the validator
+   saves the thing it costs a header to offer.
+4. A page renders **byte-identically** three times running, which is the assumption the
+   fingerprint rests on.
+5. Changing the dataset changes the index's `ETag`.
+
+**Assertions 4 and 5 are the ones that matter**, because the ETag is computed from the build
+and the URL rather than from the body. That substitute is what makes the scheme affordable —
+hashing the body means buffering 3.3 MB of index per concurrent request — and it is sound
+only if rendering is deterministic. A clock anywhere in the render path would make every
+cached page wrong in a way no other check here would notice, so determinism is asserted and
+not assumed. Assertion 5 closes the other end: without it a constant would satisfy the rest.
+
+**What this fixes.** BirdView sent no `Cache-Control`, no `ETag` and no `Last-Modified` on
+anything, which does not mean "do not cache" — it means the browser may apply its own
+heuristic and has nothing to revalidate against when it does. It surfaced as a review round
+on `/species/yelwar1`, reported as rendering old state when the server was serving the new
+one correctly.
+
+**Status: verified 2026-10-07 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| no `Cache-Control` is set — the state before this change | `/: Cache-Control is "", want "no-cache"` |
+| the ETag is built from the build alone, ignoring the URL | `/species/yelwar1 and / share the ETag "13b5953…"; a cache would serve one for the other` |
+| the fingerprint is a constant rather than a hash of the build | `the index keeps ETag "bce5905…" after the dataset changed; every reader with a cached copy would keep it` |

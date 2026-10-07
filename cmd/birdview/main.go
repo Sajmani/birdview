@@ -10,6 +10,8 @@ package main
 
 import (
 	"compress/gzip"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -129,6 +131,10 @@ type server struct {
 	// feedback is the issue tracker readers are pointed at, or empty, in
 	// which case no page says anything about feedback at all (T-025).
 	feedback string
+	// build fingerprints everything a response is rendered from: the
+	// dataset, the templates and the static files. It is the first half of
+	// every ETag (T-029).
+	build string
 }
 
 type familyOption struct {
@@ -252,7 +258,92 @@ func (s *server) groupFamilies(r *http.Request, selected map[string]bool, rows [
 }
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	compressed(s.mux).ServeHTTP(w, r)
+	compressed(s.revalidated(s.mux)).ServeHTTP(w, r)
+}
+
+// revalidated gives every response a validator and tells caches to check it
+// before reusing it (T-029).
+//
+// BirdView sent no Cache-Control, no ETag and no Last-Modified at all, which
+// does not mean "do not cache" -- it means the browser may apply its own
+// heuristic and has nothing to revalidate against when it does. The symptom
+// is a reader reloading a page after a rebuild and being served the old one,
+// with no way to tell and no way to force the issue. It cost a review round
+// on a page that was correct on the server.
+//
+// `no-cache` is the counter-intuitive half: it means *store this, but ask
+// before reusing it*, which is exactly right here. The page is cheap to
+// validate and must never be stale, since the whole point of a figure like
+// P-074's is that it is current.
+//
+// The ETag is computed from the build and the URL rather than by hashing the
+// body, because hashing the body means buffering it, and the index is 3.3 MB
+// before compression. That is sound only because a page is a pure function
+// of (dataset, templates, static files, request URI) -- there is no clock in
+// the render path -- and AC-110 asserts that rather than trusting it.
+func (s *server) revalidated(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// -dev re-reads templates per request, so no fingerprint taken at
+		// startup stays true. Sending no validator is correct there: the
+		// whole point of dev mode is that an edit shows on reload.
+		if s.build == "" {
+			w.Header().Set("Cache-Control", "no-store")
+			h.ServeHTTP(w, r)
+			return
+		}
+		sum := sha256.Sum256([]byte(s.build + "\x00" + r.Method + "\x00" + r.URL.RequestURI()))
+		etag := `"` + hex.EncodeToString(sum[:16]) + `"`
+		w.Header().Set("ETag", etag)
+		w.Header().Set("Cache-Control", "no-cache")
+		// Compared against the bare tag: the client echoes whatever we sent,
+		// and the gzip layer may have suffixed it to distinguish the encoded
+		// representation from the identity one.
+		if m := r.Header.Get("If-None-Match"); m != "" {
+			for _, c := range strings.Split(m, ",") {
+				c = strings.TrimSpace(c)
+				c = strings.TrimPrefix(c, "W/")
+				if c == etag || c == etag[:len(etag)-1]+`-gz"` {
+					w.WriteHeader(http.StatusNotModified)
+					return
+				}
+			}
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
+// fingerprint hashes everything a rendered page depends on besides the URL:
+// the dataset, and every template and static file the binary serves.
+//
+// All of them together rather than one per asset, so a CSS edit invalidates
+// the HTML that loads it. Over-invalidating by a little is the safe
+// direction -- the cost is one refetch after a deploy, and the alternative
+// is a page styled by a stylesheet it was not written for, which is the
+// failure that is hard to recognize as a caching problem.
+func fingerprint(ds *dataset.Dataset) (string, error) {
+	h := sha256.New()
+	paths, err := fs.Glob(assetFS, "static/*")
+	if err != nil {
+		return "", err
+	}
+	sort.Strings(paths)
+	for _, p := range paths {
+		b, err := fs.ReadFile(assetFS, p)
+		if err != nil {
+			return "", err
+		}
+		fmt.Fprintf(h, "%s\x00%d\x00", p, len(b))
+		h.Write(b)
+	}
+	// Marshal rather than a file hash: the server is handed a parsed
+	// dataset and never sees the bytes it came from. Go sorts map keys when
+	// marshalling, so this is stable across runs.
+	b, err := json.Marshal(ds)
+	if err != nil {
+		return "", err
+	}
+	h.Write(b)
+	return hex.EncodeToString(h.Sum(nil)[:16]), nil
 }
 
 // gzipPool reuses compressors. A gzip.Writer carries a ~64 KiB window and a
@@ -290,6 +381,14 @@ func (g *gzipResponse) start(code int) {
 		return
 	}
 	g.on = true
+	// The gzipped body is a different representation of the resource and
+	// may not carry the identity representation's validator: a cache that
+	// mixed them would eventually hand gzip bytes to a client that asked
+	// for none. Suffixed rather than dropped, so revalidation still works
+	// for the clients that do send Accept-Encoding (T-029).
+	if et := g.Header().Get("ETag"); strings.HasSuffix(et, `"`) {
+		g.Header().Set("ETag", et[:len(et)-1]+`-gz"`)
+	}
 	// Content-Length describes the uncompressed body and is now a lie.
 	// Deleted rather than corrected: the compressed length is not known
 	// until the stream closes, and Go will chunk happily without it.
@@ -384,6 +483,17 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	s := &server{mux: http.NewServeMux(), ds: ds, tmpl: tmpl, devDir: devDir,
 		byID: map[string]*dataset.Species{}, undrawnByID: map[string]*dataset.Undrawn{},
 		idOf: map[string]string{}}
+
+	// Once, at startup: every response's ETag is built from this (T-029).
+	// In dev mode the templates are re-read per request, so a fingerprint
+	// taken now would go stale on the first edit -- which is the precise
+	// bug -dev exists to avoid. Left empty there, and revalidated skips.
+	if devDir == "" {
+		s.build, err = fingerprint(ds)
+		if err != nil {
+			return nil, fmt.Errorf("fingerprinting the build: %w", err)
+		}
+	}
 
 	counts := map[string]int{}
 	for i := range ds.Species {

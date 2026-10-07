@@ -5840,3 +5840,100 @@ func TestEveryNameDisagreementIsOnThePage(t *testing.T) {
 		t.Fatalf("checked only %d undisputed species", quiet)
 	}
 }
+
+// TestResponsesCarryAValidator asserts T-029: every response says how long
+// it may be reused and gives a cache something to check it against.
+//
+// BirdView sent no Cache-Control, no ETag and no Last-Modified at all,
+// which does not mean "do not cache". It means the browser may apply its
+// own heuristic and has nothing to revalidate against when it does, so a
+// reader who reloads after a rebuild can be served the old page with no
+// way to tell and no way to force it. That cost a review round on a page
+// that was correct on the server.
+//
+// Watched fail: see AC-110.
+//
+// Verifies: T-029. Criterion: AC-110.
+func TestResponsesCarryAValidator(t *testing.T) {
+	s, err := newServer(realDataset(t))
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
+	}
+	paths := []string{"/", "/species/yelwar1", "/species/haiwoo", "/?region=AK",
+		"/static/styles.css"}
+
+	tags := map[string]string{}
+	for _, p := range paths {
+		w := httptest.NewRecorder()
+		s.ServeHTTP(w, httptest.NewRequest("GET", p, nil))
+		if w.Code != 200 {
+			t.Fatalf("%s: %d", p, w.Code)
+		}
+		et := w.Header().Get("ETag")
+		if et == "" {
+			t.Errorf("%s: no ETag, so a cache has nothing to revalidate against "+
+				"and must either refetch everything or guess", p)
+		}
+		if cc := w.Header().Get("Cache-Control"); cc != "no-cache" {
+			t.Errorf("%s: Cache-Control is %q, want \"no-cache\" — store it, but ask "+
+				"before reusing it", p, cc)
+		}
+		for q, seen := range tags {
+			if seen == et {
+				t.Errorf("%s and %s share the ETag %s; a cache would serve one for "+
+					"the other", p, q, et)
+			}
+		}
+		tags[p] = et
+	}
+
+	// A validator is only worth sending if it actually saves the body.
+	for _, p := range paths {
+		r := httptest.NewRequest("GET", p, nil)
+		r.Header.Set("If-None-Match", tags[p])
+		w := httptest.NewRecorder()
+		s.ServeHTTP(w, r)
+		if w.Code != http.StatusNotModified {
+			t.Errorf("%s: revalidating with its own ETag returned %d, not 304; the "+
+				"ETag costs a header and saves nothing", p, w.Code)
+		}
+		if w.Body.Len() != 0 {
+			t.Errorf("%s: 304 carried %d bytes of body", p, w.Body.Len())
+		}
+	}
+
+	// The ETag is computed from the build rather than from the body, which
+	// is sound only if a page is a pure function of what the build covers.
+	// Asserted, not assumed: a clock anywhere in the render path would make
+	// every cached page wrong in a way nothing else here would catch.
+	for _, p := range paths {
+		var first string
+		for i := 0; i < 3; i++ {
+			w := httptest.NewRecorder()
+			s.ServeHTTP(w, httptest.NewRequest("GET", p, nil))
+			if i == 0 {
+				first = w.Body.String()
+				continue
+			}
+			if w.Body.String() != first {
+				t.Errorf("%s renders differently on run %d with nothing changed; the "+
+					"ETag is a fingerprint of the build and would now be a lie", p, i)
+			}
+		}
+	}
+
+	// And it moves when the build does. Without this the whole scheme could
+	// be satisfied by a constant.
+	ds2 := realDataset(t)
+	ds2.Species[0].Mass.Value += 1
+	s2, err := newServer(ds2)
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
+	}
+	w := httptest.NewRecorder()
+	s2.ServeHTTP(w, httptest.NewRequest("GET", "/", nil))
+	if w.Header().Get("ETag") == tags["/"] {
+		t.Errorf("the index keeps ETag %s after the dataset changed; every reader "+
+			"with a cached copy would keep it", tags["/"])
+	}
+}
