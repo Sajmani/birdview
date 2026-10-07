@@ -2928,9 +2928,35 @@ bird, when the only fact available is a statement about the survey — the same 
 [P-075](product.md#p-075) draws for a species with no records, and the one
 `No data for these regions yet` draws for a region with no denominator.
 
-The floor is calibrated against the distribution of per-region record counts during
-implementation rather than guessed here. It is a floor on **evidence**, so it counts the
-species' records in that region, not the region's total.
+**The floor is 200 of the species' own records in that region**, and it is a floor on
+evidence, so it counts the species' records there rather than the region's total.
+
+Calibrated 2026-10-07 against the 27,830 species-region cells of the committed table and the
+real monthly effort of New York and Hawaii. The risk below is that a species present in
+**every** month is wrongly called absent in at least one, purely by sampling:
+
+| floor | cells abstaining | records abstaining | false absence, NY | false absence, HI |
+| --- | --- | --- | --- | --- |
+| 50 | 13.5% | — | 38.4% | 29.9% |
+| 100 | 19.0% | 0.0145% | 10.2% | 7.9% |
+| 150 | 22.4% | 0.0240% | 2.4% | 0.6% |
+| **200** | **25.1%** | **0.0345%** | **0.5%** | **0.2%** |
+| 300 | 28.6% | 0.0540% | 0.0% | 0.0% |
+
+**A quarter of the cells, and three hundredths of one percent of the records.** That is the
+shape that makes the floor cheap: abstention is concentrated almost entirely where there is
+nothing to abstain from. 117 of 1,062 species hold under 200 records in every region they
+occur in and will never be month-filtered at all; those are the vagrants, island endemics and
+species eBird withholds, for which showing every month is the only honest answer.
+
+**100 was the first guess and it is wrong**, which is why this was measured rather than
+reasoned. A uniform month share makes 100 look safe at 0.3%, but effort is not uniform — New
+York records 20.9% of its birding in May and 4.8% in December — and against the real profile
+100 misfires on **10.2%** of year-round species. The knee is at 200.
+
+**The threshold stays at the low end of its empty gap for the same reason.** A stricter cut
+is easier to fail, so it would raise this risk; 0.2 rather than 0.3 buys margin here at no
+cost to the verdicts measured above.
 
 ### What the interface says when it abstains
 
@@ -2945,7 +2971,17 @@ the months the bird is here from the months nobody looked, so it is shown in all
   carries a month — 65,504,204 checked across both sources, none missing — so this is a check
   and not an assumption.
 - `birdview-regions` goes from about 140 queries to about 2,300, one to three hours, and
-  therefore needs checkpoint and resume before it is run at all.
+  therefore needs checkpoint and resume before it is run at all. **Done 2026-10-07**: the
+  land pass caches each region's raw facet as it completes and skips what it already has.
+  The cache holds the **unnormalized facet**, not presence or counts, for the reason
+  `birdview-status` caches raw dates — asking GBIF is expensive and deciding what the answer
+  means is free, and this very decision is changing the second.
+- **The marine pass costs 2 queries per sea, not 24.** GBIF ORs repeated `gadmGid` values, so
+  one month facet over the box and one restricted to `gadmGid=USA|CAN` give total and on-land
+  per month, and the difference is water. Verified 2026-10-07. It counts **11 records fewer**
+  in 108 million than today's `gadmLevel0Gid` facet, those being records inside a third
+  country's polygon; that is 0.00001%, against the ~3% by which "on water" already overstates
+  "at sea" (`CountOffLandInBox`).
 - The committed table carries twelve counts per species-region cell and per region total.
 
 ### Rejected

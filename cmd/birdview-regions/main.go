@@ -103,6 +103,8 @@ func main() {
 		outPath  = flag.String("out", "data/region-presence.tsv", "output table (committed)")
 		marine   = flag.Bool("marine-only", false,
 			"recompute only the sea rows and sea totals in -out, leaving the land half untouched")
+		progress = flag.String("progress", "/tmp/birdview-regions-land.jsonl",
+			"resumable cache of the raw land facets; delete to refetch")
 	)
 	flag.Parse()
 
@@ -138,21 +140,69 @@ func main() {
 
 	type result struct {
 		gid, name string
-		present   map[string]bool
-		counts    map[string]int64
-		err       error
+		// raw is this region's facets, from the cache or the wire. Carried
+		// per result rather than merged into one shared map: the loop below
+		// goes on reading that map while the workers it started write to
+		// it, which is a race the detector caught and review did not.
+		raw     map[string]map[string]int64
+		present map[string]bool
+		counts  map[string]int64
+		err     error
 	}
 	results := make([]result, len(gids))
+
+	// Resume what a previous run already fetched. The land pass is about to
+	// go from 140 requests to 1,660 under CR-036, one to three hours, and a
+	// run that long will meet a dropped socket: GBIF reset two connections
+	// during a 40-minute run on 2026-10-05 and timed out two more.
+	//
+	// The cache holds the RAW FACET, not presence or counts, for the reason
+	// birdview-status caches raw dates rather than computed shapes. What is
+	// expensive is asking GBIF; deciding what an answer means is free and
+	// still being argued about -- CR-036 is changing that decision right
+	// now. Caching the verdict would mean refetching every region the next
+	// time the rule moved.
+	done := map[string]landRec{}
+	if f, err := os.Open(*progress); err == nil {
+		dec := json.NewDecoder(f)
+		for {
+			var rec landRec
+			if err := dec.Decode(&rec); err != nil {
+				break
+			}
+			done[rec.GID] = rec
+		}
+		f.Close()
+		if len(done) > 0 {
+			log.Printf("birdview-regions: %d regions already fetched (%s)", len(done), *progress)
+		}
+	}
+	pf, err := os.OpenFile(*progress, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	if err != nil {
+		log.Fatalf("birdview-regions: %v", err)
+	}
+	defer pf.Close()
+	penc := json.NewEncoder(pf)
+	// One writer. Appending from the workers would interleave two JSON
+	// objects into one unparseable line, and the file's whole purpose is to
+	// still be readable after a crash.
+	var progmu sync.Mutex
+
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, c.Concurrency)
 	for i, gid := range gids {
+		if rec, ok := done[gid]; ok {
+			results[i] = result{gid: gid, name: rec.Name, raw: rec.Raw}
+			continue
+		}
 		wg.Add(1)
 		go func(i int, gid string) {
 			defer wg.Done()
 			sem <- struct{}{}
 			defer func() { <-sem }()
-			r := result{gid: gid, present: map[string]bool{}, counts: map[string]int64{}}
-			r.name, r.err = c.RegionName(ctx, gbif.EBirdDatasetKey, gid)
+			r := result{gid: gid}
+			rec := landRec{GID: gid, Raw: map[string]map[string]int64{}}
+			rec.Name, r.err = c.RegionName(ctx, gbif.EBirdDatasetKey, gid)
 			if r.err != nil {
 				results[i] = r
 				return
@@ -161,32 +211,67 @@ func main() {
 				recs, err := c.NamesIn(ctx, key, gid)
 				if err != nil {
 					r.err = err
-					break
+					results[i] = r
+					return
 				}
-				var total int64
-				for _, rec := range recs {
-					total += rec.Records
+				raw := make(map[string]int64, len(recs))
+				for _, v := range recs {
+					raw[v.Name] = v.Records
 				}
-				if total == 0 {
-					continue
-				}
-				for _, rec := range recs {
-					// Normalized to the AviList name BEFORE matching, by the
-					// same function birdview-status uses. Matching the raw
-					// facet name is how eBird's 7,310,342 Dryobates villosus
-					// records came to belong to no species at all (CR-035).
-					n := taxonomy.Occurrence(rec.Name)
-					r.counts[n] += rec.Records
-					if float64(rec.Records)/float64(total)*1e6 >= minPPM {
-						r.present[n] = true
-					}
-				}
+				rec.Raw[key] = raw
 			}
+			// Written only when every dataset for this region succeeded.
+			// A half-fetched region in the cache would be indistinguishable
+			// from a region that really holds nothing for iNaturalist, and
+			// the resume would skip it forever.
+			progmu.Lock()
+			err := penc.Encode(rec)
+			progmu.Unlock()
+			if err != nil {
+				r.err = fmt.Errorf("writing progress: %w", err)
+				results[i] = r
+				return
+			}
+			r.name, r.raw = rec.Name, rec.Raw
 			results[i] = r
-			log.Printf("  %-28s %5d names", r.name, len(r.present))
+			log.Printf("  %-28s %5d names", rec.Name, len(rec.Raw[gbif.EBirdDatasetKey]))
 		}(i, gid)
 	}
 	wg.Wait()
+
+	// Measure, from the cache, whatever its records came from. Separated
+	// from the fetch so that a rule change costs a rerun of this loop and
+	// not of the network.
+	for i := range results {
+		if results[i].err != nil {
+			continue
+		}
+		r := &results[i]
+		if r.raw == nil {
+			continue
+		}
+		r.present, r.counts = map[string]bool{}, map[string]int64{}
+		for _, raw := range r.raw {
+			var total int64
+			for _, n := range raw {
+				total += n
+			}
+			if total == 0 {
+				continue
+			}
+			for name, n := range raw {
+				// Normalized to the AviList name BEFORE matching, by the
+				// same function birdview-status uses. Matching the raw
+				// facet name is how eBird's 7,310,342 Dryobates villosus
+				// records came to belong to no species at all (CR-035).
+				k := taxonomy.Occurrence(name)
+				r.counts[k] += n
+				if float64(n)/float64(total)*1e6 >= minPPM {
+					r.present[k] = true
+				}
+			}
+		}
+	}
 
 	// regionsOf maps a species' lowercased scientific name to the regions it
 	// was reported in.
@@ -359,6 +444,18 @@ func main() {
 		log.Fatalf("birdview-regions: %v", err)
 	}
 	log.Printf("birdview-regions: wrote %s", *outPath)
+}
+
+// landRec is one region's raw land facets, as cached for resume.
+//
+// Keyed by GADM id rather than by index, so adding a region to
+// internal/region does not invalidate the regions already fetched.
+type landRec struct {
+	GID  string `json:"gid"`
+	Name string `json:"name"`
+	// Raw maps a GBIF dataset key to the verbatim facet it returned:
+	// publisher's name, lowercased, to records. Unnormalized on purpose.
+	Raw map[string]map[string]int64 `json:"raw"`
 }
 
 func loadSpecies(path string) ([]string, error) {
