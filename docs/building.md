@@ -23,10 +23,13 @@ Everything the build needs is in the repository.
 
 ### Already here (CC BY 4.0, redistributable)
 
-- `AVONET Supplementary dataset 1.xlsx` — morphology traits
-- `wingspan_fox2026_AppendixS1.xlsx` — empirical wingspans
+- [`third_party/avilist/`](../third_party/avilist) — names, families and taxonomic sequence
+- [`third_party/avonet/`](../third_party/avonet) — morphology traits
+- [`third_party/fox-wingspan/`](../third_party/fox-wingspan) — empirical wingspans
 
-Both are vendored with provenance and hashes under [`spec/sources/`](../spec/sources).
+Each directory carries the data's own license and a README naming its source and citation. They
+are **not** covered by BirdView's Apache 2.0 license. Provenance and hashes are recorded under
+[`spec/sources/`](../spec/sources).
 
 ### Nothing to fetch
 
@@ -71,9 +74,9 @@ Flags, should you need them:
 | Command | Flag | Default |
 | --- | --- | --- |
 | `birdview-ingest` | `-status` | `data/status.tsv` |
-| | `-avilist` | `AviList-v2025b-10Jun2026-extended.xlsx` |
-| | `-avonet` | `AVONET Supplementary dataset 1.xlsx` |
-| | `-wingspan` | `wingspan_fox2026_AppendixS1.xlsx` |
+| | `-avilist` | `third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx` |
+| | `-avonet` | `third_party/avonet/AVONET Supplementary dataset 1.xlsx` |
+| | `-wingspan` | `third_party/fox-wingspan/wingspan_fox2026_AppendixS1.xlsx` |
 | | `-inat` | `data/inat-taxa.tsv` |
 | | `-regions` | `data/region-presence.tsv` |
 | | `-out` | `web/data/species.json` |

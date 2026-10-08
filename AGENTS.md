@@ -63,11 +63,17 @@ Violating any of these is a licensing problem, not a style problem.
   redistributed. Two other committed files are
   deliberate and are not source data: the generated tables under `data/` — `inat-taxa.tsv` of
   iNaturalist taxon IDs (T-022) and `gbif-taxa.tsv` of GBIF-to-AviList name correspondences — and
-  the vendored terms snapshots under `spec/sources/`.
+  the vendored iNaturalist terms.
+- **Every third-party file lives under `third_party/<name>/`, with its own license and README.**
+  BirdView is Apache 2.0 and none of these files are, so they must not sit where the root
+  `LICENSE` reads as covering them. Their provenance and hashes stay in
+  `spec/sources/<name>/PROVENANCE.md` — see the location exception in
+  [spec/tech.md](spec/tech.md#location-exception-the-third_party-directory). New
+  first-party source files carry the Apache 2.0 header; files under `third_party/` never do.
 - **BirdView links to iNaturalist and copies nothing from it** (P-064). Never embed, hotlink or
   cache a photograph: those are contributors' work under their own licenses, frequently CC BY-NC.
   T-002 forbids the mechanism anyway. Taxon IDs are fine — the terms say nothing about the
-  taxonomy, which is checkable against the hashed copies in `spec/sources/inat-terms/`.
+  taxonomy, which is checkable against the hashed copies in `third_party/inat-terms/`.
 - **Never present a modeled value as a measurement** (P-060, P-061). Every length and wingspan is
   tagged measured or estimated, and the UI shows which. This is the decision the whole measurement
   design rests on — see [CR-001](spec/decisions.md#cr-001).
@@ -152,5 +158,5 @@ Cite requirement IDs in comments using the literal token, so one search covers t
 vendored document** to match. Quoted terms of service are verbatim citations with recorded hashes;
 "fixing" a publisher's spelling falsifies the quote and breaks the record.
 
-Keep the repository's formatter away from `spec/sources/` and `spec/process.md` for the same
-reason.
+Keep the repository's formatter away from `third_party/`, `spec/sources/` and `spec/process.md`
+for the same reason.

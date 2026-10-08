@@ -8,7 +8,7 @@ order names, and the per-species eBird code** (P-004). See
 
 | File | Origin | SHA-256 |
 | --- | --- | --- |
-| `//AviList-v2025b-10Jun2026-extended.xlsx` | https://doi.org/10.2173/avilist.v2025b | `2e1fd3374e23af732b04115b033dd9d97fc53ba275c312d02ef5d12cfb85c988` |
+| `//third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx` | https://doi.org/10.2173/avilist.v2025b | `2e1fd3374e23af732b04115b033dd9d97fc53ba275c312d02ef5d12cfb85c988` |
 
 - **Size:** 8,954,422 bytes.
 - **Retrieved:** 2026-10-02, by `curl` from

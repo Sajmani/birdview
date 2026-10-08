@@ -32,7 +32,7 @@ import (
 
 const (
 	tableFile  = "../../data/gbif-taxa.tsv"
-	avlFile    = "../../AviList-v2025b-10Jun2026-extended.xlsx"
+	avlFile    = "../../third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx"
 	statusFile = "../../data/status.tsv"
 )
 

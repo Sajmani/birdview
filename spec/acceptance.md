@@ -1568,8 +1568,8 @@ documents rather than on a species page.
 not by its first line. `spec/process.md` opens with an HTML comment recording where the file
 came from, and reading line one listed it in the index as `<!--`.
 
-**Assertions, what is not served:** the embed carries documents only. `spec/sources/` holds
-other people's terms and must not be reachable, so the check walks what is embedded rather
+**Assertions, what is not served:** the embed carries documents only. `spec/sources/` and
+`third_party/` hold other people's terms and must not be reachable, so the check walks what is embedded rather
 than probing one path — a probe catches the file it names, and the risk is the whole directory
 arriving at once ([T-004](tech.md#t-004)).
 
@@ -1579,6 +1579,13 @@ server does not serve; by citing `#how-regions-work`, a section that does not ex
 renaming the section the citation names; by sending the spec's sibling links to `/docs`, which 404s eight
 requirement documents; by widening the embed to `*.md sources`, which pulls in the vendored
 terms; and by reading the title from line one again, which puts `<!--` back in the index.
+
+**Re-verified 2026-10-08** when the vendored iNaturalist pages moved from `spec/sources/` to
+`third_party/` for the Apache 2.0 release. The check gained probes for the new tree, and was
+watched failing by mounting `third_party/` on a file server:
+`/third_party/inat-terms/terms.html is served; vendored terms and non-documents must not be`.
+A check that knew only the old home would have gone on passing after the files it guards had
+moved somewhere it never looks.
 
 ### AC-092 — Habitat and diet filter per species, and say where each value came from
 **Verifies:** P-015 · **Level:** code · **Method:** unit tests over the trait table against the

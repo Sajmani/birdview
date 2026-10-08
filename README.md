@@ -87,6 +87,25 @@ the committed inputs in one command.
 
 ---
 
+## License
+
+BirdView's own code and documentation are licensed under the
+[Apache License 2.0](LICENSE). See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute.
+
+**Everything under [`third_party/`](third_party) is not.** Each directory there carries its
+own license and a README naming its source:
+
+- [AviList](third_party/avilist), [AVONET](third_party/avonet) and the
+  [Fox et al. wingspans](third_party/fox-wingspan) are licensed by their authors under
+  **CC BY 4.0**, and must be credited as each README describes.
+- The [iNaturalist terms](third_party/inat-terms) and [API practices](third_party/inat-api) are
+  **© iNaturalist** and openly licensed by no one. They are kept so that every quotation of
+  them in [spec/](spec) can be checked against the exact text it came from.
+
+This is not an officially supported Google product.
+
+---
+
 ## Contact
 
 Feedback and corrections: please open an issue.

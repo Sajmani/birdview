@@ -7,7 +7,7 @@ for the adoption record.
 
 | File | Origin | SHA-256 |
 | --- | --- | --- |
-| `//AVONET Supplementary dataset 1.xlsx` | https://doi.org/10.6084/m9.figshare.16586228 (v7) | `eb645e83dddb40f1654a3e8d721998dbca76eff540231b7b809267c1e96f8d3e` |
+| `//third_party/avonet/AVONET Supplementary dataset 1.xlsx` | https://doi.org/10.6084/m9.figshare.16586228 (v7) | `eb645e83dddb40f1654a3e8d721998dbca76eff540231b7b809267c1e96f8d3e` |
 
 - **Size:** 21,524,673 bytes
 - **Retrieved:** 2026-09-20, via a figshare private share link

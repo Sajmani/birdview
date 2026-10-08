@@ -3825,8 +3825,11 @@ func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
 
 // TestVendoredTermsAreNotServed is a licensing check, not a routing one.
 //
-// spec/sources/ holds snapshots of other people's terms — the ABA
+// spec/sources/ and third_party/ hold other people's terms — the ABA
 // checklist's, Wiley's, iNaturalist's — kept for hashing and provenance.
+// The iNaturalist pages moved to third_party/ for the Apache 2.0 release,
+// so both trees are probed: a check that only knew the old home would go on
+// passing after the files it guards had moved somewhere it never looks.
 // They are quoted for a record, not ours to republish, so the embed must
 // not reach them and no path may serve them (T-004).
 //
@@ -3835,6 +3838,8 @@ func TestVendoredTermsAreNotServed(t *testing.T) {
 	s := newTestServer(t)
 	for _, path := range []string{
 		"/spec/sources/aba", "/spec/sources/wiley", "/spec/sources/inat-terms",
+		"/third_party", "/third_party/inat-terms/terms.html",
+		"/third_party/avonet/LICENSE",
 		"/spec/check", "/docs/../README", "/spec/../README",
 	} {
 		if code, _ := get(t, s, path); code == http.StatusOK {

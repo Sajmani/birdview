@@ -8,7 +8,7 @@ Vendored copy of iNaturalist's API recommended practices. See
 
 | File | Origin | SHA-256 |
 | --- | --- | --- |
-| `//spec/sources/inat-api/api-recommended-practices.html` | <https://www.inaturalist.org/pages/api+recommended+practices> | `ffb53ae11e1cce9c8bc2cef7743d478318ae7f9525eccde68d56d9eab4f7dbd3` |
+| `//third_party/inat-api/api-recommended-practices.html` | <https://www.inaturalist.org/pages/api+recommended+practices> | `ffb53ae11e1cce9c8bc2cef7743d478318ae7f9525eccde68d56d9eab4f7dbd3` |
 
 - **Retrieved:** 2026-08-09, **by the maintainer, saved from a browser.**
 - **Page's own revision line:** "Revised on February 27, 2025 06:23 PM by kueda".

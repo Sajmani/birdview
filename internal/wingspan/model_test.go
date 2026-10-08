@@ -20,7 +20,7 @@ import (
 	"testing"
 )
 
-const foxFile = "../../wingspan_fox2026_AppendixS1.xlsx"
+const foxFile = "../../third_party/fox-wingspan/wingspan_fox2026_AppendixS1.xlsx"
 
 // TestModelAgreesWithFoxPublishedPredictions is the criterion that justifies
 // fitting our own regression instead of ingesting Fox's predicted columns: if

@@ -50,7 +50,7 @@ func main() {
 	log.SetPrefix("birdview-gbifmap: ")
 
 	var (
-		avlPath     = flag.String("avilist", "AviList-v2025b-10Jun2026-extended.xlsx", "AviList checklist (extended release)")
+		avlPath     = flag.String("avilist", "third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx", "AviList checklist (extended release)")
 		out         = flag.String("out", "data/gbif-taxa.tsv", "mapping table to write")
 		dataset     = flag.String("dataset", gbif.EBirdDatasetKey, "GBIF occurrence dataset key")
 		countryList = flag.String("countries", "US,CA", "comma-separated country codes to scope the species list to")

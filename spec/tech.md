@@ -225,16 +225,32 @@ What [process.md](process.md#project-bindings) requires each project to declare.
 | **Source refresh cadence** | Annually. ABA, AOS and eBird/Clements each revise on roughly yearly cycles, and P-006's synonym table depends on all three. |
 | **Existing docs** | `spec/` owns requirements. `PROVENANCE` files under `spec/sources/` own retrieval facts and hashes. A README, when written, owns usage instructions and duplicates neither. |
 
-### Location exception: the AVONET workbook
+### Location exception: the third_party directory
 
-`//AVONET Supplementary dataset 1.xlsx` lives at the repository root rather than under
-`spec/sources/avonet/`, and its provenance record is
-[spec/sources/avonet/PROVENANCE.md](sources/avonet/PROVENANCE.md).
+**Every vendored third-party file lives under `third_party/<name>/`**, not under
+`spec/sources/<name>/`, and its provenance record stays where [process.md](process.md) puts it:
+`spec/sources/<name>/PROVENANCE.md` names the out-of-place path and holds its hash. The
+directory names match, so `third_party/avonet/` is described by `spec/sources/avonet/`.
 
-The file is a 21.5 MB build input read by the ingest command, not a rules document consulted by a
-reader. Burying a build input inside the spec bundle would misrepresent what it is. The source
-directory exists and names the out-of-place path, so nobody helpfully copies the workbook into it
-and creates a second copy to drift.
+| `third_party/` | License | What it is |
+| --- | --- | --- |
+| `avonet/`, `avilist/`, `fox-wingspan/` | CC BY 4.0, full text beside each file | the three build inputs |
+| `inat-terms/`, `inat-api/` | none granted; © iNaturalist | terms BirdView quotes, kept so each quotation can be checked |
+
+Two reasons, and the second is why this moved from a one-file exception to the rule.
+
+The workbooks are build inputs read by the ingest, not rules documents consulted by a reader, and
+burying a 21.5 MB spreadsheet inside the spec bundle would misrepresent what it is. That was the
+original exception, for AVONET alone.
+
+**And BirdView is published under Apache 2.0, which none of these files are.** A `LICENSE` at
+the repository root reads as covering everything beneath it. Putting third-party material in its
+own tree, each directory with its own license and README, is how a reader — and a license
+scanner — can tell what BirdView may relicense from what it merely carries. `spec/sources/`
+keeps only BirdView's own writing: the provenance records and the requirement transcriptions.
+
+The source directory still exists for each, so nobody helpfully copies a file back into it and
+creates a second copy to drift.
 
 ### T-024 — What the project says about itself stays true
 Subject: `docs.currency`

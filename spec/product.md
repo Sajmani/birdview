@@ -1845,7 +1845,7 @@ is the correct link in a repository checkout and `/spec/product` is the correct 
 browser; editing the file would fix the second by breaking the first, and these documents are
 served precisely because they are the files the repository carries.
 
-**`spec/sources/` is not served.** It holds vendored snapshots of other people's terms — the
-ABA checklist's, Wiley's, iNaturalist's — kept so a provenance record can be hashed and
-checked. They are quoted for a record, not ours to republish, and serving them would be the
+**Neither `spec/sources/` nor `third_party/` is served.** Between them they hold the
+provenance of other people's terms — the ABA checklist's, Wiley's, iNaturalist's — and the
+vendored iNaturalist pages themselves, kept so a provenance record can be hashed and checked. They are quoted for a record, not ours to republish, and serving them would be the
 redistribution [T-004](tech.md#t-004) exists to prevent.

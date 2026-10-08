@@ -32,9 +32,9 @@ import (
 
 const (
 	statusFile = "../../data/status.tsv"
-	avoFile    = "../../AVONET Supplementary dataset 1.xlsx"
-	foxFile    = "../../wingspan_fox2026_AppendixS1.xlsx"
-	avlFile    = "../../AviList-v2025b-10Jun2026-extended.xlsx"
+	avoFile    = "../../third_party/avonet/AVONET Supplementary dataset 1.xlsx"
+	foxFile    = "../../third_party/fox-wingspan/wingspan_fox2026_AppendixS1.xlsx"
+	avlFile    = "../../third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx"
 	inatFile   = "../../data/inat-taxa.tsv"
 	regFile    = "../../data/region-presence.tsv"
 )

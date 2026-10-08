@@ -7,7 +7,7 @@ Vendored copy of the avian wingspan database, BirdView's only source of measured
 
 | File | Origin | SHA-256 |
 | --- | --- | --- |
-| `//wingspan_fox2026_AppendixS1.xlsx` | https://doi.org/10.6084/m9.figshare.32089083 (v1) | `6b55747a5761c08356d92c7a0b524b4e586c28a25316b0a6c1de3738db1d8eda` |
+| `//third_party/fox-wingspan/wingspan_fox2026_AppendixS1.xlsx` | https://doi.org/10.6084/m9.figshare.32089083 (v1) | `6b55747a5761c08356d92c7a0b524b4e586c28a25316b0a6c1de3738db1d8eda` |
 
 - **Size:** 4,879,919 bytes · **MD5:** `4970a3506c98859c3aeb7e98e5f5ce35`, which **matches the
   `computed_md5` figshare publishes for the file** — so the download is confirmed intact against

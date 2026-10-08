@@ -39,7 +39,7 @@ alike. Its entry is kept so the evaluation is not repeated.
 | **Version** | v7 |
 | **Integrity** | [spec/sources/avonet/PROVENANCE.md](sources/avonet/PROVENANCE.md) |
 | **Tier** | mandatory (copyright license) |
-| **Import style** | By reference; vendored at `//AVONET Supplementary dataset 1.xlsx` under the location exception in [tech.md](tech.md#location-exception-the-avonet-workbook) |
+| **Import style** | By reference; vendored at `//third_party/avonet/AVONET Supplementary dataset 1.xlsx` under the location exception in [tech.md](tech.md#location-exception-the-third_party-directory) |
 | **Scope** | All morphometric traits (P-002, P-003) |
 | **Geographic scope** | **Worldwide** — 10,661 species across 41 orders, every continent. Measured 2026-10-01. |
 | **Adopted parts** | Sheet `AVONET2_eBird` only |

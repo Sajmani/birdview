@@ -8,9 +8,9 @@ for the adoption record and [requirements.md](requirements.md) for the transcrip
 
 | File | Origin | SHA-256 |
 | --- | --- | --- |
-| `//spec/sources/inat-terms/terms.html` | <https://www.inaturalist.org/pages/terms> | `de9737c4108f4058f0f6173ed8ea95894a6d56a224a5e245ae411538a0154afb` |
-| `//spec/sources/inat-terms/community-guidelines.html` | <https://www.inaturalist.org/pages/community+guidelines> | `2f32109e84002e0208ecb86aa18331ed6b62d849c1729a9c4e816690626044b8` |
-| `//spec/sources/inat-terms/machine-generated-content.html` | <https://www.inaturalist.org/pages/machine_generated_content> | `57ebd02cf03f0eebc5823ddea52e7299b086acf0ff54d6b719a666f8fc642160` |
+| `//third_party/inat-terms/terms.html` | <https://www.inaturalist.org/pages/terms> | `de9737c4108f4058f0f6173ed8ea95894a6d56a224a5e245ae411538a0154afb` |
+| `//third_party/inat-terms/community-guidelines.html` | <https://www.inaturalist.org/pages/community+guidelines> | `2f32109e84002e0208ecb86aa18331ed6b62d849c1729a9c4e816690626044b8` |
+| `//third_party/inat-terms/machine-generated-content.html` | <https://www.inaturalist.org/pages/machine_generated_content> | `57ebd02cf03f0eebc5823ddea52e7299b086acf0ff54d6b719a666f8fc642160` |
 
 - **Retrieved:** 2026-08-09, **by the maintainer, saved from a browser.**
 
