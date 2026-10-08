@@ -58,6 +58,12 @@ details[open] > summary .sumdesc { display: none; }
    the check is blind to. */
 .grouping { margin-top: 10px; }
 .grouping + .grouping { border-top: 1px solid var(--line); padding-top: 9px; }
+/* Months sit above Region and are a separate question, so a thin rule
+   divides them -- the same line and spacing that separates one region
+   grouping from the next. Named rather than written as `.row + .row`,
+   because the Region row owns the grouping blocks beneath it and the rule
+   belongs above that whole unit, not between any two adjacent rows. */
+.row.chips.ruled { border-top: 1px solid var(--line); padding-top: 9px; margin-top: 2px; }
 .ghdr { font-size: 11.5px; font-weight: 600; }
 /* The note sits on its own line under the grouping name rather than running on
    from it: inline, a full sentence crowds the label it is explaining and wraps
