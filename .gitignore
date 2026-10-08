@@ -6,9 +6,14 @@
 # values derived from the non-redistributable inputs above.
 /web/data/species.json
 
-# Compiled binaries
+# Compiled binaries. Every command is named birdview-*, and `go build
+# ./cmd/<name>` without -o drops the binary in the working directory -- which
+# is how an 8.5 MB birdview-regions executable was committed once.
 /birdview
-/birdview-ingest
+/birdview-*
 /dist/
+
+# Editor and mutation-testing backups.
+*.bak
 
 .DS_Store
