@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"birdview/internal/dataset"
+	"birdview/internal/month"
 	"birdview/internal/region"
 	"birdview/internal/status"
 	"birdview/internal/taxonomy"
@@ -1999,7 +2000,15 @@ func TestEveryOrderGroupWrapsItsFamilies(t *testing.T) {
 				"the grid's first column")
 		}
 	}
-	if want := strings.Count(body, `class="chip`) - strings.Count(tileArea(t, body), `class="chip`); totalChips != want {
+	// Month chips are deliberately outside any group: twelve items in a row
+	// need no zones, and CR-036 rejected season groups outright because a
+	// season name inverts between hemispheres and means nothing in the
+	// tropics. They are subtracted rather than folded in, so this still
+	// catches a family or region chip that escapes its box.
+	outside := strings.Count(body, `class="chip`) -
+		strings.Count(tileArea(t, body), `class="chip`) -
+		strings.Count(body, `class="chip mchip`)
+	if want := outside; totalChips != want {
 		t.Errorf("the groups account for %d chips but the page has %d; some chip is outside "+
 			"an order group entirely", totalChips, want)
 	}
@@ -4473,7 +4482,7 @@ func TestTheUnitSaysSpeciesAndNotBird(t *testing.T) {
 	if sp == nil {
 		t.Fatal("no species has a region")
 	}
-	cell := shareOf(sp, ds.RegionTotals, options{})
+	cell := shareOf(sp, ds, options{})
 	if cell == nil {
 		t.Fatal("no share cell for a species with regions")
 	}
@@ -4822,7 +4831,7 @@ func TestShareRangesOverOneSetOfRegions(t *testing.T) {
 
 	// Everything selected: the numerator is every region that has a total,
 	// which is now all of them.
-	num, den := shareIn(sp, ds.RegionTotals, nil, true)
+	num, den := shareIn(sp, ds, options{})
 	var wantNum int64
 	for j, id := range sp.Regions {
 		if _, ok := ds.RegionTotals[id]; ok {
@@ -4850,7 +4859,8 @@ func TestShareRangesOverOneSetOfRegions(t *testing.T) {
 			break
 		}
 	}
-	n2, d2 := shareIn(sp, partial, nil, true)
+	n2, d2 := shareIn(sp, &dataset.Dataset{RegionTotals: partial,
+		RegionMonthlyTotals: ds.RegionMonthlyTotals}, options{})
 	if n2 >= num {
 		t.Errorf("%s: dropping %s from the totals left the numerator at %d (was %d); "+
 			"a region with no denominator must leave the numerator too",
@@ -4952,7 +4962,7 @@ func TestCommonestRoundTripsThroughTheIndex(t *testing.T) {
 		}
 
 		// Select exactly that region on the index and read the share back.
-		cell := shareOf(sp, ds.RegionTotals, options{
+		cell := shareOf(sp, ds, options{
 			HasRegions: true, Regions: map[string]bool{c.Region: true}})
 		if cell == nil {
 			t.Errorf("%s: the index gives no share for %s, which its own page calls its peak",
@@ -5031,7 +5041,7 @@ func TestMissingTotalsDoNotClaimTheBirdIsAbsent(t *testing.T) {
 	}
 
 	// Withhold that region's total, as the seas were withheld.
-	cell := shareOf(sp, map[string]int64{}, options{
+	cell := shareOf(sp, &dataset.Dataset{RegionTotals: map[string]int64{}}, options{
 		HasRegions: true, Regions: map[string]bool{id: true}})
 	if cell == nil {
 		t.Fatal("a missing total renders nothing at all")
@@ -5282,7 +5292,7 @@ func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 	want := map[string]int{}
 	for i := range ds.Species {
 		sp := &ds.Species[i]
-		num, den := shareIn(sp, ds.RegionTotals, nil, true)
+		num, den := shareIn(sp, ds, options{})
 		if num == 0 || den == 0 {
 			continue
 		}
@@ -6055,4 +6065,216 @@ func TestTheNameDisclosureExplainsItselfAndLinksSomewhereUseful(t *testing.T) {
 				"species that is not this one: %s", c.Species, c.Published, seam)
 		}
 	}
+}
+
+// TestMonthScopeWraps asserts the label a figure carries when the months
+// are narrowed, and the one case a naive renderer gets wrong.
+//
+// A run of three or more collapses to a range, and a range is allowed to
+// cross the year end: a winter selection reads "Nov-Feb" and not
+// "Jan, Feb, Nov, Dec". Winter is the selection a birder is most likely to
+// make, so it is the one worth the extra code — and it is unreachable by
+// any renderer that walks January to December and stops.
+//
+// Watched fail: see AC-112.
+//
+// Verifies: P-011, CR-036. Criterion: AC-112.
+func TestMonthScopeWraps(t *testing.T) {
+	mk := func(ms ...int) options {
+		o := options{HasMonths: true, Months: map[int]bool{}}
+		for _, m := range ms {
+			o.Months[m] = true
+		}
+		return o
+	}
+	cases := []struct {
+		in   options
+		want string
+	}{
+		// The whole year is the default scope and saying so is noise.
+		{options{}, ""},
+		{mk(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11), ""},
+		{mk(5, 6, 7), "Jun-Aug"},
+		{mk(5), "Jun"},
+		// Two is not a run: "Jun-Jul" saves one character and reads as a
+		// range the reader has to check.
+		{mk(5, 6), "Jun, Jul"},
+		// The wrap, and the reason this function is not three lines.
+		{mk(10, 11, 0, 1), "Nov-Feb"},
+		{mk(11, 0), "Dec, Jan"},
+		{mk(0, 1, 2, 6, 7, 8), "Jan-Mar, Jul-Sep"},
+		{mk(11), "Dec"},
+		{mk(0, 2, 4, 6, 8, 10), "Jan, Mar, May, Jul, Sep, Nov"},
+	}
+	for _, c := range cases {
+		if got := monthScope(c.in); got != c.want {
+			t.Errorf("monthScope(%v) = %q, want %q", selectedMonths(c.in.Months), got, c.want)
+		}
+	}
+}
+
+func selectedMonths(m map[int]bool) []string {
+	var out []string
+	for i := 0; i < month.Count; i++ {
+		if m[i] {
+			out = append(out, month.Abbrev[i])
+		}
+	}
+	return out
+}
+
+// TestAllTwelveMonthsIsTheWholeYear asserts the invariant CR-036 rests on:
+// selecting every month must reproduce the figure for no month selected,
+// exactly, for every species.
+//
+// Every occurrence record carries a month — 65,504,204 checked across both
+// sources, none missing — so the twelve sum to the year by construction and
+// any drift means the monthly table lost records the annual one kept. That
+// failure would be nearly invisible: every figure would simply read a
+// little scarcer than it should, with nothing on the page to say so.
+//
+// It compares the rendered ratio and not the internal sums, because the
+// server has two paths — one that reads RegionCounts and one that walks
+// RegionMonths — and the point is that a reader cannot tell them apart.
+//
+// Watched fail: see AC-112.
+//
+// Verifies: P-011, CR-036. Criterion: AC-112.
+func TestAllTwelveMonthsIsTheWholeYear(t *testing.T) {
+	ds := realDataset(t)
+	every := options{HasMonths: true, Months: map[int]bool{}}
+	for i := 0; i < month.Count; i++ {
+		every.Months[i] = true
+	}
+
+	checked := 0
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		if len(sp.Regions) == 0 {
+			continue
+		}
+		year := shareOf(sp, ds, options{})
+		twelve := shareOf(sp, ds, every)
+		if year == nil || twelve == nil {
+			t.Fatalf("%s: no cell", sp.ScientificName)
+		}
+		if year.Ratio != twelve.Ratio {
+			t.Errorf("%s: the whole year reads %q and all twelve months read %q; "+
+				"the monthly counts do not add up to the annual one",
+				sp.ScientificName, year.Ratio, twelve.Ratio)
+		}
+		checked++
+	}
+	if checked < 1000 {
+		t.Fatalf("checked only %d species", checked)
+	}
+
+	// And the sums themselves, over the denominator every tile divides by.
+	var annual, monthly int64
+	for id, n := range ds.RegionTotals {
+		annual += n
+		for _, v := range ds.RegionMonthlyTotals[id] {
+			monthly += v
+		}
+	}
+	if annual != monthly {
+		t.Errorf("region totals sum to %d a year and %d over twelve months, a difference "+
+			"of %d; every figure on the site divides by this", annual, monthly, annual-monthly)
+	}
+
+	// BOTH halves of the ratio must narrow, and the denominator is the half
+	// that fails silently. A month-blind denominator divides June's records
+	// by the whole year's birding, so every figure reads about twelve times
+	// scarcer with nothing on the page to say why -- and it survives the
+	// comparison above, because with all twelve selected the two agree.
+	sp := &ds.Species[0]
+	for i := range ds.Species {
+		if len(ds.Species[i].Regions) > 20 {
+			sp = &ds.Species[i]
+			break
+		}
+	}
+	var numSum, denSum int64
+	for m := 0; m < month.Count; m++ {
+		one := options{HasMonths: true, Months: map[int]bool{m: true}}
+		num, den := shareIn(sp, ds, one)
+		numSum += num
+		denSum += den
+		var want int64
+		for id := range ds.RegionTotals {
+			want += ds.RegionMonthlyTotals[id][m]
+		}
+		if den != want {
+			t.Errorf("%s in %s: divided by %d, want %d — that month's birding, not "+
+				"another period's", sp.ScientificName, month.Full[m], den, want)
+		}
+	}
+	yearNum, yearDen := shareIn(sp, ds, options{})
+	if numSum != yearNum || denSum != yearDen {
+		t.Errorf("%s: the twelve single-month figures sum to %d/%d and the year is %d/%d",
+			sp.ScientificName, numSum, denSum, yearNum, yearDen)
+	}
+}
+
+// TestMonthsNarrowTheListAndTheFigureTogether asserts that months behave
+// like every other filter — they decide which birds are drawn — and that
+// the figure they produce is scoped to the same months.
+//
+// The owner asked for the first explicitly: "months should filter which
+// diagrams are shown, not just record counts, as this is how all the other
+// filters work." A control that silently did something else would be the
+// worse surprise.
+//
+// Watched fail: see AC-112.
+//
+// Verifies: P-011, P-074, CR-036. Criterion: AC-112.
+func TestMonthsNarrowTheListAndTheFigureTogether(t *testing.T) {
+	s := newTestServerReal(t)
+
+	count := func(path string) int {
+		_, body := get(t, s, path)
+		return strings.Count(body, `class="tilewrap"`)
+	}
+	all := count("/")
+	june := count("/?month=Jun")
+	jan := count("/?month=Jan")
+	if all < 1000 {
+		t.Fatalf("the unfiltered index shows %d tiles", all)
+	}
+	if june >= all {
+		t.Errorf("June shows %d of %d species; a month that admits everything is "+
+			"not filtering", june, all)
+	}
+	if june == jan {
+		t.Errorf("June and January both show %d species; the filter is not reading "+
+			"which month was asked for", june)
+	}
+	// Every month selected is the same as none, which is what makes All a
+	// toggle rather than a third state.
+	months := make([]string, 0, month.Count)
+	for i := 0; i < month.Count; i++ {
+		months = append(months, "month="+month.Abbrev[i])
+	}
+	if n := count("/?" + strings.Join(months, "&")); n != all {
+		t.Errorf("all twelve months show %d species and the whole year shows %d", n, all)
+	}
+
+	// The figure narrows with the list, and says which months it covers.
+	_, body := get(t, s, "/?region=NY&month=Jun&month=Jul&month=Aug")
+	if !strings.Contains(body, "Jun-Aug") {
+		t.Error("a three-month selection does not say so on the tiles")
+	}
+	if strings.Contains(body, "(all regions)") {
+		t.Error("the scope still reads (all regions) under a region filter")
+	}
+}
+
+// newTestServerReal builds a server over the compiled dataset, or skips.
+func newTestServerReal(t *testing.T) *server {
+	t.Helper()
+	s, err := newServer(realDataset(t))
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
+	}
+	return s
 }

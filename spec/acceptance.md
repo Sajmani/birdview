@@ -2459,3 +2459,58 @@ entry, and the criterion asserts each row names eBird *and* iNaturalist, says `l
 **A third mutation never applied** — `gofmt` had realigned the struct field the anchor was
 written against, so the substitution matched nothing. The harness refused instead of
 reporting a pass. That is the second time this session and the same cause as the first.
+
+### AC-112 — Months filter the list, scope the figure, and abstain where they cannot tell
+**Verifies:** [P-011](product.md#p-011), [P-074](product.md#p-074),
+[CR-036](decisions.md#cr-036) · **Level:** code and build · **Method:** unit tests over the
+presence rule and the rendered index, plus a refusal in the build
+
+**Assertions:**
+
+1. `month.Present` recovers the known season of seven species measured in New York —
+   resident, partial migrant, winter visitor, long-distance migrant, breeder, passage
+   shorebird — month for month.
+2. It **abstains** below 200 records, and abstaining is distinguishable from twelve trues: the
+   first says nothing is known, the second says the bird is there all year.
+3. A month nobody birded in reads **present**, not absent: the missing records are everyone's.
+4. All twelve months selected reproduce the annual figure **exactly**, for every species and
+   for the denominator every tile divides by. `birdview-regions` refuses to write a table
+   where the twelve do not reconstruct the year.
+5. Months narrow the **list**, not only the figure: June shows fewer species than the year and
+   a different set from January, while all twelve shows exactly what the year shows.
+6. The scope label collapses runs and **wraps the year end** — a winter selection reads
+   `Nov-Feb`, not `Jan, Feb, Nov, Dec`.
+
+**Assertion 1 is the calibration, not a spot check.** The rule is effort-corrected because a
+raw share would call every bird a May bird: an American Robin takes 22.1% of its New York
+records in May and 2.6% in December, and is present in both. The seven profiles are measured
+counts, so a change to the measure shows up as a wrong month for a named bird rather than as a
+number moving.
+
+**Assertion 3 is the half that is easy to get backwards.** A region with no birding in a month
+says nothing about any species in it, so calling the bird absent would report an absence of
+measurement as a measurement of absence — the distinction [P-075](product.md#p-075) exists for.
+
+**Assertion 6 earns its own function.** Winter is the selection a birder is most likely to
+make and the one a renderer that walks January to December mangles worst.
+
+**Status: verified 2026-10-07 — passing, and watched failing** under both of:
+
+| Mutation | What went red |
+| --- | --- |
+| the ratio drops its effort correction, becoming a raw share of the species' own records | `Dark-eyed Junco, winter visitor: got +++++++--+++, want +++++++-++++` — September, where New York's birding is 7.8% of the year |
+| the 200-record floor is removed | `judged a species on 28 records; below 200 those months record when anyone visited, not when the bird was there` |
+| the month filter stops narrowing the list | `June shows 1083 of 1083 species; a month that admits everything is not filtering` |
+| the denominator ignores the month selection | `Acanthis flammea in January: divided by 1252561983, want 87426358 — that month's birding, not another period's` |
+
+**The fourth mutation survived the first draft of this criterion**, and it is the one that
+would have mattered most. A month-blind denominator divides June's records by the whole
+year's birding, so every figure reads about twelve times scarcer with nothing on the page to
+explain it — and it passes assertion 4, because with all twelve months selected the two
+halves agree again. The criterion now checks each single month's denominator against that
+month's own birding, and that the twelve sum to the year on **both** halves of the ratio.
+
+**A third mutation corrupted the file instead of reverting it**, because two were chained and
+the second overwrote the first's backup. The package is new and untracked, so `git` could not
+undo it and the damage had to be read off the diff by hand. Mutations are applied one at a
+time from a known-clean tree.

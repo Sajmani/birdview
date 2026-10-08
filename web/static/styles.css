@@ -211,6 +211,14 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .chip.rchip { background: #0b1220; color: var(--ink); border-color: var(--line); }
 .chip.rchip.on { border-color: var(--accent); background: #16304a; }
 
+/* Month chips take the same treatment as region chips -- they are the same
+   kind of control and sit on the same panel -- but at a fixed width, so the
+   twelve form an even strip a reader can aim at. Three letters is the widest
+   any of them gets (P-011). */
+.chip.mchip { background: #0b1220; color: var(--ink); border-color: var(--line);
+  min-width: 2.4em; text-align: center; }
+.chip.mchip.on { border-color: var(--accent); background: #16304a; }
+
 .badge { display: inline-block; font-size: 10.5px; font-weight: 600;
   border-radius: 4px; padding: 1px 6px; margin-top: 4px;
   max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;

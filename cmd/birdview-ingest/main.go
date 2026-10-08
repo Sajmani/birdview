@@ -541,7 +541,7 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 		return 0, err
 	}
 	defer f.Close()
-	table, totals, err := region.LoadPresence(f)
+	table, totals, monthlyTotals, err := region.LoadPresence(f)
 	if err != nil {
 		return 0, err
 	}
@@ -552,6 +552,11 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 	// CR-030 dropped them because they were not; the fix was to the number,
 	// not to who may see it.
 	ds.RegionTotals = totals
+	// The same denominator split twelve ways, for a figure scoped to months
+	// (P-011, CR-036). Carried beside the annual rather than replacing it:
+	// the twelve sum to it exactly, and nothing that does not filter by
+	// month should have to add them up.
+	ds.RegionMonthlyTotals = monthlyTotals
 	var n int
 	for i := range ds.Species {
 		rs := table[ds.Species[i].ScientificName]
@@ -561,11 +566,13 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 		// 27,646 entries. TestRegionCountsLineUp pins the two lengths.
 		ids := make([]string, len(rs))
 		counts := make([]int64, len(rs))
+		months := make([][12]int64, len(rs))
 		for j, r := range rs {
-			ids[j], counts[j] = r.ID, r.Records
+			ids[j], counts[j], months[j] = r.ID, r.Records, r.Months
 		}
 		ds.Species[i].Regions = ids
 		ds.Species[i].RegionCounts = counts
+		ds.Species[i].RegionMonths = months
 		ds.Species[i].Commonest = peakShare(ids, counts, totals)
 		if len(rs) > 0 {
 			n++

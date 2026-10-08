@@ -435,6 +435,11 @@ type Presence map[string][]Reported
 type Reported struct {
 	ID      string
 	Records int64
+	// Months splits Records twelve ways, January first. Carried beside the
+	// annual figure rather than replacing it: every record has a month, so
+	// the twelve sum to Records exactly, and a reader that does not care
+	// about months should not have to add them up (P-011, CR-036).
+	Months [12]int64
 }
 
 // Totals is every bird record a region holds, over every species including
@@ -443,13 +448,19 @@ type Reported struct {
 // same observers, which is what cancels out how hard anyone was looking.
 type Totals map[string]int64
 
+// MonthlyTotals is Totals split twelve ways, January first, and is the
+// denominator of a figure scoped to months (P-011, CR-036). The twelve sum
+// to the annual total exactly.
+type MonthlyTotals map[string][12]int64
+
 // LoadPresence reads the generated table. Comment lines carry the region
 // names for a human reading the file and are not parsed back -- the names
 // live in this package, and reading them from the data would let the two
 // disagree without anything noticing.
-func LoadPresence(r io.Reader) (Presence, Totals, error) {
+func LoadPresence(r io.Reader) (Presence, Totals, MonthlyTotals, error) {
 	out := Presence{}
 	totals := Totals{}
+	monthly := MonthlyTotals{}
 	sc := bufio.NewScanner(r)
 	sc.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 	line := 0
@@ -461,23 +472,24 @@ func LoadPresence(r io.Reader) (Presence, Totals, error) {
 		}
 		name, rest, ok := strings.Cut(t, "\t")
 		if !ok {
-			return nil, nil, fmt.Errorf("region presence line %d: no tab", line)
+			return nil, nil, nil, fmt.Errorf("region presence line %d: no tab", line)
 		}
 		// A "total" row carries a region's own count, over every bird
 		// recorded there. No species name collides: they are binomials.
 		if name == "total" {
 			gid, n, ok := strings.Cut(rest, "\t")
 			if !ok {
-				return nil, nil, fmt.Errorf("region presence line %d: total row needs a region and a count", line)
+				return nil, nil, nil, fmt.Errorf("region presence line %d: total row needs a region and a count", line)
 			}
-			v, err := strconv.ParseInt(strings.TrimSpace(n), 10, 64)
+			ms, sum, err := parseMonths(strings.TrimSpace(n))
 			if err != nil {
-				return nil, nil, fmt.Errorf("region presence line %d: %w", line, err)
+				return nil, nil, nil, fmt.Errorf("region presence line %d: %w", line, err)
 			}
 			if _, known := Get(gid); !known {
-				return nil, nil, fmt.Errorf("region presence line %d: %q is in no region table entry", line, gid)
+				return nil, nil, nil, fmt.Errorf("region presence line %d: %q is in no region table entry", line, gid)
 			}
-			totals[gid] = v
+			totals[gid] = sum
+			monthly[gid] = ms
 			continue
 		}
 		if rest == "" {
@@ -488,25 +500,49 @@ func LoadPresence(r io.Reader) (Presence, Totals, error) {
 		for _, pair := range strings.Split(rest, ",") {
 			id, n, ok := strings.Cut(pair, ":")
 			if !ok {
-				return nil, nil, fmt.Errorf("region presence line %d: %q is not region:records", line, pair)
+				return nil, nil, nil, fmt.Errorf("region presence line %d: %q is not region:records", line, pair)
 			}
 			if _, known := Get(id); !known {
-				return nil, nil, fmt.Errorf("region presence line %d: %q is in no region table entry", line, id)
+				return nil, nil, nil, fmt.Errorf("region presence line %d: %q is in no region table entry", line, id)
 			}
-			v, err := strconv.ParseInt(n, 10, 64)
+			ms, sum, err := parseMonths(n)
 			if err != nil {
-				return nil, nil, fmt.Errorf("region presence line %d: %w", line, err)
+				return nil, nil, nil, fmt.Errorf("region presence line %d: %w", line, err)
 			}
-			rs = append(rs, Reported{ID: id, Records: v})
+			rs = append(rs, Reported{ID: id, Records: sum, Months: ms})
 		}
 		out[name] = rs
 	}
 	if err := sc.Err(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	if len(totals) == 0 {
-		return nil, nil, fmt.Errorf("region presence has no total rows; the share of a " +
+		return nil, nil, nil, fmt.Errorf("region presence has no total rows; the share of a " +
 			"region's records cannot be computed without its denominator")
 	}
-	return out, totals, nil
+	return out, totals, monthly, nil
+}
+
+// parseMonths reads `jan|feb|...|dec` and returns the twelve and their sum.
+//
+// The annual figure is the sum and is never written down, so the two cannot
+// drift: a table carrying both would eventually carry a year that is not
+// what its months add to, and nothing would notice (P-011, CR-036).
+func parseMonths(s string) (ms [12]int64, sum int64, err error) {
+	parts := strings.Split(s, "|")
+	if len(parts) != 12 {
+		return ms, 0, fmt.Errorf("%q has %d monthly counts, want 12", s, len(parts))
+	}
+	for i, p := range parts {
+		v, err := strconv.ParseInt(p, 10, 64)
+		if err != nil {
+			return ms, 0, fmt.Errorf("month %d of %q: %w", i+1, s, err)
+		}
+		if v < 0 {
+			return ms, 0, fmt.Errorf("month %d of %q is negative", i+1, s)
+		}
+		ms[i] = v
+		sum += v
+	}
+	return ms, sum, nil
 }

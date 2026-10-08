@@ -114,7 +114,10 @@ func main() {
 					defer wg.Done()
 					sem <- struct{}{}
 					defer func() { <-sem }()
-					recs, err := c.NamesIn(ctx, ds, gid)
+					// Month 0: this pass classifies a species over the whole
+					// year, and CR-036's monthly rule is applied by the
+					// server over the region table, not here.
+					recs, err := c.NamesIn(ctx, ds, gid, 0)
 					mu.Lock()
 					defer mu.Unlock()
 					if err != nil {

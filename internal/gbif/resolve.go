@@ -249,8 +249,18 @@ type RegionRecord struct {
 // omits ~0.4% of records outright; this answers "what did the publisher say
 // was here", which is the question scope actually turns on.
 //
-// gadmGid is a level-1 region: "USA.5_1" is California.
-func (c *Client) NamesIn(ctx context.Context, datasetKey, gadmGid string) ([]RegionRecord, error) {
+// gadmGid is a level-1 region: "USA.5_1" is California. A month of 1 to 12
+// restricts the count to that month across all years; 0 counts the year.
+//
+// One month at a time, and twelve calls, because GBIF facets one field per
+// query: asking for `facet=verbatimScientificName&facet=month` returns the
+// two MARGINAL distributions, not the cross-product, so it cannot say which
+// names those monthly records belong to. That is the whole cost of
+// CR-036 — the land pass goes from about 140 requests to about 1,660.
+func (c *Client) NamesIn(ctx context.Context, datasetKey, gadmGid string, month int) ([]RegionRecord, error) {
+	if month < 0 || month > 12 {
+		return nil, fmt.Errorf("month %d is not 0 (the whole year) or 1 to 12", month)
+	}
 	var out []RegionRecord
 	seen := map[string]bool{}
 	for offset := 0; ; {
@@ -262,10 +272,14 @@ func (c *Client) NamesIn(ctx context.Context, datasetKey, gadmGid string) ([]Reg
 		q.Set("facet", "verbatimScientificName")
 		q.Set("facetLimit", strconv.Itoa(facetPage))
 		q.Set("facetOffset", strconv.Itoa(offset))
+		if month > 0 {
+			q.Set("month", strconv.Itoa(month))
+		}
 
 		var body facetResponse
 		if err := c.get(ctx, "/occurrence/search?"+q.Encode(), &body); err != nil {
-			return nil, fmt.Errorf("faceting names in %s at offset %d: %w", gadmGid, offset, err)
+			return nil, fmt.Errorf("faceting names in %s month %d at offset %d: %w",
+				gadmGid, month, offset, err)
 		}
 		if len(body.Facets) == 0 || len(body.Facets[0].Counts) == 0 {
 			break
@@ -397,6 +411,89 @@ func (c *Client) CountInBox(ctx context.Context, datasetKey, name string,
 // therefore "on water", not "at sea", and overstates the open ocean by
 // roughly 3%. GBIF would accept a WKT geometry that carves the coast off
 // properly, which is the refinement available if that 3% ever matters.
+// MonthlyOffLandInBox is CountOffLandInBox split by month, in two requests
+// rather than twenty-four.
+//
+// GBIF ORs repeated gadmGid values, so one month facet over the box gives
+// the total per month and a second restricted to `gadmGid=USA|CAN` gives the
+// part on land; the difference is water. Verified 2026-10-07.
+//
+// It differs from CountOffLandInBox by counting as on-land only what is
+// inside the USA or CAN polygons, where that function sums every
+// gadmLevel0Gid the box returns. Measured over the Gulf box, the two
+// disagree by **11 records in 108 million** — records inside a third
+// country's polygon — which is 0.00001%, against the ~3% by which "on
+// water" already overstates "at sea". Named explicitly rather than left for
+// someone to discover as a drift between two tables.
+//
+// Verifies: P-011, CR-036.
+func (c *Client) MonthlyOffLandInBox(ctx context.Context, datasetKey, name string,
+	countries []string, minLat, maxLat, minLon, maxLon float64) (offLand, total [12]int64, err error) {
+
+	ask := func(onLandOnly bool) ([12]int64, error) {
+		var out [12]int64
+		q := url.Values{}
+		q.Set("datasetKey", datasetKey)
+		for _, country := range countries {
+			q.Add("country", country)
+		}
+		if name != "" {
+			q.Set("verbatimScientificName", name)
+		} else {
+			q.Set("taxonKey", strconv.Itoa(AvesTaxonKey))
+		}
+		q.Set("decimalLatitude", fmt.Sprintf("%g,%g", minLat, maxLat))
+		q.Set("decimalLongitude", fmt.Sprintf("%g,%g", minLon, maxLon))
+		if onLandOnly {
+			q.Add("gadmGid", "USA")
+			q.Add("gadmGid", "CAN")
+		}
+		q.Set("limit", "0")
+		q.Set("facet", "month")
+		q.Set("facetLimit", "20")
+		var body facetResponse
+		if err := c.get(ctx, "/occurrence/search?"+q.Encode(), &body); err != nil {
+			return out, fmt.Errorf("faceting months for %q in box: %w", name, err)
+		}
+		if len(body.Facets) == 0 {
+			return out, nil
+		}
+		for _, f := range body.Facets[0].Counts {
+			m, err := strconv.Atoi(f.Name)
+			if err != nil || m < 1 || m > 12 {
+				// A record with no month cannot be placed. None exist in
+				// either source -- 65,504,204 checked -- so this is a
+				// guard against that changing, not a path taken.
+				return out, fmt.Errorf("month facet returned %q, which is not 1 to 12", f.Name)
+			}
+			out[m-1] = f.Count
+		}
+		return out, nil
+	}
+
+	total, err = ask(false)
+	if err != nil {
+		return offLand, total, err
+	}
+	onLand, err := ask(true)
+	if err != nil {
+		return offLand, total, err
+	}
+	for i := range offLand {
+		offLand[i] = total[i] - onLand[i]
+		if offLand[i] < 0 {
+			// Negative water is the loud failure mode CountOffLandInBox was
+			// given for faceting the wrong field, and it is kept here for
+			// the same reason: it means the two queries are not nested.
+			return offLand, total, fmt.Errorf(
+				"month %d in box holds %d records of which %d are on land, which is more "+
+					"than all of them; the two queries are not asking about the same set",
+				i+1, total[i], onLand[i])
+		}
+	}
+	return offLand, total, nil
+}
+
 func (c *Client) CountOffLandInBox(ctx context.Context, datasetKey, name string,
 	countries []string, minLat, maxLat, minLon, maxLon float64) (offLand, total int64, err error) {
 

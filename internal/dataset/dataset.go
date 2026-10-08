@@ -173,6 +173,10 @@ type Species struct {
 	// up is asserted, not assumed.
 	RegionCounts []int64 `json:"regionCounts,omitempty"`
 
+	// RegionMonths is RegionCounts split twelve ways, January first, and
+	// parallel to Regions in the same way (P-011, CR-036).
+	RegionMonths [][12]int64 `json:"regionMonths,omitempty"`
+
 	// Commonest is where this species makes up the biggest SHARE of the bird
 	// records a region holds, with both halves of the ratio kept (P-074).
 	//
@@ -313,6 +317,12 @@ type Dataset struct {
 	// page says what share of the birds recorded in the regions on screen
 	// are one species (P-074).
 	RegionTotals map[string]int64 `json:"regionTotals,omitempty"`
+
+	// RegionMonthlyTotals is the same denominator split twelve ways,
+	// January first, for a figure scoped to months (P-011, CR-036). The
+	// twelve sum to RegionTotals exactly -- every record carries a month,
+	// and birdview-regions refuses to write a table where they do not.
+	RegionMonthlyTotals map[string][12]int64 `json:"regionMonthlyTotals,omitempty"`
 
 	// SourceVersions pins what this build was made from, so a served dataset
 	// can be traced back to its inputs (G-004).

@@ -171,7 +171,7 @@
 </details>
 
 <details class="controls" id="regions">
-  <summary>Regions<span class="sumdesc">narrow to states, provinces or stretches of open sea</span></summary>
+  <summary>Regions and months<span class="sumdesc">narrow to states, provinces, stretches of open sea, or times of year</span></summary>
   <div class="ctrlhelp">
       <dl>
         <div class="ctrl"><dt>Region</dt>
@@ -179,6 +179,13 @@
           to drop the whole group, or <b>All</b> to clear the lot and start picking. A bird is
           listed in a region when it is reported there often enough to be worth looking for,
           from eBird and iNaturalist records.</dd></div>
+        <div class="ctrl"><dt>Month</dt>
+        <dd>The whole year is selected when you arrive. Click a month to drop it, or
+          <b>All</b> to clear the lot &mdash; so one month is two clicks. Months narrow the
+          birds shown, not just the numbers: pick June and you get the birds that are here in
+          June, counted against June's birdwatching rather than the year's. A bird BirdView
+          has too few records of is shown in <b>every</b> month and says so, because its
+          records show when somebody visited rather than when the bird was there.</dd></div>
         <div class="ctrl note"><dt>Zones</dt>
         <dd>The same regions, grouped two ways; pick from either. <b>Common birds</b> is
           measured &mdash; regions are clustered by how much their species lists actually
@@ -200,6 +207,25 @@
     <a class="btn{{if .AllRegions}} on{{end}}" href="{{.AllRegionsURL}}"
        title="{{if .AllRegions}}Clear every region{{else}}Select everywhere{{end}}">All</a>
     <span class="hint">states and provinces, grouped two ways</span>
+  </div>
+  {{/* The twelve, ungrouped and unnamed. No seasons: P-076 forbids naming a
+       band where the range can be stated, and a season name inverts between
+       hemispheres and means nothing in the tropics -- Hawaii, Palmyra,
+       Navassa, Wake and Johnston -- while the Central Pacific region spans
+       -10 to 40 degrees and crosses the equator (CR-036).
+
+       No "Only" either. It earns its place for 74 regions in 8 zones and
+       not for twelve items in a row: All is a toggle, so one month is two
+       clicks. */}}
+  <div class="row chips">
+    <span class="lbl">Month</span>
+    <a class="btn{{if .AllMonths}} on{{end}}" href="{{.AllMonthsURL}}"
+       title="{{if .AllMonths}}Clear every month{{else}}Select the whole year{{end}}">All</a>
+    {{range .Months}}
+    <a class="chip mchip{{if .Selected}} on{{end}}" href="{{.URL}}"
+       title="{{.Title}}">{{.Abbrev}}</a>
+    {{end}}
+    <span class="hint">when a bird is here, not when people were out looking</span>
   </div>
   {{range .RegionGroupings}}
   <div class="grouping">

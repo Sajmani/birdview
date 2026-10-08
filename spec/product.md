@@ -241,7 +241,7 @@ Checklist sequence is how the ABA checklist, Sibley and every other field guide 
 it is the order a birder already has in their head — and alphabetizing actively discards an
 ordering the source file provides for free.
 
-### P-011 — Filter by region
+### P-011 — Filter by region and month
 Subject: `presentation.region_filter`
 Goals: G-002
 
@@ -279,6 +279,51 @@ The GADM id stays the internal key — it keys the presence table and is what GB
 with — but it is a database key and does not belong in a URL. The slug is **derived** from the
 code or the name rather than stored alongside them, so a renamed region cannot keep a URL that
 no longer describes it.
+
+## Months
+
+**The reader also filters to any subset of the twelve months**, multi-select, on the same
+control and the same rules as regions — everything selected on arrival, an **All** toggle,
+and the two composing as [P-012](#p-012) requires. A month appears in a URL by its
+three-letter abbreviation: `?month=Jun&month=Jul`.
+
+**Months decide which birds are drawn, not only the figure.** Every other filter in BirdView
+narrows the list, and a control that silently did something else would be the worse surprise.
+
+**A species is present in a region in a month** when it is present in that region at all by
+the annual rule above, **and**
+
+```
+    (its records that month / all bird records that month)
+  ÷ (its records that year  / all bird records that year )   >=  0.2
+```
+
+Dividing by the month's own total is not optional: New York records **20.9%** of its birding
+in May and **4.8%** in December, so a raw share would make every bird a May bird. The ratio
+asks whether a species is a bigger or smaller part of what people record this month than
+across the year, and 1.0 means exactly as present as usual. It is [P-074](#p-074)'s own logic
+at month granularity.
+
+This is **not** the recurrence rule of [P-001](#p-001), which is the better instrument and
+cannot be had at the price — see [CR-036](decisions.md#cr-036) for the measurements, the
+calibration, and why 0.2 is not load-bearing.
+
+**Below 200 records in a region, the month filter abstains.** Millerbird has 28 records in
+Hawaii, all in five months, and lives on Nihoa year round: what those months show is when
+anyone last got to Nihoa. So a species with too little evidence is shown in **every** selected
+month and the page says why, rather than making a statement about the bird out of a fact about
+the survey. It costs a quarter of the species-region cells and **0.0345% of the records**,
+because thin cells are thin.
+
+**All twelve months selected must reproduce the annual figures exactly.** Every record carries
+a month — 65,504,204 checked across both sources, none missing — so this is a check and not an
+assumption.
+
+**No month is grouped or named.** No seasons, no "breeding", no "migration".
+[P-076](#p-076) already forbids naming a band where the range can be stated, and the reasons
+compound here: season names invert between hemispheres, the Central Pacific region spans
+−10° to 40° and crosses the equator, and for Hawaii, Palmyra, Navassa, Wake and Johnston
+temperate season names are the wrong *kind* of category whatever the latitude.
 
 **Six species belong to no region, and that is structural.** Bermuda Petrel, Desertas Petrel,
 Trindade Petrel, Townsend's Storm-Petrel, Craveri's Murrelet and Guadalupe Murrelet are seen at
@@ -719,7 +764,7 @@ among the smallest birds — because that is precision, not a second scale.
 
 ### P-074 — Each bird says how much of what people record it is
 Subject: `presentation.share`
-Value: `one species' observations over all species observations, for the regions in view`
+Value: `one species' observations over all species observations, for the regions and months in view`
 Goals: G-001, G-002
 
 Every species says how much of what people record in view is that bird, as **one in N**.
@@ -782,9 +827,11 @@ ratio. No region is in that state today; the rule stands because the numerator a
 denominator were once two separate conditions that drifted apart, and deriving both from
 *does this region have a denominator* makes that unrepresentable rather than merely fixed.
 
-**On the index the scope is the regions currently selected**, so the figure follows the
-filter: a Gyrfalcon is 1 in 3,631,056 species observations (all regions) and 1 in 82,946 in
-Alaska. That is the question a filtered page poses — *of what people record where I am
+**On the index the scope is the regions and months currently selected**, so the figure
+follows the filter: a Gyrfalcon is 1 in 3,631,056 species observations (all regions) and 1 in
+82,946 in Alaska. Narrowing the months narrows both halves of the ratio
+([P-011](#p-011)) — a June figure is divided by June's birding, so a figure is never inflated
+by a month nobody was out in. That is the question a filtered page poses — *of what people record where I am
 looking, how much is this bird* — and it is why the index does not instead show where in North
 America the bird peaks. Narrowing to Arizona and being told about Yukon answers something
 nobody asked.
@@ -901,7 +948,8 @@ Value: `ascending by one-in-N, banded by decade`
 Goals: G-001, G-002
 
 **Frequency** is a fourth ordering, over the number every tile already shows
-([P-074](#p-074)). Species run from the most often recorded to the least — ascending by the
+([P-074](#p-074)), and it follows the month selection exactly as it follows the region
+selection — the number it sorts on is the one on the tile, whatever that is scoped to. Species run from the most often recorded to the least — ascending by the
 printed N, so *1 in 43* comes before *1 in 1,252,475,518*, consistent with
 [P-021](#p-021) ordering ascending by what is displayed.
 

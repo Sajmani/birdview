@@ -30,6 +30,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -144,9 +145,12 @@ func main() {
 		// per result rather than merged into one shared map: the loop below
 		// goes on reading that map while the workers it started write to
 		// it, which is a race the detector caught and review did not.
-		raw     map[string]map[string]int64
+		raw     map[string]map[int]map[string]int64
 		present map[string]bool
 		counts  map[string]int64
+		// monthly is the same count split twelve ways, summed over both
+		// sources exactly as counts is.
+		monthly map[string]*[12]int64
 		err     error
 	}
 	results := make([]result, len(gids))
@@ -201,24 +205,33 @@ func main() {
 			sem <- struct{}{}
 			defer func() { <-sem }()
 			r := result{gid: gid}
-			rec := landRec{GID: gid, Raw: map[string]map[string]int64{}}
+			rec := landRec{GID: gid, Raw: map[string]map[int]map[string]int64{}}
 			rec.Name, r.err = c.RegionName(ctx, gbif.EBirdDatasetKey, gid)
 			if r.err != nil {
 				results[i] = r
 				return
 			}
 			for _, key := range []string{gbif.EBirdDatasetKey, iNatDatasetKey} {
-				recs, err := c.NamesIn(ctx, key, gid)
-				if err != nil {
-					r.err = err
-					results[i] = r
-					return
+				byMonth := map[int]map[string]int64{}
+				// Thirteen: the whole year, and each month. The year is
+				// fetched rather than summed so the two can be COMPARED --
+				// CR-036 rests on every record carrying a month, and this
+				// is where that claim is checked over the whole dataset
+				// instead of the two regions it was spot-checked on.
+				for m := 0; m <= 12; m++ {
+					recs, err := c.NamesIn(ctx, key, gid, m)
+					if err != nil {
+						r.err = err
+						results[i] = r
+						return
+					}
+					raw := make(map[string]int64, len(recs))
+					for _, v := range recs {
+						raw[v.Name] = v.Records
+					}
+					byMonth[m] = raw
 				}
-				raw := make(map[string]int64, len(recs))
-				for _, v := range recs {
-					raw[v.Name] = v.Records
-				}
-				rec.Raw[key] = raw
+				rec.Raw[key] = byMonth
 			}
 			// Written only when every dataset for this region succeeded.
 			// A half-fetched region in the cache would be indistinguishable
@@ -234,7 +247,7 @@ func main() {
 			}
 			r.name, r.raw = rec.Name, rec.Raw
 			results[i] = r
-			log.Printf("  %-28s %5d names", rec.Name, len(rec.Raw[gbif.EBirdDatasetKey]))
+			log.Printf("  %-28s %5d names", rec.Name, len(rec.Raw[gbif.EBirdDatasetKey][0]))
 		}(i, gid)
 	}
 	wg.Wait()
@@ -251,15 +264,43 @@ func main() {
 			continue
 		}
 		r.present, r.counts = map[string]bool{}, map[string]int64{}
-		for _, raw := range r.raw {
+		r.monthly = map[string]*[12]int64{}
+		for key, byMonth := range r.raw {
+			// Every record carries a month, so the twelve must reconstruct
+			// the year exactly. Checked here, over all 74 regions and both
+			// sources, because CR-036's whole model rests on it: a month
+			// filter that quietly loses records would make every figure it
+			// shows smaller than the annual one for no stated reason.
+			var year, summed int64
+			for _, n := range byMonth[0] {
+				year += n
+			}
+			for m := 1; m <= 12; m++ {
+				for _, n := range byMonth[m] {
+					summed += n
+				}
+			}
+			if year != summed {
+				r.err = fmt.Errorf(
+					"%s in %s: the year holds %d records and the twelve months hold %d, a "+
+						"difference of %d. CR-036 assumes every record carries a month; it "+
+						"does not, and a month filter would silently drop the difference",
+					key, r.gid, year, summed, year-summed)
+				break
+			}
+			// Presence and the annual count come from the year facet, which
+			// is what the committed table has always carried. The monthly
+			// rule of CR-036 is applied by the SERVER, not here, so the
+			// table stays a record of what GBIF said rather than of what
+			// one threshold made of it.
 			var total int64
-			for _, n := range raw {
+			for _, n := range byMonth[0] {
 				total += n
 			}
 			if total == 0 {
 				continue
 			}
-			for name, n := range raw {
+			for name, n := range byMonth[0] {
 				// Normalized to the AviList name BEFORE matching, by the
 				// same function birdview-status uses. Matching the raw
 				// facet name is how eBird's 7,310,342 Dryobates villosus
@@ -270,6 +311,20 @@ func main() {
 					r.present[k] = true
 				}
 			}
+			for m := 1; m <= 12; m++ {
+				for name, n := range byMonth[m] {
+					k := taxonomy.Occurrence(name)
+					if r.monthly[k] == nil {
+						r.monthly[k] = &[12]int64{}
+					}
+					r.monthly[k][m-1] += n
+				}
+			}
+		}
+	}
+	for i := range results {
+		if results[i].err != nil {
+			log.Fatalf("birdview-regions: %v", results[i].err)
 		}
 	}
 
@@ -289,6 +344,7 @@ func main() {
 	// page shows (P-074): dividing by all the birds the same observers saw
 	// in the same place is what cancels out how hard they were looking.
 	totals := map[string]int64{}
+	monthlyTotals := map[string][12]int64{}
 	for _, r := range results {
 		if r.err != nil {
 			log.Fatalf("birdview-regions: %s: %v", r.gid, r.err)
@@ -301,10 +357,20 @@ func main() {
 		for _, n := range r.counts {
 			totals[r.gid] += n
 		}
+		var mt [12]int64
+		for _, m := range r.monthly {
+			for i, n := range m {
+				mt[i] += n
+			}
+		}
+		monthlyTotals[r.gid] = mt
 		for _, sp := range ds {
 			if lc := strings.ToLower(sp); r.present[lc] {
-				regionsOf[sp] = append(regionsOf[sp], region.Reported{
-					ID: r.gid, Records: r.counts[lc]})
+				rep := region.Reported{ID: r.gid, Records: r.counts[lc]}
+				if m := r.monthly[lc]; m != nil {
+					rep.Months = *m
+				}
+				regionsOf[sp] = append(regionsOf[sp], rep)
 			}
 		}
 		// Every name that reached the denominator and no species. These are
@@ -365,25 +431,40 @@ func main() {
 	// run quietly reverted it -- caught by TestRegionCountsLineUp, which
 	// asserts a sea's denominator is not the sum of its own numerators.
 	// Both paths compute it the same way now.
+	//
+	// Monthly, in two requests per sea rather than twenty-four: GBIF ORs
+	// repeated gadmGid values, so one month facet over the box and one
+	// restricted to USA|CAN give total and on-land, and the difference is
+	// water (CR-036).
 	for _, id := range region.MarineIDs() {
 		minLat, maxLat, minLon, maxLon, _ := region.MarineBox(id)
-		off, _, err := c.CountOffLandInBox(ctx, gbif.EBirdDatasetKey, "",
+		off, _, err := c.MonthlyOffLandInBox(ctx, gbif.EBirdDatasetKey, "",
 			countries, minLat, maxLat, minLon, maxLon)
 		if err != nil {
 			log.Fatalf("birdview-regions: %s total: %v", id, err)
 		}
-		totals[id] = off
+		var year int64
+		for _, n := range off {
+			year += n
+		}
+		totals[id] = year
+		monthlyTotals[id] = off
 	}
 	for _, sp := range pelagic {
 		for _, id := range region.MarineIDs() {
 			minLat, maxLat, minLon, maxLon, _ := region.MarineBox(id)
-			n, _, err := c.CountOffLandInBox(ctx, gbif.EBirdDatasetKey, strings.ToLower(sp),
+			off, _, err := c.MonthlyOffLandInBox(ctx, gbif.EBirdDatasetKey, strings.ToLower(sp),
 				countries, minLat, maxLat, minLon, maxLon)
 			if err != nil {
 				log.Fatalf("birdview-regions: %s in %s: %v", sp, id, err)
 			}
-			if n > 0 {
-				regionsOf[sp] = append(regionsOf[sp], region.Reported{ID: id, Records: n})
+			var year int64
+			for _, n := range off {
+				year += n
+			}
+			if year > 0 {
+				regionsOf[sp] = append(regionsOf[sp],
+					region.Reported{ID: id, Records: year, Months: off})
 			}
 		}
 	}
@@ -440,7 +521,7 @@ func main() {
 			f*100, maxOrphanFraction*100)
 	}
 
-	if err := write(*outPath, ds, regionsOf, names, totals); err != nil {
+	if err := write(*outPath, ds, regionsOf, names, totals, monthlyTotals); err != nil {
 		log.Fatalf("birdview-regions: %v", err)
 	}
 	log.Printf("birdview-regions: wrote %s", *outPath)
@@ -453,9 +534,10 @@ func main() {
 type landRec struct {
 	GID  string `json:"gid"`
 	Name string `json:"name"`
-	// Raw maps a GBIF dataset key to the verbatim facet it returned:
-	// publisher's name, lowercased, to records. Unnormalized on purpose.
-	Raw map[string]map[string]int64 `json:"raw"`
+	// Raw maps a GBIF dataset key to month to the verbatim facet it
+	// returned: publisher's name, lowercased, to records. Month 0 is the
+	// whole year, 1 to 12 the months. Unnormalized on purpose.
+	Raw map[string]map[int]map[string]int64 `json:"raw"`
 }
 
 func loadSpecies(path string) ([]string, error) {
@@ -481,7 +563,7 @@ func loadSpecies(path string) ([]string, error) {
 }
 
 func write(path string, species []string, regionsOf map[string][]region.Reported,
-	names map[string]string, totals map[string]int64) error {
+	names map[string]string, totals map[string]int64, monthly map[string][12]int64) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
@@ -502,21 +584,36 @@ func write(path string, species []string, regionsOf map[string][]region.Reported
 	// rather than as another comment: it is the denominator of the share
 	// pages show, and a number a reader depends on should not live in a line
 	// the parser skips.
-	fmt.Fprintf(&b, "#\n# total\tregion id\tevery bird record there\n")
+	fmt.Fprintf(&b, "#\n# Counts are twelve, January first, separated by |. They sum to the\n")
+	fmt.Fprintf(&b, "# year exactly: every record carries a month, and birdview-regions\n")
+	fmt.Fprintf(&b, "# refuses to write unless the twelve reconstruct it (P-011, CR-036).\n")
+	fmt.Fprintf(&b, "#\n# total\tregion id\tevery bird record there, by month\n")
 	for _, g := range gids {
-		fmt.Fprintf(&b, "total\t%s\t%d\n", g, totals[g])
+		fmt.Fprintf(&b, "total\t%s\t%s\n", g, joinMonths(monthly[g]))
 	}
-	fmt.Fprintf(&b, "#\n# scientific name\tregion:records, comma separated\n")
+	fmt.Fprintf(&b, "#\n# scientific name\tregion:jan|feb|...|dec, comma separated\n")
 	for _, sp := range species {
 		rs := regionsOf[sp]
 		sort.Slice(rs, func(i, j int) bool { return rs[i].ID < rs[j].ID })
 		parts := make([]string, len(rs))
 		for i, r := range rs {
-			parts[i] = fmt.Sprintf("%s:%d", r.ID, r.Records)
+			parts[i] = fmt.Sprintf("%s:%s", r.ID, joinMonths(r.Months))
 		}
 		fmt.Fprintf(&b, "%s\t%s\n", sp, strings.Join(parts, ","))
 	}
 	return os.WriteFile(path, []byte(b.String()), 0o644)
+}
+
+// joinMonths renders twelve counts as `jan|feb|...|dec`.
+func joinMonths(m [12]int64) string {
+	var b strings.Builder
+	for i, n := range m {
+		if i > 0 {
+			b.WriteByte('|')
+		}
+		b.WriteString(strconv.FormatInt(n, 10))
+	}
+	return b.String()
 }
 
 // refreshMarine recomputes the five sea rows and sea totals in place,
@@ -546,7 +643,7 @@ func refreshMarine(path string, species []string) error {
 	if err != nil {
 		return fmt.Errorf("reading the existing table: %w (run without -marine-only first)", err)
 	}
-	table, totals, err := region.LoadPresence(f)
+	table, totals, monthly, err := region.LoadPresence(f)
 	f.Close()
 	if err != nil {
 		return err
@@ -584,18 +681,24 @@ func refreshMarine(path string, species []string) error {
 	// over all species rather than the pelagic ones.
 	for _, id := range region.MarineIDs() {
 		minLat, maxLat, minLon, maxLon, _ := region.MarineBox(id)
-		off, total, err := c.CountOffLandInBox(ctx, gbif.EBirdDatasetKey, "",
+		offM, totalM, err := c.MonthlyOffLandInBox(ctx, gbif.EBirdDatasetKey, "",
 			countries, minLat, maxLat, minLon, maxLon)
 		if err != nil {
 			return fmt.Errorf("%s total: %w", id, err)
 		}
+		var off, total int64
+		for i := range offM {
+			off += offM[i]
+			total += totalM[i]
+		}
 		if off == 0 {
 			return fmt.Errorf("%s holds no off-land bird records at all, which cannot be "+
-				"right for an ocean; the gadmLevel0Gid facet has probably changed shape", id)
+				"right for an ocean; the gadmGid filter has probably changed shape", id)
 		}
 		log.Printf("birdview-regions:   %-9s %12d on water of %12d in box (%.1f%%)",
 			id, off, total, 100*float64(off)/float64(total))
 		totals[id] = off
+		monthly[id] = offM
 	}
 
 	// Per species, off land, one request each.
@@ -613,7 +716,7 @@ func refreshMarine(path string, species []string) error {
 			var rs []region.Reported
 			for _, id := range region.MarineIDs() {
 				minLat, maxLat, minLon, maxLon, _ := region.MarineBox(id)
-				off, _, err := c.CountOffLandInBox(ctx, gbif.EBirdDatasetKey,
+				offM, _, err := c.MonthlyOffLandInBox(ctx, gbif.EBirdDatasetKey,
 					strings.ToLower(sp), countries, minLat, maxLat, minLon, maxLon)
 				if err != nil {
 					mu.Lock()
@@ -621,8 +724,12 @@ func refreshMarine(path string, species []string) error {
 					mu.Unlock()
 					return
 				}
+				var off int64
+				for _, n := range offM {
+					off += n
+				}
 				if off > 0 {
-					rs = append(rs, region.Reported{ID: id, Records: off})
+					rs = append(rs, region.Reported{ID: id, Records: off, Months: offM})
 				}
 			}
 			mu.Lock()
@@ -679,7 +786,7 @@ func refreshMarine(path string, species []string) error {
 			names[id] = rg.Name // nobody else names an ocean for us
 		}
 	}
-	return write(path, species, table, names, totals)
+	return write(path, species, table, names, totals, monthly)
 }
 
 // readRegionNames recovers the `#region` header lines from the table on disk.

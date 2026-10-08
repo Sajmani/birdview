@@ -47,6 +47,7 @@ import (
 	"birdview/docs"
 	"birdview/internal/dataset"
 	"birdview/internal/inat"
+	"birdview/internal/month"
 	"birdview/internal/region"
 	"birdview/internal/status"
 	"birdview/internal/taxonomy"
@@ -603,6 +604,10 @@ type options struct {
 	// absent means everywhere, explicitly empty means nowhere.
 	Regions    map[string]bool
 	HasRegions bool
+	// Months and HasMonths draw the same distinction over the twelve
+	// (P-011, CR-036). Indexed 0 to 11, January first.
+	Months    map[int]bool
+	HasMonths bool
 	// Habitats and Niches are P-015's categorical filters, and draw the same
 	// absent-versus-empty distinction. A species matches when ANY of its
 	// assignments is selected: a bird of two habitats is in both, and
@@ -637,6 +642,7 @@ func parseOptions(r *http.Request) options {
 	o := options{Metric: view.ByLength, Step: view.DefaultStepPercent, Decades: 1,
 		Scale:  view.PerSection,
 		Locale: dataset.LocaleNA, Families: map[string]bool{}, Regions: map[string]bool{},
+		Months:   map[int]bool{},
 		Habitats: map[string]bool{}, Niches: map[string]bool{}}
 	switch view.Metric(q.Get("by")) {
 	case view.ByWingspan:
@@ -720,6 +726,14 @@ func parseOptions(r *http.Request) options {
 		// An unknown slug is dropped rather than guessed at.
 		if rg, ok := region.BySlug(g); ok {
 			o.Regions[rg.ID] = true
+		}
+	}
+	_, o.HasMonths = q["month"]
+	for _, m := range q["month"] {
+		// "Jun", not 6: a month number in a URL is off by one as often as
+		// not, and an unknown abbreviation is dropped as a region slug is.
+		if i, ok := month.Index(m); ok {
+			o.Months[i] = true
 		}
 	}
 	return o
@@ -857,10 +871,15 @@ type pageData struct {
 	AllRegions      bool
 	AllRegionsURL   template.URL
 	NoRegion        bool
-	Opt             options
-	Total           int
-	Shown           int
-	Query           func(...string) template.URL
+	// Months is the twelve-month filter beside the regions (P-011).
+	Months       []monthChip
+	AllMonths    bool
+	AllMonthsURL template.URL
+	NoMonth      bool
+	Opt          options
+	Total        int
+	Shown        int
+	Query        func(...string) template.URL
 	// AllSelected is true only when every family is explicitly filtered in --
 	// not when nothing is selected. Both states display the whole dataset, but
 	// they are different selections, and the control reflects the selection.
@@ -1092,6 +1111,36 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		}
 		return false
 	}
+	// Months narrow the list as every other filter does (P-011, CR-036).
+	// A species is shown when SOME selected region admits it in SOME
+	// selected month, which is the same "any" the region and habitat
+	// filters use: picking two places asks for birds in either.
+	allMonths := !opt.HasMonths || len(opt.Months) == month.Count
+	inMonth := func(sp *dataset.Species) bool {
+		if allMonths {
+			return true
+		}
+		for i, id := range sp.Regions {
+			if opt.HasRegions && !opt.Regions[id] {
+				continue
+			}
+			if i >= len(sp.RegionMonths) {
+				continue
+			}
+			in, ok := month.Present(sp.RegionMonths[i], s.ds.RegionMonthlyTotals[id])
+			if !ok {
+				// Too thin to say when. Shown in every month rather than
+				// hidden from any, and the tile says so (CR-036).
+				return true
+			}
+			for m := range in {
+				if in[m] && opt.Months[m] {
+					return true
+				}
+			}
+		}
+		return false
+	}
 	// Habitat and niche compose the same way (P-015, P-012). A species
 	// matches when ANY of its assignments is selected, and the assignment's
 	// origin is irrelevant here: a habitat BirdView added is still a habitat
@@ -1110,7 +1159,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	var filtered []*dataset.Species
 	for i := range s.ds.Species {
 		sp := &s.ds.Species[i]
-		if selected[sp.Family] && inRegion(sp) &&
+		if selected[sp.Family] && inRegion(sp) && inMonth(sp) &&
 			anyAssigned(sp.Habitats, opt.Habitats, opt.HasHabitats) &&
 			anyAssigned(sp.Niches, opt.Niches, opt.HasNiches) {
 			filtered = append(filtered, sp)
@@ -1124,9 +1173,8 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	var secs []view.Section
 	freq := map[*dataset.Species]float64{}
 	if opt.Metric == view.ByFrequency {
-		all := !opt.HasRegions || len(opt.Regions) == region.Len()
 		for _, sp := range filtered {
-			num, den := shareIn(sp, s.ds.RegionTotals, opt.Regions, all)
+			num, den := shareIn(sp, s.ds, opt)
 			if num == 0 || den == 0 {
 				// No ratio at all. +Inf sorts them last and keeps them in
 				// one final section rather than one section each (P-076).
@@ -1209,6 +1257,21 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		page.AllRegionsURL = s.regionURL(r, everyRegion)
 	}
 	page.NoRegion = opt.HasRegions && len(opt.Regions) == 0
+	page.Months = s.monthChips(r, opt)
+	page.AllMonths = !opt.HasMonths || len(opt.Months) == month.Count
+	page.NoMonth = opt.HasMonths && len(opt.Months) == 0
+	if page.AllMonths {
+		// All is a toggle, as it is for regions: pressed when everything is
+		// on, it clears everything. That is what makes one month two clicks
+		// away and a dedicated control unnecessary (CR-036).
+		page.AllMonthsURL = s.monthURL(r, nil)
+	} else {
+		every := map[int]bool{}
+		for i := 0; i < month.Count; i++ {
+			every[i] = true
+		}
+		page.AllMonthsURL = s.monthURL(r, every)
+	}
 
 	bar, live := s.buildPickBar(r, opt, missingPicks)
 	page.Bar = bar
@@ -2239,6 +2302,73 @@ func (s *server) regionURL(r *http.Request, want map[string]bool) template.URL {
 	return template.URL("/?" + q.Encode())
 }
 
+// monthURL is regionURL for the twelve (P-011). Same three cases: all of
+// them is the default and carries no parameter, none of them is an explicit
+// empty, and anything between is listed.
+func (s *server) monthURL(r *http.Request, want map[int]bool) template.URL {
+	q := r.URL.Query()
+	q.Del("month")
+	switch {
+	case len(want) == month.Count:
+		// default: no parameter
+	case len(want) == 0:
+		q.Set("month", "")
+	default:
+		// In calendar order, not the map's: a URL that reshuffled its own
+		// months between loads would make two identical selections look
+		// like two different pages.
+		for i := 0; i < month.Count; i++ {
+			if want[i] {
+				q.Add("month", month.Abbrev[i])
+			}
+		}
+	}
+	if len(q) == 0 {
+		return "/"
+	}
+	return template.URL("/?" + q.Encode())
+}
+
+// monthChip is one of the twelve in the control.
+type monthChip struct {
+	Abbrev   string
+	Name     string
+	Selected bool
+	URL      template.URL
+	Title    string
+}
+
+// monthChips builds the twelve toggles. No groups and no season names:
+// P-076 forbids naming a band where the range can be stated, and a season
+// inverts between hemispheres and means nothing in the tropics, two of
+// which BirdView covers (CR-036).
+func (s *server) monthChips(r *http.Request, opt options) []monthChip {
+	out := make([]monthChip, 0, month.Count)
+	for i := 0; i < month.Count; i++ {
+		on := !opt.HasMonths || opt.Months[i]
+		next := map[int]bool{}
+		for j := 0; j < month.Count; j++ {
+			if !opt.HasMonths || opt.Months[j] {
+				next[j] = true
+			}
+		}
+		if on {
+			delete(next, i)
+		} else {
+			next[i] = true
+		}
+		title := "Add " + month.Full[i]
+		if on {
+			title = "Remove " + month.Full[i]
+		}
+		out = append(out, monthChip{
+			Abbrev: month.Abbrev[i], Name: month.Full[i], Selected: on,
+			URL: s.monthURL(r, next), Title: title,
+		})
+	}
+	return out
+}
+
 // regionGroups builds the region selector: each grouping, its zones, their
 // regions, and the link each toggle produces. A region appears once per
 // grouping, so the same chip is rendered twice with two different URLs —
@@ -2673,6 +2803,22 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 		out = append(out, seams...)
 	}
 
+	// The month filter declined to judge this bird, which the tile marks
+	// and so this must too (P-034, CR-036).
+	if where, n, yes := s.abstains(sp, opt); yes {
+		out = append(out, categoryRow{
+			Label:  "Months",
+			Value:  "shown in every month — too few records to say",
+			Origin: string(dataset.Derived),
+			Detail: fmt.Sprintf("BirdView holds %s records of this bird in %s, under the %d "+
+				"it takes to tell the months a bird is present from the months nobody was "+
+				"looking. Hiding it from a month on evidence that thin would state "+
+				"something about the bird that is really something about the survey.",
+				comma(n), where, month.MinRecords),
+			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "what this measures",
+		})
+	}
+
 	// The figure the tile showed, for the regions the reader had selected
 	// when they clicked it (P-034).
 	//
@@ -2801,24 +2947,52 @@ type shareCell struct {
 // denominator for this region" makes that mismatch unrepresentable rather
 // than merely fixed, which matters because the two loops read as a matching
 // pair and were not one.
-func shareIn(sp *dataset.Species, totals map[string]int64, sel map[string]bool, all bool) (num, den int64) {
+func shareIn(sp *dataset.Species, ds *dataset.Dataset, opt options) (num, den int64) {
+	totals := ds.RegionTotals
+	all := !opt.HasRegions || len(opt.Regions) == region.Len()
 	counted := func(id string) bool {
 		if _, ok := totals[id]; !ok {
 			return false
 		}
-		return all || sel[id]
+		return all || opt.Regions[id]
 	}
+	// Every month unless the reader said otherwise. Both halves of the
+	// ratio are narrowed together, which is the whole point: a June figure
+	// divided by June's birding is comparable with a December one, where
+	// June's records over the year's birding would not be (P-011).
+	allMonths := !opt.HasMonths || len(opt.Months) == month.Count
+	inMonth := func(m int) bool { return allMonths || opt.Months[m] }
+
 	for i, id := range sp.Regions {
 		if !counted(id) {
 			continue
 		}
-		if i < len(sp.RegionCounts) {
-			num += sp.RegionCounts[i]
+		if allMonths {
+			if i < len(sp.RegionCounts) {
+				num += sp.RegionCounts[i]
+			}
+			continue
+		}
+		if i < len(sp.RegionMonths) {
+			for m, n := range sp.RegionMonths[i] {
+				if inMonth(m) {
+					num += n
+				}
+			}
 		}
 	}
 	for id, n := range totals {
-		if counted(id) {
+		if !counted(id) {
+			continue
+		}
+		if allMonths {
 			den += n
+			continue
+		}
+		for m, v := range ds.RegionMonthlyTotals[id] {
+			if inMonth(m) {
+				den += v
+			}
 		}
 	}
 	return num, den
@@ -2832,12 +3006,15 @@ func shareIn(sp *dataset.Species, totals map[string]int64, sel map[string]bool, 
 // see", which is trivia a reader looking at a filtered index did not ask:
 // filtering to Arizona and being told about Yukon is a non sequitur. This
 // answers the question the page is actually posing.
-func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCell {
+func shareOf(sp *dataset.Species, ds *dataset.Dataset, opt options) *shareCell {
 	all := !opt.HasRegions || len(opt.Regions) == region.Len()
 	if opt.HasRegions && len(opt.Regions) == 0 {
 		return nil // nothing selected; the page shows no birds anyway
 	}
-	num, den := shareIn(sp, totals, opt.Regions, all)
+	if opt.HasMonths && len(opt.Months) == 0 {
+		return nil // likewise: no month is selected, so nothing is in view
+	}
+	num, den := shareIn(sp, ds, opt)
 	// No denominator at all means nothing on screen is a land region --
 	// in practice, the reader has selected only seas, which carry presence
 	// and no share (CR-030). Named for the selection rather than for the
@@ -2872,6 +3049,18 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 	} else if all {
 		where, scope = "(all regions)", "every region BirdView covers"
 	}
+	// The months the figure ranges over, where that is not the whole year.
+	// Appended to both halves rather than replacing either: a reader needs
+	// to know the figure narrowed, and narrowing in two dimensions at once
+	// is exactly when a scope label stops being obvious (P-011).
+	if ms := monthScope(opt); ms != "" {
+		if all {
+			where = "(all regions, " + ms + ")"
+		} else {
+			where += ", " + ms
+		}
+		scope += " in " + ms
+	}
 	// Zero is stated, not dashed. "0 in 1,225,176,035 species observations across
 	// every land region" carries the effort behind the absence; an em-dash
 	// left a reader unable to tell a missing figure from a missing bird.
@@ -2889,6 +3078,55 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 	}
 }
 
+// monthScope names the months a figure ranges over, or "" for the whole
+// year, where the scope is the default and saying so is noise.
+//
+// Runs of three or more collapse to "Jun-Aug", and a run is allowed to WRAP
+// the year end, so a winter selection reads "Nov-Feb" rather than
+// "Jan, Feb, Nov, Dec". Winter is the one selection a birder is most likely
+// to make and the one a naive renderer mangles worst.
+func monthScope(opt options) string {
+	if !opt.HasMonths || len(opt.Months) == 0 || len(opt.Months) == month.Count {
+		return ""
+	}
+	// Find a start: a selected month whose predecessor is not selected.
+	// With fewer than twelve selected one always exists.
+	start := -1
+	for i := 0; i < month.Count; i++ {
+		if opt.Months[i] && !opt.Months[(i+month.Count-1)%month.Count] {
+			start = i
+			break
+		}
+	}
+	var runs [][]int
+	var cur []int
+	for k := 0; k < month.Count; k++ {
+		i := (start + k) % month.Count
+		if opt.Months[i] {
+			cur = append(cur, i)
+			continue
+		}
+		if len(cur) > 0 {
+			runs = append(runs, cur)
+			cur = nil
+		}
+	}
+	if len(cur) > 0 {
+		runs = append(runs, cur)
+	}
+	parts := make([]string, 0, len(runs))
+	for _, r := range runs {
+		if len(r) >= 3 {
+			parts = append(parts, month.Abbrev[r[0]]+"-"+month.Abbrev[r[len(r)-1]])
+			continue
+		}
+		for _, i := range r {
+			parts = append(parts, month.Abbrev[i])
+		}
+	}
+	return strings.Join(parts, ", ")
+}
+
 // shareWithSeams is shareOf plus the disclosure of P-077: where an
 // occurrence source files two BirdView species under one name, the tile says
 // so rather than presenting the count as this bird's alone.
@@ -2897,8 +3135,16 @@ func shareOf(sp *dataset.Species, totals map[string]int64, opt options) *shareCe
 // the misreading happens. A Caribbean mangrove resident ranked 51st
 // most-recorded in North America looks like a fact until you open it.
 func (s *server) shareWithSeams(sp *dataset.Species, opt options) *shareCell {
-	cell := shareOf(sp, s.ds.RegionTotals, opt)
+	cell := shareOf(sp, s.ds, opt)
 	if cell == nil || cell.Ratio == "" {
+		return cell
+	}
+	if where, n, yes := s.abstains(sp, opt); yes {
+		cell.Shared = "shown in every month"
+		cell.SharedTitle = fmt.Sprintf("BirdView holds %s records of this bird in %s, which "+
+			"is too few to tell the months it is here from the months nobody looked. It is "+
+			"shown whatever months you select, rather than hidden from some on evidence "+
+			"that thin.", comma(n), where)
 		return cell
 	}
 	other, src, _, ok := taxonomy.SharedWith(sp.ScientificName)
@@ -2914,6 +3160,50 @@ func (s *server) shareWithSeams(sp *dataset.Species, opt options) *shareCell {
 		"files both it and %s under %s, and does not separate them, so BirdView does not "+
 		"divide the records either.", name, src)
 	return cell
+}
+
+// abstains reports whether the month filter declined to judge this species,
+// and in which region it has the most to go on (CR-036).
+//
+// A species under 200 records in a region cannot have its months told apart
+// from its surveys: Millerbird holds 28 in Hawaii, all in five months, and
+// lives on Nihoa the year round. It is shown in every selected month, and
+// saying so is the whole of the honesty here — the alternative is a page
+// that hides a bird from June on the strength of nobody having sailed to
+// Nihoa in June.
+//
+// Reported only when a month filter is actually narrowing something. With
+// the whole year selected nothing was judged, so there is nothing to
+// disclose and a marker would be noise on every tile.
+func (s *server) abstains(sp *dataset.Species, opt options) (where string, most int64, yes bool) {
+	if !opt.HasMonths || len(opt.Months) == 0 || len(opt.Months) == month.Count {
+		return "", 0, false
+	}
+	var best string
+	var bestN int64 = -1
+	for i, id := range sp.Regions {
+		if opt.HasRegions && !opt.Regions[id] {
+			continue
+		}
+		if i >= len(sp.RegionMonths) {
+			continue
+		}
+		if _, ok := month.Present(sp.RegionMonths[i], s.ds.RegionMonthlyTotals[id]); ok {
+			// Some region in view had enough to judge on, so the filter did
+			// its job and the species is here on its merits.
+			return "", 0, false
+		}
+		if n := sp.RegionCounts[i]; n > bestN {
+			best, bestN = id, n
+		}
+	}
+	if bestN < 0 {
+		return "", 0, false
+	}
+	if rg, ok := region.Get(best); ok {
+		best = rg.Name
+	}
+	return best, bestN, true
 }
 
 // comma groups an integer with thousands separators. The shares reach the
