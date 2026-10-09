@@ -5541,7 +5541,7 @@ func TestSharedNamesAreDisclosed(t *testing.T) {
 			if !strings.Contains(cell, `class="seam"`) {
 				t.Errorf("the index tile for %s (%s) carries no shared-count marker", id, sci)
 			}
-			if !strings.Contains(cell, "shared with") {
+			if !strings.Contains(cell, "Shared with") {
 				t.Errorf("the marker on %s's tile does not say what it is shared with", id)
 			}
 		}

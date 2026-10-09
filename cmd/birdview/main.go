@@ -3172,7 +3172,9 @@ func (s *server) shareWithSeams(sp *dataset.Species, opt options) *shareCell {
 	if o := s.byID[s.idOf[other]]; o != nil {
 		name = o.Name(opt.Locale)
 	}
-	cell.Shared = "shared with " + name
+	// Sentence case, like the abstention marker: each sits on its own line
+	// under the figure and reads as a sentence, not as a fragment of it.
+	cell.Shared = "Shared with " + name
 	cell.SharedTitle = fmt.Sprintf("This count is not this bird's alone. The occurrence data "+
 		"files both it and %s under %s, and does not separate them, so BirdView does not "+
 		"divide the records either.", name, src)
