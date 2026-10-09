@@ -447,11 +447,16 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .ctrlhelp .ctrl { break-inside: avoid; }
 .ctrlhelp .ctrl:first-child dt { margin-top: 0; }
 
-/* A count that covers two species, because a source does not separate them
-   (P-077). Marked on the tile, not only on the detail page: the index is
-   where the misreading happens. Amber on the tile's own surface, checked
-   against the 7:1 floor like every other text colour. */
-.seam { display: block; color: #f0b429; font-size: 10.5px; font-style: italic; }
+/* A caveat on the figure above it: a count that covers two species, because
+   a source does not separate them (P-077), or a bird the month filter
+   declined to judge (CR-036). Marked on the tile, not only on the detail
+   page: the index is where the misreading happens. Amber on the tile's own
+   surface, checked against the 7:1 floor like every other text colour.
+
+   5px above, the same gap the figure keeps from the measurements: .share
+   sets line-height 1, so without it the caveat sits flush against the
+   figure and reads as a run-on of it. */
+.seam { display: block; margin-top: 5px; color: #f0b429; font-size: 10.5px; font-style: italic; }
 
 /* The ordering direction, captioned under each group of Order by buttons.
    Frequency runs the opposite way from the three size metrics, so both are
