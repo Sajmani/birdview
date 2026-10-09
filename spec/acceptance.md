@@ -2510,6 +2510,14 @@ make and the one a renderer that walks January to December mangles worst.
 | the month filter stops narrowing the list | `June shows 1083 of 1083 species; a month that admits everything is not filtering` |
 | the denominator ignores the month selection | `Acanthis flammea in January: divided by 1252561983, want 87426358 — that month's birding, not another period's` |
 
+**The abstention marker says why on the tile itself.** It first read *shown in every month*,
+which states the opposite of what is meant: it reads as a claim that the bird is present all
+year, the exact misreading abstaining exists to prevent. It now reads *Shown in every month due
+to too few records*. Checked under `?region=HI&month=Jun`: Millerbird, 28 Hawaii records,
+carries it, and Warbling White-eye, 143,057, does not. Watched failing on the old wording
+(`Millerbird is shown ... without saying why`) and with the marker forced onto every bird
+(`Warbling White-eye ... carries the too-few-records marker`).
+
 **The fourth mutation survived the first draft of this criterion**, and it is the one that
 would have mattered most. A month-blind denominator divides June's records by the whole
 year's birding, so every figure reads about twelve times scarcer with nothing on the page to

@@ -6297,3 +6297,56 @@ func newTestServerReal(t *testing.T) *server {
 	}
 	return s
 }
+
+// TestAbstainedTilesSayWhy asserts that a bird the month filter declined to
+// judge says so, with the reason, on its tile and on its page.
+//
+// Millerbird is the case CR-036 was written around: 28 records in Hawaii,
+// all in five months, from a bird that lives on Nihoa the year round. Under
+// a June filter it is shown, because hiding it would turn a fact about the
+// survey into a statement about the bird -- and the tile has to say why it
+// is there. The first wording was "shown in every month", which reads as a
+// claim that the bird is present all year: the very misreading the
+// abstention exists to prevent. The reason belongs on the tile, not only
+// in a tooltip.
+//
+// Watched fail: see AC-112.
+//
+// Verifies: P-011, P-034, CR-036. Criterion: AC-112.
+func TestAbstainedTilesSayWhy(t *testing.T) {
+	s := newTestServerReal(t)
+	const path = "/?region=HI&month=Jun"
+	_, body := get(t, s, path)
+
+	tileOf := func(id string) string {
+		i := strings.Index(body, `id="s-`+id+`"`)
+		if i < 0 {
+			t.Fatalf("%s: %s is not on the page", path, id)
+		}
+		seg := body[i:]
+		if j := strings.Index(seg[1:], `class="tilewrap"`); j > 0 {
+			seg = seg[:j]
+		}
+		return strings.Join(strings.Fields(stripTags(seg)), " ")
+	}
+	const marker = "too few records"
+
+	// The abstaining bird is shown, and says why.
+	if tile := tileOf("miller"); !strings.Contains(tile, marker) {
+		t.Errorf("Millerbird is shown under %s without saying why; its tile reads: %s",
+			path, tile)
+	}
+	// A bird with plenty of evidence is judged on it and carries no marker,
+	// or the marker would be noise on every tile and say nothing.
+	if tile := tileOf("warwhe1"); strings.Contains(tile, marker) {
+		t.Errorf("Warbling White-eye, with %s, carries the too-few-records marker: %s",
+			"over 140,000 Hawaii records", tile)
+	}
+	// And the page says it too, because anything a tile shows the detail
+	// page must (P-034).
+	_, page := get(t, s, "/species/miller"+strings.TrimPrefix(path, "/"))
+	if !strings.Contains(stripTags(page), marker) {
+		t.Error("Millerbird's detail page, opened under the same filter, does not say " +
+			"the month filter abstained")
+	}
+}

@@ -3154,7 +3154,10 @@ func (s *server) shareWithSeams(sp *dataset.Species, opt options) *shareCell {
 		return cell
 	}
 	if where, n, yes := s.abstains(sp, opt); yes {
-		cell.Shared = "shown in every month"
+		// The reason is on the tile and not only in the tooltip: "shown in
+		// every month" alone reads as a fact about the bird, which is the
+		// one misreading the abstention exists to prevent (CR-036).
+		cell.Shared = "Shown in every month due to too few records"
 		cell.SharedTitle = fmt.Sprintf("BirdView holds %s records of this bird in %s, which "+
 			"is too few to tell the months it is here from the months nobody looked. It is "+
 			"shown whatever months you select, rather than hidden from some on evidence "+
