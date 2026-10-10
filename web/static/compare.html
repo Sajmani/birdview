@@ -23,7 +23,12 @@
 <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body class="detail">
-<p class="back"><a class="backlink" href="{{call .Query}}">&larr; back to picking birds</a></p>
+{{/* Two exits, one per line. Back keeps the picks to change them; stop
+     leaves pick mode, which is what a reader who has seen the comparison
+     usually wants (P-068). Its own class, so a test reading "the back link"
+     still finds the first. */}}
+<p class="back"><a class="backlink" href="{{call .Query}}">&larr; back to picking birds</a><br>
+<a class="stoplink" href="{{.StopURL}}">&larr; stop comparing</a></p>
 
 {{if .Missing}}
 {{/* Named, never silently dropped: a kept comparison link outlives some of

@@ -1649,6 +1649,10 @@ type compareData struct {
 	Panels []comparePanel
 	Opt    options
 	Query  func(...string) template.URL
+	// StopURL leaves pick mode: the index with the picks dropped and every
+	// other carried setting kept. The same URL as the pick bar's Clear, so
+	// the two exits cannot drift apart (P-068).
+	StopURL template.URL
 	// Sorts is empty below two birds, there being nothing to sort.
 	Sorts []sortOption
 	// Missing are picked ids that no longer resolve, named on the page so a
@@ -1699,7 +1703,8 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 	// "back" here means "add another bird" (CR-018). Clear, on the index, is
 	// the one control that drops it.
 	s.render(w, "compare.html", compareData{Panels: panels, Opt: opt,
-		Sorts: sortOptions(r, chosen), Missing: missing, Query: queryFor(r)})
+		Sorts: sortOptions(r, chosen), Missing: missing, Query: queryFor(r),
+		StopURL: queryFor(r, "species")()})
 }
 
 // resolvePicks turns requested ids into species, separating the ones that no

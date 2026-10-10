@@ -1185,6 +1185,12 @@ pick mode on with nothing picked, and off again — the same thing the bar's Cle
 same link. It is for a reader who wants to compare before they have a particular bird in mind;
 the detail view's control is for one who already does.
 
+**The comparison view offers both ways back, one above the other.** *Back to picking birds*
+returns to the index with the picks intact, to change them. *Stop comparing* returns to the
+index with pick mode off — the same exit as the bar's Clear, by the same URL. The second is the
+common case: a reader who has seen the comparison usually wants the index back, and offering
+only the first left them to find Clear in a bar on another page.
+
 It is **its own labelled control set**, and the button reads **On** or **Off**. Added as an
 unlabelled button after the Section step percentages it read as a sixth step option, because
 every other control in that row is a labelled set of choices. So the label names the control and

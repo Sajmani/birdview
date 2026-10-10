@@ -1095,6 +1095,14 @@ be matched by its own container; the back link and Clear both point at `/?…` a
 whether `species` survives, so they must be told apart by class and not by URL shape; and a
 one-species fixture makes the round-trip assertion vacuous.
 
+**The comparison view has two exits** (added 2026-10-09). Below *back to picking birds*, which
+keeps the picks, *stop comparing* returns to the index with pick mode off and every other
+carried setting kept. It is asserted to be **the bar's Clear URL exactly**, not merely a URL
+without `species`: two exits from one mode, computed separately, will one day disagree about
+what else they keep. Watched failing with a stop link that keeps the picks
+(`still carries species, so it lands in pick mode`) and with one that resets to `/`
+(`drops region=CA; leaving pick mode must not reset the view`).
+
 ### AC-078 — Mass is drawn as the cube of water that weighs the same
 **Verifies:** P-066, P-035 · **Level:** code · **Method:** geometry assertions over every fixture
 species, plus assertions on the rendered detail and comparison pages

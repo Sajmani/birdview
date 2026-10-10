@@ -6350,3 +6350,72 @@ func TestAbstainedTilesSayWhy(t *testing.T) {
 			"the month filter abstained")
 	}
 }
+
+// TestComparisonOffersAWayOutOfPickMode asserts the second exit from the
+// comparison view: one that returns to the index with pick mode off.
+//
+// The only way back used to be "back to picking birds", which keeps the
+// picks -- right for changing them, wrong for the common case of a reader
+// who has seen the comparison and wants the index again. They were left to
+// find Clear in a bar on a page they had not yet returned to.
+//
+// It must be the SAME exit as the bar's Clear and not a second one built
+// beside it: two links that both mean "leave pick mode" and are computed
+// separately will one day disagree about what else they keep.
+//
+// Watched fail: see AC-077.
+//
+// Verifies: P-068. Criterion: AC-077.
+func TestComparisonOffersAWayOutOfPickMode(t *testing.T) {
+	s := newTestServer(t)
+	const cmp = "/compare?species=annhum&species=amecro&region=CA&metric=mass"
+	body := mustGet(t, s, cmp)
+
+	back := html.UnescapeString(mustMatch(t, body,
+		`<a class="backlink" href="([^"]+)"`, "the back link"))
+	stop := html.UnescapeString(mustMatch(t, body,
+		`<a class="stoplink" href="([^"]+)"`, "the stop-comparing link"))
+	label := mustMatch(t, body, `class="stoplink"[^>]*>(?s)(.*?)</a>`, "its text")
+	if !strings.Contains(html.UnescapeString(label), "stop comparing") {
+		t.Errorf("the second exit reads %q", label)
+	}
+	// Below the back link, as asked, not above it or elsewhere on the page.
+	if strings.Index(body, `class="stoplink"`) < strings.Index(body, `class="backlink"`) {
+		t.Error("the stop link comes before the back link")
+	}
+
+	u, err := url.Parse(stop)
+	if err != nil {
+		t.Fatalf("stop link %q: %v", stop, err)
+	}
+	q := u.Query()
+	if _, picking := q["species"]; picking {
+		t.Errorf("stop link %q still carries species, so it lands in pick mode", stop)
+	}
+	// Everything else the comparison carried comes back with the reader.
+	for k, want := range map[string]string{"region": "CA", "metric": "mass"} {
+		if got := q.Get(k); got != want {
+			t.Errorf("stop link %q drops %s=%s; leaving pick mode must not reset the view",
+				stop, k, want)
+		}
+	}
+	if stop == back {
+		t.Error("both exits go to the same place, so one of them is not an exit")
+	}
+
+	// Following it lands on the index outside pick mode: no pick controls.
+	landed := mustGet(t, s, stop)
+	if strings.Contains(landed, `class="pick`) {
+		t.Errorf("following the stop link from %s lands in pick mode", cmp)
+	}
+
+	// And it is the bar's own Clear, so the two cannot drift apart.
+	bar := html.UnescapeString(mustMatch(t, mustGet(t, s,
+		"/?species=annhum&species=amecro&region=CA&metric=mass"),
+		`<a class="btn pickclear" href="([^"]+)"`, "the bar's Clear"))
+	if bar != stop {
+		t.Errorf("the bar's Clear goes to %q and the comparison's stop link to %q; two "+
+			"exits from one mode built separately will disagree about what they keep",
+			bar, stop)
+	}
+}
