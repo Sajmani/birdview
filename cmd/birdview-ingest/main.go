@@ -587,6 +587,20 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 		ds.Species[i].Regions = ids
 		ds.Species[i].RegionCounts = counts
 		ds.Species[i].RegionMonths = months
+		for _, r := range rs {
+			var bits uint16
+			for m, on := range r.Withheld {
+				if on {
+					bits |= 1 << m
+				}
+			}
+			if bits != 0 {
+				if ds.Species[i].RegionWithheld == nil {
+					ds.Species[i].RegionWithheld = map[string]uint16{}
+				}
+				ds.Species[i].RegionWithheld[r.ID] = bits
+			}
+		}
 		ds.Species[i].Commonest = peakShare(ids, counts, totals)
 		if len(rs) > 0 {
 			n++

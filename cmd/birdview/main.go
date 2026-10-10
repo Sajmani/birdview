@@ -1141,6 +1141,17 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			if i >= len(sp.RegionMonths) {
 				continue
 			}
+			// A month eBird withholds this species here is missing by
+			// policy, so it is not judged: the species is shown, and its
+			// tile says why (CR-037). Painted Bunting was hidden from
+			// Florida in January this way -- eBird publishes none of its
+			// Florida records from October to March.
+			withheld := sp.WithheldIn(id)
+			for m := range withheld {
+				if withheld[m] && opt.Months[m] {
+					return true
+				}
+			}
 			in, ok := month.Present(sp.RegionMonths[i], s.ds.RegionMonthlyTotals[id])
 			if !ok {
 				// Too thin to say when. Shown in every month rather than
@@ -2815,6 +2826,37 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 				"BirdView can see, not a statement about the bird.")
 	}
 
+	// Withheld in particular regions or seasons, under eBird's Sensitive
+	// Species list and confirmed against the records (CR-037). Every region,
+	// not just the ones on screen: this page is the complete record, and the
+	// tile -- which names only what is on screen -- must never say more
+	// (P-034). A species eBird withholds everywhere already has its row above.
+	if _, global := taxonomy.WithheldByEBird[sp.ScientificName]; !global && len(sp.RegionWithheld) > 0 {
+		type where struct{ name, months string }
+		var ws []where
+		for id := range sp.RegionWithheld {
+			name := id
+			if rg, ok := region.Get(id); ok {
+				name = rg.Name
+			}
+			ws = append(ws, where{name, maskScope(sp.WithheldIn(id))})
+		}
+		sort.Slice(ws, func(i, j int) bool { return ws[i].name < ws[j].name })
+		value := fmt.Sprintf("withheld by eBird in %d regions", len(ws))
+		if len(ws) == 1 {
+			value = "withheld by eBird in " + ws[0].name + ", " + ws[0].months
+		}
+		parts := make([]string, len(ws))
+		for i, w := range ws {
+			parts[i] = w.name + " (" + w.months + ")"
+		}
+		seam(value, "eBird keeps this species out of its public records in "+
+			strings.Join(parts, ", ")+", to protect it from trapping, disturbance or targeted "+
+			"hunting. In those months the counts here are iNaturalist's alone and far below "+
+			"the bird's real record, and the month filter does not judge them: a month with "+
+			"no eBird records by policy is not a month without the bird.")
+	}
+
 	// One label over the group, continuation rows blank, as the trait rows
 	// above do it.
 	if len(seams) > 0 {
@@ -2855,8 +2897,8 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 		if cell.Ratio != "" {
 			value = cell.Ratio + " species observations " + cell.Where
 			detail = cell.Title
-			if cell.Shared != "" {
-				detail += " " + cell.SharedTitle
+			for _, sm := range cell.Seams {
+				detail += " " + sm.Title
 			}
 		}
 		out = append(out, categoryRow{
@@ -2932,14 +2974,23 @@ type shareCell struct {
 	// (P-074, CR-030). Empty whenever Ratio is set, and never both: a cell
 	// either divides or explains.
 	Note string
-	// Shared marks a figure that cannot be attributed to this bird alone,
-	// because an occurrence source files two BirdView species under one
-	// name (P-077, CR-034). It accompanies the Ratio rather than replacing
-	// it: suppressing the count would hide 6.2 million records and leave a
-	// reader unable to tell that from a bird genuinely absent (G-006).
-	Shared      string
-	SharedTitle string
+	// Seams are caveats on the figure, one line each under it: a count
+	// shared with another species (P-077, CR-034), a bird the month filter
+	// declined to judge (CR-036), a species eBird withholds in the regions
+	// on screen (CR-037). They accompany the Ratio rather than replacing it:
+	// suppressing a count would leave a reader unable to tell it from a bird
+	// genuinely absent (G-006).
+	//
+	// A list, and every caveat that applies is on it. The first version held
+	// one, and the abstention marker replaced the shared-name marker when
+	// both applied -- a disclosure silently suppressed by another, which is
+	// the failure G-006 names.
+	Seams []seam
 }
+
+// seam is one caveat line on a tile: the short text, and the tooltip that
+// explains it.
+type seam struct{ Text, Title string }
 
 // shareIn gives a species' share of the species observations held by the regions
 // currently on screen: its records there, over every bird observation from the
@@ -3108,11 +3159,35 @@ func monthScope(opt options) string {
 	if !opt.HasMonths || len(opt.Months) == 0 || len(opt.Months) == month.Count {
 		return ""
 	}
-	// Find a start: a selected month whose predecessor is not selected.
-	// With fewer than twelve selected one always exists.
+	var mask [month.Count]bool
+	for m := range opt.Months {
+		mask[m] = true
+	}
+	return maskScope(mask)
+}
+
+// maskScope names a set of months the way monthScope does -- runs of three
+// collapsed, the year end allowed to wrap -- with two ends of its own: no
+// months is "", and all twelve is "all year", because a withheld-by-eBird
+// caveat covering the whole year should say so rather than say nothing.
+func maskScope(mask [month.Count]bool) string {
+	n := 0
+	for _, on := range mask {
+		if on {
+			n++
+		}
+	}
+	switch n {
+	case 0:
+		return ""
+	case month.Count:
+		return "all year"
+	}
+	// Find a start: a set month whose predecessor is not set. With fewer
+	// than twelve set one always exists.
 	start := -1
 	for i := 0; i < month.Count; i++ {
-		if opt.Months[i] && !opt.Months[(i+month.Count-1)%month.Count] {
+		if mask[i] && !mask[(i+month.Count-1)%month.Count] {
 			start = i
 			break
 		}
@@ -3121,7 +3196,7 @@ func monthScope(opt options) string {
 	var cur []int
 	for k := 0; k < month.Count; k++ {
 		i := (start + k) % month.Count
-		if opt.Months[i] {
+		if mask[i] {
 			cur = append(cur, i)
 			continue
 		}
@@ -3158,32 +3233,91 @@ func (s *server) shareWithSeams(sp *dataset.Species, opt options) *shareCell {
 	if cell == nil || cell.Ratio == "" {
 		return cell
 	}
+	if text, title, yes := s.withheldSeam(sp, opt); yes {
+		cell.Seams = append(cell.Seams, seam{text, title})
+	}
 	if where, n, yes := s.abstains(sp, opt); yes {
 		// The reason is on the tile and not only in the tooltip: "shown in
 		// every month" alone reads as a fact about the bird, which is the
 		// one misreading the abstention exists to prevent (CR-036).
-		cell.Shared = "Shown in every month due to too few records"
-		cell.SharedTitle = fmt.Sprintf("BirdView holds %s records of this bird in %s, which "+
-			"is too few to tell the months it is here from the months nobody looked. It is "+
-			"shown whatever months you select, rather than hidden from some on evidence "+
-			"that thin.", comma(n), where)
-		return cell
+		cell.Seams = append(cell.Seams, seam{"Shown in every month due to too few records",
+			fmt.Sprintf("BirdView holds %s records of this bird in %s, which "+
+				"is too few to tell the months it is here from the months nobody looked. It is "+
+				"shown whatever months you select, rather than hidden from some on evidence "+
+				"that thin.", comma(n), where)})
 	}
-	other, src, _, ok := taxonomy.SharedWith(sp.ScientificName)
-	if !ok {
-		return cell
+	if other, src, _, ok := taxonomy.SharedWith(sp.ScientificName); ok {
+		name := other
+		if o := s.byID[s.idOf[other]]; o != nil {
+			name = o.Name(opt.Locale)
+		}
+		// Sentence case, like the other caveats: each sits on its own line
+		// under the figure and reads as a sentence, not as a fragment of it.
+		cell.Seams = append(cell.Seams, seam{"Shared with " + name,
+			fmt.Sprintf("This count is not this bird's alone. The occurrence data "+
+				"files both it and %s under %s, and does not separate them, so BirdView does not "+
+				"divide the records either.", name, src)})
 	}
-	name := other
-	if o := s.byID[s.idOf[other]]; o != nil {
-		name = o.Name(opt.Locale)
-	}
-	// Sentence case, like the abstention marker: each sits on its own line
-	// under the figure and reads as a sentence, not as a fragment of it.
-	cell.Shared = "Shared with " + name
-	cell.SharedTitle = fmt.Sprintf("This count is not this bird's alone. The occurrence data "+
-		"files both it and %s under %s, and does not separate them, so BirdView does not "+
-		"divide the records either.", name, src)
 	return cell
+}
+
+// withheldIn returns, for the regions and months on screen, the months eBird
+// withholds a species in each region that has any (CR-037). Months outside
+// the selection are dropped, so a June filter does not report Florida's
+// winter.
+func (s *server) withheldIn(sp *dataset.Species, opt options) map[string][12]bool {
+	allMonths := !opt.HasMonths || len(opt.Months) == month.Count
+	out := map[string][12]bool{}
+	for id := range sp.RegionWithheld {
+		if opt.HasRegions && !opt.Regions[id] {
+			continue
+		}
+		w := sp.WithheldIn(id)
+		set := false
+		for m := range w {
+			if !allMonths && !opt.Months[m] {
+				w[m] = false
+			}
+			set = set || w[m]
+		}
+		if set {
+			out[id] = w
+		}
+	}
+	return out
+}
+
+// withheldSeam says, on the tile, that eBird withholds this species in the
+// regions and months on screen, so its figure is short by however many
+// records eBird kept back (CR-037).
+//
+// One region is named with its months, because that is the case a reader
+// can act on: "Withheld by eBird in Florida, Oct-Mar". Several are counted,
+// because thirty-eight state names do not fit on a tile, and the detail page
+// lists them.
+func (s *server) withheldSeam(sp *dataset.Species, opt options) (text, title string, yes bool) {
+	w := s.withheldIn(sp, opt)
+	if len(w) == 0 {
+		return "", "", false
+	}
+	title = "eBird keeps this species out of its public records here, to protect it -- " +
+		"from trapping, disturbance or targeted hunting -- so the figure counts only what " +
+		"iNaturalist holds in those months and is far below the bird's real record. That " +
+		"is a gap in what BirdView can see, not a statement about the bird."
+	if len(w) == 1 {
+		for id, months := range w {
+			name := id
+			if rg, ok := region.Get(id); ok {
+				name = rg.Name
+			}
+			text = "Withheld by eBird in " + name
+			if sc := maskScope(months); sc != "" {
+				text += ", " + sc
+			}
+		}
+		return text, title, true
+	}
+	return fmt.Sprintf("Withheld by eBird in %d regions", len(w)), title, true
 }
 
 // abstains reports whether the month filter declined to judge this species,

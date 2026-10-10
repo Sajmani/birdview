@@ -315,6 +315,12 @@ month and the page says why, rather than making a statement about the bird out o
 the survey. It costs a quarter of the species-region cells and **0.0345% of the records**,
 because thin cells are thin.
 
+**A month eBird withholds is not judged either.** Where eBird's Sensitive Species list keeps a
+species out of its records in a region and season, and the records confirm it
+([CR-037](decisions.md#cr-037)), those months are missing by policy: the species is shown, and
+the tile says *Withheld by eBird in Florida, Oct–Mar*. Judging them was how Painted Bunting came
+to be hidden from Florida in January, the heart of its season there.
+
 **All twelve months selected must reproduce the annual figures exactly.** Every record carries
 a month — 65,504,204 checked across both sources, none missing — so this is a check and not an
 assumption.
@@ -995,6 +1001,13 @@ Four kinds of disagreement, and they are not interchangeable:
 - **A form filed below the species.** iNaturalist records the feral population under a
   trinomial — *Columba livia domestica* — which BirdView folds into the species it is a form
   of. The count on the page therefore includes domestic and feral birds, and says so.
+
+**A source can also withhold a species in some places and seasons only.** eBird's Sensitive
+Species list names regions and date windows as well as species — Painted Bunting in Florida
+from October to mid-April, Short-eared Owl in New York from April to July. Where the records
+confirm the withholding ([CR-037](decisions.md#cr-037)), the species page lists those regions
+and months, and a tile whose regions include one says so: *Withheld by eBird in Florida,
+Oct–Mar*. The count there is iNaturalist's alone, and far below the bird's real record.
 
 **Every kind that applies to a species gets a row, and they are not an either/or.** The first
 implementation was a chain that showed the shared name *or* the withheld note and would have

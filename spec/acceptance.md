@@ -2348,8 +2348,9 @@ five naming tables and the rendered detail pages
 2. The row names the specific thing: the alias for a rename, the published binomial for a
    lump, the covering name for a shared name, `domestic and feral` for a form,
    `withheld by eBird` for a suppression.
-3. **No species outside those tables carries the row.** 27 of 1,083 are affected and the
-   other 1,056 must stay silent.
+3. **No species outside those tables carries the row.** 27 of 1,083 are affected, plus 24 that
+   eBird withholds only in some regions or seasons ([AC-113](#ac-113)); the other 1,032 must
+   stay silent.
 4. The expected set is floored at 25 species, so emptying the tables cannot make the rest
    vacuous.
 
@@ -2537,3 +2538,50 @@ month's own birding, and that the twelve sum to the year on **both** halves of t
 the second overwrote the first's backup. The package is new and untracked, so `git` could not
 undo it and the damage had to be read off the diff by hand. Mutations are applied one at a
 time from a known-clean tree.
+
+### AC-113 — A month eBird withholds is shown and explained, not read as absence
+**Verifies:** [P-011](product.md#p-011), [P-077](product.md#p-077),
+[CR-037](decisions.md#cr-037) · **Level:** code and build · **Method:** unit tests over the
+restated list, the confirmation rule and the table format, plus rendered pages on the real
+dataset
+
+**Assertions:**
+
+1. `taxonomy.EBirdSensitive` is well formed: every window parses, every region is a GADM id or a
+   country, and every species in `WithheldByEBird` is on the list — except Desertas Petrel,
+   which is not, and whose missing records are a naming question.
+2. A window marks only the months it covers **entirely**, and may wrap the year end. Painted
+   Bunting's Florida window ends April 15, and April — which still holds 12,483 eBird records —
+   is not marked.
+3. **A listing is acted on only where the records confirm it.** Painted Bunting in Florida and
+   Long-eared Owl in New York are confirmed; Greater Sage-Grouse in Utah, whose records run
+   higher inside its window than outside, and Spruce Grouse in Vermont, with 1,303 eBird records,
+   are not.
+4. The table's withheld flags round-trip, and malformed flags are refused rather than read as
+   "nothing withheld".
+5. Under `?region=FL&month=Jan` Painted Bunting is **shown** and its tile says *Withheld by eBird
+   in Florida, Jan*; under `?region=NY&month=Jun` the same holds for Short-eared Owl. Without a
+   month filter the Florida caveat reads *Oct-Mar*, wrapping the year end.
+6. Greater Sage-Grouse in Wyoming in March carries **no** caveat: its records are in the export.
+7. **Controls:** Bobolink in New York in January and Snow Bunting in New York in June stay
+   hidden. They are not withheld, just gone.
+8. The species page lists the withheld regions and months (P-034).
+
+**Assertion 7 is what keeps the fix honest.** Abstaining is easy to get right by abstaining
+everywhere, which would quietly switch the month filter off; the controls are the birds it must
+still hide.
+
+**What the build found.** 202 region cells across 34 species are marked withheld. No count
+changed: the table was rebuilt from the same cached facets as the one it replaces, and every
+cell's twelve monthly figures are identical. The flags are new information, not a new
+measurement.
+
+**Status: verified 2026-10-09 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| the month filter judges withheld months again — the bug as shipped | `paibun is hidden under /?region=FL&month=Jan, in a month eBird withholds it: missing by policy is not absent`, and the same for `sheowl` in New York in June |
+| the caveat ignores the month selection | `paibun under /?region=FL&month=Jan does not say "Withheld by eBird in Florida, Jan"` |
+| confirmation is skipped and the list trusted | `Greater Sage-Grouse, Utah: withheld -++++-------, want ------------` and `Spruce Grouse, Vermont: withheld ++++++++++++` |
+| a half-covered month counts as withheld | `"Jan 01"-"Apr 15" covers ++++--------, want +++---------` |
+| the parser drops the flags | `withheld = [false false …], want [true true true …]`, and `flags "!11100" were accepted` |

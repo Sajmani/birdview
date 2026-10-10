@@ -5809,6 +5809,16 @@ func TestEveryNameDisagreementIsOnThePage(t *testing.T) {
 	for aviList := range taxonomy.WithheldByEBird {
 		want[aviList] = append(want[aviList], "withheld by eBird")
 	}
+	// Withheld in particular regions or seasons (CR-037): read off the
+	// dataset, because whether a listing applies is decided against the
+	// records at build time, not by the list alone.
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		if _, global := taxonomy.WithheldByEBird[sp.ScientificName]; global || len(sp.RegionWithheld) == 0 {
+			continue
+		}
+		want[sp.ScientificName] = append(want[sp.ScientificName], "withheld by eBird in")
+	}
 	if len(want) < 25 {
 		t.Fatalf("only %d species to check; the tables are nearly empty and this "+
 			"check asserts almost nothing", len(want))
@@ -6417,5 +6427,81 @@ func TestComparisonOffersAWayOutOfPickMode(t *testing.T) {
 		t.Errorf("the bar's Clear goes to %q and the comparison's stop link to %q; two "+
 			"exits from one mode built separately will disagree about what they keep",
 			bar, stop)
+	}
+}
+
+// TestWithheldMonthsAreNotJudged asserts CR-037 on the cases that found it:
+// a month eBird withholds a species is shown and explained, never read as
+// a month without the bird -- and a month eBird did publish is still judged.
+//
+// Painted Bunting was hidden from Florida in January, the heart of its
+// Florida season, because eBird publishes none of its Florida records from
+// October to March. Short-eared Owl was hidden from New York in June the
+// same way. The controls matter as much: a bird genuinely gone in a month
+// must stay gone, or the fix has simply switched the month filter off.
+//
+// Watched fail: see AC-113.
+//
+// Verifies: P-011, P-077, CR-037. Criterion: AC-113.
+func TestWithheldMonthsAreNotJudged(t *testing.T) {
+	s := newTestServerReal(t)
+	tile := func(path, id string) (shown bool, text string) {
+		_, body := get(t, s, path)
+		i := strings.Index(body, `id="s-`+id+`"`)
+		if i < 0 {
+			return false, ""
+		}
+		seg := body[i:]
+		if j := strings.Index(seg[1:], `class="tilewrap"`); j > 0 {
+			seg = seg[:j]
+		}
+		return true, strings.Join(strings.Fields(stripTags(seg)), " ")
+	}
+
+	for _, c := range []struct{ path, id, want string }{
+		{"/?region=FL&month=Jan", "paibun", "Withheld by eBird in Florida, Jan"},
+		{"/?region=NY&month=Jun", "sheowl", "Withheld by eBird in New York, Jun"},
+	} {
+		shown, text := tile(c.path, c.id)
+		if !shown {
+			t.Errorf("%s is hidden under %s, in a month eBird withholds it: missing by policy "+
+				"is not absent", c.id, c.path)
+			continue
+		}
+		if !strings.Contains(text, c.want) {
+			t.Errorf("%s under %s does not say %q; its tile reads: %s", c.id, c.path, c.want, text)
+		}
+	}
+
+	// Without a month filter the caveat names the whole window, and it wraps
+	// the year end rather than listing six months.
+	if _, text := tile("/?region=FL", "paibun"); !strings.Contains(text, "Withheld by eBird in Florida, Oct-Mar") {
+		t.Errorf("Painted Bunting in Florida, all year, reads: %s", text)
+	}
+
+	// The list is not the export. Greater Sage-Grouse is listed across the US
+	// from February to May, but Wyoming's records run 302 a month inside the
+	// window against 269 outside: eBird published them, and saying otherwise
+	// would be false.
+	if _, text := tile("/?region=WY&month=Mar", "saggro"); strings.Contains(text, "Withheld by eBird") {
+		t.Errorf("Greater Sage-Grouse in Wyoming is marked withheld, but its records are in "+
+			"the export: %s", text)
+	}
+
+	// Controls: birds genuinely absent in a month stay hidden.
+	for _, c := range []struct{ path, id string }{
+		{"/?region=NY&month=Jan", "boboli"},
+		{"/?region=NY&month=Jun", "snobun"},
+	} {
+		if shown, _ := tile(c.path, c.id); shown {
+			t.Errorf("%s is shown under %s; it is not withheld there, just gone, and the month "+
+				"filter must still say so", c.id, c.path)
+		}
+	}
+
+	// And the detail page says it, opened under the same filter (P-034).
+	_, page := get(t, s, "/species/paibun?region=FL&month=Jan")
+	if !strings.Contains(stripTags(page), "withheld by eBird in Florida, Oct-Mar") {
+		t.Error("Painted Bunting's page does not list Florida's withheld months")
 	}
 }

@@ -3006,6 +3006,71 @@ one. It would also have made the index time-dependent, breaking
 its URL.
 
 
+## CR-037 — eBird's silence is not a bird's absence
+
+**Subject:** `presentation.region_filter`, `dataset.region.counts`, `presentation.name_provenance`
+**Kind:** Direct — [CR-036](#cr-036)'s month filter treats a month with no records as a month
+without the bird, and for some species in some regions eBird publishes no records **on purpose**
+**Date:** 2026-10-09 · **Decided by:** Sameer
+**Found by:** the owner, asking whether dropping iNaturalist would skew BirdView; measuring that
+turned up Long-eared Owl with 15 eBird records in the US against 17,015 in Canada
+
+### What was wrong
+
+GBIF's eBird export applies eBird's [Sensitive Species list](sources.md#ebird-sensitive), and
+the list has **regional and seasonal** entries as well as the nine global ones BirdView already
+knew as `WithheldByEBird`. In a listed region and window, eBird's records are missing by policy.
+
+The month filter read that as absence. **Painted Bunting was hidden from Florida in January**,
+the heart of its Florida season, because eBird publishes none of its Florida records from
+October to mid-April; **Short-eared Owl from New York in June**, the same way. Both are the
+error [P-075](product.md#p-075) exists to prevent: an absence of measurement read as a
+measurement of absence.
+
+### The decision
+
+1. **eBird's list is a source** ([`ebird-sensitive`](sources.md#ebird-sensitive)). The entries
+   for species BirdView draws, in the US and Canada, are restated as `taxonomy.EBirdSensitive` —
+   9 global and 68 regional, each a species, a region and a date window.
+2. **No entry is acted on until the records confirm it.** `birdview-regions` marks a month as
+   *withheld by eBird* for a species and region only when the list names it **and** eBird's
+   records there show the gap:
+   - **a seasonal window** is confirmed when eBird's monthly rate inside it is **at most 5%** of
+     its rate in the same region's other months;
+   - **a whole-year listing** is confirmed when iNaturalist holds **at least three times** what
+     eBird does there — [AC-105](acceptance.md#ac-105)'s existing test for a source that
+     out-records eBird, applied to one region.
+   Only months the window covers **entirely** are marked; a month it half covers still holds
+   half its records and is judged on them.
+3. **A withheld month is not judged.** The month filter abstains there — the species is shown —
+   exactly as it does below 200 records, and the tile and the detail page say why:
+   *Withheld by eBird in Florida, Oct–Mar*.
+
+### Why confirm rather than trust the list
+
+**The list describes eBird's policy now; the export reflects what was applied when it was
+built**, and they differ. Of the 230 region cells the US and Canada entries name, **204 are
+confirmed** and **26 are not** — among them Greater Sage-Grouse across the West from February
+to May (Utah: 422 eBird records a month inside the window, 61 outside), Ferruginous
+Pygmy-Owl in Texas (4,809 records) and Spruce Grouse in Vermont (1,303). Marking those would put
+*withheld by eBird* on records eBird plainly did publish, which is a false statement on the
+page. Where the list and the records agree, the disclosure is true; where they disagree, the
+records win and the ordinary rules apply.
+
+**The thresholds are not load-bearing for the cases that matter.** Painted Bunting in Florida
+runs at 0 inside its window against thousands a month outside; Long-eared Owl in New York holds
+no eBird records and 39 on iNaturalist. The cases that fall the other way are a handful of
+small counts — Piping Plover in Wisconsin, 9 eBird against 19 iNaturalist — where no threshold
+would make the evidence anything but thin.
+
+### What this does not change
+
+Presence ([P-011](product.md#p-011)) and the figure on the tile are untouched. Counting eBird
+alone and using iNaturalist only where eBird is confirmed silent is the larger change in work
+arising; this decision builds the table and the confirmation it will need, and fixes the bug
+that was live.
+
+
 ## Work arising
 
 Not conflicts; obligations this bundle creates that nothing yet discharges.
@@ -3014,7 +3079,7 @@ Not conflicts; obligations this bundle creates that nothing yet discharges.
 | --- | --- | --- |
 | ~~**`birdview-regions` does not fold iNaturalist trinomials**~~ — **done 2026-10-06**, [AC-106](acceptance.md#ac-106). The rank reduction moved into `taxonomy.Binomial` and runs inside `taxonomy.Occurrence` *before* either naming table is consulted, so `dryobates villosus harrisi` reaches `Leuconotopicus villosus` instead of nothing. The last of the three asymmetries [CR-035](#cr-035) found, and the criterion now asserts the property the three shared — that both readers land on the same AviList species — rather than the three bugs. The orphan residue was 0.0431% before the fold; what stays is hybrids, which must never match a species, and subspecies of birds BirdView does not draw | Sameer | closed 2026-10-06 |
 | ~~**`birdview-regions` applies neither `AviListRenames` nor `CountedAs`**~~ — **done 2026-10-05**, [CR-035](#cr-035). Both readers of the occurrence data now call `taxonomy.Occurrence`, and the join reports every name it could not match, refusing to write above 0.05% of records. The audit that justified it: 1,402 eBird names, 37 matching nothing, 9,954,362 recoverable records across ten species | Sameer | closed 2026-10-05 |
-| **Count eBird alone, and use iNaturalist only where eBird says it is hiding a bird.** Planned 2026-10-09; one change in four parts, in this order. **(1) A live bug comes first.** GBIF's eBird export applies eBird's published [Sensitive Species list](https://support.ebird.org/en/support/solutions/articles/48000803210-sensitive-species-in-ebird), including its *regional and seasonal* entries, so eBird is silent for some species in some regions and months — and [CR-036](#cr-036)'s month filter reads that silence as absence. **Painted Bunting is hidden from Florida in January**, the heart of its Florida season (eBird: 0 records October–March, 12,483 in April), and **Short-eared Owl from New York in June** (0 in May and June, 3,709 in January). Suppressed region-months must abstain and say *withheld by eBird*, not count as absent. **(2) Encode the list** for the US and Canada as a committed table: species, region, date window. Of BirdView's species, 9 are on its global list — exactly the mainland and Hawaiian entries of `WithheldByEBird` — and **26 more on its regional list**, among them Long-eared, Short-eared, Burrowing, Boreal and Barn Owls, Golden Eagle, American Goshawk, King Rail, Loggerhead Shrike, Painted Bunting and Whooping Crane; only Black Rail was known. Verified against the export: Long-eared Owl has 15 eBird records in the US against 17,015 in Canada. The list's formatting is irregular (a scrape missed Barn Owl's regional entry), so the table needs building carefully, and eBird's terms checking before anything derived from it is committed. **(3) Change what counts.** eBird alone everywhere; iNaturalist only in cells eBird declares hidden — the 9 globally withheld species (100 presences) and the 57 region cells where eBird is silent all year (Long-eared Owl in about 30 states, Whooping Crane, Burrowing Owl in the prairie provinces, Spruce Grouse in New York, Black Rail) — judged on iNaturalist alone and labelled as such. This drops **985 of the 1,228 presences that rest on iNaturalist today**: 406 species, almost all escapes and domestic birds (Red Junglefowl in 42 regions, Japanese Quail in 27, Zebra Finch, Indian Peafowl, Budgerigar, Emu) and out-of-range strays. The figures barely move — median +0.6% — because iNaturalist is 1.24% of land records. It supersedes [P-011](product.md#p-011)'s "in either source", which judges iNaturalist against its own small total so one observation passes. **(4) Shared names and scope.** With iNaturalist out of the counts, Northern Yellow Warbler loses all 53,887 records (eBird files them under *Setophaga petechia*), so both halves of a shared name take eBird's shared count and regions, as [P-077](product.md#p-077) already describes. `WithheldByEBird` is derived from the list rather than kept by hand, which removes **Desertas Petrel**: it is not on eBird's list, so its missing records are probably a naming issue, the error Blue-billed White-Tern was. And `birdview-status` must be re-run to see which species leave scope without iNaturalist recurrence; the six mainland globally withheld species probably need declaring under [P-071](product.md#p-071), as the three Hawaiian ones already are | Sameer | (1) urgent; (2)–(4) planned together |
+| **Count eBird alone, and use iNaturalist only where eBird says it is hiding a bird.** Planned 2026-10-09; one change in four parts, in this order. **Parts (1) and (2) done 2026-10-09** ([CR-037](#cr-037), [AC-113](acceptance.md#ac-113)): the list is restated as `taxonomy.EBirdSensitive`, each entry confirmed against the records, 202 cells across 34 species flagged, and the month filter no longer judges a withheld month. **(1) A live bug comes first.** GBIF's eBird export applies eBird's published [Sensitive Species list](https://support.ebird.org/en/support/solutions/articles/48000803210-sensitive-species-in-ebird), including its *regional and seasonal* entries, so eBird is silent for some species in some regions and months — and [CR-036](#cr-036)'s month filter reads that silence as absence. **Painted Bunting is hidden from Florida in January**, the heart of its Florida season (eBird: 0 records October–March, 12,483 in April), and **Short-eared Owl from New York in June** (0 in May and June, 3,709 in January). Suppressed region-months must abstain and say *withheld by eBird*, not count as absent. **(2) Encode the list** for the US and Canada as a committed table: species, region, date window. Of BirdView's species, 9 are on its global list — exactly the mainland and Hawaiian entries of `WithheldByEBird` — and **26 more on its regional list**, among them Long-eared, Short-eared, Burrowing, Boreal and Barn Owls, Golden Eagle, American Goshawk, King Rail, Loggerhead Shrike, Painted Bunting and Whooping Crane; only Black Rail was known. Verified against the export: Long-eared Owl has 15 eBird records in the US against 17,015 in Canada. The list's formatting is irregular (a scrape missed Barn Owl's regional entry), so the table needs building carefully, and eBird's terms checking before anything derived from it is committed. **(3) Change what counts.** eBird alone everywhere; iNaturalist only in cells eBird declares hidden — the 9 globally withheld species (100 presences) and the 57 region cells where eBird is silent all year (Long-eared Owl in about 30 states, Whooping Crane, Burrowing Owl in the prairie provinces, Spruce Grouse in New York, Black Rail) — judged on iNaturalist alone and labelled as such. This drops **985 of the 1,228 presences that rest on iNaturalist today**: 406 species, almost all escapes and domestic birds (Red Junglefowl in 42 regions, Japanese Quail in 27, Zebra Finch, Indian Peafowl, Budgerigar, Emu) and out-of-range strays. The figures barely move — median +0.6% — because iNaturalist is 1.24% of land records. It supersedes [P-011](product.md#p-011)'s "in either source", which judges iNaturalist against its own small total so one observation passes. **(4) Shared names and scope.** With iNaturalist out of the counts, Northern Yellow Warbler loses all 53,887 records (eBird files them under *Setophaga petechia*), so both halves of a shared name take eBird's shared count and regions, as [P-077](product.md#p-077) already describes. `WithheldByEBird` is derived from the list rather than kept by hand, which removes **Desertas Petrel**: it is not on eBird's list, so its missing records are probably a naming issue, the error Blue-billed White-Tern was. And `birdview-status` must be re-run to see which species leave scope without iNaturalist recurrence; the six mainland globally withheld species probably need declaring under [P-071](product.md#p-071), as the three Hawaiian ones already are | Sameer | (1)–(2) done; (3)–(4) planned |
 | **Judge presence over the whole selection, against a threshold the reader sets.** Chosen in principle 2026-10-09 (option B of the regions-scaling design) and parked before implementation. A species is present when its share of the selection's records — the tile's own *1 in N* — beats a threshold shown as a control: *show birds at least* 1 in 10,000 · 100,000 · 1,000,000 · 10,000,000 · 100,000,000 · any record. Proposed defaults, **undecided**: 1 in 1,000,000; the arrival page left unfiltered so scope stays P-001's job; and CR-036's month rule applied to the summed counts of the selected regions. Measured at 1 in 1,000,000: New York 491 → 443, the Northeast's nine states 564 → 470, all land regions 1,057 → 836. Two defects it would fix, both real today: [P-011](product.md#p-011)'s "in either source" judges iNaturalist against its own small total, so one observation passes — 45 of New York's species are present on that alone, Diamond Dove among them; and `birdview-regions` discards counts under the bar at write time, dropping 16,673 records from the figures and every record of three species. Keeping every count costs 11% more cells. Works on today's 74 regions; would make counties a data change rather than a rules change | Sameer | parked |
 | **Every committed table comes from the live GBIF API and cannot be re-derived.** Each build command issues thousands of throttled HTTPS queries to `api.gbif.org`, so two runs a week apart give different numbers and no past run can be reproduced — the figures pinned in `spec/` and in tests are evidence of one afternoon, not of a stated input. That is tolerable while BirdView only *consumes* the data and becomes a defect the moment it **publishes its own dataset**, where a reader must be able to check a number against the source it came from. Two routes, both of which also end the 11-to-40-minute runs: GBIF's SQL download service, which aggregates server-side and returns a small file with a citable DOI but needs an account; or a GBIF Parquet snapshot queried locally, which needs no account — the better fit if others are to work with BirdView directly — at the cost of tens of GB and a query engine. Either way the switch is **once, for the whole pipeline**: two sources at different freshness is the disagreement [CR-031](#cr-031) already fixed. Every pinned figure must be re-derived from the new input rather than adjusted to match | Sameer | before publishing the dataset |
 | **Three more domestic forms behave like the two that are declared.** The rank fold of [AC-106](acceptance.md#ac-106) moved iNaturalist's trinomials into their wild species, and the proportional gainers were `Gallus gallus` **+11.9%**, `Anser cygnoides` **+20.0%** and `Anser anser` **+6.9%** — the same signature as the declared `Columba livia` (+1.3%) and `Cairina moschata` (+10.0%). `taxonomy.DomesticForms` names only the latter two, so [T-028](tech.md#t-028)'s ratio check reads the other three as undeclared disagreements if it ever flags them. Either declare them or record why the two are special; measuring it needs a `cmd/birdview-names` run | — | opportunistic |

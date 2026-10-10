@@ -165,7 +165,11 @@ func main() {
 		// monthly is the same count split twelve ways, summed over both
 		// sources exactly as counts is.
 		monthly map[string]*[12]int64
-		err     error
+		// bySource is the same split by GBIF dataset key. Kept apart only
+		// long enough to confirm eBird's Sensitive Species listings, which
+		// need to see what eBird holds separately from iNaturalist (CR-037).
+		bySource map[string]map[string]*[12]int64
+		err      error
 	}
 	results := make([]result, len(gids))
 
@@ -279,6 +283,7 @@ func main() {
 		}
 		r.present, r.counts = map[string]bool{}, map[string]int64{}
 		r.monthly = map[string]*[12]int64{}
+		r.bySource = map[string]map[string]*[12]int64{}
 		for key, byMonth := range r.raw {
 			// Every record carries a month, so the twelve must reconstruct
 			// the year exactly. Checked here, over all 74 regions and both
@@ -332,6 +337,13 @@ func main() {
 						r.monthly[k] = &[12]int64{}
 					}
 					r.monthly[k][m-1] += n
+					if r.bySource[key] == nil {
+						r.bySource[key] = map[string]*[12]int64{}
+					}
+					if r.bySource[key][k] == nil {
+						r.bySource[key][k] = &[12]int64{}
+					}
+					r.bySource[key][k][m-1] += n
 				}
 			}
 		}
@@ -383,6 +395,20 @@ func main() {
 				rep := region.Reported{ID: r.gid, Records: r.counts[lc]}
 				if m := r.monthly[lc]; m != nil {
 					rep.Months = *m
+				}
+				// Where eBird's Sensitive Species list names this species
+				// here, mark the months the records confirm it withheld,
+				// so a month with no eBird records by policy is not read
+				// as a month without the bird (CR-037).
+				if ws := taxonomy.Withholdings(sp, r.gid); len(ws) > 0 {
+					var eb, in [12]int64
+					if m := r.bySource[gbif.EBirdDatasetKey][lc]; m != nil {
+						eb = *m
+					}
+					if m := r.bySource[iNatDatasetKey][lc]; m != nil {
+						in = *m
+					}
+					rep.Withheld = taxonomy.ConfirmedMonths(ws, eb, in)
 				}
 				regionsOf[sp] = append(regionsOf[sp], rep)
 			}
@@ -605,17 +631,40 @@ func write(path string, species []string, regionsOf map[string][]region.Reported
 	for _, g := range gids {
 		fmt.Fprintf(&b, "total\t%s\t%s\n", g, joinMonths(monthly[g]))
 	}
-	fmt.Fprintf(&b, "#\n# scientific name\tregion:jan|feb|...|dec, comma separated\n")
+	fmt.Fprintf(&b, "#\n# A cell may end in ! and twelve 0/1 flags: the months eBird withholds the\n")
+	fmt.Fprintf(&b, "# species there under its Sensitive Species list, confirmed against the\n")
+	fmt.Fprintf(&b, "# records. A withheld month is missing by policy, not absent (CR-037).\n")
+	fmt.Fprintf(&b, "#\n# scientific name\tregion:jan|feb|...|dec[!flags], comma separated\n")
 	for _, sp := range species {
 		rs := regionsOf[sp]
 		sort.Slice(rs, func(i, j int) bool { return rs[i].ID < rs[j].ID })
 		parts := make([]string, len(rs))
 		for i, r := range rs {
-			parts[i] = fmt.Sprintf("%s:%s", r.ID, joinMonths(r.Months))
+			parts[i] = fmt.Sprintf("%s:%s%s", r.ID, joinMonths(r.Months), withheldSuffix(r.Withheld))
 		}
 		fmt.Fprintf(&b, "%s\t%s\n", sp, strings.Join(parts, ","))
 	}
 	return os.WriteFile(path, []byte(b.String()), 0o644)
+}
+
+// withheldSuffix renders the months eBird is confirmed to withhold as
+// `!` and twelve 0/1 flags, or nothing when it withholds none -- so the
+// 99% of cells it never touches are unchanged byte for byte (CR-037).
+func withheldSuffix(w [12]bool) string {
+	var b strings.Builder
+	set := false
+	for _, on := range w {
+		if on {
+			set = true
+			b.WriteByte('1')
+		} else {
+			b.WriteByte('0')
+		}
+	}
+	if !set {
+		return ""
+	}
+	return "!" + b.String()
 }
 
 // joinMonths renders twelve counts as `jan|feb|...|dec`.

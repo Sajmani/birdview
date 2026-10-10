@@ -539,8 +539,8 @@
        a reader unable to tell a missing figure from a missing bird. The
        explaining form is for having no denominator at all. */}}
   <div class="share">{{with .Commonest}}{{if .Ratio}}<span title="{{.Title}}"><b>{{.Ratio}}</b>
-    species observations {{.Where}}</span>{{with .Shared}}<span class="seam"
-    title="{{$.Commonest.SharedTitle}}">{{.}}</span>{{end}}{{else}}<span class="nodata"
+    species observations {{.Where}}</span>{{range .Seams}}<span class="seam"
+    title="{{.Title}}">{{.Text}}</span>{{end}}{{else}}<span class="nodata"
     title="{{.Title}}">{{.Note}}</span>{{end}}{{else}}<span class="nodata"
     title="no regions are selected">&mdash;</span>{{end}}</div>
 </a>

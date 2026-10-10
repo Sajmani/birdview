@@ -454,6 +454,11 @@ type Reported struct {
 	// the twelve sum to Records exactly, and a reader that does not care
 	// about months should not have to add them up (P-011, CR-036).
 	Months [12]int64
+	// Withheld marks the months eBird keeps this species out of its public
+	// output here, under its Sensitive Species list, confirmed against the
+	// records (CR-037). In those months the count is missing by policy, so
+	// it says nothing about whether the bird was there.
+	Withheld [12]bool
 }
 
 // Totals is every bird record a region holds, over every species including
@@ -519,11 +524,22 @@ func LoadPresence(r io.Reader) (Presence, Totals, MonthlyTotals, error) {
 			if _, known := Get(id); !known {
 				return nil, nil, nil, fmt.Errorf("region presence line %d: %q is in no region table entry", line, id)
 			}
-			ms, sum, err := parseMonths(n)
+			counts, flags, _ := strings.Cut(n, "!")
+			ms, sum, err := parseMonths(counts)
 			if err != nil {
 				return nil, nil, nil, fmt.Errorf("region presence line %d: %w", line, err)
 			}
-			rs = append(rs, Reported{ID: id, Records: sum, Months: ms})
+			rep := Reported{ID: id, Records: sum, Months: ms}
+			if flags != "" {
+				if len(flags) != 12 || strings.Trim(flags, "01") != "" {
+					return nil, nil, nil, fmt.Errorf("region presence line %d: withheld flags %q "+
+						"are not twelve 0s and 1s", line, flags)
+				}
+				for m, c := range flags {
+					rep.Withheld[m] = c == '1'
+				}
+			}
+			rs = append(rs, rep)
 		}
 		out[name] = rs
 	}

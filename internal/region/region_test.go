@@ -327,3 +327,35 @@ func TestGADMIDsAreNotSlugs(t *testing.T) {
 		}
 	}
 }
+
+// TestPresenceReadsWithheldFlags asserts the table's optional withheld
+// suffix round-trips, and that a malformed one is refused rather than read
+// as "nothing withheld".
+//
+// Verifies: CR-037. Criterion: AC-113.
+func TestPresenceReadsWithheldFlags(t *testing.T) {
+	const table = "total\tUSA.10_1\t1|1|1|1|1|1|1|1|1|1|1|1\n" +
+		"Passerina ciris\tUSA.10_1:0|0|0|12483|2349|1034|905|1680|2759|0|0|0!111000000111\n"
+	p, _, _, err := LoadPresence(strings.NewReader(table))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rs := p["Passerina ciris"]
+	if len(rs) != 1 {
+		t.Fatalf("got %d cells", len(rs))
+	}
+	want := [12]bool{true, true, true, false, false, false, false, false, false, true, true, true}
+	if rs[0].Withheld != want {
+		t.Errorf("withheld = %v, want %v", rs[0].Withheld, want)
+	}
+	if rs[0].Records != 12483+2349+1034+905+1680+2759 {
+		t.Errorf("records = %d: the flags must not disturb the counts", rs[0].Records)
+	}
+	for _, bad := range []string{"!11100", "!11100000011x"} {
+		_, _, _, err := LoadPresence(strings.NewReader("total\tUSA.10_1\t1|1|1|1|1|1|1|1|1|1|1|1\n" +
+			"Passerina ciris\tUSA.10_1:0|0|0|1|1|1|1|1|1|0|0|0" + bad + "\n"))
+		if err == nil {
+			t.Errorf("flags %q were accepted; a malformed mask must not read as nothing withheld", bad)
+		}
+	}
+}

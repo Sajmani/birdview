@@ -139,6 +139,17 @@ type Commonest struct {
 
 // OneIn is the share expressed the way it is shown: one record in N. Zero
 // when there is nothing to divide.
+// WithheldIn returns the months eBird withholds the species in a region,
+// January first (CR-037).
+func (s *Species) WithheldIn(id string) [12]bool {
+	var out [12]bool
+	bits := s.RegionWithheld[id]
+	for m := range out {
+		out[m] = bits&(1<<m) != 0
+	}
+	return out
+}
+
 func (c *Commonest) OneIn() int {
 	if c == nil || c.Records == 0 {
 		return 0
@@ -190,6 +201,13 @@ type Species struct {
 	// RegionMonths is RegionCounts split twelve ways, January first, and
 	// parallel to Regions in the same way (P-011, CR-036).
 	RegionMonths [][12]int64 `json:"regionMonths,omitempty"`
+
+	// RegionWithheld maps a region id to the months eBird withholds this
+	// species there under its Sensitive Species list, as a bitmask with
+	// January in bit 0 (CR-037). A map rather than a slice parallel to
+	// Regions because almost every cell has none: a few hundred, against
+	// some 28,000.
+	RegionWithheld map[string]uint16 `json:"regionWithheld,omitempty"`
 
 	// Commonest is where this species makes up the biggest SHARE of the bird
 	// records a region holds, with both halves of the ratio kept (P-074).

@@ -24,8 +24,9 @@ the others can be filled in plausibly from a URL alone.
 | [`inat-api`](#inat-api) | governing | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; governs the mapping tool |
 | [`inat-terms`](#inat-terms) | mandatory | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; almost nothing in it reaches BirdView |
 | [`specman`](#specman) | — (method) | project copy | **adopted** — copied, base pin recorded below |
+| [`ebird-sensitive`](#ebird-sensitive) | mandatory | absorbed as facts, not vendored | **adopted** — the US and Canada entries restated in `taxonomy.EBirdSensitive`, each confirmed against the export ([CR-037](decisions.md#cr-037)) |
 
-One of the twelve is not fully adopted, and it does not block v1. `ricklefs` was evaluated and
+One of the thirteen is not fully adopted, and it does not block v1. `ricklefs` was evaluated and
 **rejected**: its platform terms prohibit extraction, integration, storage and redistribution
 alike. Its entry is kept so the evaluation is not repeated.
 
@@ -513,6 +514,43 @@ The `Version` field above is a **base pin, not an integrity hash**. The project 
 *supposed* to differ from it: it carries a banner, and may carry `[LOCAL]` amendments. A diff
 against the pin should contain the banner and nothing else but `[LOCAL]` rows; anything further
 is drift.
+
+---
+
+## `ebird-sensitive`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | <https://support.ebird.org/en/support/solutions/articles/48000803210-sensitive-species-in-ebird> |
+| **Version** | Page modified 2026-05-15; retrieved 2026-10-09 by an agent with a plain HTTP fetch |
+| **Integrity** | Not vendored |
+| **Tier** | **mandatory** — it determines what the eBird half of the occurrence data *cannot* say |
+| **Import style** | Absorbed as facts: the entries touching the US and Canada, for species BirdView draws, restated as `taxonomy.EBirdSensitive` |
+| **Scope** | Where and when eBird withholds a species from public output, so that BirdView can tell eBird's silence from a bird's absence ([CR-037](decisions.md#cr-037)) |
+| **Adopted parts** | 9 species from the global list, and 27 from the regional list as 68 entries of species, region and date window |
+| **Exclusions** | Everything outside the US and Canada, and every species BirdView does not draw. The rationale eBird stores for each listing is not published and not needed |
+| **Owner** | Cornell Lab of Ornithology |
+| **Status** | **Adopted 2026-10-09.** The list is not taken on trust: each entry is confirmed against the export before BirdView acts on it, and 26 of 230 region cells were not applied there |
+
+**Why it matters.** GBIF's eBird export applies this list, including its *regional and
+seasonal* entries, and nothing in BirdView knew. Painted Bunting has no eBird records in Florida
+from October to March and 12,483 in April; the month filter read that as absence and hid the
+bird from Florida in January, the heart of its season there.
+
+**The list is not the export.** Checked cell by cell against the records GBIF serves, **42 of
+the region cells the list names hold eBird records where it says none should be**: Greater
+Sage-Grouse in Utah from February to May (1,689 records), Ferruginous Pygmy-Owl in Texas
+(4,809), Spruce Grouse in Vermont (1,303). The list describes eBird's policy today; the export
+reflects what was applied when it was built. Most of the 42 are a handful of stray records — a
+Long-eared Owl or two per state, for reasons the export does not record — but some are plainly not suppressed at
+all. So BirdView uses the list only to say *where to look*, and the records to say *whether it happened* — the rule is in [CR-037](decisions.md#cr-037).
+
+**Why restating it is permitted.** Cornell's terms forbid redistributing eBird **data** —
+checklists and observations — and that is why eBird/Clements is rejected below. This page is
+neither: eBird's own data-use article classes "eBird.org products (web pages…)" as usable with
+citation, and what BirdView takes from it is a set of facts — this species, this region, these
+dates — restated in its own structure and cited here. No text from the page is copied. *Owner to
+confirm*, as for every licensing judgement.
 
 ---
 
