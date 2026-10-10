@@ -518,22 +518,37 @@ is drift.
 
 ## Where geography enters
 
-Only in one place. Recorded because it is the question the ABA decision turns on, and the answer
-is not obvious from the table above.
+**Only through BirdView's own derivation, never through a source.** Recorded because it is the
+question any change of geographic scope turns on, and the answer is not obvious from the table
+above.
+
+Every source BirdView reads is worldwide:
 
 | Source | Geographic scope |
 | --- | --- |
+| **AviList** | worldwide — 11,131 species, 252 families |
 | **AVONET** | worldwide — 10,661 species, 41 orders |
 | **Fox wingspan** | worldwide — 10,618 species; gaps are flightless birds and Galliformes, not regions |
 | **iNaturalist taxon IDs** | worldwide taxonomy; BirdView stores one id per in-scope species |
-| **ABA checklist** | **the ABA Area** — North America north of Mexico, plus Hawaii |
-| **GBIF name bridge** | US and Canada — but it reaches no page. `data/gbif-taxa.tsv` is scoped by the occurrence filter that built it, and nothing joins against it yet. |
+| **eBird and iNaturalist occurrence, via GBIF** | worldwide, at **very uneven density**: the US and Canada alone hold 1,238,404,492 eBird records ([CR-035](decisions.md#cr-035)) |
 
-So **the ABA checklist is the only thing in BirdView that knows where it is.** Everything else is
-global and merely gets subsetted by whatever species list is in force. Changing scope therefore
-costs nothing in the trait pipeline — no ingest, model or diagram depends on the region — and
-everything in the list itself. The one measurable consequence is coverage: empirical wingspan runs
-at 35.8% inside the current scope against 13.4% worldwide, so a wider list would be a thinner one.
+What makes BirdView North American is entirely its own:
+
+| Where | What it fixes |
+| --- | --- |
+| `internal/region` | the 69 land regions — the 50 US states and DC, Canada's 13 provinces and territories, and five US outlying islands — and the five marine boxes. `birdview-status` derives scope over exactly these, and `birdview-regions` derives presence over them |
+| the `US,CA` country filter | in `birdview-regions` (the pelagic share and the marine boxes), `birdview-names` and `birdview-gbifmap` |
+| the calibrations | 1 record per million for regional presence ([P-011](product.md#p-011)), the recurrence thresholds of [P-001](product.md#p-001), and the 200-record month floor of [CR-036](decisions.md#cr-036) — every one measured against US and Canadian record density |
+
+**The ABA checklist used to be the only thing in BirdView that knew where it was.** That stopped
+being true when [CR-028](decisions.md#cr-028) replaced it with scope derived from occurrence
+records, and this section said otherwise until 2026-10-09.
+
+Changing scope therefore costs nothing in the trait pipeline — no ingest, model or diagram
+depends on the region — and a great deal in the derivation: a new region table, the country
+filter, and above all **re-measuring the calibrations**, which were tuned where records are
+plentiful. The trait-side consequence is coverage: empirical wingspan runs at 35.8% inside the
+current scope against 13.4% worldwide, so a wider list would be a thinner one.
 
 ---
 
