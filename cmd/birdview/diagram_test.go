@@ -164,25 +164,20 @@ func TestPipelineDiagramNamesRealColumns(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		m := regexp.MustCompile(`(?s)\n\s*` + src.box + `\["[^"]*?─+\n(.*?)"\]`).FindSubmatch(md)
+		m := regexp.MustCompile("(?s)\n\\s*" + src.box + "\\[\"`[^`]*?─+\n(.*?)`\"\\]").FindSubmatch(md)
 		if m == nil {
 			t.Errorf("no %s box with a field list in docs/pipeline.md", src.box)
 			continue
 		}
 		var cols []string
 		for _, line := range strings.Split(string(m[1]), "\n") {
-			// The column names come before the first marker.
-			line = strings.TrimSpace(line)
-			if i := strings.IndexAny(line, "★·✗"); i >= 0 {
-				line = line[:i]
-			}
-			for _, c := range strings.Split(line, ",") {
-				c = strings.TrimSpace(c)
-				if base, ok := strings.CutSuffix(c, "1-3"); ok {
-					cols = append(cols, base+"1", base+"2", base+"3")
-				} else if c != "" {
-					cols = append(cols, c)
-				}
+			// The column name comes before the mark; one per line, which
+			// TestPipelineFieldsCarryOneMark enforces.
+			c, _, _ := strings.Cut(strings.TrimSpace(line), " ")
+			if base, ok := strings.CutSuffix(c, "1-3"); ok {
+				cols = append(cols, base+"1", base+"2", base+"3")
+			} else if c != "" {
+				cols = append(cols, c)
 			}
 		}
 		if len(cols) < 5 {
@@ -216,5 +211,52 @@ func TestPipelineDiagramIsLinked(t *testing.T) {
 	}
 	if !strings.Contains(string(readme), "(docs/pipeline.md)") {
 		t.Error("README.md does not link to docs/pipeline.md")
+	}
+}
+
+// TestPipelineFieldsCarryOneMark holds every box in the diagram to the
+// format its legend states: one field per line, then exactly one mark, then
+// an optional note in italics. The first draft used · both as a mark and as
+// a separator between fields on one line, so "species · region · date
+// window" read as one field with two marks, and the legend's "one per
+// line" was true of some boxes and not others.
+//
+// Lines under a box's name and above its rule say where it lives, and are
+// italic too.
+//
+// Verifies: P-078. Criterion: AC-115.
+func TestPipelineFieldsCarryOneMark(t *testing.T) {
+	md, err := docs.Files.ReadFile("pipeline.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m := regexp.MustCompile("(?m)^\\s*\\w+\\[\"[^`\"][^\"]*─").Find(md); m != nil {
+		t.Errorf("a box with fields is a plain label, so its notes cannot be italic: %q", m)
+	}
+	field := regexp.MustCompile(`^([^★·✗*]+?) ([★·✗])(?: \*([^*]+)\*)?$`)
+	italic := regexp.MustCompile(`^\*[^*]+\*$`)
+	boxes := 0
+	for _, b := range regexp.MustCompile("(?s)(\\w+)\\[\"`(.*?)`\"\\]").FindAllSubmatch(md, -1) {
+		name, label := string(b[1]), string(b[2])
+		head, fields, ok := strings.Cut(label, "─────────────\n")
+		if !ok {
+			continue // the legend's key to the marks, which lists marks, not fields
+		}
+		boxes++
+		heads := strings.Split(strings.TrimSpace(head), "\n")
+		for _, line := range heads[1:] {
+			if line = strings.TrimSpace(line); !italic.MatchString(line) {
+				t.Errorf("%s: %q under the box's name is not italic", name, line)
+			}
+		}
+		for _, line := range strings.Split(fields, "\n") {
+			line = strings.TrimSpace(line)
+			if !field.MatchString(line) {
+				t.Errorf("%s: %q is not one field, one mark and an optional italic note", name, line)
+			}
+		}
+	}
+	if boxes < 15 {
+		t.Errorf("only %d boxes with fields found; the diagram was not read", boxes)
 	}
 }

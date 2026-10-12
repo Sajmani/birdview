@@ -2677,6 +2677,9 @@ correctly never reached the join.
    the diagram describing a pipeline that no longer exists.
 5. **Linked** from `docs/data.md`, `docs/building.md` and `docs/using.md` as served, from the
    source list at the foot of the index, and from the README.
+6. **One field per line, one mark per field.** Every box with fields lists one field per line,
+   followed by exactly one of ★ · ✗ and an optional note in italics; the lines under a box's name
+   are italic. A box with fields written as a plain label, which cannot carry italics, fails.
 
 **The column check found two mislabeled fields before it existed.** Writing the diagram from the
 readers turned up AVONET's `Family1`–`3` and `Secondary1`, both read and neither used — `FamilyOf`
@@ -2684,6 +2687,13 @@ was kept to cross-check ABA's families, and ABA is gone — and a first draft th
 `Trophic.Level` a fallback for a missing niche, when it adds a second diet where AVONET's level says
 Omnivore and its niche does not. The check itself first failed on its own diagram, on a field label
 wrapped onto a second line; one field per line is now the rule it relies on.
+
+**Assertion 6 came from review.** The first diagram used · both as a mark and as a separator
+between fields on one line, so "species · region · date window" read as one field with two marks,
+and the legend's "one field per line" held for some boxes and not others. Rewriting every box to
+the rule also found what the diagram had left out: the server reads `internal/taxonomy`'s tables
+directly for *Recorded as* and the withheld notes, three generators read the previous build's
+`species.json` for their species list, and `birdview-gbifmap` reads AviList.
 
 **Status: verified 2026-10-12 — passing, and watched failing** under all of:
 
@@ -2702,6 +2712,11 @@ wrapped onto a second line; one field per line is now the rule it relies on.
 | the link dropped from `docs/data.md` | `/docs/data does not link to the pipeline diagram` |
 | the link dropped from the index's source list | `/ does not link to the pipeline diagram` |
 | both README links pointed elsewhere | `README.md does not link to docs/pipeline.md` |
+| three fields put back on one line, `species · region · date window` | `SENS: "species · region · date window" is not one field, one mark and an optional italic note` |
+| a note's italics removed | `AVL: "Taxon_rank · keep species rows" is not one field, ...` |
+| a field's mark removed | `AVO: "Habitat" is not one field, ...` |
+| the line under a box's name not italic | `SENS: "web page" under the box's name is not italic` |
+| a box written as a plain label | `a box with fields is a plain label, so its notes cannot be italic` |
 
 **Two mutations survived, and are recorded so they are not mistaken for coverage.** Removing the
 bare-name guard on `.svg` paths changes nothing observable: `embed.FS` refuses `..` and finds no

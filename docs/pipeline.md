@@ -4,10 +4,12 @@ Every number on a BirdView page comes from a published source, through a fixed s
 commands. This page shows that sequence: each source and table as a box listing its fields, and
 each step as an arrow saying what it does — a filter, a join, a model.
 
-**How to read the fields.** ★ marks a field that reaches a page. · marks one the pipeline uses
-to decide something — a join key, a filter, a denominator — without showing it. ✗ marks one that
-is read and then not used, which is listed because a reader auditing the pipeline would
-otherwise wonder.
+**How to read the fields.** Each box lists one field per line, and each field carries one mark:
+★ it reaches a page, · the pipeline uses it without showing it — a join key, a filter, a
+denominator — and ✗ nothing downstream uses it. A field that is shown may be used as well. The
+unused ones are listed because a reader auditing the pipeline would otherwise wonder whether they
+were forgotten. Italics are notes, given where a field's name does not say enough, and under a
+box's name they say where it lives.
 
 Square boxes are data: a published source, a table in code, or a file a command writes. Rounded
 boxes are things that run: a command, or a numbered step inside `birdview-ingest`. The steps are
@@ -19,99 +21,132 @@ diagram's corner.
 flowchart TB
   subgraph LEGEND["Legend"]
     direction LR
-    LT["Table or source
+    LT["`Table or source
+    *where it lives, its license*
     ─────────────
-    its fields, one per line"]
+    field ★ *a note, where the name is not enough*`"]
+    LM["`★ reaches a page
+    · used, not shown
+    ✗ not used`"]
     LS(["Command, or a step
     inside birdview-ingest"])
-    LM["★ field reaches a page
-    · field used, not shown
-    ✗ field read, never used"]
     LA["a published fact"] -.->|"dotted: copied by hand into code"| LB["a table in code"]
     LC["a table"] -->|"solid: read by a program"| LD(["a command"])
   end
 
   subgraph SRC["Published sources"]
-    AVL["AviList v2025b
-    third_party/avilist, CC BY 4.0
+    AVL["`AviList v2025b
+    *third_party/avilist, CC BY 4.0*
     ─────────────
-    Taxon_rank · keep species rows
-    Sequence · family order
-    Scientific_name ★ join key
-    English_name_Clements_v2025 ★ North American name
-    English_name_AviList ★ world name
-    Species_code_Cornell_Lab ★ species code
+    Taxon_rank · *keep species rows*
+    Sequence · *family order*
+    Scientific_name ★ *also the join key*
+    English_name_Clements_v2025 ★ *North American name*
+    English_name_AviList ★ *world name*
+    Species_code_Cornell_Lab ★ *also the page address*
     Family ★
     Family_English_name ★
-    Order ★"]
-    AVO["AVONET v7
-    third_party/avonet, CC BY 4.0
-    sheets AVONET1_BirdLife, AVONET2_eBird, AVONET3_BirdTree
+    Order ★`"]
+    AVO["`AVONET v7
+    *third_party/avonet, CC BY 4.0*
+    *sheets AVONET1_BirdLife, AVONET2_eBird, AVONET3_BirdTree*
     ─────────────
-    Species1, Species2, Species3 · join key
-    Order1-3 · wingspan model groups
-    Beak.Length_Culmen ★ bill
-    Tail.Length ★ tail
-    Wing.Length ★ wing chord
-    Mass ★ mass, and the head and body models
-    Habitat ★ habitat
-    Trophic.Niche ★ diet
-    Trophic.Level ★ a second diet, where it says Omnivore
+    Species1 · *join key, BirdLife names*
+    Species2 · *join key, eBird names*
+    Species3 · *join key, BirdTree names*
+    Order1-3 · *wingspan model groups*
+    Beak.Length_Culmen ★ *bill*
+    Tail.Length ★ *tail*
+    Wing.Length ★ *wing chord*
+    Mass ★ *also the head and body models*
+    Habitat ★
+    Trophic.Niche ★ *diet*
+    Trophic.Level ★ *a second diet, where it says Omnivore*
     Family1-3 ✗
-    Secondary1 ✗"]
-    FOX["Fox, Brunton and Shephard wingspans
-    third_party/fox-wingspan, CC BY 4.0
+    Secondary1 ✗`"]
+    FOX["`Fox, Brunton and Shephard wingspans
+    *third_party/fox-wingspan, CC BY 4.0*
     ─────────────
-    Species1 · join key, BirdLife names
-    needs_prediction · keep measured rows only
-    wingspan_reported_mid_all ★ wingspan
-    wingspan_reported_min_all ★ range
-    wingspan_reported_max_all ★ range"]
-    OCC["GBIF occurrence search
-    live API, CC BY 4.0
-    eBird EOD and iNaturalist research-grade
+    Species1 · *join key, BirdLife names*
+    needs_prediction · *keep measured rows only*
+    wingspan_reported_mid_all ★ *wingspan*
+    wingspan_reported_min_all ★ *range*
+    wingspan_reported_max_all ★ *range*`"]
+    OCC["`GBIF occurrence search
+    *live API, CC BY 4.0*
+    *eBird EOD and iNaturalist research-grade*
     ─────────────
-    datasetKey · which source
-    verbatimScientificName · the name as published
-    gadmGid · state or province
-    month · eventDate · when
-    decimalLatitude · decimalLongitude · the seas
-    gadmLevel0Gid · on land or off
-    country = US or CA · filter"]
-    SENS["eBird Sensitive Species list
-    web page
+    taxonKey · *birds only*
+    country · *US or CA*
+    datasetKey · *which source*
+    verbatimScientificName · *the name as published*
+    gadmGid · *state or province*
+    gadmLevel0Gid · *on land or off*
+    decimalLatitude · *each sea's box*
+    decimalLongitude · *each sea's box*
+    month ·
+    eventDate · *episodes and years*`"]
+    SENS["`eBird Sensitive Species list
+    *web page*
     ─────────────
-    species · region · date window"]
-    TAXA["iNaturalist taxa API
-    live
+    species ·
+    region ·
+    date window ·`"]
+    TAXA["`iNaturalist taxa API
+    *live*
     ─────────────
-    id ★ link to iNaturalist
-    name · common name · match check"]
-    BACK["GBIF backbone API
-    live
+    id ★ *link to iNaturalist*
+    name · *exact match*
+    rank · *species only*
+    preferred_common_name · *must agree*
+    names · *English names, for the same check*`"]
+    BACK["`GBIF backbone API
+    *live*
     ─────────────
-    name · rank · match tier"]
+    key ·
+    canonicalName ·
+    rank · *species-rank synonyms only*
+    family ·`"]
   end
 
   subgraph CODE["Hand-kept tables in code"]
-    NAMES["internal/taxonomy
+    NAMES["`internal/taxonomy
+    *one function, Occurrence, applies them all*
     ─────────────
-    Occurrence: binomial,
-    AviListRenames, CountedAs
-    SharedNames · DomesticForms
-    Renames · NearMatches for AVONET
-    NotInAviList"]
-    TSENS["taxonomy.EBirdSensitive
+    AviListRenames ★ *under Recorded as*
+    CountedAs ★ *under Recorded as*
+    SharedNames ★ *under Recorded as*
+    DomesticForms ★ *under Recorded as*
+    Renames · *AVONET's names*
+    NearMatches ★ *near-match provenance*
+    NotInAviList · *dropped at step 2*
+    OrderCommonNames ★ *order names*`"]
+    TSENS["`taxonomy.EBirdSensitive
     ─────────────
-    Species · Region · From · To
-    WithheldByEBird, derived"]
-    DECL["status.Declared
+    Species ·
+    Region ·
+    Where ✗ *eBird's wording, for checking*
+    From ·
+    To ·
+    WithheldByEBird ★ *derived; noted on the species page*`"]
+    DECL["`status.Declared
+    *P-071 exceptions*
     ─────────────
-    P-071 exceptions"]
-    TRAIT["internal/trait
+    scientific name · *added to scope*
+    reason · *printed in the build report*`"]
+    TRAIT["`internal/trait
     ─────────────
-    habitat and diet supplements"]
+    Supplementary ★ *habitats and diets BirdView adds*
+    plantFoodOf ★ *the plant half of a mixed diet*
+    plantFoodOfSpecies ★ *the same, per species*`"]
   end
+
+  PREV["`web/data/species.json, the previous build
+  *the file birdview-ingest writes, read back by three generators*
+  ─────────────
+  id ·
+  scientificName · *the species to look up*
+  names · *the North American name, checked against iNaturalist's*`"]
 
   STATUSCMD(["birdview-status"])
   REGIONSCMD(["birdview-regions"])
@@ -120,35 +155,44 @@ flowchart TB
   GBIFCMD(["birdview-gbifmap"])
 
   subgraph DATA["Committed tables in data/"]
-    STATUS["status.tsv
+    STATUS["`status.tsv
     ─────────────
-    name · occurrence spelling
-    status ★ established, rare, vagrant, historical, absent
-    region ★ · episodes ★ · years ★
-    records ★ · last seen ★
-    commonest region, its records,
-    all records there ✗"]
-    REGIONS["region-presence.tsv
+    name · *join key, as the records spell it*
+    status ★ *established, rare, vagrant, historical, absent*
+    region ★
+    episodes ★
+    years ★
+    records ★
+    commonest region ✗
+    its records there ✗
+    all bird records there ✗
+    last seen ★`"]
+    REGIONS["`region-presence.tsv
     ─────────────
-    total rows:
-    region, twelve monthly totals ·
-    species rows:
-    region, twelve monthly counts ★
-    withheld flags ★ months eBird withholds"]
-    INAT["inat-taxa.tsv
+    region id · *on total rows*
+    every bird record there, by month · *the denominator*
+    scientific name · *join key*
+    region:jan|…|dec ★ *counts by month*
+    !flags ★ *months eBird withholds*`"]
+    INAT["`inat-taxa.tsv
     ─────────────
-    scientific name · join key
-    taxon id ★
-    common name · match check"]
-    SN["source-names.tsv
+    scientific name · *join key*
+    taxon id ★ *link to iNaturalist*
+    common name as iNaturalist returned it ✗ *for the audit trail*`"]
+    SN["`source-names.tsv
+    *read only by the T-028 check*
     ─────────────
-    id · scientific name
-    ebird · inaturalist record counts
-    read only by the T-028 check"]
-    GT["gbif-taxa.tsv
+    id ·
+    scientific name ·
+    ebird ·
+    inaturalist ·`"]
+    GT["`gbif-taxa.tsv
+    *read by nothing yet*
     ─────────────
-    GBIF name · AviList name · tier
-    read by nothing yet"]
+    gbif scientific name ✗
+    gbif species key ✗
+    avilist scientific name ✗
+    tier ✗`"]
   end
 
   subgraph INGEST["birdview-ingest: nine steps, in memory; only species.json is written"]
@@ -185,25 +229,44 @@ flowchart TB
     peak share gives the top region"])
   end
 
-  JSON["web/data/species.json
-  build artifact, not committed
+  JSON["`web/data/species.json
+  *build artifact, not committed*
   ─────────────
-  id ★ · names ★ · scientificName ★ · speciesCode ★
-  family ★ · familyCommon ★ · order ★ · colors ·
-  segments ★ · totalLength ★ · wingspan ★
-  wingChord ★ · mass ★ · each with provenance ★
-  habitats ★ · niches ★ · each with origin ★
-  regions · regionCounts · regionMonths
-  regionWithheld ★ · commonest ★
+  id ★ *the page address*
+  names ★
+  scientificName ★
+  speciesCode ★
+  family ★
+  familyCommon ★
+  familyColor ★
+  familyTextColor ★
+  order ★
+  segments ★ *each with its provenance*
+  totalLength ★ *with its provenance*
+  wingspan ★ *with its provenance*
+  wingChord ★ *with its provenance*
+  mass ★ *with its provenance*
+  habitats ★ *each with its origin*
+  niches ★ *each with its origin*
+  regions · *the region filter*
+  regionCounts ★ *the 1 in N*
+  regionMonths · *the month filter*
+  regionWithheld ★
+  commonest ★
   inatTaxonId ★
-  regionTotals · regionMonthlyTotals · denominators
-  undrawn: status, region, episodes,
-  years, records, lastSeen ★"]
+  families ★ *names, orders, colors*
+  regionTotals · *the denominator*
+  regionMonthlyTotals · *the denominator, by month*
+  sourceVersions · *what the build was made from*
+  undrawn ★ *status, region, episodes, years, records, last seen*`"]
   SERVER(["birdview server
   1 in N and the month filter,
   computed per request"])
   PAGES["pages
-  index tiles · species · compare · not drawn"]
+  the index
+  a species
+  compare
+  not drawn"]
 
   OCC -->|"facet names by region, both sources;
   dates for each species in its top 3 regions"| STATUSCMD
@@ -222,7 +285,15 @@ flowchart TB
   SENS -.->|"restated as facts"| TSENS
   TAXA --> INATCMD -->|"exact name and common name agree"| INAT
   OCC --> NAMESCMD -->|"records per source under each AviList name"| SN
-  BACK --> GBIFCMD --> GT
+  OCC -->|"species in eBird's US and Canada records"| GBIFCMD
+  BACK --> GBIFCMD
+  AVL --> GBIFCMD
+  GBIFCMD --> GT
+
+  PREV -->|"the species to look up"| REGIONSCMD
+  PREV -->|"the species to look up"| INATCMD
+  PREV -->|"the species to look up"| NAMESCMD
+  NAMES -->|"retry under the pre-AviList name"| INATCMD
 
   STATUS --> S1
   DECL --> S1
@@ -240,7 +311,10 @@ flowchart TB
   INAT --> S8
   REGIONS --> S9
 
-  JSON --> SERVER --> PAGES
+  JSON --> SERVER
+  NAMES -->|"Recorded as, read directly"| SERVER
+  TSENS -->|"withheld notes, read directly"| SERVER
+  SERVER --> PAGES
 ```
 
 The diagram above is drawn on GitHub straight from this file. On BirdView's own documentation it
