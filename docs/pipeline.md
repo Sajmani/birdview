@@ -14,7 +14,7 @@ box's name they say where it lives.
 Square boxes are data: a published source, a table in code, or a file a command writes. Rounded
 boxes are things that run: a command, or a numbered step inside `birdview-ingest`. The steps are
 not files; the ingest runs all nine in memory and writes only `species.json`. Dotted arrows are
-facts copied by hand into code, rather than data read by a program. The same legend is in the
+facts copied into code, rather than data read by a program. The same legend is in the
 diagram's corner.
 
 ```mermaid
@@ -30,8 +30,11 @@ flowchart TB
     ✗ not used`"]
     LS(["Command, or a step
     inside birdview-ingest"])
-    LA["a published fact"] -.->|"dotted: copied by hand into code"| LB["a table in code"]
+    LA["a published fact"] -.->|"dotted: copied into code"| LB["a table in code"]
     LC["a table"] -->|"solid: read by a program"| LD(["a command"])
+    %% Invisible links fix the legend's order: the table, then its marks.
+    LT ~~~ LM ~~~ LS ~~~ LA
+    LS ~~~ LC
   end
 
   subgraph SRC["Published sources"]
