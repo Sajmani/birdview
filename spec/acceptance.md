@@ -2680,7 +2680,8 @@ correctly never reached the join.
 6. **One field per line, one mark per field.** Every box with fields lists one field per line,
    followed by exactly one of ★ · ✗ and an optional note in italics; the lines under a box's name
    are italic. A box with fields written as a plain label, which cannot carry italics, fails.
-7. **Tables read left-aligned.** Every box with fields is left-aligned in the rendered SVG. Mermaid
+7. **Tables read left-aligned.** Every box with fields, and the legend's key to the marks, is
+   left-aligned in the rendered SVG; steps and commands stay centered. Mermaid
    centers every label, so the renderer moves them, and a render that skipped it would still
    match its source's hash.
 
@@ -2721,6 +2722,7 @@ directly for *Recorded as* and the withheld notes, three generators read the pre
 | the line under a box's name not italic | `SENS: "web page" under the box's name is not italic` |
 | a box written as a plain label | `a box with fields is a plain label, so its notes cannot be italic` |
 | the renderer's left-align step removed, and the SVG re-rendered | `docs/pipeline.svg left-aligns 0 tables of the 19 in docs/pipeline.md` |
+| the legend's key left out of the renderer's rule, and the SVG re-rendered | `left-aligns 19 boxes of the 20 tables and keys` |
 
 **Two mutations survived, and are recorded so they are not mistaken for coverage.** Removing the
 bare-name guard on `.svg` paths changes nothing observable: `embed.FS` refuses `..` and finds no

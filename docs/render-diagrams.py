@@ -42,9 +42,11 @@ CHROME = os.environ.get("CHROME",
 BLOCK = re.compile(r"```mermaid\n(.*?)\n```", re.S)
 
 
-# A node: its box, then its label. A table is a node whose label has a rule
-# under the name; Mermaid centers every label and has no option to do
-# otherwise, so a table's lines are moved to the box's left edge here.
+# A node: its box, then its label. Tables -- a label with a rule under the
+# name -- and the legend's key to the marks are read line by line, so they
+# are left-aligned; Mermaid centers every label and has no option to do
+# otherwise, so their lines are moved to the box's left edge here. Steps
+# and commands carry neither a rule nor a mark, and stay centered.
 NODE = re.compile(r'(<g [^>]*class="node[^"]*"[^>]*>'
                   r'<rect [^>]*?x="(-?[\d.]+)"[^>]*/>)(.*?</text>)', re.S)
 PAD = 12
@@ -53,14 +55,14 @@ PAD = 12
 def left_align_tables(svg: str) -> str:
     def align(m: re.Match) -> str:
         head, left, label = m.group(1), float(m.group(2)), m.group(3)
-        if "─────" not in label:
+        if not re.search("─────|[★·✗]", label):
             return m.group(0)
         label = label.replace('<text style=""', '<text style="text-anchor: start"', 1)
         label = label.replace('x="0"', f'x="{left + PAD:g}"')
         return head + label
     out, n = NODE.subn(align, svg)
     if n == 0 or "text-anchor: start" not in out:
-        sys.exit("no table found to left-align; Mermaid's SVG has changed shape")
+        sys.exit("no box found to left-align; Mermaid's SVG has changed shape")
     return out
 
 
