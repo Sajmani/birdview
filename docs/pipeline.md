@@ -20,7 +20,7 @@ diagram's corner.
 ```mermaid
 flowchart TB
   subgraph LEGEND["Legend"]
-    direction LR
+    direction TB
     LT["`Table or source
     *where it lives, its license*
     ─────────────
@@ -30,12 +30,19 @@ flowchart TB
     ✗ not used`"]
     LS(["Command, or a step
     inside birdview-ingest"])
-    LA["a published fact"] -.->|"dotted: copied into code"| LB["a table in code"]
-    LC["a table"] -->|"solid: read by a program"| LD(["a command"])
-    %% Invisible links fix the legend's order: the table, then its marks.
-    LT ~~~ LM ~~~ LS ~~~ LA
-    LS ~~~ LC
+    subgraph LDOT[" "]
+      direction LR
+      LA["a published fact"] -.->|"dotted: copied into code"| LB["a table in code"]
+    end
+    subgraph LSOLID[" "]
+      direction LR
+      LC["a table"] -->|"solid: read by a program"| LD(["a command"])
+    end
+    %% Invisible links stack the legend in order: the table, then its marks.
+    LT ~~~ LM ~~~ LS ~~~ LDOT ~~~ LSOLID
   end
+  style LDOT fill:none,stroke:none
+  style LSOLID fill:none,stroke:none
 
   subgraph SRC["Published sources"]
     AVL["`AviList v2025b
@@ -112,7 +119,7 @@ flowchart TB
     family ·`"]
   end
 
-  subgraph CODE["Hand-kept tables in code"]
+  subgraph CODE["Tables maintained in code"]
     NAMES["`internal/taxonomy
     *one function, Occurrence, applies them all*
     ─────────────
