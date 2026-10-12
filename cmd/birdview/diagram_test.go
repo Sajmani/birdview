@@ -260,3 +260,24 @@ func TestPipelineFieldsCarryOneMark(t *testing.T) {
 		t.Errorf("only %d boxes with fields found; the diagram was not read", boxes)
 	}
 }
+
+// TestPipelineTablesAreLeftAligned checks the rendered picture has every
+// table's lines left-aligned. Mermaid centers every label, so
+// render-diagrams.py moves them; a render that skipped that step would
+// still match its source's hash, and nothing else would notice.
+//
+// Verifies: P-078. Criterion: AC-115.
+func TestPipelineTablesAreLeftAligned(t *testing.T) {
+	md, _ := docs.Files.ReadFile("pipeline.md")
+	svg, _ := docs.Files.ReadFile("pipeline.svg")
+	tables := 0
+	for _, b := range regexp.MustCompile("(?s)\\w+\\[\"`(.*?)`\"\\]").FindAllSubmatch(md, -1) {
+		if strings.Contains(string(b[1]), "─────") {
+			tables++
+		}
+	}
+	if got := strings.Count(string(svg), `style="text-anchor: start"`); tables == 0 || got != tables {
+		t.Errorf("docs/pipeline.svg left-aligns %d tables of the %d in docs/pipeline.md; "+
+			"run docs/render-diagrams.py", got, tables)
+	}
+}

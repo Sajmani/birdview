@@ -42,6 +42,28 @@ CHROME = os.environ.get("CHROME",
 BLOCK = re.compile(r"```mermaid\n(.*?)\n```", re.S)
 
 
+# A node: its box, then its label. A table is a node whose label has a rule
+# under the name; Mermaid centers every label and has no option to do
+# otherwise, so a table's lines are moved to the box's left edge here.
+NODE = re.compile(r'(<g [^>]*class="node[^"]*"[^>]*>'
+                  r'<rect [^>]*?x="(-?[\d.]+)"[^>]*/>)(.*?</text>)', re.S)
+PAD = 12
+
+
+def left_align_tables(svg: str) -> str:
+    def align(m: re.Match) -> str:
+        head, left, label = m.group(1), float(m.group(2)), m.group(3)
+        if "─────" not in label:
+            return m.group(0)
+        label = label.replace('<text style=""', '<text style="text-anchor: start"', 1)
+        label = label.replace('x="0"', f'x="{left + PAD:g}"')
+        return head + label
+    out, n = NODE.subn(align, svg)
+    if n == 0 or "text-anchor: start" not in out:
+        sys.exit("no table found to left-align; Mermaid's SVG has changed shape")
+    return out
+
+
 def render(md: pathlib.Path) -> None:
     blocks = BLOCK.findall(md.read_text(encoding="utf-8"))
     if not blocks:
@@ -66,6 +88,7 @@ def render(md: pathlib.Path) -> None:
                         "-b", "white", "-i", str(t / "in.mmd"), "-o", str(t / "out.svg")],
                        check=True, env=env)
         svg = (t / "out.svg").read_text(encoding="utf-8")
+    svg = left_align_tables(svg)
     # The digest goes first, as a comment, so the check needs no XML parser.
     out = md.with_suffix(".svg")
     out.write_text(f"<!-- source sha256 {digest} -->\n" + svg, encoding="utf-8")
