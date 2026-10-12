@@ -162,14 +162,17 @@ func main() {
 		raw     map[string]map[int]map[string]int64
 		present map[string]bool
 		counts  map[string]int64
-		// monthly is the same count split twelve ways, summed over both
-		// sources exactly as counts is.
+		// monthly is the same count split twelve ways.
 		monthly map[string]*[12]int64
-		// bySource is the same split by GBIF dataset key. Kept apart only
-		// long enough to confirm eBird's Sensitive Species listings, which
-		// need to see what eBird holds separately from iNaturalist (CR-037).
-		bySource map[string]map[string]*[12]int64
-		err      error
+		// withheld marks the months eBird is confirmed to withhold each
+		// species here (CR-037).
+		withheld map[string][12]bool
+		// total and monthlyTotal are every counted record in the region,
+		// the denominator of every figure, taken before shared names are
+		// copied so that a shared count is not divided into itself twice.
+		total        int64
+		monthlyTotal [12]int64
+		err          error
 	}
 	results := make([]result, len(gids))
 
@@ -273,6 +276,10 @@ func main() {
 	// Measure, from the cache, whatever its records came from. Separated
 	// from the fetch so that a rule change costs a rerun of this loop and
 	// not of the network.
+	aviName := make(map[string]string, len(ds))
+	for _, sp := range ds {
+		aviName[strings.ToLower(sp)] = sp
+	}
 	for i := range results {
 		if results[i].err != nil {
 			continue
@@ -281,72 +288,13 @@ func main() {
 		if r.raw == nil {
 			continue
 		}
-		r.present, r.counts = map[string]bool{}, map[string]int64{}
-		r.monthly = map[string]*[12]int64{}
-		r.bySource = map[string]map[string]*[12]int64{}
-		for key, byMonth := range r.raw {
-			// Every record carries a month, so the twelve must reconstruct
-			// the year exactly. Checked here, over all 74 regions and both
-			// sources, because CR-036's whole model rests on it: a month
-			// filter that quietly loses records would make every figure it
-			// shows smaller than the annual one for no stated reason.
-			var year, summed int64
-			for _, n := range byMonth[0] {
-				year += n
-			}
-			for m := 1; m <= 12; m++ {
-				for _, n := range byMonth[m] {
-					summed += n
-				}
-			}
-			if year != summed {
-				r.err = fmt.Errorf(
-					"%s in %s: the year holds %d records and the twelve months hold %d, a "+
-						"difference of %d. CR-036 assumes every record carries a month; it "+
-						"does not, and a month filter would silently drop the difference",
-					key, r.gid, year, summed, year-summed)
-				break
-			}
-			// Presence and the annual count come from the year facet, which
-			// is what the committed table has always carried. The monthly
-			// rule of CR-036 is applied by the SERVER, not here, so the
-			// table stays a record of what GBIF said rather than of what
-			// one threshold made of it.
-			var total int64
-			for _, n := range byMonth[0] {
-				total += n
-			}
-			if total == 0 {
-				continue
-			}
-			for name, n := range byMonth[0] {
-				// Normalized to the AviList name BEFORE matching, by the
-				// same function birdview-status uses. Matching the raw
-				// facet name is how eBird's 7,310,342 Dryobates villosus
-				// records came to belong to no species at all (CR-035).
-				k := taxonomy.Occurrence(name)
-				r.counts[k] += n
-				if float64(n)/float64(total)*1e6 >= minPPM {
-					r.present[k] = true
-				}
-			}
-			for m := 1; m <= 12; m++ {
-				for name, n := range byMonth[m] {
-					k := taxonomy.Occurrence(name)
-					if r.monthly[k] == nil {
-						r.monthly[k] = &[12]int64{}
-					}
-					r.monthly[k][m-1] += n
-					if r.bySource[key] == nil {
-						r.bySource[key] = map[string]*[12]int64{}
-					}
-					if r.bySource[key][k] == nil {
-						r.bySource[key][k] = &[12]int64{}
-					}
-					r.bySource[key][k][m-1] += n
-				}
-			}
+		m, err := measure(r.raw, r.gid, aviName)
+		if err != nil {
+			r.err = err
+			continue
 		}
+		r.present, r.counts, r.monthly, r.withheld = m.present, m.counts, m.monthly, m.withheld
+		r.total, r.monthlyTotal = m.total, m.monthlyTotal
 	}
 	for i := range results {
 		if results[i].err != nil {
@@ -380,36 +328,15 @@ func main() {
 			continue
 		}
 		names[r.gid] = r.name
-		for _, n := range r.counts {
-			totals[r.gid] += n
-		}
-		var mt [12]int64
-		for _, m := range r.monthly {
-			for i, n := range m {
-				mt[i] += n
-			}
-		}
-		monthlyTotals[r.gid] = mt
+		totals[r.gid] = r.total
+		monthlyTotals[r.gid] = r.monthlyTotal
 		for _, sp := range ds {
 			if lc := strings.ToLower(sp); r.present[lc] {
 				rep := region.Reported{ID: r.gid, Records: r.counts[lc]}
 				if m := r.monthly[lc]; m != nil {
 					rep.Months = *m
 				}
-				// Where eBird's Sensitive Species list names this species
-				// here, mark the months the records confirm it withheld,
-				// so a month with no eBird records by policy is not read
-				// as a month without the bird (CR-037).
-				if ws := taxonomy.Withholdings(sp, r.gid); len(ws) > 0 {
-					var eb, in [12]int64
-					if m := r.bySource[gbif.EBirdDatasetKey][lc]; m != nil {
-						eb = *m
-					}
-					if m := r.bySource[iNatDatasetKey][lc]; m != nil {
-						in = *m
-					}
-					rep.Withheld = taxonomy.ConfirmedMonths(ws, eb, in)
-				}
+				rep.Withheld = r.withheld[lc]
 				regionsOf[sp] = append(regionsOf[sp], rep)
 			}
 		}
@@ -565,6 +492,157 @@ func main() {
 		log.Fatalf("birdview-regions: %v", err)
 	}
 	log.Printf("birdview-regions: wrote %s", *outPath)
+}
+
+// measured is one region's counts, as BirdView counts them.
+type measured struct {
+	counts       map[string]int64
+	monthly      map[string]*[12]int64
+	present      map[string]bool
+	withheld     map[string][12]bool
+	total        int64
+	monthlyTotal [12]int64
+}
+
+// measure turns one region's raw facets into the counts BirdView uses:
+// eBird's records, plus iNaturalist's only where eBird is confirmed to be
+// withholding the species (CR-038).
+//
+// **eBird alone, as a rule.** iNaturalist is 1.24% of land records, and its
+// one real effect on the counts was to admit birds into regions on its own
+// much smaller total: one photo of an escaped pet cleared a bar of 0.43
+// records in New York. 985 of the 1,228 presences that rested on
+// iNaturalist alone were escapes, domestic birds and strays.
+//
+// **iNaturalist where eBird is silent by policy.** In a month eBird withholds
+// a species in a region -- named by its Sensitive Species list and confirmed
+// against the records (CR-037) -- iNaturalist's records are counted, because
+// they are the only evidence there is. Without them Spotted Owl would read
+// "0 in a billion" and appear in no state, which is eBird's privacy policy
+// presented as a fact about the owl. Presence there is judged on
+// iNaturalist's own total, since an eBird-sized denominator would make every
+// iNaturalist count look forty-eight times rarer than it is.
+//
+// **Shared names.** Where eBird files two species under one name, both take
+// that name's count (P-077): eBird holds Northern Yellow Warbler's records
+// only as Setophaga petechia, and without the copy the commonest warbler in
+// North America would appear nowhere. The totals are taken before the copy,
+// so a shared count is never divided into itself twice.
+//
+// aviName maps a lowercased name to the AviList spelling the Sensitive
+// Species table is keyed on.
+func measure(raw map[string]map[int]map[string]int64, gid string, aviName map[string]string) (measured, error) {
+	m := measured{counts: map[string]int64{}, monthly: map[string]*[12]int64{},
+		present: map[string]bool{}, withheld: map[string][12]bool{}}
+	by := map[string]map[string]*[12]int64{}
+	totals := map[string]int64{}
+	for key, byMonth := range raw {
+		// Every record carries a month, so the twelve must reconstruct the
+		// year exactly. Checked over all 74 regions and both sources,
+		// because CR-036's whole model rests on it.
+		var year, summed int64
+		for _, n := range byMonth[0] {
+			year += n
+		}
+		by[key] = map[string]*[12]int64{}
+		for mo := 1; mo <= 12; mo++ {
+			for name, n := range byMonth[mo] {
+				summed += n
+				k := taxonomy.Occurrence(name)
+				if by[key][k] == nil {
+					by[key][k] = &[12]int64{}
+				}
+				by[key][k][mo-1] += n
+			}
+		}
+		if year != summed {
+			return m, fmt.Errorf(
+				"%s in %s: the year holds %d records and the twelve months hold %d, a "+
+					"difference of %d. CR-036 assumes every record carries a month; it "+
+					"does not, and a month filter would silently drop the difference",
+				key, gid, year, summed, year-summed)
+		}
+		totals[key] = year
+	}
+	eb, in := by[gbif.EBirdDatasetKey], by[iNatDatasetKey]
+	names := map[string]bool{}
+	for k := range eb {
+		names[k] = true
+	}
+	for k := range in {
+		names[k] = true
+	}
+	for k := range names {
+		var e, i [12]int64
+		if v := eb[k]; v != nil {
+			e = *v
+		}
+		if v := in[k]; v != nil {
+			i = *v
+		}
+		var w [12]bool
+		if sp, drawn := aviName[k]; drawn {
+			if ws := taxonomy.Withholdings(sp, gid); len(ws) > 0 {
+				w = taxonomy.ConfirmedMonths(ws, e, i)
+			}
+		}
+		var eff [12]int64
+		var eYear, iWithheld, year int64
+		for mo := 0; mo < 12; mo++ {
+			eff[mo] = e[mo]
+			if w[mo] {
+				eff[mo] += i[mo]
+				iWithheld += i[mo]
+			}
+			eYear += e[mo]
+			year += eff[mo]
+		}
+		if year == 0 {
+			continue
+		}
+		m.counts[k] = year
+		v := eff
+		m.monthly[k] = &v
+		m.total += year
+		for mo := range eff {
+			m.monthlyTotal[mo] += eff[mo]
+		}
+		if w != ([12]bool{}) {
+			m.withheld[k] = w
+		}
+		// Present on eBird's own evidence against eBird's own total, or --
+		// only where eBird is withholding it -- on iNaturalist's against
+		// iNaturalist's. Never iNaturalist alone anywhere else.
+		if t := totals[gbif.EBirdDatasetKey]; t > 0 && float64(eYear)/float64(t)*1e6 >= minPPM {
+			m.present[k] = true
+		}
+		if t := totals[iNatDatasetKey]; t > 0 && iWithheld > 0 && float64(iWithheld)/float64(t)*1e6 >= minPPM {
+			m.present[k] = true
+		}
+	}
+	for _, sn := range taxonomy.SharedNames {
+		src := strings.ToLower(sn.Source)
+		for _, cover := range sn.Covers {
+			c := strings.ToLower(cover)
+			if c == src {
+				continue
+			}
+			delete(m.counts, c)
+			delete(m.monthly, c)
+			delete(m.present, c)
+			delete(m.withheld, c)
+			if n, ok := m.counts[src]; ok {
+				m.counts[c] = n
+				v := *m.monthly[src]
+				m.monthly[c] = &v
+				m.present[c] = m.present[src]
+				if w, ok := m.withheld[src]; ok {
+					m.withheld[c] = w
+				}
+			}
+		}
+	}
+	return m, nil
 }
 
 // landRec is one region's raw land facets, as cached for resume.

@@ -5551,7 +5551,8 @@ func TestSharedNamesAreDisclosed(t *testing.T) {
 	// are indistinguishable in the data and opposite in meaning: telling a
 	// reader eBird calls the Spotted Owl something else would send them
 	// after a name that does not exist.
-	for sci, common := range taxonomy.WithheldByEBird {
+	for sci := range taxonomy.WithheldByEBird {
+		common := sci
 		id := srv.idOf[sci]
 		if id == "" {
 			continue // out of scope is fine; several are declared exceptions
@@ -5814,7 +5815,7 @@ func TestEveryNameDisagreementIsOnThePage(t *testing.T) {
 	// records at build time, not by the list alone.
 	for i := range ds.Species {
 		sp := &ds.Species[i]
-		if _, global := taxonomy.WithheldByEBird[sp.ScientificName]; global || len(sp.RegionWithheld) == 0 {
+		if taxonomy.WithheldByEBird[sp.ScientificName] || len(sp.RegionWithheld) == 0 {
 			continue
 		}
 		want[sp.ScientificName] = append(want[sp.ScientificName], "withheld by eBird in")

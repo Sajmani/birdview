@@ -313,3 +313,43 @@ func ConfirmedMonths(entries []Withholding, ebird, inat [12]int64) [12]bool {
 	}
 	return out
 }
+
+// WithheldByEBird is the set of species eBird withholds everywhere BirdView
+// looks: a global entry on its Sensitive Species list, or year-round entries
+// for both the United States and Canada (CR-034, CR-038).
+//
+// Derived from the list rather than kept by hand. The hand-kept version
+// held eleven species, found by querying every plausible alias and finding
+// nothing, plus Great Gray Owl and Black Rail, which the ratio band of T-028
+// caught after the zero-record sweep missed them -- eBird holds one record of
+// the owl and sixteen of the rail. It also held **Desertas Petrel**, which is
+// on no entry of eBird's list: its missing records are a naming question,
+// and saying "withheld by eBird" about it was false.
+//
+// Kept apart from the naming tables because the two are indistinguishable in
+// the data -- eBird returns zero for both -- and opposite in meaning: a page
+// telling a reader to look for another name would send them after one that
+// does not exist.
+//
+// Verifies: P-077.
+var WithheldByEBird = func() map[string]bool {
+	allYear := map[string]map[string]bool{}
+	out := map[string]bool{}
+	for _, w := range EBirdSensitive {
+		switch {
+		case w.Region == "":
+			out[w.Species] = true
+		case w.From == "" && (w.Region == "USA" || w.Region == "CAN"):
+			if allYear[w.Species] == nil {
+				allYear[w.Species] = map[string]bool{}
+			}
+			allYear[w.Species][w.Region] = true
+		}
+	}
+	for sp, c := range allYear {
+		if c["USA"] && c["CAN"] {
+			out[sp] = true
+		}
+	}
+	return out
+}()

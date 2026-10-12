@@ -67,7 +67,7 @@ recalibrated dataset, a recoloured favicon and a footer credit, each reported fr
 longer matched the repository.
 
 The ingest prints a coverage summary — species in scope, how many traits and wingspans are
-measured, near-match or modeled. Expect **1083 species in 99 families across 27 orders**.
+measured, near-match or modeled. Expect **1082 species in 99 families across 27 orders**.
 
 Flags, should you need them:
 

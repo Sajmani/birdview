@@ -85,8 +85,8 @@ func TestSourceNamesAgree(t *testing.T) {
 			expected[c] = "shares the name " + sn.Source + " with another species"
 		}
 	}
-	for sci, common := range WithheldByEBird {
-		expected[sci] = "eBird withholds " + common
+	for sci := range WithheldByEBird {
+		expected[sci] = "eBird withholds it everywhere"
 	}
 	for sci, why := range DomesticForms {
 		expected[sci] = why

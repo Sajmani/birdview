@@ -19,6 +19,7 @@ import (
 	"testing"
 	"time"
 
+	"birdview/internal/gbif"
 	"birdview/internal/status"
 	"birdview/internal/taxonomy"
 )
@@ -302,5 +303,49 @@ func TestBothReadersOfTheOccurrenceDataAgreeOnTheSpecies(t *testing.T) {
 			"folded to its first parent it credits the American Herring Gull with "+
 			"records of a bird that is not one, and dropped outright it leaves the "+
 			"region's denominator short of birds that were genuinely seen", got)
+	}
+}
+
+// TestScopeCountsEBirdAndFillsOnlyItsDeclaredGaps asserts CR-038 where it
+// decides which species BirdView draws: recurrence is measured on eBird's
+// dates, plus iNaturalist's only in months eBird is confirmed to withhold.
+//
+// Verifies: P-001, CR-038. Criterion: AC-114.
+func TestScopeCountsEBirdAndFillsOnlyItsDeclaredGaps(t *testing.T) {
+	eb, in := gbif.EBirdDatasetKey, iNatDatasetKey
+
+	// An escape only iNaturalist photographed, in three different years.
+	// Under the old union this recurred; under the rule it has no dates.
+	got := countedDates("pavo cristatus", "USA.33_1", map[string]map[string]int64{
+		in: {"2019-05-01": 1, "2021-06-01": 1, "2023-07-01": 1}})
+	if len(got) != 0 {
+		t.Errorf("an iNaturalist-only escape kept %d dates; it would recur on unvetted "+
+			"evidence alone", len(got))
+	}
+
+	// Long-eared Owl in New York: eBird withholds it all year, so
+	// iNaturalist's dates are the evidence.
+	got = countedDates("asio otus", "USA.33_1", map[string]map[string]int64{
+		in: {"2019-01-10": 1, "2021-02-11": 2, "2023-12-12": 1}})
+	if len(got) != 3 {
+		t.Errorf("Long-eared Owl in New York kept %d of iNaturalist's 3 dates; eBird's "+
+			"silence there is policy", len(got))
+	}
+
+	// Painted Bunting in Florida: eBird's summer dates, and iNaturalist's
+	// winter ones -- but NOT iNaturalist's summer ones, which eBird covers.
+	by := map[string]map[string]int64{
+		eb: {"2022-05-01": 3000, "2022-06-01": 2000, "2022-07-01": 2000, "2022-08-01": 2000},
+		in: {"2022-01-15": 5, "2022-06-15": 4},
+	}
+	got = countedDates("passerina ciris", "USA.10_1", by)
+	if got["2022-01-15"] != 5 {
+		t.Error("Painted Bunting's January iNaturalist date was dropped; eBird withholds January")
+	}
+	if got["2022-06-15"] != 0 {
+		t.Error("Painted Bunting's June iNaturalist date was counted; eBird publishes June")
+	}
+	if got["2022-05-01"] != 3000 {
+		t.Error("eBird's own dates were not all counted")
 	}
 }

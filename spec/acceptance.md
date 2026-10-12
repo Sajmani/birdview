@@ -2348,9 +2348,10 @@ five naming tables and the rendered detail pages
 2. The row names the specific thing: the alias for a rename, the published binomial for a
    lump, the covering name for a shared name, `domestic and feral` for a form,
    `withheld by eBird` for a suppression.
-3. **No species outside those tables carries the row.** 27 of 1,083 are affected, plus 24 that
-   eBird withholds only in some regions or seasons ([AC-113](#ac-113)); the other 1,032 must
-   stay silent.
+3. **No species outside those tables carries the row.** 26 of 1,083 are in the tables — 27
+   until [CR-038](decisions.md#cr-038) derived `WithheldByEBird` from eBird's list and Desertas
+   Petrel, on no entry of it, left — plus 24 that eBird withholds only in some regions or
+   seasons ([AC-113](#ac-113)). The other 1,033 must stay silent.
 4. The expected set is floored at 25 species, so emptying the tables cannot make the rest
    vacuous.
 
@@ -2585,3 +2586,75 @@ measurement.
 | confirmation is skipped and the list trusted | `Greater Sage-Grouse, Utah: withheld -++++-------, want ------------` and `Spruce Grouse, Vermont: withheld ++++++++++++` |
 | a half-covered month counts as withheld | `"Jan 01"-"Apr 15" covers ++++--------, want +++---------` |
 | the parser drops the flags | `withheld = [false false …], want [true true true …]`, and `flags "!11100" were accepted` |
+
+### AC-114 — eBird is counted; iNaturalist fills only the gaps eBird declares
+**Verifies:** [P-001](product.md#p-001), [P-011](product.md#p-011), [P-074](product.md#p-074),
+[P-077](product.md#p-077), [CR-038](decisions.md#cr-038) · **Level:** code and build ·
+**Method:** unit tests over the counting rule in `birdview-regions` and `birdview-status`, the
+derived `WithheldByEBird`, and the rebuilt tables
+
+**Assertions:**
+
+1. **eBird alone, as a rule.** In a region the size of New York, iNaturalist's robins are not
+   added to eBird's, and an escaped Diamond Dove — New York's real 2 eBird records and 1
+   iNaturalist photo — is counted at 2 and is **not** present.
+2. **iNaturalist where eBird withholds.** Long-eared Owl in New York, silent on eBird and 39 on
+   iNaturalist, is counted at 39, present on iNaturalist's own total, and flagged withheld all
+   year. Painted Bunting in Florida takes iNaturalist's records in its withheld months and only
+   those.
+3. **Shared names.** Northern Yellow Warbler and Mangrove Yellow Warbler both carry eBird's
+   shared count, and the region total counts it **once**.
+4. **Scope.** An escape iNaturalist alone photographed in three different years keeps no dates;
+   Long-eared Owl in New York keeps iNaturalist's; Painted Bunting keeps iNaturalist's January
+   date and not its June one.
+5. **`WithheldByEBird` is derived:** the nine global species plus Black Rail; not Long-eared Owl,
+   withheld year-round only in the US; not Desertas Petrel, on no entry of eBird's list.
+
+**Assertion 1 needed its fixture rebuilt at New York's real size.** The presence bar is relative,
+and at 1.2 million records two Diamond Doves clear 1 per million — so the first fixture failed
+against correct code, and the first version of the escape case, with no eBird records at all,
+passed with the old presence rule put back, because a name with nothing counted is never judged.
+Both are recorded so the next fixture is not written into either.
+
+**What the build found.** Regions were rebuilt from the same cached facets as before, so every
+difference is the rule:
+
+| | Before | After |
+| --- | --- | --- |
+| land presences | 27,831 | 26,848 |
+| species placed in a region | 1,062 | 1,035 |
+| records counted (all regions) | 1,252,561,983 | 1,237,352,304 (−1.21%) |
+| Spotted Owl regions | 10 | 10 |
+| Long-eared Owl regions | 51 | 50 |
+| Northern / Mangrove Yellow Warbler | 1 in 23,244 / 1 in 203 | 1 in 200 / 1 in 200 |
+
+The 26 species that leave every region are 24 escapes — Diamond Dove in 8, Silver Pheasant in 10,
+Green-cheeked Parakeet in 7, Emu in 6, Lady Amherst's Pheasant in 5 — and two genuine vagrants
+with very few records, Ruddy Quail-Dove (16) and Ferruginous Duck (7). Red Junglefowl falls from 59
+regions to 17. None newly enters a region.
+
+**Scope barely moved**, which was the open question: 1,083 drawn species to 1,082. **Mottled
+Owl** leaves, rare to vagrant, on losing two iNaturalist dates (1,133 records to 1,131); Vireo
+swainsoni leaves scope too, but AviList does not carry it and it was dropped from the dataset
+already. The escapes do **not** leave scope: eBird records the feral populations itself, so they
+recur on eBird's evidence, and only their region presence narrows. Measuring this took a
+`birdview-status` run of some 8,600 requests that stalled for two days under GBIF throttling and
+ended with 15 queries failed; the resume fetched the missing 15 in under a minute.
+
+Two things the rebuild caught, both fixed: Northern Yellow Warbler and Coppery-tailed Trogon would
+have **left scope**, since their records sit under the shared name and their own rows no longer
+recur — `status.Scope` now brings both halves of a shared name in; and the ingest refused to run,
+because its check that *Vireo swainsoni* is dropped by the AviList join fired on a species that
+correctly never reached the join.
+
+**Status: verified 2026-10-12 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| iNaturalist counted everywhere | `robin counts 62412000, want 62,400,000 -- eBird's alone` |
+| the old per-source presence rule | `an escaped Diamond Dove is present in New York on one iNaturalist photo` |
+| no shared-name copy | `aestiva 0, petechia 6000; both should carry eBird's shared 6,000` |
+| the shared count added to the total twice | `total 62412041, want 62406041` |
+| scope reverts to the union of both sources' dates | `an iNaturalist-only escape kept 3 dates` and `Painted Bunting's June iNaturalist date was counted` |
+| `status.Scope` ignores shared names | `Setophaga aestiva is out of scope` |
+| `WithheldByEBird` from global entries only | `WithheldByEBird[Laterallus jamaicensis] = false, want true` |

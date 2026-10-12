@@ -193,7 +193,7 @@ covers contributors' work and not the taxonomy we take an identifier from.
 
 ## Scope
 
-**1083 species**: every bird whose records recur in the regions BirdView covers, by its own
+**1082 species**: every bird whose records recur in the regions BirdView covers, by its own
 rule — not by anyone else’s checklist. Those regions are 51 US states and DC, 13 Canadian
 provinces and territories, 5 US outlying islands and 5 stretches of open sea. **They are not
 the ABA Area**: that includes St-Pierre et Miquelon, which BirdView has no region for, and
@@ -251,10 +251,14 @@ years, so any absolute bar admits more species over time for no ecological reaso
 differs enormously between regions — California has 114 million species observations against Hawaii's
 2.5 million — so one count cannot mean the same thing in both.
 
-**Both sources, because one is not enough.** eBird's GBIF export **withholds
-conservation-sensitive species entirely**: Spotted Owl, Gyrfalcon, Northern Hawk Owl and the
-critically endangered Hawaiian endemics have zero eBird records and hundreds in iNaturalist. An
-eBird-only table would omit exactly the birds a reader is most likely to look up.
+**eBird first, and iNaturalist only where eBird is silent on purpose.** eBird's records are
+reviewed before they are published, and they are 98.8% of the two sources' records combined, so
+BirdView counts eBird. But eBird **withholds sensitive species** — Spotted Owl, Gyrfalcon and the Hawaiian
+endemics everywhere; Long-eared Owl across the United States; Painted Bunting in Florida from
+October to mid-April — and publishes its list of them. Where that list says eBird is withholding a
+bird and the records confirm it, BirdView counts iNaturalist's records instead, and the page says
+so. An eBird-only table would omit exactly the birds a reader is most likely to look up; a table
+that added iNaturalist everywhere counted escaped pets, which is what it used to do.
 
 **Names are matched verbatim**, as the publisher wrote them, not through GBIF's taxonomic
 backbone. The backbone silently drops what it cannot resolve and reports **zero** US and
@@ -392,13 +396,23 @@ under *Setophaga aestiva*. So its 6,245,227 records cover two species, and **nob
 they divide.** BirdView does not guess — both birds show the shared count, and both say whose
 it also is. The Elegant and Coppery-tailed Trogons are the same case.
 
-**eBird withholds some species entirely**, as it does for birds vulnerable to disturbance —
-Spotted Owl, Gyrfalcon, Northern Hawk Owl, Lesser Prairie-Chicken, Gunnison Sage-Grouse and
-four more. Their counts here are iNaturalist's alone and far below the real record. That is a
-gap in what BirdView can see, not a statement about the bird, and the page says which.
+**eBird withholds some species**, to protect birds from trapping, disturbance or targeted
+hunting, and publishes a list of which. Ten are withheld everywhere BirdView looks — Spotted
+Owl, Great Gray Owl, Gyrfalcon, Northern Hawk Owl, Lesser Prairie-Chicken, Gunnison Sage-Grouse,
+Black Rail and three Hawaiian endemics. Others only in some places or seasons: Long-eared Owl
+across the United States, Painted Bunting in Florida from October to mid-April, Short-eared Owl
+in New York in spring and summer. There, the counts are iNaturalist's alone and far below the
+real record, the month filter does not judge them, and the page says *withheld by eBird*. That
+is a gap in what BirdView can see, not a statement about the bird.
 
-These look identical in the data — eBird returns nothing either way — so each was checked by
-querying every plausible alternative name. See [CR-034](/spec/decisions#cr-034).
+**The list is checked, not trusted.** It describes eBird's policy today, and the records reflect
+what was applied when they were published; for 26 of the 230 places it names, eBird's records
+are there anyway. BirdView marks a bird withheld only where the records show the gap. See
+[CR-037](/spec/decisions#cr-037).
+
+Withholding and a different name look identical in the data — eBird returns nothing either way
+— so the names were also checked by querying every plausible alternative. See
+[CR-034](/spec/decisions#cr-034).
 
 **The same bird under another name.** Seven species are filed by eBird under a name AviList has
 since replaced, and the page names both. Five are genus moves — AviList puts the Hairy

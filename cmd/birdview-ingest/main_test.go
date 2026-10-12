@@ -88,11 +88,21 @@ func TestScopeIsWhatTheStatusTableSaysRecurs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reading the status table: %v", err)
 	}
-	want := len(status.Scope(rows)) - len(taxonomy.NotInAviList) - unmeasurable
+	// Only the species AviList lacks that are actually in scope are
+	// subtracted: Vireo swainsoni left scope under CR-038, and subtracting
+	// it anyway would make this test demand one species fewer than exists.
+	scope := status.Scope(rows)
+	noConcept := 0
+	for _, sci := range scope {
+		if _, missing := taxonomy.NotInAviList[sci]; missing {
+			noConcept++
+		}
+	}
+	want := len(scope) - noConcept - unmeasurable
 	if got := len(ds.Species); got != want {
 		t.Errorf("got %d species, want %d (in scope, less %d with no AviList concept "+
 			"and %d with no AVONET measurement)",
-			got, want, len(taxonomy.NotInAviList), unmeasurable)
+			got, want, noConcept, unmeasurable)
 	}
 	// The scope must actually be the derived one, not a leftover list.
 	if len(ds.Species) < 1000 {

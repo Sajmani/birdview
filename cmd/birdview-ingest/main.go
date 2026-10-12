@@ -202,9 +202,21 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 		avlOf[sci] = rec
 	}
 	sort.Strings(dropped)
+	// Expected: every species AviList does not carry THAT IS IN SCOPE. One
+	// that has left scope has nothing to drop: Vireo swainsoni left when
+	// scope began to be measured on eBird (CR-038), because eBird files
+	// every Warbling Vireo under Vireo gilvus and its records under
+	// swainsoni were iNaturalist's alone. Requiring it to be dropped anyway
+	// made the check fail on a species that was correctly never reached.
+	inScope := map[string]bool{}
+	for _, sci := range species {
+		inScope[sci] = true
+	}
 	var wantDropped []string
 	for k := range taxonomy.NotInAviList {
-		wantDropped = append(wantDropped, k)
+		if inScope[k] {
+			wantDropped = append(wantDropped, k)
+		}
 	}
 	sort.Strings(wantDropped)
 	if strings.Join(dropped, "|") != strings.Join(wantDropped, "|") {

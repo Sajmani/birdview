@@ -49,6 +49,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -89,7 +90,7 @@ func main() {
 		limit    = flag.Int("limit", 0, "stop after this many species (0 = all), for a smoke run")
 		cache    = flag.String("cache", "/tmp/birdview-status-pass1.json", "pass 1 cache; reused if present")
 		workers  = flag.Int("workers", 2, "concurrent requests")
-		progress = flag.String("progress", "/tmp/birdview-status-pass2.jsonl",
+		progress = flag.String("progress", "/tmp/birdview-status-pass2-bysource.jsonl",
 			"pass 2 progress log; completed species are skipped on a rerun")
 	)
 	flag.Parse()
@@ -206,7 +207,7 @@ func main() {
 			if err := dec.Decode(&rec); err != nil {
 				break
 			}
-			done[rec.Name] = rec.Dates
+			done[rec.Name] = countedAll(rec.Name, rec.BySource)
 			trunc[rec.Name] = rec.Trunc
 		}
 		f.Close()
@@ -243,6 +244,7 @@ func main() {
 				ps = ps[:topRegions]
 			}
 			dates := map[string]map[string]int64{}
+			bySource := map[string]map[string]map[string]int64{}
 			tr := map[string]bool{}
 			partial := false
 			for _, p := range ps {
@@ -261,7 +263,8 @@ func main() {
 					mu.Unlock()
 					continue
 				}
-				dates[p.gid] = d
+				bySource[p.gid] = d
+				dates[p.gid] = countedDates(n, p.gid, d)
 				tr[p.gid] = t
 			}
 
@@ -282,7 +285,7 @@ func main() {
 			// interleave and make the file unreadable on resume.
 			mu.Lock()
 			done[n], trunc[n] = dates, tr
-			if err := penc.Encode(cacheRec{n, dates, tr}); err != nil {
+			if err := penc.Encode(cacheRec{n, bySource, tr}); err != nil {
 				log.Printf("birdview-status: progress write: %v", err)
 			}
 			nDone++
@@ -512,17 +515,22 @@ func toBinomials(in map[string]map[string]int64) map[string]map[string]int64 {
 // cacheRec is one species' raw fetch: the dates each region reported, and
 // whether that region's facet was truncated.
 type cacheRec struct {
-	Name  string                      `json:"n"`
-	Dates map[string]map[string]int64 `json:"d"`
-	Trunc map[string]bool             `json:"t"`
+	Name string `json:"n"`
+	// BySource maps a region to a GBIF dataset key to the dates that source
+	// reported. Kept per source, not unioned, so the counting rule of
+	// CR-038 -- eBird's dates, and iNaturalist's only where eBird is
+	// withholding the species -- can be applied, and changed, without
+	// refetching.
+	BySource map[string]map[string]map[string]int64 `json:"s"`
+	Trunc    map[string]bool                        `json:"t"`
 }
 
 // datesOf asks both datasets for the dates behind one (species, region) pair
 // and unions them. The union is right because the two datasets record
 // different observers, not the same ones twice: a day either had a sighting
 // or it did not.
-func datesOf(ctx context.Context, c *gbif.Client, p pair) (map[string]int64, bool, error) {
-	all := map[string]int64{}
+func datesOf(ctx context.Context, c *gbif.Client, p pair) (map[string]map[string]int64, bool, error) {
+	all := map[string]map[string]int64{}
 	var trunc bool
 	for _, name := range gbifNames(p.name) {
 		for _, ds := range []string{gbif.EBirdDatasetKey, iNatDatasetKey} {
@@ -530,13 +538,89 @@ func datesOf(ctx context.Context, c *gbif.Client, p pair) (map[string]int64, boo
 			if err != nil {
 				return nil, false, fmt.Errorf("dates for %q in %s: %w", name, p.gid, err)
 			}
+			if all[ds] == nil {
+				all[ds] = map[string]int64{}
+			}
 			for d, k := range dates {
-				all[d] += k
+				all[ds][d] += k
 			}
 			trunc = trunc || t
 		}
 	}
 	return all, trunc, nil
+}
+
+// countedDates applies CR-038's rule to one species in one region: every
+// date eBird reported, plus iNaturalist's dates only in months eBird is
+// confirmed to withhold the species there (CR-037).
+//
+// Scope is recurrence, so this decides which species BirdView draws at all.
+// Before it, the two sources' dates were unioned, and a species iNaturalist
+// alone photographed in repeated years -- feral peafowl, escaped parakeets
+// -- recurred on that evidence. eBird's reviewers vet every record; the
+// union let an unvetted second source decide scope on its own.
+//
+// name is the occurrence name, lowercased.
+func countedDates(name, gid string, by map[string]map[string]int64) map[string]int64 {
+	out := map[string]int64{}
+	for d, k := range by[gbif.EBirdDatasetKey] {
+		out[d] += k
+	}
+	ws := taxonomy.Withholdings(aviListSpelling(name), gid)
+	if len(ws) == 0 {
+		return out
+	}
+	monthly := func(dates map[string]int64) [12]int64 {
+		var m [12]int64
+		for d, k := range dates {
+			if mo, ok := monthOf(d); ok {
+				m[mo] += k
+			}
+		}
+		return m
+	}
+	withheld := taxonomy.ConfirmedMonths(ws, monthly(by[gbif.EBirdDatasetKey]),
+		monthly(by[iNatDatasetKey]))
+	for d, k := range by[iNatDatasetKey] {
+		if mo, ok := monthOf(d); ok && withheld[mo] {
+			out[d] += k
+		}
+	}
+	return out
+}
+
+// countedAll applies countedDates to every region of a cached species.
+func countedAll(name string, by map[string]map[string]map[string]int64) map[string]map[string]int64 {
+	out := make(map[string]map[string]int64, len(by))
+	for gid, d := range by {
+		out[gid] = countedDates(name, gid, d)
+	}
+	return out
+}
+
+// monthOf reads the 0-based month from an ISO date, "2024-06-03".
+func monthOf(date string) (int, bool) {
+	if len(date) < 7 {
+		return 0, false
+	}
+	mo, err := strconv.Atoi(date[5:7])
+	if err != nil || mo < 1 || mo > 12 {
+		return 0, false
+	}
+	return mo - 1, true
+}
+
+// aviListSpelling maps a lowercased occurrence name onto the AviList name
+// the Sensitive Species table is keyed on.
+func aviListSpelling(name string) string {
+	if name == "" {
+		return ""
+	}
+	t := strings.ToUpper(name[:1]) + name[1:]
+	if alt, ok := taxonomy.AviListRenames[t]; ok {
+		return alt
+	}
+	return t
 }
 
 // gbifNames lists every name the occurrence data files this species under:

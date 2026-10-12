@@ -2818,9 +2818,9 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 	// Withheld is NOT a name disagreement and must not read as one: telling
 	// a reader to look for another name would send them after one that does
 	// not exist (P-077).
-	if common, held := taxonomy.WithheldByEBird[sp.ScientificName]; held {
+	if taxonomy.WithheldByEBird[sp.ScientificName] {
 		seam("withheld by eBird",
-			"eBird suppresses "+common+" from its public export, as it does for "+
+			"eBird suppresses "+sp.Name(loc)+" from its public export, as it does for "+
 				"species vulnerable to disturbance. The counts here are iNaturalist's alone, "+
 				"so they are far lower than the bird's actual record. This is a gap in what "+
 				"BirdView can see, not a statement about the bird.")
@@ -2831,7 +2831,7 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 	// not just the ones on screen: this page is the complete record, and the
 	// tile -- which names only what is on screen -- must never say more
 	// (P-034). A species eBird withholds everywhere already has its row above.
-	if _, global := taxonomy.WithheldByEBird[sp.ScientificName]; !global && len(sp.RegionWithheld) > 0 {
+	if !taxonomy.WithheldByEBird[sp.ScientificName] && len(sp.RegionWithheld) > 0 {
 		type where struct{ name, months string }
 		var ws []where
 		for id := range sp.RegionWithheld {
@@ -2936,8 +2936,8 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 			Origin: string(dataset.Derived),
 			// Both halves of the contrast, because the first on its own only
 			// says what the number is NOT. A share is where the bird is.
-			Detail: fmt.Sprintf("%s of the %s species observations from %s, in eBird and iNaturalist "+
-				"via GBIF. That is how much of what people record there is this bird, not "+
+			Detail: fmt.Sprintf("%s of the %s species observations from %s, in eBird via GBIF -- and "+
+				"iNaturalist where eBird withholds the bird. That is how much of what people record there is this bird, not "+
 				"how many of them there are: a plain count says where the birdwatchers are. "+
 				"A sea's records are those on open water inside its box, so a bird watched "+
 				"from the shore counts to the shore.",

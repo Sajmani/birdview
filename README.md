@@ -6,7 +6,7 @@ BirdView draws North American birds as a scaled schematic — bill, head, neck, 
 tail, and a wing crossbar — at one shared scale, so you can *see* the difference in size instead of
 reading it off a number and trying to imagine it.
 
-It covers **1083 species across 99 families and 27 orders**: every bird whose records **recur**
+It covers **1082 species across 99 families and 27 orders**: every bird whose records **recur**
 in the regions it covers — repeated episodes across years, in at least one region — by a rule
 BirdView derives and owns. Those regions are the US states, the Canadian provinces, five US
 outlying islands and five stretches of open sea; they are BirdView's own list and not the ABA

@@ -101,7 +101,8 @@ Everything is selected when you arrive, so every filter is a way of *dropping* b
 ### Regions
 
 States, provinces, and stretches of open sea. A bird is listed in a region when it is reported
-there often enough to be worth looking for, from eBird and iNaturalist records.
+there often enough to be worth looking for, from eBird records — and from iNaturalist where eBird
+withholds a sensitive species.
 
 The same regions are offered **grouped two ways**, and you can pick from either. **Geographic**
 is the usual map, drawn by hand, so someone looking for Alaska finds it under Alaska. **Common

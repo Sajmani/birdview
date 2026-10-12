@@ -291,3 +291,32 @@ func TestReadParsesTheLastSeenColumn(t *testing.T) {
 		t.Error("an unparseable date was accepted as no date at all")
 	}
 }
+
+// TestScopeBringsBothHalvesOfASharedName asserts that a name covering two
+// species brings both into scope (P-077, CR-038).
+//
+// Once scope is measured on eBird, Northern Yellow Warbler has no row of its
+// own that recurs: eBird files every one of its records under Setophaga
+// petechia. Without this the commonest warbler in North America would leave
+// BirdView over a filing choice -- and nothing else would notice, because
+// the dataset and the scope would shrink together.
+//
+// Verifies: P-077, CR-038. Criterion: AC-114.
+func TestScopeBringsBothHalvesOfASharedName(t *testing.T) {
+	rows := []Row{
+		{Name: "setophaga petechia", Status: Established},
+		{Name: "setophaga aestiva", Status: Absent},
+		{Name: "trogon elegans", Status: Established},
+		{Name: "trogon ambiguus", Status: Absent},
+	}
+	in := map[string]bool{}
+	for _, n := range Scope(rows) {
+		in[n] = true
+	}
+	for _, want := range []string{"Setophaga aestiva", "Setophaga petechia", "Trogon ambiguus", "Trogon elegans"} {
+		if !in[want] {
+			t.Errorf("%s is out of scope; its records are filed under the shared name, "+
+				"which recurs", want)
+		}
+	}
+}

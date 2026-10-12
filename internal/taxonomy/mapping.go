@@ -358,37 +358,6 @@ func SharedWith(aviList string) (other string, source string, why string, ok boo
 	return "", "", "", false
 }
 
-// WithheldByEBird are species eBird suppresses entirely rather than names
-// differently (CR-034).
-//
-// Kept apart from the naming tables because the two are indistinguishable in
-// the data -- eBird returns zero for both -- and opposite in meaning. Every
-// one below was confirmed by querying each plausible alias and finding
-// nothing: these records are suppressed, not relabelled, and a page telling
-// a reader to look for another name would send them after one that does not
-// exist.
-//
-// Verifies: P-077.
-var WithheldByEBird = map[string]string{
-	// Found by the ratio band of T-028, not by the zero-record sweep that
-	// built the rest of this list: eBird holds 1 record of the owl and 16
-	// of the rail, so neither reads as absent. Against iNaturalist's 2,859
-	// and 101 they are plainly suppressed, and a filter looking for zero
-	// walked straight past them.
-	"Strix nebulosa":         "Great Gray Owl",
-	"Laterallus jamaicensis": "Black Rail",
-
-	"Strix occidentalis":         "Spotted Owl",
-	"Falco rusticolus":           "Gyrfalcon",
-	"Surnia ulula":               "Northern Hawk Owl",
-	"Tympanuchus pallidicinctus": "Lesser Prairie-Chicken",
-	"Centrocercus minimus":       "Gunnison Sage-Grouse",
-	"Myadestes palmeri":          "Puaiohi",
-	"Pseudonestor xanthophrys":   "Maui Parrotbill",
-	"Palmeria dolei":             "Akohekohe",
-	"Pterodroma deserta":         "Desertas Petrel",
-}
-
 // Binomial reduces a name the occurrence data publishes to the species it
 // identifies, and reports whether it identifies one at all.
 //

@@ -21,8 +21,8 @@ import (
 
 // TestEBirdSensitiveIsWellFormed checks the restated list without trusting
 // the scrape that produced it: every window parses, every region is a GADM
-// id or a country, and the global entries are exactly WithheldByEBird's
-// species bar the one that is not on eBird's list at all.
+// id or a country, and WithheldByEBird -- now derived from the list -- holds
+// exactly the species it should.
 //
 // Verifies: CR-037. Criterion: AC-113.
 func TestEBirdSensitiveIsWellFormed(t *testing.T) {
@@ -47,25 +47,27 @@ func TestEBirdSensitiveIsWellFormed(t *testing.T) {
 			t.Errorf("%s: region %q is neither a GADM id nor a country", w.Species, w.Region)
 		}
 	}
-	for sp := range WithheldByEBird {
-		// Desertas Petrel is in WithheldByEBird and NOT on eBird's list:
-		// its missing records are a naming question, not a suppression.
-		if sp == "Pterodroma deserta" {
-			continue
-		}
-		if !global[sp] && !regional(sp) {
-			t.Errorf("%s is in WithheldByEBird but on no entry of eBird's list", sp)
-		}
-	}
-}
-
-func regional(sp string) bool {
-	for _, w := range EBirdSensitive {
-		if w.Species == sp && w.Region != "" {
-			return true
+	// WithheldByEBird is derived: the nine global species, plus Black Rail,
+	// which eBird lists year-round for both the US and Canada. Not Long-eared
+	// Owl, listed year-round for the US but only seasonally in Canada; and
+	// not Desertas Petrel, which the hand-kept table held and which is on no
+	// entry of eBird's list.
+	for sp := range global {
+		if !WithheldByEBird[sp] {
+			t.Errorf("%s is on eBird's global list but not in WithheldByEBird", sp)
 		}
 	}
-	return false
+	for sp, want := range map[string]bool{
+		"Laterallus jamaicensis": true, "Asio otus": false, "Pterodroma deserta": false,
+	} {
+		if WithheldByEBird[sp] != want {
+			t.Errorf("WithheldByEBird[%s] = %v, want %v", sp, !want, want)
+		}
+	}
+	if len(WithheldByEBird) != len(global)+1 {
+		t.Errorf("WithheldByEBird holds %d species, want the %d global plus Black Rail",
+			len(WithheldByEBird), len(global))
+	}
 }
 
 // TestWindowsCoverWholeMonthsOnly asserts the window arithmetic, including

@@ -18,8 +18,13 @@ The dataset is the species whose observations **recur** in the regions BirdView 
 species is in scope when, in at least one of them, its records fall in repeated episodes across
 multiple years.
 
+**The records are eBird's**, and iNaturalist's only in a region and month where eBird is
+confirmed to withhold the species ([CR-038](decisions.md#cr-038)). Recurrence used to be measured
+on both sources' dates together, so a species iNaturalist alone photographed in repeated years —
+feral peafowl, escaped parakeets — recurred on evidence eBird's reviewers never saw.
+
 **Those regions are BirdView's own list, not the ABA Area**, and the two are not the same.
-[`region`](../internal/region/region.go) holds 51 US states and the District of Columbia, 13
+[`region`](../internal/region/region.go) holds the 50 US states and the District of Columbia, 13
 Canadian provinces and territories, 5 US Minor Outlying Islands, and 5 stretches of open sea.
 The ABA Area additionally includes **St-Pierre et Miquelon**, for which BirdView has no region;
 BirdView additionally covers **Johnston Atoll, Palmyra Atoll, Wake Island and Navassa Island**,
@@ -253,7 +258,11 @@ The user filters to any subset of **US states and Canadian provinces**, multi-se
 the family filter works — everything selected on arrival, an **All** control, and group toggles.
 
 **Membership is per region and relative.** A species belongs to a region when it reaches **1
-record per million** of that region's bird observations, in either source. Relative rather than a
+record per million** of that region's bird observations, **counted from eBird** — and, only where
+eBird is confirmed to withhold the species there, from iNaturalist judged against its own total
+([CR-038](decisions.md#cr-038)). It used to read "in either source", which judged iNaturalist
+against its own small total everywhere, so one photo of an escaped pet cleared a bar of 0.43
+records in New York. Relative rather than a
 fixed count for two measured reasons: eBird's volume doubled in five years, so any absolute bar
 admits more species over time for no ecological reason; and effort differs enormously between
 regions — California has 114 million records against Hawaii's 2.5 million — so one count cannot

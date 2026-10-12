@@ -133,6 +133,18 @@ func Scope(rows []Row) []string {
 		}
 		in[aviListName(r.Name)] = true
 	}
+	// A name covering two species brings both into scope (P-077, CR-038).
+	// eBird holds Northern Yellow Warbler's records only under Setophaga
+	// petechia, so once scope is measured on eBird the warbler has no row
+	// of its own that recurs -- and without this it would leave BirdView,
+	// the commonest warbler in North America dropped for a filing choice.
+	for _, sn := range taxonomy.SharedNames {
+		if in[sn.Source] {
+			for _, c := range sn.Covers {
+				in[c] = true
+			}
+		}
+	}
 	for name := range Declared {
 		in[name] = true
 	}
