@@ -9,11 +9,28 @@ to decide something — a join key, a filter, a denominator — without showing 
 is read and then not used, which is listed because a reader auditing the pipeline would
 otherwise wonder.
 
-Rounded boxes are commands. Square boxes are tables. Dotted arrows are facts copied by hand into
-code, rather than data read by a program.
+Square boxes are data: a published source, a table in code, or a file a command writes. Rounded
+boxes are things that run: a command, or a numbered step inside `birdview-ingest`. The steps are
+not files; the ingest runs all nine in memory and writes only `species.json`. Dotted arrows are
+facts copied by hand into code, rather than data read by a program. The same legend is in the
+diagram's corner.
 
 ```mermaid
 flowchart TB
+  subgraph LEGEND["Legend"]
+    direction LR
+    LT["Table or source
+    ─────────────
+    its fields, one per line"]
+    LS(["Command, or a step
+    inside birdview-ingest"])
+    LM["★ field reaches a page
+    · field used, not shown
+    ✗ field read, never used"]
+    LA["a published fact"] -.->|"dotted: copied by hand into code"| LB["a table in code"]
+    LC["a table"] -->|"solid: read by a program"| LD(["a command"])
+  end
+
   subgraph SRC["Published sources"]
     AVL["AviList v2025b
     third_party/avilist, CC BY 4.0
@@ -134,36 +151,38 @@ flowchart TB
     read by nothing yet"]
   end
 
-  subgraph INGEST["birdview-ingest"]
-    S1["1 scope
+  subgraph INGEST["birdview-ingest: nine steps, in memory; only species.json is written"]
+    S1(["Step 1: scope
     keep established or rare;
     add Declared and both halves
-    of a shared name"]
-    S2["2 names
+    of a shared name"])
+    S2(["Step 2: names and families
     join AviList on scientific name;
-    drop NotInAviList"]
-    S3["3 measurements
+    drop NotInAviList;
+    family order and colors"])
+    S3(["Step 3: measurements
     join AVONET via
-    Renames and NearMatches"]
-    S4["4 segments
+    Renames and NearMatches"])
+    S4(["Step 4: segments
     head and body modeled from Mass;
     neck from body × family ratio;
-    total length = sum of segments"]
-    S5["5 wingspan
+    total length = sum of segments"])
+    S5(["Step 5: habitat and diet
+    AVONET's classes
+    plus supplements"])
+    S6(["Step 6: wingspan
     Fox's measured row if any;
     else a log-log fit on Wing.Length
-    within the order"]
-    S6["6 habitat and diet
-    AVONET's classes
-    plus supplements"]
-    S7["7 regions
+    within the order"])
+    S7(["Step 7: not drawn
+    species out of scope keep
+    their status and evidence,
+    named from AviList"])
+    S8(["Step 8: links
+    attach the iNaturalist taxon id"])
+    S9(["Step 9: regions
     attach counts, months, withheld flags;
-    peak share gives the top region"]
-    S8["8 links
-    attach the iNaturalist taxon id"]
-    S9["not drawn
-    rejected species keep
-    their status and evidence"]
+    peak share gives the top region"])
   end
 
   JSON["web/data/species.json
@@ -207,17 +226,19 @@ flowchart TB
 
   STATUS --> S1
   DECL --> S1
-  S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> JSON
-  STATUS -->|"species left out of scope"| S9 --> JSON
+  S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> JSON
+  STATUS -->|"species left out of scope"| S7
   AVL --> S2
+  AVL --> S7
   NAMES --> S3
   AVO --> S3
   AVO --> S4
-  FOX --> S5
+  AVO --> S5
+  TRAIT --> S5
+  FOX --> S6
   AVO --> S6
-  TRAIT --> S6
-  REGIONS --> S7
   INAT --> S8
+  REGIONS --> S9
 
   JSON --> SERVER --> PAGES
 ```
@@ -246,10 +267,11 @@ through one function, `taxonomy.Occurrence`: subspecies reduced to their species
 unmatched, genus moves and boundary disagreements mapped to the AviList name. The tables it
 uses are listed on each species' page under *Recorded as*.
 
-**The ingest joins everything into one file.** It keeps the in-scope species, names them from
-AviList, measures them from AVONET, models the segments no source measures, takes wingspan from
-Fox where it was measured and estimates it where it was not, and attaches the region counts and
-the iNaturalist link. Every metric carries its provenance — *measured*, *near-match* or
+**The ingest joins everything into one file, in nine steps.** It keeps the in-scope species
+(step 1), names them and their families from AviList (2), measures them from AVONET (3), models
+the segments no source measures (4), assigns habitat and diet (5), takes wingspan from Fox where it
+was measured and estimates it where it was not (6), records the species it does not draw and why
+(7), and attaches the iNaturalist link (8) and the region counts (9). Every metric carries its provenance — *measured*, *near-match* or
 *modeled* — and the page shows which. See [what is measured and what is modeled](data.md).
 
 **The server does the last arithmetic.** The *1 in N* on a tile and the month filter depend on the
