@@ -1877,3 +1877,26 @@ served precisely because they are the files the repository carries.
 provenance of other people's terms — the ABA checklist's, Wiley's, iNaturalist's — and the
 vendored iNaturalist pages themselves, kept so a provenance record can be hashed and checked. They are quoted for a record, not ours to republish, and serving them would be the
 redistribution [T-004](tech.md#t-004) exists to prevent.
+
+### P-078 — The documentation draws the data pipeline, field by field
+Subject: `presentation.docs.pipeline`
+Value: `docs/pipeline.md: every source and table, its fields, and every step between them`
+Goals: G-004, G-005
+
+The documentation carries **one diagram of how the dataset is built**: every published source and
+every intermediate table as a box giving its name and the fields BirdView reads from it, and every
+step between them — a filter, a join, a model — as an arrow saying what it does. It ends at the
+dataset the server reads and the pages it serves.
+
+**Each field says what becomes of it**: shown on a page, used without being shown (a join key, a
+filter, a denominator), or read and then not used. The last is listed because a reader auditing
+the pipeline would otherwise wonder whether it was forgotten.
+
+**Linked from wherever the documentation says where the data comes from**, and from the guide for
+readers and the guide for developers, so neither audience has to find it by browsing the index.
+
+**One source, drawn two ways.** The diagram is Mermaid in the Markdown, which GitHub draws
+directly. BirdView serves a picture pre-rendered from that same source rather than loading
+Mermaid's script, which [T-002](tech.md#t-002) rules out; the picture records a hash of the source
+it was drawn from, so a stale picture is a failing test rather than a quiet disagreement. It is
+plain SVG with no script and no link off the server.

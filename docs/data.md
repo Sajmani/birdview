@@ -8,6 +8,9 @@ The short version: of the five diagram segments, **bill and tail are measured; h
 are modeled.** Every total length is modeled, and two thirds of the wingspans are. BirdView labels
 all of it, per value, in the UI.
 
+For the whole pipeline at once — every source, the fields BirdView reads from each, and every
+join, filter and model between them — see [how BirdView's data is built](pipeline.md).
+
 ---
 
 ## The provenance system

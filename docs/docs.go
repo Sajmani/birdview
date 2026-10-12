@@ -23,9 +23,13 @@
 // to link to, and because T-002 requires the running server to be
 // self-contained: a provenance link that needs the network is one that
 // breaks (P-069).
+//
+// The SVGs are diagrams pre-rendered from the Mermaid source in the page of
+// the same name, by render-diagrams.py, so drawing them needs no script from
+// the network either.
 package docs
 
 import "embed"
 
-//go:embed *.md
+//go:embed *.md *.svg
 var Files embed.FS

@@ -101,6 +101,8 @@ ingest, and that is deliberate (T-022): between them a full run is thousands of 
 someone else's server, **tests make no network request**, and a build that needs the network is
 a build that fails on a plane. Each is run by hand when its source moves, its output is read as
 a diff, and the diff is committed.
+[How BirdView's data is built](pipeline.md) draws all of them, and the ingest they feed, as one
+diagram.
 
 | Command | Writes | Cost |
 | --- | --- | --- |
@@ -120,6 +122,14 @@ never arrived would otherwise be filed as a vagrant on no evidence.
 
 A species that does not resolve confidently is left out on purpose, and its detail page then
 shows no iNaturalist link.
+
+**When a command's inputs or outputs change, update that diagram.** It is Mermaid in
+`docs/pipeline.md`, which GitHub draws directly; BirdView serves an SVG rendered from it, because
+drawing Mermaid in the browser would need a script from the network (T-002). After editing the
+Markdown, run `python3 docs/render-diagrams.py` (it needs Node and Google Chrome) and commit the
+SVG it writes beside the page. `TestDiagramsAreCurrent` fails until you do, and
+`TestPipelineDiagramNamesRealColumns` fails if the diagram names a source column no reader asks
+for.
 
 ## Standing checks
 

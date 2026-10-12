@@ -221,6 +221,7 @@ For identification, use a field guide. For "wait, is a Merlin really that small?
 ## Where the numbers come from
 
 Every bird's detail page names the source or formula behind each number it shows. Beyond that,
-[docs/data.md](data.md) describes each input and how the dataset is built, and BirdView serves
+[docs/data.md](data.md) describes each input and how far to trust it,
+[how BirdView's data is built](pipeline.md) draws every source and step as one diagram, and BirdView serves
 its own requirements at [/spec](/spec) — the product and technical specifications, the decision
 record, and the acceptance criteria that check them.

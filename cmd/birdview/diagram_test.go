@@ -1,0 +1,220 @@
+// Copyright 2026 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package main
+
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"regexp"
+	"strings"
+	"testing"
+
+	"birdview/docs"
+)
+
+// TestDiagramsAreCurrent fails when a page's Mermaid source and the picture
+// BirdView serves for it disagree. Edit the Markdown, run
+// docs/render-diagrams.py, commit both.
+//
+// Verifies: P-078. Criterion: AC-115.
+func TestDiagramsAreCurrent(t *testing.T) {
+	entries, err := docs.Files.ReadDir(".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	diagrams := 0
+	for _, e := range entries {
+		name, ok := strings.CutSuffix(e.Name(), ".md")
+		if !ok {
+			continue
+		}
+		md, _ := docs.Files.ReadFile(e.Name())
+		m := regexp.MustCompile("(?s)```mermaid\n(.*?)\n```").FindSubmatch(md)
+		if m == nil {
+			continue
+		}
+		diagrams++
+		svg, err := docs.Files.ReadFile(name + ".svg")
+		if err != nil {
+			t.Errorf("docs/%s.md has a diagram and no docs/%s.svg; run docs/render-diagrams.py", name, name)
+			continue
+		}
+		sum := sha256.Sum256(m[1])
+		want := "<!-- source sha256 " + hex.EncodeToString(sum[:]) + " -->\n"
+		if !strings.HasPrefix(string(svg), want) {
+			first, _, _ := strings.Cut(string(svg), "\n")
+			t.Errorf("docs/%s.svg was drawn from a different source than docs/%s.md holds "+
+				"(%s, want %s); run docs/render-diagrams.py", name, name, first, strings.TrimSpace(want))
+		}
+	}
+	if diagrams == 0 {
+		t.Error("no page in docs/ has a diagram; P-078 asks for the pipeline's")
+	}
+}
+
+// TestDiagramsAreSelfContained keeps the served pictures inert and local:
+// opened full size an SVG is a document of its own, and one that ran a
+// script or fetched a font would break T-002 where no test of the pages
+// would look.
+//
+// Verifies: P-078, T-002. Criterion: AC-115.
+func TestDiagramsAreSelfContained(t *testing.T) {
+	entries, _ := docs.Files.ReadDir(".")
+	checked := 0
+	for _, e := range entries {
+		if !strings.HasSuffix(e.Name(), ".svg") {
+			continue
+		}
+		checked++
+		svg, _ := docs.Files.ReadFile(e.Name())
+		s := string(svg)
+		for _, bad := range []string{"<script", "<foreignObject", "@import"} {
+			if strings.Contains(s, bad) {
+				t.Errorf("docs/%s carries %s", e.Name(), bad)
+			}
+		}
+		if m := regexp.MustCompile(`\son[a-z]+\s*=`).FindString(s); m != "" {
+			t.Errorf("docs/%s carries an event handler:%s", e.Name(), m)
+		}
+		for _, u := range regexp.MustCompile(`(?:https?:)?//[^"'\s)<>]+`).FindAllString(s, -1) {
+			if !strings.HasPrefix(u, "http://www.w3.org/") {
+				t.Errorf("docs/%s refers off the server, to %s", e.Name(), u)
+			}
+		}
+		for _, u := range regexp.MustCompile(`(?:url\(|href=")([^)"]*)`).FindAllStringSubmatch(s, -1) {
+			if !strings.HasPrefix(u[1], "#") {
+				t.Errorf("docs/%s refers to %q, outside itself", e.Name(), u[1])
+			}
+		}
+	}
+	if checked == 0 {
+		t.Error("no SVG is embedded in docs; the pipeline diagram is not being served")
+	}
+}
+
+// TestPipelineDiagramIsServed checks the page shows the picture rather than
+// the Mermaid source, and the picture answers as one.
+//
+// Verifies: P-078, P-069. Criterion: AC-115.
+func TestPipelineDiagramIsServed(t *testing.T) {
+	s := newTestServer(t)
+	page := mustGet(t, s, "/docs/pipeline")
+	if !strings.Contains(page, `<a href="/docs/pipeline.svg"><img src="/docs/pipeline.svg"`) {
+		t.Error("/docs/pipeline does not show the diagram, linked to itself full size")
+	}
+	if strings.Contains(page, "flowchart TB") {
+		t.Error("/docs/pipeline shows the Mermaid source instead of the picture")
+	}
+
+	w := httptest.NewRecorder()
+	s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/docs/pipeline.svg", nil))
+	if w.Code != http.StatusOK || w.Header().Get("Content-Type") != "image/svg+xml" ||
+		!strings.Contains(w.Body.String(), "<svg") {
+		t.Errorf("/docs/pipeline.svg answers %d as %q; want the picture as image/svg+xml",
+			w.Code, w.Header().Get("Content-Type"))
+	}
+	for _, path := range []string{"/docs/pipeline.md", "/docs/.svg", "/docs/x/pipeline.svg",
+		"/docs/../README.svg", "/spec/product.svg"} {
+		if code, _ := get(t, s, path); code == http.StatusOK {
+			t.Errorf("%s is served; only a page's own diagram should be", path)
+		}
+	}
+
+	index := mustGet(t, s, "/docs/")
+	if !strings.Contains(index, `href="/docs/pipeline"`) {
+		t.Error("the docs index does not list the pipeline page")
+	}
+	if strings.Contains(index, "pipeline.svg") {
+		t.Error("the docs index lists the picture as a document of its own")
+	}
+}
+
+// TestPipelineDiagramNamesRealColumns checks every source column the diagram
+// names is one the reader code asks for, by its quoted name. A column
+// renamed or dropped in the code would otherwise leave the diagram
+// describing a pipeline that no longer exists.
+//
+// Verifies: P-078. Criterion: AC-115.
+func TestPipelineDiagramNamesRealColumns(t *testing.T) {
+	md, err := docs.Files.ReadFile("pipeline.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, src := range []struct{ box, reader string }{
+		{"AVL", "../../internal/avilist/avilist.go"},
+		{"AVO", "../../internal/avonet/avonet.go"},
+		{"FOX", "../../internal/wingspan/wingspan.go"},
+	} {
+		code, err := os.ReadFile(src.reader)
+		if err != nil {
+			t.Fatal(err)
+		}
+		m := regexp.MustCompile(`(?s)\n\s*` + src.box + `\["[^"]*?─+\n(.*?)"\]`).FindSubmatch(md)
+		if m == nil {
+			t.Errorf("no %s box with a field list in docs/pipeline.md", src.box)
+			continue
+		}
+		var cols []string
+		for _, line := range strings.Split(string(m[1]), "\n") {
+			// The column names come before the first marker.
+			line = strings.TrimSpace(line)
+			if i := strings.IndexAny(line, "★·✗"); i >= 0 {
+				line = line[:i]
+			}
+			for _, c := range strings.Split(line, ",") {
+				c = strings.TrimSpace(c)
+				if base, ok := strings.CutSuffix(c, "1-3"); ok {
+					cols = append(cols, base+"1", base+"2", base+"3")
+				} else if c != "" {
+					cols = append(cols, c)
+				}
+			}
+		}
+		if len(cols) < 5 {
+			t.Errorf("%s box: only %d columns parsed (%v); the field list was not read", src.box, len(cols), cols)
+		}
+		for _, c := range cols {
+			if !strings.Contains(string(code), `"`+c+`"`) {
+				t.Errorf("docs/pipeline.md names %s column %q, which %s never asks for",
+					src.box, c, src.reader)
+			}
+		}
+	}
+}
+
+// TestPipelineDiagramIsLinked checks the diagram can be reached from where
+// each audience reads about the data, not only from the index: the guide
+// for readers, the guide for developers, the using guide's word on where
+// the numbers come from, the site's source list, and the README.
+//
+// Verifies: P-078. Criterion: AC-115.
+func TestPipelineDiagramIsLinked(t *testing.T) {
+	s := newTestServer(t)
+	for _, path := range []string{"/docs/data", "/docs/building", "/docs/using", "/"} {
+		if !strings.Contains(mustGet(t, s, path), `href="/docs/pipeline"`) {
+			t.Errorf("%s does not link to the pipeline diagram", path)
+		}
+	}
+	readme, err := os.ReadFile("../../README.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(readme), "(docs/pipeline.md)") {
+		t.Error("README.md does not link to docs/pipeline.md")
+	}
+}

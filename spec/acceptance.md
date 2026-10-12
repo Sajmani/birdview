@@ -2658,3 +2658,53 @@ correctly never reached the join.
 | scope reverts to the union of both sources' dates | `an iNaturalist-only escape kept 3 dates` and `Painted Bunting's June iNaturalist date was counted` |
 | `status.Scope` ignores shared names | `Setophaga aestiva is out of scope` |
 | `WithheldByEBird` from global entries only | `WithheldByEBird[Laterallus jamaicensis] = false, want true` |
+
+### AC-115 — The pipeline diagram is served, current, self-contained and linked
+**Verifies:** [P-078](product.md#p-078), [P-069](product.md#p-069), [T-002](tech.md#t-002) ·
+**Level:** code · **Method:** unit tests over the docs embed and the served pages
+
+**Assertions:**
+
+1. **Current.** Every page in `docs/` with a Mermaid block has an SVG of the same name, whose
+   first line records the SHA-256 of that block.
+2. **Self-contained.** The SVG carries no `<script>`, no `<foreignObject>`, no event handler and
+   no URL other than XML namespace declarations.
+3. **Served.** `/docs/pipeline` shows the picture, linked to itself full size, in place of the
+   Mermaid source; `/docs/pipeline.svg` answers as `image/svg+xml`; the index lists the page and
+   not the picture.
+4. **Faithful to the readers.** Every column the diagram names for AviList, AVONET and the Fox
+   wingspans is a column the reader code asks for, so a renamed or dropped column cannot leave
+   the diagram describing a pipeline that no longer exists.
+5. **Linked** from `docs/data.md`, `docs/building.md` and `docs/using.md` as served, from the
+   source list at the foot of the index, and from the README.
+
+**The column check found two mislabeled fields before it existed.** Writing the diagram from the
+readers turned up AVONET's `Family1`–`3` and `Secondary1`, both read and neither used — `FamilyOf`
+was kept to cross-check ABA's families, and ABA is gone — and a first draft that called
+`Trophic.Level` a fallback for a missing niche, when it adds a second diet where AVONET's level says
+Omnivore and its niche does not. The check itself first failed on its own diagram, on a field label
+wrapped onto a second line; one field per line is now the rule it relies on.
+
+**Status: verified 2026-10-12 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| a field label edited, the SVG not re-rendered | `docs/pipeline.svg was drawn from a different source than docs/pipeline.md holds` |
+| the SVGs dropped from the embed | `has a diagram and no docs/pipeline.svg`, `no SVG is embedded`, and `/docs/pipeline.svg answers 404` |
+| a `<script>` added to the SVG | `docs/pipeline.svg carries <script` |
+| an `<image>` from another host added | `refers off the server, to https://example.com/x.png` |
+| an `onload` handler added | `carries an event handler: onload=` |
+| the Mermaid block left in place | `/docs/pipeline shows the Mermaid source instead of the picture` |
+| the index lists every embedded file | `the docs index lists the picture as a document of its own` |
+| the SVG served without its content type | `answers 200 as "text/html; charset=utf-8"` |
+| AVONET's `Order3` renamed in the reader | `names AVO column "Order3", which ... avonet.go never asks for` |
+| Fox's `wingspan_reported_min_all` renamed | `names FOX column "wingspan_reported_min_all"` |
+| the link dropped from `docs/data.md` | `/docs/data does not link to the pipeline diagram` |
+| the link dropped from the index's source list | `/ does not link to the pipeline diagram` |
+| both README links pointed elsewhere | `README.md does not link to docs/pipeline.md` |
+
+**Two mutations survived, and are recorded so they are not mistaken for coverage.** Removing the
+bare-name guard on `.svg` paths changes nothing observable: `embed.FS` refuses `..` and finds no
+nested file, so the guard repeats a refusal the filesystem already makes. Removing `Secondary1`
+from AVONET's list of required columns survives assertion 4, which asks only that the reader name
+the column, and the reader still names it where it reads the value.

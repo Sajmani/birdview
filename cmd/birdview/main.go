@@ -3404,6 +3404,20 @@ func (s *server) document(w http.ResponseWriter, r *http.Request) {
 		s.documentIndex(w, set)
 		return
 	}
+	// A diagram, pre-rendered beside the page it belongs to.
+	if name, ok := strings.CutSuffix(rest, ".svg"); ok && name != "" && !strings.ContainsAny(name, "/.") {
+		svg, err := src.fs.ReadFile(name + ".svg")
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "image/svg+xml")
+		// Opened full size, an SVG is a document of its own; it carries no
+		// script, and this says so to the browser as well (T-002).
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'")
+		w.Write(svg)
+		return
+	}
 	// Bare names only, so there is no traversal to reason about.
 	if strings.ContainsAny(rest, "/.") {
 		http.NotFound(w, r)
@@ -3414,7 +3428,31 @@ func (s *server) document(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	s.renderMarkdown(w, set, markdownTitle(body, rest), body)
+	title := markdownTitle(body, rest)
+	s.renderMarkdown(w, set, title, withDiagram(src.fs, set, rest, title, body))
+}
+
+// mermaidBlock is a page's diagram source. render-diagrams.py reads the same
+// pattern, one block per page.
+var mermaidBlock = regexp.MustCompile("(?s)```mermaid\n.*?\n```")
+
+// withDiagram replaces a page's Mermaid source with the picture rendered
+// from it.
+//
+// GitHub draws the source itself; BirdView would need Mermaid's script to,
+// which T-002 rules out. A page without its rendered SVG keeps the source,
+// shown as code, and TestDiagramsAreCurrent fails.
+//
+// The picture links to itself because it is several times the page's width:
+// shrunk to fit, its field names are too small to read.
+func withDiagram(fsys embed.FS, set, name, title string, body []byte) []byte {
+	if _, err := fsys.ReadFile(name + ".svg"); err != nil {
+		return body
+	}
+	src := "/" + set + "/" + name + ".svg"
+	img := fmt.Sprintf("[![Diagram: %s](%s)](%s)\n\n*Select the diagram to open it full size.*",
+		title, src, src)
+	return mermaidBlock.ReplaceAllLiteral(body, []byte(img))
 }
 
 // documentIndex lists a set, so /spec and /docs are not dead ends.
@@ -3424,7 +3462,10 @@ func (s *server) documentIndex(w http.ResponseWriter, set string) {
 	var b bytes.Buffer
 	fmt.Fprintf(&b, "# BirdView %s documents\n\n", src.kind)
 	for _, e := range entries {
-		name := strings.TrimSuffix(e.Name(), ".md")
+		name, ok := strings.CutSuffix(e.Name(), ".md")
+		if !ok {
+			continue // a diagram, listed by the page it belongs to
+		}
 		body, _ := src.fs.ReadFile(e.Name())
 		fmt.Fprintf(&b, "- [%s](/%s/%s)\n", markdownTitle(body, name), set, name)
 	}

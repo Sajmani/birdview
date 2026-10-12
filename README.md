@@ -24,6 +24,7 @@ carry only what the data supports: no plumage, no posture, no shape the sources 
 | **using the site** | [docs/using.md](docs/using.md) | the controls, the diagram, reading a tile |
 | **checking the science** | [docs/data.md](docs/data.md) | what is measured, what is modeled, what is invented |
 | **building or changing it** | [docs/building.md](docs/building.md) | build, run, and the spec-driven workflow |
+| **tracing a number to its source** | [docs/pipeline.md](docs/pipeline.md) | every source, the fields read from it, and each step between |
 
 ---
 
@@ -71,6 +72,9 @@ American Flamingo in Pennsylvania has 931 inside 13 days and is not.
 | [Fox et al. 2026 wingspan database](https://doi.org/10.6084/m9.figshare.32089083) | CC BY 4.0 | empirical wingspan; vendored in this repo |
 | [GBIF](https://www.gbif.org) — [eBird Observation Dataset](https://doi.org/10.15468/aomfnb) and iNaturalist research-grade | CC BY 4.0 | which regions each bird is found in; only the derived list is kept, never a record |
 | [iNaturalist](https://www.inaturalist.org) | terms vendored; taxon IDs are facts | one taxon ID per species, to link the detail page out for photographs |
+
+How these become the dataset, field by field, is drawn in
+[docs/pipeline.md](docs/pipeline.md).
 
 Every source above is CC BY 4.0 and is redistributed here under its license, with attribution.
 **No all-rights-reserved input remains.** The ABA Checklist supplied scope until 2026-10-05 and
