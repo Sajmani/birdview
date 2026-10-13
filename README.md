@@ -110,6 +110,12 @@ This is not an officially supported Google product.
 
 ---
 
+## Security
+
+Please report vulnerabilities at [Google Bug Hunters](https://bughunters.google.com/).
+
+---
+
 ## Contact
 
 Feedback and corrections: please open an issue.
