@@ -129,6 +129,8 @@ flowchart TB
     DomesticForms ★ *under Recorded as*
     Renames · *AVONET's names*
     NearMatches ★ *near-match provenance*
+    NearMatchSheets · *the sheet a near-match borrows from*
+    OwnRowSheets · *the sheet a species' own row comes from*
     NotInAviList · *dropped at step 2*
     OrderCommonNames ★ *order names*`"]
     TSENS["`taxonomy.EBirdSensitive
@@ -215,8 +217,10 @@ flowchart TB
     drop NotInAviList;
     family order and colors"])
     S3(["Step 3: measurements
-    join AVONET via
-    Renames and NearMatches"])
+    own row from the eBird sheet,
+    or the sheet OwnRowSheets names;
+    else via Renames; else NearMatches,
+    from the sheet NearMatchSheets names"])
     S4(["Step 4: segments
     head and body modeled from Mass;
     neck from body × family ratio;
@@ -251,7 +255,7 @@ flowchart TB
   familyColor ★
   familyTextColor ★
   order ★
-  segments ★ *each with its provenance*
+  segments ★ *each with its provenance, which also finds shared rows*
   totalLength ★ *with its provenance*
   wingspan ★ *with its provenance*
   wingChord ★ *with its provenance*
@@ -271,7 +275,9 @@ flowchart TB
   undrawn ★ *status, region, episodes, years, records, last seen*`"]
   SERVER(["birdview server
   1 in N and the month filter,
-  computed per request"])
+  computed per request;
+  species sharing a measured row,
+  found from the provenance"])
   PAGES["pages
   the index
   a species
@@ -358,9 +364,19 @@ was measured and estimates it where it was not (6), records the species it does 
 (7), and attaches the iNaturalist link (8) and the region counts (9). Every metric carries its provenance — *measured*, *near-match* or
 *modeled* — and the page shows which. See [what is measured and what is modeled](data.md).
 
+**AVONET has three taxonomy sheets, and step 3 chooses between them.** A species' own row is read
+from the eBird sheet unless `OwnRowSheets` names a narrower one: the eBird sheet's *Larus
+argentatus* contains every herring gull, so European Herring Gull is read from the BirdLife sheet
+([CR-041](../spec/decisions.md#cr-041)). A species with no row of its own borrows a relative's,
+labeled *near-match*, from the sheet `NearMatchSheets` names where one holds a narrower concept
+of that relative ([CR-039](../spec/decisions.md#cr-039)). The build stops if a named sheet lacks
+the row, rather than falling back to a broader one.
+
 **The server does the last arithmetic.** The *1 in N* on a tile and the month filter depend on the
 regions and months a reader selects, so they are computed per request from the counts and totals
-in `species.json`, not stored.
+in `species.json`, not stored. It also groups the species drawn from the same AVONET row, from
+their provenance, and notes each pair on both tiles
+([P-079](../spec/product.md#p-079)).
 
 ## Where to go next
 

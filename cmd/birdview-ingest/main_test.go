@@ -23,6 +23,7 @@ import (
 	"strings"
 	"testing"
 
+	"birdview/internal/avonet"
 	"birdview/internal/dataset"
 	"birdview/internal/inat"
 	"birdview/internal/region"
@@ -375,6 +376,66 @@ func TestNearMatchesAreExactlyTheMappedOnes(t *testing.T) {
 	}
 }
 
+// Verifies: P-060, P-062. Criterion: AC-116.
+func TestNearMatchBorrowsFromTheDeclaredSheet(t *testing.T) {
+	wb, err := avonet.Open(avoFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ds := load(t)
+
+	// The expected values come from the workbook, and must differ from the
+	// eBird row, or the check cannot tell the two sheets apart.
+	want := wb.BirdLife["Gygis alba"]
+	broad := wb.EBird["Gygis alba"]
+	if want.Culmen == broad.Culmen || want.Tail == broad.Tail {
+		t.Fatalf("BirdLife and eBird Gygis alba agree (culmen %v/%v, tail %v/%v); "+
+			"this test can no longer distinguish them", want.Culmen, broad.Culmen, want.Tail, broad.Tail)
+	}
+
+	seen := 0
+	for i := range ds.Species {
+		s := &ds.Species[i]
+		if s.Segments.Bill.Prov.Kind != dataset.NearMatch {
+			continue
+		}
+		seen++
+		// Written out rather than read from taxonomy.NearMatchSheets, so a
+		// second species moved off the eBird sheet has to be decided here too.
+		sheet := avonet.SheetEBird
+		switch s.ScientificName {
+		case "Gygis candida", "Larus vegae": // CR-039, CR-040
+			sheet = avonet.SheetBirdLife
+		}
+		for _, m := range []struct {
+			name string
+			got  dataset.Metric
+		}{{"bill", s.Segments.Bill}, {"tail", s.Segments.Tail}} {
+			if !strings.HasSuffix(m.got.Prov.Source, "sheet "+sheet) {
+				t.Errorf("%s %s comes from %q, want sheet %s", s.ScientificName, m.name, m.got.Prov.Source, sheet)
+			}
+		}
+		if s.ScientificName != "Gygis candida" {
+			continue
+		}
+		if s.Segments.Bill.Prov.SourceTaxon != "Gygis alba" {
+			t.Errorf("Gygis candida borrows from %q, want Gygis alba", s.Segments.Bill.Prov.SourceTaxon)
+		}
+		if s.Segments.Bill.Value != want.Culmen || s.Segments.Tail.Value != want.Tail {
+			t.Errorf("Gygis candida has bill %v, tail %v; BirdLife Gygis alba has %v, %v",
+				s.Segments.Bill.Value, s.Segments.Tail.Value, want.Culmen, want.Tail)
+		}
+	}
+	if seen == 0 {
+		t.Fatal("no near-match species in the dataset; the check ran over nothing")
+	}
+
+	// A declared sheet that lacks the parent stops the build.
+	if err := checkNearMatchSheets(wb, map[string]string{"Gygis candida": avonet.SheetBirdTree + "X"}); err == nil {
+		t.Error("a near-match sheet that holds no row for the parent was accepted")
+	}
+}
+
 func mustJSON(t *testing.T, v any) string {
 	t.Helper()
 	b, err := jsonMarshal(v)
@@ -591,5 +652,85 @@ func TestRegionCountsLineUp(t *testing.T) {
 				"a sea's denominator is every bird on that water, not a sum of the "+
 				"birds we happen to draw (CR-031)", id, total, summed[id])
 		}
+	}
+}
+
+// Verifies: P-079, CR-040. Criterion: AC-117.
+func TestVegaGullSharesAmericanHerringGullsRow(t *testing.T) {
+	ds := load(t)
+	got := map[string]*dataset.Species{}
+	for i := range ds.Species {
+		got[ds.Species[i].ScientificName] = &ds.Species[i]
+	}
+	vega, amhg := got["Larus vegae"], got["Larus smithsonianus"]
+	if vega == nil || amhg == nil {
+		t.Fatal("Vega Gull or American Herring Gull is not drawn")
+	}
+	for _, s := range []*dataset.Species{vega, amhg} {
+		p := s.Segments.Bill.Prov
+		if !strings.HasSuffix(p.Source, "sheet "+avonet.SheetBirdLife) || p.SourceTaxon != "Larus smithsonianus" {
+			t.Errorf("%s is drawn from %q %q, want AVONET1_BirdLife Larus smithsonianus", s.ScientificName, p.Source, p.SourceTaxon)
+		}
+	}
+	if vega.Segments.Bill.Prov.Kind != dataset.NearMatch {
+		t.Errorf("Vega Gull's bill is %q, want near-match", vega.Segments.Bill.Prov.Kind)
+	}
+	for _, m := range []struct {
+		name string
+		a, b float64
+	}{
+		{"bill", vega.Segments.Bill.Value, amhg.Segments.Bill.Value},
+		{"tail", vega.Segments.Tail.Value, amhg.Segments.Tail.Value},
+		{"mass", vega.Mass.Value, amhg.Mass.Value},
+		{"wingspan", vega.Wingspan.Value, amhg.Wingspan.Value},
+	} {
+		if m.a != m.b {
+			t.Errorf("Vega Gull's %s is %v and American Herring Gull's %v; one row should give one value", m.name, m.a, m.b)
+		}
+	}
+}
+
+// Verifies: P-060, P-062, CR-041. Criterion: AC-118.
+func TestEuropeanHerringGullReadsItsOwnRow(t *testing.T) {
+	wb, err := avonet.Open(avoFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want, broad := wb.BirdLife["Larus argentatus"], wb.EBird["Larus argentatus"]
+	if want.Culmen == broad.Culmen || want.Tail == broad.Tail {
+		t.Fatalf("BirdLife and eBird Larus argentatus agree (culmen %v/%v, tail %v/%v); "+
+			"this test can no longer distinguish them", want.Culmen, broad.Culmen, want.Tail, broad.Tail)
+	}
+
+	ds := load(t)
+	got := map[string]*dataset.Species{}
+	for i := range ds.Species {
+		got[ds.Species[i].ScientificName] = &ds.Species[i]
+	}
+	for _, c := range []struct {
+		sci, sheet string
+	}{{"Larus argentatus", avonet.SheetBirdLife}, {"Larus smithsonianus", avonet.SheetBirdLife}} {
+		s := got[c.sci]
+		if s == nil {
+			t.Fatalf("%s is not drawn", c.sci)
+		}
+		for _, m := range []struct {
+			name string
+			got  dataset.Metric
+		}{{"bill", s.Segments.Bill}, {"tail", s.Segments.Tail}, {"mass", s.Mass}} {
+			p := m.got.Prov
+			if p.Kind != dataset.Measured || !strings.HasSuffix(p.Source, "sheet "+c.sheet) || p.SourceTaxon != c.sci {
+				t.Errorf("%s %s is %s from %q %q, want measured from %s %s",
+					c.sci, m.name, p.Kind, p.Source, p.SourceTaxon, c.sheet, c.sci)
+			}
+		}
+	}
+	if s := got["Larus argentatus"]; s.Segments.Bill.Value != want.Culmen || s.Segments.Tail.Value != want.Tail {
+		t.Errorf("European Herring Gull has bill %v, tail %v; BirdLife Larus argentatus has %v, %v",
+			s.Segments.Bill.Value, s.Segments.Tail.Value, want.Culmen, want.Tail)
+	}
+
+	if err := checkOwnRowSheets(wb, map[string]string{"Larus vegae": avonet.SheetBirdLife}); err == nil {
+		t.Error("an own-row sheet that holds no row for the species was accepted")
 	}
 }

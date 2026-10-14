@@ -6506,3 +6506,112 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 		t.Error("Painted Bunting's page does not list Florida's withheld months")
 	}
 }
+
+// tileOf returns one tile's own markup on a rendered index, from its wrapper
+// to the next tile's, so an assertion about it cannot be satisfied by a
+// neighbor.
+func tileOf(t *testing.T, page, id string) string {
+	t.Helper()
+	open := `<div class="tilewrap" id="` + tileAnchor(id) + `"`
+	i := strings.Index(page, open)
+	if i < 0 {
+		t.Fatalf("no tile for %s on the index", id)
+	}
+	seg := page[i:]
+	if j := strings.Index(seg[len(open):], `class="tilewrap"`); j > 0 {
+		seg = seg[:len(open)+j]
+	}
+	return seg
+}
+
+// TestSameMeasurementsAreNoted asserts P-079 over the real dataset: every
+// species drawn from the same AVONET row as another drawn species says so,
+// on its tile and on its page, and no other tile does.
+//
+// The expected groups are computed here from the provenance, independently
+// of sharedRows, and Vega with American Herring Gull is named outright so a
+// grouping that found nothing could not pass.
+//
+// Verifies: P-079, CR-040. Criterion: AC-117.
+func TestSameMeasurementsAreNoted(t *testing.T) {
+	ds := realDataset(t)
+	srv, err := newServer(ds)
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
+	}
+	byRow := map[string][]*dataset.Species{}
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		if p := sp.Segments.Bill.Prov; p.SourceTaxon != "" {
+			byRow[p.Source+"|"+p.SourceTaxon] = append(byRow[p.Source+"|"+p.SourceTaxon], sp)
+		}
+	}
+	gulls := byRow["AVONET v7, sheet AVONET1_BirdLife|Larus smithsonianus"]
+	if len(gulls) != 2 {
+		t.Fatalf("BirdLife's Larus smithsonianus row draws %d species, want Vega and American Herring Gull", len(gulls))
+	}
+
+	_, idx := get(t, srv, "/")
+	want := 0
+	for _, group := range byRow {
+		if len(group) < 2 {
+			continue
+		}
+		for _, sp := range group {
+			tile := tileOf(t, idx, sp.ID)
+			_, page := get(t, srv, "/species/"+sp.ID)
+			row := sp.Segments.Bill.Prov
+			for _, other := range group {
+				if other == sp {
+					continue
+				}
+				want++
+				name := html.EscapeString(other.Name(dataset.LocaleNA))
+				if !strings.Contains(tile, "Same measurements as "+name) {
+					t.Errorf("the tile for %s does not say it shares measurements with %s", sp.ScientificName, name)
+				}
+				if !strings.Contains(page, "Same measurements as "+name) {
+					t.Errorf("/species/%s does not say it shares measurements with %s", sp.ID, name)
+				}
+			}
+			sheet := strings.TrimPrefix(row.Source, "AVONET v7, ")
+			if !strings.Contains(page, row.SourceTaxon+", "+sheet) {
+				t.Errorf("/species/%s does not name the shared row (%s, %s)", sp.ID, row.SourceTaxon, sheet)
+			}
+		}
+	}
+	if got := strings.Count(idx, "Same measurements as "); got != want {
+		t.Errorf("the index carries %d shared-measurement notes, want %d: a tile outside every group has one",
+			got, want)
+	}
+}
+
+// TestSameMeasurementsNeedNoTable asserts AC-117's fourth assertion: making a
+// fixture species borrow another's row is enough for both tiles to say so.
+//
+// Verifies: P-079. Criterion: AC-117.
+func TestSameMeasurementsNeedNoTable(t *testing.T) {
+	ds := testDataset()
+	if len(ds.Species) < 3 {
+		t.Fatal("the fixture needs three species: a donor, a borrower and a bystander")
+	}
+	donor, borrower, bystander := &ds.Species[0], &ds.Species[1], &ds.Species[2]
+	borrowed := donor.Segments.Bill.Prov
+	borrowed.Kind = dataset.NearMatch
+	borrower.Segments.Bill.Prov = borrowed
+
+	srv, err := newServer(ds)
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
+	}
+	_, idx := get(t, srv, "/")
+	for _, c := range []struct{ sp, other *dataset.Species }{{donor, borrower}, {borrower, donor}} {
+		name := html.EscapeString(c.other.Name(dataset.LocaleNA))
+		if !strings.Contains(tileOf(t, idx, c.sp.ID), "Same measurements as "+name) {
+			t.Errorf("the tile for %s does not name %s", c.sp.ScientificName, name)
+		}
+	}
+	if strings.Contains(tileOf(t, idx, bystander.ID), "Same measurements as") {
+		t.Errorf("%s shares no row, but its tile says it does", bystander.ScientificName)
+	}
+}

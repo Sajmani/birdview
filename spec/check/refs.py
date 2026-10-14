@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""AC-004 - every requirement cited in decisions.md and acceptance.md exists.
+"""AC-004 - every requirement cited in decisions.md, acceptance.md and todo.md exists.
 
 Verifies: process integrity. Catches an ID that was renamed, or one invented in a
 decision record and never written down as a requirement.
@@ -28,7 +28,8 @@ crs = set(re.findall(r'^## (CR-\d+)', (spec / 'decisions.md').read_text(encoding
 acs = set(re.findall(r'^### (AC-\d+)', (spec / 'acceptance.md').read_text(encoding='utf-8'), re.M))
 
 problems = []
-for name, valid in (('decisions.md', defined | crs | acs), ('acceptance.md', defined | crs | acs)):
+for name, valid in (('decisions.md', defined | crs | acs), ('acceptance.md', defined | crs | acs),
+                    ('todo.md', defined | crs | acs)):
     text = (spec / name).read_text(encoding='utf-8')
     for rid in sorted(set(re.findall(r'\b([PT]-\d{3})\b', text))):
         if rid not in defined:

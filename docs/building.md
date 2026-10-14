@@ -205,7 +205,8 @@ change — but you do need the loop.
 | [`product.md`](../spec/product.md) | what it must do — `P-###` |
 | [`tech.md`](../spec/tech.md) | technical constraints — `T-###` |
 | [`sources.md`](../spec/sources.md) | every body of rules or data the project is subject to |
-| [`decisions.md`](../spec/decisions.md) | conflict resolutions — `CR-###` — and Work arising |
+| [`decisions.md`](../spec/decisions.md) | conflict resolutions — `CR-###` |
+| [`todo.md`](../spec/todo.md) | everything still open — work, questions, unverified criteria, stale text |
 | [`acceptance.md`](../spec/acceptance.md) | how each requirement is checked — `AC-###` |
 | [`arch.md`](../spec/arch.md) | how the code is actually organized |
 
@@ -288,8 +289,7 @@ time, so nothing of anyone else's is served.
 
 What remains before a public deployment is ordinary engineering rather than permission: there is
 no deployment plumbing, no host, and no answer yet to what happens when the derived scope
-changes under a reader's bookmark. See the Work arising table in
-[`decisions.md`](../spec/decisions.md).
+changes under a reader's bookmark. See [`todo.md`](../spec/todo.md).
 
 Nothing else blocks it. There is no deployment tooling yet — no container image, and the server
 binds `localhost` by default, so a real deployment needs `-addr` pointed at `0.0.0.0:$PORT`.

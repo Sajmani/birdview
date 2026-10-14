@@ -103,21 +103,4 @@ this code's job.
 
 ## Known rough edges
 
-- **The neck ratio table covers 22 families**; everything else takes the 0.18 default. The
-  provenance string says which applied, so this is visible rather than hidden, but the table is
-  thin for a 99-family dataset.
-- **`headAspect` is an unexamined drawing constant.** Unlike the neck ratio it produces no metric,
-  so it carries no provenance — but it is just as invented.
-- **The detail view re-renders the tile at 1.9x** rather than sharing a sized component. If the
-  tile layout changes, both places need it.
-- **Hummingbirds and gamebirds get the global wingspan fit**, not an order-level one, because
-  neither order has five empirical species — Galliformes has none at all. Their estimates carry
-  roughly 7.3% median error against 4.6% for well-covered orders.
-- **The ingest re-reads the 21 MB AVONET workbook three times**, once per taxonomy sheet. It takes
-  about four seconds, which has not been worth optimizing.
-- **A resolved row in the GBIF bridge is name-correct and may still be concept-wrong.** Where GBIF
-  has not followed a split, its name maps to whichever half kept the name: GBIF's `Circus cyaneus`
-  maps to the Eurasian Hen Harrier while 3.8 million of those records are Northern Harriers. Nine
-  such lumps are known and are listed in [sources.md](sources.md#gbif); the table cannot express
-  them, because it has one AviList column and a lump needs two. Nothing detects them
-  automatically — they were found by hand, one query per unreached species.
+Listed in [todo.md](todo.md) with the rest of the open work, since 2026-10-13.

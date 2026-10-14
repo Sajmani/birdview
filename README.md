@@ -62,6 +62,8 @@ whether a species' records **recur** — repeated episodes across years, in at l
 which is insensitive to both. Akikiki has 376 records across 45 years and is a resident; the 2023
 American Flamingo in Pennsylvania has 931 inside 13 days and is not.
 
+What is left to do is listed in [spec/todo.md](spec/todo.md).
+
 ---
 
 ## Data and licensing

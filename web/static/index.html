@@ -544,7 +544,8 @@
     species observations {{.Where}}</span>{{range .Seams}}<span class="seam"
     title="{{.Title}}">{{.Text}}</span>{{end}}{{else}}<span class="nodata"
     title="{{.Title}}">{{.Note}}</span>{{end}}{{else}}<span class="nodata"
-    title="no regions are selected">&mdash;</span>{{end}}</div>
+    title="no regions are selected">&mdash;</span>{{end}}{{range .SameAs}}<span class="seam"
+    title="{{.Title}}">{{.Text}}</span>{{end}}</div>
 </a>
 {{if .PickURL}}<a class="pick{{if .Picked}} on{{end}}" href="{{.PickURL}}"
    title="{{if .Picked}}Remove from the comparison{{else}}Pick for comparison{{end}}"

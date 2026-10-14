@@ -1679,7 +1679,8 @@ count assertion exists beside the key assertion.
 | P-060 (composite) | AC-044 | |
 | P-060 (wingspan model) | AC-045 | |
 | P-050 – P-053 | — | withdrawn |
-| P-060 | AC-041 | |
+| P-060 | AC-041, AC-116, AC-118 | |
+| P-079 | AC-117 | |
 | P-061 | AC-042 | |
 | P-062 | AC-040 | |
 | P-063 | AC-043 | |
@@ -2384,7 +2385,7 @@ in a published taxonomy to satisfy a test.
 [`data/source-names.tsv`](../data/source-names.tsv) holds per-source counts and nothing reads
 it — but it counts under the *AviList* name only, so for an alias it reports eBird 0 and not
 the 7,310,342 filed under *Dryobates villosus*. Closing this needs `cmd/birdview-names` to
-query the alias too, and a run. Recorded in [decisions.md](decisions.md#work-arising).
+query the alias too, and a run. Recorded in [todo.md](todo.md).
 
 ### AC-110 — Every response can be revalidated, and the validator is honest
 **Verifies:** [T-029](tech.md#t-029) · **Level:** code · **Method:** unit test over rendered
@@ -2684,6 +2685,10 @@ correctly never reached the join.
    left-aligned in the rendered SVG; steps and commands stay centered. Mermaid
    centers every label, so the renderer moves them, and a render that skipped it would still
    match its source's hash.
+8. **Every taxonomy table the ingest reads is in the diagram.** Each `taxonomy.X` that
+   `cmd/birdview-ingest` refers to is named in `docs/pipeline.md`, except a listed few that are
+   not data: the inverse of a table the diagram already names, and a list printed in the build
+   report. A table added to the ingest without a line in the diagram fails.
 
 **The column check found two mislabeled fields before it existed.** Writing the diagram from the
 readers turned up AVONET's `Family1`–`3` and `Secondary1`, both read and neither used — `FamilyOf`
@@ -2718,6 +2723,7 @@ directly for *Recorded as* and the withheld notes, three generators read the pre
 | both README links pointed elsewhere | `README.md does not link to docs/pipeline.md` |
 | three fields put back on one line, `species · region · date window` | `SENS: "species · region · date window" is not one field, one mark and an optional italic note` |
 | a note's italics removed | `AVL: "Taxon_rank · keep species rows" is not one field, ...` |
+| none: assertion 8 was written before the diagram caught up with [CR-039](decisions.md#cr-039) and [CR-041](decisions.md#cr-041) | `the ingest reads taxonomy.OwnRowSheets, which docs/pipeline.md does not name`, and the same for `NearMatchSheets` (2026-10-13) |
 | a field's mark removed | `AVO: "Habitat" is not one field, ...` |
 | the line under a box's name not italic | `SENS: "web page" under the box's name is not italic` |
 | a box written as a plain label | `a box with fields is a plain label, so its notes cannot be italic` |
@@ -2729,3 +2735,81 @@ bare-name guard on `.svg` paths changes nothing observable: `embed.FS` refuses `
 nested file, so the guard repeats a refusal the filesystem already makes. Removing `Secondary1`
 from AVONET's list of required columns survives assertion 4, which asks only that the reader name
 the column, and the reader still names it where it reads the value.
+
+### AC-116 — Blue-billed White-Tern borrows from BirdLife's White Tern
+**Verifies:** [P-060](product.md#p-060), [P-062](product.md#p-062) · **Level:** code ·
+**Method:** unit test over ingest output
+
+**Assertions:** *Gygis candida*'s bill and tail are `near-match`, with `sourceTaxon` *Gygis alba*
+and `source` naming `AVONET1_BirdLife`, and carry that row's values, 49.7 mm and 103.8 mm, read
+from the workbook rather than written into the test. Vega Gull borrows `AVONET1_BirdLife`'s
+*Larus smithsonianus* ([CR-040](decisions.md#cr-040)). Every other near-match species still
+borrows from `AVONET2_eBird`. A sheet named in `taxonomy.NearMatchSheets` that does not hold the parent
+fails the build instead of falling back to another sheet.
+
+**Status: verified 2026-10-13 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| the `Gygis candida` entry removed from `NearMatchSheets` | `Gygis candida has bill 44.4, tail 90.2; BirdLife Gygis alba has 49.7, 103.8` |
+| `resolve` ignoring the declared sheet | `Gygis candida bill comes from "AVONET v7, sheet AVONET2_eBird", want sheet AVONET1_BirdLife` |
+| the missing-row check in `checkNearMatchSheets` disabled | `a near-match sheet that holds no row for the parent was accepted` |
+| `Larus vegae` also declared for `AVONET1_BirdLife` | `Larus vegae bill comes from "AVONET v7, sheet AVONET1_BirdLife", want sheet AVONET2_eBird` |
+
+**The last mutation first survived.** The test took each species' expected sheet from
+`NearMatchSheets`, the table under test, so adding a second entry moved the expectation along with
+the code. The expected sheet is now written in the test.
+
+### AC-117 — Species drawn from the same measurements say so
+**Verifies:** [P-079](product.md#p-079) · **Level:** code · **Method:** unit test over ingest
+output, and rendering tests over the index and the detail page
+
+**Assertions:**
+
+1. **The groups are derived.** Grouping the built dataset by the bill's `source` and
+   `sourceTaxon` gives exactly the pairs the page notes, and includes Vega Gull with American
+   Herring Gull, both at `AVONET1_BirdLife` *Larus smithsonianus*, with the same bill, tail, mass
+   and wingspan.
+2. **Every tile in a group says so.** The tile of each member carries *Same measurements as* and
+   the English name of every other member, inside that tile's own markup. A tile outside every
+   group carries no such line.
+3. **Every detail page in a group says so,** naming the other members, the source sheet and the
+   source taxon.
+4. **No hand table.** A species given a near-match to a drawn relative in a test dataset gets
+   the note on both tiles without any other change.
+
+**Status: verified 2026-10-13 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| `sharedRows` replaced by an empty map | `the index carries 0 shared-measurement notes, want 8`, and both fixture tiles unnamed |
+| rows grouped by sheet alone, not sheet and taxon | `the index carries 1125004 shared-measurement notes, want 8`; `Corvus brachyrhynchos shares no row, but its tile says it does` |
+| the tile's note deleted from `index.html` | `the tile for Sula leucogaster does not say it shares measurements with Cocos Booby` |
+| the detail page's note deleted from `detail.html` | `/species/veggul1 does not name the shared row (Larus smithsonianus, sheet AVONET1_BirdLife)` |
+| the detail note naming the taxon but not the sheet | the same, for all eight pages |
+| Vega Gull mapped back to *Larus argentatus* | `Larus vegae is drawn from "AVONET v7, sheet AVONET2_eBird" "Larus argentatus"`; `Vega Gull's bill is 70.5 and American Herring Gull's 69.3` |
+
+**The first template mutations failed for the wrong reason.** Renaming the field the template
+ranges over, rather than deleting the markup, made template execution fail, so pages errored and
+the tile checks reported tiles missing altogether. The table records the clean deletions.
+
+### AC-118 — European Herring Gull is read from BirdLife's European-only row
+**Verifies:** [P-060](product.md#p-060), [P-062](product.md#p-062) · **Level:** code ·
+**Method:** unit test over ingest output
+
+**Assertions:** *Larus argentatus*'s bill, tail and mass are `measured`, with `source` naming
+`AVONET1_BirdLife` and `sourceTaxon` *Larus argentatus*, and carry that row's values, read from
+the workbook. The workbook's eBird and BirdLife rows must differ, or the check cannot tell them
+apart. American Herring Gull is unchanged: `AVONET1_BirdLife` *Larus smithsonianus*, `measured`.
+A sheet named in `taxonomy.OwnRowSheets` that does not hold the species fails the build instead
+of falling back to the eBird sheet.
+
+**Status: verified 2026-10-13 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| the `Larus argentatus` entry removed from `OwnRowSheets` | `Larus argentatus bill is measured from "AVONET v7, sheet AVONET2_eBird"`; `European Herring Gull has bill 70.5, tail 168.5; BirdLife Larus argentatus has 74, 170.2` |
+| `resolve` ignoring the declared sheet | the same |
+| the missing-row check in `checkOwnRowSheets` disabled | `an own-row sheet that holds no row for the species was accepted` |
+| the own row labeled `near-match` | `Larus argentatus bill is near-match from "AVONET v7, sheet AVONET1_BirdLife"` |
+

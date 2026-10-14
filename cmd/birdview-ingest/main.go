@@ -121,6 +121,11 @@ func resolve(sci string, wb *avonet.Workbook) (resolution, bool) {
 		return resolution{}, false
 	}
 
+	// 0. A species whose own row must come from a narrower sheet (CR-041);
+	// checkOwnRowSheets has already made sure that sheet holds it.
+	if want, ok := taxonomy.OwnRowSheets[sci]; ok {
+		return try(sci, want, sheetTraits(wb, want), dataset.Measured)
+	}
 	// 1. The species' own name, in the eBird spine.
 	if r, ok := try(sci, avonet.SheetEBird, wb.EBird, dataset.Measured); ok {
 		return r, true
@@ -147,8 +152,13 @@ func resolve(sci string, wb *avonet.Workbook) (resolution, bool) {
 			}
 		}
 	}
-	// 3. A pre-split parent: real data, different bird.
+	// 3. A pre-split parent: real data, different bird. Where a sheet holds a
+	// narrower concept of the parent it is the only one tried (CR-039);
+	// checkNearMatchSheets has already made sure it holds the parent.
 	if parent, ok := taxonomy.NearMatches[sci]; ok {
+		if want, ok := taxonomy.NearMatchSheets[sci]; ok {
+			return try(parent, want, sheetTraits(wb, want), dataset.NearMatch)
+		}
 		for _, sh := range sheets {
 			if r, ok := try(parent, sh.name, sh.m, dataset.NearMatch); ok {
 				return r, true
@@ -156,6 +166,52 @@ func resolve(sci string, wb *avonet.Workbook) (resolution, bool) {
 		}
 	}
 	return resolution{}, false
+}
+
+// sheetTraits returns the trait table for an AVONET sheet name, or nil for a
+// name that is not one.
+func sheetTraits(wb *avonet.Workbook, sheet string) map[string]avonet.Traits {
+	switch sheet {
+	case avonet.SheetEBird:
+		return wb.EBird
+	case avonet.SheetBirdLife:
+		return wb.BirdLife
+	case avonet.SheetBirdTree:
+		return wb.BirdTree
+	}
+	return nil
+}
+
+// checkNearMatchSheets fails when a declared donor sheet does not hold the
+// parent it is declared for. Falling back to another sheet would put the
+// broader row back without a word, which is the error the declaration exists
+// to prevent (CR-039).
+//
+// Verifies: P-060, P-062.
+func checkNearMatchSheets(wb *avonet.Workbook, sheets map[string]string) error {
+	for sci, sheet := range sheets {
+		parent, ok := taxonomy.NearMatches[sci]
+		if !ok {
+			return fmt.Errorf("%s has a near-match sheet but no near-match parent", sci)
+		}
+		if t, ok := sheetTraits(wb, sheet)[parent]; !ok || t.Culmen <= 0 {
+			return fmt.Errorf("%s: near-match sheet %q holds no row for %s", sci, sheet, parent)
+		}
+	}
+	return nil
+}
+
+// checkOwnRowSheets fails when a declared sheet does not hold the species'
+// own row, for the reason checkNearMatchSheets gives (CR-041).
+//
+// Verifies: P-060, P-062.
+func checkOwnRowSheets(wb *avonet.Workbook, sheets map[string]string) error {
+	for sci, sheet := range sheets {
+		if t, ok := sheetTraits(wb, sheet)[sci]; !ok || t.Culmen <= 0 {
+			return fmt.Errorf("%s: own-row sheet %q holds no row for it", sci, sheet)
+		}
+	}
+	return nil
 }
 
 func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, string, error) {
@@ -175,6 +231,12 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 	species := status.Scope(rows)
 	wb, err := avonet.Open(avoPath)
 	if err != nil {
+		return nil, "", err
+	}
+	if err := checkNearMatchSheets(wb, taxonomy.NearMatchSheets); err != nil {
+		return nil, "", err
+	}
+	if err := checkOwnRowSheets(wb, taxonomy.OwnRowSheets); err != nil {
 		return nil, "", err
 	}
 	fox, spanModel, err := wingspan.Open(foxPath)

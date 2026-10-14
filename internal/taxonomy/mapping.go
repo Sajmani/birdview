@@ -56,11 +56,12 @@ var Renames = map[string][]string{
 // onto the pre-split parent whose measurements stand in for it. Every value
 // derived through this map is labeled near-match and names the parent.
 //
-// Note that Larus smithsonianus and Larus vegae would both resolve to Larus
-// argentatus; smithsonianus is absent here because AVONET1_BirdLife carries it
-// as its own taxon, so it resolves as measured instead.
+// Larus vegae borrows from Larus smithsonianus, which no eBird row carries:
+// HBW-BirdLife v5, the taxonomy of AVONET1_BirdLife, files vegae as a
+// subspecies of it. American Herring Gull draws from the same row, so the two
+// are drawn alike and both pages say so (CR-040, P-079).
 var NearMatches = map[string]string{
-	"Larus vegae":         "Larus argentatus",
+	"Larus vegae":         "Larus smithsonianus",
 	"Numenius hudsonicus": "Numenius phaeopus",
 	"Sturnella lilianae":  "Sturnella magna",
 	"Vireo swainsoni":     "Vireo gilvus",
@@ -80,6 +81,33 @@ var NearMatches = map[string]string{
 	"Ardea ibis":         "Bubulcus ibis",      // Western from Eastern Cattle-Egret
 	"Gygis candida":      "Gygis alba",         // split from White Tern
 	"Tyto furcata":       "Tyto alba",          // American from Western Barn Owl
+}
+
+// NearMatchSheets names the AVONET sheet a near-match must borrow from, where
+// one holds a narrower concept of the parent than the eBird sheet the lookup
+// would otherwise reach first. The value is an avonet sheet name, and there is
+// no fallback: if that sheet lacks the parent the build fails rather than
+// quietly taking the broader row.
+//
+// AVONET2_eBird's Gygis alba still contains all three white terns AviList
+// separates. AVONET1_BirdLife's excludes the small Little White Tern, so its
+// bill and tail are nearer Blue-billed White-Tern's (CR-039).
+//
+// Verifies: P-060, P-062.
+var NearMatchSheets = map[string]string{
+	"Gygis candida": "AVONET1_BirdLife",
+}
+
+// OwnRowSheets names the AVONET sheet a species' own row must be read from,
+// where the eBird sheet, which the lookup tries first, files a broader concept
+// under the same name. As with NearMatchSheets there is no fallback.
+//
+// AVONET2_eBird's Larus argentatus is the 2022 herring gull, averaging 16
+// specimens of which 6 are European; AVONET1_BirdLife's is those 6 (CR-041).
+//
+// Verifies: P-060, P-062.
+var OwnRowSheets = map[string]string{
+	"Larus argentatus": "AVONET1_BirdLife",
 }
 
 // AwaitingTaxonomicCheck lists the entries whose rename-versus-split status is

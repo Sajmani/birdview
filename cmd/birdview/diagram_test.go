@@ -192,6 +192,42 @@ func TestPipelineDiagramNamesRealColumns(t *testing.T) {
 	}
 }
 
+// TestPipelineDiagramNamesEveryTaxonomyTable checks that each table in
+// internal/taxonomy the ingest reads appears in the diagram, so a new table
+// steering the build cannot go undrawn (P-078).
+//
+// Verifies: P-078. Criterion: AC-115.
+func TestPipelineDiagramNamesEveryTaxonomyTable(t *testing.T) {
+	md, err := docs.Files.ReadFile("pipeline.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	code, err := os.ReadFile("../../cmd/birdview-ingest/main.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Not data, so not drawn. Each says why.
+	notData := map[string]string{
+		"AviListRenamedFrom":     "the inverse of AviListRenames, which the diagram names",
+		"AwaitingTaxonomicCheck": "a list printed in the build report",
+	}
+	seen := map[string]bool{}
+	for _, m := range regexp.MustCompile(`taxonomy\.([A-Z]\w*)`).FindAllStringSubmatch(string(code), -1) {
+		seen[m[1]] = true
+	}
+	if len(seen) < 5 {
+		t.Fatalf("only %d taxonomy references found in the ingest (%v); the scan read nothing", len(seen), seen)
+	}
+	for name := range seen {
+		if _, ok := notData[name]; ok {
+			continue
+		}
+		if !regexp.MustCompile(`\b` + name + `\b`).Match(md) {
+			t.Errorf("the ingest reads taxonomy.%s, which docs/pipeline.md does not name", name)
+		}
+	}
+}
+
 // TestPipelineDiagramIsLinked checks the diagram can be reached from where
 // each audience reads about the data, not only from the index: the guide
 // for readers, the guide for developers, the using guide's word on where

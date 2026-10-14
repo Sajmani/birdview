@@ -45,6 +45,15 @@ loudly when its anchor is missing.
 check failed under its mutation on a secondary assertion while the primary one — the thing the
 test was for — passed over the bug untouched; only the message showed it.
 
+## Open work
+
+**Everything outstanding is in [spec/todo.md](spec/todo.md)**: unfinished work, open questions,
+known rough edges, criteria not yet watched failing, and spec or doc text that has gone stale.
+Read it before starting something new. When you find work, or leave some unfinished, add a row
+there, citing the requirement, CR or AC it comes from. Do not leave a `TODO` in code or a "left
+open" note in a decision record without a row. Close a row by striking it through and moving it
+to *Closed*; never delete one.
+
 ## Hard rules
 
 Violating any of these is a licensing problem, not a style problem.
@@ -123,6 +132,12 @@ Three ways this goes wrong, all already paid for:
 
 Changes follow the loop in [spec/process.md](spec/process.md): spec first, then acceptance
 criteria, then code. A behavior change edits [spec/product.md](spec/product.md) in the same commit.
+
+**A change to the data pipeline updates [docs/pipeline.md](docs/pipeline.md) in the same
+change** (P-078): the diagram, the step descriptions under it, and the picture re-rendered with
+`python3 docs/render-diagrams.py`. Tests catch a stale picture, a column the readers no longer ask
+for, and a taxonomy table the ingest reads but the diagram omits; whether a step's description is
+still true is for you to check.
 
 Cite requirement IDs in comments using the literal token, so one search covers the tree:
 

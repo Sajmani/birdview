@@ -27,12 +27,17 @@ A `~` in the tile footer marks anything not measured. The rule the project holds
 a modeled value is never presented as a measurement — see
 [CR-001](../spec/decisions.md) for why that decision came first and shaped everything else.
 
-**near-match** deserves a note. Ten species are recent taxonomic splits that AVONET has not caught
-up with — American Goshawk, Vega Gull, Hudsonian Whimbrel, Western Cattle-Egret, American Barn Owl,
-Chihuahuan Meadowlark, Cocos Booby, Siberian Pipit, Blue-billed White-Tern, Western
-Warbling-Vireo. Each borrows the parent taxon's measurements, and the detail page names the taxon
+**near-match** deserves a note. Nine drawn species are recent taxonomic splits that AVONET has not
+caught up with — American Goshawk, Vega Gull, Hudsonian Whimbrel, Western Cattle-Egret, American
+Barn Owl, Chihuahuan Meadowlark, Cocos Booby, Siberian Pipit and Blue-billed White-Tern. Each borrows the parent taxon's measurements, and the detail page names the taxon
 it borrowed from. Four of those splits are still awaiting a taxonomic check
 ([CR-006](../spec/decisions.md)).
+
+Where the taxon a species borrows from is drawn too, the two drawings come out the same, because
+the measurements are. Both tiles then say *Same measurements as* the other bird, and both detail
+pages name the row they share. Four pairs do: Siberian and American Pipit, Chihuahuan and Eastern
+Meadowlark, Cocos and Brown Booby, and Vega and American Herring Gull
+([CR-040](../spec/decisions.md#cr-040)).
 
 ---
 
@@ -40,10 +45,10 @@ it borrowed from. Four of those splits are still awaiting a taxonomic check
 
 | Part | Status | Where it comes from |
 | --- | --- | --- |
-| **Bill** | **measured** — 1074 direct, 9 near-match | AVONET `Beak.Length_Culmen` |
-| **Tail** | **measured** — 1074 direct, 9 near-match | AVONET `Tail.Length` |
-| **Mass** | **measured** — 1074 direct, 9 near-match | AVONET `Mass` |
-| **Wingspan** | **391 measured**, 7 near-match, **685 modeled** | Fox et al. 2026 where empirical; otherwise a fitted regression |
+| **Bill** | **measured** — 1073 direct, 9 near-match | AVONET `Beak.Length_Culmen` |
+| **Tail** | **measured** — 1073 direct, 9 near-match | AVONET `Tail.Length` |
+| **Mass** | **measured** — 1073 direct, 9 near-match | AVONET `Mass` |
+| **Wingspan** | **391 measured**, 6 near-match, **685 modeled** | Fox et al. 2026 where empirical; otherwise a fitted regression |
 | **Head** | **modeled, unvalidated** — all 1083 | `7.5 × mass^(1/3)` |
 | **Body** | **modeled, calibrated** — all 1083 | `14.0329 × mass^0.37` |
 | **Neck** | **modeled, invented** — all 1083 | a per-family ratio × the trunk |
@@ -528,8 +533,8 @@ In rough order of how much it would change the picture:
    corrected by eye so far — Aramidae and Pelecanidae after a reader noticed a short-necked
    Limpkin, then Sulidae on review — which says the table has a slow error signal rather than that
    it is converging. Böhmer et al. 2019 measures neck length across 68 families and is the most
-   promising anchor for fixing it properly; it is logged under Work arising in
-   [spec/decisions.md](../spec/decisions.md). (Cervical vertebra *counts* were the long-standing
+   promising anchor for fixing it properly; it is logged in
+   [spec/todo.md](../spec/todo.md). (Cervical vertebra *counts* were the long-standing
    candidate and turn out not to work: a count is dimensionless, so it can give proportions but
    never millimetres.)
 2. **The head model is unvalidated, and the body model is calibrated but not fitted.** The

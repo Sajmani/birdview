@@ -1563,7 +1563,12 @@ Goals: G-001
   was found: Ricklefs 2017 was the only candidate and its terms prohibit the use
   ([CR-002](decisions.md#cr-002)).
 - **Traits** — AVONET, read from whichever of its three taxonomy sheets carries the species as its
-  own taxon ([CR-006](decisions.md#cr-006)).
+  own taxon ([CR-006](decisions.md#cr-006)). A near-match borrows its parent's row from the eBird
+  sheet, except where another sheet holds a narrower concept of that parent: Blue-billed
+  White-Tern borrows `AVONET1_BirdLife`'s *Gygis alba*, which excludes the Little White Tern
+  ([CR-039](decisions.md#cr-039)). The same holds for a species' own row: European Herring Gull
+  is read from `AVONET1_BirdLife`'s *Larus argentatus*, because the eBird sheet's row of that
+  name contains every herring gull ([CR-041](decisions.md#cr-041)).
 - **Everything not covered above** — modeled.
 
 **Total length is a composite.** It is the sum of the five segments (P-041), of which bill and
@@ -1895,8 +1900,39 @@ the pipeline would otherwise wonder whether it was forgotten.
 **Linked from wherever the documentation says where the data comes from**, and from the guide for
 readers and the guide for developers, so neither audience has to find it by browsing the index.
 
+**Kept in step with the code.** A change to what the pipeline reads, joins, models or writes
+updates the diagram and the step descriptions under it in the same change, as
+[T-024](tech.md#t-024) requires of all documentation. The parts a test can compare are compared:
+every source column the diagram names is one a reader asks for, and every `internal/taxonomy`
+table the ingest reads is named in the diagram. What a step *does* stays a reading task.
+
 **One source, drawn two ways.** The diagram is Mermaid in the Markdown, which GitHub draws
 directly. BirdView serves a picture pre-rendered from that same source rather than loading
 Mermaid's script, which [T-002](tech.md#t-002) rules out; the picture records a hash of the source
 it was drawn from, so a stale picture is a failing test rather than a quiet disagreement. It is
 plain SVG with no script and no link off the server.
+
+### P-079 — A drawing made from another drawn species' measurements says so
+Subject: `presentation.shared_measurements`
+Value: `a note on the tile and the detail page of each species, naming the others`
+Goals: G-003, G-006
+
+Where two or more drawn species take their AVONET traits from **the same row** — a near-match
+borrowing a relative's measurements under [P-062](#p-062), and the relative drawn from that same
+row — their drawings are alike because their measurements are the same, not because the birds are.
+That is acceptable: borrowing is honest when it is labeled ([CR-006](decisions.md#cr-006)). But
+two identical tiles look like a finding about the birds, and the near-match label on one of them
+does not tell a reader that the other is the source.
+
+**Every such species says so where it is drawn.** Its tile carries the line *Same measurements
+as* the other species, styled as the tile's other caveats, and its detail page says whose
+measurements were used and that the other species' drawing comes from the same row.
+
+**The groups come from the dataset, not from a table.** Two species share measurements when their
+traits name the same source sheet and source taxon. A new near-match then gets its note without
+anyone remembering to add it.
+
+Rationale: [G-006](goals.md#g-006) — a borrowed value is already labeled, but the reason two
+drawings coincide was visible only to someone who opened both detail pages and compared the
+provenance rows. [CR-040](decisions.md#cr-040).
+

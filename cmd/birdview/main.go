@@ -135,6 +135,9 @@ type server struct {
 	// idOf maps an AviList scientific name to the served id, so a page can
 	// name another species without searching the slice (P-077).
 	idOf map[string]string
+	// sameAs maps a scientific name to the other drawn species whose traits
+	// come from the same AVONET row, sorted (P-079).
+	sameAs map[string][]string
 	// undrawnByID holds the species the derivation classified and rejected.
 	// Consulted only after byID misses, so a URL that stopped working can say
 	// why instead of 404ing into silence (P-075).
@@ -555,6 +558,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		s.idOf[sp.ScientificName] = sp.ID
 		counts[sp.Family]++
 	}
+	s.sameAs = sharedRows(ds)
 	for i := range ds.Undrawn {
 		u := &ds.Undrawn[i]
 		// The ingest refuses to emit a collision, so one here means the
@@ -769,6 +773,10 @@ type tile struct {
 	// Commonest is the share line: where the bird is the biggest part of
 	// what gets recorded, and how big a part (P-074). Nil when unknown.
 	Commonest *shareCell
+	// SameAs names the other drawn species with the same measurements
+	// (P-079). Outside Commonest, because it is about the drawing and must
+	// show whether or not there is a count.
+	SameAs []seam
 
 	// WingModeled drives the crossbar split: the inner span is dashed only when
 	// the wingspan is modeled (P-065).
@@ -1397,6 +1405,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				Wing:        u.format(sp.Wingspan.Value, view.ByWingspan),
 				MassStr:     u.format(sp.Mass.Value, view.ByMass),
 				Commonest:   s.shareWithSeams(sp, opt),
+				SameAs:      s.sameMeasurements(sp, opt.Locale),
 			})
 		}
 		page.Sections = append(page.Sections, sv)
@@ -1414,8 +1423,11 @@ type detailData struct {
 	// Categories is every group the bird is sorted into, with who decided
 	// each (P-069).
 	Categories []categoryRow
-	Opt        options
-	Query      func(...string) template.URL
+	// SameAs names the other drawn species with the same measurements
+	// (P-079).
+	SameAs []seam
+	Opt    options
+	Query  func(...string) template.URL
 
 	// INatURL is empty when no confident iNaturalist match exists, and the
 	// template then renders nothing at all rather than a placeholder (P-064).
@@ -1523,6 +1535,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
 		FootLabels: lt.FootLabels, MassCube: lt.MassCube,
 		Metrics: rows, Categories: s.categories(sp, opt), Opt: opt, Query: queryFor(r), INatURL: inatURL,
+		SameAs:      s.sameMeasurements(sp, opt.Locale),
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 	})
 }
@@ -3259,6 +3272,70 @@ func (s *server) shareWithSeams(sp *dataset.Species, opt options) *shareCell {
 				"divide the records either.", name, src)})
 	}
 	return cell
+}
+
+// sharedRows groups the drawn species whose traits come from one AVONET row:
+// the same sheet and the same filed taxon. Such species are drawn alike
+// because their measurements are the same, not because the birds are (P-079).
+//
+// Derived from the provenance rather than from taxonomy.NearMatches, so a
+// borrowing reached any other way still gets its note.
+func sharedRows(ds *dataset.Dataset) map[string][]string {
+	byRow := map[string][]string{}
+	for i := range ds.Species {
+		p := ds.Species[i].Segments.Bill.Prov
+		if p.SourceTaxon == "" {
+			continue
+		}
+		key := p.Source + "\x00" + p.SourceTaxon
+		byRow[key] = append(byRow[key], ds.Species[i].ScientificName)
+	}
+	out := map[string][]string{}
+	for _, names := range byRow {
+		if len(names) < 2 {
+			continue
+		}
+		sort.Strings(names)
+		for _, n := range names {
+			for _, o := range names {
+				if o != n {
+					out[n] = append(out[n], o)
+				}
+			}
+		}
+	}
+	return out
+}
+
+// sameMeasurements gives one caveat per other drawn species that shares this
+// one's AVONET row, for the tile and the detail page (P-079). The tooltip
+// says which way the borrowing runs, because the two species are not in the
+// same position: one has no measurements of its own.
+func (s *server) sameMeasurements(sp *dataset.Species, loc dataset.Locale) []seam {
+	var out []seam
+	row := sp.Segments.Bill.Prov
+	where := fmt.Sprintf("%s, %s", row.SourceTaxon, strings.TrimPrefix(row.Source, "AVONET v7, "))
+	for _, other := range s.sameAs[sp.ScientificName] {
+		o := s.byID[s.idOf[other]]
+		if o == nil {
+			continue
+		}
+		name := o.Name(loc)
+		var why string
+		switch {
+		case sp.Segments.Bill.Prov.Kind == dataset.NearMatch && o.Segments.Bill.Prov.Kind != dataset.NearMatch:
+			why = fmt.Sprintf("AVONET has no measurements of this bird, so it is drawn from %s's (%s). "+
+				"The two drawings are alike because the measurements are the same.", name, where)
+		case o.Segments.Bill.Prov.Kind == dataset.NearMatch && sp.Segments.Bill.Prov.Kind != dataset.NearMatch:
+			why = fmt.Sprintf("AVONET has no measurements of %s, so it is drawn from this bird's (%s). "+
+				"The two drawings are alike because the measurements are the same.", name, where)
+		default:
+			why = fmt.Sprintf("This bird and %s are both drawn from one AVONET row (%s). "+
+				"The two drawings are alike because the measurements are the same.", name, where)
+		}
+		out = append(out, seam{"Same measurements as " + name, why})
+	}
+	return out
 }
 
 // withheldIn returns, for the regions and months on screen, the months eBird
