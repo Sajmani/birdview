@@ -268,6 +268,12 @@ admits more species over time for no ecological reason; and effort differs enorm
 regions — California has 114 million records against Hawaii's 2.5 million — so one count cannot
 mean the same thing in both.
 
+**Membership decides where a species is listed, not what it counts.** Records in a region where
+the species stays below the bar are kept and counted in its figure ([P-074](#p-074)); they only
+leave it off that region's list. Discarding them made the figure contradict the status: Emu is
+established on 19 eBird records in Texas, 0.26 per million, and its tile read *0 in
+1,237,352,304* ([CR-042](decisions.md#cr-042)).
+
 **Deciding membership per region is what keeps the endemics.** A continental cut drops them by
 construction: the Millerbird's handful of records is nothing against a billion, and 22 per
 million within Hawaii. The regional rule needs no special case for them.

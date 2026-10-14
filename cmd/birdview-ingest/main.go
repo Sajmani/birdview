@@ -652,16 +652,32 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 		// the ids were already a list and every consumer walks them in
 		// order, where a map would repeat each key as a JSON string across
 		// 27,646 entries. TestRegionCountsLineUp pins the two lengths.
-		ids := make([]string, len(rs))
-		counts := make([]int64, len(rs))
-		months := make([][12]int64, len(rs))
-		for j, r := range rs {
-			ids[j], counts[j], months[j] = r.ID, r.Records, r.Months
+		//
+		// A region under the presence bar goes to the Below fields instead:
+		// counted in the figure, and invisible to every region filter
+		// (P-011, CR-042).
+		var ids, bids []string
+		var counts, bcounts []int64
+		var months, bmonths [][12]int64
+		for _, r := range rs {
+			if r.Below {
+				bids, bcounts, bmonths = append(bids, r.ID), append(bcounts, r.Records), append(bmonths, r.Months)
+				continue
+			}
+			ids, counts, months = append(ids, r.ID), append(counts, r.Records), append(months, r.Months)
 		}
 		ds.Species[i].Regions = ids
 		ds.Species[i].RegionCounts = counts
 		ds.Species[i].RegionMonths = months
+		ds.Species[i].BelowRegions = bids
+		ds.Species[i].BelowCounts = bcounts
+		ds.Species[i].BelowMonths = bmonths
 		for _, r := range rs {
+			// Withheld notes name regions the species is listed under; a
+			// region under the bar is not one of them.
+			if r.Below {
+				continue
+			}
 			var bits uint16
 			for m, on := range r.Withheld {
 				if on {
@@ -676,7 +692,7 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 			}
 		}
 		ds.Species[i].Commonest = peakShare(ids, counts, totals)
-		if len(rs) > 0 {
+		if len(ids) > 0 {
 			n++
 		}
 	}

@@ -3274,6 +3274,42 @@ specimens are tagged American Herring Gull; the other 4 carry no subspecies.
 - [P-060](product.md#p-060) — Active; the traits line names this case.
 - [AC-118](acceptance.md#ac-118) — new.
 
+---
+
+## CR-042 — Records below the presence bar are counted, not discarded
+
+**Subject:** `dataset.region.counts`
+**Kind:** Direct — [P-011](product.md#p-011)'s presence bar was also deciding which records
+[P-074](product.md#p-074)'s figure counts
+**Date:** 2026-10-13 · **Decided by:** Sameer
+**Found by:** the owner, asking why Emu's tile said it had zero observations
+
+### What was wrong
+
+`birdview-regions` wrote a species' count for a region only when the species reached 1 record
+per million there. Below that, the records were dropped, so the figure on the tile never saw
+them. Emu is `established` in Texas on 19 eBird records in 18 episodes across 11 years, which is
+0.26 per million of Texas's birding, and its tile read *0 in 1,237,352,304 species observations*.
+**47 drawn species read zero everywhere**, most of them escapes whose iNaturalist-only presences
+[CR-038](#cr-038) removed, and every other species lost whatever it had below the bar.
+
+### The decision
+
+**Every count is kept. The bar decides membership only.** `region-presence.tsv` writes a cell for
+every region where a species has records, and marks the cells below the bar; the ingest carries
+them separately from the regions the species belongs to, and the figure on the tile counts both.
+Region and month filtering are unchanged: a species below the bar in Texas is still not listed
+under Texas.
+
+This is the half of the parked *Judge presence over the whole selection* item that decides
+nothing about where the bar sits, so it is done on its own.
+
+### Status of requirements touched
+
+- [P-011](product.md#p-011) — Active; membership no longer decides what is counted.
+- [P-074](product.md#p-074) — Active and unchanged; its figure now has all the records it names.
+- [AC-119](acceptance.md#ac-119) — new.
+
 ## Work arising
 
 Moved to [todo.md](todo.md) on 2026-10-13, with the design notes that supported it, so that

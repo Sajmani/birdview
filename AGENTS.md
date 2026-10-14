@@ -66,6 +66,11 @@ Violating any of these is a licensing problem, not a style problem.
   prohibit AI tools from ingesting it and prohibit automated access to the site, and the source is
   rejected ([CR-002](spec/decisions.md#cr-002)). Do not try to revive it as a length source.
 - **Never commit the built dataset** (T-005). It carries values derived from those inputs.
+- **Never fetch, download or programmatically process anything from BirdLife's DataZone**
+  (`datazone.birdlife.org`), including its checklist archives. Its terms forbid automated access
+  and text and data mining (clause 11), and one consultation already breached them; see
+  [`birdlife-checklist`](spec/sources.md#birdlife-checklist). A person may read it on screen.
+  AVONET's BirdLife sheet is AVONET's, under CC BY 4.0, and is not affected.
 - **Only AVONET, the Fox wingspan data and AviList may be committed as source *data*.** All three
   are CC BY 4.0. If you are about to add a fourth data file, check
   [spec/sources.md](spec/sources.md) first — most candidates this project evaluated could not be

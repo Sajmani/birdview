@@ -25,8 +25,10 @@ the others can be filled in plausibly from a URL alone.
 | [`inat-terms`](#inat-terms) | mandatory | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; almost nothing in it reaches BirdView |
 | [`specman`](#specman) | — (method) | project copy | **adopted** — copied, base pin recorded below |
 | [`ebird-sensitive`](#ebird-sensitive) | mandatory | absorbed as facts, not vendored | **adopted** — the US and Canada entries restated in `taxonomy.EBirdSensitive`, each confirmed against the export ([CR-037](decisions.md#cr-037)) |
+| [`birdlife-checklist`](#birdlife-checklist) | mandatory | consulted, not ingested | **partial** — one taxonomic fact relied on by [CR-040](decisions.md#cr-040); the site's terms forbid automated access, and it was accessed automatically. Owner to resolve |
 
-One of the thirteen is not fully adopted, and it does not block v1. `ricklefs` was evaluated and
+Two of the fourteen are not fully adopted, and neither blocks v1. `birdlife-checklist` is
+consulted for one fact, but was consulted in a way its terms forbid; see its entry. `ricklefs` was evaluated and
 **rejected**: its platform terms prohibit extraction, integration, storage and redistribution
 alike. Its entry is kept so the evaluation is not repeated.
 
@@ -514,6 +516,49 @@ The `Version` field above is a **base pin, not an integrity hash**. The project 
 *supposed* to differ from it: it carries a banner, and may carry `[LOCAL]` amendments. A diff
 against the pin should contain the banner and nothing else but `[LOCAL]` rows; anything further
 is drift.
+
+---
+
+## `birdlife-checklist`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | HBW and BirdLife International digital checklist of the birds of the world, archived versions linked from <http://datazone.birdlife.org/species/taxonomy> |
+| **Version** | Version 5 (December 2020), the version AVONET's `Metadata` sheet names for its BirdLife taxonomy; version 7 (December 2022) was also read |
+| **Integrity** | **Not vendored, so no hash here.** The archived version is the pin. No copy is kept, in the repository or elsewhere |
+| **Tier** | mandatory (the site's terms bind anyone who uses it) |
+| **Import style** | **Consulted, not ingested.** No value from it enters the dataset or the repository |
+| **Scope** | One taxonomic fact: HBW-BirdLife treats *vegae* as a subspecies of *Larus smithsonianus*, which decides Vega Gull's AVONET donor ([CR-040](decisions.md#cr-040)) |
+| **Adopted parts** | That fact, restated in BirdView's words in CR-040 and in a code comment. Short quotations of its taxonomic notes appear in CR-040 |
+| **Exclusions** | Everything else: the species list, the names, the Red List categories and the notes |
+| **Owner** | BirdLife International |
+| **Status** | **Partial — owner to resolve.** Consulted 2026-10-13, by an agent, in a way the terms forbid |
+
+**What the terms say.** The DataZone *Terms and Conditions of Use* (read 2026-10-13) govern the
+site and the checklist files it links. Website clause 3 permits viewing on screen and copies of
+extracts "for your personal use or private study"; any other use "requires the written prior
+permission of BirdLife International", which it says it is "generally happy to authorise" for
+non-commercial conservation use. **Website clause 11 forbids "any text or data mining or web
+scraping"**, including any "automated device, program, tool … to access, obtain, copy, monitor
+or republish any portion of the website" or its data, and any "automated analytical technique".
+Data clause 11 forbids redistributing the Data, whole or in part, alone or combined with other
+data.
+
+**How it was consulted, which those terms do not allow.** An agent fetched the taxonomy page,
+downloaded the version 5 and version 7 archives with `curl`, and searched the spreadsheets with a
+program for *vegae*. That is automated access and automated analysis under clause 11. The copies
+were deleted the same evening, and nothing from them was committed except the restated fact and
+three short quotations in CR-040.
+
+**What does not change.** AVONET's BirdLife sheet is AVONET's work, under CC BY 4.0, and is
+unaffected; it carries BirdLife's species *names*, not its checklist. A taxonomic placement is a
+fact, and the dataset holds no BirdLife data.
+
+**What needs deciding.** Either a person confirms the placement by reading the checklist on
+screen, which clause 3 permits, so that CR-040 rests on a permitted consultation; or BirdLife is
+asked in writing; or CR-040 is re-based on a secondary source that states the same placement.
+Until then, **no agent may fetch or process anything from BirdLife's DataZone**, as for Wiley
+([CR-002](decisions.md#cr-002)).
 
 ---
 

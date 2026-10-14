@@ -185,6 +185,7 @@ flowchart TB
     every bird record there, by month · *the denominator*
     scientific name · *join key*
     region:jan|…|dec ★ *counts by month*
+    ~ · *under the bar: counted, not listed*
     !flags ★ *months eBird withholds*`"]
     INAT["`inat-taxa.tsv
     ─────────────
@@ -240,6 +241,7 @@ flowchart TB
     attach the iNaturalist taxon id"])
     S9(["Step 9: regions
     attach counts, months, withheld flags;
+    regions under the bar counted apart;
     peak share gives the top region"])
   end
 
@@ -266,6 +268,9 @@ flowchart TB
   regionCounts ★ *the 1 in N*
   regionMonths · *the month filter*
   regionWithheld ★
+  belowRegions · *the 1 in N, never a filter*
+  belowCounts · *the same*
+  belowMonths · *the same*
   commonest ★
   inatTaxonId ★
   families ★ *names, orders, colors*
@@ -296,7 +301,7 @@ flowchart TB
   NAMES -->|"normalize every name"| REGIONSCMD
   TSENS -->|"confirm withheld months"| REGIONSCMD
   REGIONSCMD -->|"count eBird, iNaturalist only in confirmed gaps;
-  present at 1 per million"| REGIONS
+  present at 1 per million; every count kept"| REGIONS
 
   SENS -.->|"restated as facts"| TSENS
   TAXA --> INATCMD -->|"exact name and common name agree"| INAT
@@ -350,7 +355,9 @@ every region, once for the year and once for each month, and counts the off-land
 each sea's box separately. A species is *present* in a region at 1 record per million of what is
 recorded there. eBird's records count everywhere; iNaturalist's fill in only where eBird's
 [Sensitive Species list](data.md#when-the-sources-disagree-about-a-name) names the species and the
-records confirm the gap ([CR-037](../spec/decisions.md#cr-037)).
+records confirm the gap ([CR-037](../spec/decisions.md#cr-037)). Records in a region where a species
+stays under the bar are kept too, marked `~`: the ingest counts them in the *1 in N* and leaves
+the species off that region's list ([CR-042](../spec/decisions.md#cr-042)).
 
 **Names are normalized before anything is matched.** Both commands pass every published name
 through one function, `taxonomy.Occurrence`: subspecies reduced to their species, hybrids left

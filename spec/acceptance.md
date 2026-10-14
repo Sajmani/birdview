@@ -1650,7 +1650,7 @@ count assertion exists beside the key assertion.
 | P-006 | AC-014 | |
 | P-007 | AC-015 | |
 | P-010 | AC-056, AC-075 | |
-| P-011, P-012 | AC-086, AC-088 | |
+| P-011, P-012 | AC-086, AC-088, AC-119 | |
 | P-013 | AC-086, AC-087 | |
 | P-014 | AC-089 | |
 | P-015 | AC-092 | |
@@ -2812,4 +2812,35 @@ of falling back to the eBird sheet.
 | `resolve` ignoring the declared sheet | the same |
 | the missing-row check in `checkOwnRowSheets` disabled | `an own-row sheet that holds no row for the species was accepted` |
 | the own row labeled `near-match` | `Larus argentatus bill is near-match from "AVONET v7, sheet AVONET1_BirdLife"` |
+
+### AC-119 — Records below the presence bar are counted
+**Verifies:** [P-011](product.md#p-011), [P-074](product.md#p-074) · **Level:** code ·
+**Method:** unit tests on the table's reader and writer, and over the built dataset and the
+rendered index
+
+**Assertions:**
+
+1. **The table keeps them.** A cell marked below the bar round-trips through the writer and
+   `region.LoadPresence` with its counts, its months and its mark, and an unmarked cell reads as
+   present.
+2. **The ingest separates them.** A below-bar cell never appears in `regions`, so region and
+   month filtering are unchanged, and its counts appear in the species' below-bar fields.
+3. **The figure counts them.** With every region selected, a species' figure is its records in
+   every region it has any, present or not. Emu's is not zero, and no drawn species with records
+   reads zero.
+
+**Status: verified 2026-10-13 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| none: the real-data test run against the table built before this change | `no species has a region below the bar; the table was built without them` |
+| the writer dropping the `~` mark | `the below-bar cell read back as {… Below:false}` |
+| the reader ignoring the mark | the same, and `regions [USA.44_1 USA.5_1] counts [19 12], want only USA.5_1 with 12` |
+| the ingest listing below-bar regions with the rest | `regions [USA.44_1 USA.5_1] counts [19 12]`; `below regions [] …, want USA.44_1 with 19` |
+| the figure ignoring the below-bar counts | 717 species, e.g. `Acanthis flammea: the figure counts 902200 records, want 902219` |
+
+The rebuilt table, from GBIF on 2026-10-13, holds 26,847 listed cells and 3,689 below the bar.
+Emu has 19 records in Texas and 14 regions in all, every one below the bar, and is listed under
+none. Of the 47 drawn species that read zero before, only Desertas Petrel still does: it has no
+open record at all ([P-071](product.md#p-071)).
 

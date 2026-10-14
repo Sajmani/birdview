@@ -330,9 +330,12 @@ func main() {
 		names[r.gid] = r.name
 		totals[r.gid] = r.total
 		monthlyTotals[r.gid] = r.monthlyTotal
+		// Every region with records is written, and the ones under the bar
+		// are marked rather than dropped: the bar decides where a species
+		// is listed, not what it counts (P-011, CR-042).
 		for _, sp := range ds {
-			if lc := strings.ToLower(sp); r.present[lc] {
-				rep := region.Reported{ID: r.gid, Records: r.counts[lc]}
+			if lc := strings.ToLower(sp); r.counts[lc] > 0 {
+				rep := region.Reported{ID: r.gid, Records: r.counts[lc], Below: !r.present[lc]}
 				if m := r.monthly[lc]; m != nil {
 					rep.Months = *m
 				}
@@ -442,8 +445,11 @@ func main() {
 
 	placed := 0
 	for _, v := range regionsOf {
-		if len(v) > 0 {
-			placed++
+		for _, r := range v {
+			if !r.Below {
+				placed++
+				break
+			}
 		}
 	}
 	log.Printf("birdview-regions: %d of %d species placed in at least one region", placed, len(ds))
@@ -712,13 +718,20 @@ func write(path string, species []string, regionsOf map[string][]region.Reported
 	fmt.Fprintf(&b, "#\n# A cell may end in ! and twelve 0/1 flags: the months eBird withholds the\n")
 	fmt.Fprintf(&b, "# species there under its Sensitive Species list, confirmed against the\n")
 	fmt.Fprintf(&b, "# records. A withheld month is missing by policy, not absent (CR-037).\n")
-	fmt.Fprintf(&b, "#\n# scientific name\tregion:jan|feb|...|dec[!flags], comma separated\n")
+	fmt.Fprintf(&b, "#\n# A region id followed by %s is one where the species has records but stays\n", region.BelowMark)
+	fmt.Fprintf(&b, "# under the bar: its records count, and it is not one of the species'\n")
+	fmt.Fprintf(&b, "# regions (CR-042).\n")
+	fmt.Fprintf(&b, "#\n# scientific name\tregion[%s]:jan|feb|...|dec[!flags], comma separated\n", region.BelowMark)
 	for _, sp := range species {
 		rs := regionsOf[sp]
 		sort.Slice(rs, func(i, j int) bool { return rs[i].ID < rs[j].ID })
 		parts := make([]string, len(rs))
 		for i, r := range rs {
-			parts[i] = fmt.Sprintf("%s:%s%s", r.ID, joinMonths(r.Months), withheldSuffix(r.Withheld))
+			mark := ""
+			if r.Below {
+				mark = region.BelowMark
+			}
+			parts[i] = fmt.Sprintf("%s%s:%s%s", r.ID, mark, joinMonths(r.Months), withheldSuffix(r.Withheld))
 		}
 		fmt.Fprintf(&b, "%s\t%s\n", sp, strings.Join(parts, ","))
 	}

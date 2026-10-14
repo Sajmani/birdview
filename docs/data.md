@@ -252,7 +252,9 @@ records and the rule is stated here rather than implied by the result.
 plus five ocean boxes that are BirdView's own and are described below.
 
 **A species is listed in a region when it reaches 1 record per million of that region's bird
-records, in either eBird or iNaturalist**, both via GBIF under CC BY 4.0.
+records**, from GBIF under CC BY 4.0. The bar decides only where it is listed. Records in a region
+where it stays under the bar still count in its *1 in N*: Emu is listed nowhere, and its 38
+records, 19 of them in Texas, are on its tile ([CR-042](../spec/decisions.md#cr-042)).
 
 **Relative rather than a fixed count**, for two measured reasons. eBird's volume doubled in five
 years, so any absolute bar admits more species over time for no ecological reason. And effort

@@ -202,6 +202,15 @@ type Species struct {
 	// parallel to Regions in the same way (P-011, CR-036).
 	RegionMonths [][12]int64 `json:"regionMonths,omitempty"`
 
+	// BelowRegions are the regions where the species has records but stays
+	// under the presence bar, with BelowCounts and BelowMonths parallel as
+	// above. Their records count in the species' figure; the species is not
+	// listed under them, so nothing that filters by region reads these
+	// (P-011, CR-042).
+	BelowRegions []string    `json:"belowRegions,omitempty"`
+	BelowCounts  []int64     `json:"belowCounts,omitempty"`
+	BelowMonths  [][12]int64 `json:"belowMonths,omitempty"`
+
 	// RegionWithheld maps a region id to the months eBird withholds this
 	// species there under its Sensitive Species list, as a bitmask with
 	// January in bit 0 (CR-037). A map rather than a slice parallel to

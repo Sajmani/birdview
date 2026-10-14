@@ -734,3 +734,34 @@ func TestEuropeanHerringGullReadsItsOwnRow(t *testing.T) {
 		t.Error("an own-row sheet that holds no row for the species was accepted")
 	}
 }
+
+// TestBelowBarRegionsAreCountedNotListed asserts AC-119's second assertion:
+// the ingest keeps a below-bar cell out of Regions, so no region or month
+// filter sees it, and carries its counts in the Below fields.
+//
+// Verifies: P-011, CR-042. Criterion: AC-119.
+func TestBelowBarRegionsAreCountedNotListed(t *testing.T) {
+	table := "total\tUSA.44_1\t10|10|10|10|10|10|10|10|10|10|10|10\n" +
+		"total\tUSA.5_1\t10|10|10|10|10|10|10|10|10|10|10|10\n" +
+		"Dromaius novaehollandiae\tUSA.44_1~:2|1|3|1|2|1|1|2|2|1|2|1,USA.5_1:1|1|1|1|1|1|1|1|1|1|1|1\n"
+	path := t.TempDir() + "/presence.tsv"
+	if err := os.WriteFile(path, []byte(table), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	ds := &dataset.Dataset{Species: []dataset.Species{{ScientificName: "Dromaius novaehollandiae"}}}
+	n, err := applyRegions(ds, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := ds.Species[0]
+	if len(s.Regions) != 1 || s.Regions[0] != "USA.5_1" || s.RegionCounts[0] != 12 {
+		t.Errorf("regions %v counts %v, want only USA.5_1 with 12", s.Regions, s.RegionCounts)
+	}
+	if len(s.BelowRegions) != 1 || s.BelowRegions[0] != "USA.44_1" || s.BelowCounts[0] != 19 ||
+		len(s.BelowMonths) != 1 || s.BelowMonths[0][2] != 3 {
+		t.Errorf("below regions %v counts %v months %v, want USA.44_1 with 19", s.BelowRegions, s.BelowCounts, s.BelowMonths)
+	}
+	if n != 1 {
+		t.Errorf("%d species placed, want 1", n)
+	}
+}

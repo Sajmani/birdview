@@ -459,7 +459,16 @@ type Reported struct {
 	// records (CR-037). In those months the count is missing by policy, so
 	// it says nothing about whether the bird was there.
 	Withheld [12]bool
+	// Below marks a region where the species has records but stays under
+	// the presence bar. Its records count in the species' figure; it is not
+	// one of the species' regions (P-011, CR-042). Written as a ~ after the
+	// region id.
+	Below bool
 }
+
+// BelowMark follows a region id in the table when the species is under the
+// presence bar there (CR-042).
+const BelowMark = "~"
 
 // Totals is every bird record a region holds, over every species including
 // the ones BirdView does not draw. It is the denominator of that share: a
@@ -521,6 +530,7 @@ func LoadPresence(r io.Reader) (Presence, Totals, MonthlyTotals, error) {
 			if !ok {
 				return nil, nil, nil, fmt.Errorf("region presence line %d: %q is not region:records", line, pair)
 			}
+			id, below := strings.CutSuffix(id, BelowMark)
 			if _, known := Get(id); !known {
 				return nil, nil, nil, fmt.Errorf("region presence line %d: %q is in no region table entry", line, id)
 			}
@@ -529,7 +539,7 @@ func LoadPresence(r io.Reader) (Presence, Totals, MonthlyTotals, error) {
 			if err != nil {
 				return nil, nil, nil, fmt.Errorf("region presence line %d: %w", line, err)
 			}
-			rep := Reported{ID: id, Records: sum, Months: ms}
+			rep := Reported{ID: id, Records: sum, Months: ms, Below: below}
 			if flags != "" {
 				if len(flags) != 12 || strings.Trim(flags, "01") != "" {
 					return nil, nil, nil, fmt.Errorf("region presence line %d: withheld flags %q "+

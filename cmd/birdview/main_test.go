@@ -6615,3 +6615,42 @@ func TestSameMeasurementsNeedNoTable(t *testing.T) {
 		t.Errorf("%s shares no row, but its tile says it does", bystander.ScientificName)
 	}
 }
+
+// TestRecordsBelowTheBarCount asserts AC-119's third assertion over the real
+// dataset: with every region selected, the figure counts every record the
+// species has, listed or not. Emu is named because it is the case that
+// was found, and a species with records that reads zero is the bug.
+//
+// Verifies: P-011, P-074, CR-042. Criterion: AC-119.
+func TestRecordsBelowTheBarCount(t *testing.T) {
+	ds := realDataset(t)
+	var emu *dataset.Species
+	below := 0
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		if sp.ScientificName == "Dromaius novaehollandiae" {
+			emu = sp
+		}
+		var want int64
+		for _, n := range sp.RegionCounts {
+			want += n
+		}
+		for _, n := range sp.BelowCounts {
+			want += n
+		}
+		below += len(sp.BelowRegions)
+		if num, _ := shareIn(sp, ds, options{}); num != want {
+			t.Errorf("%s: the figure counts %d records, want %d (listed and below the bar)",
+				sp.ScientificName, num, want)
+		}
+	}
+	if below == 0 {
+		t.Fatal("no species has a region below the bar; the table was built without them")
+	}
+	if emu == nil {
+		t.Fatal("Emu is not drawn")
+	}
+	if num, _ := shareIn(emu, ds, options{}); num == 0 {
+		t.Error("Emu's figure is zero; its Texas records are below the bar and must still count")
+	}
+}

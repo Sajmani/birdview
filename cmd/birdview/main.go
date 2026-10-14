@@ -3046,24 +3046,31 @@ func shareIn(sp *dataset.Species, ds *dataset.Dataset, opt options) (num, den in
 	allMonths := !opt.HasMonths || len(opt.Months) == month.Count
 	inMonth := func(m int) bool { return allMonths || opt.Months[m] }
 
-	for i, id := range sp.Regions {
-		if !counted(id) {
-			continue
-		}
-		if allMonths {
-			if i < len(sp.RegionCounts) {
-				num += sp.RegionCounts[i]
+	// The species' regions and the regions where it stays under the bar
+	// both count: the bar decides where it is listed, not what it counts
+	// (P-011, CR-042).
+	add := func(ids []string, counts []int64, months [][12]int64) {
+		for i, id := range ids {
+			if !counted(id) {
+				continue
 			}
-			continue
-		}
-		if i < len(sp.RegionMonths) {
-			for m, n := range sp.RegionMonths[i] {
-				if inMonth(m) {
-					num += n
+			if allMonths {
+				if i < len(counts) {
+					num += counts[i]
+				}
+				continue
+			}
+			if i < len(months) {
+				for m, n := range months[i] {
+					if inMonth(m) {
+						num += n
+					}
 				}
 			}
 		}
 	}
+	add(sp.Regions, sp.RegionCounts, sp.RegionMonths)
+	add(sp.BelowRegions, sp.BelowCounts, sp.BelowMonths)
 	for id, n := range totals {
 		if !counted(id) {
 			continue
