@@ -36,7 +36,7 @@ No openly licensed dataset publishes body length for North American birds. The o
 does is under terms that forbid us using it ([CR-002](spec/decisions.md)), so **every length
 in BirdView is a model** — built from measured parts, with each part labeled. Of the three numbers
 on a tile, mass is measured for almost every species, wingspan is measured for about a third, and
-length is modeled for all 1083.
+length is modeled for all 1082.
 
 That is why every value carries its own provenance — `measured`, `near-match` or `modeled` — and
 why clicking any bird shows you the source or the formula behind each individual number.

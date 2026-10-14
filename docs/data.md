@@ -49,10 +49,10 @@ Meadowlark, Cocos and Brown Booby, and Vega and American Herring Gull
 | **Tail** | **measured** — 1073 direct, 9 near-match | AVONET `Tail.Length` |
 | **Mass** | **measured** — 1073 direct, 9 near-match | AVONET `Mass` |
 | **Wingspan** | **391 measured**, 6 near-match, **685 modeled** | Fox et al. 2026 where empirical; otherwise a fitted regression |
-| **Head** | **modeled, unvalidated** — all 1083 | `7.5 × mass^(1/3)` |
-| **Body** | **modeled, calibrated** — all 1083 | `14.0329 × mass^0.37` |
-| **Neck** | **modeled, invented** — all 1083 | a per-family ratio × the trunk |
-| **Total length** | **modeled** — all 1083 | `bill + head + neck + body + tail` |
+| **Head** | **modeled, unvalidated** — all 1082 | `7.5 × mass^(1/3)` |
+| **Body** | **modeled, calibrated** — all 1082 | `14.0329 × mass^0.37` |
+| **Neck** | **modeled, invented** — all 1082 | a per-family ratio × the trunk |
+| **Total length** | **modeled** — all 1082 | `bill + head + neck + body + tail` |
 
 Those five — bill, head, neck, body, tail — are the diagram's segments, and they are what total
 length is built from. Mass and wingspan are drawn or reported but are not part of the sum.
@@ -209,13 +209,15 @@ excludes Johnston, Palmyra, Wake and Navassa, which BirdView covers. A species i
 in repeated episodes across years. Nine more are kept by hand because the open record cannot
 speak for them, each named with its reason.
 
-Two species the occurrence data names are dropped: Gray-headed Swamphen and Western
-Warbling-Vireo, both of which eBird splits and AviList lumps into a bird already in the list.
-Every name BirdView serves comes from AviList, so one AviList has no concept for has no name
-this project can publish.
+One in-scope species the occurrence data names is dropped: Gray-headed Swamphen (*Porphyrio
+poliocephalus*), which eBird splits and AviList lumps into Purple Swamphen. (A second, Western
+Warbling-Vireo, is also in the drop table, and left scope when [CR-038](../spec/decisions.md#cr-038)
+switched recurrence to eBird.) Every name BirdView serves comes from AviList, so one AviList has
+no concept for has no name this project can publish.
 
-**The birds that did not make it still have a page.** The derivation classifies 1426 species
-and draws 1083; the other 334 were judged `vagrant`, `historical` or `absent`. Ask for one of
+**The birds that did not make it still have a page.** The derivation draws 1082 species and
+leaves 326 named species out of scope as `vagrant`, `historical` or `absent` (124 vagrant, 38
+historical, 164 absent). Ask for one of
 them by URL — `/species/paspig` — and you get a 404 whose body names the bird and gives the
 measured reason, rather than `404 page not found`. Passenger Pigeon recurs across 89 episodes
 in 52 years in Ontario and every one of those records ends on 18 May 1902; the page says so.
@@ -307,8 +309,10 @@ records and a vagrant with four records really are the same shape.
 
 What separates them is **recurrence**: not how many records, but whether they repeat across
 years. The 2023 flamingo has 931 records inside thirteen days; Akikiki, a Hawaiian endemic, has
-376 across forty-five years and is unmistakably the resident of the two. That is
-[CR-028](../spec/decisions.md#cr-028), in progress.
+376 across forty-five years and is unmistakably the resident of the two.
+[CR-028](../spec/decisions.md#cr-028) replaced record counts with recurrence for **scope**;
+**per-region presence** still uses the 1-ppm record bar, and replacing or qualifying it is open in
+[spec/todo.md](../spec/todo.md).
 
 ## How common a bird is
 
@@ -484,7 +488,7 @@ quarter rounds to nothing a reader can read. "1 in 514" stays legible the whole 
 
 **Both numbers are kept, not just the ratio.** The detail page gives the species' records and
 the region's total, so a figure resting on nine records says so. That is deliberate: the
-alternative is a minimum-evidence cutoff, which is one more arbitrary threshold, and 50 of 1,083
+alternative is a minimum-evidence cutoff, which is one more arbitrary threshold, and 50 of 1,082
 species have a peak region resting on fewer than ten records.
 
 ### What this is not
@@ -534,11 +538,13 @@ In rough order of how much it would change the picture:
    they visibly drive the silhouette of every long-necked family. Three families have been
    corrected by eye so far — Aramidae and Pelecanidae after a reader noticed a short-necked
    Limpkin, then Sulidae on review — which says the table has a slow error signal rather than that
-   it is converging. Böhmer et al. 2019 measures neck length across 68 families and is the most
-   promising anchor for fixing it properly; it is logged in
-   [spec/todo.md](../spec/todo.md). (Cervical vertebra *counts* were the long-standing
-   candidate and turn out not to work: a count is dimensionless, so it can give proportions but
-   never millimetres.)
+   it is converging. Böhmer et al. 2019 was evaluated as an anchor and withdrawn: it measures the
+   full cervical column including the part inside the body contour, where BirdView models the
+   *exposed* neck of a silhouette, so converting one to the other still needs an unmeasured
+   per-family fraction ([spec/sources.md](../spec/sources.md#bohmer-neck)). Reviewing the 66
+   families still on the 0.18 default is logged in [spec/todo.md](../spec/todo.md). (Cervical
+   vertebra *counts* were the earlier candidate and do not work either: a count is dimensionless,
+   so it can give proportions but never millimetres.)
 2. **The head model is unvalidated, and the body model is calibrated but not fitted.** The
    cranium's coefficient is a shape function fitted against nothing. The trunk's exponent is now
    pinned to measured skeletons, but to *necks and legs* — nobody has published trunk lengths at

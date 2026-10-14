@@ -2,14 +2,9 @@
 
 For each requirement, a check that would fail if the requirement were violated.
 
-> **No code-level criterion here has been watched failing, because no code exists yet.** Every one
-> is `planned`. Per [process.md](process.md#guidance), a criterion you have not seen go red is not
+> Per [process.md](process.md#guidance), a criterion you have not seen go red is not
 > yet a criterion — it is an intention. Before any status becomes `verified`, break the thing it
 > checks and confirm it fails.
->
-> The four spec-level criteria are the exception. They run today, they pass, and three of them have
-> each been **deliberately broken and watched failing** — the fourth, AC-002, has no code to run
-> against yet.
 
 Each criterion records its ID, the requirements it verifies, its level (`spec` or `code`), its
 method, how to run it, and its status.
@@ -96,25 +91,28 @@ tolerating — the failure is loud, immediate, and safer than a checker that gue
 
 ## Dataset and ingest
 
-### AC-010 — Scope is exactly the ABA code 1–3 species
+### AC-010 — Scope is what the status table says recurs
 **Verifies:** P-001 · **Level:** code · **Method:** unit test over ingest output
-**Assertion:** the dataset contains **841** species for ABA checklist 8.19, and no species whose
-rarity code is 4, 5 or 6 appears.
-**Status: verified 2026-09-22 — the ingest produces exactly 841 species.**
-on 2026-09-21, rarity distribution 490 + 258 + 93 — **not** from a run of our code. If the
-checklist version changes, this number changes with it and the test should name the version.
+**Assertion:** the dataset contains every species `data/status.tsv` marks in scope (`established` or
+`rare`, plus the declared exceptions of P-071), less those AviList has no concept for and the four
+species with no AVONET measurement — **1,082** species today — derived from the inputs rather than
+hardcoded from a run.
+**Status: verified 2026-10-05 — passing (`TestScopeIsWhatTheStatusTableSaysRecurs`).** Previously
+verified 2026-09-22 against ABA checklist 8.19 (841 species); rewritten for
+[CR-028](decisions.md#cr-028).
 
 ### AC-011 — Rarity codes never reach the dataset
 **Verifies:** P-001 · **Level:** code · **Method:** inspect the serialized record's field names
 for anything carrying an ABA rarity code
-**Status: verified 2026-09-22 — no rarity field appears in the serialized record.**
-editorial judgment, and the project uses them only as a filter.
+**Status: verified 2026-09-22 — no rarity field appears in the serialized record.** Retained as a
+regression guard after [CR-028](decisions.md#cr-028) removed the ABA checklist.
 
 ### AC-012 — Every record carries all five AVONET traits
 **Verifies:** P-002, P-003 · **Level:** code · **Method:** property test over every record
 **Assertion:** culmen, tail, wing chord, secondary and mass are all present and positive.
-**Status: planned.** Trait coverage on `AVONET2_eBird` was measured complete for the target
-families, so any failure means a join or parse bug rather than missing data.
+**Status: planned.** Trait coverage across AVONET's three sheets brings **1,082** of the 1,086
+named in-scope species to a complete row (the 4 unmatched species are named in `unmeasurableNames`),
+so any failure on a built record means a join or parse bug rather than missing data.
 
 ### AC-013 — Names and families are populated from AviList, never defaulted
 **Verifies:** P-004 · **Level:** code · **Method:** property test over the built dataset
@@ -189,11 +187,12 @@ headers under the default locale.
 
 ### AC-014 — The join covers every species, and the direct-match rate is monitored
 **Verifies:** P-006 · **Level:** code · **Method:** unit test over ingest
-**Assertions:** (a) after the mapping table is applied, 100% of in-scope species resolve to a
-trait row; (b) the *direct* binomial match rate is reported, and is **≥ 97.38%** for the current
-source versions.
-**Status: planned.** 97.38% (819 of 841) was measured against `AVONET2_eBird` on 2026-09-21. It is
-a regression guard, not a target: a drop means a taxonomy moved and the mapping table needs review.
+**Assertions:** (a) after the mapping table is applied, every in-scope species (except the 4 named
+in `unmeasurableNames`) resolves to a trait row; (b) `TestNearMatchesAreExactlyTheMappedOnes`
+verifies that the 9 near-matches in the **1,082**-species dataset match `taxonomy.NearMatches`.
+**Status: planned.** 1,073 measured + 9 near-match = 1,082 species (earlier 97.38%, 819 of 841, was
+measured against `AVONET2_eBird` on 2026-09-21 before [CR-028](decisions.md#cr-028)). It is a
+regression guard, not a target: a drop means a taxonomy moved and the mapping table needs review.
 
 ### AC-015 — Unmatched species fail the build above a threshold
 **Verifies:** P-007 · **Level:** code · **Method:** unit test with a fixture containing a bogus
@@ -1718,9 +1717,8 @@ Honest gaps, rather than criteria that would not bite:
 
 ### Criteria that cannot yet fail
 
-All `planned` criteria. The project has no code, so none of them has been watched going red. As
-each is implemented, break its subject deliberately and record the result here — a check believed
-but never seen failing is worse than no check.
+All `planned` criteria. As each is implemented, break its subject deliberately and record the
+result here — a check believed but never seen failing is worse than no check.
 
 ### AC-093 — "Only" narrows to one group and leaves other sections alone
 **Verifies:** [P-072](product.md#p-072) · **Level:** code · **Method:** rendering tests over the

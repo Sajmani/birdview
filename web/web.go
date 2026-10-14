@@ -18,9 +18,9 @@
 // matches files at or below the embedding package's own directory, and the
 // assets are not under cmd/.
 //
-// species.json is deliberately NOT embedded: it is a build artifact carrying
-// values derived from the ABA checklist, which is all rights reserved (T-005).
-// The server reads it from disk at startup instead.
+// species.json is deliberately NOT embedded: it is a build artifact derived
+// from the committed data tables and must not be committed (T-005). The server
+// reads it from disk at startup instead.
 package web
 
 import "embed"

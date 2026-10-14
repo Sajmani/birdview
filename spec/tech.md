@@ -36,28 +36,28 @@ Goals: G-001
 Subject: `build.inputs`
 Goals: G-004
 
-Inputs whose license forbids redistribution — currently the ABA checklist alone — are downloaded
-onto the building machine at build time, verified against the hashes recorded in
-[sources.md](sources.md), consumed, and never committed. They land under `fetched/`, which
-`.gitignore` excludes.
+Inputs whose license forbids redistribution are downloaded onto the building machine at build time,
+verified against the hashes recorded in [sources.md](sources.md), consumed, and never committed.
+They land under `fetched/`, which `.gitignore` excludes. Since [CR-028](decisions.md#cr-028)
+replaced the ABA checklist, no build input uses this path; the rule and the `.gitignore` entry stay
+in place in case a future source requires them.
 
 This mechanism is available only where the publisher permits automated retrieval. It is not a
 general workaround for a restrictive license: Ricklefs 2017 was rejected partly because Wiley's
 terms forbid automated access outright ([CR-002](decisions.md#cr-002)).
 
-The CC BY inputs are committed: the AVONET workbook, and the Fox et al. wingspan data when it is
-retrieved. So is the synonym table of P-006, which is the project's own work.
-
-Rationale: the species list BirdView needs is `all rights reserved` and says so in the first row
-of its own CSV. Fetching at build keeps the project honest without giving up the data.
+The CC BY inputs are committed: AviList, the AVONET workbook, and the Fox et al. wingspan data. So
+are the synonym tables of P-006 and the occurrence tables under `data/`, which are the project's
+own work.
 
 ### T-005 — The built dataset is an artifact, never committed
 Subject: `build.output`
 Goals: G-004
 
-The generated dataset is excluded from version control, because it carries values derived from the
-non-redistributable inputs of T-004. A clean checkout builds it; it is not shipped in the
-repository.
+The generated dataset is excluded from version control. It was originally excluded because it
+carried values derived from the ABA checklist ([CR-028](decisions.md#cr-028) ended that); it stays
+excluded because it is reproducible from the committed inputs in one command and a stale copy in the
+tree is worse than none. A clean checkout builds it; it is not shipped in the repository.
 
 ### T-006 — Identify the client on every outbound request
 Subject: `http.user_agent`
@@ -83,9 +83,9 @@ Rationale: a minimum-version floor exists to protect *dependents* from a bump th
 for. BirdView exports no library and has no dependents — it is two commands — so the floor would
 protect nobody while costing the project the ability to take upstream fixes.
 
-Current state, for the record rather than as a constraint: `go 1.25.0`, raised from 1.22 by
-excelize v2.11.0, with the toolchain resolving to 1.26.8. Module versions stay pinned in `go.sum`;
-it is only the language and toolchain versions that float.
+Current state, for the record rather than as a constraint: `go 1.26.9`, raised from 1.25.0 by
+`golang.org/x/net` v0.60.0 and standard-library `net/http` security fixes. Module versions stay
+pinned in `go.sum`; it is only the language and toolchain versions that float.
 
 ---
 
@@ -121,11 +121,11 @@ BirdView runs locally today and may be deployed publicly later. It will not beco
 offering, and source obligations are recorded against the public, non-commercial case so that a
 later deployment needs no licensing re-litigation.
 
-**Public deployment is gated on written permission from the ABA.** Serving the application
-reproduces their checklist — the species list, common names, family names and banding codes — to
-every visitor, which the notice in their own file forbids. Keeping the CSV out of the repository
-does not address this; the served pages are the reproduction. The request is drafted and awaiting
-a demo to accompany it.
+**The ABA licensing gate is gone as of 2026-10-05.** [CR-028](decisions.md#cr-028) replaced ABA
+scope with BirdView's own derivation from open occurrence records; [CR-022](decisions.md#cr-022)
+replaced ABA names with AviList. Nothing all-rights-reserved is read at build time, so nothing of
+anyone else's is served. Public deployment is now an engineering task, not a licensing one; see
+`todo.md` for what remains.
 
 Rationale: non-commercial is load-bearing, not incidental. Macaulay Library permits embedding for
 non-commercial use only, and iNaturalist's default CC BY-NC corpus is usable on the same basis.
@@ -151,7 +151,7 @@ Resolving species to iNaturalist taxon IDs happens in `cmd/birdview-inatmap`, ne
 (`inat-api/R1`) and identifies itself (T-006). Its output is a table committed to the repository;
 the ingest joins against that table and makes no network request.
 
-Rationale: 841 requests at the rate iNaturalist asks for is a quarter of an hour, which does not
+Rationale: 1082 requests at the rate iNaturalist asks for is a quarter of an hour, which does not
 belong in a build — and a build that needs the network is a build that fails on a plane. Keeping
 resolution separate also keeps T-002 and the no-network-in-tests binding intact without exception.
 The table going stale is the accepted cost; a stale ID fails visibly and the refresh is one
@@ -218,11 +218,11 @@ What [process.md](process.md#project-bindings) requires each project to declare.
 | **ID citation syntax** | Go line comments, preserving the literal token: `// Verifies: P-042, T-010.` |
 | **Artifact locations** | `spec/`, per the standard layout, with one exception below. |
 | **Subject vocabulary** | Dotted paths, lowercase, e.g. `diagram.scale.mode`, `badge.contrast.ratio`, `dataset.join.key`. New subjects are added by the project owner. |
-| **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never redistribute data derived from the ABA checklist. Never access or process Wiley Online Library material, by any means including an AI agent (CR-002). |
+| **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never access or process Wiley Online Library material, by any means including an AI agent (CR-002). Never fetch or process anything from BirdLife's DataZone by any automated means (see `sources.md` and `todo.md`). |
 | **External systems** | Tests make no network requests. Any source fetch is exercised against a local fixture or an `httptest` server, never against the live publisher. |
 | **Approval authority** | Sameer — gates, waivers, amendments, source deviations, risk acceptances. |
 | **Supported runtime** | Whatever the dependencies require (T-007). No minimum Go version is maintained. |
-| **Source refresh cadence** | Annually. ABA, AOS and eBird/Clements each revise on roughly yearly cycles, and P-006's synonym table depends on all three. |
+| **Source refresh cadence** | Annually. AviList, AOS and eBird/Clements each revise on roughly yearly cycles, and P-006's synonym table depends on all three. |
 | **Existing docs** | `spec/` owns requirements. `PROVENANCE` files under `spec/sources/` own retrieval facts and hashes. A README, when written, owns usage instructions and duplicates neither. |
 
 ### Location exception: the third_party directory
@@ -273,7 +273,8 @@ there is worse than no claim. Two kinds of staleness are forbidden:
   [CR-022](decisions.md#cr-022) cut the list to 839.
 - **A source credited for something it no longer supplies.** `README.md` listed the ABA Checklist
   as the source of "species list, names, families" after CR-022 moved names and families to
-  AviList. The ABA checklist supplies **scope** and nothing else.
+  AviList (at that point the ABA checklist supplied **scope** alone; [CR-028](decisions.md#cr-028)
+  then replaced scope too).
 
 **Before any public deployment, the docs are checked against the spec**, since a release is the
 moment the claims become promises to strangers rather than notes to ourselves.

@@ -25,12 +25,13 @@ the others can be filled in plausibly from a URL alone.
 | [`inat-terms`](#inat-terms) | mandatory | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; almost nothing in it reaches BirdView |
 | [`specman`](#specman) | — (method) | project copy | **adopted** — copied, base pin recorded below |
 | [`ebird-sensitive`](#ebird-sensitive) | mandatory | absorbed as facts, not vendored | **adopted** — the US and Canada entries restated in `taxonomy.EBirdSensitive`, each confirmed against the export ([CR-037](decisions.md#cr-037)) |
-| [`birdlife-checklist`](#birdlife-checklist) | mandatory | consulted, not ingested | **partial** — one taxonomic fact relied on by [CR-040](decisions.md#cr-040); the site's terms forbid automated access, and it was accessed automatically. Owner to resolve |
+| [`birdlife-checklist`](#birdlife-checklist) | mandatory | **rejected** | **rejected** — DataZone terms forbid automated access; [CR-040](decisions.md#cr-040) re-based 2026-10-14 onto the vendored `avilist` and `avonet` workbooks |
 
-Two of the fourteen are not fully adopted, and neither blocks v1. `birdlife-checklist` is
-consulted for one fact, but was consulted in a way its terms forbid; see its entry. `ricklefs` was evaluated and
+Two of the fourteen are rejected, and neither blocks v1. `birdlife-checklist` was consulted in a
+way DataZone's terms forbid; its quotations were removed and [CR-040](decisions.md#cr-040) was
+re-based on the vendored CC BY 4.0 workbooks. `ricklefs` was evaluated and
 **rejected**: its platform terms prohibit extraction, integration, storage and redistribution
-alike. Its entry is kept so the evaluation is not repeated.
+alike. Both entries are kept so the evaluations are not repeated.
 
 ---
 
@@ -45,7 +46,7 @@ alike. Its entry is kept so the evaluation is not repeated.
 | **Import style** | By reference; vendored at `//third_party/avonet/AVONET Supplementary dataset 1.xlsx` under the location exception in [tech.md](tech.md#location-exception-the-third_party-directory) |
 | **Scope** | All morphometric traits (P-002, P-003) |
 | **Geographic scope** | **Worldwide** — 10,661 species across 41 orders, every continent. Measured 2026-10-01. |
-| **Adopted parts** | Sheet `AVONET2_eBird` only |
+| **Adopted parts** | Sheets `AVONET2_eBird`, `AVONET1_BirdLife` and `AVONET3_BirdTree` ingested ([CR-006](decisions.md#cr-006), [CR-039](decisions.md#cr-039), [CR-041](decisions.md#cr-041)); `AVONET_Raw_Data` and the crosswalk sheets consulted |
 | **Exclusions** | Supplementary dataset 2 (specimen repeatability data) — carries no species-level rows and neither of the dimensions BirdView needs. Removed from the working tree; re-obtainable from the same deposit. |
 | **Owner** | Tobias et al. / figshare |
 | **Status** | **Adopted.** Pinned, vendored, hashed. No acceptance criteria yet. |
@@ -525,14 +526,14 @@ is drift.
 | --- | --- |
 | **Origin** | HBW and BirdLife International digital checklist of the birds of the world, archived versions linked from <http://datazone.birdlife.org/species/taxonomy> |
 | **Version** | Version 5 (December 2020), the version AVONET's `Metadata` sheet names for its BirdLife taxonomy; version 7 (December 2022) was also read |
-| **Integrity** | **Not vendored, so no hash here.** The archived version is the pin. No copy is kept, in the repository or elsewhere |
+| **Integrity** | **Not vendored, so no hash here.** No copy is kept, in the repository or elsewhere |
 | **Tier** | mandatory (the site's terms bind anyone who uses it) |
-| **Import style** | **Consulted, not ingested.** No value from it enters the dataset or the repository |
-| **Scope** | One taxonomic fact: HBW-BirdLife treats *vegae* as a subspecies of *Larus smithsonianus*, which decides Vega Gull's AVONET donor ([CR-040](decisions.md#cr-040)) |
-| **Adopted parts** | That fact, restated in BirdView's words in CR-040 and in a code comment. Short quotations of its taxonomic notes appear in CR-040 |
-| **Exclusions** | Everything else: the species list, the names, the Red List categories and the notes |
+| **Import style** | **Rejected.** Nothing from it enters the dataset, the repository or the decision record |
+| **Scope** | Evaluated for [CR-040](decisions.md#cr-040) (Vega Gull's AVONET donor); superseded by the vendored `avilist` and `avonet` workbooks |
+| **Adopted parts** | None |
+| **Exclusions** | Everything |
 | **Owner** | BirdLife International |
-| **Status** | **Partial — owner to resolve.** Consulted 2026-10-13, by an agent, in a way the terms forbid |
+| **Status** | **Rejected 2026-10-14.** Consulted 2026-10-13 by an agent in a way DataZone's terms forbid; quotations removed and [CR-040](decisions.md#cr-040) re-based on `avilist` and `avonet` |
 
 **What the terms say.** The DataZone *Terms and Conditions of Use* (read 2026-10-13) govern the
 site and the checklist files it links. Website clause 3 permits viewing on screen and copies of
@@ -544,21 +545,20 @@ or republish any portion of the website" or its data, and any "automated analyti
 Data clause 11 forbids redistributing the Data, whole or in part, alone or combined with other
 data.
 
-**How it was consulted, which those terms do not allow.** An agent fetched the taxonomy page,
-downloaded the version 5 and version 7 archives with `curl`, and searched the spreadsheets with a
-program for *vegae*. That is automated access and automated analysis under clause 11. The copies
-were deleted the same evening, and nothing from them was committed except the restated fact and
-three short quotations in CR-040.
+**How it was consulted, and how that was resolved.** On 2026-10-13 an agent fetched the taxonomy
+page, downloaded the version 5 and version 7 archives with `curl`, and searched the spreadsheets
+with a program for *vegae* — automated access and automated analysis under clause 11. The copies
+were deleted the same evening. On 2026-10-14 the three short quotations in [CR-040](decisions.md#cr-040)
+were removed and CR-040 was re-based on the two CC BY 4.0 workbooks BirdView already vendors:
+AviList v2025b's `Decision_summary` for Proposal `2025-1136` (which records that *L. vegae* is
+sometimes treated as a subspecies of *L. smithsonianus* and that BirdLife's *L. argentatus* is the
+European Herring Gull alone) and AVONET's `AVONET_Raw_Data` sheet (which shows that all 6
+specimens of `AVONET1_BirdLife`'s *Larus argentatus* are `argentatus/argenteus` while 4 of the 8
+specimens of `AVONET1_BirdLife`'s *Larus smithsonianus* are from Russia and Japan).
 
 **What does not change.** AVONET's BirdLife sheet is AVONET's work, under CC BY 4.0, and is
-unaffected; it carries BirdLife's species *names*, not its checklist. A taxonomic placement is a
-fact, and the dataset holds no BirdLife data.
-
-**What needs deciding.** Either a person confirms the placement by reading the checklist on
-screen, which clause 3 permits, so that CR-040 rests on a permitted consultation; or BirdLife is
-asked in writing; or CR-040 is re-based on a secondary source that states the same placement.
-Until then, **no agent may fetch or process anything from BirdLife's DataZone**, as for Wiley
-([CR-002](decisions.md#cr-002)).
+unaffected; it carries BirdLife's species *names*, not its checklist. **No agent may fetch or
+process anything from BirdLife's DataZone**, as for Wiley ([CR-002](decisions.md#cr-002)).
 
 ---
 

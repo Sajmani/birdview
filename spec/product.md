@@ -99,11 +99,14 @@ number. A short table of named exceptions is a larger admission and a smaller li
 
 ### P-002 — Morphometric traits come from AVONET
 Subject: `dataset.traits.source`
-Value: `AVONET2_eBird`
+Value: `AVONET, preferring AVONET2_eBird`
 Goals: G-001, G-003
 
-Bill, wing, tail and mass measurements come from AVONET's `AVONET2_eBird` sheet, which uses
-eBird/Clements taxonomy. See [sources.md](sources.md#avonet).
+Bill, wing, tail and mass measurements come from [AVONET](sources.md#avonet) — its `AVONET2_eBird`
+sheet first, then `AVONET1_BirdLife` or `AVONET3_BirdTree` where the eBird sheet lacks a row for
+the species ([CR-006](decisions.md#cr-006)), or where another sheet holds a narrower concept of the
+species ([CR-041](decisions.md#cr-041)) or of its near-match donor ([CR-039](decisions.md#cr-039)).
+See [P-060](#p-060).
 
 ### P-003 — Traits carried per species
 Goals: G-003

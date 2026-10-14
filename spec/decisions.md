@@ -3179,25 +3179,39 @@ on the eBird row.
 
 ---
 
-## CR-040 — Vega Gull borrows from BirdLife's Arctic Herring Gull, and shared drawings say so
+## CR-040 — Vega Gull borrows from BirdLife's *Larus smithsonianus*, and shared drawings say so
 
 **Subject:** `dataset.join.near_match`, `presentation.shared_measurements`
 **Kind:** Resolves the open item of [CR-039](#cr-039), and adds [P-079](product.md#p-079)
-**Date:** 2026-10-13 · **Decided by:** Sameer
+**Date:** 2026-10-13 (evidence re-based 2026-10-14) · **Decided by:** Sameer
 
 ### What was found
 
-[CR-039](#cr-039) left open where BirdLife files Vega Gull. **HBW-BirdLife version 5.0
-(December 2020)**, the version AVONET's `Metadata` sheet names for its BirdLife taxonomy, lists
-*Larus smithsonianus*, "Arctic Herring Gull", with three subspecies: *smithsonianus*, *vegae* and
-*mongolicus*. *Larus vegae* appears only as a name it does not recognize as a species. Its
-taxonomic note under *Larus fuscus* says *vegae* is "currently treated as a subspecies of L.
-smithsonianus", and version 7.0 says the same. Read from BirdLife's archived checklist, linked from
-the [BirdLife DataZone taxonomy page](http://datazone.birdlife.org/species/taxonomy); nothing from
-it is committed.
+[CR-039](#cr-039) left open which of BirdLife's two herring gull rows — *Larus argentatus* or
+*Larus smithsonianus* — holds Vega Gull. Both vendored CC BY 4.0 workbooks answer it:
+
+1. **AviList v2025b extended** (`Proposal_number` `2025-1136`, `Decision_summary` on the four
+   herring gull rows) splits the complex into four species — polytypic *L. argentatus* (including
+   *argenteus*), monotypic *L. smithsonianus*, monotypic *L. vegae* and monotypic *L. mongolicus* —
+   and notes that *"Species L. vegae is sometimes considered a subspecies of L. smithsonianus"*. Its
+   `English_name_BirdLife_v10` column names `European Herring Gull` (`avibase-F002188E`) on *Larus
+   argentatus* alone, and gives *Larus vegae*'s range as breeding across Arctic Siberia and
+   wintering mostly in Japan, the Korean Peninsula and eastern China.
+2. **AVONET's `AVONET_Raw_Data` sheet** shows which specimens each BirdLife row actually averages.
+   All 6 specimens behind `AVONET1_BirdLife`'s *Larus argentatus* (`AVIBASE-F002188E`) are tagged
+   `eBird.species.group = Larus argentatus argentatus/argenteus`. The 8 specimens behind
+   `AVONET1_BirdLife`'s *Larus smithsonianus* are 4 from the United States and Canada
+   (`eBird.species.group = Larus argentatus smithsonianus`, `AVIBASE-60F32AF8`) and **4 from Russia
+   and Japan** (NHMUK `1965.M.3949`, `84.1.7.5`, `95.5.14.5`, `98.12.2.634`).
 
 So BirdLife's *Larus argentatus* is the European bird alone and is not a donor for Vega Gull.
-BirdLife's *Larus smithsonianus* is the narrowest AVONET row that contains it.
+BirdLife's *Larus smithsonianus* is the narrowest AVONET row that contains it — and averages four
+Russian and Japanese specimens alongside four North American ones.
+
+*(Re-based 2026-10-14 onto the vendored `avilist` and `avonet` workbooks. The 2026-10-13 text cited
+the archived HBW-BirdLife checklist on DataZone, which had been fetched in a way DataZone's terms
+forbid; those quotations are removed and [`birdlife-checklist`](sources.md#birdlife-checklist) is
+not used.)*
 
 ### The decision
 

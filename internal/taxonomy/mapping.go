@@ -57,8 +57,11 @@ var Renames = map[string][]string{
 // derived through this map is labeled near-match and names the parent.
 //
 // Larus vegae borrows from Larus smithsonianus, which no eBird row carries:
-// HBW-BirdLife v5, the taxonomy of AVONET1_BirdLife, files vegae as a
-// subspecies of it. American Herring Gull draws from the same row, so the two
+// AVONET1_BirdLife's Larus argentatus averages only European (argentatus/
+// argenteus) specimens, while its Larus smithsonianus averages four Russian
+// and Japanese specimens alongside four North American ones (and AviList
+// Proposal 2025-1136 notes that vegae is treated as a subspecies of
+// L. smithsonianus). American Herring Gull draws from the same row, so the two
 // are drawn alike and both pages say so (CR-040, P-079).
 var NearMatches = map[string]string{
 	"Larus vegae":         "Larus smithsonianus",

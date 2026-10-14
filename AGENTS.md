@@ -19,7 +19,7 @@ server that embeds and serves the web UI (T-001).
 ## Status
 
 **Gate 1 and Gate 2 both passed.** The requirements and the acceptance criteria are approved, and
-the code is live: `birdview-ingest` builds 841 species across 91 families, and `birdview` serves
+the code is live: `birdview-ingest` builds 1082 species across 99 families, and `birdview` serves
 them. A behavior change still goes spec first, then the criterion, then the code — see
 [spec/process.md](spec/process.md) and "Working on a change" below.
 

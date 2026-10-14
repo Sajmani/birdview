@@ -208,8 +208,7 @@ It is a size and proportion tool, not a field guide.
   appearance.
 - **No range map, season or behavior.** You can filter by region, but that is a list of where a
   bird is reported often enough to be worth looking for — not a range map, not a migration, and
-  not a date. Rarity codes are used once, at build time, to pick the species list, and then
-  discarded.
+  not a date.
 - **No perched or standing view.** The diagrams are flight silhouettes only. A perched view would
   need leg and posture data that does not exist at this coverage.
 - **No individual variation.** One figure per species, not a range.

@@ -278,21 +278,51 @@ Violating any of these is a licensing problem, not a style problem.
 
 ## Deployment
 
-**BirdView is not deployed publicly, and cannot be yet.**
+**BirdView is not yet deployed publicly.**
 
 **The licensing blocker is gone as of 2026-10-05.** Serving BirdView used to reproduce the ABA
 checklist to every visitor, and that checklist is all-rights-reserved with no license permitting
 it. Permission was requested on 2026-09-27 and never answered, so the project stopped waiting:
 names moved to AviList ([CR-022](../spec/decisions.md#cr-022)) and scope to BirdView's own
 derivation ([CR-028](../spec/decisions.md#cr-028)). Nothing all-rights-reserved is read at build
-time, so nothing of anyone else's is served.
+time, so nothing of anyone else's is served. When a regenerated scope drops a species under a
+reader's bookmark, `/species/<code>` answers 404 naming the bird and its measured reason
+([CR-029](../spec/decisions.md#cr-029)).
 
-What remains before a public deployment is ordinary engineering rather than permission: there is
-no deployment plumbing, no host, and no answer yet to what happens when the derived scope
-changes under a reader's bookmark. See [`todo.md`](../spec/todo.md).
+See [`spec/todo.md`](../spec/todo.md) for what remains before a public deployment.
 
-Nothing else blocks it. There is no deployment tooling yet — no container image, and the server
-binds `localhost` by default, so a real deployment needs `-addr` pointed at `0.0.0.0:$PORT`.
+### Container image
+
+A `Dockerfile` at the repository root builds the dataset and the server in separate stages and
+packages them into a minimal static image (`gcr.io/distroless/static-debian12:nonroot`):
+
+1. **Stage `ingest`** compiles and runs `birdview-ingest`, producing `/out/species.json`.
+2. **Stage `builder`** compiles the static `birdview` server binary.
+3. **Final image** copies only the binary and `/data/species.json`.
+
+```
+docker build -t birdview .
+docker run --rm -p 8080:8080 birdview
+```
+
+The server binds `0.0.0.0:8080` inside the container and reads `/data/species.json`. To override
+either, or to pass a feedback URL ([T-025](../spec/tech.md#t-025)):
+
+```
+docker run --rm -p 8080:8080 birdview \
+  -addr 0.0.0.0:8080 \
+  -data /data/species.json \
+  -feedback https://github.com/google/birdview/issues
+```
+
+### Running without Docker
+
+The server binds `localhost:8080` by default ([T-003](../spec/tech.md#t-003)). For a deployment
+without a container, point `-addr` at the interface and port the host expects:
+
+```
+./birdview -addr 0.0.0.0:$PORT
+```
 
 ---
 
