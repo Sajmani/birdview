@@ -137,10 +137,10 @@ Either would become a licensing breach the day BirdView took revenue.
 
 ### T-020 — The spec bundle is normative
 Subject: `process.spec_location`
-Value: `spec/`
+Value: `river/`
 Goals: G-004
 
-The repository follows the loop in [process.md](process.md). `AGENTS.md` names `spec/` as
+The repository follows the loop in [process.md](process.md). `AGENTS.md` names `river/` as
 normative so agents reading the instruction file are pointed at it.
 
 ### T-022 — The iNaturalist mapping is built by a separate, paced tool

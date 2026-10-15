@@ -15,7 +15,7 @@
 
 """AC-001 - every active requirement cites a declared goal, and every goal is cited.
 
-Verifies: the structural rules in spec/process.md.
+Verifies: the structural rules in river/process.md.
 
 NOTE: this checks STRUCTURE only. Whether a requirement genuinely serves the goal it
 names is not measurable and belongs to Gate 1 review. A green run here is not a

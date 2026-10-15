@@ -1890,12 +1890,12 @@ link that needs the network is a provenance link that breaks.
 **Both sets are served: the guides at `/docs` and the requirement documents at `/spec`.** The
 guides cite the spec constantly, and a citation to a 404 is worse than no citation.
 
-**Links are rewritten when the document is rendered, never in the file.** `../spec/product.md`
+**Links are rewritten when the document is rendered, never in the file.** `../river/product.md`
 is the correct link in a repository checkout and `/spec/product` is the correct one in a
 browser; editing the file would fix the second by breaking the first, and these documents are
 served precisely because they are the files the repository carries.
 
-**Neither `spec/sources/` nor `third_party/` is served.** Between them they hold the
+**Neither `river/sources/` nor `third_party/` is served.** Between them they hold the
 provenance of other people's terms — the ABA checklist's, Wiley's, iNaturalist's — and the
 vendored iNaturalist pages themselves, kept so a provenance record can be hashed and checked. They are quoted for a record, not ours to republish, and serving them would be the
 redistribution [T-004](tech.md#t-004) exists to prevent.

@@ -21,7 +21,7 @@
 // iNaturalist's — kept for hashing and provenance. They are quoted under
 // fair dealing for a record, not ours to republish, and serving them would
 // be exactly the redistribution T-004 exists to prevent.
-package spec
+package river
 
 import "embed"
 

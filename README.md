@@ -34,7 +34,7 @@ sources cannot justify.
 Most of what you see is **modeled**, and BirdView says so everywhere it can.
 
 No openly licensed dataset publishes body length for North American birds. The one source that
-does is under terms that forbid us using it ([CR-002](spec/decisions.md)), so **every length
+does is under terms that forbid us using it ([CR-002](river/decisions.md)), so **every length
 in BirdView is a model** — built from measured parts, with each part labeled. Of the three numbers
 on a tile, mass is measured for almost every species, wingspan is measured for about a third, and
 length is modeled for all 1082.
@@ -50,9 +50,9 @@ why clicking any bird shows you the source or the formula behind each individual
 Runs locally. **The licensing blocker is gone**: nothing all-rights-reserved is read at build
 time any more, so serving BirdView reproduces nobody else's work.
 
-Names, families and taxonomic sequence come from [AviList](spec/sources.md#avilist)
-([CR-022](spec/decisions.md#cr-022)), and **scope is now BirdView's own**
-([CR-028](spec/decisions.md#cr-028)). The ABA was asked for permission on 2026-09-27 and never
+Names, families and taxonomic sequence come from [AviList](river/sources.md#avilist)
+([CR-022](river/decisions.md#cr-022)), and **scope is now BirdView's own**
+([CR-028](river/decisions.md#cr-028)). The ABA was asked for permission on 2026-09-27 and never
 replied, so the project stopped waiting and derived a list it owns.
 
 What replaced the checklist is not a better threshold on how *often* a bird is recorded. A record
@@ -63,7 +63,7 @@ whether a species' records **recur** — repeated episodes across years, in at l
 which is insensitive to both. Akikiki has 376 records across 45 years and is a resident; the 2023
 American Flamingo in Pennsylvania has 931 inside 13 days and is not.
 
-What is left to do is listed in [spec/todo.md](spec/todo.md).
+What is left to do is listed in [river/todo.md](river/todo.md).
 
 ---
 
@@ -85,7 +85,7 @@ was never committed; it is no longer read at all.
 
 BirdView **links** to iNaturalist and copies nothing from it: no photograph is embedded, cached
 or hotlinked, so no contributor's license is engaged. See
-[CR-012](spec/decisions.md).
+[CR-012](river/decisions.md).
 
 BirdView's own code is in this repository, along with the tables it derives under `data/` —
 the occurrence status, the region presence, and the two name bridges. The built dataset
@@ -107,7 +107,7 @@ own license and a README naming its source:
   **CC BY 4.0**, and must be credited as each README describes.
 - The [iNaturalist terms](third_party/inat-terms) and [API practices](third_party/inat-api) are
   **© iNaturalist** and openly licensed by no one. They are kept so that every quotation of
-  them in [spec/](spec) can be checked against the exact text it came from.
+  them in [river/](river) can be checked against the exact text it came from.
 
 This is not an officially supported Google product.
 

@@ -41,7 +41,7 @@ alike. Both entries are kept so the evaluations are not repeated.
 | --- | --- |
 | **Origin** | https://doi.org/10.6084/m9.figshare.16586228 |
 | **Version** | v7 |
-| **Integrity** | [spec/sources/avonet/PROVENANCE.md](sources/avonet/PROVENANCE.md) |
+| **Integrity** | [river/sources/avonet/PROVENANCE.md](sources/avonet/PROVENANCE.md) |
 | **Tier** | mandatory (copyright license) |
 | **Import style** | By reference; vendored at `//third_party/avonet/AVONET Supplementary dataset 1.xlsx` under the location exception in [tech.md](tech.md#location-exception-the-third_party-directory) |
 | **Scope** | All morphometric traits (P-002, P-003) |
@@ -65,7 +65,7 @@ data for all birds. *Ecology Letters* 25: 581–597.
 | --- | --- |
 | **Origin** | https://www.aba.org/aba-checklist/ — CSV at `https://www.aba.org/wp-content/uploads/2026/03/ABA_Checklist-8.19.csv.zip` |
 | **Version** | 8.19, January 2026 |
-| **Integrity** | [spec/sources/aba/PROVENANCE.md](sources/aba/PROVENANCE.md) |
+| **Integrity** | [river/sources/aba/PROVENANCE.md](sources/aba/PROVENANCE.md) |
 | **Tier** | mandatory (copyright) |
 | **Import style** | **Retired 2026-10-05.** Not read at build, not vendored, not referenced by any code. |
 | **Scope** | *(formerly)* species list, common and scientific names, families, rarity filter |
@@ -93,7 +93,7 @@ cannot be committed, and a non-commercial, attributed, open-source request costs
 | --- | --- |
 | **Origin** | <https://www.inaturalist.org/pages/api+recommended+practices> |
 | **Version** | Page's own revision line: "Revised on February 27, 2025 06:23 PM by kueda" |
-| **Integrity** | [spec/sources/inat-api/PROVENANCE.md](sources/inat-api/PROVENANCE.md) |
+| **Integrity** | [river/sources/inat-api/PROVENANCE.md](sources/inat-api/PROVENANCE.md) |
 | **Tier** | governing (the operator can throttle or block a client that ignores it) |
 | **Import style** | By reference, vendored — **copied from the maintainer's `birdsync` repository and verified byte-for-byte against the SHA-256 recorded there** |
 | **Scope** | Every request `cmd/birdview-inatmap` makes to `api.inaturalist.org` |
@@ -119,7 +119,7 @@ HTTP 403 and a JavaScript challenge. The API itself serves an identified client 
 | --- | --- |
 | **Origin** | <https://www.inaturalist.org/pages/terms>, <https://www.inaturalist.org/pages/community+guidelines>, and the linked <https://www.inaturalist.org/pages/machine_generated_content> |
 | **Version** | Retrieved 2026-08-09 from a browser; hashes in [PROVENANCE.md](sources/inat-terms/PROVENANCE.md) |
-| **Integrity** | [spec/sources/inat-terms/PROVENANCE.md](sources/inat-terms/PROVENANCE.md) |
+| **Integrity** | [river/sources/inat-terms/PROVENANCE.md](sources/inat-terms/PROVENANCE.md) |
 | **Tier** | mandatory (copyright and platform terms) |
 | **Import style** | By reference, vendored — **copied from `birdsync` and hash-verified**, as above |
 | **Scope** | BirdView's use of the platform: unauthenticated reads, and outbound links to taxon pages |
@@ -149,7 +149,7 @@ image, which [T-002](tech.md) independently forbids anyway. See
 | --- | --- |
 | **Origin** | https://doi.org/10.2173/avilist.v2025b |
 | **Version** | v2025b, published 2026-06-11, **extended** release |
-| **Integrity** | [spec/sources/avilist/PROVENANCE.md](sources/avilist/PROVENANCE.md) |
+| **Integrity** | [river/sources/avilist/PROVENANCE.md](sources/avilist/PROVENANCE.md) |
 | **Tier** | mandatory (copyright license) |
 | **Import style** | By reference, vendored — CC BY 4.0 permits it, and that permission is the point |
 | **Scope** | Every English name, family and order name, and the eBird species code (P-004, P-049) |
@@ -365,7 +365,7 @@ iNaturalist is superseded — see that entry.
 | --- | --- |
 | **Origin** | https://doi.org/10.6084/m9.figshare.32089083 |
 | **Version** | v1, published 2026-04-24 |
-| **Integrity** | [spec/sources/fox-wingspan/PROVENANCE.md](sources/fox-wingspan/PROVENANCE.md) |
+| **Integrity** | [river/sources/fox-wingspan/PROVENANCE.md](sources/fox-wingspan/PROVENANCE.md) |
 | **Tier** | mandatory (copyright license) |
 | **Import style** | By reference, vendored — CC BY 4.0 permits it |
 | **Scope** | Empirical wingspan (P-060) |
@@ -457,7 +457,7 @@ Two further cautions, both from research rather than from the terms:
 | --- | --- |
 | **Origin** | https://onlinelibrary.wiley.com/terms-and-conditions#vor |
 | **Version** | Retrieved 2026-09-21; page footer 9/21/26 5:29 PM. Wiley reserves the right to change these terms at any time. |
-| **Integrity** | [spec/sources/wiley/PROVENANCE.md](sources/wiley/PROVENANCE.md) — records the hash of the maintainer's local printout, **not** a vendored file |
+| **Integrity** | [river/sources/wiley/PROVENANCE.md](sources/wiley/PROVENANCE.md) — records the hash of the maintainer's local printout, **not** a vendored file |
 | **Tier** | mandatory |
 | **Import style** | **Quoted only.** The document is deliberately not vendored — see below |
 | **Scope** | Any use of material from Wiley Online Library; in practice, Ricklefs 2017 |

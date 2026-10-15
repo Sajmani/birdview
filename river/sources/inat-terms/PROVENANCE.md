@@ -59,5 +59,5 @@ Verified on copy into BirdView: zero `<script>`, `<style>` or `<link>` elements 
 As-served hashes are carried over from `birdsync`'s record and have **not** been re-verified here,
 because the unstripped files were never in this repository. The as-stored hashes have been.
 
-The paths above are anchored at the repository root with `//` so `spec/check/pins.py` can
+The paths above are anchored at the repository root with `//` so `river/check/pins.py` can
 verify them (AC-003).

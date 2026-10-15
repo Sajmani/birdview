@@ -10,7 +10,7 @@ framework.
 ## Prerequisites
 
 - **Go.** No minimum version is maintained — whatever the dependencies require
-  ([T-007](../spec/tech.md)). Developed on 1.25.
+  ([T-007](../river/tech.md)). Developed on 1.25.
 - **Python 3**, for the three spec-level check scripts.
 
 That is all. The one dependency is `excelize`, for reading the source workbooks.
@@ -29,7 +29,7 @@ Everything the build needs is in the repository.
 
 Each directory carries the data's own license and a README naming its source and citation. They
 are **not** covered by BirdView's Apache 2.0 license. Provenance and hashes are recorded under
-[`spec/sources/`](../spec/sources).
+[`river/sources/`](../river/sources).
 
 ### Nothing to fetch
 
@@ -39,8 +39,8 @@ because serving BirdView reproduced that list to every visitor, it was also what
 deployment.
 
 It is gone. Names, families and sequence come from AviList
-([CR-022](../spec/decisions.md#cr-022)) and scope is now BirdView's own, derived from open
-occurrence records ([CR-028](../spec/decisions.md#cr-028)) and committed as `data/status.tsv`.
+([CR-022](../river/decisions.md#cr-022)) and scope is now BirdView's own, derived from open
+occurrence records ([CR-028](../river/decisions.md#cr-028)) and committed as `data/status.tsv`.
 Every input the build reads is either CC BY 4.0 or the project's own work.
 
 ---
@@ -88,7 +88,7 @@ Flags, should you need them:
 > re-running the ingest you must restart the server, or you will spend a while debugging stale
 > data that is already fixed on disk.
 
-The built dataset is a build artifact and is gitignored ([T-005](../spec/tech.md)) — not for
+The built dataset is a build artifact and is gitignored ([T-005](../river/tech.md)) — not for
 licensing reasons any more, but because it is reproducible from the committed inputs in one
 command and a stale copy in the tree is worse than none.
 
@@ -142,12 +142,12 @@ gofmt -l .        # must print nothing
 go test ./...
 ```
 
-Plus the spec-level checks, after any edit under `spec/`:
+Plus the spec-level checks, after any edit under `river/`:
 
 ```
-python3 spec/check/goals.py    # every requirement cites a goal; every goal is cited
-python3 spec/check/pins.py     # vendored sources match their recorded hashes
-python3 spec/check/refs.py     # every P-/T-/AC-/CR- cross-reference resolves
+python3 river/check/goals.py    # every requirement cites a goal; every goal is cited
+python3 river/check/pins.py     # vendored sources match their recorded hashes
+python3 river/check/refs.py     # every P-/T-/AC-/CR- cross-reference resolves
 ```
 
 These check **structure**, not substance. A green run means the bundle is internally consistent,
@@ -180,7 +180,7 @@ internal/palette/      family and order colors, with contrast guarantees
 data/                  the committed generated tables the ingest reads
 web/static/            templates and CSS, embedded into the binary
 docs/                  this documentation, also served at /docs
-spec/                  the requirements bundle — normative, also served at /spec
+river/                  the requirements bundle — normative, also served at /spec
 ```
 
 `internal/view` is deliberately free of HTML and HTTP so the layout rules can be property-tested
@@ -190,10 +190,10 @@ directly. If you find yourself wanting to format a string in there, you are in t
 
 ## The spec-driven workflow
 
-**The requirements are normative and live in [`spec/`](../spec).** Code implements them; it does
-not define them. Where this doc and `spec/` disagree, `spec/` wins.
+**The requirements are normative and live in [`river/`](../river).** Code implements them; it does
+not define them. Where this doc and `river/` disagree, `river/` wins.
 
-[`spec/process.md`](../spec/process.md) is the method itself, copied into the repo so the project
+[`river/process.md`](../river/process.md) is the method itself, copied into the repo so the project
 does not depend on an external document. It is long. You do not need to read all of it to make a
 change — but you do need the loop.
 
@@ -201,14 +201,14 @@ change — but you do need the loop.
 
 | File | Answers |
 | --- | --- |
-| [`goals.md`](../spec/goals.md) | why the project exists — four goals, G-001…G-004 |
-| [`product.md`](../spec/product.md) | what it must do — `P-###` |
-| [`tech.md`](../spec/tech.md) | technical constraints — `T-###` |
-| [`sources.md`](../spec/sources.md) | every body of rules or data the project is subject to |
-| [`decisions.md`](../spec/decisions.md) | conflict resolutions — `CR-###` |
-| [`todo.md`](../spec/todo.md) | everything still open — work, questions, unverified criteria, stale text |
-| [`acceptance.md`](../spec/acceptance.md) | how each requirement is checked — `AC-###` |
-| [`arch.md`](../spec/arch.md) | how the code is actually organized |
+| [`goals.md`](../river/goals.md) | why the project exists — four goals, G-001…G-004 |
+| [`product.md`](../river/product.md) | what it must do — `P-###` |
+| [`tech.md`](../river/tech.md) | technical constraints — `T-###` |
+| [`sources.md`](../river/sources.md) | every body of rules or data the project is subject to |
+| [`decisions.md`](../river/decisions.md) | conflict resolutions — `CR-###` |
+| [`todo.md`](../river/todo.md) | everything still open — work, questions, unverified criteria, stale text |
+| [`acceptance.md`](../river/acceptance.md) | how each requirement is checked — `AC-###` |
+| [`arch.md`](../river/arch.md) | how the code is actually organized |
 
 Cite IDs in code comments using the literal token, so one search covers the tree:
 
@@ -238,7 +238,7 @@ three phases — classify first:
 ### Three rules that carry most of the weight
 
 **Never resolve a conflict in code.** If two requirements disagree, or a change reverses something
-the spec wrote down, stop and record it in [`decisions.md`](../spec/decisions.md) as a `CR-###`.
+the spec wrote down, stop and record it in [`decisions.md`](../river/decisions.md) as a `CR-###`.
 Picking one silently is the failure this process exists to prevent. Every interesting decision in
 this project — rejecting Ricklefs, surfacing the neck model, fitting the wingspan regression,
 deleting the legs — is a CR, and each one is more useful than the diff it produced.
@@ -263,14 +263,14 @@ Violating any of these is a licensing problem, not a style problem.
   copy in the tree is worse than none.
 - **Never read or process Wiley Online Library material**, including Ricklefs (2017). Its terms
   prohibit AI tools ingesting it and prohibit automated access, and the source is formally rejected
-  ([CR-002](../spec/decisions.md)). Do not try to revive it as a length source.
+  ([CR-002](../river/decisions.md)). Do not try to revive it as a length source.
 - **Only AVONET, the Fox wingspan data and AviList may be committed as source data.** All three
-  are CC BY 4.0. Before adding a fourth, read [`sources.md`](../spec/sources.md) — most candidates
+  are CC BY 4.0. Before adding a fourth, read [`sources.md`](../river/sources.md) — most candidates
   this project evaluated could not be redistributed. The generated tables under `data/` are not
   source data: they are the project's own reductions, and they carry their provenance in their
   own headers.
-- **Never present a modeled value as a measurement** ([P-060](../spec/product.md), P-061). This is
-  the decision the whole measurement design rests on ([CR-001](../spec/decisions.md)).
+- **Never present a modeled value as a measurement** ([P-060](../river/product.md), P-061). This is
+  the decision the whole measurement design rests on ([CR-001](../river/decisions.md)).
 
 `AGENTS.md` carries the same rules in the form AI coding agents read.
 
@@ -283,13 +283,13 @@ Violating any of these is a licensing problem, not a style problem.
 **The licensing blocker is gone as of 2026-10-05.** Serving BirdView used to reproduce the ABA
 checklist to every visitor, and that checklist is all-rights-reserved with no license permitting
 it. Permission was requested on 2026-09-27 and never answered, so the project stopped waiting:
-names moved to AviList ([CR-022](../spec/decisions.md#cr-022)) and scope to BirdView's own
-derivation ([CR-028](../spec/decisions.md#cr-028)). Nothing all-rights-reserved is read at build
+names moved to AviList ([CR-022](../river/decisions.md#cr-022)) and scope to BirdView's own
+derivation ([CR-028](../river/decisions.md#cr-028)). Nothing all-rights-reserved is read at build
 time, so nothing of anyone else's is served. When a regenerated scope drops a species under a
 reader's bookmark, `/species/<code>` answers 404 naming the bird and its measured reason
-([CR-029](../spec/decisions.md#cr-029)).
+([CR-029](../river/decisions.md#cr-029)).
 
-See [`spec/todo.md`](../spec/todo.md) for what remains before a public deployment.
+See [`river/todo.md`](../river/todo.md) for what remains before a public deployment.
 
 ### Container image
 
@@ -306,7 +306,7 @@ docker run --rm -p 8080:8080 birdview
 ```
 
 The server binds `0.0.0.0:8080` inside the container and reads `/data/species.json`. To override
-either, or to pass a feedback URL ([T-025](../spec/tech.md#t-025)):
+either, or to pass a feedback URL ([T-025](../river/tech.md#t-025)):
 
 ```
 docker run --rm -p 8080:8080 birdview \
@@ -317,7 +317,7 @@ docker run --rm -p 8080:8080 birdview \
 
 ### Running without Docker
 
-The server binds `localhost:8080` by default ([T-003](../spec/tech.md#t-003)). For a deployment
+The server binds `localhost:8080` by default ([T-003](../river/tech.md#t-003)). For a deployment
 without a container, point `-addr` at the interface and port the host expects:
 
 ```

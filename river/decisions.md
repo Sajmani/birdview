@@ -3401,3 +3401,42 @@ site, *diagram* now means only the pipeline diagram.
 
 Moved to [todo.md](todo.md) on 2026-10-13, with the design notes that supported it, so that
 everything outstanding is in one file. Decisions stay here; open work does not.
+
+---
+
+## CR-045 — The bundle moves from spec/ to river/; the site keeps /spec
+
+**Subject:** `process.spec_location`
+**Kind:** Amends [T-020](tech.md#t-020)
+**Date:** 2026-10-15 · **Decided by:** Sameer
+
+### What changed
+
+[T-020](tech.md#t-020) named `spec/` as where the normative bundle lives. On adopting River, whose
+method gives the bundle the directory `river/`, it moves there. T-020's value is now `river/`.
+
+### What did not change
+
+**The site still serves the documents at `/spec`.** The directory names the method; the URL names
+the thing a reader is looking at, and a birder following a link from a species page wants the
+requirements, not the name of the process that produced them. The URL is also already linked
+from outside. `repoLinks` in `cmd/birdview` maps one to the other, so neither name bends.
+
+### What the move exposed
+
+`TestServedDocumentsHaveNoBrokenLinks` (AC-091) was written for exactly the bug a move like this
+causes — a repository link like `../river/product.md` left unrewritten, so a browser gets a 404 —
+and passed over 53 of them, because it followed only links that began with `/`. An unrewritten
+link is relative, so it was skipped rather than fetched. The test could never have caught its own
+founding bug.
+
+It now resolves every link against the page it sits on, as a browser does, and was watched
+failing twice before being trusted: once with the rewriter deliberately left unfixed, once with a
+stale entry planted in its known-breakage list.
+
+Making it honest surfaced **26 links that were broken before the move**, from served documents to
+repository files the server does not serve: source files, data tables, vendored inputs, and the
+provenance records under `river/sources/`. They are listed by name in the test rather than
+excused, so a new broken link still fails and a fixed one must leave the list. What they should
+become — links to the published repository, or plain code spans — is undecided and logged in
+[todo.md](todo.md).

@@ -67,7 +67,7 @@ import (
 	"birdview/internal/taxonomy"
 	"birdview/internal/trait"
 	"birdview/internal/view"
-	"birdview/spec"
+	"birdview/river"
 	"birdview/web"
 )
 
@@ -3499,7 +3499,7 @@ var served = map[string]struct {
 	kind string
 }{
 	"docs": {docs.Files, "documentation"},
-	"spec": {spec.Files, "requirement"},
+	"spec": {river.Files, "requirement"},
 }
 
 // document serves one embedded Markdown file, rendered.
@@ -3585,7 +3585,7 @@ func (s *server) documentIndex(w http.ResponseWriter, set string) {
 // markdownTitle is a document's first top-level heading, falling back to
 // its file name.
 //
-// **The first heading, not the first line.** spec/process.md opens with an
+// **The first heading, not the first line.** river/process.md opens with an
 // HTML comment recording where the file came from, and reading line one
 // listed it in the index as "<!--".
 func markdownTitle(src []byte, fallback string) string {
@@ -3613,7 +3613,7 @@ func (s *server) renderMarkdown(w http.ResponseWriter, set, title string, src []
 // repoLinks rewrites the repository-relative links these documents carry
 // into the paths BirdView serves them at.
 //
-// **Rewritten at render time, not in the files.** `../spec/product.md` is
+// **Rewritten at render time, not in the files.** `../river/product.md` is
 // the correct link in a repository checkout and `/spec/product` is the
 // correct one in a browser; editing the files would fix the second by
 // breaking the first, and these are served precisely because they are the
@@ -3621,12 +3621,20 @@ func (s *server) renderMarkdown(w http.ResponseWriter, set, title string, src []
 //
 // The `base` is the set the document being rendered belongs to, because a
 // bare sibling link means different things in each: `product.md` inside
-// spec/ is a requirement document, and the same link inside docs/ is a
+// river/ is a requirement document, and the same link inside docs/ is a
 // guide. Rewriting both to /docs/ was the first attempt and sent half the
 // spec to a 404.
+//
+// **The directory and the URL are named separately.** The requirements live
+// in river/, the directory River's method gives them, and are served at
+// /spec, which is what a reader of the site understands; servedAt maps one
+// to the other so that neither name has to bend to the other.
 type repoLinks struct{ base string }
 
-var repoLink = regexp.MustCompile(`^(?:\.\./)?(spec|docs)(?:/([a-z-]+?)(?:\.md)?)?(#.*)?$`)
+var repoLink = regexp.MustCompile(`^(?:\.\./)?(river|docs)(?:/([a-z-]+?)(?:\.md)?)?(#.*)?$`)
+
+// servedAt maps a repository directory to the URL its documents are served at.
+var servedAt = map[string]string{"river": "spec", "docs": "docs"}
 
 func (t repoLinks) Transform(doc *goldmarkast.Document, reader goldmarktext.Reader, _ goldmarkparser.Context) {
 	_ = goldmarkast.Walk(doc, func(n goldmarkast.Node, entering bool) (goldmarkast.WalkStatus, error) {
@@ -3643,7 +3651,7 @@ func (t repoLinks) Transform(doc *goldmarkast.Document, reader goldmarktext.Read
 			}
 			return goldmarkast.WalkContinue, nil
 		}
-		dest := "/" + m[1] + "/"
+		dest := "/" + servedAt[m[1]] + "/"
 		if m[2] != "" {
 			dest += m[2]
 		}
@@ -3662,7 +3670,7 @@ func (t repoLinks) Transform(doc *goldmarkast.Document, reader goldmarktext.Read
 // — Scope is ..." -- the id alone as its anchor.
 //
 // Every cross-reference in the spec is written `(product.md#p-001)`, and
-// spec/check/refs.py checks those resolve. It checks the MARKDOWN. Served,
+// river/check/refs.py checks those resolve. It checks the MARKDOWN. Served,
 // goldmark's auto id turned that heading into
 // `p-001--scope-is-the-aba-area-avifauna-that-recurs-by-birdviews-own-measure`,
 // so all 176 anchored cross-references in the rendered spec landed at the top

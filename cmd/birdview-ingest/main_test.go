@@ -286,7 +286,7 @@ func TestProvenanceMatchesTheSourcesUsed(t *testing.T) {
 	}
 	// There used to be an absolute count here -- 301 less one, measured
 	// against the Fox dataset for the ABA checklist's scope and recorded in
-	// spec/sources/fox-wingspan/PROVENANCE.md. CR-028 replaced that scope, so
+	// river/sources/fox-wingspan/PROVENANCE.md. CR-028 replaced that scope, so
 	// the number is a fact about a species list that no longer exists, and
 	// restating it as whatever this run produces would be reading the
 	// expectation off the code under test.

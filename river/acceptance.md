@@ -32,7 +32,7 @@ re-run whenever a requirement or a source pin changes.
 ### AC-001 — Every requirement cites a declared goal, and every goal is cited
 **Verifies:** the structural rules in [process.md](process.md) · **Level:** spec · **Method:**
 script over `goals.md`, `product.md`, `tech.md`
-**Run:** `python3 spec/check/goals.py`
+**Run:** `python3 river/check/goals.py`
 **Status: verified — run 2026-09-21, passing, and watched failing.** Three rules: every active
 requirement has a `Goals:` field, every cited goal is declared, every declared goal is cited. It
 found four uncited requirements on first run (T-003, T-006, T-011, T-020), which is what prompted
@@ -69,8 +69,8 @@ it fail by lowering a generated color's luminance.
 
 ### AC-003 — Every vendored source matches its recorded hash
 **Verifies:** T-021, G-004 · **Level:** spec · **Method:** hash each committed input and compare
-against `spec/sources/*/PROVENANCE.md`
-**Run:** `python3 spec/check/pins.py`
+against `river/sources/*/PROVENANCE.md`
+**Run:** `python3 river/check/pins.py`
 **Status: verified — run 2026-09-21, passing** for `avonet` and `fox-wingspan`, **and watched
 failing**: zeroing AVONET's recorded hash produced exit 1 and a recorded-vs-actual diff.
 **Scope exception:** `wiley` is quoted, not vendored, so it has no hash to check — see
@@ -79,7 +79,7 @@ failing**: zeroing AVONET's recorded hash produced exit 1 and a recorded-vs-actu
 ### AC-004 — Decision records reference requirements that exist
 **Verifies:** process integrity · **Level:** spec · **Method:** extract every `P-###` / `T-###`
 cited in `decisions.md` and confirm each resolves
-**Run:** `python3 spec/check/refs.py`
+**Run:** `python3 river/check/refs.py`
 **Status: verified — run 2026-09-21, passing, and watched failing** — appending a reference to a
 requirement id in the P-9xx range, which nothing defines, produced exit 1.
 
@@ -1567,15 +1567,19 @@ with a 200 and lands the reader nowhere near the explanation, which is how the r
 to cite a document that said nothing whatever about regions.
 
 **Assertions, between documents:** every internal link in every served document resolves. The
-guides cite the spec as `../spec/product.md`, which is right in a checkout and a 404 in a
+guides cite the spec as `../river/product.md`, which is right in a checkout and a 404 in a
 browser, and the per-species link check could not see it because these are links between
-documents rather than on a species page.
+documents rather than on a species page. **Relative links are resolved as a browser resolves
+them**, against the page they sit on; until 2026-10-15 the check followed only absolute links,
+so it could not see an unrewritten link at all. Links to repository files the server does not
+serve are listed by name as known breakage, and the list may only shrink.
 
 **Assertions, titles:** a document is titled and indexed by its **first top-level heading**,
-not by its first line. `spec/process.md` opens with an HTML comment recording where the file
-came from, and reading line one listed it in the index as `<!--`.
+not by its first line. `river/process.md` opens with a banner recording where the file came
+from, above its heading; under specman it was an HTML comment, and reading line one listed it
+in the index as `<!--`.
 
-**Assertions, what is not served:** the embed carries documents only. `spec/sources/` and
+**Assertions, what is not served:** the embed carries documents only. `river/sources/` and
 `third_party/` hold other people's terms and must not be reachable, so the check walks what is embedded rather
 than probing one path — a probe catches the file it names, and the risk is the whole directory
 arriving at once ([T-004](tech.md#t-004)).
@@ -1818,7 +1822,7 @@ link-walking check drops the fragment first — *"fragments are within the page"
 `/docs/data` and never `#commonest`. Writing the row before the section left the suite green.
 
 Walking it found **176 broken cross-references in the served spec**: every `(product.md#p-001)`
-in the bundle, which `spec/check/refs.py` validates in the *markdown*, rendered as
+in the bundle, which `river/check/refs.py` validates in the *markdown*, rendered as
 `#p-001--scope-is-the-aba-area-avifauna-that-recurs-by-birdviews-own-measure` and landed every
 reader at the top of the document. Headings opening with a requirement id now anchor on the id.
 

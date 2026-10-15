@@ -40,7 +40,7 @@ import (
 	"birdview/internal/taxonomy"
 	"birdview/internal/trait"
 	"birdview/internal/view"
-	"birdview/spec"
+	"birdview/river"
 	"birdview/web"
 )
 
@@ -1335,7 +1335,7 @@ func s2(t *testing.T) *server { t.Helper(); return newTestServer(t) }
 // own readers.
 //
 // Delete this test only when a written grant exists and is recorded in
-// spec/sources.md.
+// river/sources.md.
 //
 // Verifies: G-004. Criterion: AC-064.
 func TestNoUnearnedPermissionClaim(t *testing.T) {
@@ -3779,14 +3779,60 @@ func stripTags(s string) string {
 // and fetches every internal link in it.
 //
 // The bug it was written for: the guides link to the spec as
-// `../spec/product.md`, correct in a repository checkout and a 404 in a
+// `../river/product.md`, correct in a repository checkout and a 404 in a
 // browser. Nothing noticed, because AC-091 only checks the `/docs/` links
 // on a species page, and these are links between documents.
 //
+// **Relative links are resolved the way a browser resolves them**, against
+// the page they sit on. The first version followed only links beginning
+// with "/", so an unrewritten repository link -- the founding bug -- was
+// skipped rather than fetched, and the test passed over 53 of them when the
+// bundle moved from spec/ to river/.
+//
 // Verifies: P-069. Criterion: AC-091.
+// knownBrokenRepoLinks are links from served documents to repository files
+// the server does not serve -- source code, data files, vendored inputs --
+// which 404 on the site. They were always broken; the crawler hid them by
+// following only absolute links. What they should become is undecided (see
+// river/todo.md), so they are listed rather than excused: a new broken link
+// still fails, and a listed one that stops being broken fails too, so the
+// list can only shrink.
+var knownBrokenRepoLinks = map[string]bool{
+	"/spec/product -> /internal/region/region.go":      true,
+	"/spec/product -> /cmd/birdview-status":            true,
+	"/spec/product -> /data/status.tsv":                true,
+	"/spec/acceptance -> /data/source-names.tsv":       true,
+	"/spec/todo -> /data/source-names.tsv":             true,
+	"/spec/todo -> /data/status.tsv":                   true,
+	"/spec/decisions -> /internal/region/region.go":    true,
+	"/spec/decisions -> /internal/taxonomy/mapping.go": true,
+	"/spec/decisions -> /cmd/birdview-regions":         true,
+	"/spec/decisions -> /cmd/birdview-status/main.go":  true,
+	"/spec/decisions -> /cmd/birdview-regions/main.go": true,
+	"/spec/tech -> /data/gbif-taxa.tsv":                true,
+	"/docs/building -> /third_party/avilist":           true,
+	"/docs/building -> /third_party/avonet":            true,
+	"/docs/building -> /third_party/fox-wingspan":      true,
+
+	// Provenance records under river/sources/, which the server refuses
+	// along with the vendored terms beside them (TestVendoredTermsAreNotServed).
+	"/spec/decisions -> /spec/sources/wiley/requirements.md":    true,
+	"/spec/decisions -> /spec/sources/aba/PROVENANCE.md":        true,
+	"/spec/sources -> /spec/sources/avonet/PROVENANCE.md":       true,
+	"/spec/sources -> /spec/sources/aba/PROVENANCE.md":          true,
+	"/spec/sources -> /spec/sources/inat-api/PROVENANCE.md":     true,
+	"/spec/sources -> /spec/sources/inat-api/requirements.md":   true,
+	"/spec/sources -> /spec/sources/inat-terms/PROVENANCE.md":   true,
+	"/spec/sources -> /spec/sources/inat-terms/requirements.md": true,
+	"/spec/sources -> /spec/sources/avilist/PROVENANCE.md":      true,
+	"/spec/sources -> /spec/sources/fox-wingspan/PROVENANCE.md": true,
+	"/spec/sources -> /spec/sources/wiley/PROVENANCE.md":        true,
+}
+
 func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
 	s := newTestServer(t)
 	seen := map[string]bool{}
+	stillBroken := map[string]bool{}
 	var visit func(path string)
 	visit = func(path string) {
 		if seen[path] {
@@ -3798,21 +3844,33 @@ func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
 			t.Errorf("%s answers %d", path, code)
 			return
 		}
-		for _, m := range regexp.MustCompile(`href="(/[^"]*)"`).FindAllStringSubmatch(body, -1) {
-			href := m[1]
-			if i := strings.IndexByte(href, '#'); i >= 0 {
-				href = href[:i] // fragments are within the page
+		base, err := url.Parse(path)
+		if err != nil {
+			t.Fatalf("visiting unparsable path %q: %v", path, err)
+		}
+		for _, m := range regexp.MustCompile(`href="([^"]*)"`).FindAllStringSubmatch(body, -1) {
+			ref, err := url.Parse(html.UnescapeString(m[1]))
+			if err != nil || ref.Scheme != "" || ref.Host != "" {
+				continue // external, or not a link this server answers
+			}
+			href := base.ResolveReference(ref).Path
+			if href == path && ref.Path == "" {
+				continue // a fragment within the page
 			}
 			if href == "" || strings.HasPrefix(href, "/static/") {
 				continue
 			}
-			// Follow document links; merely check anything else resolves.
-			if strings.HasPrefix(href, "/docs") || strings.HasPrefix(href, "/spec") {
-				visit(href)
+			// Every link must resolve; document links are then followed.
+			if c, _ := get(t, s, href); c != http.StatusOK {
+				if key := path + " -> " + href; knownBrokenRepoLinks[key] {
+					stillBroken[key] = true
+				} else {
+					t.Errorf("%s links to %s, which answers %d", path, href, c)
+				}
 				continue
 			}
-			if c, _ := get(t, s, href); c != http.StatusOK {
-				t.Errorf("%s links to %s, which answers %d", path, href, c)
+			if strings.HasPrefix(href, "/docs") || strings.HasPrefix(href, "/spec") {
+				visit(href)
 			}
 		}
 	}
@@ -3821,11 +3879,17 @@ func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
 	if len(seen) < 10 {
 		t.Errorf("only walked %d documents; the indexes are not listing the set", len(seen))
 	}
+	for key := range knownBrokenRepoLinks {
+		if !stillBroken[key] {
+			t.Errorf("%s is listed as a known broken link but is no longer broken; "+
+				"remove it from knownBrokenRepoLinks", key)
+		}
+	}
 }
 
 // TestVendoredTermsAreNotServed is a licensing check, not a routing one.
 //
-// spec/sources/ and third_party/ hold other people's terms — the ABA
+// river/sources/ and third_party/ hold other people's terms — the ABA
 // checklist's, Wiley's, iNaturalist's — kept for hashing and provenance.
 // The iNaturalist pages moved to third_party/ for the Apache 2.0 release,
 // so both trees are probed: a check that only knew the old home would go on
@@ -3849,7 +3913,7 @@ func TestVendoredTermsAreNotServed(t *testing.T) {
 	// And the embed itself does not carry them. Checked by walking what is
 	// embedded rather than probing one path: a probe only catches the file
 	// it names, and the risk is the whole directory arriving at once.
-	entries, err := spec.Files.ReadDir(".")
+	entries, err := river.Files.ReadDir(".")
 	if err != nil {
 		t.Fatalf("reading the spec embed: %v", err)
 	}
@@ -3867,7 +3931,7 @@ func TestVendoredTermsAreNotServed(t *testing.T) {
 // TestDocumentTitlesAreHeadings pins the title rule: a document is listed
 // and titled by its first top-level heading, not by its first line.
 //
-// spec/process.md opens with an HTML comment recording where the file came
+// river/process.md opens with an HTML comment recording where the file came
 // from, and reading line one listed it in the index as "<!--".
 //
 // Verifies: P-069. Criterion: AC-091.
@@ -3887,7 +3951,7 @@ func TestDocumentTitlesAreHeadings(t *testing.T) {
 	// The document whose heading is not on its first line.
 	body := mustGet(t, s, "/spec/process")
 	if !strings.Contains(body, "<title>River") {
-		t.Error("spec/process is not titled by its heading")
+		t.Error("river/process is not titled by its heading")
 	}
 	if !strings.Contains(mustGet(t, s, "/spec"), ">River</a>") {
 		t.Error("the spec index does not list process.md by its heading")
