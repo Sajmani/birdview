@@ -219,6 +219,10 @@ For identification, use a field guide. For "wait, is a Merlin really that small?
 
 ## Where the numbers come from
 
+Escaped cage, aviary and farm birds — parrots, waxbills, a farmed Emu — are not drawn on the
+index, though their records pass BirdView's scope rule. [Every one is listed](/excluded) with
+the reason, and each keeps its own page.
+
 Every bird's detail page names the source or formula behind each number it shows. Beyond that,
 [docs/data.md](data.md) describes each input and how far to trust it,
 [how BirdView's data is built](pipeline.md) draws every source and step as one diagram, and BirdView serves

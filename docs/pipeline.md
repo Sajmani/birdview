@@ -145,7 +145,8 @@ flowchart TB
     *P-071 exceptions*
     ─────────────
     scientific name · *added to scope*
-    reason · *printed in the build report*`"]
+    reason · *printed in the build report*
+    status.Exotic ★ *escapes off the index, with a reason each*`"]
     TRAIT["`internal/trait
     ─────────────
     Supplementary ★ *habitats and diets BirdView adds*
@@ -212,7 +213,7 @@ flowchart TB
     S1(["Step 1: scope
     keep established or rare;
     add Declared and both halves
-    of a shared name"])
+    of a shared name; flag Exotic"])
     S2(["Step 2: names and families
     join AviList on scientific name;
     drop NotInAviList;
@@ -277,12 +278,14 @@ flowchart TB
   regionTotals · *the denominator*
   regionMonthlyTotals · *the denominator, by month*
   sourceVersions · *what the build was made from*
+  exotic ★ *why it is off the index; /excluded*
   undrawn ★ *status, region, episodes, years, records, last seen*`"]
   SERVER(["birdview server
   1 in N and the month filter,
   computed per request;
   species sharing a measured row,
-  found from the provenance"])
+  found from the provenance;
+  exotics left off the index"])
   PAGES["pages
   the index
   a species
@@ -358,6 +361,11 @@ recorded there. eBird's records count everywhere; iNaturalist's fill in only whe
 records confirm the gap ([CR-037](../spec/decisions.md#cr-037)). Records in a region where a species
 stays under the bar are kept too, marked `~`: the ingest counts them in the *1 in N* and leaves
 the species off that region's list ([CR-042](../spec/decisions.md#cr-042)).
+
+**Escapes are flagged, not dropped.** `status.Exotic` is a declared list of birds whose records
+here are escapes or birds kept by people. The ingest marks each with its reason; the server
+leaves them off the index and its controls, lists them at `/excluded`, and keeps their pages
+([P-080](../spec/product.md#p-080)).
 
 **Names are normalized before anything is matched.** Both commands pass every published name
 through one function, `taxonomy.Occurrence`: subspecies reduced to their species, hybrids left

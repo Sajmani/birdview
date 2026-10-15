@@ -66,6 +66,7 @@ Each species carries the status [P-001](#p-001) derives, and it is shown and fil
 alongside Habitat and Diet ([CR-027](decisions.md#cr-027)) rather than consumed silently at
 ingest. The flags `withheld` — eBird suppresses the species, so the evidence is iNaturalist's —
 and `exotic` are orthogonal to the status, because a bird can be withheld *and* established.
+`exotic` is a declared list, not a measurement, and what it does is [P-080](#p-080).
 
 Rationale: the ABA codes were read at ingest and discarded, which was right while they were
 someone else's data under a license that forbade republishing them. BirdView's own status is
@@ -90,7 +91,9 @@ which every entry names its reason. Two classes qualify, and no others:
   and iNaturalist obscures dates for others, so Akohekohe has 7 records and no parseable date.
 - **Presence is maintained by people.** Indian Peafowl in New York recurs on every measure — 47
   episodes across 33 years — because ornamental birds are continuously replenished. Recurrence
-  is robust to observer bias and blind to origin.
+  is robust to observer bias and blind to origin. Escaped cage, aviary and farm birds with no
+  self-sustaining population anywhere BirdView covers are declared `exotic` and left off the
+  index ([P-080](#p-080)); their status is still the derived one.
 
 Rationale: an exception that is declared and visible can be argued with. The failure this
 guards against is the one [CR-028](decisions.md#cr-028) rejected for the model as a whole —
@@ -1944,4 +1947,29 @@ anyone remembering to add it.
 Rationale: [G-006](goals.md#g-006) — a borrowed value is already labeled, but the reason two
 drawings coincide was visible only to someone who opened both detail pages and compared the
 provenance rows. [CR-040](decisions.md#cr-040).
+
+### P-080 — Escaped and kept birds are left off the index, and listed
+Subject: `presentation.index.exotic`
+Value: `declared list; off the index, listed at /excluded, detail pages kept`
+Goals: G-002, G-006
+
+**A bird whose records here are escapes is not drawn on the index.** Recurrence cannot tell a
+wild population from a supply of escapes ([P-071](#p-071)), so parrots, waxbills, ornamental
+waterfowl, zoo birds and a farmed Emu were drawn among the birds a reader can expect to meet,
+and they crowd out the ones that answer the question BirdView is for.
+
+**Which birds are left off is a declared list, with a reason for each** — the kind of bird, where
+it comes from, and how its records here arise. The rule: no self-sustaining population in any
+region BirdView covers, so that its records are escapes, releases or birds kept by people. A
+long-feral population, such as Indian Peafowl in Florida or Red Junglefowl on Kauai, does not
+qualify; nor does a wild vagrant, however rare.
+
+**Left off, not deleted.** Every listed bird keeps its detail page, which says it is not on the
+index and why. `/excluded` lists them all, each linked to that page, with its reason and its
+records; the index links to the list. A bird listed here appears in no family, habitat, diet or
+region control, and is not counted by them.
+
+Rationale: [G-006](goals.md#g-006) — removing a bird a reader may have seen, with no trace, is
+the failure the goals forbid; a list that says why is the honest version of the same edit.
+[CR-043](decisions.md#cr-043).
 

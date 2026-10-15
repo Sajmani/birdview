@@ -209,6 +209,12 @@ excludes Johnston, Palmyra, Wake and Navassa, which BirdView covers. A species i
 in repeated episodes across years. Nine more are kept by hand because the open record cannot
 speak for them, each named with its reason.
 
+**41 of them are not on the index.** Recurrence cannot tell a wild population from a steady
+supply of escapes, so parrots, waxbills, ornamental waterfowl, zoo birds and a farmed Emu pass
+the rule too. They are on a declared list, each with its reason, and are left off the index and
+its controls; [the list](/excluded) names them all and links to their pages, which stay up
+([P-080](../spec/product.md#p-080)). Long-feral populations and wild vagrants are not on it.
+
 One in-scope species the occurrence data names is dropped: Gray-headed Swamphen (*Porphyrio
 poliocephalus*), which eBird splits and AviList lumps into Purple Swamphen. (A second, Western
 Warbling-Vireo, is also in the drop table, and left scope when [CR-038](../spec/decisions.md#cr-038)

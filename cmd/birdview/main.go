@@ -128,8 +128,12 @@ func load(path string) (*dataset.Dataset, error) {
 }
 
 type server struct {
-	mux  *http.ServeMux
+	mux *http.ServeMux
+	// ds is what the index draws: every species except the exotics
+	// (P-080). all is the whole dataset, for the detail pages and the lists
+	// that must name every bird.
 	ds   *dataset.Dataset
+	all  *dataset.Dataset
 	tmpl *template.Template
 	byID map[string]*dataset.Species
 	// idOf maps an AviList scientific name to the served id, so a page can
@@ -559,6 +563,18 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		counts[sp.Family]++
 	}
 	s.sameAs = sharedRows(ds)
+	// The index view: the same dataset without the exotics, which keep
+	// their pages through byID (P-080). A shallow copy, so the totals and
+	// the undrawn records are shared rather than duplicated.
+	s.all = ds
+	shown := *ds
+	shown.Species = nil
+	for i := range ds.Species {
+		if ds.Species[i].Exotic == "" {
+			shown.Species = append(shown.Species, ds.Species[i])
+		}
+	}
+	s.ds = &shown
 	for i := range ds.Undrawn {
 		u := &ds.Undrawn[i]
 		// The ingest refuses to emit a collision, so one here means the
@@ -572,7 +588,16 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	}
 	// ds.Families is already in AviList's taxonomic sequence; preserve it
 	// rather than alphabetizing, which is the order every field guide uses.
+	onIndex := map[string]bool{}
+	for i := range s.ds.Species {
+		onIndex[s.ds.Species[i].Family] = true
+	}
 	for _, f := range ds.Families {
+		// A family every one of whose birds is off the index is not
+		// offered: a control that selects nothing is noise (P-080).
+		if !onIndex[f.Name] {
+			continue
+		}
 		s.fams = append(s.fams, familyOption{
 			Name: f.Name, Common: f.Common, Color: f.Color, TextColor: f.TextColor,
 			Order: f.Order, OrderCommon: f.OrderCommon,
@@ -585,6 +610,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	}
 	s.mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(assets))))
 	s.mux.HandleFunc("/added", s.added)
+	s.mux.HandleFunc("/excluded", s.excluded)
 	for _, set := range []string{"/docs", "/spec"} {
 		// Both the exact path and the subtree, so the bare name serves the
 		// index instead of a 301 to it.
@@ -3696,8 +3722,8 @@ func newMarkdown(base string) goldmark.Markdown {
 func (s *server) added(w http.ResponseWriter, r *http.Request) {
 	type row struct{ kind, species, value, origin, why string }
 	var rows []row
-	for i := range s.ds.Species {
-		sp := &s.ds.Species[i]
+	for i := range s.all.Species {
+		sp := &s.all.Species[i]
 		for _, a := range sp.Habitats {
 			if a.Origin != dataset.Published {
 				rows = append(rows, row{"Habitat", sp.Name(dataset.LocaleNA),
@@ -3737,4 +3763,42 @@ func (s *server) added(w http.ResponseWriter, r *http.Request) {
 			r.kind, r.species, r.value, r.origin, r.why)
 	}
 	s.renderMarkdown(w, "docs", "What BirdView adds to its sources", b.Bytes())
+}
+
+// excluded lists every bird left off the index, with its reason and its
+// records, each linked to its detail page (P-080). A bird a reader has seen
+// should not vanish without a word; this is the word.
+func (s *server) excluded(w http.ResponseWriter, r *http.Request) {
+	var rows []*dataset.Species
+	for i := range s.all.Species {
+		if sp := &s.all.Species[i]; sp.Exotic != "" {
+			rows = append(rows, sp)
+		}
+	}
+	sort.Slice(rows, func(i, j int) bool {
+		return rows[i].Name(dataset.LocaleNA) < rows[j].Name(dataset.LocaleNA)
+	})
+	var b bytes.Buffer
+	b.WriteString("# Birds left off the index\n\n")
+	fmt.Fprintf(&b, "These %d birds recur in the records BirdView reads, so they pass its scope "+
+		"rule, but their records here are escapes, releases or birds kept by people: none has a "+
+		"population of its own anywhere BirdView covers. They are left off the index so they do "+
+		"not crowd out the birds a reader can expect to meet, and listed here so that leaving "+
+		"them off is not a silent edit. Each keeps its own page.\n\n", len(rows))
+	b.WriteString("The list is BirdView's own judgement, not a measurement: the records cannot say " +
+		"where a bird came from. Long-feral populations, such as Indian Peafowl in Florida, are " +
+		"not on it, and neither is any wild vagrant. See [the specification](/spec/product#p-080).\n\n")
+	b.WriteString("| Bird | Scientific name | Records | Why it is left off |\n|---|---|---:|---|\n")
+	for _, sp := range rows {
+		var n int64
+		for _, c := range sp.RegionCounts {
+			n += c
+		}
+		for _, c := range sp.BelowCounts {
+			n += c
+		}
+		fmt.Fprintf(&b, "| [%s](/species/%s) | *%s* | %s | %s |\n",
+			sp.Name(dataset.LocaleNA), sp.ID, sp.ScientificName, comma(n), sp.Exotic)
+	}
+	s.renderMarkdown(w, "docs", "Birds left off the index", b.Bytes())
 }

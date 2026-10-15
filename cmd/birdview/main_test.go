@@ -5311,6 +5311,9 @@ func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 	want := map[string]int{}
 	for i := range ds.Species {
 		sp := &ds.Species[i]
+		if sp.Exotic != "" {
+			continue // off the index (P-080), so in no tier
+		}
 		num, den := shareIn(sp, ds, options{})
 		if num == 0 || den == 0 {
 			continue
@@ -5705,6 +5708,7 @@ func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
 		return strings.Join(strings.Fields(stripTags(h)), " ")
 	}
 	tile := regexp.MustCompile(`(?s)id="s-([a-z0-9]+)".*?<div class="share">(.*?)</div>`)
+	span := regexp.MustCompile(`(?s)<span[^>]*>(.*?)</span>`)
 
 	seen := map[string]string{}
 	// min is per scope: unfiltered is the whole dataset, Alaska a large
@@ -5730,21 +5734,34 @@ func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
 			if i%40 != 0 {
 				continue
 			}
-			id, figure := m[1], norm(m[2])
-			if figure == "" {
+			id := m[1]
+			// Each span in the cell is its own statement -- the figure, then
+			// any caveats -- and the detail page may set them apart, so
+			// each is looked for on its own rather than as one run of text.
+			var statements []string
+			for _, sm := range span.FindAllStringSubmatch(m[2], -1) {
+				if st := norm(sm[1]); st != "" {
+					statements = append(statements, st)
+				}
+			}
+			if len(statements) == 0 {
 				t.Errorf("%s: tile carries no figure at all", id)
 				continue
 			}
 			_, page := get(t, s, "/species/"+id+scope.query)
 			body := norm(page)
-			if !strings.Contains(body, figure) {
-				t.Errorf("%s%s: the tile says %q and the detail page does not. "+
-					"P-034 makes the detail view a superset of the tile: a reader "+
-					"who opens a bird to learn more must not find less",
-					id, scope.query, figure)
+			for _, figure := range statements {
+				if !strings.Contains(body, figure) {
+					t.Errorf("%s%s: the tile says %q and the detail page does not. "+
+						"P-034 makes the detail view a superset of the tile: a reader "+
+						"who opens a bird to learn more must not find less",
+						id, scope.query, figure)
+				}
 			}
 			// And it is reported under the scope the reader selected, not
-			// quietly swapped for a different one.
+			// quietly swapped for a different one. The figure is the first
+			// statement; the caveats after it name no scope.
+			figure := statements[0]
 			if !strings.Contains(figure, scope.want) {
 				t.Errorf("%s: tile figure %q does not name the scope %q",
 					id, figure, scope.want)
@@ -6652,5 +6669,87 @@ func TestRecordsBelowTheBarCount(t *testing.T) {
 	}
 	if num, _ := shareIn(emu, ds, options{}); num == 0 {
 		t.Error("Emu's figure is zero; its Texas records are below the bar and must still count")
+	}
+}
+
+// TestExoticsAreOffTheIndexAndListed asserts AC-120's second to fourth
+// assertions over the real dataset: no flagged bird reaches the index or its
+// family control, /excluded lists every one with its reason and a link, and
+// each keeps a detail page that says why it is not on the index.
+//
+// Verifies: P-080, CR-043. Criterion: AC-120.
+func TestExoticsAreOffTheIndexAndListed(t *testing.T) {
+	ds := realDataset(t)
+	srv, err := newServer(ds)
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
+	}
+	var exotic []*dataset.Species
+	famAll, famExotic := map[string]int{}, map[string]int{}
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		famAll[sp.Family]++
+		if sp.Exotic != "" {
+			exotic = append(exotic, sp)
+			famExotic[sp.Family]++
+		}
+	}
+	if len(exotic) < 30 {
+		t.Fatalf("only %d flagged species in the dataset; the check has too little to assert", len(exotic))
+	}
+
+	_, idx := get(t, srv, "/")
+	if !strings.Contains(idx, `href="/excluded"`) {
+		t.Error("the index does not link to /excluded")
+	}
+	tiles := 0
+	for _, sp := range exotic {
+		if strings.Contains(idx, `id="`+tileAnchor(sp.ID)+`"`) {
+			tiles++
+			t.Errorf("%s is flagged exotic but has a tile on the index", sp.ScientificName)
+		}
+	}
+	// The count the page reports leaves them out too.
+	shown := len(ds.Species) - len(exotic)
+	if want := fmt.Sprintf("%d of %d species", shown, shown); !strings.Contains(stripTags(idx), want) {
+		t.Errorf("the index does not report %q; flagged birds are still being counted", want)
+	}
+	gone := 0
+	for fam, n := range famExotic {
+		if n == famAll[fam] {
+			gone++
+			if strings.Contains(idx, "family="+fam) {
+				t.Errorf("family %s holds only flagged birds but is still offered", fam)
+			}
+		}
+	}
+	if gone == 0 {
+		t.Error("no family is made only of flagged birds; the family check asserted nothing")
+	}
+
+	code, list := get(t, srv, "/excluded")
+	if code != http.StatusOK {
+		t.Fatalf("/excluded answers %d", code)
+	}
+	for _, sp := range exotic {
+		if !strings.Contains(list, `href="/species/`+sp.ID+`"`) {
+			t.Errorf("/excluded does not link %s", sp.ScientificName)
+		}
+		if !strings.Contains(list, html.EscapeString(sp.Exotic)) {
+			t.Errorf("/excluded does not give %s's reason", sp.ScientificName)
+		}
+		code, page := get(t, srv, "/species/"+sp.ID)
+		if code != http.StatusOK {
+			t.Errorf("/species/%s answers %d; a bird off the index keeps its page", sp.ID, code)
+			continue
+		}
+		if !strings.Contains(page, "Not on the index") || !strings.Contains(page, html.EscapeString(sp.Exotic)) ||
+			!strings.Contains(page, `href="/excluded"`) {
+			t.Errorf("/species/%s does not say it is off the index, why, and where the list is", sp.ID)
+		}
+	}
+	// An ordinary bird says none of it.
+	if _, plain := get(t, srv, "/species/amerob"); strings.Contains(plain, "Not on the index") {
+		t.Error("American Robin's page says it is not on the index")
 	}
 }

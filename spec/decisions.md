@@ -3324,6 +3324,49 @@ nothing about where the bar sits, so it is done on its own.
 - [P-074](product.md#p-074) — Active and unchanged; its figure now has all the records it names.
 - [AC-119](acceptance.md#ac-119) — new.
 
+---
+
+## CR-043 — Escaped and kept birds come off the index
+
+**Subject:** `presentation.index.exotic`, `dataset.status.exceptions`
+**Kind:** Resolves the open question on [P-071](product.md#p-071)'s second class, and implements
+[P-070](product.md#p-070)'s `exotic` flag
+**Date:** 2026-10-14 · **Decided by:** Sameer
+
+### What was wrong
+
+Recurrence is blind to origin, as [CR-028](#cr-028) said, and P-071 required a declared list for
+birds kept going by people. None was built, so escapes were drawn as ordinary birds. Once
+[CR-042](#cr-042) counted every record, they showed up as figures too. The owner found them
+distracting.
+
+### Options
+
+| Option | Effect | |
+| --- | --- | --- |
+| Escaped cage, aviary and farm birds | About 40 species, all from one recognizable class | **chosen** |
+| Every introduced species | House Sparrow, European Starling, Rock Pigeon and much of Hawaii's avifauna; no open source records origin, so every entry would be a judgement | rejected — removes many of the commonest birds a reader meets |
+
+### The decision
+
+- **`status.Exotic` declares the list**, each entry with its reason. It started from the 47
+  drawn species that reach the presence bar in no region and kept out the wild ones: Little
+  Curlew, Ruddy Quail-Dove, Desertas Petrel, and — as doubtful rather than escapes —
+  West Indian Whistling-Duck, Cuban Grassquit and Cinnamon-rumped Seedeater.
+- **Listed birds stay in the dataset**, flagged, so their detail pages are served. The index and
+  every control leave them out, and `/excluded` lists them, linked.
+- **The ingest fails if a listed bird is not drawn**, so a list entry cannot outlive the bird.
+- **Emu is on the list.** A note of 2026-10-13 in the open-work list read "Emu stays", written
+  while [CR-042](#cr-042) was restoring its counts; the owner decided on 2026-10-14 that it is
+  excluded with the other farm escapes, which replaces that note.
+
+### Status of requirements touched
+
+- [P-080](product.md#p-080) — new.
+- [P-070](product.md#p-070) — Active; `exotic` exists, as a declared list.
+- [P-071](product.md#p-071) — Active; its second class is now implemented for escapes.
+- [AC-120](acceptance.md#ac-120) — new.
+
 ## Work arising
 
 Moved to [todo.md](todo.md) on 2026-10-13, with the design notes that supported it, so that

@@ -1680,6 +1680,7 @@ count assertion exists beside the key assertion.
 | P-050 – P-053 | — | withdrawn |
 | P-060 | AC-041, AC-116, AC-118 | |
 | P-079 | AC-117 | |
+| P-080 | AC-120 | |
 | P-061 | AC-042 | |
 | P-062 | AC-040 | |
 | P-063 | AC-043 | |
@@ -2841,4 +2842,36 @@ The rebuilt table, from GBIF on 2026-10-13, holds 26,847 listed cells and 3,689 
 Emu has 19 records in Texas and 14 regions in all, every one below the bar, and is listed under
 none. Of the 47 drawn species that read zero before, only Desertas Petrel still does: it has no
 open record at all ([P-071](product.md#p-071)).
+
+### AC-120 — Escaped and kept birds are off the index, listed and still served
+**Verifies:** [P-080](product.md#p-080), [P-070](product.md#p-070) · **Level:** code ·
+**Method:** unit test over ingest output, and rendering tests over the index, `/excluded` and
+the detail pages
+
+**Assertions:**
+
+1. **Flagged from the list.** Every species in `status.Exotic` is drawn and carries its reason as
+   `exotic`; no other species carries one. A listed name that is not drawn fails the build.
+2. **Off the index.** No flagged species has a tile on the index, and none is offered or counted
+   by the family, habitat, diet or region controls. A family whose every species is flagged is
+   not offered.
+3. **Listed.** `/excluded` names every flagged species with its reason and links to its detail
+   page, and the index links to `/excluded`.
+4. **Still served.** Each flagged species' detail page answers 200, says it is not on the index
+   with its reason, and links to `/excluded`.
+
+**Status: verified 2026-10-14 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| the index view keeping the exotics | `Amadina fasciata is flagged exotic but has a tile on the index`, and the reported count |
+| families of flagged birds only still offered | `family Casuariidae holds only flagged birds but is still offered`, and Ramphastidae |
+| `/excluded` reading the index view instead of the whole dataset | `/excluded does not link Amadina fasciata` |
+| the detail page's note deleted | `/species/blhwea1 does not say it is off the index, why, and where the list is` |
+| the index's link to `/excluded` removed | `the index does not link to /excluded` |
+| the ingest not setting the flag | `Amadina fasciata carries exotic "", want "A cage bird from Africa; …"` |
+
+The first try at the third mutation changed the slice indexed but not the loop over it, and
+panicked rather than failing; the table records the corrected mutation. The list removes 41
+birds: the index shows 1,041 of 1,082, and Casuariidae and Ramphastidae leave the family control.
 

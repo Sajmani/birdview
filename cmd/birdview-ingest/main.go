@@ -483,11 +483,16 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 			strings.Join(unmatched, "\n  "))
 	}
 
+	if err := flagExotic(out, status.Exotic); err != nil {
+		return nil, "", err
+	}
+
 	var b strings.Builder
 	fmt.Fprintf(&b, "recurring in BirdView's regions: %d species in %d families across %d orders\n",
 		len(out), len(famSeq), len(orderSeq))
 	fmt.Fprintf(&b, "  scope             : %s\n", status.Source)
 	fmt.Fprintf(&b, "  declared by hand  : %d (P-071)\n", len(status.Declared))
+	fmt.Fprintf(&b, "  exotic, off index : %d (P-080)\n", len(status.Exotic))
 	fmt.Fprintf(&b, "  names + code      : AviList v2025b, %d of %d with an eBird code\n",
 		counts["coded"], len(out))
 	if len(dropped) > 0 {
@@ -543,6 +548,33 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 		Species: out,
 		Undrawn: undrawn,
 	}, b.String(), nil
+}
+
+// flagExotic marks each declared escape with its reason (P-070, P-080). A
+// listed name that is not drawn is an error: the entry would otherwise
+// outlive its bird, and a stale list is the kind that nobody rereads.
+//
+// Verifies: P-080.
+func flagExotic(out []dataset.Species, exotic map[string]string) error {
+	seen := map[string]bool{}
+	for i := range out {
+		if why, ok := exotic[out[i].ScientificName]; ok {
+			out[i].Exotic = why
+			seen[out[i].ScientificName] = true
+		}
+	}
+	var missing []string
+	for name := range exotic {
+		if !seen[name] {
+			missing = append(missing, name)
+		}
+	}
+	if len(missing) > 0 {
+		sort.Strings(missing)
+		return fmt.Errorf("status.Exotic lists species that are not drawn: %s",
+			strings.Join(missing, ", "))
+	}
+	return nil
 }
 
 // rejected turns the out-of-scope rows into servable records: a name, an id

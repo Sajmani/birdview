@@ -765,3 +765,29 @@ func TestBelowBarRegionsAreCountedNotListed(t *testing.T) {
 		t.Errorf("%d species placed, want 1", n)
 	}
 }
+
+// Verifies: P-070, P-080, CR-043. Criterion: AC-120.
+func TestExoticsAreFlaggedFromTheList(t *testing.T) {
+	ds := load(t)
+	if len(status.Exotic) < 30 {
+		t.Fatalf("status.Exotic lists %d species; the check has too little to assert", len(status.Exotic))
+	}
+	flagged := 0
+	for i := range ds.Species {
+		s := &ds.Species[i]
+		want := status.Exotic[s.ScientificName]
+		if s.Exotic != want {
+			t.Errorf("%s carries exotic %q, want %q", s.ScientificName, s.Exotic, want)
+		}
+		if s.Exotic != "" {
+			flagged++
+		}
+	}
+	if flagged != len(status.Exotic) {
+		t.Errorf("%d species flagged, but status.Exotic lists %d", flagged, len(status.Exotic))
+	}
+	out := []dataset.Species{{ScientificName: "Ara macao"}}
+	if err := flagExotic(out, map[string]string{"Ara macao": "x", "Nonesuch nonesuch": "y"}); err == nil {
+		t.Error("a listed species that is not drawn was accepted")
+	}
+}

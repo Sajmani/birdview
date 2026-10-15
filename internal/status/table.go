@@ -247,3 +247,62 @@ var Declared = map[string]string{
 	"Pterodroma arminjoniana": "Trindade Petrel: the same, and its land records are old " +
 		"enough to read as historical",
 }
+
+// Exotic are the drawn species whose records here are escapes, releases or
+// birds kept by people, with no self-sustaining population in any region
+// BirdView covers (P-071, P-080). They stay in the dataset, flagged, and are
+// left off the index and its controls; /excluded lists them with these
+// reasons and each keeps its detail page.
+//
+// A declared editorial list, not a measurement: recurrence cannot see origin
+// (CR-028). It began from the drawn species that reach the presence bar in
+// no region and kept out the wild ones there -- Little Curlew, Ruddy
+// Quail-Dove, Desertas Petrel -- and three whose origin is doubtful rather
+// than plainly escaped: West Indian Whistling-Duck, Cuban Grassquit and
+// Cinnamon-rumped Seedeater (CR-043). Long-feral populations, such as Indian
+// Peafowl in Florida, are not escapes and are not listed.
+//
+// Verifies: P-070, P-071, P-080.
+var Exotic = map[string]string{
+	"Amadina fasciata":         "A cage bird from Africa; the birds seen here are escapes.",
+	"Amandava subflava":        "A cage bird from Africa; the birds seen here are escapes.",
+	"Amazona auropalliata":     "A pet parrot from Mexico and Central America; the birds seen here are escapes.",
+	"Amazona farinosa":         "A pet parrot from Central and South America; the birds seen here are escapes.",
+	"Amazona ventralis":        "A pet parrot from Hispaniola; the birds seen here are escapes.",
+	"Amazona xantholora":       "A pet parrot from the Yucatán Peninsula; the birds seen here are escapes.",
+	"Ara macao":                "A pet parrot from Central and South America; the birds seen here are escapes.",
+	"Ara militaris":            "A pet parrot from Mexico and South America; the birds seen here are escapes.",
+	"Aratinga weddellii":       "A pet parrot from South America; the birds seen here are escapes.",
+	"Aythya nyroca":            "A duck from Europe and Asia, kept in waterfowl collections; the birds seen here are escapes.",
+	"Balearica regulorum":      "A zoo and collection bird from Africa; the birds seen here are escapes.",
+	"Cacatua sanguinea":        "A pet parrot from Australia; the birds seen here are escapes.",
+	"Chloebia gouldiae":        "A cage bird from Australia; the birds seen here are escapes.",
+	"Chrysolophus amherstiae":  "An ornamental pheasant from China and Myanmar; the birds seen here are escapes and releases.",
+	"Coturnix coturnix":        "A gamebird from Europe, Asia and Africa, raised and released; the birds seen here are escapes and releases.",
+	"Dromaius novaehollandiae": "An Australian bird farmed for meat and oil; the birds seen here are escapes from farms.",
+	"Eudocimus ruber":          "A zoo and collection bird from South America; the birds seen here are escapes.",
+	"Euodice malabarica":       "A cage bird from South Asia and Arabia; the birds seen here are escapes.",
+	"Eupsittula aurea":         "A pet parrot from South America; the birds seen here are escapes.",
+	"Eupsittula canicularis":   "A pet parrot from Mexico and Central America; the birds seen here are escapes.",
+	"Geopelia cuneata":         "A cage bird from Australia; the birds seen here are escapes.",
+	"Icterus icterus":          "A cage bird from South America; the birds seen here are escapes.",
+	"Lagonosticta senegala":    "A cage bird from Africa; the birds seen here are escapes.",
+	"Lamprotornis caudatus":    "A cage bird from Africa; the birds seen here are escapes.",
+	"Lophura nycthemera":       "An ornamental pheasant from Asia; the birds seen here are escapes and releases.",
+	"Mareca sibilatrix":        "A duck from South America, kept in waterfowl collections; the birds seen here are escapes.",
+	"Passerina leclancherii":   "A cage bird from Mexico; the birds seen here are escapes.",
+	"Pavo muticus":             "An ornamental bird from Southeast Asia; the birds seen here are escapes.",
+	"Pelecanus rufescens":      "A zoo and collection bird from Africa; the birds seen here are escapes.",
+	"Pionus senilis":           "A pet parrot from Mexico and Central America; the birds seen here are escapes.",
+	"Ploceus cucullatus":       "A cage bird from Africa; the birds seen here are escapes.",
+	"Ploceus melanocephalus":   "A cage bird from Africa; the birds seen here are escapes.",
+	"Psittacara wagleri":       "A pet parrot from South America; the birds seen here are escapes.",
+	"Psittacula cyanocephala":  "A pet parrot from India; the birds seen here are escapes.",
+	"Psittacus erithacus":      "A pet parrot from Africa; the birds seen here are escapes.",
+	"Pyrrhura molinae":         "A pet parrot from South America; the birds seen here are escapes.",
+	"Ramphastos sulfuratus":    "A zoo and cage bird from Mexico to South America; the birds seen here are escapes.",
+	"Ramphocelus carbo":        "A cage bird from South America; the birds seen here are escapes.",
+	"Tadorna cana":             "A duck from southern Africa, kept in waterfowl collections; the birds seen here are escapes.",
+	"Thraupis episcopus":       "A cage bird from Mexico to South America; the birds seen here are escapes.",
+	"Threskiornis aethiopicus": "A zoo and collection bird from Africa; the birds seen here are escapes.",
+}

@@ -37,6 +37,9 @@
   </div>
   {{template "diagram" .}}
 </div>
+{{/* P-080: a bird left off the index keeps this page, and says why. */}}
+{{with .S.Exotic}}<p class="seam">Not on the index. {{.}}
+  <a href="/excluded">Every bird left off the index</a>.</p>{{end}}
 {{/* P-079: a drawing that coincides with another species' because the
      measurements are the same row says so, with the reason in full. */}}
 {{range .SameAs}}<p class="seam">{{.Text}}. {{.Title}}</p>{{end}}

@@ -218,6 +218,11 @@ type Species struct {
 	// some 28,000.
 	RegionWithheld map[string]uint16 `json:"regionWithheld,omitempty"`
 
+	// Exotic is the declared reason this species is left off the index: its
+	// records here are escapes or birds kept by people (P-070, P-080). Empty
+	// for every other species. The detail page is still served.
+	Exotic string `json:"exotic,omitempty"`
+
 	// Commonest is where this species makes up the biggest SHARE of the bird
 	// records a region holds, with both halves of the ratio kept (P-074).
 	//
