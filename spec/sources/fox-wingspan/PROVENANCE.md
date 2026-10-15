@@ -23,7 +23,7 @@ Vendored copy of the avian wingspan database, BirdView's only source of measured
 
 The file lives at the repository root under the same location exception as the AVONET workbook —
 it is a build input, not a rules document. See
-[../../tech.md](../../tech.md#location-exception-the-avonet-workbook).
+[../../bindings.md](../../bindings.md#location-exception-the-third_party-directory).
 
 ## What the file contains
 

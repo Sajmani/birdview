@@ -3886,10 +3886,10 @@ func TestDocumentTitlesAreHeadings(t *testing.T) {
 	}
 	// The document whose heading is not on its first line.
 	body := mustGet(t, s, "/spec/process")
-	if !strings.Contains(body, "<title>Spec-driven development") {
+	if !strings.Contains(body, "<title>River") {
 		t.Error("spec/process is not titled by its heading")
 	}
-	if !strings.Contains(mustGet(t, s, "/spec"), ">Spec-driven development</a>") {
+	if !strings.Contains(mustGet(t, s, "/spec"), ">River</a>") {
 		t.Error("the spec index does not list process.md by its heading")
 	}
 }

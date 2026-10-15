@@ -22,7 +22,7 @@ for the adoption record.
 The path above is anchored at the repository root with `//` because the workbook is a build input
 read by the ingest command, not a rules document. Moving it under this directory would
 misrepresent what it is. The location exception is recorded as a project binding in
-[../../tech.md](../../tech.md#location-exception-the-avonet-workbook).
+[../../bindings.md](../../bindings.md#location-exception-the-third_party-directory).
 
 This directory exists so that nobody helpfully copies the workbook into it and creates a second
 copy to drift.

@@ -23,7 +23,7 @@ the others can be filled in plausibly from a URL alone.
 | [`wcag`](#wcag) | mandatory | absorbed, partial | **partial** — adopted for two criteria, not vendored |
 | [`inat-api`](#inat-api) | governing | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; governs the mapping tool |
 | [`inat-terms`](#inat-terms) | mandatory | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; almost nothing in it reaches BirdView |
-| [`specman`](#specman) | — (method) | project copy | **adopted** — copied, base pin recorded below |
+| [`specman`](#specman) | — (method) | project copy | **retired** 2026-10-15 — replaced by River, whose pin is in `process.md`'s banner |
 | [`ebird-sensitive`](#ebird-sensitive) | mandatory | absorbed as facts, not vendored | **adopted** — the US and Canada entries restated in `taxonomy.EBirdSensitive`, each confirmed against the export ([CR-037](decisions.md#cr-037)) |
 | [`birdlife-checklist`](#birdlife-checklist) | mandatory | **rejected** | **rejected** — DataZone terms forbid automated access; [CR-040](decisions.md#cr-040) re-based 2026-10-14 onto the vendored `avilist` and `avonet` workbooks |
 
@@ -474,7 +474,7 @@ Use C permits "brief quotations for purposes of comment, criticism or similar sc
 purposes", so the transcription quotes the governing clauses and the document stays out.
 
 Recorded here as a location and import-style exception, in the same spirit as the AVONET workbook
-exception in [tech.md](tech.md#location-exception-the-avonet-workbook).
+exception in [tech.md](bindings.md#location-exception-the-third_party-directory).
 
 ---
 
@@ -511,12 +511,15 @@ is not.
 | **Import style** | Project copy at [spec/process.md](process.md), carrying a banner that points here |
 | **Scope** | How changes to this repository are worked |
 | **Owner** | Project owner |
-| **Status** | **Adopted.** Copied with banner; base pin recorded here and nowhere else. |
+| **Status** | **Retired 2026-10-15.** Replaced by River, specman's successor. |
 
-The `Version` field above is a **base pin, not an integrity hash**. The project copy is
-*supposed* to differ from it: it carries a banner, and may carry `[LOCAL]` amendments. A diff
-against the pin should contain the banner and nothing else but `[LOCAL]` rows; anything further
-is drift.
+The `Version` field above is a **base pin, not an integrity hash**, and is kept as history: it
+records which method this project was worked under from 2026-09-23 to 2026-10-15.
+
+**River gets no entry here.** River's `process.md` holds that the method is not a requirements
+source — it produces nothing for a criterion to cite, which this entry already observed — and
+records the pin in the file's own banner, so that one pin has one record. Local amendments to
+it are in [bindings.md](bindings.md).
 
 ---
 

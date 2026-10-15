@@ -105,7 +105,7 @@ go test ./...
 ```
 
 Run all four before declaring work finished (see Project bindings in
-[spec/tech.md](spec/tech.md#project-bindings)). The three spec checks —
+[spec/bindings.md](spec/bindings.md)). The three spec checks —
 `python3 spec/check/goals.py`, `spec/check/pins.py`, `spec/check/refs.py` — go with them whenever
 `spec/` is touched.
 
