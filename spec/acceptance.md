@@ -2875,3 +2875,32 @@ The first try at the third mutation changed the slice indexed but not the loop o
 panicked rather than failing; the table records the corrected mutation. The list removes 41
 birds: the index shows 1,041 of 1,082, and Casuariidae and Ramphastidae leave the family control.
 
+
+### AC-121 — Readers are told the drawing is a stick figure
+**Verifies:** [P-040](product.md#p-040), [CR-044](decisions.md#cr-044) · **Level:** code ·
+**Method:** rendering test over the visible text of the index, a detail page, the comparison page
+and the using guide
+
+**Assertions:**
+
+1. No visible text on the index, a detail page or the comparison page says *diagram* or
+   *diagrams*, except the link to the data-pipeline diagram. Class names, template comments and
+   scripts are not visible text and are not checked.
+2. The index and `docs/using.md` call the drawing a *stick figure*.
+
+**The check found one the edit had missed:** the detail page's provenance for total length read
+*sum of the five diagram segments*, a model string written by the ingest rather than the
+templates. It now reads *sum of the five drawn segments*.
+
+**Status: verified 2026-10-15 — passing, and watched failing** under all of:
+
+| Mutation | What went red |
+| --- | --- |
+| the index's heading back to *The diagram* | `/ says "what they do not The diagram Every bird is drawn as a"` |
+| the figure key back to *lines in the diagram* | the same line, on `/species/amerob` and `/compare` |
+| every *stick figure* in `docs/using.md` replaced | `the using guide never calls the drawing a stick figure` |
+| the pipeline link no longer exempt | `/ says "... is set out in one diagram ."` |
+
+**Two mutations survived, and were replaced by the ones above.** Removing one *stick figure* from
+the using guide leaves another, so assertion 2 still holds; and making the pipeline-link
+exemption greedy only widens it past the last *diagram* on the page, so nothing new is hidden.

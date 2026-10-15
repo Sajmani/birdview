@@ -3367,6 +3367,36 @@ distracting.
 - [P-071](product.md#p-071) — Active; its second class is now implemented for escapes.
 - [AC-120](acceptance.md#ac-120) — new.
 
+## CR-044 — Readers are told the drawing is a stick figure
+
+**Subject:** `diagram.segments` (wording)
+**Kind:** Presentation; no behavior changes
+**Date:** 2026-10-15 · **Decided by:** Sameer
+
+### What was wrong
+
+The site called each bird's drawing a *diagram*. That is correct, but it does not tell a reader
+what they will see, and since [P-078](product.md#p-078) the site has a second diagram, of the data
+pipeline, linked from the same page as the first.
+
+### The decision
+
+**On the site and in the guides, the drawing is a *stick figure*.** It is one: lines for the bill,
+neck, body and tail, an oval head, and a crossbar for the wings. The term also says up front that
+the drawing is not a likeness, which is the honesty the rest of the page depends on. Because
+*stick figure* can suggest crude or not to scale, it is paired with *to scale* where a reader
+first meets it, and the contrast is the point. In running text *the figure* or *the drawing*
+takes over, since the mass cube is not a stick and the full term repeated reads as a gimmick.
+
+**The spec, the code and the tests keep *diagram*.** Template names, requirement titles and test
+names are internal and correct, and renaming them would be churn with no reader benefit. On the
+site, *diagram* now means only the pipeline diagram.
+
+### Status of requirements touched
+
+- [P-040](product.md#p-040) — Active; states the reader-facing term.
+- [AC-121](acceptance.md#ac-121) — new.
+
 ## Work arising
 
 Moved to [todo.md](todo.md) on 2026-10-13, with the design notes that supported it, so that

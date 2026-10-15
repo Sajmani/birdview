@@ -1,10 +1,10 @@
 # What is measured, what is modeled, and what is invented
 
 This page exists because BirdView draws confident-looking pictures out of data that is, in places,
-very thin. If you are going to trust the diagrams, you should know exactly which parts are
+very thin. If you are going to trust the stick figures, you should know exactly which parts are
 observations and which are arithmetic.
 
-The short version: of the five diagram segments, **bill and tail are measured; head, neck and body
+The short version: of the five segments in each figure, **bill and tail are measured; head, neck and body
 are modeled.** Every total length is modeled, and two thirds of the wingspans are. BirdView labels
 all of it, per value, in the UI.
 
@@ -54,7 +54,7 @@ Meadowlark, Cocos and Brown Booby, and Vega and American Herring Gull
 | **Neck** | **modeled, invented** — all 1082 | a per-family ratio × the trunk |
 | **Total length** | **modeled** — all 1082 | `bill + head + neck + body + tail` |
 
-Those five — bill, head, neck, body, tail — are the diagram's segments, and they are what total
+Those five — bill, head, neck, body, tail — are the figure's segments, and they are what total
 length is built from. Mass and wingspan are drawn or reported but are not part of the sum.
 
 Of the five, **bill and tail are observations. Head, neck and body are not.**
@@ -70,8 +70,8 @@ it was evaluated and **rejected** ([CR-002](../spec/decisions.md)).
 
 So BirdView builds length rather than borrowing it: bill + head + neck + body + tail, with the two
 measured parts real and the three modeled parts labeled. The segments sum exactly to the total
-([P-041](../spec/product.md)), which is what lets the height of a diagram *be* the bird's
-length and makes two diagrams at one scale directly comparable.
+([P-041](../spec/product.md)), which is what lets the height of a figure *be* the bird's
+length and makes two figures at one scale directly comparable.
 
 The consequence is that **BirdView's lengths will not match your field guide.** They are a
 different quantity, built a different way, and they should be read as a consistent basis for
@@ -143,7 +143,7 @@ everything unlisted at 0.18.
 They are surfaced anyway, with the function named — a heron's detail page reads *"neck modeled as
 0.85 × trunk (family-specific ratio for Ardeidae)"*. The reasoning
 ([CR-007](../spec/decisions.md)) is that the user sees the neck either way, since it is
-drawn at a length in every diagram. Hiding the number hides the explanation, not the claim.
+drawn at a length in every figure. Hiding the number hides the explanation, not the claim.
 
 ---
 
@@ -151,7 +151,7 @@ drawn at a length in every diagram. Hiding the number hides the explanation, not
 
 These are choices about rendering, not data. None of them produces a number.
 
-**The diagram is a top-down view of a bird in flight.** Stated as a requirement
+**The stick figure is a top-down view of a bird in flight.** Stated as a requirement
 ([P-040](../spec/product.md)) because leaving it unstated made several questions
 unanswerable. It is also what makes the wing crossbar honest: seen from above, wingspan and body
 length genuinely lie in one plane, so drawing them at one scale is a fact rather than a convention.

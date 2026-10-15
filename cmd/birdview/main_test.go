@@ -96,7 +96,7 @@ func testDataset() *dataset.Dataset {
 			},
 			SpeciesCode: code(common), ScientificName: sci, Family: fam,
 			FamilyCommon: fam + " family", FamilyColor: "#86efac",
-			TotalLength: mod(bill+head+neck+body+tail, "sum of the five diagram segments"),
+			TotalLength: mod(bill+head+neck+body+tail, "sum of the five drawn segments"),
 			Wingspan:    dataset.Metric{Value: span, Prov: dataset.Provenance{Kind: k, Source: "Fox et al. 2026", SourceTaxon: "Other species"}},
 			Mass:        m(mass),
 			WingChord:   m(chord),
@@ -862,7 +862,7 @@ func TestHelpCoversEveryControl(t *testing.T) {
 	}
 	// Two sections, in a stated order (P-035): the thing on screen, then what
 	// its strokes mean. How to change it moved down to the controls.
-	order := []string{"The diagram", "Where the numbers come from"}
+	order := []string{"The stick figure", "Where the numbers come from"}
 	at := make([]int, len(order))
 	for i, h := range order {
 		if at[i] = strings.Index(help, ">"+h+"<"); at[i] < 0 {
@@ -6751,5 +6751,44 @@ func TestExoticsAreOffTheIndexAndListed(t *testing.T) {
 	// An ordinary bird says none of it.
 	if _, plain := get(t, srv, "/species/amerob"); strings.Contains(plain, "Not on the index") {
 		t.Error("American Robin's page says it is not on the index")
+	}
+}
+
+// TestReadersAreToldItIsAStickFigure pins the reader-facing term. On the
+// pages a reader sees, the drawing is a stick figure, and the only
+// "diagram" left is the link to the data-pipeline diagram, which P-078 owns.
+// Visible text only: class names, template comments and the code keep
+// "diagram", by design.
+//
+// Verifies: P-040. Criterion: AC-121.
+func TestReadersAreToldItIsAStickFigure(t *testing.T) {
+	s := newTestServer(t)
+	strip := []*regexp.Regexp{
+		regexp.MustCompile(`(?s)<!--.*?-->`),
+		regexp.MustCompile(`(?s)<script.*?</script>`),
+		regexp.MustCompile(`(?s)<style.*?</style>`),
+		regexp.MustCompile(`(?s)<a href="/docs/pipeline">.*?</a>`),
+		regexp.MustCompile(`<[^>]+>`),
+	}
+	visible := func(page string) string {
+		for _, re := range strip {
+			page = re.ReplaceAllString(page, " ")
+		}
+		return html.UnescapeString(page)
+	}
+	word := regexp.MustCompile(`(?i)\bdiagrams?\b`)
+	for _, path := range []string{"/", "/species/amerob", "/compare?species=amerob&species=blujay"} {
+		text := visible(mustGet(t, s, path))
+		for _, m := range word.FindAllStringIndex(text, -1) {
+			lo, hi := max(0, m[0]-40), min(len(text), m[1]+40)
+			t.Errorf("%s says %q to readers; the drawing is a stick figure (CR-044)",
+				path, strings.Join(strings.Fields(text[lo:hi]), " "))
+		}
+	}
+	if !strings.Contains(visible(mustGet(t, s, "/")), "stick figure") {
+		t.Error("the index never calls the drawing a stick figure")
+	}
+	if !strings.Contains(visible(mustGet(t, s, "/docs/using")), "stick figure") {
+		t.Error("the using guide never calls the drawing a stick figure")
 	}
 }

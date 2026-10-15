@@ -1287,6 +1287,11 @@ Goals: G-003
 is stated first because leaving it unstated is what made the leg question unanswerable for as long
 as it was; see [CR-010](decisions.md#cr-010).
 
+**Readers are told it is a stick figure.** Text BirdView serves to readers calls the drawing a
+*stick figure*, usually *drawn to scale* where it is introduced, and *the figure* or *the drawing*
+after that. *Diagram* stays the word in this spec and in the code, and on the site it means only
+the data-pipeline diagram ([P-078](#p-078)); see [CR-044](decisions.md#cr-044).
+
 The diagram is a vertical cross. Top to bottom: a bill stick, a head oval, a neck, a body stick,
 and a tail stick — plus one horizontal crossbar representing the wings. The tail is visually
 distinguished from the body by stroke style, colour and a mark at the junction between them. That

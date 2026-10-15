@@ -10,9 +10,9 @@ what you are looking at. Bookmark it, share it, or hand-edit the query string.
 
 ## Reading a tile
 
-Each bird is one tile: a header, a diagram, and three numbers.
+Each bird is one tile: a header, a stick figure drawn to scale, and three numbers.
 
-The diagram is a **top-down view of a bird in flight**, drawn head-up:
+The figure is a **top-down view of a bird in flight**, drawn head-up:
 
 | Part | What it is |
 | --- | --- |
@@ -61,7 +61,7 @@ This is the important one.
 
 Use Global to be surprised; use Per section to study a family. Global is one click away and not
 the default because at global scale a median bird is a couple of pixels tall, and none of the
-diagram's vocabulary — the dashed modeled segments, the chord ticks, the labels — is legible
+figure's vocabulary — the dashed modeled segments, the chord ticks, the labels — is legible
 there.
 
 ### Section step
@@ -209,7 +209,7 @@ It is a size and proportion tool, not a field guide.
 - **No range map, season or behavior.** You can filter by region, but that is a list of where a
   bird is reported often enough to be worth looking for — not a range map, not a migration, and
   not a date.
-- **No perched or standing view.** The diagrams are flight silhouettes only. A perched view would
+- **No perched or standing view.** The stick figures show a bird in flight only. A perched view would
   need leg and posture data that does not exist at this coverage.
 - **No individual variation.** One figure per species, not a range.
 

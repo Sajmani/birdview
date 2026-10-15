@@ -12,8 +12,9 @@ BirdView derives and owns. Those regions are the US states, the Canadian provinc
 outlying islands and five stretches of open sea; they are BirdView's own list and not the ABA
 Area, which includes St-Pierre et Miquelon and excludes four of the islands.
 
-The diagrams are deliberately abstract. They are a **top-down view of a bird in flight**, and they
-carry only what the data supports: no plumage, no posture, no shape the sources cannot justify.
+Each bird is drawn as a stick figure, to scale and deliberately abstract: a **top-down view of a
+bird in flight** that carries only what the data supports — no plumage, no posture, no shape the
+sources cannot justify.
 
 ---
 
@@ -21,7 +22,7 @@ carry only what the data supports: no plumage, no posture, no shape the sources 
 
 | If you are… | Read | It covers |
 | --- | --- | --- |
-| **using the site** | [docs/using.md](docs/using.md) | the controls, the diagram, reading a tile |
+| **using the site** | [docs/using.md](docs/using.md) | the controls, the stick figures, reading a tile |
 | **checking the science** | [docs/data.md](docs/data.md) | what is measured, what is modeled, what is invented |
 | **building or changing it** | [docs/building.md](docs/building.md) | build, run, and the spec-driven workflow |
 | **tracing a number to its source** | [docs/pipeline.md](docs/pipeline.md) | every source, the fields read from it, and each step between |

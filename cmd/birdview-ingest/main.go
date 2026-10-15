@@ -416,7 +416,7 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 			WingChord: dataset.Metric{Value: morphology.Round1(res.traits.WingChord), Prov: traitProv()},
 			TotalLength: dataset.Metric{
 				Value: total,
-				Prov: modeled("sum of the five diagram segments; bill and tail measured, " +
+				Prov: modeled("sum of the five drawn segments; bill and tail measured, " +
 					"head, neck and trunk modeled"),
 			},
 		}
