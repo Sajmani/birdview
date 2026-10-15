@@ -1,4 +1,4 @@
-> Project copy of River's `process.md`. Canonical origin: `sso://user/sameer/river`, pin `fb1b001`.
+> Project copy of River's `process.md`. Canonical origin: `sso://user/sameer/river`, pin `9dbdc47`.
 > Local amendments, if any, are listed in [bindings.md](bindings.md).
 
 # River
@@ -139,14 +139,19 @@ A gradient may carry a **target**, a **backstop**, both, or neither.
 ```
 
 - A **target** is absolute: where you are trying to get to. A gradient with one is an SLO.
-- A **backstop** is relative: the value must not get worse. Performance budgets, coverage
-  ratchets and canary analysis against a baseline are all backstops.
+- A **backstop** is a fixed limit the value must not cross. It does not move when you
+  improve: reach 90 ms against a 100 ms backstop and the backstop stays at 100 ms, and the 10 ms
+  between is slack you may spend elsewhere, as an error budget is spent. Performance budgets are
+  backstops.
 - **Both** brackets the work: *reach 100 ms, fail above 300 ms, improve in between.*
 
 **The kind of threshold does not decide whether you have written a goal or a requirement** —
-attainment does. Either kind can produce either, though backstops skew heavily to requirements,
-because a backstop needs a baseline measurement and whatever can be measured now can usually be
-measured again after a change.
+attainment does. Either kind can produce either, though backstops are usually requirements,
+because every change can be checked against one.
+
+**A ratchet is not a backstop.** A ratchet moves the limit to each new best, which throws the
+slack away. It is occasionally the right policy, but moving a backstop is a decision, and a
+person's to make.
 
 **Most gradients carry no threshold, and should not.** Where several exist, nearly every change
 regresses one of them; thresholding all of them stops delivery, and what follows is not stricter
