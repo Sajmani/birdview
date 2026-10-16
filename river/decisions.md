@@ -3440,3 +3440,61 @@ provenance records under `river/sources/`. They are listed by name in the test r
 excused, so a new broken link still fails and a fixed one must leave the list. What they should
 become — links to the published repository, or plain code spans — is undecided and logged in
 [todo.md](todo.md).
+
+---
+
+## CR-046 — The requirements are no longer served; the guides link to the repository
+
+**Subject:** `presentation.docs`
+**Kind:** Amends [P-069](product.md#p-069); supersedes the half of [CR-045](#cr-045) that kept `/spec`
+**Date:** 2026-10-16 · **Decided by:** Sameer
+
+### Why the spec was served
+
+[P-069](product.md#p-069) gave two reasons, and the second rested on the first. The guides were
+served by BirdView itself because *"the project has no public repository to link to"*; and the
+requirement documents were then served too, in commit `a19bda7` on 2026-10-03, because the
+guides cite them constantly and *"a citation to a 404 is worse than no citation."* Serving the
+spec was never a goal of its own.
+
+### What changed
+
+**The first premise expired.** `github.com/google/birdview` has existed since 2026-10-08 and is
+to be published. P-069 also leaned on [T-002](tech.md#t-002), but T-002 limits the requests the
+*server* makes, not the links a reader follows. Its rationale — a laptop in a cabin — argues for
+serving the guides offline, which still holds, and only weakly for serving requirement
+documents to an offline birder.
+
+**And the cost grew.** Under River the bundle holds working documents: the decision log, the
+open-work list, bindings, and River's own `process.md`. Serving them was also behind most of
+the friction of the migration — the link rewriter's directory-to-URL mapping, the reason River's
+nested layout would have needed a server change, and all 26 links that 404'd because a served
+requirement linked to source code or a data table the site could not serve.
+
+### The decision
+
+1. **`/docs` stays served; `/spec` is not.** The embed package for `river/` is deleted, so the
+   server holds no requirement document at all.
+2. **A guide's link into the repository becomes a link to the published repository.** That
+   covers requirements, source code, data tables and vendored inputs alike. A link to another
+   guide becomes its `/docs` path.
+3. **The three reader-facing links to the spec now go to the guide.** The index, the
+   undrawn-species page and `/excluded` linked readers to P-001 and P-080 for scope; they now
+   link to [Scope](../docs/data.md) in the data guide, which explains it for a reader rather
+   than as a requirement.
+
+### Guardrails, and one coverage gap closed
+
+The broken-links check (AC-091) now confirms that every repository link names a file that
+exists in the checkout, and was watched failing on a misspelled one. The 26 known-broken links
+are gone, and the list that held them is deleted.
+
+**Stopping serving would have quietly cut [AC-097](acceptance.md#ac-097)'s coverage.** The
+personal-address check scanned the requirements because they were served; they are still
+public with the repository. It now reads `river/*.md` from the checkout — the same files — and
+was watched failing on an address planted in `river/goals.md`.
+
+### Known limitation
+
+GitHub builds a heading's anchor from its full text, so a link to `decisions.md#cr-030` opens
+the file at the top rather than at the entry. Logged in [todo.md](todo.md).

@@ -1882,23 +1882,27 @@ Jaccard similarity of species lists, cut at k=26, each remaining region assigned
 seed" does not belong in a table cell. The rule is named in one line and links to the fuller
 account in `docs/`.
 
-Those documents are **served by BirdView itself**, not linked off to a code host. The project
-has no public repository to link to, and inventing a URL for one would be a fabricated citation;
-[T-002](tech.md#t-002) also requires the running server to be self-contained, so a provenance
-link that needs the network is a provenance link that breaks.
+**The guides are served by BirdView itself, at `/docs`.** A reader following a provenance link
+lands on an explanation that works wherever the site does, including offline, which is the
+point of [T-002](tech.md#t-002)'s laptop in a cabin.
 
-**Both sets are served: the guides at `/docs` and the requirement documents at `/spec`.** The
-guides cite the spec constantly, and a citation to a 404 is worse than no citation.
+**The requirement documents are not served** ([CR-046](decisions.md#cr-046)). They are working
+documents — the decision log, the open-work list, the method itself — and they are published
+with the repository at `github.com/google/birdview`, which is where someone who wants them
+looks. A guide that cites a requirement links to it there.
 
 **Links are rewritten when the document is rendered, never in the file.** `../river/product.md`
-is the correct link in a repository checkout and `/spec/product` is the correct one in a
-browser; editing the file would fix the second by breaking the first, and these documents are
-served precisely because they are the files the repository carries.
+is the correct link in a repository checkout; in a browser it becomes the file in the published
+repository, and a link to another guide becomes its `/docs` path. Editing the file to suit a
+browser would break it for the checkout, and these documents are served precisely because they
+are the files the repository carries. Every rewritten repository link must name a file that
+exists, or it is a 404 waiting for publication.
 
-**Neither `river/sources/` nor `third_party/` is served.** Between them they hold the
-provenance of other people's terms — the ABA checklist's, Wiley's, iNaturalist's — and the
-vendored iNaturalist pages themselves, kept so a provenance record can be hashed and checked. They are quoted for a record, not ours to republish, and serving them would be the
-redistribution [T-004](tech.md#t-004) exists to prevent.
+**Nothing under `river/` or `third_party/` is served.** Between them they hold the provenance
+of other people's terms — the ABA checklist's, Wiley's, iNaturalist's — and the vendored
+iNaturalist pages themselves, kept so a provenance record can be hashed and checked. They are
+quoted for a record, not ours to republish, and serving them would be the redistribution
+[T-004](tech.md#t-004) exists to prevent.
 
 ### P-078 — The documentation draws the data pipeline, field by field
 Subject: `presentation.docs.pipeline`

@@ -267,8 +267,9 @@ someone else and closed, where mail to one person is none of those things. The o
 mailbox is not the project's contact point.
 
 *(This requirement does not quote the address it removed, and that is not squeamishness. The
-spec is served, so a quotation here would republish on `/spec/tech` exactly what the rule
-forbids — which is how [AC-097](acceptance.md#ac-097) first failed.)*
+requirements are published with the repository, so a quotation here would republish exactly
+what the rule forbids — which is how [AC-097](acceptance.md#ac-097) first failed, back when they
+were also served at `/spec`.)*
 
 **The `User-Agent` contact stays, and is a different thing.** [T-006](#t-006) requires outbound
 requests to name a contact, and iNaturalist's API guidance asks for it specifically. That

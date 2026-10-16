@@ -1571,18 +1571,26 @@ guides cite the spec as `../river/product.md`, which is right in a checkout and 
 browser, and the per-species link check could not see it because these are links between
 documents rather than on a species page. **Relative links are resolved as a browser resolves
 them**, against the page they sit on; until 2026-10-15 the check followed only absolute links,
-so it could not see an unrewritten link at all. Links to repository files the server does not
-serve are listed by name as known breakage, and the list may only shrink.
+so it could not see an unrewritten link at all. A link a guide makes into the repository —
+a requirement, source code, a data table — is rewritten to the published repository, and the
+check confirms the file it names exists in the checkout.
 
 **Assertions, titles:** a document is titled and indexed by its **first top-level heading**,
-not by its first line. `river/process.md` opens with a banner recording where the file came
-from, above its heading; under specman it was an HTML comment, and reading line one listed it
-in the index as `<!--`.
+not by its first line. The case that forced it was the requirements' `process.md`, which opened
+with an HTML comment and was listed in the index as `<!--`; the requirements are no longer
+served, and the rule stands for the guides.
 
-**Assertions, what is not served:** the embed carries documents only. `river/sources/` and
-`third_party/` hold other people's terms and must not be reachable, so the check walks what is embedded rather
-than probing one path — a probe catches the file it names, and the risk is the whole directory
-arriving at once ([T-004](tech.md#t-004)).
+**Assertions, what is not served:** nothing under `river/` or `third_party/` is served.
+`river/sources/` and `third_party/` hold other people's terms and must not be reachable
+([T-004](tech.md#t-004)). Since [CR-046](decisions.md#cr-046) nothing under `river/` is embedded
+at all; the probes remain, so that serving the requirements again cannot quietly bring the
+vendored terms back with them.
+
+**Re-verified 2026-10-16** when the requirements stopped being served
+([CR-046](decisions.md#cr-046)). Watched failing by planting a misspelled repository link in a
+guide — `river/decisons.md does not exist in the repository` — and, for the coverage
+[AC-097](acceptance.md#ac-097) would otherwise have lost, by planting an address in
+`river/goals.md`.
 
 **Status: verified 2026-10-03 — passing, and watched failing** by giving each region its own
 row; by rendering a category with an empty origin; by citing `/docs/regions`, a document the
@@ -1852,7 +1860,9 @@ provenance table recorded it — a provenance record names who owns a source wit
 their mail. And once on this bundle: the requirement and this criterion both quoted the address
 as an example, and the spec is served, so they republished on `/spec/tech` and
 `/spec/acceptance` precisely what the rule forbids. Neither quotes it now. Exempting the spec
-was the wrong fix, because the spec is a page readers reach.
+was the wrong fix, because the spec is a page readers reach. Since [CR-046](decisions.md#cr-046)
+it is no longer served, but it is still published with the repository, so the check reads
+`river/*.md` from the checkout instead — the same files, with no loss of coverage.
 
 **Status: verified 2026-10-05 — passing, and watched failing** by restoring the old header
 sentence, which reports it on every page that renders the header.
@@ -1921,7 +1931,8 @@ decides what a URL means.
    never anything of the form *no records*, which would state a gap in BirdView's data as a
    fact about the bird.
 7. **No page of the interface, and no guide under `/docs`, uses the word "share"** as the
-   name of the metric. The normative documents under `/spec` are exempt; they define it.
+   name of the metric. The normative documents under `river/` are exempt; they define it, and
+they are not served.
 6. A species with no records in the regions on screen reads **`0 in <denominator>`** in the
    same sentence every other tile uses — never an em-dash. The denominator is stated, because
    zero in a billion records and zero in nine hundred are different findings.

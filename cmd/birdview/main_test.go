@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -40,7 +41,6 @@ import (
 	"birdview/internal/taxonomy"
 	"birdview/internal/trait"
 	"birdview/internal/view"
-	"birdview/river"
 	"birdview/web"
 )
 
@@ -3790,49 +3790,10 @@ func stripTags(s string) string {
 // bundle moved from spec/ to river/.
 //
 // Verifies: P-069. Criterion: AC-091.
-// knownBrokenRepoLinks are links from served documents to repository files
-// the server does not serve -- source code, data files, vendored inputs --
-// which 404 on the site. They were always broken; the crawler hid them by
-// following only absolute links. What they should become is undecided (see
-// river/todo.md), so they are listed rather than excused: a new broken link
-// still fails, and a listed one that stops being broken fails too, so the
-// list can only shrink.
-var knownBrokenRepoLinks = map[string]bool{
-	"/spec/product -> /internal/region/region.go":      true,
-	"/spec/product -> /cmd/birdview-status":            true,
-	"/spec/product -> /data/status.tsv":                true,
-	"/spec/acceptance -> /data/source-names.tsv":       true,
-	"/spec/todo -> /data/source-names.tsv":             true,
-	"/spec/todo -> /data/status.tsv":                   true,
-	"/spec/decisions -> /internal/region/region.go":    true,
-	"/spec/decisions -> /internal/taxonomy/mapping.go": true,
-	"/spec/decisions -> /cmd/birdview-regions":         true,
-	"/spec/decisions -> /cmd/birdview-status/main.go":  true,
-	"/spec/decisions -> /cmd/birdview-regions/main.go": true,
-	"/spec/tech -> /data/gbif-taxa.tsv":                true,
-	"/docs/building -> /third_party/avilist":           true,
-	"/docs/building -> /third_party/avonet":            true,
-	"/docs/building -> /third_party/fox-wingspan":      true,
-
-	// Provenance records under river/sources/, which the server refuses
-	// along with the vendored terms beside them (TestVendoredTermsAreNotServed).
-	"/spec/decisions -> /spec/sources/wiley/requirements.md":    true,
-	"/spec/decisions -> /spec/sources/aba/PROVENANCE.md":        true,
-	"/spec/sources -> /spec/sources/avonet/PROVENANCE.md":       true,
-	"/spec/sources -> /spec/sources/aba/PROVENANCE.md":          true,
-	"/spec/sources -> /spec/sources/inat-api/PROVENANCE.md":     true,
-	"/spec/sources -> /spec/sources/inat-api/requirements.md":   true,
-	"/spec/sources -> /spec/sources/inat-terms/PROVENANCE.md":   true,
-	"/spec/sources -> /spec/sources/inat-terms/requirements.md": true,
-	"/spec/sources -> /spec/sources/avilist/PROVENANCE.md":      true,
-	"/spec/sources -> /spec/sources/fox-wingspan/PROVENANCE.md": true,
-	"/spec/sources -> /spec/sources/wiley/PROVENANCE.md":        true,
-}
-
 func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
 	s := newTestServer(t)
 	seen := map[string]bool{}
-	stillBroken := map[string]bool{}
+	repoLinks := 0
 	var visit func(path string)
 	visit = func(path string) {
 		if seen[path] {
@@ -3850,8 +3811,26 @@ func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
 		}
 		for _, m := range regexp.MustCompile(`href="([^"]*)"`).FindAllStringSubmatch(body, -1) {
 			ref, err := url.Parse(html.UnescapeString(m[1]))
-			if err != nil || ref.Scheme != "" || ref.Host != "" {
-				continue // external, or not a link this server answers
+			if err != nil {
+				continue
+			}
+			// A link into the published repository must name a file that
+			// exists in this checkout, or it is a 404 waiting for publication.
+			if rest, ok := strings.CutPrefix(ref.String(), repository+"/"); ok {
+				repoLinks++
+				parts := strings.SplitN(rest, "/", 3) // blob|tree, main, path
+				if len(parts) != 3 {
+					t.Errorf("%s links to %s, which names no path in the repository", path, ref)
+					continue
+				}
+				file := strings.SplitN(parts[2], "#", 2)[0]
+				if _, err := os.Stat(filepath.Join("..", "..", filepath.FromSlash(file))); err != nil {
+					t.Errorf("%s links to %s, but %s does not exist in the repository", path, ref, file)
+				}
+				continue
+			}
+			if ref.Scheme != "" || ref.Host != "" {
+				continue // external, and not ours to check
 			}
 			href := base.ResolveReference(ref).Path
 			if href == path && ref.Path == "" {
@@ -3862,28 +3841,20 @@ func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
 			}
 			// Every link must resolve; document links are then followed.
 			if c, _ := get(t, s, href); c != http.StatusOK {
-				if key := path + " -> " + href; knownBrokenRepoLinks[key] {
-					stillBroken[key] = true
-				} else {
-					t.Errorf("%s links to %s, which answers %d", path, href, c)
-				}
+				t.Errorf("%s links to %s, which answers %d", path, href, c)
 				continue
 			}
-			if strings.HasPrefix(href, "/docs") || strings.HasPrefix(href, "/spec") {
+			if strings.HasPrefix(href, "/docs") {
 				visit(href)
 			}
 		}
 	}
 	visit("/docs/")
-	visit("/spec/")
-	if len(seen) < 10 {
-		t.Errorf("only walked %d documents; the indexes are not listing the set", len(seen))
+	if len(seen) < 4 {
+		t.Errorf("only walked %d documents; the index is not listing the set", len(seen))
 	}
-	for key := range knownBrokenRepoLinks {
-		if !stillBroken[key] {
-			t.Errorf("%s is listed as a known broken link but is no longer broken; "+
-				"remove it from knownBrokenRepoLinks", key)
-		}
+	if repoLinks == 0 {
+		t.Error("no guide links into the repository, so the existence check proved nothing")
 	}
 }
 
@@ -3894,8 +3865,10 @@ func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
 // The iNaturalist pages moved to third_party/ for the Apache 2.0 release,
 // so both trees are probed: a check that only knew the old home would go on
 // passing after the files it guards had moved somewhere it never looks.
-// They are quoted for a record, not ours to republish, so the embed must
-// not reach them and no path may serve them (T-004).
+// They are quoted for a record, not ours to republish, so no path may serve
+// them (T-004). Since CR-046 nothing under river/ is embedded at all; the
+// probes stay, so that serving the requirements again cannot quietly bring
+// the vendored terms back with them.
 //
 // Verifies: T-004. Criterion: AC-091.
 func TestVendoredTermsAreNotServed(t *testing.T) {
@@ -3904,26 +3877,10 @@ func TestVendoredTermsAreNotServed(t *testing.T) {
 		"/spec/sources/aba", "/spec/sources/wiley", "/spec/sources/inat-terms",
 		"/third_party", "/third_party/inat-terms/terms.html",
 		"/third_party/avonet/LICENSE",
-		"/spec/check", "/docs/../README", "/spec/../README",
+		"/spec", "/spec/product", "/spec/check", "/docs/../README", "/spec/../README",
 	} {
 		if code, _ := get(t, s, path); code == http.StatusOK {
 			t.Errorf("%s is served; vendored terms and non-documents must not be", path)
-		}
-	}
-	// And the embed itself does not carry them. Checked by walking what is
-	// embedded rather than probing one path: a probe only catches the file
-	// it names, and the risk is the whole directory arriving at once.
-	entries, err := river.Files.ReadDir(".")
-	if err != nil {
-		t.Fatalf("reading the spec embed: %v", err)
-	}
-	for _, e := range entries {
-		if e.IsDir() {
-			t.Errorf("the spec embed carries the directory %q; *.md must match "+
-				"documents only, and sources/ holds other people's terms", e.Name())
-		}
-		if !strings.HasSuffix(e.Name(), ".md") {
-			t.Errorf("the spec embed carries %q, which is not a document", e.Name())
 		}
 	}
 }
@@ -3931,13 +3888,14 @@ func TestVendoredTermsAreNotServed(t *testing.T) {
 // TestDocumentTitlesAreHeadings pins the title rule: a document is listed
 // and titled by its first top-level heading, not by its first line.
 //
-// river/process.md opens with an HTML comment recording where the file came
-// from, and reading line one listed it in the index as "<!--".
+// The case that forced it was the requirements' process.md, which opened
+// with an HTML comment and was listed in the index as "<!--". The
+// requirements are no longer served (CR-046); the rule stands for the guides.
 //
 // Verifies: P-069. Criterion: AC-091.
 func TestDocumentTitlesAreHeadings(t *testing.T) {
 	s := newTestServer(t)
-	for _, set := range []string{"/docs", "/spec"} {
+	for _, set := range []string{"/docs"} {
 		body := mustGet(t, s, set)
 		for _, m := range regexp.MustCompile(`<li><a href="[^"]*">([^<]*)</a>`).
 			FindAllStringSubmatch(body, -1) {
@@ -3947,14 +3905,6 @@ func TestDocumentTitlesAreHeadings(t *testing.T) {
 					"not whatever is on line one", set, title)
 			}
 		}
-	}
-	// The document whose heading is not on its first line.
-	body := mustGet(t, s, "/spec/process")
-	if !strings.Contains(body, "<title>River") {
-		t.Error("river/process is not titled by its heading")
-	}
-	if !strings.Contains(mustGet(t, s, "/spec"), ">River</a>") {
-		t.Error("the spec index does not list process.md by its heading")
 	}
 }
 
@@ -4410,7 +4360,7 @@ func TestCitedAnchorsResolve(t *testing.T) {
 	// The ids goldmark actually emitted, per served document.
 	ids := map[string]map[string]bool{}
 	headingID := regexp.MustCompile(`<h[1-6][^>]*\bid="([^"]+)"`)
-	for _, set := range []string{"/docs/", "/spec/"} {
+	for _, set := range []string{"/docs/"} {
 		index := mustGet(t, s, set)
 		for _, m := range regexp.MustCompile(`href="(`+set+`[^"#]+)"`).
 			FindAllStringSubmatch(index, -1) {
@@ -4424,8 +4374,8 @@ func TestCitedAnchorsResolve(t *testing.T) {
 			}
 		}
 	}
-	if len(ids) < 8 {
-		t.Fatalf("only found %d served documents; the indexes are not listing the set", len(ids))
+	if len(ids) < 4 {
+		t.Fatalf("only found %d served documents; the index is not listing the set", len(ids))
 	}
 	var withIDs int
 	for _, set := range ids {
@@ -4438,10 +4388,10 @@ func TestCitedAnchorsResolve(t *testing.T) {
 	}
 
 	// Every anchored citation anywhere on the site.
-	cite := regexp.MustCompile(`href="((?:/docs|/spec)/[^"#]+)#([^"]+)"`)
+	cite := regexp.MustCompile(`href="(/docs/[^"#]+)#([^"]+)"`)
 	checked := 0
 	for _, page := range []string{"/", "/species/greblu", "/species/amerob", "/added",
-		"/docs/", "/spec/", "/docs/data", "/docs/using", "/spec/product"} {
+		"/docs/", "/docs/data", "/docs/using", "/excluded"} {
 		body := mustGet(t, s, page)
 		for _, m := range cite.FindAllStringSubmatch(body, -1) {
 			doc, frag := m[1], m[2]
@@ -4608,15 +4558,13 @@ func atoiComma(t *testing.T, s string) int {
 func TestNoPersonalAddressIsPublished(t *testing.T) {
 	s := newTestServer(t)
 	pages := []string{"/", "/species/greblu", "/species/amerob", "/added",
-		"/compare?species=amerob&species=blujay", "/docs/", "/spec/"}
-	for _, set := range []string{"/docs/", "/spec/"} {
-		for _, m := range regexp.MustCompile(`href="(`+set+`[^"#]+)"`).
-			FindAllStringSubmatch(mustGet(t, s, set), -1) {
-			pages = append(pages, m[1])
-		}
+		"/compare?species=amerob&species=blujay", "/docs/"}
+	guides := regexp.MustCompile(`href="(/docs/[^"#]+)"`).FindAllStringSubmatch(mustGet(t, s, "/docs/"), -1)
+	if len(guides) < 4 {
+		t.Fatalf("the docs index lists only %d guides; it is not listing the set", len(guides))
 	}
-	if len(pages) < 12 {
-		t.Fatalf("only %d pages to check; the document indexes are not listing the set", len(pages))
+	for _, m := range guides {
+		pages = append(pages, m[1])
 	}
 
 	// Both the plain form and the spelled-out obfuscation.
@@ -4634,6 +4582,26 @@ func TestNoPersonalAddressIsPublished(t *testing.T) {
 				t.Errorf("%s publishes a contact address %q; feedback goes to the "+
 					"issue tracker, and a personal mailbox on a public page is "+
 					"harvested within the week", p, m)
+			}
+		}
+	}
+
+	// The requirements are no longer served (CR-046), but they are published
+	// with the repository, and this check covered them while they were served.
+	// Read the same files from the checkout so that coverage is not lost.
+	docs, err := filepath.Glob(filepath.Join("..", "..", "river", "*.md"))
+	if err != nil || len(docs) < 5 {
+		t.Fatalf("found %d requirement documents under river/ (err %v); the check would prove nothing", len(docs), err)
+	}
+	for _, path := range docs {
+		body, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, re := range patterns {
+			if m := re.Find(body); m != nil {
+				t.Errorf("%s publishes a contact address %q; the requirements are public "+
+					"with the repository", filepath.ToSlash(path), m)
 			}
 		}
 	}
@@ -5156,7 +5124,7 @@ func TestMissingTotalsDoNotClaimTheBirdIsAbsent(t *testing.T) {
 //
 // Over the app's own pages AND the guides under /docs, because a guide is
 // where a confused reader goes next and finding the jargon there teaches
-// nothing. The normative documents under /spec are exempt: they define the
+// nothing. The normative documents under river/ are exempt: they define the
 // term, and `presentation.share` is the subject this requirement is filed
 // under.
 //

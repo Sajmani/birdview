@@ -180,7 +180,7 @@ internal/palette/      family and order colors, with contrast guarantees
 data/                  the committed generated tables the ingest reads
 web/static/            templates and CSS, embedded into the binary
 docs/                  this documentation, also served at /docs
-river/                  the requirements bundle — normative, also served at /spec
+river/                  the requirements bundle — normative; not served, read it here
 ```
 
 `internal/view` is deliberately free of HTML and HTTP so the layout rules can be property-tested

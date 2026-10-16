@@ -37,6 +37,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	pathpkg "path"
 	"regexp"
 	"slices"
 	"sort"
@@ -67,7 +68,6 @@ import (
 	"birdview/internal/taxonomy"
 	"birdview/internal/trait"
 	"birdview/internal/view"
-	"birdview/river"
 	"birdview/web"
 )
 
@@ -611,7 +611,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	s.mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(assets))))
 	s.mux.HandleFunc("/added", s.added)
 	s.mux.HandleFunc("/excluded", s.excluded)
-	for _, set := range []string{"/docs", "/spec"} {
+	for _, set := range []string{"/docs"} {
 		// Both the exact path and the subtree, so the bare name serves the
 		// index instead of a 301 to it.
 		s.mux.HandleFunc(set, s.document)
@@ -3499,7 +3499,6 @@ var served = map[string]struct {
 	kind string
 }{
 	"docs": {docs.Files, "documentation"},
-	"spec": {river.Files, "requirement"},
 }
 
 // document serves one embedded Markdown file, rendered.
@@ -3565,7 +3564,7 @@ func withDiagram(fsys embed.FS, set, name, title string, body []byte) []byte {
 	return mermaidBlock.ReplaceAllLiteral(body, []byte(img))
 }
 
-// documentIndex lists a set, so /spec and /docs are not dead ends.
+// documentIndex lists a set, so /docs is not a dead end.
 func (s *server) documentIndex(w http.ResponseWriter, set string) {
 	src := served[set]
 	entries, _ := src.fs.ReadDir(".")
@@ -3611,30 +3610,32 @@ func (s *server) renderMarkdown(w http.ResponseWriter, set, title string, src []
 }
 
 // repoLinks rewrites the repository-relative links these documents carry
-// into the paths BirdView serves them at.
+// into links a browser can follow.
 //
 // **Rewritten at render time, not in the files.** `../river/product.md` is
-// the correct link in a repository checkout and `/spec/product` is the
-// correct one in a browser; editing the files would fix the second by
-// breaking the first, and these are served precisely because they are the
-// files the repository carries.
+// the correct link in a repository checkout, and editing the file to suit a
+// browser would break it for the checkout; these documents are served
+// precisely because they are the files the repository carries.
 //
-// The `base` is the set the document being rendered belongs to, because a
-// bare sibling link means different things in each: `product.md` inside
-// river/ is a requirement document, and the same link inside docs/ is a
-// guide. Rewriting both to /docs/ was the first attempt and sent half the
-// spec to a 404.
-//
-// **The directory and the URL are named separately.** The requirements live
-// in river/, the directory River's method gives them, and are served at
-// /spec, which is what a reader of the site understands; servedAt maps one
-// to the other so that neither name has to bend to the other.
+// **Only the guides are served** (CR-046). A link to another guide becomes
+// its /docs path. A link to anything else in the repository -- the
+// requirements under river/, source code, data tables, vendored inputs --
+// becomes a link to that file in the published repository, because the
+// site does not serve it and a citation to a 404 is worse than none.
 type repoLinks struct{ base string }
 
-var repoLink = regexp.MustCompile(`^(?:\.\./)?(river|docs)(?:/([a-z-]+?)(?:\.md)?)?(#.*)?$`)
+// repository is where BirdView's source is published.
+const repository = "https://github.com/google/birdview"
 
-// servedAt maps a repository directory to the URL its documents are served at.
-var servedAt = map[string]string{"river": "spec", "docs": "docs"}
+// repoURL links to path, relative to the repository root, on the code host.
+// A path with no extension in its last element is a directory.
+func repoURL(path, frag string) string {
+	kind := "blob"
+	if !strings.Contains(pathpkg.Base(path), ".") {
+		kind = "tree"
+	}
+	return repository + "/" + kind + "/main/" + path + frag
+}
 
 func (t repoLinks) Transform(doc *goldmarkast.Document, reader goldmarktext.Reader, _ goldmarkparser.Context) {
 	_ = goldmarkast.Walk(doc, func(n goldmarkast.Node, entering bool) (goldmarkast.WalkStatus, error) {
@@ -3642,22 +3643,39 @@ func (t repoLinks) Transform(doc *goldmarkast.Document, reader goldmarktext.Read
 		if !entering || !ok {
 			return goldmarkast.WalkContinue, nil
 		}
-		m := repoLink.FindStringSubmatch(string(link.Destination))
-		if m == nil {
-			// A bare sibling document, as docs/ links to its neighbours.
-			if sib := regexp.MustCompile(`^([a-z-]+)\.md(#.*)?$`).
-				FindStringSubmatch(string(link.Destination)); sib != nil {
-				link.Destination = []byte("/" + t.base + "/" + sib[1] + sib[2])
-			}
-			return goldmarkast.WalkContinue, nil
+		if dest := t.rewrite(string(link.Destination)); dest != "" {
+			link.Destination = []byte(dest)
 		}
-		dest := "/" + servedAt[m[1]] + "/"
-		if m[2] != "" {
-			dest += m[2]
-		}
-		link.Destination = []byte(dest + m[3])
 		return goldmarkast.WalkContinue, nil
 	})
+}
+
+// rewrite maps one repository-relative destination to where a browser
+// should go, or returns "" to leave it alone: anything absolute, external,
+// or a fragment within the page.
+func (t repoLinks) rewrite(dest string) string {
+	u, err := url.Parse(dest)
+	if err != nil || u.Scheme != "" || u.Host != "" || u.Path == "" || strings.HasPrefix(u.Path, "/") {
+		return ""
+	}
+	frag := ""
+	if u.Fragment != "" {
+		frag = "#" + u.Fragment
+	}
+	// Resolve against the directory the document lives in, as a checkout would.
+	path := pathpkg.Clean(t.base + "/" + u.Path)
+	if strings.HasPrefix(path, "../") || path == ".." {
+		return "" // outside the repository; nothing sensible to point at
+	}
+	if name, ok := strings.CutPrefix(path, "docs/"); ok && !strings.Contains(name, "/") {
+		if stem, isDoc := strings.CutSuffix(name, ".md"); isDoc {
+			return "/docs/" + stem + frag
+		}
+	}
+	if path == "docs" {
+		return "/docs/" + frag
+	}
+	return repoURL(path, frag)
 }
 
 // markdown renders the served documents. GFM tables are enabled because the
@@ -3702,7 +3720,6 @@ func (idAnchors) Transform(doc *goldmarkast.Document, reader goldmarktext.Reader
 
 var markdown = map[string]goldmark.Markdown{
 	"docs": newMarkdown("docs"),
-	"spec": newMarkdown("spec"),
 }
 
 func newMarkdown(base string) goldmark.Markdown {
@@ -3795,7 +3812,7 @@ func (s *server) excluded(w http.ResponseWriter, r *http.Request) {
 		"them off is not a silent edit. Each keeps its own page.\n\n", len(rows))
 	b.WriteString("The list is BirdView's own judgement, not a measurement: the records cannot say " +
 		"where a bird came from. Long-feral populations, such as Indian Peafowl in Florida, are " +
-		"not on it, and neither is any wild vagrant. See [the specification](/spec/product#p-080).\n\n")
+		"not on it, and neither is any wild vagrant. See [how the data is made](/docs/data#scope).\n\n")
 	b.WriteString("| Bird | Scientific name | Records | Why it is left off |\n|---|---|---:|---|\n")
 	for _, sp := range rows {
 		var n int64

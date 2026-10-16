@@ -225,6 +225,6 @@ the reason, and each keeps its own page.
 
 Every bird's detail page names the source or formula behind each number it shows. Beyond that,
 [docs/data.md](data.md) describes each input and how far to trust it,
-[how BirdView's data is built](pipeline.md) draws every source and step as one diagram, and BirdView serves
-its own requirements at [/spec](/spec) — the product and technical specifications, the decision
-record, and the acceptance criteria that check them.
+[how BirdView's data is built](pipeline.md) draws every source and step as one diagram, and
+BirdView's own requirements are [in its repository](../river/) — the product and technical
+specifications, the decision record, and the acceptance criteria that check them.

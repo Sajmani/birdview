@@ -401,8 +401,8 @@ Until 2026-10-05 a sea's denominator summed only the species already judged pela
 land region's counted every bird, and the two were divided alike — so every marine figure
 shown was inflated, by 962× in the North Atlantic. Where a bird was commonest came from a different
 table again, built from a land-only pass, so no bird could peak at sea and the detail page
-could name a region the index did not list it in. See [CR-030](/spec/decisions#cr-030) and
-[CR-031](/spec/decisions#cr-031).
+could name a region the index did not list it in. See [CR-030](../river/decisions.md#cr-030) and
+[CR-031](../river/decisions.md#cr-031).
 
 ### When the sources disagree about a name
 
@@ -428,11 +428,11 @@ is a gap in what BirdView can see, not a statement about the bird.
 **The list is checked, not trusted.** It describes eBird's policy today, and the records reflect
 what was applied when they were published; for 26 of the 230 places it names, eBird's records
 are there anyway. BirdView marks a bird withheld only where the records show the gap. See
-[CR-037](/spec/decisions#cr-037).
+[CR-037](../river/decisions.md#cr-037).
 
 Withholding and a different name look identical in the data — eBird returns nothing either way
 — so the names were also checked by querying every plausible alternative. See
-[CR-034](/spec/decisions#cr-034).
+[CR-034](../river/decisions.md#cr-034).
 
 **The same bird under another name.** Seven species are filed by eBird under a name AviList has
 since replaced, and the page names both. Five are genus moves — AviList puts the Hairy

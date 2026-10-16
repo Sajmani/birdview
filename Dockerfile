@@ -45,7 +45,6 @@ RUN go mod download
 COPY cmd/birdview ./cmd/birdview
 COPY internal ./internal
 COPY web ./web
-COPY river ./river
 COPY docs ./docs
 
 RUN CGO_ENABLED=0 go build -o /usr/local/bin/birdview ./cmd/birdview
