@@ -24,7 +24,7 @@ import (
 	"testing"
 )
 
-// TestSourceNamesAgree asserts T-028 over the committed correspondence
+// TestSourceNamesAgree asserts tech.sourceNamingMeasured over the committed correspondence
 // table: for every species BirdView draws, the two occurrence sources hold
 // comparable numbers of records under the name BirdView serves — and every
 // species that breaks that is declared, with which of the four shapes it is.
@@ -36,7 +36,7 @@ import (
 // against itself as `exact`, which is true and useless. Asking each database
 // how many records it holds is the only instrument that separates them.
 //
-// Verifies: T-028. Criterion: AC-105.
+// Verifies: tech.sourceNamingMeasured. Criterion: acceptance.disagreementsDeclared.
 func TestSourceNamesAgree(t *testing.T) {
 	// Two asymmetric rules, because the two databases are not peers:
 	// iNaturalist is uniformly about 48x shallower than eBird, so what
@@ -137,7 +137,7 @@ func TestSourceNamesAgree(t *testing.T) {
 			"    Either eBird files it under another name (add to AviListRenames or "+
 			"CountedAs), it shares a name with another species (SharedNames), eBird "+
 			"withholds it (WithheldByEBird), or iNaturalist files a domestic form "+
-			"separately (DomesticForms). T-028.", s)
+			"separately (DomesticForms). tech.sourceNamingMeasured.", s)
 	}
 	t.Logf("%d species, %d flagged as a source disagreement, all declared", checked, flagged)
 }

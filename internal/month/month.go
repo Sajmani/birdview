@@ -13,13 +13,13 @@
 // limitations under the License.
 
 // Package month holds the twelve months BirdView filters by, and the one
-// rule that decides whether a species is present in one (P-011, CR-036).
+// rule that decides whether a species is present in one (product.regionAndMonthFilter, decisions.monthPresence).
 //
 // A package of its own, small as it is, because the rule has three callers
 // that must agree — the index's species list, the tile's figure and the
 // detail page's — and the last time one measure had two implementations the
 // index and the detail page disagreed about where a bird was commonest
-// (CR-031).
+// (decisions.honestSeaDenominator).
 package month
 
 import "strings"
@@ -30,7 +30,7 @@ const Count = 12
 
 // Abbrev is the three-letter form a URL and a chip both use, January first.
 //
-// English and not localized, like the region slugs beside it (CR-024): a URL
+// English and not localized, like the region slugs beside it (decisions.regionUrlIsPostalCode): a URL
 // that changed with the reader's language could not be shared.
 var Abbrev = [Count]string{
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -57,7 +57,7 @@ func Index(abbrev string) (int, bool) {
 
 // MinRecords is the evidence floor below which the month filter abstains:
 // a species with fewer records than this in a region is shown in EVERY
-// selected month rather than hidden from any (CR-036).
+// selected month rather than hidden from any (decisions.monthPresence).
 //
 // Millerbird is why. It holds 28 records in Hawaii, all in five months, and
 // lives on Nihoa the year round — so those months report when anyone last
@@ -84,7 +84,7 @@ func Index(abbrev string) (int, bool) {
 const MinRecords = 200
 
 // MinRatio is how much of its usual share a species must hold in a month to
-// count as present then (CR-036).
+// count as present then (decisions.monthPresence).
 //
 // Not load-bearing: measured across New York and Hawaii the passing ratios
 // cluster at 0.31 and above and the failing ones at 0.17 and below, so any
@@ -97,7 +97,7 @@ const MinRatio = 0.2
 // and whether there was enough evidence to say at all.
 //
 // The measure is the species' share of that month against its share of the
-// year — P-074's own logic at month granularity. Dividing by the month's
+// year — product.shareOfRecords's own logic at month granularity. Dividing by the month's
 // own total is not optional: a raw share would call every bird a May bird,
 // because May is when people are out.
 //
@@ -105,7 +105,7 @@ const MinRatio = 0.2
 // and say why. An all-true result is NOT the same answer: that means the
 // bird really is there all year.
 //
-// Verifies: P-011, CR-036.
+// Verifies: product.regionAndMonthFilter, decisions.monthPresence.
 func Present(speciesMonths, regionMonths [Count]int64) (in [Count]bool, ok bool) {
 	var spYear, regYear int64
 	for i := 0; i < Count; i++ {

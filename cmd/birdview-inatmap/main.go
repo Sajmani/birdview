@@ -19,9 +19,9 @@
 // iNaturalist asks for (inat-api/R1), 841 species is about a quarter of an
 // hour, and a build that needs the network is a build that fails on a plane.
 // Run this when the mapping needs refreshing; commit the result; the ingest
-// joins against it offline (T-022, CR-012).
+// joins against it offline (tech.pacedInaturalistMapping, decisions.inaturalistLinkAdopted).
 //
-// Verifies: P-064, T-022.
+// Verifies: product.inaturalistLink, tech.pacedInaturalistMapping.
 package main
 
 import (
@@ -123,7 +123,7 @@ func main() {
 	log.Printf("wrote %d of %d species to %s in %s", len(table), len(species), *out,
 		time.Since(start).Round(time.Second))
 	if len(missed) > 0 {
-		log.Printf("%d without a confident match; these get no link (P-064):", len(missed))
+		log.Printf("%d without a confident match; these get no link (product.inaturalistLink):", len(missed))
 		for _, m := range missed {
 			fmt.Fprintf(os.Stderr, "    %s\n", m)
 		}

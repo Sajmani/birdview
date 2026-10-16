@@ -32,7 +32,7 @@ const foxFile = "../../third_party/fox-wingspan/wingspan_fox2026_AppendixS1.xlsx
 // from running this implementation. A regression in the fitting code moves
 // these numbers immediately.
 //
-// Verifies: P-060, P-062. Criterion: AC-045.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric. Criterion: acceptance.wingspanModelReconstructsFox.
 func TestModelAgreesWithFoxPublishedPredictions(t *testing.T) {
 	if _, err := os.Stat(foxFile); err != nil {
 		t.Skip("skipping: Fox wingspan workbook not present")
@@ -77,7 +77,7 @@ func TestModelAgreesWithFoxPublishedPredictions(t *testing.T) {
 }
 
 // TestPredictAlwaysExplainsItself checks every estimate names its model, its
-// scope and its error -- the detail view has nothing else to show (P-063).
+// scope and its error -- the detail view has nothing else to show (product.metricProvenanceExplained).
 func TestPredictAlwaysExplainsItself(t *testing.T) {
 	if _, err := os.Stat(foxFile); err != nil {
 		t.Skip("skipping: Fox wingspan workbook not present")

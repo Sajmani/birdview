@@ -19,7 +19,7 @@
 // assets are not under cmd/.
 //
 // species.json is deliberately NOT embedded: it is a build artifact derived
-// from the committed data tables and must not be committed (T-005). The server
+// from the committed data tables and must not be committed (tech.datasetNeverCommitted). The server
 // reads it from disk at startup instead.
 package web
 

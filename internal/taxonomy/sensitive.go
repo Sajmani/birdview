@@ -21,7 +21,7 @@ import (
 
 // Withholding is one entry of eBird's Sensitive Species list: a species
 // eBird keeps out of its public output in a region, in a window of the year
-// (CR-037).
+// (decisions.ebirdSilenceNotAbsence).
 type Withholding struct {
 	// Species is the AviList name BirdView draws.
 	Species string
@@ -55,7 +55,7 @@ func (w Withholding) Covers(gid string) bool {
 // Only whole months. A window ending April 15 leaves half of April's
 // records in the export -- Painted Bunting has 12,483 of them in Florida --
 // and a month that still holds half its evidence is judged on it rather
-// than declared withheld (CR-037).
+// than declared withheld (decisions.ebirdSilenceNotAbsence).
 func (w Withholding) FullMonths() [12]bool {
 	var out [12]bool
 	if w.From == "" {
@@ -84,7 +84,7 @@ func (w Withholding) FullMonths() [12]bool {
 }
 
 // EBirdSensitive is every entry of eBird's Sensitive Species list for a
-// species BirdView draws, in the US and Canada (CR-037). Retrieved
+// species BirdView draws, in the US and Canada (decisions.ebirdSilenceNotAbsence). Retrieved
 // 2026-10-09 from the page named in sources.md.
 //
 // A listing says where eBird withholds a bird, not where the bird is, and
@@ -97,7 +97,7 @@ func (w Withholding) FullMonths() [12]bool {
 // TestEBirdSensitiveIsWellFormed. A refresh should regenerate the table
 // rather than edit it, and re-run birdview-regions.
 //
-// Verifies: CR-037.
+// Verifies: decisions.ebirdSilenceNotAbsence.
 var EBirdSensitive = []Withholding{
 	// Global: withheld everywhere, all year.
 	{Species: "Centrocercus minimus"},
@@ -244,7 +244,7 @@ func Withholdings(species, gid string) []Withholding {
 	return out
 }
 
-// Confirmation thresholds (CR-037). Neither is load-bearing for the cases
+// Confirmation thresholds (decisions.ebirdSilenceNotAbsence). Neither is load-bearing for the cases
 // that motivated them -- Painted Bunting in Florida runs at zero inside its
 // window against thousands a month outside -- and both are recorded so the
 // borderline cases have a stated rule rather than a judgement call.
@@ -253,14 +253,14 @@ const (
 	// must fall, as a share of its rate in the same region's other months.
 	withheldRate = 0.05
 	// outRecords is how many times eBird's count iNaturalist must hold for
-	// a whole-year listing to count as applied: AC-105's existing test for
+	// a whole-year listing to count as applied: acceptance.disagreementsDeclared's existing test for
 	// a source that out-records eBird, applied to one region.
 	outRecords = 3
 )
 
 // ConfirmedMonths reports the months in which eBird is withholding a species
 // in a region: named by an entry of its Sensitive Species list AND borne out
-// by the records (CR-037).
+// by the records (decisions.ebirdSilenceNotAbsence).
 //
 // The list says where eBird intends to withhold; the export says whether it
 // did. They disagree for 26 of the 230 region cells the US and Canada
@@ -316,11 +316,11 @@ func ConfirmedMonths(entries []Withholding, ebird, inat [12]int64) [12]bool {
 
 // WithheldByEBird is the set of species eBird withholds everywhere BirdView
 // looks: a global entry on its Sensitive Species list, or year-round entries
-// for both the United States and Canada (CR-034, CR-038).
+// for both the United States and Canada (decisions.sharedCountShownOnBoth, decisions.countEbirdFirst).
 //
 // Derived from the list rather than kept by hand. The hand-kept version
 // held eleven species, found by querying every plausible alias and finding
-// nothing, plus Great Gray Owl and Black Rail, which the ratio band of T-028
+// nothing, plus Great Gray Owl and Black Rail, which the ratio band of tech.sourceNamingMeasured
 // caught after the zero-record sweep missed them -- eBird holds one record of
 // the owl and sixteen of the rail. It also held **Desertas Petrel**, which is
 // on no entry of eBird's list: its missing records are a naming question,
@@ -331,7 +331,7 @@ func ConfirmedMonths(entries []Withholding, ebird, inat [12]int64) [12]bool {
 // telling a reader to look for another name would send them after one that
 // does not exist.
 //
-// Verifies: P-077.
+// Verifies: product.namesRecordsFiledUnder.
 var WithheldByEBird = func() map[string]bool {
 	allYear := map[string]map[string]bool{}
 	out := map[string]bool{}

@@ -17,9 +17,9 @@
 // AVONET ships three parallel taxonomies. BirdView's spine is AVONET2_eBird,
 // but several ABA species that sheet lumps have their own row in
 // AVONET1_BirdLife or AVONET3_BirdTree, and reading across all three is what
-// CR-006 decided to do.
+// decisions.abaSpeciesWithoutAvonet decided to do.
 //
-// Verifies: P-002, P-003, P-006.
+// Verifies: product.traitsFromAvonet, product.traitsPerSpecies, product.joinOnBinomial.
 package avonet
 
 import (
@@ -41,12 +41,12 @@ const (
 
 // Traits are the five AVONET measurements BirdView consumes. Other columns --
 // Beak.Width, Beak.Depth, Hand-Wing.Index -- are deliberately not read: carrying
-// unused data invites someone to invent a use for it (P-003).
+// unused data invites someone to invent a use for it (product.traitsPerSpecies).
 //
 // A column that stops earning its place leaves. Beak.Depth was read until the
 // cranium model moved from bill depth to mass. Tarsus.Length made the round
 // trip -- unused, then ingested when the diagram gained legs, then dropped
-// again when the flight premise removed them (CR-010).
+// again when the flight premise removed them (decisions.inFlightNoLegs).
 type Traits struct {
 	Culmen    float64 // Beak.Length_Culmen, mm
 	Tail      float64 // Tail.Length, mm
@@ -58,13 +58,13 @@ type Traits struct {
 	// verbatim. They are **primary** values: AVONET records the one habitat
 	// and the one feeding niche a species mostly uses, not every one it
 	// uses. Anything BirdView adds beyond them is its own and is marked as
-	// such (P-069).
+	// such (product.categoryProvenance).
 	Habitat string // Habitat: Forest, Wetland, Marine, Grassland, ...
 	Niche   string // Trophic.Niche: Invertivore, Aquatic predator, ...
 	// Level is Trophic.Level: Herbivore, Carnivore, Omnivore, Scavenger.
 	// Read because it disagrees with Niche usefully -- an Omnivore level
 	// beside a specific niche is AVONET saying the diet is mixed and the
-	// niche only names the larger half (P-015).
+	// niche only names the larger half (product.habitatAndDietFilters).
 	Level string
 }
 
@@ -76,7 +76,7 @@ type Workbook struct {
 	BirdTree map[string]Traits
 
 	// FamilyOf gives the eBird-sheet family for a species, used only as a
-	// cross-check against ABA's family; ABA is authoritative (P-004).
+	// cross-check against ABA's family; ABA is authoritative (product.namesFromAvilist).
 	FamilyOf map[string]string
 
 	// OrderOf gives the taxonomic order, which the wingspan model needs: the

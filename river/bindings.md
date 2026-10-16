@@ -12,8 +12,8 @@ migration finishes, these are deliberate local departures from `process.md`, not
 | Area | Current state | Why it has not moved yet |
 | --- | --- | --- |
 | **Method** | River's `process.md`, pin in its banner | — |
-| **Layout** | specman's flat layout, in River's directory `river/` ([CR-045](decisions.md#cr-045)) | No longer blocked: the server used to serve these files by flat name, and since [CR-046](decisions.md#cr-046) it serves none of them. Nesting is now a file move, not yet made |
-| **Identifiers** | `P-###`, `T-###`, `G-###`, `AC-###`, `CR-###` | 228 identifiers carry about 3,000 references, over 1,000 of them in Go comments, log output and generated data files |
+| **Layout** | specman's flat layout, in River's directory `river/` ([decisions.bundleMovesToRiver](decisions.md#bundlemovestoriver)) | No longer blocked: the server used to serve these files by flat name, and since [decisions.requirementsNotServed](decisions.md#requirementsnotserved) it serves none of them. Nesting is now a file move, not yet made |
+| **Identifiers** | Descriptive camelCase, qualified by kind outside their own file: `goals.*`, `product.*`, `tech.*`, `decisions.*`, `acceptance.*` ([decisions.descriptiveIdentifiers](decisions.md#descriptiveidentifiers)) | — |
 | **Composition** | Not run. `acceptance.md` sits beside the sources | River puts criteria in composed packages; the split into `app`, `dataset` and `internal/repo` is a judgment still to make |
 | **Checks** | specman's `goals.py`, `pins.py`, `refs.py` | They parse the legacy layout and IDs, and they work |
 | **Stage adoption** | Not yet declared | River asks each stage to be adopted or declared informal. To be decided by the project owner |
@@ -25,14 +25,14 @@ What this project declares, as [process.md](process.md) asks of every adopter.
 | Binding | This project |
 | --- | --- |
 | **Standing checks** | `go build ./...`, `go vet ./...`, `gofmt -l .` (must print nothing), `go test ./...`. All four, in that order, before any change is called done. |
-| **ID citation syntax** | Go line comments, preserving the literal token: `// Verifies: P-042, T-010.` |
-| **Artifact locations** | `river/`, with one exception below. Not served; the guides link to it in the published repository ([CR-046](decisions.md#cr-046)). |
+| **ID citation syntax** | Go line comments, preserving the literal token: `// Verifies: product.scaleToggle, tech.badgeContrast.` |
+| **Artifact locations** | `river/`, with one exception below. Not served; the guides link to it in the published repository ([decisions.requirementsNotServed](decisions.md#requirementsnotserved)). |
 | **Subject vocabulary** | Dotted paths, lowercase, e.g. `diagram.scale.mode`, `badge.contrast.ratio`, `dataset.join.key`. New subjects are added by the project owner. |
-| **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never access or process Wiley Online Library material, by any means including an AI agent (CR-002). Never fetch or process anything from BirdLife's DataZone by any automated means (see `sources.md` and `todo.md`). |
+| **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never access or process Wiley Online Library material, by any means including an AI agent (decisions.ricklefsProhibited). Never fetch or process anything from BirdLife's DataZone by any automated means (see `sources.md` and `todo.md`). |
 | **External systems** | Tests make no network requests. Any source fetch is exercised against a local fixture or an `httptest` server, never against the live publisher. |
 | **Approval authority** | Sameer — gates, waivers, amendments, source deviations, risk acceptances. |
-| **Supported runtime** | Whatever the dependencies require (T-007). No minimum Go version is maintained. |
-| **Source refresh cadence** | Annually. AviList, AOS and eBird/Clements each revise on roughly yearly cycles, and P-006's synonym table depends on all three. |
+| **Supported runtime** | Whatever the dependencies require (tech.goVersionFollowsDeps). No minimum Go version is maintained. |
+| **Source refresh cadence** | Annually. AviList, AOS and eBird/Clements each revise on roughly yearly cycles, and product.joinOnBinomial's synonym table depends on all three. |
 | **Existing docs** | `river/` owns requirements. `PROVENANCE` files under `river/sources/` own retrieval facts and hashes. A README, when written, owns usage instructions and duplicates neither. |
 
 ## Location exception: the third_party directory

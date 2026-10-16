@@ -16,13 +16,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img"
      aria-label="BirdView: a bird diagram seen from above">
   <!--
-    The same figure the app draws: a bird from above, in flight (P-040),
+    The same figure the app draws: a bird from above, in flight (product.segmentComposition),
     reduced to the three parts that survive 16px. Wing crossbar, body and
     head, plus a bill nub for the palette's amber. The tail is solid rather
     than dashed, because a 5/3 dash pattern is invisible at this size.
 
-    Colors are the diagram's own, and must stay that way (P-048): the icon
-    may use no color that paints no part of the diagram. AC-081 checks this
+    Colors are the diagram's own, and must stay that way (product.oneDiagramVocabulary): the icon
+    may use no color that paints no part of the diagram. acceptance.faviconFromPalette checks this
     against the stylesheet, so a change there without a change here is caught.
 
     On #0f172a: wing #4ade80 at 10.25:1, head and body #cbd5e1 at 12.02:1,
@@ -33,10 +33,10 @@
     crossbar's own blue was too dark for this icon, which was real evidence
     that the blue was too dark full stop: it was also failing the 7:1 text
     floor on the labels sharing it. Fixing the vocabulary rather than this
-    copy of it is what P-048 asks for.
+    copy of it is what product.oneDiagramVocabulary asks for.
 
-    Two parts are drawn in a color that is not their own, which P-048 allows
-    at this size and which is why AC-081 does not check per-part mapping. The
+    Two parts are drawn in a color that is not their own, which product.oneDiagramVocabulary allows
+    at this size and which is why acceptance.faviconFromPalette does not check per-part mapping. The
     body uses the head's #cbd5e1 because its own #64748b is 3.75:1 and
     unreadable at 16px, and neck and tail collapse into the same stroke.
 

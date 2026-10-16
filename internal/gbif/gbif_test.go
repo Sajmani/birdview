@@ -78,7 +78,7 @@ func testIndex() *Index {
 // the epithet tier searches all of AviList, reddens "epithet must not cross a
 // family" as well.
 //
-// Verifies: T-021.
+// Verifies: tech.recordBeforeConsuming.
 func TestResolveTiers(t *testing.T) {
 	idx := testIndex()
 	cases := []struct {
@@ -198,7 +198,7 @@ func TestResolveTiers(t *testing.T) {
 // "alba" fold to "al" and "aestiva" to "aestiv" -- the first pair of "must
 // stay apart" cases below then collapses and the test reddens.
 //
-// Verifies: T-021.
+// Verifies: tech.recordBeforeConsuming.
 func TestFoldCrossesGenusAndCaseButNotSpecies(t *testing.T) {
 	same := [][2]string{
 		{"jubatus", "jubata"},         // gender follows the genus
@@ -240,7 +240,7 @@ func TestFoldCrossesGenusAndCaseButNotSpecies(t *testing.T) {
 // the test goes red. Removing the tier/name agreement check does the same for
 // the two cases after it.
 //
-// Verifies: T-021.
+// Verifies: tech.recordBeforeConsuming.
 func TestTableRoundTripsAndRejectsJunk(t *testing.T) {
 	in := Table{
 		"Phalacrocorax auritus": {GBIFName: "Phalacrocorax auritus", GBIFKey: 2481875,
@@ -314,7 +314,7 @@ func TestTableRoundTripsAndRejectsJunk(t *testing.T) {
 // to "Phalacrocorax auritum" reddens it; so does lowering wantResolved by
 // hand-editing four rows of the committed table to tier=none.
 //
-// Verifies: T-021.
+// Verifies: tech.recordBeforeConsuming.
 func TestCommittedTableResolvesAlmostEverything(t *testing.T) {
 	f, err := os.Open(tableFile)
 	if err != nil {
@@ -413,7 +413,7 @@ func TestCommittedTableResolvesAlmostEverything(t *testing.T) {
 // Watched fail: changing one word of Write's header literal reddens it, and so
 // does swapping two data lines in data/gbif-taxa.tsv by hand.
 //
-// Verifies: T-021.
+// Verifies: tech.recordBeforeConsuming.
 func TestCommittedTableIsExactlyWhatWriteProduces(t *testing.T) {
 	onDisk, err := os.ReadFile(tableFile)
 	if err != nil {
@@ -451,17 +451,17 @@ func TestCommittedTableIsExactlyWhatWriteProduces(t *testing.T) {
 // It reconstructs BirdView's species list from the ABA checklist and the
 // AviList rename table rather than from the compiled dataset, so it needs no
 // AVONET parse -- and skips on a clean checkout, because the checklist is all
-// rights reserved and never committed (T-004).
+// rights reserved and never committed (tech.fetchRestrictedInputs).
 //
 // Watched fail: rewriting every synonym- and epithet-tier row of the
 // committed table to point at GBIF's own name -- a plain join on scientific
 // name, which is what the project had -- drops the count from 813 to 780 and
 // the test goes red.
 //
-// Verifies: T-021.
+// Verifies: tech.recordBeforeConsuming.
 func TestCommittedTableCoversBirdViewsSpecies(t *testing.T) {
 	// BirdView's species, from the committed status table rather than from
-	// the ABA checklist (CR-028). This used to skip on a clean checkout
+	// the ABA checklist (decisions.scopeFromRecurrence). This used to skip on a clean checkout
 	// because the checklist is never committed; it no longer can.
 	sf, err := os.Open(statusFile)
 	if err != nil {
@@ -555,7 +555,7 @@ const (
 )
 
 // TestTaxonIdentifiesItselfAndPaces checks the two courtesies this tool owes:
-// say who you are (T-006) and do not hammer the service. Both are observed at
+// say who you are (tech.identifiedClient) and do not hammer the service. Both are observed at
 // the server -- a client that sets Interval and never waits would satisfy a
 // test that read the field.
 //
@@ -563,7 +563,7 @@ const (
 // leaves Go's default Go-http-client/1.1 and the first two assertions redden;
 // making pace() return immediately reddens the third.
 //
-// Verifies: T-006.
+// Verifies: tech.identifiedClient.
 func TestTaxonIdentifiesItselfAndPaces(t *testing.T) {
 	srv, times, agents := fakeAPI(t, map[string]string{
 		"/species/2481875":          cormorantJSON,
@@ -614,7 +614,7 @@ func TestTaxonIdentifiesItselfAndPaces(t *testing.T) {
 // Watched fail: dropping the `r.Rank == "SPECIES"` condition in Taxon admits
 // "Nannopterum auritum auritum" and the length check goes red.
 //
-// Verifies: T-021.
+// Verifies: tech.recordBeforeConsuming.
 func TestTaxonKeepsOnlySpeciesRankSynonyms(t *testing.T) {
 	srv, _, _ := fakeAPI(t, map[string]string{
 		"/species/2481875":          cormorantJSON,
@@ -651,7 +651,7 @@ func TestTaxonKeepsOnlySpeciesRankSynonyms(t *testing.T) {
 // never advancing offset trips the duplicate-key guard, which is the last case
 // below.
 //
-// Verifies: T-021.
+// Verifies: tech.recordBeforeConsuming.
 func TestSpeciesKeysPagesUntilTheFacetIsEmpty(t *testing.T) {
 	all := []struct {
 		key   string
@@ -733,7 +733,7 @@ func TestSpeciesKeysPagesUntilTheFacetIsEmpty(t *testing.T) {
 // 404 server sees 4 requests, not 1); making it retry nothing reddens the
 // first (the 503 never reaches its 200).
 //
-// Verifies: T-006.
+// Verifies: tech.identifiedClient.
 func TestGetRetriesServerErrorsButNotClientErrors(t *testing.T) {
 	var hits int
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -813,7 +813,7 @@ func TestGetRetriesServerErrorsButNotClientErrors(t *testing.T) {
 // error makes it return a short slice with no error, and both assertions here
 // redden.
 //
-// Verifies: T-021.
+// Verifies: tech.recordBeforeConsuming.
 func TestTaxaFailsTheBatchOnATransportError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/synonyms") {
@@ -934,7 +934,7 @@ func TestPacingRecoversAfterACleanStreak(t *testing.T) {
 	}
 }
 
-// TestCountOffLandInBoxSubtractsTheLand checks the measurement CR-031 rests
+// TestCountOffLandInBoxSubtractsTheLand checks the measurement decisions.honestSeaDenominator rests
 // on: a box's records minus those GADM places in a country are the records on
 // water.
 //
@@ -947,7 +947,7 @@ func TestPacingRecoversAfterACleanStreak(t *testing.T) {
 // holds 413,188,208 records and a plain gadmGid facet summed to
 // 1,175,397,927 of them.
 //
-// Verifies: T-006, CR-031.
+// Verifies: tech.identifiedClient, decisions.honestSeaDenominator.
 func TestCountOffLandInBoxSubtractsTheLand(t *testing.T) {
 	const onePerLevel = `{"count":1000,"facets":[{"field":"GADM_LEVEL_0_GID",
 	  "counts":[{"name":"USA","count":700},{"name":"CAN","count":200}]}]}`
@@ -968,7 +968,7 @@ func TestCountOffLandInBoxSubtractsTheLand(t *testing.T) {
 		t.Errorf("off land %d, want 100 — 1000 in the box less 700 in the USA and 200 in Canada", off)
 	}
 	if len(*agents) == 0 || (*agents)[0] == "" {
-		t.Error("no User-Agent sent (T-006)")
+		t.Error("no User-Agent sent (tech.identifiedClient)")
 	}
 
 	// Multi-level facet rows sum past the box: refuse, do not clamp.

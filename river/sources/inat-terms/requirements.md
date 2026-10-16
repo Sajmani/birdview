@@ -46,7 +46,7 @@ words rather than reproducing a logo.
 **For BirdView: governs the thing BirdView deliberately does not do.** The photographs a reader
 sees after following a link are contributors' work under their own licenses, frequently CC BY-NC.
 BirdView never copies, caches, hotlinks or embeds any of them — which is also what
-[T-002](../../tech.md) requires for unrelated reasons, since an embedded image would be an
+[tech.selfContainedServer](../../tech.md) requires for unrelated reasons, since an embedded image would be an
 external subresource. The reader arrives on iNaturalist, where each photograph carries its own
 license notice.
 
@@ -68,7 +68,7 @@ first thing to re-read, and the answer will be per-photograph rather than blanke
 > — Terms of Use, Responsibility of Contributors
 
 **Not applicable as written** — BirdView posts nothing. Its read rate is governed instead by
-`inat-api/R1`, implemented as [T-022](../../tech.md).
+`inat-api/R1`, implemented as [tech.pacedInaturalistMapping](../../tech.md).
 
 ### `inat-terms/R4` — Machine generated content is prohibited *(hard rule)*
 

@@ -25,7 +25,7 @@ type Box struct{ W, H float64 }
 
 // Geometry is everything the renderer needs to draw one bird, in pixels
 // relative to the box origin. Every vertical coordinate derives from the same
-// scale, and so does the crossbar (P-043).
+// scale, and so does the crossbar (product.crossbarAtVerticalScale).
 type Geometry struct {
 	PxPerMm float64
 
@@ -52,7 +52,7 @@ type Geometry struct {
 	ChordTickX float64
 
 	// NeckFolded is set for the families that fly with the neck drawn back onto
-	// the shoulders (P-040). Their neck is an S of two semicircles of NeckArcR
+	// the shoulders (product.segmentComposition). Their neck is an S of two semicircles of NeckArcR
 	// rather than a straight stick, so it is the same length of stroke in less
 	// height. NeckArcR is zero when the neck is straight.
 	NeckFolded bool
@@ -66,7 +66,7 @@ const headAspect = 0.72
 
 // foldedNecks are the families that fly with the neck folded back rather than
 // extended -- the field mark that separates a heron from a crane, a stork or an
-// ibis in the air (P-040, CR-011).
+// ibis in the air (product.segmentComposition, decisions.foldedNeckAsS).
 //
 // This is a posture, not a measurement, and it produces no metric: the neck
 // length is unchanged and is still reported in full. So like headAspect it
@@ -95,18 +95,18 @@ const neckFoldCompression = 2 / math.Pi
 // Layout places one bird inside a box at a shared scale.
 //
 // refLength and refWingspan are the largest total length and wingspan the
-// scale must accommodate -- the section's, or the whole set's in global mode (P-042).
+// scale must accommodate -- the section's, or the whole set's in global mode (product.scaleToggle).
 // Passing the same references for every bird in a group is what makes them
 // comparable; the scale is chosen so the largest of each fits, and every other
 // bird is drawn smaller in proportion.
 //
-// Verifies: P-040, P-041, P-042, P-043.
+// Verifies: product.segmentComposition, product.segmentsSumToLength, product.scaleToggle, product.crossbarAtVerticalScale.
 func Layout(s *dataset.Species, refLength, refWingspan float64, box Box) Geometry {
 	scale := 0.0
 	if refLength > 0 {
 		scale = box.H / refLength
 	}
-	// The crossbar is drawn at the vertical scale (P-043), so a wingspan of
+	// The crossbar is drawn at the vertical scale (product.crossbarAtVerticalScale), so a wingspan of
 	// 2.5x body length needs 2.5x the height in width. Where the box cannot
 	// give that, the whole diagram shrinks rather than the crossbar alone --
 	// rescaling one axis would silently misstate the proportion.
@@ -128,7 +128,7 @@ func Layout(s *dataset.Species, refLength, refWingspan float64, box Box) Geometr
 
 	// A folded neck is the same stroke in less height: two semicircles whose
 	// combined path length is exactly the neck, so r = neck/2pi and the pair
-	// spans 4r (P-040).
+	// spans 4r (product.segmentComposition).
 	neck := seg.Neck.Value * scale
 	if g.NeckFolded = foldedNecks[s.Family]; g.NeckFolded {
 		g.NeckArcR = neck / (2 * math.Pi)
@@ -151,17 +151,17 @@ func Layout(s *dataset.Species, refLength, refWingspan float64, box Box) Geometr
 func (g Geometry) NeckMid() float64 { return (g.YNeckTop + g.YShoulder) / 2 }
 
 // TotalHeight is the drawn extent from bill tip to tail tip. Because the
-// segments sum exactly to total length (P-041), this equals the bird's total
+// segments sum exactly to total length (product.segmentsSumToLength), this equals the bird's total
 // length at the current scale -- which is what makes two diagrams at one scale
 // directly comparable.
 //
 // Except when the neck is folded, where the S spans less height than the neck
-// is long and the drawing is correspondingly shorter (CR-011). Length as data
+// is long and the drawing is correspondingly shorter (decisions.foldedNeckAsS). Length as data
 // is unaffected: Sections and Scales read TotalLength, never this.
 func (g Geometry) TotalHeight() float64 { return g.YTailTip - g.YBillTip }
 
 // Label is one annotation on the detail diagram: a segment named and measured
-// beside the part it describes (P-066).
+// beside the part it describes (product.labeledDetailDiagram).
 type Label struct {
 	Key     string  // bill, head, neck, body, tail
 	AnchorY float64 // the segment's midpoint on the axis: where the leader points
@@ -182,7 +182,7 @@ const labelMinGap = 14
 // bottom. The leader line, not the text position, is what ties a label to its
 // segment, so moving the text is safe where moving the anchor would not be.
 //
-// Verifies: P-066.
+// Verifies: product.labeledDetailDiagram.
 func (g Geometry) DetailLabels(box Box, topOffset float64) []Label {
 	mid := func(a, b float64) float64 { return topOffset + (a+b)/2 }
 	out := []Label{

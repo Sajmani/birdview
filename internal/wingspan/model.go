@@ -36,7 +36,7 @@ import (
 // BirdView's previous constants carried a mean error of 18.7% against the
 // empirical data, against roughly 6% for this.
 //
-// Verifies: P-060, P-062.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric.
 type Model struct {
 	byGroup      map[string]fit
 	global       fit
@@ -56,7 +56,7 @@ const minGroupSize = 5
 
 // Predict returns an estimated wingspan in millimeters and a provenance
 // description naming the model, the group it came from, and its measured
-// error -- so the detail view can tell a reader how much to trust it (P-063).
+// error -- so the detail view can tell a reader how much to trust it (product.metricProvenanceExplained).
 func (m *Model) Predict(order string, chordMm float64) (float64, string) {
 	if chordMm <= 0 {
 		return 0, ""

@@ -20,7 +20,7 @@ import (
 )
 
 // TestOccurrenceNormalizesEveryKnownName asserts the single normalization
-// both readers of the occurrence data now share (CR-035).
+// both readers of the occurrence data now share (decisions.regionJoinNormalizes).
 //
 // The bug this closes was not a missing table entry — every entry below
 // already existed — but a second reader that never consulted them.
@@ -28,7 +28,7 @@ import (
 // 7,310,342 Dryobates villosus records matched no drawn species and went
 // into the denominator of every share and no numerator at all.
 //
-// Verifies: P-011, P-074, T-027.
+// Verifies: product.regionAndMonthFilter, product.shareOfRecords, tech.joinsReportDrops.
 func TestOccurrenceNormalizesEveryKnownName(t *testing.T) {
 	for from, to := range AviListRenames {
 		if got := Occurrence(from); got != strings.ToLower(to) {
@@ -54,10 +54,10 @@ func TestOccurrenceNormalizesEveryKnownName(t *testing.T) {
 		}
 	}
 	// A shared name is NOT normalized away: Setophaga petechia is a drawn
-	// species in its own right, and CR-034 discloses the overlap rather
+	// species in its own right, and decisions.sharedCountShownOnBoth discloses the overlap rather
 	// than folding it (which would assert a division nobody measured).
 	if got := Occurrence("setophaga petechia"); got != "setophaga petechia" {
-		t.Errorf("Occurrence folded a shared name to %q; CR-034 discloses those, "+
+		t.Errorf("Occurrence folded a shared name to %q; decisions.sharedCountShownOnBoth discloses those, "+
 			"it does not reassign them", got)
 	}
 	if len(AviListRenames)+len(CountedAs) < 5 {
@@ -76,9 +76,9 @@ func TestOccurrenceNormalizesEveryKnownName(t *testing.T) {
 // species name, joins cleanly, and credits a real bird with records of
 // something that is not it.
 //
-// Watched fail: see AC-106.
+// Watched fail: see acceptance.occurrenceReadersAgree.
 //
-// Verifies: P-011, T-027. Criterion: AC-106.
+// Verifies: product.regionAndMonthFilter, tech.joinsReportDrops. Criterion: acceptance.occurrenceReadersAgree.
 func TestBinomialReducesRankWithoutInventingSpecies(t *testing.T) {
 	species := map[string]string{
 		"turdus migratorius":                "turdus migratorius",

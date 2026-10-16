@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""AC-003 - every vendored input matches the hash recorded in its PROVENANCE.md.
+"""acceptance.vendoredHashesMatch - every vendored input matches the hash recorded in its PROVENANCE.md.
 
-Verifies: T-021, G-004.
+Verifies: tech.recordBeforeConsuming, goals.goodDataCitizen.
 
 Scope: committed inputs only. `wiley` is quoted rather than vendored and has no file
-to hash; `aba` is fetched at build and verified by the ingest instead (AC-053).
+to hash; `aba` is fetched at build and verified by the ingest instead (acceptance.abaFileHashMatches).
 """
 import re, sys, hashlib, pathlib
 

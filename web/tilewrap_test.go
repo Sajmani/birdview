@@ -23,7 +23,7 @@ import (
 // A tile header that wraps makes its tile taller than its neighbours, and
 // .tiles is a flex row, so one tall tile leaves the whole row ragged with the
 // diagrams at different offsets. Reading down a section is what the index is
-// for (P-031).
+// for (product.tileContents).
 //
 // This is structural: whether text actually wraps depends on font metrics and
 // the viewport, which needs a browser harness this project does not have. What
@@ -31,7 +31,7 @@ import (
 // that the markup gives them something to act on -- which is the shape the bug
 // actually had. A declaration was missing, not mismeasured.
 //
-// Verifies: P-031. Criterion: AC-082.
+// Verifies: product.tileContents. Criterion: acceptance.tileHeaderNeverWraps.
 
 // rule returns the declaration block of a top-level selector, exactly as
 // written, so an assertion can look for a property in it.
@@ -79,7 +79,7 @@ var (
 // inside it would be the first thing eaten -- and the markup looks correct
 // until a name is long enough to prove otherwise.
 //
-// Verifies: P-031. Criterion: AC-082.
+// Verifies: product.tileContents. Criterion: acceptance.tileHeaderNeverWraps.
 func TestBandingCodeIsOutsideTheTruncatingElement(t *testing.T) {
 	for _, name := range []string{"static/index.html", "static/detail.html", "static/compare.html"} {
 		b, err := Static.ReadFile(name)

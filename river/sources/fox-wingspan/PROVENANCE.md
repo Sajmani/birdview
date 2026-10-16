@@ -37,12 +37,12 @@ The columns BirdView reads:
 | `Species1` | Join key — **BirdLife taxonomy**, matching AVONET's `AVONET1_BirdLife` sheet |
 | `needs_prediction` | `0` marks an empirical value; anything else means the row is modeled |
 | `wingspan_reported_mid_all` | The measured value |
-| `wingspan_reported_min_all` / `_max_all` | The reported range, stored alongside per P-060 |
+| `wingspan_reported_min_all` / `_max_all` | The reported range, stored alongside per product.lengthAndWingspanSources |
 
 **The predicted columns are deliberately not read.** `wingspan_predicted_order` and
 `wingspan_predicted_global` are regressions from AVONET wing chord. Ingesting them would
 reintroduce modeled-as-measured values under a source that looks authoritative, which is the error
-[CR-001](../../decisions.md#cr-001) exists to prevent. BirdView models its own estimates and labels
+[decisions.noOpenLengthAndWingspan](../../decisions.md#noopenlengthandwingspan) exists to prevent. BirdView models its own estimates and labels
 them.
 
 ## Measured coverage for BirdView's scope

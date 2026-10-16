@@ -29,12 +29,12 @@ import (
 const DefaultBaseURL = "https://api.inaturalist.org/v1"
 
 // MinInterval is the pacing iNaturalist asks for: "about 1 per second"
-// (inat-api/R1, T-022). A full rebuild is 841 requests, so roughly fifteen
+// (inat-api/R1, tech.pacedInaturalistMapping). A full rebuild is 841 requests, so roughly fifteen
 // minutes -- which is exactly why this runs in its own tool and not in the
 // ingest.
 const MinInterval = time.Second
 
-// UserAgent identifies the client, as inat-api/R4 and T-006 both require.
+// UserAgent identifies the client, as inat-api/R4 and tech.identifiedClient both require.
 // A contact address is included because a service operator who needs to ask a
 // client to stop should not have to guess who to ask. No project URL: BirdView
 // is not published anywhere yet, and a plausible-looking dead link is worse
@@ -80,7 +80,7 @@ type taxaResponse struct {
 
 // Lookup resolves one species. It returns the entry and true only when
 // iNaturalist offers a species-rank taxon that Accept is satisfied with;
-// otherwise it returns false, and the caller emits no link (P-064).
+// otherwise it returns false, and the caller emits no link (product.inaturalistLink).
 //
 // A miss is not an error. Most of the time it will mean iNaturalist has not yet
 // followed a split that ABA has, which is a fact about the world rather than a
@@ -91,7 +91,7 @@ func (c *Client) Lookup(ctx context.Context, sciName, commonName string) (Entry,
 	// autocomplete rather than the plain search: the latter fails outright on
 	// short repeated binomials -- "Alle alle" returns a mustard plant and a
 	// domestic cat -- while autocomplete finds the Dovekie. all_names asks for
-	// every vernacular, not just the preferred one (P-064).
+	// every vernacular, not just the preferred one (product.inaturalistLink).
 	u := fmt.Sprintf("%s/taxa/autocomplete?rank=species&all_names=true&q=%s",
 		c.BaseURL, url.QueryEscape(sciName))
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)

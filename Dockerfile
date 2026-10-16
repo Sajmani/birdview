@@ -15,7 +15,7 @@
 #
 # Multi-stage build: stage `ingest` compiles and runs birdview-ingest to produce
 # species.json; stage `builder` compiles the server binary; the final image
-# copies only the static binary and the compiled dataset (T-001, T-002, T-005).
+# copies only the static binary and the compiled dataset (tech.twoCommandsOneModule, tech.selfContainedServer, tech.datasetNeverCommitted).
 #
 # Usage:
 #   docker build -t birdview .

@@ -15,7 +15,7 @@
 // Command birdview-ingest compiles the BirdView dataset from its sources.
 //
 // The output is a build artifact and is never committed: it carries values
-// derived from the ABA checklist, which is all rights reserved (T-004, T-005).
+// derived from the ABA checklist, which is all rights reserved (tech.fetchRestrictedInputs, tech.datasetNeverCommitted).
 package main
 
 import (
@@ -43,7 +43,7 @@ import (
 
 // maxUnmatchedFraction fails the build when too many species cannot be joined.
 // Without a loud failure a taxonomy update silently shrinks the dataset and
-// nobody notices (P-007).
+// nobody notices (product.unmatchedSpeciesReported).
 const maxUnmatchedFraction = 0.02
 
 func main() {
@@ -73,7 +73,7 @@ func main() {
 		// notices the table was never regenerated.
 		log.Printf("birdview-ingest: WARNING: no iNaturalist links (%v)", err)
 	} else {
-		fmt.Printf("  iNaturalist links: %d of %d species (P-064)\n", linked, len(ds.Species))
+		fmt.Printf("  iNaturalist links: %d of %d species (product.inaturalistLink)\n", linked, len(ds.Species))
 	}
 
 	placed, err := applyRegions(ds, *regPath)
@@ -83,7 +83,7 @@ func main() {
 		// shipping an unregioned build is how nobody notices.
 		log.Printf("birdview-ingest: WARNING: no region data (%v)", err)
 	} else {
-		fmt.Printf("  regions          : %d of %d species placed (P-011)\n", placed, len(ds.Species))
+		fmt.Printf("  regions          : %d of %d species placed (product.regionAndMonthFilter)\n", placed, len(ds.Species))
 	}
 
 	if err := os.MkdirAll(filepath.Dir(*outPath), 0o755); err != nil {
@@ -112,7 +112,7 @@ type resolution struct {
 }
 
 // resolve finds trait data for one species, preferring an exact taxon match in
-// any AVONET taxonomy over borrowing a relative's measurements (CR-006).
+// any AVONET taxonomy over borrowing a relative's measurements (decisions.abaSpeciesWithoutAvonet).
 func resolve(sci string, wb *avonet.Workbook) (resolution, bool) {
 	try := func(name, sheet string, tbl map[string]avonet.Traits, kind dataset.Kind) (resolution, bool) {
 		if t, ok := tbl[name]; ok && t.Culmen > 0 {
@@ -121,7 +121,7 @@ func resolve(sci string, wb *avonet.Workbook) (resolution, bool) {
 		return resolution{}, false
 	}
 
-	// 0. A species whose own row must come from a narrower sheet (CR-041);
+	// 0. A species whose own row must come from a narrower sheet (decisions.herringGullEuropeanRow);
 	// checkOwnRowSheets has already made sure that sheet holds it.
 	if want, ok := taxonomy.OwnRowSheets[sci]; ok {
 		return try(sci, want, sheetTraits(wb, want), dataset.Measured)
@@ -153,7 +153,7 @@ func resolve(sci string, wb *avonet.Workbook) (resolution, bool) {
 		}
 	}
 	// 3. A pre-split parent: real data, different bird. Where a sheet holds a
-	// narrower concept of the parent it is the only one tried (CR-039);
+	// narrower concept of the parent it is the only one tried (decisions.whiteTernBorrows);
 	// checkNearMatchSheets has already made sure it holds the parent.
 	if parent, ok := taxonomy.NearMatches[sci]; ok {
 		if want, ok := taxonomy.NearMatchSheets[sci]; ok {
@@ -185,9 +185,9 @@ func sheetTraits(wb *avonet.Workbook, sheet string) map[string]avonet.Traits {
 // checkNearMatchSheets fails when a declared donor sheet does not hold the
 // parent it is declared for. Falling back to another sheet would put the
 // broader row back without a word, which is the error the declaration exists
-// to prevent (CR-039).
+// to prevent (decisions.whiteTernBorrows).
 //
-// Verifies: P-060, P-062.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric.
 func checkNearMatchSheets(wb *avonet.Workbook, sheets map[string]string) error {
 	for sci, sheet := range sheets {
 		parent, ok := taxonomy.NearMatches[sci]
@@ -202,9 +202,9 @@ func checkNearMatchSheets(wb *avonet.Workbook, sheets map[string]string) error {
 }
 
 // checkOwnRowSheets fails when a declared sheet does not hold the species'
-// own row, for the reason checkNearMatchSheets gives (CR-041).
+// own row, for the reason checkNearMatchSheets gives (decisions.herringGullEuropeanRow).
 //
-// Verifies: P-060, P-062.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric.
 func checkOwnRowSheets(wb *avonet.Workbook, sheets map[string]string) error {
 	for sci, sheet := range sheets {
 		if t, ok := sheetTraits(wb, sheet)[sci]; !ok || t.Culmen <= 0 {
@@ -216,7 +216,7 @@ func checkOwnRowSheets(wb *avonet.Workbook, sheets map[string]string) error {
 
 func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, string, error) {
 	// Scope comes from BirdView's own status table now, not from the ABA
-	// checklist (P-001, CR-028). That is what unblocks deployment: nothing
+	// checklist (product.scopeIsRecurringAvifauna, decisions.scopeFromRecurrence). That is what unblocks deployment: nothing
 	// all-rights-reserved is read at build time, so nothing of anyone else's
 	// is reproduced by serving the result.
 	sf, err := os.Open(statusPath)
@@ -250,7 +250,7 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 
 	// Every name now comes from AviList, so the ABA checklist supplies only
 	// SCOPE -- which species are in -- and nothing that reaches a page
-	// (CR-022). Resolve each in-scope species to its AviList row first; what
+	// (decisions.avilistReplacesAba). Resolve each in-scope species to its AviList row first; what
 	// cannot be resolved is dropped, because a bird AviList does not recognize
 	// could only be named from the one source that may not be served.
 	avlOf := map[string]avilist.Species{}
@@ -266,7 +266,7 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 	sort.Strings(dropped)
 	// Expected: every species AviList does not carry THAT IS IN SCOPE. One
 	// that has left scope has nothing to drop: Vireo swainsoni left when
-	// scope began to be measured on eBird (CR-038), because eBird files
+	// scope began to be measured on eBird (decisions.countEbirdFirst), because eBird files
 	// every Warbling Vireo under Vireo gilvus and its records under
 	// swainsoni were iNaturalist's alone. Requiring it to be dropped anyway
 	// made the check fail on a species that was correctly never reached.
@@ -319,7 +319,7 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 
 	// One palette for orders, and one per order for its families. Family colors
 	// need only be distinct within their order, which is what makes 91 families
-	// fit a gamut that holds far fewer (P-005).
+	// fit a gamut that holds far fewer (product.generatedBadgeColors).
 	var orderSeq []string
 	byOrder := map[string][]string{}
 	for _, f := range famSeq {
@@ -382,7 +382,7 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 		// The eBird code is the id, so a URL is /species/amerob rather than a
 		// genus nobody can spell. Where AviList publishes no code the
 		// scientific-name slug stands in, which keeps every species reachable
-		// and keeps the id stable (P-049, AC-084).
+		// and keeps the id stable (product.englishNameChoice, acceptance.stableSpeciesId).
 		sid := avr.Code
 		if sid == "" {
 			sid = id(sci)
@@ -401,8 +401,8 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 			FamilyColor:    famColors[avr.Family].Hex,
 			FamilyText:     famColors[avr.Family].Text,
 			Order:          avr.Order,
-			// Categorical assignments (P-015). AVONET's primary value, plus
-			// anything BirdView adds, each marked with its origin (P-069).
+			// Categorical assignments (product.habitatAndDietFilters). AVONET's primary value, plus
+			// anything BirdView adds, each marked with its origin (product.categoryProvenance).
 			Habitats: trait.HabitatsFor(sci, res.traits.Habitat),
 			Niches:   trait.NichesFor(sci, avr.Family, res.traits.Niche, res.traits.Level),
 			Segments: dataset.Segments{
@@ -428,7 +428,7 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 		// a pre-split parent, the crosswalk leads to that parent's BirdLife
 		// name, so any wingspan found through it is the parent's measurement
 		// too -- real data, wrong bird. Labeling it measured because the source
-		// is empirical would be exactly the error P-062 exists to catch.
+		// is empirical would be exactly the error product.provenancePerMetric exists to catch.
 		var found bool
 		for _, bl := range append([]string{sci}, wb.EBirdToBirdLife[res.taxon]...) {
 			r, ok := fox[bl]
@@ -467,7 +467,7 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 	sort.Slice(out, func(i, j int) bool { return out[i].ScientificName < out[j].ScientificName })
 
 	// The birds the derivation rejected, so /species/<id> can say why rather
-	// than 404 into silence (P-075, CR-029). They get names and ids by the
+	// than 404 into silence (product.undrawnSpeciesAnswer, decisions.speciesUrlOutlivesSpecies). They get names and ids by the
 	// same route a drawn species does, because the point is that a URL which
 	// worked yesterday still resolves.
 	undrawn, err := rejected(status.OutOfScope(rows), avl, out)
@@ -491,8 +491,8 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 	fmt.Fprintf(&b, "recurring in BirdView's regions: %d species in %d families across %d orders\n",
 		len(out), len(famSeq), len(orderSeq))
 	fmt.Fprintf(&b, "  scope             : %s\n", status.Source)
-	fmt.Fprintf(&b, "  declared by hand  : %d (P-071)\n", len(status.Declared))
-	fmt.Fprintf(&b, "  exotic, off index : %d (P-080)\n", len(status.Exotic))
+	fmt.Fprintf(&b, "  declared by hand  : %d (product.declaredExceptions)\n", len(status.Declared))
+	fmt.Fprintf(&b, "  exotic, off index : %d (product.escapedBirdsListed)\n", len(status.Exotic))
 	fmt.Fprintf(&b, "  names + code      : AviList v2025b, %d of %d with an eBird code\n",
 		counts["coded"], len(out))
 	if len(dropped) > 0 {
@@ -503,18 +503,18 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 	fmt.Fprintf(&b, "  wingspan measured : %d\n", counts["wingspan measured"])
 	fmt.Fprintf(&b, "  wingspan near-match: %d\n", counts["wingspan near-match"])
 	fmt.Fprintf(&b, "  wingspan modeled  : %d\n", counts["wingspan modeled"])
-	fmt.Fprintf(&b, "  length            : %d modeled (no usable measured source -- CR-002)\n", len(out))
+	fmt.Fprintf(&b, "  length            : %d modeled (no usable measured source -- decisions.ricklefsProhibited)\n", len(out))
 	if len(unmatched) > 0 {
 		fmt.Fprintf(&b, "  unmatched (%d, below threshold):\n    %s\n",
 			len(unmatched), strings.Join(unmatched, "\n    "))
 	}
-	fmt.Fprintf(&b, "  awaiting taxonomic check (CR-006): %s\n",
+	fmt.Fprintf(&b, "  awaiting taxonomic check (decisions.abaSpeciesWithoutAvonet): %s\n",
 		strings.Join(taxonomy.AwaitingTaxonomicCheck, ", "))
 	byVerdict := map[string]int{}
 	for _, u := range undrawn {
 		byVerdict[u.Status]++
 	}
-	fmt.Fprintf(&b, "  classified, not drawn: %d (%d vagrant, %d historical, %d absent) -- P-075\n",
+	fmt.Fprintf(&b, "  classified, not drawn: %d (%d vagrant, %d historical, %d absent) -- product.undrawnSpeciesAnswer\n",
 		len(undrawn), byVerdict["vagrant"], byVerdict["historical"], byVerdict["absent"])
 
 	fams := make([]dataset.Family, 0, len(famSeq))
@@ -535,10 +535,10 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 	return &dataset.Dataset{
 		Families: fams,
 		// What this build actually read. The "aba" line that stood here
-		// outlived the thing it pinned: CR-028 removed the checklist from the
+		// outlived the thing it pinned: decisions.scopeFromRecurrence removed the checklist from the
 		// build, and this provenance record went on naming it for a release
 		// in which nothing read it. A pin to an input you do not consume is
-		// worse than no pin, because it is checkable and wrong (G-004).
+		// worse than no pin, because it is checkable and wrong (goals.goodDataCitizen).
 		SourceVersions: map[string]string{
 			"avonet":       "AVONET v7, doi:10.6084/m9.figshare.16586228",
 			"fox-wingspan": "Fox et al. 2026 v1, doi:10.6084/m9.figshare.32089083",
@@ -550,11 +550,11 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 	}, b.String(), nil
 }
 
-// flagExotic marks each declared escape with its reason (P-070, P-080). A
+// flagExotic marks each declared escape with its reason (product.statusIsPublished, product.escapedBirdsListed). A
 // listed name that is not drawn is an error: the entry would otherwise
 // outlive its bird, and a stale list is the kind that nobody rereads.
 //
-// Verifies: P-080.
+// Verifies: product.escapedBirdsListed.
 func flagExotic(out []dataset.Species, exotic map[string]string) error {
 	seen := map[string]bool{}
 	for i := range out {
@@ -578,7 +578,7 @@ func flagExotic(out []dataset.Species, exotic map[string]string) error {
 }
 
 // rejected turns the out-of-scope rows into servable records: a name, an id
-// and the evidence behind the verdict (P-075).
+// and the evidence behind the verdict (product.undrawnSpeciesAnswer).
 //
 // Two refusals, both deliberate:
 //
@@ -592,7 +592,7 @@ func flagExotic(out []dataset.Species, exotic map[string]string) error {
 // after missing the drawn index, so a collision cannot hide a live page
 // today; it is fatal because the lookup order is an implementation detail and
 // the invariant is not. A build that quietly ships two meanings for one URL
-// has already lost the property the ids exist for (AC-084).
+// has already lost the property the ids exist for (acceptance.stableSpeciesId).
 func rejected(rows map[string]status.Row, avl avilist.Table,
 	drawn []dataset.Species) ([]dataset.Undrawn, error) {
 
@@ -649,12 +649,12 @@ func id(sci string) string {
 	return strings.ToLower(strings.ReplaceAll(sci, " ", "_"))
 }
 
-// applyINat joins the committed iNaturalist mapping onto the dataset (P-064).
+// applyINat joins the committed iNaturalist mapping onto the dataset (product.inaturalistLink).
 //
 // A species absent from the table gets no taxon ID and therefore no link, which
 // is the intended outcome for anything iNaturalist has not confidently matched
-// -- usually a split it has not yet followed (CR-012).
-// applyRegions joins the generated presence table onto the dataset (P-011).
+// -- usually a split it has not yet followed (decisions.inaturalistLinkAdopted).
+// applyRegions joins the generated presence table onto the dataset (product.regionAndMonthFilter).
 func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -665,15 +665,15 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	// Every region's total is carried, seas included (CR-031). A sea's
+	// Every region's total is carried, seas included (decisions.honestSeaDenominator). A sea's
 	// figure is now every bird record ON WATER inside its box, measured the
 	// same way a land region's is -- over all species, not the pelagic ones
 	// -- so the two are the same quantity and a share may range over both.
-	// CR-030 dropped them because they were not; the fix was to the number,
+	// decisions.seaShareDiffers dropped them because they were not; the fix was to the number,
 	// not to who may see it.
 	ds.RegionTotals = totals
 	// The same denominator split twelve ways, for a figure scoped to months
-	// (P-011, CR-036). Carried beside the annual rather than replacing it:
+	// (product.regionAndMonthFilter, decisions.monthPresence). Carried beside the annual rather than replacing it:
 	// the twelve sum to it exactly, and nothing that does not filter by
 	// month should have to add them up.
 	ds.RegionMonthlyTotals = monthlyTotals
@@ -687,7 +687,7 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 		//
 		// A region under the presence bar goes to the Below fields instead:
 		// counted in the figure, and invisible to every region filter
-		// (P-011, CR-042).
+		// (product.regionAndMonthFilter, decisions.belowBarCounted).
 		var ids, bids []string
 		var counts, bcounts []int64
 		var months, bmonths [][12]int64
@@ -732,7 +732,7 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 }
 
 // peakShare picks the region where a species is the largest fraction of what
-// gets recorded, out of the same table the index divides by (P-074, CR-031).
+// gets recorded, out of the same table the index divides by (product.shareOfRecords, decisions.honestSeaDenominator).
 //
 // Computed here rather than carried over from data/status.tsv, where it used
 // to come from, for two reasons that are really one.
@@ -748,7 +748,7 @@ func applyRegions(ds *dataset.Dataset, path string) (int, error) {
 // Deriving it from Regions and RegionTotals makes the detail page and the
 // index the same arithmetic: the peak is always a region the bird is listed
 // in, and selecting that one region on the index reproduces the figure
-// exactly. AC-100 asserts that round trip over the whole dataset.
+// exactly. acceptance.peakAndShareOneCalculation asserts that round trip over the whole dataset.
 //
 // Compared by cross-multiplication rather than by dividing: the products
 // stay far inside int64 -- the largest is about 1e17 against a 9.2e18 limit

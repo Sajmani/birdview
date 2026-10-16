@@ -21,10 +21,10 @@ import (
 )
 
 // The favicon is the one surface that cannot reference the stylesheet, so it
-// restates the diagram's palette by hand (P-048). Index, detail and comparison
+// restates the diagram's palette by hand (product.oneDiagramVocabulary). Index, detail and comparison
 // share one `diagram` template and one stylesheet and cannot diverge at all.
 //
-// Verifies: P-048. Criterion: AC-081.
+// Verifies: product.oneDiagramVocabulary. Criterion: acceptance.faviconFromPalette.
 
 var (
 	reHexAny   = regexp.MustCompile(`#[0-9a-fA-F]{3,8}`)
@@ -144,7 +144,7 @@ func TestFaviconUsesTheAppPalette(t *testing.T) {
 	for h := range used {
 		if !palette[h] {
 			t.Errorf("favicon uses %s, which paints no part of the diagram — "+
-				"the icon has a colour of its own instead of the app's (P-048)", h)
+				"the icon has a colour of its own instead of the app's (product.oneDiagramVocabulary)", h)
 		}
 	}
 
@@ -152,7 +152,7 @@ func TestFaviconUsesTheAppPalette(t *testing.T) {
 	// the stylesheet so that changing one there and not here goes red.
 	for _, part := range []string{"wing", "bill"} {
 		if want := partColor(t, part); !used[want] {
-			t.Errorf("favicon does not use the %s colour %s; the icon is behind the app (P-048)",
+			t.Errorf("favicon does not use the %s colour %s; the icon is behind the app (product.oneDiagramVocabulary)",
 				part, want)
 		}
 	}

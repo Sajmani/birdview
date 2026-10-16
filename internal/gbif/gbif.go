@@ -37,11 +37,11 @@
 // wrong bird is worse than an honest gap.
 //
 // The mapping is a committed table rather than a build-time fetch, for the
-// reason T-022 gives for the iNaturalist one: tests make no network request
+// reason tech.pacedInaturalistMapping gives for the iNaturalist one: tests make no network request
 // (tech.md bindings), and a build that needs the network is a build that fails
 // on a plane. See cmd/birdview-gbifmap.
 //
-// Verifies: T-006, T-021.
+// Verifies: tech.identifiedClient, tech.recordBeforeConsuming.
 package gbif
 
 import (

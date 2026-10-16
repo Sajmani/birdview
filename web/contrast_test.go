@@ -41,14 +41,14 @@ func mustReadStyles(t *testing.T) []byte {
 var surfaceVars = []string{"--bg", "--panel"}
 
 // textFloor is WCAG 2.2 SC 1.4.6 (Contrast Enhanced), the same 7:1 the badges
-// are held to (T-010), applied to every declared text color against both
+// are held to (tech.badgeContrast), applied to every declared text color against both
 // surfaces.
 //
 // It was 4.5:1 for a day. The two-floor scheme existed only because --dim sat
 // at 6.96:1 on the page background and 5.71:1 on a panel, and repainting the
 // interface's secondary text looked disproportionate to the link bug that
 // prompted the check. The owner then noticed the dim text too, so the colors
-// moved and one floor covers everything (CR-014).
+// moved and one floor covers everything (decisions.oneContrastFloor).
 const textFloor = 7.0
 
 var (
@@ -71,7 +71,7 @@ func hexRGB(t *testing.T, h string) (uint8, uint8, uint8) {
 	return r, g, b
 }
 
-// TestStylesheetContrast asserts T-023 over the shipped stylesheet.
+// TestStylesheetContrast asserts tech.textContrastFloor over the shipped stylesheet.
 //
 // The bug this exists for: the iNaturalist link was added with no color rule,
 // so it fell back to the browser default -- #0000EE on a #0f172a background,
@@ -83,7 +83,7 @@ func hexRGB(t *testing.T, h string) (uint8, uint8, uint8) {
 // on a bare surface must clear the floor, and no link may go uncolored at all --
 // a rule that only checks declared colors cannot see the color nobody declared.
 //
-// Verifies: T-023, `wcag/1.4.3`, `wcag/1.4.6`. Criterion: AC-070.
+// Verifies: tech.textContrastFloor, `wcag/1.4.3`, `wcag/1.4.6`. Criterion: acceptance.noTextBelowContrastFloor.
 func TestStylesheetContrast(t *testing.T) {
 	css := stripComments(string(mustReadStyles(t)))
 
@@ -120,7 +120,7 @@ func TestStylesheetContrast(t *testing.T) {
 		}
 		// A rule that sets its own background is self-contained: badges and
 		// chips pair a generated background with a matching text color and are
-		// governed by T-010 and AC-002 instead.
+		// governed by tech.badgeContrast and acceptance.legibleDistinctColors instead.
 		if reBg.MatchString(body) {
 			continue
 		}
@@ -157,7 +157,7 @@ var (
 )
 
 // TestSVGTextContrast holds diagram labels to the same floor as every other run
-// of text (T-023).
+// of text (tech.textContrastFloor).
 //
 // The bug: `.dlabel.chord, .dlabel.span` painted the wing chord and wingspan
 // labels #0ea5e9, which is 6.44:1 on the page background and 5.28:1 on a panel
@@ -170,7 +170,7 @@ var (
 // the selector it is missing, which is the failure being fixed rather than a
 // fix for it.
 //
-// Verifies: T-023, `wcag/1.4.6`. Criterion: AC-070.
+// Verifies: tech.textContrastFloor, `wcag/1.4.6`. Criterion: acceptance.noTextBelowContrastFloor.
 func TestSVGTextContrast(t *testing.T) {
 	css := stripComments(string(mustReadStyles(t)))
 
@@ -248,7 +248,7 @@ func TestSVGTextContrast(t *testing.T) {
 // carries a bare `a` rule and a bare `a:visited` rule -- the catch-alls that
 // make "someone forgot" impossible rather than merely unlikely.
 //
-// Verifies: T-023. Criterion: AC-070.
+// Verifies: tech.textContrastFloor. Criterion: acceptance.noTextBelowContrastFloor.
 func TestNoLinkUsesTheBrowserDefault(t *testing.T) {
 	css := string(mustReadStyles(t))
 	for _, want := range []struct{ sel, why string }{
@@ -269,10 +269,10 @@ func stripComments(css string) string {
 	return regexp.MustCompile(`(?s)/\*.*?\*/`).ReplaceAllString(css, "")
 }
 
-// TestStrokeStyleCarriesProvenance asserts P-065 where it is actually defined:
+// TestStrokeStyleCarriesProvenance asserts product.measuredVersusModeled where it is actually defined:
 // in the stylesheet, one rule per drawn element.
 //
-// Verifies: P-065. Criterion: AC-072.
+// Verifies: product.measuredVersusModeled. Criterion: acceptance.diagramDistinguishesModeled.
 func TestStrokeStyleCarriesProvenance(t *testing.T) {
 	css := stripComments(string(mustReadStyles(t)))
 
@@ -308,7 +308,7 @@ func TestStrokeStyleCarriesProvenance(t *testing.T) {
 	}
 
 	// The neck's pattern differs from the body's, deliberately: matching them
-	// makes a 6px neck render as one lozenge, i.e. solid (CR-015).
+	// makes a 6px neck render as one lozenge, i.e. solid (decisions.drawingCarriesProvenance).
 	pat := func(sel string) string {
 		m := regexp.MustCompile(`stroke-dasharray:\s*([^;]+)`).FindStringSubmatch(decl(sel))
 		if m == nil {
@@ -334,7 +334,7 @@ func TestStrokeStyleCarriesProvenance(t *testing.T) {
 // before: it keeps the paragraph whole while still allowing the dt to be
 // orphaned above it. The pair has to be one unbreakable box.
 //
-// Verifies: P-035. Criterion: AC-059.
+// Verifies: product.pageExplainsItself. Criterion: acceptance.pageExplainsControls.
 func TestControlHelpEntriesAreUnbreakable(t *testing.T) {
 	css := stripComments(string(mustReadStyles(t)))
 	m := regexp.MustCompile(`\.ctrlhelp \.ctrl\s*\{([^}]*)\}`).FindStringSubmatch(css)
@@ -364,7 +364,7 @@ func TestControlHelpEntriesAreUnbreakable(t *testing.T) {
 // useless: the families need their own box, and the group needs to be a
 // two-column grid for that box to be a column of.
 //
-// Verifies: P-010. Criterion: AC-075.
+// Verifies: product.familyFilter. Criterion: acceptance.familyListWraps.
 func TestOrderGroupsIndentWrappedFamilies(t *testing.T) {
 	css := stripComments(string(mustReadStyles(t)))
 
@@ -376,7 +376,7 @@ func TestOrderGroupsIndentWrappedFamilies(t *testing.T) {
 		t.Errorf(".ogroup is not a grid, so the families have no column to wrap inside "+
 			"and a wrapped line returns to the page margin. Got %q", strings.TrimSpace(g[1]))
 	}
-	// Three tracks: the order toggle, the Only button (P-072), then the
+	// Three tracks: the order toggle, the Only button (product.onlyPerGroup), then the
 	// families. Fewer would push a child onto its own row, and the last track
 	// must stay the flexible one or the chips get a fixed width to wrap in.
 	cols := regexp.MustCompile(`grid-template-columns:\s*([^;}]+)`).FindStringSubmatch(g[1])
@@ -406,12 +406,12 @@ func TestOrderGroupsIndentWrappedFamilies(t *testing.T) {
 // TestComparePanelsWrap asserts the layout half of the comparison view: the
 // panels flow onto as many lines as they need.
 //
-// P-067 requires this rather than treating it as taste. With several birds the
+// product.comparisonOneScale requires this rather than treating it as taste. With several birds the
 // panels cannot fit on one line at a readable size, and a row that does not
 // wrap either overflows the page or squeezes the diagrams until the comparison
 // they exist to make is gone.
 //
-// Verifies: P-067. Criterion: AC-076.
+// Verifies: product.comparisonOneScale. Criterion: acceptance.comparisonSharesScale.
 func TestComparePanelsWrap(t *testing.T) {
 	css := stripComments(string(mustReadStyles(t)))
 

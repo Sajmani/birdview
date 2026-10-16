@@ -47,10 +47,10 @@ func flat(n int64) [12]int64 {
 	return v
 }
 
-// TestMeasureCountsEBirdAndFillsOnlyItsDeclaredGaps asserts CR-038's
+// TestMeasureCountsEBirdAndFillsOnlyItsDeclaredGaps asserts decisions.countEbirdFirst's
 // counting rule, one case per clause.
 //
-// Verifies: P-011, P-074, P-077, CR-038. Criterion: AC-114.
+// Verifies: product.regionAndMonthFilter, product.shareOfRecords, product.namesRecordsFiledUnder, decisions.countEbirdFirst. Criterion: acceptance.ebirdCountedInatFillsGaps.
 func TestMeasureCountsEBirdAndFillsOnlyItsDeclaredGaps(t *testing.T) {
 	avi := map[string]string{
 		"turdus migratorius": "Turdus migratorius", "geopelia cuneata": "Geopelia cuneata",

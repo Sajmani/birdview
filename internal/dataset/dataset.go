@@ -15,11 +15,11 @@
 // Package dataset defines the compiled record BirdView serves, and the
 // provenance vocabulary every presented value carries.
 //
-// Verifies: P-062.
+// Verifies: product.provenancePerMetric.
 package dataset
 
 // Kind classifies how well grounded a value is. Every metric BirdView shows
-// carries one, and the interface distinguishes them (P-061, P-063).
+// carries one, and the interface distinguishes them (product.tileMarksModeled, product.metricProvenanceExplained).
 type Kind string
 
 const (
@@ -41,11 +41,11 @@ const (
 
 // Provenance records where one specific value came from.
 //
-// Verifies: P-062.
+// Verifies: product.provenancePerMetric.
 // Origin says who decided a categorical assignment. Deliberately a separate
 // vocabulary from Kind, which grades a *number*: "measured" and "published"
 // are not the same claim, and one word for both would blur the only
-// distinction P-069 exists to draw.
+// distinction product.categoryProvenance exists to draw.
 type Origin string
 
 const (
@@ -59,7 +59,7 @@ const (
 
 // Assignment is one category a species is in, with its origin. The zero
 // Origin is invalid: an unmarked category is an opinion wearing a finding's
-// clothes, which is the failure P-069 exists to prevent.
+// clothes, which is the failure product.categoryProvenance exists to prevent.
 type Assignment struct {
 	Value  string `json:"value"`
 	Origin Origin `json:"origin"`
@@ -70,7 +70,7 @@ type Assignment struct {
 	Why string `json:"why,omitempty"`
 	// Doc is a path BirdView itself serves, e.g. "data". There is no public
 	// repository to link to, and a provenance link that needs the network is
-	// one that breaks (P-069, T-002).
+	// one that breaks (product.categoryProvenance, tech.selfContainedServer).
 	Doc string `json:"doc,omitempty"`
 }
 
@@ -89,13 +89,13 @@ type Provenance struct {
 
 	// Model names the computation that produced a Modeled value, specifically
 	// enough that a reader can check it. For the neck this must name both the
-	// per-family function and the ratio applied to this bird's family (P-045).
+	// per-family function and the ratio applied to this bird's family (product.neckModelPerFamily).
 	Model string `json:"model,omitempty"`
 }
 
 // Metric is a value in millimeters (or grams, for mass) plus its provenance.
 // Min and Max carry a reported range where the source supplies one; Fox et al.
-// report wingspan as a range, and P-060 requires storing the triple rather
+// report wingspan as a range, and product.lengthAndWingspanSources requires storing the triple rather
 // than flattening it to a point.
 type Metric struct {
 	Value float64    `json:"value"`
@@ -105,8 +105,8 @@ type Metric struct {
 }
 
 // Segments are the five vertical parts of the diagram, top to bottom. They abut
-// exactly and sum to TotalLength (P-041), and each carries its own provenance
-// because the detail view shows them individually (P-034, P-063).
+// exactly and sum to TotalLength (product.segmentsSumToLength), and each carries its own provenance
+// because the detail view shows them individually (product.tileOpensDetail, product.metricProvenanceExplained).
 type Segments struct {
 	Bill Metric `json:"bill"`
 	Head Metric `json:"head"`
@@ -115,7 +115,7 @@ type Segments struct {
 	Tail Metric `json:"tail"`
 }
 
-// Locale selects which English name is served (P-049).
+// Locale selects which English name is served (product.englishNameChoice).
 type Locale string
 
 const (
@@ -127,7 +127,7 @@ const (
 )
 
 // Commonest records where a species is the largest share of what a region
-// reports, and the evidence that share rests on (P-074).
+// reports, and the evidence that share rests on (product.shareOfRecords).
 type Commonest struct {
 	// Region is a region id, as Species.Regions uses.
 	Region string `json:"region"`
@@ -140,7 +140,7 @@ type Commonest struct {
 // OneIn is the share expressed the way it is shown: one record in N. Zero
 // when there is nothing to divide.
 // WithheldIn returns the months eBird withholds the species in a region,
-// January first (CR-037).
+// January first (decisions.ebirdSilenceNotAbsence).
 func (s *Species) WithheldIn(id string) [12]bool {
 	var out [12]bool
 	bits := s.RegionWithheld[id]
@@ -161,7 +161,7 @@ func (c *Commonest) OneIn() int {
 type Species struct {
 	// ID is the eBird species code where AviList supplies one -- "amerob" --
 	// and otherwise the scientific-name slug. It is the species URL and must
-	// be stable across rebuilds (P-049, AC-084).
+	// be stable across rebuilds (product.englishNameChoice, acceptance.stableSpeciesId).
 	ID string `json:"id"`
 
 	// Names carries BOTH English names, keyed by Locale, because the locale is
@@ -173,7 +173,7 @@ type Species struct {
 	// SpeciesCode is the eBird code, e.g. "amerob", shown beside the name. It
 	// replaced the ABA four-letter alpha code, which was locale-DEPENDENT --
 	// derived from the English name, so Dovekie's DOVE would have to become
-	// LIAU under the world locale (CR-022).
+	// LIAU under the world locale (decisions.avilistReplacesAba).
 	//
 	// Not fixed-width despite the name: 4 to 8 characters in practice.
 	SpeciesCode    string `json:"speciesCode,omitempty"`
@@ -185,7 +185,7 @@ type Species struct {
 	Order          string `json:"order"`
 
 	// Regions are the places this species is reported from, as region ids
-	// (P-011). Empty for the one species with too few records to place
+	// (product.regionAndMonthFilter). Empty for the one species with too few records to place
 	// anywhere, which the region filter must not silently swallow.
 	Regions []string `json:"regions,omitempty"`
 
@@ -199,32 +199,32 @@ type Species struct {
 	RegionCounts []int64 `json:"regionCounts,omitempty"`
 
 	// RegionMonths is RegionCounts split twelve ways, January first, and
-	// parallel to Regions in the same way (P-011, CR-036).
+	// parallel to Regions in the same way (product.regionAndMonthFilter, decisions.monthPresence).
 	RegionMonths [][12]int64 `json:"regionMonths,omitempty"`
 
 	// BelowRegions are the regions where the species has records but stays
 	// under the presence bar, with BelowCounts and BelowMonths parallel as
 	// above. Their records count in the species' figure; the species is not
 	// listed under them, so nothing that filters by region reads these
-	// (P-011, CR-042).
+	// (product.regionAndMonthFilter, decisions.belowBarCounted).
 	BelowRegions []string    `json:"belowRegions,omitempty"`
 	BelowCounts  []int64     `json:"belowCounts,omitempty"`
 	BelowMonths  [][12]int64 `json:"belowMonths,omitempty"`
 
 	// RegionWithheld maps a region id to the months eBird withholds this
 	// species there under its Sensitive Species list, as a bitmask with
-	// January in bit 0 (CR-037). A map rather than a slice parallel to
+	// January in bit 0 (decisions.ebirdSilenceNotAbsence). A map rather than a slice parallel to
 	// Regions because almost every cell has none: a few hundred, against
 	// some 28,000.
 	RegionWithheld map[string]uint16 `json:"regionWithheld,omitempty"`
 
 	// Exotic is the declared reason this species is left off the index: its
-	// records here are escapes or birds kept by people (P-070, P-080). Empty
+	// records here are escapes or birds kept by people (product.statusIsPublished, product.escapedBirdsListed). Empty
 	// for every other species. The detail page is still served.
 	Exotic string `json:"exotic,omitempty"`
 
 	// Commonest is where this species makes up the biggest SHARE of the bird
-	// records a region holds, with both halves of the ratio kept (P-074).
+	// records a region holds, with both halves of the ratio kept (product.shareOfRecords).
 	//
 	// Share rather than record count, because a count says where the
 	// birdwatchers are: California holds 35x the Sharp-shinned Hawk records
@@ -233,12 +233,12 @@ type Species struct {
 	// the ratio, so a share resting on nine records can say so.
 	Commonest *Commonest `json:"commonest,omitempty"`
 
-	// INatTaxonID links the detail view to iNaturalist (P-064). Zero means no
+	// INatTaxonID links the detail view to iNaturalist (product.inaturalistLink). Zero means no
 	// confident match, and then no link is shown at all -- not a search URL,
-	// not a guess (CR-012).
+	// not a guess (decisions.inaturalistLinkAdopted).
 	INatTaxonID int `json:"inatTaxonId,omitempty"`
 
-	// The three main metrics shown on every tile (P-031).
+	// The three main metrics shown on every tile (product.tileContents).
 	TotalLength Metric `json:"totalLength"`
 	Wingspan    Metric `json:"wingspan"`
 	Mass        Metric `json:"mass"`
@@ -248,18 +248,18 @@ type Species struct {
 	// aerodynamic chord (leading edge to trailing edge), which is a different
 	// quantity on a different axis and which this diagram has no room for.
 	//
-	// Measured, and the input to the modeled wingspan (CR-008). Drawn as the
-	// solid outer portion of the crossbar (P-065).
+	// Measured, and the input to the modeled wingspan (decisions.fittedWingspanModel). Drawn as the
+	// solid outer portion of the crossbar (product.measuredVersusModeled).
 	WingChord Metric `json:"wingChord,omitempty"`
 
-	// Habitats and Niches are the categorical assignments of P-015, each
+	// Habitats and Niches are the categorical assignments of product.habitatAndDietFilters, each
 	// carrying where it came from. Several are possible: AVONET records one
 	// primary value, and BirdView may add its own, which is marked BirdView and
-	// never silently mixed in with the published one (P-069).
+	// never silently mixed in with the published one (product.categoryProvenance).
 	Habitats []Assignment `json:"habitats,omitempty"`
 	Niches   []Assignment `json:"niches,omitempty"`
 
-	// Shown in the detail view (P-034).
+	// Shown in the detail view (product.tileOpensDetail).
 	Segments Segments `json:"segments"`
 }
 
@@ -267,7 +267,7 @@ type Species struct {
 //
 // The fallback is not decoration: five species have no Clements concept and so
 // no North American name, and a reader who asked for NA names must still see a
-// bird rather than a blank (P-049).
+// bird rather than a blank (product.englishNameChoice).
 func (s *Species) Name(l Locale) string {
 	if n := s.Names[l]; n != "" {
 		return n
@@ -276,7 +276,7 @@ func (s *Species) Name(l Locale) string {
 }
 
 // AllMetrics returns every metric the interface may present, so that checks
-// over "every presented metric" (AC-040) cannot miss one by enumerating the
+// over "every presented metric" (acceptance.provenanceWellFormed) cannot miss one by enumerating the
 // struct by hand.
 func (s *Species) AllMetrics() map[string]*Metric {
 	return map[string]*Metric{
@@ -292,7 +292,7 @@ func (s *Species) AllMetrics() map[string]*Metric {
 }
 
 // Undrawn is a species the status derivation classified and left out of
-// scope: it has a URL and no drawing (P-075, CR-029).
+// scope: it has a URL and no drawing (product.undrawnSpeciesAnswer, decisions.speciesUrlOutlivesSpecies).
 //
 // Deliberately NOT a Species with empty metrics. A Species is the input to
 // every drawing function in the program, and 334 of them carrying zero mass
@@ -361,17 +361,17 @@ type Dataset struct {
 	// RegionTotals is every bird record a region holds, over every species
 	// including those BirdView does not draw. It is the denominator when a
 	// page says what share of the birds recorded in the regions on screen
-	// are one species (P-074).
+	// are one species (product.shareOfRecords).
 	RegionTotals map[string]int64 `json:"regionTotals,omitempty"`
 
 	// RegionMonthlyTotals is the same denominator split twelve ways,
-	// January first, for a figure scoped to months (P-011, CR-036). The
+	// January first, for a figure scoped to months (product.regionAndMonthFilter, decisions.monthPresence). The
 	// twelve sum to RegionTotals exactly -- every record carries a month,
 	// and birdview-regions refuses to write a table where they do not.
 	RegionMonthlyTotals map[string][12]int64 `json:"regionMonthlyTotals,omitempty"`
 
 	// SourceVersions pins what this build was made from, so a served dataset
-	// can be traced back to its inputs (G-004).
+	// can be traced back to its inputs (goals.goodDataCitizen).
 	SourceVersions map[string]string `json:"sourceVersions"`
 	// Families in AviList's taxonomic sequence, grouped implicitly by Order.
 	Families []Family  `json:"families"`
@@ -379,7 +379,7 @@ type Dataset struct {
 
 	// Undrawn are the species the derivation classified and rejected, so a
 	// URL that stops working can say why rather than 404 into silence
-	// (P-075). Not species: nothing here is drawn, filtered, counted or
+	// (product.undrawnSpeciesAnswer). Not species: nothing here is drawn, filtered, counted or
 	// compared.
 	Undrawn []Undrawn `json:"undrawn,omitempty"`
 }

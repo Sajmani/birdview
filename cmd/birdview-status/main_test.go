@@ -102,7 +102,7 @@ func keys(m map[string]map[string]int64) []string {
 // first version called mergeLumps directly and passed with the call removed
 // from main, verifying the function and not the pipeline.
 //
-// Verifies: P-001. Criterion: AC-093.
+// Verifies: product.scopeIsRecurringAvifauna. Criterion: acceptance.onlyNarrowsOneGroup.
 func TestLumpsMergeIntoTheSpeciesBirdViewCarries(t *testing.T) {
 	// eBird files everything under the lump; iNaturalist under the split.
 	in := map[string]map[string]int64{
@@ -155,7 +155,7 @@ func TestLumpsMergeIntoTheSpeciesBirdViewCarries(t *testing.T) {
 // 119,194 on the next -- a generated table two runs over identical inputs
 // disagree about.
 //
-// It matters more now that the table carries a date: P-075 puts that date on
+// It matters more now that the table carries a date: product.undrawnSpeciesAnswer puts that date on
 // a page as the reason a bird is not drawn, and a reason that changes when
 // nothing changed is not a reason.
 //
@@ -164,7 +164,7 @@ func TestLumpsMergeIntoTheSpeciesBirdViewCarries(t *testing.T) {
 // self-consistent whatever order it saw -- which is why this calls many
 // times and compares.
 //
-// Verifies: P-075, CR-028.
+// Verifies: product.undrawnSpeciesAnswer, decisions.scopeFromRecurrence.
 func TestBestRegionIsDeterministic(t *testing.T) {
 	since := time.Date(2001, 1, 1, 0, 0, 0, 0, time.UTC)
 	recent := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
@@ -205,7 +205,7 @@ func TestBestRegionIsDeterministic(t *testing.T) {
 }
 
 // TestBothReadersOfTheOccurrenceDataAgreeOnTheSpecies asserts the invariant
-// CR-035 turned out to be three separate violations of: a verbatim
+// decisions.regionJoinNormalizes turned out to be three separate violations of: a verbatim
 // occurrence name reaches the SAME AviList species whichever command reads
 // it.
 //
@@ -225,9 +225,9 @@ func TestBestRegionIsDeterministic(t *testing.T) {
 // a real difference and not a defect, and a check pinned to an intermediate
 // value would call it one.
 //
-// Watched fail: see AC-106.
+// Watched fail: see acceptance.occurrenceReadersAgree.
 //
-// Verifies: P-011, P-074, T-027. Criterion: AC-106.
+// Verifies: product.regionAndMonthFilter, product.shareOfRecords, tech.joinsReportDrops. Criterion: acceptance.occurrenceReadersAgree.
 func TestBothReadersOfTheOccurrenceDataAgreeOnTheSpecies(t *testing.T) {
 	// One verbatim name of each shape the facet actually contains, with the
 	// species each is a record of.
@@ -238,10 +238,10 @@ func TestBothReadersOfTheOccurrenceDataAgreeOnTheSpecies(t *testing.T) {
 		"setophaga coronata auduboni": "setophaga coronata",      // a subspecies needing no rename
 		"columba livia domestica":     "columba livia",           // a domestic form
 		"numenius phaeopus":           "numenius hudsonicus",     // a lump
-		"icterus bullockii":           "icterus bullockiorum",    // in no region at all before CR-035
+		"icterus bullockii":           "icterus bullockiorum",    // in no region at all before decisions.regionJoinNormalizes
 	}
 
-	// Scope returns the declared P-071 exceptions whatever it is given, so
+	// Scope returns the declared product.declaredExceptions exceptions whatever it is given, so
 	// the species a row actually contributes is the difference. Subtracted
 	// rather than filtered by name, so this stays correct when the
 	// exceptions change.
@@ -284,7 +284,7 @@ func TestBothReadersOfTheOccurrenceDataAgreeOnTheSpecies(t *testing.T) {
 			t.Errorf("the two readers disagree about %q: birdview-status says %q, "+
 				"birdview-regions says %q. One of the two tables is in a taxonomy "+
 				"the other cannot join on, which is how 7,310,342 Hairy Woodpecker "+
-				"records came to belong to no species (CR-035)",
+				"records came to belong to no species (decisions.regionJoinNormalizes)",
 				verbatim, added[0], fromRegions)
 		}
 	}
@@ -306,11 +306,11 @@ func TestBothReadersOfTheOccurrenceDataAgreeOnTheSpecies(t *testing.T) {
 	}
 }
 
-// TestScopeCountsEBirdAndFillsOnlyItsDeclaredGaps asserts CR-038 where it
+// TestScopeCountsEBirdAndFillsOnlyItsDeclaredGaps asserts decisions.countEbirdFirst where it
 // decides which species BirdView draws: recurrence is measured on eBird's
 // dates, plus iNaturalist's only in months eBird is confirmed to withhold.
 //
-// Verifies: P-001, CR-038. Criterion: AC-114.
+// Verifies: product.scopeIsRecurringAvifauna, decisions.countEbirdFirst. Criterion: acceptance.ebirdCountedInatFillsGaps.
 func TestScopeCountsEBirdAndFillsOnlyItsDeclaredGaps(t *testing.T) {
 	eb, in := gbif.EBirdDatasetKey, iNatDatasetKey
 

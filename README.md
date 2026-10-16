@@ -34,7 +34,7 @@ sources cannot justify.
 Most of what you see is **modeled**, and BirdView says so everywhere it can.
 
 No openly licensed dataset publishes body length for North American birds. The one source that
-does is under terms that forbid us using it ([CR-002](river/decisions.md)), so **every length
+does is under terms that forbid us using it ([decisions.ricklefsProhibited](river/decisions.md)), so **every length
 in BirdView is a model** — built from measured parts, with each part labeled. Of the three numbers
 on a tile, mass is measured for almost every species, wingspan is measured for about a third, and
 length is modeled for all 1082.
@@ -51,8 +51,8 @@ Runs locally. **The licensing blocker is gone**: nothing all-rights-reserved is 
 time any more, so serving BirdView reproduces nobody else's work.
 
 Names, families and taxonomic sequence come from [AviList](river/sources.md#avilist)
-([CR-022](river/decisions.md#cr-022)), and **scope is now BirdView's own**
-([CR-028](river/decisions.md#cr-028)). The ABA was asked for permission on 2026-09-27 and never
+([decisions.avilistReplacesAba](river/decisions.md#avilistreplacesaba)), and **scope is now BirdView's own**
+([decisions.scopeFromRecurrence](river/decisions.md#scopefromrecurrence)). The ABA was asked for permission on 2026-09-27 and never
 replied, so the project stopped waiting and derived a list it owns.
 
 What replaced the checklist is not a better threshold on how *often* a bird is recorded. A record
@@ -85,7 +85,7 @@ was never committed; it is no longer read at all.
 
 BirdView **links** to iNaturalist and copies nothing from it: no photograph is embedded, cached
 or hotlinked, so no contributor's license is engaged. See
-[CR-012](river/decisions.md).
+[decisions.inaturalistLinkAdopted](river/decisions.md).
 
 BirdView's own code is in this repository, along with the tables it derives under `data/` —
 the occurrence status, the region presence, and the two name bridges. The built dataset

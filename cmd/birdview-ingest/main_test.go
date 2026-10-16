@@ -50,7 +50,7 @@ func load(t *testing.T) *dataset.Dataset {
 		return built
 	}
 	// The status table IS committed, unlike the ABA checklist it replaced
-	// (CR-028), so this no longer skips on a clean checkout. That is the
+	// (decisions.scopeFromRecurrence), so this no longer skips on a clean checkout. That is the
 	// point of the change: the build depends on nothing it may not
 	// redistribute.
 	ds, _, err := build(statusFile, avoFile, foxFile, avlFile)
@@ -70,14 +70,14 @@ func load(t *testing.T) *dataset.Dataset {
 }
 
 // Scope is now every species the status table says recurs, plus the declared
-// exceptions, less what cannot be named or measured (P-001, CR-028).
+// exceptions, less what cannot be named or measured (product.scopeIsRecurringAvifauna, decisions.scopeFromRecurrence).
 //
 // The expected count is derived from those inputs rather than from a run:
 // count the in-scope rows, add the declared, subtract the names AviList has
 // no concept for. Writing the total as a literal would make this test agree
 // with whatever the code last produced.
 //
-// Verifies: P-001. Criterion: AC-010.
+// Verifies: product.scopeIsRecurringAvifauna. Criterion: acceptance.scopeMatchesStatusTable.
 func TestScopeIsWhatTheStatusTableSaysRecurs(t *testing.T) {
 	ds := load(t)
 	f, err := os.Open(statusFile)
@@ -90,7 +90,7 @@ func TestScopeIsWhatTheStatusTableSaysRecurs(t *testing.T) {
 		t.Fatalf("reading the status table: %v", err)
 	}
 	// Only the species AviList lacks that are actually in scope are
-	// subtracted: Vireo swainsoni left scope under CR-038, and subtracting
+	// subtracted: Vireo swainsoni left scope under decisions.countEbirdFirst, and subtracting
 	// it anyway would make this test demand one species fewer than exists.
 	scope := status.Scope(rows)
 	noConcept := 0
@@ -126,14 +126,14 @@ var unmeasurableNames = []string{
 const unmeasurable = 4
 
 // TestRarityCodeNeverReachesTheDataset checks the ABA rarity code is used as a
-// scope filter and then discarded (P-001).
+// scope filter and then discarded (product.scopeIsRecurringAvifauna).
 //
 // This inspects field NAMES rather than searching the whole record for "code",
 // which an earlier version did. That was too broad: it would now reject the
 // four-letter banding code, which is a legitimate part of a species' identity
-// and which P-004 requires. The requirement is about rarity specifically.
+// and which product.namesFromAvilist requires. The requirement is about rarity specifically.
 //
-// Verifies: P-001. Criterion: AC-011.
+// Verifies: product.scopeIsRecurringAvifauna. Criterion: acceptance.noRarityCodes.
 func TestRarityCodeNeverReachesTheDataset(t *testing.T) {
 	ds := load(t)
 	var fields map[string]any
@@ -151,10 +151,10 @@ func TestRarityCodeNeverReachesTheDataset(t *testing.T) {
 	}
 }
 
-// TestBandingCodesArePresent checks P-004's newest requirement: the tile shows
+// TestBandingCodesArePresent checks product.namesFromAvilist's newest requirement: the tile shows
 // the four-letter code, so the ingest must carry it.
 //
-// Verifies: P-004. Criterion: AC-013.
+// Verifies: product.namesFromAvilist. Criterion: acceptance.namesNeverDefaulted.
 func TestSpeciesCodesArePresent(t *testing.T) {
 	ds := load(t)
 	var missing []string
@@ -181,9 +181,9 @@ func TestSpeciesCodesArePresent(t *testing.T) {
 }
 
 // TestSpeciesCodesAreUniqueAndURLSafe guards the thing the code now carries
-// that an alpha code never did: it IS the URL (P-049).
+// that an alpha code never did: it IS the URL (product.englishNameChoice).
 //
-// Verifies: P-049. Criterion: AC-084.
+// Verifies: product.englishNameChoice. Criterion: acceptance.stableSpeciesId.
 func TestSpeciesCodesAreUniqueAndURLSafe(t *testing.T) {
 	ds := load(t)
 	seen := map[string]string{}
@@ -201,7 +201,7 @@ func TestSpeciesCodesAreUniqueAndURLSafe(t *testing.T) {
 	}
 }
 
-// Verifies: P-004. Criterion: AC-013.
+// Verifies: product.namesFromAvilist. Criterion: acceptance.namesNeverDefaulted.
 func TestNamesArePopulatedNotDefaulted(t *testing.T) {
 	ds := load(t)
 	for _, s := range ds.Species {
@@ -222,7 +222,7 @@ func TestNamesArePopulatedNotDefaulted(t *testing.T) {
 	}
 }
 
-// Verifies: P-041. Criterion: AC-030.
+// Verifies: product.segmentsSumToLength. Criterion: acceptance.segmentsSumExactly.
 func TestSegmentsSumToTotalExactly(t *testing.T) {
 	ds := load(t)
 	for _, s := range ds.Species {
@@ -234,7 +234,7 @@ func TestSegmentsSumToTotalExactly(t *testing.T) {
 	}
 }
 
-// Verifies: P-062. Criterion: AC-040.
+// Verifies: product.provenancePerMetric. Criterion: acceptance.provenanceWellFormed.
 func TestEveryMetricHasWellFormedProvenance(t *testing.T) {
 	ds := load(t)
 	for i := range ds.Species {
@@ -265,14 +265,14 @@ func TestEveryMetricHasWellFormedProvenance(t *testing.T) {
 	}
 }
 
-// Verifies: P-060, P-062. Criterion: AC-041.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric. Criterion: acceptance.provenanceMatchesSources.
 func TestProvenanceMatchesTheSourcesUsed(t *testing.T) {
 	ds := load(t)
 	var measuredSpan, nearSpan, modeledSpan int
 	for i := range ds.Species {
 		s := &ds.Species[i]
 		if s.TotalLength.Prov.Kind != dataset.Modeled {
-			t.Errorf("%s: length is %q; no measured length source exists (CR-002)",
+			t.Errorf("%s: length is %q; no measured length source exists (decisions.ricklefsProhibited)",
 				s.ScientificName, s.TotalLength.Prov.Kind)
 		}
 		switch s.Wingspan.Prov.Kind {
@@ -286,12 +286,12 @@ func TestProvenanceMatchesTheSourcesUsed(t *testing.T) {
 	}
 	// There used to be an absolute count here -- 301 less one, measured
 	// against the Fox dataset for the ABA checklist's scope and recorded in
-	// river/sources/fox-wingspan/PROVENANCE.md. CR-028 replaced that scope, so
+	// river/sources/fox-wingspan/PROVENANCE.md. decisions.scopeFromRecurrence replaced that scope, so
 	// the number is a fact about a species list that no longer exists, and
 	// restating it as whatever this run produces would be reading the
 	// expectation off the code under test.
 	//
-	// What survives the change is the PROPERTY, which is what P-060 actually
+	// What survives the change is the PROPERTY, which is what product.lengthAndWingspanSources actually
 	// requires: a wingspan is `measured` only if an empirical one was found,
 	// and an empirical one is only ever Fox's. A regression that modeled a
 	// span and called it measured fails here however many species are in
@@ -318,7 +318,7 @@ func TestProvenanceMatchesTheSourcesUsed(t *testing.T) {
 	}
 }
 
-// Verifies: P-045, P-062. Criterion: AC-035.
+// Verifies: product.neckModelPerFamily, product.provenancePerMetric. Criterion: acceptance.neckLengthSerialized.
 func TestNeckIsModeledAndNamesItsFamilyRatio(t *testing.T) {
 	ds := load(t)
 	for i := range ds.Species {
@@ -336,7 +336,7 @@ func TestNeckIsModeledAndNamesItsFamilyRatio(t *testing.T) {
 	}
 }
 
-// Verifies: P-060, P-041. Criterion: AC-044.
+// Verifies: product.lengthAndWingspanSources, product.segmentsSumToLength. Criterion: acceptance.totalIsSumOfSegments.
 func TestTotalLengthSaysItIsASum(t *testing.T) {
 	ds := load(t)
 	m := ds.Species[0].TotalLength.Prov.Model
@@ -348,7 +348,7 @@ func TestTotalLengthSaysItIsASum(t *testing.T) {
 	}
 }
 
-// Verifies: P-006, P-007. Criterion: AC-014.
+// Verifies: product.joinOnBinomial, product.unmatchedSpeciesReported. Criterion: acceptance.joinCoversEverySpecies.
 func TestNearMatchesAreExactlyTheMappedOnes(t *testing.T) {
 	ds := load(t)
 	got := map[string]bool{}
@@ -360,7 +360,7 @@ func TestNearMatchesAreExactlyTheMappedOnes(t *testing.T) {
 	}
 	for name := range taxonomy.NearMatches {
 		if _, dropped := taxonomy.NotInAviList[name]; dropped {
-			// The species left the dataset with CR-022, so there is nothing
+			// The species left the dataset with decisions.avilistReplacesAba, so there is nothing
 			// to label. The mapping stays: it records a real AVONET
 			// relationship and would be needed again if AviList split the
 			// taxon back out.
@@ -376,7 +376,7 @@ func TestNearMatchesAreExactlyTheMappedOnes(t *testing.T) {
 	}
 }
 
-// Verifies: P-060, P-062. Criterion: AC-116.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric. Criterion: acceptance.whiteTernFromBirdlife.
 func TestNearMatchBorrowsFromTheDeclaredSheet(t *testing.T) {
 	wb, err := avonet.Open(avoFile)
 	if err != nil {
@@ -404,7 +404,7 @@ func TestNearMatchBorrowsFromTheDeclaredSheet(t *testing.T) {
 		// second species moved off the eBird sheet has to be decided here too.
 		sheet := avonet.SheetEBird
 		switch s.ScientificName {
-		case "Gygis candida", "Larus vegae": // CR-039, CR-040
+		case "Gygis candida", "Larus vegae": // decisions.whiteTernBorrows, decisions.vegaGullBorrows
 			sheet = avonet.SheetBirdLife
 		}
 		for _, m := range []struct {
@@ -454,7 +454,7 @@ func jsonMarshal(v any) ([]byte, error) { return json.Marshal(v) }
 // dataset drew an identical head that consumed a fixed share of every small
 // bird's length and differentiated nothing.
 //
-// Verifies: P-062. Criterion: AC-065.
+// Verifies: product.provenancePerMetric. Criterion: acceptance.craniumVaries.
 func TestHeadIsNotAConstant(t *testing.T) {
 	ds := load(t)
 	counts := map[float64]int{}
@@ -499,10 +499,10 @@ func TestHeadIsNotAConstant(t *testing.T) {
 // nobody told. This makes that loud.
 //
 // It does NOT require full coverage. A species iNaturalist has not confidently
-// matched is supposed to be absent (P-064) -- usually a recent split it has not
+// matched is supposed to be absent (product.inaturalistLink) -- usually a recent split it has not
 // followed yet -- so absence is correct and only a *stale* row is a fault.
 //
-// Verifies: P-064, T-022. Criterion: AC-068.
+// Verifies: product.inaturalistLink, tech.pacedInaturalistMapping. Criterion: acceptance.inaturalistLinkConfidentOnly.
 func TestINatTableMatchesTheDataset(t *testing.T) {
 	f, err := os.Open(inatFile)
 	if err != nil {
@@ -545,7 +545,7 @@ func TestINatTableMatchesTheDataset(t *testing.T) {
 		seen[e.TaxonID] = sci
 	}
 
-	// Coverage is REQUIRED to be total (P-064, CR-016). Every one of the 30 that
+	// Coverage is REQUIRED to be total (product.inaturalistLink, decisions.fullInaturalistCoverage). Every one of the 30 that
 	// once failed turned out to be a formatting or synonym artifact, not a real
 	// disagreement, so an unresolved species now means something is wrong --
 	// a taxonomic change, a normalizer regression, or a stale table -- rather
@@ -574,7 +574,7 @@ func TestINatTableMatchesTheDataset(t *testing.T) {
 // Watched fail: appending one extra count in applyRegions reports the
 // mismatch and names the species.
 //
-// Verifies: P-074, CR-030. Criterion: AC-096, AC-099.
+// Verifies: product.shareOfRecords, decisions.seaShareDiffers. Criterion: acceptance.commonestShareIsShare, acceptance.commonestIsLargestShare.
 func TestRegionCountsLineUp(t *testing.T) {
 	ds := load(t)
 	var withCounts int
@@ -601,10 +601,10 @@ func TestRegionCountsLineUp(t *testing.T) {
 	// Every region a species is placed in must have a total to divide by,
 	// or its share is silently uncomputable.
 	//
-	// This briefly excluded the seas, under CR-030, because a sea's figure
+	// This briefly excluded the seas, under decisions.seaShareDiffers, because a sea's figure
 	// summed only the species already judged pelagic -- a denominator built
 	// out of its own numerators, which is not the quantity a land total is.
-	// CR-031 fixed the number rather than hiding it: a sea's total is now
+	// decisions.honestSeaDenominator fixed the number rather than hiding it: a sea's total is now
 	// every bird record on open water in its box. So the assertion reverts,
 	// and a second one below pins the thing that was actually wrong.
 	if len(ds.RegionTotals) == 0 {
@@ -626,7 +626,7 @@ func TestRegionCountsLineUp(t *testing.T) {
 
 	// A sea's denominator must not be the sum of its own numerators.
 	//
-	// This is the shape of the CR-030 bug, and it is the only part a test
+	// This is the shape of the decisions.seaShareDiffers bug, and it is the only part a test
 	// can see offline. A sea's total is every bird on that water, while the
 	// species BirdView places at sea are a few dozen specialists, so the
 	// total runs 8x to 200x the sum -- the tightest is the North Pacific at
@@ -650,12 +650,12 @@ func TestRegionCountsLineUp(t *testing.T) {
 		if total <= summed[id] {
 			t.Errorf("%s totals %d against %d summed over the species placed there; "+
 				"a sea's denominator is every bird on that water, not a sum of the "+
-				"birds we happen to draw (CR-031)", id, total, summed[id])
+				"birds we happen to draw (decisions.honestSeaDenominator)", id, total, summed[id])
 		}
 	}
 }
 
-// Verifies: P-079, CR-040. Criterion: AC-117.
+// Verifies: product.borrowedMeasurementsSaySo, decisions.vegaGullBorrows. Criterion: acceptance.sharedMeasurementsDisclosed.
 func TestVegaGullSharesAmericanHerringGullsRow(t *testing.T) {
 	ds := load(t)
 	got := map[string]*dataset.Species{}
@@ -690,7 +690,7 @@ func TestVegaGullSharesAmericanHerringGullsRow(t *testing.T) {
 	}
 }
 
-// Verifies: P-060, P-062, CR-041. Criterion: AC-118.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric, decisions.herringGullEuropeanRow. Criterion: acceptance.herringGullFromEuropeanRow.
 func TestEuropeanHerringGullReadsItsOwnRow(t *testing.T) {
 	wb, err := avonet.Open(avoFile)
 	if err != nil {
@@ -735,11 +735,11 @@ func TestEuropeanHerringGullReadsItsOwnRow(t *testing.T) {
 	}
 }
 
-// TestBelowBarRegionsAreCountedNotListed asserts AC-119's second assertion:
+// TestBelowBarRegionsAreCountedNotListed asserts acceptance.belowBarCountsKept's second assertion:
 // the ingest keeps a below-bar cell out of Regions, so no region or month
 // filter sees it, and carries its counts in the Below fields.
 //
-// Verifies: P-011, CR-042. Criterion: AC-119.
+// Verifies: product.regionAndMonthFilter, decisions.belowBarCounted. Criterion: acceptance.belowBarCountsKept.
 func TestBelowBarRegionsAreCountedNotListed(t *testing.T) {
 	table := "total\tUSA.44_1\t10|10|10|10|10|10|10|10|10|10|10|10\n" +
 		"total\tUSA.5_1\t10|10|10|10|10|10|10|10|10|10|10|10\n" +
@@ -766,7 +766,7 @@ func TestBelowBarRegionsAreCountedNotListed(t *testing.T) {
 	}
 }
 
-// Verifies: P-070, P-080, CR-043. Criterion: AC-120.
+// Verifies: product.statusIsPublished, product.escapedBirdsListed, decisions.escapedBirdsOffIndex. Criterion: acceptance.escapedBirdsListedAndServed.
 func TestExoticsAreFlaggedFromTheList(t *testing.T) {
 	ds := load(t)
 	if len(status.Exotic) < 30 {

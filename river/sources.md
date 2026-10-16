@@ -18,17 +18,17 @@ the others can be filled in plausibly from a URL alone.
 | [`bohmer-neck`](#bohmer-neck) | mandatory | consulted, not ingested | **adopted** — CC BY 4.0 verified; calibrates one constant, contributes no data |
 | [`avilist`](#avilist) | mandatory | by reference, vendored | **adopted** — CC BY 4.0, vendored and hashed; supplies every name and the species code |
 | [`gbif`](#gbif) | mandatory | by reference, queried, not vendored | **adopted** — CC BY 4.0 verified from the API; supplies the GBIF→AviList name bridge only |
-| [`ricklefs`](#ricklefs) | mandatory | **rejected** | **rejected** — Wiley terms prohibit the use, see CR-002 |
+| [`ricklefs`](#ricklefs) | mandatory | **rejected** | **rejected** — Wiley terms prohibit the use, see decisions.ricklefsProhibited |
 | [`wiley`](#wiley) | mandatory | quoted only, not vendored | **adopted** — terms read and transcribed; the reason `ricklefs` is rejected |
 | [`wcag`](#wcag) | mandatory | absorbed, partial | **partial** — adopted for two criteria, not vendored |
 | [`inat-api`](#inat-api) | governing | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; governs the mapping tool |
 | [`inat-terms`](#inat-terms) | mandatory | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; almost nothing in it reaches BirdView |
 | [`specman`](#specman) | — (method) | project copy | **retired** 2026-10-15 — replaced by River, whose pin is in `process.md`'s banner |
-| [`ebird-sensitive`](#ebird-sensitive) | mandatory | absorbed as facts, not vendored | **adopted** — the US and Canada entries restated in `taxonomy.EBirdSensitive`, each confirmed against the export ([CR-037](decisions.md#cr-037)) |
-| [`birdlife-checklist`](#birdlife-checklist) | mandatory | **rejected** | **rejected** — DataZone terms forbid automated access; [CR-040](decisions.md#cr-040) re-based 2026-10-14 onto the vendored `avilist` and `avonet` workbooks |
+| [`ebird-sensitive`](#ebird-sensitive) | mandatory | absorbed as facts, not vendored | **adopted** — the US and Canada entries restated in `taxonomy.EBirdSensitive`, each confirmed against the export ([decisions.ebirdSilenceNotAbsence](decisions.md#ebirdsilencenotabsence)) |
+| [`birdlife-checklist`](#birdlife-checklist) | mandatory | **rejected** | **rejected** — DataZone terms forbid automated access; [decisions.vegaGullBorrows](decisions.md#vegagullborrows) re-based 2026-10-14 onto the vendored `avilist` and `avonet` workbooks |
 
 Two of the fourteen are rejected, and neither blocks v1. `birdlife-checklist` was consulted in a
-way DataZone's terms forbid; its quotations were removed and [CR-040](decisions.md#cr-040) was
+way DataZone's terms forbid; its quotations were removed and [decisions.vegaGullBorrows](decisions.md#vegagullborrows) was
 re-based on the vendored CC BY 4.0 workbooks. `ricklefs` was evaluated and
 **rejected**: its platform terms prohibit extraction, integration, storage and redistribution
 alike. Both entries are kept so the evaluations are not repeated.
@@ -43,10 +43,10 @@ alike. Both entries are kept so the evaluations are not repeated.
 | **Version** | v7 |
 | **Integrity** | [river/sources/avonet/PROVENANCE.md](sources/avonet/PROVENANCE.md) |
 | **Tier** | mandatory (copyright license) |
-| **Import style** | By reference; vendored at `//third_party/avonet/AVONET Supplementary dataset 1.xlsx` under the location exception in [tech.md](tech.md#location-exception-the-third_party-directory) |
-| **Scope** | All morphometric traits (P-002, P-003) |
+| **Import style** | By reference; vendored at `//third_party/avonet/AVONET Supplementary dataset 1.xlsx` under the location exception in [bindings.md](bindings.md#location-exception-the-third_party-directory) |
+| **Scope** | All morphometric traits (product.traitsFromAvonet, product.traitsPerSpecies) |
 | **Geographic scope** | **Worldwide** — 10,661 species across 41 orders, every continent. Measured 2026-10-01. |
-| **Adopted parts** | Sheets `AVONET2_eBird`, `AVONET1_BirdLife` and `AVONET3_BirdTree` ingested ([CR-006](decisions.md#cr-006), [CR-039](decisions.md#cr-039), [CR-041](decisions.md#cr-041)); `AVONET_Raw_Data` and the crosswalk sheets consulted |
+| **Adopted parts** | Sheets `AVONET2_eBird`, `AVONET1_BirdLife` and `AVONET3_BirdTree` ingested ([decisions.abaSpeciesWithoutAvonet](decisions.md#abaspecieswithoutavonet), [decisions.whiteTernBorrows](decisions.md#whiteternborrows), [decisions.herringGullEuropeanRow](decisions.md#herringgulleuropeanrow)); `AVONET_Raw_Data` and the crosswalk sheets consulted |
 | **Exclusions** | Supplementary dataset 2 (specimen repeatability data) — carries no species-level rows and neither of the dimensions BirdView needs. Removed from the working tree; re-obtainable from the same deposit. |
 | **Owner** | Tobias et al. / figshare |
 | **Status** | **Adopted.** Pinned, vendored, hashed. No acceptance criteria yet. |
@@ -72,7 +72,7 @@ data for all birds. *Ecology Letters* 25: 581–597.
 | **Adopted parts** | None. |
 | **Exclusions** | Everything. |
 | **Owner** | American Birding Association |
-| **Status** | **Retired 2026-10-05, and this is the entry that unblocked deployment.** Names, families and sequence moved to AviList ([CR-022](decisions.md#cr-022)); scope moved to BirdView's own derivation ([CR-028](decisions.md#cr-028)). `internal/aba` is deleted and nothing fetches the file. The entry stays because the record of why a source was adopted and then dropped is worth more than the space it takes — and because anyone re-reading the terms below should see at the top that they no longer bind this project. |
+| **Status** | **Retired 2026-10-05, and this is the entry that unblocked deployment.** Names, families and sequence moved to AviList ([decisions.avilistReplacesAba](decisions.md#avilistreplacesaba)); scope moved to BirdView's own derivation ([decisions.scopeFromRecurrence](decisions.md#scopefromrecurrence)). `internal/aba` is deleted and nothing fetches the file. The entry stays because the record of why a source was adopted and then dropped is worth more than the space it takes — and because anyone re-reading the terms below should see at the top that they no longer bind this project. |
 
 License, quoted verbatim from row 0 of the CSV itself:
 
@@ -102,8 +102,8 @@ cannot be committed, and a non-commercial, attributed, open-source request costs
 | **Owner** | iNaturalist |
 | **Status** | **Adopted 2026-09-23.** Vendored and hash-verified; transcribed against BirdView's much narrower use. |
 
-Two of the eight are implemented (`R1` pacing as T-022, `R4` User-Agent as the pre-existing
-T-006); two are not applicable because BirdView never pages; four are satisfied by construction
+Two of the eight are implemented (`R1` pacing as tech.pacedInaturalistMapping, `R4` User-Agent as the pre-existing
+tech.identifiedClient); two are not applicable because BirdView never pages; four are satisfied by construction
 because it never authenticates, never posts and downloads no media. `inat-api/R7` is worth noting:
 it is the one requirement `birdsync` records as a knowing departure, and BirdView satisfies it
 only because its needs are so much smaller.
@@ -138,8 +138,8 @@ That is exactly the kind of claim that is worthless asserted from memory, which 
 copies are in the tree: anyone can search them and check.
 
 Photographs stay on iNaturalist. BirdView links; it never copies, caches, hotlinks or embeds an
-image, which [T-002](tech.md) independently forbids anyway. See
-[CR-012](decisions.md) for the adoption reasoning and what was rejected.
+image, which [tech.selfContainedServer](tech.md) independently forbids anyway. See
+[decisions.inaturalistLinkAdopted](decisions.md) for the adoption reasoning and what was rejected.
 
 ---
 
@@ -152,12 +152,12 @@ image, which [T-002](tech.md) independently forbids anyway. See
 | **Integrity** | [river/sources/avilist/PROVENANCE.md](sources/avilist/PROVENANCE.md) |
 | **Tier** | mandatory (copyright license) |
 | **Import style** | By reference, vendored — CC BY 4.0 permits it, and that permission is the point |
-| **Scope** | Every English name, family and order name, and the eBird species code (P-004, P-049) |
+| **Scope** | Every English name, family and order name, and the eBird species code (product.namesFromAvilist, product.englishNameChoice) |
 | **Geographic scope** | Worldwide — 11,131 species, 252 families |
 | **Adopted parts** | `Taxon_rank`, `Scientific_name`, `English_name_Clements_v2025`, `English_name_AviList`, `Species_code_Cornell_Lab`, `Family`, `Family_English_name`, `Order`. The **extended** release is required: the short one omits the Clements name and the species code. |
 | **Exclusions** | `Range`, which looks like a scope source and is not — empty for **4,992 of 11,131** species, including Ruddy Duck and Tundra Swan, because it is populated only on an exact Clements concept match. |
 | **Owner** | AviList Core Team |
-| **Status** | **Adopted 2026-10-02**, replacing the ABA checklist for names ([CR-022](decisions.md#cr-022)). Retrieved, hashed, vendored. |
+| **Status** | **Adopted 2026-10-02**, replacing the ABA checklist for names ([decisions.avilistReplacesAba](decisions.md#avilistreplacesaba)). Retrieved, hashed, vendored. |
 
 **This is the source that unblocks deployment.** The ABA checklist is all-rights-reserved and
 serving BirdView reproduces it, so going public was blocked on a permission that has not arrived.
@@ -168,7 +168,7 @@ usage — Little Auk for Dovekie — which is wrong for this audience. But the e
 **also carries the Clements name**, which *is* this audience's usage: measured over BirdView's
 scope, the Clements column reproduces the ABA name for **827 of 827** species where both exist,
 the only five differences being ABA's own `X (alternate)` notation. One file, both vocabularies,
-which is what makes [P-049](product.md#p-049) possible rather than aspirational.
+which is what makes [product.englishNameChoice](product.md#englishnamechoice) possible rather than aspirational.
 
 ### Why the Clements and Cornell columns are usable
 
@@ -196,8 +196,8 @@ accepted* — is exactly what should attract scrutiny rather than escape it.
 | **Import style** | By reference, **queried not vendored** — `cmd/birdview-gbifmap` reads the API and writes the bridge table, which the repository commits |
 | **Scope** | Names only: mapping a GBIF backbone scientific name onto the AviList name for the same taxon |
 | **Geographic scope** | The backbone is worldwide. The species set the bridge covers is scoped to `country=US` and `country=CA` — 1,378 species over 1,238,404,492 records. |
-| **Adopted parts** | `/occurrence/search` faceted on `speciesKey` (the bridge) and on `verbatimScientificName` per GADM region (region membership, [P-011](product.md#p-011)); `/species/{key}` for the accepted name and family; `/species/{key}/synonyms` for the names it absorbed. The **iNaturalist research-grade dataset**, `50c9509d-22c7-4a22-a47d-8c48425ef4a7`, is queried the same way and for one reason: eBird withholds sensitive species. |
-| **Exclusions** | Occurrence records themselves — no coordinate, date, observer or media reaches the dataset. `/species/match` is excluded as unfit, below. **The occurrence counts are still not used for scope**, which remains an open product decision; they *are* used for region membership ([P-011](product.md#p-011)), where only the derived list of regions per species is stored, never a count. |
+| **Adopted parts** | `/occurrence/search` faceted on `speciesKey` (the bridge) and on `verbatimScientificName` per GADM region (region membership, [product.regionAndMonthFilter](product.md#regionandmonthfilter)); `/species/{key}` for the accepted name and family; `/species/{key}/synonyms` for the names it absorbed. The **iNaturalist research-grade dataset**, `50c9509d-22c7-4a22-a47d-8c48425ef4a7`, is queried the same way and for one reason: eBird withholds sensitive species. |
+| **Exclusions** | Occurrence records themselves — no coordinate, date, observer or media reaches the dataset. `/species/match` is excluded as unfit, below. **The occurrence counts are still not used for scope**, which remains an open product decision; they *are* used for region membership ([product.regionAndMonthFilter](product.md#regionandmonthfilter)), where only the derived list of regions per species is stored, never a count. |
 | **Owner** | GBIF Secretariat |
 | **Status** | **Adopted 2026-10-02** for the name bridge. License verified from the API's own dataset records; coverage measured and recorded below; no criteria in `acceptance.md` yet. |
 
@@ -207,7 +207,7 @@ names both DOIs in its header, which is where the attribution lives while nothin
 served.
 
 **No API terms are transcribed, and the gap is deliberate.** `www.gbif.org/terms` returns HTTP 403
-to an identified client, and [process.md](process.md#import-style) forbids supplying from memory a
+to an identified client, and [process.md](process.md#sources) forbids supplying from memory a
 rule that could not be retrieved — a plausible rate limit is indistinguishable from a real one.
 What *was* retrievable is `api.gbif.org/robots.txt`, which disallows one image path and nothing
 else. So the pacing in `cmd/birdview-gbifmap` — 100 ms between requests across four workers, about
@@ -325,7 +325,7 @@ an absent bird unless the two paths are kept apart.)*
 inverted query cannot find are not a taxonomy problem. Every one is present in iNaturalist and
 all but absent from eBird:
 
-*(Corrected 2026-10-05 by [T-028](tech.md#t-028)'s ratio band. This said **12 species** and
+*(Corrected 2026-10-05 by [tech.sourceNamingMeasured](tech.md#sourcenamingmeasured)'s ratio band. This said **12 species** and
 listed nine, and one of the nine was wrong: **Blue-billed White-Tern is not withheld** — eBird
 holds 16,008 records of it under *Gygis alba*, a lump, not a suppression. The band also found
 two the table missed, because neither reads as zero: **Great Gray Owl**, eBird 1 against
@@ -368,10 +368,10 @@ iNaturalist is superseded — see that entry.
 | **Integrity** | [river/sources/fox-wingspan/PROVENANCE.md](sources/fox-wingspan/PROVENANCE.md) |
 | **Tier** | mandatory (copyright license) |
 | **Import style** | By reference, vendored — CC BY 4.0 permits it |
-| **Scope** | Empirical wingspan (P-060) |
+| **Scope** | Empirical wingspan (product.lengthAndWingspanSources) |
 | **Geographic scope** | **Worldwide** — 10,618 species. Its gaps are functional, not regional: flightless birds (Ostrich, Emu, penguins, kiwi) and Galliformes are absent, while flying birds from every continent are present. Measured 2026-10-01. |
 | **Adopted parts** | Rows with `needs_prediction` false only. The column is a spreadsheet boolean: `FALSE`/`TRUE` as excelize renders it, `0`/`1` in the underlying XML, and the reader accepts both. Matching only `"0"` yields **zero** measured wingspans and looks like a coverage problem rather than a parsing one — see `isEmpirical`. |
-| **Exclusions** | **Predicted wingspans are not ingested as values.** The `wingspan_predicted_*` columns are regressions from AVONET wing chord; taking them as data would reintroduce the modeled-as-measured problem CR-001 resolves. They are used for one other purpose: as the reference BirdView's own fitted model is validated against ([CR-008](decisions.md#cr-008)). Reading them to check our arithmetic is not the same as presenting them as measurements. |
+| **Exclusions** | **Predicted wingspans are not ingested as values.** The `wingspan_predicted_*` columns are regressions from AVONET wing chord; taking them as data would reintroduce the modeled-as-measured problem decisions.noOpenLengthAndWingspan resolves. They are used for one other purpose: as the reference BirdView's own fitted model is validated against ([decisions.fittedWingspanModel](decisions.md#fittedwingspanmodel)). Reading them to check our arithmetic is not the same as presenting them as measurements. |
 | **Owner** | Fox, Brunton & Shephard |
 | **Status** | **Adopted 2026-09-21.** Retrieved, hashed, vendored; its MD5 matches figshare's published `computed_md5`. Coverage for BirdView's scope measured and recorded. |
 
@@ -395,14 +395,14 @@ would not break the pipeline, but it would thin the measured wingspans sharply.
 | **Integrity** | **Not vendored, so no hash here.** The figshare DOI pins the version, and the file is re-downloadable. |
 | **Tier** | mandatory (copyright license) |
 | **Import style** | **Consulted, not ingested.** No value from it enters the dataset. |
-| **Scope** | Calibration evidence only: the mass exponent of [P-047](product.md#p-047) |
+| **Scope** | Calibration evidence only: the mass exponent of [product.trunkFromMass](product.md#trunkfrommass) |
 | **Geographic scope** | Worldwide — 103 species across 68 families and 34 orders, MNHN Paris skeletal collection, one specimen per species |
 | **Adopted parts** | Table S4's published scaling, used to choose one constant. Nothing is joined to BirdView's species. |
-| **Exclusions** | Everything else. In particular the per-species neck lengths are **not** used as BirdView's neck values — Böhmer measures the full cervical column, including the part inside the body contour, where [P-045](product.md#p-045) models the *exposed* neck of a silhouette. The two are different quantities and must not be equated; see [CR-021](decisions.md#cr-021). |
+| **Exclusions** | Everything else. In particular the per-species neck lengths are **not** used as BirdView's neck values — Böhmer measures the full cervical column, including the part inside the body contour, where [product.neckModelPerFamily](product.md#neckmodelperfamily) models the *exposed* neck of a silhouette. The two are different quantities and must not be equated; see [decisions.trunkExponentCalibrated](decisions.md#trunkexponentcalibrated). |
 | **Owner** | Böhmer, Rössner, Fabre et al. |
 | **Status** | **Adopted 2026-10-02 as calibration evidence.** CC BY 4.0 verified from the figshare API record itself, not inferred from the article. |
 
-Why it is a source at all when no number from it is stored: [CR-021](decisions.md#cr-021) changes a
+Why it is a source at all when no number from it is stored: [decisions.trunkExponentCalibrated](decisions.md#trunkexponentcalibrated) changes a
 constant in the trunk model, and the evidence for that constant has to be citable. A source entry
 is the honest place for it. The alternative — a magic number in a code comment saying "measured
 elsewhere" — is exactly what this manifest exists to prevent.
@@ -436,11 +436,11 @@ depend on that recovery being right: a slope is invariant under a change of unit
 | **Integrity** | None — nothing vendored |
 | **Tier** | mandatory (copyright) |
 | **Import style** | **None — rejected.** Fetch-at-build was the plan; Wiley's Rules of Use G prohibits automated access |
-| **Scope** | Passerine total length (P-060) |
+| **Scope** | Passerine total length (product.lengthAndWingspanSources) |
 | **Adopted parts** | `Length` column, passerines |
 | **Exclusions** | — |
 | **Owner** | Ricklefs / Wiley / ESA |
-| **Status** | **Rejected 2026-09-21.** The terms were read and prohibit extraction, integration with other data, storage in a retrieval system, and redistribution — explicitly regardless of non-commercial use. See [`wiley`](#wiley) and [CR-002](decisions.md#cr-002). |
+| **Status** | **Rejected 2026-09-21.** The terms were read and prohibit extraction, integration with other data, storage in a retrieval system, and redistribution — explicitly regardless of non-commercial use. See [`wiley`](#wiley) and [decisions.ricklefsProhibited](decisions.md#ricklefsprohibited). |
 
 Two further cautions, both from research rather than from the terms:
 
@@ -486,10 +486,10 @@ exception in [tech.md](bindings.md#location-exception-the-third_party-directory)
 | **Version** | WCAG 2.2 |
 | **Integrity** | Not vendored |
 | **Tier** | **mandatory** |
-| **Import style** | Absorbed, partial — the adopted criteria are restated as T-010 |
-| **Scope** | Family badge colors (T-010), and link and text colors against the page surfaces (T-023) |
+| **Import style** | Absorbed, partial — the adopted criteria are restated as tech.badgeContrast |
+| **Scope** | Family badge colors (tech.badgeContrast), and link and text colors against the page surfaces (tech.textContrastFloor) |
 | **Adopted parts** | SC 1.4.3 (Contrast Minimum) and SC 1.4.6 (Contrast Enhanced). Badges and links target 1.4.6 at 7:1; other text is held to 1.4.3 at 4.5:1. |
-| **Exclusions** | **Everything else.** No keyboard-access, focus-order, timing, reading-level or other criteria are adopted, and BirdView claims no conformance level. The scope widened once, from badges to all text, after an unstyled link shipped at 1.9:1 — see [CR-013](decisions.md). |
+| **Exclusions** | **Everything else.** No keyboard-access, focus-order, timing, reading-level or other criteria are adopted, and BirdView claims no conformance level. The scope widened once, from badges to all text, after an unstyled link shipped at 1.9:1 — see [decisions.twoContrastFloors](decisions.md). |
 | **Owner** | W3C; project owner grants any deviation |
 | **Status** | **Partial by design.** Adopted for two criteria, restated as a checkable requirement, not vendored. |
 
@@ -532,11 +532,11 @@ it are in [bindings.md](bindings.md).
 | **Integrity** | **Not vendored, so no hash here.** No copy is kept, in the repository or elsewhere |
 | **Tier** | mandatory (the site's terms bind anyone who uses it) |
 | **Import style** | **Rejected.** Nothing from it enters the dataset, the repository or the decision record |
-| **Scope** | Evaluated for [CR-040](decisions.md#cr-040) (Vega Gull's AVONET donor); superseded by the vendored `avilist` and `avonet` workbooks |
+| **Scope** | Evaluated for [decisions.vegaGullBorrows](decisions.md#vegagullborrows) (Vega Gull's AVONET donor); superseded by the vendored `avilist` and `avonet` workbooks |
 | **Adopted parts** | None |
 | **Exclusions** | Everything |
 | **Owner** | BirdLife International |
-| **Status** | **Rejected 2026-10-14.** Consulted 2026-10-13 by an agent in a way DataZone's terms forbid; quotations removed and [CR-040](decisions.md#cr-040) re-based on `avilist` and `avonet` |
+| **Status** | **Rejected 2026-10-14.** Consulted 2026-10-13 by an agent in a way DataZone's terms forbid; quotations removed and [decisions.vegaGullBorrows](decisions.md#vegagullborrows) re-based on `avilist` and `avonet` |
 
 **What the terms say.** The DataZone *Terms and Conditions of Use* (read 2026-10-13) govern the
 site and the checklist files it links. Website clause 3 permits viewing on screen and copies of
@@ -551,8 +551,8 @@ data.
 **How it was consulted, and how that was resolved.** On 2026-10-13 an agent fetched the taxonomy
 page, downloaded the version 5 and version 7 archives with `curl`, and searched the spreadsheets
 with a program for *vegae* — automated access and automated analysis under clause 11. The copies
-were deleted the same evening. On 2026-10-14 the three short quotations in [CR-040](decisions.md#cr-040)
-were removed and CR-040 was re-based on the two CC BY 4.0 workbooks BirdView already vendors:
+were deleted the same evening. On 2026-10-14 the three short quotations in [decisions.vegaGullBorrows](decisions.md#vegagullborrows)
+were removed and decisions.vegaGullBorrows was re-based on the two CC BY 4.0 workbooks BirdView already vendors:
 AviList v2025b's `Decision_summary` for Proposal `2025-1136` (which records that *L. vegae* is
 sometimes treated as a subspecies of *L. smithsonianus* and that BirdLife's *L. argentatus* is the
 European Herring Gull alone) and AVONET's `AVONET_Raw_Data` sheet (which shows that all 6
@@ -561,7 +561,7 @@ specimens of `AVONET1_BirdLife`'s *Larus smithsonianus* are from Russia and Japa
 
 **What does not change.** AVONET's BirdLife sheet is AVONET's work, under CC BY 4.0, and is
 unaffected; it carries BirdLife's species *names*, not its checklist. **No agent may fetch or
-process anything from BirdLife's DataZone**, as for Wiley ([CR-002](decisions.md#cr-002)).
+process anything from BirdLife's DataZone**, as for Wiley ([decisions.ricklefsProhibited](decisions.md#ricklefsprohibited)).
 
 ---
 
@@ -574,7 +574,7 @@ process anything from BirdLife's DataZone**, as for Wiley ([CR-002](decisions.md
 | **Integrity** | Not vendored |
 | **Tier** | **mandatory** — it determines what the eBird half of the occurrence data *cannot* say |
 | **Import style** | Absorbed as facts: the entries touching the US and Canada, for species BirdView draws, restated as `taxonomy.EBirdSensitive` |
-| **Scope** | Where and when eBird withholds a species from public output, so that BirdView can tell eBird's silence from a bird's absence ([CR-037](decisions.md#cr-037)) |
+| **Scope** | Where and when eBird withholds a species from public output, so that BirdView can tell eBird's silence from a bird's absence ([decisions.ebirdSilenceNotAbsence](decisions.md#ebirdsilencenotabsence)) |
 | **Adopted parts** | 9 species from the global list, and 27 from the regional list as 68 entries of species, region and date window |
 | **Exclusions** | Everything outside the US and Canada, and every species BirdView does not draw. The rationale eBird stores for each listing is not published and not needed |
 | **Owner** | Cornell Lab of Ornithology |
@@ -591,7 +591,7 @@ Sage-Grouse in Utah from February to May (1,689 records), Ferruginous Pygmy-Owl 
 (4,809), Spruce Grouse in Vermont (1,303). The list describes eBird's policy today; the export
 reflects what was applied when it was built. Most of the 42 are a handful of stray records — a
 Long-eared Owl or two per state, for reasons the export does not record — but some are plainly not suppressed at
-all. So BirdView uses the list only to say *where to look*, and the records to say *whether it happened* — the rule is in [CR-037](decisions.md#cr-037).
+all. So BirdView uses the list only to say *where to look*, and the records to say *whether it happened* — the rule is in [decisions.ebirdSilenceNotAbsence](decisions.md#ebirdsilencenotabsence).
 
 **Why restating it is permitted.** Cornell's terms forbid redistributing eBird **data** —
 checklists and observations — and that is why eBird/Clements is rejected below. This page is
@@ -616,7 +616,7 @@ Every source BirdView reads is worldwide:
 | **AVONET** | worldwide — 10,661 species, 41 orders |
 | **Fox wingspan** | worldwide — 10,618 species; gaps are flightless birds and Galliformes, not regions |
 | **iNaturalist taxon IDs** | worldwide taxonomy; BirdView stores one id per in-scope species |
-| **eBird and iNaturalist occurrence, via GBIF** | worldwide, at **very uneven density**: the US and Canada alone hold 1,238,404,492 eBird records ([CR-035](decisions.md#cr-035)) |
+| **eBird and iNaturalist occurrence, via GBIF** | worldwide, at **very uneven density**: the US and Canada alone hold 1,238,404,492 eBird records ([decisions.regionJoinNormalizes](decisions.md#regionjoinnormalizes)) |
 
 What makes BirdView North American is entirely its own:
 
@@ -624,10 +624,10 @@ What makes BirdView North American is entirely its own:
 | --- | --- |
 | `internal/region` | the 69 land regions — the 50 US states and DC, Canada's 13 provinces and territories, and five US outlying islands — and the five marine boxes. `birdview-status` derives scope over exactly these, and `birdview-regions` derives presence over them |
 | the `US,CA` country filter | in `birdview-regions` (the pelagic share and the marine boxes), `birdview-names` and `birdview-gbifmap` |
-| the calibrations | 1 record per million for regional presence ([P-011](product.md#p-011)), the recurrence thresholds of [P-001](product.md#p-001), and the 200-record month floor of [CR-036](decisions.md#cr-036) — every one measured against US and Canadian record density |
+| the calibrations | 1 record per million for regional presence ([product.regionAndMonthFilter](product.md#regionandmonthfilter)), the recurrence thresholds of [product.scopeIsRecurringAvifauna](product.md#scopeisrecurringavifauna), and the 200-record month floor of [decisions.monthPresence](decisions.md#monthpresence) — every one measured against US and Canadian record density |
 
 **The ABA checklist used to be the only thing in BirdView that knew where it was.** That stopped
-being true when [CR-028](decisions.md#cr-028) replaced it with scope derived from occurrence
+being true when [decisions.scopeFromRecurrence](decisions.md#scopefromrecurrence) replaced it with scope derived from occurrence
 records, and this section said otherwise until 2026-10-09.
 
 Changing scope therefore costs nothing in the trait pipeline — no ingest, model or diagram
@@ -644,7 +644,7 @@ Recorded so nobody re-litigates them annually.
 
 | Source | Why not |
 | --- | --- |
-| **eBird / Clements taxonomy** | Cornell terms clause 2 forbids reproduction or redistribution without written authorization. Superseded anyway: ABA supplies common names, scientific names and families, so no second taxonomy is needed (P-004). |
+| **eBird / Clements taxonomy** | Cornell terms clause 2 forbids reproduction or redistribution without written authorization. Superseded anyway: ABA supplies common names, scientific names and families, so no second taxonomy is needed (product.namesFromAvilist). |
 | **eBird API region species lists** | Would supply scope and geography in AVONET's own taxonomy, but requires an API key and `api.ebird.org/robots.txt` is `Disallow: /`, with the API terms page returning 403. Not evaluated further; a human would need to read the terms. |
 | **AOS / NACC check-list** | Best-shaped data of the three checklists — family, order and subfamily as real columns, plus machine-readable status flags — but covers North *and Middle* America, which is the wrong scope, and carries no license statement anywhere. Absence of a statement is not permission. Re-checked 2026-10-01 against the live CSV: 2,212 species, and filtering to neither accidental nor extinct leaves **1,957** — 1,131 more than the ABA area's 841, because the area runs to Panama and the West Indies. The status flags cannot reconstruct ABA scope; they are relative to a far larger region. |
 | **AviList v2025b** | **CC BY 4.0**, verified on the publisher's own download page 2026-10-01, and the consensus successor to IOC, Clements and BirdLife with the AOS, Cornell, BirdLife, Avibase and the IOU behind it. It would solve names, families and taxonomic sequence outright — 832 of BirdView's 841 match on scientific name. It does **not** solve scope, which is the only thing ABA is actually blocking, and its English names are wrong for this audience. See [below](#why-avilist-does-not-replace-the-aba-checklist). |
@@ -656,7 +656,7 @@ Recorded so nobody re-litigates them annually.
 | **Audubon field guide** | Carries exactly the two needed dimensions, in near-parseable form. Terms forbid reproduction, distribution, storage in a retrieval system, and derivative works. |
 | **All About Birds / Birds of the World** | Carries the data; blocks automated retrieval (403) and is subscription-gated respectively. Not assessed further. |
 | **Macaulay Library** | Permits *embedding* for non-commercial use — which BirdView qualifies for — but offers no discovery API, and its media-request path explicitly prunes species lists over 100. Cannot scale to the dataset. Viable later for hand-curated species. |
-| **Wikimedia Commons, iNaturalist, Flickr** | Photo sources, all researched in detail. Out of scope while P-050 is withdrawn; Commons is the recommendation when it returns. |
+| **Wikimedia Commons, iNaturalist, Flickr** | Photo sources, all researched in detail. Out of scope while product.speciesPhotographs is withdrawn; Commons is the recommendation when it returns. |
 
 ### Why AviList does not replace the ABA checklist
 
@@ -667,9 +667,9 @@ the checklist could be dropped entirely, since redistributing it is what blocks 
 
 | | Replaceable? |
 | --- | --- |
-| **Scope** — which 841 species, by rarity codes 1–3 (P-001) | **no open source found** |
-| **Common names**, species and family (P-004) | yes, but at a cost |
-| **Taxonomic sequence** for the order grouping (P-010) | yes |
+| **Scope** — which 841 species, by rarity codes 1–3 (product.scopeIsRecurringAvifauna) | **no open source found** |
+| **Common names**, species and family (product.namesFromAvilist) | yes, but at a cost |
+| **Taxonomic sequence** for the order grouping (product.familyFilter) | yes |
 
 **Scope is the one that matters and nothing supplies it.** AviList carries a `Range` column, but
 it is free-text prose — *"desert to savanna plains of northeastern Africa, from northern
@@ -734,7 +734,7 @@ field.
   Sparrow, Whiskered Auklet.
 - **Some misses are nomenclature, not biology.** *Anarhynchus montanus*, *nivosus* and *wilsonia*
   and *Amphispizopsis quinquestriata* fail to match because GBIF's backbone has not followed the
-  recent genus moves — the same rot CR-018 handles for links, reappearing as a data-quality
+  recent genus moves — the same rot decisions.compareUrlContract handles for links, reappearing as a data-quality
   problem.
 
 Each of these can be patched — special-case Hawaii, filter on establishment, pin a taxonomy —

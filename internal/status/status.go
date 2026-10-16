@@ -16,7 +16,7 @@
 // the dates on which it was recorded, rather than from how many records it
 // has.
 //
-// The distinction is the whole point (CR-028). A record count measures
+// The distinction is the whole point (decisions.scopeFromRecurrence). A record count measures
 // observer effort: it under-reports pelagic species and remote-island
 // endemics because nobody is there, and over-reports vagrants because a
 // twitchable rarity draws a crowd. Those pull in opposite directions, so no
@@ -28,9 +28,9 @@
 // What this package cannot do is tell where a bird came from. Indian Peafowl
 // in New York recurs on every measure here -- 47 episodes across 33 years --
 // because ornamental birds are replenished by people. Origin is declared, not
-// measured; see P-071.
+// measured; see product.declaredExceptions.
 //
-// Verifies: P-001, P-070.
+// Verifies: product.scopeIsRecurringAvifauna, product.statusIsPublished.
 package status
 
 import "time"
@@ -57,7 +57,7 @@ const (
 	Absent Status = "absent"
 )
 
-// InScope reports whether a status puts a species in the dataset (P-001).
+// InScope reports whether a status puts a species in the dataset (product.scopeIsRecurringAvifauna).
 func (s Status) InScope() bool { return s == Established || s == Rare }
 
 // Gap is the silence, in days, that separates one arrival from the next.
@@ -130,7 +130,7 @@ func Measure(records int64, dates []time.Time, truncated bool) Shape {
 // reason; nothing here is fitted to reproduce anyone else's list, because the
 // only available training signal would have been the ABA checklist and
 // fitting to it would launder its editorial judgement into our weights
-// (CR-028).
+// (decisions.scopeFromRecurrence).
 const (
 	// MinEpisodes and MinYears are the bar for recurrence at all. Two
 	// arrivals in two years is the least evidence that can distinguish

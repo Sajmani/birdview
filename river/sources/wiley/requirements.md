@@ -33,7 +33,7 @@ the reading can be checked.
 
 **For BirdView: fatal.** A built dataset holding Ricklefs lengths is material "stored in a
 retrieval system", and shipping it is "systematic distribution". The final clause closes the exit
-this project might otherwise have taken: T-011's non-commercial posture is expressly no defense —
+this project might otherwise have taken: tech.localNowPublicLater's non-commercial posture is expressly no defense —
 "whether or not for commercial or non-profit use or for a fee or free of charge".
 
 ### `wiley/R2` — No integration with other material, and no derivative works
@@ -62,7 +62,7 @@ carved out, and that is all this file does.
 > headers or other measures we may use to prevent or restrict access"
 > — Rules of Use, G
 
-**For BirdView: fatal to the mechanism.** T-004's fetch-at-build design — the arrangement that
+**For BirdView: fatal to the mechanism.** tech.fetchRestrictedInputs's fetch-at-build design — the arrangement that
 lets the ABA checklist be used without redistributing it — is "automated means" and is
 prohibited. Note also that the HTTP 403 this project met repeatedly is the "robot exclusion...
 measures" the clause refers to, so the block was not incidental.
@@ -138,4 +138,4 @@ because nobody here is qualified to make it, and because the contract binds inde
 whether copyright does.
 
 The clean path to this data, if it is ever wanted, is the author or ESA — not the platform. See
-[CR-002](../../decisions.md#cr-002).
+[decisions.ricklefsProhibited](../../decisions.md#ricklefsprohibited).

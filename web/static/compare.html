@@ -25,14 +25,14 @@
 <body class="detail">
 {{/* Two exits, one per line. Back keeps the picks to change them; stop
      leaves pick mode, which is what a reader who has seen the comparison
-     usually wants (P-068). Its own class, so a test reading "the back link"
+     usually wants (product.pickFromIndex). Its own class, so a test reading "the back link"
      still finds the first. */}}
 <p class="back"><a class="backlink" href="{{call .Query}}">&larr; back to picking birds</a><br>
 <a class="stoplink" href="{{.StopURL}}">&larr; stop comparing</a></p>
 
 {{if .Missing}}
 {{/* Named, never silently dropped: a kept comparison link outlives some of
-     its own ids, and the reader needs to know what it lost (CR-018). */}}
+     its own ids, and the reader needs to know what it lost (decisions.compareUrlContract). */}}
 <p class="note pickgone">{{len .Missing}} unrecognised and dropped:
   {{range $i, $m := .Missing}}{{if $i}}, {{end}}<code>{{$m}}</code>{{end}}.
   Species identifiers follow scientific names, which are occasionally reassigned.</p>
@@ -48,7 +48,7 @@ that small.</p>
 {{/* Each link is an ordinary comparison URL naming the same birds in a new
      order, so the page still draws them in the order given and there is no
      stored sort to go stale. A metric reads as on when the panels already
-     happen to be in its order (P-067). */}}
+     happen to be in its order (product.comparisonOneScale). */}}
 <div class="row cmpsort">
   <span class="lbl">Sort by</span>
   {{range .Sorts}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}">{{.Label}}</a>{{end}}
@@ -57,7 +57,7 @@ that small.</p>
 
 {{/* The panels wrap: with several birds they will not fit on one line at any
      useful size, and a row squeezed until they do would compare nothing
-     (P-067). */}}
+     (product.comparisonOneScale). */}}
 <div class="cmprow">
   {{range .Panels}}
   <div class="tile big cmppanel">
@@ -70,7 +70,7 @@ that small.</p>
         <em>{{.S.FamilyCommon}}</em></span>
     </div>
     {{template "diagram" .}}
-    {{/* P-067 trades the provenance table for this link. It is what makes
+    {{/* product.comparisonOneScale trades the provenance table for this link. It is what makes
          omitting the table honest, so it is part of every panel. */}}
     <p class="cmplinks">
       <a href="{{.DetailURL}}">Where these numbers come from &rarr;</a>

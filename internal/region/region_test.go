@@ -27,12 +27,12 @@ import (
 // the same grouping appears twice in it.
 //
 // The invariant is per grouping, not global: a region is deliberately in two
-// zones overall, one from each grouping (P-013).
+// zones overall, one from each grouping (product.regionsGroupedTwoWays).
 //
-// Verifies: P-011, P-013.
+// Verifies: product.regionAndMonthFilter, product.regionsGroupedTwoWays.
 func TestEachGroupingPartitionsTheRegions(t *testing.T) {
 	if len(Groupings) < 2 {
-		t.Fatalf("expected at least the two groupings of P-013, got %d", len(Groupings))
+		t.Fatalf("expected at least the two groupings of product.regionsGroupedTwoWays, got %d", len(Groupings))
 	}
 	for _, g := range Groupings {
 		seen := map[string]int{}
@@ -73,16 +73,16 @@ func TestEachGroupingPartitionsTheRegions(t *testing.T) {
 // TestGroupingsAreDistinct checks that the two groupings actually group
 // differently. Two identical groupings would render two identical blocks and
 // satisfy every other test here, while telling the reader nothing -- and the
-// whole point of CR-023 is that the measured grouping disagrees with the
+// whole point of decisions.regionsTwoWays is that the measured grouping disagrees with the
 // hand-drawn one.
 //
-// Verifies: P-013.
+// Verifies: product.regionsGroupedTwoWays.
 func TestGroupingsAreDistinct(t *testing.T) {
 	// Alaska is the documented disagreement: the clustering files it with
 	// British Columbia, geography files it with the Yukon.
 	ak, _ := Get("USA.2_1")
 	if ak.Zone(ByBirds) == ak.Zone(ByGeography) {
-		t.Errorf("Alaska is in %q under both groupings; CR-023 records that they disagree",
+		t.Errorf("Alaska is in %q under both groupings; decisions.regionsTwoWays records that they disagree",
 			ak.Zone(ByBirds))
 	}
 	for _, g := range Groupings {
@@ -106,12 +106,12 @@ func TestGroupingsAreDistinct(t *testing.T) {
 // abbreviation and is therefore exactly two letters, or it is absent — there
 // is no third case, and **absent is the assertion that matters**: it is what
 // stops an invented code being slipped in beside 64 official ones to make a
-// tidier chip (CR-024).
+// tidier chip (decisions.regionUrlIsPostalCode).
 //
 // Two regions sharing a code would be indistinguishable on screen, so
 // non-empty codes must still be unique. Empty ones collide by design.
 //
-// Verifies: P-011.
+// Verifies: product.regionAndMonthFilter.
 func TestCodesAreStandardOrAbsent(t *testing.T) {
 	seen := map[string]string{}
 	coded := 0
@@ -147,7 +147,7 @@ func TestCodesAreStandardOrAbsent(t *testing.T) {
 // tell Ohio from Oklahoma -- only the generator's name read-back does that --
 // but it does catch a malformed id before a network run burns ten minutes.
 //
-// Verifies: P-011.
+// Verifies: product.regionAndMonthFilter.
 func TestLandIDsLookLikeGADM(t *testing.T) {
 	re := regexp.MustCompile(`^(USA|CAN|UMI)\.\d+_1$`)
 	for _, id := range LandIDs() {
@@ -174,7 +174,7 @@ func TestLandIDsLookLikeGADM(t *testing.T) {
 // claim that was simply false — the boxes abut at 66°N rather than overlapping,
 // so no ordering matters. The test caught the error in its own comment.
 //
-// Verifies: P-011.
+// Verifies: product.regionAndMonthFilter.
 func TestMarineBoxesAreDisjoint(t *testing.T) {
 	ids := MarineIDs()
 	if len(ids) < 2 {
@@ -212,11 +212,11 @@ func TestMarineBoxesAreDisjoint(t *testing.T) {
 	}
 }
 
-// TestPelagicIsTheLastZone pins the ordering P-011 asks for, in **every**
+// TestPelagicIsTheLastZone pins the ordering product.regionAndMonthFilter asks for, in **every**
 // grouping. The sea is the one group that is not somewhere a reader lives, so
 // it sits after the places that are, rather than between them.
 //
-// Verifies: P-011, P-013.
+// Verifies: product.regionAndMonthFilter, product.regionsGroupedTwoWays.
 func TestPelagicIsTheLastZone(t *testing.T) {
 	for _, g := range Groupings {
 		zs := g.Zones
@@ -242,7 +242,7 @@ func TestPelagicIsTheLastZone(t *testing.T) {
 // Two regions sharing a slug makes one unreachable from every chip, and the
 // collision is silent: the page still renders, the wrong birds appear.
 //
-// Verifies: P-011. Criterion: AC-088.
+// Verifies: product.regionAndMonthFilter. Criterion: acceptance.regionUrlRoundTrips.
 func TestSlugsAreUniqueAndResolve(t *testing.T) {
 	seen := map[string]string{}
 	for _, id := range append(LandIDs(), MarineIDs()...) {
@@ -283,9 +283,9 @@ func TestSlugsAreUniqueAndResolve(t *testing.T) {
 
 // TestSlugIsCodeOrPascalName pins the rule itself, so the two halves cannot
 // drift into one another: a postal code where there is one, the name in
-// PascalCase where there is not (CR-024).
+// PascalCase where there is not (decisions.regionUrlIsPostalCode).
 //
-// Verifies: P-011. Criterion: AC-088.
+// Verifies: product.regionAndMonthFilter. Criterion: acceptance.regionUrlRoundTrips.
 func TestSlugIsCodeOrPascalName(t *testing.T) {
 	for _, tc := range []struct{ id, want string }{
 		{"USA.5_1", "CA"},            // a state uses its postal code
@@ -315,11 +315,11 @@ func TestSlugIsCodeOrPascalName(t *testing.T) {
 	}
 }
 
-// TestGADMIDsAreNotSlugs guards the thing CR-024 removed. The GADM id stays
+// TestGADMIDsAreNotSlugs guards the thing decisions.regionUrlIsPostalCode removed. The GADM id stays
 // the internal key, so it is still in the table and still easy to reach for;
 // what must never happen is it reaching a URL again.
 //
-// Verifies: P-011. Criterion: AC-088.
+// Verifies: product.regionAndMonthFilter. Criterion: acceptance.regionUrlRoundTrips.
 func TestGADMIDsAreNotSlugs(t *testing.T) {
 	for _, id := range append(LandIDs(), MarineIDs()...) {
 		if _, ok := BySlug(id); ok {
@@ -332,7 +332,7 @@ func TestGADMIDsAreNotSlugs(t *testing.T) {
 // suffix round-trips, and that a malformed one is refused rather than read
 // as "nothing withheld".
 //
-// Verifies: CR-037. Criterion: AC-113.
+// Verifies: decisions.ebirdSilenceNotAbsence. Criterion: acceptance.withheldMonthsExplained.
 func TestPresenceReadsWithheldFlags(t *testing.T) {
 	const table = "total\tUSA.10_1\t1|1|1|1|1|1|1|1|1|1|1|1\n" +
 		"Passerina ciris\tUSA.10_1:0|0|0|12483|2349|1034|905|1680|2759|0|0|0!111000000111\n"

@@ -13,33 +13,77 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""AC-004 - every requirement cited in decisions.md, acceptance.md and todo.md exists.
+"""acceptance.decisionReferencesExist - every reference to a goal, requirement, criterion or decision resolves.
 
-Verifies: process integrity. Catches an ID that was renamed, or one invented in a
-decision record and never written down as a requirement.
+Verifies: process integrity. Catches a name that was renamed, one invented in a
+decision record and never written down, and a link whose anchor lands nowhere.
+
+Three checks, across every tracked text file outside third_party/:
+
+  - every qualified reference -- goals.x, product.x, tech.x, decisions.x,
+    acceptance.x -- names an item that its file defines;
+  - every anchored link into river/ lands on a heading that exists, where an
+    item's anchor is its identifier lowercased (decisions.descriptiveIdentifiers);
+  - no identifier in the superseded P-001 / CR-001 form survives anywhere.
 """
-import re, sys, pathlib
+import re, sys, pathlib, subprocess
 
 spec = pathlib.Path(__file__).resolve().parents[1]
-defined = set()
-for name in ('product.md', 'tech.md'):
-    defined |= set(re.findall(r'^### ([PT]-\d+)', (spec / name).read_text(encoding='utf-8'), re.M))
-crs = set(re.findall(r'^## (CR-\d+)', (spec / 'decisions.md').read_text(encoding='utf-8'), re.M))
-acs = set(re.findall(r'^### (AC-\d+)', (spec / 'acceptance.md').read_text(encoding='utf-8'), re.M))
+repo = spec.parent
+KINDS = {'goals': 'goals.md', 'product': 'product.md', 'tech': 'tech.md',
+         'decisions': 'decisions.md', 'acceptance': 'acceptance.md'}
+ITEM = re.compile(r'^#{2,3} ([a-z][A-Za-z]+)[ \t]*$', re.M)
+HEADING = re.compile(r'^#{1,6} (.+?)[ \t]*$', re.M)
 
-problems = []
-for name, valid in (('decisions.md', defined | crs | acs), ('acceptance.md', defined | crs | acs),
-                    ('todo.md', defined | crs | acs)):
+def slug(text):
+    """A heading's anchor, as GitHub derives it."""
+    text = re.sub(r'[`*]', '', text.strip().lower())  # underscores inside words survive
+    return re.sub(r'[^\w\- ]', '', text).replace(' ', '-')
+
+defined, anchors = {}, {}
+for kind, name in KINDS.items():
     text = (spec / name).read_text(encoding='utf-8')
-    for rid in sorted(set(re.findall(r'\b([PT]-\d{3})\b', text))):
-        if rid not in defined:
-            problems.append(f'{name} cites {rid}, which no requirement defines')
-    for cid in sorted(set(re.findall(r'\b(CR-\d{3})\b', text))):
-        if cid not in crs:
-            problems.append(f'{name} cites {cid}, which no decision record defines')
+    defined[kind] = set(ITEM.findall(text))
+for path in spec.glob('*.md'):
+    anchors[path.name] = {slug(h) for h in HEADING.findall(path.read_text(encoding='utf-8'))}
+
+tracked = subprocess.run(['git', 'ls-files'], cwd=repo, capture_output=True, text=True).stdout.split()
+EXTENSIONS = {'md', 'py', 'go', 'svg', 'json', 'tsv', 'html', 'css'}
+QUALIFIED = re.compile(r'\b(goals|product|tech|decisions|acceptance)\.([a-z][A-Za-z]+)\b')
+LEGACY = re.compile(r'\b(?:G|P|T|AC|CR)-\d{3}\b')
+LINK = re.compile(r'\]\(([^)\s#]*)#([^)\s]+)\)')
+
+problems, refs = [], 0
+for rel in tracked:
+    path = repo / rel
+    if rel.startswith('third_party/') or not path.is_file():
+        continue
+    try:
+        text = path.read_text(encoding='utf-8')
+    except (UnicodeDecodeError, OSError):
+        continue
+    # process.md is River's method, copied in unchanged; its examples are River's.
+    for m in (QUALIFIED.finditer(text) if rel != 'river/process.md' else ()):
+        kind, name = m.groups()
+        if name in EXTENSIONS:
+            continue  # goals.md, refs.py: a file, not a reference
+        refs += 1
+        if name not in defined[kind]:
+            problems.append(f'{rel}: {kind}.{name} names nothing {KINDS[kind]} defines')
+    # The checks have to describe the form they reject.
+    for m in (LEGACY.finditer(text) if not rel.startswith('river/check/') and rel != 'river/process.md' else ()):
+        problems.append(f'{rel}: {m.group(0)} is a superseded identifier')
+    if rel.endswith('.md'):
+        for target, frag in LINK.findall(text):
+            dest = (path.parent / target).resolve() if target else path.resolve()
+            if dest.parent != spec or not dest.name.endswith('.md'):
+                continue  # only links into the bundle are held to its anchors
+            if frag not in anchors.get(dest.name, set()):
+                problems.append(f'{rel}: link to {dest.name}#{frag} lands on no heading')
 
 for p in problems:
     print('FAIL:', p)
 if problems:
     sys.exit(1)
-print(f'ok: {len(defined)} requirements, {len(crs)} decisions, {len(acs)} criteria; all references resolve')
+counts = ', '.join(f'{len(v)} {k}' for k, v in defined.items())
+print(f'ok: {counts}; {refs} references resolve')

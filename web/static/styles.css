@@ -29,7 +29,7 @@ footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 12px;
 /* Every link is colored here, not per-component. A link with no rule inherits
    the browser default -- #0000EE unvisited, #551A8B visited -- which against
    this background is 1.9:1 and 1.6:1, effectively invisible. That is exactly
-   what happened to the iNaturalist link on the detail page (T-023, AC-070). */
+   what happened to the iNaturalist link on the detail page (tech.textContrastFloor, acceptance.noTextBelowContrastFloor). */
 a { color: var(--accent); }
 a:visited { color: var(--accent-visited); }
 footer a { color: var(--accent); }
@@ -68,7 +68,7 @@ details[open] > summary .sumdesc { display: none; }
 .chip.on { font-weight: 600; outline: 2px solid var(--accent); outline-offset: 1px; }
 .chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .hint { color: var(--dim); font-size: 11px; font-style: italic; }
-/* One of the two region groupings (P-013). The heading is what tells a derived
+/* One of the two region groupings (product.regionsGroupedTwoWays). The heading is what tells a derived
    grouping from a hand-drawn one, so it is labelled text rather than a divider
    -- and the note uses --dim, which the contrast check can see, not an opacity
    the check is blind to. */
@@ -87,7 +87,7 @@ details[open] > summary .sumdesc { display: none; }
    heading and subtitle instead of as one run of text. */
 .ghdr em { display: block; margin-top: 4px; font-size: 10.5px; font-style: italic;
            font-weight: 400; color: var(--dim); }
-/* A categorical control (P-015): one row per option, each carrying its count
+/* A categorical control (product.habitatAndDietFilters): one row per option, each carrying its count
    and the publisher's definition. A list rather than chips because the
    definition is the point -- "Coastal" means something specific and a chip
    has nowhere to say it. */
@@ -130,14 +130,14 @@ details[open] > summary .sumdesc { display: none; }
    grey ignores whether the chip is light or dark and goes unreadable on both --
    it made the common name invisible on Anatidae, Columbidae and a dozen others.
    Hierarchy comes from weight and size, not from dimming, so every character
-   keeps the 7:1 ratio the background was chosen for (T-010). */
+   keeps the 7:1 ratio the background was chosen for (tech.badgeContrast). */
 .chip:visited em, .chip em { font-style: normal; color: inherit; font-weight: 400; font-size: 11.5px; }
 .chip b { color: inherit; font-weight: 700; font-size: 11.5px; }
 .chip em::before { content: "\00b7"; margin: 0 5px; }
 .chip b::before { content: ""; margin-left: 7px; }
 .count { margin: 4px 0 0; }
 
-/* Pick mode (P-068). The control is a sibling of the tile link, laid over the
+/* Pick mode (product.pickFromIndex). The control is a sibling of the tile link, laid over the
    free right end of the metrics footer -- the tile itself still opens the
    detail view, so it cannot contain this. */
 .tilewrap { position: relative; display: block; }
@@ -167,7 +167,7 @@ details[open] > summary .sumdesc { display: none; }
 .pickacts { display: flex; gap: 8px; margin-left: auto; }
 .pickaction { margin: 10px 0 0; }
 
-/* The comparison view (P-067). Panels wrap onto as many lines as they need:
+/* The comparison view (product.comparisonOneScale). Panels wrap onto as many lines as they need:
    with several birds they cannot fit on one line at a readable size, and a row
    squeezed until they do would defeat the comparison. The basis puts two side
    by side on a normal laptop and one on anything narrower, and the cap keeps a
@@ -197,7 +197,7 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .tile:visited { color: inherit; }
 .tile:hover { border-color: var(--accent); }
 .tile.big { width: min(760px, 100%); }
-/* The header is ONE line (P-031), and stays one line at any name length.
+/* The header is ONE line (product.tileContents), and stays one line at any name length.
 
    It did not. "Greater Necklaced Laughingthrush (GNLA)" wrapped its banding
    code onto a second line, which made that tile taller than its neighbours --
@@ -229,14 +229,14 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 /* Region chips carry no family colour, so they take the panel treatment and
    lean on the code rather than on hue. The code is the standard postal
    abbreviation; the full name follows it, as a family chip carries its common
-   name (P-011). */
+   name (product.regionAndMonthFilter). */
 .chip.rchip { background: #0b1220; color: var(--ink); border-color: var(--line); }
 .chip.rchip.on { border-color: var(--accent); background: #16304a; }
 
 /* Month chips take the same treatment as region chips -- they are the same
    kind of control and sit on the same panel -- but at a fixed width, so the
    twelve form an even strip a reader can aim at. Three letters is the widest
-   any of them gets (P-011). */
+   any of them gets (product.regionAndMonthFilter). */
 .chip.mchip { background: #0b1220; color: var(--ink); border-color: var(--line);
   min-width: 2.4em; text-align: center; }
 .chip.mchip.on { border-color: var(--accent); background: #16304a; }
@@ -251,10 +251,10 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
   color: var(--dim); border-top: 1px solid var(--line); padding-top: 7px; margin-top: 4px; }
 .ft .est::after { content: "~"; color: var(--accent); margin-left: 2px; }
 /* The share: where the bird is the biggest part of what a region records
-   (P-074). Right of the family badge, dim, and in the footer's monospace so
+   (product.shareOfRecords). Right of the family badge, dim, and in the footer's monospace so
    the digits line up down a column of tiles. It is not a measurement of the
    bird, and should not read like one. */
-/* The share line (P-074): where the bird is the biggest part of what a
+/* The share line (product.shareOfRecords): where the bird is the biggest part of what a
    region records. Below the three measurements, because it is not one -- it
    is a fact about how often the bird is reported. Monospace to match the
    footer, truncated rather than wrapped, since a wrapped tile is a taller
@@ -279,12 +279,12 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
    Blue belongs to the mass cube, where it reads as the water it depicts. The
    crossbar was #0ea5e9 and the cube #38bdf8 -- near-identical hue and
    luminance -- so the one mark that is NOT a length looked like a matched set
-   with the mark whose entire point is that it IS a length to scale (P-043).
+   with the mark whose entire point is that it IS a length to scale (product.crossbarAtVerticalScale).
    This colour is dE 86 from the cube and 92 from the amber bill.
 
    #0ea5e9 was also 6.44:1 on the page and 5.28:1 on a panel, and this colour
    is used as TEXT: the chord and wingspan labels below take their fill from
-   the same vocabulary. That shipped under a 7:1 floor (T-023) because the
+   the same vocabulary. That shipped under a 7:1 floor (tech.textContrastFloor) because the
    contrast check matched `color:` and SVG text has no `color`. See
    TestSVGTextContrast. */
 .wing { stroke: #4ade80; stroke-width: 2.5; stroke-linecap: round; }
@@ -300,7 +300,7 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .t-measured { background: #86efac; color: #000; }
 .t-near-match { background: #fde047; color: #000; }
 .t-modeled { background: #cbd5e1; color: #000; }
-/* Origins (P-069). Published is the same green as a measured number -- both
+/* Origins (product.categoryProvenance). Published is the same green as a measured number -- both
    mean "a source says so" -- while birdview is amber: not wrong, but this
    project's own call and worth the reader's eye. */
 .t-published { background: #86efac; color: #000; }
@@ -311,7 +311,7 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .cats .cont th, .cats .cont td { border-top: none; padding-top: 0; }
 .cats .v { white-space: normal; max-width: 52ch; }
 .note { color: var(--dim); font-size: 12.5px; max-width: 70ch; margin-top: 18px; }
-/* A served document (P-069), rendered from Markdown. Narrow measure because
+/* A served document (product.categoryProvenance), rendered from Markdown. Narrow measure because
    it is prose, not a control panel. */
 .doc { max-width: 90ch; color: var(--ink); font-size: 13.5px; line-height: 1.65; }
 .doc h1, .doc h2, .doc h3 { color: var(--ink); margin: 26px 0 8px; line-height: 1.3; }
@@ -336,12 +336,12 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .doc hr { border: 0; border-top: 1px solid var(--line); margin: 22px 0; }
 .empty { color: var(--dim); padding: 30px 0; }
 /* Each active filter as its own chip in the empty-state sentence, so a reader
-   scanning for "which one did this" finds them without parsing prose (P-037). */
+   scanning for "which one did this" finds them without parsing prose (product.helpfulEmptyState). */
 .fsum { display: inline-block; background: var(--panel); border: 1px solid var(--line);
   border-radius: 4px; padding: 1px 7px; margin: 0 4px; color: var(--ink); }
 .fsum b { font-weight: 600; margin-right: 5px; }
 
-/* Help (P-035) */
+/* Help (product.pageExplainsItself) */
 /* Same box metrics as .controls, and the same bottom margin: the Presentation
    panel sits in the same stack, so a different margin here made the first gap
    16px against 24px for the rest. Margins collapse, so it is the larger of the
@@ -351,7 +351,7 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .help summary { cursor: pointer; font-size: 12px; text-transform: uppercase;
   letter-spacing: .05em; color: var(--accent); }
 /* Two columns, each half the page: the diagram needs the room, and three
-   columns made all of them too narrow to read (P-035). */
+   columns made all of them too narrow to read (product.pageExplainsItself). */
 .helpgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: 20px; margin-top: 12px; }
 .help h3 { font-size: 12px; margin: 0 0 6px; color: var(--ink); }
@@ -365,7 +365,7 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .help .est-demo { color: var(--accent); }
 .seealso { margin: 14px 0 0; }
 
-/* The page for a bird BirdView classified and does not draw (P-075).
+/* The page for a bird BirdView classified and does not draw (product.undrawnSpeciesAnswer).
 
    The badge carries the verdict where a drawn bird's carries its family, and
    it declares its own background for the same reason the family badge does:
@@ -383,7 +383,7 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .tile.undrawn .verdict b { color: #f8fafc; }
 .evidence { max-width: 70ch; margin: 0 0 10px; }
 
-/* Stroke style carries provenance (P-065): solid measured, dashed modeled.
+/* Stroke style carries provenance (product.measuredVersusModeled): solid measured, dashed modeled.
 
    Head, neck and body are modeled for ALL 841 species, so that signal is
    CONSTANT. Only the wingspan varies, which is why the crossbar splits: its
@@ -413,11 +413,11 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .chordtick          { stroke: #4ade80; stroke-width: 1.5; opacity: .85; }
 .diagramkey { margin-top: 16px; max-width: 80ch; }
 
-/* Detail-diagram labels (P-066). The leader is faint because it is scaffolding;
+/* Detail-diagram labels (product.labeledDetailDiagram). The leader is faint because it is scaffolding;
    the text is what carries meaning. An estimated value repeats the ~ the tile
    footer uses, so the same mark means the same thing everywhere. */
 .leader { stroke: var(--line); stroke-width: 1; }
-/* Mass as water (P-066). Tinted rather than outlined only: it is a volume, not
+/* Mass as water (product.labeledDetailDiagram). Tinted rather than outlined only: it is a volume, not
    a length, and a bare outline in a figure made of lines reads as one more
    measurement. Dashed when the mass is not measured, like every other
    estimated stroke. */
@@ -431,10 +431,10 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 /* No ::after here: generated content produces no box on an SVG <text>, so the
    rule that used to sit on this line was inert and every modeled value on the
    diagram drew exactly like a measured one. The ~ is emitted in the markup
-   instead (P-066); .est stays as a styling hook. */
+   instead (product.labeledDetailDiagram); .est stays as a styling hook. */
 /* Half again the previous 570px. The column is wider than that, so the cap was
    leaving the legend small with empty space beside it -- and the legend is the
-   one thing in this panel worth looking at (P-035). */
+   one thing in this panel worth looking at (product.pageExplainsItself). */
 .legenddia { max-width: 855px; margin: 6px 0; }
 
 /* The control explanations live with the controls they describe, laid out in
@@ -451,8 +451,8 @@ h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px;
 .ctrlhelp .ctrl:first-child dt { margin-top: 0; }
 
 /* A caveat on the figure above it: a count that covers two species, because
-   a source does not separate them (P-077), or a bird the month filter
-   declined to judge (CR-036). Marked on the tile, not only on the detail
+   a source does not separate them (product.namesRecordsFiledUnder), or a bird the month filter
+   declined to judge (decisions.monthPresence). Marked on the tile, not only on the detail
    page: the index is where the misreading happens. Amber on the tile's own
    surface, checked against the 7:1 floor like every other text colour.
 

@@ -10,7 +10,7 @@ framework.
 ## Prerequisites
 
 - **Go.** No minimum version is maintained — whatever the dependencies require
-  ([T-007](../river/tech.md)). Developed on 1.25.
+  ([tech.goVersionFollowsDeps](../river/tech.md)). Developed on 1.25.
 - **Python 3**, for the three spec-level check scripts.
 
 That is all. The one dependency is `excelize`, for reading the source workbooks.
@@ -39,8 +39,8 @@ because serving BirdView reproduced that list to every visitor, it was also what
 deployment.
 
 It is gone. Names, families and sequence come from AviList
-([CR-022](../river/decisions.md#cr-022)) and scope is now BirdView's own, derived from open
-occurrence records ([CR-028](../river/decisions.md#cr-028)) and committed as `data/status.tsv`.
+([decisions.avilistReplacesAba](../river/decisions.md#avilistreplacesaba)) and scope is now BirdView's own, derived from open
+occurrence records ([decisions.scopeFromRecurrence](../river/decisions.md#scopefromrecurrence)) and committed as `data/status.tsv`.
 Every input the build reads is either CC BY 4.0 or the project's own work.
 
 ---
@@ -88,7 +88,7 @@ Flags, should you need them:
 > re-running the ingest you must restart the server, or you will spend a while debugging stale
 > data that is already fixed on disk.
 
-The built dataset is a build artifact and is gitignored ([T-005](../river/tech.md)) — not for
+The built dataset is a build artifact and is gitignored ([tech.datasetNeverCommitted](../river/tech.md)) — not for
 licensing reasons any more, but because it is reproducible from the committed inputs in one
 command and a stale copy in the tree is worse than none.
 
@@ -97,7 +97,7 @@ command and a stale copy in the tree is worse than none.
 ## The generators, and why they are separate commands
 
 Four commands build committed lookup tables under `data/`. None of them runs as part of the
-ingest, and that is deliberate (T-022): between them a full run is thousands of requests to
+ingest, and that is deliberate (tech.pacedInaturalistMapping): between them a full run is thousands of requests to
 someone else's server, **tests make no network request**, and a build that needs the network is
 a build that fails on a plane. Each is run by hand when its source moves, its output is read as
 a diff, and the diff is committed.
@@ -125,7 +125,7 @@ shows no iNaturalist link.
 
 **When a command's inputs or outputs change, update that diagram.** It is Mermaid in
 `docs/pipeline.md`, which GitHub draws directly; BirdView serves an SVG rendered from it, because
-drawing Mermaid in the browser would need a script from the network (T-002). After editing the
+drawing Mermaid in the browser would need a script from the network (tech.selfContainedServer). After editing the
 Markdown, run `python3 docs/render-diagrams.py` (it needs Node and Google Chrome) and commit the
 SVG it writes beside the page. `TestDiagramsAreCurrent` fails until you do, and
 `TestPipelineDiagramNamesRealColumns` fails if the diagram names a source column no reader asks
@@ -201,19 +201,19 @@ change — but you do need the loop.
 
 | File | Answers |
 | --- | --- |
-| [`goals.md`](../river/goals.md) | why the project exists — four goals, G-001…G-004 |
-| [`product.md`](../river/product.md) | what it must do — `P-###` |
-| [`tech.md`](../river/tech.md) | technical constraints — `T-###` |
+| [`goals.md`](../river/goals.md) | why the project exists — six goals, `goals.*` |
+| [`product.md`](../river/product.md) | what it must do — `product.*` |
+| [`tech.md`](../river/tech.md) | technical constraints — `tech.*` |
 | [`sources.md`](../river/sources.md) | every body of rules or data the project is subject to |
-| [`decisions.md`](../river/decisions.md) | conflict resolutions — `CR-###` |
+| [`decisions.md`](../river/decisions.md) | conflict resolutions — `decisions.*` |
 | [`todo.md`](../river/todo.md) | everything still open — work, questions, unverified criteria, stale text |
-| [`acceptance.md`](../river/acceptance.md) | how each requirement is checked — `AC-###` |
+| [`acceptance.md`](../river/acceptance.md) | how each requirement is checked — `acceptance.*` |
 | [`arch.md`](../river/arch.md) | how the code is actually organized |
 
 Cite IDs in code comments using the literal token, so one search covers the tree:
 
 ```go
-// Verifies: P-042, T-010.
+// Verifies: product.scaleToggle, tech.badgeContrast.
 ```
 
 ### The loop
@@ -238,7 +238,7 @@ three phases — classify first:
 ### Three rules that carry most of the weight
 
 **Never resolve a conflict in code.** If two requirements disagree, or a change reverses something
-the spec wrote down, stop and record it in [`decisions.md`](../river/decisions.md) as a `CR-###`.
+the spec wrote down, stop and record it in [`decisions.md`](../river/decisions.md) as a new entry.
 Picking one silently is the failure this process exists to prevent. Every interesting decision in
 this project — rejecting Ricklefs, surfacing the neck model, fitting the wingspan regression,
 deleting the legs — is a CR, and each one is more useful than the diff it produced.
@@ -263,14 +263,14 @@ Violating any of these is a licensing problem, not a style problem.
   copy in the tree is worse than none.
 - **Never read or process Wiley Online Library material**, including Ricklefs (2017). Its terms
   prohibit AI tools ingesting it and prohibit automated access, and the source is formally rejected
-  ([CR-002](../river/decisions.md)). Do not try to revive it as a length source.
+  ([decisions.ricklefsProhibited](../river/decisions.md)). Do not try to revive it as a length source.
 - **Only AVONET, the Fox wingspan data and AviList may be committed as source data.** All three
   are CC BY 4.0. Before adding a fourth, read [`sources.md`](../river/sources.md) — most candidates
   this project evaluated could not be redistributed. The generated tables under `data/` are not
   source data: they are the project's own reductions, and they carry their provenance in their
   own headers.
-- **Never present a modeled value as a measurement** ([P-060](../river/product.md), P-061). This is
-  the decision the whole measurement design rests on ([CR-001](../river/decisions.md)).
+- **Never present a modeled value as a measurement** ([product.lengthAndWingspanSources](../river/product.md), product.tileMarksModeled). This is
+  the decision the whole measurement design rests on ([decisions.noOpenLengthAndWingspan](../river/decisions.md)).
 
 `AGENTS.md` carries the same rules in the form AI coding agents read.
 
@@ -283,11 +283,11 @@ Violating any of these is a licensing problem, not a style problem.
 **The licensing blocker is gone as of 2026-10-05.** Serving BirdView used to reproduce the ABA
 checklist to every visitor, and that checklist is all-rights-reserved with no license permitting
 it. Permission was requested on 2026-09-27 and never answered, so the project stopped waiting:
-names moved to AviList ([CR-022](../river/decisions.md#cr-022)) and scope to BirdView's own
-derivation ([CR-028](../river/decisions.md#cr-028)). Nothing all-rights-reserved is read at build
+names moved to AviList ([decisions.avilistReplacesAba](../river/decisions.md#avilistreplacesaba)) and scope to BirdView's own
+derivation ([decisions.scopeFromRecurrence](../river/decisions.md#scopefromrecurrence)). Nothing all-rights-reserved is read at build
 time, so nothing of anyone else's is served. When a regenerated scope drops a species under a
 reader's bookmark, `/species/<code>` answers 404 naming the bird and its measured reason
-([CR-029](../river/decisions.md#cr-029)).
+([decisions.speciesUrlOutlivesSpecies](../river/decisions.md#speciesurloutlivesspecies)).
 
 See [`river/todo.md`](../river/todo.md) for what remains before a public deployment.
 
@@ -306,7 +306,7 @@ docker run --rm -p 8080:8080 birdview
 ```
 
 The server binds `0.0.0.0:8080` inside the container and reads `/data/species.json`. To override
-either, or to pass a feedback URL ([T-025](../river/tech.md#t-025)):
+either, or to pass a feedback URL ([tech.noPersonalAddress](../river/tech.md#nopersonaladdress)):
 
 ```
 docker run --rm -p 8080:8080 birdview \
@@ -317,7 +317,7 @@ docker run --rm -p 8080:8080 birdview \
 
 ### Running without Docker
 
-The server binds `localhost:8080` by default ([T-003](../river/tech.md#t-003)). For a deployment
+The server binds `localhost:8080` by default ([tech.servesOnLocalhost](../river/tech.md#servesonlocalhost)). For a deployment
 without a container, point `-addr` at the interface and port the host expects:
 
 ```

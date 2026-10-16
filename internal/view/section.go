@@ -14,9 +14,9 @@
 
 // Package view computes what the page shows: ordering, sectioning and diagram
 // geometry. It is deliberately pure -- no HTML, no HTTP -- so the rules in
-// P-020 through P-024 and P-040 through P-043 can be property-tested directly.
+// product.oneSelectedMetric through product.sectionHeadersStateRange and product.segmentComposition through product.crossbarAtVerticalScale can be property-tested directly.
 //
-// Verifies: P-020, P-021, P-022, P-023, P-024, P-042, P-043.
+// Verifies: product.oneSelectedMetric, product.ascendingOrder, product.sectionBreakRule, product.sectionThresholdDefault, product.sectionHeadersStateRange, product.scaleToggle, product.crossbarAtVerticalScale.
 package view
 
 import (
@@ -26,21 +26,21 @@ import (
 	"birdview/internal/dataset"
 )
 
-// Metric selects what the page is ordered and sectioned by (P-020).
+// Metric selects what the page is ordered and sectioned by (product.oneSelectedMetric).
 type Metric string
 
 const (
 	ByLength   Metric = "length"
 	ByWingspan Metric = "wingspan"
 	ByMass     Metric = "mass"
-	// ByFrequency orders by how often a species is recorded (P-076). Its
+	// ByFrequency orders by how often a species is recorded (product.orderByFrequency). Its
 	// value is not a property of the species: it is a ratio over whatever
 	// regions the reader has selected, so Value cannot compute it and
 	// SectionsBy takes it as a key function instead.
 	ByFrequency Metric = "frequency"
 )
 
-// DefaultStepPercent is N in P-023: a new section starts at the first bird more
+// DefaultStepPercent is N in product.sectionThresholdDefault: a new section starts at the first bird more
 // than N% larger than the minimum of the previous section.
 const DefaultStepPercent = 15.0
 
@@ -59,7 +59,7 @@ func (m Metric) Value(s *dataset.Species) float64 {
 // Section is one run of similarly sized species.
 type Section struct {
 	Species  []*dataset.Species
-	Min, Max float64 // in the selected metric (P-024)
+	Min, Max float64 // in the selected metric (product.sectionHeadersStateRange)
 }
 
 // Sections orders species ascending by metric and breaks them into sections.
@@ -70,7 +70,7 @@ type Section struct {
 // lets a section drift arbitrarily wide, one bird at a time, which is exactly
 // what a ratio rule is supposed to prevent.
 //
-// Verifies: P-021, P-022, P-023, P-024.
+// Verifies: product.ascendingOrder, product.sectionBreakRule, product.sectionThresholdDefault, product.sectionHeadersStateRange.
 func Sections(species []*dataset.Species, m Metric, stepPercent float64) []Section {
 	factor := 1 + stepPercent/100
 	return SectionsBy(species, m.Value, func(min float64) float64 { return min * factor })
@@ -78,9 +78,9 @@ func Sections(species []*dataset.Species, m Metric, stepPercent float64) []Secti
 
 // SectionsBy is Sections with the ordering key and the break rule supplied.
 //
-// Two rules exist and they differ in what they are anchored to. P-022's is
+// Two rules exist and they differ in what they are anchored to. product.sectionBreakRule's is
 // anchored to the DATA -- the first section starts at the smallest bird
-// present -- which suits a quantity that is a property of the bird. P-076's
+// present -- which suits a quantity that is a property of the bird. product.orderByFrequency's
 // is anchored to powers of ten, because frequency is a ratio over the
 // reader's region selection: a data-anchored band would denote one thing
 // nationally and another in Alaska, and a reader comparing two views of the
@@ -90,7 +90,7 @@ func Sections(species []*dataset.Species, m Metric, stepPercent float64) []Secti
 // minimum is min. Returning something not greater than min would loop, so it
 // is asserted rather than trusted.
 //
-// Verifies: P-021, P-022, P-023, P-024, P-076.
+// Verifies: product.ascendingOrder, product.sectionBreakRule, product.sectionThresholdDefault, product.sectionHeadersStateRange, product.orderByFrequency.
 func SectionsBy(species []*dataset.Species, key func(*dataset.Species) float64,
 	next func(min float64) float64) []Section {
 
@@ -127,7 +127,7 @@ func SectionsBy(species []*dataset.Species, key func(*dataset.Species) float64,
 }
 
 // Decade returns the first value in the band above the one holding v: the
-// next power of ten (P-076).
+// next power of ten (product.orderByFrequency).
 //
 // bands is how many decades a section spans -- 1 for "1 in 100 to 1 in 999",
 // 2 for "1 in 100 to 1 in 9,999".
@@ -150,7 +150,7 @@ func Decade(v float64, bands int) float64 {
 	return math.Pow(10, float64(k+bands))
 }
 
-// ScaleMode is the user toggle of P-042.
+// ScaleMode is the user toggle of product.scaleToggle.
 type ScaleMode string
 
 const (
@@ -171,7 +171,7 @@ const (
 // Returning a reference *length* rather than a pixels-per-mm factor keeps this
 // independent of tile size, which the renderer owns.
 //
-// Verifies: P-042.
+// Verifies: product.scaleToggle.
 func Scales(sections []Section, mode ScaleMode) []float64 {
 	refs := make([]float64, len(sections))
 	var overall float64

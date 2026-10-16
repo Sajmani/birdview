@@ -19,9 +19,9 @@
 // own id and labeled with the standard postal abbreviation. **Marine** regions
 // are BirdView's own, and exist because six species belong to no land region
 // at all: Bermuda Petrel has 384 records offshore and zero inside any
-// land polygon (P-011).
+// land polygon (product.regionAndMonthFilter).
 //
-// Zones group regions, two ways (P-013). **Common birds** is derived by
+// Zones group regions, two ways (product.regionsGroupedTwoWays). **Common birds** is derived by
 // clustering regions on how much their species lists overlap; **Geographic**
 // is drawn by hand so that a reader looking for Alaska finds it under Alaska.
 // Each grouping is a partition, so a region appears exactly once in each and
@@ -31,9 +31,9 @@
 // subdivide the east. That was an artifact of faceting GBIF on `speciesKey`,
 // which drops what its backbone cannot resolve; redone against the verbatim
 // names in data/region-presence.tsv, the east subdivides into four groups.
-// See CR-023.
+// See decisions.regionsTwoWays.
 //
-// Verifies: P-011, P-013.
+// Verifies: product.regionAndMonthFilter, product.regionsGroupedTwoWays.
 package region
 
 import (
@@ -71,14 +71,14 @@ type Region struct {
 	// ID is GADM's own id for a land region ("USA.5_1"), or a SEA.* id for a
 	// marine one. It keys the presence table and is the gadmGid sent to
 	// GBIF. It is **not** what appears in a URL: it is a database key, and
-	// Slug is the reader's handle (CR-024).
+	// Slug is the reader's handle (decisions.regionUrlIsPostalCode).
 	ID string
 	// Code is the standard postal abbreviation, or **empty** where no
 	// standard exists. It is deliberately left empty for the islands and the
 	// oceans: the obvious abbreviations are taken -- Midway cannot be MI,
 	// Navassa cannot be NV, Palmyra cannot be PA, Wake cannot be WA -- and a
 	// code invented to dodge a collision would sit beside 64 official ones
-	// with nothing marking it as this project's guess (CR-024).
+	// with nothing marking it as this project's guess (decisions.regionUrlIsPostalCode).
 	Code string
 	// Name is the full name, shown beside the code, or alone where there is
 	// no code.
@@ -123,7 +123,7 @@ func (r Region) Slug() string {
 }
 
 // Grouping is one way of carving the regions up. Each is a partition: every
-// region sits in exactly one of its zones (P-013).
+// region sits in exactly one of its zones (product.regionsGroupedTwoWays).
 type Grouping struct {
 	// Name is both the identifier and the UI label.
 	Name string
@@ -261,8 +261,8 @@ func add(id, code, name, gloss string, kind Kind, birds, geo string) {
 
 func init() {
 	// Two zone columns: the derived grouping, then the hand-drawn one. The
-	// `birds` column is transcribed from the clustering described in CR-023
-	// and is re-derived by AC-087, so a hand edit here that the data does not
+	// `birds` column is transcribed from the clustering described in decisions.regionsTwoWays
+	// and is re-derived by acceptance.zonesAnswerToData, so a hand edit here that the data does not
 	// support fails a test.
 	land := []struct{ id, code, name, birds, geo string }{
 		// Alaska & the North (geographic). The clustering splits these four:
@@ -445,29 +445,29 @@ type Presence map[string][]Reported
 
 // Reported is one region a species was reported in, and its record count
 // there. The count is what lets a page say what share of the birds recorded
-// in the regions on screen are this one (P-074).
+// in the regions on screen are this one (product.shareOfRecords).
 type Reported struct {
 	ID      string
 	Records int64
 	// Months splits Records twelve ways, January first. Carried beside the
 	// annual figure rather than replacing it: every record has a month, so
 	// the twelve sum to Records exactly, and a reader that does not care
-	// about months should not have to add them up (P-011, CR-036).
+	// about months should not have to add them up (product.regionAndMonthFilter, decisions.monthPresence).
 	Months [12]int64
 	// Withheld marks the months eBird keeps this species out of its public
 	// output here, under its Sensitive Species list, confirmed against the
-	// records (CR-037). In those months the count is missing by policy, so
+	// records (decisions.ebirdSilenceNotAbsence). In those months the count is missing by policy, so
 	// it says nothing about whether the bird was there.
 	Withheld [12]bool
 	// Below marks a region where the species has records but stays under
 	// the presence bar. Its records count in the species' figure; it is not
-	// one of the species' regions (P-011, CR-042). Written as a ~ after the
+	// one of the species' regions (product.regionAndMonthFilter, decisions.belowBarCounted). Written as a ~ after the
 	// region id.
 	Below bool
 }
 
 // BelowMark follows a region id in the table when the species is under the
-// presence bar there (CR-042).
+// presence bar there (decisions.belowBarCounted).
 const BelowMark = "~"
 
 // Totals is every bird record a region holds, over every species including
@@ -477,7 +477,7 @@ const BelowMark = "~"
 type Totals map[string]int64
 
 // MonthlyTotals is Totals split twelve ways, January first, and is the
-// denominator of a figure scoped to months (P-011, CR-036). The twelve sum
+// denominator of a figure scoped to months (product.regionAndMonthFilter, decisions.monthPresence). The twelve sum
 // to the annual total exactly.
 type MonthlyTotals map[string][12]int64
 
@@ -567,7 +567,7 @@ func LoadPresence(r io.Reader) (Presence, Totals, MonthlyTotals, error) {
 //
 // The annual figure is the sum and is never written down, so the two cannot
 // drift: a table carrying both would eventually carry a year that is not
-// what its months add to, and nothing would notice (P-011, CR-036).
+// what its months add to, and nothing would notice (product.regionAndMonthFilter, decisions.monthPresence).
 func parseMonths(s string) (ms [12]int64, sum int64, err error) {
 	parts := strings.Split(s, "|")
 	if len(parts) != 12 {

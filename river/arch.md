@@ -41,7 +41,7 @@ position on leaving the index and restore it on return. It is the only script in
 holds no application logic — the rule it protects is that *logic* stays in Go, not that the client
 is inert.
 
-This is what let AC-056 and AC-057 be real checks rather than declared gaps.
+This is what let acceptance.familyFilterSelectsAndClears and acceptance.unitToggleSwitches be real checks rather than declared gaps.
 
 ## Data flow
 
@@ -54,7 +54,7 @@ Fox wingspans ─────────► empirical value, else the fitted �
                          order-level regression
 ```
 
-Resolution order is the substance of CR-006: prefer any row that is genuinely *this* taxon —
+Resolution order is the substance of decisions.abaSpeciesWithoutAvonet: prefer any row that is genuinely *this* taxon —
 whatever name or sheet it is filed under — over borrowing a relative's measurements. Only when no
 such row exists anywhere does a near-match apply, and the label then says so.
 
@@ -70,8 +70,8 @@ independently leaves up to 0.2 mm adrift; the previous design did that and broke
 
 `view.Sections` groups; `view.Scales` picks one reference length per group — the section's largest
 bird, or the whole set's in global mode. `view.Layout` turns a reference into pixels. Keeping the
-reference separate from the pixel conversion is what lets AC-031 assert that every bird in a
-section shares a scale factor, which is the property P-042 actually requires.
+reference separate from the pixel conversion is what lets acceptance.sharedScale assert that every bird in a
+section shares a scale factor, which is the property product.scaleToggle actually requires.
 
 The server also computes a *width* reference per group, because a to-scale crossbar on a
 wide-winged bird in a section of short ones would otherwise overflow. Both references come from
@@ -81,7 +81,7 @@ the same group, so one scale still serves the whole section.
 
 `birdview-inatmap` and `birdview-gbifmap` both resolve BirdView's species against somebody else's
 taxonomy over the network, and both write a committed table rather than running at build time
-(T-022). The reasons are the same in each case: tests make no network request, a build that needs
+(tech.pacedInaturalistMapping). The reasons are the same in each case: tests make no network request, a build that needs
 the network fails on a plane, and a quarter of an hour of someone else's server time does not
 belong in a `go build`. The tables go stale; a stale row fails visibly and the refresh is one
 command.

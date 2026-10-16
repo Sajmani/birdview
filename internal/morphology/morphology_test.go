@@ -25,14 +25,14 @@ import (
 	"testing"
 )
 
-// TestSegmentsSumExactly asserts P-041 as stated: the five serialized segment
+// TestSegmentsSumExactly asserts product.segmentsSumToLength as stated: the five serialized segment
 // values sum exactly to the serialized total, not within a tolerance.
 //
 // Property test over random but plausible inputs, because the failure this
 // guards against is a rounding residue that appears for some values and not
 // others -- an earlier design broke it for 27.6% of its species.
 //
-// Verifies: P-041. Criterion: AC-030.
+// Verifies: product.segmentsSumToLength. Criterion: acceptance.segmentsSumExactly.
 func TestSegmentsSumExactly(t *testing.T) {
 	r := rand.New(rand.NewSource(1))
 	for i := 0; i < 20000; i++ {
@@ -50,11 +50,11 @@ func TestSegmentsSumExactly(t *testing.T) {
 	}
 }
 
-// TestNeckModelNamesTheFamilyRatio asserts the part of P-045 with teeth: the
+// TestNeckModelNamesTheFamilyRatio asserts the part of product.neckModelPerFamily with teeth: the
 // model string must name the numeric ratio applied to this bird's family, not
 // merely say that a per-family ratio exists.
 //
-// Verifies: P-045. Criterion: AC-035.
+// Verifies: product.neckModelPerFamily. Criterion: acceptance.neckLengthSerialized.
 func TestNeckModelNamesTheFamilyRatio(t *testing.T) {
 	cases := []struct {
 		family string
@@ -79,7 +79,7 @@ func TestNeckModelNamesTheFamilyRatio(t *testing.T) {
 // TestNeckRatioDefaultIsFlagged checks that an unlisted family is described as
 // taking the default rather than being presented as a considered choice.
 //
-// Verifies: P-045.
+// Verifies: product.neckModelPerFamily.
 func TestNeckRatioDefaultIsFlagged(t *testing.T) {
 	if _, model := NeckLength(100, "Parulidae"); !strings.Contains(model, "default") {
 		t.Errorf("unlisted family should be described as taking the default, got %q", model)
@@ -89,13 +89,13 @@ func TestNeckRatioDefaultIsFlagged(t *testing.T) {
 	}
 }
 
-// TestShapeDifferentiation asserts P-044 through orderings that come from
+// TestShapeDifferentiation asserts product.proportionDifferentiates through orderings that come from
 // ornithology, not from running the code. If one fails, the model is wrong.
 //
 // A heron's neck is the defining feature of its silhouette and an owl's is
 // invisible; whatever the absolute numbers, that ordering must hold.
 //
-// Verifies: P-044. Criterion: AC-034 (partial -- the bill and tail orderings
+// Verifies: product.proportionDifferentiates. Criterion: acceptance.proportionsDifferentiate (partial -- the bill and tail orderings
 // live in the ingest test, where real trait data is available).
 func TestShapeDifferentiation(t *testing.T) {
 	const body = 100
@@ -118,7 +118,7 @@ func TestShapeDifferentiation(t *testing.T) {
 // one head that varied with nothing. Isometric scaling has no floor, so a
 // regression to a constant shows up as a flat curve here.
 //
-// Verifies: P-062. Criterion: AC-065.
+// Verifies: product.provenancePerMetric. Criterion: acceptance.craniumVaries.
 func TestHeadScalesWithMass(t *testing.T) {
 	// Expected values follow from the model definition, 7.5 * mass^(1/3), not
 	// from running it: 8 g gives 7.5*2 = 15, 1000 g gives 7.5*10 = 75.
@@ -145,7 +145,7 @@ func TestHeadScalesWithMass(t *testing.T) {
 //	neck length       0.380, 95% CI 0.338 - 0.421
 //	total leg length  0.364, 95% CI 0.328 - 0.401
 //
-// P-047 requires the trunk exponent to lie in the intersection. These bounds
+// product.trunkFromMass requires the trunk exponent to lie in the intersection. These bounds
 // come from the published data, not from this package -- do not "fix" a failure
 // by widening them.
 const (
@@ -154,7 +154,7 @@ const (
 )
 
 // supersededExponent and supersededCoefficient are the invented constants
-// CR-021 replaced. Kept because two assertions below are about them: that the
+// decisions.trunkExponentCalibrated replaced. Kept because two assertions below are about them: that the
 // calibrated band excludes the old exponent, and that the new curve still
 // passes through the old one at the anchor.
 const (
@@ -170,7 +170,7 @@ const (
 // clamped, would fail here while a direct comparison against trunkExponent
 // would still pass.
 //
-// Verifies: P-047. Criterion: AC-080.
+// Verifies: product.trunkFromMass. Criterion: acceptance.trunkScalesLikeSkeletons.
 func TestTrunkScalesLikeMeasuredSkeletons(t *testing.T) {
 	// The band must actually discriminate. A criterion whose bounds admit the
 	// value it replaced cannot fail, which is the failure mode this project
@@ -196,7 +196,7 @@ func TestTrunkScalesLikeMeasuredSkeletons(t *testing.T) {
 	}
 	got := slope(xs, ys)
 	if got < minTrunkExponent || got > maxTrunkExponent {
-		t.Errorf("trunk scales as mass^%.4f, outside the measured interval [%g, %g] P-047 requires",
+		t.Errorf("trunk scales as mass^%.4f, outside the measured interval [%g, %g] product.trunkFromMass requires",
 			got, minTrunkExponent, maxTrunkExponent)
 	}
 
@@ -248,7 +248,7 @@ func slope(x, y []float64) float64 {
 
 // TestModelsAreDescribed checks every model function returns a non-empty
 // description. A modeled value with an empty model string would satisfy the
-// schema while telling the reader nothing (P-062).
+// schema while telling the reader nothing (product.provenancePerMetric).
 func TestModelsAreDescribed(t *testing.T) {
 	_, h := HeadLength(20)
 	_, b := BodyLength(50)
@@ -276,7 +276,7 @@ func TestModelsAreDescribed(t *testing.T) {
 // Watched fail: deleting Stercorariidae from NeckRatios reports it as
 // unreviewed; so does removing Procellariidae from NeckDefaultReviewed.
 //
-// Verifies: P-045. Criterion: AC-095.
+// Verifies: product.neckModelPerFamily. Criterion: acceptance.neckRatiosReviewed.
 func TestEveryFamilyHasBeenReviewed(t *testing.T) {
 	ds := realFamilies(t)
 	var missing []string

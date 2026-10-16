@@ -37,14 +37,14 @@
   </div>
   {{template "diagram" .}}
 </div>
-{{/* P-080: a bird left off the index keeps this page, and says why. */}}
+{{/* product.escapedBirdsListed: a bird left off the index keeps this page, and says why. */}}
 {{with .S.Exotic}}<p class="seam">Not on the index. {{.}}
   <a href="/excluded">Every bird left off the index</a>.</p>{{end}}
-{{/* P-079: a drawing that coincides with another species' because the
+{{/* product.borrowedMeasurementsSaySo: a drawing that coincides with another species' because the
      measurements are the same row says so, with the reason in full. */}}
 {{range .SameAs}}<p class="seam">{{.Text}}. {{.Title}}</p>{{end}}
 
-{{/* Three states (P-068): start a comparison, add this bird to one, or drop
+{{/* Three states (product.pickFromIndex): start a comparison, add this bird to one, or drop
      it from one. The link carries the whole set either way, so it is built in
      Go rather than assembled here. */}}
 <p class="pickaction"><a class="btn{{if .Picked}} on{{end}}" href="{{.PickURL}}">{{.PickLabel}}</a></p>
@@ -69,7 +69,7 @@
 <p class="note" style="margin-top:0">Anything not marked
   <span class="tag t-published">published</span> is BirdView's own work;
   <a href="/added">everything it adds</a> is listed together.</p>
-{{/* The categorical twin of the measurements table (P-069). Every group this
+{{/* The categorical twin of the measurements table (product.categoryProvenance). Every group this
      bird is sorted into, and whether a source said so, BirdView derived it,
      or BirdView decided it. Regions are one row: they share a single rule,
      and sixty copies of that sentence would bury the habitat rows where

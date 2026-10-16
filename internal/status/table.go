@@ -64,7 +64,7 @@ type Row struct {
 	// Without it the table can say Passenger Pigeon recurs across 89 episodes
 	// in 52 years AND that it is historical, but not the one fact that
 	// reconciles them -- that every one of those records ends in 1902. A
-	// verdict whose evidence is withheld is not checkable (P-075).
+	// verdict whose evidence is withheld is not checkable (product.undrawnSpeciesAnswer).
 	LastSeen time.Time
 }
 
@@ -119,7 +119,7 @@ func Read(r io.Reader) ([]Row, error) {
 }
 
 // Scope returns the AviList names BirdView draws, from the table plus the
-// declared exceptions (P-001, P-071).
+// declared exceptions (product.scopeIsRecurringAvifauna, product.declaredExceptions).
 //
 // The table is keyed on the name the occurrence data uses, which is not
 // always AviList's: eBird still files five woodpeckers and the Evening
@@ -133,7 +133,7 @@ func Scope(rows []Row) []string {
 		}
 		in[aviListName(r.Name)] = true
 	}
-	// A name covering two species brings both into scope (P-077, CR-038).
+	// A name covering two species brings both into scope (product.namesRecordsFiledUnder, decisions.countEbirdFirst).
 	// eBird holds Northern Yellow Warbler's records only under Setophaga
 	// petechia, so once scope is measured on eBird the warbler has no row
 	// of its own that recurs -- and without this it would leave BirdView,
@@ -161,14 +161,14 @@ func Scope(rows []Row) []string {
 //
 // It is the complement of Scope over the same rows and in the same namespace,
 // computed from Scope rather than from InScope, so the two cannot drift. The
-// difference is not academic -- the nine declared exceptions of P-071 are in
+// difference is not academic -- the nine declared exceptions of product.declaredExceptions are in
 // scope with an out-of-scope status, and a complement built on InScope alone
 // would publish an epitaph for a bird the index is drawing.
 //
 // Where two occurrence names fold onto one AviList name, the strongest
 // verdict wins, on the same rule as Best.
 //
-// Verifies: P-075.
+// Verifies: product.undrawnSpeciesAnswer.
 func OutOfScope(rows []Row) map[string]Row {
 	in := map[string]bool{}
 	for _, n := range Scope(rows) {
@@ -205,7 +205,7 @@ func title(s string) string {
 }
 
 // Declared are the species kept in scope by hand, because the occurrence data
-// cannot speak for them (P-071). Each names its reason.
+// cannot speak for them (product.declaredExceptions). Each names its reason.
 //
 // Every one is a bird the ABA area genuinely holds. They are here because the
 // open record is empty or stale, not because the bird is: eBird withholds
@@ -217,7 +217,7 @@ func title(s string) string {
 // nine species. The rule it patches keeps 830 of the previous 839 on measured
 // evidence alone.
 //
-// Verifies: P-001, P-071.
+// Verifies: product.scopeIsRecurringAvifauna, product.declaredExceptions.
 var Declared = map[string]string{
 	"Pseudonestor xanthophrys": "Maui Parrotbill: critically endangered Hawaiian endemic; " +
 		"no open record at all, eBird withholding it and iNaturalist holding none",
@@ -227,7 +227,7 @@ var Declared = map[string]string{
 		"open record for the same reason",
 	"Hydrobates socorroensis": "Townsend's Storm-Petrel: breeds on Mexican islands and is seen " +
 		"off California; the open record carries no dated occurrence on land, and its " +
-		"records at sea are not yet reachable by the recurrence test (CR-030)",
+		"records at sea are not yet reachable by the recurrence test (decisions.seaShareDiffers)",
 	"Pterodroma cahow": "Bermuda Petrel: breeds on Bermuda and ranges into waters " +
 		"BirdView covers, but Bermuda is outside the US/CA country filter the " +
 		"derivation runs under, so the open record holds nothing for it here",
@@ -237,7 +237,7 @@ var Declared = map[string]string{
 	// almost nobody is on the water where it is". That stated a measurement
 	// nobody had made: the recurrence test runs on gadmGid and GBIF has no
 	// gadmGid for open ocean, so pass 2 has never asked the water anything
-	// (CR-030). All three are 95-100% pelagic with thousands of records at
+	// (decisions.seaShareDiffers). All three are 95-100% pelagic with thousands of records at
 	// sea. Whether they would clear the bar unaided is unknown, so the
 	// exceptions stand and only the reason is corrected.
 	"Pelagodroma marina": "White-faced Storm-Petrel: a pelagic whose records are almost all " +
@@ -250,19 +250,19 @@ var Declared = map[string]string{
 
 // Exotic are the drawn species whose records here are escapes, releases or
 // birds kept by people, with no self-sustaining population in any region
-// BirdView covers (P-071, P-080). They stay in the dataset, flagged, and are
+// BirdView covers (product.declaredExceptions, product.escapedBirdsListed). They stay in the dataset, flagged, and are
 // left off the index and its controls; /excluded lists them with these
 // reasons and each keeps its detail page.
 //
 // A declared editorial list, not a measurement: recurrence cannot see origin
-// (CR-028). It began from the drawn species that reach the presence bar in
+// (decisions.scopeFromRecurrence). It began from the drawn species that reach the presence bar in
 // no region and kept out the wild ones there -- Little Curlew, Ruddy
 // Quail-Dove, Desertas Petrel -- and three whose origin is doubtful rather
 // than plainly escaped: West Indian Whistling-Duck, Cuban Grassquit and
-// Cinnamon-rumped Seedeater (CR-043). Long-feral populations, such as Indian
+// Cinnamon-rumped Seedeater (decisions.escapedBirdsOffIndex). Long-feral populations, such as Indian
 // Peafowl in Florida, are not escapes and are not listed.
 //
-// Verifies: P-070, P-071, P-080.
+// Verifies: product.statusIsPublished, product.declaredExceptions, product.escapedBirdsListed.
 var Exotic = map[string]string{
 	"Amadina fasciata":         "A cage bird from Africa; the birds seen here are escapes.",
 	"Amandava subflava":        "A cage bird from Africa; the birds seen here are escapes.",

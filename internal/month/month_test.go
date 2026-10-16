@@ -36,7 +36,7 @@ func pct(total int64, shares [Count]float64) [Count]int64 {
 	return out
 }
 
-// TestPresentRecoversKnownSeasons asserts CR-036's rule against ten species
+// TestPresentRecoversKnownSeasons asserts decisions.monthPresence's rule against ten species
 // whose comings and goings are not in dispute.
 //
 // The measure is effort-corrected on purpose. A raw share of a species' own
@@ -49,9 +49,9 @@ func pct(total int64, shares [Count]float64) [Count]int64 {
 // exactly that from record counts, with nothing about the species, its
 // migration or its breeding range encoded anywhere.
 //
-// Watched fail: see AC-112.
+// Watched fail: see acceptance.monthsFilterAndAbstain.
 //
-// Verifies: P-011, CR-036. Criterion: AC-112.
+// Verifies: product.regionAndMonthFilter, decisions.monthPresence. Criterion: acceptance.monthsFilterAndAbstain.
 func TestPresentRecoversKnownSeasons(t *testing.T) {
 	// Measured shares of each species' own New York records, 2026-10-07.
 	cases := []struct {
@@ -103,7 +103,7 @@ func TestPresentRecoversKnownSeasons(t *testing.T) {
 	}
 }
 
-// TestPresentAbstainsBelowTheFloor asserts the other half of CR-036: a
+// TestPresentAbstainsBelowTheFloor asserts the other half of decisions.monthPresence: a
 // species with too little evidence gets no verdict at all.
 //
 // Millerbird is the case. It holds 28 records in Hawaii, every one in
@@ -117,7 +117,7 @@ func TestPresentRecoversKnownSeasons(t *testing.T) {
 // year. A caller that conflated them would show the same page for a
 // well-measured resident and a bird nobody has visited.
 //
-// Verifies: P-011, CR-036. Criterion: AC-112.
+// Verifies: product.regionAndMonthFilter, decisions.monthPresence. Criterion: acceptance.monthsFilterAndAbstain.
 func TestPresentAbstainsBelowTheFloor(t *testing.T) {
 	hi := [Count]int64{270765, 278287, 290821, 208088, 155439, 157946,
 		150425, 152932, 165468, 230652, 198060, 245694}

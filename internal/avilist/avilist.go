@@ -18,15 +18,15 @@
 // AviList replaced the ABA checklist as BirdView's name source because it is
 // CC BY 4.0 and the ABA checklist is not: serving BirdView reproduces whatever
 // supplies its names, so an all-rights-reserved list blocked deployment
-// outright (CR-022).
+// outright (decisions.avilistReplacesAba).
 //
 // Two English names are read, not one. AviList's own name is IOC usage and the
 // extended release also carries the eBird/Clements name, which is North
-// American usage -- Little Auk and Dovekie for the same bird. P-049 serves
+// American usage -- Little Auk and Dovekie for the same bird. product.englishNameChoice serves
 // whichever the reader asks for, and that is only possible because both are in
 // this one file.
 //
-// Verifies: P-004, P-049.
+// Verifies: product.namesFromAvilist, product.englishNameChoice.
 package avilist
 
 import (

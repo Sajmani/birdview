@@ -38,7 +38,7 @@ const EBirdDatasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e"
 // AvesTaxonKey is the backbone key for class Aves.
 const AvesTaxonKey = 212
 
-// UserAgent identifies the client, as T-006 requires, with a contact address
+// UserAgent identifies the client, as tech.identifiedClient requires, with a contact address
 // so an operator who needs to ask it to stop knows who to ask.
 const UserAgent = "birdview-gbifmap/1.0 (contact: birdview@ajmani.net)"
 
@@ -270,7 +270,7 @@ type RegionRecord struct {
 // query: asking for `facet=verbatimScientificName&facet=month` returns the
 // two MARGINAL distributions, not the cross-product, so it cannot say which
 // names those monthly records belong to. That is the whole cost of
-// CR-036 — the land pass goes from about 140 requests to about 1,660.
+// decisions.monthPresence — the land pass goes from about 140 requests to about 1,660.
 func (c *Client) NamesIn(ctx context.Context, datasetKey, gadmGid string, month int) ([]RegionRecord, error) {
 	if month < 0 || month > 12 {
 		return nil, fmt.Errorf("month %d is not 0 (the whole year) or 1 to 12", month)
@@ -351,7 +351,7 @@ func (c *Client) CountFor(ctx context.Context, datasetKey, name string, countrie
 // would buy nothing; what matters is that the caller never reads a floor as a
 // count (internal/status.Shape.Truncated).
 //
-// Verifies: P-001, T-006.
+// Verifies: product.scopeIsRecurringAvifauna, tech.identifiedClient.
 func (c *Client) DatesIn(ctx context.Context, datasetKey, gadmGid, name string) (
 	dates map[string]int64, total int64, truncated bool, err error) {
 	q := url.Values{}
@@ -411,7 +411,7 @@ func (c *Client) CountInBox(ctx context.Context, datasetKey, name string,
 // threshold is involved, and none would help: measured east of Cape Hatteras,
 // composition does not taper with distance, it flips between the band that
 // holds coastline (4.9% off land, led by Northern Cardinal) and the band that
-// does not (100% off land, led by Wilson's Storm-Petrel). See CR-031.
+// does not (100% off land, led by Wilson's Storm-Petrel). See decisions.honestSeaDenominator.
 //
 // One request for both numbers: a facet response carries the unfiltered count
 // beside the facet rows, so this costs exactly what the plain count it
@@ -440,7 +440,7 @@ func (c *Client) CountInBox(ctx context.Context, datasetKey, name string,
 // water" already overstates "at sea". Named explicitly rather than left for
 // someone to discover as a drift between two tables.
 //
-// Verifies: P-011, CR-036.
+// Verifies: product.regionAndMonthFilter, decisions.monthPresence.
 func (c *Client) MonthlyOffLandInBox(ctx context.Context, datasetKey, name string,
 	countries []string, minLat, maxLat, minLon, maxLon float64) (offLand, total [12]int64, err error) {
 

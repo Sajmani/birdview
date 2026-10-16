@@ -20,9 +20,9 @@
 // these are not under web/.
 //
 // They are served rather than linked because there is no public repository
-// to link to, and because T-002 requires the running server to be
+// to link to, and because tech.selfContainedServer requires the running server to be
 // self-contained: a provenance link that needs the network is one that
-// breaks (P-069).
+// breaks (product.categoryProvenance).
 //
 // The SVGs are diagrams pre-rendered from the Mermaid source in the page of
 // the same name, by render-diagrams.py, so drawing them needs no script from

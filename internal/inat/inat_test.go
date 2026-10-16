@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-// TestAcceptRequiresBothNames asserts the confidence gate of P-064.
+// TestAcceptRequiresBothNames asserts the confidence gate of product.inaturalistLink.
 //
 // The failure this prevents is silent. Matching on scientific name alone would
 // find the right page nearly always, and the rare miss would be a plausible
@@ -32,7 +32,7 @@ import (
 // being careful about what it claims. So the common name is a required second
 // opinion, and the test checks it actually rejects.
 //
-// Verifies: P-064. Criterion: AC-068.
+// Verifies: product.inaturalistLink. Criterion: acceptance.inaturalistLinkConfidentOnly.
 func TestAcceptRequiresBothNames(t *testing.T) {
 	cases := []struct {
 		name                               string
@@ -80,7 +80,7 @@ func TestAcceptRequiresBothNames(t *testing.T) {
 // Poecile cinctus and ALSO carries ABA's "Gray-headed Chickadee". The
 // authorities agree; they disagree only about which name leads.
 //
-// Verifies: P-064. Criterion: AC-068.
+// Verifies: product.inaturalistLink. Criterion: acceptance.inaturalistLinkConfidentOnly.
 func TestAcceptUsesEveryEnglishName(t *testing.T) {
 	all := []string{"Siberian Tit", "Gray-headed Chickadee", "Alaska Chickadee"}
 	if !Accept("Poecile cinctus", "Gray-headed Chickadee", "Poecile cinctus", all) {
@@ -98,7 +98,7 @@ func TestAcceptUsesEveryEnglishName(t *testing.T) {
 
 // TestTableRoundTripsAndRejectsJunk covers the committed table's format.
 //
-// Verifies: T-022. Criterion: AC-068.
+// Verifies: tech.pacedInaturalistMapping. Criterion: acceptance.inaturalistLinkConfidentOnly.
 func TestTableRoundTripsAndRejectsJunk(t *testing.T) {
 	in := Table{
 		"Ardea herodias": {ScientificName: "Ardea herodias", TaxonID: 4956, CommonName: "Great Blue Heron"},
@@ -144,9 +144,9 @@ func TestTableRoundTripsAndRejectsJunk(t *testing.T) {
 	}
 }
 
-// TestTaxonURL pins the link format P-064 specifies.
+// TestTaxonURL pins the link format product.inaturalistLink specifies.
 //
-// Verifies: P-064. Criterion: AC-068.
+// Verifies: product.inaturalistLink. Criterion: acceptance.inaturalistLinkConfidentOnly.
 func TestTaxonURL(t *testing.T) {
 	if got, want := TaxonURL(4956), "https://www.inaturalist.org/taxa/4956"; got != want {
 		t.Errorf("TaxonURL(4956) = %q, want %q", got, want)
@@ -174,13 +174,13 @@ const heronJSON = `{"results":[
   {"id":4956,"name":"Ardea herodias","rank":"species","preferred_common_name":"Great Blue Heron"}]}`
 
 // TestLookupHonorsTheSourceRequirements checks the two obligations the adopted
-// source actually imposes: identify yourself (inat-api/R4, T-006) and pace the
-// requests (inat-api/R1, T-022).
+// source actually imposes: identify yourself (inat-api/R4, tech.identifiedClient) and pace the
+// requests (inat-api/R1, tech.pacedInaturalistMapping).
 //
 // Both are observed at the server, not read off the client's own fields -- a
 // client that sets Interval and never waits would satisfy the latter.
 //
-// Verifies: T-022, T-006. Criterion: AC-068.
+// Verifies: tech.pacedInaturalistMapping, tech.identifiedClient. Criterion: acceptance.inaturalistLinkConfidentOnly.
 func TestLookupHonorsTheSourceRequirements(t *testing.T) {
 	srv, times, agents := fakeAPI(t, heronJSON)
 
@@ -218,7 +218,7 @@ func TestLookupHonorsTheSourceRequirements(t *testing.T) {
 // TestLookupRejectsAWrongBird is the gate at the network boundary: iNaturalist
 // answering with a different species must produce no entry, not a link to it.
 //
-// Verifies: P-064. Criterion: AC-068.
+// Verifies: product.inaturalistLink. Criterion: acceptance.inaturalistLinkConfidentOnly.
 func TestLookupRejectsAWrongBird(t *testing.T) {
 	// A plausible near miss -- right genus, wrong species, and a common name a
 	// careless matcher might wave through.
@@ -250,7 +250,7 @@ func TestLookupRejectsAWrongBird(t *testing.T) {
 // non-match, and must not be recorded as one. The mapping tool needs the
 // difference so a rerun can fill the gap instead of baking in a missing link.
 //
-// Verifies: T-022. Criterion: AC-068.
+// Verifies: tech.pacedInaturalistMapping. Criterion: acceptance.inaturalistLinkConfidentOnly.
 func TestLookupReportsTransportErrorsSeparately(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "nope", http.StatusInternalServerError)

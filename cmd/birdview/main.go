@@ -19,7 +19,7 @@
 // than duplicating them in a language the acceptance criteria cannot reach.
 // Filters and toggles are query parameters, and a tile's detail view is a URL.
 //
-// Verifies: T-001, T-002, T-003.
+// Verifies: tech.twoCommandsOneModule, tech.selfContainedServer, tech.servesOnLocalhost.
 package main
 
 import (
@@ -78,7 +78,7 @@ func main() {
 	// Where readers are asked to send feedback. A URL, not an address: a
 	// mailto on a public page is a mailbox harvested within the week, and
 	// the owner's personal address is not the project's contact point
-	// (T-025).
+	// (tech.noPersonalAddress).
 	//
 	// Empty by default, and an empty value publishes NOTHING rather than a
 	// dead link -- a site can go up before its tracker exists, but it must
@@ -96,7 +96,7 @@ func main() {
 	ds, err := load(*data)
 	if err != nil {
 		log.Fatalf("birdview: %v\n\nRun birdview-ingest first; the dataset is a build artifact "+
-			"and is not committed (T-005).", err)
+			"and is not committed (tech.datasetNeverCommitted).", err)
 	}
 	srv, err := newServer(ds)
 	if err == nil {
@@ -130,32 +130,32 @@ func load(path string) (*dataset.Dataset, error) {
 type server struct {
 	mux *http.ServeMux
 	// ds is what the index draws: every species except the exotics
-	// (P-080). all is the whole dataset, for the detail pages and the lists
+	// (product.escapedBirdsListed). all is the whole dataset, for the detail pages and the lists
 	// that must name every bird.
 	ds   *dataset.Dataset
 	all  *dataset.Dataset
 	tmpl *template.Template
 	byID map[string]*dataset.Species
 	// idOf maps an AviList scientific name to the served id, so a page can
-	// name another species without searching the slice (P-077).
+	// name another species without searching the slice (product.namesRecordsFiledUnder).
 	idOf map[string]string
 	// sameAs maps a scientific name to the other drawn species whose traits
-	// come from the same AVONET row, sorted (P-079).
+	// come from the same AVONET row, sorted (product.borrowedMeasurementsSaySo).
 	sameAs map[string][]string
 	// undrawnByID holds the species the derivation classified and rejected.
 	// Consulted only after byID misses, so a URL that stopped working can say
-	// why instead of 404ing into silence (P-075).
+	// why instead of 404ing into silence (product.undrawnSpeciesAnswer).
 	undrawnByID map[string]*dataset.Undrawn
 	fams        []familyOption
 	// devDir is empty for a real binary. When set, render re-parses the
 	// templates on every request so an edit shows on reload.
 	devDir string
 	// feedback is the issue tracker readers are pointed at, or empty, in
-	// which case no page says anything about feedback at all (T-025).
+	// which case no page says anything about feedback at all (tech.noPersonalAddress).
 	feedback string
 	// build fingerprints everything a response is rendered from: the
 	// dataset, the templates and the static files. It is the first half of
-	// every ETag (T-029).
+	// every ETag (tech.cacheLifetimeStated).
 	build string
 }
 
@@ -167,10 +167,10 @@ type familyOption struct {
 }
 
 // orderGroup is one group of families inside a block of the selector --
-// historically an order, now either an order or a birder group (P-014).
+// historically an order, now either an order or a birder group (product.familiesByOrder).
 // Grouping by order in the checklist's taxonomic sequence matches how every
 // field guide is arranged, and it is what lets family colors repeat across
-// orders (P-010, P-005).
+// orders (product.familyFilter, product.generatedBadgeColors).
 type orderGroup struct {
 	Order    string       // the order's name
 	Common   string       // the order's English name; empty for a birder group
@@ -182,7 +182,7 @@ type orderGroup struct {
 }
 
 // familyGroupingBlock is one way of carving the families up, rendered as its
-// own labelled block (P-014). The same shape as the region selector's
+// own labelled block (product.familiesByOrder). The same shape as the region selector's
 // groupingBlock, and it reuses that CSS.
 type familyGroupingBlock struct {
 	Name   string
@@ -197,13 +197,13 @@ type groupKey struct{ Name, Common string }
 //
 // `keyOf` names **every** group a family belongs to: a birder group may hold
 // a family that another birder group also holds, since an owl is both a bird
-// of prey and a bird of the night (P-014, CR-026). `order` fixes the sequence
+// of prey and a bird of the night (product.familiesByOrder, decisions.familyInTwoGroups). `order` fixes the sequence
 // groups are offered in; passing nil keeps the order families first appear
 // in, which for the taxonomic block is checklist sequence.
 //
 // A family the table does not know -- one AviList added that the birder table
 // has not been told about -- yields no groups and is gathered under the empty
-// name rather than dropped, so it stays reachable and AC-089 reports it.
+// name rather than dropped, so it stays reachable and acceptance.familyGroupingComplete reports it.
 func (s *server) groupFamilies(r *http.Request, selected map[string]bool, rows []familyRow,
 	order []string, keyOf func(familyOption) []groupKey) []orderGroup {
 
@@ -284,7 +284,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // revalidated gives every response a validator and tells caches to check it
-// before reusing it (T-029).
+// before reusing it (tech.cacheLifetimeStated).
 //
 // BirdView sent no Cache-Control, no ETag and no Last-Modified at all, which
 // does not mean "do not cache" -- it means the browser may apply its own
@@ -296,13 +296,13 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // `no-cache` is the counter-intuitive half: it means *store this, but ask
 // before reusing it*, which is exactly right here. The page is cheap to
 // validate and must never be stale, since the whole point of a figure like
-// P-074's is that it is current.
+// product.shareOfRecords's is that it is current.
 //
 // The ETag is computed from the build and the URL rather than by hashing the
 // body, because hashing the body means buffering it, and the index is 3.3 MB
 // before compression. That is sound only because a page is a pure function
 // of (dataset, templates, static files, request URI) -- there is no clock in
-// the render path -- and AC-110 asserts that rather than trusting it.
+// the render path -- and acceptance.honestRevalidation asserts that rather than trusting it.
 func (s *server) revalidated(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// -dev re-reads templates per request, so no fingerprint taken at
@@ -418,7 +418,7 @@ var gzipPool = sync.Pool{New: func() any { return gzip.NewWriter(io.Discard) }}
 // too late for any handler that calls WriteHeader itself -- the header map is
 // already committed -- so the body goes out compressed and unlabelled, and a
 // browser renders binary. Both of BirdView's static files and every page of
-// P-075's 404 did exactly that in the first version of this.
+// product.undrawnSpeciesAnswer's 404 did exactly that in the first version of this.
 type gzipResponse struct {
 	http.ResponseWriter
 	gz *gzip.Writer
@@ -445,7 +445,7 @@ func (g *gzipResponse) start(code int) {
 	// may not carry the identity representation's validator: a cache that
 	// mixed them would eventually hand gzip bytes to a client that asked
 	// for none. Suffixed rather than dropped, so revalidation still works
-	// for the clients that do send Accept-Encoding (T-029).
+	// for the clients that do send Accept-Encoding (tech.cacheLifetimeStated).
 	if et := g.Header().Get("ETag"); strings.HasSuffix(et, `"`) {
 		g.Header().Set("ETag", et[:len(et)-1]+`-gz"`)
 	}
@@ -476,7 +476,7 @@ func (g *gzipResponse) Flush() {
 	}
 }
 
-// compressed gzips a response when the client asks for it (T-026).
+// compressed gzips a response when the client asks for it (tech.compressedResponses).
 //
 // Worth doing here and not left to a CDN, because the pages are enormous and
 // the saving is on the one axis that costs money to serve. The index inlines
@@ -544,7 +544,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		byID: map[string]*dataset.Species{}, undrawnByID: map[string]*dataset.Undrawn{},
 		idOf: map[string]string{}}
 
-	// Once, at startup: every response's ETag is built from this (T-029).
+	// Once, at startup: every response's ETag is built from this (tech.cacheLifetimeStated).
 	// In dev mode the templates are re-read per request, so a fingerprint
 	// taken now would go stale on the first edit -- which is the precise
 	// bug -dev exists to avoid. Left empty there, and revalidated skips.
@@ -564,7 +564,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	}
 	s.sameAs = sharedRows(ds)
 	// The index view: the same dataset without the exotics, which keep
-	// their pages through byID (P-080). A shallow copy, so the totals and
+	// their pages through byID (product.escapedBirdsListed). A shallow copy, so the totals and
 	// the undrawn records are shared rather than duplicated.
 	s.all = ds
 	shown := *ds
@@ -582,7 +582,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		// the safe direction: a drawn bird keeps its page.
 		if _, drawn := s.byID[u.ID]; drawn {
 			return nil, fmt.Errorf("id %q is both drawn and not drawn; "+
-				"one URL cannot mean two birds (P-075)", u.ID)
+				"one URL cannot mean two birds (product.undrawnSpeciesAnswer)", u.ID)
 		}
 		s.undrawnByID[u.ID] = u
 	}
@@ -594,7 +594,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	}
 	for _, f := range ds.Families {
 		// A family every one of whose birds is off the index is not
-		// offered: a control that selects nothing is noise (P-080).
+		// offered: a control that selects nothing is noise (product.escapedBirdsListed).
 		if !onIndex[f.Name] {
 			continue
 		}
@@ -627,11 +627,11 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 // that any view is a shareable URL.
 type options struct {
 	Metric view.Metric
-	// Step is P-023's section-step percentage, used by the three size
+	// Step is product.sectionThresholdDefault's section-step percentage, used by the three size
 	// metrics. Frequency ignores it and bands by Decades instead.
 	Step float64
 	// Decades is how many orders of magnitude a frequency section spans
-	// (P-076): 1 for "1 in 100 to 1 in 999", 2 for a band four times wider.
+	// (product.orderByFrequency): 1 for "1 in 100 to 1 in 999", 2 for a band four times wider.
 	// A separate field rather than an overloaded Step, because one float
 	// meaning "15 percent" in three views and "one decade" in a fourth is
 	// the kind of thing that reads fine and divides wrong.
@@ -644,15 +644,15 @@ type options struct {
 	// mean opposite things.
 	Families     map[string]bool
 	HasSelection bool
-	// Regions and HasRegions draw the same distinction for P-011's filter:
+	// Regions and HasRegions draw the same distinction for product.regionAndMonthFilter's filter:
 	// absent means everywhere, explicitly empty means nowhere.
 	Regions    map[string]bool
 	HasRegions bool
 	// Months and HasMonths draw the same distinction over the twelve
-	// (P-011, CR-036). Indexed 0 to 11, January first.
+	// (product.regionAndMonthFilter, decisions.monthPresence). Indexed 0 to 11, January first.
 	Months    map[int]bool
 	HasMonths bool
-	// Habitats and Niches are P-015's categorical filters, and draw the same
+	// Habitats and Niches are product.habitatAndDietFilters's categorical filters, and draw the same
 	// absent-versus-empty distinction. A species matches when ANY of its
 	// assignments is selected: a bird of two habitats is in both, and
 	// requiring all of them would mean selecting two habitats returned only
@@ -663,12 +663,12 @@ type options struct {
 	HasNiches   bool
 	Metric3     bool // imperial when false
 
-	// Locale selects which English name is served (P-049). North American is
+	// Locale selects which English name is served (product.englishNameChoice). North American is
 	// the default: this is an ABA-area dataset and Dovekie is what its reader
 	// calls that bird.
 	Locale dataset.Locale
 
-	// Picking is pick mode (P-068): the `species` parameter is present, even
+	// Picking is pick mode (product.pickFromIndex): the `species` parameter is present, even
 	// if it is empty. Picks are the ids named in it, deduplicated, in the
 	// order given -- that order is the reader's and no page reorders it.
 	Picking bool
@@ -677,7 +677,7 @@ type options struct {
 
 func parseOptions(r *http.Request) options {
 	q := r.URL.Query()
-	// Per-section is the default (P-042, CR-017). Global makes the cross-family
+	// Per-section is the default (product.scaleToggle, decisions.perSectionDefault). Global makes the cross-family
 	// argument better and is one click away, but at global scale a median bird
 	// is a couple of pixels tall, and none of the diagram's vocabulary --
 	// dashed for modeled, the chord ticks, the labels -- is legible there. The
@@ -696,8 +696,8 @@ func parseOptions(r *http.Request) options {
 	case view.ByFrequency:
 		o.Metric = view.ByFrequency
 	}
-	// Frequency defaults to global (CR-033). Per-section scaling rests on
-	// P-022's guarantee that a section is at most N% wide, and a frequency
+	// Frequency defaults to global (decisions.frequencyGlobalScale). Per-section scaling rests on
+	// product.sectionBreakRule's guarantee that a section is at most N% wide, and a frequency
 	// tier has no such bound: it would draw the one 140 mm bird in the last
 	// tier at the height of a 1,201 mm swan six tiers up.
 	if o.Metric == view.ByFrequency {
@@ -705,7 +705,7 @@ func parseOptions(r *http.Request) options {
 	}
 	// BOTH values recognised, not just the non-default. The old comment here
 	// warned that reading only the non-default silently disables the toggle
-	// when the default moves -- which is what happened when CR-017 moved it.
+	// when the default moves -- which is what happened when decisions.perSectionDefault moved it.
 	// With a default that now varies by metric, reading only Global would
 	// leave "Per section" dead under Frequency, which is the same bug
 	// arriving by a different road.
@@ -716,7 +716,7 @@ func parseOptions(r *http.Request) options {
 		o.Scale = view.PerSection
 	}
 	// One `step` parameter, read differently by the two sectioning rules
-	// (CR-032). Under Frequency the control offers band widths in orders of
+	// (decisions.frequencyMetric). Under Frequency the control offers band widths in orders of
 	// magnitude, so the value is 10 or 100 rather than a percentage -- and
 	// 10 is a legal percentage too, which is why the metric decides first
 	// instead of the range of the number.
@@ -734,7 +734,7 @@ func parseOptions(r *http.Request) options {
 		o.Locale = dataset.LocaleWorld
 	}
 	// Pick mode is the presence of the parameter, not a value in it: a bare
-	// `species=` holds the mode open with nothing picked (P-068). Exactly the
+	// `species=` holds the mode open with nothing picked (product.pickFromIndex). Exactly the
 	// distinction drawn just below for `family`.
 	_, o.Picking = q["species"]
 	picked := map[string]bool{}
@@ -766,7 +766,7 @@ func parseOptions(r *http.Request) options {
 	_, o.HasRegions = q["region"]
 	for _, g := range q["region"] {
 		// A URL carries slugs ("CA", "GulfOfMexico"); everything downstream
-		// works in GADM ids, so translate here and nowhere else (CR-024).
+		// works in GADM ids, so translate here and nowhere else (decisions.regionUrlIsPostalCode).
 		// An unknown slug is dropped rather than guessed at.
 		if rg, ok := region.BySlug(g); ok {
 			o.Regions[rg.ID] = true
@@ -789,7 +789,7 @@ func parseOptions(r *http.Request) options {
 type tile struct {
 	S *dataset.Species
 	// Name is the species' English name in the reader's chosen locale,
-	// resolved once here so no template has to know about locales (P-049).
+	// resolved once here so no template has to know about locales (product.englishNameChoice).
 	Name    string
 	Geom    view.Geometry
 	Box     view.Box
@@ -797,18 +797,18 @@ type tile struct {
 	Wing    string
 	MassStr string
 	// Commonest is the share line: where the bird is the biggest part of
-	// what gets recorded, and how big a part (P-074). Nil when unknown.
+	// what gets recorded, and how big a part (product.shareOfRecords). Nil when unknown.
 	Commonest *shareCell
 	// SameAs names the other drawn species with the same measurements
-	// (P-079). Outside Commonest, because it is about the drawing and must
+	// (product.borrowedMeasurementsSaySo). Outside Commonest, because it is about the drawing and must
 	// show whether or not there is a count.
 	SameAs []seam
 
 	// WingModeled drives the crossbar split: the inner span is dashed only when
-	// the wingspan is modeled (P-065).
+	// the wingspan is modeled (product.measuredVersusModeled).
 	WingModeled bool
 
-	// Labels and ChordLabel are empty on an index tile: the annotations of P-066
+	// Labels and ChordLabel are empty on an index tile: the annotations of product.labeledDetailDiagram
 	// need room, so they appear only in the detail view and in the help legend,
 	// both of which build this struct through labelledTile.
 	Labels     []diagramLabel
@@ -819,8 +819,8 @@ type tile struct {
 	WingspanLabel string
 	WingspanEst   bool
 	// FootLabels name the whole bird rather than any part of it, stacked on
-	// the drawing axis below the tail tip (P-066): its total length and its
-	// mass. A slice rather than named fields because P-066 requires every
+	// the drawing axis below the tail tip (product.labeledDetailDiagram): its total length and its
+	// mass. A slice rather than named fields because product.labeledDetailDiagram requires every
 	// metric the detail view reports to appear in the drawing, so the next
 	// whole-bird metric should be one more entry and not a new layout.
 	//
@@ -829,24 +829,24 @@ type tile struct {
 	FootLabels []footLabel
 
 	// MassCube is the bird's mass drawn as water: one face of the cube of
-	// water that weighs the same (P-066, CR-019). Side zero means none.
+	// water that weighs the same (product.labeledDetailDiagram, decisions.massAsWaterCube). Side zero means none.
 	MassCube massCube
 
 	// DetailURL is the tile's own link. Built in Go rather than in the
-	// template so it carries the reader's view state (P-068); empty on the
+	// template so it carries the reader's view state (product.pickFromIndex); empty on the
 	// legend tile, which is an illustration and links nowhere.
 	DetailURL template.URL
 
 	// PickURL is the pick control, a SIBLING of the tile link and never a
 	// replacement for it -- the tile opens the detail view in both modes, so
-	// P-034 holds without exception. Empty outside pick mode, which is what
-	// keeps the tile unchanged during ordinary browsing (P-031).
+	// product.tileOpensDetail holds without exception. Empty outside pick mode, which is what
+	// keeps the tile unchanged during ordinary browsing (product.tileContents).
 	PickURL template.URL
 	Picked  bool
 	// Anchor is this tile's fragment id. Picking navigates to it, so the
 	// browser restores the reading position itself during load instead of the
 	// scroll script jumping there after the page has already painted -- which
-	// on a 1.7 MB index is a visible flash (P-038).
+	// on a 1.7 MB index is a visible flash (product.togglesKeepPlace).
 	Anchor string
 }
 
@@ -861,17 +861,17 @@ type sectionView struct {
 	Tiles    []tile
 	// Note replaces the range where there is no range to state: the birds
 	// with no records in the regions selected have no ratio and so no tier
-	// (P-076).
+	// (product.orderByFrequency).
 	Note string
 }
 
-// frequencyBand labels a decade section (P-076).
+// frequencyBand labels a decade section (product.orderByFrequency).
 //
 // The label states the BAND, not the extremes of the birds in it: a tier
 // reading "1 in 1,000 - 1 in 9,999" means the same thing on every page,
 // where "1 in 1,184 - 1 in 9,781" would be a different pair of numbers under
 // every region filter and would invite a reader to compare two tiers that
-// are not the same tier. P-024 asks for the range the section covers, and
+// are not the same tier. product.sectionHeadersStateRange asks for the range the section covers, and
 // under this rule the band IS that range.
 func frequencyBand(min, max float64, decades int) (lo, hi, note string) {
 	if math.IsInf(min, 1) {
@@ -901,25 +901,25 @@ type familyRow struct {
 
 type pageData struct {
 	// Feedback is the issue tracker URL, or empty. Empty publishes nothing
-	// (T-025): a site may go up before its tracker exists, but must not
+	// (tech.noPersonalAddress): a site may go up before its tracker exists, but must not
 	// invite a reader somewhere that does not.
 	Feedback string
 
 	Sections []sectionView
-	// FamilyGroupings is the family selector (P-014): families grouped by
+	// FamilyGroupings is the family selector (product.familiesByOrder): families grouped by
 	// taxonomic order.
 	FamilyGroupings []familyGroupingBlock
-	// Traits are the categorical controls of P-015: habitat and niche,
+	// Traits are the categorical controls of product.habitatAndDietFilters: habitat and niche,
 	// assigned per species rather than per family, which is why they can be
-	// right where a family-level grouping could not (CR-027).
+	// right where a family-level grouping could not (decisions.habitatDietSpeciesLevel).
 	Traits []traitBlock
-	// RegionGroupings is the region selector (P-011): two groupings of the
-	// same regions (P-013), each a labelled block of zones.
+	// RegionGroupings is the region selector (product.regionAndMonthFilter): two groupings of the
+	// same regions (product.regionsGroupedTwoWays), each a labelled block of zones.
 	RegionGroupings []groupingBlock
 	AllRegions      bool
 	AllRegionsURL   template.URL
 	NoRegion        bool
-	// Months is the twelve-month filter beside the regions (P-011).
+	// Months is the twelve-month filter beside the regions (product.regionAndMonthFilter).
 	Months       []monthChip
 	AllMonths    bool
 	AllMonthsURL template.URL
@@ -938,17 +938,17 @@ type pageData struct {
 	NothingSelected bool
 
 	// Filters describes what is currently narrowing the list, for the empty
-	// state to name (P-037). Empty when nothing is narrowing it.
+	// state to name (product.helpfulEmptyState). Empty when nothing is narrowing it.
 	Filters []activeFilter
 	// ClearURL drops every filter, so the dead end has an exit.
 	ClearURL template.URL
 
-	// Legend is the labeled example diagram the help opens with (P-035). Nil
+	// Legend is the labeled example diagram the help opens with (product.pageExplainsItself). Nil
 	// only if no suitable species exists, in which case the help degrades to
 	// prose rather than breaking.
 	Legend *tile
 
-	// Bar is the pick-mode furniture of P-068, shared with the detail view.
+	// Bar is the pick-mode furniture of product.pickFromIndex, shared with the detail view.
 	Bar pickBar
 	// CompareToggleURL enters pick mode with nothing picked, or leaves it.
 	// The entry point for a reader who wants to compare before they have a
@@ -958,7 +958,7 @@ type pageData struct {
 }
 
 // pickBar is everything the pick bar needs, built identically for the index
-// and the detail view so the two cannot drift apart (P-068).
+// and the detail view so the two cannot drift apart (product.pickFromIndex).
 //
 // Picks are resolved against the WHOLE dataset rather than the filtered list,
 // so a bird the family filter is currently hiding is still named here. A
@@ -967,7 +967,7 @@ type pageData struct {
 // activeFilter is one filter and what it is set to, in words.
 //
 // It exists so the empty state can say WHICH filter emptied the page rather
-// than that one did (P-037). The same description belongs in the collapsed
+// than that one did (product.helpfulEmptyState). The same description belongs in the collapsed
 // summary of a filter control, which is why it is built once here rather than
 // composed in the template: two places phrasing it separately is two places to
 // drift.
@@ -980,7 +980,7 @@ type activeFilter struct {
 // narrowing anything -- every family selected, which is the arrival state --
 // is deliberately absent: naming it would describe the default as a choice.
 //
-// Verifies: P-037.
+// Verifies: product.helpfulEmptyState.
 func describeFilters(fams []familyOption, opt options) []activeFilter {
 	// Past a handful the names stop being readable and the count is the
 	// useful fact. The threshold is a presentation judgement, not a rule.
@@ -1017,7 +1017,7 @@ func describeFilters(fams []familyOption, opt options) []activeFilter {
 		}
 		out = append(out, activeFilter{Label: "Family", Value: describe(picked, len(fams))})
 	}
-	// Habitat and diet, in the order the controls appear (P-015). Labels
+	// Habitat and diet, in the order the controls appear (product.habitatAndDietFilters). Labels
 	// rather than AVONET's terms: the reader picked "Eats insects" and
 	// should be told "Eats insects", not "Invertivore".
 	cat := func(label string, terms []trait.Term, sel map[string]bool, active bool) {
@@ -1057,7 +1057,7 @@ type pickChip struct {
 //
 // Called before anything is built from the request, which is the whole point:
 // every link the page goes on to build then omits the dead id, and the set
-// repairs itself on the reader's next click (P-068, CR-018). Healing it later
+// repairs itself on the reader's next click (product.pickFromIndex, decisions.compareUrlContract). Healing it later
 // produced a correct notice beside 970 links that still carried the dead id.
 func (s *server) healPicks(r *http.Request, opt *options) []string {
 	if !opt.Picking {
@@ -1116,7 +1116,7 @@ func (s *server) buildPickBar(r *http.Request, opt options, missing []string) (p
 const pickBarNames = 8
 
 // tileBox is the drawing area for one diagram. Roughly 2.6:1, because a
-// to-scale wingspan runs up to ~2.5x body length and P-043 draws it at the
+// to-scale wingspan runs up to ~2.5x body length and product.crossbarAtVerticalScale draws it at the
 // vertical scale rather than shrinking it to fit.
 var tileBox = view.Box{W: 380, H: 148}
 
@@ -1131,7 +1131,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	// resolves is dropped here and reported in the bar, and the request's own
 	// query is rewritten to the surviving set -- so every link the page goes on
 	// to build, tile links and control links alike, omits the dead id and the
-	// set repairs itself on the reader's next click (P-068, CR-018).
+	// set repairs itself on the reader's next click (product.pickFromIndex, decisions.compareUrlContract).
 	//
 	// Done here rather than where the bar is assembled because by then the
 	// links have already been built from the raw query, which is the bug this
@@ -1146,7 +1146,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			selected[f.Name] = true
 		}
 	}
-	// Region works the same way, and composes with family (P-012): a bird is
+	// Region works the same way, and composes with family (product.filtersCompose): a bird is
 	// shown when every active filter admits it.
 	inRegion := func(sp *dataset.Species) bool {
 		if !opt.HasRegions {
@@ -1159,7 +1159,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		}
 		return false
 	}
-	// Months narrow the list as every other filter does (P-011, CR-036).
+	// Months narrow the list as every other filter does (product.regionAndMonthFilter, decisions.monthPresence).
 	// A species is shown when SOME selected region admits it in SOME
 	// selected month, which is the same "any" the region and habitat
 	// filters use: picking two places asks for birds in either.
@@ -1177,7 +1177,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			}
 			// A month eBird withholds this species here is missing by
 			// policy, so it is not judged: the species is shown, and its
-			// tile says why (CR-037). Painted Bunting was hidden from
+			// tile says why (decisions.ebirdSilenceNotAbsence). Painted Bunting was hidden from
 			// Florida in January this way -- eBird publishes none of its
 			// Florida records from October to March.
 			withheld := sp.WithheldIn(id)
@@ -1189,7 +1189,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			in, ok := month.Present(sp.RegionMonths[i], s.ds.RegionMonthlyTotals[id])
 			if !ok {
 				// Too thin to say when. Shown in every month rather than
-				// hidden from any, and the tile says so (CR-036).
+				// hidden from any, and the tile says so (decisions.monthPresence).
 				return true
 			}
 			for m := range in {
@@ -1200,7 +1200,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		}
 		return false
 	}
-	// Habitat and niche compose the same way (P-015, P-012). A species
+	// Habitat and niche compose the same way (product.habitatAndDietFilters, product.filtersCompose). A species
 	// matches when ANY of its assignments is selected, and the assignment's
 	// origin is irrelevant here: a habitat BirdView added is still a habitat
 	// the bird uses, and filtering it out would make the addition pointless.
@@ -1225,7 +1225,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// Frequency is not a property of a bird, it is a ratio over the regions
-	// the reader has selected (P-074), so it is computed once here for the
+	// the reader has selected (product.shareOfRecords), so it is computed once here for the
 	// current selection rather than read off the species. Once per species,
 	// not once per comparison: the sort would otherwise walk every region
 	// 1,083 log 1,083 times.
@@ -1236,7 +1236,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			num, den := shareIn(sp, s.ds, opt)
 			if num == 0 || den == 0 {
 				// No ratio at all. +Inf sorts them last and keeps them in
-				// one final section rather than one section each (P-076).
+				// one final section rather than one section each (product.orderByFrequency).
 				freq[sp] = math.Inf(1)
 				continue
 			}
@@ -1300,7 +1300,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		page.AllURL = s.familyURL(r, every)
 	}
 	// Either filter emptied to nothing means nothing is selected: the reader
-	// turned something off, and no bird can satisfy an empty set (P-037).
+	// turned something off, and no bird can satisfy an empty set (product.helpfulEmptyState).
 	page.NothingSelected = len(selected) == 0 || (opt.HasRegions && len(opt.Regions) == 0)
 
 	// The region selector, and its All control, mirroring the family one.
@@ -1322,7 +1322,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	if page.AllMonths {
 		// All is a toggle, as it is for regions: pressed when everything is
 		// on, it clears everything. That is what makes one month two clicks
-		// away and a dedicated control unnecessary (CR-036).
+		// away and a dedicated control unnecessary (decisions.monthPresence).
 		page.AllMonthsURL = s.monthURL(r, nil)
 	} else {
 		every := map[int]bool{}
@@ -1355,7 +1355,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	}
 	// One row per family, independent of grouping: a family's own toggle does
 	// the same thing whichever block it is clicked in. The rows are then
-	// grouped twice (P-014).
+	// grouped twice (product.familiesByOrder).
 	rows := make([]familyRow, 0, len(s.fams))
 	for _, f := range s.fams {
 		next := map[string]bool{}
@@ -1385,7 +1385,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				})},
 	}
 	// The unit scope follows the SCALE setting, because that is what the page
-	// is claiming to compare (P-073). Per section, each section shares a unit;
+	// is claiming to compare (product.oneUnitInComparison). Per section, each section shares a unit;
 	// globally, so does the whole set.
 	var globalUnits units
 	if opt.Scale == view.Global {
@@ -1417,14 +1417,14 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				// Set here rather than recomputed in the template: the template
 				// used to derive the centering from Box.H itself, which silently
 				// disagreed with this value the moment Box stopped being the
-				// drawing area (P-066's bottom strip).
+				// drawing area (product.labeledDetailDiagram's bottom strip).
 				TopOffset: (tileBox.H - g.TotalHeight()) / 2,
 				DetailURL: detailLink(r, sp.ID),
 				PickURL:   pickOf(sp.ID),
 				Picked:    pickedSet[sp.ID],
 				Anchor:    tileAnchor(sp.ID),
 				// Unlabelled: the tile carries no labels and its footer names
-				// the mass already (P-031, CR-020).
+				// the mass already (product.tileContents, decisions.massCubeOnTiles).
 				MassCube:    newMassCube(sp, tileBox.H, g.PxPerMm, ""),
 				WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 				Length:      u.format(sp.TotalLength.Value, view.ByLength),
@@ -1441,29 +1441,29 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 
 type detailData struct {
 	S *dataset.Species
-	// Name is the species' English name in the reader's locale (P-049).
+	// Name is the species' English name in the reader's locale (product.englishNameChoice).
 	Name    string
 	Geom    view.Geometry
 	Box     view.Box
 	Metrics []metricRow
 	// Categories is every group the bird is sorted into, with who decided
-	// each (P-069).
+	// each (product.categoryProvenance).
 	Categories []categoryRow
 	// SameAs names the other drawn species with the same measurements
-	// (P-079).
+	// (product.borrowedMeasurementsSaySo).
 	SameAs []seam
 	Opt    options
 	Query  func(...string) template.URL
 
 	// INatURL is empty when no confident iNaturalist match exists, and the
-	// template then renders nothing at all rather than a placeholder (P-064).
+	// template then renders nothing at all rather than a placeholder (product.inaturalistLink).
 	INatURL string
 
 	// WingModeled drives the crossbar split: the inner span is dashed only when
-	// the wingspan is modeled (P-065).
+	// the wingspan is modeled (product.measuredVersusModeled).
 	WingModeled bool
 
-	// Labels annotate the detail diagram (P-066); empty on a tile.
+	// Labels annotate the detail diagram (product.labeledDetailDiagram); empty on a tile.
 	Labels        []diagramLabel
 	TopOffset     float64
 	ChordLabel    string
@@ -1472,7 +1472,7 @@ type detailData struct {
 	FootLabels    []footLabel
 	MassCube      massCube
 
-	// Bar is the pick-mode furniture (P-068), shared with the index.
+	// Bar is the pick-mode furniture (product.pickFromIndex), shared with the index.
 	Bar pickBar
 	// PickURL toggles THIS bird in the comparison, and PickLabel says which of
 	// the three states the control is in: not picking, picking but this bird
@@ -1501,7 +1501,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	sp, ok := s.byID[wanted]
 	if !ok {
 		// A bird the derivation classified and left out of scope gets a page
-		// naming it and the measured reason, at 404 (P-075, CR-029). Anything
+		// naming it and the measured reason, at 404 (product.undrawnSpeciesAnswer, decisions.speciesUrlOutlivesSpecies). Anything
 		// else gets the bare 404: this page is for a bird BirdView knows of
 		// and chose not to draw, and it would be a fabrication for a typo.
 		if u, known := s.undrawnByID[wanted]; known {
@@ -1513,14 +1513,14 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	}
 	opt := parseOptions(r)
 	missingPicks := s.healPicks(r, &opt)
-	// Wider than the tile's 2.6:1 so the labels of P-066 have margin outside the
+	// Wider than the tile's 2.6:1 so the labels of product.labeledDetailDiagram have margin outside the
 	// wingtips. The extra width costs nothing: the scale is already limited by
 	// height for almost every bird, so the bird does not grow, the margin does.
 	box := view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}
 	// The detail view always draws the bird as large as the box allows, whatever
 	// scale the index is using. Under a global scale a small bird is a few
 	// pixels tall by design, and carrying that into the one view devoted to
-	// that single bird would leave nothing to look at (P-034).
+	// that single bird would leave nothing to look at (product.tileOpensDetail).
 
 	// A detail page compares nothing, so the bird is its own scope and the
 	// unit is whichever suits it.
@@ -1538,14 +1538,14 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	}
 	lt := labelledTile(sp, box, one, opt.Locale)
 
-	// Only a confident match gets a link; zero means none was found (P-064).
+	// Only a confident match gets a link; zero means none was found (product.inaturalistLink).
 	var inatURL string
 	if sp.INatTaxonID > 0 {
 		inatURL = inat.TaxonURL(sp.INatTaxonID)
 	}
 	bar, live := s.buildPickBar(r, opt, missingPicks)
 	picked := slices.Contains(live, sp.ID)
-	// Three states, not two (P-068).
+	// Three states, not two (product.pickFromIndex).
 	pickLabel := "Compare with another bird\u2026"
 	switch {
 	case picked:
@@ -1566,7 +1566,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// undrawnData is the page for a bird the derivation rejected (P-075).
+// undrawnData is the page for a bird the derivation rejected (product.undrawnSpeciesAnswer).
 //
 // The prose is assembled in Go rather than branched in the template, because
 // the three verdicts say genuinely different things and a template that tries
@@ -1580,7 +1580,7 @@ type undrawnData struct {
 	Name string
 	// AlsoCalled is the other locale's English name, present only when it
 	// differs. A reader who followed a stale link may have it under the other
-	// one (P-049).
+	// one (product.englishNameChoice).
 	AlsoCalled string
 	U          *dataset.Undrawn
 	// Verdict is the one-line answer, and Why the paragraph behind it.
@@ -1593,13 +1593,13 @@ type undrawnData struct {
 }
 
 // undrawn renders the page for a species the status table classified and
-// scope rejected, at 404 (P-075, CR-029).
+// scope rejected, at 404 (product.undrawnSpeciesAnswer, decisions.speciesUrlOutlivesSpecies).
 //
 // 404 and not 410: scope is regenerated from live occurrence data, so a bird
 // that misses the recurrence bar on one run can clear it on the next, and
 // "gone permanently" is a claim this derivation does not support.
 //
-// Verifies: P-075.
+// Verifies: product.undrawnSpeciesAnswer.
 func (s *server) undrawn(w http.ResponseWriter, r *http.Request, u *dataset.Undrawn) {
 	opt := parseOptions(r)
 	name := u.Name(opt.Locale)
@@ -1676,7 +1676,7 @@ func prettyDate(iso string) string {
 // .Labels and the rest off whatever it is handed, works here unchanged.
 type comparePanel struct {
 	tile
-	// DetailURL is where this panel's numbers are explained. P-067 trades the
+	// DetailURL is where this panel's numbers are explained. product.comparisonOneScale trades the
 	// provenance table for this link, so it is not decoration -- it is the
 	// whole of what makes omitting the table honest.
 	DetailURL template.URL
@@ -1701,23 +1701,23 @@ type compareData struct {
 	Query  func(...string) template.URL
 	// StopURL leaves pick mode: the index with the picks dropped and every
 	// other carried setting kept. The same URL as the pick bar's Clear, so
-	// the two exits cannot drift apart (P-068).
+	// the two exits cannot drift apart (product.pickFromIndex).
 	StopURL template.URL
 	// Sorts is empty below two birds, there being nothing to sort.
 	Sorts []sortOption
 	// Missing are picked ids that no longer resolve, named on the page so a
-	// rotted link says what it lost instead of silently shrinking (CR-018).
+	// rotted link says what it lost instead of silently shrinking (decisions.compareUrlContract).
 	Missing []string
 }
 
-// compare renders several birds to one shared scale (P-067).
+// compare renders several birds to one shared scale (product.comparisonOneScale).
 func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 	opt := parseOptions(r)
 	// Named order is the reader's and is preserved; a repeat is drawn once,
 	// both handled when the parameter is parsed.
 	//
 	// An id that no longer resolves is dropped and named rather than refused
-	// (CR-018). This page used to 404, which was the honest option until
+	// (decisions.compareUrlContract). This page used to 404, which was the honest option until
 	// drop-and-name existed; the case that decides it is not a typo but rot,
 	// since a comparison link is made to be kept and ids follow scientific
 	// names that get reassigned.
@@ -1725,7 +1725,7 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 	chosen, _ := s.resolvePicks(opt.Picks)
 
 	// One scale for the whole set, taken from the largest bird in it, exactly
-	// as a section does (P-042). Laying each panel out against its own length
+	// as a section does (product.scaleToggle). Laying each panel out against its own length
 	// would fill every panel equally and compare nothing.
 	var refLength, refWingspan float64
 	masses := make([]float64, 0, len(chosen))
@@ -1735,7 +1735,7 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 		masses = append(masses, sp.Mass.Value)
 	}
 	// One unit for the whole set, for the same reason there is one scale
-	// (P-073). The set named in the address IS the scope here -- comparing a
+	// (product.oneUnitInComparison). The set named in the address IS the scope here -- comparing a
 	// swan with a sparrow must not print "4.2 lb" beside "0.9 oz", which is
 	// two scales in the one place the page exists to put birds on one.
 	u := unitsFor(opt.Metric3, masses...)
@@ -1750,7 +1750,7 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	// The species list goes back with the reader: the index is the picker, and
-	// "back" here means "add another bird" (CR-018). Clear, on the index, is
+	// "back" here means "add another bird" (decisions.compareUrlContract). Clear, on the index, is
 	// the one control that drops it.
 	s.render(w, "compare.html", compareData{Panels: panels, Opt: opt,
 		Sorts: sortOptions(r, chosen), Missing: missing, Query: queryFor(r),
@@ -1758,14 +1758,14 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 }
 
 // resolvePicks turns requested ids into species, separating the ones that no
-// longer exist (P-068).
+// longer exist (product.pickFromIndex).
 //
 // Missing ids are dropped and reported rather than refused, because the case
 // that matters is not a typo but rot: ids follow scientific names and this
 // checklist renames them -- the Sandhill Crane is antigone_canadensis and was
 // grus_canadensis. A comparison link is made to be kept, so it outlives some of
 // its own ids, and refusing the whole page would kill a five-bird comparison
-// over one reassigned genus. See CR-018.
+// over one reassigned genus. See decisions.compareUrlContract.
 func (s *server) resolvePicks(ids []string) (found []*dataset.Species, missing []string) {
 	for _, id := range ids {
 		if sp, ok := s.byID[id]; ok {
@@ -1787,7 +1787,7 @@ func carried(r *http.Request) url.Values {
 
 // pickURL is the current page with the picks replaced. It keeps every other
 // parameter INCLUDING `family`, because picking a bird must not silently drop
-// the filter the reader is picking from (P-068).
+// the filter the reader is picking from (product.pickFromIndex).
 //
 // An empty set writes a bare `species=`, which holds pick mode open with
 // nothing picked rather than dropping the reader back into browsing mid-task.
@@ -1804,7 +1804,7 @@ func pickURL(r *http.Request, ids []string) template.URL {
 }
 
 // sortedIDs is the species reordered by one metric, ascending and stably, as
-// the index orders its sections (P-021).
+// the index orders its sections (product.ascendingOrder).
 func sortedIDs(sp []*dataset.Species, m view.Metric) []string {
 	s := append([]*dataset.Species(nil), sp...)
 	sort.SliceStable(s, func(i, j int) bool { return m.Value(s[i]) < m.Value(s[j]) })
@@ -1816,7 +1816,7 @@ func sortedIDs(sp []*dataset.Species, m view.Metric) []string {
 }
 
 // sortOptions builds the Sort by control. Each link is an ordinary comparison
-// URL naming the same birds in a new order (P-067), so a sorted comparison is
+// URL naming the same birds in a new order (product.comparisonOneScale), so a sorted comparison is
 // indistinguishable from one assembled by hand and there is no second place an
 // ordering can live.
 func sortOptions(r *http.Request, chosen []*dataset.Species) []sortOption {
@@ -1869,7 +1869,7 @@ func toggled(picks []string, id string) []string {
 
 // detailLink builds a link from any page into a species detail view, carrying
 // the view state the reader is in -- minus the one parameter too large to copy
-// 841 times (P-068).
+// 841 times (product.pickFromIndex).
 //
 // The picks ride along because the detail view cannot otherwise tell whether to
 // offer to pick that bird, nor build a link to the set plus it; `units` because
@@ -1879,7 +1879,7 @@ func toggled(picks []string, id string) []string {
 //
 // `family` is deliberately dropped. It is the only parameter with no bound on
 // its length: 90 families is about 1.7 KB, which repeated across 841 tile
-// hrefs would add roughly 1.4 MB to one page. The cost, accepted in P-068, is
+// hrefs would add roughly 1.4 MB to one page. The cost, accepted in product.pickFromIndex, is
 // that the in-page back link cannot restore the filter. The browser's own Back
 // button does, because it replays the previous URL.
 func detailLink(r *http.Request, id string) template.URL {
@@ -1923,7 +1923,7 @@ var legendBox = view.Box{W: 900, H: 148 * 1.2}
 const labelGutter = 320
 
 // The strip reserved at the bottom of an annotated diagram for the whole-bird
-// labels (P-066), the vertical counterpart of labelGutter.
+// labels (product.labeledDetailDiagram), the vertical counterpart of labelGutter.
 //
 // Without it they are clipped rather than merely cramped: the detail view
 // scales the bird to fill the box, so any bird whose height binds has its tail
@@ -1947,7 +1947,7 @@ type footLabel struct {
 }
 
 // massCube is the cube of water that weighs what the bird weighs, drawn in the
-// lower-left in oblique projection (P-066, CR-019).
+// lower-left in oblique projection (product.labeledDetailDiagram, decisions.massAsWaterCube).
 //
 // X,Y is the top-left of the FRONT FACE, and the face's base sits on the
 // bottom of the drawing area in every diagram. That is what makes two cubes
@@ -1959,7 +1959,7 @@ type massCube struct {
 	// under the tail, so the number is beside the shape it describes.
 	Label          string
 	LabelX, LabelY float64
-	Est            bool // mass not measured -- dashed, per P-065
+	Est            bool // mass not measured -- dashed, per product.measuredVersusModeled
 	Title          string
 }
 
@@ -1994,7 +1994,7 @@ const massLabelCharWidth = 6.2
 // One gram of water is one cubic centimetre, by the historical definition of
 // the gram, so this is a unit conversion and not a model: it assumes nothing
 // about the density of birds. That is what lets the square share the diagram's
-// own scale instead of needing one of its own, which P-043 would refuse.
+// own scale instead of needing one of its own, which product.crossbarAtVerticalScale would refuse.
 func massCubeSide(massG float64) float64 {
 	if massG <= 0 {
 		return 0
@@ -2006,10 +2006,10 @@ func massCubeSide(massG float64) float64 {
 const massCubeMargin = 8
 
 // newMassCube places the cube of water in the lower-left of a drawing area
-// drawH tall, at pxPerMm (P-066, CR-019).
+// drawH tall, at pxPerMm (product.labeledDetailDiagram, decisions.massAsWaterCube).
 //
 // label is empty on an index tile, which carries no labels at all and names
-// the mass in its footer instead (P-031, CR-020). Everything else about the
+// the mass in its footer instead (product.tileContents, decisions.massCubeOnTiles). Everything else about the
 // cube is identical there, including the face standing on the floor, so the
 // two surfaces cannot drift.
 func newMassCube(sp *dataset.Species, drawH, pxPerMm float64, label string) massCube {
@@ -2041,7 +2041,7 @@ func footStrip(n int) float64 {
 }
 
 // legendPreferred are the species the help diagram would like to use, best
-// first. Each has a MODELED wingspan, so the dashed inner crossbar of P-065
+// first. Each has a MODELED wingspan, so the dashed inner crossbar of product.measuredVersusModeled
 // appears in the legend rather than only in the prose beside it, and none is a
 // neck-folding family, so the neck reads as a plain stick.
 var legendPreferred = []string{"cyanocitta_cristata", "corvus_brachyrhynchos", "cardinalis_cardinalis"}
@@ -2065,33 +2065,33 @@ func (s *server) legendSpecies() *dataset.Species {
 
 // labelledTile builds the annotated diagram for a bird drawn at its own scale:
 // the detail view and the help legend, each of which shows one bird with
-// nothing to measure it against (P-034).
+// nothing to measure it against (product.tileOpensDetail).
 func labelledTile(sp *dataset.Species, box view.Box, u units, loc dataset.Locale) tile {
 	return labelledTileAt(sp, box, u, sp.TotalLength.Value, sp.Wingspan.Value, loc)
 }
 
 // labelledTileAt is the same diagram laid out against an EXTERNAL reference, so
-// several birds can share one scale (P-067).
+// several birds can share one scale (product.comparisonOneScale).
 //
 // That reference is the whole of the difference between the two views: the
 // bird's own length makes a detail page fill its box, and the set maximum makes
 // a comparison mean something. Getting the argument wrong yields a page that
-// looks entirely correct and compares nothing, which is why AC-076 asserts
+// looks entirely correct and compares nothing, which is why acceptance.comparisonSharesScale asserts
 // drawn heights against the length ratio rather than asserting on the markup.
 func labelledTileAt(sp *dataset.Species, box view.Box, u units, refLength, refWingspan float64, loc dataset.Locale) tile {
 	// draw is the area the bird gets; the emitted box is that plus the strip the
 	// total length label sits in, so the label costs the bird nothing. Going the
 	// other way -- keeping the box and shrinking the bird into it -- would take
-	// 8.5% of the detail view's height and contradict P-034, which requires the
+	// 8.5% of the detail view's height and contradict product.tileOpensDetail, which requires the
 	// bird drawn as large as the view allows. Width has no such freedom, which
 	// is why labelGutter does shrink the bird and this does not.
 	// Every metric the detail view reports has to appear in the drawing
-	// (P-066). The two that name the whole bird rather than a part of it go
+	// (product.labeledDetailDiagram). The two that name the whole bird rather than a part of it go
 	// under the tail; mass is here and not in the stack because it is not a
 	// length and has no part to point at.
 	//
 	// The reported total length, never g.TotalHeight(): for a folded neck the
-	// drawing is shorter than the bird (CR-011), and the label names the bird.
+	// drawing is shorter than the bird (decisions.foldedNeckAsS), and the label names the bird.
 	foot := []footLabel{{
 		Key:  "total",
 		Text: "Total length  " + u.format(sp.TotalLength.Value, view.ByLength),
@@ -2145,7 +2145,7 @@ func labelledTileAt(sp *dataset.Species, box view.Box, u units, refLength, refWi
 }
 
 // row turns a metric into a display line, stating its provenance in plain
-// language (P-063).
+// language (product.metricProvenanceExplained).
 func row(label string, m dataset.Metric, as view.Metric, u units) metricRow {
 	r := metricRow{Label: label, Value: u.format(m.Value, as), Kind: string(m.Prov.Kind)}
 	switch m.Prov.Kind {
@@ -2306,7 +2306,7 @@ func (u units) format(v float64, as view.Metric) string {
 
 // regionRow is one region chip, and zoneGroup one block of them. They mirror
 // familyRow and orderGroup exactly: zones play the part orders play, so the
-// two selectors share markup, CSS and the wrap criterion (P-011, AC-075).
+// two selectors share markup, CSS and the wrap criterion (product.regionAndMonthFilter, acceptance.familyListWraps).
 type regionRow struct {
 	ID   string
 	Code string
@@ -2331,7 +2331,7 @@ type zoneGroup struct {
 }
 
 // groupingBlock is one way of carving the regions up, rendered as its own
-// labelled block of chips (P-013). The Note is not decoration: it is where
+// labelled block of chips (product.regionsGroupedTwoWays). The Note is not decoration: it is where
 // the derived grouping and the hand-drawn one are told apart.
 type groupingBlock struct {
 	Name  string
@@ -2351,7 +2351,7 @@ func (s *server) regionURL(r *http.Request, want map[string]bool) template.URL {
 	case len(want) == 0:
 		q.Set("region", "")
 	default:
-		// `want` is keyed by GADM id; the URL carries slugs (CR-024).
+		// `want` is keyed by GADM id; the URL carries slugs (decisions.regionUrlIsPostalCode).
 		slugs := make([]string, 0, len(want))
 		for id := range want {
 			rg, ok := region.Get(id)
@@ -2371,7 +2371,7 @@ func (s *server) regionURL(r *http.Request, want map[string]bool) template.URL {
 	return template.URL("/?" + q.Encode())
 }
 
-// monthURL is regionURL for the twelve (P-011). Same three cases: all of
+// monthURL is regionURL for the twelve (product.regionAndMonthFilter). Same three cases: all of
 // them is the default and carries no parameter, none of them is an explicit
 // empty, and anything between is listed.
 func (s *server) monthURL(r *http.Request, want map[int]bool) template.URL {
@@ -2408,9 +2408,9 @@ type monthChip struct {
 }
 
 // monthChips builds the twelve toggles. No groups and no season names:
-// P-076 forbids naming a band where the range can be stated, and a season
+// product.orderByFrequency forbids naming a band where the range can be stated, and a season
 // inverts between hemispheres and means nothing in the tropics, two of
-// which BirdView covers (CR-036).
+// which BirdView covers (decisions.monthPresence).
 func (s *server) monthChips(r *http.Request, opt options) []monthChip {
 	out := make([]monthChip, 0, month.Count)
 	for i := 0; i < month.Count; i++ {
@@ -2548,7 +2548,7 @@ var funcs = template.FuncMap{
 	// whynot explains, in a tooltip, why a value is not this bird's own
 	// measurement. The three footer cells used to say "estimated" for
 	// anything not measured, which is false for a near-match and said so
-	// right beside a stroke P-065 draws SOLID because it IS a measurement.
+	// right beside a stroke product.measuredVersusModeled draws SOLID because it IS a measurement.
 	"whynot": whyNotMeasured,
 }
 
@@ -2558,7 +2558,7 @@ var funcs = template.FuncMap{
 // act on: two tiles showing an identical mass are not a coincidence when one
 // of them borrowed it from the other, and nothing else on the index says so.
 //
-// Verifies: P-062, P-065.
+// Verifies: product.provenancePerMetric, product.measuredVersusModeled.
 func whyNotMeasured(p dataset.Provenance) string {
 	switch p.Kind {
 	case dataset.NearMatch:
@@ -2577,14 +2577,14 @@ func whyNotMeasured(p dataset.Provenance) string {
 
 // traitRow is one option of a categorical control: its label, AVONET's
 // definition, how many species carry it, and the link that toggles it
-// (P-015).
+// (product.habitatAndDietFilters).
 type traitRow struct {
 	Value       string
 	Label       string
 	Description string
 	// Coined marks a category BirdView added where AVONET has none. The
 	// control says so: every other row leads with AVONET's term, and a
-	// term of ours must not borrow that authority (P-015).
+	// term of ours must not borrow that authority (product.habitatAndDietFilters).
 	Coined   bool
 	Count    int
 	Selected bool
@@ -2711,7 +2711,7 @@ func (s *server) traitControl(r *http.Request, name, note, param string,
 	return b
 }
 
-// categoryRow is one line of the detail view's category table (P-069): what
+// categoryRow is one line of the detail view's category table (product.categoryProvenance): what
 // the bird is sorted as, and who decided.
 type categoryRow struct {
 	// Label is blank on a continuation row, so two habitats read as one
@@ -2785,14 +2785,14 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 
 	// Every way this bird's name or record differs between AviList, which
 	// supplies the names, and the occurrence data, which supplies the
-	// evidence (P-077). Placed before the count rows deliberately: all four
+	// evidence (product.namesRecordsFiledUnder). Placed before the count rows deliberately: all four
 	// change how the numbers below should be read.
 	//
 	// All of them, not the first that matches. This was an if/else-if over
 	// two of the four tables, which would have shown a shared name OR a
 	// withheld note had any species ever been both. None is today, and the
 	// chain was still the wrong shape: a disclosure silently suppressed by
-	// another disclosure is exactly what G-006 forbids.
+	// another disclosure is exactly what goals.nothingDisappearsQuietly forbids.
 	//
 	// Why a reader wants these and not just the number: a visitor who knows
 	// the bird as Dryobates villosus and finds a page headed Leuconotopicus
@@ -2856,7 +2856,7 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 
 	// Withheld is NOT a name disagreement and must not read as one: telling
 	// a reader to look for another name would send them after one that does
-	// not exist (P-077).
+	// not exist (product.namesRecordsFiledUnder).
 	if taxonomy.WithheldByEBird[sp.ScientificName] {
 		seam("withheld by eBird",
 			"eBird suppresses "+sp.Name(loc)+" from its public export, as it does for "+
@@ -2866,10 +2866,10 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 	}
 
 	// Withheld in particular regions or seasons, under eBird's Sensitive
-	// Species list and confirmed against the records (CR-037). Every region,
+	// Species list and confirmed against the records (decisions.ebirdSilenceNotAbsence). Every region,
 	// not just the ones on screen: this page is the complete record, and the
 	// tile -- which names only what is on screen -- must never say more
-	// (P-034). A species eBird withholds everywhere already has its row above.
+	// (product.tileOpensDetail). A species eBird withholds everywhere already has its row above.
 	if !taxonomy.WithheldByEBird[sp.ScientificName] && len(sp.RegionWithheld) > 0 {
 		type where struct{ name, months string }
 		var ws []where
@@ -2904,7 +2904,7 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 	}
 
 	// The month filter declined to judge this bird, which the tile marks
-	// and so this must too (P-034, CR-036).
+	// and so this must too (product.tileOpensDetail, decisions.monthPresence).
 	if where, n, yes := s.abstains(sp, opt); yes {
 		out = append(out, categoryRow{
 			Label:  "Months",
@@ -2920,12 +2920,12 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 	}
 
 	// The figure the tile showed, for the regions the reader had selected
-	// when they clicked it (P-034).
+	// when they clicked it (product.tileOpensDetail).
 	//
 	// Built by shareWithSeams, the same function the tile calls, rather
 	// than recomputed here. Two call sites deriving one number from the
 	// same inputs is how the index and the detail page came to disagree
-	// about where a bird is commonest (CR-031); one function cannot.
+	// about where a bird is commonest (decisions.honestSeaDenominator); one function cannot.
 	//
 	// It is NOT the row below. "Top region" is where the bird peaks, which
 	// is a different scope and usually a smaller N, and a reader who saw
@@ -2949,7 +2949,7 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 		})
 	}
 
-	// Where the bird is the biggest share of what gets recorded (P-074).
+	// Where the bird is the biggest share of what gets recorded (product.shareOfRecords).
 	//
 	// Stated as "1 in N species observations there" rather than as a percentage: the
 	// share runs from 1 in 2 to 1 in 117 million across the dataset, and a
@@ -2965,11 +2965,11 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 			// "Top region". It began as the bare "Commonest in", which said
 			// nothing about what it ranged over, and spent a while as
 			// "Commonest land region" while the seas had no honest
-			// denominator (CR-030). They have one now (CR-031), so the row
+			// denominator (decisions.seaShareDiffers). They have one now (decisions.honestSeaDenominator), so the row
 			// ranges over everything again and the qualifier went -- and
 			// "top" says plainly that this is the maximum of the same
 			// figure the index shows, which selecting this one region there
-			// reproduces exactly (AC-100).
+			// reproduces exactly (acceptance.peakAndShareOneCalculation).
 			Label:  "Top region",
 			Value:  fmt.Sprintf("%s — 1 in %s species observations there", where, comma(int64(c.OneIn()))),
 			Origin: string(dataset.Derived),
@@ -2998,7 +2998,7 @@ type shareCell struct {
 	// et Miquelon, which BirdView has no region for, and excludes Johnston,
 	// Palmyra, Wake and Navassa, which it has regions for. Naming someone
 	// else's boundary would also re-attribute BirdView's scope to the
-	// authority CR-028 just removed it from. The selection describes itself.
+	// authority decisions.scopeFromRecurrence just removed it from. The selection describes itself.
 	Where string
 	// Ratio is the whole left-hand phrase, "1 in 883,328" or "0 in
 	// 1,225,176,035". Both forms are spelled out rather than the second
@@ -3010,20 +3010,20 @@ type shareCell struct {
 	Title string
 	// Note replaces the ratio when there is nothing to divide by at all --
 	// the reader has selected only seas, which carry presence and no share
-	// (P-074, CR-030). Empty whenever Ratio is set, and never both: a cell
+	// (product.shareOfRecords, decisions.seaShareDiffers). Empty whenever Ratio is set, and never both: a cell
 	// either divides or explains.
 	Note string
 	// Seams are caveats on the figure, one line each under it: a count
-	// shared with another species (P-077, CR-034), a bird the month filter
-	// declined to judge (CR-036), a species eBird withholds in the regions
-	// on screen (CR-037). They accompany the Ratio rather than replacing it:
+	// shared with another species (product.namesRecordsFiledUnder, decisions.sharedCountShownOnBoth), a bird the month filter
+	// declined to judge (decisions.monthPresence), a species eBird withholds in the regions
+	// on screen (decisions.ebirdSilenceNotAbsence). They accompany the Ratio rather than replacing it:
 	// suppressing a count would leave a reader unable to tell it from a bird
-	// genuinely absent (G-006).
+	// genuinely absent (goals.nothingDisappearsQuietly).
 	//
 	// A list, and every caveat that applies is on it. The first version held
 	// one, and the abstention marker replaced the shared-name marker when
 	// both applied -- a disclosure silently suppressed by another, which is
-	// the failure G-006 names.
+	// the failure goals.nothingDisappearsQuietly names.
 	Seams []seam
 }
 
@@ -3047,7 +3047,7 @@ type seam struct{ Text, Title string }
 // the denominator and nothing to the numerator, which is correct: widening
 // the selection to places a bird is absent from should lower its share.
 //
-// **A region with no entry in totals contributes to NEITHER side** (CR-030).
+// **A region with no entry in totals contributes to NEITHER side** (decisions.seaShareDiffers).
 // That is the whole guard, and it replaces a pair of conditions that drifted:
 // the numerator ranged over the species' regions and the denominator over the
 // totals, so when the marine regions turned out to have counts on one side
@@ -3068,13 +3068,13 @@ func shareIn(sp *dataset.Species, ds *dataset.Dataset, opt options) (num, den in
 	// Every month unless the reader said otherwise. Both halves of the
 	// ratio are narrowed together, which is the whole point: a June figure
 	// divided by June's birding is comparable with a December one, where
-	// June's records over the year's birding would not be (P-011).
+	// June's records over the year's birding would not be (product.regionAndMonthFilter).
 	allMonths := !opt.HasMonths || len(opt.Months) == month.Count
 	inMonth := func(m int) bool { return allMonths || opt.Months[m] }
 
 	// The species' regions and the regions where it stays under the bar
 	// both count: the bar decides where it is listed, not what it counts
-	// (P-011, CR-042).
+	// (product.regionAndMonthFilter, decisions.belowBarCounted).
 	add := func(ids []string, counts []int64, months [][12]int64) {
 		for i, id := range ids {
 			if !counted(id) {
@@ -3133,11 +3133,11 @@ func shareOf(sp *dataset.Species, ds *dataset.Dataset, opt options) *shareCell {
 	num, den := shareIn(sp, ds, opt)
 	// No denominator at all means nothing on screen is a land region --
 	// in practice, the reader has selected only seas, which carry presence
-	// and no share (CR-030). Named for the selection rather than for the
+	// and no share (decisions.seaShareDiffers). Named for the selection rather than for the
 	// sea, because that is the thing the reader can act on.
 	// No denominator for anything selected. Unreachable from the UI today,
 	// every region having a total -- but it is how the marine regions
-	// behaved for months before CR-031 measured one, so a region added to
+	// behaved for months before decisions.honestSeaDenominator measured one, so a region added to
 	// internal/region ahead of its data lands here rather than dividing by
 	// zero.
 	if den == 0 {
@@ -3168,7 +3168,7 @@ func shareOf(sp *dataset.Species, ds *dataset.Dataset, opt options) *shareCell {
 	// The months the figure ranges over, where that is not the whole year.
 	// Appended to both halves rather than replacing either: a reader needs
 	// to know the figure narrowed, and narrowing in two dimensions at once
-	// is exactly when a scope label stops being obvious (P-011).
+	// is exactly when a scope label stops being obvious (product.regionAndMonthFilter).
 	if ms := monthScope(opt); ms != "" {
 		if all {
 			where = "(all regions, " + ms + ")"
@@ -3267,7 +3267,7 @@ func maskScope(mask [month.Count]bool) string {
 	return strings.Join(parts, ", ")
 }
 
-// shareWithSeams is shareOf plus the disclosure of P-077: where an
+// shareWithSeams is shareOf plus the disclosure of product.namesRecordsFiledUnder: where an
 // occurrence source files two BirdView species under one name, the tile says
 // so rather than presenting the count as this bird's alone.
 //
@@ -3285,7 +3285,7 @@ func (s *server) shareWithSeams(sp *dataset.Species, opt options) *shareCell {
 	if where, n, yes := s.abstains(sp, opt); yes {
 		// The reason is on the tile and not only in the tooltip: "shown in
 		// every month" alone reads as a fact about the bird, which is the
-		// one misreading the abstention exists to prevent (CR-036).
+		// one misreading the abstention exists to prevent (decisions.monthPresence).
 		cell.Seams = append(cell.Seams, seam{"Shown in every month due to too few records",
 			fmt.Sprintf("BirdView holds %s records of this bird in %s, which "+
 				"is too few to tell the months it is here from the months nobody looked. It is "+
@@ -3309,7 +3309,7 @@ func (s *server) shareWithSeams(sp *dataset.Species, opt options) *shareCell {
 
 // sharedRows groups the drawn species whose traits come from one AVONET row:
 // the same sheet and the same filed taxon. Such species are drawn alike
-// because their measurements are the same, not because the birds are (P-079).
+// because their measurements are the same, not because the birds are (product.borrowedMeasurementsSaySo).
 //
 // Derived from the provenance rather than from taxonomy.NearMatches, so a
 // borrowing reached any other way still gets its note.
@@ -3341,7 +3341,7 @@ func sharedRows(ds *dataset.Dataset) map[string][]string {
 }
 
 // sameMeasurements gives one caveat per other drawn species that shares this
-// one's AVONET row, for the tile and the detail page (P-079). The tooltip
+// one's AVONET row, for the tile and the detail page (product.borrowedMeasurementsSaySo). The tooltip
 // says which way the borrowing runs, because the two species are not in the
 // same position: one has no measurements of its own.
 func (s *server) sameMeasurements(sp *dataset.Species, loc dataset.Locale) []seam {
@@ -3372,7 +3372,7 @@ func (s *server) sameMeasurements(sp *dataset.Species, loc dataset.Locale) []sea
 }
 
 // withheldIn returns, for the regions and months on screen, the months eBird
-// withholds a species in each region that has any (CR-037). Months outside
+// withholds a species in each region that has any (decisions.ebirdSilenceNotAbsence). Months outside
 // the selection are dropped, so a June filter does not report Florida's
 // winter.
 func (s *server) withheldIn(sp *dataset.Species, opt options) map[string][12]bool {
@@ -3399,7 +3399,7 @@ func (s *server) withheldIn(sp *dataset.Species, opt options) map[string][12]boo
 
 // withheldSeam says, on the tile, that eBird withholds this species in the
 // regions and months on screen, so its figure is short by however many
-// records eBird kept back (CR-037).
+// records eBird kept back (decisions.ebirdSilenceNotAbsence).
 //
 // One region is named with its months, because that is the case a reader
 // can act on: "Withheld by eBird in Florida, Oct-Mar". Several are counted,
@@ -3431,7 +3431,7 @@ func (s *server) withheldSeam(sp *dataset.Species, opt options) (text, title str
 }
 
 // abstains reports whether the month filter declined to judge this species,
-// and in which region it has the most to go on (CR-036).
+// and in which region it has the most to go on (decisions.monthPresence).
 //
 // A species under 200 records in a region cannot have its months told apart
 // from its surveys: Millerbird holds 28 in Hawaii, all in five months, and
@@ -3493,7 +3493,7 @@ func comma(n int64) string {
 
 // served names the two document sets BirdView publishes: the user-facing
 // guides and the normative spec. Both are embedded, so a provenance
-// citation resolves without the network (P-069, T-002).
+// citation resolves without the network (product.categoryProvenance, tech.selfContainedServer).
 var served = map[string]struct {
 	fs   embed.FS
 	kind string
@@ -3522,7 +3522,7 @@ func (s *server) document(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Set("Content-Type", "image/svg+xml")
 		// Opened full size, an SVG is a document of its own; it carries no
-		// script, and this says so to the browser as well (T-002).
+		// script, and this says so to the browser as well (tech.selfContainedServer).
 		w.Header().Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'")
 		w.Write(svg)
 		return
@@ -3549,7 +3549,7 @@ var mermaidBlock = regexp.MustCompile("(?s)```mermaid\n.*?\n```")
 // from it.
 //
 // GitHub draws the source itself; BirdView would need Mermaid's script to,
-// which T-002 rules out. A page without its rendered SVG keeps the source,
+// which tech.selfContainedServer rules out. A page without its rendered SVG keeps the source,
 // shown as code, and TestDiagramsAreCurrent fails.
 //
 // The picture links to itself because it is several times the page's width:
@@ -3617,7 +3617,7 @@ func (s *server) renderMarkdown(w http.ResponseWriter, set, title string, src []
 // browser would break it for the checkout; these documents are served
 // precisely because they are the files the repository carries.
 //
-// **Only the guides are served** (CR-046). A link to another guide becomes
+// **Only the guides are served** (decisions.requirementsNotServed). A link to another guide becomes
 // its /docs path. A link to anything else in the repository -- the
 // requirements under river/, source code, data tables, vendored inputs --
 // becomes a link to that file in the published repository, because the
@@ -3684,40 +3684,6 @@ func (t repoLinks) rewrite(dest string) string {
 //
 // Raw HTML in the source is NOT passed through: these files are ours, but a
 // renderer that emits whatever HTML it is given is a habit worth not having.
-// idAnchors gives a heading whose text begins with a requirement id -- "P-001
-// — Scope is ..." -- the id alone as its anchor.
-//
-// Every cross-reference in the spec is written `(product.md#p-001)`, and
-// river/check/refs.py checks those resolve. It checks the MARKDOWN. Served,
-// goldmark's auto id turned that heading into
-// `p-001--scope-is-the-aba-area-avifauna-that-recurs-by-birdviews-own-measure`,
-// so all 176 anchored cross-references in the rendered spec landed at the top
-// of the document instead of on the requirement they cite. Nothing noticed,
-// because the link-walking test drops the fragment before checking anything.
-//
-// Runs after WithAutoHeadingID, replacing the generated id where a heading
-// opens with an id token and leaving every other heading alone.
-//
-// Verifies: P-069.
-type idAnchors struct{}
-
-// idToken matches a leading requirement id: P-001, T-024, AC-091, CR-028, G-004.
-var idToken = regexp.MustCompile(`^(?:P|T|AC|CR|G)-\d+\b`)
-
-func (idAnchors) Transform(doc *goldmarkast.Document, reader goldmarktext.Reader, _ goldmarkparser.Context) {
-	src := reader.Source()
-	_ = goldmarkast.Walk(doc, func(n goldmarkast.Node, entering bool) (goldmarkast.WalkStatus, error) {
-		h, ok := n.(*goldmarkast.Heading)
-		if !entering || !ok {
-			return goldmarkast.WalkContinue, nil
-		}
-		if m := idToken.Find(h.Text(src)); m != nil {
-			h.SetAttribute([]byte("id"), []byte(strings.ToLower(string(m))))
-		}
-		return goldmarkast.WalkContinue, nil
-	})
-}
-
 var markdown = map[string]goldmark.Markdown{
 	"docs": newMarkdown("docs"),
 }
@@ -3728,11 +3694,10 @@ func newMarkdown(base string) goldmark.Markdown {
 		goldmark.WithParserOptions(
 			// Heading ids, so a provenance citation can point at the
 			// section that answers it rather than at the whole document
-			// and a hope (P-069).
+			// and a hope (product.categoryProvenance).
 			goldmarkparser.WithAutoHeadingID(),
 			goldmarkparser.WithASTTransformers(
-				goldmarkutil.Prioritized(repoLinks{base}, 100),
-				goldmarkutil.Prioritized(idAnchors{}, 200))),
+				goldmarkutil.Prioritized(repoLinks{base}, 100))),
 		goldmark.WithRendererOptions(goldmarkhtml.WithHardWraps()),
 	)
 }
@@ -3791,7 +3756,7 @@ func (s *server) added(w http.ResponseWriter, r *http.Request) {
 }
 
 // excluded lists every bird left off the index, with its reason and its
-// records, each linked to its detail page (P-080). A bird a reader has seen
+// records, each linked to its detail page (product.escapedBirdsListed). A bird a reader has seen
 // should not vanish without a word; this is the word.
 func (s *server) excluded(w http.ResponseWriter, r *http.Request) {
 	var rows []*dataset.Species

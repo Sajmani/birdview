@@ -31,7 +31,7 @@ import (
 // BirdView serves for it disagree. Edit the Markdown, run
 // docs/render-diagrams.py, commit both.
 //
-// Verifies: P-078. Criterion: AC-115.
+// Verifies: product.pipelineDiagram. Criterion: acceptance.pipelineDiagramServed.
 func TestDiagramsAreCurrent(t *testing.T) {
 	entries, err := docs.Files.ReadDir(".")
 	if err != nil {
@@ -63,16 +63,16 @@ func TestDiagramsAreCurrent(t *testing.T) {
 		}
 	}
 	if diagrams == 0 {
-		t.Error("no page in docs/ has a diagram; P-078 asks for the pipeline's")
+		t.Error("no page in docs/ has a diagram; product.pipelineDiagram asks for the pipeline's")
 	}
 }
 
 // TestDiagramsAreSelfContained keeps the served pictures inert and local:
 // opened full size an SVG is a document of its own, and one that ran a
-// script or fetched a font would break T-002 where no test of the pages
+// script or fetched a font would break tech.selfContainedServer where no test of the pages
 // would look.
 //
-// Verifies: P-078, T-002. Criterion: AC-115.
+// Verifies: product.pipelineDiagram, tech.selfContainedServer. Criterion: acceptance.pipelineDiagramServed.
 func TestDiagramsAreSelfContained(t *testing.T) {
 	entries, _ := docs.Files.ReadDir(".")
 	checked := 0
@@ -110,7 +110,7 @@ func TestDiagramsAreSelfContained(t *testing.T) {
 // TestPipelineDiagramIsServed checks the page shows the picture rather than
 // the Mermaid source, and the picture answers as one.
 //
-// Verifies: P-078, P-069. Criterion: AC-115.
+// Verifies: product.pipelineDiagram, product.categoryProvenance. Criterion: acceptance.pipelineDiagramServed.
 func TestPipelineDiagramIsServed(t *testing.T) {
 	s := newTestServer(t)
 	page := mustGet(t, s, "/docs/pipeline")
@@ -149,7 +149,7 @@ func TestPipelineDiagramIsServed(t *testing.T) {
 // renamed or dropped in the code would otherwise leave the diagram
 // describing a pipeline that no longer exists.
 //
-// Verifies: P-078. Criterion: AC-115.
+// Verifies: product.pipelineDiagram. Criterion: acceptance.pipelineDiagramServed.
 func TestPipelineDiagramNamesRealColumns(t *testing.T) {
 	md, err := docs.Files.ReadFile("pipeline.md")
 	if err != nil {
@@ -194,9 +194,9 @@ func TestPipelineDiagramNamesRealColumns(t *testing.T) {
 
 // TestPipelineDiagramNamesEveryTaxonomyTable checks that each table in
 // internal/taxonomy the ingest reads appears in the diagram, so a new table
-// steering the build cannot go undrawn (P-078).
+// steering the build cannot go undrawn (product.pipelineDiagram).
 //
-// Verifies: P-078. Criterion: AC-115.
+// Verifies: product.pipelineDiagram. Criterion: acceptance.pipelineDiagramServed.
 func TestPipelineDiagramNamesEveryTaxonomyTable(t *testing.T) {
 	md, err := docs.Files.ReadFile("pipeline.md")
 	if err != nil {
@@ -233,7 +233,7 @@ func TestPipelineDiagramNamesEveryTaxonomyTable(t *testing.T) {
 // for readers, the guide for developers, the using guide's word on where
 // the numbers come from, the site's source list, and the README.
 //
-// Verifies: P-078. Criterion: AC-115.
+// Verifies: product.pipelineDiagram. Criterion: acceptance.pipelineDiagramServed.
 func TestPipelineDiagramIsLinked(t *testing.T) {
 	s := newTestServer(t)
 	for _, path := range []string{"/docs/data", "/docs/building", "/docs/using", "/"} {
@@ -260,7 +260,7 @@ func TestPipelineDiagramIsLinked(t *testing.T) {
 // Lines under a box's name and above its rule say where it lives, and are
 // italic too.
 //
-// Verifies: P-078. Criterion: AC-115.
+// Verifies: product.pipelineDiagram. Criterion: acceptance.pipelineDiagramServed.
 func TestPipelineFieldsCarryOneMark(t *testing.T) {
 	md, err := docs.Files.ReadFile("pipeline.md")
 	if err != nil {
@@ -303,7 +303,7 @@ func TestPipelineFieldsCarryOneMark(t *testing.T) {
 // render-diagrams.py moves them; a render that skipped that step would
 // still match its source's hash, and nothing else would notice.
 //
-// Verifies: P-078. Criterion: AC-115.
+// Verifies: product.pipelineDiagram. Criterion: acceptance.pipelineDiagramServed.
 func TestPipelineTablesAreLeftAligned(t *testing.T) {
 	md, _ := docs.Files.ReadFile("pipeline.md")
 	svg, _ := docs.Files.ReadFile("pipeline.svg")

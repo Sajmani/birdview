@@ -11,7 +11,7 @@ The ABA Checklist is all rights reserved. Its own CSV says so in row 0, quoted v
 > be reproduced without the express written permission of American Birding Association, Inc."
 
 So the file is fetched onto the building machine at build time, used, and never committed
-(T-004). This directory exists to say that out loud, so nobody resolves a missing input by
+(tech.fetchRestrictedInputs). This directory exists to say that out loud, so nobody resolves a missing input by
 helpfully checking the CSV in.
 
 ## What is fetched
@@ -54,7 +54,7 @@ Six columns, **no header row**:
 
 Family is **not** a per-species column. It appears in 99 section-header rows formatted
 `Ducks, Geese, and Swans (Anatidae)`, which a forward-fill parse recovers — and which supplies
-both the family scientific name for joining and the family common name for badges (P-004).
+both the family scientific name for joining and the family common name for badges (product.namesFromAvilist).
 
 Row 0 is the copyright blob quoted above. The final row is a footnote. Together with the 99 family
 headers those make up the 101 rows whose first column is non-blank, so "first column non-blank"
@@ -63,7 +63,7 @@ alone is not a family-header test — the pattern `... (Familyname)` is.
 Every one of the 1,301 rows has exactly 6 fields, so a parser may rely on the column count.
 
 Rarity distribution across the 1,161 species rows: code 1 = 490, 2 = 258, 3 = 93, 4 = 124,
-5 = 151, 6 = 45. BirdView keeps codes 1–3, which is 841 species (P-001).
+5 = 151, 6 = 45. BirdView keeps codes 1–3, which is 841 species (product.scopeIsRecurringAvifauna).
 
 **All of the above was measured from the fetched file on 2026-09-21**, not taken from the
 publisher's description.
@@ -80,7 +80,7 @@ ABA follows AOS/NACC; AVONET's `AVONET2_eBird` sheet follows eBird/Clements. The
 | Set | Joined on binomial | Rate |
 | --- | --- | --- |
 | All 1,161 ABA species | 1,094 | 94.23% |
-| Codes 1–3, the P-001 scope | 819 of 841 | **97.38%** |
+| Codes 1–3, the product.scopeIsRecurringAvifauna scope | 819 of 841 | **97.38%** |
 
 An earlier research pass reported 99.4%, but that measured ABA against the **eBird taxonomy
 v2025** CSV. AVONET was published in 2022 and carries the eBird/Clements taxonomy of that era, so
@@ -105,16 +105,16 @@ The 22 in-scope misses fall into three kinds, which matter very differently:
 Searching all three AVONET taxonomy sheets rather than `AVONET2_eBird` alone shows that only
 **6** of the 22 are absent from AVONET entirely — *Larus vegae*, *Numenius hudsonicus*,
 *Sturnella lilianae*, *Vireo swainsoni*, *Sula brewsteri* and *Anthus japonicus*. See
-[CR-006](../../decisions.md#cr-006) for the full disposition and the mass caveat.
+[decisions.abaSpeciesWithoutAvonet](../../decisions.md#abaspecieswithoutavonet) for the full disposition and the mass caveat.
 
 **The rename/split classification above is provisional.** It was derived mechanically from
 whether the parent name still appears in ABA 8.19, and that test under-detects: *Astur
 atricapillus* is a split from Eurasian Goshawk, and looks like a rename only because the Eurasian
 bird is not on the ABA list. Each entry needs a human taxonomic check before it enters the mapping
-table. See [CR-006](../../decisions.md#cr-006).
+table. See [decisions.abaSpeciesWithoutAvonet](../../decisions.md#abaspecieswithoutavonet).
 
 ## Open action
 
 Ask `info@aba.org` for written permission to redistribute the checklist in a non-commercial,
-attributed, open-source project. Permission would let T-005 relax and make a clean checkout
+attributed, open-source project. Permission would let tech.datasetNeverCommitted relax and make a clean checkout
 buildable with no network access. Recorded in [../../decisions.md](../../decisions.md#work-arising).

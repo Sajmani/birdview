@@ -22,11 +22,11 @@ import (
 	"birdview/internal/region"
 )
 
-// TestBelowBarCellsRoundTrip asserts AC-119's first assertion: a cell under
+// TestBelowBarCellsRoundTrip asserts acceptance.belowBarCountsKept's first assertion: a cell under
 // the presence bar is written with its mark and its counts, and reads back
 // as below; an unmarked cell reads back as present.
 //
-// Verifies: P-011, CR-042. Criterion: AC-119.
+// Verifies: product.regionAndMonthFilter, decisions.belowBarCounted. Criterion: acceptance.belowBarCountsKept.
 func TestBelowBarCellsRoundTrip(t *testing.T) {
 	below := region.Reported{ID: "USA.44_1", Records: 19,
 		Months: [12]int64{2, 1, 3, 1, 2, 1, 1, 2, 2, 1, 2, 1}, Below: true}

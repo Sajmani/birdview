@@ -24,7 +24,7 @@
 // order, Passeriformes with 44 families, which does fit. Two families in
 // different orders may share a color; the order badge tells them apart.
 //
-// Verifies: P-005, T-010, wcag/1.4.6.
+// Verifies: product.generatedBadgeColors, tech.badgeContrast, wcag/1.4.6.
 package palette
 
 import (
@@ -36,7 +36,7 @@ import (
 // MinContrast is WCAG 2.2 success criterion 1.4.6 (Contrast Enhanced) for
 // normal text. BirdView targets it rather than 1.4.3's 4.5:1.
 //
-// Verifies: T-010.
+// Verifies: tech.badgeContrast.
 const MinContrast = 7.0
 
 const (
@@ -116,7 +116,7 @@ var presets = []struct {
 // Callers pass a distinct seed per order, so families in different orders are
 // not gratuitously given the same color even though they may collide.
 //
-// Verifies: P-005, T-010.
+// Verifies: product.generatedBadgeColors, tech.badgeContrast.
 func Generate(names []string, seed float64) map[string]Swatch {
 	sorted := append([]string(nil), names...)
 	sort.Strings(sorted)
@@ -177,7 +177,7 @@ func ContrastOnBlack(r, g, b uint8) float64 { return Contrast(RelativeLuminance(
 func ContrastOnWhite(r, g, b uint8) float64 { return Contrast(1, RelativeLuminance(r, g, b)) }
 
 // ContrastWith returns the contrast ratio of a swatch's background against its
-// own text color, which is the ratio T-010 actually constrains.
+// own text color, which is the ratio tech.badgeContrast actually constrains.
 func (s Swatch) ContrastWith() (float64, error) {
 	r, g, b, err := ParseHex(s.Hex)
 	if err != nil {

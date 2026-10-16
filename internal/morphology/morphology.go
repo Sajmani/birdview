@@ -16,13 +16,13 @@
 //
 // Two of the five are measured; three are modeled. Every modeled value names
 // the function that produced it, which is what makes presenting them
-// defensible (P-062, P-045, CR-007).
+// defensible (product.provenancePerMetric, product.neckModelPerFamily, decisions.neckLengthAsMetric).
 //
 // None of the models below is a published relation validated against real
 // birds. They are documented shape functions, and the provenance strings say
 // so. Do not quietly promote one to "measured".
 //
-// Verifies: P-040, P-041, P-045, P-062.
+// Verifies: product.segmentComposition, product.segmentsSumToLength, product.neckModelPerFamily, product.provenancePerMetric.
 package morphology
 
 import (
@@ -34,10 +34,10 @@ import (
 // this share of the modeled body axis.
 const DefaultNeckRatio = 0.18
 
-// NeckRatios is the per-family neck model of P-045. It is a drawing parameter
+// NeckRatios is the per-family neck model of product.neckModelPerFamily. It is a drawing parameter
 // with no measured basis -- no source measures avian neck length at this
 // coverage -- and it is surfaced to the user with this value named, rather than
-// hidden (CR-007).
+// hidden (decisions.neckLengthAsMetric).
 //
 // Families absent here get DefaultNeckRatio. The entries are the ones where
 // neck length is the visually defining feature of the family's silhouette.
@@ -92,7 +92,7 @@ var NeckRatios = map[string]float64{
 	"Alcidae": 0.10,
 	// New World vultures soar with the small bare head drawn back against
 	// the shoulders, so almost nothing projects. AviList gave them an order
-	// of their own (CR-022) and they were among the families never reviewed
+	// of their own (decisions.avilistReplacesAba) and they were among the families never reviewed
 	// against this table.
 	"Cathartidae": 0.10,
 
@@ -107,7 +107,7 @@ var NeckRatios = map[string]float64{
 	"Fregatidae":  0.40,
 	"Diomedeidae": 0.30,
 
-	// Arrived with the derived scope (CR-028).
+	// Arrived with the derived scope (decisions.scopeFromRecurrence).
 	//
 	// The Emu is the odd one in this whole table: it does not fly, so the
 	// flight silhouette every other bird is drawn in is a convention here
@@ -136,7 +136,7 @@ var NeckRatios = map[string]float64{
 // made: a new passerine family needs no review, a new family in any other
 // order does.
 //
-// Verifies: P-045.
+// Verifies: product.neckModelPerFamily.
 var NeckDefaultReviewed = map[string]string{
 	// Landbirds with no exposed neck to speak of. The default is a short
 	// stub, which is what these are.
@@ -157,7 +157,7 @@ var NeckDefaultReviewed = map[string]string{
 	"Phaethontidae":  "moderate, between a gull and a shearwater; the tail streamers identify it, not the neck",
 	"Procellariidae": "shearwaters and petrels fly head-close; unlike the albatrosses",
 	"Hydrobatidae":   "too small for a neck to read at any scale this project draws",
-	// Also arrived with the derived scope (CR-028).
+	// Also arrived with the derived scope (decisions.scopeFromRecurrence).
 	"Cacatuidae":   "compact, as the other parrots are",
 	"Numididae":    "gamebird; short neck, as Phasianidae",
 	"Ramphastidae": "compact; the bill carries the silhouette, not the neck",
@@ -207,9 +207,9 @@ const headCoefficient = 7.5
 // why the trunk is derived from it rather than from a linear trait.
 //
 // The exponent is NOT a free parameter. It is calibrated against measured
-// skeletons and must stay inside the interval P-047 names; see trunkExponent.
+// skeletons and must stay inside the interval product.trunkFromMass names; see trunkExponent.
 //
-// Verifies: P-047.
+// Verifies: product.trunkFromMass.
 func BodyLength(massG float64) (float64, string) {
 	m := math.Max(massG, 1.0)
 	v := trunkCoefficient * math.Pow(m, trunkExponent)
@@ -220,7 +220,7 @@ func BodyLength(massG float64) (float64, string) {
 // trunkExponent is how fast the trunk grows with mass.
 //
 // It replaces an invented 0.31 that was too shallow, understating the large end
-// of the ABA scope by about 1.65x (CR-021). Three independent measurements of
+// of the ABA scope by about 1.65x (decisions.trunkExponentCalibrated). Three independent measurements of
 // how a linear dimension scales with mass agree far above it: measured wingspan
 // 0.368 (n=301, Fox), neck length 0.380 and total leg length 0.364 (n=103,
 // Bohmer et al. 2019). 0.37 is the round value nearest the mean of the two that
@@ -228,10 +228,10 @@ func BodyLength(massG float64) (float64, string) {
 //
 // The distinction that makes this evidence usable: SINGLE bones scale near
 // isometry -- femur 0.325, central cervical vertebra 0.314 -- while CHAINS of
-// them scale higher. A trunk is a chain. This is also why the cranium of P-046
+// them scale higher. A trunk is a chain. This is also why the cranium of product.craniumFromMass
 // keeps its cube root and was deliberately left alone.
 //
-// P-047 requires this to lie in [0.338, 0.401]. Do not retune it by eye; that
+// product.trunkFromMass requires this to lie in [0.338, 0.401]. Do not retune it by eye; that
 // is what produced the value it replaced.
 const trunkExponent = 0.37
 
@@ -243,22 +243,22 @@ const trunkExponent = 0.37
 // little shorter, large birds substantially longer.
 //
 // Derivation: 18.0 * 63.4^0.31 / 63.4^0.37 = 14.0329. Carried to four decimals
-// because AC-080 checks the anchor to 0.01 mm and 14.03 misses it by 0.013.
+// because acceptance.trunkScalesLikeSkeletons checks the anchor to 0.01 mm and 14.03 misses it by 0.013.
 const trunkCoefficient = 14.0329
 
-// anchorMassG is the mass at which the recalibration of CR-021 is a no-op: the
+// anchorMassG is the mass at which the recalibration of decisions.trunkExponentCalibrated is a no-op: the
 // median of the 841 ABA species when the exponent was calibrated.
 //
 // It is a FIXED CONSTANT, deliberately not recomputed from the dataset at build
 // time. If scope changes the median moves, and the whole drawing must not move
-// with it silently -- re-anchoring is a decision, and P-047 says it has to be
+// with it silently -- re-anchoring is a decision, and product.trunkFromMass says it has to be
 // recorded as one.
 const anchorMassG = 63.4
 
 // NeckLength models the exposed neck as a share of the trunk.
 //
 // Modeled. The returned description names the family and the exact ratio, as
-// P-045 requires -- a model string naming a function but not its value would
+// product.neckModelPerFamily requires -- a model string naming a function but not its value would
 // tell the reader nothing they could check.
 func NeckLength(bodyMm float64, family string) (float64, string) {
 	ratio, explicit := NeckRatio(family)
@@ -274,7 +274,7 @@ func NeckLength(bodyMm float64, family string) (float64, string) {
 func Round1(v float64) float64 { return math.Round(v*10) / 10 }
 
 // BalanceToSum adjusts body so the five rounded segments sum exactly to the
-// rounded total, which P-041 requires and AC-030 asserts without tolerance.
+// rounded total, which product.segmentsSumToLength requires and acceptance.segmentsSumExactly asserts without tolerance.
 //
 // Rounding each segment independently leaves the sum up to 0.2 mm adrift; an
 // earlier design did exactly that and broke the stated invariant for 27.6% of

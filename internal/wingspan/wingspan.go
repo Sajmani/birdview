@@ -17,10 +17,10 @@
 // Only rows flagged needs_prediction = 0 are read. The dataset's
 // wingspan_predicted_* columns are regressions from AVONET wing chord;
 // ingesting them would reintroduce modeled values wearing a measured source's
-// name, which is the error CR-001 exists to prevent. BirdView models its own
+// name, which is the error decisions.noOpenLengthAndWingspan exists to prevent. BirdView models its own
 // estimates and labels them.
 //
-// Verifies: P-060, P-062.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric.
 package wingspan
 
 import (
@@ -35,7 +35,7 @@ import (
 const Source = "Fox et al. 2026 avian wingspan database (CC BY 4.0)"
 
 // Reported is an empirical wingspan with the range the source reports.
-// P-060 requires storing the triple rather than flattening to a point.
+// product.lengthAndWingspanSources requires storing the triple rather than flattening to a point.
 type Reported struct {
 	Mid, Min, Max float64 // centimeters as published
 	Taxon         string  // the BirdLife binomial it was filed under

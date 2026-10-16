@@ -20,7 +20,7 @@
 // somebody eventually notices. A name that MATCHES THE WRONG CONCEPT joins
 // cleanly and is wrong forever: eBird's Setophaga petechia is AviList's
 // Mangrove Yellow Warbler by string and the undivided Yellow Warbler by
-// meaning, and no name-matching check can tell (CR-034).
+// meaning, and no name-matching check can tell (decisions.sharedCountShownOnBoth).
 //
 // What separates them is asking each database how many records it holds
 // under the name BirdView serves. The ratio between the two is remarkably
@@ -42,9 +42,9 @@
 // exactly that reason.
 //
 // Nothing queries the network at build or test time; the output is
-// committed and the test reads it (T-028).
+// committed and the test reads it (tech.sourceNamingMeasured).
 //
-// Verifies: T-028.
+// Verifies: tech.sourceNamingMeasured.
 package main
 
 import (
@@ -139,7 +139,7 @@ func main() {
 	fmt.Fprintf(&sb, "#\n# Records each database holds in the US and Canada under the AviList\n")
 	fmt.Fprintf(&sb, "# binomial BirdView serves. A species far outside the usual eBird:iNat\n")
 	fmt.Fprintf(&sb, "# ratio is one the two databases disagree about -- a rename, a lump, a\n")
-	fmt.Fprintf(&sb, "# shared name, or a species eBird withholds (T-028, CR-034, CR-035).\n")
+	fmt.Fprintf(&sb, "# shared name, or a species eBird withholds (tech.sourceNamingMeasured, decisions.sharedCountShownOnBoth, decisions.regionJoinNormalizes).\n")
 	fmt.Fprintf(&sb, "#\n# Sources: EOD - eBird Observation Dataset, doi:10.15468/aomfnb, and the\n")
 	fmt.Fprintf(&sb, "# iNaturalist research-grade dataset. Both CC BY 4.0.\n#\n")
 	fmt.Fprintf(&sb, "# id\tscientific name\tebird\tinaturalist\n")

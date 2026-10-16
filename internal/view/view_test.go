@@ -24,7 +24,7 @@ import (
 )
 
 // bird builds a species with segments that sum to total, as the ingest
-// guarantees (P-041).
+// guarantees (product.segmentsSumToLength).
 func bird(name string, bill, head, neck, body, tail, span, mass float64) *dataset.Species {
 	return &dataset.Species{
 		ScientificName: name,
@@ -51,7 +51,7 @@ func sample() []*dataset.Species {
 	}
 }
 
-// Verifies: P-021. Criterion: AC-020.
+// Verifies: product.ascendingOrder. Criterion: acceptance.sortsAscending.
 func TestSortedAscending(t *testing.T) {
 	for _, m := range []Metric{ByLength, ByWingspan, ByMass} {
 		secs := Sections(sample(), m, DefaultStepPercent)
@@ -68,7 +68,7 @@ func TestSortedAscending(t *testing.T) {
 	}
 }
 
-// TestSectionRule asserts P-022 as written: a section breaks at the first bird
+// TestSectionRule asserts product.sectionBreakRule as written: a section breaks at the first bird
 // more than N% larger than the MINIMUM of the previous section.
 //
 // Both halves matter. The first says no section spans more than N%. The second
@@ -76,7 +76,7 @@ func TestSortedAscending(t *testing.T) {
 // section drifting wide one bird at a time -- the failure an implementation
 // keyed on the previous maximum would produce while passing casual inspection.
 //
-// Verifies: P-022, P-023. Criterion: AC-021.
+// Verifies: product.sectionBreakRule, product.sectionThresholdDefault. Criterion: acceptance.sectionBoundariesObeyRule.
 func TestSectionRule(t *testing.T) {
 	r := rand.New(rand.NewSource(7))
 	for _, step := range []float64{5, 10, DefaultStepPercent, 25, 50} {
@@ -108,7 +108,7 @@ func TestSectionRule(t *testing.T) {
 
 // TestSectionsPartition checks every species lands in exactly one section.
 //
-// Verifies: P-022. Criterion: AC-021.
+// Verifies: product.sectionBreakRule. Criterion: acceptance.sectionBoundariesObeyRule.
 func TestSectionsPartition(t *testing.T) {
 	in := sample()
 	var n int
@@ -130,7 +130,7 @@ func TestSectionsPartition(t *testing.T) {
 // TestSectionRangeMatchesContents verifies the header can state a range that is
 // actually true of its members.
 //
-// Verifies: P-024. Criterion: AC-022.
+// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.sectionHeadersMatch.
 func TestSectionRangeMatchesContents(t *testing.T) {
 	for _, sec := range Sections(sample(), ByMass, DefaultStepPercent) {
 		lo, hi := math.Inf(1), math.Inf(-1)
@@ -144,14 +144,14 @@ func TestSectionRangeMatchesContents(t *testing.T) {
 	}
 }
 
-// TestScaleModes asserts P-042: one scale per section, or one for everything.
+// TestScaleModes asserts product.scaleToggle: one scale per section, or one for everything.
 //
 // The second assertion is the one with teeth. "Identical within a section" is
 // satisfied trivially by a per-tile implementation whenever a section holds one
 // bird, so the test also requires that sections genuinely differ from each
 // other -- which a per-tile scale could not produce.
 //
-// Verifies: P-042. Criterion: AC-031.
+// Verifies: product.scaleToggle. Criterion: acceptance.sharedScale.
 func TestScaleModes(t *testing.T) {
 	secs := Sections(sample(), ByLength, DefaultStepPercent)
 	if len(secs) < 2 {
@@ -185,7 +185,7 @@ func TestScaleModes(t *testing.T) {
 	}
 }
 
-// TestCrossbarIsToScale asserts P-043: the crossbar represents wingspan at the
+// TestCrossbarIsToScale asserts product.crossbarAtVerticalScale: the crossbar represents wingspan at the
 // same scale as the vertical axis, so its length relative to the bird's drawn
 // height equals wingspan relative to total length.
 //
@@ -193,7 +193,7 @@ func TestScaleModes(t *testing.T) {
 // size -- larger birds drew shorter crossbars, and the 300 largest species
 // floored out. This assertion catches that class exactly.
 //
-// Verifies: P-043. Criterion: AC-032.
+// Verifies: product.crossbarAtVerticalScale. Criterion: acceptance.crossbarToScale.
 func TestCrossbarIsToScale(t *testing.T) {
 	species := sample()
 	box := Box{W: 420, H: 160}
@@ -212,10 +212,10 @@ func TestCrossbarIsToScale(t *testing.T) {
 	}
 }
 
-// TestLargerBirdsDrawLarger is the property G-001 depends on: at a shared
+// TestLargerBirdsDrawLarger is the property goals.sizeIntuition depends on: at a shared
 // scale, a bigger bird is bigger on screen.
 //
-// Verifies: P-042. Criterion: AC-031.
+// Verifies: product.scaleToggle. Criterion: acceptance.sharedScale.
 func TestLargerBirdsDrawLarger(t *testing.T) {
 	species := sample()
 	box := Box{W: 420, H: 160}
@@ -237,9 +237,9 @@ func TestLargerBirdsDrawLarger(t *testing.T) {
 }
 
 // TestSegmentsAbutInPixels checks the drawn parts meet without gap or overlap,
-// which is P-041 expressed in the renderer rather than in the data.
+// which is product.segmentsSumToLength expressed in the renderer rather than in the data.
 //
-// Verifies: P-040, P-041.
+// Verifies: product.segmentComposition, product.segmentsSumToLength.
 func TestSegmentsAbutInPixels(t *testing.T) {
 	s := sample()[5] // heron: a long neck makes ordering errors obvious
 	g := Layout(s, s.TotalLength.Value, s.Wingspan.Value, Box{W: 420, H: 160})
@@ -257,16 +257,16 @@ func TestSegmentsAbutInPixels(t *testing.T) {
 	}
 }
 
-// TestSharedScaleWithinSection asserts P-042 directly: birds given the same
+// TestSharedScaleWithinSection asserts product.scaleToggle directly: birds given the same
 // references are drawn at the same pixels-per-millimeter.
 //
 // This exists because the weaker assertions did not bite. Breaking Layout to
-// scale each bird to its own length -- the exact failure P-042 forbids -- still
+// scale each bird to its own length -- the exact failure product.scaleToggle forbids -- still
 // passed TestLargerBirdsDrawLarger and TestCrossbarIsToScale, because the
 // wingspan constraint happened to preserve size ordering. Comparing the scale
 // factor itself is the only check that cannot be satisfied by accident.
 //
-// Verifies: P-042. Criterion: AC-031.
+// Verifies: product.scaleToggle. Criterion: acceptance.sharedScale.
 func TestSharedScaleWithinSection(t *testing.T) {
 	species := sample()
 	box := Box{W: 420, H: 160}
@@ -301,7 +301,7 @@ func foldingPair(neck float64) (folds, extends *dataset.Species) {
 	return folds, extends
 }
 
-// TestFoldedNeckIsTheSameStrokeInLessHeight asserts P-040's folded neck: for the
+// TestFoldedNeckIsTheSameStrokeInLessHeight asserts product.segmentComposition's folded neck: for the
 // families that fly with the head drawn back onto the shoulders, the neck is an
 // S of two semicircles rather than a stick.
 //
@@ -311,13 +311,13 @@ func foldingPair(neck float64) (folds, extends *dataset.Species) {
 // pixels-per-millimeter as the rest of the bird -- the same neck, curved. The
 // compression that follows is 2/pi, a consequence of the shape rather than a
 // number anyone picked, which is precisely what separates this from the
-// per-family leg factors that CR-010 deleted.
+// per-family leg factors that decisions.inFlightNoLegs deleted.
 //
 // So the assertion is on the arc length, which no change to the radius can
 // satisfy by accident, and the compression is checked against 2/pi rather than
 // against whatever the code happens to produce.
 //
-// Verifies: P-040, P-041. Criterion: AC-067.
+// Verifies: product.segmentComposition, product.segmentsSumToLength. Criterion: acceptance.foldedNeckSameStroke.
 func TestFoldedNeckIsTheSameStrokeInLessHeight(t *testing.T) {
 	const neck = 200.0
 	heron, crane := foldingPair(neck)
@@ -365,7 +365,7 @@ func TestFoldedNeckIsTheSameStrokeInLessHeight(t *testing.T) {
 	}
 }
 
-// TestFoldedNeckDoesNotChangeOrdering asserts the other half of CR-011: the fold
+// TestFoldedNeckDoesNotChangeOrdering asserts the other half of decisions.foldedNeckAsS: the fold
 // is a rendering change and nothing else.
 //
 // Two birds of identical total length, one folding and one not, must sort into
@@ -374,7 +374,7 @@ func TestFoldedNeckIsTheSameStrokeInLessHeight(t *testing.T) {
 // a heron starts sorting as a smaller bird than it is -- which is the one thing
 // this change was not allowed to do.
 //
-// Verifies: P-021, P-042, P-041. Criterion: AC-067.
+// Verifies: product.ascendingOrder, product.scaleToggle, product.segmentsSumToLength. Criterion: acceptance.foldedNeckSameStroke.
 func TestFoldedNeckDoesNotChangeOrdering(t *testing.T) {
 	heron, crane := foldingPair(200)
 	in := []*dataset.Species{heron, crane}
@@ -420,10 +420,10 @@ func TestFoldedNeckDoesNotChangeOrdering(t *testing.T) {
 //
 // This is not hypothetical. Pelecanidae was in foldedNecks while falling back to
 // the 0.18 default, so a pelican -- a bird whose neck is its most obvious
-// feature -- folded a 5%-of-length stub. The bug survived CR-011 review because
+// feature -- folded a 5%-of-length stub. The bug survived decisions.foldedNeckAsS review because
 // each table looked reasonable on its own.
 //
-// Verifies: P-040, P-045. Criterion: AC-069.
+// Verifies: product.segmentComposition, product.neckModelPerFamily. Criterion: acceptance.foldingFamiliesHaveNecks.
 func TestEveryFoldedFamilyHasALongNeck(t *testing.T) {
 	for fam := range foldedNecks {
 		ratio, explicit := morphology.NeckRatio(fam)
@@ -437,16 +437,16 @@ func TestEveryFoldedFamilyHasALongNeck(t *testing.T) {
 	}
 }
 
-// TestChordTickMarksTheMeasuredPortion asserts the geometry behind P-065's
+// TestChordTickMarksTheMeasuredPortion asserts the geometry behind product.measuredVersusModeled's
 // split crossbar: the tick sits exactly one scaled chord inboard of the wingtip.
 //
 // That identity is the whole argument for splitting the bar. The outer segment
 // is a measured length, so it stays true even when the span model is wrong, and
-// the inner segment absorbs the entire error (CR-015). If the tick is placed by
+// the inner segment absorbs the entire error (decisions.drawingCarriesProvenance). If the tick is placed by
 // any other rule, the outer segment stops being the chord and the claim the
 // drawing makes becomes false.
 //
-// Verifies: P-065. Criterion: AC-072.
+// Verifies: product.measuredVersusModeled. Criterion: acceptance.diagramDistinguishesModeled.
 func TestChordTickMarksTheMeasuredPortion(t *testing.T) {
 	box := Box{W: 420, H: 160}
 	s := bird("Ardea herodias", 140, 40, 200, 300, 180, 1825, 2400)
@@ -476,16 +476,16 @@ func TestChordTickMarksTheMeasuredPortion(t *testing.T) {
 	}
 }
 
-// TestDetailLabelsDoNotCollide asserts P-066's layout rules.
+// TestDetailLabelsDoNotCollide asserts product.labeledDetailDiagram's layout rules.
 //
 // The collision pass is exercised with a synthetic geometry, because no real
 // species needs it: at the current box and font, 0 of 841 have segment
 // midpoints closer than a line height. It is kept rather than deleted because
-// unlike the dead branch CR-010 removed, this one is dead by the current
+// unlike the dead branch decisions.inFlightNoLegs removed, this one is dead by the current
 // numbers rather than by construction -- a larger font or a shorter box wakes
 // it -- so it has to be tested by construction too.
 //
-// Verifies: P-066. Criterion: AC-073.
+// Verifies: product.labeledDetailDiagram. Criterion: acceptance.segmentLabelsDontCollide.
 func TestDetailLabelsDoNotCollide(t *testing.T) {
 	box := Box{W: 988, H: 281}
 

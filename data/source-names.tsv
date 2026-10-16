@@ -4,7 +4,7 @@
 # Records each database holds in the US and Canada under the AviList
 # binomial BirdView serves. A species far outside the usual eBird:iNat
 # ratio is one the two databases disagree about -- a rename, a lump, a
-# shared name, or a species eBird withholds (T-028, CR-034, CR-035).
+# shared name, or a species eBird withholds (tech.sourceNamingMeasured, decisions.sharedCountShownOnBoth, decisions.regionJoinNormalizes).
 #
 # Sources: EOD - eBird Observation Dataset, doi:10.15468/aomfnb, and the
 # iNaturalist research-grade dataset. Both CC BY 4.0.

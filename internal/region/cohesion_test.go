@@ -20,7 +20,7 @@ import (
 )
 
 // presenceFile is the committed table the app itself filters on. The zones
-// are derived from it (CR-023), so the check reads the same file rather than
+// are derived from it (decisions.regionsTwoWays), so the check reads the same file rather than
 // a fixture: a fixture would let the shipped grouping and the shipped data
 // drift apart, which is the one failure this criterion exists to catch.
 const presenceFile = "../../data/region-presence.tsv"
@@ -156,7 +156,7 @@ func meanTo(sp map[string]map[string]bool, id string, to []string) (float64, boo
 // It deliberately does not re-run the clustering, which would compare the
 // algorithm against itself and ratify whatever it produced.
 //
-// Verifies: P-013.
+// Verifies: product.regionsGroupedTwoWays.
 func TestEveryRegionResemblesItsOwnZone(t *testing.T) {
 	sp := regionSpecies(t)
 
@@ -220,7 +220,7 @@ func worstOwnZoneRank(sp map[string]map[string]bool, grouping string) (int, stri
 	return worst, who
 }
 
-// TestDerivedZonesBeatTheHandDrawnOnes is the comparison CR-023 rests on. If
+// TestDerivedZonesBeatTheHandDrawnOnes is the comparison decisions.regionsTwoWays rests on. If
 // the measured grouping were no better than the one somebody drew from
 // memory, deriving it would buy nothing and the honest move would be to ship
 // the hand-drawn one alone.
@@ -236,9 +236,9 @@ func worstOwnZoneRank(sp map[string]map[string]bool, grouping string) (int, stri
 // this data.** Nine regions sit closer to a neighbouring zone than to their
 // own, by margins as small as 0.001; reassigning them iteratively does not
 // converge but cycles, five regions moving every sweep. The mainland is a
-// smooth gradient and any cut is a choice of where to slice (CR-023).
+// smooth gradient and any cut is a choice of where to slice (decisions.regionsTwoWays).
 //
-// Verifies: P-013.
+// Verifies: product.regionsGroupedTwoWays.
 func TestDerivedZonesBeatTheHandDrawnOnes(t *testing.T) {
 	sp := regionSpecies(t)
 
@@ -261,7 +261,7 @@ func TestDerivedZonesBeatTheHandDrawnOnes(t *testing.T) {
 
 	if birds, geo := mean(ByBirds), mean(ByGeography); birds <= geo {
 		t.Errorf("the derived grouping is no more cohesive than the hand-drawn one "+
-			"(%.4f vs %.4f); CR-023 claims it is, and if it is not then deriving "+
+			"(%.4f vs %.4f); decisions.regionsTwoWays claims it is, and if it is not then deriving "+
 			"it bought nothing", birds, geo)
 	}
 

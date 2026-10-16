@@ -34,7 +34,7 @@ Sheets: `Metadata`, `AVONET1_BirdLife`, `AVONET2_eBird`, `AVONET3_BirdTree`, `Pi
 `BirdLife–BirdTree crosswalk`.
 
 BirdView reads `AVONET2_eBird` only — 10,661 species rows in eBird/Clements taxonomy, with
-`Species2`, `Family2` and the trait columns named in P-003. Trait coverage on that sheet is
+`Species2`, `Family2` and the trait columns named in product.traitsPerSpecies. Trait coverage on that sheet is
 complete for the families checked: zero missing values for culmen, bill depth, tail, wing chord,
 secondary or mass.
 
@@ -55,4 +55,4 @@ was removed. Re-obtainable from the same DOI.
 ## Refreshing
 
 Re-download from the DOI, compare the hash, read the diff. A new AVONET version may revise
-taxonomy, in which case P-006's synonym table needs revisiting.
+taxonomy, in which case product.joinOnBinomial's synonym table needs revisiting.

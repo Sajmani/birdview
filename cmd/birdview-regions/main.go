@@ -17,7 +17,7 @@
 // For each US state and Canadian province it asks GBIF which bird names were
 // reported there and how often, then writes the regions each of BirdView's
 // species occurs in. The ingest reads the result; nothing queries the network
-// at build or test time (T-006, and the no-network-in-tests binding).
+// at build or test time (tech.identifiedClient, and the no-network-in-tests binding).
 //
 // Two sources, because one is not enough:
 //
@@ -32,7 +32,7 @@
 // GBIF's backbone, which drops what it cannot resolve and reported zero
 // records for Cooper's Hawk.
 //
-// Verifies: P-011.
+// Verifies: product.regionAndMonthFilter.
 package main
 
 import (
@@ -104,7 +104,7 @@ const minPPM = 1.0
 // The bar is 0.1%, now **8.8x the measured residue**. A bar set at the
 // measured value fails the next time iNaturalist gains a subspecies, and a
 // check that cries wolf gets deleted. What it exists to catch is the other
-// order of magnitude: before CR-035 this was 0.81%, and 9,954,362 of those
+// order of magnitude: before decisions.regionJoinNormalizes this was 0.81%, and 9,954,362 of those
 // records belonged to ten species BirdView draws.
 //
 // Deliberately a fraction of records rather than a count of names. A new
@@ -132,7 +132,7 @@ func main() {
 	// A sea-only refresh costs about 300 requests against the full run's
 	// several thousand, and leaves every land row byte-identical -- so the
 	// diff of a change to the marine rule is the marine rule, which is the
-	// only way to review one (CR-031).
+	// only way to review one (decisions.honestSeaDenominator).
 	if *marine {
 		if err := refreshMarine(*outPath, ds); err != nil {
 			log.Fatalf("birdview-regions: %v", err)
@@ -165,7 +165,7 @@ func main() {
 		// monthly is the same count split twelve ways.
 		monthly map[string]*[12]int64
 		// withheld marks the months eBird is confirmed to withhold each
-		// species here (CR-037).
+		// species here (decisions.ebirdSilenceNotAbsence).
 		withheld map[string][12]bool
 		// total and monthlyTotal are every counted record in the region,
 		// the denominator of every figure, taken before shared names are
@@ -177,14 +177,14 @@ func main() {
 	results := make([]result, len(gids))
 
 	// Resume what a previous run already fetched. The land pass is about to
-	// go from 140 requests to 1,660 under CR-036, one to three hours, and a
+	// go from 140 requests to 1,660 under decisions.monthPresence, one to three hours, and a
 	// run that long will meet a dropped socket: GBIF reset two connections
 	// during a 40-minute run on 2026-10-05 and timed out two more.
 	//
 	// The cache holds the RAW FACET, not presence or counts, for the reason
 	// birdview-status caches raw dates rather than computed shapes. What is
 	// expensive is asking GBIF; deciding what an answer means is free and
-	// still being argued about -- CR-036 is changing that decision right
+	// still being argued about -- decisions.monthPresence is changing that decision right
 	// now. Caching the verdict would mean refetching every region the next
 	// time the rule moved.
 	done := map[string]landRec{}
@@ -236,7 +236,7 @@ func main() {
 				byMonth := map[int]map[string]int64{}
 				// Thirteen: the whole year, and each month. The year is
 				// fetched rather than summed so the two can be COMPARED --
-				// CR-036 rests on every record carrying a month, and this
+				// decisions.monthPresence rests on every record carrying a month, and this
 				// is where that claim is checked over the whole dataset
 				// instead of the two regions it was spot-checked on.
 				for m := 0; m <= 12; m++ {
@@ -315,7 +315,7 @@ func main() {
 	names := map[string]string{}
 	// Every bird record a region holds, over every species including the
 	// ones BirdView does not draw. This is the denominator of the share a
-	// page shows (P-074): dividing by all the birds the same observers saw
+	// page shows (product.shareOfRecords): dividing by all the birds the same observers saw
 	// in the same place is what cancels out how hard they were looking.
 	totals := map[string]int64{}
 	monthlyTotals := map[string][12]int64{}
@@ -332,7 +332,7 @@ func main() {
 		monthlyTotals[r.gid] = r.monthlyTotal
 		// Every region with records is written, and the ones under the bar
 		// are marked rather than dropped: the bar decides where a species
-		// is listed, not what it counts (P-011, CR-042).
+		// is listed, not what it counts (product.regionAndMonthFilter, decisions.belowBarCounted).
 		for _, sp := range ds {
 			if lc := strings.ToLower(sp); r.counts[lc] > 0 {
 				rep := region.Reported{ID: r.gid, Records: r.counts[lc], Below: !r.present[lc]}
@@ -346,7 +346,7 @@ func main() {
 		// Every name that reached the denominator and no species. These are
 		// records counted as "some other bird" on every tile, which is
 		// correct for a bird BirdView does not draw and a silent loss for
-		// one it does (G-006, T-027).
+		// one it does (goals.nothingDisappearsQuietly, tech.joinsReportDrops).
 		for n, c := range r.counts {
 			if !drawnName[n] {
 				orphan[n] += c
@@ -392,7 +392,7 @@ func main() {
 
 	// Which ocean. Tested in the order internal/region declares, Arctic first,
 	// because it is a latitude band that overlaps both oceans in longitude.
-	// A sea counts only what is on OPEN WATER inside its box (CR-031). The
+	// A sea counts only what is on OPEN WATER inside its box (decisions.honestSeaDenominator). The
 	// boxes overlap the coast, so a plain box count attributes a bird
 	// watched from the shore to the sea; GADM covers land, so a record
 	// off land carries no country and the difference is the water.
@@ -405,7 +405,7 @@ func main() {
 	// Monthly, in two requests per sea rather than twenty-four: GBIF ORs
 	// repeated gadmGid values, so one month facet over the box and one
 	// restricted to USA|CAN give total and on-land, and the difference is
-	// water (CR-036).
+	// water (decisions.monthPresence).
 	for _, id := range region.MarineIDs() {
 		minLat, maxLat, minLon, maxLon, _ := region.MarineBox(id)
 		off, _, err := c.MonthlyOffLandInBox(ctx, gbif.EBirdDatasetKey, "",
@@ -454,7 +454,7 @@ func main() {
 	}
 	log.Printf("birdview-regions: %d of %d species placed in at least one region", placed, len(ds))
 
-	// What the join discarded, named and counted (T-027).
+	// What the join discarded, named and counted (tech.joinsReportDrops).
 	//
 	// A record under a name matching no drawn species still reaches the
 	// denominator of every share, so it is never absent from the data --
@@ -465,7 +465,7 @@ func main() {
 	// Measured before this existed: 37 names, 10,015,688 records, of which
 	// 9,954,362 belonged to ten species BirdView draws. Hairy Woodpecker
 	// alone was 7,310,342 of them, leaving the bird showing 0.7% of its own
-	// record (CR-035).
+	// record (decisions.regionJoinNormalizes).
 	var orphans []string
 	var orphanTotal, everything int64
 	for _, n := range totals {
@@ -490,7 +490,7 @@ func main() {
 			"%.2f%% bar. Every one of those is counted in the denominator of every share "+
 			"and in no species' numerator. A name the occurrence data uses and "+
 			"taxonomy.Occurrence does not know about belongs in AviListRenames or "+
-			"CountedAs; refusing to write a table that loses them quietly (T-027).",
+			"CountedAs; refusing to write a table that loses them quietly (tech.joinsReportDrops).",
 			f*100, maxOrphanFraction*100)
 	}
 
@@ -512,7 +512,7 @@ type measured struct {
 
 // measure turns one region's raw facets into the counts BirdView uses:
 // eBird's records, plus iNaturalist's only where eBird is confirmed to be
-// withholding the species (CR-038).
+// withholding the species (decisions.countEbirdFirst).
 //
 // **eBird alone, as a rule.** iNaturalist is 1.24% of land records, and its
 // one real effect on the counts was to admit birds into regions on its own
@@ -522,7 +522,7 @@ type measured struct {
 //
 // **iNaturalist where eBird is silent by policy.** In a month eBird withholds
 // a species in a region -- named by its Sensitive Species list and confirmed
-// against the records (CR-037) -- iNaturalist's records are counted, because
+// against the records (decisions.ebirdSilenceNotAbsence) -- iNaturalist's records are counted, because
 // they are the only evidence there is. Without them Spotted Owl would read
 // "0 in a billion" and appear in no state, which is eBird's privacy policy
 // presented as a fact about the owl. Presence there is judged on
@@ -530,7 +530,7 @@ type measured struct {
 // iNaturalist count look forty-eight times rarer than it is.
 //
 // **Shared names.** Where eBird files two species under one name, both take
-// that name's count (P-077): eBird holds Northern Yellow Warbler's records
+// that name's count (product.namesRecordsFiledUnder): eBird holds Northern Yellow Warbler's records
 // only as Setophaga petechia, and without the copy the commonest warbler in
 // North America would appear nowhere. The totals are taken before the copy,
 // so a shared count is never divided into itself twice.
@@ -545,7 +545,7 @@ func measure(raw map[string]map[int]map[string]int64, gid string, aviName map[st
 	for key, byMonth := range raw {
 		// Every record carries a month, so the twelve must reconstruct the
 		// year exactly. Checked over all 74 regions and both sources,
-		// because CR-036's whole model rests on it.
+		// because decisions.monthPresence's whole model rests on it.
 		var year, summed int64
 		for _, n := range byMonth[0] {
 			year += n
@@ -564,7 +564,7 @@ func measure(raw map[string]map[int]map[string]int64, gid string, aviName map[st
 		if year != summed {
 			return m, fmt.Errorf(
 				"%s in %s: the year holds %d records and the twelve months hold %d, a "+
-					"difference of %d. CR-036 assumes every record carries a month; it "+
+					"difference of %d. decisions.monthPresence assumes every record carries a month; it "+
 					"does not, and a month filter would silently drop the difference",
 				key, gid, year, summed, year-summed)
 		}
@@ -710,17 +710,17 @@ func write(path string, species []string, regionsOf map[string][]region.Reported
 	// the parser skips.
 	fmt.Fprintf(&b, "#\n# Counts are twelve, January first, separated by |. They sum to the\n")
 	fmt.Fprintf(&b, "# year exactly: every record carries a month, and birdview-regions\n")
-	fmt.Fprintf(&b, "# refuses to write unless the twelve reconstruct it (P-011, CR-036).\n")
+	fmt.Fprintf(&b, "# refuses to write unless the twelve reconstruct it (product.regionAndMonthFilter, decisions.monthPresence).\n")
 	fmt.Fprintf(&b, "#\n# total\tregion id\tevery bird record there, by month\n")
 	for _, g := range gids {
 		fmt.Fprintf(&b, "total\t%s\t%s\n", g, joinMonths(monthly[g]))
 	}
 	fmt.Fprintf(&b, "#\n# A cell may end in ! and twelve 0/1 flags: the months eBird withholds the\n")
 	fmt.Fprintf(&b, "# species there under its Sensitive Species list, confirmed against the\n")
-	fmt.Fprintf(&b, "# records. A withheld month is missing by policy, not absent (CR-037).\n")
+	fmt.Fprintf(&b, "# records. A withheld month is missing by policy, not absent (decisions.ebirdSilenceNotAbsence).\n")
 	fmt.Fprintf(&b, "#\n# A region id followed by %s is one where the species has records but stays\n", region.BelowMark)
 	fmt.Fprintf(&b, "# under the bar: its records count, and it is not one of the species'\n")
-	fmt.Fprintf(&b, "# regions (CR-042).\n")
+	fmt.Fprintf(&b, "# regions (decisions.belowBarCounted).\n")
 	fmt.Fprintf(&b, "#\n# scientific name\tregion[%s]:jan|feb|...|dec[!flags], comma separated\n", region.BelowMark)
 	for _, sp := range species {
 		rs := regionsOf[sp]
@@ -740,7 +740,7 @@ func write(path string, species []string, regionsOf map[string][]region.Reported
 
 // withheldSuffix renders the months eBird is confirmed to withhold as
 // `!` and twelve 0/1 flags, or nothing when it withholds none -- so the
-// 99% of cells it never touches are unchanged byte for byte (CR-037).
+// 99% of cells it never touches are unchanged byte for byte (decisions.ebirdSilenceNotAbsence).
 func withheldSuffix(w [12]bool) string {
 	var b strings.Builder
 	set := false
@@ -771,7 +771,7 @@ func joinMonths(m [12]int64) string {
 }
 
 // refreshMarine recomputes the five sea rows and sea totals in place,
-// leaving every land row exactly as it was (CR-031).
+// leaving every land row exactly as it was (decisions.honestSeaDenominator).
 //
 // Two things change from what the full run writes today, and they are the
 // whole of the fix:

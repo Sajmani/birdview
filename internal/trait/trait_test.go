@@ -50,7 +50,7 @@ func loadSpecies(t *testing.T) []dataset.Species {
 // AviList says `Nannopterum auritum` and `Larus smithsonianus` — and the
 // only symptom was a count being lower than intended.
 //
-// Verifies: P-015. Criterion: AC-092.
+// Verifies: product.habitatAndDietFilters. Criterion: acceptance.habitatDietFilterPerSpecies.
 func TestSupplementaryKeysExist(t *testing.T) {
 	sp := loadSpecies(t)
 	known := map[string]bool{}
@@ -74,7 +74,7 @@ func TestSupplementaryKeysExist(t *testing.T) {
 // from this table. Per entry says what is actually meant: this row did
 // something.
 //
-// Verifies: P-015, P-069. Criterion: AC-092.
+// Verifies: product.habitatAndDietFilters, product.categoryProvenance. Criterion: acceptance.habitatDietFilterPerSpecies.
 func TestSupplementaryReachesTheDataset(t *testing.T) {
 	byName := map[string]dataset.Species{}
 	for _, s := range loadSpecies(t) {
@@ -112,7 +112,7 @@ func carries(as []dataset.Assignment, value string) bool {
 // niche. The rule is written as a rule rather than as 52 species keys, so
 // what needs checking is that it fires and that both of its branches do.
 //
-// Verifies: P-015. Criterion: AC-092.
+// Verifies: product.habitatAndDietFilters. Criterion: acceptance.habitatDietFilterPerSpecies.
 func TestMixedDietRuleReachesTheDataset(t *testing.T) {
 	var derived, ours int
 	for _, s := range loadSpecies(t) {
@@ -143,10 +143,10 @@ func TestMixedDietRuleReachesTheDataset(t *testing.T) {
 
 // TestEveryAssignmentHasAnOriginAndTheVocabularyKnowsIt guards the two ways
 // a category can be dishonest: carrying no origin at all, which is an
-// opinion wearing a finding's clothes (P-069), and carrying a value the
+// opinion wearing a finding's clothes (product.categoryProvenance), and carrying a value the
 // control has no label for, which renders as a blank or raw-jargon chip.
 //
-// Verifies: P-015, P-069. Criterion: AC-092.
+// Verifies: product.habitatAndDietFilters, product.categoryProvenance. Criterion: acceptance.habitatDietFilterPerSpecies.
 func TestEveryAssignmentHasAnOriginAndTheVocabularyKnowsIt(t *testing.T) {
 	sp := loadSpecies(t)
 	hab := map[string]bool{}
@@ -198,7 +198,7 @@ func checkAssignment(t *testing.T, sci, what string, a dataset.Assignment, vocab
 // so it must actually differ from the term where the term is jargon, and
 // every description must be AVONET's own.
 //
-// Verifies: P-015. Criterion: AC-092.
+// Verifies: product.habitatAndDietFilters. Criterion: acceptance.habitatDietFilterPerSpecies.
 func TestLabelsAreNotJargon(t *testing.T) {
 	jargon := []string{"Invertivore", "Vertivore", "Granivore", "Frugivore",
 		"Nectarivore", "Herbivore terrestrial", "Herbivore aquatic"}
@@ -226,10 +226,10 @@ func TestLabelsAreNotJargon(t *testing.T) {
 // eats berries is a Frugivore even if the word is clumsy; a bird that
 // drinks tree sap is nothing in AVONET's list at all. Without that limit
 // the vocabulary drifts from a published classification into this
-// project's own, which is the habit CR-025 was written about — so the
+// project's own, which is the habit decisions.familiesTwoWays was written about — so the
 // count is capped and a coined term must declare itself.
 //
-// Verifies: P-015. Criterion: AC-092.
+// Verifies: product.habitatAndDietFilters. Criterion: acceptance.habitatDietFilterPerSpecies.
 func TestCoinedTermsAreRareAndSaySo(t *testing.T) {
 	coined := 0
 	for _, set := range [][]Term{Habitats, Niches} {
@@ -255,7 +255,7 @@ func TestCoinedTermsAreRareAndSaySo(t *testing.T) {
 // TestCoinedTermsAreNeverPublished closes the loop: a category of ours must
 // never reach a species as though a source had said it.
 //
-// Verifies: P-015, P-069. Criterion: AC-092.
+// Verifies: product.habitatAndDietFilters, product.categoryProvenance. Criterion: acceptance.habitatDietFilterPerSpecies.
 func TestCoinedTermsAreNeverPublished(t *testing.T) {
 	ours := map[string]bool{}
 	for _, set := range [][]Term{Habitats, Niches} {

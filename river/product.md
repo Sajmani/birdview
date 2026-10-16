@@ -9,17 +9,19 @@ IDs are permanent. Withdrawn requirements stay in place so references to them st
 
 ## Dataset and taxonomy
 
-### P-001 — Scope is the recurring avifauna of the regions BirdView covers
+### scopeIsRecurringAvifauna
+
+**Scope is the recurring avifauna of the regions BirdView covers**
 Subject: `dataset.scope`
 Value: `BirdView's regions, status established or rare`
-Goals: G-001, G-002
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
 The dataset is the species whose observations **recur** in the regions BirdView covers: a
 species is in scope when, in at least one of them, its records fall in repeated episodes across
 multiple years.
 
 **The records are eBird's**, and iNaturalist's only in a region and month where eBird is
-confirmed to withhold the species ([CR-038](decisions.md#cr-038)). Recurrence used to be measured
+confirmed to withhold the species ([decisions.countEbirdFirst](decisions.md#countebirdfirst)). Recurrence used to be measured
 on both sources' dates together, so a species iNaturalist alone photographed in repeated years —
 feral peafowl, escaped parakeets — recurred on evidence eBird's reviewers never saw.
 
@@ -31,13 +33,13 @@ BirdView additionally covers **Johnston Atoll, Palmyra Atoll, Wake Island and Na
 which lie well outside it.
 
 Calling the union "the ABA Area" was therefore wrong in both directions, and wrong in a second
-way: it attributes BirdView's geography to the authority [CR-028](decisions.md#cr-028) removed
+way: it attributes BirdView's geography to the authority [decisions.scopeFromRecurrence](decisions.md#scopefromrecurrence) removed
 it from. Nothing in the product names that boundary now — the page says *(all regions)*,
 which describes itself. Status is derived by
 [`birdview-status`](../cmd/birdview-status) and committed to
 [`data/status.tsv`](../data/status.tsv); `established` and `rare` are in scope, `vagrant`,
 `historical` and `absent` are not. A species the table classifies but leaves out still has a
-page saying so ([P-075](#p-075)). See [CR-028](decisions.md#cr-028).
+page saying so ([undrawnSpeciesAnswer](#undrawnspeciesanswer)). See [decisions.scopeFromRecurrence](decisions.md#scopefromrecurrence).
 
 Rationale: a bird a reader will actually meet is one that keeps turning up, and **recurrence
 measures that where a record count cannot**. Occurrence counts measure observer effort, so they
@@ -49,24 +51,26 @@ records across 13 days and is not.
 
 **This replaces the ABA rarity codes**, which supplied scope until 2026-10-04 and could not be
 redistributed. The codes were never a scope rule in their own right — they are a status
-vocabulary, of which P-001 used three values as a cutoff — so what replaces them is BirdView's
-own status vocabulary, published rather than hidden ([P-070](#p-070)).
+vocabulary, of which scopeIsRecurringAvifauna used three values as a cutoff — so what replaces them is BirdView's
+own status vocabulary, published rather than hidden ([statusIsPublished](#statusispublished)).
 
 **Two limits are declared rather than measured**, because occurrence data cannot express them.
 Species with no open record at all are listed by hand, and so are species whose presence is
-maintained by people rather than self-sustaining; see [P-071](#p-071). Nothing in either dataset
+maintained by people rather than self-sustaining; see [declaredExceptions](#declaredexceptions). Nothing in either dataset
 separates a feral population from a steady trickle of escapees.
 
-### P-070 — Status is published, not just used
+### statusIsPublished
+
+**Status is published, not just used**
 Subject: `dataset.status`
 Value: `established | rare | vagrant | absent, plus withheld and exotic flags`
-Goals: G-001, G-002
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
-Each species carries the status [P-001](#p-001) derives, and it is shown and filterable
-alongside Habitat and Diet ([CR-027](decisions.md#cr-027)) rather than consumed silently at
+Each species carries the status [scopeIsRecurringAvifauna](#scopeisrecurringavifauna) derives, and it is shown and filterable
+alongside Habitat and Diet ([decisions.habitatDietSpeciesLevel](decisions.md#habitatdietspecieslevel)) rather than consumed silently at
 ingest. The flags `withheld` — eBird suppresses the species, so the evidence is iNaturalist's —
 and `exotic` are orthogonal to the status, because a bird can be withheld *and* established.
-`exotic` is a declared list, not a measurement, and what it does is [P-080](#p-080).
+`exotic` is a declared list, not a measurement, and what it does is [escapedBirdsListed](#escapedbirdslisted).
 
 Rationale: the ABA codes were read at ingest and discarded, which was right while they were
 someone else's data under a license that forbade republishing them. BirdView's own status is
@@ -78,10 +82,12 @@ invisible ingest filter does not.
 This is the first BirdView output that is a dataset in its own right rather than an input to a
 drawing.
 
-### P-071 — Where the data cannot speak, the exception is declared and named
+### declaredExceptions
+
+**Where the data cannot speak, the exception is declared and named**
 Subject: `dataset.status.exceptions`
 Value: `declared table, each entry with a written reason`
-Goals: G-002, G-004
+Goals: goals.comparisonAcrossFamilies, goals.goodDataCitizen
 
 Species whose status cannot be derived carry a declared one instead, from a committed table in
 which every entry names its reason. Two classes qualify, and no others:
@@ -93,26 +99,30 @@ which every entry names its reason. Two classes qualify, and no others:
   episodes across 33 years — because ornamental birds are continuously replenished. Recurrence
   is robust to observer bias and blind to origin. Escaped cage, aviary and farm birds with no
   self-sustaining population anywhere BirdView covers are declared `exotic` and left off the
-  index ([P-080](#p-080)); their status is still the derived one.
+  index ([escapedBirdsListed](#escapedbirdslisted)); their status is still the derived one.
 
 Rationale: an exception that is declared and visible can be argued with. The failure this
-guards against is the one [CR-028](decisions.md#cr-028) rejected for the model as a whole —
+guards against is the one [decisions.scopeFromRecurrence](decisions.md#scopefromrecurrence) rejected for the model as a whole —
 quietly tuning a coefficient until the output looks right, which hides the judgement inside a
 number. A short table of named exceptions is a larger admission and a smaller lie.
 
-### P-002 — Morphometric traits come from AVONET
+### traitsFromAvonet
+
+**Morphometric traits come from AVONET**
 Subject: `dataset.traits.source`
 Value: `AVONET, preferring AVONET2_eBird`
-Goals: G-001, G-003
+Goals: goals.sizeIntuition, goals.shapeNotOnlySize
 
 Bill, wing, tail and mass measurements come from [AVONET](sources.md#avonet) — its `AVONET2_eBird`
 sheet first, then `AVONET1_BirdLife` or `AVONET3_BirdTree` where the eBird sheet lacks a row for
-the species ([CR-006](decisions.md#cr-006)), or where another sheet holds a narrower concept of the
-species ([CR-041](decisions.md#cr-041)) or of its near-match donor ([CR-039](decisions.md#cr-039)).
-See [P-060](#p-060).
+the species ([decisions.abaSpeciesWithoutAvonet](decisions.md#abaspecieswithoutavonet)), or where another sheet holds a narrower concept of the
+species ([decisions.herringGullEuropeanRow](decisions.md#herringgulleuropeanrow)) or of its near-match donor ([decisions.whiteTernBorrows](decisions.md#whiteternborrows)).
+See [lengthAndWingspanSources](#lengthandwingspansources).
 
-### P-003 — Traits carried per species
-Goals: G-003
+### traitsPerSpecies
+
+**Traits carried per species**
+Goals: goals.shapeNotOnlySize
 
 Each species record carries scientific name, family, and these AVONET traits: `Beak.Length_Culmen`,
 `Tail.Length`, `Wing.Length`, `Secondary1`, `Mass`.
@@ -124,20 +134,22 @@ unused data invites someone to invent a use for it.
 The set moves both ways, and a column that stops earning its place leaves. `Beak.Depth` was
 ingested until the cranium model left bill depth for mass. `Tarsus.Length` made the whole round
 trip — excluded as unused, ingested when the diagram gained legs, then dropped again when the
-flight premise removed them ([CR-010](decisions.md#cr-010)).
+flight premise removed them ([decisions.inFlightNoLegs](decisions.md#inflightnolegs)).
 
-### P-004 — Names come from AviList
+### namesFromAvilist
+
+**Names come from AviList**
 Subject: `dataset.names.source`
 Value: `AviList v2025b`
-Goals: G-002
+Goals: goals.comparisonAcrossFamilies
 
-English common names in **both locales** ([P-049](#p-049)), the **eBird species code**, family
+English common names in **both locales** ([englishNameChoice](#englishnamechoice)), the **eBird species code**, family
 scientific and English names, the order, and the family **sequence** all come from
 [AviList](sources.md#avilist). Scientific names come from the scope list, and are the join key.
 
 Rationale: **licensing, and nothing else.** The ABA checklist supplied all of this and supplied it
 well, but it is all rights reserved — serving BirdView reproduces whatever names it, so the
-checklist blocked public deployment outright ([CR-022](decisions.md#cr-022)). AviList is CC BY 4.0
+checklist blocked public deployment outright ([decisions.avilistReplacesAba](decisions.md#avilistreplacesaba)). AviList is CC BY 4.0
 and carries the same four things, so it can be served.
 
 That it is *also* the consensus successor to IOC, Clements and BirdLife is a bonus, not the
@@ -152,15 +164,17 @@ the project may not redistribute.
 
 Both tables are recorded in the code with this requirement cited beside them, and the ingest
 **asserts the drop list** rather than discovering it: a species losing its name source quietly
-would change its URL under a reader ([P-049](#p-049)).
+would change its URL under a reader ([englishNameChoice](#englishnamechoice)).
 
-### P-005 — Family badge colors are generated
+### generatedBadgeColors
+
+**Family badge colors are generated**
 Subject: `badge.color.derivation`
 Value: `generated`
-Goals: G-002
+Goals: goals.comparisonAcrossFamilies
 
 Colors are generated as **two palettes**: one per taxonomic order, and one per family *within* its
-order. Both satisfy T-010, and families are visibly different from those listed next to them.
+order. Both satisfy tech.badgeContrast, and families are visibly different from those listed next to them.
 
 Two families in different orders may share a color. Their order badge distinguishes them.
 
@@ -183,27 +197,31 @@ of the gamut has less perceptual room than the light half, and 44 families is cl
 space holds. Those pairs are never adjacent in the selector, and every badge carries its family
 name.
 
-### P-006 — Sources join on normalized scientific binomial
+### joinOnBinomial
+
+**Sources join on normalized scientific binomial**
 Subject: `dataset.join.key`
 Value: `scientific binomial, normalized`
-Goals: G-001
+Goals: goals.sizeIntuition
 
 Species are joined across sources on scientific binomial, after stripping `(...)` parentheticals
 and collapsing internal whitespace, with a committed mapping table covering the taxonomic
 divergence between AOS/NACC (which ABA follows) and the 2022-era eBird/Clements taxonomy AVONET
 carries.
 
-Rationale: the measured join rate on binomial alone, over the P-001 scope, is **97.38%** — 819 of
+Rationale: the measured join rate on binomial alone, over the scopeIsRecurringAvifauna scope, is **97.38%** — 819 of
 841 — leaving 22 species needing a mapping entry. English name is the worse key: hyphenation and
 Eastern/Western prefixes churn on every taxonomy update.
 
-The 22 are not all renames, and that distinction is the subject of [CR-006](decisions.md#cr-006).
+The 22 are not all renames, and that distinction is the subject of [decisions.abaSpeciesWithoutAvonet](decisions.md#abaspecieswithoutavonet).
 A rename may be mapped freely. A **split** cannot be mapped without borrowing the parent species'
 measurements, which makes the value no longer a measurement *of that species* and therefore
-engages P-060 and P-061.
+engages lengthAndWingspanSources and tileMarksModeled.
 
-### P-007 — Unmatched species are reported, not silently dropped
-Goals: G-001
+### unmatchedSpeciesReported
+
+**Unmatched species are reported, not silently dropped**
+Goals: goals.sizeIntuition
 
 Ingest reports every species that fails to join, by name and count, and fails the build if the
 unmatched fraction exceeds a stated threshold.
@@ -215,8 +233,10 @@ failure, a taxonomy update silently shrinks the dataset and nobody notices.
 
 ## Filtering
 
-### P-010 — Filter by family
-Goals: G-002
+### familyFilter
+
+**Filter by family**
+Goals: goals.comparisonAcrossFamilies
 
 The user can filter to any subset of families, multi-select. **Everything is selected on arrival**
 — All, every order and every family show as on. An **All** control toggles like an order does,
@@ -239,7 +259,7 @@ shorebirds plus gulls plus auks. Nothing is derived from them. Each family is la
 how many species the current filters match out of the whole dataset.
 
 Rationale for moving it: a per-control count is only true while it is the only filter. The moment
-a second filter exists — a region ([P-011](#p-011)) — "Parulidae 51" is false in Hawaii, and a
+a second filter exists — a region ([regionAndMonthFilter](#regionandmonthfilter)) — "Parulidae 51" is false in Hawaii, and a
 count that lies is worse than no count. Making every chip's count depend on every other filter is
 possible and cheap, but it means 90 numbers that each need re-reading after every click, to answer
 a question the reader asked once. One number above the list answers it once.
@@ -252,12 +272,14 @@ Checklist sequence is how the ABA checklist, Sibley and every other field guide 
 it is the order a birder already has in their head — and alphabetizing actively discards an
 ordering the source file provides for free.
 
-### P-011 — Filter by region and month
+### regionAndMonthFilter
+
+**Filter by region and month**
 Subject: `presentation.region_filter`
-Goals: G-002
+Goals: goals.comparisonAcrossFamilies
 
 **Reinstated 2026-10-02**, having been withdrawn because no freely redistributable per-region
-occurrence data existed at useful granularity ([CR-003](decisions.md#cr-003)). It does: GBIF
+occurrence data existed at useful granularity ([decisions.noLocationData](decisions.md#nolocationdata)). It does: GBIF
 serves eBird and iNaturalist under CC BY 4.0 with GADM regions as a queryable field.
 
 The user filters to any subset of **US states and Canadian provinces**, multi-select, exactly as
@@ -266,7 +288,7 @@ the family filter works — everything selected on arrival, an **All** control, 
 **Membership is per region and relative.** A species belongs to a region when it reaches **1
 record per million** of that region's bird observations, **counted from eBird** — and, only where
 eBird is confirmed to withhold the species there, from iNaturalist judged against its own total
-([CR-038](decisions.md#cr-038)). It used to read "in either source", which judged iNaturalist
+([decisions.countEbirdFirst](decisions.md#countebirdfirst)). It used to read "in either source", which judged iNaturalist
 against its own small total everywhere, so one photo of an escaped pet cleared a bar of 0.43
 records in New York. Relative rather than a
 fixed count for two measured reasons: eBird's volume doubled in five years, so any absolute bar
@@ -275,10 +297,10 @@ regions — California has 114 million records against Hawaii's 2.5 million — 
 mean the same thing in both.
 
 **Membership decides where a species is listed, not what it counts.** Records in a region where
-the species stays below the bar are kept and counted in its figure ([P-074](#p-074)); they only
+the species stays below the bar are kept and counted in its figure ([shareOfRecords](#shareofrecords)); they only
 leave it off that region's list. Discarding them made the figure contradict the status: Emu is
 established on 19 eBird records in Texas, 0.26 per million, and its tile read *0 in
-1,237,352,304* ([CR-042](decisions.md#cr-042)).
+1,237,352,304* ([decisions.belowBarCounted](decisions.md#belowbarcounted)).
 
 **Deciding membership per region is what keeps the endemics.** A continental cut drops them by
 construction: the Millerbird's handful of records is nothing against a billion, and 22 per
@@ -286,10 +308,10 @@ million within Hawaii. The regional rule needs no special case for them.
 
 **Regions are gathered into zones so a reader can select an area in one click**, and zones mix
 the two countries — British Columbia sits with Washington and Oregon, not with Nova Scotia. What
-a zone *means* is [P-013](#p-013).
+a zone *means* is [regionsGroupedTwoWays](#regionsgroupedtwoways).
 
 **A region appears in a URL as its postal abbreviation, or as its name** — `?region=CA`,
-`?region=GulfOfMexico` ([CR-024](decisions.md#cr-024)). Where a standard abbreviation exists it
+`?region=GulfOfMexico` ([decisions.regionUrlIsPostalCode](decisions.md#regionurlispostalcode)). Where a standard abbreviation exists it
 is used, and where none does the name is used in PascalCase. **No code is invented**: the four
 obvious ones are already taken, since Midway cannot be `MI` and Palmyra cannot be `PA`, and a
 code chosen only to dodge a collision would sit beside 64 official ones with nothing marking it
@@ -305,7 +327,7 @@ no longer describes it.
 
 **The reader also filters to any subset of the twelve months**, multi-select, on the same
 control and the same rules as regions — everything selected on arrival, an **All** toggle,
-and the two composing as [P-012](#p-012) requires. A month appears in a URL by its
+and the two composing as [filtersCompose](#filterscompose) requires. A month appears in a URL by its
 three-letter abbreviation: `?month=Jun&month=Jul`.
 
 **Months decide which birds are drawn, not only the figure.** Every other filter in BirdView
@@ -322,11 +344,11 @@ the annual rule above, **and**
 Dividing by the month's own total is not optional: New York records **20.9%** of its birding
 in May and **4.8%** in December, so a raw share would make every bird a May bird. The ratio
 asks whether a species is a bigger or smaller part of what people record this month than
-across the year, and 1.0 means exactly as present as usual. It is [P-074](#p-074)'s own logic
+across the year, and 1.0 means exactly as present as usual. It is [shareOfRecords](#shareofrecords)'s own logic
 at month granularity.
 
-This is **not** the recurrence rule of [P-001](#p-001), which is the better instrument and
-cannot be had at the price — see [CR-036](decisions.md#cr-036) for the measurements, the
+This is **not** the recurrence rule of [scopeIsRecurringAvifauna](#scopeisrecurringavifauna), which is the better instrument and
+cannot be had at the price — see [decisions.monthPresence](decisions.md#monthpresence) for the measurements, the
 calibration, and why 0.2 is not load-bearing.
 
 **Below 200 records in a region, the month filter abstains.** Millerbird has 28 records in
@@ -338,7 +360,7 @@ because thin cells are thin.
 
 **A month eBird withholds is not judged either.** Where eBird's Sensitive Species list keeps a
 species out of its records in a region and season, and the records confirm it
-([CR-037](decisions.md#cr-037)), those months are missing by policy: the species is shown, and
+([decisions.ebirdSilenceNotAbsence](decisions.md#ebirdsilencenotabsence)), those months are missing by policy: the species is shown, and
 the tile says *Withheld by eBird in Florida, Oct–Mar*. Judging them was how Painted Bunting came
 to be hidden from Florida in January, the heart of its season there.
 
@@ -347,7 +369,7 @@ a month — 65,504,204 checked across both sources, none missing — so this is 
 assumption.
 
 **No month is grouped or named.** No seasons, no "breeding", no "migration".
-[P-076](#p-076) already forbids naming a band where the range can be stated, and the reasons
+[orderByFrequency](#orderbyfrequency) already forbids naming a band where the range can be stated, and the reasons
 compound here: season names invert between hemispheres, the Central Pacific region spans
 −10° to 40° and crosses the equator, and for Hawaii, Palmyra, Navassa, Wake and Johnston
 temperate season names are the wrong *kind* of category whatever the latitude.
@@ -358,24 +380,28 @@ sea, where no land polygon reaches — Bermuda Petrel has 384 records offshore a
 in any GADM region. They are not errors and must not be filtered away silently; a pelagic bird is
 still a bird a reader may want.
 
-### P-012 — Filters compose
-Subject: `presentation.filters`
-Goals: G-002
+### filtersCompose
 
-**Reinstated with [P-011](#p-011).** Region and family narrow the list together: what is shown is
+**Filters compose**
+Subject: `presentation.filters`
+Goals: goals.comparisonAcrossFamilies
+
+**Reinstated with [regionAndMonthFilter](#regionandmonthfilter).** Region and family narrow the list together: what is shown is
 what every active filter admits. Selecting Hawaii and Parulidae shows the warblers of Hawaii, and
 shows nothing if there are none.
 
 An empty intersection is a real outcome and is **not** the same as nothing being selected
-([P-037](#p-037)). The empty state names each filter and what it is set to, because with two
+([helpfulEmptyState](#helpfulemptystate)). The empty state names each filter and what it is set to, because with two
 filters a reader cannot otherwise tell which one emptied the page.
 
-### P-013 — Regions are grouped two ways
+### regionsGroupedTwoWays
+
+**Regions are grouped two ways**
 Subject: `presentation.region_filter.zones`
-Goals: G-002
+Goals: goals.comparisonAcrossFamilies
 
 The selector offers **two groupings** of the same regions, and the reader picks from either
-([CR-023](decisions.md#cr-023)). Each is a **partition**: every region sits in exactly one zone
+([decisions.regionsTwoWays](decisions.md#regionstwoways)). Each is a **partition**: every region sits in exactly one zone
 of each grouping, so a region appears exactly twice in the selector and no region is unreachable
 from either.
 
@@ -397,17 +423,19 @@ on the map they already know; the derived grouping is the more interesting answe
 the one you go looking for rather than the one you need on arrival.
 
 **Neither grouping may be presented as the other.** The UI labels which is which, because a
-hand-drawn grouping shown as measurement is the failure [CR-023](decisions.md#cr-023) was
+hand-drawn grouping shown as measurement is the failure [decisions.regionsTwoWays](decisions.md#regionstwoways) was
 written to correct: the previous zones were defended with a statistic that turned out to be an
 artifact of a broken query.
 
 Zone membership is **presentation only**. It changes which chips a group toggle selects and
-nothing about which birds a region contains — that is [P-011](#p-011)'s 1-ppm rule, and it is
+nothing about which birds a region contains — that is [regionAndMonthFilter](#regionandmonthfilter)'s 1-ppm rule, and it is
 computed per region, never per zone.
 
-### P-014 — Families are grouped by taxonomic order
+### familiesByOrder
+
+**Families are grouped by taxonomic order**
 Subject: `presentation.family_filter.groups`
-Goals: G-002
+Goals: goals.comparisonAcrossFamilies
 
 The family selector groups families by **AviList's taxonomic order**, in checklist sequence.
 Every family has exactly one order, so the grouping is a partition and no family is
@@ -419,11 +447,11 @@ already what a birder would say — Waterfowl, Owls, Tubenoses, Grebes — so th
 is one order.
 
 **A hand-drawn "birder groups" grouping was built to fix that, and withdrawn**
-([CR-027](decisions.md#cr-027)). It was a family-level answer to a species-level question and
+([decisions.habitatDietSpeciesLevel](decisions.md#habitatdietspecieslevel)). It was a family-level answer to a species-level question and
 failed in that shape repeatedly: an Anhinga filed under seabirds, a frugivorous Phainopepla
 among insect-eating flycatchers, a finch family called seed-eaters when only 13 of its 37
 species eat seeds. The job it was trying to do — let a reader ask for birds of a kind — is done
-per species by [P-015](#p-015), where the data supports it.
+per species by [habitatAndDietFilters](#habitatanddietfilters), where the data supports it.
 
 **What survives is the lesson.** A category attached to a family must be true of *every*
 species in it. Where the property varies within the family, no family-level tag is honest in
@@ -432,12 +460,14 @@ return birds that were not asked for — tagging families with every habitat the
 drops the precision of "Fresh Water" to **38%**, because one wetland warbler brings all fifty.
 Such a property is a species trait and belongs on a species filter.
 
-### P-015 — Filter by habitat and by diet
+### habitatAndDietFilters
+
+**Filter by habitat and by diet**
 Subject: `presentation.trait_filter`
-Goals: G-002
+Goals: goals.comparisonAcrossFamilies
 
 Two more filters, **assigned per species**: where a bird mostly lives and what it mostly eats.
-Both are multi-select and compose with region and family ([P-012](#p-012)). Selecting two
+Both are multi-select and compose with region and family ([filtersCompose](#filterscompose)). Selecting two
 options shows birds in **either**, because picking two places asks for the birds of both places
 and not for the birds that use both.
 
@@ -451,7 +481,7 @@ rather than letting a quoted sentence look like BirdView's own prose. And the te
 value in the URL** — `?niche=Invertivore` — so the control explains its own query string
 without a separate note about it. Translating the word while
 keeping the classification is a far lighter liberty than inventing the classification, and this
-project's record on inventing classifications is [CR-025](decisions.md#cr-025).
+project's record on inventing classifications is [decisions.familiesTwoWays](decisions.md#familiestwoways).
 
 **Per species is why this works where a family grouping did not.** A family-level habitat
 misfiles 23–35% of birds, because habitat is a property of a species: Double-crested Cormorant
@@ -462,7 +492,7 @@ is right about all of them.
 **AVONET records one primary value per species; BirdView may add others.** A bird that uses two
 habitats, or eats two things, gets one of each from AVONET. BirdView adds **as many further
 habitats and diets as apply** — there is no limit of one — and tags each **`birdview`**, never
-merged into the published value ([P-069](#p-069)).
+merged into the published value ([categoryProvenance](#categoryprovenance)).
 
 **BirdView may also add a term to the vocabulary, under a narrower rule: only where AVONET has
 none that fits at all.** Not "none that fits well" — a bird that eats berries is a `Frugivore`
@@ -491,7 +521,7 @@ What keeps this honest is not scarcity but **provenance plus evidence**. Every a
 visibly this project's, and every addition must rest on something stateable: a different
 AVONET taxonomy sheet that says so, or a fact derivable from BirdView's own data. An addition
 whose only support is that it seemed right to whoever typed it is the failure
-[CR-025](decisions.md#cr-025) was written about, and is not permitted however it is tagged.
+[decisions.familiesTwoWays](decisions.md#familiestwoways) was written about, and is not permitted however it is tagged.
 
 **Counts beside each option are of the whole dataset, not the current view.** How many birds
 there are of a kind is a fact about the data; how many are still showing is what the species
@@ -501,16 +531,20 @@ count above the list already says.
 
 ## Ordering and sectioning
 
-### P-020 — One primary metric, user-selected
+### oneSelectedMetric
+
+**One primary metric, user-selected**
 Subject: `ordering.metric`
 Value: `length | mass | wingspan | frequency`
-Goals: G-001, G-002
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
 The user chooses whether the dataset is ordered by total length, body mass, wingspan, or how
-often the bird is recorded ([P-076](#p-076), [CR-032](decisions.md#cr-032)).
+often the bird is recorded ([orderByFrequency](#orderbyfrequency), [decisions.frequencyMetric](decisions.md#frequencymetric)).
 
-### P-021 — Ascending order
-Goals: G-001
+### ascendingOrder
+
+**Ascending order**
+Goals: goals.sizeIntuition
 
 Species are sorted ascending by the selected metric, **and the page says which way that
 runs**: *smallest first* under length, wingspan and mass, *most common first* under
@@ -522,14 +556,16 @@ The direction is stated for all four rather than only for the one that departs. 
 ascends a reciprocal — *1 in N* rises as the bird gets scarcer — so ascending the printed
 number descends abundance, and a reader who has learned "smallest first" from three metrics
 would otherwise read the fourth as a defect. See
-[CR-032](decisions.md#cr-032) for why renaming it was declined three times.
+[decisions.frequencyMetric](decisions.md#frequencymetric) for why renaming it was declined three times.
 
-### P-022 — Sections break at N% above the section minimum
+### sectionBreakRule
+
+**Sections break at N% above the section minimum**
 Subject: `sectioning.rule`
-Goals: G-001, G-002
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
 **For the three size metrics.** Frequency is banded by decade instead
-([P-076](#p-076), [CR-032](decisions.md#cr-032)): this rule would give it 128 sections, and its
+([orderByFrequency](#orderbyfrequency), [decisions.frequencyMetric](decisions.md#frequencymetric)): this rule would give it 128 sections, and its
 bands would move whenever the region filter did.
 
 A new section begins at the first species more than N% larger than the **minimum** species of the
@@ -538,43 +574,51 @@ previous section.
 Rationale: bird size follows a power law. Fixed-width bins put hundreds of small birds in one row
 and isolate large raptors in rows of one. A ratio rule produces sections of comparable visual
 span at every scale — and, because a section is by construction no more than N% wide, makes the
-per-section scale of P-042 honest.
+per-section scale of scaleToggle honest.
 
-### P-023 — N defaults to 15 and is adjustable
+### sectionThresholdDefault
+
+**N defaults to 15 and is adjustable**
 Subject: `sectioning.step_percent`
 Value: `15`
-Goals: G-002
+Goals: goals.comparisonAcrossFamilies
 
 Offered values run from 5% to 30%. Every value the control offers must be one the server accepts,
 or the control silently falls back to the default.
 
 **Under Frequency the same control selects a band width in orders of magnitude**, `10×` or
-`100×` ([P-076](#p-076)). The percentages are not shown there because they would misdescribe
+`100×` ([orderByFrequency](#orderbyfrequency)). The percentages are not shown there because they would misdescribe
 the rule: one decade is +900%, and a button reading "900%" explains nothing.
 
-### P-024 — Section headers state range and count
-Goals: G-001
+### sectionHeadersStateRange
+
+**Section headers state range and count**
+Goals: goals.sizeIntuition
 
 Each section shows its range in the currently selected metric and the number of species in it.
 
-Rationale: under per-section scaling (P-042) the header is what tells the user that the scale has
+Rationale: under per-section scaling (scaleToggle) the header is what tells the user that the scale has
 changed between one section and the next. Without it, per-section scaling is misleading.
 
 ---
 
 ## Presentation
 
-### P-030 — Diagram is the only presentation mode in v1
+### diagramOnlyMode
+
+**Diagram is the only presentation mode in v1**
 Subject: `presentation.mode`
 Value: `diagram`
-Goals: G-001, G-003
+Goals: goals.sizeIntuition, goals.shapeNotOnlySize
 
-Rationale: photographs were scoped out of v1 (P-050). The diagram is what makes size and shape
+Rationale: photographs were scoped out of v1 (speciesPhotographs). The diagram is what makes size and shape
 comparable; photographs were always the enrichment.
 
-### P-031 — Tile contents
+### tileContents
+
+**Tile contents**
 Subject: `presentation.tile`
-Goals: G-001, G-002, G-003
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies, goals.shapeNotOnlySize
 
 Each species is one **tile**, laid out top to bottom:
 
@@ -582,15 +626,15 @@ Each species is one **tile**, laid out top to bottom:
    parentheses**, with the **scientific name right-justified on the same line**; and below it the
    **family badge**, showing the family's scientific name and its common name together;
 2. the diagram, **vertically centered** in its area, carrying the **mass cube** in its lower-left
-   corner ([CR-020](decisions.md#cr-020)) and **no labels of any kind**;
+   corner ([decisions.massCubeOnTiles](decisions.md#masscubeontiles)) and **no labels of any kind**;
 3. the main metrics — **length, wingspan, mass** — named in full and in the selected unit system.
 
 **The family badge is the only badge, and the count is the rule.** A family is the one grouping
-a tile names. The others — the birder groups and the taxonomic order of [P-014](#p-014), and any
+a tile names. The others — the birder groups and the taxonomic order of [familiesByOrder](#familiesbyorder), and any
 later grouping such as co-occurrence — are **navigation, and never appear on a tile**. Two
 reasons, both already load-bearing elsewhere: every tile is one height and a second badge costs
 a line on all of them, and the badge is part of the single diagram vocabulary
-[P-048](#p-048) holds the UI to. Stated as a count rather than a list because a list invites
+[oneDiagramVocabulary](#onediagramvocabulary) holds the UI to. Stated as a count rather than a list because a list invites
 one more entry.
 
 The metrics are **spelled out**, not abbreviated to `L`, `W` and `M`. The initials cost a reader
@@ -600,7 +644,7 @@ nothing: the three fit a tile at full width.
 The **cube** is the one mark the tile shares with the annotated diagram. It needs no gutter and
 no leader, only a corner the drawing does not use, so it does not cost the density that keeps
 labels off the tile. It carries no label here — the footer already names the mass — and because
-every tile in a section is drawn to one scale (P-042), the cubes are directly comparable down the
+every tile in a section is drawn to one scale (scaleToggle), the cubes are directly comparable down the
 whole section. That is where bulk against elongation is most worth seeing, since a section is by
 construction a run of birds of similar length.
 
@@ -625,14 +669,14 @@ The species code is short — 4 to 8 characters, **not the fixed six its name su
 the one element that cannot be guessed from a truncation, so it is the one element that never
 truncates. Nothing laying it out may assume a width.
 
-Rationale: this is a layout rule in service of G-001. A section is a run of birds drawn to one
+Rationale: this is a layout rule in service of goals.sizeIntuition. A section is a run of birds drawn to one
 scale, and reading down it — comparing diagrams, and comparing mass cubes against each other — is
 what the index is for. A single tile standing taller than its neighbours puts every diagram in
 that row at a different offset, which costs the comparison far more than an abbreviated word
 does. Eight of the 841 common names are long enough to wrap, and the longest family badge comes
 within a few pixels of the tile's inner width; one tile is enough to disturb a whole row.
 
-In pick mode ([P-068](#p-068)) each tile also carries a **pick control**, beside the tile's own
+In pick mode ([pickFromIndex](#pickfromindex)) each tile also carries a **pick control**, beside the tile's own
 link rather than inside it. In browsing mode it is absent entirely, so the tile a reader sees
 almost all the time is unchanged.
 
@@ -643,10 +687,12 @@ Centering makes the empty space symmetric, so it reads as headroom rather than a
 Family common names are **not** unique across families — several groups share a vernacular
 label — so they are a reading aid beside the scientific name, never an identifier.
 
-### P-032 — Imperial by default, metric available
+### imperialByDefault
+
+**Imperial by default, metric available**
 Subject: `units.default`
 Value: `imperial`
-Goals: G-001
+Goals: goals.sizeIntuition
 
 One toggle switches the whole interface between:
 
@@ -662,17 +708,21 @@ who thinks in centimeters. Ounces below one are shown to two decimals, because a
 and a 12 g kinglet both round to 0.1 oz otherwise, erasing the distinction at exactly the size
 where the app is trying to make it.
 
-### P-033 — First load shows everything
-Goals: G-002
+### firstLoadShowsAll
+
+**First load shows everything**
+Goals: goals.comparisonAcrossFamilies
 
 The initial view has every family selected and shows all species, ordered by length.
 
 Rationale: the full sweep from hummingbird to swan is the clearest statement of what the app is
 for. Opening filtered or empty would hide it.
 
-### P-038 — Toggling a control keeps your place
+### togglesKeepPlace
+
+**Toggling a control keeps your place**
 Subject: `presentation.scroll`
-Goals: G-002
+Goals: goals.comparisonAcrossFamilies
 
 Changing any control preserves the scroll position **and the collapsed state of the Presentation
 and Controls panels**, as does returning from a detail view.
@@ -689,9 +739,11 @@ The restoration is the only client-side script in BirdView and holds no applicat
 ordering, sectioning and geometry stay in Go where they are property-tested (see
 [arch.md](arch.md)). Without JavaScript the page behaves as it did before.
 
-### P-037 — The empty state says what to do
+### helpfulEmptyState
+
+**The empty state says what to do**
 Subject: `presentation.empty_state`
-Goals: G-002
+Goals: goals.comparisonAcrossFamilies
 
 With nothing selected, the display area reads *"Select birds to display in Controls above"*.
 
@@ -720,18 +772,20 @@ this requirement claimed the description was also used in the collapsed summary 
 control; it never was, and the claim is withdrawn rather than left as a spec describing
 something that does not exist.
 
-### P-036 — The controls collapse
+### collapsibleControls
+
+**The controls collapse**
 Subject: `presentation.controls`
-Goals: G-002
+Goals: goals.comparisonAcrossFamilies
 
 The controls are **several collapsible panels**, each starting **closed** and each remembering its
-own state across navigations (P-038): **Controls** for the display toggles, **Regions**, **Diet
+own state across navigations (togglesKeepPlace): **Controls** for the display toggles, **Regions**, **Diet
 and Habitat**, and **Families**.
 
 They are separate boxes rather than one, because the filters are large — 90 family chips in
 26 order groups, and 74 regions in 10 zones — and stacking them inside one panel pushes the birds
 a long way below the fold while making "collapse the filter I am done with" impossible. Each
-panel carries the documentation for its own controls (P-035), so an explanation sits with the
+panel carries the documentation for its own controls (pageExplainsItself), so an explanation sits with the
 thing it explains.
 
 **A closed panel names what it holds.** Its summary carries a one-line description of what
@@ -745,9 +799,11 @@ the reader who wants a filter rather than on every reader who does not. A reader
 their filter should also be able to put it away and have it stay away; with several filters that
 is not one decision but several, and one panel cannot express it.
 
-### P-072 — Every group offers "Only"
+### onlyPerGroup
+
+**Every group offers "Only"**
 Subject: `presentation.filter_only`
-Goals: G-002
+Goals: goals.comparisonAcrossFamilies
 
 Beside each group selector in **Regions**, **Diet and Habitat** and **Families** sits an
 **Only** control that selects that group and deselects everything else **within its own
@@ -755,7 +811,7 @@ section**. Clicking Only beside *The High Arctic* leaves Nunavut selected and ev
 dropped; Only beside *Waterfowl* leaves that order's families and no others. Diet and habitat
 are separate sections, so narrowing one leaves the other whole.
 
-It is a link like every other control (P-037), carrying the resulting selection in the URL, and
+It is a link like every other control (helpfulEmptyState), carrying the resulting selection in the URL, and
 its target is built from the group alone rather than from what is currently selected — so it
 lands on the same page whatever was on before, and is as shareable as any other view.
 
@@ -765,14 +821,16 @@ reader wanting one zone must first clear all, then find their zone: two steps, a
 empties the page. Narrowing to one group is the common case and was the only one that took more
 than a click.
 
-### P-073 — One unit across whatever is being compared
+### oneUnitInComparison
+
+**One unit across whatever is being compared**
 Subject: `presentation.units`
 Value: `mass unit fixed per comparison scope, smallest bird decides`
-Goals: G-001, G-002
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
 Mass is written in **one unit across everything a page is comparing**. The scope is what the
 page claims to compare: on the index, a section or the whole set, following the **scale**
-setting ([P-042](#p-042)); on the comparison page, the birds named in the address; on a detail
+setting ([scaleToggle](#scaletoggle)); on the comparison page, the birds named in the address; on a detail
 page, the one bird, which compares nothing.
 
 **The smallest bird in the scope chooses the unit.** A scope holding one small bird is written
@@ -789,10 +847,12 @@ Length never switches unit, so only mass is affected. The decimal places within 
 vary by value — a 3 g hummingbird is `0.11 oz` and one decimal would erase the differences
 among the smallest birds — because that is precision, not a second scale.
 
-### P-074 — Each bird says how much of what people record it is
+### shareOfRecords
+
+**Each bird says how much of what people record it is**
 Subject: `presentation.share`
 Value: `one species' observations over all species observations, for the regions and months in view`
-Goals: G-001, G-002
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
 Every species says how much of what people record in view is that bird, as **one in N**.
 
@@ -822,7 +882,7 @@ than one where they list five — which is otherwise a fact available only in
 [`docs/data.md`](../docs/data.md).
 
 Preferred over the alternatives on the same grounds as the sort-direction wording
-([CR-032](decisions.md#cr-032)): *records* is this project's internal word and says nothing to
+([decisions.frequencyMetric](decisions.md#frequencymetric)): *records* is this project's internal word and says nothing to
 a birder, *checklist entries* is accurate but names a mechanism the interface never shows, and
 *sightings* re-opens the individuals ambiguity it is meant to close.
 
@@ -835,11 +895,11 @@ pages say what the number *is* instead: *how much of what people record there is
 how many of them are out there.*
 
 The exemption for this bundle is narrower than it looks and does not follow
-[AC-097](acceptance.md#ac-097)'s precedent, where exempting the spec was the wrong fix. An
+[acceptance.noContactAddressPublished](acceptance.md#nocontactaddresspublished)'s precedent, where exempting the spec was the wrong fix. An
 address published anywhere is harm wherever it appears; a defined term inside the document
 that defines it is not.
 
-**The share ranges over every region, land and sea** ([CR-031](decisions.md#cr-031)). A
+**The share ranges over every region, land and sea** ([decisions.honestSeaDenominator](decisions.md#honestseadenominator)). A
 sea's denominator is every bird observation on **open water** inside its box: GADM covers land, so
 a record on a beach carries a country and a record on the water carries none, and the
 difference is the water. That is the same quantity a land region's total is, so the two may be
@@ -857,7 +917,7 @@ denominator were once two separate conditions that drifted apart, and deriving b
 **On the index the scope is the regions and months currently selected**, so the figure
 follows the filter: a Gyrfalcon is 1 in 3,631,056 species observations (all regions) and 1 in
 82,946 in Alaska. Narrowing the months narrows both halves of the ratio
-([P-011](#p-011)) — a June figure is divided by June's birding, so a figure is never inflated
+([regionAndMonthFilter](#regionandmonthfilter)) — a June figure is divided by June's birding, so a figure is never inflated
 by a month nobody was out in. That is the question a filtered page poses — *of what people record where I am
 looking, how much is this bird* — and it is why the index does not instead show where in North
 America the bird peaks. Narrowing to Arizona and being told about Yukon answers something
@@ -885,7 +945,7 @@ where it is commonest is worth knowing once you are looking at it.
 same per-region counts and the same totals, so selecting the named region on the index
 reproduces the detail page's figure exactly, and the peak is always a region the bird is
 listed in. They were two tables with two denominators until
-[CR-031](decisions.md#cr-031), and the pages contradicted each other in public.
+[decisions.honestSeaDenominator](decisions.md#honestseadenominator), and the pages contradicted each other in public.
 
 **A bird watched from the shore counts to the shore.** The boxes overlap the land regions
 rather than abutting them — all six of the Black-capped Petrel's North Carolina records fall
@@ -896,7 +956,7 @@ Atlantic Yellow-nosed Albatross is 1 in 282,315 in the North Atlantic rather tha
 
 What this does not reach is the estuaries: bay water carries no GADM country either, so the
 figure is *on water* rather than *at sea* and overstates the open ocean by roughly 3%
-([CR-031](decisions.md#cr-031)). [`docs/data.md`](../docs/data.md) says so.
+([decisions.honestSeaDenominator](decisions.md#honestseadenominator)). [`docs/data.md`](../docs/data.md) says so.
 
 **Share, not record count: a count says where the birdwatchers are, a share says where the bird
 is.** California holds 35× the Sharp-shinned Hawk records of Yukon and 118× the birdwatching,
@@ -918,7 +978,7 @@ and uncorrected: species eBird withholds look rarer than they are, and a bird th
 crowd is over-reported against a quiet resident. [`docs/data.md`](../docs/data.md) says both.
 
 **It is not a rarity tag and must not become one.** No threshold divides common from rare; the
-number is shown and the reader judges. Vagrancy stays a status ([P-070](#p-070)), because the
+number is shown and the reader judges. Vagrancy stays a status ([statusIsPublished](#statusispublished)), because the
 metric that would express it does not work: the share of a species' records falling in one
 arrival reads 73% for the Hawaiian peafowl and 75% for the 2023 Florida flamingo irruption, and
 61% of per-region date facets are truncated, so any episode-derived number would be a floor for
@@ -929,16 +989,18 @@ sums over the regions in view, and sums compose from their parts, so 69 regions 
 2^69 subaggregates — the per-region counts already are the subaggregate, and any selection is
 one pass over them.
 
-### P-075 — A species BirdView does not draw still answers for itself
+### undrawnSpeciesAnswer
+
+**A species BirdView does not draw still answers for itself**
 Subject: `presentation.species_url.out_of_scope`
 Value: `404 with a named bird and its measured reason`
-Goals: G-001, G-002, G-004
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies, goals.goodDataCitizen
 
 `/species/<id>` for a bird the derivation classified but left out of scope returns **404 with a
 page that names the bird and says why it is not drawn**, rather than the bare "404 page not
 found" an unknown path gets.
 
-The page carries both English names, the scientific name, the status [P-001](#p-001) derived,
+The page carries both English names, the scientific name, the status [scopeIsRecurringAvifauna](#scopeisrecurringavifauna) derived,
 and the evidence that status rests on:
 
 - **vagrant** — the episodes, years and records in the region that decided it, against the bar
@@ -947,7 +1009,7 @@ and the evidence that status rests on:
   verdict checkable. Passenger Pigeon recurs across 89 episodes in 52 years and every one of
   them ends in 1902.
 - **absent** — no counts at all. The derivation never measured this bird's dates, so printing
-  its zeros as though they were a result would be the error [P-062](#p-062) exists to prevent.
+  its zeros as though they were a result would be the error [provenancePerMetric](#provenancepermetric) exists to prevent.
   The page says the open record held nothing it could measure, and stops.
 
 **404, not 410.** Scope is regenerated from live occurrence data, so a bird that is out today
@@ -962,48 +1024,52 @@ stable id, the page would be an apology for a binomial, so none is served.
 Rationale: the status table classifies far more species than the dataset holds — 1,426 against
 1,083 — so the derivation already knows the answer to *where did this bird go* for 334 of the
 birds it rejected, 328 of which AviList can also name. Throwing that away at the door and answering `404 page not found` discards a
-measured result in favor of nothing. [CR-018](decisions.md#cr-018) settled the same question
+measured result in favor of nothing. [decisions.compareUrlContract](decisions.md#compareurlcontract) settled the same question
 for comparison links — name what was lost rather than refuse the page — and the reasoning
 carries: a link is made to be kept, and a reader who kept one is owed the reason it stopped
 working rather than left to wonder whether they mistyped.
-[CR-029](decisions.md#cr-029) records why the status code nevertheless differs from
+[decisions.speciesUrlOutlivesSpecies](decisions.md#speciesurloutlivesspecies) records why the status code nevertheless differs from
 `/compare`'s.
 
-### P-076 — Birds can be ordered by how often they are recorded
+### orderByFrequency
+
+**Birds can be ordered by how often they are recorded**
 Subject: `ordering.frequency`
 Value: `ascending by one-in-N, banded by decade`
-Goals: G-001, G-002
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
 **Frequency** is a fourth ordering, over the number every tile already shows
-([P-074](#p-074)), and it follows the month selection exactly as it follows the region
+([shareOfRecords](#shareofrecords)), and it follows the month selection exactly as it follows the region
 selection — the number it sorts on is the one on the tile, whatever that is scoped to. Species run from the most often recorded to the least — ascending by the
 printed N, so *1 in 43* comes before *1 in 1,252,475,518*, consistent with
-[P-021](#p-021) ordering ascending by what is displayed.
+[ascendingOrder](#ascendingorder) ordering ascending by what is displayed.
 
 **Sections are decades, anchored at powers of ten**: `1 in 10 – 99`, `1 in 100 – 999`, and so
 on, nine of them over the whole dataset. Anchored absolutely rather than to the data, so a
 tier means the same thing under every filter — the number follows the region selection, and a
 band starting at whichever bird happens to be commonest today would make *1 in 1,000–9,999*
-denote one thing nationally and another in Alaska. See [CR-032](decisions.md#cr-032) for the
+denote one thing nationally and another in Alaska. See [decisions.frequencyMetric](decisions.md#frequencymetric) for the
 measurements.
 
-**No tier carries a name.** Not "Common", not "Scarce". [P-074](#p-074) refuses to let this
+**No tier carries a name.** Not "Common", not "Scarce". [shareOfRecords](#shareofrecords) refuses to let this
 number become a rarity tag, and a named band is that threshold with a label on it. Headers
-state the range, exactly as [P-024](#p-024) requires for every other metric.
+state the range, exactly as [sectionHeadersStateRange](#sectionheadersstaterange) requires for every other metric.
 
 **Birds with no records in the selection are kept**, in a final section headed *No records in
 the regions selected*. They have no ratio and so no tier; dropping them would silently shorten
-the page, and the whole point of [P-074](#p-074)'s stated zero is that absence is a finding.
+the page, and the whole point of [shareOfRecords](#shareofrecords)'s stated zero is that absence is a finding.
 
-Rationale: the share has been on every tile since [P-074](#p-074) and there was no way to
+Rationale: the share has been on every tile since [shareOfRecords](#shareofrecords) and there was no way to
 arrange the page by it — a reader could see that a bird was 1 in 282,315 but not ask *what else
 is about that common*. Size answers "how big", and this answers the question a birder actually
 starts with.
 
-### P-077 — A species says which names its records were filed under
+### namesRecordsFiledUnder
+
+**A species says which names its records were filed under**
 Subject: `presentation.name_provenance`
 Value: `per-source binomial and count, shown where the sources disagree`
-Goals: G-004, G-005, G-006
+Goals: goals.goodDataCitizen, goals.dataAsItIs, goals.nothingDisappearsQuietly
 
 Where the occurrence sources do not use the name BirdView serves, the species page says so,
 naming **each source's binomial and how many records it holds under it**.
@@ -1026,7 +1092,7 @@ Four kinds of disagreement, and they are not interchangeable:
 **A source can also withhold a species in some places and seasons only.** eBird's Sensitive
 Species list names regions and date windows as well as species — Painted Bunting in Florida
 from October to mid-April, Short-eared Owl in New York from April to July. Where the records
-confirm the withholding ([CR-037](decisions.md#cr-037)), the species page lists those regions
+confirm the withholding ([decisions.ebirdSilenceNotAbsence](decisions.md#ebirdsilencenotabsence)), the species page lists those regions
 and months, and a tile whose regions include one says so: *Withheld by eBird in Florida,
 Oct–Mar*. The count there is iNaturalist's alone, and far below the bird's real record.
 
@@ -1034,7 +1100,7 @@ Oct–Mar*. The count there is iNaturalist's alone, and far below the bird's rea
 implementation was a chain that showed the shared name *or* the withheld note and would have
 shown one of two had both ever applied. No species is in two of these tables today; the rule
 is that the page states each one it is in, because a disclosure silently suppressed by another
-disclosure is the failure [G-006](goals.md#g-006) names.
+disclosure is the failure [goals.nothingDisappearsQuietly](goals.md#nothingdisappearsquietly) names.
 
 **The third case is the one this requirement exists for.** Attributing those records to either
 daughter would assert a division nobody has measured — eBird holds 6,245,227 of them in the US
@@ -1050,15 +1116,17 @@ conservation-sensitive species, not because it calls the Spotted Owl something e
 reader to look for another name would send them after one that does not exist. Eleven species
 are in that state, and the page says the source withholds them.
 
-Rationale: [G-005](goals.md#g-005) and [G-006](goals.md#g-006). A reader who can see that two
+Rationale: [goals.dataAsItIs](goals.md#dataasitis) and [goals.nothingDisappearsQuietly](goals.md#nothingdisappearsquietly). A reader who can see that two
 sources disagree can discount the figure appropriately; a reader shown a reconciled number
 cannot, and a reader shown nothing cannot even know to ask. The disagreement is also
 not a transient to be waited out — eBird filed 827,098 records under the shared name in 2024
 alone, so this grows by roughly that much a year.
 
-### P-035 — The page explains itself
+### pageExplainsItself
+
+**The page explains itself**
 Subject: `presentation.help`
-Goals: G-001, G-002, G-003
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies, goals.shapeNotOnlySize
 
 Below the title, a **Presentation** panel carries two sections side by side, each half the page:
 **the diagram**, then **where the numbers come from**.
@@ -1076,7 +1144,7 @@ by the time anyone looked, the panel had gained **Compare birds** and **Names** 
 enumeration had been updated for neither. An enumeration cannot notice the thing it omits: adding
 a control and forgetting to document it leaves both the control and the requirement looking
 complete. So the rule is that **a control is documented if and only if it exists**, which
-[AC-085](acceptance.md#ac-085) checks by comparing the two sets rather than by looking for names
+[acceptance.everyControlDocumented](acceptance.md#everycontroldocumented) checks by comparing the two sets rather than by looking for names
 written down here.
 
 The "only if" half matters as much. Documentation for a control that has been removed is worse
@@ -1095,18 +1163,20 @@ on it. That needs room, which is why the panel holds two half-page columns rathe
 ones — and why the control descriptions moved down to sit with the controls they describe, where a
 reader looking at a control finds its explanation without going back up the page.
 
-### P-034 — A tile opens a detail view
+### tileOpensDetail
+
+**A tile opens a detail view**
 Subject: `presentation.detail_view`
-Goals: G-001, G-003
+Goals: goals.sizeIntuition, goals.shapeNotOnlySize
 
 Clicking a tile opens a detail view that is **a larger version of the same tile** — same header,
 same diagram, same main metrics, same layout — with the bird drawn **as large as the view allows,
 whatever scale the index is using**, plus:
 
 - the measurement of **every individual diagram segment**: bill, head, neck, body, tail;
-- the **wing chord**, which the crossbar draws as its solid outer portions (P-065) and which would
+- the **wing chord**, which the crossbar draws as its solid outer portions (measuredVersusModeled) and which would
   otherwise be the one length visible in the drawing with no row explaining it;
-- the **provenance of every metric shown**, main metrics and segments alike (P-063).
+- the **provenance of every metric shown**, main metrics and segments alike (metricProvenanceExplained).
 
 **The detail view is a superset of the tile, and that is binding.** Every piece of information
 a tile carries about a species appears on that species' detail page — not merely the header,
@@ -1117,7 +1187,7 @@ shows.
 
 Stated as an invariant rather than a list because the list is what failed. The *plus* above
 was read as permission to add to the detail view and not as a floor under it, so when
-[P-074](#p-074)'s frequency figure was put on every tile it was never added to the detail
+[shareOfRecords](#shareofrecords)'s frequency figure was put on every tile it was never added to the detail
 page: a reader could see `1 in 23,393 species observations (all regions)` on the Northern
 Yellow Warbler's tile, open it, and find only `Top region — 1 in 2,986 there`. A different
 number, in the same unit, for a scope they had not asked about.
@@ -1136,13 +1206,15 @@ The detail view does **not** inherit the index's scale. Under the global default
 few pixels tall, which is the honest comparison — but the one view devoted to that single bird has
 nothing to compare it against, so carrying the scale there would leave nothing to look at.
 
-### P-067 — A comparison view holds several birds to one scale
+### comparisonOneScale
+
+**A comparison view holds several birds to one scale**
 Subject: `presentation.compare_view`
 Value: `/compare?species=<id>&species=<id>…`
-Goals: G-002, G-001, G-003
+Goals: goals.comparisonAcrossFamilies, goals.sizeIntuition, goals.shapeNotOnlySize
 
 A **comparison view** draws any number of chosen species together **on a single shared scale**, so
-they can be read directly against one another. It answers G-002's own question — *is a Merlin
+they can be read directly against one another. It answers goals.comparisonAcrossFamilies's own question — *is a Merlin
 bigger than a Blue Jay?* — which the index answers only for birds that happen to land in the same
 section, and the detail view cannot answer at all.
 
@@ -1168,8 +1240,8 @@ in. Remove a bird or add one and the highlight simply stops being true, which is
 result: the page never claims an ordering the panels do not have.
 
 **The scale is set by the largest total length in the set**, and the crossbar by the largest
-wingspan, exactly as P-042 does for a section. There is **no per-panel scale option**. Drawing each
-bird to fill its own panel is what P-042 rejects outright, and in a view whose entire purpose is
+wingspan, exactly as scaleToggle does for a section. There is **no per-panel scale option**. Drawing each
+bird to fill its own panel is what scaleToggle rejects outright, and in a view whose entire purpose is
 comparison it would not merely fail to help, it would state something false.
 
 Consequently a hummingbird compared against a swan draws the hummingbird a few pixels tall. That is
@@ -1186,20 +1258,22 @@ bird. It describes a drawing convention shared by every panel, and repeating it 
 crowd out the thing it explains.
 
 **There is no provenance table.** Each panel instead **links to that species' detail view**, which
-is where the source or model behind each number is named (P-063).
+is where the source or model behind each number is named (metricProvenanceExplained).
 
 This is a deliberate scoping of where provenance is *explained*, not a weakening of it. The compare
-view still marks every value that is not measured — the stroke styles of P-065, the hollow head,
-and the `~` on each label — which is exactly what P-061 requires of a surface showing numbers and a
+view still marks every value that is not measured — the stroke styles of measuredVersusModeled, the hollow head,
+and the `~` on each label — which is exactly what tileMarksModeled requires of a surface showing numbers and a
 diagram: mark the kind, *without having to explain why*. What it does not reproduce is the `model`
-and `source` text of P-063. The alternative was to repeat a full provenance table for every bird on
+and `source` text of metricProvenanceExplained. The alternative was to repeat a full provenance table for every bird on
 the page, which would bury the comparison the view exists to make, under the same reasoning that
 keeps the tile dense.
 
-### P-068 — Birds are picked for comparison from the index, and the picks are the mode
+### pickFromIndex
+
+**Birds are picked for comparison from the index, and the picks are the mode**
 Subject: `presentation.pick_mode`
 Value: `?species=<id>&species=<id>… — present, even empty, means picking`
-Goals: G-002
+Goals: goals.comparisonAcrossFamilies
 
 A reader assembles a comparison by **picking birds from the index**, where the diagrams and the
 family filter already are, rather than from a separate chooser that would duplicate both.
@@ -1211,7 +1285,7 @@ and the detail view offers to pick the bird being read.
 
 A **bare `species=`** — the parameter present with no value — means *picking, nothing picked yet*,
 so unpicking the last bird does not silently drop the reader out of the mode mid-task. This is
-the distinction P-010's family filter already draws between a parameter that is absent and one
+the distinction familyFilter's family filter already draws between a parameter that is absent and one
 that is explicitly empty, and it is drawn here the same way for the same reason.
 
 That empty state is also an **entry point**. A **Compare birds** toggle in the controls turns
@@ -1238,7 +1312,7 @@ in the list is a long and visible jump. The scroll script stands down whenever t
 anchor, so the two cannot fight.
 
 **The tile still opens the detail view in both modes.** The pick control is a separate target
-beside it, never a repurposing of the tile, so [P-034](#p-034) holds without exception. A reader
+beside it, never a repurposing of the tile, so [tileOpensDetail](#tileopensdetail) holds without exception. A reader
 mid-pick can always open a bird to look at it properly, which is the main thing they will want to
 do while deciding.
 
@@ -1260,7 +1334,7 @@ itself on the next click.
 This is not typo-handling, it is rot-handling. Species ids are derived from scientific names and
 this checklist renames them — the Sandhill Crane is `antigone_canadensis` and was
 `grus_canadensis`. A comparison URL is made to be shared and kept, so it will outlive some of the
-ids in it. See [CR-018](decisions.md#cr-018), which reverses an earlier 404.
+ids in it. See [decisions.compareUrlContract](decisions.md#compareurlcontract), which reverses an earlier 404.
 
 #### What a tile link carries, and the one thing it does not
 
@@ -1278,24 +1352,26 @@ browser's own Back button restores that exactly, because it replays the previous
 
 ## Diagram
 
-### P-040 — Segment composition
+### segmentComposition
+
+**Segment composition**
 Subject: `diagram.segments`
 Value: `bill, head, neck, body, tail, wing crossbar`
-Goals: G-003
+Goals: goals.shapeNotOnlySize
 
 **The diagram is a top-down view of a bird in flight.** Everything below follows from that, and it
 is stated first because leaving it unstated is what made the leg question unanswerable for as long
-as it was; see [CR-010](decisions.md#cr-010).
+as it was; see [decisions.inFlightNoLegs](decisions.md#inflightnolegs).
 
 **Readers are told it is a stick figure.** Text BirdView serves to readers calls the drawing a
 *stick figure*, usually *drawn to scale* where it is introduced, and *the figure* or *the drawing*
 after that. *Diagram* stays the word in this spec and in the code, and on the site it means only
-the data-pipeline diagram ([P-078](#p-078)); see [CR-044](decisions.md#cr-044).
+the data-pipeline diagram ([pipelineDiagram](#pipelinediagram)); see [decisions.stickFigure](decisions.md#stickfigure).
 
 The diagram is a vertical cross. Top to bottom: a bill stick, a head oval, a neck, a body stick,
 and a tail stick — plus one horizontal crossbar representing the wings. The tail is visually
 distinguished from the body by stroke style, colour and a mark at the junction between them. That
-remains true under P-065, but for a different reason: the tail is measured and so solid, the body
+remains true under measuredVersusModeled, but for a different reason: the tail is measured and so solid, the body
 modeled and so dashed. The junction mark carries the distinction on its own if the two ever share a
 stroke style again.
 
@@ -1303,22 +1379,24 @@ stroke style again.
 with the head drawn back onto the shoulders, and for those the neck is drawn as an **S of two
 semicircular arcs**. The stroke is still exactly the neck long at the diagram's scale — the S is
 the same neck, curved — so it occupies `2/π ≈ 63.7%` of that length vertically. That ratio is a
-consequence of the shape and not a chosen parameter; see [CR-011](decisions.md#cr-011).
+consequence of the shape and not a chosen parameter; see [decisions.foldedNeckAsS](decisions.md#foldedneckass).
 
 **There are no legs.** In flight most birds tuck them out of sight, and for the minority that
 trail them — herons, cranes, storks, ibises, flamingos, stilts, rails, loons, grebes — what shows
 is the leg's projection past the tail tip, a small residual of quantities BirdView does not have:
 the femur, the toes and the hip's position are unmeasured by any source, and the feathered
 tibiotarsus that straightens out in flight is exactly what a standing-posture leg model leaves out.
-Legs were drawn from the measured tarsus, then from a modeled leg, and are now removed; CR-010
+Legs were drawn from the measured tarsus, then from a modeled leg, and are now removed; decisions.inFlightNoLegs
 records the evidence and what the removal costs.
 
 Rationale: the tail is a stick rather than a triangle because no trait in any source gives a tail
 width, and a triangle would assert a fan shape the data does not support.
 
-### P-041 — Segments abut exactly and sum to total length
+### segmentsSumToLength
+
+**Segments abut exactly and sum to total length**
 Subject: `diagram.segments.sum`
-Goals: G-001, G-003
+Goals: goals.sizeIntuition, goals.shapeNotOnlySize
 
 The five vertical segments meet without gap or overlap, and their lengths sum to the species'
 total length.
@@ -1328,22 +1406,24 @@ two diagrams at the same scale can be compared directly.
 
 **Qualification.** That equality is a property of the segment *lengths*, and it holds without
 exception. It is also true of the drawn vertical extent for 827 of 841 species — but not for the
-folded-neck families of P-040, whose S occupies less height than the neck is long. Their silhouette
+folded-neck families of segmentComposition, whose S occupies less height than the neck is long. Their silhouette
 is genuinely shorter than their catalogued length, which is a fact about a flying heron and not a
 rendering error. Everything that treats length as data — ordering, sectioning, the scale reference
-of P-042, and the detail view — uses the full total length regardless of how the neck is drawn, so
-comparability is unaffected. See [CR-011](decisions.md#cr-011).
+of scaleToggle, and the detail view — uses the full total length regardless of how the neck is drawn, so
+comparability is unaffected. See [decisions.foldedNeckAsS](decisions.md#foldedneckass).
 
-### P-042 — Scale is a user toggle, defaulting to per-section
+### scaleToggle
+
+**Scale is a user toggle, defaulting to per-section**
 Subject: `diagram.scale.mode`
 Value: `per-section (default) | global; global is the default under Frequency`
-Goals: G-001, G-002
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
 The user switches between a single scale across the entire filtered set, and a scale shared by all
 species within a section. **Per-section is the default, and is listed first.**
 
-**Except under Frequency, where global is the default** ([CR-033](decisions.md#cr-033)).
-Per-section scaling is justified by [P-022](#p-022) guaranteeing a section is at most N% wide,
+**Except under Frequency, where global is the default** ([decisions.frequencyGlobalScale](decisions.md#frequencyglobalscale)).
+Per-section scaling is justified by [sectionBreakRule](#sectionbreakrule) guaranteeing a section is at most N% wide,
 and a frequency tier has no such bound — it is banded by how often a bird is recorded, which
 is uncorrelated with size, so one tier runs from 72 mm to 1,201 mm. Each tier would be drawn
 against its own largest bird, and across the nine tiers that reference swings by 0.15× to
@@ -1351,24 +1431,26 @@ against its own largest bird, and across the nine tiers that reference swings by
 Trumpeter Swan six tiers above it. Both choices stay one click away under either ordering.
 
 Whichever is chosen, the scale is set by the largest total length in the group. Since the segments
-sum to total length (P-041) and nothing is drawn outside them, that is the whole vertical extent.
+sum to total length (segmentsSumToLength) and nothing is drawn outside them, that is the whole vertical extent.
 
-Rationale: this is the requirement G-001 lives or dies by. A per-tile scale — every bird drawn to
+Rationale: this is the requirement goals.sizeIntuition lives or dies by. A per-tile scale — every bird drawn to
 fill its tile — makes a hummingbird and a swan identical on screen and destroys size intuition
 entirely.
 
-**The default was global and is now per-section** ([CR-017](decisions.md)). Global still makes the
+**The default was global and is now per-section** ([decisions.perSectionDefault](decisions.md)). Global still makes the
 cross-family argument better than anything else, and it is one click away and named first in the
 help. But the diagram has since acquired detail a reader has to be able to see — provenance in the
-stroke style (P-065), the chord ticks, the labels of P-066 — and at global scale a median bird is a
+stroke style (measuredVersusModeled), the chord ticks, the labels of labeledDetailDiagram — and at global scale a median bird is a
 few pixels tall, where none of it is legible. A default that hides the drawing's own vocabulary
 teaches the reader nothing, and a reader who has learned to read one bird is far better placed to
 be surprised by the swan.
 
-### P-043 — The wing crossbar is drawn at the vertical scale
+### crossbarAtVerticalScale
+
+**The wing crossbar is drawn at the vertical scale**
 Subject: `diagram.wingspan.scale`
 Value: `same as vertical axis`
-Goals: G-001
+Goals: goals.sizeIntuition
 
 The crossbar's length represents wingspan at the same scale as the vertical axis, so its length
 relative to the body is literal.
@@ -1377,18 +1459,22 @@ Rationale: wingspan runs 1.0–2.5× body length, so honoring this forces a wide
 2.6:1. That is a real layout cost, accepted because a crossbar on its own arbitrary scale tells
 the user something false about proportion while looking authoritative.
 
-### P-044 — Proportion differentiates species
-Goals: G-003
+### proportionDifferentiates
+
+**Proportion differentiates species**
+Goals: goals.shapeNotOnlySize
 
 A dowitcher reads as long-billed, an accipiter as long-tailed, a heron as long-necked.
 
-### P-046 — The cranium is modeled from mass
+### craniumFromMass
+
+**The cranium is modeled from mass**
 Subject: `diagram.head_model`
 Value: `isometric on mass`
-Goals: G-003
+Goals: goals.shapeNotOnlySize
 
 Head length scales isometrically with body mass. Like every modeled value it names its function
-(P-062) and claims no measurement.
+(provenancePerMetric) and claims no measurement.
 
 Rationale: an earlier model derived the cranium from bill depth with a 12 mm floor, and the floor
 bound for **442 of 841 species and 86% of birds under 200 mm**. Half the dataset drew one identical
@@ -1404,10 +1490,10 @@ Known limitation: because both cranium and trunk scale on mass, birds of similar
 heads. Within a size tier the head therefore differentiates little — the shape signal there comes
 from bill, tail, neck and wingspan, which are measured or family-specific.
 
-**The cube root is deliberately left alone by [CR-021](decisions.md#cr-021)**, which raised the
+**The cube root is deliberately left alone by [decisions.trunkExponentCalibrated](decisions.md#trunkexponentcalibrated)**, which raised the
 *trunk's* exponent on the evidence of measured skeletons. The same evidence supports isometry for
 a cranium: single skeletal elements scale at 0.314–0.325, where chains of them scale higher. The
-head is one element and keeps 1/3; the trunk is a chain and does not. See [P-047](#p-047).
+head is one element and keeps 1/3; the trunk is a chain and does not. See [trunkFromMass](#trunkfrommass).
 
 Still open, and recorded because it is the one place the head model is visibly wrong: an Ostrich
 draws a 360 mm cranium against a real skull of roughly 200 mm, which implies bird heads scale with
@@ -1415,13 +1501,15 @@ draws a 360 mm cranium against a real skull of roughly 200 mm, which implies bir
 — the one large skull collection is passerines-only — so the coefficient stands unvalidated. It
 costs nothing inside the ABA scope, where the heaviest bird is 11 kg rather than 111 kg.
 
-### P-047 — The trunk is modeled allometrically from mass
+### trunkFromMass
+
+**The trunk is modeled allometrically from mass**
 Subject: `diagram.trunk_model`
 Value: `14.0329 x mass^0.37`
-Goals: G-001, G-003
+Goals: goals.sizeIntuition, goals.shapeNotOnlySize
 
 Trunk length scales with body mass by a power law. Like every modeled value it names its function
-(P-062) and claims no measurement.
+(provenancePerMetric) and claims no measurement.
 
 The **exponent is calibrated against measured skeletons** rather than chosen. It must lie inside
 the 95% confidence interval that published skeletal data give for a *multi-element* linear
@@ -1440,15 +1528,17 @@ changes the median moves, and the drawing must not move with it silently; re-anc
 decision, recorded as one.
 
 Rationale: three of the five segments are driven by mass, so this exponent governs how much longer
-a big bird is drawn than a small one — which is the one thing G-001 exists to convey. The original
+a big bird is drawn than a small one — which is the one thing goals.sizeIntuition exists to convey. The original
 0.31 was an unvalidated constant and it was **too shallow**, understating the large end of the
-current scope by about 1.65×. See [CR-021](decisions.md#cr-021) for the measurement, and for what
+current scope by about 1.65×. See [decisions.trunkExponentCalibrated](decisions.md#trunkexponentcalibrated) for the measurement, and for what
 it does not establish.
 
-### P-045 — The neck/body split is a named per-family model
+### neckModelPerFamily
+
+**The neck/body split is a named per-family model**
 Subject: `diagram.neck_ratio`
 Value: `per-family modeling function`
-Goals: G-001, G-003, G-004
+Goals: goals.sizeIntuition, goals.shapeNotOnlySize, goals.goodDataCitizen
 
 The division of the remaining body axis between neck and body uses a per-family ratio. The
 resulting **neck length is presented as a metric like any other**, in the detail view, carrying a
@@ -1458,16 +1548,18 @@ the ratio applied to that bird's family** — for example, "per-family neck rati
 The ratio table is recorded in the code with this requirement cited beside it.
 
 Rationale: no source measures avian neck length at this coverage, and one ratio for every species
-would make every bird the same shape, defeating G-003. What makes a per-family constant
+would make every bird the same shape, defeating goals.shapeNotOnlySize. What makes a per-family constant
 acceptable is not hiding it but naming it: a user who wants to know why a heron is drawn
 long-necked can read the exact function that made it so. Hiding the number while still drawing it
 would be the less honest option — the reader sees the neck either way, and only the explanation
-would be missing. Supersedes the condition in [CR-004](decisions.md#cr-004); see
-[CR-007](decisions.md#cr-007).
+would be missing. Supersedes the condition in [decisions.neckSplitUnmeasured](decisions.md#necksplitunmeasured); see
+[decisions.neckLengthAsMetric](decisions.md#necklengthasmetric).
 
-### P-048 — One diagram vocabulary, on every surface that draws one
+### oneDiagramVocabulary
+
+**One diagram vocabulary, on every surface that draws one**
 Subject: `diagram.vocabulary.shared`
-Goals: G-001, G-002
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
 Four surfaces draw the diagram: the **favicon**, the **index** (its tiles and its legend), the
 **detail view**, and the **comparison view**. A reader meets the same figure on all four, so the
@@ -1487,22 +1579,24 @@ legible at its own scale. Any such divergence carries its reason beside it.
 one `diagram` template emits the markup and one stylesheet colours it, so there is nowhere for a
 per-page shade to live. The favicon is the exception, and the only one — a standalone asset that
 cannot reference the stylesheet and therefore restates the palette by hand. **It is the restatement
-that has to be checked**, which is what [AC-081](acceptance.md#ac-081) does.
+that has to be checked**, which is what [acceptance.faviconFromPalette](acceptance.md#faviconfrompalette) does.
 
 Rationale: this requirement exists because the thing it forbids had already happened. The favicon
 drew its crossbar `#5ccbfa` while the app drew `#0ea5e9` — a hand-lightened variant adopted
 because the app's own blue was too dark to clear the icon's contrast standard. That is the
 failure in miniature: a surface hit a problem with the shared vocabulary and fixed it locally
-instead of fixing the vocabulary. The app's blue was *also* too dark for its own labels (T-023),
+instead of fixing the vocabulary. The app's blue was *also* too dark for its own labels (tech.textContrastFloor),
 so the local fix concealed a real defect for as long as it stood.
 
 The lesson generalizes past colour. When one surface cannot live with a shared decision, that is
 evidence about the decision, not licence to fork it.
 
-### P-049 — The reader chooses which English name, and the URL does not change
+### englishNameChoice
+
+**The reader chooses which English name, and the URL does not change**
 Subject: `presentation.names.locale`
 Value: `na (default) | world`
-Goals: G-001, G-002
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
 English bird names are regional. The same bird is **Dovekie** to a North American birder and
 **Little Auk** to everyone else, and neither is a mistake. BirdView serves both, as a toggle
@@ -1529,7 +1623,7 @@ Accepted: a family label is a reading aid, not an identifier.
 
 A species' URL is `/species/amerob`, and the comparison view names its birds the same way:
 `/compare?species=amerob&species=doveki`. The id is the **eBird species code** from
-[P-004](#p-004).
+[namesFromAvilist](#namesfromavilist).
 
 **This is what makes the locale toggle possible at all.** The four-letter alpha code it replaced
 was *derived from the English name*, so under the world locale `DOVE` would have to become
@@ -1545,72 +1639,86 @@ old scheme surviving where the new one has nothing to offer.
 
 **Ids must be unique and stable across rebuilds.** Uniqueness is not automatic: AviList lumps two
 BirdView species into taxa already in scope, and lumping them in place rather than dropping them
-would have given two birds one URL. That is one of the two reasons P-004 drops them.
+would have given two birds one URL. That is one of the two reasons namesFromAvilist drops them.
 
-### P-050 — Species photographs
-Status: **Withdrawn from v1.** See [CR-005](decisions.md#cr-005) for the research and the reasons
+### speciesPhotographs
+
+**Species photographs**
+Status: **Withdrawn from v1.** See [decisions.photographsWithdrawn](decisions.md#photographswithdrawn) for the research and the reasons
 it is deferred rather than abandoned.
 
-### P-051 — Perched and in-flight selection
-Status: **Withdrawn from v1** with P-050. Note for whoever revives it: Wikimedia Commons has
+### perchedOrInFlight
+
+**Perched and in-flight selection**
+Status: **Withdrawn from v1** with speciesPhotographs. Note for whoever revives it: Wikimedia Commons has
 per-species `in flight` categories but no "perched" equivalent, so the design must treat in-flight
 as a positive filter and perched as the residual default.
 
-### P-052 — Photograph attribution
-Status: **Withdrawn from v1** with P-050.
+### photoAttribution
 
-### P-053 — Local caching of photographs
-Status: **Withdrawn from v1** with P-050.
+**Photograph attribution**
+Status: **Withdrawn from v1** with speciesPhotographs.
+
+### photoCaching
+
+**Local caching of photographs**
+Status: **Withdrawn from v1** with speciesPhotographs.
 
 ---
 
 ## Measurements
 
-### P-060 — Where length and wingspan come from
+### lengthAndWingspanSources
+
+**Where length and wingspan come from**
 Subject: `measurement.source`
-Goals: G-001
+Goals: goals.sizeIntuition
 
 - **Wingspan, measured** — Fox et al. 2026, filtered to `needs_prediction = 0` so only empirical
   values are taken. Stored as the reported min/mid/max triple rather than a point value.
 - **Wingspan, modeled** — where no empirical value exists, a log-log regression of wingspan on
   wing chord, fitted **by the ingest** on those same empirical rows, per taxonomic order, with a
   global fit for orders holding fewer than five empirical species. See
-  [CR-008](decisions.md#cr-008).
+  [decisions.fittedWingspanModel](decisions.md#fittedwingspanmodel).
 - **Length** — **modeled for every species.** No usable source of measured avian total length
   was found: Ricklefs 2017 was the only candidate and its terms prohibit the use
-  ([CR-002](decisions.md#cr-002)).
+  ([decisions.ricklefsProhibited](decisions.md#ricklefsprohibited)).
 - **Traits** — AVONET, read from whichever of its three taxonomy sheets carries the species as its
-  own taxon ([CR-006](decisions.md#cr-006)). A near-match borrows its parent's row from the eBird
+  own taxon ([decisions.abaSpeciesWithoutAvonet](decisions.md#abaspecieswithoutavonet)). A near-match borrows its parent's row from the eBird
   sheet, except where another sheet holds a narrower concept of that parent: Blue-billed
   White-Tern borrows `AVONET1_BirdLife`'s *Gygis alba*, which excludes the Little White Tern
-  ([CR-039](decisions.md#cr-039)). The same holds for a species' own row: European Herring Gull
+  ([decisions.whiteTernBorrows](decisions.md#whiteternborrows)). The same holds for a species' own row: European Herring Gull
   is read from `AVONET1_BirdLife`'s *Larus argentatus*, because the eBird sheet's row of that
-  name contains every herring gull ([CR-041](decisions.md#cr-041)).
+  name contains every herring gull ([decisions.herringGullEuropeanRow](decisions.md#herringgulleuropeanrow)).
 - **Everything not covered above** — modeled.
 
-**Total length is a composite.** It is the sum of the five segments (P-041), of which bill and
+**Total length is a composite.** It is the sum of the five segments (segmentsSumToLength), of which bill and
 tail are measured from AVONET while head, neck and body are modeled. Its `kind` is therefore
 `modeled`, and its `model` says so — a reader who sees a measured bill inside a modeled total
 should be able to find out how both are true at once.
 
 Rationale: AVONET records neither macroscopic dimension, and no open source supplies both across
-the ABA avifauna. Mixing sources of differing authority is acceptable *only* under P-062. See
-[CR-001](decisions.md#cr-001).
+the ABA avifauna. Mixing sources of differing authority is acceptable *only* under provenancePerMetric. See
+[decisions.noOpenLengthAndWingspan](decisions.md#noopenlengthandwingspan).
 
-### P-061 — The tile marks any metric that is not measured
-Goals: G-001
+### tileMarksModeled
+
+**The tile marks any metric that is not measured**
+Goals: goals.sizeIntuition
 
 On the tile itself — where numbers and the scaled diagram appear — any metric whose `kind` is not
 `measured` is visibly marked as such, without the tile having to explain why.
 
-Rationale: this is what makes P-060 honest rather than merely convenient. If it is dropped, the
+Rationale: this is what makes lengthAndWingspanSources honest rather than merely convenient. If it is dropped, the
 provenance record becomes metadata nobody sees and BirdView presents modeled numbers as data,
 which is the thing the project explicitly rejected. It is load-bearing, not decoration.
 
-### P-062 — Every presented metric carries a provenance record
+### provenancePerMetric
+
+**Every presented metric carries a provenance record**
 Subject: `measurement.provenance.record`
 Value: `{kind, source, sourceTaxon, model}`
-Goals: G-001, G-004
+Goals: goals.sizeIntuition, goals.goodDataCitizen
 
 Every metric BirdView presents — total length, wingspan, mass, and each diagram segment — carries
 a record of where that specific value came from:
@@ -1635,14 +1743,16 @@ The three kinds:
   model's accuracy has been measured it states that too, so a reader can judge how far to trust
   the number rather than only knowing that it is an estimate.
 
-Rationale: this generalizes what CR-001 established for lengths and CR-006 for split taxa. Those
+Rationale: this generalizes what decisions.noOpenLengthAndWingspan established for lengths and decisions.abaSpeciesWithoutAvonet for split taxa. Those
 were solved twice, differently, because there was no single place to say how confident a number
 is. One record covers all of it, and makes each later gap a labeling problem rather than a
 redesign.
 
-### P-065 — The diagram shows which lengths are measured and which are modeled
+### measuredVersusModeled
+
+**The diagram shows which lengths are measured and which are modeled**
 Subject: `diagram.provenance`
-Goals: G-001, G-004
+Goals: goals.sizeIntuition, goals.goodDataCitizen
 
 Stroke style carries provenance. A **solid** stroke is a measured length; a **dashed** stroke is a
 modeled one. `near-match` draws solid: it is a real measurement, of a real bird, taken with
@@ -1659,7 +1769,7 @@ oddity to the three readers who can see it while adding a mark to six who cannot
 
 What a tile must not do is say something **false** about it. All three footer cells once
 labelled any unmeasured value `estimated`, which contradicted the solid stroke beside it; a
-near-match now names its donor in the tooltip ([P-062](#p-062)).
+near-match now names its donor in the tooltip ([provenancePerMetric](#provenancepermetric)).
 
 That gives, for every species: **bill and tail solid**, **neck and body dashed**, and the **head
 drawn hollow** — an unfilled outline, because dash is meaningless on a closed shape and absence of
@@ -1673,18 +1783,20 @@ available the crossbar is drawn whole, dashed if the span is modeled.
 **Both pages explain the convention**, because a visual code nobody documents is decoration.
 
 Rationale: the diagram asserted five proportions and explained none of them. A reader saw a heron's
-long neck with no cue that it is entirely invented — the `~` markers of P-061 sit on the *numbers*,
+long neck with no cue that it is entirely invented — the `~` markers of tileMarksModeled sit on the *numbers*,
 and a reader looking at the shape never meets them. For a project whose central commitment is that
-a modeled value is never presented as a measurement (CR-001), the drawing being silent was the
+a modeled value is never presented as a measurement (decisions.noOpenLengthAndWingspan), the drawing being silent was the
 largest remaining gap.
 
 The crossbar split earns its complexity: the outer segment's length stays true even when the span
 model is wrong, so all the model's error is attributed to the inner segment, where it belongs. See
-[CR-015](decisions.md).
+[decisions.drawingCarriesProvenance](decisions.md).
 
-### P-066 — The detail diagram is labeled with each segment and its measurement
+### labeledDetailDiagram
+
+**The detail diagram is labeled with each segment and its measurement**
 Subject: `presentation.detail_view.diagram_labels`
-Goals: G-001, G-003
+Goals: goals.sizeIntuition, goals.shapeNotOnlySize
 
 **Every metric the detail view reports appears in the drawing.** The provenance table below it may
 explain more about a number, but it may not be the only place a number appears: a reader looking
@@ -1704,7 +1816,7 @@ The `~` must be in the **markup**. Writing it as CSS generated content is the ob
 not work: `::after` generates no box on an SVG `<text>`, so the rule is silently inert. This is not
 a hypothetical — it is how the marker was built in `a826b96`, the commit that introduced these
 labels, and it shipped drawing every modeled value identically to a measured one. See
-[AC-073](acceptance.md#ac-073).
+[acceptance.segmentLabelsDontCollide](acceptance.md#segmentlabelsdontcollide).
 
 Labels never overlap one another. Where two segments are too close together for their labels to
 sit at both midpoints, the text moves and the leader line stretches — the leader, not the text
@@ -1752,7 +1864,7 @@ everywhere, but leaves 14px where this leaves 21, and no unit test can see that 
 the fixture holds five birds.
 
 The **Presentation panel explains the cube**, not only the diagram key: that panel is where a
-reader is taught to read the drawing ([P-035](#p-035)), and the cube is the one mark on the
+reader is taught to read the drawing ([pageExplainsItself](#pageexplainsitself)), and the cube is the one mark on the
 figure that is not a length. It says what the cube is, that every cube stands on the floor of its
 own diagram so two can be held against each other, and that a cube root flattens — a cube twice
 as wide is a bird eight times as heavy.
@@ -1761,22 +1873,22 @@ as wide is a bird eight times as heavy.
 shape it describes. On a small cube the label is wider than the face and is held clear of the
 left edge rather than centred past it.
 
-The **index tiles carry the cube too**, unlabelled ([P-031](#p-031), CR-020). It is there for
+The **index tiles carry the cube too**, unlabelled ([tileContents](#tilecontents), decisions.massCubeOnTiles). It is there for
 what the rest of the figure cannot say: **bulk against elongation**. Read against
 the bird's own length it is about **27%** of the drawing height for alcids, which are dense
 divers, and **10–13%** for long-tailed light-bodied species like the Scissor-tailed Flycatcher
 and the magpie. Length and wingspan cannot tell those apart.
 
-*(Re-measured after [CR-021](decisions.md#cr-021), which lengthened heavy birds and so shrank the
+*(Re-measured after [decisions.trunkExponentCalibrated](decisions.md#trunkexponentcalibrated), which lengthened heavy birds and so shrank the
 cube's share of them; the alcid figure was 28–29%. The ratio is scale-invariant, so it is the same
-under either mode of P-042.)*
+under either mode of scaleToggle.)*
 
 **The cube compresses, and the number is there because it does.** A Bushtit and a Common Raven
 differ in mass by **175×** and their cubes differ by 5.6×, which is correct for equal-volume cubes
 and understates the gap badly. So the number carries the magnitude and the square carries the
 sense of it; a reader who takes the squares alone as the mass comparison will read them wrong.
-See [CR-019](decisions.md#cr-019), which reverses an earlier decision to draw no shape at all, and
-[P-043](#p-043) for why a disc or bar sized by mass — a second, arbitrary scale — is still
+See [decisions.massAsWaterCube](decisions.md#massaswatercube), which reverses an earlier decision to draw no shape at all, and
+[crossbarAtVerticalScale](#crossbaratverticalscale) for why a disc or bar sized by mass — a second, arbitrary scale — is still
 refused.
 
 Mass also behaves differently from its neighbours on provenance, and the drawing shows it:
@@ -1784,7 +1896,7 @@ Mass also behaves differently from its neighbours on provenance, and the drawing
 the only unmarked number on the figure, and the only solid-stroked whole-bird mark.
 
 It belongs on the diagram for the reason the segments do, only more so. Total length is the number
-BirdView exists to give a reader intuition about (G-001); every other label names a component of
+BirdView exists to give a reader intuition about (goals.sizeIntuition); every other label names a component of
 it. Leaving it only in the table below made the drawing annotate its own parts while staying silent
 about the thing it is a drawing *of*.
 
@@ -1795,20 +1907,22 @@ nothing below it.
 The strip **extends the box downward rather than shrinking the bird into it** — the opposite of
 what the label gutter does horizontally, and deliberately so. Width is fixed by the page column, so
 the gutter has to come out of the bird. Height is not: the drawing can simply be taller, and the
-bird keeps the size [P-034](#p-034) requires. Taking it out of the bird instead would cost 8.5% of
+bird keeps the size [tileOpensDetail](#tileopensdetail) requires. Taking it out of the bird instead would cost 8.5% of
 the detail view's height to buy a one-line label, which is a bad trade and would put this
-requirement in conflict with P-034 rather than beside it.
+requirement in conflict with tileOpensDetail rather than beside it.
 
 **Total length states the bird's length, not the drawing's height.** For the folded-neck families of
-[CR-011](decisions.md#cr-011) these differ: the neck's S spans 2/π of its length, so the figure is
+[decisions.foldedNeckAsS](decisions.md#foldedneckass) these differ: the neck's S spans 2/π of its length, so the figure is
 6–9% shorter than the labeled number across the 14 species affected. That is the rule the neck
-label already follows — CR-011 reports neck length in full while drawing it compressed — and the
+label already follows — decisions.foldedNeckAsS reports neck length in full while drawing it compressed — and the
 total length label inherits it rather than introducing it. A label derived from the drawn extent
 would be a different and worse thing: it would name a quantity no source states and no table lists.
 
-### P-064 — The detail view links to the species on iNaturalist
+### inaturalistLink
+
+**The detail view links to the species on iNaturalist**
 Subject: `presentation.detail_view.external_link`
-Goals: G-001, G-004
+Goals: goals.sizeIntuition, goals.goodDataCitizen
 
 The detail view carries a link to the species' iNaturalist taxon page, so a reader who has just
 learned how big a bird is can go and see one.
@@ -1828,22 +1942,24 @@ bird.
 
 **Coverage is expected to be total.** Every in-scope species resolves under these rules, and a
 species that stops resolving is a fault to investigate rather than an absence to accept — see
-[CR-016](decisions.md).
+[decisions.fullInaturalistCoverage](decisions.md).
 
 BirdView **links and never copies**. No photograph is embedded, hotlinked, cached or reproduced;
-the reader arrives on iNaturalist, where each image carries its own license. T-002 forbids the
+the reader arrives on iNaturalist, where each image carries its own license. tech.selfContainedServer forbids the
 embedding independently.
 
 Rationale: BirdView will never have photographs, and a reader surprised by a size wants to see the
 bird. Linking is the whole answer. The confidence gate exists because a link to the *wrong* bird is
 worse than no link on a page whose purpose is being careful about what it claims — and an absent
 link is legible, where a search URL that always "works" hides the failure. See
-[CR-012](decisions.md).
+[decisions.inaturalistLinkAdopted](decisions.md).
 
-### P-063 — The detail view explains each metric's provenance
-Goals: G-001, G-004
+### metricProvenanceExplained
 
-In the detail view (P-034), **every** metric — the three main metrics and all five diagram
+**The detail view explains each metric's provenance**
+Goals: goals.sizeIntuition, goals.goodDataCitizen
+
+In the detail view (tileOpensDetail), **every** metric — the three main metrics and all five diagram
 segments — is shown with its value and its provenance stated in plain language: naming the source,
 naming the taxon actually measured for a `near-match`, and naming the model for a `modeled` value.
 
@@ -1855,11 +1971,13 @@ and a birder who cares enough to click deserves the difference.
 Showing the segments individually is what makes the diagram auditable. Without it, the drawing
 asserts five proportions and explains none of them.
 
-### P-069 — The detail view lists every category the bird is in, and where each came from
-Subject: `presentation.detail.categories`
-Goals: G-001, G-004
+### categoryProvenance
 
-[P-063](#p-063) does this for numbers. A bird is also **sorted**, and the sorting is as much a
+**The detail view lists every category the bird is in, and where each came from**
+Subject: `presentation.detail.categories`
+Goals: goals.sizeIntuition, goals.goodDataCitizen
+
+[metricProvenanceExplained](#metricprovenanceexplained) does this for numbers. A bird is also **sorted**, and the sorting is as much a
 claim as a measurement is: its family and order, the regions it is listed in, its habitat and
 its niche, and any group BirdView puts it in. Each is a statement about the bird that someone or
 something decided, and the detail view **names every one of them and says where it came from**.
@@ -1875,7 +1993,7 @@ Three provenances, and the UI distinguishes them:
 
 **An unmarked category is the failure this exists to prevent.** A page that lists "Habitat:
 Wetland" beside "Habitat: Coastal" without saying the first is AVONET's and the second is ours
-presents an opinion as a finding, which is the same error [P-060](#p-060) forbids for numbers.
+presents an opinion as a finding, which is the same error [lengthAndWingspanSources](#lengthandwingspansources) forbids for numbers.
 
 **Where the explanation is an algorithm, link to it rather than inline it.** "Clustered on
 Jaccard similarity of species lists, cut at k=26, each remaining region assigned to its nearest
@@ -1884,9 +2002,9 @@ account in `docs/`.
 
 **The guides are served by BirdView itself, at `/docs`.** A reader following a provenance link
 lands on an explanation that works wherever the site does, including offline, which is the
-point of [T-002](tech.md#t-002)'s laptop in a cabin.
+point of [tech.selfContainedServer](tech.md#selfcontainedserver)'s laptop in a cabin.
 
-**The requirement documents are not served** ([CR-046](decisions.md#cr-046)). They are working
+**The requirement documents are not served** ([decisions.requirementsNotServed](decisions.md#requirementsnotserved)). They are working
 documents — the decision log, the open-work list, the method itself — and they are published
 with the repository at `github.com/google/birdview`, which is where someone who wants them
 looks. A guide that cites a requirement links to it there.
@@ -1902,12 +2020,14 @@ exists, or it is a 404 waiting for publication.
 of other people's terms — the ABA checklist's, Wiley's, iNaturalist's — and the vendored
 iNaturalist pages themselves, kept so a provenance record can be hashed and checked. They are
 quoted for a record, not ours to republish, and serving them would be the redistribution
-[T-004](tech.md#t-004) exists to prevent.
+[tech.fetchRestrictedInputs](tech.md#fetchrestrictedinputs) exists to prevent.
 
-### P-078 — The documentation draws the data pipeline, field by field
+### pipelineDiagram
+
+**The documentation draws the data pipeline, field by field**
 Subject: `presentation.docs.pipeline`
 Value: `docs/pipeline.md: every source and table, its fields, and every step between them`
-Goals: G-004, G-005
+Goals: goals.goodDataCitizen, goals.dataAsItIs
 
 The documentation carries **one diagram of how the dataset is built**: every published source and
 every intermediate table as a box giving its name and the fields BirdView reads from it, and every
@@ -1923,25 +2043,27 @@ readers and the guide for developers, so neither audience has to find it by brow
 
 **Kept in step with the code.** A change to what the pipeline reads, joins, models or writes
 updates the diagram and the step descriptions under it in the same change, as
-[T-024](tech.md#t-024) requires of all documentation. The parts a test can compare are compared:
+[tech.selfDescriptionStaysTrue](tech.md#selfdescriptionstaystrue) requires of all documentation. The parts a test can compare are compared:
 every source column the diagram names is one a reader asks for, and every `internal/taxonomy`
 table the ingest reads is named in the diagram. What a step *does* stays a reading task.
 
 **One source, drawn two ways.** The diagram is Mermaid in the Markdown, which GitHub draws
 directly. BirdView serves a picture pre-rendered from that same source rather than loading
-Mermaid's script, which [T-002](tech.md#t-002) rules out; the picture records a hash of the source
+Mermaid's script, which [tech.selfContainedServer](tech.md#selfcontainedserver) rules out; the picture records a hash of the source
 it was drawn from, so a stale picture is a failing test rather than a quiet disagreement. It is
 plain SVG with no script and no link off the server.
 
-### P-079 — A drawing made from another drawn species' measurements says so
+### borrowedMeasurementsSaySo
+
+**A drawing made from another drawn species' measurements says so**
 Subject: `presentation.shared_measurements`
 Value: `a note on the tile and the detail page of each species, naming the others`
-Goals: G-003, G-006
+Goals: goals.shapeNotOnlySize, goals.nothingDisappearsQuietly
 
 Where two or more drawn species take their AVONET traits from **the same row** — a near-match
-borrowing a relative's measurements under [P-062](#p-062), and the relative drawn from that same
+borrowing a relative's measurements under [provenancePerMetric](#provenancepermetric), and the relative drawn from that same
 row — their drawings are alike because their measurements are the same, not because the birds are.
-That is acceptable: borrowing is honest when it is labeled ([CR-006](decisions.md#cr-006)). But
+That is acceptable: borrowing is honest when it is labeled ([decisions.abaSpeciesWithoutAvonet](decisions.md#abaspecieswithoutavonet)). But
 two identical tiles look like a finding about the birds, and the near-match label on one of them
 does not tell a reader that the other is the source.
 
@@ -1953,17 +2075,19 @@ measurements were used and that the other species' drawing comes from the same r
 traits name the same source sheet and source taxon. A new near-match then gets its note without
 anyone remembering to add it.
 
-Rationale: [G-006](goals.md#g-006) — a borrowed value is already labeled, but the reason two
+Rationale: [goals.nothingDisappearsQuietly](goals.md#nothingdisappearsquietly) — a borrowed value is already labeled, but the reason two
 drawings coincide was visible only to someone who opened both detail pages and compared the
-provenance rows. [CR-040](decisions.md#cr-040).
+provenance rows. [decisions.vegaGullBorrows](decisions.md#vegagullborrows).
 
-### P-080 — Escaped and kept birds are left off the index, and listed
+### escapedBirdsListed
+
+**Escaped and kept birds are left off the index, and listed**
 Subject: `presentation.index.exotic`
 Value: `declared list; off the index, listed at /excluded, detail pages kept`
-Goals: G-002, G-006
+Goals: goals.comparisonAcrossFamilies, goals.nothingDisappearsQuietly
 
 **A bird whose records here are escapes is not drawn on the index.** Recurrence cannot tell a
-wild population from a supply of escapes ([P-071](#p-071)), so parrots, waxbills, ornamental
+wild population from a supply of escapes ([declaredExceptions](#declaredexceptions)), so parrots, waxbills, ornamental
 waterfowl, zoo birds and a farmed Emu were drawn among the birds a reader can expect to meet,
 and they crowd out the ones that answer the question BirdView is for.
 
@@ -1978,7 +2102,7 @@ index and why. `/excluded` lists them all, each linked to that page, with its re
 records; the index links to the list. A bird listed here appears in no family, habitat, diet or
 region control, and is not counted by them.
 
-Rationale: [G-006](goals.md#g-006) — removing a bird a reader may have seen, with no trace, is
+Rationale: [goals.nothingDisappearsQuietly](goals.md#nothingdisappearsquietly) — removing a bird a reader may have seen, with no trace, is
 the failure the goals forbid; a list that says why is the honest version of the same edit.
-[CR-043](decisions.md#cr-043).
+[decisions.escapedBirdsOffIndex](decisions.md#escapedbirdsoffindex).
 

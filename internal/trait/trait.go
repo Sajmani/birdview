@@ -15,9 +15,9 @@
 // Package trait holds the habitat and niche vocabularies the species filter
 // offers, and the handful of assignments BirdView adds to AVONET's.
 //
-// **The classification is AVONET's, not this project's** (P-015). Every term
+// **The classification is AVONET's, not this project's** (product.habitatAndDietFilters). Every term
 // here is one AVONET uses, and every description is AVONET's own definition,
-// quoted. That is deliberate and it is the lesson of CR-024 and CR-025: the
+// quoted. That is deliberate and it is the lesson of decisions.regionUrlIsPostalCode and decisions.familiesTwoWays: the
 // categories this project invented had to be withdrawn one after another,
 // while the postal codes and published names it merely cited did not.
 //
@@ -25,9 +25,9 @@
 // few species, a **second** habitat or niche AVONET has no room for. AVONET
 // records one primary value per species; a bird that genuinely lives in two
 // places gets one of them. Those additions are marked BirdView and are listed in
-// Supplementary below, each with a reason (P-069).
+// Supplementary below, each with a reason (product.categoryProvenance).
 //
-// Verifies: P-015, P-069.
+// Verifies: product.habitatAndDietFilters, product.categoryProvenance.
 package trait
 
 import (
@@ -46,7 +46,7 @@ type Term struct {
 	// eats berries is a Frugivore even if the word is clumsy; a bird that
 	// drinks tree sap is nothing in AVONET's list at all. Without that
 	// limit the vocabulary drifts from a published classification into this
-	// project's own, which is what CR-025 was written about.
+	// project's own, which is what decisions.familiesTwoWays was written about.
 	Coined bool
 	// Value is AVONET's own string, as it appears in the data. It is the
 	// filter's value and must not be prettified -- the data is the key.
@@ -115,11 +115,11 @@ type extra struct {
 // **Kept deliberately short.** AVONET's primary value is right about the
 // bird's main haunt in almost every case, and a long list here would be this
 // project quietly substituting its own classification for a published one,
-// which is the habit CR-025 was written to break. An entry earns its place
+// which is the habit decisions.familiesTwoWays was written to break. An entry earns its place
 // only when AVONET's single value hides something a reader filtering by
 // habitat would certainly expect to find.
 //
-// Every entry is rendered as BirdView, never merged into AVONET's (P-069).
+// Every entry is rendered as BirdView, never merged into AVONET's (product.categoryProvenance).
 var Supplementary = map[string][]extra{
 	// AVONET codes these by where they nest or mainly feed, but each is a
 	// bird a reader filtering for the other habitat would expect to see.
@@ -162,7 +162,7 @@ var Supplementary = map[string][]extra{
 // The rules are written as rules, not as a list of 64 species keys. A typed
 // list would need every scientific name to be right, and the first five
 // hand-typed entries in Supplementary had two names AviList does not use
-// (AC-092).
+// (acceptance.habitatDietFilterPerSpecies).
 
 // plantFoodOf names the plant half for a family AVONET codes Invertivore at
 // an Omnivore level. **That there is a plant half is AVONET's statement;

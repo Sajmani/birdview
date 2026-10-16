@@ -21,7 +21,7 @@ Each entry quotes the source so the reading can be checked. See [PROVENANCE.md](
 > “Too Many Requests”... Please add delays into your code to keep under these limits...
 > We may block IPs that consistently exceed these limits"
 
-**Implemented as [T-022](../../tech.md).** The mapping tool waits a minimum interval between
+**Implemented as [tech.pacedInaturalistMapping](../../tech.md).** The mapping tool waits a minimum interval between
 requests. A full rebuild is 841 requests — one per in-scope species — which is under a tenth of
 the daily figure, and the tool is run rarely rather than on every build.
 
@@ -48,8 +48,8 @@ response is discarded after the ID is taken.
 > set to the name of your app, an iNaturalist username, or anything we might use to
 > differentiate your requests"
 
-**Implemented as [T-006](../../tech.md)**, which BirdView already required of every outbound
-request before this source was adopted, and which [AC-052](../../acceptance.md) already checks.
+**Implemented as [tech.identifiedClient](../../tech.md)**, which BirdView already required of every outbound
+request before this source was adopted, and which [acceptance.outboundRequestsIdentified](../../acceptance.md) already checks.
 
 ### `inat-api/R5` — JWTs, expiring in 24 hours, in an Authorization header
 

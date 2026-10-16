@@ -8,7 +8,9 @@ considered, the decision, who made it, and the resulting status of everything it
 
 ---
 
-## CR-001 — No open source supplies both body length and wingspan
+## noOpenLengthAndWingspan
+
+**No open source supplies both body length and wingspan**
 
 **Subject:** `measurement.provenance`
 **Kind:** Over-constraint — no value satisfies every applicable constraint
@@ -20,8 +22,8 @@ Three requirements could not hold at once:
 
 1. Lengths and wingspans shown to the user are real published measurements, not model output
    (owner's stated position, after rejecting the earlier design's invented allometry).
-2. The dataset covers the regularly occurring ABA avifauna — 841 species (P-001).
-3. Inputs are freely licensed and machine-readable (T-004, T-021).
+2. The dataset covers the regularly occurring ABA avifauna — 841 species (product.scopeIsRecurringAvifauna).
+3. Inputs are freely licensed and machine-readable (tech.fetchRestrictedInputs, tech.recordBeforeConsuming).
 
 Research against actual sources established that no combination satisfies all three. AVONET
 records neither dimension. Of the candidates that do: Fox et al. 2026 is CC BY 4.0 but carries
@@ -45,21 +47,23 @@ BIRDBASE, Lislevand and Dunning were each checked and carry neither.
 **Per-value provenance.** Real measurements where they exist, modeled estimates elsewhere, each
 tagged, with the interface distinguishing them.
 
-The conditional matters: this only satisfies (1) because **P-061 makes the labeling
-user-visible**. Without P-061 the decision degenerates into presenting modeled numbers as data,
-which is the thing that was rejected. P-061 is therefore not a nice-to-have and must not be
+The conditional matters: this only satisfies (1) because **product.tileMarksModeled makes the labeling
+user-visible**. Without product.tileMarksModeled the decision degenerates into presenting modeled numbers as data,
+which is the thing that was rejected. product.tileMarksModeled is therefore not a nice-to-have and must not be
 dropped as a simplification.
 
 ### Resulting status
 
-- **P-060** Active, as amended.
-- **P-061** Active, and load-bearing for this decision.
+- **product.lengthAndWingspanSources** Active, as amended.
+- **product.tileMarksModeled** Active, and load-bearing for this decision.
 - Honest expectation: most v1 lengths will be estimates. Ricklefs covers passerines only, so
   roughly half of the 841 species have no measured length available at any price.
 
 ---
 
-## CR-002 — Ricklefs 2017 cannot be used; its terms prohibit it *(resolved)*
+## ricklefsProhibited
+
+**Ricklefs 2017 cannot be used; its terms prohibit it** *(resolved)*
 
 **Subject:** `dataset.length.source`
 **Kind:** Cross-source — a mandatory source's terms versus a local requirement
@@ -68,7 +72,7 @@ dropped as a simplification.
 ### Resolution
 
 **The source is withdrawn. BirdView will not use Ricklefs 2017.** Every total length in v1 is
-`modeled`, tagged as such under P-062 and marked on the tile under P-061.
+`modeled`, tagged as such under product.provenancePerMetric and marked on the tile under product.tileMarksModeled.
 
 The terms were finally read — the maintainer printed the page from a browser, since the site 403s
 automated requests — and four clauses each independently prohibit what BirdView would do. They are
@@ -79,17 +83,17 @@ transcribed with quotations in
 | --- | --- |
 | Rules of Use B | No storing material "in a retrieval system", no "systematic distribution" — and expressly "whether or not for commercial or non-profit use or for a fee or free of charge" |
 | Rules of Use C | No integrating the material "with other material or otherwise creat[ing] derivative works" — which is exactly the AVONET join |
-| Rules of Use G | No "automated means of any kind" to access the site, which forecloses the fetch-at-build mechanism of T-004 |
+| Rules of Use G | No "automated means of any kind" to access the site, which forecloses the fetch-at-build mechanism of tech.fetchRestrictedInputs |
 | Rules of Use F | No incorporation "into any institutional or other repository under any circumstances" |
 
-The decisive detail is in B. This project's non-commercial posture (T-011) has unlocked other
+The decisive detail is in B. This project's non-commercial posture (tech.localNowPublicLater) has unlocked other
 sources — Macaulay embedding, iNaturalist's CC BY-NC corpus — and it was the natural hope here
 too. The clause forecloses it in as many words.
 
 ### Consequence
 
 Roughly half the dataset would have had a measured length; now none does. That is a real quality
-loss and it is worth naming rather than absorbing quietly. What makes it survivable is P-062:
+loss and it is worth naming rather than absorbing quietly. What makes it survivable is product.provenancePerMetric:
 before per-metric provenance existed, an all-modeled length column meant presenting synthetic
 numbers as data. Now it means a length column honestly labeled `modeled` throughout, with the
 model named in the detail view.
@@ -125,7 +129,7 @@ Ricklefs 2017 is the only source of real total-length measurements for North Ame
 this project found. Crossref reports only Wiley version-of-record terms and no CC license, and the
 Wiley terms page returns HTTP 403 to automated retrieval — so **the terms have not been read**.
 
-Per [process.md](process.md#some-sources-refuse-to-be-fetched), the gap is left unfilled rather
+Per [process.md](process.md#sources), the gap is left unfilled rather
 than guessed at. Specifically *not* relied upon: that the `RS-eco/traitdata` R package
 redistributes the data under GPL-3 (a package license does not establish the data's license), and
 the argument that measurements are uncopyrightable facts (a legal judgment nobody here is
@@ -135,9 +139,9 @@ qualified to make).
 
 1. A human reads the Wiley terms and records what they permit.
 2. Ask Ricklefs or ESA for permission for non-commercial open-source use.
-3. Drop the measured-length half of P-060, making every length an estimate.
+3. Drop the measured-length half of product.lengthAndWingspanSources, making every length an estimate.
 
-Until one is taken, the measured-length branch of P-060 is **Deferred (owner: Sameer)**. The
+Until one is taken, the measured-length branch of product.lengthAndWingspanSources is **Deferred (owner: Sameer)**. The
 modeled branch is unaffected, so this does not block v1 — it bounds how good v1 can be.
 
 ### Checked and ruled out: the CC0 Dryad deposit *(2026-09-21)*
@@ -167,66 +171,72 @@ The negative result sharpens the original problem: the `Length` column in Rickle
 distinguishes that dataset, and it is absent even from the same author's other public deposits.
 Nothing found so far substitutes for it.
 
-### Reframed by P-062 *(2026-09-21)*
+### Reframed by product.provenancePerMetric *(2026-09-21)*
 
 This conflict was raised when provenance was binary — a value was either measured or the app was
-misrepresenting it. P-062 removed that premise. If no measured length is ever obtained, every
+misrepresenting it. product.provenancePerMetric removed that premise. If no measured length is ever obtained, every
 length is labeled `modeled`, and the product is honest and complete.
 
-CR-002 is therefore **not a blocker** and should not be treated as one. It governs how good v1's
+ricklefsProhibited is therefore **not a blocker** and should not be treated as one. It governs how good v1's
 length data is, not whether v1 can ship.
 
 ---
 
-## CR-003 — Location filtering has no redistributable data source
+## noLocationData
+
+**Location filtering has no redistributable data source**
 
 **Subject:** `filter.location`
 **Kind:** Over-constraint
 **Date:** 2026-09-20 · **Decided by:** Sameer
 
-The owner asked for filtering by location. The species-list source chosen for P-001 carries no
+The owner asked for filtering by location. The species-list source chosen for product.scopeIsRecurringAvifauna carries no
 geography, and no freely redistributable per-region occurrence data was found at useful
 granularity. eBird's region species-list endpoint would serve, but requires an API key, and
 `api.ebird.org/robots.txt` is `Disallow: /` with the API terms page returning 403 — so what it
 permits is unestablished.
 
-**Decision:** withdraw P-011 and P-012 from v1 rather than defer them, and revisit with a range
+**Decision:** withdraw product.regionAndMonthFilter and product.filtersCompose from v1 rather than defer them, and revisit with a range
 source. Withdrawing rather than deferring is deliberate: a `Deferred` entry needs an owner and a
 date, and there is no date until a source exists.
 
-**Resulting status:** P-011 Withdrawn · P-012 Withdrawn · family is the only filter.
+**Resulting status:** product.regionAndMonthFilter Withdrawn · product.filtersCompose Withdrawn · family is the only filter.
 
 ---
 
-## CR-004 — The neck/body split has no measured basis
+## neckSplitUnmeasured
+
+**The neck/body split has no measured basis**
 
 **Subject:** `diagram.neck_ratio`
-**Kind:** Over-constraint, and a consistency question against CR-001
+**Kind:** Over-constraint, and a consistency question against noOpenLengthAndWingspan
 **Date:** 2026-09-20 · **Decided by:** Sameer
 
 With a total length in hand, AVONET supplies culmen and tail directly and head follows from bill
 depth — but nothing measures where the neck ends and the body begins. The earlier design used
-hand-assigned per-family neck ratios, which is the same class of invented number that CR-001
+hand-assigned per-family neck ratios, which is the same class of invented number that noOpenLengthAndWingspan
 rejected for lengths.
 
 | Option | Consequence |
 | --- | --- |
 | Per-family ratio | Herons look like herons; the split is a guess with no source |
-| One fixed ratio | No invented numbers; every bird the same shape, largely defeating G-003 |
+| One fixed ratio | No invented numbers; every bird the same shape, largely defeating goals.shapeNotOnlySize |
 | Find a source | No per-species neck-length data is believed to exist at this coverage |
 | Merge neck into body | Drops a segment the owner explicitly asked to keep |
 
 **Decision:** keep the per-family ratio, **declared as a visual design parameter** carrying no
-measurement claim and never surfaced as data (P-045).
+measurement claim and never surfaced as data (product.neckModelPerFamily).
 
-This is consistent with CR-001 rather than in tension with it, on one condition: CR-001 governs
+This is consistent with noOpenLengthAndWingspan rather than in tension with it, on one condition: noOpenLengthAndWingspan governs
 *numbers presented to the user as measurements*, and this governs *pixels in a schematic*. The
 distinction holds only while the ratio stays out of the dataset and out of the UI's numbers. If a
 neck length ever appears as a value, this decision is void and must be reopened.
 
 ---
 
-## CR-005 — Photographs withdrawn from v1
+## photographsWithdrawn
+
+**Photographs withdrawn from v1**
 
 **Subject:** `presentation.mode`
 **Kind:** Scope
@@ -241,7 +251,7 @@ the work is not repeated:
   hot-linking, and per-species `in flight` categories exist. There is **no "perched" equivalent**
   — 30 category hits in total, mostly cats — so in-flight is a positive filter and perched is the
   residual default.
-- **iNaturalist** is a viable fallback *because BirdView is non-commercial* (T-011), which makes
+- **iNaturalist** is a viable fallback *because BirdView is non-commercial* (tech.localNowPublicLater), which makes
   its default CC BY-NC corpus usable. Its API supplies a ready-made attribution string per photo.
   It has a **verified absence** of behavior annotation: the controlled-terms endpoint returns
   seven terms, none of them about flight or perching.
@@ -254,16 +264,18 @@ the work is not repeated:
 - **Flickr** is legally usable but operationally hostile: caching is forbidden, galleries are
   capped at 30 photos per page, and there is a 24-hour takedown-propagation duty.
 
-**Decision:** ship v1 with diagrams only. P-050 through P-053 are withdrawn, not abandoned.
+**Decision:** ship v1 with diagrams only. product.speciesPhotographs through product.photoCaching are withdrawn, not abandoned.
 
-**Resulting status:** P-030 reduced to a single mode · P-050–P-053 Withdrawn.
+**Resulting status:** product.diagramOnlyMode reduced to a single mode · product.speciesPhotographs–product.photoCaching Withdrawn.
 
 ---
 
-## CR-006 — ABA species with no AVONET row of their own *(resolved)*
+## abaSpeciesWithoutAvonet
+
+**ABA species with no AVONET row of their own** *(resolved)*
 
 **Subject:** `dataset.join.key`
-**Kind:** Derived — no pair of requirements contradicts; the conflict appears only when P-006's
+**Kind:** Derived — no pair of requirements contradicts; the conflict appears only when product.joinOnBinomial's
 mapping meets the provenance rule
 **Date raised:** 2026-09-21 · **Resolved:** 2026-09-21 · **Decided by:** Sameer
 
@@ -275,18 +287,18 @@ Two decisions, together:
    sheet and the filed name in its provenance record. This reduces the problem from 9 species to
    6.
 2. **For the remaining 6, borrow the parent taxon's traits and label them `near-match`** under
-   P-062. All 841 species stay in the dataset, and every borrowed value says whose measurement it
+   product.provenancePerMetric. All 841 species stay in the dataset, and every borrowed value says whose measurement it
    actually is.
 
 A value read from another sheet, or found under a pre-revision name, is **`measured`** — the
 specimens are the right birds and only the filing changed. `near-match` is reserved for a value
 measured on a genuinely different taxon.
 
-This mirrors CR-001 exactly: mixed authority is acceptable when, and only when, each value is
-labeled. P-062 now provides the vocabulary both decisions needed, and the detail view of P-034 /
-P-063 is where it reaches the user.
+This mirrors noOpenLengthAndWingspan exactly: mixed authority is acceptable when, and only when, each value is
+labeled. product.provenancePerMetric now provides the vocabulary both decisions needed, and the detail view of product.tileOpensDetail /
+product.metricProvenanceExplained is where it reaches the user.
 
-**Resulting status:** P-006 Active as amended · P-062 Active · P-063 Active · the six near-match
+**Resulting status:** product.joinOnBinomial Active as amended · product.provenancePerMetric Active · product.metricProvenanceExplained Active · the six near-match
 species are `Larus vegae`, `Numenius hudsonicus`, `Sturnella lilianae`, `Vireo swainsoni`,
 `Sula brewsteri`, `Anthus japonicus`.
 
@@ -325,7 +337,7 @@ the rows above resolve to the *same* parent, so American Herring Gull and Vega G
 as pixel-identical birds in an application whose entire purpose is showing that birds differ in
 size and shape.
 
-It also collides with [CR-001](#cr-001). P-060 divides every value into *measured* or *estimated*;
+It also collides with [noOpenLengthAndWingspan](#noopenlengthandwingspan). product.lengthAndWingspanSources divides every value into *measured* or *estimated*;
 a trait borrowed from a pre-split parent is neither. It is a real measurement of a different
 taxon, which is a third category the provenance model does not currently have.
 
@@ -333,7 +345,7 @@ taxon, which is a third category the provenance model does not currently have.
 
 | Option | Effect |
 | --- | --- |
-| Borrow parent traits, tag as a third provenance class | All 841 species present; honest labeling; P-060/P-061 grow a category |
+| Borrow parent traits, tag as a third provenance class | All 841 species present; honest labeling; product.lengthAndWingspanSources/product.tileMarksModeled grow a category |
 | Borrow parent traits silently | Complete dataset, false precision, and identical gull diagrams |
 | Exclude the 9 | 832 species, every one genuinely its own measurement; some common birds missing |
 | Source the 9 elsewhere | Correct and slow; no identified source |
@@ -368,7 +380,7 @@ Larus argentatus      culmen 74.0  depth 19.6  tail 170.2  wing 430.8  mass 1090
 The same holds for *Calonectris borealis*/*diomedea* (both 534.99 g) and *Pterodroma
 deserta*/*feae* (both 311 g). AVONET's mass column is sourced separately from its morphometrics
 and was evidently not split. So diagrams would differentiate correctly while **ordering by mass
-(P-020) would still show the pair as identical** — a smaller version of the original problem,
+(product.oneSelectedMetric) would still show the pair as identical** — a smaller version of the original problem,
 confined to one of the three sort metrics.
 
 ### Options considered
@@ -390,7 +402,9 @@ before entering the mapping table.
 
 ---
 
-## CR-007 — The neck length is surfaced as a metric, superseding CR-004's condition
+## neckLengthAsMetric
+
+**The neck length is surfaced as a metric, superseding neckSplitUnmeasured's condition**
 
 **Subject:** `diagram.neck_ratio`
 **Kind:** Direct — a later decision reverses a condition an earlier one set
@@ -398,16 +412,16 @@ before entering the mapping table.
 
 ### What changed
 
-[CR-004](#cr-004) kept the per-family neck ratio on one condition, stated plainly: *"If a neck
+[neckSplitUnmeasured](#necksplitunmeasured) kept the per-family neck ratio on one condition, stated plainly: *"If a neck
 length ever appears as a value, this decision is void and must be reopened."* The owner has now
 decided it should appear — in the detail view, alongside every other segment, with provenance
 naming the specific modeling function and the ratio used for that bird's family.
 
-This record reopens it, as CR-004 required.
+This record reopens it, as neckSplitUnmeasured required.
 
 ### Why it resolves the other way now
 
-CR-004 was decided before P-062 existed. At the time the choice lay between hiding the number and
+neckSplitUnmeasured was decided before product.provenancePerMetric existed. At the time the choice lay between hiding the number and
 presenting it as though it were measured, because there was no way to say "drawing convention" in
 the data. Confining it to pixels was the least-bad option available.
 
@@ -419,20 +433,20 @@ And the concealment was never worth much. **The user sees the neck either way** 
 a length, in every diagram. Withholding the number withheld the explanation, not the claim. Naming
 the function is strictly more honest than drawing an unexplained proportion.
 
-This is the third time P-062 has dissolved a constraint that existed only because provenance was
-binary, after [CR-001](#cr-001) on modeled lengths and [CR-006](#cr-006) on split taxa.
+This is the third time product.provenancePerMetric has dissolved a constraint that existed only because provenance was
+binary, after [noOpenLengthAndWingspan](#noopenlengthandwingspan) on modeled lengths and [abaSpeciesWithoutAvonet](#abaspecieswithoutavonet) on split taxa.
 
 ### Resulting status
 
-- **P-045** amended: the ratio is a named per-family model, and the neck length is presented with
+- **product.neckModelPerFamily** amended: the ratio is a named per-family model, and the neck length is presented with
   its function named. No longer "never surfaced as data".
-- **P-063** amended: every metric, including all five segments, is shown with its provenance.
-- **P-034** amended: the detail view is a larger version of the same tile, plus per-segment
+- **product.metricProvenanceExplained** amended: every metric, including all five segments, is shown with its provenance.
+- **product.tileOpensDetail** amended: the detail view is a larger version of the same tile, plus per-segment
   measurements and provenance.
-- **P-031** amended: the tile header carries scientific name as well as common name and badge.
-- **AC-035** inverted: it asserted the neck length never leaves the drawing layer; it now asserts
+- **product.tileContents** amended: the tile header carries scientific name as well as common name and badge.
+- **acceptance.neckLengthSerialized** inverted: it asserted the neck length never leaves the drawing layer; it now asserts
   the neck length *is* serialized, with a `model` naming the family ratio.
-- **CR-004** stands as history. Its reasoning was right for the constraints of its time; only its
+- **neckSplitUnmeasured** stands as history. Its reasoning was right for the constraints of its time; only its
   condition is superseded.
 
 ### Consequence worth watching
@@ -440,11 +454,13 @@ binary, after [CR-001](#cr-001) on modeled lengths and [CR-006](#cr-006) on spli
 Surfacing the segments makes the composition of total length visible. A reader will see a
 **measured** bill inside a **modeled** total and may reasonably ask how both are true. The answer
 is that total length is the sum of five segments, two measured and three modeled — now stated in
-P-060 so the detail view can say it rather than leave the reader to infer it.
+product.lengthAndWingspanSources so the detail view can say it rather than leave the reader to infer it.
 
 ---
 
-## CR-008 — Fit the wingspan model rather than invent one
+## fittedWingspanModel
+
+**Fit the wingspan model rather than invent one**
 
 **Subject:** `measurement.wingspan.model`
 **Kind:** Over-constraint, reopened by evidence
@@ -483,7 +499,7 @@ Fitted this way and asked for the same 9,194 species Fox predicted, BirdView's m
 theirs to a **mean of 1.32%** and a median under 1%, with 1.4% of species differing by more than
 10% — mostly extreme-aspect seabirds. It is, in effect, their model reconstructed.
 
-That comparison is now a standing check (AC-045), so a regression in the fitting code shows up as
+That comparison is now a standing check (acceptance.wingspanModelReconstructsFox), so a regression in the fitting code shows up as
 disagreement with an external published reference rather than as a silently worse dataset.
 
 Note what could **not** be tested: Fox report no predicted value for species that have an
@@ -500,15 +516,17 @@ about 5%, and the figure falls out of the fitting already being done.
 
 ### Resulting status
 
-- **P-060** amended: the modeled-wingspan branch names the fitted regression.
-- **P-062** amended: a `model` states the computation *and its measured error* where one exists.
-- **AC-045** added: agreement with Fox's published predictions stays within 2% mean.
+- **product.lengthAndWingspanSources** amended: the modeled-wingspan branch names the fitted regression.
+- **product.provenancePerMetric** amended: a `model` states the computation *and its measured error* where one exists.
+- **acceptance.wingspanModelReconstructsFox** added: agreement with Fox's published predictions stays within 2% mean.
 - `morphology.Wingspan`, the invented model, is deleted rather than left for someone to reach for.
 - Coverage is unchanged at 301 measured, 7 near-match, 533 modeled; only the modeled values move.
 
 ---
 
-## CR-009 — The exposed leg is modeled from the tarsus, reversing P-040
+## legFromTarsus
+
+**The exposed leg is modeled from the tarsus, reversing product.segmentComposition**
 
 **Subject:** `diagram.legs`
 **Kind:** Direct — a later decision reverses a rejection an earlier one recorded
@@ -516,7 +534,7 @@ about 5%, and the figure falls out of the fitting already being done.
 
 ### What changed
 
-[P-040](product.md#p-040) drew the legs as the measured tarsus and explicitly rejected the
+[product.segmentComposition](product.md#segmentcomposition) drew the legs as the measured tarsus and explicitly rejected the
 alternative: *"scaling up by a per-family factor to approximate the exposed leg would replace the
 diagram's one new measurement with another invented table, so it is not done."* That is now done.
 `morphology.LegFactors` scales the tarsus by a per-family factor between 1.0 and 2.0, and the
@@ -537,20 +555,20 @@ Ardeidae)"` is not passing itself off as a measurement, and **the measured tarsu
 and still shown**, on its own row in the detail view. Nothing was concealed to buy the accuracy; a
 second row was added.
 
-This is the same shape of argument as [CR-007](#cr-007), and the fourth time P-062 has dissolved a
+This is the same shape of argument as [neckLengthAsMetric](#necklengthasmetric), and the fourth time product.provenancePerMetric has dissolved a
 constraint that existed only because there was no way to say "this is a model" in the data.
 
 ### What it costs, stated plainly
 
 The diagram used to have three parts that were not modeled — bill, tail and tarsus. It now has
 two. The factors are **invented**: no source measures exposed leg length, and unlike the wingspan
-model of [CR-008](#cr-008) there is no empirical column to fit against or validate on. They are a
-drawing parameter of the same kind as the neck ratio of P-045, and carry the same obligation —
+model of [fittedWingspanModel](#fittedwingspanmodel) there is no empirical column to fit against or validate on. They are a
+drawing parameter of the same kind as the neck ratio of product.neckModelPerFamily, and carry the same obligation —
 named in the provenance of every value they produce, never presented as measurement.
 
 ### Consequence the renderer had to absorb
 
-AC-066 recorded an invariant: feet never fall below the tail tip, which is what let the renderer
+acceptance.legsFromTarsusWithdrawn recorded an invariant: feet never fall below the tail tip, which is what let the renderer
 center a diagram on its bill-to-tail extent. **The modeled leg makes that false** for 11 of the
 841 species — an American Flamingo by 30% of its own length, then Whooping Crane, Reddish Egret
 and Black-necked Stilt. That is correct anatomy, so the renderer accommodates it: `VerticalExtent`
@@ -563,35 +581,37 @@ behind the body rather than crossing it and the junction mark.
 
 ### Resulting status
 
-- **P-040** amended: legs are the modeled exposed leg, not the measured tarsus; the rejection
+- **product.segmentComposition** amended: legs are the modeled exposed leg, not the measured tarsus; the rejection
   above is superseded; the draw order is stated.
-- **AC-066** rewritten: the feet-above-tail assertion is inverted into a drawn-extent invariant,
+- **acceptance.legsFromTarsusWithdrawn** rewritten: the feet-above-tail assertion is inverted into a drawn-extent invariant,
   and the leg model gains dataset-wide checks.
-- **P-062** unchanged but newly load-bearing: `Species.Leg` is modeled, `Species.Tarsus` measured,
+- **product.provenancePerMetric** unchanged but newly load-bearing: `Species.Leg` is modeled, `Species.Tarsus` measured,
   and both are serialized and shown.
 - The tile width reference stays the wingspan alone. A pair of legs never spreads wider than the
   wings — the widest case in the dataset reaches 35% of it — so that is asserted over the whole
   dataset rather than guarded by a branch nothing would ever exercise.
 
-**Superseded in full by [CR-010](#cr-010).** The diagram is a bird in flight; legs are gone.
+**Superseded in full by [inFlightNoLegs](#inflightnolegs).** The diagram is a bird in flight; legs are gone.
 
 ---
 
-## CR-010 — The diagram depicts a bird in flight, and legs are removed entirely
+## inFlightNoLegs
+
+**The diagram depicts a bird in flight, and legs are removed entirely**
 
 **Subject:** `diagram.posture`, `diagram.legs`
-**Kind:** Premise settled, and a scope cut following from it — supersedes [CR-009](#cr-009)
+**Kind:** Premise settled, and a scope cut following from it — supersedes [legFromTarsus](#legfromtarsus)
 **Date:** 2026-09-23 · **Decided by:** Sameer
 
 ### The premise, which was never written down
 
 The diagram has always been ambiguous about what it depicts. A vertical body axis reads as a
 standing bird; a spread wing crossbar reads as a flying one. Nothing in the spec said which, and
-every leg decision so far — the rake angle, the Z-shape proposal, CR-009 itself — was really an
+every leg decision so far — the rake angle, the Z-shape proposal, legFromTarsus itself — was really an
 argument about that unstated premise.
 
 It is now stated: **the diagram is a top-down view of a bird in flight.** That reading is what the
-crossbar already assumed, and it makes P-043 better founded than it was — seen from above, wingspan
+crossbar already assumed, and it makes product.crossbarAtVerticalScale better founded than it was — seen from above, wingspan
 and body length genuinely lie in one plane, so drawing them at one scale is not a convention but a
 fact.
 
@@ -623,7 +643,7 @@ Counting species in the trailing-leg families whose leg clears the tail tip:
 | Using | Clears the tail |
 | --- | --- |
 | The measured tarsus | 1 of 110 |
-| The modeled leg (CR-009) | 14 of 110 |
+| The modeled leg (legFromTarsus) | 14 of 110 |
 
 The true figure is far higher — every large heron, egret, crane, stork and ibis does it. Checking
 the textbook field marks against the modeled leg: Whooping Crane +208 mm, Sandhill Crane +115,
@@ -635,7 +655,7 @@ not model.
 ### What is lost, stated plainly
 
 The tarsus was a **measured** trait spanning 115×, from a Rufous Hummingbird's 2.5 mm to a Whooping
-Crane's 289 mm, and CR-009's rationale for drawing it at all still reads well. That range is real
+Crane's 289 mm, and legFromTarsus's rationale for drawing it at all still reads well. That range is real
 and it is now not shown anywhere. The honest accounting is that it was only ever *visible* because
 the diagram tacitly depicted a standing bird — the posture the project has now decided against. A
 measurement that can only be displayed by implying a false posture is not a measurement the
@@ -647,16 +667,16 @@ whose entire premise is that everything in it is to scale. That cost is higher t
 
 ### Resulting status
 
-- **P-040** amended: five segments and a crossbar. No legs. The flight premise is stated there.
-- **P-042** reverted: the scale reference is the largest total length again, not the drawn extent.
-- **P-002/P-003** amended: `Tarsus.Length` is no longer ingested, leaving five AVONET traits.
-- **AC-066** withdrawn — the requirement it verified no longer exists.
-- **AC-012** amended: five traits, not six.
+- **product.segmentComposition** amended: five segments and a crossbar. No legs. The flight premise is stated there.
+- **product.scaleToggle** reverted: the scale reference is the largest total length again, not the drawn extent.
+- **product.traitsFromAvonet/product.traitsPerSpecies** amended: `Tarsus.Length` is no longer ingested, leaving five AVONET traits.
+- **acceptance.legsFromTarsusWithdrawn** withdrawn — the requirement it verified no longer exists.
+- **acceptance.allFiveTraits** amended: five traits, not six.
 - Deleted from the code: `morphology.LegFactors`, `DefaultLegFactor`, `LegLength`;
   `dataset.Species.Leg` and `.Tarsus`; `avonet.Traits.Tarsus`; `view.VerticalExtent`,
   `Geometry.DrawnHeight`, `LegCos`, `legRake`, `legSin` and the leg coordinates; the leg strokes,
   legend entry and CSS.
-- CR-009's renderer machinery goes with it. That work was correct for its premise and survived
+- legFromTarsus's renderer machinery goes with it. That work was correct for its premise and survived
   about a day; the premise, not the code, was the thing that was wrong.
 
 ### Left open
@@ -664,15 +684,17 @@ whose entire premise is that everything in it is to scale. That cost is higher t
 The **neck** is still modeled on a standing posture, and under the flight premise it is wrong for
 the families that fold it — Ardeidae and Pelecanidae fly with the head drawn back onto the
 shoulders, while our Ardeidae neck ratio of 0.85 is the second-highest in the table. Fixing it
-collides with P-041, since a folded-neck heron's drawn extent is genuinely shorter than its
-catalogued total length. **Resolved by [CR-011](#cr-011).**
+collides with product.segmentsSumToLength, since a folded-neck heron's drawn extent is genuinely shorter than its
+catalogued total length. **Resolved by [foldedNeckAsS](#foldedneckass).**
 
 ---
 
-## CR-011 — A folded neck is drawn as an S; length as data is untouched
+## foldedNeckAsS
+
+**A folded neck is drawn as an S; length as data is untouched**
 
 **Subject:** `diagram.neck.posture`
-**Kind:** Open item from [CR-010](#cr-010), resolved
+**Kind:** Open item from [inFlightNoLegs](#inflightnolegs), resolved
 **Date:** 2026-09-23 · **Decided by:** Sameer
 
 ### What changed
@@ -688,7 +710,7 @@ so a neck of length L is drawn with `r = L/2π`, the stroke is **exactly L long 
 scale**, and it occupies `2L/π ≈ 63.7%` of L vertically.
 
 That ratio is a **consequence of the shape, not a parameter**. No new number enters the system —
-which is exactly what separates this from the leg factors of CR-009, and why this change needs no
+which is exactly what separates this from the leg factors of legFromTarsus, and why this change needs no
 provenance record: like `headAspect`, it produces no metric. Nothing is rescaled, nothing is
 hidden, and the ink you see is still the neck at the same pixels-per-millimeter as every other
 part of the bird. It is the same neck, curved.
@@ -698,7 +720,7 @@ number. If 63.7% ever proves too loose to read as a fold, the cost of the next s
 
 ### What it costs
 
-For these 14 species the **drawn vertical extent is no longer the total length**. P-041's rationale
+For these 14 species the **drawn vertical extent is no longer the total length**. product.segmentsSumToLength's rationale
 — "this is what lets the vertical extent of the drawing *be* the bird's length" — now holds for
 827 of 841 species rather than all of them.
 
@@ -725,15 +747,17 @@ a stick is not misleading.
 
 ### Resulting status
 
-- **P-040** amended: the neck is a stick or an S depending on the family's flight posture.
-- **P-041** amended: the rationale is qualified — drawn extent equals total length except where the
+- **product.segmentComposition** amended: the neck is a stick or an S depending on the family's flight posture.
+- **product.segmentsSumToLength** amended: the rationale is qualified — drawn extent equals total length except where the
   neck is folded, and the sum over the *metrics* is unaffected.
-- **AC-067** added.
-- No change to P-045, the neck-ratio model, or to any serialized value.
+- **acceptance.foldedNeckSameStroke** added.
+- No change to product.neckModelPerFamily, the neck-ratio model, or to any serialized value.
 
 ---
 
-## CR-012 — Adopting iNaturalist for a species link, and what it is allowed to be
+## inaturalistLinkAdopted
+
+**Adopting iNaturalist for a species link, and what it is allowed to be**
 
 **Subject:** `presentation.detail_view.external_link`
 **Kind:** Source adoption, with three sub-decisions
@@ -756,7 +780,7 @@ decisive.
 this project's own standard — terms read and quoted before a source is adopted — that is not a
 position from which "permitted" can be written down. Working around the block was rejected on the
 same reasoning that rejected it for the iNaturalist pages, and for Wiley in
-[CR-002](#cr-002).
+[ricklefsProhibited](#ricklefsprohibited).
 
 **Its URLs cannot be constructed.** All About Birds keys on Clements/eBird common names; BirdView
 carries ABA/AOS names, and the ABA checklist's own header warns that the two authorities disagree.
@@ -806,7 +830,7 @@ this bird on iNaturalist, which is true and worth knowing.
 
 ### Sub-decision 3: the mapping is a committed table, not a build-time fetch
 
-`birdview-ingest` currently makes **no network request at all**, and [T-002](product.md) keeps the
+`birdview-ingest` currently makes **no network request at all**, and [tech.selfContainedServer](product.md) keeps the
 server offline at runtime while `tech.md` binds tests to make none either. Resolving 841 names at
 the one-request-per-second that `inat-api/R1` asks for would add roughly fifteen minutes to every
 build and break it entirely offline.
@@ -825,7 +849,7 @@ linking to a taxon page; the vendored copies contain no occurrence of *taxon*, *
 photographs a reader will go and look at — not the taxonomy.
 
 **BirdView therefore links and never copies.** No photograph is embedded, hotlinked, cached or
-reproduced, so no contributor's license is engaged. [T-002](tech.md) forbids the embedding
+reproduced, so no contributor's license is engaged. [tech.selfContainedServer](tech.md) forbids the embedding
 independently, which is a useful accident: two unrelated rules point the same way.
 
 ### Resulting status
@@ -834,16 +858,18 @@ independently, which is a useful accident: two unrelated rules point the same wa
   copy from the maintainer's `birdsync` repository and verified byte-for-byte against the SHA-256
   hashes recorded there. Neither could have been fetched — `inaturalist.org/pages/*` answers an
   agent with a 403 and a JavaScript challenge.
-- **P-064** added: the detail view links to iNaturalist when, and only when, the match is
+- **product.inaturalistLink** added: the detail view links to iNaturalist when, and only when, the match is
   confident.
-- **T-022** added: the mapping tool paces its requests and identifies itself.
-- **AC-068** added.
-- The existing **T-006** (identify the client) and **AC-052** already discharge `inat-api/R4`,
+- **tech.pacedInaturalistMapping** added: the mapping tool paces its requests and identifies itself.
+- **acceptance.inaturalistLinkConfidentOnly** added.
+- The existing **tech.identifiedClient** (identify the client) and **acceptance.outboundRequestsIdentified** already discharge `inat-api/R4`,
   which is why that requirement needed no new work.
 
 ---
 
-## CR-013 — Contrast is checked for all text, at two floors rather than one
+## twoContrastFloors
+
+**Contrast is checked for all text, at two floors rather than one**
 
 **Subject:** `text.contrast.ratio`
 **Kind:** Source scope widened, after a defect the existing scope could not see
@@ -851,7 +877,7 @@ independently, which is a useful accident: two unrelated rules point the same wa
 
 ### What prompted it
 
-The iNaturalist link of [CR-012](#cr-012) shipped with no `color` rule, so it fell back to the
+The iNaturalist link of [inaturalistLinkAdopted](#inaturalistlinkadopted) shipped with no `color` rule, so it fell back to the
 browser default: `#0000EE` on a `#0f172a` background, which is **1.90:1**, and `#551A8B` once
 visited, which is **1.62:1**. Effectively invisible. A reader spotted it immediately.
 
@@ -874,7 +900,7 @@ So **two floors**, and the gap between them stated rather than rounded up:
 
 | | Floor | Why |
 | --- | --- | --- |
-| Badges and chips | 7:1 against their own text (T-010, unchanged) | the colors are generated |
+| Badges and chips | 7:1 against their own text (tech.badgeContrast, unchanged) | the colors are generated |
 | **Links** | **7:1** against the page background | interactive, and the palette clears it easily at 8.33:1 |
 | **All other text** | **4.5:1** against both surfaces | AA; `--dim` clears this comfortably |
 
@@ -887,7 +913,7 @@ runs.
 ### The second assertion, which is the one that matters
 
 A contrast check over *declared* colors is blind to the colour nobody declared — which is precisely
-how this bug shipped. So AC-070 also asserts the stylesheet carries top-level `a` and `a:visited`
+how this bug shipped. So acceptance.noTextBelowContrastFloor also asserts the stylesheet carries top-level `a` and `a:visited`
 rules, making "someone forgot" impossible rather than merely unlikely.
 
 Colors are now set by a global rule rather than per component, so a new link inherits a good color
@@ -906,18 +932,20 @@ accent.
 
 - **`sources.md`**: the `wcag` scope widens from badges to badges *plus* link and text colors. Both
   already-adopted criteria are now used, at the two floors above.
-- **T-023** added.
-- **AC-070** added, watched failing three ways, including against the original defect.
+- **tech.textContrastFloor** added.
+- **acceptance.noTextBelowContrastFloor** added, watched failing three ways, including against the original defect.
 - `--accent-visited` added; link colors moved to global `a` / `a:visited` rules; `.tile`, `.btn` and
   `.chip` given explicit `:visited` rules so the global rule cannot recolor them.
 - Still excluded, and still claimed nowhere: keyboard access, focus order, timing, reading level.
   **BirdView claims no WCAG conformance level.**
 
-**The two-floor scheme was superseded the next day by [CR-014](#cr-014).**
+**The two-floor scheme was superseded the next day by [oneContrastFloor](#onecontrastfloor).**
 
 ---
 
-## CR-014 — One contrast floor, superseding CR-013's two
+## oneContrastFloor
+
+**One contrast floor, superseding twoContrastFloors's two**
 
 **Subject:** `text.contrast.ratio`
 **Kind:** Direct — a later decision reverses a tradeoff an earlier one accepted
@@ -925,7 +953,7 @@ accent.
 
 ### What changed
 
-[CR-013](#cr-013) set two floors: 7:1 for links and badges, 4.5:1 for everything else. There is now
+[twoContrastFloors](#twocontrastfloors) set two floors: 7:1 for links and badges, 4.5:1 for everything else. There is now
 one, **7:1**, and `--dim` and `--accent` moved to clear it.
 
 | | was | now | on page bg | on panel |
@@ -935,7 +963,7 @@ one, **7:1**, and `--dim` and `--accent` moved to clear it.
 
 ### Why it resolves the other way now
 
-CR-013's reasoning was explicit and, at the time, sound: raising the floor meant repainting the
+twoContrastFloors's reasoning was explicit and, at the time, sound: raising the floor meant repainting the
 interface's secondary text, which looked disproportionate to the one broken link that prompted the
 check. So it recorded the gap instead of closing it.
 
@@ -946,11 +974,11 @@ worth defending; it is the same defect as the link, one tier less severe.
 
 Cheap, too, in the end. Two variables moved and nothing else did. `--accent` as the `.btn.on` fill
 still clears its own dark text at 8.25:1, and `--accent-visited` was already at 7.92:1 on a panel.
-The repaint CR-013 was avoiding turned out to be two hex values.
+The repaint twoContrastFloors was avoiding turned out to be two hex values.
 
 ### What this says about recording a known gap
 
-CR-013 did the right thing by writing the shortfall down with its numbers rather than rounding up
+twoContrastFloors did the right thing by writing the shortfall down with its numbers rather than rounding up
 to a claim BirdView could not support. That is what made this decision a one-line lookup rather
 than a rediscovery — the exact figures were already on the page.
 
@@ -959,8 +987,8 @@ the next time an exception looks cheaper than a fix.
 
 ### Resulting status
 
-- **T-023** amended: one floor, 7:1, links and text alike, against both surfaces.
-- **AC-070** amended: the measured assertion is now a single floor, and the watched-failing list
+- **tech.textContrastFloor** amended: one floor, 7:1, links and text alike, against both surfaces.
+- **acceptance.noTextBelowContrastFloor** amended: the measured assertion is now a single floor, and the watched-failing list
   gains the two restored colors.
 - The test's two-tier machinery — a separate link floor, and the selector tokenizer that decided
   which rules were links — is deleted rather than left switched off. It is recoverable from history
@@ -971,7 +999,9 @@ the next time an exception looks cheaper than a fix.
 
 ---
 
-## CR-015 — The drawing carries provenance, and the crossbar splits to do it
+## drawingCarriesProvenance
+
+**The drawing carries provenance, and the crossbar splits to do it**
 
 **Subject:** `diagram.provenance`
 **Kind:** New capability, with one reversal and two exceptions worth defending
@@ -981,7 +1011,7 @@ the next time an exception looks cheaper than a fix.
 
 Stroke style now encodes provenance: solid measured, dashed modeled, head hollow. The wing crossbar
 is split at the wing chord, so its measured outer portions stay solid even when the span is
-modeled. Both pages document the code. [P-065](product.md) states it.
+modeled. Both pages document the code. [product.measuredVersusModeled](product.md) states it.
 
 ### The reversal: what dash used to mean
 
@@ -993,7 +1023,7 @@ channel, since tail-versus-body was a distinction the drawing already made twice
 ### The crossbar split, and an argument that was wrong on the first pass
 
 The initial objection to splitting was this: `span = a × chord^b` is multiplicative
-([CR-008](#cr-008)), so the span does not decompose into a measured part and a modeled remainder,
+([fittedWingspanModel](#fittedwingspanmodel)), so the span does not decompose into a measured part and a modeled remainder,
 and drawing it as though it did would assert a structure the model lacks.
 
 **That objection was aimed at the wrong claim.** It refutes "the span is built from a measured piece
@@ -1051,8 +1081,8 @@ which a reader can only ask once but must be able to answer.
 
 ### Resulting status
 
-- **P-065** added; **P-040** amended, since the tail's stroke style now means something else.
-- **AC-072** added.
+- **product.measuredVersusModeled** added; **product.segmentComposition** amended, since the tail's stroke style now means something else.
+- **acceptance.diagramDistinguishesModeled** added.
 - `dataset.Species.WingChord` added: AVONET's `Wing.Length`, previously consumed by the wingspan
   model and discarded. Note this is the **ornithological** chord, carpal joint to primary tip, not
   the aerodynamic chord of leading edge to trailing edge — the two share a name, and only the first
@@ -1062,7 +1092,9 @@ which a reader can only ask once but must be able to answer.
 
 ---
 
-## CR-016 — Total iNaturalist coverage, reached by widening the evidence rather than lowering the bar
+## fullInaturalistCoverage
+
+**Total iNaturalist coverage, reached by widening the evidence rather than lowering the bar**
 
 **Subject:** `presentation.detail_view.external_link`
 **Kind:** Requirement tightened, after diagnosis showed the shortfall was artifactual
@@ -1070,11 +1102,11 @@ which a reader can only ask once but must be able to answer.
 
 ### What prompted it
 
-[CR-012](#cr-012) shipped with 811 of 841 species linked and treated the other 30 as correct
+[inaturalistLinkAdopted](#inaturalistlinkadopted) shipped with 811 of 841 species linked and treated the other 30 as correct
 absences: species iNaturalist had not confidently matched, mostly assumed to be splits it had not
 followed. The owner asked for **100% coverage**.
 
-That request sits directly against CR-012's central rule, that a wrong bird is worse than no link.
+That request sits directly against inaturalistLinkAdopted's central rule, that a wrong bird is worse than no link.
 Reaching totality by relaxing the match would have traded a visible absence for an invisible error
 — the worse failure. So the 30 were diagnosed one at a time first.
 
@@ -1125,8 +1157,8 @@ the other cannot.
 
 ### Resulting status
 
-- **P-064** amended: both names must still agree, but each is compared more thoroughly.
-- **AC-068** extended: a case per bucket, plus the assertion that a differing genus is refused when
+- **product.inaturalistLink** amended: both names must still agree, but each is compared more thoroughly.
+- **acceptance.inaturalistLinkConfidentOnly** extended: a case per bucket, plus the assertion that a differing genus is refused when
   the common name does not agree.
 - Coverage is now a **required** 841 of 841, asserted over the built dataset rather than reported.
   A species that stops resolving is a fault, not an absence.
@@ -1135,7 +1167,9 @@ the other cannot.
 
 ---
 
-## CR-017 — Per-section becomes the default, and the legend becomes a diagram
+## perSectionDefault
+
+**Per-section becomes the default, and the legend becomes a diagram**
 
 **Subject:** `diagram.scale.mode`, `presentation.help`
 **Kind:** Direct — a later decision reverses a default an earlier one argued for
@@ -1147,15 +1181,15 @@ The scale default returns to **per-section**, listed first. The help's diagram s
 real labeled diagram instead of a list of colour swatches, and the three sections are reordered:
 the diagram, where the numbers come from, then the controls.
 
-### Why the default moves, against P-042's own argument
+### Why the default moves, against product.scaleToggle's own argument
 
-P-042 argued the case for global plainly and it has not become wrong: *"the cross-family surprise
+product.scaleToggle argued the case for global plainly and it has not become wrong: *"the cross-family surprise
 **is** the product… a reader could scroll the whole list without ever seeing that a Trumpeter Swan
 dwarfs a kinglet."* That is still true, and global is still one click away and still named first
 in the help text.
 
 What changed is the diagram. Since that default was chosen it has acquired provenance in the stroke
-style ([CR-015](#cr-015)), a split crossbar with chord ticks, and labels ([P-066](product.md)). At
+style ([drawingCarriesProvenance](#drawingcarriesprovenance)), a split crossbar with chord ticks, and labels ([product.labeledDetailDiagram](product.md)). At
 global scale a median bird is a **few pixels** tall — measured earlier at 1.7px for a robin's neck
 and 0.4px for a hummingbird's — so none of that vocabulary is visible on the landing page. The
 default was hiding the drawing's own language from every first-time reader.
@@ -1172,22 +1206,24 @@ drawing with the answers written on it — and BirdView now has exactly that mac
 detail view, so the help can show the real thing rather than describe it.
 
 It also removes a class of rot the old legend was prone to: the swatch list described the tail as
-"dashed, to tell it from the body", which stopped being true when CR-015 gave dash a different
+"dashed, to tell it from the body", which stopped being true when drawingCarriesProvenance gave dash a different
 meaning, and nothing caught it because the text and the stylesheet had no connection. A rendered
 diagram cannot drift from the renderer.
 
 ### Resulting status
 
-- **P-042** amended: per-section is the default and is listed first.
-- **P-035** amended: three sections in a stated order, and the diagram section is a rendered,
+- **product.scaleToggle** amended: per-section is the default and is listed first.
+- **product.pageExplainsItself** amended: three sections in a stated order, and the diagram section is a rendered,
   labeled diagram.
-- **AC-031** and **AC-059** amended, and the tests that asserted the global default inverted.
+- **acceptance.sharedScale** and **acceptance.pageExplainsControls** amended, and the tests that asserted the global default inverted.
 - The help diagram is drawn from a real species with a **modeled** wingspan, so the dashed inner
-  crossbar of P-065 is visible in the legend rather than only in the prose beside it.
+  crossbar of product.measuredVersusModeled is visible in the legend rather than only in the prose beside it.
 
 ---
 
-## CR-018 — The compare URL contract changes when the index becomes the picker
+## compareUrlContract
+
+**The compare URL contract changes when the index becomes the picker**
 
 **Subject:** `presentation.compare_view`, `presentation.pick_mode`
 **Kind:** Direct — a later decision reverses two conditions an earlier one set
@@ -1196,11 +1232,11 @@ diagram cannot drift from the renderer.
 ### What changed
 
 Two behaviors settled days ago now resolve the other way, both because the same premise
-disappeared. [P-068](product.md#p-068) gives the index a picker, which means the index now reads
+disappeared. [product.pickFromIndex](product.md#pickfromindex) gives the index a picker, which means the index now reads
 the `species` parameter that the compare view writes.
 
 **a. Leaving the compare view keeps the species list.** Commit `10e938d` removed it, and
-[AC-076](acceptance.md#ac-076) asserted that no link back to the index may carry `species`.
+[acceptance.comparisonSharesScale](acceptance.md#comparisonsharesscale) asserted that no link back to the index may carry `species`.
 
 **b. An unrecognised id is dropped and named, not a 404.** `/compare` refused the whole page; it
 now renders the species it recognises and says which it could not.
@@ -1212,7 +1248,7 @@ so the parameter is copied into every control link on that page and follows the 
 every toggle afterwards."* A parameter that means nothing where it lands is litter, and litter
 that propagates is worse.
 
-That argument rests entirely on the index not reading it. P-068 makes the index read it — the
+That argument rests entirely on the index not reading it. product.pickFromIndex makes the index read it — the
 species list is now the live state of a pick in progress. Carrying it back is no longer litter; it
 is the whole point. Dropping it would break the plainest flow the picker has: open a bird to look
 at it, go back, add it.
@@ -1245,7 +1281,9 @@ link is both likelier and more harmful than the typo: a typo is made and correct
 the person who made it, while a rotted link fails for someone who did not write it and cannot
 tell what was supposed to be there.
 
-## CR-019 — Mass gets a shape after all: the cube of water
+## massAsWaterCube
+
+**Mass gets a shape after all: the cube of water**
 
 **Subject:** `presentation.detail_view.diagram_labels`
 **Kind:** Direct — a later decision reverses one an earlier one argued for, on finding one of its
@@ -1254,21 +1292,21 @@ two reasons did not hold
 
 ### What changed
 
-[P-066](product.md#p-066) said mass is drawn as a number **and not as a shape**, one day before
+[product.labeledDetailDiagram](product.md#labeleddetaildiagram) said mass is drawn as a number **and not as a shape**, one day before
 this. It now also carries a square in the lower-left corner: one face of the cube of water that
 weighs what the bird weighs, drawn at the diagram's own scale.
 
 ### Why it reverses
 
-P-066 gave two reasons and they are not equally good. The first — that a mass glyph puts a
+product.labeledDetailDiagram gave two reasons and they are not equally good. The first — that a mass glyph puts a
 second, arbitrary scale on a figure whose every other dimension shares one, which
-[P-043](product.md#p-043) refuses — **does not apply to this glyph.** One gram of water is one
+[product.crossbarAtVerticalScale](product.md#crossbaratverticalscale) refuses — **does not apply to this glyph.** One gram of water is one
 cubic centimetre by the historical definition of the gram, so ∛(mass) is a unit conversion and
 not a model: it assumes nothing about the density of birds, and it is a real length that draws at
 the diagram's own px/mm. The objection was to arbitrary scales, and this is not one. The earlier
 text conflated the general case with the specific proposal and rejected both.
 
-The second reason stands and is recorded in P-066 as a limitation rather than deleted: **the cube
+The second reason stands and is recorded in product.labeledDetailDiagram as a limitation rather than deleted: **the cube
 compresses.** A Bushtit and a Common Raven differ 175× in mass and their cubes differ 5.6×. That
 is correct for equal-volume cubes and understates the gap. What changed is that it no longer has
 to carry the magnitude — the mass label was added in the same breath, so the number states the
@@ -1283,7 +1321,7 @@ drawing height — and the smallest to long-tailed, light-bodied species: Fork-t
 Scissor-tailed Flycatcher and Black-billed Magpie, at 10–13%. Nothing else on the figure
 distinguishes a bird that is long from a bird that is heavy.
 
-*(Re-measured after [CR-021](#cr-021): the alcid end read 28–29% before heavy birds lengthened.
+*(Re-measured after [trunkExponentCalibrated](#trunkexponentcalibrated): the alcid end read 28–29% before heavy birds lengthened.
 The comparison and its direction are unchanged.)*
 
 Measured before it was built, at the detail view's geometry: 28 px smallest, 52 px median, 80 px
@@ -1295,9 +1333,11 @@ intrudes for **0 of 841 species**, the tightest clearance being 50 px on Western
 A reader who takes the cubes as *the* mass comparison reads them wrong, by a factor of the cube
 root. The mitigation is that the number is right beside it and the diagram key names what the
 square is. If it proves misleading in use, the thing to remove is the square and not the number —
-the number is what P-066 requires.
+the number is what product.labeledDetailDiagram requires.
 
-## CR-020 — The mass cube goes on the index tiles too
+## massCubeOnTiles
+
+**The mass cube goes on the index tiles too**
 
 **Subject:** `presentation.tile`
 **Kind:** Direct — a later decision reverses a scope an earlier one set
@@ -1305,19 +1345,19 @@ the number is what P-066 requires.
 
 ### What changed
 
-[CR-019](#cr-019) put the cube of water on the annotated diagrams and kept it off the index
-tiles, and [AC-078](acceptance.md#ac-078) asserted that exclusion. The tiles now carry it as
+[massAsWaterCube](#massaswatercube) put the cube of water on the annotated diagrams and kept it off the index
+tiles, and [acceptance.massDrawnAsWaterCube](acceptance.md#massdrawnaswatercube) asserted that exclusion. The tiles now carry it as
 well, in the same lower-left corner, **without the mass label** — a tile carries no labels at all
-([P-031](product.md#p-031)), and the mass is already in its footer.
+([product.tileContents](product.md#tilecontents)), and the mass is already in its footer.
 
 ### Why it reverses
 
 The exclusion rested on two claims. One was crowding: *"the tile is dense by design and this is
-annotated-diagram furniture, as P-066's labels already are."* That reasoning holds for **labels**,
+annotated-diagram furniture, as product.labeledDetailDiagram's labels already are."* That reasoning holds for **labels**,
 which need a gutter a third of the width and a leader line to the part they name. It does not
 transfer to the cube, which needs neither: it sits in a corner the drawing does not use, and
 measured across the whole dataset it never reaches the crossbar — **0 overlaps in 841**, which is
-the claim that matters and which [CR-021](#cr-021) re-verified after every length moved.
+the claim that matters and which [trunkExponentCalibrated](#trunkexponentcalibrated) re-verified after every length moved.
 
 The accompanying figure was "the tightest clearance is 7.5px on Western Grebe". Re-measuring at
 per-section scale as the vertical gap between the cube's top vertex and the crossbar, over the
@@ -1331,7 +1371,7 @@ introduced and is no longer: the Presentation panel now explains it, and the til
 mass in full rather than as `M`.
 
 What the exclusion cost is the comparison the index is *for*. Every tile is drawn to a shared
-scale (P-042), so cubes on tiles are directly comparable down a whole section — and the thing the
+scale (product.scaleToggle), so cubes on tiles are directly comparable down a whole section — and the thing the
 cube shows, bulk against elongation, is exactly what a reader scanning a section of similar-length
 birds cannot otherwise see. Confining it to the detail view meant it could only ever be read one
 bird at a time, or two or three on a comparison page assembled by hand.
@@ -1341,7 +1381,9 @@ bird at a time, or two or three on a comparison page assembled by hand.
 The cube stays off the tile in no other way: no label, no leader, no footer row of its own. The
 tile's contract is unchanged apart from the shape itself.
 
-## CR-021 — The trunk's mass exponent is calibrated against skeletons, not invented
+## trunkExponentCalibrated
+
+**The trunk's mass exponent is calibrated against skeletons, not invented**
 
 **Subject:** `diagram.trunk_model`
 **Kind:** Direct — a measurement contradicts a constant the project chose by eye
@@ -1351,7 +1393,7 @@ tile's contract is unchanged apart from the shape itself.
 
 `BodyLength` modeled the trunk as `18.0 x mass^0.31`, an unvalidated constant carried since the
 first ingest. It is now **`14.0329 x mass^0.37`**, and the exponent is pinned to published skeletal
-measurement by [P-047](product.md#p-047) and [AC-080](acceptance.md#ac-080).
+measurement by [product.trunkFromMass](product.md#trunkfrommass) and [acceptance.trunkScalesLikeSkeletons](acceptance.md#trunkscaleslikeskeletons).
 
 ### Why
 
@@ -1388,7 +1430,7 @@ Within the current scope's 4,258× mass range, the gap understated the large end
 ### Why 0.37, and why the coefficient moved with it
 
 0.37 is the round value nearest the mean of the two non-aerodynamic estimates (0.372), and the
-wingspan estimate at 0.368 corroborates it. It sits comfortably inside the band P-047 requires.
+wingspan estimate at 0.368 corroborates it. It sits comfortably inside the band product.trunkFromMass requires.
 
 Raising the exponent alone would have lengthened every bird, which is not what the evidence says
 — the evidence is about *relative* size across the range. The coefficient is therefore re-anchored
@@ -1414,7 +1456,7 @@ weakest link in the argument, and the thing a better source would most repay.
 **The direct species-level comparison is not evidence, in either direction.** Joining Böhmer's
 taxa to BirdView gives 19 exact matches, on which BirdView's modeled neck is a median 29% of
 Böhmer's measured neck. That is expected: Böhmer sums cervical centrum lengths, including the part
-inside the body contour, where [P-045](product.md#p-045) models the *exposed* neck of a
+inside the body contour, where [product.neckModelPerFamily](product.md#neckmodelperfamily) models the *exposed* neck of a
 silhouette. A raven's cervical column is 106 mm; its visible neck is not. The apparent mass trend
 in that join (+0.115, CI +0.001 to +0.229) points the opposite way from the exponent argument and
 is an artifact of which families were sampled — its large taxa sit in long-neck families (Anatidae
@@ -1423,11 +1465,11 @@ is an artifact of which families were sampled — its large taxa sit in long-nec
 
 The decision rests only on the pure scaling fits, which involve no BirdView model at all.
 
-**The head model is untouched** ([P-046](product.md#p-046)). Single-element data supports isometry
+**The head model is untouched** ([product.craniumFromMass](product.md#craniumfrommass)). Single-element data supports isometry
 for a cranium, so the cube root stays — along with its own unresolved problem, recorded there.
 
-**Total length is still `modeled`.** A better exponent is not a measurement. [CR-001](#cr-001) and
-[P-062](product.md#p-062) are unaffected, and every length stays dashed and marked.
+**Total length is still `modeled`.** A better exponent is not a measurement. [noOpenLengthAndWingspan](#noopenlengthandwingspan) and
+[product.provenancePerMetric](product.md#provenancepermetric) are unaffected, and every length stays dashed and marked.
 
 ### What it costs
 
@@ -1436,7 +1478,9 @@ within sections all shift. That churn is why this lands as its own commit, ahead
 names work rather than beside it: two large dataset changes at once would be impossible to tell
 apart in review or in a screenshot.
 
-## CR-022 — AviList replaces the ABA checklist for names, and the eBird code becomes the URL
+## avilistReplacesAba
+
+**AviList replaces the ABA checklist for names, and the eBird code becomes the URL**
 
 **Subject:** `dataset.names.source`
 **Kind:** Direct — a licensing constraint forces a source change, which then enables a feature
@@ -1461,7 +1505,7 @@ Little Auk for Dovekie — and wrong for this audience. The extended release ans
 the **Clements** name as well, which is this audience's usage. Measured over BirdView's scope, the
 Clements column reproduces the ABA name for **827 of 827** species where both exist, the only
 five differences being ABA's own `X (alternate)` notation. One file, both vocabularies — which is
-what turned a loss into [P-049](product.md#p-049).
+what turned a loss into [product.englishNameChoice](product.md#englishnamechoice).
 
 ### Why the code changed too, which was not the original plan
 
@@ -1510,7 +1554,7 @@ left the ordering as the last thing the ABA still supplied.
 ### What this does *not* do
 
 **It does not unblock deployment on its own.** The ABA checklist is still read at build time for
-**scope** — which 841 species are in — and scope is the remaining dependency. T-004 already
+**scope** — which 841 species are in — and scope is the remaining dependency. tech.fetchRestrictedInputs already
 permits fetching it at build; what it does not permit is serving it. The next step is a list
 BirdView derives and owns.
 
@@ -1521,10 +1565,12 @@ unchanged, and no number moved.
 Clements and Cornell columns are usable here when eBird/Clements itself is rejected: AviList is a
 separate CC BY 4.0 publication, and nothing is taken from Cornell's own distribution.
 
-## CR-023 — Regions are grouped two ways: by shared birds, and by geography
+## regionsTwoWays
+
+**Regions are grouped two ways: by shared birds, and by geography**
 
 **Subject:** `presentation.region_filter.zones`
-**Kind:** Reversal — [P-011](product.md#p-011) said zones "claim nothing about birds". They now
+**Kind:** Reversal — [product.regionAndMonthFilter](product.md#regionandmonthfilter) said zones "claim nothing about birds". They now
 claim something about birds, because a corrected measurement says they can.
 **Date:** 2026-10-03 · **Decided by:** Sameer
 
@@ -1537,7 +1583,7 @@ appears twice in the selector.
 
 ### Why the old claim was wrong
 
-P-011 said there was "no data-driven way to subdivide the east", citing a 42-member block
+product.regionAndMonthFilter said there was "no data-driven way to subdivide the east", citing a 42-member block
 covering everything from Maine to Georgia. **That measurement was an artifact.** It came from
 faceting GBIF's `/occurrence/search` on `speciesKey`, which silently drops records whose names
 the backbone cannot resolve — the same trap recorded in [sources.md](sources.md#gbif), which
@@ -1616,11 +1662,13 @@ partition, still testable, but it is a real weakening and anything relying on th
 breaks loudly.
 
 **The bird zones are only as good as the presence table.** They are derived from a generated
-file, so a regeneration can move them. [AC-087](acceptance.md#ac-087) recomputes cohesion from
+file, so a regeneration can move them. [acceptance.zonesAnswerToData](acceptance.md#zonesanswertodata) recomputes cohesion from
 that table rather than pinning the names, so a drift that makes the grouping dishonest fails a
 test instead of going unnoticed.
 
-## CR-024 — A region's URL is its postal code, or its name, never an invented code
+## regionUrlIsPostalCode
+
+**A region's URL is its postal code, or its name, never an invented code**
 
 **Subject:** `presentation.region_filter.url`
 **Kind:** Direct — the URL carried an internal database key, and the obvious fix would have
@@ -1672,13 +1720,15 @@ name itself and the Pelagic zone it sits in. That is accepted.
 **Three marine names were shortened.** `North Pacific, off the west coast` would have slugged to
 `NorthPacificOffTheWestCoast`, so the clarifier moved to a separate gloss shown in the chip's
 tooltip, leaving the name proper. The slug is **derived** from the name rather than stored, so a
-renamed region cannot keep a stale URL ([AC-088](acceptance.md#ac-088)).
+renamed region cannot keep a stale URL ([acceptance.regionUrlRoundTrips](acceptance.md#regionurlroundtrips)).
 
 **Old URLs break, and no alias is kept.** Nothing links to BirdView yet, so this is free now and
-would not be later — the same argument [CR-022](#cr-022) made for species URLs. Accepting both
+would not be later — the same argument [avilistReplacesAba](#avilistreplacesaba) made for species URLs. Accepting both
 forms would mean two identifiers for one region and a second thing to keep in step.
 
-## CR-025 — Families are grouped two ways, and habitat is not one of them
+## familiesTwoWays
+
+**Families are grouped two ways, and habitat is not one of them**
 
 **Subject:** `presentation.family_filter.groups`
 **Kind:** Direct — the taxonomic grouping is unusable for navigation, and the obvious
@@ -1690,7 +1740,7 @@ replacement turned out to be unsupportable
 The family selector offers **two groupings**. **Birder groups** is hand-drawn and offered
 first — Shorebirds, Birds of Prey, Owls & Nightbirds. **Taxonomic order** is the existing
 grouping from AviList. A family sits in exactly one group of each, so it appears twice in the
-selector, exactly as a region now does ([CR-023](#cr-023)).
+selector, exactly as a region now does ([regionsTwoWays](#regionstwoways)).
 
 ### Why the taxonomic grouping needed company
 
@@ -1744,7 +1794,7 @@ regions.
 Geographic region grouping is hand-drawn. It is not a measurement and must never be presented
 as one.
 
-**The table is keyed on the scientific family name.** [CR-022](#cr-022) renamed **55 of 90**
+**The table is keyed on the scientific family name.** [avilistReplacesAba](#avilistreplacesaba) renamed **55 of 90**
 English family names and only **2** scientific ones, so the English name is the fragile key.
 
 ### What review changed, and the rule that came out of it
@@ -1780,13 +1830,15 @@ common.
 ### What it does not do
 
 **It adds no badge to a tile.** The tile carries the family badge alone
-([P-031](product.md#p-031)); groupings beyond family are navigation. Every tile is one height
+([product.tileContents](product.md#tilecontents)); groupings beyond family are navigation. Every tile is one height
 and a second badge costs a line on all of them.
 
-## CR-026 — A family may be in two birder groups, and that is not a route to habitat
+## familyInTwoGroups
+
+**A family may be in two birder groups, and that is not a route to habitat**
 
 **Subject:** `presentation.family_filter.groups`
-**Kind:** Direct — [P-014](product.md#p-014) required a partition, and one family has two
+**Kind:** Direct — [product.familiesByOrder](product.md#familiesbyorder) required a partition, and one family has two
 honest homes
 **Date:** 2026-10-03 · **Decided by:** Sameer
 
@@ -1836,13 +1888,15 @@ rails. An axis that is wrong about ducks is not worth a row of chips.
 Nightbirds showing as not fully selected, because the owls it holds have gone. That is correct
 and it is also surprising, and it is the price of the overlap. With one overlapping family it
 is explicable; with several axes it would be unpredictable, which is why
-[AC-089](acceptance.md#ac-089) caps the number of duplicated placements rather than trusting
+[acceptance.familyGroupingComplete](acceptance.md#familygroupingcomplete) caps the number of duplicated placements rather than trusting
 restraint.
 
-## CR-027 — Habitat and diet become species-level filters, and the birder grouping is retired
+## habitatDietSpeciesLevel
+
+**Habitat and diet become species-level filters, and the birder grouping is retired**
 
 **Subject:** `presentation.trait_filter`
-**Kind:** Reversal — [P-014](product.md#p-014)'s hand-drawn family grouping is withdrawn and
+**Kind:** Reversal — [product.familiesByOrder](product.md#familiesbyorder)'s hand-drawn family grouping is withdrawn and
 replaced by published per-species classifiers
 **Date:** 2026-10-03 · **Decided by:** Sameer
 
@@ -1867,7 +1921,7 @@ right, because the information was never at the family level to begin with.
 
 ### Why AVONET's classification rather than our own
 
-Measured earlier and recorded in CR-025: **only 12% of families with ten or more species share
+Measured earlier and recorded in familiesTwoWays: **only 12% of families with ten or more species share
 one habitat, and 81% of species sit in a family that is mixed.** That killed habitat as a
 family grouping. It says nothing against habitat as a *species* trait, which is what AVONET
 publishes and what is adopted here.
@@ -1890,7 +1944,7 @@ landfill. Each is marked **`birdview`** with a reason, never merged into AVONET'
 
 **Two of the first five did nothing at all**, keyed on `Phalacrocorax auritus` and
 `Larus argentatus` where AviList says `Nannopterum auritum` and `Larus smithsonianus`. A map
-lookup that misses is silent, so [AC-092](acceptance.md#ac-092) now checks every key against the
+lookup that misses is silent, so [acceptance.habitatDietFilterPerSpecies](acceptance.md#habitatdietfilterperspecies) now checks every key against the
 dataset.
 
 ### What it costs
@@ -1904,10 +1958,12 @@ one that is merely less convenient.
 **One value per species is still a simplification**, and the control says so rather than
 implying completeness.
 
-## CR-028 — Scope becomes a consequence of a derived status label, and recurrence replaces abundance
+## scopeFromRecurrence
+
+**Scope becomes a consequence of a derived status label, and recurrence replaces abundance**
 
 **Subject:** `dataset.scope`
-**Kind:** Replacement — [P-001](product.md#p-001)'s ABA rarity-code filter is withdrawn in favor
+**Kind:** Replacement — [product.scopeIsRecurringAvifauna](product.md#scopeisrecurringavifauna)'s ABA rarity-code filter is withdrawn in favor
 of a status vocabulary BirdView derives from open occurrence data and owns
 **Date:** 2026-10-04 · **Decided by:** Sameer
 
@@ -1920,11 +1976,11 @@ observations has failed, and the next one would fail too. What replaces it is **
 a species is in scope when its records in at least one region recur across years, however few
 of them there are.
 
-**Status becomes a product.** The ABA codes 1–6 that P-001 filters on are not a scope rule at
-all — they are a *status vocabulary*, and P-001 uses three of its values as a cutoff. BirdView
+**Status becomes a product.** The ABA codes 1–6 that product.scopeIsRecurringAvifauna filters on are not a scope rule at
+all — they are a *status vocabulary*, and product.scopeIsRecurringAvifauna uses three of its values as a cutoff. BirdView
 deriving its own status labels makes scope a consequence of labeling rather than a knife-edge,
 and the labels themselves become a navigation facet alongside Habitat and Diet
-([CR-027](#cr-027)). A vagrant is no longer *excluded*; it is *labeled*, and the default view
+([habitatDietSpeciesLevel](#habitatdietspecieslevel)). A vagrant is no longer *excluded*; it is *labeled*, and the default view
 does not show it. That turns the hardest judgement in the project into a filter the reader
 controls.
 
@@ -2040,7 +2096,7 @@ editorial surface than the weighted model this CR was asked for.
 The first complete run classified **1,424 species**: 956 established, 131 rare, 131 vagrant,
 38 historical, 173 absent. Against BirdView's current 839 it **keeps 830 and drops 9**, where
 the best abundance rule dropped 59. The nine are the declared-exception cases of
-[P-071](product.md#p-071) and nothing else: three with no open record at all (Maui Parrotbill,
+[product.declaredExceptions](product.md#declaredexceptions) and nothing else: three with no open record at all (Maui Parrotbill,
 Akohekohe, Townsend's Storm-Petrel), two outside the US/CA filter (Bermuda and Desertas
 Petrel), and four single-episode seabirds and Hawaiian endemics.
 
@@ -2068,7 +2124,7 @@ A table written from this would list Whimbrel twice. **Resolved 2026-10-04** on 
 principles: extra species beat omission, and eBird is the more authoritative source.
 
 Those settle it once separated. eBird is authoritative for **evidence** — it is eighty times
-deeper and better curated — while AviList is already the authority for **names** (CR-022). So
+deeper and better curated — while AviList is already the authority for **names** (avilistReplacesAba). So
 eBird's records are credited to the AviList name whose birds they are, which is what
 `AviListRenames` does for genus moves; `taxonomy.CountedAs` now does it where the sources draw the boundary elsewhere.
 
@@ -2108,32 +2164,34 @@ inventing a coefficient and then finding data to justify it; the honest order is
 distribution first and then declare the cut with a written reason. This is the one piece of the
 model still owed a number.
 
-## CR-029 — A species URL outlives the species, but does not keep its 200
+## speciesUrlOutlivesSpecies
+
+**A species URL outlives the species, but does not keep its 200**
 
 **Subject:** `presentation.unknown_species_id`
-**Kind:** Conditional — [CR-018](#cr-018)(b) set this subject for `/compare`, and the detail
+**Kind:** Conditional — [compareUrlContract](#compareurlcontract)(b) set this subject for `/compare`, and the detail
 view resolves it the same way in substance and the opposite way in status code
 **Date:** 2026-10-05 · **Decided by:** Sameer
 
-### The question CR-018 left open
+### The question compareUrlContract left open
 
-CR-018(b) decided that an unrecognised species id in `/compare` is **dropped and named**, not a
+compareUrlContract(b) decided that an unrecognised species id in `/compare` is **dropped and named**, not a
 404: *"render what is recognised and name what is not."* `/species/<id>` was never revisited, and
 it still calls `http.NotFound`, which writes `404 page not found` and nothing else.
 
 That was harmless while scope came from a checklist nobody intended to change. It stopped being
-harmless with [CR-028](#cr-028): scope is now **derived from live occurrence data and
+harmless with [scopeFromRecurrence](#scopefromrecurrence): scope is now **derived from live occurrence data and
 regenerated**, so the set of species URLs that work is a function of a GBIF query, and a future
 run can take `/species/<code>` away from a bird that has one today.
 
-### Why it is not simply CR-018 again
+### Why it is not simply compareUrlContract again
 
-CR-018's answer has two halves — *render what you can* and *name what you cannot* — and only
+compareUrlContract's answer has two halves — *render what you can* and *name what you cannot* — and only
 the second half survives the move. A comparison of four birds minus one is still a comparison
 of three; a detail page minus its one bird is nothing. There is no partial page to render.
 
 That difference decides the status code, which is the only point on which this record departs
-from CR-018. `/compare` returns **200** because it delivered a comparison and merely delivered
+from compareUrlContract. `/compare` returns **200** because it delivered a comparison and merely delivered
 a smaller one than was asked for. `/species/<id>` has delivered **no bird at all**, and
 returning 200 would tell every cache and crawler that an address which serves nothing is fine.
 
@@ -2144,12 +2202,12 @@ returning 200 would tell every cache and crawler that an address which serves no
 | Keep `http.NotFound` | 404 | `404 page not found` | Throws away a measured verdict the derivation already holds. This is the status quo being changed |
 | Redirect to the index | 302 | The index, no explanation | Loses the question. The reader asked about one bird and is handed 1,083 |
 | **Named 404** | **404** | The bird, its status, its evidence | **Chosen** |
-| Named 410 Gone | 410 | The same page | Overclaims. 410 asserts the resource is permanently gone and should be de-indexed; scope is regenerated, and a bird that fails the recurrence bar on one run can clear it on the next. Three of the nine [P-071](product.md#p-071) exceptions exist precisely because sparse evidence moves |
-| Serve the bird anyway, marked out of scope | 200 | A drawing | Rejected outright. [P-001](product.md#p-001) decides what BirdView draws, and a page that draws a bird the dataset excludes makes the scope rule a suggestion |
+| Named 410 Gone | 410 | The same page | Overclaims. 410 asserts the resource is permanently gone and should be de-indexed; scope is regenerated, and a bird that fails the recurrence bar on one run can clear it on the next. Three of the nine [product.declaredExceptions](product.md#declaredexceptions) exceptions exist precisely because sparse evidence moves |
+| Serve the bird anyway, marked out of scope | 200 | A drawing | Rejected outright. [product.scopeIsRecurringAvifauna](product.md#scopeisrecurringavifauna) decides what BirdView draws, and a page that draws a bird the dataset excludes makes the scope rule a suggestion |
 
 ### Decision
 
-[P-075](product.md#p-075): **404 with a page that names the bird and gives the measured reason.**
+[product.undrawnSpeciesAnswer](product.md#undrawnspeciesanswer): **404 with a page that names the bird and gives the measured reason.**
 `410` is rejected for overclaiming, `200` for lying to caches, and a redirect for losing the
 question.
 
@@ -2181,13 +2239,13 @@ different region on each run** and carried their episode, year, record and now l
 figures with them: Cooper's Hawk recurs in 39 episodes in both Alaska and Arizona, and the
 table reported 24 years and 216,391 records one run and 18 and 119,194 the next.
 
-Harmless while nothing read the region column; not harmless once [P-075](product.md#p-075)
+Harmless while nothing read the region column; not harmless once [product.undrawnSpeciesAnswer](product.md#undrawnspeciesanswer)
 prints the date on a page as the reason a bird is not drawn. A reason that changes when nothing
 changed is not a reason.
 
 The tiebreak is now declared rather than incidental: status, then episodes, then **years, then
 records, then the region id**. Years before records because the model is recurrence and not
-abundance ([CR-028](#cr-028)) — between two regions a bird recurs in equally often, the one it
+abundance ([scopeFromRecurrence](#scopefromrecurrence)) — between two regions a bird recurs in equally often, the one it
 came back to across more years is the better evidence, whatever the crowds did. The id settles
 what nothing else can: arbitrary, but the same arbitrary answer every run. Fifteen rows moved,
 most of them onto strictly more evidence; **no species changed status, and scope is unchanged at
@@ -2195,15 +2253,17 @@ most of them onto strictly more evidence; **no species changed status, and scope
 
 ### Status of requirements touched
 
-- [P-001](product.md#p-001) — Active; amended to name `historical` in the out-of-scope list,
-  which it had omitted, and to point at P-075.
-- [P-075](product.md#p-075) — Active, new.
-- [CR-018](#cr-018)(b) — stands unchanged for `/compare`.
+- [product.scopeIsRecurringAvifauna](product.md#scopeisrecurringavifauna) — Active; amended to name `historical` in the out-of-scope list,
+  which it had omitted, and to point at product.undrawnSpeciesAnswer.
+- [product.undrawnSpeciesAnswer](product.md#undrawnspeciesanswer) — Active, new.
+- [compareUrlContract](#compareurlcontract)(b) — stands unchanged for `/compare`.
 
-## CR-030 — The share at sea is not the share on land, and P-074 presents them as one number
+## seaShareDiffers
+
+**The share at sea is not the share on land, and product.shareOfRecords presents them as one number**
 
 **Subject:** `presentation.share`, `dataset.region.totals`
-**Kind:** Derived / emergent — [P-074](product.md#p-074) and [P-011](product.md#p-011) are each
+**Kind:** Derived / emergent — [product.shareOfRecords](product.md#shareofrecords) and [product.regionAndMonthFilter](product.md#regionandmonthfilter) are each
 satisfiable alone; the defect is in a ratio computed across both
 **Date:** 2026-10-05 · **Decided by:** Sameer — **option A**, and no commonest sea
 **Found by:** the owner, reading `/species/yenalb2?region=NorthAtlantic` against
@@ -2232,7 +2292,7 @@ wrong one**, and the detail page's answer survives a correct recomputation.
 `birdview-regions` only boxes the seas for species already judged **pelagic** — at least
 `minPelagicShare` = 0.5 of their records outside every land region — and accumulates
 `totals[id]` over just those. A land total is every bird record in the region. The two are
-different quantities, and P-074 divides by both as though they were one. Measured against GBIF
+different quantities, and product.shareOfRecords divides by both as though they were one. Measured against GBIF
 on 2026-10-05:
 
 | sea | dataset total | all bird records in the same box | inflation |
@@ -2267,7 +2327,7 @@ overstated by a factor it was itself an instance of.
 ### Why nothing caught it
 
 **No test asserts that `Commonest` is the largest share.** The server fixture hardcodes
-`commonestOf` and every test renders it back, so P-074's central claim — *the region where this
+`commonestOf` and every test renders it back, so product.shareOfRecords's central claim — *the region where this
 bird is the biggest share of what is recorded* — has never been evaluated against data. A value
 the fixture supplies is a value no test can falsify.
 
@@ -2282,7 +2342,7 @@ The choice is (c); it decides (a) and (b).
 | **C. Leave it** | — | none | The index is actively wrong by 15–4,472× today |
 
 C is rejected. **A is recommended**, on the grounds that B buys comparable arithmetic over a
-region that is not really a region, and that P-074 already refuses to publish a number it
+region that is not really a region, and that product.shareOfRecords already refuses to publish a number it
 cannot stand behind. A pelagic's detail page can still say *recorded in the North Atlantic*
 without claiming a ratio.
 
@@ -2322,7 +2382,7 @@ right for the 25 species that are ≥90% at sea and quietly wrong for the 29 tha
 
 Whether **scope** is affected. The recurrence test runs on `gadmGid`, and `DatesIn` has no
 coordinate-box form, so pass 2 has never asked whether a pelagic recurs at sea. Four of the
-nine [P-071](product.md#p-071) exceptions are pelagics whose written reason is that the
+nine [product.declaredExceptions](product.md#declaredexceptions) exceptions are pelagics whose written reason is that the
 derivation "sees [it] in one episode because almost nobody is on the water where it is". All
 four are 95–100% at sea with real marine records. The reason as written states a measurement
 that was never made; **at minimum the wording is wrong**, and whether those species would clear
@@ -2381,23 +2441,25 @@ delivers *on water* rather than *at sea*, overstating by roughly 3%. GBIF does a
 is available later — but it chases a 3% effect against a 30× one, and the boxes are declared
 approximations already.
 
-**Consequence: [P-074](product.md#p-074) could get its share back at sea.** "Of the records on
+**Consequence: [product.shareOfRecords](product.md#shareofrecords) could get its share back at sea.** "Of the records on
 water in this box, how much is this bird" is a real quantity, comparable in kind to the land
 figure and computable for free. That would reverse the part of option A that declines a marine
 share — and would need a CR of its own, a regenerated `region-presence.tsv`, and a decision on
 whether "on water" may be labelled with an ocean's name. Tracked below; nothing is changed on
 the strength of this experiment alone.
 
-## CR-031 — A sea gets an honest denominator, and its share back
+## honestSeaDenominator
+
+**A sea gets an honest denominator, and its share back**
 
 **Subject:** `presentation.share`, `dataset.region.totals`
-**Kind:** Reversal — [CR-030](#cr-030)'s option A declined a marine share; the measurement it
+**Kind:** Reversal — [seaShareDiffers](#seasharediffers)'s option A declined a marine share; the measurement it
 declined for turns out to be available
 **Date:** 2026-10-05 · **Decided by:** Sameer
 
 ### What changed
 
-[CR-030](#cr-030) withheld the share at sea because no honest denominator existed for a sea.
+[seaShareDiffers](#seasharediffers) withheld the share at sea because no honest denominator existed for a sea.
 Its own [experiment](#experiment--is-there-a-distance-from-shore-that-cleans-up-the-boxes),
 run immediately afterwards, found one. GADM covers land, so **a record on a beach carries a
 country and a record on the water carries none**: faceting a box by `gadmLevel0Gid` and
@@ -2406,7 +2468,7 @@ response carries the unfiltered count beside the facet rows, so it costs **no ex
 
 A sea's total is now every bird record on open water inside its box, over all species — the
 same quantity a land region's total is, measured the same way. `RegionTotals` carries all 74
-regions again, and [P-074](product.md#p-074)'s share ranges over every one.
+regions again, and [product.shareOfRecords](product.md#shareofrecords)'s share ranges over every one.
 
 | sea | was | now |
 | --- | --- | --- |
@@ -2426,12 +2488,12 @@ compared them**, each being tested against its own source.
 
 Worse, the status table's land-only pass meant no species could ever peak at sea, and its
 peak could name a region the index does not list the bird in at all: Maine holds 12 albatross
-records against 14 million, below [P-011](product.md#p-011)'s one-per-million presence bar, so
+records against 14 million, below [product.regionAndMonthFilter](product.md#regionandmonthfilter)'s one-per-million presence bar, so
 the page named a place a reader could not then find in the filter.
 
 `Commonest` is now computed in the ingest from `Regions`, `RegionCounts` and `RegionTotals` —
 the same numbers the index divides. The two pages are the same arithmetic by construction, and
-[AC-100](acceptance.md#ac-100) asserts the round trip over all 1,059 placed species.
+[acceptance.peakAndShareOneCalculation](acceptance.md#peakandshareonecalculation) asserts the round trip over all 1,059 placed species.
 `status.CommonestBy` is deleted.
 
 **The Atlantic Yellow-nosed Albatross now reads 1 in 282,315 in the North Atlantic**, which is
@@ -2444,7 +2506,7 @@ The result is **on water**, not **at sea**. An estuary has no GADM country eithe
 Chesapeake Bay reads 8.8% off land, Pamlico Sound 8.5%, Long Island Sound 4.1% — roughly a 3%
 overstatement of the open ocean against a 30× error corrected. GBIF accepts a WKT `geometry`
 polygon alongside facets (verified), so carving the coast off properly is available if that 3%
-ever matters. The boxes are declared approximations already and [P-074](product.md#p-074) says
+ever matters. The boxes are declared approximations already and [product.shareOfRecords](product.md#shareofrecords) says
 what the figure counts.
 
 **"No land regions selected" is retired**, one turn after being added. Its condition no longer
@@ -2461,22 +2523,24 @@ That is a deliberate trade: re-measuring it costs a `CountFor` for every species
 
 ### Status of requirements touched
 
-- [P-074](product.md#p-074) — Active; amended, the share ranges over every region again.
-- [CR-030](#cr-030) — option A's *no share at sea* half is superseded here. Its structural
+- [product.shareOfRecords](product.md#shareofrecords) — Active; amended, the share ranges over every region again.
+- [seaShareDiffers](#seasharediffers) — option A's *no share at sea* half is superseded here. Its structural
   guard is not: `shareIn` still takes both sides of the ratio from one test, and
-  [AC-099](acceptance.md#ac-099) still asserts it. What was wrong there was the number, and
+  [acceptance.commonestIsLargestShare](acceptance.md#commonestislargestshare) still asserts it. What was wrong there was the number, and
   what was right was the shape.
 
-## CR-032 — Frequency joins the metrics, and brings a second sectioning rule with it
+## frequencyMetric
+
+**Frequency joins the metrics, and brings a second sectioning rule with it**
 
 **Subject:** `ordering.metric`, `sectioning.rule`, `sectioning.step_percent`
-**Kind:** Direct — a fourth ordering does not fit the value [P-020](product.md#p-020) fixes, and
-cannot be sectioned by the rule [P-022](product.md#p-022) fixes
+**Kind:** Direct — a fourth ordering does not fit the value [product.oneSelectedMetric](product.md#oneselectedmetric) fixes, and
+cannot be sectioned by the rule [product.sectionBreakRule](product.md#sectionbreakrule) fixes
 **Date:** 2026-10-05 · **Decided by:** Sameer
 
 ### What changed
 
-[P-074](product.md#p-074) put a number on every tile — *1 in 282,315 bird records in North
+[product.shareOfRecords](product.md#shareofrecords) put a number on every tile — *1 in 282,315 bird records in North
 Atlantic* — and the index could not order by it. It can now: **Frequency** is a fourth choice
 under Sort by.
 
@@ -2488,16 +2552,16 @@ Three subjects move:
 
 ### Why the proportional rule cannot section frequency
 
-[P-022](product.md#p-022)'s rule is already multiplicative — a section ends at `min × (1 + N/100)`
+[product.sectionBreakRule](product.md#sectionbreakrule)'s rule is already multiplicative — a section ends at `min × (1 + N/100)`
 — so on the face of it 15% should work. It does not, for two reasons measured on the data.
 
 **It produces 128 sections.** Frequency spans **1 in 43 to 1 in 1,252,475,518**, which is 7.5
 decades. At 15% that is `log(1.25e9/43) / log(1.15)` ≈ 128 bands of a few hundred species each.
 Length at 15% produces a page a reader can scroll.
 
-**Its boundaries move when the filter does.** P-022 anchors each band to the data — the first
+**Its boundaries move when the filter does.** product.sectionBreakRule anchors each band to the data — the first
 section starts at the smallest bird present. Frequency follows the region filter
-([P-074](product.md#p-074)), so a data-anchored band would start at 1 in 43 nationally and
+([product.shareOfRecords](product.md#shareofrecords)), so a data-anchored band would start at 1 in 43 nationally and
 somewhere else entirely in Alaska, and *the same tier would mean a different thing on two
 pages of the same site.* Size does not have this problem because a Gyrfalcon is the same
 length wherever you select.
@@ -2530,10 +2594,10 @@ control reading "900%" explains nothing.
 
 ### What is deliberately NOT done
 
-**No tier is given a name.** Not "Common", not "Scarce". [P-074](product.md#p-074) says the
+**No tier is given a name.** Not "Common", not "Scarce". [product.shareOfRecords](product.md#shareofrecords) says the
 metric "is not a rarity tag and must not become one — no threshold divides common from rare;
 the number is shown and the reader judges", and a named band is exactly that threshold wearing
-a label. The headers state the range, as [P-024](product.md#p-024) already requires of every
+a label. The headers state the range, as [product.sectionHeadersStateRange](product.md#sectionheadersstaterange) already requires of every
 other metric.
 
 **Species with no records in the selection are kept, in a final section of their own**, headed
@@ -2544,37 +2608,39 @@ filter.
 ### A known consequence — and this got it wrong
 
 Under the size metrics a section holds birds of similar size, so
-[P-042](product.md#p-042)'s per-section scale is both honest and legible. Frequency does not
+[product.scaleToggle](product.md#scaletoggle)'s per-section scale is both honest and legible. Frequency does not
 correlate with size, so a frequency tier can hold a hummingbird and a swan.
 
 *This record originally concluded that was "no worse than Global, which draws the hummingbird
-just as small". That is false, and [CR-033](#cr-033) corrects it with the measurements:
+just as small". That is false, and [frequencyGlobalScale](#frequencyglobalscale) corrects it with the measurements:
 per-section rescales each tier by its own largest bird, which across the nine tiers swings by
 0.15× to 1.36×, so a 140 mm parrotbill is drawn the height of a 1,201 mm swan six tiers up.
 Global is the default under Frequency now.*
 
 ### Status of requirements touched
 
-- [P-020](product.md#p-020) — Active; value gains `frequency`.
-- [P-022](product.md#p-022) — Active; scoped to the size metrics, pointing at P-076.
-- [P-023](product.md#p-023) — Active; scoped likewise.
-- [P-076](product.md#p-076) — Active, new.
+- [product.oneSelectedMetric](product.md#oneselectedmetric) — Active; value gains `frequency`.
+- [product.sectionBreakRule](product.md#sectionbreakrule) — Active; scoped to the size metrics, pointing at product.orderByFrequency.
+- [product.sectionThresholdDefault](product.md#sectionthresholddefault) — Active; scoped likewise.
+- [product.orderByFrequency](product.md#orderbyfrequency) — Active, new.
 
-## CR-033 — Frequency defaults to global scale, because per-section has nothing to stand on there
+## frequencyGlobalScale
+
+**Frequency defaults to global scale, because per-section has nothing to stand on there**
 
 **Subject:** `diagram.scale.mode`
-**Kind:** Conditional — [P-042](product.md#p-042)'s default is right for the three size metrics
+**Kind:** Conditional — [product.scaleToggle](product.md#scaletoggle)'s default is right for the three size metrics
 and unsupported under the fourth
 **Date:** 2026-10-05 · **Decided by:** Sameer, who picked Global by hand and said so
 
-### What [CR-032](#cr-032) got wrong
+### What [frequencyMetric](#frequencymetric) got wrong
 
 That record said per-section scaling under Frequency was "the per-section scale working as
 specified rather than a new defect, and it is no worse than Global". **The second half is
 false**, and the owner found it by preferring Global without being told to.
 
-[P-022](product.md#p-022) justifies per-section scaling in one sentence: *"because a section is
-by construction no more than N% wide, [it] makes the per-section scale of P-042 honest."* That
+[product.sectionBreakRule](product.md#sectionbreakrule) justifies per-section scaling in one sentence: *"because a section is
+by construction no more than N% wide, [it] makes the per-section scale of product.scaleToggle honest."* That
 guarantee is the entire basis for rescaling between sections, and **a frequency tier does not
 have it** — tiers are banded by how often a bird is recorded, which is uncorrelated with size,
 so one tier spans 72 mm to 1,201 mm.
@@ -2597,7 +2663,7 @@ Each tier is drawn against its own largest bird. Across the nine tiers that refe
 
 The last tier holds one bird, a **140 mm** parrotbill, drawn to fill the box — the same height
 on screen as the 1,201 mm Trumpeter Swan six tiers up. **An 8.6× lie between two sections of
-one page**, and precisely the confusion [P-042](product.md#p-042) exists to prevent.
+one page**, and precisely the confusion [product.scaleToggle](product.md#scaletoggle) exists to prevent.
 
 ### Decision
 
@@ -2605,23 +2671,25 @@ one page**, and precisely the confusion [P-042](product.md#p-042) exists to prev
 length, wingspan and mass, where a section really is at most N% wide and the rescaling is
 honest. Either choice stays one click away under both.
 
-The reader loses legibility, which is what [CR-017](#cr-017) moved the default *to* per-section
+The reader loses legibility, which is what [perSectionDefault](#persectiondefault) moved the default *to* per-section
 for. That cost is accepted here because the alternative is not a less legible drawing but a
 wrong one: under Frequency, per-section scaling answers "how big is this bird" differently in
 adjacent tiers for no reason the reader can see.
 
 **Both scale values are now recognised explicitly in parsing.** With a default that varies by
 metric, reading only the non-default would leave *Per section* a dead button under Frequency —
-the exact trap the comment on that code already warned about, written when CR-017 moved the
+the exact trap the comment on that code already warned about, written when perSectionDefault moved the
 default the other way.
 
 ### Status of requirements touched
 
-- [P-042](product.md#p-042) — Active; the default is per-section for the size metrics and
+- [product.scaleToggle](product.md#scaletoggle) — Active; the default is per-section for the size metrics and
   global for frequency.
-- [CR-032](#cr-032) — its "no worse than Global" aside is withdrawn, above.
+- [frequencyMetric](#frequencymetric) — its "no worse than Global" aside is withdrawn, above.
 
-## CR-034 — A count that covers two species is shown on both, and says so
+## sharedCountShownOnBoth
+
+**A count that covers two species is shown on both, and says so**
 
 **Subject:** `presentation.share`, `dataset.name_provenance`
 **Kind:** Derived / emergent — no requirement is violated alone; the defect is in what a tile
@@ -2662,7 +2730,7 @@ already covered by `AviListRenames` or `CountedAs`:
 Prairie-Chicken, Gunnison Sage-Grouse, Puaiohi, Maui Parrotbill, Akohekohe, Desertas Petrel.
 Confirmed by querying every plausible alias: *Strix occidentalis* and *Falco rusticolus* return
 zero under any name. Their records are suppressed, not renamed, and
-[P-077](product.md#p-077) must not say otherwise.
+[product.namesRecordsFiledUnder](product.md#namesrecordsfiledunder) must not say otherwise.
 
 **Two of the name disagreements are SHARED names**, where one eBird binomial covers two species
 BirdView draws: *Setophaga petechia* (Northern + Mangrove Yellow Warbler) and *Trogon elegans*
@@ -2680,8 +2748,8 @@ withheld from both. The tile prints the figure it has and names the species it i
 the detail page says which source does not separate them and how many records are involved.
 
 The alternative considered was showing no figure on either, which is defensible under
-[G-005](goals.md#g-005) alone — a number we cannot attribute is a number we cannot stand
-behind. **[G-006](goals.md#g-006) decides it the other way**: suppressing the figure hides
+[goals.dataAsItIs](goals.md#dataasitis) alone — a number we cannot attribute is a number we cannot stand
+behind. **[goals.nothingDisappearsQuietly](goals.md#nothingdisappearsquietly) decides it the other way**: suppressing the figure hides
 6.2 million records and one of the commonest warblers in North America, and a reader has no way
 to tell that view from a bird genuinely absent. Showing the count with its seam named tells the
 reader strictly more, and nothing it tells them is false.
@@ -2693,7 +2761,9 @@ sit in a tier its own records do not earn. That is the honest consequence of eBi
 separating the two: the records are real, the tier is real, and the attribution is the part
 nobody knows. The label is what keeps the page from asserting the part nobody knows.
 
-## CR-035 — The region join normalizes names, and says what it drops
+## regionJoinNormalizes
+
+**The region join normalizes names, and says what it drops**
 
 **Subject:** `build.join_loss`, `dataset.region.counts`
 **Kind:** Direct — `birdview-status` and `birdview-regions` read the same facets under
@@ -2749,7 +2819,7 @@ above the 61,326 records of legitimate residue. Before this change the figure wa
 
 ### What this does not touch
 
-The shared names of [CR-034](#cr-034). *Setophaga petechia* and *Trogon elegans* match a drawn
+The shared names of [sharedCountShownOnBoth](#sharedcountshownonboth). *Setophaga petechia* and *Trogon elegans* match a drawn
 species exactly — they are not orphans and never were, which is why this audit does not list
 them and why that one needed a different instrument entirely.
 
@@ -2762,7 +2832,7 @@ an inconsistency.
 
 It is one, and it cannot be fixed by reversing the sort. **"1 in N" is a reciprocal**: N rises
 as the bird gets scarcer, so ascending the printed number descends abundance. Every ordering
-here obeys [P-021](product.md#p-021) — ascending the selected metric — and the metric itself is
+here obeys [product.ascendingOrder](product.md#ascendingorder) — ascending the selected metric — and the metric itself is
 inverted relative to the other three.
 
 Reversing it would move the inconsistency rather than remove it:
@@ -2779,7 +2849,7 @@ else, and the justification — *we ascend abundance, which descends the printed
 nowhere on the page.
 
 The root of the tension is a decision taken for other reasons and still right:
-[P-074](product.md#p-074) shows a scarcity-shaped number and refuses to call it rarity. If the
+[product.shareOfRecords](product.md#shareofrecords) shows a scarcity-shaped number and refuses to call it rarity. If the
 control were named for the shape of the figure the tension would vanish, and that name is
 exactly the one the requirement forbids. The felt inversion is the price of not shipping a
 rarity tag, and it is worth paying.
@@ -2787,7 +2857,7 @@ rarity tag, and it is worth paying.
 **What is done instead is to say the direction rather than imply it:** the Sort by control
 carries *most common first*, the help repeats it, and the first tier on the page reads
 `1 in 10 – 1 in 99`. Naming the tiers — "the birds you see most" — was considered and rejected
-on the same grounds as every other tier name ([CR-032](#cr-032)).
+on the same grounds as every other tier name ([frequencyMetric](#frequencymetric)).
 
 ### Two renames proposed and declined
 
@@ -2807,7 +2877,7 @@ the same denominator, so ranking by share and ranking by raw count are **provabl
 order** — verified over all regions and over New York. It is declined because *observations*
 is the **unit, not the quantity**. Length is measured in millimetres and the control does not
 say "Millimetres"; mass is in grams and it does not say "Grams". Having just standardised
-*observation* as the unit on every tile ([P-074](product.md#p-074)), reusing it as the axis
+*observation* as the unit on every tile ([product.shareOfRecords](product.md#shareofrecords)), reusing it as the axis
 name would conflate the two.
 
 On direction the second proposal is a wash and was offered as such: ascending *Observations*
@@ -2823,7 +2893,7 @@ scarcity-polarity name overclaims.
 It is declined on usability alone, which is the honest reason. *Infrequency* is a real English
 word and an uncommon one, and it would sit in a row of four buttons beside Length, Wingspan
 and Mass — three everyday nouns and one that makes a reader stop. The project has made this
-trade before and in the same direction: [P-074](product.md#p-074) prints *1 in N* rather than
+trade before and in the same direction: [product.shareOfRecords](product.md#shareofrecords) prints *1 in N* rather than
 a percentage because 0.000001% is unreadable, choosing the legible form over the conventional
 one. Here the legible form is the vaguer one.
 
@@ -2845,10 +2915,12 @@ Each sits under its own group behind a thin rule the width of the wider of the b
 text — an inline-flex column sizes to its widest child, so the Frequency rule tracks its own
 caption without anything being measured.
 
-## CR-036 — A month is present when the bird is, not when somebody was looking
+## monthPresence
+
+**A month is present when the bird is, not when somebody was looking**
 
 **Subject:** `presentation.region_filter`, `dataset.region.counts`
-**Kind:** Direct — [P-011](product.md#p-011) decides membership per region and says nothing
+**Kind:** Direct — [product.regionAndMonthFilter](product.md#regionandmonthfilter) decides membership per region and says nothing
 about when in the year, and extending the filter to months needs a rule it does not have
 **Date:** 2026-10-07 · **Decided by:** Sameer
 **Found by:** the owner, asking what it would take to add a Months control beside Regions
@@ -2866,12 +2938,12 @@ A species is present in a region **in a month** when
   ÷ (its records that year  / all bird records that year )   >=  0.2
 ```
 
-and it is present in that region at all by [P-011](product.md#p-011)'s annual rule, which is
+and it is present in that region at all by [product.regionAndMonthFilter](product.md#regionandmonthfilter)'s annual rule, which is
 unchanged.
 
 ### Why not recurrence, which is the model everywhere else
 
-[P-001](product.md#p-001) decides scope by **recurrence** — records falling in repeated
+[product.scopeIsRecurringAvifauna](product.md#scopeisrecurringavifauna) decides scope by **recurrence** — records falling in repeated
 episodes across years — and that is the right instrument for "is this bird really here". It
 cannot be had per month at an acceptable price. The `eventDate` facet caps at 1,000 distinct
 dates and truncates for every common species, so months read off it would be whichever dates
@@ -2888,7 +2960,7 @@ birding in May and **4.8%** in December, so a raw share would make every bird a 
 ratio asks a different question — *is this species a bigger or smaller part of what people
 record this month than it is across the year* — and 1.0 means exactly as present as usual.
 
-It is [P-074](product.md#p-074)'s own logic at month granularity, not a new concept.
+It is [product.shareOfRecords](product.md#shareofrecords)'s own logic at month granularity, not a new concept.
 
 ### The measurements, 2026-10-07, eBird via GBIF
 
@@ -2925,7 +2997,7 @@ October. It is a Nihoa resident, present every month of the year. What those rec
 So below an evidence floor the month filter **abstains**: the species is shown in every
 selected month, and the page says why. Hiding it from June would be a statement about the
 bird, when the only fact available is a statement about the survey — the same distinction
-[P-075](product.md#p-075) draws for a species with no records, and the one
+[product.undrawnSpeciesAnswer](product.md#undrawnspeciesanswer) draws for a species with no records, and the one
 `No data for these regions yet` draws for a region with no denominator.
 
 **The floor is 200 of the species' own records in that region**, and it is a floor on
@@ -2960,8 +3032,8 @@ cost to the verdicts measured above.
 
 ### What the interface says when it abstains
 
-The tile marks the figure, as [P-077](product.md#p-077)'s shared-name seam does, and the
-detail page carries the same disclosure, as [P-034](product.md#p-034) requires of anything a
+The tile marks the figure, as [product.namesRecordsFiledUnder](product.md#namesrecordsfiledunder)'s shared-name seam does, and the
+detail page carries the same disclosure, as [product.tileOpensDetail](product.md#tileopensdetail) requires of anything a
 tile shows. The marker names the reason rather than the mechanism: too few records to tell
 the months the bird is here from the months nobody looked, so it is shown in all of them.
 
@@ -2986,7 +3058,7 @@ the months the bird is here from the months nobody looked, so it is shown in all
 
 ### Rejected
 
-**A fixed record count per month.** [P-011](product.md#p-011) already rejected absolute bars
+**A fixed record count per month.** [product.regionAndMonthFilter](product.md#regionandmonthfilter) already rejected absolute bars
 for region membership — eBird's volume doubled in five years, so any fixed count admits more
 species over time for nothing — and a month is the same argument twelve times over.
 
@@ -2994,7 +3066,7 @@ species over time for nothing — and a month is the same argument twelve times 
 needed: Hawaii records roughly 208,000 birds a month, so one per million is 0.2 records and
 any single sighting would read as presence.
 
-**Season groups, named.** Rejected on [P-076](product.md#p-076)'s existing rule — state the
+**Season groups, named.** Rejected on [product.orderByFrequency](product.md#orderbyfrequency)'s existing rule — state the
 range, do not name the band. "Winter" is wrong for Hawaii, Palmyra, Navassa, Wake and
 Johnston whatever the hemisphere, and the Central Pacific box spans −10° to 40° and crosses
 the equator. The twelve months stand unlabeled and ungrouped.
@@ -3002,14 +3074,16 @@ the equator. The twelve months stand unlabeled and ungrouped.
 **A "This month" control.** Dropped by the owner: clicking **All** when every month is
 selected clears them, so the current month is two clicks away and a dedicated control buys
 one. It would also have made the index time-dependent, breaking
-[AC-110](acceptance.md#ac-110)'s invariant that a page is a pure function of its build and
+[acceptance.honestRevalidation](acceptance.md#honestrevalidation)'s invariant that a page is a pure function of its build and
 its URL.
 
 
-## CR-037 — eBird's silence is not a bird's absence
+## ebirdSilenceNotAbsence
+
+**eBird's silence is not a bird's absence**
 
 **Subject:** `presentation.region_filter`, `dataset.region.counts`, `presentation.name_provenance`
-**Kind:** Direct — [CR-036](#cr-036)'s month filter treats a month with no records as a month
+**Kind:** Direct — [monthPresence](#monthpresence)'s month filter treats a month with no records as a month
 without the bird, and for some species in some regions eBird publishes no records **on purpose**
 **Date:** 2026-10-09 · **Decided by:** Sameer
 **Found by:** the owner, asking whether dropping iNaturalist would skew BirdView; measuring that
@@ -3024,7 +3098,7 @@ knew as `WithheldByEBird`. In a listed region and window, eBird's records are mi
 The month filter read that as absence. **Painted Bunting was hidden from Florida in January**,
 the heart of its Florida season, because eBird publishes none of its Florida records from
 October to mid-April; **Short-eared Owl from New York in June**, the same way. Both are the
-error [P-075](product.md#p-075) exists to prevent: an absence of measurement read as a
+error [product.undrawnSpeciesAnswer](product.md#undrawnspeciesanswer) exists to prevent: an absence of measurement read as a
 measurement of absence.
 
 ### The decision
@@ -3038,7 +3112,7 @@ measurement of absence.
    - **a seasonal window** is confirmed when eBird's monthly rate inside it is **at most 5%** of
      its rate in the same region's other months;
    - **a whole-year listing** is confirmed when iNaturalist holds **at least three times** what
-     eBird does there — [AC-105](acceptance.md#ac-105)'s existing test for a source that
+     eBird does there — [acceptance.disagreementsDeclared](acceptance.md#disagreementsdeclared)'s existing test for a source that
      out-records eBird, applied to one region.
    Only months the window covers **entirely** are marked; a month it half covers still holds
    half its records and is judged on them.
@@ -3065,20 +3139,22 @@ would make the evidence anything but thin.
 
 ### What this does not change
 
-Presence ([P-011](product.md#p-011)) and the figure on the tile are untouched. Counting eBird
+Presence ([product.regionAndMonthFilter](product.md#regionandmonthfilter)) and the figure on the tile are untouched. Counting eBird
 alone and using iNaturalist only where eBird is confirmed silent is the larger change in work
 arising; this decision builds the table and the confirmation it will need, and fixes the bug
 that was live.
 
 
-## CR-038 — Count eBird, and use iNaturalist only where eBird is withholding a bird
+## countEbirdFirst
+
+**Count eBird, and use iNaturalist only where eBird is withholding a bird**
 
 **Subject:** `dataset.region.counts`, `presentation.region_filter`, `dataset.scope`
-**Kind:** Direct — [P-011](product.md#p-011) admitted a species to a region on either source
+**Kind:** Direct — [product.regionAndMonthFilter](product.md#regionandmonthfilter) admitted a species to a region on either source
 against that source's own total, and iNaturalist's totals are small enough that one record passes
 **Date:** 2026-10-09 · **Decided by:** Sameer
 **Found by:** the owner, concerned that iNaturalist was skewing BirdView, then asking what dropping
-it would cost once eBird's withholdings were known ([CR-037](#cr-037))
+it would cost once eBird's withholdings were known ([ebirdSilenceNotAbsence](#ebirdsilencenotabsence))
 
 ### What was wrong
 
@@ -3094,14 +3170,14 @@ alone photographed in repeated years recurred.
 ### The decision
 
 **eBird's records are counted, everywhere. iNaturalist's are counted only in a month eBird is
-confirmed to withhold the species in that region** (CR-037's flags). That applies to the figure
+confirmed to withhold the species in that region** (ebirdSilenceNotAbsence's flags). That applies to the figure
 on every tile, to region presence, to the month filter's counts, and to the recurrence that
 decides scope.
 
 - **Presence** is eBird's count against eBird's total — or, where eBird is withholding the
   species, iNaturalist's count in those months against iNaturalist's total. An eBird-sized
   denominator would make every iNaturalist count look about forty-eight times rarer than it is.
-- **Shared names**: both species take the shared name's eBird count ([P-077](product.md#p-077)).
+- **Shared names**: both species take the shared name's eBird count ([product.namesRecordsFiledUnder](product.md#namesrecordsfiledunder)).
   eBird holds Northern Yellow Warbler's records only under *Setophaga petechia*; without this the
   commonest warbler in North America would appear in no region. Region totals are taken before
   the copy, so the shared count is never divided into itself twice.
@@ -3128,17 +3204,19 @@ without knowing where eBird withholds trades one error for its opposite.
 
 ---
 
-## CR-039 — Blue-billed White-Tern borrows from BirdLife's narrower White Tern
+## whiteTernBorrows
+
+**Blue-billed White-Tern borrows from BirdLife's narrower White Tern**
 
 **Subject:** `dataset.join.near_match.sheet`
-**Kind:** Refinement of [CR-006](#cr-006) — a near-match donor exists in a narrower concept than
+**Kind:** Refinement of [abaSpeciesWithoutAvonet](#abaspecieswithoutavonet) — a near-match donor exists in a narrower concept than
 the one the lookup order reaches first
 **Date:** 2026-10-13 · **Decided by:** Sameer
 
 ### What was wrong
 
 *Gygis candida* has no AVONET row of its own, so it borrows from *Gygis alba* under
-[CR-006](#cr-006). The near-match lookup tries the eBird sheet first, and `AVONET2_eBird`'s
+[abaSpeciesWithoutAvonet](#abaspecieswithoutavonet). The near-match lookup tries the eBird sheet first, and `AVONET2_eBird`'s
 *Gygis alba* is the 2022 Clements concept, which still contains all three white terns AviList now
 separates: *alba*, *candida* and *microrhyncha*. `AVONET1_BirdLife` already splits off
 *microrhyncha*, the Little White Tern, so its *Gygis alba* is *alba* plus *candida* only. The
@@ -3151,13 +3229,13 @@ crosswalk shows it: eBird *Gygis alba* maps to BirdLife *Gygis alba* and *Gygis 
 | `AVONET1_BirdLife` *Gygis microrhyncha* | 39.0 | 76.8 | 215.0 | 117 |
 
 The small Little White Tern pulls the eBird row's linear traits down. Mass is identical across all
-three rows, the same unsplit-mass caveat CR-006 recorded for the gulls.
+three rows, the same unsplit-mass caveat abaSpeciesWithoutAvonet recorded for the gulls.
 
 ### The decision
 
 **Blue-billed White-Tern's traits come from `AVONET1_BirdLife`'s *Gygis alba*.** They remain
 `near-match`, because that row still combines two species. The source sheet is named in the
-provenance record as P-062 already requires. Bill and tail change; mass, and the head, neck and
+provenance record as product.provenancePerMetric already requires. Bill and tail change; mass, and the head, neck and
 trunk modeled from it, do not. Wingspan does not either: the crosswalk already led to Fox's
 BirdLife *Gygis alba*.
 
@@ -3170,24 +3248,26 @@ on the eBird row.
 
 ### Status of requirements touched
 
-- [P-060](product.md#p-060) — Active; the traits line names the exception.
-- [P-062](product.md#p-062) — Active and unchanged; the sheet already appears in `source`.
-- [AC-116](acceptance.md#ac-116) — new.
-- CR-006's open taxonomic check on the four disguised splits is **not** closed by this record.
+- [product.lengthAndWingspanSources](product.md#lengthandwingspansources) — Active; the traits line names the exception.
+- [product.provenancePerMetric](product.md#provenancepermetric) — Active and unchanged; the sheet already appears in `source`.
+- [acceptance.whiteTernFromBirdlife](acceptance.md#whiteternfrombirdlife) — new.
+- abaSpeciesWithoutAvonet's open taxonomic check on the four disguised splits is **not** closed by this record.
 - Open: whether Vega Gull should borrow from BirdLife's *Larus argentatus* in the same way.
 
 
 ---
 
-## CR-040 — Vega Gull borrows from BirdLife's *Larus smithsonianus*, and shared drawings say so
+## vegaGullBorrows
+
+**Vega Gull borrows from BirdLife's *Larus smithsonianus*, and shared drawings say so**
 
 **Subject:** `dataset.join.near_match`, `presentation.shared_measurements`
-**Kind:** Resolves the open item of [CR-039](#cr-039), and adds [P-079](product.md#p-079)
+**Kind:** Resolves the open item of [whiteTernBorrows](#whiteternborrows), and adds [product.borrowedMeasurementsSaySo](product.md#borrowedmeasurementssayso)
 **Date:** 2026-10-13 (evidence re-based 2026-10-14) · **Decided by:** Sameer
 
 ### What was found
 
-[CR-039](#cr-039) left open which of BirdLife's two herring gull rows — *Larus argentatus* or
+[whiteTernBorrows](#whiteternborrows) left open which of BirdLife's two herring gull rows — *Larus argentatus* or
 *Larus smithsonianus* — holds Vega Gull. Both vendored CC BY 4.0 workbooks answer it:
 
 1. **AviList v2025b extended** (`Proposal_number` `2025-1136`, `Decision_summary` on the four
@@ -3218,7 +3298,7 @@ not used.)*
 1. **Vega Gull borrows from `AVONET1_BirdLife`'s *Larus smithsonianus*,** labeled `near-match`.
    American Herring Gull already uses that row, so the two are drawn identically.
 2. **Identical drawings are acceptable for borrowed values, and are noted on the drawing**
-   ([P-079](product.md#p-079)). CR-006 named identical drawings only as a symptom of *silent*
+   ([product.borrowedMeasurementsSaySo](product.md#borrowedmeasurementssayso)). abaSpeciesWithoutAvonet named identical drawings only as a symptom of *silent*
    borrowing. It never forbade two labeled species sharing a row. The owner asked that the
    coincidence be visible on the tile, in the way a shared name already is.
 3. **Vega Gull's wingspan becomes modeled.** It was a near-match to Fox's *Larus argentatus*,
@@ -3242,17 +3322,19 @@ Both are recorded in [todo.md](todo.md).
 
 ### Status of requirements touched
 
-- [P-079](product.md#p-079) — new.
-- [P-060](product.md#p-060), [P-062](product.md#p-062) — Active and unchanged.
-- [AC-116](acceptance.md#ac-116) — Vega Gull now expects `AVONET1_BirdLife`.
-- [AC-117](acceptance.md#ac-117) — new.
+- [product.borrowedMeasurementsSaySo](product.md#borrowedmeasurementssayso) — new.
+- [product.lengthAndWingspanSources](product.md#lengthandwingspansources), [product.provenancePerMetric](product.md#provenancepermetric) — Active and unchanged.
+- [acceptance.whiteTernFromBirdlife](acceptance.md#whiteternfrombirdlife) — Vega Gull now expects `AVONET1_BirdLife`.
+- [acceptance.sharedMeasurementsDisclosed](acceptance.md#sharedmeasurementsdisclosed) — new.
 
 ---
 
-## CR-041 — European Herring Gull is read from BirdLife's European-only row
+## herringGullEuropeanRow
+
+**European Herring Gull is read from BirdLife's European-only row**
 
 **Subject:** `dataset.join.key`
-**Kind:** Resolves one of the two items [CR-040](#cr-040) left open
+**Kind:** Resolves one of the two items [vegaGullBorrows](#vegagullborrows) left open
 **Date:** 2026-10-13 · **Decided by:** Sameer
 
 ### What was wrong
@@ -3277,7 +3359,7 @@ modeled head, neck and body do not change. Wingspan is Fox's empirical *Larus ar
 way.
 
 The sheet is declared per species in `taxonomy.OwnRowSheets`, with no fallback, as
-[CR-039](#cr-039) did for near-match donors.
+[whiteTernBorrows](#whiteternborrows) did for near-match donors.
 
 **American Herring Gull stays as it is**, by the owner's decision: `AVONET1_BirdLife`'s
 *Larus smithsonianus*, labeled `measured`. It is the narrowest row AVONET has, and 4 of its 8
@@ -3285,16 +3367,18 @@ specimens are tagged American Herring Gull; the other 4 carry no subspecies.
 
 ### Status of requirements touched
 
-- [P-060](product.md#p-060) — Active; the traits line names this case.
-- [AC-118](acceptance.md#ac-118) — new.
+- [product.lengthAndWingspanSources](product.md#lengthandwingspansources) — Active; the traits line names this case.
+- [acceptance.herringGullFromEuropeanRow](acceptance.md#herringgullfromeuropeanrow) — new.
 
 ---
 
-## CR-042 — Records below the presence bar are counted, not discarded
+## belowBarCounted
+
+**Records below the presence bar are counted, not discarded**
 
 **Subject:** `dataset.region.counts`
-**Kind:** Direct — [P-011](product.md#p-011)'s presence bar was also deciding which records
-[P-074](product.md#p-074)'s figure counts
+**Kind:** Direct — [product.regionAndMonthFilter](product.md#regionandmonthfilter)'s presence bar was also deciding which records
+[product.shareOfRecords](product.md#shareofrecords)'s figure counts
 **Date:** 2026-10-13 · **Decided by:** Sameer
 **Found by:** the owner, asking why Emu's tile said it had zero observations
 
@@ -3305,7 +3389,7 @@ per million there. Below that, the records were dropped, so the figure on the ti
 them. Emu is `established` in Texas on 19 eBird records in 18 episodes across 11 years, which is
 0.26 per million of Texas's birding, and its tile read *0 in 1,237,352,304 species observations*.
 **47 drawn species read zero everywhere**, most of them escapes whose iNaturalist-only presences
-[CR-038](#cr-038) removed, and every other species lost whatever it had below the bar.
+[countEbirdFirst](#countebirdfirst) removed, and every other species lost whatever it had below the bar.
 
 ### The decision
 
@@ -3320,24 +3404,26 @@ nothing about where the bar sits, so it is done on its own.
 
 ### Status of requirements touched
 
-- [P-011](product.md#p-011) — Active; membership no longer decides what is counted.
-- [P-074](product.md#p-074) — Active and unchanged; its figure now has all the records it names.
-- [AC-119](acceptance.md#ac-119) — new.
+- [product.regionAndMonthFilter](product.md#regionandmonthfilter) — Active; membership no longer decides what is counted.
+- [product.shareOfRecords](product.md#shareofrecords) — Active and unchanged; its figure now has all the records it names.
+- [acceptance.belowBarCountsKept](acceptance.md#belowbarcountskept) — new.
 
 ---
 
-## CR-043 — Escaped and kept birds come off the index
+## escapedBirdsOffIndex
+
+**Escaped and kept birds come off the index**
 
 **Subject:** `presentation.index.exotic`, `dataset.status.exceptions`
-**Kind:** Resolves the open question on [P-071](product.md#p-071)'s second class, and implements
-[P-070](product.md#p-070)'s `exotic` flag
+**Kind:** Resolves the open question on [product.declaredExceptions](product.md#declaredexceptions)'s second class, and implements
+[product.statusIsPublished](product.md#statusispublished)'s `exotic` flag
 **Date:** 2026-10-14 · **Decided by:** Sameer
 
 ### What was wrong
 
-Recurrence is blind to origin, as [CR-028](#cr-028) said, and P-071 required a declared list for
+Recurrence is blind to origin, as [scopeFromRecurrence](#scopefromrecurrence) said, and product.declaredExceptions required a declared list for
 birds kept going by people. None was built, so escapes were drawn as ordinary birds. Once
-[CR-042](#cr-042) counted every record, they showed up as figures too. The owner found them
+[belowBarCounted](#belowbarcounted) counted every record, they showed up as figures too. The owner found them
 distracting.
 
 ### Options
@@ -3357,17 +3443,19 @@ distracting.
   every control leave them out, and `/excluded` lists them, linked.
 - **The ingest fails if a listed bird is not drawn**, so a list entry cannot outlive the bird.
 - **Emu is on the list.** A note of 2026-10-13 in the open-work list read "Emu stays", written
-  while [CR-042](#cr-042) was restoring its counts; the owner decided on 2026-10-14 that it is
+  while [belowBarCounted](#belowbarcounted) was restoring its counts; the owner decided on 2026-10-14 that it is
   excluded with the other farm escapes, which replaces that note.
 
 ### Status of requirements touched
 
-- [P-080](product.md#p-080) — new.
-- [P-070](product.md#p-070) — Active; `exotic` exists, as a declared list.
-- [P-071](product.md#p-071) — Active; its second class is now implemented for escapes.
-- [AC-120](acceptance.md#ac-120) — new.
+- [product.escapedBirdsListed](product.md#escapedbirdslisted) — new.
+- [product.statusIsPublished](product.md#statusispublished) — Active; `exotic` exists, as a declared list.
+- [product.declaredExceptions](product.md#declaredexceptions) — Active; its second class is now implemented for escapes.
+- [acceptance.escapedBirdsListedAndServed](acceptance.md#escapedbirdslistedandserved) — new.
 
-## CR-044 — Readers are told the drawing is a stick figure
+## stickFigure
+
+**Readers are told the drawing is a stick figure**
 
 **Subject:** `diagram.segments` (wording)
 **Kind:** Presentation; no behavior changes
@@ -3376,7 +3464,7 @@ distracting.
 ### What was wrong
 
 The site called each bird's drawing a *diagram*. That is correct, but it does not tell a reader
-what they will see, and since [P-078](product.md#p-078) the site has a second diagram, of the data
+what they will see, and since [product.pipelineDiagram](product.md#pipelinediagram) the site has a second diagram, of the data
 pipeline, linked from the same page as the first.
 
 ### The decision
@@ -3394,8 +3482,8 @@ site, *diagram* now means only the pipeline diagram.
 
 ### Status of requirements touched
 
-- [P-040](product.md#p-040) — Active; states the reader-facing term.
-- [AC-121](acceptance.md#ac-121) — new.
+- [product.segmentComposition](product.md#segmentcomposition) — Active; states the reader-facing term.
+- [acceptance.readersToldStickFigure](acceptance.md#readerstoldstickfigure) — new.
 
 ## Work arising
 
@@ -3404,16 +3492,18 @@ everything outstanding is in one file. Decisions stay here; open work does not.
 
 ---
 
-## CR-045 — The bundle moves from spec/ to river/; the site keeps /spec
+## bundleMovesToRiver
+
+**The bundle moves from spec/ to river/; the site keeps /spec**
 
 **Subject:** `process.spec_location`
-**Kind:** Amends [T-020](tech.md#t-020)
+**Kind:** Amends [tech.bundleIsNormative](tech.md#bundleisnormative)
 **Date:** 2026-10-15 · **Decided by:** Sameer
 
 ### What changed
 
-[T-020](tech.md#t-020) named `spec/` as where the normative bundle lives. On adopting River, whose
-method gives the bundle the directory `river/`, it moves there. T-020's value is now `river/`.
+[tech.bundleIsNormative](tech.md#bundleisnormative) named `spec/` as where the normative bundle lives. On adopting River, whose
+method gives the bundle the directory `river/`, it moves there. tech.bundleIsNormative's value is now `river/`.
 
 ### What did not change
 
@@ -3424,7 +3514,7 @@ from outside. `repoLinks` in `cmd/birdview` maps one to the other, so neither na
 
 ### What the move exposed
 
-`TestServedDocumentsHaveNoBrokenLinks` (AC-091) was written for exactly the bug a move like this
+`TestServedDocumentsHaveNoBrokenLinks` (acceptance.categoryOriginShown) was written for exactly the bug a move like this
 causes — a repository link like `../river/product.md` left unrewritten, so a browser gets a 404 —
 and passed over 53 of them, because it followed only links that began with `/`. An unrewritten
 link is relative, so it was skipped rather than fetched. The test could never have caught its own
@@ -3443,15 +3533,17 @@ become — links to the published repository, or plain code spans — is undecid
 
 ---
 
-## CR-046 — The requirements are no longer served; the guides link to the repository
+## requirementsNotServed
+
+**The requirements are no longer served; the guides link to the repository**
 
 **Subject:** `presentation.docs`
-**Kind:** Amends [P-069](product.md#p-069); supersedes the half of [CR-045](#cr-045) that kept `/spec`
+**Kind:** Amends [product.categoryProvenance](product.md#categoryprovenance); supersedes the half of [bundleMovesToRiver](#bundlemovestoriver) that kept `/spec`
 **Date:** 2026-10-16 · **Decided by:** Sameer
 
 ### Why the spec was served
 
-[P-069](product.md#p-069) gave two reasons, and the second rested on the first. The guides were
+[product.categoryProvenance](product.md#categoryprovenance) gave two reasons, and the second rested on the first. The guides were
 served by BirdView itself because *"the project has no public repository to link to"*; and the
 requirement documents were then served too, in commit `a19bda7` on 2026-10-03, because the
 guides cite them constantly and *"a citation to a 404 is worse than no citation."* Serving the
@@ -3460,7 +3552,7 @@ spec was never a goal of its own.
 ### What changed
 
 **The first premise expired.** `github.com/google/birdview` has existed since 2026-10-08 and is
-to be published. P-069 also leaned on [T-002](tech.md#t-002), but T-002 limits the requests the
+to be published. product.categoryProvenance also leaned on [tech.selfContainedServer](tech.md#selfcontainedserver), but tech.selfContainedServer limits the requests the
 *server* makes, not the links a reader follows. Its rationale — a laptop in a cabin — argues for
 serving the guides offline, which still holds, and only weakly for serving requirement
 documents to an offline birder.
@@ -3479,22 +3571,73 @@ requirement linked to source code or a data table the site could not serve.
    covers requirements, source code, data tables and vendored inputs alike. A link to another
    guide becomes its `/docs` path.
 3. **The three reader-facing links to the spec now go to the guide.** The index, the
-   undrawn-species page and `/excluded` linked readers to P-001 and P-080 for scope; they now
+   undrawn-species page and `/excluded` linked readers to product.scopeIsRecurringAvifauna and product.escapedBirdsListed for scope; they now
    link to [Scope](../docs/data.md) in the data guide, which explains it for a reader rather
    than as a requirement.
 
 ### Guardrails, and one coverage gap closed
 
-The broken-links check (AC-091) now confirms that every repository link names a file that
+The broken-links check (acceptance.categoryOriginShown) now confirms that every repository link names a file that
 exists in the checkout, and was watched failing on a misspelled one. The 26 known-broken links
 are gone, and the list that held them is deleted.
 
-**Stopping serving would have quietly cut [AC-097](acceptance.md#ac-097)'s coverage.** The
+**Stopping serving would have quietly cut [acceptance.noContactAddressPublished](acceptance.md#nocontactaddresspublished)'s coverage.** The
 personal-address check scanned the requirements because they were served; they are still
 public with the repository. It now reads `river/*.md` from the checkout — the same files — and
 was watched failing on an address planted in `river/goals.md`.
 
 ### Known limitation
 
-GitHub builds a heading's anchor from its full text, so a link to `decisions.md#cr-030` opens
+GitHub builds a heading's anchor from its full text, so a link to `decisions.md#seasharediffers` opens
 the file at the top rather than at the entry. Logged in [todo.md](todo.md).
+
+---
+
+## descriptiveIdentifiers
+
+**Every identifier is a descriptive name, and every heading is the identifier alone**
+
+**Subject:** `process.identifiers`
+**Kind:** Renames every goal, requirement, criterion and decision; no behavior changes
+**Date:** 2026-10-16 · **Decided by:** Sameer
+
+### What changed
+
+All 230 identifiers — 6 goals, 62 product and 19 technical requirements, 97 acceptance criteria
+and 46 decisions — went from letter-and-number codes, a `P`, `T`, `AC` or `CR` and three digits,
+to descriptive camelCase:
+[product.scopeIsRecurringAvifauna](product.md#scopeisrecurringavifauna),
+[tech.fetchRestrictedInputs](tech.md#fetchrestrictedinputs),
+[acceptance.bothCommandsBuild](acceptance.md#bothcommandsbuild),
+[decisions.scopeFromRecurrence](#scopefromrecurrence). This is River's convention, adopted with
+the method.
+
+**A reference is qualified by kind outside the file that defines it** — `product.x`, `tech.x`,
+`goals.x`, `decisions.x`, `acceptance.x` — and bare inside it. Requirement and criterion names are
+unique across all files, because composition will merge them into the `app` and `dataset`
+packages, where a shared name would be a silent conflict.
+
+**An item's heading is its identifier alone, with the title in bold beneath.** A code host
+anchors a heading by its whole text, so a heading of the old form — the code, a dash, then the
+title — anchored as the code and the title run together, and a link to the code alone opened the
+file at the top. That mattered once
+[requirementsNotServed](#requirementsnotserved) sent the guides' citations to the published
+repository. Now every anchor is the identifier lowercased, and a title can be reworded without
+breaking a link.
+
+### What it cost, and why it was done anyway
+
+About 3,000 references across 96 files: Go comments, log output, generated data, the guides.
+The alternative was to let River accept legacy identifiers. Sameer chose to rename: a migration
+from specman happens once, and optimizing the method for it would leave the cost in every
+project afterwards.
+
+Two pipeline-diagram labels named requirements by identifier; they now say what they mean in
+words, and the picture was re-rendered from its source.
+
+### Checks
+
+`refs.py` was rewritten: it now checks every tracked file rather than three, resolves every
+qualified reference and every anchored link into the bundle, and fails on any identifier in the
+superseded form. Its first run found three links that had been broken since specman's method was
+replaced — two citing a rule River had dropped, which River has since restored.

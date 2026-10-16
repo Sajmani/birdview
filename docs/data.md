@@ -25,19 +25,19 @@ Every number carries one of three kinds, visible on the detail page for any bird
 
 A `~` in the tile footer marks anything not measured. The rule the project holds itself to is that
 a modeled value is never presented as a measurement — see
-[CR-001](../river/decisions.md) for why that decision came first and shaped everything else.
+[decisions.noOpenLengthAndWingspan](../river/decisions.md) for why that decision came first and shaped everything else.
 
 **near-match** deserves a note. Nine drawn species are recent taxonomic splits that AVONET has not
 caught up with — American Goshawk, Vega Gull, Hudsonian Whimbrel, Western Cattle-Egret, American
 Barn Owl, Chihuahuan Meadowlark, Cocos Booby, Siberian Pipit and Blue-billed White-Tern. Each borrows the parent taxon's measurements, and the detail page names the taxon
 it borrowed from. Four of those splits are still awaiting a taxonomic check
-([CR-006](../river/decisions.md)).
+([decisions.abaSpeciesWithoutAvonet](../river/decisions.md)).
 
 Where the taxon a species borrows from is drawn too, the two drawings come out the same, because
 the measurements are. Both tiles then say *Same measurements as* the other bird, and both detail
 pages name the row they share. Four pairs do: Siberian and American Pipit, Chihuahuan and Eastern
 Meadowlark, Cocos and Brown Booby, and Vega and American Herring Gull
-([CR-040](../river/decisions.md#cr-040)).
+([decisions.vegaGullBorrows](../river/decisions.md#vegagullborrows)).
 
 ---
 
@@ -66,11 +66,11 @@ This is the project's central compromise and it is worth stating plainly.
 AVONET — the only openly licensed morphology dataset with this coverage — **has no body length and
 no wingspan**. Field-guide lengths are not openly licensed. The one comprehensive academic source,
 Ricklefs (2017), is published under terms that prohibit extraction, storage and redistribution, so
-it was evaluated and **rejected** ([CR-002](../river/decisions.md)).
+it was evaluated and **rejected** ([decisions.ricklefsProhibited](../river/decisions.md)).
 
 So BirdView builds length rather than borrowing it: bill + head + neck + body + tail, with the two
 measured parts real and the three modeled parts labeled. The segments sum exactly to the total
-([P-041](../river/product.md)), which is what lets the height of a figure *be* the bird's
+([product.segmentsSumToLength](../river/product.md)), which is what lets the height of a figure *be* the bird's
 length and makes two figures at one scale directly comparable.
 
 The consequence is that **BirdView's lengths will not match your field guide.** They are a
@@ -94,7 +94,7 @@ Asked for the same species Fox et al. predicted, it agrees with their published 
 **mean of 1.32%** — it is, in effect, their model reconstructed from the data they published. That
 agreement is a standing check, so a regression in the fitting code shows up as disagreement with an
 external reference rather than as a quietly worse dataset. Full reasoning:
-[CR-008](../river/decisions.md).
+[decisions.fittedWingspanModel](../river/decisions.md).
 
 Each modeled wingspan states its own error. A Passeriform reads:
 
@@ -142,7 +142,7 @@ everything unlisted at 0.18.
 
 They are surfaced anyway, with the function named — a heron's detail page reads *"neck modeled as
 0.85 × trunk (family-specific ratio for Ardeidae)"*. The reasoning
-([CR-007](../river/decisions.md)) is that the user sees the neck either way, since it is
+([decisions.neckLengthAsMetric](../river/decisions.md)) is that the user sees the neck either way, since it is
 drawn at a length in every figure. Hiding the number hides the explanation, not the claim.
 
 ---
@@ -152,7 +152,7 @@ drawn at a length in every figure. Hiding the number hides the explanation, not 
 These are choices about rendering, not data. None of them produces a number.
 
 **The stick figure is a top-down view of a bird in flight.** Stated as a requirement
-([P-040](../river/product.md)) because leaving it unstated made several questions
+([product.segmentComposition](../river/product.md)) because leaving it unstated made several questions
 unanswerable. It is also what makes the wing crossbar honest: seen from above, wingspan and body
 length genuinely lie in one plane, so drawing them at one scale is a fact rather than a convention.
 
@@ -162,14 +162,14 @@ herons, cranes, storks, ibises, flamingos, stilts, rails, loons, grebes — what
 projection past the tail tip, which needs the femur, the toes, the hip position and the *full*
 tibiotarsus. AVONET measures only the tarsometatarsus. Attempting it anyway put a White Ibis at
 −14 mm of projection, a bird whose trailing legs are unmistakable.
-[CR-010](../river/decisions.md) has the numbers and what the removal cost.
+[decisions.inFlightNoLegs](../river/decisions.md) has the numbers and what the removal cost.
 
 **Herons and pelicans get an S-shaped neck.** Ardeidae and Pelecanidae fly with the head drawn back
 onto the shoulders — the field mark separating a heron from a crane, a stork or an ibis in the air.
 Their neck is drawn as two semicircles, which run exactly the neck's length of stroke through
 `2/π ≈ 63.7%` of that height. The stroke is still to scale; the compression is a consequence of the
 shape, not a chosen number. Sorting, sectioning and the detail view all still use the full neck
-length ([CR-011](../river/decisions.md)).
+length ([decisions.foldedNeckAsS](../river/decisions.md)).
 
 **The head is an oval 0.72 as wide as it is long**, the tail is a stick, and the body is a stick.
 No source gives a tail width or a body width, and drawing a fan or a teardrop would assert a shape
@@ -193,7 +193,7 @@ search URL, which would never 404 and would therefore always look like it had wo
 Matching was measured before adoption: on a 55-species sample containing all ten near-match
 splits, 55 resolved exactly on scientific name and 54 also agreed on common name, the one
 difference being a hyphen. Wikimedia Commons was tested too and failed on three of six of the hard
-cases, because it lags the recent splits. [CR-012](../river/decisions.md) has the full comparison.
+cases, because it lags the recent splits. [decisions.inaturalistLinkAdopted](../river/decisions.md) has the full comparison.
 
 BirdView **links and never copies**. No photograph is embedded, hotlinked or cached; the reader
 arrives on iNaturalist, where each image carries its own license — frequently CC BY-NC, which
@@ -213,11 +213,11 @@ speak for them, each named with its reason.
 supply of escapes, so parrots, waxbills, ornamental waterfowl, zoo birds and a farmed Emu pass
 the rule too. They are on a declared list, each with its reason, and are left off the index and
 its controls; [the list](/excluded) names them all and links to their pages, which stay up
-([P-080](../river/product.md#p-080)). Long-feral populations and wild vagrants are not on it.
+([product.escapedBirdsListed](../river/product.md#escapedbirdslisted)). Long-feral populations and wild vagrants are not on it.
 
 One in-scope species the occurrence data names is dropped: Gray-headed Swamphen (*Porphyrio
 poliocephalus*), which eBird splits and AviList lumps into Purple Swamphen. (A second, Western
-Warbling-Vireo, is also in the drop table, and left scope when [CR-038](../river/decisions.md#cr-038)
+Warbling-Vireo, is also in the drop table, and left scope when [decisions.countEbirdFirst](../river/decisions.md#countebirdfirst)
 switched recurrence to eBird.) Every name BirdView serves comes from AviList, so one AviList has
 no concept for has no name this project can publish.
 
@@ -243,7 +243,7 @@ assigned rather than derived from the English name.
 dataset, so every one is modeled.
 
 **Taxonomy is AviList's** — names, families, and the sequence families are listed in
-([CR-022](../river/decisions.md#cr-022)). Where AVONET's BirdLife taxonomy disagrees, AviList
+([decisions.avilistReplacesAba](../river/decisions.md#avilistreplacesaba)). Where AVONET's BirdLife taxonomy disagrees, AviList
 wins, and the join is bridged by explicit synonym tables rather than by fuzzy matching. The
 tables run in both directions and are kept apart on purpose: one reaches *backward* from a
 current name to the older label AVONET measured under, the other *forward* from BirdView's name
@@ -262,7 +262,7 @@ plus five ocean boxes that are BirdView's own and are described below.
 **A species is listed in a region when it reaches 1 record per million of that region's bird
 records**, from GBIF under CC BY 4.0. The bar decides only where it is listed. Records in a region
 where it stays under the bar still count in its *1 in N*: Emu is listed nowhere, and its 38
-records, 19 of them in Texas, are on its tile ([CR-042](../river/decisions.md#cr-042)).
+records, 19 of them in Texas, are on its tile ([decisions.belowBarCounted](../river/decisions.md#belowbarcounted)).
 
 **Relative rather than a fixed count**, for two measured reasons. eBird's volume doubled in five
 years, so any absolute bar admits more species over time for no ecological reason. And effort
@@ -316,7 +316,7 @@ records and a vagrant with four records really are the same shape.
 What separates them is **recurrence**: not how many records, but whether they repeat across
 years. The 2023 flamingo has 931 records inside thirteen days; Akikiki, a Hawaiian endemic, has
 376 across forty-five years and is unmistakably the resident of the two.
-[CR-028](../river/decisions.md#cr-028) replaced record counts with recurrence for **scope**;
+[decisions.scopeFromRecurrence](../river/decisions.md#scopefromrecurrence) replaced record counts with recurrence for **scope**;
 **per-region presence** still uses the 1-ppm record bar, and replacing or qualifying it is open in
 [river/todo.md](../river/todo.md).
 
@@ -401,8 +401,8 @@ Until 2026-10-05 a sea's denominator summed only the species already judged pela
 land region's counted every bird, and the two were divided alike — so every marine figure
 shown was inflated, by 962× in the North Atlantic. Where a bird was commonest came from a different
 table again, built from a land-only pass, so no bird could peak at sea and the detail page
-could name a region the index did not list it in. See [CR-030](../river/decisions.md#cr-030) and
-[CR-031](../river/decisions.md#cr-031).
+could name a region the index did not list it in. See [decisions.seaShareDiffers](../river/decisions.md#seasharediffers) and
+[decisions.honestSeaDenominator](../river/decisions.md#honestseadenominator).
 
 ### When the sources disagree about a name
 
@@ -428,11 +428,11 @@ is a gap in what BirdView can see, not a statement about the bird.
 **The list is checked, not trusted.** It describes eBird's policy today, and the records reflect
 what was applied when they were published; for 26 of the 230 places it names, eBird's records
 are there anyway. BirdView marks a bird withheld only where the records show the gap. See
-[CR-037](../river/decisions.md#cr-037).
+[decisions.ebirdSilenceNotAbsence](../river/decisions.md#ebirdsilencenotabsence).
 
 Withholding and a different name look identical in the data — eBird returns nothing either way
 — so the names were also checked by querying every plausible alternative. See
-[CR-034](../river/decisions.md#cr-034).
+[decisions.sharedCountShownOnBoth](../river/decisions.md#sharedcountshownonboth).
 
 **The same bird under another name.** Seven species are filed by eBird under a name AviList has
 since replaced, and the page names both. Five are genus moves — AviList puts the Hairy

@@ -9,17 +9,21 @@ Normative. Where this file and the code disagree, the code is wrong.
 
 ## Structure and delivery
 
-### T-001 — Two commands, one module
+### twoCommandsOneModule
+
+**Two commands, one module**
 Subject: `build.layout`
-Goals: G-001
+Goals: goals.sizeIntuition
 
 A single Go module with an ingest command that produces the dataset, and a server command that
 embeds and serves it.
 
-### T-002 — The server is self-contained at runtime
+### selfContainedServer
+
+**The server is self-contained at runtime**
 Subject: `runtime.network`
 Value: `none`
-Goals: G-001
+Goals: goals.sizeIntuition
 
 The server binary makes no network request to serve the application. No CDN for styles or scripts,
 no remote data fetch.
@@ -27,53 +31,63 @@ no remote data fetch.
 Rationale: the tool should work on a laptop in a cabin. This supersedes the earlier design's
 `cdn.tailwindcss.com` dependency, which would have left the UI unstyled offline.
 
-### T-003 — Serves on localhost:8080
+### servesOnLocalhost
+
+**Serves on localhost:8080**
 Subject: `server.address`
 Value: `localhost:8080`
-Goals: G-001
+Goals: goals.sizeIntuition
 
-### T-004 — Fetch restricted inputs at build time; commit only what may be redistributed
+### fetchRestrictedInputs
+
+**Fetch restricted inputs at build time; commit only what may be redistributed**
 Subject: `build.inputs`
-Goals: G-004
+Goals: goals.goodDataCitizen
 
 Inputs whose license forbids redistribution are downloaded onto the building machine at build time,
 verified against the hashes recorded in [sources.md](sources.md), consumed, and never committed.
-They land under `fetched/`, which `.gitignore` excludes. Since [CR-028](decisions.md#cr-028)
+They land under `fetched/`, which `.gitignore` excludes. Since [decisions.scopeFromRecurrence](decisions.md#scopefromrecurrence)
 replaced the ABA checklist, no build input uses this path; the rule and the `.gitignore` entry stay
 in place in case a future source requires them.
 
 This mechanism is available only where the publisher permits automated retrieval. It is not a
 general workaround for a restrictive license: Ricklefs 2017 was rejected partly because Wiley's
-terms forbid automated access outright ([CR-002](decisions.md#cr-002)).
+terms forbid automated access outright ([decisions.ricklefsProhibited](decisions.md#ricklefsprohibited)).
 
 The CC BY inputs are committed: AviList, the AVONET workbook, and the Fox et al. wingspan data. So
-are the synonym tables of P-006 and the occurrence tables under `data/`, which are the project's
+are the synonym tables of product.joinOnBinomial and the occurrence tables under `data/`, which are the project's
 own work.
 
-### T-005 — The built dataset is an artifact, never committed
+### datasetNeverCommitted
+
+**The built dataset is an artifact, never committed**
 Subject: `build.output`
-Goals: G-004
+Goals: goals.goodDataCitizen
 
 The generated dataset is excluded from version control. It was originally excluded because it
-carried values derived from the ABA checklist ([CR-028](decisions.md#cr-028) ended that); it stays
+carried values derived from the ABA checklist ([decisions.scopeFromRecurrence](decisions.md#scopefromrecurrence) ended that); it stays
 excluded because it is reproducible from the committed inputs in one command and a stale copy in the
 tree is worse than none. A clean checkout builds it; it is not shipped in the repository.
 
-### T-006 — Identify the client on every outbound request
+### identifiedClient
+
+**Identify the client on every outbound request**
 Subject: `http.user_agent`
-Goals: G-004
+Goals: goals.goodDataCitizen
 
 Any HTTP client this project uses to fetch a source sends a descriptive `User-Agent` naming the
 application and a contact. Go's default `Go-http-client/1.1` is not acceptable.
 
 Rationale: Wikimedia's User-Agent policy returns HTTP 403 for generic agents, and iNaturalist's
-API guidance asks for the same courtesy. Both are relevant when P-050 returns; the rule is stated
+API guidance asks for the same courtesy. Both are relevant when product.speciesPhotographs returns; the rule is stated
 now so it is not discovered later.
 
-### T-007 — The Go version tracks whatever dependencies require
+### goVersionFollowsDeps
+
+**The Go version tracks whatever dependencies require**
 Subject: `build.go_version`
 Value: `no floor; follow dependencies`
-Goals: G-001
+Goals: goals.sizeIntuition
 
 BirdView sets no minimum Go version of its own. When a dependency requires a newer toolchain,
 `go mod tidy` raises the `go` directive and the toolchain switches, and that is an accepted
@@ -91,17 +105,19 @@ pinned in `go.sum`; it is only the language and toolchain versions that float.
 
 ## Accessibility
 
-### T-010 — Badge contrast meets WCAG 2.2 SC 1.4.6
+### badgeContrast
+
+**Badge contrast meets WCAG 2.2 SC 1.4.6**
 Subject: `badge.contrast.ratio`
 Value: `>= 7.0`
-Goals: G-002
+Goals: goals.comparisonAcrossFamilies
 
 Every generated badge color yields a contrast ratio of at least 7:1 against **the text it actually
 carries**, which is black or white per badge, computed per WCAG 2.2 relative luminance.
 
 Requiring black text specifically would be a stricter rule than WCAG asks for, and an expensive
 one: it discards the entire dark half of the gamut and costs about a third of the distinguishable
-colors available to P-005.
+colors available to product.generatedBadgeColors.
 
 Rationale: WCAG is adopted as a **mandatory** source scoped to the contrast criteria only — see
 [sources.md](sources.md#wcag). BirdView makes no broader conformance claim, and saying so is the
@@ -112,17 +128,19 @@ asserted a conformance level nothing checked. This requirement is checkable and 
 
 ## Posture
 
-### T-011 — Local now, public later; never commercial
+### localNowPublicLater
+
+**Local now, public later; never commercial**
 Subject: `deployment.posture`
 Value: `local; non-commercial in perpetuity`
-Goals: G-004
+Goals: goals.goodDataCitizen
 
 BirdView runs locally today and may be deployed publicly later. It will not become a commercial
 offering, and source obligations are recorded against the public, non-commercial case so that a
 later deployment needs no licensing re-litigation.
 
-**The ABA licensing gate is gone as of 2026-10-05.** [CR-028](decisions.md#cr-028) replaced ABA
-scope with BirdView's own derivation from open occurrence records; [CR-022](decisions.md#cr-022)
+**The ABA licensing gate is gone as of 2026-10-05.** [decisions.scopeFromRecurrence](decisions.md#scopefromrecurrence) replaced ABA
+scope with BirdView's own derivation from open occurrence records; [decisions.avilistReplacesAba](decisions.md#avilistreplacesaba)
 replaced ABA names with AviList. Nothing all-rights-reserved is read at build time, so nothing of
 anyone else's is served. Public deployment is now an engineering task, not a licensing one; see
 `todo.md` for what remains.
@@ -135,37 +153,43 @@ Either would become a licensing breach the day BirdView took revenue.
 
 ## Process
 
-### T-020 — The spec bundle is normative
+### bundleIsNormative
+
+**The spec bundle is normative**
 Subject: `process.spec_location`
 Value: `river/`
-Goals: G-004
+Goals: goals.goodDataCitizen
 
 The repository follows the loop in [process.md](process.md). `AGENTS.md` names `river/` as
 normative so agents reading the instruction file are pointed at it.
 
-### T-022 — The iNaturalist mapping is built by a separate, paced tool
-Goals: G-004
+### pacedInaturalistMapping
+
+**The iNaturalist mapping is built by a separate, paced tool**
+Goals: goals.goodDataCitizen
 
 Resolving species to iNaturalist taxon IDs happens in `cmd/birdview-inatmap`, never in
 `birdview-ingest` and never while serving. The tool waits at least one second between requests
-(`inat-api/R1`) and identifies itself (T-006). Its output is a table committed to the repository;
+(`inat-api/R1`) and identifies itself (identifiedClient). Its output is a table committed to the repository;
 the ingest joins against that table and makes no network request.
 
 Rationale: 1082 requests at the rate iNaturalist asks for is a quarter of an hour, which does not
 belong in a build — and a build that needs the network is a build that fails on a plane. Keeping
-resolution separate also keeps T-002 and the no-network-in-tests binding intact without exception.
+resolution separate also keeps selfContainedServer and the no-network-in-tests binding intact without exception.
 The table going stale is the accepted cost; a stale ID fails visibly and the refresh is one
 command.
 
 ---
 
-### T-023 — Link and text colors meet a stated contrast floor
+### textContrastFloor
+
+**Link and text colors meet a stated contrast floor**
 Subject: `text.contrast.ratio`
-Goals: G-001
+Goals: goals.sizeIntuition
 
 Every text color the stylesheet declares for text on a bare surface clears **7:1** (WCAG 2.2
 SC 1.4.6, Contrast Enhanced) against **both** the page background and the panel background. Links
-and ordinary text are held to the same floor, which is also the floor T-010 holds badges to.
+and ordinary text are held to the same floor, which is also the floor badgeContrast holds badges to.
 
 **"Text color" means `fill` as well as `color`.** SVG text is painted with `fill`, so a diagram
 label is text and is held to this floor exactly like a paragraph. Shapes are not: a stroke or a
@@ -174,10 +198,10 @@ rather than by this requirement. What separates the two is whether the rule styl
 which the stylesheet already declares by giving that element a font property.
 
 That distinction went unwritten, and the check read `color` alone. The wing chord and wingspan
-labels of [P-066](product.md#p-066) shipped painted `#0ea5e9` — **6.44:1 on the page background
+labels of [product.labeledDetailDiagram](product.md#labeleddetaildiagram) shipped painted `#0ea5e9` — **6.44:1 on the page background
 and 5.28:1 on a panel** — and nothing saw them, because SVG text does not use `color`.
 
-Rules that set their own background are excluded and governed by T-010 instead: badges and chips
+Rules that set their own background are excluded and governed by badgeContrast instead: badges and chips
 pair a generated background with a matching text color, and the pair is what has to clear 7:1.
 
 **No link may go uncolored.** A link with no rule inherits the browser default — `#0000EE`
@@ -185,19 +209,21 @@ unvisited and `#551A8B` visited — which on this background is 1.90:1 and 1.62:
 
 Rationale: contrast was adopted for badges only, because badge colors are *generated* and an
 unchecked generator is obviously dangerous. Hand-written CSS turned out to be just as dangerous and
-had no check at all: the iNaturalist link of P-064 shipped with no color rule and was effectively
+had no check at all: the iNaturalist link of product.inaturalistLink shipped with no color rule and was effectively
 invisible.
 
 One floor rather than two. The first version of this requirement set 4.5:1 for ordinary text,
 because `--dim` sat at 6.96:1 on the page background and 5.71:1 on a panel and repainting the
 interface's secondary text looked disproportionate to a single broken link. The owner then reported
 the dim text as hard to read too, which settled it: `--dim` and `--accent` moved, and the exception
-went with them. See [CR-014](decisions.md).
+went with them. See [decisions.oneContrastFloor](decisions.md).
 
 ---
 
-### T-021 — No source is consumed before it is recorded
-Goals: G-004
+### recordBeforeConsuming
+
+**No source is consumed before it is recorded**
+Goals: goals.goodDataCitizen
 
 Every input source appears in [sources.md](sources.md) with its tier, pin, license and status
 *before* code that reads it is written.
@@ -217,9 +243,11 @@ Requirements added after the groups above were laid out, which sat under the bin
 only because they were appended after it. Each belongs in one of the groups above; placing them
 is part of splitting this source into files.
 
-### T-024 — What the project says about itself stays true
+### selfDescriptionStaysTrue
+
+**What the project says about itself stays true**
 Subject: `docs.currency`
-Goals: G-003
+Goals: goals.shapeNotOnlySize
 
 **Every CC BY source whose output appears on a page is credited on that page.** This is a licence
 condition, not a courtesy: AviList, AVONET and Fox are all CC BY 4.0, and attribution is the
@@ -235,22 +263,24 @@ BirdView for an hour and never see the source of the words on the screen.
 there is worse than no claim. Two kinds of staleness are forbidden:
 
 - **A count that no longer matches the dataset.** `docs/data.md` claimed 841 species after
-  [CR-022](decisions.md#cr-022) cut the list to 839.
+  [decisions.avilistReplacesAba](decisions.md#avilistreplacesaba) cut the list to 839.
 - **A source credited for something it no longer supplies.** `README.md` listed the ABA Checklist
-  as the source of "species list, names, families" after CR-022 moved names and families to
-  AviList (at that point the ABA checklist supplied **scope** alone; [CR-028](decisions.md#cr-028)
+  as the source of "species list, names, families" after decisions.avilistReplacesAba moved names and families to
+  AviList (at that point the ABA checklist supplied **scope** alone; [decisions.scopeFromRecurrence](decisions.md#scopefromrecurrence)
   then replaced scope too).
 
 **Before any public deployment, the docs are checked against the spec**, since a release is the
 moment the claims become promises to strangers rather than notes to ourselves.
 
 The check is mechanical where it can be — counts and credits are comparable against the dataset
-and the page — and a reading task where it cannot. [AC-090](acceptance.md#ac-090) does the
+and the page — and a reading task where it cannot. [acceptance.creditsComplete](acceptance.md#creditscomplete) does the
 mechanical part, and records plainly that prose accuracy is not something a test can hold.
 
-### T-025 — No personal address is published
+### noPersonalAddress
+
+**No personal address is published**
 Subject: `deploy.contact`
-Goals: G-004
+Goals: goals.goodDataCitizen
 
 No page BirdView serves carries a contact address. Reader feedback goes to the project's issue
 tracker, whose URL is a deployment setting (`-feedback`) rather than a constant in the markup.
@@ -268,10 +298,10 @@ mailbox is not the project's contact point.
 
 *(This requirement does not quote the address it removed, and that is not squeamishness. The
 requirements are published with the repository, so a quotation here would republish exactly
-what the rule forbids — which is how [AC-097](acceptance.md#ac-097) first failed, back when they
+what the rule forbids — which is how [acceptance.noContactAddressPublished](acceptance.md#nocontactaddresspublished) first failed, back when they
 were also served at `/spec`.)*
 
-**The `User-Agent` contact stays, and is a different thing.** [T-006](#t-006) requires outbound
+**The `User-Agent` contact stays, and is a different thing.** [identifiedClient](#identifiedclient) requires outbound
 requests to name a contact, and iNaturalist's API guidance asks for it specifically. That
 address reaches a handful of API operators who may need to reach whoever is making the requests;
 it is not published to visitors. Removing it would be discourteous and risks the project being
@@ -281,10 +311,12 @@ blocked.
 mailbox, which the served spec then republished to every visitor. A provenance record names who
 owns a source; it does not need to hand out their mail.
 
-### T-026 — Responses are compressed when the client asks
+### compressedResponses
+
+**Responses are compressed when the client asks**
 Subject: `http.content_encoding`
 Value: `gzip on Accept-Encoding, Vary on every response`
-Goals: G-001, G-004
+Goals: goals.sizeIntuition, goals.goodDataCitizen
 
 Every response is gzipped when the request carries `Accept-Encoding: gzip`, and every response
 carries `Vary: Accept-Encoding` whether or not it was compressed.
@@ -307,21 +339,23 @@ a client that cannot read one.
 status itself has already committed the header map by the time a byte is written, so a
 compressor that labels from `Write` emits a correctly compressed body with no
 `Content-Encoding` and the browser renders binary. Both static files and every
-[P-075](product.md#p-075) 404 shipped that way in the first draft of this.
+[product.undrawnSpeciesAnswer](product.md#undrawnspeciesanswer) 404 shipped that way in the first draft of this.
 
 **A status that may carry no body — 204, 304 — is not compressed at all**, an empty gzip
 stream's twenty-byte header being bytes the protocol says must not be there.
 
-### T-027 — Every join reports what it dropped
+### joinsReportDrops
+
+**Every join reports what it dropped**
 Subject: `build.join_loss`
 Value: `named and counted on every run; a declared bar above which the run refuses`
-Goals: G-004, G-006
+Goals: goals.goodDataCitizen, goals.nothingDisappearsQuietly
 
 Every join between two datasets reports the records it could not match: how many, under what
 names, and whether the loss was intended. Where a loss can be bounded, the bar is declared and
 the run **refuses to write** rather than exceed it.
 
-Rationale: [G-006](goals.md#g-006) at the point where data actually disappears. A join is the
+Rationale: [goals.nothingDisappearsQuietly](goals.md#nothingdisappearsquietly) at the point where data actually disappears. A join is the
 one place in this pipeline where a record can cease to exist without anyone deciding it should,
 and the failure is invisible on both sides — the input still has the record, the output simply
 never mentions it.
@@ -331,10 +365,10 @@ loss was. `birdview-ingest` prints what the AviList join dropped and asserts it 
 declared list, prints what AVONET could not match and fails above a threshold, and requires
 iNaturalist coverage to be total. `birdview-regions` matched raw facet names against AviList
 names and discarded the rest in silence: **37 names, 10,015,688 records, of which 9,954,362
-belonged to ten species BirdView draws** ([CR-035](decisions.md#cr-035)).
+belonged to ten species BirdView draws** ([decisions.regionJoinNormalizes](decisions.md#regionjoinnormalizes)).
 
 **A discarded record is worse than absent, because it still counts.** Every one of those names
-reached the denominator of [P-074](product.md#p-074)'s share and no species' numerator — so
+reached the denominator of [product.shareOfRecords](product.md#shareofrecords)'s share and no species' numerator — so
 Hairy Woodpecker's 7,310,342 eBird records were counted as *some other bird* on every tile
 including its own, and the bird showed 0.7% of its own record.
 
@@ -345,7 +379,7 @@ records; a genus move adds one name and seven million.
 data, and the loss above was not a missing table entry — every entry already existed — but a
 second reader that never consulted them. So every reader normalizes through **one function**,
 and a criterion asserts the two agree on the species rather than asserting either in isolation
-([AC-106](acceptance.md#ac-106)). The three gaps [CR-035](decisions.md#cr-035) found surfaced
+([acceptance.occurrenceReadersAgree](acceptance.md#occurrencereadersagree)). The three gaps [decisions.regionJoinNormalizes](decisions.md#regionjoinnormalizes) found surfaced
 one at a time over two days precisely because nothing compared the readers, so each fix left
 the next one standing: no rename, then no lump, then no reduction of rank.
 
@@ -364,10 +398,12 @@ largest single beneficiaries are the two declared domestic forms, feral Rock Pig
 (+109,401) and Muscovy Duck (+37,470), and one genuine subspecies recovery, Yellow-rumped
 Warbler (+30,274) from `coronata` and `auduboni`.
 
-### T-029 — Every response says how long it may be reused
+### cacheLifetimeStated
+
+**Every response says how long it may be reused**
 Subject: `serving.cache_validation`
 Value: `Cache-Control: no-cache and an ETag on every response`
-Goals: G-001, G-006
+Goals: goals.sizeIntuition, goals.nothingDisappearsQuietly
 
 Every response carries a `Cache-Control` directive and a validator, so a cache knows whether
 it may reuse what it holds and can ask cheaply when it may not.
@@ -380,14 +416,14 @@ from a bug in the page and was reported as one.
 
 **`no-cache` means store it and ask before reusing it**, not "do not store". That is the right
 directive for every page here: validation is cheap and staleness is never acceptable, since
-the point of a figure like [P-074](product.md#p-074)'s is that it is current.
+the point of a figure like [product.shareOfRecords](product.md#shareofrecords)'s is that it is current.
 
 **The ETag is a fingerprint of the build and the URL, not a hash of the body.** Hashing the
 body means buffering it, and the index is 3.3 MB before compression — the memory this would
-cost on every concurrent request is the thing [T-026](#t-026) exists to avoid spending. The
+cost on every concurrent request is the thing [compressedResponses](#compressedresponses) exists to avoid spending. The
 substitute is sound only because a page is a pure function of the dataset, the templates, the
 static files and the request URI, with no clock anywhere in the render path, and
-[AC-110](acceptance.md#ac-110) asserts that rather than trusting it.
+[acceptance.honestRevalidation](acceptance.md#honestrevalidation) asserts that rather than trusting it.
 
 **One fingerprint over all assets, not one per asset.** A stylesheet edit invalidates the HTML
 that loads it. Over-invalidating costs one refetch after a deploy; under-invalidating serves a
@@ -403,10 +439,12 @@ of error `Vary: Accept-Encoding` exists to prevent, one layer down.
 fingerprint taken at startup stays true, and a stale page under the one flag that exists to
 make edits visible would defeat the flag.
 
-### T-028 — How each source names a species is measured, not assumed
+### sourceNamingMeasured
+
+**How each source names a species is measured, not assumed**
 Subject: `build.name_correspondence`
 Value: `committed per-source record counts; a declared ratio band`
-Goals: G-004, G-005, G-006
+Goals: goals.goodDataCitizen, goals.dataAsItIs, goals.nothingDisappearsQuietly
 
 A committed table records how many records each occurrence source holds for every species
 BirdView draws, under the name BirdView serves. A species far outside the usual ratio between

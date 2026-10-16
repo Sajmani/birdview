@@ -49,14 +49,14 @@ func seq(n int) []int {
 	return out
 }
 
-// The two vagrants named in CR-028, as they appear in the data. Both must come
+// The two vagrants named in decisions.scopeFromRecurrence, as they appear in the data. Both must come
 // out Vagrant, and the second is the one that matters: it straddles a New Year,
 // so a rule counting distinct YEARS sees two and lets it through. Counting
 // episodes sees one arrival.
 //
 // Watched fail: changing Classify's Vagrant default to Rare turns both red.
 // Replacing the recurrence arm with a bare `s.Years >= 2` -- the shape of the
-// four-year-window rule CR-028 rejected -- turns LucysWarbler red while the
+// four-year-window rule decisions.scopeFromRecurrence rejected -- turns LucysWarbler red while the
 // flamingo stays green, because 13 days in September sit inside one calendar
 // year and Lucy's six days straddle a New Year. That asymmetry is the whole
 // reason the second case is here.
@@ -138,7 +138,7 @@ func TestTruncatedFacetIsEstablished(t *testing.T) {
 
 // Watched fail: returning Vagrant instead of Absent for an empty date list
 // turns this red. The distinction matters because Absent means "no open
-// record exists", which P-071 handles by declaration, while Vagrant is a
+// record exists", which product.declaredExceptions handles by declaration, while Vagrant is a
 // measurement.
 func TestNoDatesIsAbsent(t *testing.T) {
 	if got := Classify(Measure(0, nil, false), since); got != Absent {
@@ -168,7 +168,7 @@ func TestBestTakesTheStrongestRegion(t *testing.T) {
 		t.Error("no regions at all must be Absent")
 	}
 	if Vagrant.InScope() || Absent.InScope() {
-		t.Error("Vagrant and Absent are out of scope (P-001)")
+		t.Error("Vagrant and Absent are out of scope (product.scopeIsRecurringAvifauna)")
 	}
 }
 
@@ -255,7 +255,7 @@ func TestHistoricalRecordsAreNotPresence(t *testing.T) {
 // reports a zero date for Passenger Pigeon; dropping the time.Parse call
 // leaves the date zero on the full row too.
 //
-// Verifies: P-075.
+// Verifies: product.undrawnSpeciesAnswer.
 func TestReadParsesTheLastSeenColumn(t *testing.T) {
 	const full = "# a comment\n" +
 		"ectopistes migratorius\thistorical\tCAN.9_1\t89\t52\t145\tCAN.6_1\t4\t303189\t1902-05-18\n" +
@@ -293,7 +293,7 @@ func TestReadParsesTheLastSeenColumn(t *testing.T) {
 }
 
 // TestScopeBringsBothHalvesOfASharedName asserts that a name covering two
-// species brings both into scope (P-077, CR-038).
+// species brings both into scope (product.namesRecordsFiledUnder, decisions.countEbirdFirst).
 //
 // Once scope is measured on eBird, Northern Yellow Warbler has no row of its
 // own that recurs: eBird files every one of its records under Setophaga
@@ -301,7 +301,7 @@ func TestReadParsesTheLastSeenColumn(t *testing.T) {
 // BirdView over a filing choice -- and nothing else would notice, because
 // the dataset and the scope would shrink together.
 //
-// Verifies: P-077, CR-038. Criterion: AC-114.
+// Verifies: product.namesRecordsFiledUnder, decisions.countEbirdFirst. Criterion: acceptance.ebirdCountedInatFillsGaps.
 func TestScopeBringsBothHalvesOfASharedName(t *testing.T) {
 	rows := []Row{
 		{Name: "setophaga petechia", Status: Established},

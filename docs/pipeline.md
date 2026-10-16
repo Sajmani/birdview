@@ -142,7 +142,7 @@ flowchart TB
     To ·
     WithheldByEBird ★ *derived; noted on the species page*`"]
     DECL["`status.Declared
-    *P-071 exceptions*
+    *declared exceptions*
     ─────────────
     scientific name · *added to scope*
     reason · *printed in the build report*
@@ -194,7 +194,7 @@ flowchart TB
     taxon id ★ *link to iNaturalist*
     common name as iNaturalist returned it ✗ *for the audit trail*`"]
     SN["`source-names.tsv
-    *read only by the T-028 check*
+    *read only by the name-agreement check*
     ─────────────
     id ·
     scientific name ·
@@ -351,21 +351,21 @@ records, then fetches the dates behind each species in its three best regions an
 *established* when its records recur in repeated episodes across years. eBird's dates count
 everywhere; iNaturalist's count only in a region and month where eBird is confirmed to withhold
 the species. See [where the data comes from](data.md#scope) and
-[CR-038](../river/decisions.md#cr-038).
+[decisions.countEbirdFirst](../river/decisions.md#countebirdfirst).
 
 **Region counts come from the same source, finer.** `birdview-regions` asks GBIF for every name in
 every region, once for the year and once for each month, and counts the off-land records inside
 each sea's box separately. A species is *present* in a region at 1 record per million of what is
 recorded there. eBird's records count everywhere; iNaturalist's fill in only where eBird's
 [Sensitive Species list](data.md#when-the-sources-disagree-about-a-name) names the species and the
-records confirm the gap ([CR-037](../river/decisions.md#cr-037)). Records in a region where a species
+records confirm the gap ([decisions.ebirdSilenceNotAbsence](../river/decisions.md#ebirdsilencenotabsence)). Records in a region where a species
 stays under the bar are kept too, marked `~`: the ingest counts them in the *1 in N* and leaves
-the species off that region's list ([CR-042](../river/decisions.md#cr-042)).
+the species off that region's list ([decisions.belowBarCounted](../river/decisions.md#belowbarcounted)).
 
 **Escapes are flagged, not dropped.** `status.Exotic` is a declared list of birds whose records
 here are escapes or birds kept by people. The ingest marks each with its reason; the server
 leaves them off the index and its controls, lists them at `/excluded`, and keeps their pages
-([P-080](../river/product.md#p-080)).
+([product.escapedBirdsListed](../river/product.md#escapedbirdslisted)).
 
 **Names are normalized before anything is matched.** Both commands pass every published name
 through one function, `taxonomy.Occurrence`: subspecies reduced to their species, hybrids left
@@ -382,16 +382,16 @@ was measured and estimates it where it was not (6), records the species it does 
 **AVONET has three taxonomy sheets, and step 3 chooses between them.** A species' own row is read
 from the eBird sheet unless `OwnRowSheets` names a narrower one: the eBird sheet's *Larus
 argentatus* contains every herring gull, so European Herring Gull is read from the BirdLife sheet
-([CR-041](../river/decisions.md#cr-041)). A species with no row of its own borrows a relative's,
+([decisions.herringGullEuropeanRow](../river/decisions.md#herringgulleuropeanrow)). A species with no row of its own borrows a relative's,
 labeled *near-match*, from the sheet `NearMatchSheets` names where one holds a narrower concept
-of that relative ([CR-039](../river/decisions.md#cr-039)). The build stops if a named sheet lacks
+of that relative ([decisions.whiteTernBorrows](../river/decisions.md#whiteternborrows)). The build stops if a named sheet lacks
 the row, rather than falling back to a broader one.
 
 **The server does the last arithmetic.** The *1 in N* on a tile and the month filter depend on the
 regions and months a reader selects, so they are computed per request from the counts and totals
 in `species.json`, not stored. It also groups the species drawn from the same AVONET row, from
 their provenance, and notes each pair on both tiles
-([P-079](../river/product.md#p-079)).
+([product.borrowedMeasurementsSaySo](../river/product.md#borrowedmeasurementssayso)).
 
 ## Where to go next
 

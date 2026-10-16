@@ -1,7 +1,7 @@
 # avilist — provenance
 
 Vendored copy of the global avian checklist. BirdView's source of **English names, family and
-order names, and the per-species eBird code** (P-004). See
+order names, and the per-species eBird code** (product.namesFromAvilist). See
 [../../sources.md](../../sources.md#avilist) for the adoption record.
 
 ## What was retrieved
@@ -39,7 +39,7 @@ The columns BirdView reads:
 | --- | --- |
 | `Taxon_rank` | Row filter — only `species` is read |
 | `Scientific_name` | Join key against AVONET's `Species2` |
-| `English_name_Clements_v2025` | The **North American** common name (P-049) |
+| `English_name_Clements_v2025` | The **North American** common name (product.englishNameChoice) |
 | `English_name_AviList` | The **world** common name; IOC 15.1 usage |
 | `Species_code_Cornell_Lab` | The eBird species code, which is BirdView's species id and the code shown on a tile |
 | `Family` / `Family_English_name` | Family scientific and English names |
@@ -97,4 +97,4 @@ These five keep their scientific-name slug as their id, and no eBird code is sho
 Re-download from the DOI, compare the hash, and re-run the coverage count above. Expect the
 synonym table to need entries: AviList revises annually and a genus move is the common case. A
 species that silently loses its code would change its URL, which is why
-[AC-084](../../acceptance.md#ac-084) asserts id stability rather than trusting the join.
+[acceptance.stableSpeciesId](../../acceptance.md#stablespeciesid) asserts id stability rather than trusting the join.

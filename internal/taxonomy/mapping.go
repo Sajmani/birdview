@@ -18,14 +18,14 @@
 // ABA 8.19 follows AOS/NACC; AVONET2_eBird carries the eBird/Clements taxonomy
 // of 2022. Four years of revision separate them, so 22 of BirdView's 841
 // in-scope species do not join on name alone. This table is the project's own
-// work and is committed (P-006).
+// work and is committed (product.joinOnBinomial).
 //
 // The distinction between the two maps below is not cosmetic. A Rename is the
 // same birds under a different label, so the measurement stays `measured`. A
 // NearMatch borrows a different taxon's measurement, so it must be labeled
-// `near-match` and the borrowed taxon named (P-062, CR-006).
+// `near-match` and the borrowed taxon named (product.provenancePerMetric, decisions.abaSpeciesWithoutAvonet).
 //
-// Verifies: P-006, P-007.
+// Verifies: product.joinOnBinomial, product.unmatchedSpeciesReported.
 package taxonomy
 
 import (
@@ -62,7 +62,7 @@ var Renames = map[string][]string{
 // and Japanese specimens alongside four North American ones (and AviList
 // Proposal 2025-1136 notes that vegae is treated as a subspecies of
 // L. smithsonianus). American Herring Gull draws from the same row, so the two
-// are drawn alike and both pages say so (CR-040, P-079).
+// are drawn alike and both pages say so (decisions.vegaGullBorrows, product.borrowedMeasurementsSaySo).
 var NearMatches = map[string]string{
 	"Larus vegae":         "Larus smithsonianus",
 	"Numenius hudsonicus": "Numenius phaeopus",
@@ -76,7 +76,7 @@ var NearMatches = map[string]string{
 	// is not of this species. They appear as near-matches because that is the
 	// conservative and accurate label.
 	//
-	// CR-006 left their classification open pending a human taxonomic check and
+	// decisions.abaSpeciesWithoutAvonet left their classification open pending a human taxonomic check and
 	// said explicitly that each "needs a human taxonomic check before entering
 	// the mapping table". Labeling them near-match takes the safe side without
 	// closing that question; it does not resolve it.
@@ -94,9 +94,9 @@ var NearMatches = map[string]string{
 //
 // AVONET2_eBird's Gygis alba still contains all three white terns AviList
 // separates. AVONET1_BirdLife's excludes the small Little White Tern, so its
-// bill and tail are nearer Blue-billed White-Tern's (CR-039).
+// bill and tail are nearer Blue-billed White-Tern's (decisions.whiteTernBorrows).
 //
-// Verifies: P-060, P-062.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric.
 var NearMatchSheets = map[string]string{
 	"Gygis candida": "AVONET1_BirdLife",
 }
@@ -106,9 +106,9 @@ var NearMatchSheets = map[string]string{
 // under the same name. As with NearMatchSheets there is no fallback.
 //
 // AVONET2_eBird's Larus argentatus is the 2022 herring gull, averaging 16
-// specimens of which 6 are European; AVONET1_BirdLife's is those 6 (CR-041).
+// specimens of which 6 are European; AVONET1_BirdLife's is those 6 (decisions.herringGullEuropeanRow).
 //
-// Verifies: P-060, P-062.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric.
 var OwnRowSheets = map[string]string{
 	"Larus argentatus": "AVONET1_BirdLife",
 }
@@ -116,7 +116,7 @@ var OwnRowSheets = map[string]string{
 // AwaitingTaxonomicCheck lists the entries whose rename-versus-split status is
 // still open, so the ingest can report them rather than let the question fade.
 //
-// Verifies: P-007.
+// Verifies: product.unmatchedSpeciesReported.
 var AwaitingTaxonomicCheck = []string{
 	"Astur atricapillus", "Ardea ibis", "Gygis candida", "Tyto furcata",
 }
@@ -124,7 +124,7 @@ var AwaitingTaxonomicCheck = []string{
 // AviListRenames maps the name BirdView carries onto the name AviList files
 // the SAME taxon under. These are one-to-one renamings -- a genus move or a
 // corrected epithet -- so the name, code and family resolved through them
-// belong to this bird and nothing is borrowed (CR-022).
+// belong to this bird and nothing is borrowed (decisions.avilistReplacesAba).
 //
 // This is a second synonym table and not an extension of Renames above,
 // because the two point in opposite directions: Renames reaches BACKWARD from
@@ -132,7 +132,7 @@ var AwaitingTaxonomicCheck = []string{
 // FORWARD from BirdView's name to a newer label AviList adopted. Merging them
 // would make the direction of each entry a matter of memory.
 //
-// Verifies: P-004.
+// Verifies: product.namesFromAvilist.
 var AviListRenames = map[string]string{
 	"Coccothraustes vespertinus": "Hesperiphona vespertina",
 	"Dryobates albolarvatus":     "Leuconotopicus albolarvatus",
@@ -172,7 +172,7 @@ type Counted struct {
 // occurrence data publishes, and an AviList species whose records those are.
 //
 // eBird is the deeper and better-curated source and supplies the evidence;
-// AviList supplies the names (CR-022). This table is where the two meet.
+// AviList supplies the names (decisions.avilistReplacesAba). This table is where the two meet.
 //
 // **Why these and not every boundary disagreement.** The first two published
 // names are also the AVONET donor for the species BirdView carries -- see
@@ -190,7 +190,7 @@ type Counted struct {
 // BirdView carries elegans, AviList splits ambiguus off it, and both would
 // have their own measurements.
 //
-// Verifies: P-001, P-077.
+// Verifies: product.scopeIsRecurringAvifauna, product.namesRecordsFiledUnder.
 var CountedAs = []Counted{{
 	Published: "Numenius phaeopus",
 	Species:   "Numenius hudsonicus",
@@ -251,7 +251,7 @@ func CountedInto(aviList string) []Counted {
 // finds nothing. It is the same bird; only the label moved forward, so a
 // value resolved through here is still `measured`.
 //
-// Verifies: P-006.
+// Verifies: product.joinOnBinomial.
 var AviListRenamedFrom = func() map[string]string {
 	m := make(map[string]string, len(AviListRenames))
 	for from, to := range AviListRenames {
@@ -262,7 +262,7 @@ var AviListRenamedFrom = func() map[string]string {
 
 // NotInAviList lists species AviList does not recognize at all, because it
 // lumps them into a taxon BirdView already carries. They are DROPPED from the
-// dataset rather than kept under an ABA name (CR-022).
+// dataset rather than kept under an ABA name (decisions.avilistReplacesAba).
 //
 // That follows from the decision itself: if AviList supplies the names, it
 // supplies the species concepts too, and keeping a bird AviList does not
@@ -275,7 +275,7 @@ var AviListRenamedFrom = func() map[string]string {
 // Listed rather than inferred, so the ingest asserts the count and a third
 // species going quiet is a build failure rather than a silent deletion.
 //
-// Verifies: P-004.
+// Verifies: product.namesFromAvilist.
 var NotInAviList = map[string]string{
 	"Porphyrio poliocephalus": "AviList lumps it into Porphyrio porphyrio, which is out of scope",
 	"Vireo swainsoni":         "AviList lumps it into Vireo gilvus, already in scope as warvir",
@@ -291,9 +291,9 @@ var NotInAviList = map[string]string{
 // gulls plus auks, and no short phrase covers it exactly.
 //
 // Anything displayed from this table is a convenience label. Nothing is derived
-// from it, and no measurement depends on it (G-004).
+// from it, and no measurement depends on it (goals.goodDataCitizen).
 var OrderCommonNames = map[string]string{
-	// Arrived with the derived scope (CR-028): one feral Emu population
+	// Arrived with the derived scope (decisions.scopeFromRecurrence): one feral Emu population
 	// recurs often enough to qualify. Named for the family a reader would
 	// recognize rather than for the order's full worldwide content.
 	"Casuariiformes":      "Emus and Cassowaries",
@@ -316,7 +316,7 @@ var OrderCommonNames = map[string]string{
 	"Pelecaniformes":      "Pelicans, Herons, and Ibises",
 	"Accipitriformes":     "Hawks and Eagles",
 	// AviList separates the New World vultures into their own order, where
-	// ABA and AVONET had them among the hawks (CR-022). Accipitriformes is
+	// ABA and AVONET had them among the hawks (decisions.avilistReplacesAba). Accipitriformes is
 	// relabelled to match: it no longer contains a vulture.
 	"Cathartiformes": "New World Vultures",
 	"Strigiformes":   "Owls",
@@ -342,14 +342,14 @@ var OrderCommonNames = map[string]string{
 // `Setophaga petechia -> Setophaga petechia` as tier `exact`, and it is
 // exact: the strings agree and denote different birds. Finding these took a
 // sweep of all 1,083 species against both databases, comparing what each
-// reports under each name (CR-034).
+// reports under each name (decisions.sharedCountShownOnBoth).
 //
 // The records are NOT divided between the two species. eBird distinguishes
 // none of them, so any division would be invented -- 6,245,227 records for
 // the warblers alone, growing by about 827,000 a year. Both species carry
-// the shared count and both say whose it also is (P-077, G-005, G-006).
+// the shared count and both say whose it also is (product.namesRecordsFiledUnder, goals.dataAsItIs, goals.nothingDisappearsQuietly).
 //
-// Verifies: P-077.
+// Verifies: product.namesRecordsFiledUnder.
 type SharedName struct {
 	// Source is the binomial the occurrence data publishes.
 	Source string
@@ -412,7 +412,7 @@ func SharedWith(aviList string) (other string, source string, why string, ok boo
 // already bare binomials, 2.6% sit under trinomials, 0.2% are hybrids and
 // 0.1% are genus-only.
 //
-// Verifies: P-011, T-027.
+// Verifies: product.regionAndMonthFilter, tech.joinsReportDrops.
 func Binomial(name string) (string, bool) {
 	if strings.ContainsRune(name, '×') {
 		return "", false
@@ -432,7 +432,7 @@ func Binomial(name string) (string, bool) {
 // how the two committed tables came to use different taxonomies: eBird's
 // 7,310,342 Dryobates villosus records matched no drawn species and were
 // discarded, leaving the Hairy Woodpecker with iNaturalist's 0.7% of its own
-// record (CR-035).
+// record (decisions.regionJoinNormalizes).
 //
 // The three steps run in one order and it is not arbitrary. Rank first, so a
 // trinomial is a species before any table is consulted — both tables are
@@ -440,7 +440,7 @@ func Binomial(name string) (string, bool) {
 // harrisi`. Then the genus move, then the lump, each of which is keyed on
 // the name the occurrence data publishes rather than on the other's output.
 //
-// Verifies: P-011, P-074.
+// Verifies: product.regionAndMonthFilter, product.shareOfRecords.
 func Occurrence(name string) string {
 	lower := strings.ToLower(strings.TrimSpace(name))
 	b, ok := Binomial(lower)
@@ -464,7 +464,7 @@ func Occurrence(name string) string {
 
 // DomesticForms are species whose record counts are skewed because
 // iNaturalist files the feral or domestic population under a trinomial and
-// eBird does not (T-028).
+// eBird does not (tech.sourceNamingMeasured).
 //
 // Not a naming disagreement to fix: both databases are right about their own
 // records, and BirdView draws the wild species. Declared so the ratio check

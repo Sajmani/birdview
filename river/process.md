@@ -1,4 +1,4 @@
-> Project copy of River's `process.md`. Canonical origin: `sso://user/sameer/river`, pin `912276b`.
+> Project copy of River's `process.md`. Canonical origin: `sso://user/sameer/river`, pin `a1f29c2`.
 > Local amendments, if any, are listed in [bindings.md](bindings.md).
 
 # River
@@ -186,6 +186,11 @@ copy. Record an **import style** per source — vendored, fetched at build, quer
 absorbed, consulted — and pin it by whatever the style allows. What is constant is that a
 change is detectable, not the mechanism.
 
+**A source you cannot retrieve is a recorded gap, never a reconstruction.** Terms pages refuse
+automated clients; publishers go offline. Write down what could not be read and leave it
+unread. Never supply its contents from memory — a plausible rate limit or licence term is
+indistinguishable from a real one, and an agent will produce one readily.
+
 **A source has a lifecycle, and refusal is part of it.** A source you evaluated and
 **rejected** is kept, with the reason: the refusal is a durable decision, usually worth more
 than the source would have been, because otherwise the next person evaluates it again. A
@@ -227,7 +232,9 @@ the record of having been wrong is worth keeping.
 ### Anatomy
 
 ```markdown
-## noSilentFailures — Errors surface to the caller
+## noSilentFailures
+
+**Errors surface to the caller**
 
 Subject: `api.errors`
 Goals: `goals.trustworthyApi`
@@ -239,6 +246,12 @@ Identifiers are descriptive CamelCase — `noSilentFailures`, not `P-014`. Insid
 own names are bare; everywhere else they are qualified, `product.noSilentFailures`. Package
 names are unique within a module, which is what lets a bare prefix resolve without an import
 block.
+
+**The heading is the identifier and nothing else; the title is the bold line beneath it.** A
+heading's anchor is derived from its text, so this makes every item's anchor its identifier
+lowercased — `product.md#nosilentfailures` — and lets the title be reworded without breaking
+a single link to it. Write link fragments in lowercase; anchors are generated that way and
+matched exactly. Decisions follow the same form.
 
 ---
 

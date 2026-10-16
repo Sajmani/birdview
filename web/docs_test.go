@@ -26,7 +26,7 @@ import (
 
 // repoFile reads a file from the repository root. The docs are not embedded,
 // so these read from disk; a missing one fails rather than skips, because a
-// README that has gone away is itself the problem T-024 is about.
+// README that has gone away is itself the problem tech.selfDescriptionStaysTrue is about.
 func repoFile(t *testing.T, rel string) string {
 	t.Helper()
 	b, err := os.ReadFile(filepath.Join("..", rel))
@@ -45,7 +45,7 @@ func userFacingDocs(t *testing.T) map[string]string {
 		t.Fatalf("listing docs: %v", err)
 	}
 	if len(paths) == 0 {
-		t.Fatal("no files under docs/; T-024 expects user-facing documentation to exist")
+		t.Fatal("no files under docs/; tech.selfDescriptionStaysTrue expects user-facing documentation to exist")
 	}
 	for _, p := range paths {
 		b, err := os.ReadFile(p)
@@ -58,7 +58,7 @@ func userFacingDocs(t *testing.T) map[string]string {
 }
 
 // datasetCounts reads the compiled dataset, which is a build artifact and is
-// not committed (T-005), so a machine that has not run the ingest skips.
+// not committed (tech.datasetNeverCommitted), so a machine that has not run the ingest skips.
 func datasetCounts(t *testing.T) (species, families int) {
 	t.Helper()
 	b, err := os.ReadFile(filepath.Join("..", "web", "data", "species.json"))
@@ -78,7 +78,7 @@ func datasetCounts(t *testing.T) (species, families int) {
 // ccBySources are the CC BY sources whose output reaches a page, each with
 // the marker that counts as crediting it. Attribution is the licence
 // condition these sources ask for in return, so a page that shows their work
-// and omits the credit is a licence breach, not a styling lapse (T-024).
+// and omits the credit is a licence breach, not a styling lapse (tech.selfDescriptionStaysTrue).
 //
 // `pages` names the pages a source's output actually reaches; nil means all
 // of them. GBIF is the reason this field exists: region membership is derived
@@ -87,7 +87,7 @@ func datasetCounts(t *testing.T) (species, families int) {
 // asking for attribution for something the page does not use.
 //
 // This list is hand-maintained, which is its weakness: it cannot catch a
-// source nobody added to it. GBIF supplied served data from the day P-011
+// source nobody added to it. GBIF supplied served data from the day product.regionAndMonthFilter
 // shipped and was missing here until 2026-10-04, so the test passed while the
 // obligation went unmet. Adding a source that reaches a page is part of
 // adopting it, not a later tidy-up.
@@ -102,14 +102,14 @@ var ccBySources = []struct {
 		[]string{"index.html", "detail.html"}},
 }
 
-// TestEveryPageCreditsWhatItShows asserts the licence half of T-024.
+// TestEveryPageCreditsWhatItShows asserts the licence half of tech.selfDescriptionStaysTrue.
 //
 // Checked **per page**, because that is how attribution works and because
 // the gap it was written for was per-page: the index carried full credits
 // while detail.html and compare.html omitted AviList, on pages built out of
 // AviList names from the title down.
 //
-// Verifies: T-024. Criterion: AC-090.
+// Verifies: tech.selfDescriptionStaysTrue. Criterion: acceptance.creditsComplete.
 func TestEveryPageCreditsWhatItShows(t *testing.T) {
 	for _, page := range []string{"index.html", "detail.html", "compare.html"} {
 		b, err := Static.ReadFile("static/" + page)
@@ -130,7 +130,7 @@ func TestEveryPageCreditsWhatItShows(t *testing.T) {
 	}
 }
 
-// TestDocsCountsMatchTheDataset asserts the staleness half of T-024.
+// TestDocsCountsMatchTheDataset asserts the staleness half of tech.selfDescriptionStaysTrue.
 //
 // **Only totality claims are checked**, in the two shapes the docs use to
 // state the size of the dataset: "N species across/in M families", and a
@@ -142,7 +142,7 @@ func TestEveryPageCreditsWhatItShows(t *testing.T) {
 // families" is somebody else's study. A check that flagged those would be
 // turned off within a week.
 //
-// Verifies: T-024. Criterion: AC-090.
+// Verifies: tech.selfDescriptionStaysTrue. Criterion: acceptance.creditsComplete.
 func TestDocsCountsMatchTheDataset(t *testing.T) {
 	species, families := datasetCounts(t)
 	pair := regexp.MustCompile(`(\d{2,4}) species (?:across|in) (\d{2,3}) families`)
@@ -167,7 +167,7 @@ func TestDocsCountsMatchTheDataset(t *testing.T) {
 // of staleness: a source still named for a job it was relieved of.
 //
 // The failure it was written for: README.md listed the ABA Checklist as the
-// source of "species list, names, families" after CR-022 moved names and
+// source of "species list, names, families" after decisions.avilistReplacesAba moved names and
 // families to AviList. The ABA checklist supplies scope and nothing else.
 //
 // **Scoped to the sentence, and skipped when AviList is named in it.** A
@@ -176,7 +176,7 @@ func TestDocsCountsMatchTheDataset(t *testing.T) {
 // the ABA and the word it was relieved of. A sentence that names the real
 // source is disambiguating, not misattributing.
 //
-// Verifies: T-024. Criterion: AC-090.
+// Verifies: tech.selfDescriptionStaysTrue. Criterion: acceptance.creditsComplete.
 func TestNoDocCreditsASourceForWhatItNoLongerSupplies(t *testing.T) {
 	relieved := []string{"names", "families", "species codes", "alpha code"}
 	// Sentence-ish: a full stop *followed by space*, or a line break. Table
@@ -197,7 +197,7 @@ func TestNoDocCreditsASourceForWhatItNoLongerSupplies(t *testing.T) {
 			for _, w := range relieved {
 				if strings.Contains(low, w) {
 					t.Errorf("%s credits the ABA Checklist with %q: %q\n"+
-						"CR-022 moved that to AviList; the ABA supplies scope alone",
+						"decisions.avilistReplacesAba moved that to AviList; the ABA supplies scope alone",
 						name, w, strings.TrimSpace(seg))
 				}
 			}

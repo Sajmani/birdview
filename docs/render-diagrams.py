@@ -17,7 +17,7 @@
 
 GitHub draws a ```mermaid block straight from the Markdown. BirdView's server
 cannot: drawing Mermaid in the browser means loading Mermaid's script, and
-T-002 forbids the server needing the network -- vendoring three megabytes of
+tech.selfContainedServer forbids the server needing the network -- vendoring three megabytes of
 JavaScript to draw one picture is the wrong trade. So each diagram is
 rendered once, here, to a static SVG committed beside its page, and the
 server shows that.

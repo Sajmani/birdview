@@ -160,7 +160,7 @@
 
     <span class="lbl">Section step</span>
     {{/* Under Frequency the same control picks a band width in orders of
-         magnitude (CR-032). The percentages are not shown there because they
+         magnitude (decisions.frequencyMetric). The percentages are not shown there because they
          would misdescribe the rule: one decade is +900%, and a button
          reading "900%" explains nothing. */}}
     {{if eq .Opt.Metric "frequency"}}
@@ -177,7 +177,7 @@
     {{/* Its own labelled control set, not a trailing button: beside the
          Section step percentages an unlabelled "Compare birds" read as a sixth
          step option. The button states the mode rather than naming the
-         control, which the label now does (P-068). */}}
+         control, which the label now does (product.pickFromIndex). */}}
     <span class="lbl">Compare birds</span>
     <a class="btn cmptoggle{{if .Bar.Picking}} on{{end}}" href="{{.CompareToggleURL}}"
        title="{{if .Bar.Picking}}Leave compare mode and forget the picks{{else}}Pick birds to compare side by side{{end}}"
@@ -219,11 +219,11 @@
           seen from.</dd></div>
       </dl>
   </div>
-  {{/* The twelve, ungrouped and unnamed. No seasons: P-076 forbids naming a
+  {{/* The twelve, ungrouped and unnamed. No seasons: product.orderByFrequency forbids naming a
        band where the range can be stated, and a season name inverts between
        hemispheres and means nothing in the tropics -- Hawaii, Palmyra,
        Navassa, Wake and Johnston -- while the Central Pacific region spans
-       -10 to 40 degrees and crosses the equator (CR-036).
+       -10 to 40 degrees and crosses the equator (decisions.monthPresence).
 
        No "Only" either. It earns its place for 74 regions in 8 zones and
        not for twelve items in a row: All is a toggle, so one month is two
@@ -259,7 +259,7 @@
           {{/* A region with no standard abbreviation shows its name alone.
                Rendering an empty code would still emit the <em>, and the
                stylesheet puts a separator before it -- ten chips would open
-               with a stray middot (CR-024). */}}
+               with a stray middot (decisions.regionUrlIsPostalCode). */}}
           <a class="chip rchip{{if .Selected}} on{{end}}" href="{{.URL}}"
              title="{{.Title}}">{{if .Code}}{{.Code}}<em>{{.Name}}</em>{{else}}{{.Name}}{{end}}</a>
           {{end}}
@@ -313,7 +313,7 @@
         {{/* AVONET's own term leads the definition. It is the word the
              definition belongs to, and it is also the value in the URL --
              ?niche=Invertivore -- so showing it explains the query string
-             without a separate note (P-015). */}}
+             without a separate note (product.habitatAndDietFilters). */}}
         <span class="tdesc"><b>{{.Value}}</b>: {{.Description}}</span></li>
       {{end}}
     </ul>
@@ -365,14 +365,14 @@
 
 {{/* The active filters sit on the count line, not only in the empty state:
      what is narrowing the list is worth knowing while it still has birds in
-     it (P-037). When nothing matches, "No birds match" follows immediately
+     it (product.helpfulEmptyState). When nothing matches, "No birds match" follows immediately
      below and reads as a continuation of this line. */}}
 <p class="count">{{.Shown}} of {{.Total}} species{{range .Filters}}<span class="fsum"><b>{{.Label}}</b> {{.Value}}</span>{{end}}</p>
 
 {{range .Sections}}
 <section>
   {{/* Three shapes, because a frequency tier is not always a range
-       (P-076): a closed band, an open last band, and the birds with no
+       (product.orderByFrequency): a closed band, an open last band, and the birds with no
        ratio at all, which have no band to state. */}}
   <h2><span class="tier">Tier {{.Index}}</span>
       {{if .Note}}{{.Note}}{{else if .Max}}{{.Min}} &ndash; {{.Max}}{{else}}{{.Min}} and beyond{{end}}
@@ -384,12 +384,12 @@
 {{else}}
   {{if .NothingSelected}}
     {{/* Nothing FAILED to match here: the reader turned everything off, and
-         saying "no matches" would blame the data for their click (P-037). */}}
+         saying "no matches" would blame the data for their click (product.helpfulEmptyState). */}}
     <p class="empty">Select birds to display in <b>Controls</b> above.</p>
   {{else}}
     {{/* The filters are already named on the count line directly above, so
          this does not repeat them -- it only says the intersection is
-         empty and offers the way out (P-037). */}}
+         empty and offers the way out (product.helpfulEmptyState). */}}
     <p class="empty">No birds match. <a href="{{.ClearURL}}">Clear the filters</a>.</p>
   {{end}}
 {{end}}
@@ -500,8 +500,8 @@
 {{/* The pick control is a SIBLING of the tile link, positioned over the free
      right end of the metrics footer. Not nested: anchors cannot nest, and more
      importantly the tile must keep opening the detail view in both modes
-     (P-034). Absent entirely outside pick mode, so ordinary browsing sees the
-     tile it always has (P-031). */}}
+     (product.tileOpensDetail). Absent entirely outside pick mode, so ordinary browsing sees the
+     tile it always has (product.tileContents). */}}
 <div class="tilewrap" id="{{.Anchor}}">
 <a class="tile" href="{{.DetailURL}}">
   <div class="hd">
@@ -515,11 +515,11 @@
   {{template "diagram" .}}
   <div class="ft">
     {{/* Named in full, not L/W/M: the initials cost every reader who has not
-         yet learned them, and the three fit a tile at full width (P-031).
+         yet learned them, and the three fit a tile at full width (product.tileContents).
 
          `whynot` supplies the tooltip. All three used to say "estimated" for
          anything not measured, which was false for a near-match: that is a
-         real measurement with callipers, of a sibling taxon, and P-065 draws
+         real measurement with callipers, of a sibling taxon, and product.measuredVersusModeled draws
          it SOLID for exactly that reason. The footer calling it an estimate
          contradicted the stroke beside it, and named no reason a reader
          could act on -- the Chihuahuan Meadowlark's mass is the Eastern
@@ -529,17 +529,17 @@
     <span{{if ne .S.Mass.Prov.Kind "measured"}} class="est" title="{{whynot .S.Mass.Prov}}"{{end}}>Mass {{.MassStr}}</span>
   </div>
   {{/* How much of the species observations held by the regions currently on screen
-       on screen (P-074). It answers the question the filtered page is
+       on screen (product.shareOfRecords). It answers the question the filtered page is
        posing; "commonest in Yukon" answers one the reader did not ask and
        stays on the detail page.
 
        Its own line, not a fourth cell in the footer: the footer holds the
-       three measurements, P-031 keeps it to one line, and a fourth wrapped
+       three measurements, product.tileContents keeps it to one line, and a fourth wrapped
        it. Rendered on EVERY tile, because a line that appears on some tiles
        and not others makes those tiles shorter and takes the whole flex row
        out of step.
 
-       A cell either divides or explains (CR-030). The dividing form covers
+       A cell either divides or explains (decisions.seaShareDiffers). The dividing form covers
        absence too -- "0 in 1,225,176,035" rather than an em-dash, which left
        a reader unable to tell a missing figure from a missing bird. The
        explaining form is for having no denominator at all. */}}
@@ -599,7 +599,7 @@
 
        These coordinates are the box's, not the group's, so the centering
        offset is added explicitly -- view has already folded it into the segment
-       labels' own y values (P-066). */}}
+       labels' own y values (product.labeledDetailDiagram). */}}
   {{range .Labels}}
   <line class="leader" x1="{{f1 (add $g.CX 6)}}" y1="{{f1 .AnchorY}}"
         x2="{{f1 (sub $b.W 150)}}" y2="{{f1 .TextY}}"/>
@@ -626,10 +626,10 @@
        drawing axis -- $g.CX, not the box centre: the bird is laid out left of
        the label gutter, so the two are 160px apart. No leader lines; there is
        no part to point at. Mass sits here rather than in the stack beside the
-       drawing because it is not a length (P-066). */}}
+       drawing because it is not a length (product.labeledDetailDiagram). */}}
   {{with .MassCube}}{{if .Side}}
   {{/* The cube of water that weighs what the bird weighs, in oblique
-       projection (P-066, CR-019). The FACE's base sits on the bottom of the
+       projection (product.labeledDetailDiagram, decisions.massAsWaterCube). The FACE's base sits on the bottom of the
        drawing area in every diagram, so the projection grows up and right
        from a corner that never moves and two cubes can be compared by eye.
        Top and right faces first, front face over them: nearest last. */}}
@@ -661,7 +661,7 @@
 {{define "pickbar"}}
 {{if .Picking}}
 {{/* Sticky, because the flow ends in "now compare them" and that action should
-     not require scrolling back through 841 tiles to find it (P-068). */}}
+     not require scrolling back through 841 tiles to find it (product.pickFromIndex). */}}
 <div class="pickbar">
   <div class="pickbar-in">
     {{if .Picks}}
@@ -674,7 +674,7 @@
     {{end}}
     {{if .Missing}}
     {{/* Named, not silently dropped: ids follow scientific names and this
-         checklist renames them, so a kept link rots (P-068, CR-018). */}}
+         checklist renames them, so a kept link rots (product.pickFromIndex, decisions.compareUrlContract). */}}
     <span class="pickgone">{{len .Missing}} unrecognised and dropped:
       {{range $i, $m := .Missing}}{{if $i}}, {{end}}<code>{{$m}}</code>{{end}}</span>
     {{end}}
