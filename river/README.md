@@ -1,4 +1,4 @@
-> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `236464d`.
+> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `b94253b`.
 > Local amendments, if any, are listed in [bindings.md](bindings.md).
 
 # River
@@ -439,6 +439,12 @@ reference checks are in Python: use them as they are if your project has no bett
 them, or translate them into your language and record which River version you translated, so a
 later change to River's checks is visible. What is normative is what a check asserts, not the
 language it is written in. Write your own checks in the same language.
+
+**Before River's checks replace yours, list what yours enforced.** River's checker counts some
+things a project's own checks may have failed — a requirement citing no goal, say — because a
+brownfield project may start that way. If your project was stricter, keep the stricter rule as
+your own check; swapping checkers is otherwise how a rule disappears without anyone deciding it
+should.
 
 Run them before calling a change done. At minimum a bundle should check that:
 
