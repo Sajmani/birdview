@@ -90,6 +90,22 @@ failing**: zeroing AVONET's recorded hash produced exit 1 and a recorded-vs-actu
 **Scope exception:** `wiley` is quoted, not vendored, so it has no hash to check — see
 [requirements.md](requirements.md#wiley). `aba` is fetched at build and checked by sortsAscending instead.
 
+### quotationsAreVerbatim
+
+**Every quotation from a vendored source is word for word**
+
+**Verifies:** tech.recordBeforeConsuming · **Level:** spec · **Method:** every block quotation in a
+transcribed source's `requirements.md` is found in the text of a file that source vendors,
+ignoring markup, whitespace and the style of quotation mark, and splitting at an ellipsis
+**Run:** `go test ./river/check/ -run TestQuotationsAreVerbatim`
+**Status: verified 2026-10-16, passing, and watched failing** — changing the large-text ratio in
+the quotation of WCAG 1.4.6 from 4.5:1 to 3:1 failed it, naming the quotation. Its first run also
+failed seven quotations that were correct, every one a defect in the comparison (an underscore
+read as emphasis, a space left where a link's markup was removed, several quoted sentences in one
+block); all seven pass after the fix, and none of the transcriptions needed changing.
+**Scope:** sources that vendor HTML — `inatapi`, `inatterms` and `wcag`. A source quoted but not
+vendored, such as `wiley`, has nothing to check against.
+
 ### decisionReferencesExist
 
 **Decision records reference requirements that exist**
@@ -1930,7 +1946,7 @@ count assertion exists beside the key assertion.
 | tech.textContrastFloor | noTextBelowContrastFloor | |
 | product.selfDescriptionStaysTrue | creditsComplete | |
 | tech.localNowPublicLater | attributionComplete | partial — the non-commercial posture itself is still untestable |
-| tech.bundleIsNormative, tech.recordBeforeConsuming | everyRequirementCitesGoal, vendoredHashesMatch, decisionReferencesExist | |
+| tech.bundleIsNormative, tech.recordBeforeConsuming | everyRequirementCitesGoal, vendoredHashesMatch, decisionReferencesExist, quotationsAreVerbatim | |
 | `wcag/1.4.6` | legibleDistinctColors | |
 
 ### Declared gaps

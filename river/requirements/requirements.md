@@ -32,7 +32,7 @@ requirements, such as a dataset, has a directory holding only its provenance.
 | [`gbif`](#gbif) | mandatory | by reference, queried, not vendored | **adopted** — CC BY 4.0 verified from the API; supplies the GBIF→AviList name bridge only |
 | [`ricklefs`](#ricklefs) | mandatory | **rejected** | **rejected** — Wiley terms prohibit the use, see decisions.ricklefsProhibited |
 | [`wiley`](#wiley) | mandatory | quoted only, not vendored | **adopted** — terms read and transcribed; the reason `ricklefs` is rejected |
-| [`wcag`](#wcag) | mandatory | absorbed, partial | **partial** — adopted for two criteria, not vendored |
+| [`wcag`](#wcag) | mandatory | by reference, vendored | **partial by design** — three contrast criteria transcribed; no conformance level claimed |
 | [`inat-api`](#inat-api) | governing | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; governs the mapping tool |
 | [`inat-terms`](#inat-terms) | mandatory | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; almost nothing in it reaches BirdView |
 | [`specman`](#specman) | — (method) | project copy | **retired** 2026-10-15 — replaced by River, whose pin is in `process.md`'s banner |
@@ -494,16 +494,16 @@ exception in [bindings.md](../bindings.md#location-exception-the-third_party-dir
 
 | Field | Value |
 | --- | --- |
-| **Origin** | https://www.w3.org/TR/WCAG22/ |
-| **Version** | WCAG 2.2 |
-| **Integrity** | Not vendored |
+| **Origin** | https://www.w3.org/TR/2024/REC-WCAG22-20241212/ |
+| **Version** | WCAG 2.2, W3C Recommendation of 12 December 2024 |
+| **Integrity** | [river/requirements/sources/wcag/PROVENANCE.md](sources/wcag/PROVENANCE.md) |
 | **Tier** | **mandatory** |
-| **Import style** | Absorbed, partial — the adopted criteria are restated as tech.badgeContrast |
-| **Scope** | Family badge colors (tech.badgeContrast), and link and text colors against the page surfaces (tech.textContrastFloor) |
-| **Adopted parts** | SC 1.4.3 (Contrast Minimum) and SC 1.4.6 (Contrast Enhanced). Badges and links target 1.4.6 at 7:1; other text is held to 1.4.3 at 4.5:1. |
-| **Exclusions** | **Everything else.** No keyboard-access, focus-order, timing, reading-level or other criteria are adopted, and BirdView claims no conformance level. The scope widened once, from badges to all text, after an unstyled link shipped at 1.9:1 — see [decisions.twoContrastFloors](decisions.md#twocontrastfloors). |
+| **Import style** | By reference, vendored at `//third_party/wcag/` under the location exception in [bindings.md](../bindings.md#location-exception-the-third_party-directory); transcribed in [sources/wcag/requirements.md](sources/wcag/requirements.md) |
+| **Scope** | Every BirdView web page, in full |
+| **Adopted parts** | SC 1.4.6 Contrast (Enhanced) for all text, which meets SC 1.4.3 Contrast (Minimum) as well; SC 1.4.11 Non-text Contrast for graphics and interface components; conformance requirement 5.2.2, Full pages, as the reading of each; and the definitions of *web page* and *contrast ratio* they use |
+| **Exclusions** | **Everything else.** No keyboard-access, focus-order, timing, reading-level or other criteria are adopted, and BirdView claims no conformance level. The scope widened once, from badges to all text, after an unstyled link shipped at 1.9:1 — see [decisions.twoContrastFloors](decisions.md#twocontrastfloors) — and the separate 4.5:1 floor for ordinary text was then dropped for one 7:1 floor ([decisions.oneContrastFloor](decisions.md#onecontrastfloor)). |
 | **Owner** | W3C; project owner grants any deviation |
-| **Status** | **Partial by design.** Adopted for two criteria, restated as a checkable requirement, not vendored. |
+| **Status** | **Partial by design.** Vendored, hashed and transcribed 2026-10-16, with every quotation checked against the vendored copy. 1.4.11 has no check yet. |
 
 Scoping this narrowly is deliberate. The earlier design claimed "a minimum WCAG AA contrast ratio
 of ≥ 7:1", which conflates two conformance levels and asserts an accessibility posture nothing
