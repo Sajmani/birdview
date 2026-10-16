@@ -15,7 +15,7 @@ migration finishes, these are deliberate local departures from `README.md`, not 
 | **Layout** | River's nested layout: `goals/`, `requirements/`, one package per source under `requirements/sources/` ([decisions.nestedLayout](requirements/decisions.md#nestedlayout)) | — |
 | **Identifiers** | Descriptive camelCase, qualified by kind outside their own file: `goals.*`, `product.*`, `tech.*`, `decisions.*`, `acceptance.*`; a transcribed source is its own package with exported names, `inatapi.RequestRate` ([decisions.descriptiveIdentifiers](requirements/decisions.md#descriptiveidentifiers)) | — |
 | **Composition** | Not run. Criteria wait in `requirements/acceptance.md` | Each `product` and `tech` requirement must first be classified as local intent or composed from an imported source; then the split into `app`, `dataset` and `internal/repo` |
-| **Checks** | River's checker as `goals.py`, copied unchanged; BirdView's own `pins.py` and `refs.py`, which do what River does not check yet — hashes, and every reference and anchor across the repository | — |
+| **Checks** | Still Python: River's checker as `goals.py`, copied unchanged, and BirdView's own `pins.py` and `refs.py` | BirdView's dominant language is **Go**, and River now asks for checks in it, run by `go test` alongside the four standing checks. Translation waits on River's shared test cases, which are what make a translation trustworthy |
 | **Stage adoption** | **Requirements**, **Implementation** and **Verification** adopted; **Release informal** | BirdView is not deployed. It has a Dockerfile but no rollout policy, monitoring or alerting — none of the release guardrails River's Release stage produces. Decided 2026-10-16; revisit when the site goes live |
 
 ## Project bindings

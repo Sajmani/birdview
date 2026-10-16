@@ -1,4 +1,4 @@
-> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `6672b18`.
+> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `236464d`.
 > Local amendments, if any, are listed in [bindings.md](bindings.md).
 
 # River
@@ -15,8 +15,8 @@ about any particular project; what is true of yours goes in `bindings.md`.
 ## Adopting River
 
 **You do not have to change any tool you already use.** River is files in your repository plus
-checks that run in whatever already runs your tests. If adopting a methodology requires
-adopting a toolchain first, you have been handed a migration, not a method.
+checks written in your language and run by whatever already runs your tests. If adopting a
+methodology requires adopting a toolchain first, you have been handed a migration, not a method.
 
 **Adopt one stage at a time.** Requirements alone is worth doing. A stage you have not adopted
 is declared **informal** in `bindings.md` rather than left unmentioned, so a partial adoption is
@@ -432,6 +432,13 @@ approved verifies nothing**, because the agent will simply have satisfied itself
 ---
 
 ## Checks
+
+**Write them in your project's dominant language, and run them in its own test suite.** Checks
+that run wherever your tests already run cannot be skipped and add no toolchain. River's
+reference checks are in Python: use them as they are if your project has no better home for
+them, or translate them into your language and record which River version you translated, so a
+later change to River's checks is visible. What is normative is what a check asserts, not the
+language it is written in. Write your own checks in the same language.
 
 Run them before calling a change done. At minimum a bundle should check that:
 
