@@ -1702,7 +1702,7 @@ that has never run the ingest, this criterion is silent.
 
 **Credits are complete and the docs are not stale**
 
-**Verifies:** tech.selfDescriptionStaysTrue · **Level:** code · **Method:** tests over the rendered pages and over
+**Verifies:** product.selfDescriptionStaysTrue · **Level:** code · **Method:** tests over the rendered pages and over
 `README.md` and `docs/`, against the compiled dataset
 
 **Assertions, credits:** **every page that shows a CC BY source's output credits that source on
@@ -1722,7 +1722,7 @@ after names and families moved to AviList.
 **What this cannot check, stated so nobody assumes otherwise:** whether the prose is *true*. A
 test can compare a number against the dataset and a credit against a page; it cannot read
 `docs/using.md` and notice that the control it describes was redesigned. That remains a reading
-task before release, and [tech.selfDescriptionStaysTrue](sources/tech/ungrouped.md#selfdescriptionstaystrue) requires it as a release gate rather than
+task before release, and [product.selfDescriptionStaysTrue](sources/product/presentation.md#selfdescriptionstaystrue) requires it as a release gate rather than
 pretending a test covers it.
 
 **Counts are checked only where a claim is about the whole dataset** — "N species across M
@@ -1913,7 +1913,7 @@ count assertion exists beside the key assertion.
 | tech.identifiedClient | outboundRequestsIdentified | |
 | tech.badgeContrast | legibleDistinctColors | |
 | tech.textContrastFloor | noTextBelowContrastFloor | |
-| tech.selfDescriptionStaysTrue | creditsComplete | |
+| product.selfDescriptionStaysTrue | creditsComplete | |
 | tech.localNowPublicLater | attributionComplete | partial — the non-commercial posture itself is still untestable |
 | tech.bundleIsNormative, tech.recordBeforeConsuming | everyRequirementCitesGoal, vendoredHashesMatch, decisionReferencesExist | |
 | `wcag/1.4.6` | legibleDistinctColors | |
@@ -2063,7 +2063,7 @@ shape it was written to catch.
 
 **No served page publishes a contact address**
 
-**Verifies:** [tech.noPersonalAddress](sources/tech/ungrouped.md#nopersonaladdress) · **Level:** code · **Method:** rendering test over every
+**Verifies:** [product.noPersonalAddress](sources/product/presentation.md#nopersonaladdress) · **Level:** code · **Method:** rendering test over every
 served page, including every document the two indexes list
 
 **Assertions:** no page matches a plain address, the spelled-out obfuscation, or a mail link.
@@ -2260,7 +2260,7 @@ off-land count, silently stored.
 
 **Responses compress, and say that they did**
 
-**Verifies:** [tech.compressedResponses](sources/tech/ungrouped.md#compressedresponses) · **Level:** code · **Method:** handler test over a page,
+**Verifies:** [tech.compressedResponses](sources/tech/delivery.md#compressedresponses) · **Level:** code · **Method:** handler test over a page,
 a detail view, a static file and a served document
 
 **Assertions:**
@@ -2385,7 +2385,7 @@ not exist. Nine species are in that state.
 
 **The region join normalizes names, and reports what it could not match**
 
-**Verifies:** [tech.joinsReportDrops](sources/tech/ungrouped.md#joinsreportdrops), [decisions.regionJoinNormalizes](decisions.md#regionjoinnormalizes) · **Level:** code and
+**Verifies:** [product.joinsReportDrops](sources/product/dataset.md#joinsreportdrops), [decisions.regionJoinNormalizes](decisions.md#regionjoinnormalizes) · **Level:** code and
 build · **Method:** unit test over the shared normalization, plus a bounded report on every run
 
 **Assertions:**
@@ -2422,7 +2422,7 @@ return the project has had on a check written to assert an invariant rather than
 
 **Every species the two sources disagree about is declared**
 
-**Verifies:** [tech.sourceNamingMeasured](sources/tech/ungrouped.md#sourcenamingmeasured) · **Level:** code · **Method:** offline test over the
+**Verifies:** [product.sourceNamingMeasured](sources/product/dataset.md#sourcenamingmeasured) · **Level:** code · **Method:** offline test over the
 committed correspondence table
 
 **Assertions:**
@@ -2464,7 +2464,7 @@ Re-run with the anchor asserted, it fails as above.
 
 **Both readers of the occurrence data land on the same species**
 
-**Verifies:** [tech.joinsReportDrops](sources/tech/ungrouped.md#joinsreportdrops), [decisions.regionJoinNormalizes](decisions.md#regionjoinnormalizes) · **Level:** code ·
+**Verifies:** [product.joinsReportDrops](sources/product/dataset.md#joinsreportdrops), [decisions.regionJoinNormalizes](decisions.md#regionjoinnormalizes) · **Level:** code ·
 **Method:** unit test over the two pipelines, from one verbatim name to the name each joins on
 
 **Assertions:**
@@ -2661,7 +2661,7 @@ query the alias too, and a run. Recorded in [todo.md](../todo.md).
 
 **Every response can be revalidated, and the validator is honest**
 
-**Verifies:** [tech.cacheLifetimeStated](sources/tech/ungrouped.md#cachelifetimestated) · **Level:** code · **Method:** unit test over rendered
+**Verifies:** [tech.cacheLifetimeStated](sources/tech/delivery.md#cachelifetimestated) · **Level:** code · **Method:** unit test over rendered
 responses, their headers and their conditional round trip
 
 **Assertions:**

@@ -227,7 +227,7 @@ func TestBestRegionIsDeterministic(t *testing.T) {
 //
 // Watched fail: see acceptance.occurrenceReadersAgree.
 //
-// Verifies: product.regionAndMonthFilter, product.shareOfRecords, tech.joinsReportDrops. Criterion: acceptance.occurrenceReadersAgree.
+// Verifies: product.regionAndMonthFilter, product.shareOfRecords, product.joinsReportDrops. Criterion: acceptance.occurrenceReadersAgree.
 func TestBothReadersOfTheOccurrenceDataAgreeOnTheSpecies(t *testing.T) {
 	// One verbatim name of each shape the facet actually contains, with the
 	// species each is a record of.

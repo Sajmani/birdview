@@ -26,7 +26,7 @@ import (
 
 // repoFile reads a file from the repository root. The docs are not embedded,
 // so these read from disk; a missing one fails rather than skips, because a
-// README that has gone away is itself the problem tech.selfDescriptionStaysTrue is about.
+// README that has gone away is itself the problem product.selfDescriptionStaysTrue is about.
 func repoFile(t *testing.T, rel string) string {
 	t.Helper()
 	b, err := os.ReadFile(filepath.Join("..", rel))
@@ -45,7 +45,7 @@ func userFacingDocs(t *testing.T) map[string]string {
 		t.Fatalf("listing docs: %v", err)
 	}
 	if len(paths) == 0 {
-		t.Fatal("no files under docs/; tech.selfDescriptionStaysTrue expects user-facing documentation to exist")
+		t.Fatal("no files under docs/; product.selfDescriptionStaysTrue expects user-facing documentation to exist")
 	}
 	for _, p := range paths {
 		b, err := os.ReadFile(p)
@@ -78,7 +78,7 @@ func datasetCounts(t *testing.T) (species, families int) {
 // ccBySources are the CC BY sources whose output reaches a page, each with
 // the marker that counts as crediting it. Attribution is the licence
 // condition these sources ask for in return, so a page that shows their work
-// and omits the credit is a licence breach, not a styling lapse (tech.selfDescriptionStaysTrue).
+// and omits the credit is a licence breach, not a styling lapse (product.selfDescriptionStaysTrue).
 //
 // `pages` names the pages a source's output actually reaches; nil means all
 // of them. GBIF is the reason this field exists: region membership is derived
@@ -102,14 +102,14 @@ var ccBySources = []struct {
 		[]string{"index.html", "detail.html"}},
 }
 
-// TestEveryPageCreditsWhatItShows asserts the licence half of tech.selfDescriptionStaysTrue.
+// TestEveryPageCreditsWhatItShows asserts the licence half of product.selfDescriptionStaysTrue.
 //
 // Checked **per page**, because that is how attribution works and because
 // the gap it was written for was per-page: the index carried full credits
 // while detail.html and compare.html omitted AviList, on pages built out of
 // AviList names from the title down.
 //
-// Verifies: tech.selfDescriptionStaysTrue. Criterion: acceptance.creditsComplete.
+// Verifies: product.selfDescriptionStaysTrue. Criterion: acceptance.creditsComplete.
 func TestEveryPageCreditsWhatItShows(t *testing.T) {
 	for _, page := range []string{"index.html", "detail.html", "compare.html"} {
 		b, err := Static.ReadFile("static/" + page)
@@ -130,7 +130,7 @@ func TestEveryPageCreditsWhatItShows(t *testing.T) {
 	}
 }
 
-// TestDocsCountsMatchTheDataset asserts the staleness half of tech.selfDescriptionStaysTrue.
+// TestDocsCountsMatchTheDataset asserts the staleness half of product.selfDescriptionStaysTrue.
 //
 // **Only totality claims are checked**, in the two shapes the docs use to
 // state the size of the dataset: "N species across/in M families", and a
@@ -142,7 +142,7 @@ func TestEveryPageCreditsWhatItShows(t *testing.T) {
 // families" is somebody else's study. A check that flagged those would be
 // turned off within a week.
 //
-// Verifies: tech.selfDescriptionStaysTrue. Criterion: acceptance.creditsComplete.
+// Verifies: product.selfDescriptionStaysTrue. Criterion: acceptance.creditsComplete.
 func TestDocsCountsMatchTheDataset(t *testing.T) {
 	species, families := datasetCounts(t)
 	pair := regexp.MustCompile(`(\d{2,4}) species (?:across|in) (\d{2,3}) families`)
@@ -176,7 +176,7 @@ func TestDocsCountsMatchTheDataset(t *testing.T) {
 // the ABA and the word it was relieved of. A sentence that names the real
 // source is disambiguating, not misattributing.
 //
-// Verifies: tech.selfDescriptionStaysTrue. Criterion: acceptance.creditsComplete.
+// Verifies: product.selfDescriptionStaysTrue. Criterion: acceptance.creditsComplete.
 func TestNoDocCreditsASourceForWhatItNoLongerSupplies(t *testing.T) {
 	relieved := []string{"names", "families", "species codes", "alpha code"}
 	// Sentence-ish: a full stop *followed by space*, or a line break. Table

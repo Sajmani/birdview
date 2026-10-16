@@ -320,7 +320,7 @@ func ConfirmedMonths(entries []Withholding, ebird, inat [12]int64) [12]bool {
 //
 // Derived from the list rather than kept by hand. The hand-kept version
 // held eleven species, found by querying every plausible alias and finding
-// nothing, plus Great Gray Owl and Black Rail, which the ratio band of tech.sourceNamingMeasured
+// nothing, plus Great Gray Owl and Black Rail, which the ratio band of product.sourceNamingMeasured
 // caught after the zero-record sweep missed them -- eBird holds one record of
 // the owl and sixteen of the rail. It also held **Desertas Petrel**, which is
 // on no entry of eBird's list: its missing records are a naming question,

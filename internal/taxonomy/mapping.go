@@ -412,7 +412,7 @@ func SharedWith(aviList string) (other string, source string, why string, ok boo
 // already bare binomials, 2.6% sit under trinomials, 0.2% are hybrids and
 // 0.1% are genus-only.
 //
-// Verifies: product.regionAndMonthFilter, tech.joinsReportDrops.
+// Verifies: product.regionAndMonthFilter, product.joinsReportDrops.
 func Binomial(name string) (string, bool) {
 	if strings.ContainsRune(name, '×') {
 		return "", false
@@ -464,7 +464,7 @@ func Occurrence(name string) string {
 
 // DomesticForms are species whose record counts are skewed because
 // iNaturalist files the feral or domestic population under a trinomial and
-// eBird does not (tech.sourceNamingMeasured).
+// eBird does not (product.sourceNamingMeasured).
 //
 // Not a naming disagreement to fix: both databases are right about their own
 // records, and BirdView draws the wild species. Declared so the ratio check

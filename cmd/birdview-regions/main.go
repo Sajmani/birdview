@@ -346,7 +346,7 @@ func main() {
 		// Every name that reached the denominator and no species. These are
 		// records counted as "some other bird" on every tile, which is
 		// correct for a bird BirdView does not draw and a silent loss for
-		// one it does (goals.nothingDisappearsQuietly, tech.joinsReportDrops).
+		// one it does (goals.nothingDisappearsQuietly, product.joinsReportDrops).
 		for n, c := range r.counts {
 			if !drawnName[n] {
 				orphan[n] += c
@@ -454,7 +454,7 @@ func main() {
 	}
 	log.Printf("birdview-regions: %d of %d species placed in at least one region", placed, len(ds))
 
-	// What the join discarded, named and counted (tech.joinsReportDrops).
+	// What the join discarded, named and counted (product.joinsReportDrops).
 	//
 	// A record under a name matching no drawn species still reaches the
 	// denominator of every share, so it is never absent from the data --
@@ -490,7 +490,7 @@ func main() {
 			"%.2f%% bar. Every one of those is counted in the denominator of every share "+
 			"and in no species' numerator. A name the occurrence data uses and "+
 			"taxonomy.Occurrence does not know about belongs in AviListRenames or "+
-			"CountedAs; refusing to write a table that loses them quietly (tech.joinsReportDrops).",
+			"CountedAs; refusing to write a table that loses them quietly (product.joinsReportDrops).",
 			f*100, maxOrphanFraction*100)
 	}
 

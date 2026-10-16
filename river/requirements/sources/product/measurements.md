@@ -386,7 +386,7 @@ readers and the guide for developers, so neither audience has to find it by brow
 
 **Kept in step with the code.** A change to what the pipeline reads, joins, models or writes
 updates the diagram and the step descriptions under it in the same change, as
-[tech.selfDescriptionStaysTrue](../tech/ungrouped.md#selfdescriptionstaystrue) requires of all documentation. The parts a test can compare are compared:
+[product.selfDescriptionStaysTrue](presentation.md#selfdescriptionstaystrue) requires of all documentation. The parts a test can compare are compared:
 every source column the diagram names is one a reader asks for, and every `internal/taxonomy`
 table the ingest reads is named in the diagram. What a step *does* stays a reading task.
 

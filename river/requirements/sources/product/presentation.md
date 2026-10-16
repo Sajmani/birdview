@@ -763,3 +763,72 @@ on its length: a 90-family selection is about 1.7 KB, which across 841 tiles wou
 link restores the picks, the ordering, the scale and the units, but **not the filter**. The
 browser's own Back button restores that exactly, because it replays the previous URL.
 
+## selfDescriptionStaysTrue
+
+**What the project says about itself stays true**
+
+Subject: `docs.currency`
+Goals: goals.shapeNotOnlySize
+
+**Every CC BY source whose output appears on a page is credited on that page.** This is a licence
+condition, not a courtesy: AviList, AVONET and Fox are all CC BY 4.0, and attribution is the
+thing they ask for in return.
+
+It was not being met. The index page carried full credits, while **`detail.html` and
+`compare.html` credited AVONET, Fox and the ABA and omitted AviList** — on pages whose every
+English name, scientific name, family and species code comes from AviList. A reader could use
+BirdView for an hour and never see the source of the words on the screen.
+
+**User-facing documentation describes the project as it is, not as it was.** `README.md` and
+`docs/` are read before the code and are the first thing a new reader trusts, so a stale claim
+there is worse than no claim. Two kinds of staleness are forbidden:
+
+- **A count that no longer matches the dataset.** `docs/data.md` claimed 841 species after
+  [decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba) cut the list to 839.
+- **A source credited for something it no longer supplies.** `README.md` listed the ABA Checklist
+  as the source of "species list, names, families" after decisions.avilistReplacesAba moved names and families to
+  AviList (at that point the ABA checklist supplied **scope** alone; [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence)
+  then replaced scope too).
+
+**Before any public deployment, the docs are checked against the spec**, since a release is the
+moment the claims become promises to strangers rather than notes to ourselves.
+
+The check is mechanical where it can be — counts and credits are comparable against the dataset
+and the page — and a reading task where it cannot. [acceptance.creditsComplete](../../acceptance.md#creditscomplete) does the
+mechanical part, and records plainly that prose accuracy is not something a test can hold.
+
+## noPersonalAddress
+
+**No personal address is published**
+
+Subject: `deploy.contact`
+Goals: goals.goodDataCitizen
+
+No page BirdView serves carries a contact address. Reader feedback goes to the project's issue
+tracker, whose URL is a deployment setting (`-feedback`) rather than a constant in the markup.
+
+**Unset publishes nothing**, not a dead link. A site may legitimately go up before its tracker
+exists; what it must not do is invite a reader somewhere that does not.
+
+Rationale: the header carried the owner's personal mailbox for the project's whole life, spelled
+out in words rather than written plainly. **That obfuscation is the argument against it.** It
+was written that way because a plain address on a public page is a harvested mailbox — which is
+a reason not to publish the address at all, not a reason to spell it oddly. Beyond the spam, an
+issue tracker is the better channel: a bug report in public can be read, searched, corrected by
+someone else and closed, where mail to one person is none of those things. The owner's personal
+mailbox is not the project's contact point.
+
+*(This requirement does not quote the address it removed, and that is not squeamishness. The
+requirements are published with the repository, so a quotation here would republish exactly
+what the rule forbids — which is how [acceptance.noContactAddressPublished](../../acceptance.md#nocontactaddresspublished) first failed, back when they
+were also served at `/spec`.)*
+
+**The `User-Agent` contact stays, and is a different thing.** [tech.identifiedClient](../tech/delivery.md#identifiedclient) requires outbound
+requests to name a contact, and iNaturalist's API guidance asks for it specifically. That
+address reaches a handful of API operators who may need to reach whoever is making the requests;
+it is not published to visitors. Removing it would be discourteous and risks the project being
+blocked.
+
+**This extends to addresses that are not ours.** The source manifest recorded a source owner's
+mailbox, which the served spec then republished to every visitor. A provenance record names who
+owns a source; it does not need to hand out their mail.

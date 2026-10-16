@@ -307,7 +307,7 @@ docker run --rm -p 8080:8080 birdview
 ```
 
 The server binds `0.0.0.0:8080` inside the container and reads `/data/species.json`. To override
-either, or to pass a feedback URL ([tech.noPersonalAddress](../river/requirements/sources/tech/ungrouped.md#nopersonaladdress)):
+either, or to pass a feedback URL ([product.noPersonalAddress](../river/requirements/sources/product/presentation.md#nopersonaladdress)):
 
 ```
 docker run --rm -p 8080:8080 birdview \

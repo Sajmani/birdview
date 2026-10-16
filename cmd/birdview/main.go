@@ -78,7 +78,7 @@ func main() {
 	// Where readers are asked to send feedback. A URL, not an address: a
 	// mailto on a public page is a mailbox harvested within the week, and
 	// the owner's personal address is not the project's contact point
-	// (tech.noPersonalAddress).
+	// (product.noPersonalAddress).
 	//
 	// Empty by default, and an empty value publishes NOTHING rather than a
 	// dead link -- a site can go up before its tracker exists, but it must
@@ -151,7 +151,7 @@ type server struct {
 	// templates on every request so an edit shows on reload.
 	devDir string
 	// feedback is the issue tracker readers are pointed at, or empty, in
-	// which case no page says anything about feedback at all (tech.noPersonalAddress).
+	// which case no page says anything about feedback at all (product.noPersonalAddress).
 	feedback string
 	// build fingerprints everything a response is rendered from: the
 	// dataset, the templates and the static files. It is the first half of
@@ -901,7 +901,7 @@ type familyRow struct {
 
 type pageData struct {
 	// Feedback is the issue tracker URL, or empty. Empty publishes nothing
-	// (tech.noPersonalAddress): a site may go up before its tracker exists, but must not
+	// (product.noPersonalAddress): a site may go up before its tracker exists, but must not
 	// invite a reader somewhere that does not.
 	Feedback string
 

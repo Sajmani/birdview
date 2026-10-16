@@ -4538,7 +4538,7 @@ func atoiComma(t *testing.T, s string) int {
 }
 
 // No page BirdView serves may publish a personal address, in any of the
-// forms that reach a reader (tech.noPersonalAddress).
+// forms that reach a reader (product.noPersonalAddress).
 //
 // "birdview at ajmani dot net" was in the header for the project's whole
 // life. The obfuscation is the tell: it was written that way because a
@@ -4554,7 +4554,7 @@ func atoiComma(t *testing.T, s string) int {
 // Watched fail: putting the old sentence back in the header reports it on
 // every page that renders the header.
 //
-// Verifies: tech.noPersonalAddress. Criterion: acceptance.noContactAddressPublished.
+// Verifies: product.noPersonalAddress. Criterion: acceptance.noContactAddressPublished.
 func TestNoPersonalAddressIsPublished(t *testing.T) {
 	s := newTestServer(t)
 	pages := []string{"/", "/species/greblu", "/species/amerob", "/added",

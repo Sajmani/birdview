@@ -28,7 +28,7 @@ import (
 // 7,310,342 Dryobates villosus records matched no drawn species and went
 // into the denominator of every share and no numerator at all.
 //
-// Verifies: product.regionAndMonthFilter, product.shareOfRecords, tech.joinsReportDrops.
+// Verifies: product.regionAndMonthFilter, product.shareOfRecords, product.joinsReportDrops.
 func TestOccurrenceNormalizesEveryKnownName(t *testing.T) {
 	for from, to := range AviListRenames {
 		if got := Occurrence(from); got != strings.ToLower(to) {
@@ -78,7 +78,7 @@ func TestOccurrenceNormalizesEveryKnownName(t *testing.T) {
 //
 // Watched fail: see acceptance.occurrenceReadersAgree.
 //
-// Verifies: product.regionAndMonthFilter, tech.joinsReportDrops. Criterion: acceptance.occurrenceReadersAgree.
+// Verifies: product.regionAndMonthFilter, product.joinsReportDrops. Criterion: acceptance.occurrenceReadersAgree.
 func TestBinomialReducesRankWithoutInventingSpecies(t *testing.T) {
 	species := map[string]string{
 		"turdus migratorius":                "turdus migratorius",

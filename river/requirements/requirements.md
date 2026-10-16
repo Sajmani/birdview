@@ -337,7 +337,7 @@ an absent bird unless the two paths are kept apart.)*
 inverted query cannot find are not a taxonomy problem. Every one is present in iNaturalist and
 all but absent from eBird:
 
-*(Corrected 2026-10-05 by [tech.sourceNamingMeasured](sources/tech/ungrouped.md#sourcenamingmeasured)'s ratio band. This said **12 species** and
+*(Corrected 2026-10-05 by [product.sourceNamingMeasured](sources/product/dataset.md#sourcenamingmeasured)'s ratio band. This said **12 species** and
 listed nine, and one of the nine was wrong: **Blue-billed White-Tern is not withheld** — eBird
 holds 16,008 records of it under *Gygis alba*, a lump, not a suppression. The band also found
 two the table missed, because neither reads as zero: **Great Gray Owl**, eBird 1 against

@@ -42,9 +42,9 @@
 // exactly that reason.
 //
 // Nothing queries the network at build or test time; the output is
-// committed and the test reads it (tech.sourceNamingMeasured).
+// committed and the test reads it (product.sourceNamingMeasured).
 //
-// Verifies: tech.sourceNamingMeasured.
+// Verifies: product.sourceNamingMeasured.
 package main
 
 import (
@@ -139,7 +139,7 @@ func main() {
 	fmt.Fprintf(&sb, "#\n# Records each database holds in the US and Canada under the AviList\n")
 	fmt.Fprintf(&sb, "# binomial BirdView serves. A species far outside the usual eBird:iNat\n")
 	fmt.Fprintf(&sb, "# ratio is one the two databases disagree about -- a rename, a lump, a\n")
-	fmt.Fprintf(&sb, "# shared name, or a species eBird withholds (tech.sourceNamingMeasured, decisions.sharedCountShownOnBoth, decisions.regionJoinNormalizes).\n")
+	fmt.Fprintf(&sb, "# shared name, or a species eBird withholds (product.sourceNamingMeasured, decisions.sharedCountShownOnBoth, decisions.regionJoinNormalizes).\n")
 	fmt.Fprintf(&sb, "#\n# Sources: EOD - eBird Observation Dataset, doi:10.15468/aomfnb, and the\n")
 	fmt.Fprintf(&sb, "# iNaturalist research-grade dataset. Both CC BY 4.0.\n#\n")
 	fmt.Fprintf(&sb, "# id\tscientific name\tebird\tinaturalist\n")
