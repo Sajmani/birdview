@@ -1,7 +1,7 @@
 # fox-wingspan — provenance
 
 Vendored copy of the avian wingspan database, BirdView's only source of measured wingspan. See
-[../../sources.md](../../requirements.md#fox-wingspan) for the adoption record.
+[../../requirements.md](../../requirements.md#fox-wingspan) for the adoption record.
 
 ## What was retrieved
 

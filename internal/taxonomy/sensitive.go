@@ -85,7 +85,7 @@ func (w Withholding) FullMonths() [12]bool {
 
 // EBirdSensitive is every entry of eBird's Sensitive Species list for a
 // species BirdView draws, in the US and Canada (decisions.ebirdSilenceNotAbsence). Retrieved
-// 2026-10-09 from the page named in sources.md.
+// 2026-10-09 from the page named in the source manifest.
 //
 // A listing says where eBird withholds a bird, not where the bird is, and
 // not even that the withholding reached the export: 26 of the 230 region

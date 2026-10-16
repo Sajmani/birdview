@@ -27,7 +27,7 @@ import (
 // The fit is made here, at ingest time, from the empirical rows of the Fox et
 // al. dataset -- the same CC BY column BirdView already adopts as measured
 // data. It is not an ingest of that dataset's own predicted columns, which
-// sources.md excludes.
+// the source manifest excludes.
 //
 // Validated against those published predictions before adoption: fitted this
 // way and asked for the same 9,194 species, this model agrees with Fox's to a

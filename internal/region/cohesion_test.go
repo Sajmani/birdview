@@ -151,7 +151,7 @@ func meanTo(sp map[string]map[string]bool, id string, to []string) (float64, boo
 // The bar is zero, not a number lifted from a run. "Resembles its zone-mates
 // more than it resembles regions at large" is what being in a group *means*;
 // any positive threshold would be a record of what this data happened to do
-// (process.md).
+// (river/README.md).
 //
 // It deliberately does not re-run the clustering, which would compare the
 // algorithm against itself and ratify whatever it produced.

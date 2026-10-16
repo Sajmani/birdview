@@ -257,43 +257,6 @@ label already follows — decisions.foldedNeckAsS reports neck length in full wh
 total length label inherits it rather than introducing it. A label derived from the drawn extent
 would be a different and worse thing: it would name a quantity no source states and no table lists.
 
-## inaturalistLink
-
-**The detail view links to the species on iNaturalist**
-
-Subject: `presentation.detail_view.external_link`
-Goals: goals.sizeIntuition, goals.goodDataCitizen
-
-The detail view carries a link to the species' iNaturalist taxon page, so a reader who has just
-learned how big a bird is can go and see one.
-
-The link is shown **only where the match is confident**, which requires **both** names to agree:
-
-- **Scientific name** — identical, or differing only in genus while sharing a species epithet, which
-  is a generic reassignment one authority has made and the other has not.
-- **Common name** — ABA's matches **any** English name iNaturalist holds for the taxon, not merely
-  its preferred one, once case, punctuation and British spelling are normalized and any ABA
-  parenthetical alternate is set aside.
-
-A species that fails **either** test shows **no link at all** — not a search URL, not a genus page,
-not a guess. Neither name alone is sufficient: the scientific name identifies the species and the
-common name is the independent second opinion that stops a near miss becoming a link to the wrong
-bird.
-
-**Coverage is expected to be total.** Every in-scope species resolves under these rules, and a
-species that stops resolving is a fault to investigate rather than an absence to accept — see
-[decisions.fullInaturalistCoverage](../../decisions.md#fullinaturalistcoverage).
-
-BirdView **links and never copies**. No photograph is embedded, hotlinked, cached or reproduced;
-the reader arrives on iNaturalist, where each image carries its own license. tech.selfContainedServer forbids the
-embedding independently.
-
-Rationale: BirdView will never have photographs, and a reader surprised by a size wants to see the
-bird. Linking is the whole answer. The confidence gate exists because a link to the *wrong* bird is
-worse than no link on a page whose purpose is being careful about what it claims — and an absent
-link is legible, where a search URL that always "works" hides the failure. See
-[decisions.inaturalistLinkAdopted](../../decisions.md#inaturalistlinkadopted).
-
 ## metricProvenanceExplained
 
 **The detail view explains each metric's provenance**

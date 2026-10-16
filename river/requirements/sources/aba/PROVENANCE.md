@@ -1,7 +1,7 @@
 # aba — provenance
 
 **Nothing is vendored here, and that is deliberate.** See
-[../../sources.md](../../requirements.md#aba) for the adoption record.
+[../../requirements.md](../../requirements.md#aba) for the adoption record.
 
 ## Why this directory is empty of documents
 

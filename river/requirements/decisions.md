@@ -129,7 +129,7 @@ Ricklefs 2017 is the only source of real total-length measurements for North Ame
 this project found. Crossref reports only Wiley version-of-record terms and no CC license, and the
 Wiley terms page returns HTTP 403 to automated retrieval — so **the terms have not been read**.
 
-Per [process.md](../README.md#sources), the gap is left unfilled rather
+Per [README.md](../README.md#sources), the gap is left unfilled rather
 than guessed at. Specifically *not* relied upon: that the `RS-eco/traitdata` R package
 redistributes the data under GPL-3 (a package license does not establish the data's license), and
 the argument that measurements are uncopyrightable facts (a legal judgment nobody here is
@@ -485,7 +485,7 @@ Five-fold cross-validation on the same empirical data, comparing candidate forms
 ### The obstacle, and why it was not one
 
 Fox et al. publish exactly this: an order-level regression, with its fitted values shipped in
-`wingspan_predicted_*`. But [sources.md](requirements.md#fox-wingspan) excludes those columns, so
+`wingspan_predicted_*`. But [requirements.md](requirements.md#fox-wingspan) excludes those columns, so
 ingesting them would have needed an amendment — and spec2code does not get to reinterpret an
 exclusion.
 
@@ -1561,7 +1561,7 @@ BirdView derives and owns.
 **It does not touch any measurement.** AVONET and Fox are unaffected, every provenance record is
 unchanged, and no number moved.
 
-**It is not a route into Cornell's data.** [sources.md](requirements.md#avilist) records why the
+**It is not a route into Cornell's data.** [requirements.md](requirements.md#avilist) records why the
 Clements and Cornell columns are usable here when eBird/Clements itself is rejected: AviList is a
 separate CC BY 4.0 publication, and nothing is taken from Cornell's own distribution.
 
@@ -1586,7 +1586,7 @@ appears twice in the selector.
 product.regionAndMonthFilter said there was "no data-driven way to subdivide the east", citing a 42-member block
 covering everything from Maine to Georgia. **That measurement was an artifact.** It came from
 faceting GBIF's `/occurrence/search` on `speciesKey`, which silently drops records whose names
-the backbone cannot resolve — the same trap recorded in [sources.md](requirements.md#gbif), which
+the backbone cannot resolve — the same trap recorded in [requirements.md](requirements.md#gbif), which
 reports **zero** US and Canadian records for Cooper's Hawk.
 
 Redone against `data/region-presence.tsv` — built from **verbatim** names, which is the table the
@@ -2050,7 +2050,7 @@ already defines. A query for Black-capped Petrel against North Carolina's land p
 ### Why the weights are declared and never fitted
 
 The obvious way to build this is to fit coefficients so the output reproduces the ABA's 839.
-**That is rejected.** It would re-target exactly what [`sources.md`](requirements.md#why-occurrence-data-cannot-reproduce-the-aba-scope)
+**That is rejected.** It would re-target exactly what [`requirements.md`](requirements.md#why-occurrence-data-cannot-reproduce-the-aba-scope)
 disclaimed when the owner chose to own the list, and it would launder the ABA's editorial
 judgement into model weights — a list that is theirs in substance and ours in format is not a
 list BirdView owns. There is no other labeled training signal available, so there is no

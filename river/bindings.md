@@ -1,17 +1,17 @@
 # Bindings
 
-How BirdView applies [process.md](README.md). Where the two disagree, this file states the
+How BirdView applies [README.md](README.md). Where the two disagree, this file states the
 local amendment and why.
 
 ## River adoption — in progress
 
 BirdView adopted specman on 2026-09-23 and is migrating to **River**, its successor. The method
 file is River's as of 2026-10-15; the bundle around it is still specman-shaped. Until the
-migration finishes, these are deliberate local departures from `process.md`, not drift:
+migration finishes, these are deliberate local departures from `README.md`, not drift:
 
 | Area | Current state | Why it has not moved yet |
 | --- | --- | --- |
-| **Method** | River's `process.md`, pin in its banner | — |
+| **Method** | River's `README.md`, pin in its banner | — |
 | **Layout** | River's nested layout: `goals/`, `requirements/`, one package per source under `requirements/sources/` ([decisions.nestedLayout](requirements/decisions.md#nestedlayout)) | — |
 | **Identifiers** | Descriptive camelCase, qualified by kind outside their own file: `goals.*`, `product.*`, `tech.*`, `decisions.*`, `acceptance.*`; a transcribed source is its own package with exported names, `inatapi.RequestRate` ([decisions.descriptiveIdentifiers](requirements/decisions.md#descriptiveidentifiers)) | — |
 | **Composition** | Not run. Criteria wait in `requirements/acceptance.md` | Each `product` and `tech` requirement must first be classified as local intent or composed from an imported source; then the split into `app`, `dataset` and `internal/repo` |
@@ -20,7 +20,7 @@ migration finishes, these are deliberate local departures from `process.md`, not
 
 ## Project bindings
 
-What this project declares, as [process.md](README.md) asks of every adopter.
+What this project declares, as [README.md](README.md) asks of every adopter.
 
 | Binding | This project |
 | --- | --- |
@@ -28,7 +28,7 @@ What this project declares, as [process.md](README.md) asks of every adopter.
 | **ID citation syntax** | Go line comments, preserving the literal token: `// Verifies: product.scaleToggle, tech.badgeContrast.` |
 | **Artifact locations** | `river/`, with one exception below. Not served; the guides link to it in the published repository ([decisions.requirementsNotServed](requirements/decisions.md#requirementsnotserved)). |
 | **Subject vocabulary** | Dotted paths, lowercase, e.g. `diagram.scale.mode`, `badge.contrast.ratio`, `dataset.join.key`. New subjects are added by the project owner. |
-| **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never access or process Wiley Online Library material, by any means including an AI agent (decisions.ricklefsProhibited). Never fetch or process anything from BirdLife's DataZone by any automated means (see `sources.md` and `todo.md`). |
+| **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never access or process Wiley Online Library material, by any means including an AI agent (decisions.ricklefsProhibited). Never fetch or process anything from BirdLife's DataZone by any automated means (see `requirements/requirements.md` and `todo.md`). |
 | **External systems** | Tests make no network requests. Any source fetch is exercised against a local fixture or an `httptest` server, never against the live publisher. |
 | **Approval authority** | Sameer — gates, waivers, amendments, source deviations, risk acceptances. |
 | **Supported runtime** | Whatever the dependencies require (tech.goVersionFollowsDeps). No minimum Go version is maintained. |
@@ -38,7 +38,7 @@ What this project declares, as [process.md](README.md) asks of every adopter.
 ## Location exception: the third_party directory
 
 **Every vendored third-party file lives under `third_party/<name>/`**, not under
-`river/requirements/sources/<name>/`, and its provenance record stays where [process.md](README.md) puts it:
+`river/requirements/sources/<name>/`, and its provenance record stays where [README.md](README.md) puts it:
 `river/requirements/sources/<name>/PROVENANCE.md` names the out-of-place path and holds its hash. The
 directory names match, so `third_party/avonet/` is described by `river/requirements/sources/avonet/`.
 

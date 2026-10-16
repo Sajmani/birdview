@@ -1,7 +1,7 @@
 # inat-terms — provenance
 
 Vendored copies of iNaturalist's terms of use, community guidelines, and the definition of
-machine generated content that the guidelines link to. See [../../sources.md](../../requirements.md)
+machine generated content that the guidelines link to. See [../../requirements.md](../../requirements.md)
 for the adoption record and [requirements.md](requirements.md) for the transcription.
 
 ## What was retrieved

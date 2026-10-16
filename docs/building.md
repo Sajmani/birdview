@@ -233,7 +233,7 @@ three phases — classify first:
 | New feature or changed behavior | Full loop: spec edit, then criterion, then code |
 | Bug fix | The spec already forbids it. Add a criterion under the existing requirement, then fix. No requirement covers it? That is a spec gap — add the requirement first |
 | Refactor | No spec change. The suite stays green. If you must edit a check's *assertions*, it is not a refactor |
-| Adopting a new source | A `sources.md` entry, then a full compose-and-resolve pass. Expect conflicts |
+| Adopting a new source | A `requirements.md` entry, then a full compose-and-resolve pass. Expect conflicts |
 | Docs only | No spec change — unless writing the doc reveals the spec was wrong |
 
 ### Three rules that carry most of the weight
@@ -266,7 +266,7 @@ Violating any of these is a licensing problem, not a style problem.
   prohibit AI tools ingesting it and prohibit automated access, and the source is formally rejected
   ([decisions.ricklefsProhibited](../river/requirements/decisions.md#ricklefsprohibited)). Do not try to revive it as a length source.
 - **Only AVONET, the Fox wingspan data and AviList may be committed as source data.** All three
-  are CC BY 4.0. Before adding a fourth, read [`sources.md`](../river/requirements/requirements.md) — most candidates
+  are CC BY 4.0. Before adding a fourth, read [`requirements.md`](../river/requirements/requirements.md) — most candidates
   this project evaluated could not be redistributed. The generated tables under `data/` are not
   source data: they are the project's own reductions, and they carry their provenance in their
   own headers.

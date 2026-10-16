@@ -32,7 +32,7 @@
 //
 // Both eBird and iNaturalist are queried, because eBird withholds
 // conservation-sensitive species outright and iNaturalist is the only open
-// source that has them (sources.md, `gbif`).
+// source that has them (requirements.md, `gbif`).
 //
 // Nothing queries the network at build or test time; the output is committed
 // (tech.datasetNeverCommitted's sibling rule for generated tables, as for data/gbif-taxa.tsv).

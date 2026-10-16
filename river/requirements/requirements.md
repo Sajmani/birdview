@@ -219,7 +219,7 @@ names both DOIs in its header, which is where the attribution lives while nothin
 served.
 
 **No API terms are transcribed, and the gap is deliberate.** `www.gbif.org/terms` returns HTTP 403
-to an identified client, and [process.md](../README.md#sources) forbids supplying from memory a
+to an identified client, and [README.md](../README.md#sources) forbids supplying from memory a
 rule that could not be retrieved — a plausible rate limit is indistinguishable from a real one.
 What *was* retrievable is `api.gbif.org/robots.txt`, which disallows one image path and nothing
 else. So the pacing in `cmd/birdview-gbifmap` — 100 ms between requests across four workers, about
@@ -486,7 +486,7 @@ Use C permits "brief quotations for purposes of comment, criticism or similar sc
 purposes", so the transcription quotes the governing clauses and the document stays out.
 
 Recorded here as a location and import-style exception, in the same spirit as the AVONET workbook
-exception in [tech.md](../bindings.md#location-exception-the-third_party-directory).
+exception in [bindings.md](../bindings.md#location-exception-the-third_party-directory).
 
 ---
 
@@ -520,7 +520,7 @@ is not.
 | **Version** | Base pin `63bfdecb99a256d2819aa6d0e55bfb0bccf19b96db40e28f72572315e81cbdbc`, upstream `2c41af8`, taken 2026-09-23 |
 | **Integrity** | Not applicable — see below |
 | **Tier** | — it states how requirements are made, and produces none for criteria to cite |
-| **Import style** | Project copy at [spec/process.md](../README.md), carrying a banner that points here |
+| **Import style** | Project copy at `spec/process.md`, carrying a banner that points here |
 | **Scope** | How changes to this repository are worked |
 | **Owner** | Project owner |
 | **Status** | **Retired 2026-10-15.** Replaced by River, specman's successor. |
@@ -528,7 +528,7 @@ is not.
 The `Version` field above is a **base pin, not an integrity hash**, and is kept as history: it
 records which method this project was worked under from 2026-09-23 to 2026-10-15.
 
-**River gets no entry here.** River's `process.md` holds that the method is not a requirements
+**River gets no entry here.** River's `README.md` holds that the method is not a requirements
 source — it produces nothing for a criterion to cite, which this entry already observed — and
 records the pin in the file's own banner, so that one pin has one record. Local amendments to
 it are in [bindings.md](../bindings.md).

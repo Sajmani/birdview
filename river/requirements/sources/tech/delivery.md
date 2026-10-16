@@ -42,7 +42,7 @@ Subject: `build.inputs`
 Goals: goals.goodDataCitizen
 
 Inputs whose license forbids redistribution are downloaded onto the building machine at build time,
-verified against the hashes recorded in [sources.md](../../requirements.md), consumed, and never committed.
+verified against the hashes recorded in [requirements.md](../../requirements.md), consumed, and never committed.
 They land under `fetched/`, which `.gitignore` excludes. Since [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence)
 replaced the ABA checklist, no build input uses this path; the rule and the `.gitignore` entry stay
 in place in case a future source requires them.

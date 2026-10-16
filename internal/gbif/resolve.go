@@ -46,7 +46,7 @@ const UserAgent = "birdview-gbifmap/1.0 (contact: birdview@ajmani.net)"
 //
 // This is BirdView's own choice, not a published GBIF limit. GBIF's terms page
 // is behind a Cloudflare challenge that answers an agent with HTTP 403, and
-// process.md forbids supplying from memory a number that could not be
+// River's method (river/README.md) forbids supplying from memory a number that could not be
 // retrieved -- a plausible rate limit is indistinguishable from a real one. So
 // the number below is a courtesy BirdView sets for itself: a full run is about
 // 2,800 requests, which at this pace takes around five minutes.
@@ -250,7 +250,7 @@ type RegionRecord struct {
 	// Name is the scientific name AS THE PUBLISHER WROTE IT, lowercased by
 	// the facet. Deliberately not GBIF's matched name: the backbone silently
 	// drops what it cannot resolve, which is how Cooper's Hawk came to have
-	// zero records (sources.md, `gbif`).
+	// zero records (requirements.md, `gbif`).
 	Name    string
 	Records int64
 }

@@ -320,7 +320,7 @@ shows as an outlier, and in opposite directions:
 **Only 7 of 1,019 species fall outside 1×–1000×, and every one is a real finding.** Measured
 2026-10-05, the band immediately caught two species nothing had recorded as withheld —
 **Great Gray Owl** (eBird 1, iNaturalist 2,859) and **Black Rail** (16 against 101) — and
-exposed an error in [`sources.md`](../../requirements.md), which listed Blue-billed White-Tern among the
+exposed an error in [`requirements.md`](../../requirements.md), which listed Blue-billed White-Tern among the
 withheld when eBird holds 16,008 records of it under *Gygis alba*.
 
 **The declared exceptions are the point, not an escape hatch.** Each names which of the four

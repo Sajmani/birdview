@@ -2,7 +2,7 @@
 
 Vendored copy of the global avian checklist. BirdView's source of **English names, family and
 order names, and the per-species eBird code** (product.namesFromAvilist). See
-[../../sources.md](../../requirements.md#avilist) for the adoption record.
+[../../requirements.md](../../requirements.md#avilist) for the adoption record.
 
 ## What was retrieved
 
@@ -51,7 +51,7 @@ are populated only where the taxon concept matches Clements exactly. Measured 20
 
 ## Why the Clements and Cornell columns are usable here
 
-[sources.md](../../requirements.md) rejects eBird/Clements as a source, because Cornell's own terms
+[requirements.md](../../requirements.md) rejects eBird/Clements as a source, because Cornell's own terms
 forbid redistribution without written authorization. That rejection governs **Cornell's
 distribution under Cornell's terms**, and this is not it.
 
