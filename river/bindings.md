@@ -15,8 +15,8 @@ migration finishes, these are deliberate local departures from `process.md`, not
 | **Layout** | specman's flat layout, in River's directory `river/` ([decisions.bundleMovesToRiver](decisions.md#bundlemovestoriver)) | No longer blocked: the server used to serve these files by flat name, and since [decisions.requirementsNotServed](decisions.md#requirementsnotserved) it serves none of them. Nesting is now a file move, not yet made |
 | **Identifiers** | Descriptive camelCase, qualified by kind outside their own file: `goals.*`, `product.*`, `tech.*`, `decisions.*`, `acceptance.*` ([decisions.descriptiveIdentifiers](decisions.md#descriptiveidentifiers)) | — |
 | **Composition** | Not run. `acceptance.md` sits beside the sources | River puts criteria in composed packages; the split into `app`, `dataset` and `internal/repo` is a judgment still to make |
-| **Checks** | specman's `goals.py`, `pins.py`, `refs.py` | They parse the legacy layout and IDs, and they work |
-| **Stage adoption** | Not yet declared | River asks each stage to be adopted or declared informal. To be decided by the project owner |
+| **Checks** | birdview's own `goals.py`, `pins.py` and `refs.py`, rewritten for descriptive identifiers and identifier-only headings ([decisions.descriptiveIdentifiers](decisions.md#descriptiveidentifiers)); `refs.py` now covers every tracked file | River's checker expects its nested layout, which birdview has not moved to yet |
+| **Stage adoption** | **Requirements**, **Implementation** and **Verification** adopted; **Release informal** | BirdView is not deployed. It has a Dockerfile but no rollout policy, monitoring or alerting — none of the release guardrails River's Release stage produces. Decided 2026-10-16; revisit when the site goes live |
 
 ## Project bindings
 
