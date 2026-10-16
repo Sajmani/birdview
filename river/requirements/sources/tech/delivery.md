@@ -26,6 +26,21 @@ no remote data fetch.
 Rationale: the tool should work on a laptop in a cabin. This supersedes the earlier design's
 `cdn.tailwindcss.com` dependency, which would have left the UI unstyled offline.
 
+## servesOnlyItsPages
+
+**The server serves its pages and what they load, and nothing else**
+
+Subject: `server.routes`
+Goals: goals.sizeIntuition
+
+Under `/static/` the server serves the stylesheet and the favicon. It never serves a page template
+or a directory listing, though the templates are embedded in the same directory.
+
+Rationale: a plain file server over that directory served the Go template source of every page
+as an HTML page of its own, and `index.html`'s source for the bare `/static/`. Nothing linked
+there, so nobody saw it; it was found by enumerating the server's routes for the web pages WCAG
+applies to.
+
 ## servesOnLocalhost
 
 **Serves on localhost:8080**

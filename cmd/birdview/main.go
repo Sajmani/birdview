@@ -508,6 +508,22 @@ func compressed(h http.Handler) http.Handler {
 	})
 }
 
+// staticFiles serves the files a page loads -- the stylesheet and the
+// favicon -- and nothing else from the same directory. The page templates live
+// beside them, and a plain file server would serve each one's source as an
+// HTML page, and index.html's for the bare directory (tech.servesOnlyItsPages).
+func staticFiles(assets fs.FS) http.Handler {
+	files := http.FileServer(http.FS(assets))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		name := r.URL.Path
+		if name == "" || strings.HasSuffix(name, "/") || pathpkg.Ext(name) == ".html" {
+			http.NotFound(w, r)
+			return
+		}
+		files.ServeHTTP(w, r)
+	})
+}
+
 // assetFS is where templates and static files are read from.
 //
 // Embedded for a real binary, and overridable from disk for development. That
@@ -608,7 +624,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(assets))))
+	s.mux.Handle("/static/", http.StripPrefix("/static/", staticFiles(assets)))
 	s.mux.HandleFunc("/added", s.added)
 	s.mux.HandleFunc("/excluded", s.excluded)
 	for _, set := range []string{"/docs"} {

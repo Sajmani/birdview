@@ -1885,10 +1885,23 @@ count assertion exists beside the key assertion.
 
 ---
 
+### staticServesAssetsOnly
+
+**`/static/` serves the files pages load, never a template**
+
+**Verifies:** tech.servesOnlyItsPages · **Level:** code · **Method:** request the bare directory and
+every page template under `/static/` and expect 404; request the stylesheet and the favicon and
+expect 200
+**Run:** `go test ./cmd/birdview/ -run TestStaticServesAssetsOnly`
+**Status: verified 2026-10-16, passing, and watched failing** — against the code as found, every
+template returned 200 with its source, `/static/` returned `index.html`'s, and
+`/static/index.html` redirected to it.
+
 ## Traceability
 
 | Requirement | Criteria | |
 | --- | --- | --- |
+| tech.servesOnlyItsPages | staticServesAssetsOnly | |
 | product.scopeIsRecurringAvifauna | scopeMatchesStatusTable, noRarityCodes, abaFileHashMatches | |
 | product.traitsFromAvonet, product.traitsPerSpecies | allFiveTraits | |
 | product.namesFromAvilist | namesNeverDefaulted | |

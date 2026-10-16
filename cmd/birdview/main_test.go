@@ -6875,3 +6875,26 @@ func TestReadersAreToldItIsAStickFigure(t *testing.T) {
 		t.Error("the using guide never calls the drawing a stick figure")
 	}
 }
+
+// TestStaticServesAssetsOnly checks that /static/ serves the files a page
+// loads and never a page template or a directory listing. The templates sit in
+// the same embedded directory as the stylesheet, and a plain file server over
+// it served each one's Go template source as an HTML page, plus index.html's
+// source for the bare directory. Found by enumerating the server's routes for
+// the web pages WCAG applies to; no link leads there, so a crawl would not.
+//
+// Verifies: tech.servesOnlyItsPages. Criterion: acceptance.staticServesAssetsOnly.
+func TestStaticServesAssetsOnly(t *testing.T) {
+	s := newTestServer(t)
+	for _, p := range []string{"/static/", "/static/index.html", "/static/detail.html",
+		"/static/compare.html", "/static/docs.html", "/static/undrawn.html"} {
+		if code, body := get(t, s, p); code != http.StatusNotFound {
+			t.Errorf("GET %s = %d, want 404; it serves %.40q", p, code, body)
+		}
+	}
+	for _, p := range []string{"/static/styles.css", "/static/favicon.svg"} {
+		if code, _ := get(t, s, p); code != http.StatusOK {
+			t.Errorf("GET %s = %d, want 200; a page loads it", p, code)
+		}
+	}
+}
