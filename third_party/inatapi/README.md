@@ -15,5 +15,5 @@ documents are © iNaturalist; BirdView claims no rights in them and grants none.
 | **Used for** | Nothing at runtime. BirdView's requirements quote these documents, and the copies let a reader check every quotation against the exact text it came from. |
 
 Retrieval details and the SHA-256 each file is checked against are recorded once, in
-[spec/sources/inatapi/PROVENANCE.md](../../spec/sources/inatapi/PROVENANCE.md), and verified
-by `spec/check/pins.py`.
+[river/requirements/sources/inatapi/PROVENANCE.md](../../river/requirements/sources/inatapi/PROVENANCE.md),
+and verified by `river/check/pins_test.go`.

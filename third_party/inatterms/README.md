@@ -16,5 +16,5 @@ and <https://www.inaturalist.org/pages/machine_generated_content> |
 | **Used for** | Nothing at runtime. BirdView's requirements quote these documents, and the copies let a reader check every quotation against the exact text it came from. |
 
 Retrieval details and the SHA-256 each file is checked against are recorded once, in
-[spec/sources/inatterms/PROVENANCE.md](../../spec/sources/inatterms/PROVENANCE.md), and verified
-by `spec/check/pins.py`.
+[river/requirements/sources/inatterms/PROVENANCE.md](../../river/requirements/sources/inatterms/PROVENANCE.md),
+and verified by `river/check/pins_test.go`.

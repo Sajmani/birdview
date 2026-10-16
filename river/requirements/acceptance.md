@@ -102,6 +102,12 @@ resolving the same 2,692 references, and watched failing on each of its rules
 **Status: verified — run 2026-09-21, passing, and watched failing** — appending a reference to a
 requirement id in the P-9xx range, which nothing defines, produced exit 1.
 
+**Relative links, added 2026-10-16:** every relative link in a tracked Markdown file, anchored or
+not and including the READMEs under `third_party/`, lands on a path that exists
+(`TestRelativeLinksResolve`). Watched failing on first run against the tree as it was: 16 links
+broken since the bundle moved, all five vendored READMEs pointing at the old `spec/` tree, and
+the `product` and `tech` index files pointing three directories too high.
+
 *Known limitation, found by this check catching its own documentation:* the scanner cannot
 distinguish a citation from a mention, so writing an example id in prose trips it. Worth
 tolerating — the failure is loud, immediate, and safer than a checker that guesses intent.

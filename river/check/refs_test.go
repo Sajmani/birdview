@@ -196,6 +196,50 @@ func TestReferencesResolve(t *testing.T) {
 	t.Logf("%s; %d references resolve", strings.Join(counts, ", "), refs)
 }
 
+// TestRelativeLinksResolve checks that every relative link in a tracked
+// Markdown file lands on a file or directory that exists, anchored or not,
+// including the READMEs this project writes for its vendored files under
+// third_party/. TestReferencesResolve holds anchored links into the bundle to
+// their headings and skips third_party/ altogether, so a plain link to a file
+// that has moved went unnoticed: all five vendored READMEs still pointed at the
+// pre-River spec/ tree after the bundle moved.
+//
+// Links starting with "/" are the server's own URLs, in guides it serves, and
+// are not paths in the repository.
+//
+// Verifies: process integrity. Criterion: acceptance.decisionReferencesExist.
+func TestRelativeLinksResolve(t *testing.T) {
+	bundle, _ := filepath.Abs("..")
+	repo := filepath.Dir(bundle)
+	out, err := exec.Command("git", "-C", repo, "ls-files", "*.md").Output()
+	if err != nil {
+		t.Fatalf("listing tracked files: %v; this check reads exactly what git tracks", err)
+	}
+	link := regexp.MustCompile(`\]\(([^)\s]+)\)`)
+	checked := 0
+	for _, rel := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+		if strings.HasPrefix(rel, "river/check/testdata/") {
+			continue
+		}
+		path := filepath.Join(repo, filepath.FromSlash(rel))
+		for _, m := range link.FindAllStringSubmatch(read(t, path), -1) {
+			target, _, _ := strings.Cut(m[1], "#")
+			if target == "" || strings.HasPrefix(target, "/") || strings.Contains(target, ":") {
+				continue
+			}
+			checked++
+			dest := filepath.Join(filepath.Dir(path), filepath.FromSlash(target))
+			if _, err := os.Stat(dest); err != nil {
+				t.Errorf("%s: link to %s lands on nothing", rel, m[1])
+			}
+		}
+	}
+	if checked == 0 {
+		t.Fatal("no relative links found; the layout or the pattern has changed and this check proves nothing")
+	}
+	t.Logf("%d relative links resolve", checked)
+}
+
 // slug is a heading's anchor as a code host derives it: lowercased, markup and
 // punctuation removed, spaces made hyphens. Letters outside ASCII survive, as
 // they do in Python's \w and on GitHub.
