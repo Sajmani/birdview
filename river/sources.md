@@ -138,8 +138,8 @@ That is exactly the kind of claim that is worthless asserted from memory, which 
 copies are in the tree: anyone can search them and check.
 
 Photographs stay on iNaturalist. BirdView links; it never copies, caches, hotlinks or embeds an
-image, which [tech.selfContainedServer](tech.md) independently forbids anyway. See
-[decisions.inaturalistLinkAdopted](decisions.md) for the adoption reasoning and what was rejected.
+image, which [tech.selfContainedServer](tech.md#selfcontainedserver) independently forbids anyway. See
+[decisions.inaturalistLinkAdopted](decisions.md#inaturalistlinkadopted) for the adoption reasoning and what was rejected.
 
 ---
 
@@ -489,7 +489,7 @@ exception in [tech.md](bindings.md#location-exception-the-third_party-directory)
 | **Import style** | Absorbed, partial — the adopted criteria are restated as tech.badgeContrast |
 | **Scope** | Family badge colors (tech.badgeContrast), and link and text colors against the page surfaces (tech.textContrastFloor) |
 | **Adopted parts** | SC 1.4.3 (Contrast Minimum) and SC 1.4.6 (Contrast Enhanced). Badges and links target 1.4.6 at 7:1; other text is held to 1.4.3 at 4.5:1. |
-| **Exclusions** | **Everything else.** No keyboard-access, focus-order, timing, reading-level or other criteria are adopted, and BirdView claims no conformance level. The scope widened once, from badges to all text, after an unstyled link shipped at 1.9:1 — see [decisions.twoContrastFloors](decisions.md). |
+| **Exclusions** | **Everything else.** No keyboard-access, focus-order, timing, reading-level or other criteria are adopted, and BirdView claims no conformance level. The scope widened once, from badges to all text, after an unstyled link shipped at 1.9:1 — see [decisions.twoContrastFloors](decisions.md#twocontrastfloors). |
 | **Owner** | W3C; project owner grants any deviation |
 | **Status** | **Partial by design.** Adopted for two criteria, restated as a checkable requirement, not vendored. |
 

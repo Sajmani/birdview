@@ -830,7 +830,7 @@ this bird on iNaturalist, which is true and worth knowing.
 
 ### Sub-decision 3: the mapping is a committed table, not a build-time fetch
 
-`birdview-ingest` currently makes **no network request at all**, and [tech.selfContainedServer](product.md) keeps the
+`birdview-ingest` currently makes **no network request at all**, and [tech.selfContainedServer](tech.md#selfcontainedserver) keeps the
 server offline at runtime while `tech.md` binds tests to make none either. Resolving 841 names at
 the one-request-per-second that `inat-api/R1` asks for would add roughly fifteen minutes to every
 build and break it entirely offline.
@@ -849,7 +849,7 @@ linking to a taxon page; the vendored copies contain no occurrence of *taxon*, *
 photographs a reader will go and look at — not the taxonomy.
 
 **BirdView therefore links and never copies.** No photograph is embedded, hotlinked, cached or
-reproduced, so no contributor's license is engaged. [tech.selfContainedServer](tech.md) forbids the embedding
+reproduced, so no contributor's license is engaged. [tech.selfContainedServer](tech.md#selfcontainedserver) forbids the embedding
 independently, which is a useful accident: two unrelated rules point the same way.
 
 ### Resulting status
@@ -1011,7 +1011,7 @@ the next time an exception looks cheaper than a fix.
 
 Stroke style now encodes provenance: solid measured, dashed modeled, head hollow. The wing crossbar
 is split at the wing chord, so its measured outer portions stay solid even when the span is
-modeled. Both pages document the code. [product.measuredVersusModeled](product.md) states it.
+modeled. Both pages document the code. [product.measuredVersusModeled](product.md#measuredversusmodeled) states it.
 
 ### The reversal: what dash used to mean
 
@@ -1189,7 +1189,7 @@ dwarfs a kinglet."* That is still true, and global is still one click away and s
 in the help text.
 
 What changed is the diagram. Since that default was chosen it has acquired provenance in the stroke
-style ([drawingCarriesProvenance](#drawingcarriesprovenance)), a split crossbar with chord ticks, and labels ([product.labeledDetailDiagram](product.md)). At
+style ([drawingCarriesProvenance](#drawingcarriesprovenance)), a split crossbar with chord ticks, and labels ([product.labeledDetailDiagram](product.md#labeleddetaildiagram)). At
 global scale a median bird is a **few pixels** tall — measured earlier at 1.7px for a robin's neck
 and 0.4px for a hummingbird's — so none of that vocabulary is visible on the landing page. The
 default was hiding the drawing's own language from every first-time reader.

@@ -1437,7 +1437,7 @@ Rationale: this is the requirement goals.sizeIntuition lives or dies by. A per-t
 fill its tile — makes a hummingbird and a swan identical on screen and destroys size intuition
 entirely.
 
-**The default was global and is now per-section** ([decisions.perSectionDefault](decisions.md)). Global still makes the
+**The default was global and is now per-section** ([decisions.perSectionDefault](decisions.md#persectiondefault)). Global still makes the
 cross-family argument better than anything else, and it is one click away and named first in the
 help. But the diagram has since acquired detail a reader has to be able to see — provenance in the
 stroke style (measuredVersusModeled), the chord ticks, the labels of labeledDetailDiagram — and at global scale a median bird is a
@@ -1790,7 +1790,7 @@ largest remaining gap.
 
 The crossbar split earns its complexity: the outer segment's length stays true even when the span
 model is wrong, so all the model's error is attributed to the inner segment, where it belongs. See
-[decisions.drawingCarriesProvenance](decisions.md).
+[decisions.drawingCarriesProvenance](decisions.md#drawingcarriesprovenance).
 
 ### labeledDetailDiagram
 
@@ -1942,7 +1942,7 @@ bird.
 
 **Coverage is expected to be total.** Every in-scope species resolves under these rules, and a
 species that stops resolving is a fault to investigate rather than an absence to accept — see
-[decisions.fullInaturalistCoverage](decisions.md).
+[decisions.fullInaturalistCoverage](decisions.md#fullinaturalistcoverage).
 
 BirdView **links and never copies**. No photograph is embedded, hotlinked, cached or reproduced;
 the reader arrives on iNaturalist, where each image carries its own license. tech.selfContainedServer forbids the
@@ -1952,7 +1952,7 @@ Rationale: BirdView will never have photographs, and a reader surprised by a siz
 bird. Linking is the whole answer. The confidence gate exists because a link to the *wrong* bird is
 worse than no link on a page whose purpose is being careful about what it claims — and an absent
 link is legible, where a search URL that always "works" hides the failure. See
-[decisions.inaturalistLinkAdopted](decisions.md).
+[decisions.inaturalistLinkAdopted](decisions.md#inaturalistlinkadopted).
 
 ### metricProvenanceExplained
 

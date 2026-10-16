@@ -216,7 +216,7 @@ One floor rather than two. The first version of this requirement set 4.5:1 for o
 because `--dim` sat at 6.96:1 on the page background and 5.71:1 on a panel and repainting the
 interface's secondary text looked disproportionate to a single broken link. The owner then reported
 the dim text as hard to read too, which settled it: `--dim` and `--accent` moved, and the exception
-went with them. See [decisions.oneContrastFloor](decisions.md).
+went with them. See [decisions.oneContrastFloor](decisions.md#onecontrastfloor).
 
 ---
 

@@ -10,7 +10,7 @@ framework.
 ## Prerequisites
 
 - **Go.** No minimum version is maintained — whatever the dependencies require
-  ([tech.goVersionFollowsDeps](../river/tech.md)). Developed on 1.25.
+  ([tech.goVersionFollowsDeps](../river/tech.md#goversionfollowsdeps)). Developed on 1.25.
 - **Python 3**, for the three spec-level check scripts.
 
 That is all. The one dependency is `excelize`, for reading the source workbooks.
@@ -88,7 +88,7 @@ Flags, should you need them:
 > re-running the ingest you must restart the server, or you will spend a while debugging stale
 > data that is already fixed on disk.
 
-The built dataset is a build artifact and is gitignored ([tech.datasetNeverCommitted](../river/tech.md)) — not for
+The built dataset is a build artifact and is gitignored ([tech.datasetNeverCommitted](../river/tech.md#datasetnevercommitted)) — not for
 licensing reasons any more, but because it is reproducible from the committed inputs in one
 command and a stale copy in the tree is worse than none.
 
@@ -263,14 +263,14 @@ Violating any of these is a licensing problem, not a style problem.
   copy in the tree is worse than none.
 - **Never read or process Wiley Online Library material**, including Ricklefs (2017). Its terms
   prohibit AI tools ingesting it and prohibit automated access, and the source is formally rejected
-  ([decisions.ricklefsProhibited](../river/decisions.md)). Do not try to revive it as a length source.
+  ([decisions.ricklefsProhibited](../river/decisions.md#ricklefsprohibited)). Do not try to revive it as a length source.
 - **Only AVONET, the Fox wingspan data and AviList may be committed as source data.** All three
   are CC BY 4.0. Before adding a fourth, read [`sources.md`](../river/sources.md) — most candidates
   this project evaluated could not be redistributed. The generated tables under `data/` are not
   source data: they are the project's own reductions, and they carry their provenance in their
   own headers.
-- **Never present a modeled value as a measurement** ([product.lengthAndWingspanSources](../river/product.md), product.tileMarksModeled). This is
-  the decision the whole measurement design rests on ([decisions.noOpenLengthAndWingspan](../river/decisions.md)).
+- **Never present a modeled value as a measurement** ([product.lengthAndWingspanSources](../river/product.md#lengthandwingspansources), product.tileMarksModeled). This is
+  the decision the whole measurement design rests on ([decisions.noOpenLengthAndWingspan](../river/decisions.md#noopenlengthandwingspan)).
 
 `AGENTS.md` carries the same rules in the form AI coding agents read.
 

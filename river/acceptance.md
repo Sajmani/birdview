@@ -281,7 +281,7 @@ reachable by `?scale=global`, and per-section is listed first in the controls.
 **Status: verified 2026-09-22 — passing, and **watched failing**: scaling each bird to its own length was caught by the direct px/mm comparison. Worth noting that it was *not* caught by the first two assertions written for this criterion, because the wingspan constraint happened to preserve size ordering; comparing the scale factor itself is the only form that cannot pass by accident.**
 implementation satisfies "identical within a section" trivially when sections hold one bird.
 
-The default moved from global to per-section in [decisions.perSectionDefault](decisions.md), and the tests asserting the
+The default moved from global to per-section in [decisions.perSectionDefault](decisions.md#persectiondefault), and the tests asserting the
 old default were inverted rather than deleted. Flipping it exposed a real bug: `parseOptions`
 recognised only the **non**-default value, so the toggle stopped working entirely the moment the
 default changed. Written that way the parser is correct exactly once.
@@ -515,7 +515,7 @@ by removing the tail from the legend, by suppressing the legend diagram, and by 
 sections.
 
 The legend is a **rendered diagram of a real species** rather than a list of colour swatches
-([decisions.perSectionDefault](decisions.md)), which closes a rot the old one had: it described the tail as "dashed, to
+([decisions.perSectionDefault](decisions.md#persectiondefault)), which closes a rot the old one had: it described the tail as "dashed, to
 tell it from the body", and that stopped being true when decisions.drawingCarriesProvenance gave dash a different meaning.
 Nothing caught it, because prose and stylesheet had no connection. A rendered diagram cannot drift
 from the renderer.
@@ -703,7 +703,7 @@ name disagrees with ABA's is rejected even when the scientific name matches exac
 the five forms of agreement is accepted — a Hawaiian okina against its absence, an ABA parenthetical
 alternate, British against American spelling, a hyphen against a space, and a name iNaturalist holds
 but does not prefer. A **different genus** is accepted only alongside an agreeing common name, and
-refused without one ([decisions.fullInaturalistCoverage](decisions.md)). A **gendered epithet** is matched across a change of
+refused without one ([decisions.fullInaturalistCoverage](decisions.md#fullinaturalistcoverage)). A **gendered epithet** is matched across a change of
 genus — *Coccothraustes vespertinus* against *Hesperiphona vespertina* — since a specific epithet
 agrees in grammatical gender with its genus, but only where the shared stem is long enough to be
 evidence.
@@ -731,7 +731,7 @@ emitting a search URL instead of nothing; removing the pacing; dropping the `Use
 the zero-ID guard; deleting a row from the committed table; and reverting the gender stemming.
 
 Coverage is **841 of 841**, reached by widening the evidence rather than lowering the bar
-([decisions.fullInaturalistCoverage](decisions.md)).
+([decisions.fullInaturalistCoverage](decisions.md#fullinaturalistcoverage)).
 
 The confidence gate is the part worth testing hardest, because the failure it prevents is silent.
 Matching on scientific name alone would find the right page nearly always, and the rare miss would
@@ -786,7 +786,7 @@ can fall back to the browser default.
 **Status: verified 2026-09-23 — passing, and watched failing** by removing the global link rules
 (which reproduces the original defect exactly), by setting the visited color to the browser's
 `#551A8B`, by picking a link color that clears AA at 4.90:1 but misses 7:1, and — after the floor
-rose to 7:1 for everything ([decisions.oneContrastFloor](decisions.md)) — by restoring the previous `--dim` and
+rose to 7:1 for everything ([decisions.oneContrastFloor](decisions.md#onecontrastfloor)) — by restoring the previous `--dim` and
 `--accent`, which fail at 5.71:1 and 6.83:1 on a panel.
 
 **SVG text assertion added 2026-10-02 — and it caught a live defect on its first run**, not a

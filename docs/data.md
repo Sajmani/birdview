@@ -25,13 +25,13 @@ Every number carries one of three kinds, visible on the detail page for any bird
 
 A `~` in the tile footer marks anything not measured. The rule the project holds itself to is that
 a modeled value is never presented as a measurement — see
-[decisions.noOpenLengthAndWingspan](../river/decisions.md) for why that decision came first and shaped everything else.
+[decisions.noOpenLengthAndWingspan](../river/decisions.md#noopenlengthandwingspan) for why that decision came first and shaped everything else.
 
 **near-match** deserves a note. Nine drawn species are recent taxonomic splits that AVONET has not
 caught up with — American Goshawk, Vega Gull, Hudsonian Whimbrel, Western Cattle-Egret, American
 Barn Owl, Chihuahuan Meadowlark, Cocos Booby, Siberian Pipit and Blue-billed White-Tern. Each borrows the parent taxon's measurements, and the detail page names the taxon
 it borrowed from. Four of those splits are still awaiting a taxonomic check
-([decisions.abaSpeciesWithoutAvonet](../river/decisions.md)).
+([decisions.abaSpeciesWithoutAvonet](../river/decisions.md#abaspecieswithoutavonet)).
 
 Where the taxon a species borrows from is drawn too, the two drawings come out the same, because
 the measurements are. Both tiles then say *Same measurements as* the other bird, and both detail
@@ -66,11 +66,11 @@ This is the project's central compromise and it is worth stating plainly.
 AVONET — the only openly licensed morphology dataset with this coverage — **has no body length and
 no wingspan**. Field-guide lengths are not openly licensed. The one comprehensive academic source,
 Ricklefs (2017), is published under terms that prohibit extraction, storage and redistribution, so
-it was evaluated and **rejected** ([decisions.ricklefsProhibited](../river/decisions.md)).
+it was evaluated and **rejected** ([decisions.ricklefsProhibited](../river/decisions.md#ricklefsprohibited)).
 
 So BirdView builds length rather than borrowing it: bill + head + neck + body + tail, with the two
 measured parts real and the three modeled parts labeled. The segments sum exactly to the total
-([product.segmentsSumToLength](../river/product.md)), which is what lets the height of a figure *be* the bird's
+([product.segmentsSumToLength](../river/product.md#segmentssumtolength)), which is what lets the height of a figure *be* the bird's
 length and makes two figures at one scale directly comparable.
 
 The consequence is that **BirdView's lengths will not match your field guide.** They are a
@@ -94,7 +94,7 @@ Asked for the same species Fox et al. predicted, it agrees with their published 
 **mean of 1.32%** — it is, in effect, their model reconstructed from the data they published. That
 agreement is a standing check, so a regression in the fitting code shows up as disagreement with an
 external reference rather than as a quietly worse dataset. Full reasoning:
-[decisions.fittedWingspanModel](../river/decisions.md).
+[decisions.fittedWingspanModel](../river/decisions.md#fittedwingspanmodel).
 
 Each modeled wingspan states its own error. A Passeriform reads:
 
@@ -142,7 +142,7 @@ everything unlisted at 0.18.
 
 They are surfaced anyway, with the function named — a heron's detail page reads *"neck modeled as
 0.85 × trunk (family-specific ratio for Ardeidae)"*. The reasoning
-([decisions.neckLengthAsMetric](../river/decisions.md)) is that the user sees the neck either way, since it is
+([decisions.neckLengthAsMetric](../river/decisions.md#necklengthasmetric)) is that the user sees the neck either way, since it is
 drawn at a length in every figure. Hiding the number hides the explanation, not the claim.
 
 ---
@@ -152,7 +152,7 @@ drawn at a length in every figure. Hiding the number hides the explanation, not 
 These are choices about rendering, not data. None of them produces a number.
 
 **The stick figure is a top-down view of a bird in flight.** Stated as a requirement
-([product.segmentComposition](../river/product.md)) because leaving it unstated made several questions
+([product.segmentComposition](../river/product.md#segmentcomposition)) because leaving it unstated made several questions
 unanswerable. It is also what makes the wing crossbar honest: seen from above, wingspan and body
 length genuinely lie in one plane, so drawing them at one scale is a fact rather than a convention.
 
@@ -162,14 +162,14 @@ herons, cranes, storks, ibises, flamingos, stilts, rails, loons, grebes — what
 projection past the tail tip, which needs the femur, the toes, the hip position and the *full*
 tibiotarsus. AVONET measures only the tarsometatarsus. Attempting it anyway put a White Ibis at
 −14 mm of projection, a bird whose trailing legs are unmistakable.
-[decisions.inFlightNoLegs](../river/decisions.md) has the numbers and what the removal cost.
+[decisions.inFlightNoLegs](../river/decisions.md#inflightnolegs) has the numbers and what the removal cost.
 
 **Herons and pelicans get an S-shaped neck.** Ardeidae and Pelecanidae fly with the head drawn back
 onto the shoulders — the field mark separating a heron from a crane, a stork or an ibis in the air.
 Their neck is drawn as two semicircles, which run exactly the neck's length of stroke through
 `2/π ≈ 63.7%` of that height. The stroke is still to scale; the compression is a consequence of the
 shape, not a chosen number. Sorting, sectioning and the detail view all still use the full neck
-length ([decisions.foldedNeckAsS](../river/decisions.md)).
+length ([decisions.foldedNeckAsS](../river/decisions.md#foldedneckass)).
 
 **The head is an oval 0.72 as wide as it is long**, the tail is a stick, and the body is a stick.
 No source gives a tail width or a body width, and drawing a fan or a teardrop would assert a shape
@@ -193,7 +193,7 @@ search URL, which would never 404 and would therefore always look like it had wo
 Matching was measured before adoption: on a 55-species sample containing all ten near-match
 splits, 55 resolved exactly on scientific name and 54 also agreed on common name, the one
 difference being a hyphen. Wikimedia Commons was tested too and failed on three of six of the hard
-cases, because it lags the recent splits. [decisions.inaturalistLinkAdopted](../river/decisions.md) has the full comparison.
+cases, because it lags the recent splits. [decisions.inaturalistLinkAdopted](../river/decisions.md#inaturalistlinkadopted) has the full comparison.
 
 BirdView **links and never copies**. No photograph is embedded, hotlinked or cached; the reader
 arrives on iNaturalist, where each image carries its own license — frequently CC BY-NC, which

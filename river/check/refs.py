@@ -24,6 +24,8 @@ Three checks, across every tracked text file outside third_party/:
     acceptance.x -- names an item that its file defines;
   - every anchored link into river/ lands on a heading that exists, where an
     item's anchor is its identifier lowercased (decisions.descriptiveIdentifiers);
+  - a link whose text names an item -- [tech.selfContainedServer](...) --
+    lands on that item: the right file, at its anchor, not the top of the file;
   - no identifier in the superseded P-001 / CR-001 form survives anywhere.
 """
 import re, sys, pathlib, subprocess
@@ -52,6 +54,7 @@ EXTENSIONS = {'md', 'py', 'go', 'svg', 'json', 'tsv', 'html', 'css'}
 QUALIFIED = re.compile(r'\b(goals|product|tech|decisions|acceptance)\.([a-z][A-Za-z]+)\b')
 LEGACY = re.compile(r'\b(?:G|P|T|AC|CR)-\d{3}\b')
 LINK = re.compile(r'\]\(([^)\s#]*)#([^)\s]+)\)')
+CITATION = re.compile(r'\[`?(goals|product|tech|decisions|acceptance)\.([a-z][A-Za-z]+)`?\]\(([^)\s]*)\)')
 
 problems, refs = [], 0
 for rel in tracked:
@@ -74,6 +77,14 @@ for rel in tracked:
     for m in (LEGACY.finditer(text) if not rel.startswith('river/check/') and rel != 'river/process.md' else ()):
         problems.append(f'{rel}: {m.group(0)} is a superseded identifier')
     if rel.endswith('.md'):
+        for kind, name, url in CITATION.findall(text):
+            if name in EXTENSIONS:
+                continue
+            target, _, frag = url.partition('#')
+            dest = (path.parent / target).resolve() if target else path.resolve()
+            if dest != (spec / KINDS[kind]).resolve() or frag != name.lower():
+                problems.append(f'{rel}: [{kind}.{name}]({url}) does not land on it; '
+                                f'link to {KINDS[kind]}#{name.lower()}')
         for target, frag in LINK.findall(text):
             dest = (path.parent / target).resolve() if target else path.resolve()
             if dest.parent != spec or not dest.name.endswith('.md'):
