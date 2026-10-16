@@ -26,7 +26,12 @@ Three checks, across every tracked text file outside third_party/:
     item's anchor is its identifier lowercased (decisions.descriptiveIdentifiers);
   - a link whose text names an item -- [tech.selfContainedServer](...) --
     lands on that item: the right file, at its anchor, not the top of the file;
-  - no identifier in the superseded P-001 / CR-001 form survives anywhere.
+  - no identifier in a superseded form survives anywhere: P-001 / CR-001 for the
+    bundle's own items, and `inat-api/R1` for a transcribed source's.
+
+A transcribed source under sources/<name>/requirements.md is its own package,
+named for the source without punctuation -- inat-api becomes inatapi -- and its
+names are exported, as an imported module's are: inatapi.RequestRate.
 """
 import re, sys, pathlib, subprocess
 
@@ -46,13 +51,20 @@ defined, anchors = {}, {}
 for kind, name in KINDS.items():
     text = (spec / name).read_text(encoding='utf-8')
     defined[kind] = set(ITEM.findall(text))
-for path in spec.glob('*.md'):
-    anchors[path.name] = {slug(h) for h in HEADING.findall(path.read_text(encoding='utf-8'))}
+EXPORTED_ITEM = re.compile(r'^### ([A-Z][A-Za-z]+)[ \t]*$', re.M)
+transcribed = {}
+for path in sorted(spec.glob('sources/*/requirements.md')):
+    pkg = re.sub(r'[^a-z]', '', path.parent.name)
+    transcribed[pkg] = path
+    defined[pkg] = set(EXPORTED_ITEM.findall(path.read_text(encoding='utf-8')))
+for path in spec.rglob('*.md'):
+    anchors[path.resolve()] = {slug(h) for h in HEADING.findall(path.read_text(encoding='utf-8'))}
 
 tracked = subprocess.run(['git', 'ls-files'], cwd=repo, capture_output=True, text=True).stdout.split()
 EXTENSIONS = {'md', 'py', 'go', 'svg', 'json', 'tsv', 'html', 'css'}
 QUALIFIED = re.compile(r'\b(goals|product|tech|decisions|acceptance)\.([a-z][A-Za-z]+)\b')
-LEGACY = re.compile(r'\b(?:G|P|T|AC|CR)-\d{3}\b')
+LEGACY = re.compile(r'\b(?:G|P|T|AC|CR)-\d{3}\b|`[a-z][a-z-]*/R\d+`')
+EXPORTED = re.compile(r'\b(' + '|'.join(transcribed) + r')\.([A-Z][A-Za-z]+)\b') if transcribed else None
 LINK = re.compile(r'\]\(([^)\s#]*)#([^)\s]+)\)')
 CITATION = re.compile(r'\[`?(goals|product|tech|decisions|acceptance)\.([a-z][A-Za-z]+)`?\]\(([^)\s]*)\)')
 
@@ -73,6 +85,11 @@ for rel in tracked:
         refs += 1
         if name not in defined[kind]:
             problems.append(f'{rel}: {kind}.{name} names nothing {KINDS[kind]} defines')
+    for m in (EXPORTED.finditer(text) if EXPORTED else ()):
+        pkg, name = m.groups()
+        refs += 1
+        if name not in defined[pkg]:
+            problems.append(f'{rel}: {pkg}.{name} names nothing {transcribed[pkg].relative_to(spec)} defines')
     # The checks have to describe the form they reject.
     for m in (LEGACY.finditer(text) if not rel.startswith('river/check/') and rel != 'river/process.md' else ()):
         problems.append(f'{rel}: {m.group(0)} is a superseded identifier')
@@ -87,10 +104,10 @@ for rel in tracked:
                                 f'link to {KINDS[kind]}#{name.lower()}')
         for target, frag in LINK.findall(text):
             dest = (path.parent / target).resolve() if target else path.resolve()
-            if dest.parent != spec or not dest.name.endswith('.md'):
+            if spec.resolve() not in dest.parents or not dest.name.endswith('.md'):
                 continue  # only links into the bundle are held to its anchors
-            if frag not in anchors.get(dest.name, set()):
-                problems.append(f'{rel}: link to {dest.name}#{frag} lands on no heading')
+            if frag not in anchors.get(dest, set()):
+                problems.append(f'{rel}: link to {dest.relative_to(spec.resolve())}#{frag} lands on no heading')
 
 for p in problems:
     print('FAIL:', p)

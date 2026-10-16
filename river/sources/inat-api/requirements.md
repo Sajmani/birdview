@@ -13,7 +13,9 @@ Each entry quotes the source so the reading can be checked. See [PROVENANCE.md](
 
 ---
 
-### `inat-api/R1` — About one request per second, about 10,000 a day
+### RequestRate
+
+**About one request per second, about 10,000 a day**
 
 > "Please keep requests to about 1 per second, and around 10k API requests a day"
 >
@@ -25,7 +27,9 @@ Each entry quotes the source so the reading can be checked. See [PROVENANCE.md](
 requests. A full rebuild is 841 requests — one per in-scope species — which is under a tenth of
 the daily figure, and the tool is run rarely rather than on every build.
 
-### `inat-api/R2` — Use the largest supported page size
+### LargestPageSize
+
+**Use the largest supported page size**
 
 > "If using the API to fetch a lot of results, please use the highest supported per_page
 > value. For example you can get up to 200 observations in a single request, which would be
@@ -35,14 +39,18 @@ the daily figure, and the tool is run rarely rather than on every build.
 is no bulk endpoint for name resolution to page through; `per_page` is left at its default and the
 response is discarded after the ID is taken.
 
-### `inat-api/R3` — Page numbers cap at 10,000 results; use `id_above` beyond that
+### IdAboveBeyondPageCap
+
+**Page numbers cap at 10,000 results; use `id_above` beyond that**
 
 > "The page and per_page parameters can be used to fetch up to (for many endpoints) 10k
 > results. An error will be thrown if results beyond 10k are requested."
 
 **Not applicable.** BirdView never pages.
 
-### `inat-api/R4` — Identify the client with a User-Agent
+### UserAgent
+
+**Identify the client with a User-Agent**
 
 > "please consider using a custom User Agent to identify your application... this could be
 > set to the name of your app, an iNaturalist username, or anything we might use to
@@ -51,14 +59,18 @@ response is discarded after the ID is taken.
 **Implemented as [tech.identifiedClient](../../tech.md#identifiedclient)**, which BirdView already required of every outbound
 request before this source was adopted, and which [acceptance.outboundRequestsIdentified](../../acceptance.md#outboundrequestsidentified) already checks.
 
-### `inat-api/R5` — JWTs, expiring in 24 hours, in an Authorization header
+### JwtAuthorization
+
+**JWTs, expiring in 24 hours, in an Authorization header**
 
 > "The preferred way to make an authenticated request in the newer API is to use a JSON Web
 > Token (JWT), available at https://www.inaturalist.org/users/api_token"
 
 **Not applicable.** BirdView holds no credential and sends no `Authorization` header.
 
-### `inat-api/R6` — Users log in as themselves; no group accounts
+### NoGroupAccounts
+
+**Users log in as themselves; no group accounts**
 
 > "If you are creating an application that will allow users to post data to iNaturalist,
 > please do not do it using a group account (i.e. many individuals submitting data under a
@@ -66,7 +78,9 @@ request before this source was adopted, and which [acceptance.outboundRequestsId
 
 **Not applicable.** BirdView allows no one to post anything.
 
-### `inat-api/R7` — Authenticate only when necessary
+### AuthenticateOnlyWhenNecessary
+
+**Authenticate only when necessary**
 
 > "Authenticate API requests only when required. Since the data returned from authenticated
 > requests might contain private information, these requests are not cached, therefore they
@@ -77,7 +91,9 @@ cacheable by iNaturalist. Worth recording rather than skipping: this is the one 
 `birdsync` records as a knowing departure, and BirdView gets it for free only because its needs
 are so much smaller.
 
-### `inat-api/R8` — One IP; media download volume caps
+### MediaDownloadCaps
+
+**One IP; media download volume caps**
 
 > "Please use a single IP address for fetching data. If we think multiple IPs are being used
 > in coordination to bypass rate limits, we may block those IPs regardless of query rate"

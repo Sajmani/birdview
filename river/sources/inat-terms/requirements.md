@@ -24,7 +24,7 @@ copies, `terms.html` contains no occurrence of *taxon*, *taxonomy*, *database*, 
 occurrence of "link to", in an example encouraging a user to share a helpful link with another
 user.
 
-What the terms *do* license is **Content a contributor posts** — see `inat-terms/R1` below. A
+What the terms *do* license is **Content a contributor posts** — see `ContributorKeepsRights` below. A
 taxon record is not contributed Content; it is iNaturalist's own taxonomy. BirdView stores one
 integer per species from it and reproduces nothing else.
 
@@ -35,7 +35,9 @@ words rather than reproducing a logo.
 
 ---
 
-### `inat-terms/R1` — A contributor keeps their rights, and licenses by default as CC BY-NC
+### ContributorKeepsRights
+
+**A contributor keeps their rights, and licenses by default as CC BY-NC**
 
 > "If you own the Content prior to contributing the Content to the Site, and that Content is
 > subject to Intellectual Property rights, you retain ownership of those rights. Unless you
@@ -53,7 +55,9 @@ license notice.
 If BirdView ever wants to *show* a photograph rather than link to one, this requirement is the
 first thing to re-read, and the answer will be per-photograph rather than blanket.
 
-### `inat-terms/R2` — The account holder is responsible for everything done under the account
+### AccountHolderResponsible
+
+**The account holder is responsible for everything done under the account**
 
 > "You are fully responsible for all activities that occur under the account and any other
 > actions taken in connection with the account."
@@ -61,16 +65,20 @@ first thing to re-read, and the answer will be per-photograph rather than blanke
 
 **Not applicable.** BirdView has no account.
 
-### `inat-terms/R3` — Post at a rate and volume that doesn't hinder other users
+### RateDoesNotHinderOthers
+
+**Post at a rate and volume that doesn't hinder other users**
 
 > "You will post only Content that is relevant to iNaturalist and at a rate and volume that
 > does not hinder other Users' ability to use iNaturalist"
 > — Terms of Use, Responsibility of Contributors
 
 **Not applicable as written** — BirdView posts nothing. Its read rate is governed instead by
-`inat-api/R1`, implemented as [tech.pacedInaturalistMapping](../../tech.md#pacedinaturalistmapping).
+`inatapi.RequestRate`, implemented as [tech.pacedInaturalistMapping](../../tech.md#pacedinaturalistmapping).
 
-### `inat-terms/R4` — Machine generated content is prohibited *(hard rule)*
+### NoMachineGeneratedContent
+
+**Machine generated content is prohibited** *(hard rule)*
 
 > "(!) Machine generated observations, identifications, comments, and messages. We do not
 > allow machines to generate and post content on iNat with no human oversight curating each
@@ -86,7 +94,9 @@ that gave BirdView any write capability at all would land squarely inside it. `b
 resolve exactly this question and did so against the linked definition, vendored here as
 `machine-generated-content.html`.
 
-### `inat-terms/R5` — Don't behave like a machine
+### DoNotBehaveLikeMachine
+
+**Don't behave like a machine**
 
 > "Any account that adds content we believe decreases the accuracy of iNaturalist data may be
 > suspended, particularly if that account behaves like a machine, e.g. adds a lot of content
@@ -95,7 +105,9 @@ resolve exactly this question and did so against the linked definition, vendored
 
 **Not applicable.** Scoped to accounts adding content.
 
-### `inat-terms/R6` — Duplicates are undesirable but not an offense
+### DuplicatesUndesirable
+
+**Duplicates are undesirable but not an offense**
 
 > "Duplicate observations. They're not ideal, but they're usually due to oversight or bugs."
 > — Community Guidelines

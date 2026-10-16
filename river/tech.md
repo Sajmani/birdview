@@ -170,7 +170,7 @@ Goals: goals.goodDataCitizen
 
 Resolving species to iNaturalist taxon IDs happens in `cmd/birdview-inatmap`, never in
 `birdview-ingest` and never while serving. The tool waits at least one second between requests
-(`inat-api/R1`) and identifies itself (identifiedClient). Its output is a table committed to the repository;
+(`inatapi.RequestRate`) and identifies itself (identifiedClient). Its output is a table committed to the repository;
 the ingest joins against that table and makes no network request.
 
 Rationale: 1082 requests at the rate iNaturalist asks for is a quarter of an hour, which does not

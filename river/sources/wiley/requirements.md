@@ -13,7 +13,9 @@ the reading can be checked.
 
 ---
 
-### `wiley/R1` — No storage in a retrieval system, and non-profit status is explicitly irrelevant
+### NoRetrievalStorage
+
+**No storage in a retrieval system, and non-profit status is explicitly irrelevant**
 
 > "Except as expressly provided above or with respect to material published on an open access
 > basis under a Creative Commons license for which the license terms apply (including the
@@ -36,7 +38,9 @@ retrieval system", and shipping it is "systematic distribution". The final claus
 this project might otherwise have taken: tech.localNowPublicLater's non-commercial posture is expressly no defense —
 "whether or not for commercial or non-profit use or for a fee or free of charge".
 
-### `wiley/R2` — No integration with other material, and no derivative works
+### NoIntegrationOrDerivatives
+
+**No integration with other material, and no derivative works**
 
 > "Users may not integrate material from the Electronic Product(s) with other material or
 > otherwise create derivative works (including resulting from the use of artificial intelligence
@@ -52,7 +56,9 @@ creating a derivative work.
 The final sentence is what permits this transcription to exist: brief quotation for comment is
 carved out, and that is all this file does.
 
-### `wiley/R3` — No automated access of any kind
+### NoAutomatedAccess
+
+**No automated access of any kind**
 
 > "Users shall not:
 >
@@ -67,7 +73,9 @@ lets the ABA checklist be used without redistributing it — is "automated means
 prohibited. Note also that the HTTP 403 this project met repeatedly is the "robot exclusion...
 measures" the clause refers to, so the block was not incidental.
 
-### `wiley/R4` — No incorporation into any repository
+### NoRepositoryIncorporation
+
+**No incorporation into any repository**
 
 > "Users shall not have the right to incorporate any material from the Electronic Products into
 > any institutional or other repository under any circumstances without Wiley's prior written
@@ -77,7 +85,9 @@ measures" the clause refers to, so the block was not incidental.
 **For BirdView:** forecloses committing the data even if the other clauses somehow did not apply.
 "Under any circumstances" leaves no room for a non-commercial reading.
 
-### `wiley/R5` — AI tools may not ingest or process the material
+### NoAiProcessing
+
+**AI tools may not ingest or process the material**
 
 > "Use or enable artificial intelligence technologies and tools to ingest, train, test, analyze,
 > process, copy, distribute, make publicly accessible, and/or generate output (including resulting
@@ -91,10 +101,12 @@ measures" the clause refers to, so the block was not incidental.
 relevant to how the work is done, not only to what ships. No agent on this project should ingest
 or process the Ricklefs article or its data. The agent read the Terms of Use themselves, from a
 copy a human retrieved and supplied, for the purpose of determining compliance — which is the
-brief-quotation-for-comment case carved out in `wiley/R2`, and is the last contact this project
+brief-quotation-for-comment case carved out in `NoIntegrationOrDerivatives`, and is the last contact this project
 should have with Wiley material.
 
-### `wiley/R6` — What *is* permitted, and why it does not help
+### WhatIsPermitted
+
+**What *is* permitted, and why it does not help**
 
 > "Customers and their Authorized Users may download, search, retrieve, display and view, copy and
 > save to a secure network or other electronic storage media and store or print out single copies
@@ -109,7 +121,9 @@ is a genuine and generous permission, and it is not what BirdView needs. BirdVie
 a data column, join it to another dataset, store the result, and distribute it — each step
 prohibited above.
 
-### `wiley/R7` — Text and data mining requires a separate agreement
+### MiningNeedsAgreement
+
+**Text and data mining requires a separate agreement**
 
 > "If expressly permitted by Wiley under a relevant License or by statutory rights under applicable
 > legislation, users who wish to engage in text and data mining of the Electronic Products for

@@ -832,7 +832,7 @@ this bird on iNaturalist, which is true and worth knowing.
 
 `birdview-ingest` currently makes **no network request at all**, and [tech.selfContainedServer](tech.md#selfcontainedserver) keeps the
 server offline at runtime while `tech.md` binds tests to make none either. Resolving 841 names at
-the one-request-per-second that `inat-api/R1` asks for would add roughly fifteen minutes to every
+the one-request-per-second that `inatapi.RequestRate` asks for would add roughly fifteen minutes to every
 build and break it entirely offline.
 
 So resolution is a separate, rarely run tool — `cmd/birdview-inatmap` — writing a table that is
@@ -862,7 +862,7 @@ independently, which is a useful accident: two unrelated rules point the same wa
   confident.
 - **tech.pacedInaturalistMapping** added: the mapping tool paces its requests and identifies itself.
 - **acceptance.inaturalistLinkConfidentOnly** added.
-- The existing **tech.identifiedClient** (identify the client) and **acceptance.outboundRequestsIdentified** already discharge `inat-api/R4`,
+- The existing **tech.identifiedClient** (identify the client) and **acceptance.outboundRequestsIdentified** already discharge `inatapi.UserAgent`,
   which is why that requirement needed no new work.
 
 ---

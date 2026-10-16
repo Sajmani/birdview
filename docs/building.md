@@ -111,7 +111,7 @@ diagram.
 | `birdview-regions` | `data/region-presence.tsv` — which regions each species occurs in | one facet per region |
 | `birdview-status` | `data/status.tsv` — BirdView's own occurrence status per species | two passes, resumable |
 
-The iNaturalist pace is what that API asks for (`inat-api/R1`) and is not negotiable downward.
+The iNaturalist pace is what that API asks for (`inatapi.RequestRate`) and is not negotiable downward.
 The GBIF pace is a courtesy BirdView sets for itself, and the client widens it further whenever
 GBIF answers 429 — a run that ignores the throttling spends its time in backoff rather than
 working.

@@ -97,14 +97,14 @@ cannot be committed, and a non-commercial, attributed, open-source request costs
 | **Tier** | governing (the operator can throttle or block a client that ignores it) |
 | **Import style** | By reference, vendored — **copied from the maintainer's `birdsync` repository and verified byte-for-byte against the SHA-256 recorded there** |
 | **Scope** | Every request `cmd/birdview-inatmap` makes to `api.inaturalist.org` |
-| **Adopted parts** | `inat-api/R1`–`R8`, in [requirements.md](sources/inat-api/requirements.md) |
+| **Adopted parts** | all eight, in [requirements.md](sources/inat-api/requirements.md) |
 | **Exclusions** | Bulk access routes — observation exports, the weekly GBIF dataset — which serve consumers of observation data. BirdView reads one integer per species from the taxonomy. |
 | **Owner** | iNaturalist |
 | **Status** | **Adopted 2026-09-23.** Vendored and hash-verified; transcribed against BirdView's much narrower use. |
 
-Two of the eight are implemented (`R1` pacing as tech.pacedInaturalistMapping, `R4` User-Agent as the pre-existing
+Two of the eight are implemented (`inatapi.RequestRate` pacing as tech.pacedInaturalistMapping, `inatapi.UserAgent` as the pre-existing
 tech.identifiedClient); two are not applicable because BirdView never pages; four are satisfied by construction
-because it never authenticates, never posts and downloads no media. `inat-api/R7` is worth noting:
+because it never authenticates, never posts and downloads no media. `inatapi.AuthenticateOnlyWhenNecessary` is worth noting:
 it is the one requirement `birdsync` records as a knowing departure, and BirdView satisfies it
 only because its needs are so much smaller.
 
@@ -123,7 +123,7 @@ HTTP 403 and a JavaScript challenge. The API itself serves an identified client 
 | **Tier** | mandatory (copyright and platform terms) |
 | **Import style** | By reference, vendored — **copied from `birdsync` and hash-verified**, as above |
 | **Scope** | BirdView's use of the platform: unauthenticated reads, and outbound links to taxon pages |
-| **Adopted parts** | `inat-terms/R1`–`R6`, in [requirements.md](sources/inat-terms/requirements.md) |
+| **Adopted parts** | all six, in [requirements.md](sources/inat-terms/requirements.md) |
 | **Exclusions** | Conduct rules unreachable by a client that posts nothing: harassment, sockpuppets, explicit content, commercial AI training |
 | **Owner** | iNaturalist |
 | **Status** | **Adopted 2026-09-23.** Vendored so that one negative finding is checkable rather than remembered. |

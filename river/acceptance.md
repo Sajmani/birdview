@@ -722,8 +722,8 @@ placeholder, checked by scoping to the row rather than searching the page; and t
 iNaturalist image — the existing noServerNetworkRequest subresource scan already covers the mechanism, and this
 adds the intent.
 
-**Assertions, courtesy:** the resolver sends a descriptive `User-Agent` (tech.identifiedClient, `inat-api/R4`) and
-waits at least the configured interval between requests (tech.pacedInaturalistMapping, `inat-api/R1`), both observed
+**Assertions, courtesy:** the resolver sends a descriptive `User-Agent` (tech.identifiedClient, `inatapi.UserAgent`) and
+waits at least the configured interval between requests (tech.pacedInaturalistMapping, `inatapi.RequestRate`), both observed
 against the test server.
 
 **Status: verified 2026-09-27 — passing, and watched failing** by: ignoring the common name;
