@@ -142,13 +142,9 @@ gofmt -l .        # must print nothing
 go test ./...
 ```
 
-River's checker runs with the tests above — it is translated into Go in `river/check/`. Plus the
-spec-level checks, after any edit under `river/`:
-
-```
-python3 river/check/pins.py     # vendored sources match their recorded hashes
-python3 river/check/refs.py     # every reference and anchor into the bundle resolves
-```
+Every spec-level check is a Go test in `river/check/` and runs with the tests above: River's
+checker and its shared cases, BirdView's stricter goal rule, the vendored-file hashes, and every
+reference and anchor into the bundle. There is no separate command to remember.
 
 These check **structure**, not substance. A green run means the bundle is internally consistent,
 not that it is right.

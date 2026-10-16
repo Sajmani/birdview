@@ -83,7 +83,8 @@ it fail by lowering a generated color's luminance.
 
 **Verifies:** tech.recordBeforeConsuming, goals.goodDataCitizen · **Level:** spec · **Method:** hash each committed input and compare
 against `river/requirements/sources/*/PROVENANCE.md`
-**Run:** `python3 river/check/pins.py`
+**Run:** `go test ./river/check/ -run TestVendoredHashesMatch` — translated from Python on 2026-10-16,
+checking the same seven files, and watched failing on a changed recorded hash
 **Status: verified — run 2026-09-21, passing** for `avonet` and `fox-wingspan`, **and watched
 failing**: zeroing AVONET's recorded hash produced exit 1 and a recorded-vs-actual diff.
 **Scope exception:** `wiley` is quoted, not vendored, so it has no hash to check — see
@@ -96,7 +97,8 @@ failing**: zeroing AVONET's recorded hash produced exit 1 and a recorded-vs-actu
 **Verifies:** process integrity · **Level:** spec · **Method:** extract every qualified reference
 (`product.x`, `tech.x`, `goals.x`, `decisions.x`, `acceptance.x`) and every anchored link, and
 confirm each resolves
-**Run:** `python3 river/check/refs.py`
+**Run:** `go test ./river/check/ -run TestReferencesResolve` — translated from Python on 2026-10-16,
+resolving the same 2,692 references, and watched failing on each of its rules
 **Status: verified — run 2026-09-21, passing, and watched failing** — appending a reference to a
 requirement id in the P-9xx range, which nothing defines, produced exit 1.
 

@@ -106,10 +106,8 @@ go test ./...
 ```
 
 Run all four before declaring work finished (see Project bindings in
-[river/bindings.md](river/bindings.md)). River's checker is among them: it is translated into Go
-in `river/check/` and runs under `go test`. The two remaining spec checks —
-`python3 river/check/pins.py` and `python3 river/check/refs.py` — go with them whenever `river/`
-is touched.
+[river/bindings.md](river/bindings.md)). Every spec check is among them: River's checker, its shared
+cases and BirdView's own checks are Go tests in `river/check/`, so `go test ./...` runs them all.
 
 ### Leave a server running, every turn
 
