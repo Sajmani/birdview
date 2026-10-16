@@ -763,6 +763,10 @@ on its length: a 90-family selection is about 1.7 KB, which across 841 tiles wou
 link restores the picks, the ordering, the scale and the units, but **not the filter**. The
 browser's own Back button restores that exactly, because it replays the previous URL.
 
+**The Compare link does carry it**, and so do the comparison view's back, stop and sort links. Each
+appears once per page, so the size bound above does not apply, and dropping `family` there would
+return a reader who picked from a filtered index to an unfiltered one.
+
 ## selfDescriptionStaysTrue
 
 **What the project says about itself stays true**

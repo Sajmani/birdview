@@ -1190,7 +1190,10 @@ directly rather than left to review.
 
 **Assertions, the filter:** picking inside a filtered index neither resets nor ignores the filter,
 and the bar lists a picked bird that the filter is **currently hiding**. A filter that appeared to
-discard picks silently would be worse than one that refused to run.
+discard picks silently would be worse than one that refused to run. **Compare keeps the filter:**
+from an index filtered to two families, the Compare link, and the comparison view's back, stop and
+sort links, all carry both `family` values. Watched failing on 2026-10-16 against the code as
+reported, where `compareURL` dropped `family` as a tile link does.
 
 **Assertions, the Controls entry point:** the toggle is a **labelled control set of its own** and
 its button **states the mode** — `Off` while browsing, `On` while picking, matching its styling.

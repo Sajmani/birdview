@@ -2461,6 +2461,46 @@ func TestPickingIsReversibleAndKeepsTheFilter(t *testing.T) {
 	}
 }
 
+// TestComparisonKeepsTheFilter follows Compare from a filtered index and back.
+// The tile links' reason for dropping `family` is their count; the Compare link
+// and the comparison view's links each appear once, so they carry it, and the
+// reader comes back to the filter they were picking from. Two families, so a
+// link that kept only the first value would fail too.
+//
+// Verifies: product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
+func TestComparisonKeepsTheFilter(t *testing.T) {
+	s := newTestServer(t)
+	want := []string{"Corvidae", "Trochilidae"}
+	index := mustGet(t, s, "/?by=mass&family=Corvidae&family=Trochilidae"+
+		"&species=amecro&species=annhum&step=10")
+
+	keeps := func(what, h string) {
+		t.Helper()
+		u, err := url.Parse(html.UnescapeString(h))
+		if err != nil {
+			t.Fatalf("%s %q: %v", what, h, err)
+		}
+		if got := u.Query()["family"]; !slices.Equal(got, want) {
+			t.Errorf("%s %q carries family=%v, want %v; it is one link, so the "+
+				"tile links' size bound does not apply", what, h, got, want)
+		}
+	}
+	cmp := mustMatch(t, index, `<a class="btn on pickgo" href="([^"]+)"`, "the Compare link")
+	keeps("the Compare link", cmp)
+
+	body := mustGet(t, s, html.UnescapeString(cmp))
+	keeps("the back link", mustMatch(t, body, `<a class="backlink" href="([^"]+)"`, "the back link"))
+	keeps("the stop link", mustMatch(t, body, `<a class="stoplink" href="([^"]+)"`, "the stop link"))
+	sorts := regexp.MustCompile(`<a class="btn(?: on)?" href="(/compare\?[^"]+)"`).
+		FindAllStringSubmatch(body, -1)
+	if len(sorts) != 3 {
+		t.Fatalf("found %d sort links on the comparison, want 3", len(sorts))
+	}
+	for _, m := range sorts {
+		keeps("a sort link", m[1])
+	}
+}
+
 // TestPicksSurviveTheDetailRoundTrip is the flow the whole picker rests on:
 // open a bird to look at it, go back, pick something.
 //

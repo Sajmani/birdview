@@ -1777,14 +1777,6 @@ func (s *server) resolvePicks(ids []string) (found []*dataset.Species, missing [
 	return found, missing
 }
 
-// carried is the reader's view state minus the one parameter too large to copy
-// across 841 links. See detailLink for why `family` is the exception.
-func carried(r *http.Request) url.Values {
-	q := r.URL.Query()
-	q.Del("family")
-	return q
-}
-
 // pickURL is the current page with the picks replaced. It keeps every other
 // parameter INCLUDING `family`, because picking a bird must not silently drop
 // the filter the reader is picking from (product.pickFromIndex).
@@ -1839,9 +1831,12 @@ func sortOptions(r *http.Request, chosen []*dataset.Species) []sortOption {
 	return out
 }
 
-// compareURL sends the current picks to the comparison view.
+// compareURL sends the current picks to the comparison view. It keeps
+// `family`, unlike a tile link: it is one link per page, so the size bound
+// in detailLink does not apply, and the comparison's back links can only
+// return the reader to the filter if they were handed it (product.pickFromIndex).
 func compareURL(r *http.Request, ids []string) template.URL {
-	q := carried(r)
+	q := r.URL.Query()
 	q.Del("species")
 	for _, id := range ids {
 		q.Add("species", id)
