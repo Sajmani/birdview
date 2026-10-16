@@ -95,7 +95,7 @@ func testDataset() *dataset.Dataset {
 				dataset.LocaleWorld: worldName(common),
 			},
 			SpeciesCode: code(common), ScientificName: sci, Family: fam,
-			FamilyCommon: fam + " family", FamilyColor: "#86efac",
+			FamilyCommon: fam + " family", FamilyColor: "#86efac", FamilyText: "#000000",
 			TotalLength: mod(bill+head+neck+body+tail, "sum of the five drawn segments"),
 			Wingspan:    dataset.Metric{Value: span, Prov: dataset.Provenance{Kind: k, Source: "Fox et al. 2026", SourceTaxon: "Other species"}},
 			Mass:        m(mass),

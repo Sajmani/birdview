@@ -62,6 +62,8 @@ func TestReferencesResolve(t *testing.T) {
 		"tech":       glob("requirements/sources/tech/*.md"),
 		"decisions":  {filepath.Join(bundle, "requirements", "decisions.md")},
 		"acceptance": {filepath.Join(bundle, "requirements", "acceptance.md")},
+		// A composed package: its requirements and its criteria.
+		"app": glob("requirements/app/*.md"),
 	}
 	// A transcribed source is its own package, with exported names.
 	exported := map[string]bool{}
@@ -103,7 +105,7 @@ func TestReferencesResolve(t *testing.T) {
 	})
 
 	extensions := map[string]bool{"md": true, "py": true, "go": true, "svg": true, "json": true, "tsv": true, "html": true, "css": true}
-	qualified := regexp.MustCompile(`\b(goals|product|tech|decisions|acceptance)\.([a-z][A-Za-z]+)\b`)
+	qualified := regexp.MustCompile(`\b(goals|product|tech|decisions|acceptance|app)\.([a-z][A-Za-z]+)\b`)
 	var names []string
 	for pkg := range exported {
 		names = append(names, pkg)
@@ -190,7 +192,7 @@ func TestReferencesResolve(t *testing.T) {
 		}
 	}
 	counts := []string{}
-	for _, pkg := range append([]string{"goals", "product", "tech", "decisions", "acceptance"}, names...) {
+	for _, pkg := range append([]string{"goals", "product", "tech", "decisions", "acceptance", "app"}, names...) {
 		counts = append(counts, strconv.Itoa(len(defined[pkg]))+" "+pkg)
 	}
 	t.Logf("%s; %d references resolve", strings.Join(counts, ", "), refs)

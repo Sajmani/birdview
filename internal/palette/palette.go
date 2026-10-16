@@ -24,7 +24,7 @@
 // order, Passeriformes with 44 families, which does fit. Two families in
 // different orders may share a color; the order badge tells them apart.
 //
-// Verifies: product.generatedBadgeColors, tech.badgeContrast, wcag/1.4.6.
+// Verifies: product.generatedBadgeColors, tech.badgeContrast, wcag.ContrastEnhanced.
 package palette
 
 import (
@@ -190,11 +190,13 @@ func (s Swatch) ContrastWith() (float64, error) {
 	return Contrast(RelativeLuminance(r, g, b), RelativeLuminance(tr, tg, tb)), nil
 }
 
-// RelativeLuminance implements the WCAG 2.x definition.
+// RelativeLuminance implements the WCAG 2.2 definition (wcag.ContrastRatio).
+// Its threshold was 0.03928 before May 2021; no 8-bit channel value lies
+// between that and 0.04045, so the change moves no ratio.
 func RelativeLuminance(r, g, b uint8) float64 {
 	lin := func(c uint8) float64 {
 		s := float64(c) / 255
-		if s <= 0.03928 {
+		if s <= 0.04045 {
 			return s / 12.92
 		}
 		return math.Pow((s+0.055)/1.055, 2.4)

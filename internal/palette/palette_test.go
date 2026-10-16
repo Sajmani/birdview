@@ -41,7 +41,7 @@ var abaFamilies = []string{
 // when it clears 7:1 against the text it actually carries, which may be black
 // or white. The expected value comes from WCAG, not from a run.
 //
-// Verifies: tech.badgeContrast, product.generatedBadgeColors, wcag/1.4.6. Criterion: acceptance.legibleDistinctColors.
+// Verifies: tech.badgeContrast, product.generatedBadgeColors, wcag.ContrastEnhanced. Criterion: acceptance.legibleDistinctColors.
 func TestContrastAgainstOwnText(t *testing.T) {
 	for _, sw := range Generate(abaFamilies, 0) {
 		got, err := sw.ContrastWith()
@@ -95,7 +95,7 @@ func TestPresetsAlternate(t *testing.T) {
 // The expected value comes from the standard (7:1), not from running the
 // generator and recording what it produced.
 //
-// Verifies: tech.badgeContrast, product.generatedBadgeColors, wcag/1.4.6. Criterion: acceptance.legibleDistinctColors.
+// Verifies: tech.badgeContrast, product.generatedBadgeColors, wcag.ContrastEnhanced. Criterion: acceptance.legibleDistinctColors.
 func TestContrast(t *testing.T) {
 	colors := Generate(abaFamilies, 0)
 	if len(colors) != len(abaFamilies) {

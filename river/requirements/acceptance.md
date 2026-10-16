@@ -54,7 +54,7 @@ looks exactly like a validated one.
 
 **Generated colors are legible and mutually distinguishable**
 
-**Verifies:** tech.badgeContrast, product.generatedBadgeColors, `wcag/1.4.6` · **Level:** spec and code · **Method:** pure functions
+**Verifies:** tech.badgeContrast, product.generatedBadgeColors, wcag.ContrastEnhanced · **Level:** spec and code · **Method:** pure functions
 over the color generator
 **Assertions:** WCAG 2.2 contrast ≥ 7:1 against each badge's **own** text color; CIE76 ΔE ≥ 25
 between families adjacent in the selector; both halves of the gamut are used; and the preset cycle
@@ -105,6 +105,20 @@ read as emphasis, a space left where a link's markup was removed, several quoted
 block); all seven pass after the fix, and none of the transcriptions needed changing.
 **Scope:** sources that vendor HTML — `inatapi`, `inatterms` and `wcag`. A source quoted but not
 vendored, such as `wiley`, has nothing to check against.
+
+### compositionResolves
+
+**Every composition field names something that exists, and every applied domain is bound**
+
+**Verifies:** process integrity · **Level:** spec · **Method:** read every `Applies to:`, `Binds:`,
+`Composed from:` and `Covers:` field in the sources and composed packages; each must name an item
+that exists, each domain must be bound by exactly one local requirement, and every domain an
+adopted requirement applies to must be bound — otherwise that requirement silently applies to
+nothing. Composed requirements no criterion covers are counted and logged, not failed.
+**Run:** `go test ./river/check/ -run TestCompositionResolves`
+**Status: verified 2026-10-16, passing, and watched failing** — deleting `Binds: wcag.WebPage`
+from tech.webPages failed it, naming the three WCAG criteria left applying to nothing; misspelling
+a `Covers:` target failed it, naming the criterion.
 
 ### decisionReferencesExist
 
@@ -839,12 +853,16 @@ Recorded here so the limit is not mistaken for coverage.
 
 **No text or link falls below its contrast floor**
 
-**Verifies:** tech.textContrastFloor, `wcag/1.4.3`, `wcag/1.4.6` · **Level:** code · **Method:** two checks parsing
+**Verifies:** tech.textContrastFloor, wcag.ContrastEnhanced · **Level:** code · **Method:** two checks parsing
 the stylesheet **as embedded in the binary**, not off disk
 
 **Assertions, measured:** every `color` a rule declares — with custom properties resolved — clears
-**7:1** against both `--bg` and `--panel`. Rules that also set a `background` are excluded, being
-self-contained and governed by tech.badgeContrast.
+**7:1** against both `--bg` and `--panel`, or, for a rule that also sets a `background`, against
+that background. **Until 2026-10-16 such rules were excluded** as self-contained and governed by
+tech.badgeContrast; that was true of badges and false of the selected button and the pick
+control, whose hand-written pairs nothing read. Watched failing since: selected-button text set to
+`#2a7fa8` is reported at 2.42:1 against its own `--accent` background. That change was first
+caught by app.renderedTextContrast, with this check passing.
 
 **Assertions, SVG text:** every `fill` a rule declares **on a text element** clears the same 7:1
 against both surfaces. Which rules those are is derived rather than listed: a class token that any
@@ -1902,6 +1920,7 @@ template returned 200 with its source, `/static/` returned `index.html`'s, and
 | Requirement | Criteria | |
 | --- | --- | --- |
 | tech.servesOnlyItsPages | staticServesAssetsOnly | |
+| tech.webPages | app.everyPageIsFound | |
 | product.scopeIsRecurringAvifauna | scopeMatchesStatusTable, noRarityCodes, abaFileHashMatches | |
 | product.traitsFromAvonet, product.traitsPerSpecies | allFiveTraits | |
 | product.namesFromAvilist | namesNeverDefaulted | |
@@ -1959,8 +1978,8 @@ template returned 200 with its source, `/static/` returned `index.html`'s, and
 | tech.textContrastFloor | noTextBelowContrastFloor | |
 | product.selfDescriptionStaysTrue | creditsComplete | |
 | tech.localNowPublicLater | attributionComplete | partial — the non-commercial posture itself is still untestable |
-| tech.bundleIsNormative, tech.recordBeforeConsuming | everyRequirementCitesGoal, vendoredHashesMatch, decisionReferencesExist, quotationsAreVerbatim | |
-| `wcag/1.4.6` | legibleDistinctColors | |
+| tech.bundleIsNormative, tech.recordBeforeConsuming | everyRequirementCitesGoal, vendoredHashesMatch, decisionReferencesExist, quotationsAreVerbatim, compositionResolves | |
+| wcag.ContrastEnhanced | legibleDistinctColors | |
 
 ### Declared gaps
 

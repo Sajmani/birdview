@@ -55,7 +55,7 @@ var (
 	reVar   = regexp.MustCompile(`(--[a-z-]+):\s*(#[0-9a-fA-F]{3,6})`)
 	reRule  = regexp.MustCompile(`(?s)([^{}]+)\{([^{}]*)\}`)
 	reColor = regexp.MustCompile(`(?:^|[;\s])color:\s*([^;]+)`)
-	reBg    = regexp.MustCompile(`(?:^|[;\s])background(?:-color)?:\s*`)
+	reBg    = regexp.MustCompile(`(?:^|[;\s])background(?:-color)?:\s*([^;]+)`)
 	reHex   = regexp.MustCompile(`#[0-9a-fA-F]{3,6}`)
 )
 
@@ -83,7 +83,7 @@ func hexRGB(t *testing.T, h string) (uint8, uint8, uint8) {
 // on a bare surface must clear the floor, and no link may go uncolored at all --
 // a rule that only checks declared colors cannot see the color nobody declared.
 //
-// Verifies: tech.textContrastFloor, `wcag/1.4.3`, `wcag/1.4.6`. Criterion: acceptance.noTextBelowContrastFloor.
+// Verifies: tech.textContrastFloor, wcag.ContrastEnhanced. Criterion: acceptance.noTextBelowContrastFloor.
 func TestStylesheetContrast(t *testing.T) {
 	css := stripComments(string(mustReadStyles(t)))
 
@@ -118,18 +118,32 @@ func TestStylesheetContrast(t *testing.T) {
 		if cm == nil {
 			continue
 		}
-		// A rule that sets its own background is self-contained: badges and
-		// chips pair a generated background with a matching text color and are
-		// governed by tech.badgeContrast and acceptance.legibleDistinctColors instead.
-		if reBg.MatchString(body) {
-			continue
-		}
 		fg := resolve(cm[1])
 		if fg == "" { // inherit, currentColor, a keyword -- nothing to measure
 			continue
 		}
 		fr, fg2, fb := hexRGB(t, fg)
 		lfg := palette.RelativeLuminance(fr, fg2, fb)
+
+		// A rule that sets its own background is measured against that
+		// background, not the page's. This used to skip such rules outright, on
+		// the grounds that badges pair a generated background with a generated
+		// text color (tech.badgeContrast). Badges do, but the selected button and
+		// the pick control pair a hand-written color with --accent, and nothing
+		// read those pairs: 2.42:1 on .btn.on passed here, and only the rendered
+		// check in cmd/birdview/pages_test.go caught it. A background this file
+		// cannot resolve -- none, a gradient -- is still skipped.
+		if bm := reBg.FindStringSubmatch(body); bm != nil {
+			if bg := resolve(bm[1]); bg != "" {
+				br, bgc, bb := hexRGB(t, bg)
+				if got := palette.Contrast(lfg, palette.RelativeLuminance(br, bgc, bb)); got < textFloor {
+					t.Errorf("%-30s color %s on its own background %s is %.2f:1, below the %.1f:1 floor",
+						sel, fg, bg, got, textFloor)
+				}
+				checked++
+			}
+			continue
+		}
 
 		// One floor, both surfaces, links and text alike.
 		for _, v := range surfaceVars {
@@ -170,7 +184,7 @@ var (
 // the selector it is missing, which is the failure being fixed rather than a
 // fix for it.
 //
-// Verifies: tech.textContrastFloor, `wcag/1.4.6`. Criterion: acceptance.noTextBelowContrastFloor.
+// Verifies: tech.textContrastFloor, wcag.ContrastEnhanced. Criterion: acceptance.noTextBelowContrastFloor.
 func TestSVGTextContrast(t *testing.T) {
 	css := stripComments(string(mustReadStyles(t)))
 

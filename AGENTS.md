@@ -109,6 +109,10 @@ Run all four before declaring work finished (see Project bindings in
 [river/bindings.md](river/bindings.md)). Every spec check is among them: River's checker, its shared
 cases and BirdView's own checks are Go tests in `river/check/`, so `go test ./...` runs them all.
 
+**`TestRenderedTextContrast` needs Chrome** and skips without it (set `BIRDVIEW_CHROME` if it is not
+in a standard place). A skip is not a pass: check for the skip line before calling contrast work
+done.
+
 ### Leave a server running, every turn
 
 **End every turn with a freshly built server on <http://localhost:8080>**, whether or not

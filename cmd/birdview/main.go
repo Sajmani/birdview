@@ -128,7 +128,11 @@ func load(path string) (*dataset.Dataset, error) {
 }
 
 type server struct {
-	mux *http.ServeMux
+	mux    *http.ServeMux
+	routes []route
+	// onRender, when set, is told the name of every template rendered. Only
+	// the checks set it, to confirm they have seen every kind of page.
+	onRender func(template string)
 	// ds is what the index draws: every species except the exotics
 	// (product.escapedBirdsListed). all is the whole dataset, for the detail pages and the lists
 	// that must name every bird.
@@ -624,19 +628,30 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.mux.Handle("/static/", http.StripPrefix("/static/", staticFiles(assets)))
-	s.mux.HandleFunc("/added", s.added)
-	s.mux.HandleFunc("/excluded", s.excluded)
-	for _, set := range []string{"/docs"} {
+	s.routes = []route{
+		{"/static/", http.StripPrefix("/static/", staticFiles(assets))},
+		{"/added", http.HandlerFunc(s.added)},
+		{"/excluded", http.HandlerFunc(s.excluded)},
 		// Both the exact path and the subtree, so the bare name serves the
 		// index instead of a 301 to it.
-		s.mux.HandleFunc(set, s.document)
-		s.mux.HandleFunc(set+"/", s.document)
+		{"/docs", http.HandlerFunc(s.document)},
+		{"/docs/", http.HandlerFunc(s.document)},
+		{"/compare", http.HandlerFunc(s.compare)},
+		{"/species/", http.HandlerFunc(s.detail)},
+		{"/", http.HandlerFunc(s.index)},
 	}
-	s.mux.HandleFunc("/compare", s.compare)
-	s.mux.HandleFunc("/species/", s.detail)
-	s.mux.HandleFunc("/", s.index)
+	for _, rt := range s.routes {
+		s.mux.Handle(rt.pattern, rt.handler)
+	}
 	return s, nil
+}
+
+// route is one pattern the server answers. Kept as a list, not only
+// registered, because the checks enumerate every route to find every web page
+// WCAG applies to (tech.webPages), and a ServeMux cannot list its patterns.
+type route struct {
+	pattern string
+	handler http.Handler
 }
 
 // options are the user's current selections, all carried in the query string so
@@ -2193,6 +2208,9 @@ func (s *server) render(w http.ResponseWriter, name string, data any) {
 		} else {
 			tmpl = t
 		}
+	}
+	if s.onRender != nil {
+		s.onRender(name)
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := tmpl.ExecuteTemplate(w, name, data); err != nil {

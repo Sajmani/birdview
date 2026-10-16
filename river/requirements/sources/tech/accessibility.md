@@ -43,8 +43,15 @@ That distinction went unwritten, and the check read `color` alone. The wing chor
 labels of [product.labeledDetailDiagram](../product/measurements.md#labeleddetaildiagram) shipped painted `#0ea5e9` — **6.44:1 on the page background
 and 5.28:1 on a panel** — and nothing saw them, because SVG text does not use `color`.
 
-Rules that set their own background are excluded and governed by badgeContrast instead: badges and chips
-pair a generated background with a matching text color, and the pair is what has to clear 7:1.
+**A rule that sets its own background is held to 7:1 against that background**, not the page's.
+A badge's background and text color are generated together and set inline, so that pair is
+badgeContrast's; a pair written in the stylesheet, such as a selected button's dark text on
+`--accent`, is this requirement's.
+
+That sentence used to exempt every rule with its own background, on the reasoning that badges and
+chips are generated pairs. The selected button and the pick control are not, and nothing read
+them: text on a selected button at 2.42:1 passed every stylesheet check and was caught only by
+rendering the page (app.renderedTextContrast).
 
 **No link may go uncolored.** A link with no rule inherits the browser default — `#0000EE`
 unvisited and `#551A8B` visited — which on this background is 1.90:1 and 1.62:1.
@@ -61,3 +68,33 @@ the dim text as hard to read too, which settled it: `--dim` and `--accent` moved
 went with them. See [decisions.oneContrastFloor](../../decisions.md#onecontrastfloor).
 
 ---
+
+## webPages
+
+**What counts as a BirdView web page**
+
+Subject: `pages.domain`
+Binds: wcag.WebPage
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
+
+**Every response the server sends as `text/html`, `image/svg+xml` or `text/plain`, at any route,
+is a BirdView web page**, with everything drawn into it. Today that is the index, the species
+page in its drawn and undrawn forms, the comparison, the guides and their index, the added-values
+and excluded-birds pages, the pipeline diagram and the favicon opened at their own URLs, and the
+plain-text error responses.
+
+The list is illustrative, not the definition. Nothing in the bundle enumerates the pages: the
+checks discover them from the server's routes, so a page added later is a web page the day it
+exists.
+
+**This binds WCAG's definition and does not narrow it.** WCAG makes a web page of any resource
+obtained from a URI, so an error response or an SVG opened on its own is one whether BirdView
+would like it to be or not. A page BirdView chose to leave out would be a page excused from a
+mandatory source, and the only way to do that is an accepted gap in
+[decisions.md](../../decisions.md), page by page.
+
+Rationale: the contrast checks were written against the stylesheet, which made "the pages" mean
+"what the stylesheet styles" without anyone deciding so. Mapping WCAG over the server's actual
+responses found two kinds of page that meaning left out: the pipeline diagram served as its own
+SVG document with its own colors, and the page templates served as raw source under `/static/`
+(tech.servesOnlyItsPages).
