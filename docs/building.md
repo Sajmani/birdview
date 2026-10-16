@@ -10,7 +10,7 @@ framework.
 ## Prerequisites
 
 - **Go.** No minimum version is maintained — whatever the dependencies require
-  ([tech.goVersionFollowsDeps](../river/tech.md#goversionfollowsdeps)). Developed on 1.25.
+  ([tech.goVersionFollowsDeps](../river/requirements/sources/tech/delivery.md#goversionfollowsdeps)). Developed on 1.25.
 - **Python 3**, for the three spec-level check scripts.
 
 That is all. The one dependency is `excelize`, for reading the source workbooks.
@@ -25,11 +25,11 @@ Everything the build needs is in the repository.
 
 - [`third_party/avilist/`](../third_party/avilist) — names, families and taxonomic sequence
 - [`third_party/avonet/`](../third_party/avonet) — morphology traits
-- [`third_party/fox-wingspan/`](../third_party/fox-wingspan) — empirical wingspans
+- [`third_party/foxwingspan/`](../third_party/foxwingspan) — empirical wingspans
 
 Each directory carries the data's own license and a README naming its source and citation. They
 are **not** covered by BirdView's Apache 2.0 license. Provenance and hashes are recorded under
-[`river/sources/`](../river/sources).
+[`river/requirements/sources/`](../river/requirements/sources).
 
 ### Nothing to fetch
 
@@ -39,8 +39,8 @@ because serving BirdView reproduced that list to every visitor, it was also what
 deployment.
 
 It is gone. Names, families and sequence come from AviList
-([decisions.avilistReplacesAba](../river/decisions.md#avilistreplacesaba)) and scope is now BirdView's own, derived from open
-occurrence records ([decisions.scopeFromRecurrence](../river/decisions.md#scopefromrecurrence)) and committed as `data/status.tsv`.
+([decisions.avilistReplacesAba](../river/requirements/decisions.md#avilistreplacesaba)) and scope is now BirdView's own, derived from open
+occurrence records ([decisions.scopeFromRecurrence](../river/requirements/decisions.md#scopefromrecurrence)) and committed as `data/status.tsv`.
 Every input the build reads is either CC BY 4.0 or the project's own work.
 
 ---
@@ -76,7 +76,7 @@ Flags, should you need them:
 | `birdview-ingest` | `-status` | `data/status.tsv` |
 | | `-avilist` | `third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx` |
 | | `-avonet` | `third_party/avonet/AVONET Supplementary dataset 1.xlsx` |
-| | `-wingspan` | `third_party/fox-wingspan/wingspan_fox2026_AppendixS1.xlsx` |
+| | `-wingspan` | `third_party/foxwingspan/wingspan_fox2026_AppendixS1.xlsx` |
 | | `-inat` | `data/inat-taxa.tsv` |
 | | `-regions` | `data/region-presence.tsv` |
 | | `-out` | `web/data/species.json` |
@@ -88,7 +88,7 @@ Flags, should you need them:
 > re-running the ingest you must restart the server, or you will spend a while debugging stale
 > data that is already fixed on disk.
 
-The built dataset is a build artifact and is gitignored ([tech.datasetNeverCommitted](../river/tech.md#datasetnevercommitted)) — not for
+The built dataset is a build artifact and is gitignored ([tech.datasetNeverCommitted](../river/requirements/sources/tech/delivery.md#datasetnevercommitted)) — not for
 licensing reasons any more, but because it is reproducible from the committed inputs in one
 command and a stale copy in the tree is worse than none.
 
@@ -193,7 +193,7 @@ directly. If you find yourself wanting to format a string in there, you are in t
 **The requirements are normative and live in [`river/`](../river).** Code implements them; it does
 not define them. Where this doc and `river/` disagree, `river/` wins.
 
-[`river/process.md`](../river/process.md) is the method itself, copied into the repo so the project
+[`river/README.md`](../river/README.md) is the method itself, copied into the repo so the project
 does not depend on an external document. It is long. You do not need to read all of it to make a
 change — but you do need the loop.
 
@@ -201,13 +201,14 @@ change — but you do need the loop.
 
 | File | Answers |
 | --- | --- |
-| [`goals.md`](../river/goals.md) | why the project exists — six goals, `goals.*` |
-| [`product.md`](../river/product.md) | what it must do — `product.*` |
-| [`tech.md`](../river/tech.md) | technical constraints — `tech.*` |
-| [`sources.md`](../river/sources.md) | every body of rules or data the project is subject to |
-| [`decisions.md`](../river/decisions.md) | conflict resolutions — `decisions.*` |
+| [`README.md`](../river/README.md) | the method — River, copied in unchanged |
+| [`goals/`](../river/goals/goals.md) | why the project exists — six goals, `goals.*` |
+| [`requirements/sources/product/`](../river/requirements/sources/product/product.md) | what it must do, one file per group — `product.*` |
+| [`requirements/sources/tech/`](../river/requirements/sources/tech/tech.md) | technical constraints, one file per group — `tech.*` |
+| [`requirements/requirements.md`](../river/requirements/requirements.md) | every body of rules or data the project is subject to |
+| [`requirements/decisions.md`](../river/requirements/decisions.md) | conflict resolutions — `decisions.*` |
+| [`requirements/acceptance.md`](../river/requirements/acceptance.md) | how each requirement is checked — `acceptance.*` |
 | [`todo.md`](../river/todo.md) | everything still open — work, questions, unverified criteria, stale text |
-| [`acceptance.md`](../river/acceptance.md) | how each requirement is checked — `acceptance.*` |
 | [`arch.md`](../river/arch.md) | how the code is actually organized |
 
 Cite IDs in code comments using the literal token, so one search covers the tree:
@@ -238,7 +239,7 @@ three phases — classify first:
 ### Three rules that carry most of the weight
 
 **Never resolve a conflict in code.** If two requirements disagree, or a change reverses something
-the spec wrote down, stop and record it in [`decisions.md`](../river/decisions.md) as a new entry.
+the spec wrote down, stop and record it in [`decisions.md`](../river/requirements/decisions.md) as a new entry.
 Picking one silently is the failure this process exists to prevent. Every interesting decision in
 this project — rejecting Ricklefs, surfacing the neck model, fitting the wingspan regression,
 deleting the legs — is a CR, and each one is more useful than the diff it produced.
@@ -263,14 +264,14 @@ Violating any of these is a licensing problem, not a style problem.
   copy in the tree is worse than none.
 - **Never read or process Wiley Online Library material**, including Ricklefs (2017). Its terms
   prohibit AI tools ingesting it and prohibit automated access, and the source is formally rejected
-  ([decisions.ricklefsProhibited](../river/decisions.md#ricklefsprohibited)). Do not try to revive it as a length source.
+  ([decisions.ricklefsProhibited](../river/requirements/decisions.md#ricklefsprohibited)). Do not try to revive it as a length source.
 - **Only AVONET, the Fox wingspan data and AviList may be committed as source data.** All three
-  are CC BY 4.0. Before adding a fourth, read [`sources.md`](../river/sources.md) — most candidates
+  are CC BY 4.0. Before adding a fourth, read [`sources.md`](../river/requirements/requirements.md) — most candidates
   this project evaluated could not be redistributed. The generated tables under `data/` are not
   source data: they are the project's own reductions, and they carry their provenance in their
   own headers.
-- **Never present a modeled value as a measurement** ([product.lengthAndWingspanSources](../river/product.md#lengthandwingspansources), product.tileMarksModeled). This is
-  the decision the whole measurement design rests on ([decisions.noOpenLengthAndWingspan](../river/decisions.md#noopenlengthandwingspan)).
+- **Never present a modeled value as a measurement** ([product.lengthAndWingspanSources](../river/requirements/sources/product/measurements.md#lengthandwingspansources), product.tileMarksModeled). This is
+  the decision the whole measurement design rests on ([decisions.noOpenLengthAndWingspan](../river/requirements/decisions.md#noopenlengthandwingspan)).
 
 `AGENTS.md` carries the same rules in the form AI coding agents read.
 
@@ -283,11 +284,11 @@ Violating any of these is a licensing problem, not a style problem.
 **The licensing blocker is gone as of 2026-10-05.** Serving BirdView used to reproduce the ABA
 checklist to every visitor, and that checklist is all-rights-reserved with no license permitting
 it. Permission was requested on 2026-09-27 and never answered, so the project stopped waiting:
-names moved to AviList ([decisions.avilistReplacesAba](../river/decisions.md#avilistreplacesaba)) and scope to BirdView's own
-derivation ([decisions.scopeFromRecurrence](../river/decisions.md#scopefromrecurrence)). Nothing all-rights-reserved is read at build
+names moved to AviList ([decisions.avilistReplacesAba](../river/requirements/decisions.md#avilistreplacesaba)) and scope to BirdView's own
+derivation ([decisions.scopeFromRecurrence](../river/requirements/decisions.md#scopefromrecurrence)). Nothing all-rights-reserved is read at build
 time, so nothing of anyone else's is served. When a regenerated scope drops a species under a
 reader's bookmark, `/species/<code>` answers 404 naming the bird and its measured reason
-([decisions.speciesUrlOutlivesSpecies](../river/decisions.md#speciesurloutlivesspecies)).
+([decisions.speciesUrlOutlivesSpecies](../river/requirements/decisions.md#speciesurloutlivesspecies)).
 
 See [`river/todo.md`](../river/todo.md) for what remains before a public deployment.
 
@@ -306,7 +307,7 @@ docker run --rm -p 8080:8080 birdview
 ```
 
 The server binds `0.0.0.0:8080` inside the container and reads `/data/species.json`. To override
-either, or to pass a feedback URL ([tech.noPersonalAddress](../river/tech.md#nopersonaladdress)):
+either, or to pass a feedback URL ([tech.noPersonalAddress](../river/requirements/sources/tech/ungrouped.md#nopersonaladdress)):
 
 ```
 docker run --rm -p 8080:8080 birdview \
@@ -317,7 +318,7 @@ docker run --rm -p 8080:8080 birdview \
 
 ### Running without Docker
 
-The server binds `localhost:8080` by default ([tech.servesOnLocalhost](../river/tech.md#servesonlocalhost)). For a deployment
+The server binds `localhost:8080` by default ([tech.servesOnLocalhost](../river/requirements/sources/tech/delivery.md#servesonlocalhost)). For a deployment
 without a container, point `-addr` at the interface and port the host expects:
 
 ```

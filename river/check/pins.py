@@ -26,7 +26,7 @@ spec = pathlib.Path(__file__).resolve().parents[1]
 repo = spec.parent
 rows, problems = [], []
 
-for prov in sorted(spec.glob('sources/*/PROVENANCE.md')):
+for prov in sorted(spec.glob('requirements/sources/*/PROVENANCE.md')):
     text = prov.read_text(encoding='utf-8')
     # table rows of the form | `//path` | origin | `sha256` |
     for m in re.finditer(r'\|\s*`//([^`]+)`\s*\|[^|]*\|\s*`([0-9a-f]{64})`\s*\|', text):

@@ -29,12 +29,12 @@ import (
 const DefaultBaseURL = "https://api.inaturalist.org/v1"
 
 // MinInterval is the pacing iNaturalist asks for: "about 1 per second"
-// (inat-api/R1, tech.pacedInaturalistMapping). A full rebuild is 841 requests, so roughly fifteen
+// (inatapi.RequestRate, tech.pacedInaturalistMapping). A full rebuild is 841 requests, so roughly fifteen
 // minutes -- which is exactly why this runs in its own tool and not in the
 // ingest.
 const MinInterval = time.Second
 
-// UserAgent identifies the client, as inat-api/R4 and tech.identifiedClient both require.
+// UserAgent identifies the client, as inatapi.UserAgent and tech.identifiedClient both require.
 // A contact address is included because a service operator who needs to ask a
 // client to stop should not have to guess who to ask. No project URL: BirdView
 // is not published anywhere yet, and a plausible-looking dead link is worse
@@ -43,7 +43,7 @@ const UserAgent = "birdview-inatmap/1.0 (contact: birdview@ajmani.net)"
 
 // Client is a paced, identified, read-only iNaturalist API client. It sends no
 // credential: BirdView has no account and needs none, which satisfies
-// inat-api/R5, R6 and R7 by construction.
+// inatapi.JwtAuthorization, R6 and R7 by construction.
 type Client struct {
 	BaseURL   string
 	UserAgent string

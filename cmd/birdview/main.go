@@ -3584,7 +3584,7 @@ func (s *server) documentIndex(w http.ResponseWriter, set string) {
 // markdownTitle is a document's first top-level heading, falling back to
 // its file name.
 //
-// **The first heading, not the first line.** river/process.md opens with an
+// **The first heading, not the first line.** river/README.md opens with an
 // HTML comment recording where the file came from, and reading line one
 // listed it in the index as "<!--".
 func markdownTitle(src []byte, fallback string) string {
@@ -3612,7 +3612,7 @@ func (s *server) renderMarkdown(w http.ResponseWriter, set, title string, src []
 // repoLinks rewrites the repository-relative links these documents carry
 // into links a browser can follow.
 //
-// **Rewritten at render time, not in the files.** `../river/product.md` is
+// **Rewritten at render time, not in the files.** `../river/requirements/sources/product/` is
 // the correct link in a repository checkout, and editing the file to suit a
 // browser would break it for the checkout; these documents are served
 // precisely because they are the files the repository carries.

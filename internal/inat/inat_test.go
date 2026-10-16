@@ -174,8 +174,8 @@ const heronJSON = `{"results":[
   {"id":4956,"name":"Ardea herodias","rank":"species","preferred_common_name":"Great Blue Heron"}]}`
 
 // TestLookupHonorsTheSourceRequirements checks the two obligations the adopted
-// source actually imposes: identify yourself (inat-api/R4, tech.identifiedClient) and pace the
-// requests (inat-api/R1, tech.pacedInaturalistMapping).
+// source actually imposes: identify yourself (inatapi.UserAgent, tech.identifiedClient) and pace the
+// requests (inatapi.RequestRate, tech.pacedInaturalistMapping).
 //
 // Both are observed at the server, not read off the client's own fields -- a
 // client that sets Interval and never waits would satisfy the latter.

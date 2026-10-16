@@ -34,7 +34,7 @@ import (
 const (
 	statusFile = "../../data/status.tsv"
 	avoFile    = "../../third_party/avonet/AVONET Supplementary dataset 1.xlsx"
-	foxFile    = "../../third_party/fox-wingspan/wingspan_fox2026_AppendixS1.xlsx"
+	foxFile    = "../../third_party/foxwingspan/wingspan_fox2026_AppendixS1.xlsx"
 	avlFile    = "../../third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx"
 	inatFile   = "../../data/inat-taxa.tsv"
 	regFile    = "../../data/region-presence.tsv"
@@ -286,7 +286,7 @@ func TestProvenanceMatchesTheSourcesUsed(t *testing.T) {
 	}
 	// There used to be an absolute count here -- 301 less one, measured
 	// against the Fox dataset for the ABA checklist's scope and recorded in
-	// river/sources/fox-wingspan/PROVENANCE.md. decisions.scopeFromRecurrence replaced that scope, so
+	// river/requirements/sources/foxwingspan/PROVENANCE.md. decisions.scopeFromRecurrence replaced that scope, so
 	// the number is a fact about a species list that no longer exists, and
 	// restating it as whatever this run produces would be reading the
 	// expectation off the code under test.

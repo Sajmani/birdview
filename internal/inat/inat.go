@@ -17,7 +17,7 @@
 //
 // BirdView links to iNaturalist and copies nothing from it: no photograph is
 // embedded, hotlinked, cached or reproduced, so no contributor's CC BY-NC
-// license is engaged (inat-terms/R1, decisions.inaturalistLinkAdopted). tech.selfContainedServer forbids the embedding
+// license is engaged (inatterms.ContributorKeepsRights, decisions.inaturalistLinkAdopted). tech.selfContainedServer forbids the embedding
 // independently.
 //
 // The mapping itself is a committed table rather than a build-time fetch --

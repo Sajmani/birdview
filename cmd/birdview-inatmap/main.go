@@ -16,7 +16,7 @@
 // IDs and writes the committed mapping table.
 //
 // It is deliberately NOT part of birdview-ingest. At the one-request-per-second
-// iNaturalist asks for (inat-api/R1), 841 species is about a quarter of an
+// iNaturalist asks for (inatapi.RequestRate), 841 species is about a quarter of an
 // hour, and a build that needs the network is a build that fails on a plane.
 // Run this when the mapping needs refreshing; commit the result; the ingest
 // joins against it offline (tech.pacedInaturalistMapping, decisions.inaturalistLinkAdopted).
@@ -48,7 +48,7 @@ func main() {
 	var (
 		in       = flag.String("data", "web/data/species.json", "compiled dataset to read species from")
 		out      = flag.String("out", "data/inat-taxa.tsv", "mapping table to write")
-		interval = flag.Duration("interval", inat.MinInterval, "minimum delay between requests (inat-api/R1)")
+		interval = flag.Duration("interval", inat.MinInterval, "minimum delay between requests (inatapi.RequestRate)")
 		base     = flag.String("api", inat.DefaultBaseURL, "API base URL")
 	)
 	flag.Parse()

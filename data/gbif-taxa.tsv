@@ -18,7 +18,7 @@
 # behind it are mostly the other half: GBIF's Circus cyaneus maps to AviList's
 # Circus cyaneus, the Eurasian Hen Harrier, and 3.8 million of those records
 # are Northern Harriers. Nine such lumps touch BirdView's own species; they are
-# named in river/sources.md under `gbif`.
+# named in river/requirements/requirements.md under `gbif`.
 #
 # 1375 of 1378 resolved.
 Acanthis flammea	5231630	Acanthis flammea	exact

@@ -34,7 +34,7 @@ sources cannot justify.
 Most of what you see is **modeled**, and BirdView says so everywhere it can.
 
 No openly licensed dataset publishes body length for North American birds. The one source that
-does is under terms that forbid us using it ([decisions.ricklefsProhibited](river/decisions.md#ricklefsprohibited)), so **every length
+does is under terms that forbid us using it ([decisions.ricklefsProhibited](river/requirements/decisions.md#ricklefsprohibited)), so **every length
 in BirdView is a model** — built from measured parts, with each part labeled. Of the three numbers
 on a tile, mass is measured for almost every species, wingspan is measured for about a third, and
 length is modeled for all 1082.
@@ -50,9 +50,9 @@ why clicking any bird shows you the source or the formula behind each individual
 Runs locally. **The licensing blocker is gone**: nothing all-rights-reserved is read at build
 time any more, so serving BirdView reproduces nobody else's work.
 
-Names, families and taxonomic sequence come from [AviList](river/sources.md#avilist)
-([decisions.avilistReplacesAba](river/decisions.md#avilistreplacesaba)), and **scope is now BirdView's own**
-([decisions.scopeFromRecurrence](river/decisions.md#scopefromrecurrence)). The ABA was asked for permission on 2026-09-27 and never
+Names, families and taxonomic sequence come from [AviList](river/requirements/requirements.md#avilist)
+([decisions.avilistReplacesAba](river/requirements/decisions.md#avilistreplacesaba)), and **scope is now BirdView's own**
+([decisions.scopeFromRecurrence](river/requirements/decisions.md#scopefromrecurrence)). The ABA was asked for permission on 2026-09-27 and never
 replied, so the project stopped waiting and derived a list it owns.
 
 What replaced the checklist is not a better threshold on how *often* a bird is recorded. A record
@@ -85,7 +85,7 @@ was never committed; it is no longer read at all.
 
 BirdView **links** to iNaturalist and copies nothing from it: no photograph is embedded, cached
 or hotlinked, so no contributor's license is engaged. See
-[decisions.inaturalistLinkAdopted](river/decisions.md#inaturalistlinkadopted).
+[decisions.inaturalistLinkAdopted](river/requirements/decisions.md#inaturalistlinkadopted).
 
 BirdView's own code is in this repository, along with the tables it derives under `data/` —
 the occurrence status, the region presence, and the two name bridges. The built dataset
@@ -103,9 +103,9 @@ BirdView's own code and documentation are licensed under the
 own license and a README naming its source:
 
 - [AviList](third_party/avilist), [AVONET](third_party/avonet) and the
-  [Fox et al. wingspans](third_party/fox-wingspan) are licensed by their authors under
+  [Fox et al. wingspans](third_party/foxwingspan) are licensed by their authors under
   **CC BY 4.0**, and must be credited as each README describes.
-- The [iNaturalist terms](third_party/inat-terms) and [API practices](third_party/inat-api) are
+- The [iNaturalist terms](third_party/inatterms) and [API practices](third_party/inatapi) are
   **© iNaturalist** and openly licensed by no one. They are kept so that every quotation of
   them in [river/](river) can be checked against the exact text it came from.
 

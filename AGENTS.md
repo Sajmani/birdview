@@ -12,7 +12,7 @@ search `river/` for the full statement and rationale.
 BirdView is a tool for birders that shows how big birds actually are, relative to one another,
 within and across families. It draws each species as a scaled schematic — bill, head, neck, body,
 tail, and a wing crossbar — grouped into sections of similar size. See
-[river/goals.md](river/goals.md).
+[river/goals/goals.md](river/goals/goals.md).
 
 It is a single Go module: an ingest command that builds the dataset from published sources, and a
 server that embeds and serves the web UI (tech.twoCommandsOneModule).
@@ -22,10 +22,10 @@ server that embeds and serves the web UI (tech.twoCommandsOneModule).
 **Gate 1 and Gate 2 both passed.** The requirements and the acceptance criteria are approved, and
 the code is live: `birdview-ingest` builds 1082 species across 99 families, and `birdview` serves
 them. A behavior change still goes spec first, then the criterion, then the code — see
-[river/process.md](river/process.md) and "Working on a change" below.
+[river/README.md](river/README.md) and "Working on a change" below.
 
 **The licensing blocker is gone as of 2026-10-05.** Scope was the last thing the ABA checklist
-supplied, and [decisions.scopeFromRecurrence](river/decisions.md#scopefromrecurrence) replaced it with BirdView's own derivation from
+supplied, and [decisions.scopeFromRecurrence](river/requirements/decisions.md#scopefromrecurrence) replaced it with BirdView's own derivation from
 open occurrence records. `internal/aba` is deleted and nothing reads `fetched/`. What remains
 before a public deployment is plumbing, not permission.
 
@@ -61,20 +61,20 @@ Violating any of these is a licensing problem, not a style problem.
 
 - **Never reintroduce the ABA checklist.** It is all-rights-reserved and says so in the first row
   of its own CSV, and reproducing it to every visitor is what blocked deployment for weeks. Scope
-  is now derived ([decisions.scopeFromRecurrence](river/decisions.md#scopefromrecurrence)); `fetched/` stays gitignored so a stray copy
+  is now derived ([decisions.scopeFromRecurrence](river/requirements/decisions.md#scopefromrecurrence)); `fetched/` stays gitignored so a stray copy
   cannot creep back in.
 - **Never read or process Wiley Online Library material**, including Ricklefs 2017. Its terms
   prohibit AI tools from ingesting it and prohibit automated access to the site, and the source is
-  rejected ([decisions.ricklefsProhibited](river/decisions.md#ricklefsprohibited)). Do not try to revive it as a length source.
+  rejected ([decisions.ricklefsProhibited](river/requirements/decisions.md#ricklefsprohibited)). Do not try to revive it as a length source.
 - **Never commit the built dataset** (tech.datasetNeverCommitted). It carries values derived from those inputs.
 - **Never fetch, download or programmatically process anything from BirdLife's DataZone**
   (`datazone.birdlife.org`), including its checklist archives. Its terms forbid automated access
   and text and data mining (clause 11), and one consultation already breached them; see
-  [`birdlife-checklist`](river/sources.md#birdlife-checklist). A person may read it on screen.
+  [`birdlife-checklist`](river/requirements/requirements.md#birdlife-checklist). A person may read it on screen.
   AVONET's BirdLife sheet is AVONET's, under CC BY 4.0, and is not affected.
 - **Only AVONET, the Fox wingspan data and AviList may be committed as source *data*.** All three
   are CC BY 4.0. If you are about to add a fourth data file, check
-  [river/sources.md](river/sources.md) first — most candidates this project evaluated could not be
+  [river/requirements/requirements.md](river/requirements/requirements.md) first — most candidates this project evaluated could not be
   redistributed. Two other committed files are
   deliberate and are not source data: the generated tables under `data/` — `inat-taxa.tsv` of
   iNaturalist taxon IDs (tech.pacedInaturalistMapping) and `gbif-taxa.tsv` of GBIF-to-AviList name correspondences — and
@@ -82,18 +82,18 @@ Violating any of these is a licensing problem, not a style problem.
 - **Every third-party file lives under `third_party/<name>/`, with its own license and README.**
   BirdView is Apache 2.0 and none of these files are, so they must not sit where the root
   `LICENSE` reads as covering them. Their provenance and hashes stay in
-  `river/sources/<name>/PROVENANCE.md` — see the location exception in
+  `river/requirements/sources/<name>/PROVENANCE.md` — see the location exception in
   [river/bindings.md](river/bindings.md#location-exception-the-third_party-directory). New
   first-party source files carry the Apache 2.0 header; files under `third_party/` never do.
 - **BirdView links to iNaturalist and copies nothing from it** (product.inaturalistLink). Never embed, hotlink or
   cache a photograph: those are contributors' work under their own licenses, frequently CC BY-NC.
   tech.selfContainedServer forbids the mechanism anyway. Taxon IDs are fine — the terms say nothing about the
-  taxonomy, which is checkable against the hashed copies in `third_party/inat-terms/`.
+  taxonomy, which is checkable against the hashed copies in `third_party/inatterms/`.
 - **Never present a modeled value as a measurement** (product.lengthAndWingspanSources, product.tileMarksModeled). Every length and wingspan is
   tagged measured or estimated, and the UI shows which. This is the decision the whole measurement
-  design rests on — see [decisions.noOpenLengthAndWingspan](river/decisions.md#noopenlengthandwingspan).
+  design rests on — see [decisions.noOpenLengthAndWingspan](river/requirements/decisions.md#noopenlengthandwingspan).
 - **Never resolve a conflict in code.** If two requirements disagree, stop and take it to
-  [river/decisions.md](river/decisions.md). Picking one silently is the failure mode the process
+  [river/requirements/decisions.md](river/requirements/decisions.md). Picking one silently is the failure mode the process
   exists to prevent.
 
 ## Commands
@@ -136,8 +136,8 @@ Three ways this goes wrong, all already paid for:
 
 ## Working on a change
 
-Changes follow the loop in [river/process.md](river/process.md): spec first, then acceptance
-criteria, then code. A behavior change edits [river/product.md](river/product.md) in the same commit.
+Changes follow the loop in [river/README.md](river/README.md): spec first, then acceptance
+criteria, then code. A behavior change edits [river/requirements/sources/product/](river/requirements/sources/product/product.md) in the same commit.
 
 **A change to the data pipeline updates [docs/pipeline.md](docs/pipeline.md) in the same
 change** (product.pipelineDiagram): the diagram, the step descriptions under it, and the picture re-rendered with
@@ -157,7 +157,7 @@ Cite requirement IDs in comments using the literal token, so one search covers t
   per-family modeling function, and the neck length *is* serialized and shown in the detail view —
   with `kind: modeled` and a `model` naming the function and that family's ratio. Do not quietly
   drop the model string: naming it is the whole reason showing the number is defensible. See
-  [decisions.neckLengthAsMetric](river/decisions.md#necklengthasmetric), which superseded the opposite rule in decisions.neckSplitUnmeasured.
+  [decisions.neckLengthAsMetric](river/requirements/decisions.md#necklengthasmetric), which superseded the opposite rule in decisions.neckSplitUnmeasured.
 - **Per-tile diagram scaling destroys the product** (product.scaleToggle). Scaling every bird to fill its tile
   makes a hummingbird and a swan identical on screen, which is exactly what BirdView exists to
   prevent. Scale is per-section or global, never per-tile.
@@ -179,5 +179,5 @@ Cite requirement IDs in comments using the literal token, so one search covers t
 vendored document** to match. Quoted terms of service are verbatim citations with recorded hashes;
 "fixing" a publisher's spelling falsifies the quote and breaks the record.
 
-Keep the repository's formatter away from `third_party/`, `river/sources/` and `river/process.md`
+Keep the repository's formatter away from `third_party/`, `river/requirements/sources/` and `river/README.md`
 for the same reason.

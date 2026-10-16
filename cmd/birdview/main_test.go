@@ -1335,7 +1335,7 @@ func s2(t *testing.T) *server { t.Helper(); return newTestServer(t) }
 // own readers.
 //
 // Delete this test only when a written grant exists and is recorded in
-// river/sources.md.
+// river/requirements/requirements.md.
 //
 // Verifies: goals.goodDataCitizen. Criterion: acceptance.attributionComplete.
 func TestNoUnearnedPermissionClaim(t *testing.T) {
@@ -1451,7 +1451,7 @@ func TestINatLinkOnlyForAConfidentMatch(t *testing.T) {
 }
 
 // TestNoINaturalistImagesAreEmbedded states the intent behind BirdView linking
-// rather than copying (product.inaturalistLink, inat-terms/R1). acceptance.noServerNetworkRequest's subresource scan already
+// rather than copying (product.inaturalistLink, inatterms.ContributorKeepsRights). acceptance.noServerNetworkRequest's subresource scan already
 // forbids the mechanism for tech.selfContainedServer reasons; this says why it also matters here.
 //
 // Photographs on iNaturalist are contributors' work under their own licenses,
@@ -3779,7 +3779,7 @@ func stripTags(s string) string {
 // and fetches every internal link in it.
 //
 // The bug it was written for: the guides link to the spec as
-// `../river/product.md`, correct in a repository checkout and a 404 in a
+// `../river/requirements/sources/product/`, correct in a repository checkout and a 404 in a
 // browser. Nothing noticed, because acceptance.categoryOriginShown only checks the `/docs/` links
 // on a species page, and these are links between documents.
 //
@@ -3860,7 +3860,7 @@ func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
 
 // TestVendoredTermsAreNotServed is a licensing check, not a routing one.
 //
-// river/sources/ and third_party/ hold other people's terms — the ABA
+// river/requirements/sources/ and third_party/ hold other people's terms — the ABA
 // checklist's, Wiley's, iNaturalist's — kept for hashing and provenance.
 // The iNaturalist pages moved to third_party/ for the Apache 2.0 release,
 // so both trees are probed: a check that only knew the old home would go on
@@ -3875,7 +3875,7 @@ func TestVendoredTermsAreNotServed(t *testing.T) {
 	s := newTestServer(t)
 	for _, path := range []string{
 		"/spec/sources/aba", "/spec/sources/wiley", "/spec/sources/inat-terms",
-		"/third_party", "/third_party/inat-terms/terms.html",
+		"/third_party", "/third_party/inatterms/terms.html",
 		"/third_party/avonet/LICENSE",
 		"/spec", "/spec/product", "/spec/check", "/docs/../README", "/spec/../README",
 	} {
@@ -4589,9 +4589,20 @@ func TestNoPersonalAddressIsPublished(t *testing.T) {
 	// The requirements are no longer served (decisions.requirementsNotServed), but they are published
 	// with the repository, and this check covered them while they were served.
 	// Read the same files from the checkout so that coverage is not lost.
-	docs, err := filepath.Glob(filepath.Join("..", "..", "river", "*.md"))
-	if err != nil || len(docs) < 5 {
-		t.Fatalf("found %d requirement documents under river/ (err %v); the check would prove nothing", len(docs), err)
+	// The same files the server used to serve, now spread through the nested
+	// layout. Provenance records and transcriptions under requirements/sources/<pkg>/
+	// were never served, and are left out so the scope does not silently grow.
+	var docs []string
+	for _, pattern := range []string{"*.md", "goals/*.md", "requirements/*.md",
+		"requirements/sources/product/*.md", "requirements/sources/tech/*.md"} {
+		m, err := filepath.Glob(filepath.Join("..", "..", "river", pattern))
+		if err != nil {
+			t.Fatal(err)
+		}
+		docs = append(docs, m...)
+	}
+	if len(docs) < 15 {
+		t.Fatalf("found %d requirement documents under river/; the layout has changed and the check would prove nothing", len(docs))
 	}
 	for _, path := range docs {
 		body, err := os.ReadFile(path)

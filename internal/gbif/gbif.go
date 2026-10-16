@@ -380,7 +380,7 @@ func Write(w io.Writer, t Table) error {
 			"# behind it are mostly the other half: GBIF's Circus cyaneus maps to AviList's\n"+
 			"# Circus cyaneus, the Eurasian Hen Harrier, and 3.8 million of those records\n"+
 			"# are Northern Harriers. Nine such lumps touch BirdView's own species; they are\n"+
-			"# named in river/sources.md under `gbif`.\n"+
+			"# named in river/requirements/requirements.md under `gbif`.\n"+
 			"#\n"+
 			"# %d of %d resolved.\n", resolved, len(t)); err != nil {
 		return err
