@@ -1,4 +1,4 @@
-> Project copy of River's `process.md`. Canonical origin: `sso://user/sameer/river`, pin `9dbdc47`.
+> Project copy of River's `process.md`. Canonical origin: `sso://user/sameer/river`, pin `912276b`.
 > Local amendments, if any, are listed in [bindings.md](bindings.md).
 
 # River
@@ -75,7 +75,7 @@ once on different changes.
 ## The bundle
 
 ```
-<bundle>/
+river/
   process.md                 this file
   bindings.md                how THIS project works
   implements.md              what is actually built
@@ -92,9 +92,10 @@ once on different changes.
     <name>/                  exported composed package, and its criteria
 ```
 
-The bundle may sit anywhere in the repository. Paths inside it are relative to its root, and
-your agent instruction file (`AGENTS.md` or equivalent) points at `process.md` — that pointer is
-how an agent finds the method at all.
+**Put the bundle in `river/` at the repository root**, unless you have a reason not to; if you
+put it elsewhere, say where in `bindings.md`. Paths inside it are relative to its root, and your
+agent instruction file (`AGENTS.md` or equivalent) points at `process.md` — that pointer is how
+an agent finds the method at all.
 
 **Everything is plain Markdown.** No database, no server, no format that needs a tool to read.
 Checks are written in a language the project already builds with, so adopting River adds no
