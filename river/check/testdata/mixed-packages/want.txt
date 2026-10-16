@@ -1,0 +1,9 @@
+# Files in one directory declare one package.
+exit 1
+requirements 2
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem package-dir-mismatch requirements/sources/product/extra.md
+problem mixed-packages requirements/sources/product

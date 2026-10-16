@@ -1,0 +1,8 @@
+# A gradient must serve a goal.
+exit 1
+requirements 1
+goals 1
+gradients 1
+unjustified 0
+unserved 0
+problem gradient-cites-no-goal gradients/gradients.md

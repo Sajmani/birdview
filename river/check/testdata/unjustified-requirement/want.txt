@@ -1,0 +1,7 @@
+# A requirement citing no goal is counted, not failed.
+exit 0
+requirements 1
+goals 1
+gradients 0
+unjustified 1
+unserved 1

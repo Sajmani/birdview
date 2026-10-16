@@ -1,0 +1,8 @@
+# requirements.md declares its module.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem missing-module requirements/requirements.md

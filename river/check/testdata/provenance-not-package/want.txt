@@ -1,0 +1,7 @@
+# PROVENANCE.md is a record about a source and declares no package.
+exit 0
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0

@@ -1,0 +1,7 @@
+# A brownfield bundle may have requirements and no goals yet.
+exit 0
+requirements 1
+goals 0
+gradients 0
+unjustified 1
+unserved 0

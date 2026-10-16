@@ -1,0 +1,8 @@
+# An item with no bold title beneath its heading.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem missing-title requirements/sources/product/product.md

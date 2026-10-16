@@ -1,0 +1,7 @@
+# A status marker after the title is part of the title line. Missed until 2026-10-16.
+exit 0
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0

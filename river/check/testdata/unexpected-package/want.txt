@@ -1,0 +1,9 @@
+# goals/ holds package goals.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem package-dir-mismatch goals/goals.md
+problem unexpected-package goals/goals.md

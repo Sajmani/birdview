@@ -142,12 +142,12 @@ gofmt -l .        # must print nothing
 go test ./...
 ```
 
-Plus the spec-level checks, after any edit under `river/`:
+River's checker runs with the tests above — it is translated into Go in `river/check/`. Plus the
+spec-level checks, after any edit under `river/`:
 
 ```
-python3 river/check/goals.py    # every requirement cites a goal; every goal is cited
 python3 river/check/pins.py     # vendored sources match their recorded hashes
-python3 river/check/refs.py     # every P-/T-/AC-/CR- cross-reference resolves
+python3 river/check/refs.py     # every reference and anchor into the bundle resolves
 ```
 
 These check **structure**, not substance. A green run means the bundle is internally consistent,

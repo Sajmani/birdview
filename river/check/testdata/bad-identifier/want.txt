@@ -1,0 +1,8 @@
+# Identifiers are letters only. This check could not fail until 2026-10-16: such a heading was skipped.
+exit 1
+requirements 2
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem bad-identifier requirements/sources/product/product.md

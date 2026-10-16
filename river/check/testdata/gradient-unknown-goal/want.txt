@@ -1,0 +1,8 @@
+# A gradient serves a goal that exists.
+exit 1
+requirements 1
+goals 1
+gradients 1
+unjustified 0
+unserved 0
+problem gradient-unknown-goal gradients/gradients.md

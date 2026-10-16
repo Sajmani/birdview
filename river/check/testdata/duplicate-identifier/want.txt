@@ -1,0 +1,8 @@
+# An identifier is unique within its package.
+exit 1
+requirements 2
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem duplicate-identifier requirements/sources/product/product.md

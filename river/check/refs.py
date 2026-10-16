@@ -76,12 +76,13 @@ LEGACY = re.compile(r'\b(?:G|P|T|AC|CR)-\d{3}\b|\b[a-z][a-z-]*/R\d+\b')
 LINK = re.compile(r'\]\(([^)\s#]*)#([^)\s]+)\)')
 CITATION = re.compile(r'\[`?([a-z]+)\.([A-Za-z]+)`?\]\(([^)\s]*)\)')
 
-FROM_RIVER = {'river/README.md', 'river/check/goals.py'}
+# Translated from River: their names are River's. River's test bundles are not BirdView's at all.
+FROM_RIVER = {'river/README.md', 'river/check/check.go', 'river/check/check_test.go'}
 tracked = subprocess.run(['git', 'ls-files'], cwd=repo, capture_output=True, text=True).stdout.split()
 problems, refs = [], 0
 for rel in tracked:
     path = repo / rel
-    if rel.startswith('third_party/') or not path.is_file():
+    if rel.startswith(('third_party/', 'river/check/testdata/')) or not path.is_file():
         continue
     try:
         text = path.read_text(encoding='utf-8')

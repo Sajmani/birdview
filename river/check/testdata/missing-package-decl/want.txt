@@ -1,0 +1,8 @@
+# A package file must open with its declaration.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem missing-package-decl requirements/sources/product/product.md

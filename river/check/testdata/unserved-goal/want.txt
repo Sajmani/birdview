@@ -1,0 +1,7 @@
+# A goal nothing cites is counted, not failed.
+exit 0
+requirements 1
+goals 2
+gradients 0
+unjustified 0
+unserved 1

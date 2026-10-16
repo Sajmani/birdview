@@ -34,8 +34,12 @@ re-run whenever a requirement or a source pin changes.
 **Every requirement cites a declared goal, and every goal is cited**
 
 **Verifies:** the structural rules in [README.md](../README.md) · **Level:** spec · **Method:**
-script over `goals.md`, `product.md`, `tech.md`
-**Run:** `python3 river/check/goals.py`
+Go test over the bundle. River's checker counts a requirement citing no goal and a goal nothing
+cites rather than failing them; BirdView is stricter, and `TestEveryLocalRequirementCitesAGoal`
+fails both, exempting withdrawn requirements and the rules transcribed from imported sources
+**Run:** `go test ./river/check/`
+**Re-verified 2026-10-16** on moving to River's checker in Go, which alone would have dropped this
+rule; watched failing by deleting `familyFilter`'s `Goals:` line.
 **Status: verified — run 2026-09-21, passing, and watched failing.** Three rules: every active
 requirement has a `Goals:` field, every cited goal is declared, every declared goal is cited. It
 found four uncited requirements on first run (tech.servesOnLocalhost, tech.identifiedClient, tech.localNowPublicLater, tech.bundleIsNormative), which is what prompted

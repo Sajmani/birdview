@@ -1,0 +1,8 @@
+# A citation names a goal that does not exist.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 1
+problem unknown-goal requirements/sources/product/product.md

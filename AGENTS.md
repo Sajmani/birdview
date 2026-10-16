@@ -106,9 +106,10 @@ go test ./...
 ```
 
 Run all four before declaring work finished (see Project bindings in
-[river/bindings.md](river/bindings.md)). The three spec checks —
-`python3 river/check/goals.py`, `river/check/pins.py`, `river/check/refs.py` — go with them whenever
-`river/` is touched.
+[river/bindings.md](river/bindings.md)). River's checker is among them: it is translated into Go
+in `river/check/` and runs under `go test`. The two remaining spec checks —
+`python3 river/check/pins.py` and `python3 river/check/refs.py` — go with them whenever `river/`
+is touched.
 
 ### Leave a server running, every turn
 
