@@ -106,7 +106,11 @@ func composedLists(t *testing.T) []listed {
 	return out
 }
 
-// field returns the comma-separated names in an item's field, or nil.
+// fieldLink is a field entry written as a link, whose text is the name.
+var fieldLink = regexp.MustCompile(`^\[([^\]]+)\]\([^)]*\)$`)
+
+// field returns the comma-separated names in an item's field, or nil. An entry
+// may be a bare name or a link to the item it names.
 func field(body, name string) []string {
 	m := regexp.MustCompile(`(?m)^` + name + `:\s*(.+)$`).FindStringSubmatch(body)
 	if m == nil {
@@ -114,7 +118,11 @@ func field(body, name string) []string {
 	}
 	var out []string
 	for _, v := range strings.Split(m[1], ",") {
-		if v = strings.Trim(strings.TrimSpace(v), "`"); v != "" {
+		v = strings.TrimSpace(v)
+		if l := fieldLink.FindStringSubmatch(v); l != nil {
+			v = l[1]
+		}
+		if v = strings.Trim(v, "`"); v != "" {
 			out = append(out, v)
 		}
 	}

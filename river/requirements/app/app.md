@@ -117,7 +117,7 @@ Withdrawn with the photograph design; see [decisions.photographsWithdrawn](../de
 
 **Every BirdView web page meets WCAG 1.4.6 in full, without the large-text allowance**
 
-Composed from: wcag.ContrastEnhanced, wcag.FullPages, wcag.ContrastRatio, tech.webPages, decisions.oneContrastFloor
+Composed from: [wcag.ContrastEnhanced](../sources/wcag/requirements.md#contrastenhanced), [wcag.FullPages](../sources/wcag/requirements.md#fullpages), [wcag.ContrastRatio](../sources/wcag/requirements.md#contrastratio), [tech.webPages](../sources/tech/accessibility.md#webpages), [decisions.oneContrastFloor](../decisions.md#onecontrastfloor)
 
 Every web page, as tech.webPages defines one, meets wcag.ContrastEnhanced over every part of the
 page (wcag.FullPages), measured as wcag.ContrastRatio defines. All text is held to 7:1, large text
@@ -131,7 +131,7 @@ in the reader's own colors and meets this with nothing to measure.
 
 **Every BirdView web page meets WCAG 1.4.11 in full**
 
-Composed from: wcag.NonTextContrast, wcag.FullPages, tech.webPages
+Composed from: [wcag.NonTextContrast](../sources/wcag/requirements.md#nontextcontrast), [wcag.FullPages](../sources/wcag/requirements.md#fullpages), [tech.webPages](../sources/tech/accessibility.md#webpages)
 
 Every web page meets wcag.NonTextContrast over every part of the page: the graphics a reader needs
 to read a diagram, and the controls and their states, have 3:1 against adjacent colors.
@@ -140,7 +140,7 @@ to read a diagram, and the controls and their states, have 3:1 against adjacent 
 
 **The stylesheet and the palette carry text contrast for every page that uses only them**
 
-Composed from: tech.textContrastFloor, tech.badgeContrast, wcag.ContrastRatio
+Composed from: [tech.textContrastFloor](../sources/tech/accessibility.md#textcontrastfloor), [tech.badgeContrast](../sources/tech/accessibility.md#badgecontrast), [wcag.ContrastRatio](../sources/wcag/requirements.md#contrastratio)
 
 The stylesheet is an intermediary: it meets pagesMeetTextContrast for any page that takes its
 colors from it, so that requirement is checked once on the stylesheet rather than once per page.

@@ -1,4 +1,4 @@
-> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `8ba8fea`.
+> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `8024aa2`.
 > Local amendments, if any, are listed in [bindings.md](bindings.md).
 
 # River
@@ -237,7 +237,8 @@ item and giving its title:
 ```
 
 What composition wrote — a rule over a domain, an intermediary's contract, a requirement a
-higher tier changed — follows in full, each item naming its sources in `Composed from:`. **Every
+higher tier changed — follows in full, each item naming its sources in `Composed from:`, every
+entry a link to the item it names. **Every
 source requirement is included, excluded, or composed from, in some package**; one that is none
 of these has silently dropped out. Included requirements keep their source names. Do not commit
 a flattened copy with everything inlined beside the sources: every search would find each
