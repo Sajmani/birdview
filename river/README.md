@@ -1,4 +1,4 @@
-> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `b94253b`.
+> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `8ba8fea`.
 > Local amendments, if any, are listed in [bindings.md](bindings.md).
 
 # River
@@ -222,6 +222,47 @@ Downstream repositories import your **exported composed packages**, never your r
 every cross-repository obligation has been through composition with explicit precedence and
 human sign-off.
 
+**A composed package names everything that applies, and writes out only what composition made.**
+Requirements that apply unchanged are a list grouped by area, one line each, linking the source
+item and giving its title:
+
+```markdown
+### Diagram
+
+- [product.scaleToggle](../sources/product/diagram.md#scaletoggle) — Diagrams scale per section or globally, never per tile
+
+## Excluded
+
+- [tech.localNowPublicLater](../sources/tech/posture.md#localnowpubliclater) — Local now, public later. Excluded by [decisions.publicDeploymentDeferred](../decisions.md#publicdeploymentdeferred)
+```
+
+What composition wrote — a rule over a domain, an intermediary's contract, a requirement a
+higher tier changed — follows in full, each item naming its sources in `Composed from:`. **Every
+source requirement is included, excluded, or composed from, in some package**; one that is none
+of these has silently dropped out. Included requirements keep their source names. Do not commit
+a flattened copy with everything inlined beside the sources: every search would find each
+requirement twice. If an importer or auditor needs one, generate it when you tag.
+
+**A requirement over every instance of something is composed once.** A source names the domain
+a requirement applies to in an `Applies to:` field, in its own term — `Applies to:
+wcag.WebPage`. You define what counts as an instance in a local requirement whose `Binds:` field
+names that domain, and decide the edge cases there: is an error page a web page? The composed
+package states the rule once, *every web page meets `wcag.ContrastEnhanced`*, and records any
+excluded instance as an accepted gap. The local definition makes the source's term concrete and
+**never narrows it**: if the source's own definition makes something an instance, leaving it out
+is an exception, recorded instance by instance. **Nothing in the bundle lists the instances.**
+Verification discovers them from the system, so a new page inherits its obligations by existing
+and cannot escape by being left off a list. Discover from what the system declares — its routes,
+its templates — as well as by following links: an instance nothing links to is still an instance.
+
+**An intermediary carries a contract.** A stylesheet, a framework or a middleware that makes its
+users meet a requirement states the terms: given an assumption about how it is used, it
+guarantees the requirement, over a stated scope, and says whether its users may override it. The
+stylesheet guarantees 7:1 text, given that a page takes its colors only from it; the framework
+guarantees scrubbed request logs, given that nothing logs around it. A contract from another
+repository is imported at a pin like any other requirement. Layered intermediaries each carry
+their own, and the order they run in is part of the contract, checked where they are assembled.
+
 ### Conflicts
 
 **Never resolve a conflict silently.** Two requirements that disagree go to `decisions.md`:
@@ -239,8 +280,16 @@ the record of having been wrong is worth keeping.
 Subject: `api.errors`
 Goals: `goals.trustworthyApi`
 
+Every error reaches the caller. None is logged and dropped, and none is replaced by a default
+value.
+
 A swallowed error is indistinguishable from success, and the caller acts on a lie.
 ```
+
+**The first paragraph after the fields is the complete statement**: what must be true, readable
+on its own. Rationale, history and examples follow it, so a reader who needs only the rule can
+stop there. Keep the rationale — it is where a future reader learns a constraint is deliberate,
+and where the incident lives that a good failing test is built from — but keep it after.
 
 Identifiers are descriptive CamelCase — `noSilentFailures`, not `P-014`. Inside a package its
 own names are bare; everywhere else they are qualified, `product.noSilentFailures`. Package
@@ -252,6 +301,10 @@ heading's anchor is derived from its text, so this makes every item's anchor its
 lowercased — `product.md#nosilentfailures` — and lets the title be reworded without breaking
 a single link to it. Write link fragments in lowercase; anchors are generated that way and
 matched exactly. Decisions follow the same form.
+
+Because the heading is the identifier, a reader can find one requirement by searching for
+`## noSilentFailures` and read only that section. Tell your agents to; a source file holding
+twenty requirements costs twenty times as much to read whole.
 
 ---
 
@@ -312,6 +365,19 @@ The citation does not live in the composed package. A criterion is immutable wit
 the guardrail implementing it is operational, and swapping one tool for another must not force a
 new requirements version. Cite guardrails from a mutable, descriptive record.
 
+**Check exhaustively what varies, and sample the instances.** A thousand pages rendered from one
+template need every template checked, and every data-dependent input to the property checked in
+full — not a thousand renders. Where an intermediary carries the requirement, three checks cover
+it and none is per instance: the intermediary's **guarantee**, once; its **assumption**, for each
+kind of user; and the **scope**, so the part it does not cover has its own criterion.
+
+**Then check the result end to end anyway**, gating on a sample and informing on the full set.
+The contract checks can all pass over a real violation when the contract is wrong — a stylesheet
+check that reads `color` and never sees SVG text painted with `fill` — or when layers interfere,
+as when a later stylesheet overrides a color or a middleware logs before the scrubber runs. The
+end-to-end check tests the result regardless of how the work was divided, so the more layers
+there are, the more it matters.
+
 **A guardrail may have no criterion, and is never removed for lacking one.** A brownfield
 project begins with a suite full of orphans. An orphan is one of three things and you cannot
 tell which without looking: an undocumented requirement, a test of an implementation detail, or
@@ -359,6 +425,10 @@ change code. Implementation changes the system to satisfy a requirement; Optimiz
 to make future satisfaction cheaper. Porting to a faster language is Optimization when it makes
 later performance work tractable, and Implementation when it meets a stated performance
 requirement. Say which — only one of them answers to an acceptance criterion.
+
+**It acts on the bundle too.** Restructuring requirements so that writing code and guardrails
+from them costs less — a composed package that lists rather than copies, a requirement whose
+rule comes first — is Optimization: nothing required changes.
 
 **It has no target.** Cost, time and risk are gradients with a direction and no finish line.
 

@@ -38,12 +38,12 @@ would otherwise read the fourth as a defect. See
 Subject: `sectioning.rule`
 Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
-**For the three size metrics.** Frequency is banded by decade instead
+Under the three size metrics, a new section begins at the first species more than N% larger than
+the **minimum** species of the previous section.
+
+Frequency is banded by decade instead
 ([orderByFrequency](presentation.md#orderbyfrequency), [decisions.frequencyMetric](../../decisions.md#frequencymetric)): this rule would give it 128 sections, and its
 bands would move whenever the region filter did.
-
-A new section begins at the first species more than N% larger than the **minimum** species of the
-previous section.
 
 Rationale: bird size follows a power law. Fixed-width bins put hundreds of small birds in one row
 and isolate large raptors in rows of one. A ratio rule produces sections of comparable visual
@@ -58,8 +58,10 @@ Subject: `sectioning.step_percent`
 Value: `15`
 Goals: goals.comparisonAcrossFamilies
 
-Offered values run from 5% to 30%. Every value the control offers must be one the server accepts,
-or the control silently falls back to the default.
+The section step N defaults to 15% and the reader can change it, among values from 5% to 30%.
+
+Every value the control offers must be one the server accepts, or the control silently falls back
+to the default.
 
 **Under Frequency the same control selects a band width in orders of magnitude**, `10×` or
 `100×` ([orderByFrequency](presentation.md#orderbyfrequency)). The percentages are not shown there because they would misdescribe

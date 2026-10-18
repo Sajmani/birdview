@@ -49,6 +49,11 @@ ordering the source file provides for free.
 Subject: `presentation.region_filter`
 Goals: goals.comparisonAcrossFamilies
 
+The reader filters to any subset of US states and Canadian provinces, multi-select, as the family
+filter works. A species is listed in a region when it reaches 1 record per million of that region's
+bird observations, counted from eBird — or from iNaturalist only where eBird is confirmed to
+withhold it there — and its records below the bar still count in its figure.
+
 **Reinstated 2026-10-02**, having been withdrawn because no freely redistributable per-region
 occurrence data existed at useful granularity ([decisions.noLocationData](../../decisions.md#nolocationdata)). It does: GBIF
 serves eBird and iNaturalist under CC BY 4.0 with GADM regions as a queryable field.

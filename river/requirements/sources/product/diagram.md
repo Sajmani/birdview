@@ -10,9 +10,14 @@ Subject: `diagram.segments`
 Value: `bill, head, neck, body, tail, wing crossbar`
 Goals: goals.shapeNotOnlySize
 
+The diagram is a top-down view of a bird in flight, drawn as a vertical cross: top to bottom a bill
+stick, a head oval, a neck, a body stick and a tail stick, with one horizontal crossbar for the
+wings. The tail is visibly distinguished from the body; the neck is an S where the family folds it
+in flight; there are no legs.
+
 **The diagram is a top-down view of a bird in flight.** Everything below follows from that, and it
-is stated first because leaving it unstated is what made the leg question unanswerable for as long
-as it was; see [decisions.inFlightNoLegs](../../decisions.md#inflightnolegs).
+is stated because leaving it unstated is what made the leg question unanswerable for as long as it
+was; see [decisions.inFlightNoLegs](../../decisions.md#inflightnolegs).
 
 **Readers are told it is a stick figure.** Text BirdView serves to readers calls the drawing a
 *stick figure*, usually *drawn to scale* where it is introduced, and *the figure* or *the drawing*
@@ -119,7 +124,8 @@ the user something false about proportion while looking authoritative.
 
 Goals: goals.shapeNotOnlySize
 
-A dowitcher reads as long-billed, an accipiter as long-tailed, a heron as long-necked.
+A species' drawn proportions distinguish it by shape, not only by size: a dowitcher reads as
+long-billed, an accipiter as long-tailed, a heron as long-necked.
 
 ## craniumFromMass
 
@@ -258,9 +264,12 @@ Subject: `presentation.names.locale`
 Value: `na (default) | world`
 Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
+A toggle beside Units and Scale chooses between North American English names (eBird/Clements,
+the default) and world English names (AviList, following IOC). A species' id and URL are the same
+under both.
+
 English bird names are regional. The same bird is **Dovekie** to a North American birder and
-**Little Auk** to everyone else, and neither is a mistake. BirdView serves both, as a toggle
-beside Units and Scale:
+**Little Auk** to everyone else, and neither is a mistake. BirdView serves both:
 
 | locale | source | *Alle alle* |
 | --- | --- | --- |

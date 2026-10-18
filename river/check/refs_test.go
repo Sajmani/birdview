@@ -167,6 +167,8 @@ func TestReferencesResolve(t *testing.T) {
 			}
 			return filepath.Clean(filepath.Join(filepath.Dir(path), filepath.FromSlash(target)))
 		}
+		// A link inside a fenced code block is an example, not a link.
+		text = fenced.ReplaceAllString(text, "")
 		for _, m := range citation.FindAllStringSubmatch(text, -1) {
 			pkg, name, url := m[1], m[2], m[3]
 			want, ok := defined[pkg][name]
@@ -224,7 +226,7 @@ func TestRelativeLinksResolve(t *testing.T) {
 			continue
 		}
 		path := filepath.Join(repo, filepath.FromSlash(rel))
-		for _, m := range link.FindAllStringSubmatch(read(t, path), -1) {
+		for _, m := range link.FindAllStringSubmatch(fenced.ReplaceAllString(read(t, path), ""), -1) {
 			target, _, _ := strings.Cut(m[1], "#")
 			if target == "" || strings.HasPrefix(target, "/") || strings.Contains(target, ":") {
 				continue
@@ -241,6 +243,10 @@ func TestRelativeLinksResolve(t *testing.T) {
 	}
 	t.Logf("%d relative links resolve", checked)
 }
+
+// fenced matches a fenced code block, whose contents Markdown does not render
+// as links. River's README.md shows a composed package's list inside one.
+var fenced = regexp.MustCompile("(?ms)^```.*?^```[ \t]*$")
 
 // slug is a heading's anchor as a code host derives it: lowercased, markup and
 // punctuation removed, spaces made hyphens. Letters outside ASCII survive, as

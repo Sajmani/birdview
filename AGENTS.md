@@ -148,6 +148,13 @@ change** (product.pipelineDiagram): the diagram, the step descriptions under it,
 for, and a taxonomy table the ingest reads but the diagram omits; whether a step's description is
 still true is for you to check.
 
+**Read requirements by anchor, not by file.** A link like `diagram.md#scaletoggle` lands in a file
+holding a dozen or more requirements; search for `## scaleToggle` and read that section only.
+Start from [river/requirements/app/app.md](river/requirements/app/app.md), which lists every
+requirement the web application must meet. **A requirement's first paragraph is its rule** and
+the rest is rationale: read on when you need the why, or the incident a test should reproduce.
+Write new requirements the same way (River's `requirementStatementFirst`).
+
 Cite requirement IDs in comments using the literal token, so one search covers the tree:
 
 ```go

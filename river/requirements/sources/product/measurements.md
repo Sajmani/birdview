@@ -282,6 +282,10 @@ asserts five proportions and explains none of them.
 Subject: `presentation.detail.categories`
 Goals: goals.sizeIntuition, goals.goodDataCitizen
 
+The detail view names every category a bird is in — its family and order, the regions it is
+listed in, its habitat and niche, and any group BirdView puts it in — and marks each as
+**published**, **derived** or **`birdview`**, saying where it came from.
+
 [metricProvenanceExplained](#metricprovenanceexplained) does this for numbers. A bird is also **sorted**, and the sorting is as much a
 claim as a measurement is: its family and order, the regions it is listed in, its habitat and
 its niche, and any group BirdView puts it in. Each is a statement about the bird that someone or

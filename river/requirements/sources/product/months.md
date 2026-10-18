@@ -64,9 +64,10 @@ still a bird a reader may want.
 Subject: `presentation.filters`
 Goals: goals.comparisonAcrossFamilies
 
-**Reinstated with [regionAndMonthFilter](filtering.md#regionandmonthfilter).** Region and family narrow the list together: what is shown is
-what every active filter admits. Selecting Hawaii and Parulidae shows the warblers of Hawaii, and
-shows nothing if there are none.
+What is shown is what every active filter admits: region and family narrow the list together.
+Selecting Hawaii and Parulidae shows the warblers of Hawaii, and shows nothing if there are none.
+
+Reinstated with [regionAndMonthFilter](filtering.md#regionandmonthfilter).
 
 An empty intersection is a real outcome and is **not** the same as nothing being selected
 ([helpfulEmptyState](presentation.md#helpfulemptystate)). The empty state names each filter and what it is set to, because with two

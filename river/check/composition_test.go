@@ -45,11 +45,19 @@ func packageItems(t *testing.T) map[string]pkgItem {
 		pkg := filepath.Base(filepath.Dir(f))
 		files[pkg] = append(files[pkg], f)
 	}
-	heading := regexp.MustCompile(`(?m)^#{2,3} ([A-Za-z][A-Za-z]+)[ \t]*$`)
+	// A transcribed source exports capitalized names; every other package's
+	// names start lower case, which also keeps a section heading such as
+	// "### Diagram" from reading as an item.
+	lower := regexp.MustCompile(`(?m)^#{2,3} ([a-z][A-Za-z]+)[ \t]*$`)
+	upper := regexp.MustCompile(`(?m)^#{2,3} ([A-Z][A-Za-z]+)[ \t]*$`)
 	items := map[string]pkgItem{}
 	for pkg, fs := range files {
 		for _, f := range fs {
 			text := read(t, f)
+			heading := lower
+			if filepath.Base(f) == "requirements.md" && filepath.Base(filepath.Dir(filepath.Dir(f))) == "sources" {
+				heading = upper
+			}
 			locs := heading.FindAllStringSubmatchIndex(text, -1)
 			for i, l := range locs {
 				end := len(text)
@@ -62,6 +70,40 @@ func packageItems(t *testing.T) map[string]pkgItem {
 		}
 	}
 	return items
+}
+
+// title is an item's bold title line.
+func (it pkgItem) title() string {
+	m := regexp.MustCompile(`^\s*\*\*(.+?)\*\*\s*\n`).FindStringSubmatch(it.body)
+	if m == nil {
+		return ""
+	}
+	return m[1]
+}
+
+// listed is one line of a composed package's list of requirements that apply
+// unchanged, or that it excludes.
+type listed struct {
+	ref, title, decision, file string
+}
+
+var listLine = regexp.MustCompile(`(?m)^- \[([a-z]+\.[A-Za-z]+)\]\([^)]*\) — (.+?)(?:\. Excluded by \[(decisions\.[A-Za-z]+)\]\([^)]*\))?\s*$`)
+
+// composedLists reads every list line in the composed packages.
+func composedLists(t *testing.T) []listed {
+	t.Helper()
+	bundle, _ := filepath.Abs("..")
+	files, _ := filepath.Glob(filepath.Join(bundle, "requirements", "*", "*.md"))
+	var out []listed
+	for _, f := range files {
+		if filepath.Base(filepath.Dir(f)) == "sources" || filepath.Base(f) == "acceptance.md" {
+			continue
+		}
+		for _, m := range listLine.FindAllStringSubmatch(read(t, f), -1) {
+			out = append(out, listed{m[1], m[2], m[3], f})
+		}
+	}
+	return out
 }
 
 // field returns the comma-separated names in an item's field, or nil.
@@ -154,6 +196,51 @@ func TestCompositionResolves(t *testing.T) {
 	if checked == 0 {
 		t.Fatal("no composition fields found; the layout has changed and this check proves nothing")
 	}
+
+	// The lists of what applies unchanged, and what is excluded.
+	accounted := map[string]bool{}
+	for _, it := range items {
+		if filepath.Base(filepath.Dir(filepath.Dir(it.file))) != "sources" {
+			for _, ref := range field(it.body, "Composed from") {
+				accounted[qualify(it.pkg, ref)] = true
+			}
+		}
+	}
+	inPackage := map[string]string{}
+	lists := composedLists(t)
+	for _, l := range lists {
+		checked++
+		src, ok := items[l.ref]
+		switch {
+		case !ok:
+			t.Errorf("%s lists %s, which is not defined", filepath.Base(l.file), l.ref)
+			continue
+		case src.title() != l.title:
+			t.Errorf("%s lists %s as %q; its title is %q", filepath.Base(l.file), l.ref, l.title, src.title())
+		case l.decision != "" && !exists(l.decision):
+			t.Errorf("%s excludes %s by %s, which is not defined", filepath.Base(l.file), l.ref, l.decision)
+		}
+		key := l.file + " " + l.ref
+		if prev, dup := inPackage[key]; dup {
+			t.Errorf("%s lists %s twice (%s)", filepath.Base(l.file), l.ref, prev)
+		}
+		inPackage[key] = l.title
+		accounted[l.ref] = true
+	}
+	if len(lists) == 0 {
+		t.Fatal("no listed requirements found in any composed package; the list form has changed")
+	}
+	// Every local requirement is included, excluded or composed from by some
+	// package. Counted rather than failed while dataset and internal/repo are
+	// still to compose (river/todo.md).
+	var unaccounted []string
+	for key, it := range items {
+		if (it.pkg == "product" || it.pkg == "tech") && !accounted[key] {
+			unaccounted = append(unaccounted, key)
+		}
+	}
+	sort.Strings(unaccounted)
+	t.Logf("%d local requirements in no composed package yet: %v", len(unaccounted), unaccounted)
 
 	// Coverage of the composed packages: everything under requirements/ that
 	// is not a source and not the decisions.

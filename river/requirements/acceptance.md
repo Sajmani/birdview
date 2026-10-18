@@ -114,11 +114,16 @@ vendored, such as `wiley`, has nothing to check against.
 `Composed from:` and `Covers:` field in the sources and composed packages; each must name an item
 that exists, each domain must be bound by exactly one local requirement, and every domain an
 adopted requirement applies to must be bound — otherwise that requirement silently applies to
-nothing. Composed requirements no criterion covers are counted and logged, not failed.
+nothing. Every line of a composed package's list of requirements that apply unchanged or are
+excluded must name a requirement that exists, under its exact title, at most once per package,
+and an exclusion must name a decision that exists. Composed requirements no criterion covers,
+and local requirements no composed package accounts for, are counted and logged, not failed.
 **Run:** `go test ./river/check/ -run TestCompositionResolves`
 **Status: verified 2026-10-16, passing, and watched failing** — deleting `Binds: wcag.WebPage`
 from tech.webPages failed it, naming the three WCAG criteria left applying to nothing; misspelling
-a `Covers:` target failed it, naming the criterion.
+a `Covers:` target failed it, naming the criterion. **The list rules, 2026-10-18:** shortening a
+listed title, excluding by a decision that does not exist, and listing a requirement twice each
+failed it, naming the line.
 
 ### decisionReferencesExist
 

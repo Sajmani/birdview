@@ -10,6 +10,8 @@ Subject: `presentation.mode`
 Value: `diagram`
 Goals: goals.sizeIntuition, goals.shapeNotOnlySize
 
+The diagram is the only way BirdView presents a species in v1. There is no photograph mode.
+
 Rationale: photographs were scoped out of v1 (speciesPhotographs). The diagram is what makes size and shape
 comparable; photographs were always the enrichment.
 

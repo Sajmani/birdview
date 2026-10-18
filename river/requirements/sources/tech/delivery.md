@@ -49,6 +49,8 @@ Subject: `server.address`
 Value: `localhost:8080`
 Goals: goals.sizeIntuition
 
+The server listens on localhost:8080 by default.
+
 ## fetchRestrictedInputs
 
 **Fetch restricted inputs at build time; commit only what may be redistributed**
@@ -77,7 +79,9 @@ own work.
 Subject: `build.output`
 Goals: goals.goodDataCitizen
 
-The generated dataset is excluded from version control. It was originally excluded because it
+The generated dataset is excluded from version control; a clean checkout builds it.
+
+It was originally excluded because it
 carried values derived from the ABA checklist ([decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence) ended that); it stays
 excluded because it is reproducible from the committed inputs in one command and a stale copy in the
 tree is worse than none. A clean checkout builds it; it is not shipped in the repository.
