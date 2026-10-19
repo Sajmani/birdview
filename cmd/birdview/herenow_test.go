@@ -321,3 +321,37 @@ func TestHereInTheBrowser(t *testing.T) {
 		})
 	}
 }
+
+// TestMonthsFoldIntoTwoLines checks the Months control's layout: the label,
+// All, Now and the explanation on one line, the twelve months on the next.
+//
+// Verifies: product.nowSelectsCurrentMonth. Criterion: app.hereAndNowSitBesideAll.
+func TestMonthsFoldIntoTwoLines(t *testing.T) {
+	body := mustGet(t, newTestServer(t), "/")
+	rows := regexp.MustCompile(`(?s)<div class="row[^"]*">(.*?)</div>`).FindAllStringSubmatch(body, -1)
+	first := -1
+	for i, r := range rows {
+		if strings.Contains(r[1], `<span class="lbl">Month</span>`) {
+			first = i
+			break
+		}
+	}
+	if first < 0 || first+1 >= len(rows) {
+		t.Fatal("no Month row, or nothing after it")
+	}
+	head, months := rows[first][1], rows[first+1][1]
+	for _, want := range []string{">All</a>", `class="btn now"`, `class="hint"`} {
+		if !strings.Contains(head, want) {
+			t.Errorf("the Month line lacks %s", want)
+		}
+	}
+	if n := strings.Count(head, `class="chip mchip`); n != 0 {
+		t.Errorf("the Month line carries %d month chips; they belong on the next line", n)
+	}
+	if n := strings.Count(months, `class="chip mchip`); n != month.Count {
+		t.Errorf("the line after Month carries %d month chips, want all %d", n, month.Count)
+	}
+	if strings.Contains(months, `class="lbl"`) || strings.Contains(months, ">All</a>") {
+		t.Error("the months line carries more than the months")
+	}
+}

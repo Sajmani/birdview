@@ -124,7 +124,10 @@ the index with the server's month as the only month, marked `no-store`. Here car
 template keeping every other setting, and without JavaScript is marked inactive, focusable and
 labeled with why.
 
-**Run:** `go test ./cmd/birdview/ -run TestHereAndNow`
+The Months control folds into two lines — the label, All, Now and the explanation, then the
+twelve months (`TestMonthsFoldIntoTwoLines`, watched failing against the one-line layout).
+
+**Run:** `go test ./cmd/birdview/ -run 'TestHereAndNow|TestMonthsFoldIntoTwoLines'`
 **Status: verified 2026-10-18, passing, and watched failing:** a template that added the reader's
 region to the old one instead of replacing it failed on every region; letting `/now` be
 revalidated failed on its `no-cache` and ETag.

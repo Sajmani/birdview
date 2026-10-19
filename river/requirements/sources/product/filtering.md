@@ -131,6 +131,8 @@ Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
 A **Now** button beside **All** in Months replaces the month selection with the current month on
 the reader's own clock, every other setting kept. Without JavaScript it uses the server's month.
+The Months control is two lines: the label, All, Now and the explanation of what a month means,
+then the twelve months.
 
 The two differ only near midnight at the end of a month, in the reader's time zone. Without
 JavaScript the button links to `/now`, which redirects to the index for the server's current
