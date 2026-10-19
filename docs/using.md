@@ -196,11 +196,12 @@ page is the honest way to read this view. Per section is still one click away.
   only sees which region and month were chosen. Without sharing it, try
   [New York in October](/?by=frequency&scale=global&region=NY&month=Oct), or press **Here** and
   **Now** yourself under **Regions and months**.
-- **[Blue Jay vs Mourning Dove vs American Kestrel](/compare?species=blujay&species=moudov&species=amekes).**
-  Three common birds of almost exactly the same length, 272 to 276 mm, on one scale. The dove and
-  the kestrel even weigh about the same, yet the kestrel's wings span more than a quarter wider than
-  the dove's and nearly half again the jay's. Any birds can be compared this way: turn on
-  **Compare birds** in Controls and pick them from the index.
+- **[Jay vs kestrel vs thrasher vs dove vs kingfisher vs nightjar](/compare?species=blujay&species=amekes&species=calthr&species=moudov&species=belkin1&species=chwwid).**
+  Blue Jay, American Kestrel, California Thrasher, Mourning Dove, Belted Kingfisher and
+  Chuck-will's-widow, all 272 to 292 mm long, on one scale. Same length, six different shapes: their
+  wingspans run from 307 mm for the thrasher to 655 mm for the nightjar, more than double, and their
+  bills from 15 mm for the nightjar to 59 mm for the kingfisher, nearly four times. Any birds can be
+  compared this way: turn on **Compare birds** in Controls and pick them from the index.
 - **[Herons and ducks together](/?family=Ardeidae&family=Anatidae).** Similar lengths, entirely
   different birds: herons are nearly all neck and leg, ducks nearly all body. Herons and pelicans
   are the only families whose neck draws as an S, because they fly with it folded back onto the
