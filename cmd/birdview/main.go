@@ -1540,6 +1540,11 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		}
 		globalUnits = unitsFor(opt.Metric3, all...)
 	}
+	// Each heading states its tier's span: from its first bird up to where
+	// the next tier begins, so successive headings share an edge written
+	// the same way; the last ends at its largest bird. Headings are formatted
+	// after the loop, all with one precision (product.sectionHeadersStateRange).
+	spans := make([]tierSpan, len(secs))
 	for i, sec := range secs {
 		u := globalUnits
 		if opt.Scale != view.Global {
@@ -1550,7 +1555,10 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			u = unitsFor(opt.Metric3, ms...)
 		}
 		sv := sectionView{Index: i + 1, Count: len(sec.Species)}
-		sv.Min, sv.Max = u.formatRange(sec.Min, sec.Max, opt.Metric)
+		spans[i] = tierSpan{sec.Min, sec.Max, u}
+		if i+1 < len(secs) {
+			spans[i].hi = secs[i+1].Min
+		}
 		if opt.Metric == view.ByFrequency {
 			sv.Min, sv.Max, sv.Note = frequencyBand(sec.Min, sec.Max, opt.Decades)
 		}
@@ -1580,6 +1588,13 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 		page.Sections = append(page.Sections, sv)
+	}
+	if opt.Metric != view.ByFrequency {
+		extra := headingDigits(spans, opt.Metric)
+		for i, sp := range spans {
+			page.Sections[i].Min = sp.u.formatDigits(sp.lo, opt.Metric, extra)
+			page.Sections[i].Max = sp.u.formatDigits(sp.hi, opt.Metric, extra)
+		}
 	}
 	s.render(w, "index.html", page)
 }
@@ -2417,18 +2432,32 @@ func (u units) format(v float64, as view.Metric) string {
 	return u.formatDigits(v, as, 0)
 }
 
-// formatRange formats a section's range, adding up to two decimal places to
-// both ends until they differ. One decimal of an inch is 2.5 mm, and a 15%
-// section of small bills is narrower than that: a heading read "0.5 in –
-// 0.5 in" (product.sectionHeadersStateRange). A one-bird section, whose ends
-// are equal, reads as format gives it.
-func (u units) formatRange(lo, hi float64, as view.Metric) (string, string) {
-	for extra := 0; ; extra++ {
-		a, b := u.formatDigits(lo, as, extra), u.formatDigits(hi, as, extra)
-		if a != b || lo == hi || extra == 2 {
-			return a, b
+// tierSpan is a section heading's range before it is written: from the
+// tier's first bird up to where the next tier begins, in the section's units.
+type tierSpan struct {
+	lo, hi float64
+	u      units
+}
+
+// headingDigits is the fewest extra decimals, up to three, that keep every
+// tier's two ends apart when all the page's headings share them. One decimal
+// of an inch is 2.5 mm, and a tier of small bills is narrower than that
+// (product.sectionHeadersStateRange).
+func headingDigits(spans []tierSpan, m view.Metric) int {
+	extra := 0
+	for ; extra < 3; extra++ {
+		apart := true
+		for _, sp := range spans {
+			if sp.lo != sp.hi && sp.u.formatDigits(sp.lo, m, extra) == sp.u.formatDigits(sp.hi, m, extra) {
+				apart = false
+				break
+			}
+		}
+		if apart {
+			break
 		}
 	}
+	return extra
 }
 
 // formatDigits is format with extra decimal places.

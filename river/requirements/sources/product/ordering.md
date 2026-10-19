@@ -81,8 +81,15 @@ Goals: goals.sizeIntuition
 
 Each section shows its range in the currently selected metric and the number of species in it,
 under a heading that names the ordering as Order by does and the section's number: *Tail Tier 1*
-when ordering by Tail. The two ends of the range carry as many decimals as it takes to tell them apart, up to two
-more than usual: a section of small bills can be narrower than a tenth of an inch.
+when ordering by Tail.
+
+**The range is the tier's span, and successive tiers abut.** A tier runs from its first bird up to
+where the next tier begins, so each heading ends exactly where the next one starts, written the
+same way; the last tier ends at its largest bird, and a tier of one bird states one value. Every
+heading on a page carries the same number of decimals, the fewest — up to three more than usual —
+that keep each tier's two ends apart, since a tier of small bills can be narrower than a tenth of
+an inch. Headings once gave each tier's smallest and largest bird, rounded heading by heading:
+"0.2 in – 0.3 in" then "0.3 in – 0.4 in" read as an overlap and hid the gap between them.
 
 Rationale: under per-section scaling (scaleToggle) the header is what tells the user that the scale has
 changed between one section and the next. Without it, per-section scaling is misleading.

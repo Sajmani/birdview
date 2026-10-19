@@ -635,31 +635,58 @@ func TestTierHeadersNameTheOrdering(t *testing.T) {
 	}
 }
 
-// TestSectionRangeEndsDiffer checks a section heading never shows a range
-// whose two ends read the same when they are not. One decimal of an inch is
-// 2.5 mm, and a 15% section of bills can be narrower than that: a heading read
-// "Bill Tier 4 0.5 in – 0.5 in".
+// TestHeadingDigits checks the precision chosen for a page's headings: the
+// fewest extra decimals that keep every tier's ends apart, so the reported
+// "Bill Tier 1 0.209 in" tier (5.31 to 5.41 mm) gets enough, and a page of
+// wide tiers gets none.
 //
 // Verifies: product.sectionHeadersStateRange. Criterion: acceptance.sortsAscending.
-func TestSectionRangeEndsDiffer(t *testing.T) {
-	for _, metric := range []bool{false, true} {
-		for _, m := range []view.Metric{view.ByLength, view.ByBill, view.ByTail, view.ByWingspan, view.ByMass} {
-			u := unitsFor(metric, 10, 20) // small birds: the case that runs out of digits
-			for v := 3.0; v < 3000; v *= 1.07 {
-				for _, ratio := range []float64{1.01, 1.03, 1.149} {
-					lo, hi := u.formatRange(v, v*ratio, m)
-					if lo == hi {
-						t.Fatalf("metric=%v %s: %.3f to %.3f reads %q – %q", metric, m, v, v*ratio, lo, hi)
-					}
-				}
-			}
-			if lo, hi := u.formatRange(12.3, 12.3, m); lo != hi || lo != u.format(12.3, m) {
-				t.Errorf("a one-bird section reads %q – %q; want it as format gives it", lo, hi)
-			}
+func TestHeadingDigits(t *testing.T) {
+	u := unitsFor(false, 10)
+	narrow := []tierSpan{{5.31, 5.41, u}, {5.41, 6.2, u}, {6.2, 7.5, u}}
+	extra := headingDigits(narrow, view.ByBill)
+	for _, sp := range narrow {
+		if a, b := u.formatDigits(sp.lo, view.ByBill, extra), u.formatDigits(sp.hi, view.ByBill, extra); a == b {
+			t.Errorf("with %d extra decimals a %.2f–%.2f mm tier reads %q – %q", extra, sp.lo, sp.hi, a, b)
 		}
 	}
-	u := unitsFor(false, 10)
-	if lo, hi := u.formatRange(12.0, 13.5, view.ByBill); lo == hi {
-		t.Errorf("the reported case still reads %q – %q", lo, hi)
+	if wide := headingDigits([]tierSpan{{100, 115, u}, {115, 132, u}}, view.ByLength); wide != 0 {
+		t.Errorf("wide tiers got %d extra decimals, want none", wide)
+	}
+}
+
+// TestTiersAbut checks that section headings read as one continuous scale:
+// each tier ends where the next begins, written identically, and every
+// heading on a page carries the same number of decimals. Headings once gave
+// each tier's smallest and largest bird, rounded heading by heading, so
+// "0.2 in – 0.3 in" followed by "0.3 in – 0.4 in" looked like an overlap and
+// hid the gap between them.
+//
+// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.sortsAscending.
+func TestTiersAbut(t *testing.T) {
+	s := newTestServer(t)
+	heading := regexp.MustCompile(`<span class="tier">[^<]+</span>\s*([^<&]+) &ndash; ([^<]+?)\s*<span class="n">`)
+	decimals := func(v string) int {
+		num, _, _ := strings.Cut(v, " ")
+		_, frac, _ := strings.Cut(num, ".")
+		return len(frac)
+	}
+	for _, q := range []string{"by=length", "by=bill", "by=tail", "by=wingspan", "by=length&units=metric", "by=bill&units=metric"} {
+		hs := heading.FindAllStringSubmatch(mustGet(t, s, "/?"+q+"&scale=global"), -1)
+		if len(hs) < 2 {
+			t.Fatalf("%s: %d tier headings with a range; the fixture needs at least two to test", q, len(hs))
+		}
+		for i, h := range hs {
+			lo, hi := strings.TrimSpace(h[1]), strings.TrimSpace(h[2])
+			if lo == hi {
+				t.Errorf("%s tier %d reads %q – %q", q, i+1, lo, hi)
+			}
+			if decimals(lo) != decimals(strings.TrimSpace(hs[0][1])) || decimals(hi) != decimals(lo) {
+				t.Errorf("%s tier %d reads %q – %q; every heading should carry tier 1's decimals (%q)", q, i+1, lo, hi, hs[0][1])
+			}
+			if i+1 < len(hs) && hi != strings.TrimSpace(hs[i+1][1]) {
+				t.Errorf("%s tier %d ends at %q but tier %d begins at %q; successive tiers should abut", q, i+1, hi, i+2, hs[i+1][1])
+			}
+		}
 	}
 }
