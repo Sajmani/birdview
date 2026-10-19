@@ -995,10 +995,14 @@ type pageData struct {
 	// HereNowTemplate is this page with both the region and the month
 	// replaced by placeholders, for arriving by a #here-and-now link.
 	HereNowTemplate string
-	Opt             options
-	Total           int
-	Shown           int
-	Query           func(...string) template.URL
+	// WelcomeNear and WelcomeHerons are the welcome line's things to try,
+	// carrying the picks while picking so following one keeps them
+	// (product.pickFromIndex).
+	WelcomeNear, WelcomeHerons template.URL
+	Opt                        options
+	Total                      int
+	Shown                      int
+	Query                      func(...string) template.URL
 	// AllSelected is true only when every family is explicitly filtered in --
 	// not when nothing is selected. Both states display the whole dataset, but
 	// they are different selections, and the control reflects the selection.
@@ -1451,6 +1455,8 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	page.BoundaryURL = s.boundaryURL
 	page.HereScript = s.hereJS
 	page.HereNowTemplate = slotsURL(r, "region", hereSlot, "month", nowSlot)
+	page.WelcomeNear = withPicks(r, "/?by=frequency&scale=global") + "#here-and-now"
+	page.WelcomeHerons = withPicks(r, "/?family=Ardeidae&family=Anatidae")
 	page.NowTemplate = slotURL(r, "month", nowSlot)
 	page.NowURL = template.URL("/now" + strings.TrimPrefix(slotURL(r, "month", ""), "/"))
 
@@ -2522,6 +2528,21 @@ func slotsURL(r *http.Request, kv ...string) string {
 		return "/"
 	}
 	return "/?" + q.Encode()
+}
+
+// withPicks is a fixed index address carrying the request's picks, if it has
+// any, so a link to it does not leave pick mode: only Clear and reset to
+// defaults may (product.pickFromIndex). A bare species= holds the mode open
+// and is carried as it is.
+func withPicks(r *http.Request, target string) template.URL {
+	picks, picking := r.URL.Query()["species"]
+	if !picking {
+		return template.URL(target)
+	}
+	u, _ := url.Parse(target)
+	q := u.Query()
+	q["species"] = picks
+	return template.URL(u.Path + "?" + q.Encode())
 }
 
 // now sends a reader without JavaScript to the index for the server's

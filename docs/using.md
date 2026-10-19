@@ -196,11 +196,11 @@ page is the honest way to read this view. Per section is still one click away.
   only sees which region and month were chosen. Without sharing it, try
   [New York in October](/?by=frequency&scale=global&region=NY&month=Oct), or press **Here** and
   **Now** yourself under **Regions and months**.
-- **[Blue Jay vs Pigeon vs American Kestrel](/compare?species=blujay&species=rocpig&species=amekes).**
-  Three common birds on one scale. The jay and the kestrel are almost exactly the same length, yet
-  the kestrel's wings span nearly half again as wide, and the pigeon weighs four times what the jay
-  does. Any birds can be compared this way: turn on **Compare birds** in Controls and pick them from
-  the index.
+- **[Blue Jay vs Mourning Dove vs American Kestrel](/compare?species=blujay&species=moudov&species=amekes).**
+  Three common birds of almost exactly the same length, 272 to 276 mm, on one scale. The dove and
+  the kestrel even weigh about the same, yet the kestrel's wings span more than a quarter wider than
+  the dove's and nearly half again the jay's. Any birds can be compared this way: turn on
+  **Compare birds** in Controls and pick them from the index.
 - **[Herons and ducks together](/?family=Ardeidae&family=Anatidae).** Similar lengths, entirely
   different birds: herons are nearly all neck and leg, ducks nearly all body. Herons and pelicans
   are the only families whose neck draws as an S, because they fly with it folded back onto the

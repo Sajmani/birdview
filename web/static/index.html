@@ -29,20 +29,20 @@
   drawing them as stick figures to scale, from public and modeled data. Read Presentation for details,
   and use the Controls to configure the view.{{with .Feedback}}
   Found something wrong? <a href="{{.}}">Report it</a>.{{end}}</p>
-  {{/* Every link here is also in the guide's "Some things to try"
+  {{/* Every thing to try here is also in the guide's "Some things to try"
        (product.pageExplainsItself). The first presses Here and Now on arrival;
        its fragment never reaches the server (product.hereSelectsLocalRegion).
-       Not shown while picking: a reader mid-comparison is not new, and these
-       fixed links would drop the picks, which only Clear may do
+       While picking, the things to try carry the picks; reset to defaults
+       drops them, compare mode being a setting like any other
        (product.pickFromIndex). */}}
-  {{if not .Bar.Picking}}<p class="welcome"><b>New here? Try</b>
-    <a href="/?by=frequency&amp;scale=global#here-and-now">the birds around you now</a> &middot;
-    <a href="/compare?species=blujay&amp;species=rocpig&amp;species=amekes">Blue Jay vs Pigeon vs American Kestrel</a> &middot;
-    <a href="/?family=Ardeidae&amp;family=Anatidae">herons and ducks</a> &middot;
+  <p class="welcome"><b>New here? Try</b>
+    <a href="{{.WelcomeNear}}">the birds around you now</a> &middot;
+    <a href="/compare?species=blujay&amp;species=moudov&amp;species=amekes">Blue Jay vs Mourning Dove vs American Kestrel</a> &middot;
+    <a href="{{.WelcomeHerons}}">herons and ducks</a> &middot;
     <a href="/docs/using#some-things-to-try">more ideas</a> &middot;
     <a href="/">reset to defaults</a>
     <span class="welcomestatus" role="status" aria-live="polite"
-          data-template="{{.HereNowTemplate}}"></span></p>{{end}}
+          data-template="{{.HereNowTemplate}}"></span></p>
 </header>
 
 <details class="help" id="presentation">

@@ -535,3 +535,31 @@ func TestGuidesReflow(t *testing.T) {
 		}
 	}
 }
+
+// TestWelcomeLineWhilePicking checks the welcome line stays while picking
+// birds to compare, and that following it does not lose the picks: each
+// thing to try carries them, the comparison example aside, which brings its
+// own birds. Only reset to defaults drops them, compare mode being a setting
+// like any other.
+//
+// Verifies: product.pageExplainsItself, product.pickFromIndex. Criterion: app.hereAndNowSitBesideAll.
+func TestWelcomeLineWhilePicking(t *testing.T) {
+	s := newTestServer(t)
+	body := mustGet(t, s, "/?species=amecro&species=annhum")
+	welcome := mustMatch(t, body, `(?s)<p class="welcome">(.*?)</p>`, "the welcome line while picking")
+	for _, l := range regexp.MustCompile(`<a href="([^"]+)">([^<]+)</a>`).FindAllStringSubmatch(welcome, -1) {
+		href := html.UnescapeString(l[1])
+		u, _ := url.Parse(href)
+		switch {
+		case l[2] == "reset to defaults":
+			if href != "/" {
+				t.Errorf("reset to defaults goes to %s while picking; want /", href)
+			}
+		case u.Path == "/compare", strings.HasPrefix(u.Path, "/docs/"):
+		default:
+			if got := u.Query()["species"]; !slices.Equal(got, []string{"amecro", "annhum"}) {
+				t.Errorf("%q goes to %s, dropping the picks %v", l[2], href, got)
+			}
+		}
+	}
+}

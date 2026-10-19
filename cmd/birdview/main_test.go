@@ -2558,10 +2558,24 @@ func TestOnlyClearLeavesPickMode(t *testing.T) {
 		FindAllStringSubmatch(body, -1) {
 		edits[html.UnescapeString(m[1])] = true
 	}
+	// Reset to defaults leaves on purpose, resetting every setting
+	// (product.pickFromIndex). It is the only link to the bare address.
+	if !strings.Contains(body, `<a href="/">reset to defaults</a>`) {
+		t.Error("no reset to defaults on the index while picking")
+	}
+	resets := 0
 	checked := 0
-	for _, m := range regexp.MustCompile(`href="(/\?[^"]*)"`).FindAllStringSubmatch(body, -1) {
+	// The bare address included: a link to "/" drops the picks as surely
+	// as one with a query, and this once looked only at the latter.
+	for _, m := range regexp.MustCompile(`href="(/(?:\?[^"]*)?)"`).FindAllStringSubmatch(body, -1) {
 		h := html.UnescapeString(m[1])
 		if edits[h] {
+			continue
+		}
+		if h == "/" {
+			if resets++; resets > 1 {
+				t.Error("more than one link to the bare address; only reset to defaults may leave this way")
+			}
 			continue
 		}
 		checked++

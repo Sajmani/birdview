@@ -575,9 +575,9 @@ The help is collapsible and starts open, so a returning user can dismiss it with
 **A welcome line under the title offers a few things to try**, each a link, then a link to the
 full list in the guide's *Some things to try*, and last **reset to defaults**, a link to the bare
 address, which carries no setting. Every thing to try is also in the guide's list, so the two
-cannot drift apart; the guide says more about each. It is not shown while
-picking birds to compare: that reader is not new, and its fixed links would drop the picks, which
-only Clear may do (pickFromIndex).
+cannot drift apart; the guide says more about each. It is shown while picking birds to compare
+too, and its things to try then carry the picks, so following one does not lose them; reset to
+defaults drops them, compare mode being a setting like any other (pickFromIndex).
 
 Rationale: nothing about the diagram is self-evident. A reader cannot be expected to know that the
 amber stroke is the bill, that a dashed stroke means estimated, or that the crossbar is a true
@@ -728,6 +728,10 @@ returns to the index with the picks intact, to change them. *Stop comparing* ret
 index with pick mode off — the same exit as the bar's Clear, by the same URL. The second is the
 common case: a reader who has seen the comparison usually wants the index back, and offering
 only the first left them to find Clear in a bar on another page.
+
+**Reset to defaults**, at the end of the welcome line (pageExplainsItself), is the one other link
+on the index that leaves pick mode: it goes to the bare address, resetting every setting, and
+compare mode is one. Every other link keeps the picks.
 
 It is **its own labelled control set**, and the button reads **On** or **Off**. Added as an
 unlabelled button after the Section step percentages it read as a sixth step option, because

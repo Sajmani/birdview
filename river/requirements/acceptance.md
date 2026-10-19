@@ -1261,7 +1261,10 @@ an anchor the script immediately overrides, or a stood-down script with nothing 
 for.
 
 **Assertions, leaving:** **Clear** removes every `species` parameter and returns the page to
-browsing mode, and **no other control does** — asserted by following every other link on the page
+browsing mode, and **no other control does** except the welcome line's *reset to defaults*, which
+goes to the bare address on purpose (product.pickFromIndex, added 2026-10-19). Links to the bare
+address are checked too: the test once looked only at addresses with a query string, so a link to
+`/` could have dropped the picks unseen — asserted by following every other link on the page
 and confirming the picks survive it.
 
 **Assertions, unrecognised ids:** a set mixing a good id with a dead one renders the good bird,
