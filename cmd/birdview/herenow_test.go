@@ -639,57 +639,83 @@ func TestTierHeadersNameTheOrdering(t *testing.T) {
 }
 
 // TestHeadingDigits checks the precision chosen for a page's headings: the
-// fewest extra decimals that keep every tier's ends apart, so the reported
-// "Bill Tier 1 0.209 in" tier (5.31 to 5.41 mm) gets enough, and a page of
-// wide tiers gets none.
+// fewest extra decimals that keep every stated value apart, within a heading
+// and between neighbors, so a tier of 5.0 to 6.0 mm bills followed by one
+// starting at 6.05 mm never reads as sharing an end, though each tier's own
+// ends already differ at two decimals of an inch; a page of wide tiers with
+// wide gaps gets none.
 //
 // Verifies: product.sectionHeadersStateRange. Criterion: acceptance.sortsAscending.
 func TestHeadingDigits(t *testing.T) {
 	u := unitsFor(false, 10)
-	narrow := []tierSpan{{5.31, 5.41, u}, {5.41, 6.2, u}, {6.2, 7.5, u}}
+	narrow := []tierSpan{{5.0, 6.0, u}, {6.05, 7.0, u}, {8.0, 9.0, u}}
 	extra := headingDigits(narrow, view.ByBill)
+	var stated []string
 	for _, sp := range narrow {
-		if a, b := u.formatDigits(sp.lo, view.ByBill, extra), u.formatDigits(sp.hi, view.ByBill, extra); a == b {
-			t.Errorf("with %d extra decimals a %.2f–%.2f mm tier reads %q – %q", extra, sp.lo, sp.hi, a, b)
+		stated = append(stated, u.formatDigits(sp.lo, view.ByBill, extra), u.formatDigits(sp.hi, view.ByBill, extra))
+	}
+	for i := 1; i < len(stated); i++ {
+		if stated[i] == stated[i-1] {
+			t.Errorf("with %d extra decimals the headings read %v; %q appears twice running", extra, stated, stated[i])
 		}
 	}
-	if wide := headingDigits([]tierSpan{{100, 115, u}, {115, 132, u}}, view.ByLength); wide != 0 {
+	if wide := headingDigits([]tierSpan{{100, 112, u}, {140, 155, u}}, view.ByLength); wide != 0 {
 		t.Errorf("wide tiers got %d extra decimals, want none", wide)
 	}
 }
 
-// TestTiersAbut checks that section headings read as one continuous scale:
-// each tier ends where the next begins, written identically, and every
-// heading on a page carries the same number of decimals. Headings once gave
-// each tier's smallest and largest bird, rounded heading by heading, so
-// "0.2 in – 0.3 in" followed by "0.3 in – 0.4 in" looked like an overlap and
-// hid the gap between them.
+// TestTierRangesHoldTheirBirds checks that a tier heading states only its own
+// birds, smallest to largest, and that the page's headings read as a strictly
+// rising sequence in one precision, so a gap between tiers shows as a gap.
+// A heading once ran on to where the next tier began, which made four herons
+// and an ibis look as if they spanned the five inches up to the pelicans.
 //
 // Verifies: product.sectionHeadersStateRange. Criterion: acceptance.sortsAscending.
-func TestTiersAbut(t *testing.T) {
+func TestTierRangesHoldTheirBirds(t *testing.T) {
 	s := newTestServer(t)
-	heading := regexp.MustCompile(`<span class="tier">[^<]+</span>\s*([^<&]+) &ndash; ([^<]+?)\s*<span class="n">`)
+	heading := regexp.MustCompile(`<span class="tier">[^<]+</span>\s*([^<&]+?)(?: &ndash; ([^<]+?))?\s*<span class="n">`)
+	toMM := func(v string) float64 {
+		num, unit, _ := strings.Cut(strings.TrimSpace(v), " ")
+		f, _ := strconv.ParseFloat(num, 64)
+		return map[string]float64{"in": 25.4, "cm": 10}[unit] * f
+	}
 	decimals := func(v string) int {
-		num, _, _ := strings.Cut(v, " ")
+		num, _, _ := strings.Cut(strings.TrimSpace(v), " ")
 		_, frac, _ := strings.Cut(num, ".")
 		return len(frac)
 	}
-	for _, q := range []string{"by=length", "by=bill", "by=tail", "by=wingspan", "by=length&units=metric", "by=bill&units=metric"} {
-		hs := heading.FindAllStringSubmatch(mustGet(t, s, "/?"+q+"&scale=global"), -1)
-		if len(hs) < 2 {
-			t.Fatalf("%s: %d tier headings with a range; the fixture needs at least two to test", q, len(hs))
+	var drawn []*dataset.Species
+	for i := range s.ds.Species {
+		drawn = append(drawn, &s.ds.Species[i])
+	}
+	for _, c := range []struct {
+		q string
+		m view.Metric
+	}{{"by=length", view.ByLength}, {"by=bill", view.ByBill}, {"by=tail", view.ByTail},
+		{"by=wingspan", view.ByWingspan}, {"by=length&units=metric", view.ByLength}} {
+		hs := heading.FindAllStringSubmatch(mustGet(t, s, "/?"+c.q+"&scale=global"), -1)
+		secs := view.Sections(drawn, c.m, view.DefaultStepPercent)
+		if len(hs) != len(secs) || len(hs) < 2 {
+			t.Fatalf("%s: %d headings for %d tiers", c.q, len(hs), len(secs))
 		}
+		var prev float64
 		for i, h := range hs {
-			lo, hi := strings.TrimSpace(h[1]), strings.TrimSpace(h[2])
-			if lo == hi {
-				t.Errorf("%s tier %d reads %q – %q", q, i+1, lo, hi)
+			lo, hi := h[1], h[2]
+			if hi == "" {
+				hi = lo // one bird: one value
 			}
-			if decimals(lo) != decimals(strings.TrimSpace(hs[0][1])) || decimals(hi) != decimals(lo) {
-				t.Errorf("%s tier %d reads %q – %q; every heading should carry tier 1's decimals (%q)", q, i+1, lo, hi, hs[0][1])
+			d := decimals(lo)
+			tol := 25.4 * 0.5 * math.Pow(10, -float64(d)) // half the last digit, in inches at worst
+			if math.Abs(toMM(lo)-secs[i].Min) > tol || math.Abs(toMM(hi)-secs[i].Max) > tol {
+				t.Errorf("%s tier %d reads %s – %s; its birds run %.1f to %.1f mm", c.q, i+1, lo, hi, secs[i].Min, secs[i].Max)
 			}
-			if i+1 < len(hs) && hi != strings.TrimSpace(hs[i+1][1]) {
-				t.Errorf("%s tier %d ends at %q but tier %d begins at %q; successive tiers should abut", q, i+1, hi, i+2, hs[i+1][1])
+			if decimals(hi) != d || decimals(lo) != decimals(hs[0][1]) {
+				t.Errorf("%s tier %d reads %s – %s; every heading should carry tier 1's decimals", c.q, i+1, lo, hi)
 			}
+			if i > 0 && toMM(lo) <= prev {
+				t.Errorf("%s tier %d begins at %s, not above where tier %d ended", c.q, i+1, lo, i)
+			}
+			prev = toMM(hi)
 		}
 	}
 }
@@ -738,6 +764,45 @@ func TestTierHistogram(t *testing.T) {
 		}
 		if len(bars) != len(secs) {
 			t.Fatalf("/?%s: %d bars for %d tiers", q, len(bars), len(secs))
+		}
+		// A stretch with no birds is one empty bucket per whole 15% step it
+		// spans, between the bars on either side, under the size orderings.
+		if !strings.Contains(q, "frequency") {
+			m := view.ByLength
+			for _, k := range []view.Metric{view.ByBill, view.ByMass} {
+				if strings.Contains(q, string(k)) {
+					m = k
+				}
+			}
+			var drawn []*dataset.Species
+			for i := range s.ds.Species {
+				if !strings.Contains(q, "family=") || s.ds.Species[i].Family == "Ardeidae" {
+					drawn = append(drawn, &s.ds.Species[i])
+				}
+			}
+			raw := view.Sections(drawn, m, view.DefaultStepPercent)
+			hist := mustMatch(t, body, `(?s)<nav class="hist"[^>]*>(.*?)</nav>`, "the histogram")
+			runs := regexp.MustCompile(`<a href="#tier-\d+"|<span class="gap"></span>`).FindAllString(hist, -1)
+			var gaps []int
+			n := 0
+			for _, r := range runs {
+				if strings.HasPrefix(r, "<span") {
+					n++
+				} else {
+					gaps = append(gaps, n)
+					n = 0
+				}
+			}
+			for k := 1; k < len(raw) && k < len(gaps); k++ {
+				want := int(math.Floor(math.Log(raw[k].Min/(raw[k-1].Min*1.15)) / math.Log(1.15)))
+				if want < 0 {
+					want = 0
+				}
+				if gaps[k] != want {
+					t.Errorf("/?%s: %d empty buckets before tier %d, want %d for the stretch from %.1f to %.1f",
+						q, gaps[k], k+1, want, raw[k-1].Min*1.15, raw[k].Min)
+				}
+			}
 		}
 		largest := 0
 		for _, sec := range secs {

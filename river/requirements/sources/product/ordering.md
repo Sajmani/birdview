@@ -84,13 +84,16 @@ under a heading that names the ordering as Order by does and the section's numbe
 when ordering by Tail. The count follows the range directly, as *N species*, in the style of the
 *K of N species* line at the top of the index.
 
-**The range is the tier's span, and successive tiers abut.** A tier runs from its first bird up to
-where the next tier begins, so each heading ends exactly where the next one starts, written the
-same way; the last tier ends at its largest bird, and a tier of one bird states one value. Every
-heading on a page carries the same number of decimals, the fewest — up to three more than usual —
-that keep each tier's two ends apart, since a tier of small bills can be narrower than a tenth of
-an inch. Headings once gave each tier's smallest and largest bird, rounded heading by heading:
-"0.2 in – 0.3 in" then "0.3 in – 0.4 in" read as an overlap and hid the gap between them.
+**The range is the tier's own birds**, smallest to largest; a tier of one bird states one value.
+Tiers do not abut: the next begins only at the first bird more than N% above this tier's smallest,
+and the stretch between can be wide. So every heading on a page carries the same number of
+decimals, the fewest — up to three more than usual — that keep every stated value apart, within a
+heading and from its neighbors, and a gap between tiers shows as a gap between the numbers.
+
+Two earlier versions each misled. Rounding heading by heading wrote "0.2 in – 0.3 in" then
+"0.3 in – 0.4 in", which read as an overlap. Running each range on to where the next tier began
+made four herons and an ibis with bills under 6 in read "4.97 in – 8.84 in", because the pelicans
+started at 8.84.
 
 Rationale: under per-section scaling (scaleToggle) the header is what tells the user that the scale has
 changed between one section and the next. Without it, per-section scaling is misleading.
@@ -107,7 +110,10 @@ tier's species count against the largest tier's, and each linking to its tier. A
 the tier as its heading does, its range and its count: *Bill Tier 4: 0.35 in – 0.41 in, 72
 species*. It follows the current ordering and filters, so it is the shape of the view on screen.
 
-Every tier is the same 15% step, so the bars are a histogram of size on a log scale. Its shape is
+Every tier is the same 15% step, so the bars are a histogram of size on a log scale, and **a
+stretch with no birds shows as empty space**: one empty bucket for each whole step between where a
+tier's step ends and the next tier begins. Without them, tiers far apart would stand side by side
+as if they abutted. Frequency's bands are fixed decades and need none. Its shape is
 worth seeing: by length it has two humps, songbirds peaking near 5 in and everything else near a
 foot, crossing over around 7 in; by mass it is a long plateau; tails crowd into a few tiers. Added
 2026-10-19 at the owner's request.

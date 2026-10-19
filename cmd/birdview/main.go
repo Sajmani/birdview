@@ -1542,10 +1542,9 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		}
 		globalUnits = unitsFor(opt.Metric3, all...)
 	}
-	// Each heading states its tier's span: from its first bird up to where
-	// the next tier begins, so successive headings share an edge written
-	// the same way; the last ends at its largest bird. Headings are formatted
-	// after the loop, all with one precision (product.sectionHeadersStateRange).
+	// Each heading states its own birds, smallest to largest. Headings are
+	// formatted after the loop, all with one precision, so a gap between
+	// tiers shows as a gap between the numbers (product.sectionHeadersStateRange).
 	spans := make([]tierSpan, len(secs))
 	for i, sec := range secs {
 		u := globalUnits
@@ -1558,9 +1557,6 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		}
 		sv := sectionView{Index: i + 1, Count: len(sec.Species)}
 		spans[i] = tierSpan{sec.Min, sec.Max, u}
-		if i+1 < len(secs) {
-			spans[i].hi = secs[i+1].Min
-		}
 		if opt.Metric == view.ByFrequency {
 			sv.Min, sv.Max, sv.Note = frequencyBand(sec.Min, sec.Max, opt.Decades)
 		}
@@ -1598,7 +1594,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			page.Sections[i].Max = sp.u.formatDigits(sp.hi, opt.Metric, extra)
 		}
 	}
-	page.Histogram = histogram(page.MetricLabel, page.Sections)
+	page.Histogram = histogram(page.MetricLabel, page.Sections, secs, opt.Metric, opt.Step)
 	s.render(w, "index.html", page)
 }
 
@@ -2437,20 +2433,33 @@ func (u units) format(v float64, as view.Metric) string {
 
 // histBar is one tier's bar in the histogram under the count line
 // (product.tierHistogram): its height as a percentage of the largest tier's
-// count, and a label saying which tier it is.
+// count, and a label saying which tier it is. An Empty bar is a step of the
+// scale that no bird falls in.
 type histBar struct {
 	Index, Percent int
 	Label          string
+	Empty          bool
 }
 
 // histogram builds one bar per section, each labeled as its heading reads.
-func histogram(metric string, secs []sectionView) []histBar {
+// Under the size orderings every tier is one step of the scale, so a stretch
+// with no birds becomes one empty bucket per whole step it spans: without
+// them two tiers far apart would stand side by side as if they abutted.
+// Frequency's bands are fixed and need none.
+func histogram(metric string, secs []sectionView, raw []view.Section, m view.Metric, stepPercent float64) []histBar {
 	largest := 0
 	for _, sv := range secs {
 		largest = max(largest, sv.Count)
 	}
 	out := make([]histBar, 0, len(secs))
-	for _, sv := range secs {
+	step := 1 + stepPercent/100
+	for i, sv := range secs {
+		if m != view.ByFrequency && i > 0 && i < len(raw) {
+			gap := math.Floor(math.Log(raw[i].Min/(raw[i-1].Min*step)) / math.Log(step))
+			for k := 0; k < int(gap); k++ {
+				out = append(out, histBar{Empty: true})
+			}
+		}
 		var span string
 		switch {
 		case sv.Note != "":
@@ -2469,23 +2478,34 @@ func histogram(metric string, secs []sectionView) []histBar {
 	return out
 }
 
-// tierSpan is a section heading's range before it is written: from the
-// tier's first bird up to where the next tier begins, in the section's units.
+// tierSpan is a section heading's range before it is written: the tier's
+// smallest and largest bird, in the section's units.
 type tierSpan struct {
 	lo, hi float64
 	u      units
 }
 
 // headingDigits is the fewest extra decimals, up to three, that keep every
-// tier's two ends apart when all the page's headings share them. One decimal
-// of an inch is 2.5 mm, and a tier of small bills is narrower than that
-// (product.sectionHeadersStateRange).
+// stated value apart when all the page's headings share them: each tier's two
+// ends, and each tier's end from the next tier's start, which is always
+// higher. One decimal of an inch is 2.5 mm, and a tier of small bills is
+// narrower than that; written alike, two neighbors would read as sharing a
+// bird (product.sectionHeadersStateRange).
 func headingDigits(spans []tierSpan, m view.Metric) int {
+	type val struct {
+		v float64
+		u units
+	}
+	var seq []val
+	for _, sp := range spans {
+		seq = append(seq, val{sp.lo, sp.u}, val{sp.hi, sp.u})
+	}
 	extra := 0
 	for ; extra < 3; extra++ {
 		apart := true
-		for _, sp := range spans {
-			if sp.lo != sp.hi && sp.u.formatDigits(sp.lo, m, extra) == sp.u.formatDigits(sp.hi, m, extra) {
+		for i := 1; i < len(seq); i++ {
+			a, b := seq[i-1], seq[i]
+			if a.v != b.v && a.u.formatDigits(a.v, m, extra) == b.u.formatDigits(b.v, m, extra) {
 				apart = false
 				break
 			}

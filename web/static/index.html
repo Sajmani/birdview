@@ -407,7 +407,7 @@
 {{/* One bar per tier, as tall as its count against the largest, each a link
      to its tier (product.tierHistogram). Heights are inline because they are
      data; no color is set here. */}}
-{{if .Histogram}}<nav class="hist" aria-label="Species in each tier">{{range .Histogram}}<a href="#tier-{{.Index}}" style="height:{{.Percent}}%" aria-label="{{.Label}}" title="{{.Label}}"></a>{{end}}</nav>{{end}}
+{{if .Histogram}}<nav class="hist" aria-label="Species in each tier">{{range .Histogram}}{{if .Empty}}<span class="gap"></span>{{else}}<a href="#tier-{{.Index}}" style="height:{{.Percent}}%" aria-label="{{.Label}}" title="{{.Label}}"></a>{{end}}{{end}}</nav>{{end}}
 
 {{range .Sections}}
 <section id="tier-{{.Index}}">

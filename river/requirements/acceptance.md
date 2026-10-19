@@ -298,11 +298,12 @@ metrics
 the index sorts ascending by each, defaults to the Global scale under each, names it on the count
 line, and the comparison view offers both (`TestBillAndTailOrderings`, watched failing before the
 orderings existed). Every section heading names the ordering, as Order by does: *Tail Tier 1*
-(`TestTierHeadersNameTheOrdering`, watched failing on the bare "Tier 1"). Successive tiers abut: each heading
-ends where the next begins, written identically, and every heading on a page carries the same
-decimals (`TestTiersAbut`, watched failing against headings that gave each tier's smallest and
-largest bird); that precision is the fewest that keep every tier's ends apart, enough for a
-5.31–5.41 mm tier of bills (`TestHeadingDigits`, watched failing with no extra decimals). The
+(`TestTierHeadersNameTheOrdering`, watched failing on the bare "Tier 1"). Each heading states only its own birds,
+and the page's headings rise strictly in one precision, so a gap shows as a gap
+(`TestTierRangesHoldTheirBirds`, watched failing against headings that ran on to the next tier, as
+"4.97 in – 8.84 in" did for herons below the pelicans); that precision is the fewest that keep
+every stated value apart from its neighbors (`TestHeadingDigits`, watched failing when only each
+tier's own ends were kept apart, which let "0.20 – 0.24" sit before "0.24 – 0.28"). The
 tier's *N species* follows the range in the count line's style (`TestTierCountFollowsTheRange`,
 watched failing while it sat at the far edge in a smaller size).
 

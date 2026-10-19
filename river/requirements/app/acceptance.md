@@ -183,9 +183,11 @@ Covers: product.tierHistogram
 **Method:** on the rendered index under several orderings and a filter, the histogram has exactly
 one bar per tier section, in order; each bar links to its tier's section; each bar's height is its
 tier's count as a percentage of the largest tier's, rounded; and each bar's label names the tier
-and ends with its count.
+and ends with its count. Under the size orderings, a stretch with no birds is one empty bucket per
+whole 15% step it spans, between the bars on either side.
 
 **Run:** `go test ./cmd/birdview/ -run TestTierHistogram`
 **Status: verified 2026-10-19, passing, and watched failing** before the histogram and the tier
-ids existed, and with bars sized by raw count instead of by share of the largest tier.
+ids existed, and with bars sized by raw count instead of by share of the largest tier. The empty
+buckets were watched failing by removing them: "0 empty buckets before tier 2, want 4".
 
