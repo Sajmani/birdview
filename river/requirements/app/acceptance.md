@@ -93,7 +93,9 @@ Louisiana → GulfOfMexico, a point in the open North Atlantic → NorthAtlantic
 London → no region. The expected answers come from geography, not from a run of the code.
 
 **Run:** `go test ./cmd/birdview-boundaries/ -run TestKnownPoints`
-**Status: not yet verified.**
+**Status: verified 2026-10-18, passing, and watched failing:** making the lookup try the sea boxes
+before land failed it on Tampa, which lies inside the Gulf box; deleting Midway's boundary failed
+it on Sand Island, which then fell to the Central Pacific box.
 
 ## boundariesCoverEveryRegion
 
@@ -106,7 +108,9 @@ and every polygon belongs to one; the file's sea boxes equal `internal/region`'s
 compressed is at most 200 KB.
 
 **Run:** `go test ./cmd/birdview-boundaries/ -run TestCoverage`
-**Status: not yet verified.**
+**Status: verified 2026-10-18, passing** at 154,956 bytes compressed (425,003 uncompressed),
+simplified to about 450 m on the ground. **Watched failing:** deleting Midway's boundary failed
+it, and regenerating at about 100 m failed it on size, 228,788 bytes compressed.
 
 ## hereAndNowSitBesideAll
 
@@ -121,7 +125,9 @@ template keeping every other setting, and without JavaScript is marked inactive,
 labeled with why.
 
 **Run:** `go test ./cmd/birdview/ -run TestHereAndNow`
-**Status: not yet verified.**
+**Status: verified 2026-10-18, passing, and watched failing:** a template that added the reader's
+region to the old one instead of replacing it failed on every region; letting `/now` be
+revalidated failed on its `no-cache` and ETag.
 
 ## hereLookupAgreesInTheBrowser
 
@@ -135,7 +141,9 @@ refused, location unavailable, and a point outside every region, require the mat
 no navigation. Now, pressed, goes to the reader's month without requesting `/now`.
 
 **Run:** `go test ./cmd/birdview/ -run TestHereInTheBrowser`
-**Status: not yet verified.**
+**Status: verified 2026-10-18, passing, and watched failing:** a browser lookup that tried the sea
+boxes first failed on Tampa, and one that read a refusal as an ordinary failure failed on the
+message. Needs Chrome, and skips without it.
 
 ## hereSendsNothingExtra
 
@@ -149,4 +157,7 @@ to the one choosing that region's chip would make after Only, and no request car
 coordinate.
 
 **Run:** `go test ./cmd/birdview/ -run TestHereInTheBrowser`
-**Status: not yet verified.**
+**Status: verified 2026-10-18, passing, and watched failing:** adding the latitude to the URL a
+press requests failed it on the coordinate in the request and on the page requested. A press that
+navigates leaves headless Chrome waiting under the flags that keep it off the network, so that
+case reads the server's request log and then stops the browser.

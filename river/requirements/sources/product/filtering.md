@@ -117,9 +117,10 @@ Florida. Near a border or a coast the answer can differ from how the occurrence 
 filed, because the boundaries come from a different source (tech.regionBoundaries); within a few
 hundred meters, Here may pick the neighbor.
 
-**Without JavaScript, Here is shown inactive** — dashed border, muted background, text at the
-full contrast floor (decisions.oneContrastFloor) — and focusable, with a tooltip saying it needs
-JavaScript and permission to use the reader's location. It does nothing when pressed.
+**Without JavaScript, Here is shown inactive** — dotted border, no background, text at the full
+contrast floor (decisions.oneContrastFloor) — and focusable, with a tooltip saying it needs
+JavaScript and permission to use the reader's location. It does nothing when pressed. Dotted,
+because a dashed border already marks the Only buttons, which are active.
 
 ## nowSelectsCurrentMonth
 

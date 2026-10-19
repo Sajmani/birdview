@@ -65,6 +65,14 @@ details[open] > summary .sumdesc { display: none; }
    the "All" chip. */
 .btn, .chip, .btn:visited, .chip:visited { color: var(--ink); }
 .btn.on, .btn.on:visited { background: var(--accent); color: #06283d; border-color: var(--accent); font-weight: 600; }
+/* Here is a button, not a link, so it needs the link buttons' font. Inactive
+   until the script enables it: dotted, because dashed already means Only, and
+   with the text at full contrast, because the floor holds for inactive
+   controls too (product.hereSelectsLocalRegion). */
+.here { font: inherit; font-size: 12.5px; cursor: pointer; }
+.here[aria-disabled="true"] { border-style: dotted; background: transparent; cursor: not-allowed; }
+.herestatus { color: var(--ink); font-size: 12px; }
+.herestatus:empty { display: none; }
 .chip.on { font-weight: 600; outline: 2px solid var(--accent); outline-offset: 1px; }
 .chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .hint { color: var(--dim); font-size: 11px; font-style: italic; }

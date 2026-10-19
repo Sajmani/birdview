@@ -59,6 +59,7 @@ import (
 	goldmarktext "github.com/yuin/goldmark/text"
 	goldmarkutil "github.com/yuin/goldmark/util"
 
+	"birdview/data"
 	"birdview/docs"
 	"birdview/internal/dataset"
 	"birdview/internal/inat"
@@ -133,6 +134,12 @@ type server struct {
 	// onRender, when set, is told the name of every template rendered. Only
 	// the checks set it, to confirm they have seen every kind of page.
 	onRender func(template string)
+	// hereJS is web/static/here.js, inlined into every index page.
+	hereJS template.JS
+	// boundaryURL is where the region boundary file is served: its path
+	// carries the file's hash, so it can be cached for a year
+	// (tech.regionBoundaries, decisions.hereAndNowCaching).
+	boundaryURL string
 	// ds is what the index draws: every species except the exotics
 	// (product.escapedBirdsListed). all is the whole dataset, for the detail pages and the lists
 	// that must name every bird.
@@ -312,7 +319,10 @@ func (s *server) revalidated(h http.Handler) http.Handler {
 		// -dev re-reads templates per request, so no fingerprint taken at
 		// startup stays true. Sending no validator is correct there: the
 		// whole point of dev mode is that an edit shows on reload.
-		if s.build == "" {
+		// -dev mode has no fingerprint to trust, and /now answers from the
+		// clock: neither may be stored, and neither gets a validator that
+		// would let a stale answer be confirmed (decisions.hereAndNowCaching).
+		if s.build == "" || r.URL.Path == "/now" {
 			w.Header().Set("Cache-Control", "no-store")
 			h.ServeHTTP(w, r)
 			return
@@ -399,6 +409,11 @@ func fingerprint(ds *dataset.Dataset) (string, error) {
 		fmt.Fprintf(h, "%s\x00%d\x00", p, len(b))
 		h.Write(b)
 	}
+	// The boundary file too: every index page carries its hashed URL, so a
+	// new file must mean a new page validator or a cached index would point
+	// at a URL that no longer exists (tech.regionBoundaries).
+	fmt.Fprintf(h, "boundaries\x00%d\x00", len(data.Boundaries))
+	h.Write(data.Boundaries)
 	// Marshal rather than a file hash: the server is handed a parsed
 	// dataset and never sees the bytes it came from. Go sorts map keys when
 	// marshalling, so this is stable across runs.
@@ -563,6 +578,13 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	s := &server{mux: http.NewServeMux(), ds: ds, tmpl: tmpl, devDir: devDir,
 		byID: map[string]*dataset.Species{}, undrawnByID: map[string]*dataset.Undrawn{},
 		idOf: map[string]string{}}
+	// Inlined into the index rather than fetched, as the scroll script is
+	// (acceptance.scrollScriptScoped).
+	js, err := fs.ReadFile(assetFS, "static/here.js")
+	if err != nil {
+		return nil, fmt.Errorf("reading here.js: %w", err)
+	}
+	s.hereJS = template.JS(js)
 
 	// Once, at startup: every response's ETag is built from this (tech.cacheLifetimeStated).
 	// In dev mode the templates are re-read per request, so a fingerprint
@@ -628,6 +650,8 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	if err != nil {
 		return nil, err
 	}
+	sum := sha256.Sum256(data.Boundaries)
+	s.boundaryURL = "/boundaries/" + hex.EncodeToString(sum[:8]) + ".json"
 	s.routes = []route{
 		{"/static/", http.StripPrefix("/static/", staticFiles(assets))},
 		{"/added", http.HandlerFunc(s.added)},
@@ -637,6 +661,8 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		{"/docs", http.HandlerFunc(s.document)},
 		{"/docs/", http.HandlerFunc(s.document)},
 		{"/compare", http.HandlerFunc(s.compare)},
+		{"/now", http.HandlerFunc(s.now)},
+		{"/boundaries/", http.HandlerFunc(s.boundaries)},
 		{"/species/", http.HandlerFunc(s.detail)},
 		{"/", http.HandlerFunc(s.index)},
 	}
@@ -955,10 +981,22 @@ type pageData struct {
 	AllMonths    bool
 	AllMonthsURL template.URL
 	NoMonth      bool
-	Opt          options
-	Total        int
-	Shown        int
-	Query        func(...string) template.URL
+	// HereURL is the index with the region selection replaced by the
+	// placeholder hereSlot; the browser substitutes the reader's region
+	// (product.hereSelectsLocalRegion). BoundaryURL is the file it looks the
+	// region up in, loaded by every index page (product.locationStaysInBrowser).
+	HereURL     string
+	BoundaryURL string
+	// NowURL goes through /now, for a reader without JavaScript; NowTemplate
+	// is the index with the month replaced by nowSlot, which the script
+	// fills from the reader's clock (product.nowSelectsCurrentMonth).
+	NowURL      template.URL
+	NowTemplate string
+	HereScript  template.JS
+	Opt         options
+	Total       int
+	Shown       int
+	Query       func(...string) template.URL
 	// AllSelected is true only when every family is explicitly filtered in --
 	// not when nothing is selected. Both states display the whole dataset, but
 	// they are different selections, and the control reflects the selection.
@@ -1362,6 +1400,11 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		}
 		page.AllMonthsURL = s.monthURL(r, every)
 	}
+	page.HereURL = slotURL(r, "region", hereSlot)
+	page.BoundaryURL = s.boundaryURL
+	page.HereScript = s.hereJS
+	page.NowTemplate = slotURL(r, "month", nowSlot)
+	page.NowURL = template.URL("/now" + strings.TrimPrefix(slotURL(r, "month", ""), "/"))
 
 	bar, live := s.buildPickBar(r, opt, missingPicks)
 	page.Bar = bar
@@ -2398,6 +2441,54 @@ func (s *server) regionURL(r *http.Request, want map[string]bool) template.URL {
 		return "/"
 	}
 	return template.URL("/?" + q.Encode())
+}
+
+// The placeholders the browser replaces in HereURL and NowTemplate. Both are
+// left alone by URL encoding, and no slug or month abbreviation contains them.
+const (
+	hereSlot = "__REGION__"
+	nowSlot  = "__MONTH__"
+)
+
+// slotURL is the current page with one parameter replaced by a single value.
+// Filled with a region slug or a month abbreviation it is exactly the URL
+// regionURL or monthURL builds for that one choice, because both sort what
+// they write and a single value sorts the same whatever it is: so pressing
+// Here asks for the same thing as choosing the region by hand
+// (product.locationStaysInBrowser). An empty value drops the parameter.
+func slotURL(r *http.Request, key, value string) string {
+	q := r.URL.Query()
+	q.Del(key)
+	if value != "" {
+		q.Set(key, value)
+	}
+	if len(q) == 0 {
+		return "/"
+	}
+	return "/?" + q.Encode()
+}
+
+// now sends a reader without JavaScript to the index for the server's
+// current month, every other setting kept (product.nowSelectsCurrentMonth).
+// It is the one response that reads the clock, which is why it is a redirect
+// that is never stored rather than a month written into the index
+// (decisions.hereAndNowCaching).
+func (s *server) now(w http.ResponseWriter, r *http.Request) {
+	m := month.Abbrev[time.Now().Month()-1]
+	http.Redirect(w, r, slotURL(r, "month", m), http.StatusSeeOther)
+}
+
+// boundaries serves the region boundary file at its hashed URL, and only
+// there. The URL changes whenever the file does, so it is cached for a year
+// (tech.cacheLifetimeStated's one exception).
+func (s *server) boundaries(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != s.boundaryURL {
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+	w.Write(data.Boundaries)
 }
 
 // monthURL is regionURL for the twelve (product.regionAndMonthFilter). Same three cases: all of

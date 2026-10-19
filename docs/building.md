@@ -110,6 +110,7 @@ diagram.
 | `birdview-gbifmap` | `data/gbif-taxa.tsv` — GBIF backbone name → AviList name | ~5 min, ~2,800 requests |
 | `birdview-regions` | `data/region-presence.tsv` — which regions each species occurs in | one facet per region |
 | `birdview-status` | `data/status.tsv` — BirdView's own occurrence status per species | two passes, resumable |
+| `birdview-boundaries` | `data/region-boundaries.json` — region outlines for the Here button, from Natural Earth | one 15 MB download, hash-checked |
 
 The iNaturalist pace is what that API asks for (`inatapi.RequestRate`) and is not negotiable downward.
 The GBIF pace is a courtesy BirdView sets for itself, and the client widens it further whenever
@@ -160,6 +161,7 @@ cmd/birdview-inatmap/  generator: iNaturalist taxon IDs
 cmd/birdview-gbifmap/  generator: GBIF backbone -> AviList name bridge
 cmd/birdview-regions/  generator: per-region presence
 cmd/birdview-status/   generator: BirdView's own occurrence status
+cmd/birdview-boundaries/ generator: region boundaries for the Here button
 internal/avilist/      the AviList workbook reader — names, families, codes, sequence
 internal/avonet/       the trait workbook reader, including habitat and trophic niche
 internal/wingspan/     the Fox dataset + the fitted wingspan regression
@@ -167,6 +169,7 @@ internal/taxonomy/     the synonym tables, in both directions, and the order lab
 internal/trait/        the habitat and diet vocabularies and BirdView's additions
 internal/morphology/   the segment models (head, body, neck) and rounding
 internal/region/       the regions, their two groupings, and their ids
+internal/boundary/     the region boundary file and the Go reference lookup over it
 internal/gbif/         the paced GBIF client and the name bridge
 internal/inat/         the iNaturalist taxon lookup
 internal/status/       recurrence: episodes, and the status they imply

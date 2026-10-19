@@ -1,0 +1,323 @@
+// Copyright 2026 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package main
+
+import (
+	"context"
+	_ "embed"
+	"encoding/json"
+	"fmt"
+	"html"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"os/exec"
+	"regexp"
+	"slices"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	"birdview/data"
+	"birdview/internal/boundary"
+	"birdview/internal/month"
+	"birdview/internal/region"
+)
+
+// A page with settings of every kind, so "every other setting kept" has
+// something to keep.
+const busyIndex = "/?by=mass&family=Corvidae&family=Trochilidae&month=Jun&month=Jul&region=CA&step=10"
+
+// TestHereAndNow checks what the server renders for Here and Now: where they
+// sit, the URLs they carry, the /now redirect, and the boundary file.
+//
+// Verifies: product.hereSelectsLocalRegion, product.nowSelectsCurrentMonth.
+// Criterion: app.hereAndNowSitBesideAll.
+func TestHereAndNow(t *testing.T) {
+	s := newTestServer(t)
+	body := mustGet(t, s, busyIndex)
+
+	// Placement: each sits immediately after its row's All.
+	for _, c := range []struct{ name, row, control string }{
+		{"Here", `<span class="lbl">Region</span>`, `<button type="button" class="btn here"`},
+		{"Now", `<span class="lbl">Month</span>`, `<a class="btn now"`},
+	} {
+		i := strings.Index(body, c.row)
+		if i < 0 {
+			t.Fatalf("no %s row", c.row)
+		}
+		rest := body[i:]
+		all := regexp.MustCompile(`(?s)<a class="btn[^"]*"[^>]*>All</a>\s*(?:\{\{.*?\}\}\s*)?`).FindStringIndex(rest)
+		if all == nil {
+			t.Fatalf("no All in the %s row", c.name)
+		}
+		if !strings.HasPrefix(strings.TrimSpace(rest[all[1]:]), c.control) {
+			t.Errorf("%s does not follow All in its row; found %.60q", c.name, strings.TrimSpace(rest[all[1]:]))
+		}
+	}
+
+	// Here without JavaScript: inactive, focusable, and saying why.
+	here := mustMatch(t, body, `(<button type="button" class="btn here"[^>]*>)`, "the Here button")
+	if !strings.Contains(here, `aria-disabled="true"`) || strings.Contains(here, " disabled") {
+		t.Errorf("Here should be aria-disabled and still focusable: %s", here)
+	}
+	if !strings.Contains(here, "JavaScript") || !strings.Contains(here, "location") {
+		t.Errorf("Here's tooltip does not say what it needs: %s", here)
+	}
+
+	// The templates, filled in, are exactly the URLs choosing by hand builds.
+	r := httptest.NewRequest(http.MethodGet, busyIndex, nil)
+	hereT := html.UnescapeString(mustMatch(t, here, `data-template="([^"]+)"`, "Here's template"))
+	for _, id := range append(region.LandIDs(), region.MarineIDs()...) {
+		rg, _ := region.Get(id)
+		want := string(s.regionURL(r, map[string]bool{id: true}))
+		if got := strings.Replace(hereT, hereSlot, rg.Slug(), 1); got != want {
+			t.Errorf("Here for %s asks for %s; choosing it by hand asks for %s", rg.Slug(), got, want)
+		}
+	}
+	nowTag := mustMatch(t, body, `(<a class="btn now"[^>]*>)`, "the Now link")
+	nowT := html.UnescapeString(mustMatch(t, nowTag, `data-template="([^"]+)"`, "Now's template"))
+	for i, m := range month.Abbrev {
+		want := string(s.monthURL(r, map[int]bool{i: true}))
+		if got := strings.Replace(nowT, nowSlot, m, 1); got != want {
+			t.Errorf("Now in %s asks for %s; choosing %s by hand asks for %s", m, got, m, want)
+		}
+	}
+
+	// Without JavaScript Now goes through /now, every other setting kept.
+	nowHref := html.UnescapeString(mustMatch(t, nowTag, `href="([^"]+)"`, "Now's link"))
+	u, _ := url.Parse(nowHref)
+	if u.Path != "/now" || u.Query().Has("month") || u.Query().Get("by") != "mass" ||
+		len(u.Query()["family"]) != 2 || u.Query().Get("region") != "CA" {
+		t.Errorf("Now links to %s; want /now with every setting but the month", nowHref)
+	}
+	w := httptest.NewRecorder()
+	s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, nowHref, nil))
+	m := month.Abbrev[time.Now().Month()-1]
+	want := slotURL(httptest.NewRequest(http.MethodGet, nowHref, nil), "month", m)
+	if w.Code != http.StatusSeeOther || w.Header().Get("Location") != want {
+		t.Errorf("/now answers %d to %q; want 303 to %s", w.Code, w.Header().Get("Location"), want)
+	}
+	if cc := w.Header().Get("Cache-Control"); cc != "no-store" || w.Header().Get("ETag") != "" {
+		t.Errorf("/now is cacheable (Cache-Control %q, ETag %q); it reads the clock", cc, w.Header().Get("ETag"))
+	}
+
+	// The boundary file: named by its hash, cached for a year, nothing else
+	// served under its directory.
+	bURL := mustMatch(t, here, `data-boundaries="([^"]+)"`, "the boundary file's URL")
+	w = httptest.NewRecorder()
+	s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, bURL, nil))
+	if w.Code != http.StatusOK || w.Body.String() != string(data.Boundaries) {
+		t.Errorf("GET %s = %d, not the boundary file", bURL, w.Code)
+	}
+	if cc := w.Header().Get("Cache-Control"); cc != "public, max-age=31536000, immutable" {
+		t.Errorf("the boundary file is served with Cache-Control %q", cc)
+	}
+	if code, _ := get(t, s, "/boundaries/0000000000000000.json"); code != http.StatusNotFound {
+		t.Errorf("a wrong hash under /boundaries/ answered %d, want 404", code)
+	}
+}
+
+//go:embed testdata/here_probe.js
+var hereProbe string
+
+var dataAttr = func(name string) *regexp.Regexp { return regexp.MustCompile(name + `="([^"]*)"`) }
+
+// TestHereInTheBrowser presses Here in headless Chrome with the browser's
+// location stubbed, and records every request the browser makes.
+//
+// The lookup must give the Go lookup's answer at every known point; a press
+// must land on the URL choosing the region by hand gives; a refusal, a failure
+// and a point outside every region must each say so and go nowhere; and no
+// request may carry the position, or show that Here was pressed.
+//
+// Verifies: product.hereSelectsLocalRegion, product.locationStaysInBrowser.
+// Criteria: app.hereLookupAgreesInTheBrowser, app.hereSendsNothingExtra.
+func TestHereInTheBrowser(t *testing.T) {
+	chrome := findChrome()
+	if chrome == "" {
+		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); Here was not tested in a browser")
+	}
+	s := newTestServer(t)
+	const start = "/?by=mass&step=10"
+	r := httptest.NewRequest(http.MethodGet, start, nil)
+	ca, _ := region.BySlug("CA")
+	pressedCA := string(s.regionURL(r, map[string]bool{ca.ID: true}))
+
+	var points [][2]float64
+	for _, p := range boundary.KnownPoints {
+		points = append(points, [2]float64{p.Lat, p.Lon})
+	}
+	pts, _ := json.Marshal(points)
+
+	cases := []struct {
+		name, click string
+		lands       string // the page the browser ends on
+		status      string // what the page says, if it stays
+	}{
+		{name: "lookups"},
+		{name: "in California", click: "38.5816,-121.4944", lands: pressedCA},
+		{name: "refused", click: "denied", lands: start, status: "refused"},
+		{name: "unavailable", click: "unavailable", lands: start, status: "could not be found"},
+		{name: "outside", click: "51.5074,-0.1278", lands: start, status: "outside every region"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			t.Parallel()
+			var mu sync.Mutex
+			var requests []string
+			ts := httptest.NewServer(instrument(s, hereProbe, func(uri string) {
+				mu.Lock()
+				requests = append(requests, uri)
+				mu.Unlock()
+			}))
+			defer ts.Close()
+
+			frag := "#probe=1&points=" + url.QueryEscape(string(pts))
+			if c.click != "" {
+				frag += "&click=" + c.click
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+			defer cancel()
+			cmd := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
+				"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
+				"--disable-component-update", "--disable-sync", "--disable-extensions",
+				"--user-data-dir="+t.TempDir(), "--virtual-time-budget=3000",
+				"--dump-dom", ts.URL+start+frag)
+			var dom string
+			if c.lands == pressedCA {
+				// A press that navigates leaves headless Chrome waiting forever
+				// under these flags, which keep it off the network. What the
+				// server received is the evidence that matters, so wait for
+				// the page request and then stop the browser.
+				if err := cmd.Start(); err != nil {
+					t.Fatalf("chrome: %v", err)
+				}
+				deadline := time.Now().Add(20 * time.Second)
+				for time.Now().Before(deadline) {
+					mu.Lock()
+					arrived := slices.Contains(requests, pressedCA)
+					mu.Unlock()
+					if arrived {
+						// Long enough for anything else a press sends to arrive.
+						time.Sleep(500 * time.Millisecond)
+						break
+					}
+					time.Sleep(100 * time.Millisecond)
+				}
+				cmd.Process.Kill()
+				cmd.Wait()
+			} else {
+				out, err := cmd.Output()
+				if err != nil {
+					t.Fatalf("chrome: %v", err)
+				}
+				dom = string(out)
+			}
+			mu.Lock()
+			defer mu.Unlock()
+
+			// Loaded with the page: before any page request after the first,
+			// so before anything a press could have caused.
+			loaded := -1
+			for i, q := range requests {
+				if q == s.boundaryURL {
+					loaded = i
+					break
+				}
+			}
+			if loaded < 0 {
+				t.Errorf("the boundary file was never requested: %v", requests)
+			}
+			for i, q := range requests[1:] {
+				if i+1 < loaded && !strings.HasPrefix(q, "/static/") {
+					t.Errorf("page request %s came before the boundary file: %v", q, requests)
+				}
+			}
+			// Nothing the browser sent carries the position or mentions Here.
+			for _, q := range requests {
+				for _, leak := range []string{"38.58", "121.49", "51.50", "0.127", "/now", "here", "lat"} {
+					if strings.Contains(strings.ToLower(q), leak) {
+						t.Errorf("request %q contains %q", q, leak)
+					}
+				}
+			}
+
+			if m := dataAttr("data-url").FindStringSubmatch(dom); c.lands != "" && c.lands != pressedCA && (m == nil || html.UnescapeString(m[1]) != c.lands) {
+				got := "nothing"
+				if m != nil {
+					got = html.UnescapeString(m[1])
+				}
+				t.Errorf("the browser ended on %s, want %s; requests %v", got, c.lands, requests)
+			}
+			if c.lands == pressedCA {
+				// One page request beyond the first, and it is the hand-chosen URL.
+				var pages []string
+				for _, q := range requests {
+					if !strings.HasPrefix(q, "/boundaries/") && !strings.HasPrefix(q, "/static/") {
+						pages = append(pages, q)
+					}
+				}
+				if len(pages) < 2 || pages[1] != pressedCA {
+					t.Errorf("pressing Here requested pages %v; want %s next after %s", pages, pressedCA, start)
+				}
+				for _, p := range pages[2:] {
+					if p != pressedCA {
+						t.Errorf("pressing Here also requested %s", p)
+					}
+				}
+				return
+			}
+
+			m := dataAttr("data-probe").FindStringSubmatch(dom)
+			if m == nil {
+				t.Fatalf("the probe recorded nothing; requests %v", requests)
+			}
+			var probe struct {
+				Now     string   `json:"now"`
+				Enabled bool     `json:"enabled"`
+				Lookups []string `json:"lookups"`
+				Status  string   `json:"status"`
+				Error   string   `json:"error"`
+			}
+			if err := json.Unmarshal([]byte(html.UnescapeString(m[1])), &probe); err != nil {
+				t.Fatal(err)
+			}
+			if probe.Error != "" {
+				t.Fatalf("the boundary file did not load in the browser: %s", probe.Error)
+			}
+			if !probe.Enabled {
+				t.Error("Here is still inactive with JavaScript running")
+			}
+			for i, p := range boundary.KnownPoints {
+				if i >= len(probe.Lookups) || probe.Lookups[i] != p.Want {
+					got := "nothing"
+					if i < len(probe.Lookups) {
+						got = fmt.Sprintf("%q", probe.Lookups[i])
+					}
+					t.Errorf("in the browser %s resolves to %s; Go and geography say %q", p.Place, got, p.Want)
+				}
+			}
+			wantNow := slotURL(r, "month", month.Abbrev[time.Now().Month()-1])
+			if probe.Now != wantNow {
+				t.Errorf("with JavaScript Now links to %s, want the reader's month, %s", probe.Now, wantNow)
+			}
+			if c.status != "" && !strings.Contains(probe.Status, c.status) {
+				t.Errorf("after pressing Here the page says %q, want it to say %q", probe.Status, c.status)
+			}
+		})
+	}
+}

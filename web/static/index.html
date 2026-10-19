@@ -232,6 +232,11 @@
     <span class="lbl">Month</span>
     <a class="btn{{if .AllMonths}} on{{end}}" href="{{.AllMonthsURL}}"
        title="{{if .AllMonths}}Clear every month{{else}}Select the whole year{{end}}">All</a>
+    {{/* The current month only. Without JavaScript the link asks the server
+         for its month through /now; the script points it at the reader's own
+         month instead (product.nowSelectsCurrentMonth). */}}
+    <a class="btn now" href="{{.NowURL}}" data-template="{{.NowTemplate}}"
+       title="Select only the current month">Now</a>
     {{range .Months}}
     <a class="chip mchip{{if .Selected}} on{{end}}" href="{{.URL}}"
        title="{{.Title}}">{{.Abbrev}}</a>
@@ -242,6 +247,15 @@
     <span class="lbl">Region</span>
     <a class="btn{{if .AllRegions}} on{{end}}" href="{{.AllRegionsURL}}"
        title="{{if .AllRegions}}Clear every region{{else}}Select everywhere{{end}}">All</a>
+    {{/* Inactive until the script runs, and focusable while inactive so the
+         reason can be found. The position never leaves the browser: the
+         script looks the region up itself and asks for the same URL choosing
+         that region by hand would (product.hereSelectsLocalRegion,
+         product.locationStaysInBrowser). */}}
+    <button type="button" class="btn here" aria-disabled="true"
+            data-template="{{.HereURL}}" data-boundaries="{{.BoundaryURL}}"
+            title="Here needs JavaScript and permission to use your location">Here</button>
+    <span class="herestatus" role="status" aria-live="polite"></span>
     <span class="hint">states and provinces, grouped two ways</span>
   </div>
   {{range .RegionGroupings}}
@@ -413,6 +427,9 @@
       <a href="https://doi.org/10.6084/m9.figshare.32089083">doi:10.6084/m9.figshare.32089083</a>,
       licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
       Only empirically reported wingspans are used; the rest are modeled here.</li>
+    <li><b>Region boundaries</b> &mdash; Made with
+      <a href="https://www.naturalearthdata.com/">Natural Earth</a>, in the public domain.
+      Used only by the Here button, in your browser.</li>
     <li><b>Names, families and species codes</b> &mdash; AviList Core Team (2026).
       <i>AviList: The Global Avian Checklist, v2025b.</i>
       <a href="https://doi.org/10.2173/avilist.v2025b">doi:10.2173/avilist.v2025b</a>,
@@ -440,6 +457,7 @@
 </footer>
 {{template "pickbar" .Bar}}
 
+<script>{{.HereScript}}</script>
 <script>
 /* Keep the page still across navigations.
  *
@@ -451,9 +469,11 @@
  * Both are remembered for the session. Panels are restored before the scroll,
  * since collapsing one afterwards would move everything beneath it.
  *
- * It is the only script in BirdView, and it deliberately holds no logic:
- * ordering, sectioning and geometry stay in Go where they are property-tested.
- * Without JavaScript the page still works exactly as before, minus this. */
+ * It holds no logic: ordering, sectioning and geometry stay in Go where they
+ * are property-tested. The one exception is here.js, which looks up the
+ * reader's region in the browser so their position never reaches the server,
+ * and is held to the Go lookup's answers by a test. Without JavaScript the
+ * page still works, minus this and Here. */
 (function () {
   if (window.location.pathname !== "/") return;
 

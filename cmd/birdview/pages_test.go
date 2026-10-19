@@ -143,6 +143,13 @@ func discoverPages(t *testing.T, s *server) []webPage {
 	return pages
 }
 
+// noPages are the routes that serve no web page, and why. Each is probed to
+// confirm it, so an exemption cannot hide a page added there later.
+var noPages = map[string]string{
+	"/now":         "a redirect to the index for the current month",
+	"/boundaries/": "the region boundary file, JSON",
+}
+
 // TestEveryKindOfPageIsDiscovered checks the discovery the other page checks
 // rely on: every route the server registers, and every page template it can
 // render, produced at least one page. A route or template added later that no
@@ -162,6 +169,19 @@ func TestEveryKindOfPageIsDiscovered(t *testing.T) {
 		media[mt] = true
 	}
 	for _, rt := range s.routes {
+		if why, exempt := noPages[rt.pattern]; exempt {
+			// Exempt only while it really serves no page.
+			w := httptest.NewRecorder()
+			probe := rt.pattern
+			if probe == "/boundaries/" {
+				probe = s.boundaryURL
+			}
+			s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, probe, nil))
+			if w.Code/100 != 3 && isWebPage(w.Header().Get("Content-Type")) {
+				t.Errorf("%s is exempt as %q but served a %s page", rt.pattern, why, w.Header().Get("Content-Type"))
+			}
+			continue
+		}
 		if !routes[rt.pattern] {
 			t.Errorf("no page discovered under route %s; add a seed so its pages are checked", rt.pattern)
 		}
@@ -316,7 +336,7 @@ func TestRenderedTextContrast(t *testing.T) {
 		}
 	}
 
-	ts := httptest.NewServer(instrument(s))
+	ts := httptest.NewServer(instrument(s, contrastScript, nil))
 	t.Cleanup(ts.Close) // not defer: the parallel subtests run after this returns
 	for _, p := range sample {
 		t.Run(p.url, func(t *testing.T) {
@@ -359,14 +379,19 @@ func TestRenderedTextContrast(t *testing.T) {
 	}
 }
 
-// instrument serves s with the measuring script added to every HTML and SVG
-// page, and without the Content-Security-Policy that would refuse to run it.
-func instrument(s *server) http.Handler {
+// instrument serves s with a test script added to every HTML and SVG page,
+// and without the Content-Security-Policy that would refuse to run it. If
+// logRequest is set it is told the URI of every request the browser makes,
+// other than for the injected script itself.
+func instrument(s *server, script string, logRequest func(string)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/__contrast.js" {
 			w.Header().Set("Content-Type", "text/javascript")
-			fmt.Fprint(w, contrastScript)
+			fmt.Fprint(w, script)
 			return
+		}
+		if logRequest != nil {
+			logRequest(r.URL.RequestURI())
 		}
 		// Uncompressed, or the script would be spliced into gzip bytes.
 		r.Header.Del("Accept-Encoding")

@@ -193,9 +193,11 @@ page is the honest way to read this view. Per section is still one click away.
   first, all drawn to one scale, so you see what most of the recording is actually *of* — and how
   small most of it is.
 
-  **Then make it yours.** Open **Regions and months**. Under the regions, click **All** to clear
-  them, then click your state or province. Under the months, click **All** again, then click this
-  month. The tiers now rank what people record where you are, at this time of year, and birds with
+  **Then make it yours.** Open **Regions and months**. Under the regions, click **Here**: your
+  browser asks to share your location, works out your state or province itself, and selects it.
+  Your location never leaves the browser; BirdView only sees which region was chosen. (Or click
+  **All** to clear the regions and then click yours.) Under the months, click **Now**. The tiers
+  now rank what people record where you are, at this time of year, and birds with
   no records there move to a last section of their own. New York in October, for example, is
   [this view](/?by=frequency&scale=global&region=NY&month=Oct).
 - **[Sort by mass, scale Global](/?by=mass&scale=global).** Mass is a cube of a linear dimension,
