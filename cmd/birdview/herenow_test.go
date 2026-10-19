@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
+	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -688,5 +689,32 @@ func TestTiersAbut(t *testing.T) {
 				t.Errorf("%s tier %d ends at %q but tier %d begins at %q; successive tiers should abut", q, i+1, hi, i+2, hs[i+1][1])
 			}
 		}
+	}
+}
+
+// TestTierCountFollowsTheRange checks a tier heading's "N species" sits right
+// after the range in the count line's style, not pushed to the far edge in
+// its own, where it read as part of something else or was not seen at all.
+//
+// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.sortsAscending.
+func TestTierCountFollowsTheRange(t *testing.T) {
+	css, err := fs.ReadFile(assetFS, "static/styles.css")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rule := mustMatch(t, string(css), `(?m)^h2 \.n \{([^}]*)\}`, "the tier count's rule")
+	if strings.Contains(rule, "margin-left: auto") {
+		t.Errorf("the tier count is pushed to the far edge: %s", rule)
+	}
+	count := mustMatch(t, string(css), `(?m)^\.sub, \.count, footer \{([^}]*)\}`, "the count line's rule")
+	for _, decl := range []string{"color: var(--dim)", "font-size: 12.5px"} {
+		if !strings.Contains(count, decl) || !strings.Contains(rule, decl) {
+			t.Errorf("the tier count and the count line differ on %q: %q vs %q", decl, rule, count)
+		}
+	}
+	body := mustGet(t, newTestServer(t), "/")
+	if !regexp.MustCompile(`&ndash; [^<]+</?[^>]*>?\s*<span class="n">\d+ species</span>`).MatchString(body) &&
+		!regexp.MustCompile(`in\s*<span class="n">\d+ species</span>`).MatchString(body) {
+		t.Error("no tier heading has its species count right after the range")
 	}
 }

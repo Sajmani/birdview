@@ -200,7 +200,8 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
   border-bottom: 1px solid var(--line); padding-bottom: 6px; }
 .tier { background: var(--panel); border: 1px solid var(--line); border-radius: 5px;
   padding: 2px 8px; color: var(--accent); }
-h2 .n { margin-left: auto; color: var(--dim); font-weight: 400; font-size: 12px; }
+/* Right after the range, in the count line's style (product.sectionHeadersStateRange). */
+h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 
 .tiles { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
 .tile { width: 396px; background: var(--panel); border: 1px solid var(--line);

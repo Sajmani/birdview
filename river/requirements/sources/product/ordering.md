@@ -81,7 +81,8 @@ Goals: goals.sizeIntuition
 
 Each section shows its range in the currently selected metric and the number of species in it,
 under a heading that names the ordering as Order by does and the section's number: *Tail Tier 1*
-when ordering by Tail.
+when ordering by Tail. The count follows the range directly, as *N species*, in the style of the
+*K of N species* line at the top of the index.
 
 **The range is the tier's span, and successive tiers abut.** A tier runs from its first bird up to
 where the next tier begins, so each heading ends exactly where the next one starts, written the

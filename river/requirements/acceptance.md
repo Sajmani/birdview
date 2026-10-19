@@ -302,7 +302,9 @@ orderings existed). Every section heading names the ordering, as Order by does: 
 ends where the next begins, written identically, and every heading on a page carries the same
 decimals (`TestTiersAbut`, watched failing against headings that gave each tier's smallest and
 largest bird); that precision is the fewest that keep every tier's ends apart, enough for a
-5.31–5.41 mm tier of bills (`TestHeadingDigits`, watched failing with no extra decimals).
+5.31–5.41 mm tier of bills (`TestHeadingDigits`, watched failing with no extra decimals). The
+tier's *N species* follows the range in the count line's style (`TestTierCountFollowsTheRange`,
+watched failing while it sat at the far edge in a smaller size).
 
 ### sectionBoundariesObeyRule
 
