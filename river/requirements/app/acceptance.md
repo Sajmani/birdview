@@ -124,8 +124,9 @@ the index with the server's month as the only month, marked `no-store`. Here car
 template keeping every other setting, and without JavaScript is marked inactive, focusable and
 labeled with why.
 
-**The welcome line** (product.pageExplainsItself): every link in it is also in the guide's *Some
-things to try*, its link to that list lands on the heading, and the `#here-and-now` page's
+**The welcome line** (product.pageExplainsItself): it ends with *reset to defaults*, linking the
+bare address (watched failing before the link existed); every other link in it is also in the
+guide's *Some things to try*, its link to that list lands on the heading, and the `#here-and-now` page's
 template, filled in, equals choosing the region and month by hand (`TestWelcomeLine`, watched
 failing on a welcome link the guide lacks and on a template missing the month).
 

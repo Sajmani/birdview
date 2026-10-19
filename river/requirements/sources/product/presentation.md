@@ -572,9 +572,10 @@ than none, because it sends a reader looking for something that is not there.
 
 The help is collapsible and starts open, so a returning user can dismiss it without losing it.
 
-**A welcome line under the title offers a few things to try**, each a link, ending with a link to
-the full list in the guide's *Some things to try*. Every link in the welcome line is also in that
-list, so the two cannot drift apart; the guide says more about each. It is not shown while
+**A welcome line under the title offers a few things to try**, each a link, then a link to the
+full list in the guide's *Some things to try*, and last **reset to defaults**, a link to the bare
+address, which carries no setting. Every thing to try is also in the guide's list, so the two
+cannot drift apart; the guide says more about each. It is not shown while
 picking birds to compare: that reader is not new, and its fixed links would drop the picks, which
 only Clear may do (pickFromIndex).
 

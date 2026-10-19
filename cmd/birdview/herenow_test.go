@@ -381,9 +381,16 @@ func TestWelcomeLine(t *testing.T) {
 	if end := strings.Index(list[3:], "\n## "); end >= 0 {
 		list = list[:end+3]
 	}
-	links := regexp.MustCompile(`<a href="([^"]+)"`).FindAllStringSubmatch(welcome, -1)
+	links := regexp.MustCompile(`<a href="([^"]+)">([^<]+)</a>`).FindAllStringSubmatch(welcome, -1)
 	if len(links) < 3 {
 		t.Fatalf("the welcome line has %d links", len(links))
+	}
+	// The last goes back to the defaults: the bare address, which carries no
+	// setting. It is not something to try, so the guide's list need not have it.
+	if last := links[len(links)-1]; last[1] != "/" || last[2] != "reset to defaults" {
+		t.Errorf("the welcome line ends with %q -> %s; want \"reset to defaults\" -> /", last[2], last[1])
+	} else {
+		links = links[:len(links)-1]
 	}
 	for _, l := range links {
 		href := html.UnescapeString(l[1])
