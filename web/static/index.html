@@ -410,7 +410,7 @@
   {{/* Three shapes, because a frequency tier is not always a range
        (product.orderByFrequency): a closed band, an open last band, and the birds with no
        ratio at all, which have no band to state. */}}
-  <h2><span class="tier">Tier {{.Index}}</span>
+  <h2><span class="tier">{{$.MetricLabel}} Tier {{.Index}}</span>
       {{if .Note}}{{.Note}}{{else if .Max}}{{.Min}} &ndash; {{.Max}}{{else}}{{.Min}} and beyond{{end}}
       <span class="n">{{.Count}} species</span></h2>
   <div class="tiles">

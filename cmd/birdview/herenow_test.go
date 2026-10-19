@@ -609,3 +609,27 @@ func TestBillAndTailOrderings(t *testing.T) {
 		}
 	}
 }
+
+// TestTierHeadersNameTheOrdering checks every section heading names the
+// ordering it belongs to, as Order by labels it: "Tail Tier 1" under Tail.
+//
+// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.sortsAscending.
+func TestTierHeadersNameTheOrdering(t *testing.T) {
+	s := newTestServer(t)
+	for by, label := range map[string]string{"": "Length", "length": "Length", "wingspan": "Wingspan",
+		"mass": "Mass", "bill": "Bill", "tail": "Tail", "frequency": "Frequency"} {
+		path := "/"
+		if by != "" {
+			path = "/?by=" + by
+		}
+		tiers := regexp.MustCompile(`<span class="tier">([^<]+)</span>`).FindAllStringSubmatch(mustGet(t, s, path), -1)
+		if len(tiers) == 0 {
+			t.Fatalf("%s has no section headings", path)
+		}
+		for i, m := range tiers {
+			if want := fmt.Sprintf("%s Tier %d", label, i+1); m[1] != want {
+				t.Errorf("%s heading %d reads %q, want %q", path, i+1, m[1], want)
+			}
+		}
+	}
+}

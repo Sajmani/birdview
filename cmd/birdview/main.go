@@ -1000,6 +1000,8 @@ type pageData struct {
 	NowURL      template.URL
 	NowTemplate string
 	HereScript  template.JS
+	// MetricLabel names the ordering in each section heading: "Tail Tier 1".
+	MetricLabel string
 	// HereNowTemplate is this page with both the region and the month
 	// replaced by placeholders, for arriving by a #here-and-now link.
 	HereNowTemplate string
@@ -1059,6 +1061,13 @@ type activeFilter struct {
 	Value string // "Parulidae, Icteridae" or "3 of 90 selected"
 }
 
+// metricLabel is an ordering's name as its Order by button shows it, used on
+// the count line and in every section heading (product.sectionHeadersStateRange).
+func metricLabel(m view.Metric) string {
+	return map[view.Metric]string{view.ByLength: "Length", view.ByWingspan: "Wingspan",
+		view.ByMass: "Mass", view.ByBill: "Bill", view.ByTail: "Tail", view.ByFrequency: "Frequency"}[m]
+}
+
 // describeView names every setting on the count line, defaults included, one
 // box each, labeled as its control is and in the order the controls appear
 // (product.helpfulEmptyState). Comparing appears only while picking. A filter
@@ -1084,8 +1093,7 @@ func describeView(fams []familyOption, opt options) []activeFilter {
 	add := func(label, value string) { out = append(out, activeFilter{Label: label, Value: value}) }
 
 	// The Controls panel, top to bottom.
-	add("Order by", map[view.Metric]string{view.ByLength: "Length", view.ByWingspan: "Wingspan",
-		view.ByMass: "Mass", view.ByBill: "Bill", view.ByTail: "Tail", view.ByFrequency: "Frequency"}[opt.Metric])
+	add("Order by", metricLabel(opt.Metric))
 	add("Scale", map[view.ScaleMode]string{view.PerSection: "Per section", view.Global: "Global"}[opt.Scale])
 	add("Units", map[bool]string{false: "in / oz", true: "cm / g"}[opt.Metric3])
 	add("Names", map[dataset.Locale]string{dataset.LocaleNA: "N. America", dataset.LocaleWorld: "World"}[opt.Locale])
@@ -1462,6 +1470,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	page.HereURL = slotURL(r, "region", hereSlot)
 	page.BoundaryURL = s.boundaryURL
 	page.HereScript = s.hereJS
+	page.MetricLabel = metricLabel(opt.Metric)
 	page.HereNowTemplate = slotsURL(r, "region", hereSlot, "month", nowSlot)
 	page.WelcomeNear = withPicks(r, "/?by=frequency&scale=global") + "#here-and-now"
 	page.WelcomeHerons = withPicks(r, "/?family=Ardeidae&family=Anatidae")

@@ -79,7 +79,9 @@ the rule: one decade is +900%, and a button reading "900%" explains nothing.
 
 Goals: goals.sizeIntuition
 
-Each section shows its range in the currently selected metric and the number of species in it.
+Each section shows its range in the currently selected metric and the number of species in it,
+under a heading that names the ordering as Order by does and the section's number: *Tail Tier 1*
+when ordering by Tail.
 
 Rationale: under per-section scaling (scaleToggle) the header is what tells the user that the scale has
 changed between one section and the next. Without it, per-section scaling is misleading.
