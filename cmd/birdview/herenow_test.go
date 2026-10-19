@@ -37,6 +37,7 @@ import (
 	"birdview/internal/dataset"
 	"birdview/internal/month"
 	"birdview/internal/region"
+	"birdview/internal/view"
 )
 
 // A page with settings of every kind, so "every other setting kept" has
@@ -631,5 +632,34 @@ func TestTierHeadersNameTheOrdering(t *testing.T) {
 				t.Errorf("%s heading %d reads %q, want %q", path, i+1, m[1], want)
 			}
 		}
+	}
+}
+
+// TestSectionRangeEndsDiffer checks a section heading never shows a range
+// whose two ends read the same when they are not. One decimal of an inch is
+// 2.5 mm, and a 15% section of bills can be narrower than that: a heading read
+// "Bill Tier 4 0.5 in – 0.5 in".
+//
+// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.sortsAscending.
+func TestSectionRangeEndsDiffer(t *testing.T) {
+	for _, metric := range []bool{false, true} {
+		for _, m := range []view.Metric{view.ByLength, view.ByBill, view.ByTail, view.ByWingspan, view.ByMass} {
+			u := unitsFor(metric, 10, 20) // small birds: the case that runs out of digits
+			for v := 3.0; v < 3000; v *= 1.07 {
+				for _, ratio := range []float64{1.01, 1.03, 1.149} {
+					lo, hi := u.formatRange(v, v*ratio, m)
+					if lo == hi {
+						t.Fatalf("metric=%v %s: %.3f to %.3f reads %q – %q", metric, m, v, v*ratio, lo, hi)
+					}
+				}
+			}
+			if lo, hi := u.formatRange(12.3, 12.3, m); lo != hi || lo != u.format(12.3, m) {
+				t.Errorf("a one-bird section reads %q – %q; want it as format gives it", lo, hi)
+			}
+		}
+	}
+	u := unitsFor(false, 10)
+	if lo, hi := u.formatRange(12.0, 13.5, view.ByBill); lo == hi {
+		t.Errorf("the reported case still reads %q – %q", lo, hi)
 	}
 }

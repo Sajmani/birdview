@@ -81,7 +81,8 @@ Goals: goals.sizeIntuition
 
 Each section shows its range in the currently selected metric and the number of species in it,
 under a heading that names the ordering as Order by does and the section's number: *Tail Tier 1*
-when ordering by Tail.
+when ordering by Tail. The two ends of the range carry as many decimals as it takes to tell them apart, up to two
+more than usual: a section of small bills can be narrower than a tenth of an inch.
 
 Rationale: under per-section scaling (scaleToggle) the header is what tells the user that the scale has
 changed between one section and the next. Without it, per-section scaling is misleading.

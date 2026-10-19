@@ -298,7 +298,10 @@ metrics
 the index sorts ascending by each, defaults to the Global scale under each, names it on the count
 line, and the comparison view offers both (`TestBillAndTailOrderings`, watched failing before the
 orderings existed). Every section heading names the ordering, as Order by does: *Tail Tier 1*
-(`TestTierHeadersNameTheOrdering`, watched failing on the bare "Tier 1").
+(`TestTierHeadersNameTheOrdering`, watched failing on the bare "Tier 1"). A heading's range never reads the
+same at both ends unless it is: up to two more decimals are added until the ends differ
+(`TestSectionRangeEndsDiffer`, from a reported "Bill Tier 4 0.5 in – 0.5 in", watched failing with
+the extra digits removed).
 
 ### sectionBoundariesObeyRule
 

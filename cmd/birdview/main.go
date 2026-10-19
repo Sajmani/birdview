@@ -1549,8 +1549,8 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			}
 			u = unitsFor(opt.Metric3, ms...)
 		}
-		sv := sectionView{Index: i + 1, Count: len(sec.Species),
-			Min: u.format(sec.Min, opt.Metric), Max: u.format(sec.Max, opt.Metric)}
+		sv := sectionView{Index: i + 1, Count: len(sec.Species)}
+		sv.Min, sv.Max = u.formatRange(sec.Min, sec.Max, opt.Metric)
 		if opt.Metric == view.ByFrequency {
 			sv.Min, sv.Max, sv.Note = frequencyBand(sec.Min, sec.Max, opt.Decades)
 		}
@@ -2414,31 +2414,53 @@ func unitsFor(metric bool, masses ...float64) units {
 }
 
 func (u units) format(v float64, as view.Metric) string {
+	return u.formatDigits(v, as, 0)
+}
+
+// formatRange formats a section's range, adding up to two decimal places to
+// both ends until they differ. One decimal of an inch is 2.5 mm, and a 15%
+// section of small bills is narrower than that: a heading read "0.5 in –
+// 0.5 in" (product.sectionHeadersStateRange). A one-bird section, whose ends
+// are equal, reads as format gives it.
+func (u units) formatRange(lo, hi float64, as view.Metric) (string, string) {
+	for extra := 0; ; extra++ {
+		a, b := u.formatDigits(lo, as, extra), u.formatDigits(hi, as, extra)
+		if a != b || lo == hi || extra == 2 {
+			return a, b
+		}
+	}
+}
+
+// formatDigits is format with extra decimal places.
+func (u units) formatDigits(v float64, as view.Metric, extra int) string {
+	f := func(decimals int, x float64, unit string) string {
+		return strconv.FormatFloat(x, 'f', decimals+extra, 64) + " " + unit
+	}
 	if as == view.ByMass {
 		if u.metric {
 			if u.big {
-				return fmt.Sprintf("%.2f kg", v/1000)
+				return f(2, v/1000, "kg")
 			}
-			return fmt.Sprintf("%.0f g", v)
+			return f(0, v, "g")
 		}
 		oz := v / gramsPerOunce
 		switch {
 		case u.big:
-			return fmt.Sprintf("%.1f lb", oz/16)
+			return f(1, oz/16, "lb")
 		case oz >= 1:
-			return fmt.Sprintf("%.1f oz", oz)
+			return f(1, oz, "oz")
 		default:
 			// A 3 g hummingbird is 0.11 oz; one decimal would erase the
 			// difference between the smallest birds entirely. This is a
 			// precision choice within one unit, not a second unit, so it
 			// stays per value.
-			return fmt.Sprintf("%.2f oz", oz)
+			return f(2, oz, "oz")
 		}
 	}
 	if u.metric {
-		return fmt.Sprintf("%.1f cm", v/10)
+		return f(1, v/10, "cm")
 	}
-	return fmt.Sprintf("%.1f in", v/25.4)
+	return f(1, v/25.4, "in")
 }
 
 // familyURL rebuilds the current URL with exactly the given families selected.
