@@ -173,3 +173,19 @@ coordinate.
 press requests failed it on the coordinate in the request and on the page requested. A press that
 navigates leaves headless Chrome waiting under the flags that keep it off the network, so that
 case reads the server's request log and then stops the browser.
+
+## tierHistogramMatchesTiers
+
+**The histogram has one bar per tier, sized and labeled from the tiers themselves**
+
+Covers: product.tierHistogram
+
+**Method:** on the rendered index under several orderings and a filter, the histogram has exactly
+one bar per tier section, in order; each bar links to its tier's section; each bar's height is its
+tier's count as a percentage of the largest tier's, rounded; and each bar's label names the tier
+and ends with its count.
+
+**Run:** `go test ./cmd/birdview/ -run TestTierHistogram`
+**Status: verified 2026-10-19, passing, and watched failing** before the histogram and the tier
+ids existed, and with bars sized by raw count instead of by share of the largest tier.
+

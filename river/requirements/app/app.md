@@ -79,6 +79,7 @@ a lower tier may always do; nothing local loosens it.
 - [product.sectionBreakRule](../sources/product/ordering.md#sectionbreakrule) — Sections break at N% above the section minimum
 - [product.sectionThresholdDefault](../sources/product/ordering.md#sectionthresholddefault) — N defaults to 15 and is adjustable
 - [product.sectionHeadersStateRange](../sources/product/ordering.md#sectionheadersstaterange) — Section headers state range and count
+- [product.tierHistogram](../sources/product/ordering.md#tierhistogram) — A histogram shows how many species each tier holds
 
 ### Pages and views
 

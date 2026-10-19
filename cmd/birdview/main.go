@@ -1002,6 +1002,8 @@ type pageData struct {
 	HereScript  template.JS
 	// MetricLabel names the ordering in each section heading: "Tail Tier 1".
 	MetricLabel string
+	// Histogram is one bar per tier (product.tierHistogram).
+	Histogram []histBar
 	// HereNowTemplate is this page with both the region and the month
 	// replaced by placeholders, for arriving by a #here-and-now link.
 	HereNowTemplate string
@@ -1596,6 +1598,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			page.Sections[i].Max = sp.u.formatDigits(sp.hi, opt.Metric, extra)
 		}
 	}
+	page.Histogram = histogram(page.MetricLabel, page.Sections)
 	s.render(w, "index.html", page)
 }
 
@@ -2430,6 +2433,40 @@ func unitsFor(metric bool, masses ...float64) units {
 
 func (u units) format(v float64, as view.Metric) string {
 	return u.formatDigits(v, as, 0)
+}
+
+// histBar is one tier's bar in the histogram under the count line
+// (product.tierHistogram): its height as a percentage of the largest tier's
+// count, and a label saying which tier it is.
+type histBar struct {
+	Index, Percent int
+	Label          string
+}
+
+// histogram builds one bar per section, each labeled as its heading reads.
+func histogram(metric string, secs []sectionView) []histBar {
+	largest := 0
+	for _, sv := range secs {
+		largest = max(largest, sv.Count)
+	}
+	out := make([]histBar, 0, len(secs))
+	for _, sv := range secs {
+		var span string
+		switch {
+		case sv.Note != "":
+			span = sv.Note
+		case sv.Min == sv.Max:
+			span = sv.Min
+		case sv.Max != "":
+			span = sv.Min + " – " + sv.Max
+		default:
+			span = sv.Min + " and beyond"
+		}
+		out = append(out, histBar{Index: sv.Index,
+			Percent: int(math.Round(100 * float64(sv.Count) / float64(largest))),
+			Label:   fmt.Sprintf("%s Tier %d: %s, %d species", metric, sv.Index, span, sv.Count)})
+	}
+	return out
 }
 
 // tierSpan is a section heading's range before it is written: from the

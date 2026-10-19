@@ -21,12 +21,14 @@ import (
 	"fmt"
 	"html"
 	"io/fs"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os/exec"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -716,5 +718,44 @@ func TestTierCountFollowsTheRange(t *testing.T) {
 	if !regexp.MustCompile(`&ndash; [^<]+</?[^>]*>?\s*<span class="n">\d+ species</span>`).MatchString(body) &&
 		!regexp.MustCompile(`in\s*<span class="n">\d+ species</span>`).MatchString(body) {
 		t.Error("no tier heading has its species count right after the range")
+	}
+}
+
+// TestTierHistogram checks the histogram under the count line: one bar per
+// tier, in order, each as tall as its tier's count against the largest, each
+// labeled with its tier and linking to it, under every ordering.
+//
+// Verifies: product.tierHistogram. Criterion: app.tierHistogramMatchesTiers.
+func TestTierHistogram(t *testing.T) {
+	s := newTestServer(t)
+	bar := regexp.MustCompile(`<a href="#tier-(\d+)" style="height:(\d+)%" aria-label="([^"]+)"`)
+	for _, q := range []string{"", "by=bill", "by=mass", "by=frequency", "family=Ardeidae"} {
+		body := mustGet(t, s, "/?"+q)
+		bars := bar.FindAllStringSubmatch(body, -1)
+		secs := regexp.MustCompile(`(?s)<section id="tier-(\d+)">.*?<span class="n">(\d+) species</span>`).FindAllStringSubmatch(body, -1)
+		if len(secs) == 0 {
+			t.Fatalf("/?%s: no tier sections with ids", q)
+		}
+		if len(bars) != len(secs) {
+			t.Fatalf("/?%s: %d bars for %d tiers", q, len(bars), len(secs))
+		}
+		largest := 0
+		for _, sec := range secs {
+			n, _ := strconv.Atoi(sec[2])
+			largest = max(largest, n)
+		}
+		for i, b := range bars {
+			n, _ := strconv.Atoi(secs[i][2])
+			if b[1] != secs[i][1] || b[1] != strconv.Itoa(i+1) {
+				t.Errorf("/?%s: bar %d links to tier %s; tiers are in order", q, i+1, b[1])
+			}
+			if h, _ := strconv.Atoi(b[2]); h != int(math.Round(100*float64(n)/float64(largest))) {
+				t.Errorf("/?%s: bar %d is %d%% tall for %d of the largest tier's %d species", q, i+1, h, n, largest)
+			}
+			if label := html.UnescapeString(b[3]); !strings.Contains(label, fmt.Sprintf("Tier %d", i+1)) ||
+				!strings.HasSuffix(label, fmt.Sprintf("%d species", n)) {
+				t.Errorf("/?%s: bar %d is labeled %q", q, i+1, label)
+			}
+		}
 	}
 }

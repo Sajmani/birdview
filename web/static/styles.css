@@ -200,6 +200,12 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
   border-bottom: 1px solid var(--line); padding-bottom: 6px; }
 .tier { background: var(--panel); border: 1px solid var(--line); border-radius: 5px;
   padding: 2px 8px; color: var(--accent); }
+/* One bar per tier (product.tierHistogram). A tier of one bird keeps a sliver
+   so it can still be seen and clicked. */
+.hist { display: flex; align-items: flex-end; gap: 2px; height: 44px; margin: 10px 0 4px; }
+.hist a { flex: 1 1 0; max-width: 22px; min-height: 2px; background: var(--accent);
+  border-radius: 2px 2px 0 0; }
+.hist a:hover, .hist a:focus { background: var(--ink); }
 /* Right after the range, in the count line's style (product.sectionHeadersStateRange). */
 h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 

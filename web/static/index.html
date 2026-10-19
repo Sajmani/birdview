@@ -404,9 +404,13 @@
      (product.helpfulEmptyState). When nothing matches, "No birds match"
      follows immediately below and reads as a continuation of this line. */}}
 <p class="count">{{.Shown}} of {{.Total}} species{{range .Filters}}<span class="fsum"><b>{{.Label}}</b> {{.Value}}</span>{{end}}</p>
+{{/* One bar per tier, as tall as its count against the largest, each a link
+     to its tier (product.tierHistogram). Heights are inline because they are
+     data; no color is set here. */}}
+{{if .Histogram}}<nav class="hist" aria-label="Species in each tier">{{range .Histogram}}<a href="#tier-{{.Index}}" style="height:{{.Percent}}%" aria-label="{{.Label}}" title="{{.Label}}"></a>{{end}}</nav>{{end}}
 
 {{range .Sections}}
-<section>
+<section id="tier-{{.Index}}">
   {{/* Three shapes, because a frequency tier is not always a range
        (product.orderByFrequency): a closed band, an open last band, and the birds with no
        ratio at all, which have no band to state. */}}

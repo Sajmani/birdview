@@ -95,3 +95,20 @@ an inch. Headings once gave each tier's smallest and largest bird, rounded headi
 Rationale: under per-section scaling (scaleToggle) the header is what tells the user that the scale has
 changed between one section and the next. Without it, per-section scaling is misleading.
 
+## tierHistogram
+
+**A histogram shows how many species each tier holds**
+
+Subject: `sectioning.histogram`
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
+
+Under the species-count line, a histogram has one bar per tier, in tier order, each as tall as its
+tier's species count against the largest tier's, and each linking to its tier. A bar's label names
+the tier as its heading does, its range and its count: *Bill Tier 4: 0.35 in – 0.41 in, 72
+species*. It follows the current ordering and filters, so it is the shape of the view on screen.
+
+Every tier is the same 15% step, so the bars are a histogram of size on a log scale. Its shape is
+worth seeing: by length it has two humps, songbirds peaking near 5 in and everything else near a
+foot, crossing over around 7 in; by mass it is a long plateau; tails crowd into a few tiers. Added
+2026-10-19 at the owner's request.
+
