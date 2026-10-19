@@ -79,3 +79,74 @@ panels, laid out but not drawn, measured against whatever was drawn there.
 **Known limits:** a background image or gradient counts as no background; text whose middle lands
 on a thin line drawn behind it is measured against the line; an SVG drawn into a page as an image
 is measured only as its own page.
+
+## boundariesResolveKnownPoints
+
+**Known places resolve to the regions they are in**
+
+Covers: tech.regionBoundaries
+
+**Method:** look up known coordinates in the committed boundary file with the Go reference
+lookup — land polygons first, then sea boxes — and require: Sacramento → CA, Toronto → ON,
+Honolulu → HI, Anchorage → AK, Washington → DC, Midway → MidwayAtoll, a point in the Gulf off
+Louisiana → GulfOfMexico, a point in the open North Atlantic → NorthAtlantic; Mexico City and
+London → no region. The expected answers come from geography, not from a run of the code.
+
+**Run:** `go test ./cmd/birdview-boundaries/ -run TestKnownPoints`
+**Status: not yet verified.**
+
+## boundariesCoverEveryRegion
+
+**Every land region has a boundary, and the file stays small**
+
+Covers: tech.regionBoundaries
+
+**Method:** every land region in `internal/region` has at least one polygon in the boundary file
+and every polygon belongs to one; the file's sea boxes equal `internal/region`'s; and the file
+compressed is at most 200 KB.
+
+**Run:** `go test ./cmd/birdview-boundaries/ -run TestCoverage`
+**Status: not yet verified.**
+
+## hereAndNowSitBesideAll
+
+**Here and Now sit beside All, and keep every other setting**
+
+Covers: product.hereSelectsLocalRegion, product.nowSelectsCurrentMonth
+
+**Method:** on the rendered index, Here is the control after All in Regions and Now the control
+after All in Months. Now links to `/now` with every other setting kept, and `/now` redirects to
+the index with the server's month as the only month, marked `no-store`. Here carries a URL
+template keeping every other setting, and without JavaScript is marked inactive, focusable and
+labeled with why.
+
+**Run:** `go test ./cmd/birdview/ -run TestHereAndNow`
+**Status: not yet verified.**
+
+## hereLookupAgreesInTheBrowser
+
+**The browser finds the same region Go does, and says when it cannot**
+
+Covers: product.hereSelectsLocalRegion
+
+**Method:** in headless Chrome with the location stubbed, press Here at each point of
+boundariesResolveKnownPoints and require the navigation the Go lookup predicts; with permission
+refused, location unavailable, and a point outside every region, require the matching message and
+no navigation. Now, pressed, goes to the reader's month without requesting `/now`.
+
+**Run:** `go test ./cmd/birdview/ -run TestHereInTheBrowser`
+**Status: not yet verified.**
+
+## hereSendsNothingExtra
+
+**The server cannot tell that Here was used**
+
+Covers: product.locationStaysInBrowser
+
+**Method:** in headless Chrome, record every request: the boundary file is requested when the
+index loads, before anything is pressed; pressing Here then makes exactly one request, identical
+to the one choosing that region's chip would make after Only, and no request carries a
+coordinate.
+
+**Run:** `go test ./cmd/birdview/ -run TestHereInTheBrowser`
+**Status: not yet verified.**

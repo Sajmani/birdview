@@ -98,3 +98,56 @@ The GADM id stays the internal key — it keys the presence table and is what GB
 with — but it is a database key and does not belong in a URL. The slug is **derived** from the
 code or the name rather than stored alongside them, so a renamed region cannot keep a URL that
 no longer describes it.
+
+## hereSelectsLocalRegion
+
+**Here selects the region the reader is in**
+
+Subject: `presentation.region_filter.here`
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
+
+A **Here** button beside **All** in Regions replaces the region selection with the one region the
+reader is in, every other setting kept. If the reader refuses permission, their location cannot
+be found, or it falls in no region BirdView covers, the page says which of the three happened and
+leaves the region selection unchanged.
+
+The region is found by testing the reader's position against the land regions first and the sea
+regions second, so a reader on a ferry in the Gulf gets the Gulf and a reader in Tampa gets
+Florida. Near a border or a coast the answer can differ from how the occurrence records were
+filed, because the boundaries come from a different source (tech.regionBoundaries); within a few
+hundred meters, Here may pick the neighbor.
+
+**Without JavaScript, Here is shown inactive** — dashed border, muted background, text at the
+full contrast floor (decisions.oneContrastFloor) — and focusable, with a tooltip saying it needs
+JavaScript and permission to use the reader's location. It does nothing when pressed.
+
+## nowSelectsCurrentMonth
+
+**Now selects the current month**
+
+Subject: `presentation.month_filter.now`
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
+
+A **Now** button beside **All** in Months replaces the month selection with the current month on
+the reader's own clock, every other setting kept. Without JavaScript it uses the server's month.
+
+The two differ only near midnight at the end of a month, in the reader's time zone. Without
+JavaScript the button links to `/now`, which redirects to the index for the server's current
+month and is never cached; with it, the script points the button at the reader's month directly,
+and `/now` is not requested. Either way no page carries a month taken from the server's clock,
+which tech.cacheLifetimeStated depends on ([decisions.hereAndNowCaching](../../decisions.md#hereandnowcaching)).
+
+## locationStaysInBrowser
+
+**The reader's location never leaves the browser**
+
+Subject: `privacy.location`
+Goals: goals.readerPrivacy
+
+The reader's position is used only inside the browser to choose a region, and is never sent,
+stored or logged. The region boundaries load with every index page whether or not Here is
+pressed, and pressing Here produces exactly the request that choosing that region by hand would.
+
+So the server cannot tell that Here was used, let alone where the reader is. Loading the
+boundaries only when Here is pressed would leak the first of those; sending the position to the
+server for the lookup would leak both.

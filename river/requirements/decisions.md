@@ -3684,3 +3684,42 @@ exactly this.
   because it looked only for the backticked form. `refs.py` now rejects both forms.
 - **River's checker now runs here**, as `goals.py`, and found that it read a title followed by a
   status marker — *(withdrawn)*, *(hard rule)* — as missing. River was fixed.
+
+---
+
+## hereAndNowCaching
+
+**The boundary file is cached for a year, and Now keeps the server's clock out of every page**
+
+**Subject:** `serving.cache_validation`
+**Kind:** Amends tech.cacheLifetimeStated; settles how product.nowSelectsCurrentMonth works without JavaScript
+**Date:** 2026-10-18 · **Decided by:** Sameer
+
+### What conflicted
+
+Here and Now (product.hereSelectsLocalRegion, product.nowSelectsCurrentMonth) ran into
+tech.cacheLifetimeStated twice.
+
+1. **The boundary file wants a long cache lifetime.** It loads with every index page
+   (product.locationStaysInBrowser), so revalidating it on every load is waste. The requirement
+   said `no-cache` and an ETag on *every* response.
+2. **A Now link carrying the server's month would put a clock into the page.** The requirement's
+   ETag is a fingerprint of the build and the URL, sound only because a page has "no clock
+   anywhere in the render path", which acceptance.honestRevalidation checks. After a month ended,
+   a browser revalidating a cached index would get 304 and keep last month's Now link.
+
+### Decided
+
+1. **A file whose URL carries a hash of its own content is served immutable for a year.** It can
+   never be stale: new content is a new URL. The pages that load it keep `no-cache`.
+2. **Without JavaScript, Now links to `/now`**, which redirects to the index for the server's
+   current month and is marked `no-store`. With JavaScript the script sets the link to the
+   reader's own month and `/now` is never requested. No page carries the server's month.
+
+### Considered and not chosen
+
+- **The month in the ETag.** Workable, but it amends the purity rationale and its check, and
+  every cached page would refetch in full once a month.
+- **Now only with JavaScript**, inactive otherwise like Here. It drops the server-month fallback
+  the owner accepted.
+

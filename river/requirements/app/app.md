@@ -67,6 +67,9 @@ a lower tier may always do; nothing local loosens it.
 - [product.onlyPerGroup](../sources/product/presentation.md#onlypergroup) — Every group offers "Only"
 - [product.firstLoadShowsAll](../sources/product/presentation.md#firstloadshowsall) — First load shows everything
 - [product.helpfulEmptyState](../sources/product/presentation.md#helpfulemptystate) — The empty state says what to do
+- [product.hereSelectsLocalRegion](../sources/product/filtering.md#hereselectslocalregion) — Here selects the region the reader is in
+- [product.nowSelectsCurrentMonth](../sources/product/filtering.md#nowselectscurrentmonth) — Now selects the current month
+- [product.locationStaysInBrowser](../sources/product/filtering.md#locationstaysinbrowser) — The reader's location never leaves the browser
 
 ### Ordering and sections
 
@@ -99,6 +102,7 @@ a lower tier may always do; nothing local loosens it.
 - [tech.servesOnLocalhost](../sources/tech/delivery.md#servesonlocalhost) — Serves on localhost:8080
 - [tech.compressedResponses](../sources/tech/delivery.md#compressedresponses) — Responses are compressed when the client asks
 - [tech.cacheLifetimeStated](../sources/tech/delivery.md#cachelifetimestated) — Every response says how long it may be reused
+- [tech.regionBoundaries](../sources/tech/delivery.md#regionboundaries) — Region boundaries are generated from Natural Earth and kept small
 
 ## Excluded
 

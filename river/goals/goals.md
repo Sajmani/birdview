@@ -100,6 +100,16 @@ says the gaps are part of the data. It is why a species out of scope keeps a pag
 
 ---
 
+## readerPrivacy
+
+**The reader's privacy is protected**
+
+BirdView learns no more about a reader than serving the page they asked for requires.
+
+A page that knows where its reader is, or remembers what they looked at, holds something the
+reader did not mean to give. No single change can make this true for good — every new feature is
+a new chance to learn too much — which is why it is a goal and not a requirement.
+
 ## Non-goals
 
 Stated as deliberately as the goals. Each of these is a plausible thing a bird app does, and

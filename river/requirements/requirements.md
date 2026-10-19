@@ -37,9 +37,10 @@ requirements, such as a dataset, has a directory holding only its provenance.
 | [`inat-terms`](#inat-terms) | mandatory | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; almost nothing in it reaches BirdView |
 | [`specman`](#specman) | — (method) | project copy | **retired** 2026-10-15 — replaced by River, whose pin is in `process.md`'s banner |
 | [`ebird-sensitive`](#ebird-sensitive) | mandatory | absorbed as facts, not vendored | **adopted** — the US and Canada entries restated in `taxonomy.EBirdSensitive`, each confirmed against the export ([decisions.ebirdSilenceNotAbsence](decisions.md#ebirdsilencenotabsence)) |
+| [`natural-earth`](#natural-earth) | mandatory | by reference, pinned by hash, **not** vendored | **adopted** 2026-10-18 — public domain; fetched and hash-checked by `cmd/birdview-boundaries` for the Here button's region boundaries |
 | [`birdlife-checklist`](#birdlife-checklist) | mandatory | **rejected** | **rejected** — DataZone terms forbid automated access; [decisions.vegaGullBorrows](decisions.md#vegagullborrows) re-based 2026-10-14 onto the vendored `avilist` and `avonet` workbooks |
 
-Two of the fourteen are rejected, and neither blocks v1. `birdlife-checklist` was consulted in a
+Two of the fifteen are rejected, and neither blocks v1. `birdlife-checklist` was consulted in a
 way DataZone's terms forbid; its quotations were removed and [decisions.vegaGullBorrows](decisions.md#vegagullborrows) was
 re-based on the vendored CC BY 4.0 workbooks. `ricklefs` was evaluated and
 **rejected**: its platform terms prohibit extraction, integration, storage and redistribution
@@ -532,6 +533,32 @@ records which method this project was worked under from 2026-09-23 to 2026-10-15
 source — it produces nothing for a criterion to cite, which this entry already observed — and
 records the pin in the file's own banner, so that one pin has one record. Local amendments to
 it are in [bindings.md](../bindings.md).
+
+---
+
+## `natural-earth`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/ — archive at `https://naciscdn.org/naturalearth/10m/cultural/ne_10m_admin_1_states_provinces.zip` |
+| **Version** | 5.1.1 |
+| **Integrity** | [river/requirements/sources/naturalearth/PROVENANCE.md](sources/naturalearth/PROVENANCE.md) |
+| **Tier** | mandatory (copyright), though a public-domain source imposes nothing |
+| **Import style** | By reference, **pinned by hash, not vendored**: `cmd/birdview-boundaries` fetches the archive, checks its hash and writes `data/region-boundaries.json` ([tech.regionBoundaries](sources/tech/delivery.md#regionboundaries)) |
+| **Scope** | Region boundaries for the Here button ([product.hereSelectsLocalRegion](sources/product/filtering.md#hereselectslocalregion)) |
+| **Adopted parts** | Admin-1 polygons for the 51 US units (50 states and DC), the 13 Canadian provinces and territories, and five US Minor Outlying Islands: Johnston, Midway, Navassa, Palmyra and Wake |
+| **Exclusions** | Every other country, and Jarvis, Baker and Howland, which are not BirdView regions |
+| **Owner** | Natural Earth (Tom Patterson, Nathaniel Vaughn Kelso and contributors) |
+| **Status** | **Adopted 2026-10-18.** Retrieved, hashed, and the five atolls confirmed present. Credited in the index footer though no credit is required. |
+
+License, quoted from <https://www.naturalearthdata.com/about/terms-of-use/>, read 2026-10-18:
+
+> "All versions of Natural Earth raster + vector map data found on this website are in the public
+> domain. … No permission is needed to use Natural Earth. Crediting the authors is unnecessary."
+
+Its borders and coastlines are not GADM's, which the occurrence records were filed under, so near
+a border or a shore the Here button may pick a neighboring region. GADM itself was not usable: its
+license forbids redistribution, and the boundaries are sent to every reader's browser.
 
 ---
 
