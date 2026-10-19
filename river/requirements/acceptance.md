@@ -634,13 +634,14 @@ selection
 does **not** say that nothing matched; the count reports zero; and All is no longer marked
 selected.
 
-**Assertions, the address named while the list is full:** the **count line names every setting
-the address carries, and nothing else** — one box per parameter, in the order the controls
-appear, each labeled as its control is: an address carrying nothing names nothing, one carrying
-every parameter names all eleven in order, and each parameter alone names exactly one box, even
-when it selects everything or nothing (`TestCountLineNamesTheAddress`). **Changed 2026-10-19** at
-the owner's request from naming only filters that narrow something. Watched failing by dropping the Units box,
-and by naming regions before months.
+**Assertions, every setting named while the list is full:** the **count line names every
+setting, defaults included** — one box each, in the order the controls appear, each labeled as its
+control is, with Comparing only while picking: the arrival page names all ten at their defaults,
+a page setting everything names all eleven in order, and Frequency's own defaults (Global, 10×)
+are named under Frequency (`TestCountLineNamesEverySetting`). **Changed twice on 2026-10-19** at
+the owner's request: from naming only filters that narrow something, to naming what the address
+carries, to naming everything. Watched failing by leaving months out when the address carries
+none.
 
 **Assertions, nothing matched:** the message says the intersection is empty and offers a link
 that clears the filters. It does **not** repeat the filter names, which the count line

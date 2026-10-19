@@ -3238,32 +3238,29 @@ func TestEmptyStateNamesTheFiltersThatEmptiedIt(t *testing.T) {
 	// the fixture cannot yet reach an empty intersection through the UI: one
 	// filter cannot contradict itself, and the region filter of product.regionAndMonthFilter does not
 	// exist. When it does, this should become a rendering test.
-	got := describeView(url.Values{"family": {"Ardeidae", "Turdidae"}}, s.fams, options{HasSelection: true,
+	got := describeView(s.fams, options{HasSelection: true,
 		Families: map[string]bool{"Ardeidae": true, "Turdidae": true}})
-	if len(got) != 1 || got[0].Label != "Family" {
-		t.Fatalf("describeView gave %+v, want one Family entry", got)
+	fam := got[len(got)-1]
+	if fam.Label != "Family" {
+		t.Fatalf("describeView gave %+v, want Family last", got)
 	}
 	for _, want := range []string{"Ardeidae", "Turdidae"} {
-		if !strings.Contains(got[0].Value, want) {
-			t.Errorf("the description %q does not name %q", got[0].Value, want)
+		if !strings.Contains(fam.Value, want) {
+			t.Errorf("the description %q does not name %q", fam.Value, want)
 		}
 	}
 
-	// A filter the address carries is described even when it selects
-	// everything, so the line and the address agree; one the address does
-	// not carry is at its default and is not. The first half reversed on
-	// 2026-10-19 at the owner's request (product.helpfulEmptyState).
+	// Every family selected, and no family filter at all, both say All.
+	// Until 2026-10-19 neither was described; the owner asked for every
+	// setting to be named, defaults included (product.helpfulEmptyState).
 	everything := map[string]bool{}
-	var names []string
 	for _, f := range s.fams {
 		everything[f.Name] = true
-		names = append(names, f.Name)
 	}
-	if d := describeView(url.Values{"family": names}, s.fams, options{HasSelection: true, Families: everything}); len(d) != 1 || d[0].Value != "All" {
-		t.Errorf("every family selected, in the address, is described as %+v; want Family All", d)
-	}
-	if d := describeView(url.Values{}, s.fams, options{}); d != nil {
-		t.Errorf("nothing in the address is described as %+v", d)
+	for _, o := range []options{{HasSelection: true, Families: everything}, {}} {
+		if d := describeView(s.fams, o); d[len(d)-1] != (activeFilter{"Family", "All"}) {
+			t.Errorf("every family is described as %+v; want Family All", d[len(d)-1])
+		}
 	}
 }
 
@@ -3689,10 +3686,11 @@ func TestFiltersAreNamedOnTheCountLine(t *testing.T) {
 		return mustMatch(t, body, `<p class="count">(.*?)</p>`, "the species count line")
 	}
 
-	// Arrival: nothing is narrowing anything, so nothing is named. Saying
-	// "Family: all 6" here would present the default as a choice.
-	if got := countLine(mustGet(t, s, "/")); strings.Contains(got, "fsum") {
-		t.Errorf("the arrival page names a filter on the count line: %q", got)
+	// Arrival: every setting at its default, named as such. Until
+	// 2026-10-19 nothing was named here; the owner asked for every setting,
+	// defaults included (TestCountLineNamesEverySetting has the full list).
+	if got := countLine(mustGet(t, s, "/")); !strings.Contains(got, "<b>Family</b> All") {
+		t.Errorf("the arrival page does not name its family filter as All: %q", got)
 	}
 
 	// One filter set, and birds still matching: named anyway.
@@ -3717,9 +3715,9 @@ func TestFiltersAreNamedOnTheCountLine(t *testing.T) {
 	if !strings.Contains(empty, "No birds match") {
 		t.Fatal("an empty intersection does not report a failed match")
 	}
-	if n := strings.Count(empty, `class="fsum"`); n != 2 {
-		t.Errorf("the page carries %d filter chips, want 2 — the empty state is "+
-			"repeating what the count line already said", n)
+	if n, m := strings.Count(empty, `class="fsum"`), strings.Count(line, `class="fsum"`); n != m {
+		t.Errorf("the page carries %d setting chips and the count line %d — the empty state is "+
+			"repeating what the count line already said", n, m)
 	}
 }
 
@@ -6903,12 +6901,12 @@ func TestStaticServesAssetsOnly(t *testing.T) {
 	}
 }
 
-// TestCountLineNamesTheAddress checks that the species-count line names every
-// setting the address carries and nothing else: one box per parameter, in
-// the order the controls appear, each labeled as its control is.
+// TestCountLineNamesEverySetting checks that the species-count line names
+// every setting, defaults included, one box each, in the order the controls
+// appear, each labeled as its control is; Comparing only while picking.
 //
 // Verifies: product.helpfulEmptyState. Criterion: acceptance.emptyStateGuides.
-func TestCountLineNamesTheAddress(t *testing.T) {
+func TestCountLineNamesEverySetting(t *testing.T) {
 	s := newTestServer(t)
 	boxes := func(path string) []string {
 		t.Helper()
@@ -6919,8 +6917,10 @@ func TestCountLineNamesTheAddress(t *testing.T) {
 		}
 		return out
 	}
-	if got := boxes("/"); got != nil {
-		t.Errorf("an address carrying nothing names %v", got)
+	defaults := []string{"Order by: Length", "Scale: Per section", "Units: in / oz", "Names: N. America",
+		"Section step: 15%", "Month: All", "Region: All", "Habitat: All", "Diet: All", "Family: All"}
+	if got := boxes("/"); !slices.Equal(got, defaults) {
+		t.Errorf("the arrival page names\n  %v\nwant every default\n  %v", got, defaults)
 	}
 	everything := "/?by=mass&scale=global&units=metric&names=world&step=20&species=amecro" +
 		"&month=Jun&region=CA&habitat=" + trait.Habitats[0].Value + "&niche=" + trait.Niches[0].Value +
@@ -6931,12 +6931,9 @@ func TestCountLineNamesTheAddress(t *testing.T) {
 	if got := boxes(everything); !slices.Equal(got, want) {
 		t.Errorf("the count line names\n  %v\nwant\n  %v", got, want)
 	}
-	// One parameter, one box, whatever it says.
-	for _, p := range []string{"by=length", "scale=section", "units=imperial", "names=na", "step=15",
-		"species=", "month=", "region=", "habitat=", "niche=", "family="} {
-		if got := boxes("/?" + p); len(got) != 1 {
-			t.Errorf("/?%s names %v; want exactly one box", p, got)
-		}
+	// Frequency's own defaults: global scale, bands of one decade.
+	if got := boxes("/?by=frequency"); !slices.Contains(got, "Scale: Global") || !slices.Contains(got, "Section step: 10×") {
+		t.Errorf("under Frequency the count line names %v; want its defaults, Global and 10×", got)
 	}
 	// Each label is a control's own, so the line reads in the page's words.
 	page := mustGet(t, s, "/")

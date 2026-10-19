@@ -153,14 +153,13 @@ Goals: goals.comparisonAcrossFamilies
 
 With nothing selected, the display area reads *"Select birds to display in Controls above"*.
 
-**Every setting the address carries is named on the species-count line**, one box per parameter,
+**Every setting is named on the species-count line, always**, defaults included, one box each,
 labeled as its control is and in the order the controls appear: Order by, Scale, Units, Names,
-Section step, Comparing (while picking birds to compare), Month, Region, Habitat, Diet, Family. A
-setting the address does not carry is at its default and is not named; one it carries is named
-even when it selects everything, so the line and the address always say the same thing. What is
-shaping the list is worth knowing while the list still has birds in it, not only once it is empty
-— a reader who has forgotten that a region is still selected should not have to open a control to
-find out.
+Section step, Comparing (only while picking birds to compare), Month, Region, Habitat, Diet,
+Family. A setting at its default says so — *Order by Length*, *Region All* — so the line describes
+the whole view whether or not the address spells it out. What is shaping the list is worth knowing
+while the list still has birds in it, not only once it is empty — a reader who has forgotten that a
+region is still selected should not have to open a control to find out.
 
 This replaced, at the owner's request on 2026-10-19, a rule that named only filters narrowing
 something and left out the sort, the scale, the units, the names, the section step, the months and

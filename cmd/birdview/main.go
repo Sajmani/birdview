@@ -1047,18 +1047,13 @@ type activeFilter struct {
 	Value string // "Parulidae, Icteridae" or "3 of 90 selected"
 }
 
-// describeView names every setting the address carries, one box per
-// parameter, labeled as its control is and in the order the controls appear
-// (product.helpfulEmptyState). A parameter the address does not carry is at
-// its default and gets no box; one it carries gets a box even when it selects
-// everything, so the line and the address always say the same thing.
-//
-// The settings are read from the query itself, since their defaults are
-// indistinguishable from an explicit choice once parsed; the filters from the
-// presence flags parseOptions records for exactly this distinction.
+// describeView names every setting on the count line, defaults included, one
+// box each, labeled as its control is and in the order the controls appear
+// (product.helpfulEmptyState). Comparing appears only while picking. A filter
+// the address does not carry selects everything, and says All.
 //
 // Verifies: product.helpfulEmptyState.
-func describeView(q url.Values, fams []familyOption, opt options) []activeFilter {
+func describeView(fams []familyOption, opt options) []activeFilter {
 	// Past a handful the names stop being readable and the count is the
 	// useful fact. The threshold is a presentation judgement, not a rule.
 	const nameLimit = 6
@@ -1077,25 +1072,15 @@ func describeView(q url.Values, fams []familyOption, opt options) []activeFilter
 	add := func(label, value string) { out = append(out, activeFilter{Label: label, Value: value}) }
 
 	// The Controls panel, top to bottom.
-	if q.Has("by") {
-		add("Order by", map[view.Metric]string{view.ByLength: "Length", view.ByWingspan: "Wingspan",
-			view.ByMass: "Mass", view.ByFrequency: "Frequency"}[opt.Metric])
-	}
-	if q.Has("scale") {
-		add("Scale", map[view.ScaleMode]string{view.PerSection: "Per section", view.Global: "Global"}[opt.Scale])
-	}
-	if q.Has("units") {
-		add("Units", map[bool]string{false: "in / oz", true: "cm / g"}[opt.Metric3])
-	}
-	if q.Has("names") {
-		add("Names", map[dataset.Locale]string{dataset.LocaleNA: "N. America", dataset.LocaleWorld: "World"}[opt.Locale])
-	}
-	if q.Has("step") {
-		if opt.Metric == view.ByFrequency {
-			add("Section step", map[int]string{1: "10×", 2: "100×"}[opt.Decades])
-		} else {
-			add("Section step", strconv.FormatFloat(opt.Step, 'f', -1, 64)+"%")
-		}
+	add("Order by", map[view.Metric]string{view.ByLength: "Length", view.ByWingspan: "Wingspan",
+		view.ByMass: "Mass", view.ByFrequency: "Frequency"}[opt.Metric])
+	add("Scale", map[view.ScaleMode]string{view.PerSection: "Per section", view.Global: "Global"}[opt.Scale])
+	add("Units", map[bool]string{false: "in / oz", true: "cm / g"}[opt.Metric3])
+	add("Names", map[dataset.Locale]string{dataset.LocaleNA: "N. America", dataset.LocaleWorld: "World"}[opt.Locale])
+	if opt.Metric == view.ByFrequency {
+		add("Section step", map[int]string{1: "10×", 2: "100×"}[opt.Decades])
+	} else {
+		add("Section step", strconv.FormatFloat(opt.Step, 'f', -1, 64)+"%")
 	}
 	if opt.Picking {
 		switch n := len(opt.Picks); n {
@@ -1109,7 +1094,9 @@ func describeView(q url.Values, fams []familyOption, opt options) []activeFilter
 	}
 
 	// The Regions and months panel: months, then regions.
-	if opt.HasMonths {
+	if !opt.HasMonths {
+		add("Month", "All")
+	} else {
 		var picked []string
 		for i := 0; i < month.Count; i++ {
 			if opt.Months[i] {
@@ -1118,7 +1105,9 @@ func describeView(q url.Values, fams []familyOption, opt options) []activeFilter
 		}
 		add("Month", describe(picked, month.Count))
 	}
-	if opt.HasRegions {
+	if !opt.HasRegions {
+		add("Region", "All")
+	} else {
 		var picked []string
 		// Any grouping enumerates every region exactly once, being a
 		// partition; the geographic one is used because its order is the one
@@ -1137,6 +1126,7 @@ func describeView(q url.Values, fams []familyOption, opt options) []activeFilter
 	// "Eats insects", not "Invertivore".
 	cat := func(label string, terms []trait.Term, sel map[string]bool, present bool) {
 		if !present {
+			add(label, "All")
 			return
 		}
 		var picked []string
@@ -1149,7 +1139,9 @@ func describeView(q url.Values, fams []familyOption, opt options) []activeFilter
 	}
 	cat("Habitat", trait.Habitats, opt.Habitats, opt.HasHabitats)
 	cat("Diet", trait.Niches, opt.Niches, opt.HasNiches)
-	if opt.HasSelection {
+	if !opt.HasSelection {
+		add("Family", "All")
+	} else {
 		var picked []string
 		for _, f := range fams {
 			if opt.Families[f.Name] {
@@ -1397,7 +1389,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 
 	page := pageData{Feedback: s.feedback, Opt: opt, Total: len(s.ds.Species), Shown: len(filtered),
 		Query:    queryFor(r),
-		Filters:  describeView(r.URL.Query(), s.fams, opt),
+		Filters:  describeView(s.fams, opt),
 		ClearURL: queryFor(r)("family", "region"),
 	}
 	if sp := s.legendSpecies(); sp != nil {
