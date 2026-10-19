@@ -7,11 +7,17 @@ package product
 **One primary metric, user-selected**
 
 Subject: `ordering.metric`
-Value: `length | mass | wingspan | frequency`
-Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
+Value: `length | wingspan | mass | bill | tail | frequency`
+Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies, goals.shapeNotOnlySize
 
-The user chooses whether the dataset is ordered by total length, body mass, wingspan, or how
-often the bird is recorded ([orderByFrequency](presentation.md#orderbyfrequency), [decisions.frequencyMetric](../../decisions.md#frequencymetric)).
+The user chooses whether the dataset is ordered by total length, wingspan, body mass, bill length,
+tail length, or how often the bird is recorded ([orderByFrequency](presentation.md#orderbyfrequency), [decisions.frequencyMetric](../../decisions.md#frequencymetric)).
+The comparison view offers the same size orderings for the birds it holds.
+
+**Bill and tail are absolute lengths, not proportions.** They are measured for every species, where
+total length is a sum with three segments modeled from mass; a bill or tail "for its size" was
+considered and not offered, because the only plain denominator, total length, would put modeled
+values under every ratio. Added 2026-10-19 at the owner's request.
 
 ## ascendingOrder
 
@@ -20,7 +26,7 @@ often the bird is recorded ([orderByFrequency](presentation.md#orderbyfrequency)
 Goals: goals.sizeIntuition
 
 Species are sorted ascending by the selected metric, **and the page says which way that
-runs**: *smallest first* under length, wingspan and mass, *most common first* under
+runs**: *smallest first* under length, wingspan, mass, bill and tail, *most common first* under
 Frequency, captioned under each group of controls rather than one caption that follows the
 selection. The row aligns on the text baseline, so the heading and every button stay on one
 line and only the captions hang below.

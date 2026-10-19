@@ -2493,8 +2493,8 @@ func TestComparisonKeepsTheFilter(t *testing.T) {
 	keeps("the stop link", mustMatch(t, body, `<a class="stoplink" href="([^"]+)"`, "the stop link"))
 	sorts := regexp.MustCompile(`<a class="btn(?: on)?" href="(/compare\?[^"]+)"`).
 		FindAllStringSubmatch(body, -1)
-	if len(sorts) != 3 {
-		t.Fatalf("found %d sort links on the comparison, want 3", len(sorts))
+	if len(sorts) != 5 {
+		t.Fatalf("found %d sort links on the comparison, want 5", len(sorts))
 	}
 	for _, m := range sorts {
 		keeps("a sort link", m[1])
@@ -3044,8 +3044,8 @@ func TestCompareSortReordersTheURL(t *testing.T) {
 	body := mustGet(t, s, start)
 
 	opts := sortControls(t, body)
-	if len(opts) != 3 {
-		t.Fatalf("%d sort options, want length, wingspan and mass", len(opts))
+	if len(opts) != 5 {
+		t.Fatalf("%d sort options, want length, wingspan, mass, bill and tail", len(opts))
 	}
 	ds := testDataset()
 	byID := map[string]*dataset.Species{}
@@ -3056,6 +3056,7 @@ func TestCompareSortReordersTheURL(t *testing.T) {
 	for _, o := range opts {
 		m := map[string]view.Metric{
 			"Length": view.ByLength, "Wingspan": view.ByWingspan, "Mass": view.ByMass,
+			"Bill": view.ByBill, "Tail": view.ByTail,
 		}[o.Label]
 		if m == "" {
 			t.Errorf("unexpected sort option %q", o.Label)
@@ -5711,11 +5712,11 @@ func TestOrderByStatesItsDirection(t *testing.T) {
 				query, len(groups)-1)
 			continue
 		}
-		// The three size metrics share one caption; Frequency has its own.
+		// The five size metrics share one caption; Frequency has its own.
 		// Asserted by COUNTING buttons per group, so a metric silently
 		// moving between them fails rather than passing on the strings.
-		if n := strings.Count(groups[1][:strings.Index(groups[1], "</span>")], `class="btn`); n != 3 {
-			t.Errorf("%s: first group holds %d buttons, want 3", query, n)
+		if n := strings.Count(groups[1][:strings.Index(groups[1], "</span>")], `class="btn`); n != 5 {
+			t.Errorf("%s: first group holds %d buttons, want 5", query, n)
 		}
 		if n := strings.Count(groups[2][:strings.Index(groups[2], "</span>")], `class="btn`); n != 1 {
 			t.Errorf("%s: second group holds %d buttons, want 1", query, n)

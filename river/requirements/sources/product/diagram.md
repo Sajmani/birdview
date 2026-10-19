@@ -74,7 +74,7 @@ comparability is unaffected. See [decisions.foldedNeckAsS](../../decisions.md#fo
 **Scale is a user toggle, defaulting to per-section**
 
 Subject: `diagram.scale.mode`
-Value: `per-section (default) | global; global is the default under Frequency`
+Value: `per-section (default) | global; global is the default under Frequency, Bill and Tail`
 Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
 
 The user switches between a single scale across the entire filtered set, and a scale shared by all
@@ -87,6 +87,12 @@ is uncorrelated with size, so one tier runs from 72 mm to 1,201 mm. Each tier wo
 against its own largest bird, and across the nine tiers that reference swings by 0.15× to
 1.36×: the single 140 mm bird in the last tier would be drawn the height of the 1,201 mm
 Trumpeter Swan six tiers above it. Both choices stay one click away under either ordering.
+
+**Under Bill and Tail global is the default too, for the same reason.** A section bounded in bill or
+tail length is not bounded in total length: with 15% sections, one bill section runs from the
+109 mm Green-breasted Mango to the 769 mm Golden Pheasant and one tail section from the 109 mm
+Black-capped Gnatcatcher to the 774 mm Common Loon, 7.1× in each, where length sections stay within
+1.1× and mass sections within 3.1×.
 
 Whichever is chosen, the scale is set by the largest total length in the group. Since the segments
 sum to total length (segmentsSumToLength) and nothing is drawn outside them, that is the whole vertical extent.

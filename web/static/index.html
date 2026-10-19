@@ -92,7 +92,9 @@
       <dl>
         <div class="ctrl"><dt>Order by</dt>
         <dd>Sort every bird by total length, wingspan or mass, and group them into sections of
-          similar size. <b>Frequency</b> orders by how much of what people record is that bird,
+          similar size. <b>Bill</b> and <b>Tail</b> sort by the length of each, both measured for
+          every bird, and default to the Global scale, since birds with the same bill can be
+          any size. <b>Frequency</b> orders by how much of what people record is that bird,
           most common first, and groups by powers of ten &mdash; one tier for the birds that are
           one record in a thousand, the next for one in ten thousand, and so on. Those tier
           edges do not move when you change the region filter, so the same tier means the same
@@ -142,6 +144,10 @@
         <a class="btn{{if eq .Opt.Metric "length"}} on{{end}}" href="{{call $q "by" "length"}}">Length</a>
         <a class="btn{{if eq .Opt.Metric "wingspan"}} on{{end}}" href="{{call $q "by" "wingspan"}}">Wingspan</a>
         <a class="btn{{if eq .Opt.Metric "mass"}} on{{end}}" href="{{call $q "by" "mass"}}">Mass</a>
+        <a class="btn{{if eq .Opt.Metric "bill"}} on{{end}}" href="{{call $q "by" "bill"}}"
+           title="Bill length, measured">Bill</a>
+        <a class="btn{{if eq .Opt.Metric "tail"}} on{{end}}" href="{{call $q "by" "tail"}}"
+           title="Tail length, measured">Tail</a>
       </span>
       <span class="dirn">smallest first</span>
     </span>

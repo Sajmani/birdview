@@ -749,6 +749,10 @@ func parseOptions(r *http.Request) options {
 		o.Metric = view.ByWingspan
 	case view.ByMass:
 		o.Metric = view.ByMass
+	case view.ByBill:
+		o.Metric = view.ByBill
+	case view.ByTail:
+		o.Metric = view.ByTail
 	case view.ByFrequency:
 		o.Metric = view.ByFrequency
 	}
@@ -756,7 +760,11 @@ func parseOptions(r *http.Request) options {
 	// product.sectionBreakRule's guarantee that a section is at most N% wide, and a frequency
 	// tier has no such bound: it would draw the one 140 mm bird in the last
 	// tier at the height of a 1,201 mm swan six tiers up.
-	if o.Metric == view.ByFrequency {
+	//
+	// Bill and Tail too: a section bounded in bill or tail length is not
+	// bounded in total length, and one runs 7.1x from a hummingbird to a
+	// pheasant (product.scaleToggle).
+	if o.Metric == view.ByFrequency || o.Metric == view.ByBill || o.Metric == view.ByTail {
 		o.Scale = view.Global
 	}
 	// BOTH values recognised, not just the non-default. The old comment here
@@ -1077,7 +1085,7 @@ func describeView(fams []familyOption, opt options) []activeFilter {
 
 	// The Controls panel, top to bottom.
 	add("Order by", map[view.Metric]string{view.ByLength: "Length", view.ByWingspan: "Wingspan",
-		view.ByMass: "Mass", view.ByFrequency: "Frequency"}[opt.Metric])
+		view.ByMass: "Mass", view.ByBill: "Bill", view.ByTail: "Tail", view.ByFrequency: "Frequency"}[opt.Metric])
 	add("Scale", map[view.ScaleMode]string{view.PerSection: "Per section", view.Global: "Global"}[opt.Scale])
 	add("Units", map[bool]string{false: "in / oz", true: "cm / g"}[opt.Metric3])
 	add("Names", map[dataset.Locale]string{dataset.LocaleNA: "N. America", dataset.LocaleWorld: "World"}[opt.Locale])
@@ -1951,7 +1959,8 @@ func sortOptions(r *http.Request, chosen []*dataset.Species) []sortOption {
 	for _, m := range []struct {
 		label  string
 		metric view.Metric
-	}{{"Length", view.ByLength}, {"Wingspan", view.ByWingspan}, {"Mass", view.ByMass}} {
+	}{{"Length", view.ByLength}, {"Wingspan", view.ByWingspan}, {"Mass", view.ByMass},
+		{"Bill", view.ByBill}, {"Tail", view.ByTail}} {
 		ids := sortedIDs(chosen, m.metric)
 		out = append(out, sortOption{
 			Label: m.label, URL: compareURL(r, ids), On: slices.Equal(ids, now)})

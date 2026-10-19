@@ -33,6 +33,9 @@ const (
 	ByLength   Metric = "length"
 	ByWingspan Metric = "wingspan"
 	ByMass     Metric = "mass"
+	// ByBill and ByTail order by the two measured segments (product.oneSelectedMetric).
+	ByBill Metric = "bill"
+	ByTail Metric = "tail"
 	// ByFrequency orders by how often a species is recorded (product.orderByFrequency). Its
 	// value is not a property of the species: it is a ratio over whatever
 	// regions the reader has selected, so Value cannot compute it and
@@ -51,6 +54,10 @@ func (m Metric) Value(s *dataset.Species) float64 {
 		return s.Wingspan.Value
 	case ByMass:
 		return s.Mass.Value
+	case ByBill:
+		return s.Segments.Bill.Value
+	case ByTail:
+		return s.Segments.Tail.Value
 	default:
 		return s.TotalLength.Value
 	}

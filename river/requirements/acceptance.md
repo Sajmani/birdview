@@ -294,7 +294,10 @@ binomial
 
 **Verifies:** product.oneSelectedMetric, product.ascendingOrder · **Level:** code · **Method:** property test for each of the three
 metrics
-**Status: verified 2026-09-22 — ascending for all three metrics.**
+**Status: verified 2026-09-22 — ascending for all three metrics.** **Bill and Tail, 2026-10-19:**
+the index sorts ascending by each, defaults to the Global scale under each, names it on the count
+line, and the comparison view offers both (`TestBillAndTailOrderings`, watched failing before the
+orderings existed).
 
 ### sectionBoundariesObeyRule
 

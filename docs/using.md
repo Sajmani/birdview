@@ -42,9 +42,14 @@ on the wrong bird.
 
 ## The controls
 
-### Order by — length, wingspan or mass
+### Order by — length, wingspan, mass, bill or tail
 
 Sorts every bird by that measurement, then groups them into sections of similar size.
+
+**Bill** and **Tail** sort by the length of the bill or the tail alone. Both are measured for
+every bird, where total length is partly modeled. They switch the scale to Global, because birds
+with the same bill can be any size: one bill section runs from a hummingbird to a pheasant. The
+comparison view can sort its birds by either too.
 
 Switching between the three is the fastest way to see how differently birds are built. A Northern
 Harrier and a Cooper's Hawk sort close together by length and far apart by mass; sorting by

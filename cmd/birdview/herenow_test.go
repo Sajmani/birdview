@@ -34,6 +34,7 @@ import (
 	"birdview/data"
 	"birdview/docs"
 	"birdview/internal/boundary"
+	"birdview/internal/dataset"
 	"birdview/internal/month"
 	"birdview/internal/region"
 )
@@ -560,6 +561,51 @@ func TestWelcomeLineWhilePicking(t *testing.T) {
 			if got := u.Query()["species"]; !slices.Equal(got, []string{"amecro", "annhum"}) {
 				t.Errorf("%q goes to %s, dropping the picks %v", l[2], href, got)
 			}
+		}
+	}
+}
+
+// TestBillAndTailOrderings checks the two orderings by measured parts: the
+// index sorts ascending by bill or tail length, defaults to one scale, says
+// so on the count line, and the comparison view can sort by either.
+//
+// Verifies: product.oneSelectedMetric, product.ascendingOrder, product.scaleToggle.
+// Criterion: acceptance.sortsAscending.
+func TestBillAndTailOrderings(t *testing.T) {
+	s := newTestServer(t)
+	for _, c := range []struct {
+		by    string
+		label string
+		value func(*dataset.Species) float64
+	}{
+		{"bill", "Bill", func(sp *dataset.Species) float64 { return sp.Segments.Bill.Value }},
+		{"tail", "Tail", func(sp *dataset.Species) float64 { return sp.Segments.Tail.Value }},
+	} {
+		body := mustGet(t, s, "/?by="+c.by)
+		if !regexp.MustCompile(`(?s)<a class="btn on" href="/\?by=` + c.by + `"[^>]*>` + c.label + `</a>`).MatchString(body) {
+			t.Errorf("Order by has no selected %s button", c.label)
+		}
+		// Ascending by the part, read off the tiles in page order.
+		var last float64
+		for _, id := range regexp.MustCompile(`<a class="tile[^"]*" href="/species/([a-z0-9]+)`).FindAllStringSubmatch(body, -1) {
+			v := c.value(s.byID[id[1]])
+			if v < last {
+				t.Errorf("by %s, %s (%.1f) follows a bird of %.1f", c.by, id[1], v, last)
+			}
+			last = v
+		}
+		if last == 0 {
+			t.Fatalf("no tiles read by %s", c.by)
+		}
+		line := mustMatch(t, body, `<p class="count">(.*?)</p>`, "the count line")
+		for _, want := range []string{"<b>Order by</b> " + c.label, "<b>Scale</b> Global"} {
+			if !strings.Contains(line, want) {
+				t.Errorf("by %s the count line lacks %q: %s", c.by, want, line)
+			}
+		}
+		cmp := mustGet(t, s, "/compare?species=greblu&species=annhum&species=amecro")
+		if !regexp.MustCompile(`<a class="btn[^"]*" href="/compare\?[^"]*">` + c.label + `</a>`).MatchString(cmp) {
+			t.Errorf("the comparison view offers no %s sort", c.label)
 		}
 	}
 }
