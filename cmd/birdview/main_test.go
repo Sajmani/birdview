@@ -3238,10 +3238,10 @@ func TestEmptyStateNamesTheFiltersThatEmptiedIt(t *testing.T) {
 	// the fixture cannot yet reach an empty intersection through the UI: one
 	// filter cannot contradict itself, and the region filter of product.regionAndMonthFilter does not
 	// exist. When it does, this should become a rendering test.
-	got := describeFilters(s.fams, options{HasSelection: true,
+	got := describeView(url.Values{"family": {"Ardeidae", "Turdidae"}}, s.fams, options{HasSelection: true,
 		Families: map[string]bool{"Ardeidae": true, "Turdidae": true}})
 	if len(got) != 1 || got[0].Label != "Family" {
-		t.Fatalf("describeFilters gave %+v, want one Family entry", got)
+		t.Fatalf("describeView gave %+v, want one Family entry", got)
 	}
 	for _, want := range []string{"Ardeidae", "Turdidae"} {
 		if !strings.Contains(got[0].Value, want) {
@@ -3249,17 +3249,21 @@ func TestEmptyStateNamesTheFiltersThatEmptiedIt(t *testing.T) {
 		}
 	}
 
-	// A filter that is not narrowing anything is not described. Naming it
-	// would present the arrival state as a choice the reader made.
+	// A filter the address carries is described even when it selects
+	// everything, so the line and the address agree; one the address does
+	// not carry is at its default and is not. The first half reversed on
+	// 2026-10-19 at the owner's request (product.helpfulEmptyState).
 	everything := map[string]bool{}
+	var names []string
 	for _, f := range s.fams {
 		everything[f.Name] = true
+		names = append(names, f.Name)
 	}
-	if d := describeFilters(s.fams, options{HasSelection: true, Families: everything}); d != nil {
-		t.Errorf("every family selected is described as a filter: %+v", d)
+	if d := describeView(url.Values{"family": names}, s.fams, options{HasSelection: true, Families: everything}); len(d) != 1 || d[0].Value != "All" {
+		t.Errorf("every family selected, in the address, is described as %+v; want Family All", d)
 	}
-	if d := describeFilters(s.fams, options{}); d != nil {
-		t.Errorf("no selection at all is described as a filter: %+v", d)
+	if d := describeView(url.Values{}, s.fams, options{}); d != nil {
+		t.Errorf("nothing in the address is described as %+v", d)
 	}
 }
 
@@ -6895,6 +6899,50 @@ func TestStaticServesAssetsOnly(t *testing.T) {
 	for _, p := range []string{"/static/styles.css", "/static/favicon.svg"} {
 		if code, _ := get(t, s, p); code != http.StatusOK {
 			t.Errorf("GET %s = %d, want 200; a page loads it", p, code)
+		}
+	}
+}
+
+// TestCountLineNamesTheAddress checks that the species-count line names every
+// setting the address carries and nothing else: one box per parameter, in
+// the order the controls appear, each labeled as its control is.
+//
+// Verifies: product.helpfulEmptyState. Criterion: acceptance.emptyStateGuides.
+func TestCountLineNamesTheAddress(t *testing.T) {
+	s := newTestServer(t)
+	boxes := func(path string) []string {
+		t.Helper()
+		line := mustMatch(t, mustGet(t, s, path), `<p class="count">(.*?)</p>`, "the count line")
+		var out []string
+		for _, m := range regexp.MustCompile(`<span class="fsum"><b>([^<]+)</b> ([^<]*)</span>`).FindAllStringSubmatch(line, -1) {
+			out = append(out, m[1]+": "+html.UnescapeString(m[2]))
+		}
+		return out
+	}
+	if got := boxes("/"); got != nil {
+		t.Errorf("an address carrying nothing names %v", got)
+	}
+	everything := "/?by=mass&scale=global&units=metric&names=world&step=20&species=amecro" +
+		"&month=Jun&region=CA&habitat=" + trait.Habitats[0].Value + "&niche=" + trait.Niches[0].Value +
+		"&family=Corvidae"
+	want := []string{"Order by: Mass", "Scale: Global", "Units: cm / g", "Names: World",
+		"Section step: 20%", "Comparing: 1 bird", "Month: Jun", "Region: California",
+		"Habitat: " + trait.Habitats[0].Label, "Diet: " + trait.Niches[0].Label, "Family: Corvidae"}
+	if got := boxes(everything); !slices.Equal(got, want) {
+		t.Errorf("the count line names\n  %v\nwant\n  %v", got, want)
+	}
+	// One parameter, one box, whatever it says.
+	for _, p := range []string{"by=length", "scale=section", "units=imperial", "names=na", "step=15",
+		"species=", "month=", "region=", "habitat=", "niche=", "family="} {
+		if got := boxes("/?" + p); len(got) != 1 {
+			t.Errorf("/?%s names %v; want exactly one box", p, got)
+		}
+	}
+	// Each label is a control's own, so the line reads in the page's words.
+	page := mustGet(t, s, "/")
+	for _, label := range []string{"Order by", "Scale", "Units", "Names", "Section step", "Month", "Region", "Family"} {
+		if !strings.Contains(page, `<span class="lbl">`+label+`</span>`) {
+			t.Errorf("the count line's label %q is no control's label", label)
 		}
 	}
 }

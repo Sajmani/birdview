@@ -514,3 +514,17 @@ func TestHereAndNowLink(t *testing.T) {
 		})
 	}
 }
+
+// TestGuidesReflow checks that a served guide flows as its paragraphs, not as
+// its source lines. The renderer once turned every newline into <br>, so a
+// guide wrapped at 100 columns in its source broke mid-sentence on the page,
+// unlike the same file on a code host.
+func TestGuidesReflow(t *testing.T) {
+	s := newTestServer(t)
+	for _, p := range []string{"/docs/using", "/docs/data", "/docs/building", "/docs/pipeline"} {
+		_, page := get(t, s, p)
+		if n := strings.Count(page, "<br"); n > 0 {
+			t.Errorf("%s has %d line breaks; a wrapped source line should not end a line on the page", p, n)
+		}
+	}
+}

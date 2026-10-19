@@ -36,7 +36,7 @@
        fixed links would drop the picks, which only Clear may do
        (product.pickFromIndex). */}}
   {{if not .Bar.Picking}}<p class="welcome"><b>New here? Try</b>
-    the <a href="/?by=frequency&amp;scale=global#here-and-now">birds around you now</a> &middot;
+    <a href="/?by=frequency&amp;scale=global#here-and-now">the birds around you now</a> &middot;
     <a href="/compare?species=merlin&amp;species=blujay">Merlin vs Blue Jay</a> &middot;
     <a href="/?family=Ardeidae&amp;family=Anatidae">herons and ducks</a> &middot;
     <a href="/docs/using#some-things-to-try">more ideas</a>
@@ -393,10 +393,9 @@
   {{end}}
 </details>
 
-{{/* The active filters sit on the count line, not only in the empty state:
-     what is narrowing the list is worth knowing while it still has birds in
-     it (product.helpfulEmptyState). When nothing matches, "No birds match" follows immediately
-     below and reads as a continuation of this line. */}}
+{{/* Every setting the address carries, one box each, on the count line
+     (product.helpfulEmptyState). When nothing matches, "No birds match"
+     follows immediately below and reads as a continuation of this line. */}}
 <p class="count">{{.Shown}} of {{.Total}} species{{range .Filters}}<span class="fsum"><b>{{.Label}}</b> {{.Value}}</span>{{end}}</p>
 
 {{range .Sections}}

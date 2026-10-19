@@ -634,10 +634,13 @@ selection
 does **not** say that nothing matched; the count reports zero; and All is no longer marked
 selected.
 
-**Assertions, filters named while the list is full:** the **count line names each active filter
-and what it is set to**, whenever any is set — not only once nothing matches. A filter that is
-not narrowing anything, every family selected being the arrival state, is **absent**, since
-naming it would present the default as a choice the reader made.
+**Assertions, the address named while the list is full:** the **count line names every setting
+the address carries, and nothing else** — one box per parameter, in the order the controls
+appear, each labeled as its control is: an address carrying nothing names nothing, one carrying
+every parameter names all eleven in order, and each parameter alone names exactly one box, even
+when it selects everything or nothing (`TestCountLineNamesTheAddress`). **Changed 2026-10-19** at
+the owner's request from naming only filters that narrow something. Watched failing by dropping the Units box,
+and by naming regions before months.
 
 **Assertions, nothing matched:** the message says the intersection is empty and offers a link
 that clears the filters. It does **not** repeat the filter names, which the count line

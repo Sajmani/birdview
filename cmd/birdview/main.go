@@ -50,7 +50,6 @@ import (
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
-	goldmarkhtml "github.com/yuin/goldmark/renderer/html"
 
 	"embed"
 
@@ -1048,25 +1047,78 @@ type activeFilter struct {
 	Value string // "Parulidae, Icteridae" or "3 of 90 selected"
 }
 
-// describeFilters lists what is narrowing the view. A filter that is not
-// narrowing anything -- every family selected, which is the arrival state --
-// is deliberately absent: naming it would describe the default as a choice.
+// describeView names every setting the address carries, one box per
+// parameter, labeled as its control is and in the order the controls appear
+// (product.helpfulEmptyState). A parameter the address does not carry is at
+// its default and gets no box; one it carries gets a box even when it selects
+// everything, so the line and the address always say the same thing.
+//
+// The settings are read from the query itself, since their defaults are
+// indistinguishable from an explicit choice once parsed; the filters from the
+// presence flags parseOptions records for exactly this distinction.
 //
 // Verifies: product.helpfulEmptyState.
-func describeFilters(fams []familyOption, opt options) []activeFilter {
+func describeView(q url.Values, fams []familyOption, opt options) []activeFilter {
 	// Past a handful the names stop being readable and the count is the
 	// useful fact. The threshold is a presentation judgement, not a rule.
 	const nameLimit = 6
 	describe := func(picked []string, total int) string {
-		if len(picked) > nameLimit {
+		switch {
+		case len(picked) == 0:
+			return "None"
+		case len(picked) == total:
+			return "All"
+		case len(picked) > nameLimit:
 			return fmt.Sprintf("%d of %d selected", len(picked), total)
 		}
 		return strings.Join(picked, ", ")
 	}
-
 	var out []activeFilter
-	// Region first, matching the order the boxes appear in.
-	if opt.HasRegions && len(opt.Regions) > 0 && len(opt.Regions) != region.Len() {
+	add := func(label, value string) { out = append(out, activeFilter{Label: label, Value: value}) }
+
+	// The Controls panel, top to bottom.
+	if q.Has("by") {
+		add("Order by", map[view.Metric]string{view.ByLength: "Length", view.ByWingspan: "Wingspan",
+			view.ByMass: "Mass", view.ByFrequency: "Frequency"}[opt.Metric])
+	}
+	if q.Has("scale") {
+		add("Scale", map[view.ScaleMode]string{view.PerSection: "Per section", view.Global: "Global"}[opt.Scale])
+	}
+	if q.Has("units") {
+		add("Units", map[bool]string{false: "in / oz", true: "cm / g"}[opt.Metric3])
+	}
+	if q.Has("names") {
+		add("Names", map[dataset.Locale]string{dataset.LocaleNA: "N. America", dataset.LocaleWorld: "World"}[opt.Locale])
+	}
+	if q.Has("step") {
+		if opt.Metric == view.ByFrequency {
+			add("Section step", map[int]string{1: "10×", 2: "100×"}[opt.Decades])
+		} else {
+			add("Section step", strconv.FormatFloat(opt.Step, 'f', -1, 64)+"%")
+		}
+	}
+	if opt.Picking {
+		switch n := len(opt.Picks); n {
+		case 0:
+			add("Comparing", "nothing picked yet")
+		case 1:
+			add("Comparing", "1 bird")
+		default:
+			add("Comparing", fmt.Sprintf("%d birds", n))
+		}
+	}
+
+	// The Regions and months panel: months, then regions.
+	if opt.HasMonths {
+		var picked []string
+		for i := 0; i < month.Count; i++ {
+			if opt.Months[i] {
+				picked = append(picked, month.Abbrev[i])
+			}
+		}
+		add("Month", describe(picked, month.Count))
+	}
+	if opt.HasRegions {
 		var picked []string
 		// Any grouping enumerates every region exactly once, being a
 		// partition; the geographic one is used because its order is the one
@@ -1078,22 +1130,13 @@ func describeFilters(fams []familyOption, opt options) []activeFilter {
 				}
 			}
 		}
-		out = append(out, activeFilter{Label: "Region", Value: describe(picked, region.Len())})
+		add("Region", describe(picked, region.Len()))
 	}
-	if opt.HasSelection && len(opt.Families) > 0 && len(opt.Families) != len(fams) {
-		var picked []string
-		for _, f := range fams {
-			if opt.Families[f.Name] {
-				picked = append(picked, f.Name)
-			}
-		}
-		out = append(out, activeFilter{Label: "Family", Value: describe(picked, len(fams))})
-	}
-	// Habitat and diet, in the order the controls appear (product.habitatAndDietFilters). Labels
-	// rather than AVONET's terms: the reader picked "Eats insects" and
-	// should be told "Eats insects", not "Invertivore".
-	cat := func(label string, terms []trait.Term, sel map[string]bool, active bool) {
-		if !active || len(sel) == 0 || len(sel) == len(terms) {
+	// Habitat and diet (product.habitatAndDietFilters). Labels rather than
+	// AVONET's terms: the reader picked "Eats insects" and should be told
+	// "Eats insects", not "Invertivore".
+	cat := func(label string, terms []trait.Term, sel map[string]bool, present bool) {
+		if !present {
 			return
 		}
 		var picked []string
@@ -1102,10 +1145,19 @@ func describeFilters(fams []familyOption, opt options) []activeFilter {
 				picked = append(picked, t.Label)
 			}
 		}
-		out = append(out, activeFilter{Label: label, Value: describe(picked, len(terms))})
+		add(label, describe(picked, len(terms)))
 	}
 	cat("Habitat", trait.Habitats, opt.Habitats, opt.HasHabitats)
 	cat("Diet", trait.Niches, opt.Niches, opt.HasNiches)
+	if opt.HasSelection {
+		var picked []string
+		for _, f := range fams {
+			if opt.Families[f.Name] {
+				picked = append(picked, f.Name)
+			}
+		}
+		add("Family", describe(picked, len(fams)))
+	}
 	return out
 }
 
@@ -1345,7 +1397,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 
 	page := pageData{Feedback: s.feedback, Opt: opt, Total: len(s.ds.Species), Shown: len(filtered),
 		Query:    queryFor(r),
-		Filters:  describeFilters(s.fams, opt),
+		Filters:  describeView(r.URL.Query(), s.fams, opt),
 		ClearURL: queryFor(r)("family", "region"),
 	}
 	if sp := s.legendSpecies(); sp != nil {
@@ -3830,7 +3882,9 @@ func newMarkdown(base string) goldmark.Markdown {
 			goldmarkparser.WithAutoHeadingID(),
 			goldmarkparser.WithASTTransformers(
 				goldmarkutil.Prioritized(repoLinks{base}, 100))),
-		goldmark.WithRendererOptions(goldmarkhtml.WithHardWraps()),
+		// No hard wraps: the sources are wrapped at 100 columns, and turning
+		// each newline into <br> broke every paragraph mid-sentence, unlike
+		// the same file on a code host.
 	)
 }
 
