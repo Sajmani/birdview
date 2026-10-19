@@ -993,10 +993,13 @@ type pageData struct {
 	NowURL      template.URL
 	NowTemplate string
 	HereScript  template.JS
-	Opt         options
-	Total       int
-	Shown       int
-	Query       func(...string) template.URL
+	// HereNowTemplate is this page with both the region and the month
+	// replaced by placeholders, for arriving by a #here-and-now link.
+	HereNowTemplate string
+	Opt             options
+	Total           int
+	Shown           int
+	Query           func(...string) template.URL
 	// AllSelected is true only when every family is explicitly filtered in --
 	// not when nothing is selected. Both states display the whole dataset, but
 	// they are different selections, and the control reflects the selection.
@@ -1403,6 +1406,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	page.HereURL = slotURL(r, "region", hereSlot)
 	page.BoundaryURL = s.boundaryURL
 	page.HereScript = s.hereJS
+	page.HereNowTemplate = slotsURL(r, "region", hereSlot, "month", nowSlot)
 	page.NowTemplate = slotURL(r, "month", nowSlot)
 	page.NowURL = template.URL("/now" + strings.TrimPrefix(slotURL(r, "month", ""), "/"))
 
@@ -2457,10 +2461,18 @@ const (
 // Here asks for the same thing as choosing the region by hand
 // (product.locationStaysInBrowser). An empty value drops the parameter.
 func slotURL(r *http.Request, key, value string) string {
+	return slotsURL(r, key, value)
+}
+
+// slotsURL is slotURL for several parameters at once, given as key, value
+// pairs: the region and the month together, for a #here-and-now link.
+func slotsURL(r *http.Request, kv ...string) string {
 	q := r.URL.Query()
-	q.Del(key)
-	if value != "" {
-		q.Set(key, value)
+	for i := 0; i+1 < len(kv); i += 2 {
+		q.Del(kv[i])
+		if kv[i+1] != "" {
+			q.Set(kv[i], kv[i+1])
+		}
 	}
 	if len(q) == 0 {
 		return "/"

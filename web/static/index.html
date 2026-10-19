@@ -29,6 +29,19 @@
   drawing them as stick figures to scale, from public and modeled data. Read Presentation for details,
   and use the Controls to configure the view.{{with .Feedback}}
   Found something wrong? <a href="{{.}}">Report it</a>.{{end}}</p>
+  {{/* Every link here is also in the guide's "Some things to try"
+       (product.pageExplainsItself). The first presses Here and Now on arrival;
+       its fragment never reaches the server (product.hereSelectsLocalRegion).
+       Not shown while picking: a reader mid-comparison is not new, and these
+       fixed links would drop the picks, which only Clear may do
+       (product.pickFromIndex). */}}
+  {{if not .Bar.Picking}}<p class="welcome"><b>New here? Try</b>
+    the <a href="/?by=frequency&amp;scale=global#here-and-now">birds around you now</a> &middot;
+    <a href="/compare?species=merlin&amp;species=blujay">Merlin vs Blue Jay</a> &middot;
+    <a href="/?family=Ardeidae&amp;family=Anatidae">herons and ducks</a> &middot;
+    <a href="/docs/using#some-things-to-try">more ideas</a>
+    <span class="welcomestatus" role="status" aria-live="polite"
+          data-template="{{.HereNowTemplate}}"></span></p>{{end}}
 </header>
 
 <details class="help" id="presentation">

@@ -124,10 +124,15 @@ the index with the server's month as the only month, marked `no-store`. Here car
 template keeping every other setting, and without JavaScript is marked inactive, focusable and
 labeled with why.
 
+**The welcome line** (product.pageExplainsItself): every link in it is also in the guide's *Some
+things to try*, its link to that list lands on the heading, and the `#here-and-now` page's
+template, filled in, equals choosing the region and month by hand (`TestWelcomeLine`, watched
+failing on a welcome link the guide lacks and on a template missing the month).
+
 The Months control folds into two lines — the label, All, Now and the explanation, then the
 twelve months (`TestMonthsFoldIntoTwoLines`, watched failing against the one-line layout).
 
-**Run:** `go test ./cmd/birdview/ -run 'TestHereAndNow|TestMonthsFoldIntoTwoLines'`
+**Run:** `go test ./cmd/birdview/ -run 'TestHereAndNow|TestMonthsFoldIntoTwoLines|TestWelcomeLine'`
 **Status: verified 2026-10-18, passing, and watched failing:** a template that added the reader's
 region to the old one instead of replacing it failed on every region; letting `/now` be
 revalidated failed on its `no-cache` and ETag.
@@ -141,7 +146,10 @@ Covers: product.hereSelectsLocalRegion
 **Method:** in headless Chrome with the location stubbed, press Here at each point of
 boundariesResolveKnownPoints and require the navigation the Go lookup predicts; with permission
 refused, location unavailable, and a point outside every region, require the matching message and
-no navigation. Now, pressed, goes to the reader's month without requesting `/now`.
+no navigation. Now, pressed, goes to the reader's month without requesting `/now`. Arriving by a
+`#here-and-now` link goes to the page choosing the reader's region and month by hand gives; refused,
+it stays and says so in the welcome line (`TestHereAndNowLink`, watched failing on a link that set
+the wrong month and on a refusal message that did not say refused).
 
 **Run:** `go test ./cmd/birdview/ -run TestHereInTheBrowser`
 **Status: verified 2026-10-18, passing, and watched failing:** a browser lookup that tried the sea

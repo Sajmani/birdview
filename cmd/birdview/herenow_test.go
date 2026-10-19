@@ -32,6 +32,7 @@ import (
 	"time"
 
 	"birdview/data"
+	"birdview/docs"
 	"birdview/internal/boundary"
 	"birdview/internal/month"
 	"birdview/internal/region"
@@ -353,5 +354,163 @@ func TestMonthsFoldIntoTwoLines(t *testing.T) {
 	}
 	if strings.Contains(months, `class="lbl"`) || strings.Contains(months, ">All</a>") {
 		t.Error("the months line carries more than the months")
+	}
+}
+
+// TestWelcomeLine checks the welcome line under the title: every link in it
+// is also in the guide's "Some things to try", the link to that list lands on
+// its heading, and the #here-and-now page's template, filled in, is exactly
+// what choosing the region and the month by hand gives.
+//
+// Verifies: product.pageExplainsItself, product.hereSelectsLocalRegion.
+// Criterion: app.hereAndNowSitBesideAll.
+func TestWelcomeLine(t *testing.T) {
+	s := newTestServer(t)
+	body := mustGet(t, s, "/?by=frequency&scale=global")
+	welcome := mustMatch(t, body, `(?s)<p class="welcome">(.*?)</p>`, "the welcome line")
+	guide, err := docs.Files.ReadFile("using.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := string(guide)
+	start := strings.Index(g, "## Some things to try")
+	if start < 0 {
+		t.Fatal("the guide has no Some things to try")
+	}
+	list := g[start:]
+	if end := strings.Index(list[3:], "\n## "); end >= 0 {
+		list = list[:end+3]
+	}
+	links := regexp.MustCompile(`<a href="([^"]+)"`).FindAllStringSubmatch(welcome, -1)
+	if len(links) < 3 {
+		t.Fatalf("the welcome line has %d links", len(links))
+	}
+	for _, l := range links {
+		href := html.UnescapeString(l[1])
+		if href == "/docs/using#some-things-to-try" {
+			if code, page := get(t, s, "/docs/using"); code != http.StatusOK || !strings.Contains(page, `id="some-things-to-try"`) {
+				t.Errorf("the welcome's link to the full list lands on no heading")
+			}
+			continue
+		}
+		if !strings.Contains(list, "]("+href+")") {
+			t.Errorf("the welcome links to %s, which the guide's Some things to try does not", href)
+		}
+	}
+
+	tmpl := html.UnescapeString(mustMatch(t, welcome, `data-template="([^"]+)"`, "the #here-and-now template"))
+	r := httptest.NewRequest(http.MethodGet, "/?by=frequency&scale=global", nil)
+	for i, m := range month.Abbrev {
+		byMonth := httptest.NewRequest(http.MethodGet, string(s.monthURL(r, map[int]bool{i: true})), nil)
+		for _, id := range append(region.LandIDs(), region.MarineIDs()...) {
+			rg, _ := region.Get(id)
+			want := string(s.regionURL(byMonth, map[string]bool{id: true}))
+			got := strings.NewReplacer(hereSlot, rg.Slug(), nowSlot, m).Replace(tmpl)
+			if got != want {
+				t.Fatalf("#here-and-now in %s at %s asks for %s; choosing both by hand asks for %s", rg.Slug(), m, got, want)
+			}
+		}
+	}
+}
+
+// TestHereAndNowLink follows a #here-and-now link in headless Chrome, with
+// the browser's location stood in for: found, the browser goes to the page
+// choosing the region and the month by hand would; refused, it stays and says
+// so in the welcome line.
+//
+// Verifies: product.hereSelectsLocalRegion, product.locationStaysInBrowser.
+// Criterion: app.hereLookupAgreesInTheBrowser.
+func TestHereAndNowLink(t *testing.T) {
+	chrome := findChrome()
+	if chrome == "" {
+		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); the #here-and-now link was not tested")
+	}
+	s := newTestServer(t)
+	const start = "/?by=frequency&scale=global"
+	r := httptest.NewRequest(http.MethodGet, start, nil)
+	ca, _ := region.BySlug("CA")
+	thisMonth := int(time.Now().Month()) - 1
+	byMonth := httptest.NewRequest(http.MethodGet, string(s.monthURL(r, map[int]bool{thisMonth: true})), nil)
+	wantCA := string(s.regionURL(byMonth, map[string]bool{ca.ID: true}))
+
+	for _, c := range []struct{ name, geo, lands, says string }{
+		{"in California", "38.5816,-121.4944", wantCA, ""},
+		{"refused", "denied", start, "refused"},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			t.Parallel()
+			var mu sync.Mutex
+			var requests []string
+			ts := httptest.NewServer(instrument(s, hereProbe, func(uri string) {
+				mu.Lock()
+				requests = append(requests, uri)
+				mu.Unlock()
+			}))
+			defer ts.Close()
+			cmd := exec.Command(chrome, "--headless", "--disable-gpu", "--no-first-run",
+				"--no-default-browser-check", "--disable-background-networking",
+				"--disable-component-update", "--disable-sync", "--disable-extensions",
+				"--user-data-dir="+t.TempDir(), "--virtual-time-budget=3000", "--dump-dom",
+				ts.URL+start+"#here-and-now&probe=1&geo="+c.geo)
+			var dom string
+			if c.lands != start {
+				// Navigating leaves headless Chrome waiting; read the server's log.
+				if err := cmd.Start(); err != nil {
+					t.Fatal(err)
+				}
+				for deadline := time.Now().Add(20 * time.Second); time.Now().Before(deadline); time.Sleep(100 * time.Millisecond) {
+					mu.Lock()
+					arrived := slices.Contains(requests, c.lands)
+					mu.Unlock()
+					if arrived {
+						time.Sleep(500 * time.Millisecond)
+						break
+					}
+				}
+				cmd.Process.Kill()
+				cmd.Wait()
+			} else {
+				out, err := cmd.Output()
+				if err != nil {
+					t.Fatalf("chrome: %v", err)
+				}
+				dom = string(out)
+			}
+			mu.Lock()
+			defer mu.Unlock()
+			for _, q := range requests {
+				for _, leak := range []string{"38.58", "121.49", "here", "lat", "/now"} {
+					if strings.Contains(strings.ToLower(q), leak) {
+						t.Errorf("request %q contains %q", q, leak)
+					}
+				}
+			}
+			var pages []string
+			for _, q := range requests {
+				if !strings.HasPrefix(q, "/boundaries/") && !strings.HasPrefix(q, "/static/") {
+					pages = append(pages, q)
+				}
+			}
+			if c.lands != start {
+				if len(pages) < 2 || pages[1] != c.lands {
+					t.Errorf("arriving by #here-and-now requested pages %v; want %s next", pages, c.lands)
+				}
+				return
+			}
+			if len(pages) != 1 {
+				t.Errorf("a refused #here-and-now still requested pages %v", pages)
+			}
+			m := dataAttr("data-probe").FindStringSubmatch(dom)
+			if m == nil {
+				t.Fatalf("the probe recorded nothing; requests %v", requests)
+			}
+			var probe struct {
+				Welcome string `json:"welcome"`
+			}
+			json.Unmarshal([]byte(html.UnescapeString(m[1])), &probe)
+			if !strings.Contains(probe.Welcome, c.says) {
+				t.Errorf("the welcome line says %q, want it to say %q", probe.Welcome, c.says)
+			}
+		})
 	}
 }

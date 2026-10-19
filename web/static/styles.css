@@ -72,6 +72,9 @@ details[open] > summary .sumdesc { display: none; }
 .here { font: inherit; font-size: 12.5px; cursor: pointer; }
 .here[aria-disabled="true"] { border-style: dotted; background: transparent; cursor: not-allowed; }
 .herestatus { color: var(--ink); font-size: 12px; }
+.welcome { margin: 6px 0 0; font-size: 13px; }
+.welcomestatus { display: block; margin-top: 4px; color: var(--ink); }
+.welcomestatus:empty { display: none; }
 .herestatus:empty { display: none; }
 .chip.on { font-weight: 600; outline: 2px solid var(--accent); outline-offset: 1px; }
 .chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }

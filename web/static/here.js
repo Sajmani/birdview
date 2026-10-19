@@ -108,6 +108,38 @@
 
   function say(text) { status.textContent = text; }
 
+  // Arriving by a link ending in #here-and-now presses Here and Now
+  // together. On load, so a test can stand in for the browser's location
+  // first. The fragment is dropped either way, so a reload or the Back button
+  // does not ask again.
+  var welcome = document.querySelector(".welcomestatus[data-template]");
+  if (welcome && new URLSearchParams(location.hash.slice(1)).has("here-and-now")) {
+    window.addEventListener("load", function () {
+      var tell = function (text) {
+        welcome.textContent = text;
+        history.replaceState(null, "", location.pathname + location.search);
+      };
+      tell("Finding where you are\u2026");
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        ready.then(function () {
+          var slug = lookup(pos.coords.latitude, pos.coords.longitude);
+          if (!slug) {
+            tell("You are outside every region BirdView covers, so this shows every region. Press Now under Regions and months for this month.");
+            return;
+          }
+          window.location.replace(welcome.getAttribute("data-template")
+            .replace("__REGION__", slug).replace("__MONTH__", MONTHS[new Date().getMonth()]));
+        }, function () {
+          tell("The region boundaries did not load, so this shows every region.");
+        });
+      }, function (err) {
+        tell(err.code === 1
+          ? "Permission to use your location was refused, so this shows every region and month. Choose yours under Regions and months."
+          : "Your location could not be found, so this shows every region and month. Choose yours under Regions and months.");
+      }, { timeout: 15000, maximumAge: 600000 });
+    });
+  }
+
   here.addEventListener("click", function () {
     say("Finding where you are\u2026");
     navigator.geolocation.getCurrentPosition(function (pos) {

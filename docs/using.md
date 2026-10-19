@@ -189,27 +189,24 @@ page is the honest way to read this view. Per section is still one click away.
 
 ## Some things to try
 
-- **[Sort by frequency, scale Global](/?by=frequency&scale=global).** The commonest birds come
-  first, all drawn to one scale, so you see what most of the recording is actually *of* — and how
-  small most of it is.
-
-  **Then make it yours.** Open **Regions and months**. Under the regions, click **Here**: your
-  browser asks to share your location, works out your state or province itself, and selects it.
-  Your location never leaves the browser; BirdView only sees which region was chosen. (Or click
-  **All** to clear the regions and then click yours.) Under the months, click **Now**. The tiers
-  now rank what people record where you are, at this time of year, and birds with
-  no records there move to a last section of their own. New York in October, for example, is
-  [this view](/?by=frequency&scale=global&region=NY&month=Oct).
-- **[Sort by mass, scale Global](/?by=mass&scale=global).** Mass is a cube of a linear dimension,
-  so the range is brutal in a way length never shows.
-- **Select just [Ardeidae](/?family=Ardeidae), then just [Anatidae](/?family=Anatidae).** Herons
-  are nearly all neck and leg; ducks are nearly all body. Same length, entirely different birds.
-- **Sort by [wingspan](/?by=wingspan), then by [length](/?by=length).** Watch the albatrosses and
-  frigatebirds climb.
-- **[Look at the folded necks](/?family=Ardeidae&family=Pelecanidae).** Herons and pelicans are the
-  only families whose neck draws as an S, because they are the only ones that fly with the head
-  drawn back onto the shoulders. It is the field mark that separates a heron from a crane or an
-  ibis in the air.
+- **[The birds around you now](/?by=frequency&scale=global#here-and-now).** Sorted by how often
+  they are recorded, so the commonest birds where you are, this month, come first, all drawn to
+  one scale. Your browser asks to share your location, works out your state or province itself,
+  and selects it with the current month; your location never leaves the browser, and BirdView
+  only sees which region and month were chosen. Without sharing it, try
+  [New York in October](/?by=frequency&scale=global&region=NY&month=Oct), or press **Here** and
+  **Now** yourself under **Regions and months**.
+- **[Is a Merlin bigger than a Blue Jay?](/compare?species=merlin&species=blujay)** Settle it on one
+  scale. Any birds can be compared this way: turn on **Compare birds** in Controls and pick them
+  from the index.
+- **[Herons and ducks together](/?family=Ardeidae&family=Anatidae).** Similar lengths, entirely
+  different birds: herons are nearly all neck and leg, ducks nearly all body. Herons and pelicans
+  are the only families whose neck draws as an S, because they fly with it folded back onto the
+  shoulders — the field mark that separates a heron from a crane or an ibis in the air.
+- **"Big" depends on the measure.** Sort by [length](/?by=length), then
+  [wingspan](/?by=wingspan), then [mass, scale Global](/?by=mass&scale=global). Albatrosses and
+  frigatebirds climb under wingspan, and mass, a cube of a length, spreads the range far wider
+  than length ever does.
 
 ---
 

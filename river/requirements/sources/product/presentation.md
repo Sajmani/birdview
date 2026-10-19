@@ -566,6 +566,12 @@ than none, because it sends a reader looking for something that is not there.
 
 The help is collapsible and starts open, so a returning user can dismiss it without losing it.
 
+**A welcome line under the title offers a few things to try**, each a link, ending with a link to
+the full list in the guide's *Some things to try*. Every link in the welcome line is also in that
+list, so the two cannot drift apart; the guide says more about each. It is not shown while
+picking birds to compare: that reader is not new, and its fixed links would drop the picks, which
+only Clear may do (pickFromIndex).
+
 Rationale: nothing about the diagram is self-evident. A reader cannot be expected to know that the
 amber stroke is the bill, that a dashed stroke means estimated, or that the crossbar is a true
 wingspan rather than a decoration — and the scale toggle, the one control that changes what the

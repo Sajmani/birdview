@@ -117,6 +117,13 @@ Florida. Near a border or a coast the answer can differ from how the occurrence 
 filed, because the boundaries come from a different source (tech.regionBoundaries); within a few
 hundred meters, Here may pick the neighbor.
 
+**A link ending in `#here-and-now` presses Here and Now on arrival**, together: the browser asks
+for the reader's location and goes to the page with their region and the current month, exactly
+as choosing both by hand would. The fragment is never sent to the server, so the link reveals
+nothing locationStaysInBrowser does not allow. If the region cannot be found the page stays where
+the link landed and says why, beside the link that was followed rather than inside the Regions
+panel, which starts closed. Without JavaScript the link simply lands.
+
 **Without JavaScript, Here is shown inactive** — dotted border, no background, text at the full
 contrast floor (decisions.oneContrastFloor) — and focusable, with a tooltip saying it needs
 JavaScript and permission to use the reader's location. It does nothing when pressed. Dotted,
