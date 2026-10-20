@@ -1,7 +1,7 @@
 # Building, running and changing BirdView
 
 A single Go module. Two commands do the everyday work — an ingest that compiles the dataset from
-published sources, and a server that embeds and serves the web UI — and four generators build
+published sources, and a server that embeds and serves the web UI — and five generators build
 the committed lookup tables those two read. No database, no runtime data fetch, no JavaScript
 framework.
 
@@ -11,37 +11,44 @@ framework.
 
 - **Go.** No minimum version is maintained — whatever the dependencies require
   ([tech.goVersionFollowsDeps](../river/requirements/sources/tech/delivery.md#goversionfollowsdeps)). Developed on 1.25.
-- **Python 3**, for the three spec-level check scripts.
+- **Chrome or Chromium**, optional: the tests that render pages in a browser skip without it
+  (set `BIRDVIEW_CHROME` if it is not in a standard place).
 
-That is all. The one dependency is `excelize`, for reading the source workbooks.
+That is all. The dependencies are `excelize`, for reading the source workbooks, and `goldmark`, for
+rendering these guides.
 
 ---
 
-## Getting the data
+## The data and its licenses
 
-Everything the build needs is in the repository.
+Everything the build needs is in the repository; nothing is fetched to build or to serve.
 
-### Already here (CC BY 4.0, redistributable)
+| Source | License | What is in this repository | Used for |
+| --- | --- | --- | --- |
+| [AviList](https://doi.org/10.2173/avilist.v2025b) v2025b | CC BY 4.0 | the workbook, in [`third_party/avilist/`](../third_party/avilist) | names, families, taxonomic sequence, species codes |
+| [AVONET](https://doi.org/10.6084/m9.figshare.16586228.v7) (Tobias et al. 2022) | CC BY 4.0 | the workbook, in [`third_party/avonet/`](../third_party/avonet) | bill, wing, tail, mass, habitat, diet |
+| [Fox et al. 2026 wingspan database](https://doi.org/10.6084/m9.figshare.32089083) | CC BY 4.0 | the workbook, in [`third_party/foxwingspan/`](../third_party/foxwingspan) | measured wingspans |
+| [GBIF](https://www.gbif.org): the [eBird Observation Dataset](https://doi.org/10.15468/aomfnb) and iNaturalist research-grade observations | CC BY 4.0 | only tables BirdView derives, under `data/`; never a record | where each bird recurs, the regions, how common it is |
+| [iNaturalist](https://www.inaturalist.org) | taxon IDs are facts; the terms are © iNaturalist | one taxon ID per species in `data/inat-taxa.tsv`, and the terms in [`third_party/inatterms/`](../third_party/inatterms) and [`third_party/inatapi/`](../third_party/inatapi) | the link from a species page to its photographs |
+| [Natural Earth](https://www.naturalearthdata.com/) 1:10m states and provinces | public domain | the derived `data/region-boundaries.json`; the source is fetched by hash only to regenerate it | the Here button |
+| [WCAG 2.2](https://www.w3.org/TR/2024/REC-WCAG22-20241212/) | W3C Document License | the Recommendation, in [`third_party/wcag/`](../third_party/wcag) | the accessibility rules BirdView meets, quoted |
 
-- [`third_party/avilist/`](../third_party/avilist) — names, families and taxonomic sequence
-- [`third_party/avonet/`](../third_party/avonet) — morphology traits
-- [`third_party/foxwingspan/`](../third_party/foxwingspan) — empirical wingspans
+**Nothing under `third_party/` is covered by BirdView's Apache 2.0 license.** Each directory carries
+its own license and a README naming the source and how to cite it. The iNaturalist terms are
+openly licensed by no one; they and the WCAG text are kept so every quotation of them in
+[`river/`](../river) can be checked against the exact words. Retrieval details and hashes are
+recorded once, under [`river/requirements/sources/`](../river/requirements/sources), and the
+[source register](../river/requirements/requirements.md) records every source considered, including
+the ones rejected and why.
 
-Each directory carries the data's own license and a README naming its source and citation. They
-are **not** covered by BirdView's Apache 2.0 license. Provenance and hashes are recorded under
-[`river/requirements/sources/`](../river/requirements/sources).
+**BirdView links to iNaturalist and copies nothing from it**: no photograph is embedded, cached or
+hotlinked, so no contributor's license is engaged.
 
-### Nothing to fetch
+**Every CC BY source is credited on the page that uses it**, as its license asks: the index footer
+names each with its citation.
 
-There used to be a step here. The **ABA Checklist** supplied which species were in scope, was
-all-rights-reserved, and had to be downloaded by hand into `fetched/` and never committed — and
-because serving BirdView reproduced that list to every visitor, it was also what blocked public
-deployment.
-
-It is gone. Names, families and sequence come from AviList
-([decisions.avilistReplacesAba](../river/requirements/decisions.md#avilistreplacesaba)) and scope is now BirdView's own, derived from open
-occurrence records ([decisions.scopeFromRecurrence](../river/requirements/decisions.md#scopefromrecurrence)) and committed as `data/status.tsv`.
-Every input the build reads is either CC BY 4.0 or the project's own work.
+**The built dataset, `web/data/species.json`, is not committed.** It is reproducible from the
+committed inputs in one command, and a stale copy in the tree would be worse than none.
 
 ---
 
