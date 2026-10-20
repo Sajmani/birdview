@@ -1,9 +1,10 @@
-# Inputs fetched at build time and never redistributed (tech.fetchRestrictedInputs).
-# The ABA checklist is all-rights-reserved; Ricklefs 2017 is not openly licensed.
+# Where an input that may not be redistributed would be fetched (tech.fetchRestrictedInputs).
+# None is read today; the ignore stays so a stray copy of one, such as the retired ABA checklist,
+# can never be committed.
 /fetched/
 
-# The built dataset is a build artifact, not a source file (tech.datasetNeverCommitted): it carries
-# values derived from the non-redistributable inputs above.
+# The built dataset is a build artifact, not a source file (tech.datasetNeverCommitted): it is
+# reproducible from the committed inputs in one command.
 /web/data/species.json
 
 # Compiled binaries. Every command is named birdview-*, and `go build
