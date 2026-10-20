@@ -30,3 +30,9 @@ Guidelines](https://opensource.google/conduct/).
 All submissions, including submissions by project members, require review. We
 use [GitHub pull requests](https://docs.github.com/articles/about-pull-requests)
 for this purpose.
+
+### Making a change
+
+[docs/building.md](docs/building.md) explains how to build and test BirdView and how changes are
+made here: a change to behavior updates its requirement under `river/` and an acceptance criterion
+in the same pull request, and all four standing checks must pass.

@@ -1,27 +1,51 @@
 # Using BirdView
 
-BirdView shows you how big birds actually are relative to one another. Everything on screen is
-drawn to one shared scale, so a hummingbird beside a swan looks the way it would look in life.
+BirdView shows you how big birds actually are relative to one another. Each bird is drawn as a
+stick figure to scale, so a hummingbird beside a swan looks the way it would look in life.
 
 The page is server-rendered and every control is a plain link, so the URL always describes exactly
 what you are looking at. Bookmark it, share it, or hand-edit the query string.
 
 ---
 
+## The page
+
+Under the title, a line starting **New here? Try** offers a few views worth a first look, then
+**more ideas**, which leads to [Some things to try](#some-things-to-try), and **reset to
+defaults**, which returns the page to how it is when you arrive.
+
+Below the control panels, the **count line** says how many species are shown and names every
+setting, defaults included: Order by, Scale, Units, Names, Section step, Comparing (only while you
+are picking birds), Month, Region, Habitat, Diet and Family.
+
+Under the count line is a small **histogram** with one bar per section, as tall as the number of
+species in it. Each bar links to its section. An empty space in the row marks a stretch of the
+scale with no birds in it.
+
+The birds are grouped into numbered sections. Each section heading names the measurement and the
+section, such as **Tail Tier 3**, then the range covered by that section's own birds and how many
+species it holds, such as *6 species*.
+
+---
+
 ## Reading a tile
 
-Each bird is one tile: a header, a stick figure drawn to scale, and three numbers.
+Each bird is one tile: a header with its names and family, a stick figure drawn to scale, a cube
+that shows its mass, its length, wingspan and mass as numbers, and a line giving how many of the
+species observations in the selected regions are of this bird, as *1 in N*.
 
-The figure is a **top-down view of a bird in flight**, drawn head-up:
+The figure is a **top-down view of a bird in flight**, drawn head-up. Solid lines are measured;
+dashed lines are estimated.
 
 | Part | What it is |
 | --- | --- |
-| **Bill** | the exposed culmen — measured |
-| **Head** | the cranium, as an oval — estimated from mass |
-| **Neck** | estimated per family. Herons and pelicans fly with the neck folded back, so theirs is drawn as an **S** — the same length of line in less height |
-| **Body** | the trunk — estimated from mass |
-| **Tail** | dashed, so you can tell it from the body, with a tick at the junction |
-| **Wing crossbar** | the wingspan, at the **same scale as the bird's height** — so a wing really is that long relative to the body |
+| **Bill** | the exposed culmen. Measured, so drawn solid |
+| **Head** | the cranium, as an oval. Estimated from mass, and drawn hollow |
+| **Neck** | estimated per family, and dashed. Herons and pelicans fly with the neck folded back, so theirs is drawn as an **S**: the same length of line in less height |
+| **Body** | the trunk. Estimated from mass, and dashed |
+| **Tail** | measured, so drawn solid, with a tick where it meets the body |
+| **Wing crossbar** | the wingspan, at the **same scale as the bird's length**, so a wing really is that long relative to the body. The solid outer ends are the measured wing chord, and ticks mark where it reaches; the middle is dashed when the wingspan is estimated |
+| **Cube** | the bird's mass drawn as water: a cube of water that weighs the same, at the same scale. Every cube stands on the floor of its drawing, so two can be compared directly |
 
 There are no legs. In flight most birds tuck them away, and for the ones that trail them BirdView
 cannot work out how far they would project. [docs/data.md](data.md) explains why.
@@ -29,192 +53,202 @@ cannot work out how far they would project. [docs/data.md](data.md) explains why
 **A `~` after a number means it is estimated rather than measured.** You will see a lot of them:
 most lengths are modeled, because no open dataset publishes body length for North American birds.
 
-**Click any bird** for the detail view — the same tile, larger, with every segment measured out
+**Click any bird** for the detail view: the same figure, larger, with every part measured out
 individually and the source or formula behind each number named.
 
 The detail view also links to the species on **iNaturalist**, for photographs, range and
-observations. BirdView has no pictures of its own and never will. A handful of species show no
-link: those are ones iNaturalist could not be matched to with confidence, usually a recent
-taxonomic split it has not followed yet, and an absent link is more honest than a guess that lands
-on the wrong bird.
+observations. BirdView has no pictures of its own. A handful of species have no link because
+iNaturalist could not be matched to them with confidence, usually after a recent taxonomic split;
+BirdView leaves the link out rather than risk sending you to the wrong bird.
 
 ---
 
 ## The controls
 
-### Order by — length, wingspan, mass, bill or tail
+### Order by
 
-Sorts every bird by that measurement, then groups them into sections of similar size.
+**Length**, **Wingspan**, **Mass**, **Bill** and **Tail** sort every bird by that measurement,
+smallest first, and group them into sections of similar size. **Frequency** sorts by how often a
+bird is recorded, most common first; it is described
+[further down](#sorting-by-how-often-a-bird-is-recorded).
 
-**Bill** and **Tail** sort by the length of the bill or the tail alone. Both are measured for
-every bird, where total length is partly modeled. They switch the scale to Global, because birds
-with the same bill can be any size: one bill section runs from a hummingbird to a pheasant. The
-comparison view can sort its birds by either too.
+**Bill** and **Tail** sort by the length of the bill or the tail alone. Both are measured for every
+bird, where total length is partly modeled. They default to the Global scale, because birds with
+the same bill can be any size: one bill section runs from a hummingbird to a pheasant.
 
-Switching between the three is the fastest way to see how differently birds are built. A Northern
-Harrier and a Cooper's Hawk sort close together by length and far apart by mass; sorting by
-wingspan separates soaring birds from flapping ones almost cleanly.
+Switching between orderings is the fastest way to see how differently birds are built. A Northern
+Harrier and a Cooper's Hawk sort close together by length and by mass, and far apart by wingspan;
+sorting by wingspan separates soaring birds from flapping ones almost cleanly.
 
 ### Scale — per section or global
 
-This is the important one.
+This is the most important control.
 
-- **Per section** (the default) rescales each section to itself, so every bird is big enough to
-  read. Shape is easy to compare within a group, but the size gap *between* groups disappears.
-- **Global** draws everything at one scale across the whole filtered set. A kinglet really is a
-  speck beside a swan. This is the honest view across families, and the reason the site exists.
+- **Per section** rescales each section to itself, so every bird is big enough to read. Shape is
+  easy to compare within a group, but the size gap *between* groups disappears. This is the
+  default when ordering by Length, Wingspan or Mass.
+- **Global** draws everything shown at one scale. A kinglet really is a speck beside a swan. This
+  is the honest view across families, and the reason the site exists. It is the default when
+  ordering by Bill, Tail or Frequency.
 
-Use Global to be surprised; use Per section to study a family. Global is one click away and not
-the default because at global scale a median bird is a couple of pixels tall, and none of the
-figure's vocabulary — the dashed modeled segments, the chord ticks, the labels — is legible
-there.
+Use Global to be surprised; use Per section to study a family. Global is not the default for the
+other orderings because at global scale a median bird is a couple of pixels tall, too small to
+show the dashed segments, the chord ticks or the labels.
 
 ### Section step
 
-How much larger a bird has to be to start a new section — a percentage. Smaller values give more,
-tighter sections. The default is 15%.
-
-A section always spans less than the step, so at 15% no bird in a section is more than 15% larger
-than the smallest one in it.
+How much larger a bird has to be to start a new section: 5, 10, 15, 20 or 30 percent. Smaller
+values give more, tighter sections. The default is 15%, and at 15% no bird in a section is more
+than 15% larger than the smallest one in it. Under Frequency the choices are 10× and 100× instead.
 
 ### Units
 
-Inches and ounces, or centimeters and grams. Large birds switch up to pounds and kilograms.
+Inches and ounces, or centimeters and grams. Masses switch to pounds or kilograms where a section
+holds large birds.
 
 ### Names
 
-**N. America** uses the names a birder here would say — Dovekie, Brant, Rough-legged Hawk.
-**World** uses AviList's global names for the same birds — Little Auk, Brant Goose, Rough-legged
-Buzzard.
+**N. America** uses the names a birder here would say: Dovekie, Brant, Rough-legged Hawk.
+**World** uses AviList's global names for the same birds: Little Auk, Brant Goose, Rough-legged
+Buzzard. The scientific name, the species code and the page address do not change.
 
 ## The filters
 
-Three boxes narrow which birds are drawn: **Regions**, **Diet and Habitat**, and **Families**.
-Each arrives closed, with a one-line note saying what it holds; open the one you want. They
-combine, and the count line always names what is currently on.
+Three boxes narrow which birds are drawn: **Regions and months**, **Diet and Habitat**, and
+**Families**. Each starts closed, with a one-line note saying what it holds; open the one you
+want. The filters combine, and the count line names what each is set to.
 
 Everything is selected when you arrive, so every filter is a way of *dropping* birds:
 
-- Click one thing — a family, a region, a diet — to drop it.
-- Click a **group** heading to drop that whole group.
-- Click **Only** beside a group to go the other way: keep that group and drop everything else in
-  that box. From the arrival state this is the fast path, and it is one click.
-- Click **All** to clear the box and start picking.
+- Click one thing (a month, a region, a diet, a family) to drop it.
+- Click a **group** heading, such as a zone of regions or an order of families, to drop that whole
+  group.
+- Click **Only** beside a group or category to keep just that and drop everything else in that
+  box. From the arrival state this takes one click.
+- Click **All** to clear the box and start picking, or to select everything again.
 
 **Only** stays inside its own box. Only on a diet leaves your habitat and region choices alone.
+
+### Months
+
+The twelve months sit on their own line, under **All** and **Now**. **Now** selects only the
+current month. Months narrow the birds shown, not just the numbers: pick June and you get the
+birds that are present in June, with frequencies counted against June's records. A bird with too
+few records to tell when it is present is shown in every month, and says so.
 
 ### Regions
 
 States, provinces, and stretches of open sea. A bird is listed in a region when it is reported
-there often enough to be worth looking for, from eBird records — and from iNaturalist where eBird
+there often enough to be worth looking for, from eBird records, and from iNaturalist where eBird
 withholds a sensitive species.
 
-The same regions are offered **grouped two ways**, and you can pick from either. **Geographic**
-is the usual map, drawn by hand, so someone looking for Alaska finds it under Alaska. **Common
-birds** is measured — regions are clustered by how much their species lists actually overlap,
-which puts Arizona with New Mexico and Texas, and Alaska with British Columbia.
+**Here**, beside **All**, selects only the region you are in. Your browser asks for your location,
+looks up the region itself, and loads the same page you would get by choosing that region by hand,
+so your location never reaches the server. If you refuse permission, your location cannot be
+found, or you are outside every region BirdView covers, Here says so and leaves the regions as
+they were. Here needs JavaScript.
 
-Birds of the open sea belong to no state at all, so they are grouped by ocean. Seabirds that also
-come within sight of shore appear both there and in the states they are seen from.
+The same regions are offered **grouped two ways**, and you can pick from either. **Geographic** is
+the usual map, drawn by hand, so someone looking for Alaska finds it under Alaska. **Common birds**
+is measured: regions are clustered by how much their species lists overlap, which puts Arizona
+with New Mexico and Texas, and Alaska with British Columbia.
+
+Birds of the open sea belong to no state, so they are grouped by ocean. Seabirds that also come
+within sight of shore appear both there and in the states they are seen from.
 
 ### Diet and Habitat
 
 What a bird mostly eats and where it mostly lives, from **AVONET**, assigned **per species** and
-not per family — a Double-crested Cormorant and a Neotropic Cormorant need not share a habitat,
-and an Anhinga is a bird of swamps whatever its relatives do.
+not per family: a Double-crested Cormorant and a Neotropic Cormorant need not share a habitat, and
+an Anhinga is a bird of swamps whatever its relatives do.
 
 AVONET records *one* value per species. BirdView adds further habitats and diets where that hides
-something obvious — a Great Blue Heron on a tidal flat, a gull at a landfill — and marks those as
-its own rather than AVONET's. Every bird's detail page lists each category with who assigned it,
-and [everything BirdView adds](/added) is listed in one place.
+something obvious, such as a Great Blue Heron on a tidal flat or a gull at a landfill, and marks
+those as its own rather than AVONET's. Every bird's detail page lists each category with who
+assigned it, and [everything BirdView adds](/added) is listed in one place.
 
 ### Families
 
-Families are grouped by taxonomic order in **checklist sequence** — the order field guides use, not
-alphabetical — so related birds sit together and the list reads the way you already think.
+Families are grouped by taxonomic order in **checklist sequence**, the order field guides use
+rather than alphabetical, so related birds sit together.
 
-Each family chip carries both its scientific and common name plus a count, and each family has its
-own color, shaded by order: families in the same order get related hues, so you can pick out an
-order at a glance while still telling its families apart.
+Each family chip shows its scientific and common name, and each family has its own color, shaded
+by order: families in the same order get related hues, so you can pick out an order at a glance
+while still telling its families apart.
 
 ---
 
 ## Comparing a few birds side by side
 
-Picking birds puts them on one page at one shared scale, which is the comparison the index can
-only approximate across sections.
+The comparison page draws a handful of birds together at one shared scale, which the index can
+only do for birds that land in the same section.
 
-Click **Compare birds** in Controls to start picking, then click the birds you want. The compare
-page draws them together, largest setting the scale, and lets you sort the set by length,
-wingspan or mass. Each panel links to that bird's own page, where every number names its source.
+Turn on **Compare birds** in Controls and every tile gets a **+ Pick** button; a bar along the
+bottom collects your picks. The filters still work while you pick, so you can narrow to one family
+and choose from it. Press **Compare** in the bar to see them together, with the largest setting
+the scale. The comparison can be sorted by Length, Wingspan, Mass, Bill or Tail, and each panel
+links to **Species details**, the bird's own page, where every number names its source.
 
-The birds you picked live in the URL, so a comparison is a link you can keep or send.
+The birds you picked are in the URL, so a comparison is a link you can keep or send.
 
 ---
 
-## A link to a bird BirdView stopped drawing
+## A link to a bird BirdView no longer draws
 
 BirdView's list of species is derived from occurrence records and re-derived when those records
-are refreshed, so it can change. If a bird leaves the list, its page does not vanish into
-`404 page not found`: it tells you which bird you asked for and why it is no longer drawn —
-seen but not repeatedly, repeatedly but not lately, or with too little in the open record to
-judge. Try `/species/paspig`.
+are refreshed, so it can change. If a bird leaves the list, its page does not become a bare
+`404 page not found`: it tells you which bird you asked for and why it is not drawn — seen but
+not repeatedly, repeatedly but not lately, or with too little in the open record to judge. Try
+`/species/paspig`.
 
-The address still answers *not found* rather than *gone*, because the list is re-derived and a
-bird can come back.
+The page still returns *not found* rather than *gone*, because a bird can come back.
 
 ---
 
 ## Sorting by how often a bird is recorded
 
-**Order by → Frequency** arranges the page by how much of what people record is that bird,
-most common first, using the figure already on every tile.
+**Order by → Frequency** arranges the page by how much of what people record is that bird, most
+common first. It uses the *1 in N* figure shown on every tile.
 
-The tiers are powers of ten: one for the birds that are about one record in a thousand, the
-next for one in ten thousand, and so on — nine of them across the whole list. **Section step**
-switches between a tier per power of ten and tiers twice as wide.
+The tiers are powers of ten: 1 in 10 to 1 in 99, then 1 in 100 to 1 in 999, and so on. **Section
+step** switches between a tier per power of ten (10×) and tiers twice as wide (100×).
 
-Two things worth knowing. The tier edges are fixed, not fitted to whatever is on screen, so
-*1 in 1,000 – 1 in 9,999* means the same thing with Alaska selected as it does with everything
-selected — you can compare two views directly. And a tier is not a rarity label: BirdView
-states the number and leaves the judgement to you, which is why no tier is called "common" or
-"scarce".
+The tier edges are fixed, not fitted to whatever is on screen, so *1 in 1,000 – 1 in 9,999* means
+the same thing with Alaska selected as it does with everything selected, and you can compare two
+views directly. A tier is not a rarity label: BirdView states the number and leaves the judgement
+to you, which is why no tier is called "common" or "scarce".
 
-Birds with no records in the regions you have selected are kept, in a last section of their
-own, rather than dropped from the page.
+Birds with no records in the regions you have selected are kept, in a last section of their own,
+rather than dropped from the page.
 
-**Scale switches to Global here, and that is deliberate.** Everywhere else each section is
-rescaled to its own largest bird, which is safe because a section spans birds of similar size.
-A frequency tier does not — it holds whatever happens to be about as often recorded, from
-hummingbirds to swans — so rescaling tier by tier would draw the one 140 mm bird in the last
-tier at the height of a 1,201 mm Trumpeter Swan six tiers above. One scale across the whole
-page is the honest way to read this view. Per section is still one click away.
+**The scale defaults to Global here.** A frequency tier holds birds of every size, from
+hummingbirds to swans, so rescaling each tier to its own largest bird would draw a small bird that
+is alone in its tier as tall as a swan in another. Per section is still one click away.
 
 ---
 
 ## Some things to try
 
-- **[The birds around you now](/?by=frequency&scale=global#here-and-now).** Sorted by how often
-  they are recorded, so the commonest birds where you are, this month, come first, all drawn to
-  one scale. Your browser asks to share your location, works out your state or province itself,
-  and selects it with the current month; your location never leaves the browser, and BirdView
-  only sees which region and month were chosen. Without sharing it, try
+- **[The birds around you now](/?by=frequency&scale=global#here-and-now).** The commonest birds
+  where you are, this month, first, all drawn to one scale. Your browser asks to share your
+  location, works out your region itself, and selects it with the current month; your location
+  never leaves the browser. Without sharing it, try
   [New York in October](/?by=frequency&scale=global&region=NY&month=Oct), or press **Here** and
   **Now** yourself under **Regions and months**.
 - **[Jay vs kestrel vs thrasher vs dove vs kingfisher vs nightjar](/compare?species=blujay&species=amekes&species=calthr&species=moudov&species=belkin1&species=chwwid).**
   Blue Jay, American Kestrel, California Thrasher, Mourning Dove, Belted Kingfisher and
-  Chuck-will's-widow, all 272 to 292 mm long, on one scale. Same length, six different shapes: their
-  wingspans run from 307 mm for the thrasher to 655 mm for the nightjar, more than double, and their
-  bills from 15 mm for the nightjar to 59 mm for the kingfisher, nearly four times. Any birds can be
-  compared this way: turn on **Compare birds** in Controls and pick them from the index.
+  Chuck-will's-widow, all 272 to 292 mm long, on one scale. Their wingspans run from 307 mm for the
+  thrasher to 655 mm for the nightjar, more than double, and their bills from 15 mm for the
+  nightjar to 59 mm for the kingfisher, nearly four times. To compare any birds this way, turn on
+  **Compare birds** in Controls and pick them from the index.
 - **[Herons and ducks together](/?family=Ardeidae&family=Anatidae).** Similar lengths, entirely
   different birds: herons are nearly all neck and leg, ducks nearly all body. Herons and pelicans
-  are the only families whose neck draws as an S, because they fly with it folded back onto the
-  shoulders — the field mark that separates a heron from a crane or an ibis in the air.
+  are the only families whose neck is drawn as an S, because they fly with it folded back onto the
+  shoulders, which separates a heron from a crane or an ibis in the air.
 - **"Big" depends on the measure.** Sort by [length](/?by=length), then
   [wingspan](/?by=wingspan), then [mass, scale Global](/?by=mass&scale=global). Albatrosses and
-  frigatebirds climb under wingspan, and mass, a cube of a length, spreads the range far wider
-  than length ever does.
+  frigatebirds move up under wingspan, and mass, which grows with the cube of length, spreads the
+  range far wider than length does.
 
 ---
 
@@ -224,11 +258,10 @@ It is a size and proportion tool, not a field guide.
 
 - **No plumage, color or markings.** Tile colors encode taxonomy, nothing about the bird's
   appearance.
-- **No range map, season or behavior.** You can filter by region, but that is a list of where a
-  bird is reported often enough to be worth looking for — not a range map, not a migration, and
-  not a date.
-- **No perched or standing view.** The stick figures show a bird in flight only. A perched view would
-  need leg and posture data that does not exist at this coverage.
+- **No range map, migration or behavior.** You can filter by region and month, but that is a list
+  of where and when a bird is reported often enough to be worth looking for, not a range map.
+- **No perched or standing view.** The stick figures show a bird in flight only. A perched view
+  would need leg and posture data that does not exist at this coverage.
 - **No individual variation.** One figure per species, not a range.
 
 For identification, use a field guide. For "wait, is a Merlin really that small?", use this.
@@ -237,12 +270,13 @@ For identification, use a field guide. For "wait, is a Merlin really that small?
 
 ## Where the numbers come from
 
-Escaped cage, aviary and farm birds — parrots, waxbills, a farmed Emu — are not drawn on the
-index, though their records pass BirdView's scope rule. [Every one is listed](/excluded) with
+Every bird's detail page names the source or formula behind each number it shows.
+[docs/data.md](data.md) describes each input and how far to trust it, and
+[how BirdView's data is built](pipeline.md) shows every source and step in one picture.
+
+Escaped cage, aviary and farm birds, such as parrots, waxbills and a farmed Emu, are not drawn on
+the index, though their records pass BirdView's scope rule. [Every one is listed](/excluded) with
 the reason, and each keeps its own page.
 
-Every bird's detail page names the source or formula behind each number it shows. Beyond that,
-[docs/data.md](data.md) describes each input and how far to trust it,
-[how BirdView's data is built](pipeline.md) draws every source and step as one diagram, and
-BirdView's own requirements are [in its repository](../river/) — the product and technical
-specifications, the decision record, and the acceptance criteria that check them.
+BirdView's own requirements, the product and technical specifications and the checks that hold
+the site to them, are [in its repository](../river/).

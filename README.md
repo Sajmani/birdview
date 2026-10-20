@@ -62,7 +62,8 @@ This is not an officially supported Google product.
 ## Contributing
 
 Please report problems and corrections as issues; corrections to the biology are especially
-welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) to contribute code.
+welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) to contribute code, and
+[CHANGELOG.md](CHANGELOG.md) for the major changes so far.
 
 ## Security
 
