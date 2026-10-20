@@ -1,0 +1,12 @@
+# Alignment symptoms are reported as notes and never fail the check (product.alignmentReview).
+exit 0
+requirements 7
+goals 6
+gradients 0
+unjustified 0
+unserved 0
+note contained-goal goals/goals.md
+note thin-goal goals/goals.md
+note long-goal goals/goals.md
+note goal-names-implementation goals/goals.md
+note goal-names-implementation goals/goals.md

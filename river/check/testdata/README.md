@@ -13,6 +13,7 @@ through that language's test runner (`decisions.checksInRepoLanguage`).
 | `requirements N`, `goals N`, `gradients N` | items found |
 | `unjustified N`, `unserved N` | requirements citing no goal, and goals nothing cites |
 | `problem CODE PATH` | one reported problem; the set must match exactly |
+| `note CODE PATH` | one reported note; if a case lists any, the set must match exactly, and a case listing none does not check notes |
 
 `PATH` is relative to the bundle, with forward slashes: a file, a directory for a problem about a
 directory, `-` for a problem about the bundle as a whole, or `../AGENTS.md` for the instruction

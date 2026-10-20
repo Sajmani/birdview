@@ -36,10 +36,13 @@ func TestBundle(t *testing.T) {
 		t.Logf("%d requirement(s), %d goal(s), %d gradient(s), %d citing no goal, %d goal(s) uncited",
 			r.Requirements, r.Goals, r.Gradients, r.Unjustified, r.Unserved)
 	}
+	for _, n := range r.Notes {
+		t.Logf("note [%s] %s: %s", n.Code, n.Path, n.Message)
+	}
 }
 
 // TestCases holds this translation to River's shared cases: each must report
-// the same exit status, counts and problems, by code and path, as River's
+// the same exit status, counts, problems and notes, by code and path, as River's
 // Python reference does. The cases are copied from River at the pin check.go
 // records.
 func TestCases(t *testing.T) {
@@ -68,6 +71,12 @@ func TestCases(t *testing.T) {
 			}
 			sort.Strings(problems)
 			got["problems"] = strings.Join(problems, "\n")
+			var notes []string
+			for _, n := range r.Notes {
+				notes = append(notes, n.Code+" "+n.Path)
+			}
+			sort.Strings(notes)
+			got["notes"] = strings.Join(notes, "\n")
 			for k, w := range want {
 				if got[k] != w {
 					t.Errorf("%s: want %q, got %q", k, w, got[k])
@@ -83,7 +92,7 @@ func readWant(t *testing.T, path string) map[string]string {
 		t.Fatal(err)
 	}
 	want := map[string]string{}
-	var problems []string
+	var problems, notes []string
 	for _, line := range strings.Split(string(b), "\n") {
 		if strings.TrimSpace(line) == "" || strings.HasPrefix(line, "#") {
 			continue
@@ -91,11 +100,18 @@ func readWant(t *testing.T, path string) map[string]string {
 		key, value, _ := strings.Cut(line, " ")
 		if key == "problem" {
 			problems = append(problems, value)
+		} else if key == "note" {
+			notes = append(notes, value)
 		} else {
 			want[key] = value
 		}
 	}
 	sort.Strings(problems)
 	want["problems"] = strings.Join(problems, "\n")
+	// A case that lists no notes does not check them.
+	if notes != nil {
+		sort.Strings(notes)
+		want["notes"] = strings.Join(notes, "\n")
+	}
 	return want
 }

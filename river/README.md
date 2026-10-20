@@ -1,4 +1,4 @@
-> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `2e4274e`.
+> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `f86936d`.
 > Local amendments, if any, are listed in [bindings.md](bindings.md).
 
 # River
@@ -15,8 +15,7 @@ about any particular project; what is true of yours goes in `bindings.md`.
 ## Adopting River
 
 **You do not have to change any tool you already use.** River is files in your repository plus
-checks written in your language and run by whatever already runs your tests. If adopting a
-methodology requires adopting a toolchain first, you have been handed a migration, not a method.
+checks written in your language and run by whatever already runs your tests.
 
 **Adopt one stage at a time.** Requirements alone is worth doing. A stage you have not adopted
 is declared **informal** in `bindings.md` rather than left unmentioned, so a partial adoption is
@@ -25,10 +24,10 @@ distinguishable from an abandoned one.
 One dependency is unavoidable: **Verification depends on Requirements**, because a criterion
 with nothing behind it has nothing to check against. The others are free.
 
-**Brownfield is the normal case.** A codebase that already exists has requirements — they are
-implicit in the code, the tests and the documentation. Recover them first and map them to goals
-afterwards. You will start with every requirement unmapped and a test suite nobody wrote
-requirements for, and neither is a failure state. Both are counted.
+**Brownfield is the normal case.** An existing codebase already has requirements, implicit in
+its code, tests and documentation. Recover them first and map them to goals afterwards. You will
+start with every requirement unmapped and a test suite nobody wrote requirements for; neither is
+a failure state, and both are counted.
 
 ### Copying this file
 
@@ -39,13 +38,13 @@ Copy `README.md` into your project unchanged and record where it came from:
 > Local amendments, if any, are listed in `bindings.md`.
 ```
 
-Keeping the file byte-identical to its origin is what makes refreshing it a reviewable diff
-instead of an archaeology exercise. Put amendments in `bindings.md` and say what they change.
+Keeping the file byte-identical to its origin makes refreshing it a reviewable diff. Put
+amendments in `bindings.md` and say what they change.
 
 **The method is not a requirements source.** It is a pinned external document, but it
-contributes no requirements to your composed set, and its pin belongs in the banner above and
-nowhere else — recording it in the source manifest as well gives you two records of one pin,
-which is the thing a single recorded hash exists to prevent.
+contributes no requirements to your composed set. Its pin belongs in the banner above and
+nowhere else: recording it in the source manifest too gives two records of one pin, which a
+single recorded hash exists to prevent.
 
 ---
 
@@ -67,8 +66,7 @@ Four stages, and four processes that act on the arcs between them.
 | **Experimentation** | Release → Goals. Align releases with intent |
 | **Revision** | Back to Goals and Sources. Return what the other stages learned |
 
-The stages are not phases. They run continuously, and a project is normally doing all four at
-once on different changes.
+The stages are not phases: a project is normally doing all four at once, on different changes.
 
 ---
 
@@ -98,13 +96,11 @@ agent instruction file (`AGENTS.md` or equivalent) points at `README.md` — tha
 an agent finds the method at all.
 
 **Everything is plain Markdown.** No database, no server, no format that needs a tool to read.
-Checks are written in a language the project already builds with, so adopting River adds no
-runtime.
 
 **Write every agent-read file to be read in part** (`product.seekableArtifacts`). An agent
 searches and opens ranges; it should not have to read a file whole to find one item.
 
-- **Keep the instruction file short** — under 6,000 characters. It is paid for on every session,
+- **Keep the instruction file short** — under 6,000 characters. It is loaded in every session,
   so it holds commands, the rules whose breach costs a commit, and a map. No history.
 - **One item per heading, the identifier as the heading**, its title in bold beneath. Then
   `grep -n -A1 '^## '` is the table of contents and `## <id>` finds one item. Keep no
@@ -128,10 +124,14 @@ not the requirement restated in looser words.
 
 **What separates a goal from a requirement is attainment, not measurability.** Ask whether a
 single change could make it true on its own. *p99 under 200 ms* could, so it is a requirement.
-*Reach 10,000 weekly users* could not, however good the change, so it is a goal. Revenue is the
-clearest case: you do not require it in order to ship, and only by shipping can you earn it.
+*Reach 10,000 weekly users* could not, however good the change, so it is a goal.
 
 That is why **a goal never gates a change and a requirement can.**
+
+**A goal names who benefits and what they gain.** The usual beneficiaries are the software's
+users, the communities it depends on, and the people who build it; a project with no goal for one
+of them is usually missing one. A goal that names a mechanism is a requirement in disguise: it
+should survive a rewrite of the implementation. One paragraph is enough.
 
 Requirements cite goals by package-qualified ID in a `Goals:` field. A goal never lists its
 requirements, so the two cannot drift apart.
@@ -145,8 +145,8 @@ the first. Requiring either to arrive with the other attached produces invented 
 ## Gradients
 
 A **gradient** is a metric with a declared **direction of improvement**. The direction is the
-whole of the difference from a KPI: a KPI reports where you are, a gradient says which of two
-candidates is better — which is the operation an agent needs when it has produced several.
+only difference from a KPI: a KPI reports where you are; a gradient says which of two candidates
+is better, which is what an agent needs when it has produced several.
 
 A gradient may carry a **target**, a **backstop**, both, or neither.
 
@@ -157,9 +157,8 @@ A gradient may carry a **target**, a **backstop**, both, or neither.
 
 - A **target** is absolute: where you are trying to get to. A gradient with one is an SLO.
 - A **backstop** is a fixed limit the value must not cross. It does not move when you
-  improve: reach 90 ms against a 100 ms backstop and the backstop stays at 100 ms, and the 10 ms
-  between is slack you may spend elsewhere, as an error budget is spent. Performance budgets are
-  backstops.
+  improve: reach 90 ms against a 100 ms backstop and the 10 ms between is slack you may spend
+  elsewhere, as an error budget is spent. Performance budgets are backstops.
 - **Both** brackets the work: *reach 100 ms, fail above 300 ms, improve in between.*
 
 **The kind of threshold does not decide whether you have written a goal or a requirement** —
@@ -171,14 +170,14 @@ slack away. It is occasionally the right policy, but moving a backstop is a deci
 person's to make.
 
 **Most gradients carry no threshold, and should not.** Where several exist, nearly every change
-regresses one of them; thresholding all of them stops delivery, and what follows is not stricter
-engineering but a team that has learned to override gates. Online-experiment practice calls a
-thresholded metric a **guardrail metric** and warns against having many, for the same reason.
+regresses one of them; thresholding all of them stops delivery, and teams learn to override
+gates. Online-experiment practice calls a thresholded metric a **guardrail metric** and warns
+against having many, for the same reason.
 
 **Achieving a target may promote it to a backstop.** A target gives direction until you reach
 it and then gives none; converting it holds the position while effort moves to goals still
-unmet. That is what makes a set of goals prioritizable — an agent reads the achieved ones as
-constraints and the rest as direction. Promotion is a person's call: it needs a firing rule or
+unmet. That is what makes a set of goals prioritizable: an agent reads the achieved ones as
+constraints and the rest as direction. Promotion is a person's call. It needs a firing rule or
 it flaps, a level below the target or it gates on the first ordinary dip, and a cap, because
 ten achieved goals would otherwise become ten permanent gates.
 
@@ -194,24 +193,23 @@ evidence.
 A **source** provides requirements. A **local** source is authored in your repository. An
 **imported** source is written by someone else — a compliance standard, a terms of service, a
 contract — and is **pinned and integrity-checked**, so a change to it produces a reviewable
-diff rather than a surprise. Record the hash in exactly one place.
+diff. Record the hash in exactly one place.
 
-**Vendoring is one way to pin a source and is often not available.** A licence may forbid
+**Vendoring is one way to pin a source and is often not available.** A license may forbid
 redistribution, terms may forbid automated access, or the source may be an API with nothing to
 copy. Record an **import style** per source — vendored, fetched at build, queried, quoted,
-absorbed, consulted — and pin it by whatever the style allows. What is constant is that a
-change is detectable, not the mechanism.
+absorbed, consulted — and pin it by whatever the style allows. What must hold is that a change
+is detectable, whatever the mechanism.
 
 **A source you cannot retrieve is a recorded gap, never a reconstruction.** Terms pages refuse
-automated clients; publishers go offline. Write down what could not be read and leave it
-unread. Never supply its contents from memory — a plausible rate limit or licence term is
+automated clients; publishers go offline. Record what could not be read and leave it unread.
+Never supply its contents from memory: a plausible rate limit or license term is
 indistinguishable from a real one, and an agent will produce one readily.
 
 **A source has a lifecycle, and refusal is part of it.** A source you evaluated and
-**rejected** is kept, with the reason: the refusal is a durable decision, usually worth more
-than the source would have been, because otherwise the next person evaluates it again. A
-source you adopted and later **retired** is kept too, with what depended on it. Neither is the
-same as a source nobody considered.
+**rejected** is kept, with the reason: the refusal is a durable decision, and without it the
+next person evaluates the source again. A source you adopted and later **retired** is kept too,
+with what depended on it. Neither is the same as a source nobody considered.
 
 **One source is one package.** A source may span several files in its directory without becoming
 several packages; files organize, packages namespace. If a grouping deserves a prefix it
@@ -229,10 +227,10 @@ marks a source you may not locally override.
 more **composed requirements packages** — explicit, versioned artifacts rather than an implied
 state. Each records which sources it came from, at which pins, under which precedence order.
 
-A composed package is named for its **audience or scope**, the way a Go package is. Never for a
-version: versions are tags and branches, so a directory called `v1/` is the one name that is
-always wrong. Once tagged, a composed version is never edited; a later composition makes a new
-tag, and simultaneous milestones live on branches.
+A composed package is named for its **audience or scope**, the way a Go package is, never for a
+version: versions are tags and branches, so a directory called `v1/` is always wrong. Once
+tagged, a composed version is never edited; a later composition makes a new tag, and
+simultaneous milestones live on branches.
 
 Downstream repositories import your **exported composed packages**, never your raw sources, so
 every cross-repository obligation has been through composition with explicit precedence and
@@ -254,11 +252,11 @@ item and giving its title:
 
 What composition wrote — a rule over a domain, an intermediary's contract, a requirement a
 higher tier changed — follows in full, each item naming its sources in `Composed from:`, every
-entry a link to the item it names. **Every
-source requirement is included, excluded, or composed from, in some package**; one that is none
-of these has silently dropped out. Included requirements keep their source names. Do not commit
-a flattened copy with everything inlined beside the sources: every search would find each
-requirement twice. If an importer or auditor needs one, generate it when you tag.
+entry a link to the item it names. **Every source requirement is included, excluded, or composed
+from, in some package**; one that is none of these has silently dropped out. Included
+requirements keep their source names. Do not commit a flattened copy with everything inlined
+beside the sources: every search would find each requirement twice. If an importer or auditor
+needs one, generate it when you tag.
 
 **A requirement over every instance of something is composed once.** A source names the domain
 a requirement applies to in an `Applies to:` field, in its own term — `Applies to:
@@ -284,7 +282,7 @@ their own, and the order they run in is part of the contract, checked where they
 
 **Never resolve a conflict silently.** Two requirements that disagree go to `decisions.md`:
 what conflicted, which sources, what was decided, by whom, and on what authority. Records are
-append-only — a decision that turns out badly is superseded by a new one, never edited, because
+append-only: a decision that turns out badly is superseded by a new one, never edited, because
 the record of having been wrong is worth keeping.
 
 ### Anatomy
@@ -305,8 +303,8 @@ A swallowed error is indistinguishable from success, and the caller acts on a li
 
 **The first paragraph after the fields is the complete statement**: what must be true, readable
 on its own. Rationale, history and examples follow it, so a reader who needs only the rule can
-stop there. Keep the rationale — it is where a future reader learns a constraint is deliberate,
-and where the incident lives that a good failing test is built from — but keep it after.
+stop there. Keep the rationale, after the rule: it tells a future reader a constraint is
+deliberate, and it holds the incident a good failing test is built from.
 
 Identifiers are descriptive CamelCase — `noSilentFailures`, not `P-014`. Inside a package its
 own names are bare; everywhere else they are qualified, `product.noSilentFailures`. Package
@@ -319,9 +317,8 @@ lowercased — `product.md#nosilentfailures` — and lets the title be reworded 
 a single link to it. Write link fragments in lowercase; anchors are generated that way and
 matched exactly. Decisions follow the same form.
 
-Because the heading is the identifier, a reader can find one requirement by searching for
-`## noSilentFailures` and read only that section. Tell your agents to; a source file holding
-twenty requirements costs twenty times as much to read whole.
+Tell your agents to find one requirement by searching for `## noSilentFailures` and to read only
+that section; a source file holding twenty requirements costs twenty times as much to read whole.
 
 ---
 
@@ -341,8 +338,8 @@ bundle; a criterion cannot, because composition produces it from a requirement.
 
 **A criterion must have been watched failing before it is trusted.** A check that cannot fail is
 indistinguishable from one that passes, and it is worse than nothing because it reports safety.
-Equally: a criterion's expected value comes from the requirement, never from a run of the
-current code — a check built from existing output can only confirm that behavior has not
+Likewise, a criterion's expected value comes from the requirement, never from a run of the
+current code: a check built from existing output can only confirm that behavior has not
 changed, including when it was wrong.
 
 ### When a requirement cannot be verified
@@ -355,7 +352,7 @@ things, and telling them apart is judgment:
    are testable, absence is not. Attach the coverage you can get, state in the criterion what it
    does **not** cover, and count the requirement as uncovered.
 3. **Requires judgment.** *Complies with the spirit of the regulation.* The guardrail is a human
-   review with a named owner and a cadence. Still a guardrail; simply not automated.
+   review with a named owner and a cadence. It is still a guardrail, just not automated.
 
 **Never remove a requirement for being unverifiable**, and **never substitute an easier
 criterion.** *Must be accessible*, checked by a contrast checker, reports green on a product
@@ -376,7 +373,7 @@ thing.
 **Guardrails are not bundle artifacts.** They live wherever you already keep your tests and your
 deployment configuration. The bundle **cites** them; it does not contain them, because requiring
 otherwise would mean moving your tests as a condition of adoption. A scanner you already run is
-a guardrail in exactly this sense, and citing it is the whole of the integration.
+a guardrail in this sense, and citing it is the whole of the integration.
 
 The citation does not live in the composed package. A criterion is immutable with its version;
 the guardrail implementing it is operational, and swapping one tool for another must not force a
@@ -398,9 +395,8 @@ there are, the more it matters.
 **A guardrail may have no criterion, and is never removed for lacking one.** A brownfield
 project begins with a suite full of orphans. An orphan is one of three things and you cannot
 tell which without looking: an undocumented requirement, a test of an implementation detail, or
-a test of behavior nobody wants any more. The default is **keep and count**. A method that
-rewards deleting unexplained tests has made the codebase less safe in exchange for a tidier
-table.
+a test of behavior nobody wants any more. The default is **keep and count**. Deleting
+unexplained tests makes the codebase less safe in exchange for a tidier table.
 
 ---
 
@@ -408,8 +404,7 @@ table.
 
 Implementation produces the code and the **designs that describe it**, generated together and
 stored at the same commit. A design describes the code at the commit it sits in — not a record
-written afterwards, not a plan written before. It is one half of an implementation, kept in step
-with the other, so an agent can read it as grounding context.
+written afterwards, not a plan written before — so an agent can read it as grounding context.
 
 **A design lives with the code, not in the bundle.** The bundle holds intent and conformance;
 keeping a design in it would put it where people edit requirements rather than where they edit
@@ -441,7 +436,7 @@ instruction files an agent reads.
 change code. Implementation changes the system to satisfy a requirement; Optimization changes it
 to make future satisfaction cheaper. Porting to a faster language is Optimization when it makes
 later performance work tractable, and Implementation when it meets a stated performance
-requirement. Say which — only one of them answers to an acceptance criterion.
+requirement. Say which: only one of them answers to an acceptance criterion.
 
 **It acts on the bundle too.** Restructuring requirements so that writing code and guardrails
 from them costs less — a composed package that lists rather than copies, a requirement whose
@@ -463,7 +458,7 @@ Without it a bundle records what someone believed once.
 **Revision edits what was authored, never what was derived.** A source and a goal are written by
 people; a composed package is produced from them and is immutable once tagged. An edit there is
 discarded by the next composition and invisible to anyone who imported it. So feedback lands on
-the source, or on the goal, and composition runs again.
+the source or the goal, and composition runs again.
 
 Where the source is **imported** you cannot edit it. The change is either a local requirement
 overriding it under precedence, or a request to whoever owns it — and under a Governing tier,
@@ -478,25 +473,30 @@ only the request.
 
 **Newly discovered** is one of three things: a requirement, so add it; an existing requirement
 that was too vague, so sharpen that one; or an implementation decision that is not a requirement
-at all, which is the most common and the easiest to get wrong in the direction of writing
-everything down.
+at all. The last is the most common, and the usual mistake is to write it down anyway.
 
 **Unsatisfiable** has three dispositions: weaken it to what is achievable, withdraw it, or
 **accept the gap** — keep the requirement and record in `decisions.md` that it is not met, by
 whom, on what grounds, and when it will be looked at again. An accepted gap with no review date
 is indistinguishable from a forgotten one.
 
-**Release feedback is not a weaker verification.** A guardrail catches only the violation of a
-criterion that exists, so everything outside the written set is invisible to it by construction
-— and that is where most of what a running system teaches you lives. Bug reports, feature
-requests, UX studies, traces, profiles and exceptions are the one channel that reaches the
-unknown. It is also the only feedback that is not always about a defect: the answer to an
-opportunity may be a new **goal**.
+**Release feedback is not a weaker verification.** A guardrail catches only violations of
+criteria that exist, so it cannot see anything outside the written set, and that is where most
+of what a running system teaches you lies. Bug reports, feature requests, UX studies, traces,
+profiles and exceptions are the one channel that reaches the unknown. It is also the only
+feedback that is not always about a defect: the answer to an opportunity may be a new **goal**.
 
 **Goal movement has three shapes and only one invalidates anything.** A goal **added** needs new
 requirements and touches none. A goal **expanded** means the requirements serving it still serve
 it and no longer suffice. A goal **changed or withdrawn** puts every requirement citing it in
 doubt. Treating all movement as invalidation makes teams reluctant to move goals at all.
+
+**Realign by re-citing, not by editing.** When goals move, and from time to time regardless, cite
+every requirement afresh rather than adjusting its old `Goals:` line, and mark the citations that
+fit only by stretching. Weak fits that cluster are a missing goal. A goal cited by unrelated
+requirements is a catch-all hiding them. Two goals cited by the same requirements are one goal.
+Two goals that pull against each other are a tension to record, not a mistake: each new
+requirement says which side it serves.
 
 **Revision is not composition.** Revision edits a source or a goal; composition then produces a
 new requirements version from it.
@@ -508,7 +508,7 @@ new requirements version from it.
 **An agent drafts; a person decides.**
 
 An agent transcribes sources, drafts requirements, surfaces conflicts, generates criteria, runs
-guardrails, clusters unmapped requirements and proposes candidate goals.
+guardrails, clusters unmapped and weakly mapped requirements and proposes candidate goals.
 
 A person decides whether those are the right requirements, which one loses a conflict, whether a
 gap may be accepted, and whether a target should become a backstop.
@@ -530,7 +530,7 @@ language it is written in. Write your own checks in the same language.
 **Before River's checks replace yours, list what yours enforced.** River's checker counts some
 things a project's own checks may have failed — a requirement citing no goal, say — because a
 brownfield project may start that way. If your project was stricter, keep the stricter rule as
-your own check; swapping checkers is otherwise how a rule disappears without anyone deciding it
+your own check; otherwise swapping checkers is how a rule disappears without anyone deciding it
 should.
 
 Run them before calling a change done. At minimum a bundle should check that:
@@ -542,7 +542,10 @@ Run them before calling a change done. At minimum a bundle should check that:
 - the instruction file and every line in the bundle stay within `product.seekableArtifacts`' limits
 
 **Every check must have been watched failing.** Plant a violation, see it reported, remove it.
-A check nobody has seen fail is a check nobody has established.
+
+**Some symptoms are notes, never failures:** a goal cited by one requirement, a goal whose
+requirements all cite one other goal too, a goal longer than a paragraph, and a goal that contains
+code or names another item. Each can be right. Each is where to look first.
 
 What a check cannot do is tell you whether a requirement genuinely *serves* the goal it cites.
 Service is a semantic relation, not a measurement. A green run is not a validated one.
@@ -556,11 +559,11 @@ acceptance criteria, CI gates, progressive rollout, SLOs and error budgets, guar
 dependency pinning, and Go's package and module conventions, which it adopts directly rather
 than inventing syntax.
 
-What differs is mostly joinery. Requirements are composed from many sources with explicit
-precedence and a durable record of every resolution. Criteria are generated from requirements
-and cite them, so coverage is derived rather than asserted. Gradients make "better" orderable so
-an agent can choose between candidates. And the whole of it is files in your repository, legible
-to a person and loadable as grounding context by an agent.
+What is new is mostly how these are joined. Requirements are composed from many sources with
+explicit precedence and a durable record of every resolution. Criteria are generated from
+requirements and cite them, so coverage is derived rather than asserted. Gradients make "better"
+orderable so an agent can choose between candidates. And the whole of it is files in your
+repository, legible to a person and loadable as grounding context by an agent.
 
 ---
 

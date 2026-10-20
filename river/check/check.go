@@ -15,7 +15,7 @@
 // Package check is River's checker, translated into Go so it runs with
 // BirdView's own tests (River's decisions.checksInRepoLanguage).
 //
-// Translated from River's river/check/goals.py at pin 2e4274e
+// Translated from River's river/check/goals.py at pin f86936d
 // (sso://user/sameer/river). What is normative is what the checker reports,
 // not how: a problem's code and path must match the reference exactly, and
 // testdata/ -- River's shared cases, copied at the same pin -- holds that to
@@ -49,6 +49,9 @@ type Result struct {
 	// stricter than River about which of them it tolerates.
 	UnjustifiedItems []string
 	Problems         []Problem
+	// Notes are symptoms worth a person's look, never failures
+	// (River's product.alignmentReview).
+	Notes []Problem
 	// Stopped is set when a sanity check failed before anything was counted.
 	Stopped bool
 }
@@ -69,6 +72,11 @@ var (
 	goalsField    = regexp.MustCompile(`(?m)^Goals:\s*(.+)$`)
 	servesField   = regexp.MustCompile(`(?m)^Serves:\s*(.+)$`)
 	goalRef       = regexp.MustCompile(`\bgoals\.([A-Za-z0-9_]+)\b`)
+	// A qualified reference such as product.stableSurface.
+	qualifiedRef = regexp.MustCompile(`\b[a-z][a-z0-9]*\.[a-z][a-z0-9]*[A-Z][A-Za-z0-9]*\b`)
+	// A goal's text runs from its title to the next heading or rule.
+	goalEnd   = regexp.MustCompile(`(?m)^(?:#|---)`)
+	paragraph = regexp.MustCompile(`\n\s*\n`)
 )
 
 // River's product.seekableArtifacts: an agent reads by searching and opening
@@ -343,5 +351,92 @@ func Run(dir string) Result {
 		}
 	}
 	r.Problems = c.problems
+	r.Notes = c.alignmentNotes(goalsDir, reqItems)
 	return r
+}
+
+// alignmentNotes reports River's four alignment symptoms: a goal cited by one
+// requirement, a goal whose citing requirements all cite one other goal too,
+// a goal longer than one paragraph, and a goal containing code or a qualified
+// reference. Each can be right; each is where a person looks first.
+func (c *checker) alignmentNotes(goalsDir string, reqItems []item) []Problem {
+	type goal struct{ path, title, body string }
+	goals := map[string]goal{}
+	for _, path := range c.markdown(goalsDir, true) {
+		b, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		text := string(b)
+		for _, h := range h2Item.FindAllStringSubmatchIndex(text, -1) {
+			start, title := h[1], ""
+			if tm := titleLine.FindStringSubmatchIndex(text[h[1]:]); tm != nil {
+				start, title = h[1]+tm[1], text[h[1]+tm[2]:h[1]+tm[3]]
+			}
+			end := len(text)
+			if e := goalEnd.FindStringIndex(text[start:]); e != nil {
+				end = start + e[0]
+			}
+			goals[text[h[2]:h[3]]] = goal{c.rel(path), title, strings.TrimSpace(text[start:end])}
+		}
+	}
+	citedBy := map[string]map[string]bool{}
+	for g := range goals {
+		citedBy[g] = map[string]bool{}
+	}
+	for _, it := range reqItems {
+		for _, g := range it.cited {
+			if citedBy[g] != nil {
+				citedBy[g][it.path+"#"+it.ident] = true
+			}
+		}
+	}
+	ids := make([]string, 0, len(goals))
+	for g := range goals {
+		ids = append(ids, g)
+	}
+	sort.Strings(ids)
+	subset := func(a, b map[string]bool) bool {
+		for k := range a {
+			if !b[k] {
+				return false
+			}
+		}
+		return true
+	}
+	var notes []Problem
+	for _, g := range ids {
+		gl, mine := goals[g], citedBy[g]
+		if len(mine) == 1 {
+			notes = append(notes, Problem{"thin-goal", gl.path,
+				"goals." + g + " is cited by one requirement; is it narrow, or under-served?"})
+		}
+		// Two or more, so a goal with one citation is reported once, as thin.
+		// Equal sets are reported once, on the goal that sorts later.
+		if len(mine) >= 2 {
+			for _, h := range ids {
+				other := citedBy[h]
+				if h != g && subset(mine, other) && (len(mine) != len(other) || h < g) {
+					notes = append(notes, Problem{"contained-goal", gl.path,
+						"every requirement citing goals." + g + " also cites goals." + h + "; are they one goal?"})
+					break
+				}
+			}
+		}
+		paras := 0
+		for _, p := range paragraph.Split(gl.body, -1) {
+			if strings.TrimSpace(p) != "" {
+				paras++
+			}
+		}
+		if paras > 1 {
+			notes = append(notes, Problem{"long-goal", gl.path,
+				"goals." + g + " runs to more than one paragraph; a goal needs one"})
+		}
+		if strings.Contains(gl.title+gl.body, "`") || qualifiedRef.MatchString(gl.title+" "+gl.body) {
+			notes = append(notes, Problem{"goal-names-implementation", gl.path,
+				"goals." + g + " contains code or a qualified reference; a goal should survive a rewrite of the implementation"})
+		}
+	}
+	return notes
 }
