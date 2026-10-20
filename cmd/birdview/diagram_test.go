@@ -117,7 +117,7 @@ func TestPipelineDiagramIsServed(t *testing.T) {
 	if !strings.Contains(page, `<a href="/docs/pipeline.svg"><img src="/docs/pipeline.svg"`) {
 		t.Error("/docs/pipeline does not show the diagram, linked to itself full size")
 	}
-	if strings.Contains(page, "flowchart TB") {
+	if strings.Contains(page, "flowchart ") {
 		t.Error("/docs/pipeline shows the Mermaid source instead of the picture")
 	}
 

@@ -57,12 +57,46 @@ def left_align_tables(svg: str) -> str:
         head, left, label = m.group(1), float(m.group(2)), m.group(3)
         if not re.search("─────|[★·✗]", label):
             return m.group(0)
-        label = label.replace('<text style=""', '<text style="text-anchor: start"', 1)
+        label = re.sub(r'(<text\b[^>]*)style=""', r'\1style="text-anchor: start"', label, count=1)
         label = label.replace('x="0"', f'x="{left + PAD:g}"')
         return head + label
     out, n = NODE.subn(align, svg)
     if n == 0 or "text-anchor: start" not in out:
         sys.exit("no box found to left-align; Mermaid's SVG has changed shape")
+    return out
+
+
+# In a left-to-right flowchart, Mermaid's Dagre layout ignores `direction TB`
+# on a subgraph whose nodes have edges to the rest of the graph, turning
+# `S1 --> S2 --> ... --> S9` into nine horizontal ranks. Stripping the chain
+# before layout lets Dagre stack S1..S9 in one vertical column and wire
+# `S9 --> JSON`; `draw_step_arrows` then draws the vertical arrows S1 -> ... -> S9.
+STEP_CHAIN = "S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> JSON"
+STEP_NODE = re.compile(
+    r'<g [^>]*id="[^"]*flowchart-(S[1-9])-\d+"[^>]*'
+    r'transform="translate\(([-\d.]+),\s*([-\d.]+)\)"[^>]*>'
+    r'<g class="basic label-container outer-path"><path d="M[-\d.]+ ([-\d.]+)'
+)
+
+
+def draw_step_arrows(svg: str) -> str:
+    geom = {m.group(1): (float(m.group(2)), float(m.group(3)), abs(float(m.group(4))))
+            for m in STEP_NODE.finditer(svg)}
+    if len(geom) != 9:
+        sys.exit(f"expected S1..S9 in SVG, found {sorted(geom)}")
+    arrows = []
+    for i in range(1, 9):
+        x1, y1, h1 = geom[f"S{i}"]
+        x2, y2, h2 = geom[f"S{i + 1}"]
+        arrows.append(
+            f'<path d="M{x1:.3f},{y1 + h1:.3f}L{x2:.3f},{y2 - h2 - 4:.3f}" '
+            f'id="my-svg-L_S{i}_S{i + 1}_0" '
+            f'class="edge-thickness-normal edge-pattern-solid flowchart-link" '
+            f'marker-end="url(#my-svg_flowchart-v2-pointEnd)"/>'
+        )
+    out, n = re.subn(r'(<g class="edgePaths">)', r'\1' + "".join(arrows), svg, count=1)
+    if n != 1:
+        sys.exit("no <g class=\"edgePaths\"> found in SVG")
     return out
 
 
@@ -74,9 +108,11 @@ def render(md: pathlib.Path) -> None:
         sys.exit(f"{md.name}: {len(blocks)} diagrams; one per page is all the server shows")
     src = blocks[0]
     digest = hashlib.sha256(src.encode("utf-8")).hexdigest()
+    has_step_chain = STEP_CHAIN in src
+    mmd_src = src.replace(STEP_CHAIN, "S9 --> JSON", 1) if has_step_chain else src
     with tempfile.TemporaryDirectory() as tmp:
         t = pathlib.Path(tmp)
-        (t / "in.mmd").write_text(src, encoding="utf-8")
+        (t / "in.mmd").write_text(mmd_src, encoding="utf-8")
         (t / "pptr.json").write_text(json.dumps(
             {"executablePath": CHROME, "args": ["--no-sandbox"]}))
         # markdownAutoWrap off, or Mermaid rewraps every label at a fixed
@@ -91,6 +127,8 @@ def render(md: pathlib.Path) -> None:
                        check=True, env=env)
         svg = (t / "out.svg").read_text(encoding="utf-8")
     svg = left_align_tables(svg)
+    if has_step_chain:
+        svg = draw_step_arrows(svg)
     # The digest goes first, as a comment, so the check needs no XML parser.
     out = md.with_suffix(".svg")
     out.write_text(f"<!-- source sha256 {digest} -->\n" + svg, encoding="utf-8")

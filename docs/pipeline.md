@@ -18,7 +18,7 @@ facts copied into code, rather than data read by a program. The same legend is i
 corner.
 
 ```mermaid
-flowchart TB
+flowchart LR
   subgraph LEGEND["Legend"]
     direction TB
     LT["`Table or source
@@ -210,6 +210,7 @@ flowchart TB
   end
 
   subgraph INGEST["birdview-ingest: nine steps, in memory; only species.json is written"]
+    direction TB
     S1(["Step 1: scope
     keep established or rare;
     add Declared and both halves
