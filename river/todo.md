@@ -23,9 +23,27 @@ Status: open
 Owner: Sameer
 Gate: when convenient
 
-The goals were cut to one sentence each on 2026-10-20. Do the same pass over everything else a
-person reads: requirements, decisions, criteria, docs, README, AGENTS.md, code comments and the
-text on the pages. Keep each rule and its reason; cut the rest.
+First pass done 2026-10-20: README, AGENTS.md, CONTRIBUTING, CHANGELOG, the four guides, every
+product and tech requirement, `app.md` and the page templates, about 30% shorter overall. Left:
+`decisions.md` and `acceptance.md` (history and verification records; decide whether to tighten
+them at all), `requirements.md`, `notes.md`, `arch.md`, `bindings.md`, code comments, and page
+text built in Go, chiefly `cmd/birdview/main.go` (group notes, the undrawn page's verdicts, region
+and category row details, record-ratio tooltips, tile notes, and the `/added` and `/excluded`
+intros) and the grouping notes in `internal/region/region.go`. Several of those strings are
+asserted by tests; grep before editing.
+
+## massLabelPlacement
+
+**labeledDetailDiagram says two different things about where the mass label goes**
+
+Status: open
+Owner: Sameer
+Gate: needs the owner's call
+
+[product.labeledDetailDiagram](requirements/sources/product/measurements.md#labeleddetaildiagram)
+says total length and mass are labeled below the tail tip, and later that mass is labeled under its
+cube, not in the stack under the tail. Found during the prose pass; it predates it. Check what the
+page does, and correct the statement that is wrong.
 
 ## stableSurface
 
@@ -40,6 +58,19 @@ Gate: before a public deployment, and before [publishDataset](#publishdataset)
 `/compare` and the documented query parameters) and declaring everything else internal,
 including the shape of `species.json`. This pulls against publishing the dataset: expect a
 separate external schema, versioned and documented, with the internal one free to change.
+
+## craniumAtLargeMass
+
+**The cranium model overdraws the largest birds, and one is now in scope**
+
+Status: open
+Owner: Sameer
+Gate: when convenient
+
+[product.craniumFromMass](requirements/sources/product/diagram.md#craniumfrommass) said its
+overestimate at large mass cost nothing because the heaviest bird in scope was 11 kg. Emu is now in
+scope at 34 kg and draws a 243 mm cranium. Check it against a measured emu skull, and if it is far
+off, fit or cap the coefficient.
 
 ## wingspanSectionWidth
 

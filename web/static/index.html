@@ -25,9 +25,9 @@
 <body>
 <header>
   <h1>BirdView</h1>
-  <p class="sub">BirdView helps you understand the relative size of birds across families by
-  drawing them as stick figures to scale, from public and modeled data. Read Presentation for details,
-  and use the Controls to configure the view.{{with .Feedback}}
+  <p class="sub">BirdView draws birds as stick figures to scale, from public and modeled data, so
+  you can compare sizes across families. Presentation explains the drawing; Controls change the
+  view.{{with .Feedback}}
   Found something wrong? <a href="{{.}}">Report it</a>.{{end}}</p>
   {{/* Every thing to try here is also in the guide's "Some things to try"
        (product.pageExplainsItself). The first presses Here and Now on arrival;
@@ -46,42 +46,37 @@
 </header>
 
 <details class="help" id="presentation">
-  <summary>Presentation<span class="sumdesc">what the stick figures show, and what they do not</span></summary>
+  <summary>Presentation<span class="sumdesc">what the stick figures show, and what is estimated</span></summary>
   <div class="helpgrid">
     <section>
       <h3>The stick figure</h3>
       {{if .Legend}}
-      <p>Every bird is drawn as a stick figure to scale, seen from above in flight. This is a real
-      one:</p>
+      <p>Each bird is a stick figure to scale, seen from above in flight. For example:</p>
       <div class="legenddia">{{template "diagram" .Legend}}</div>
-      <p class="hint">{{.Legend.Name}} &mdash; the same drawing the detail page shows,
-      with every part named and measured.</p>
+      <p class="hint">{{.Legend.Name}}, with every part named and measured, as on its detail
+      page.</p>
       {{else}}
-      <p>Every bird is drawn as a stick figure to scale, seen from above in flight: a bill, a head, a neck,
-      a body and a tail down the middle, with the wingspan as a crossbar at the same scale.</p>
+      <p>Each bird is a stick figure to scale, seen from above in flight: bill, head, neck, body and
+      tail down the middle, and the wingspan as a crossbar.</p>
       {{end}}
     </section>
     <section>
       <h3>Where the numbers come from</h3>
-      <p><b>Solid lines are measured. Dashed lines are estimated.</b> So a bill and a tail are
-      drawn solid, a neck and a body dashed, and the head is left hollow &mdash; a dash means
-      nothing on a closed shape, so an empty outline says it instead.</p>
-      <p>The <b>wing crossbar</b> is split. Its solid outer ends are the measured wing chord, from
-      the bend of the wing to the longest primary; the <b>tick marks</b> show where that
-      measurement reaches. Only the span between the ticks is estimated, and it is drawn dashed
-      when it is &mdash; so for two thirds of these birds the wingtips are real and the middle is
-      inferred.</p>
-      <p>The <b>cube</b> is the bird's <b>mass drawn as water</b>: a cube of water weighing
-      exactly what the bird does, at the same scale. Every cube stands on the floor of its
-      drawing, so two can be compared directly &mdash; a Thick-billed Murre and a Scissor-tailed
-      Flycatcher are nearly the same length, and the murre's cube dwarfs the flycatcher's.
-      A cube root flattens, though: twice as wide is eight times as heavy, so the number under
-      it is what states the mass.</p>
-      <p>A <b class="est-demo">~</b> after a measurement means the same thing in the numbers. Most
-      lengths are estimated: no open dataset publishes body length for North American birds, so
-      BirdView models it and says so.</p>
-      <p><b>Click any bird</b> for every measurement, including each part of the figure, with the
-      source or the model behind it named individually.</p>
+      <p><b>Solid lines are measured. Dashed lines are estimated.</b> Bill and tail are solid;
+      neck and body are dashed. The head is also estimated, and is drawn hollow because a dashed
+      outline would not read.</p>
+      <p>On the <b>wing crossbar</b>, the solid outer ends are the measured wing chord, from the
+      bend of the wing to the longest primary; the <b>tick marks</b> show where it ends. The span
+      between the ticks is dashed when the wingspan is estimated, as it is for two thirds of these
+      birds.</p>
+      <p>The <b>cube</b> is the bird's <b>mass drawn as water</b>: a cube of water that weighs what
+      the bird does, at the same scale. Every cube sits on the floor of its drawing, so cubes
+      compare directly: a Thick-billed Murre and a Scissor-tailed Flycatcher are about the same
+      length, and the murre's cube is far larger. Width grows with the cube root of mass (twice as
+      wide is eight times as heavy), so read the number under the cube for the mass.</p>
+      <p>A <b class="est-demo">~</b> after a number means it is estimated. Most lengths are
+      estimated, because no open dataset publishes body length for North American birds.</p>
+      <p><b>Click any bird</b> for every measurement and the source or model behind each.</p>
     </section>
   </div>
 </details>
@@ -91,42 +86,34 @@
   <div class="ctrlhelp">
       <dl>
         <div class="ctrl"><dt>Order by</dt>
-        <dd>Sort every bird by total length, wingspan or mass, and group them into sections of
-          similar size. <b>Bill</b> and <b>Tail</b> sort by the length of each, both measured for
-          every bird, and default to the Global scale, since birds with the same bill can be
-          any size. <b>Frequency</b> orders by how much of what people record is that bird,
-          most common first, and groups by powers of ten &mdash; one tier for the birds that are
-          one record in a thousand, the next for one in ten thousand, and so on. Those tier
-          edges do not move when you change the region filter, so the same tier means the same
-          thing on every view.</dd></div>
+        <dd>Sort by total length, wingspan or mass, in sections of similar size. <b>Bill</b> and
+          <b>Tail</b> sort by that length, measured for every bird, and default to the Global
+          scale, since birds with the same bill can be any size. <b>Frequency</b> sorts by how
+          much of what people record is that bird, most common first, in tiers by powers of ten (1 in 1,000,
+          1 in 10,000, and so on). Tier edges stay fixed when you change regions, so a tier means
+          the same thing on every view.</dd></div>
         <div class="ctrl"><dt>Scale</dt>
-        <dd><b>Per section</b> rescales each section to itself, so every bird is big enough to
-          read. This is the default. <b>Global</b> draws everything shown at one scale instead
-          &mdash; a hummingbird really is a speck beside a swan. Global is the honest view across
-          families; per section is the better one for comparing shape within a group.
-          Under <b>Frequency</b> the default is Global, because a frequency tier holds birds of
-          every size and rescaling each tier to its own largest bird would draw a 140&nbsp;mm
-          bird the height of a swan.</dd></div>
+        <dd><b>Per section</b>, the default, scales each section to its own largest bird, so
+          every bird is big enough to read; use it to compare shape within a group.
+          <b>Global</b> draws everything shown at one scale, so a hummingbird is a speck beside a
+          swan; use it to compare size across families. Under <b>Frequency</b> the default is
+          Global, because a tier holds birds of every size.</dd></div>
         <div class="ctrl"><dt>Section step</dt>
-        <dd>How much larger a bird must be to start a new section. Smaller values give more,
-          tighter sections. Under <b>Frequency</b> it sets how wide a tier is instead:
-          <b>10&times;</b> gives a tier per power of ten, <b>100&times;</b> gives half as
-          many, twice as wide.</dd></div>
+        <dd>How much larger a bird must be to start a new section; smaller values give more
+          sections. Under <b>Frequency</b> it sets tier width: <b>10&times;</b> is one power of
+          ten per tier, <b>100&times;</b> is two.</dd></div>
         <div class="ctrl"><dt>Units</dt>
         <dd>Inches and ounces, or centimeters and grams.</dd></div>
         <div class="ctrl"><dt>Names</dt>
-        <dd>Which English name to use. <b>N. America</b> is what birders here say and what eBird
-          shows in the US and Canada; <b>World</b> is the international name, which the IOC and
-          AviList use. They differ for 82 of these birds &mdash; the Dovekie is a Little Auk
-          everywhere else. The scientific name, the code in brackets and the address of the page
-          never change, so a link still means the same bird whichever you pick.</dd></div>
+        <dd>Which English names to show. <b>N. America</b> follows eBird usage in the US and
+          Canada; <b>World</b> follows the IOC and AviList. They differ for 82 of these birds: the
+          Dovekie is the Little Auk elsewhere. Scientific names, codes in brackets and page
+          addresses do not change, so a link means the same bird either way.</dd></div>
         <div class="ctrl"><dt>Compare birds</dt>
-        <dd>Turns on <b>picking</b>: every bird gets a <b>+ Pick</b> button, and a bar along the
-          bottom collects what you have picked. <b>Compare</b> then draws them side by side at one
-          shared scale, so their sizes can be read directly against one another &mdash; which the
-          list can only do for birds that land in the same tier. Filtering still works while you
-          pick, so you can narrow to one family and choose from it. Click <b>Compare birds</b>
-          again, or <b>Clear</b> in the bar, to put it away.</dd></div>
+        <dd>Turns on <b>picking</b>: each bird gets a <b>+ Pick</b> button, and a bar at the bottom
+          collects your picks. <b>Compare</b> draws them side by side at one scale, even across
+          tiers. Filters still work while you pick. Click <b>Compare birds</b> again, or
+          <b>Clear</b> in the bar, to stop.</dd></div>
       </dl>
   </div>
   <div class="row ordering">
@@ -163,7 +150,7 @@
     <a class="btn{{if eq .Opt.Scale "section"}} on{{end}}" href="{{call $q "scale" "section"}}"
        title="Every bird in a section shares a scale">Per section</a>
     <a class="btn{{if eq .Opt.Scale "global"}} on{{end}}" href="{{call $q "scale" "global"}}"
-       title="One scale across everything shown - small birds become very small">Global</a>
+       title="One scale for everything shown; small birds get very small">Global</a>
 
     <span class="lbl">Units</span>
     {{/* Ounces, not grams. The imperial button read "in / g" from the day it
@@ -207,36 +194,32 @@
 </details>
 
 <details class="controls" id="regions">
-  <summary>Regions and months<span class="sumdesc">narrow to states, provinces, stretches of open sea, or times of year</span></summary>
+  <summary>Regions and months<span class="sumdesc">narrow by state, province, open sea or month</span></summary>
   <div class="ctrlhelp">
       <dl>
         <div class="ctrl"><dt>Month</dt>
-        <dd>The whole year is selected when you arrive. Click a month to drop it, or
-          <b>All</b> to clear the lot &mdash; so one month is two clicks. Months narrow the
-          birds shown, not just the numbers: pick June and you get the birds that are here in
-          June, counted against June's birdwatching rather than the year's. A bird BirdView
-          has too few records of is shown in <b>every</b> month and says so, because its
-          records show when somebody visited rather than when the bird was there.</dd></div>
+        <dd>All months start selected. Click a month to drop it, or <b>All</b> to clear them, so
+          one month is two clicks. Months filter the birds, not just the numbers: June shows the
+          birds present in June, counted against June's records. A bird with too few records is
+          shown in <b>every</b> month and says so, because its records show when people visited,
+          not when the bird was there.</dd></div>
         <div class="ctrl"><dt>Region</dt>
-        <dd>Everywhere is selected when you arrive. Click a state or province to drop it, a zone
-          to drop the whole group, or <b>All</b> to clear the lot and start picking. A bird is
-          listed in a region when it is reported there often enough to be worth looking for,
-          from eBird records &mdash; and from iNaturalist where eBird withholds a sensitive
-          species.</dd></div>
+        <dd>All regions start selected. Click a state or province to drop it, a zone to drop its
+          group, or <b>All</b> to clear them and pick your own. A bird is listed in a region when
+          eBird records show it there often enough to be worth looking for, or iNaturalist
+          records do where eBird withholds a sensitive species.</dd></div>
         <div class="ctrl note"><dt>Zones</dt>
-        <dd>The same regions, grouped two ways; pick from either. <b>Common birds</b> is
-          measured &mdash; regions are clustered by how much their species lists actually
-          overlap, which puts Arizona with New Mexico and Texas. <b>Geographic</b> is the usual
-          map, drawn by hand, so that someone looking for Alaska finds it under Alaska; the
-          measured grouping files Alaska with British Columbia. Both cross the border on
-          purpose. A few places join nothing: Hawaii is too unlike the mainland, and Navassa
-          shares no species at all with the other islands.</dd></div>
+        <dd>The same regions, grouped two ways; pick from either. <b>Common birds</b> clusters
+          regions by how much their species lists overlap, which puts Arizona with New Mexico and
+          Texas, and Alaska with British Columbia. <b>Geographic</b> is drawn by hand from the
+          map, so Alaska is under Alaska. Both cross the border on purpose. A few places join no
+          zone: Hawaii is too unlike the mainland, and Navassa shares no species with the other
+          islands.</dd></div>
         <div class="ctrl note"><dt>Pelagic</dt>
-        <dd>Birds of the open sea, which belong to no state at all &mdash; a Bermuda Petrel has
-          hundreds of records off the coast and none on land. They are grouped by ocean, and the
-          boundaries between those are ours and approximate. Seabirds that also come within
-          sight of shore, like the Sooty Shearwater, appear both here and in the states they are
-          seen from.</dd></div>
+        <dd>The open sea, for birds that belong to no state: a Bermuda Petrel has hundreds of
+          records offshore and none on land. Grouped by ocean; the boundaries are ours and
+          approximate. Seabirds also seen from shore, like the Sooty Shearwater, appear here and
+          in those states.</dd></div>
       </dl>
   </div>
   {{/* The twelve, ungrouped and unnamed. No seasons: product.orderByFrequency forbids naming a
@@ -313,20 +296,17 @@
   <div class="ctrlhelp">
       <dl>
         <div class="ctrl"><dt>Diet</dt>
-        <dd>What a bird mostly eats, from <b>AVONET</b>, whose definition is quoted beside each
-          option. Selecting two options shows birds in <b>either</b>, as the region and family
-          filters do.</dd></div>
+        <dd>What a bird mostly eats, from <b>AVONET</b>; its definition is quoted beside each
+          option. Selecting two options shows birds in <b>either</b>.</dd></div>
         <div class="ctrl"><dt>Habitat</dt>
         <dd>Where a bird mostly lives, also from AVONET. Both are assigned <b>per species</b>,
-          not per family: a Double-crested Cormorant and a Neotropic Cormorant need not share a
-          habitat, and an Anhinga is a bird of swamps whatever its relatives do. Counts are of
-          all 839 birds, not of what is currently shown.</dd></div>
+          not per family, so two cormorants can differ. Counts cover every bird in BirdView, not
+          just those shown.</dd></div>
         <div class="ctrl note"><dt>One value from AVONET, more from us</dt>
-        <dd>AVONET records the <b>one</b> habitat and the one diet a species mainly uses, so a
-          bird that lives in two places or eats two things is filed under one. BirdView adds
-          whatever further habitats and diets apply &mdash; a Great Blue Heron on a tidal flat,
-          a gull at a landfill &mdash; and tags each <b>birdview</b> rather than AVONET&rsquo;s.
-          The detail page for every bird lists each category with who assigned it, and <a href="/added">everything BirdView adds</a> is listed in one place.</dd></div>
+        <dd>AVONET records <b>one</b> main habitat and one main diet per species. BirdView adds
+          others that apply, such as a Great Blue Heron on a tidal flat or a gull at a landfill,
+          and tags them <b>birdview</b>. Each bird's detail page says who assigned each
+          category, and <a href="/added">everything BirdView adds</a> is listed in one place.</dd></div>
       </dl>
   </div>
 
@@ -363,8 +343,8 @@
   <div class="ctrlhelp">
       <dl>
         <div class="ctrl"><dt>Family</dt>
-        <dd>Everything is selected when you arrive. Click a family to drop it, an order to drop
-          the whole group, or <b>All</b> to clear everything and start picking.</dd></div>
+        <dd>All families start selected. Click a family to drop it, an order to drop all its
+          families, or <b>All</b> to clear them and pick your own.</dd></div>
       </dl>
   </div>
 
@@ -440,8 +420,8 @@
        work of its own -- the region table, the occurrence status, the
        supplementary habitat and diet assignments, and every model behind a
        drawn segment. Crediting the inputs is still the point of this list. */}}
-  <p><b>BirdView</b> is non-commercial and built using several freely available resources.
-  We thank and credit the following sources:</p>
+  <p><b>BirdView</b> is non-commercial. It is built on these freely available sources, with
+  thanks:</p>
   <ul class="credits">
     <li><b>Morphometric traits</b> &mdash; Tobias, J. A. et al. (2022).
       <i>AVONET: morphological, ecological and geographical data for all birds.</i>
@@ -452,7 +432,7 @@
       <i>Avian wingspan database.</i>
       <a href="https://doi.org/10.6084/m9.figshare.32089083">doi:10.6084/m9.figshare.32089083</a>,
       licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
-      Only empirically reported wingspans are used; the rest are modeled here.</li>
+      Only empirical wingspans are used; the rest are modeled.</li>
     <li><b>Region boundaries</b> &mdash; Made with
       <a href="https://www.naturalearthdata.com/">Natural Earth</a>, in the public domain.
       Used only by the Here button, in your browser.</li>
@@ -460,8 +440,7 @@
       <i>AviList: The Global Avian Checklist, v2025b.</i>
       <a href="https://doi.org/10.2173/avilist.v2025b">doi:10.2173/avilist.v2025b</a>,
       licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
-      English names are shown in eBird/Clements usage by default and AviList&rsquo;s own
-      on request.</li>
+      English names default to eBird/Clements usage; AviList&rsquo;s are an option.</li>
     <li><b>Where each bird is found</b> &mdash; occurrence records from
       <a href="https://www.gbif.org">GBIF</a>: the EOD &mdash; eBird Observation Dataset,
       <a href="https://doi.org/10.15468/aomfnb">doi:10.15468/aomfnb</a>, and the iNaturalist
@@ -470,16 +449,16 @@
       Only the derived list of regions per species is kept; no record, coordinate, date or
       observer reaches this site.</li>
     <li><b>Which species are in scope</b> &mdash; BirdView's own, derived from the occurrence
-      records above rather than taken from anyone's checklist: a species is drawn when its
-      records <b>recur</b> in some region, in repeated episodes across years. The derivation and
-      its limits are in <a href="/docs/data#scope">how the data is made</a>. Escaped cage,
-      aviary and farm birds pass that rule too; they are left off this page and
+      records above, not from a checklist: a species is drawn when its records <b>recur</b> in
+      some region, in repeated episodes across years. Method and limits:
+      <a href="/docs/data#scope">how the data is made</a>. Escaped cage, aviary and farm birds
+      also pass that rule; they are left off this page and
       <a href="/excluded">listed with the reason for each</a>.</li>
   </ul>
   <p class="caveat">No published source gives body length for North American birds, so
   <b>every length here is modeled</b>, as are most wingspans. Click any bird to see where each
-  number came from and how far to trust it. How the sources above become what is drawn, field by
-  field and step by step, is set out in <a href="/docs/pipeline">one diagram</a>.</p>
+  number comes from and how far to trust it. <a href="/docs/pipeline">One diagram</a> shows how
+  the sources become the drawings.</p>
 </footer>
 {{template "pickbar" .Bar}}
 
@@ -721,7 +700,7 @@
     {{if .Missing}}
     {{/* Named, not silently dropped: ids follow scientific names and this
          checklist renames them, so a kept link rots (product.pickFromIndex, decisions.compareUrlContract). */}}
-    <span class="pickgone">{{len .Missing}} unrecognised and dropped:
+    <span class="pickgone">{{len .Missing}} unrecognized and dropped:
       {{range $i, $m := .Missing}}{{if $i}}, {{end}}<code>{{$m}}</code>{{end}}</span>
     {{end}}
     <span class="pickacts">
@@ -737,12 +716,11 @@
      duplicated in both and the two had to be edited in step; the mass square
      would have been the first thing to drift. */}}
 {{define "diagramkey"}}
-<p class="note diagramkey"><b>Solid</b> lines in the figure are measured; <b>dashed</b> lines are
-estimated. The head is hollow because it is estimated too. On the wing, the solid outer ends are
-the measured wing chord and the <b>ticks</b> mark where it reaches &mdash; only the span between
-them is estimated, and it is dashed when it is. The <b>cube</b> in the lower-left corner is the
-bird's mass drawn as water: a cube of water that weighs the same, at the same scale as the bird.
-Its front face stands on the floor of every drawing, so two cubes can be compared directly. Read
-against the bird's own length it shows how heavy-set it is &mdash; but a cube root flattens big
-differences, so the number under it is what states the mass.</p>
+<p class="note diagramkey"><b>Solid</b> lines are measured; <b>dashed</b> lines are estimated.
+The head is estimated and drawn hollow. On the wing, the solid outer ends are the measured wing
+chord, the <b>ticks</b> mark where it ends, and the span between them is dashed when estimated.
+The <b>cube</b> in the lower-left corner is the bird's mass drawn as water, at the same scale as
+the bird; every cube sits on the floor of its drawing, so cubes compare directly, and against
+the bird's length it shows how heavy-set it is. A cube root flattens big differences, so read the
+mass from the number under it.</p>
 {{end}}

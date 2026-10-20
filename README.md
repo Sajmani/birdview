@@ -2,14 +2,14 @@
 
 **How big is that bird, really?**
 
-BirdView draws North American birds as scaled stick figures — bill, head, neck, body, tail, and a
-wing crossbar — at one shared scale, so you can *see* the difference in size instead of reading it
-off a number and trying to imagine it. Is a Merlin bigger than a Blue Jay? Line them up and look.
+BirdView draws North American birds as stick figures — bill, head, neck, body, tail, and a wing
+crossbar — at one shared scale, so you can see size differences instead of imagining them from
+numbers. Is a Merlin bigger than a Blue Jay? Line them up and look.
 
-It covers over a thousand species: the birds whose records recur in the US states, the Canadian
-provinces, five US outlying islands and five stretches of open sea. Each figure is a top-down view
-of a bird in flight, deliberately abstract, carrying only what the data supports — no plumage, no
-posture, no shape the sources cannot justify.
+It covers over a thousand species: those whose records recur in the US states, the Canadian
+provinces, five US outlying islands and five stretches of open sea. Each figure is an abstract
+top-down view of a bird in flight, showing only what the data supports: no plumage, posture or
+shape the sources cannot justify.
 
 ## Try it
 
@@ -33,23 +33,21 @@ Then open <http://localhost:8080> and follow one of the suggestions under the ti
 
 ## What is measured and what is modeled
 
-Most of what you see is **modeled**, and BirdView says so everywhere it can.
-
 No openly licensed dataset publishes body length for these birds, so **every length in BirdView is
-a model**, built from measured parts. Bill, tail and mass are measured for almost every species;
+a model** built from measured parts. Bill, tail and mass are measured for almost every species;
 wingspan is measured for about a third and estimated for the rest; head, neck and body are modeled
-from mass. Every value carries its own provenance — `measured`, `near-match` or `modeled` — and
-clicking any bird shows the source or the formula behind each number.
-[docs/data.md](docs/data.md) is the full accounting, including the parts that are frankly invented,
-and [where the models are most likely to be wrong](docs/data.md#where-this-is-most-likely-to-be-wrong).
+from mass. Every value is marked `measured`, `near-match` or `modeled`, and clicking a bird shows
+the source or formula behind each number. [docs/data.md](docs/data.md) gives the full accounting,
+including what is invented and
+[where the models are most likely to be wrong](docs/data.md#where-this-is-most-likely-to-be-wrong).
 
 ## Data
 
-BirdView is built from openly licensed sources: names and taxonomy from AviList, body measurements
+BirdView is built from sources under CC BY 4.0: names and taxonomy from AviList, body measurements
 from AVONET, wingspans from Fox et al. 2026, and where each bird is found from eBird and
-iNaturalist records via GBIF, all under CC BY 4.0. It links to iNaturalist for photographs and
-copies none. Every source is credited on the site; the full list, with licenses and what is kept
-in this repository, is in [docs/building.md](docs/building.md#the-data-and-its-licenses).
+iNaturalist records via GBIF. It links to iNaturalist for photographs and copies none. Every source
+is credited on the site; [docs/building.md](docs/building.md#the-data-and-its-licenses) lists them
+with licenses and what this repository keeps.
 
 ## License
 
@@ -61,9 +59,9 @@ This is not an officially supported Google product.
 
 ## Contributing
 
-Please report problems and corrections as issues; corrections to the biology are especially
-welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) to contribute code, and
-[CHANGELOG.md](CHANGELOG.md) for the major changes so far.
+Report problems and corrections as issues; corrections to the biology are especially welcome. See
+[CONTRIBUTING.md](CONTRIBUTING.md) to contribute code and [CHANGELOG.md](CHANGELOG.md) for major
+changes.
 
 ## Security
 

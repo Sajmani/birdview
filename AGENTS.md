@@ -11,7 +11,7 @@ Names like `product.scaleToggle` are citations: search `river/` for `## scaleTog
 | Need | Read |
 | --- | --- |
 | The method and the change loop | [river/README.md](river/README.md) |
-| Every requirement the web app meets | [river/requirements/app/app.md](river/requirements/app/app.md) |
+| Web app requirements | [river/requirements/app/app.md](river/requirements/app/app.md) |
 | Open work | [river/todo.md](river/todo.md) (`grep -n -A1 '^## '`) |
 | Code shape, gotchas, local server | [river/arch.md](river/arch.md) |
 | Settled conflicts | [river/requirements/decisions.md](river/requirements/decisions.md) |
@@ -24,7 +24,7 @@ Read a requirement by its heading, not its file; its first paragraph is the rule
 go build ./... && go vet ./... && gofmt -l . && go test ./...   # gofmt must print nothing
 ```
 
-All River and BirdView spec checks are Go tests in `river/check/`. `TestRenderedTextContrast` skips
+All spec checks are Go tests in `river/check/`. `TestRenderedTextContrast` skips
 without Chrome (`BIRDVIEW_CHROME`); a skip is not a pass.
 
 **End every turn with a freshly built server on <http://localhost:8080>**, started from the repo
@@ -53,7 +53,7 @@ root: `go build -o /tmp/birdview-serve ./cmd/birdview`, stop the old one, run `/
   `river/requirements/requirements.md` before adding any other. The generated tables in `data/`
   are committed on purpose.
 - **Third-party files live under `third_party/<name>/`** with their own license, no Apache header;
-  provenance goes in `river/requirements/sources/<name>/PROVENANCE.md`.
+  provenance in `river/requirements/sources/<name>/PROVENANCE.md`.
 - **Link to iNaturalist; copy nothing from it**, least of all photographs
   (product.inaturalistLink).
 - **Never present a modeled value as a measurement** (product.tileMarksModeled).

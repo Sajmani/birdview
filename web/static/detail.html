@@ -51,7 +51,7 @@
 
 {{template "diagramkey"}}
 
-<h2>Measurements, and where each comes from</h2>
+<h2>Measurements and sources</h2>
 <table class="prov metrics">
   <tbody>
   {{range .Metrics}}
@@ -65,9 +65,9 @@
   </tbody>
 </table>
 
-<h2>Categories, and where each comes from</h2>
+<h2>Categories and sources</h2>
 <p class="note" style="margin-top:0">Anything not marked
-  <span class="tag t-published">published</span> is BirdView's own work;
+  <span class="tag t-published">published</span> is BirdView's own;
   <a href="/added">everything it adds</a> is listed together.</p>
 {{/* The categorical twin of the measurements table (product.categoryProvenance). Every group this
      bird is sorted into, and whether a source said so, BirdView derived it,
@@ -90,12 +90,12 @@
 
 {{if .INatURL}}
 <p class="seealso">See <a href="{{.INatURL}}" rel="noopener noreferrer">{{.Name}} on
-iNaturalist</a> for photographs, range and observations. BirdView links rather than copying;
-each photograph there carries its own license.</p>
+iNaturalist</a> for photographs, range and observations; each photograph there has its own
+license.</p>
 {{end}}
 
-<p class="note">The neck/body division is a drawing convention, not a measurement: no source
-records avian neck length at this coverage. The ratio used for each family is named above.</p>
+<p class="note">The neck/body split is a drawing convention, not a measurement: no source records
+neck length for this many birds. The ratio used for this family is named above.</p>
 {{template "pickbar" .Bar}}
 <footer>
   Traits: AVONET, Tobias et al. 2022,

@@ -33,16 +33,15 @@
 {{if .Missing}}
 {{/* Named, never silently dropped: a kept comparison link outlives some of
      its own ids, and the reader needs to know what it lost (decisions.compareUrlContract). */}}
-<p class="note pickgone">{{len .Missing}} unrecognised and dropped:
+<p class="note pickgone">{{len .Missing}} unrecognized and dropped:
   {{range $i, $m := .Missing}}{{if $i}}, {{end}}<code>{{$m}}</code>{{end}}.
-  Species identifiers follow scientific names, which are occasionally reassigned.</p>
+  Identifiers follow scientific names, which sometimes change.</p>
 {{end}}
 
 {{if .Panels}}
 <h1 class="cmptitle">Compared to one scale</h1>
-<p class="note cmpnote">Every bird below is drawn at the same scale, set by the largest of them, so
-their sizes can be read directly against one another. A small bird beside a large one really is
-that small.</p>
+<p class="note cmpnote">All birds below share one scale, set by the largest, so their sizes compare
+directly.</p>
 
 {{if .Sorts}}
 {{/* Each link is an ordinary comparison URL naming the same birds in a new
@@ -84,15 +83,15 @@ that small.</p>
      panel shares, and repeating it would crowd out what it explains. */}}
 {{template "diagramkey"}}
 
-<p class="note">Each bird links to its own page, where the source or model behind every number is
-named. The neck/body division is a drawing convention, not a measurement: no source records avian
-neck length at this coverage.</p>
+<p class="note">Each bird's own page names the source or model behind every number. The
+neck/body split is a drawing convention, not a measurement: no source records neck length for
+this many birds.</p>
 {{else}}
 <h1 class="cmptitle">Nothing to compare yet</h1>
-<p class="note cmpnote">Name the birds in the address, one <code>species</code> each, and they are
-drawn together to a single scale &mdash; for example
-<code>/compare?species=cyanocitta_cristata&amp;species=falco_columbarius</code>. The identifier is
-the one in a bird's own page address.</p>
+<p class="note cmpnote">Add one <code>species</code> per bird to the address to draw them at one
+scale, for example
+<code>/compare?species=cyanocitta_cristata&amp;species=falco_columbarius</code>. Use the
+identifier from each bird's page address.</p>
 {{end}}
 
 <footer>

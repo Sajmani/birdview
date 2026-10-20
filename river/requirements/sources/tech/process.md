@@ -21,14 +21,13 @@ Goals: goals.goodDataCitizen, goals.rapidIteration
 
 Resolving species to iNaturalist taxon IDs happens in `cmd/birdview-inatmap`, never in
 `birdview-ingest` and never while serving. The tool waits at least one second between requests
-(`inatapi.RequestRate`) and identifies itself (identifiedClient). Its output is a table committed to the repository;
-the ingest joins against that table and makes no network request.
+(`inatapi.RequestRate`) and identifies itself (identifiedClient). Its output is a table committed
+to the repository; the ingest joins against that table and makes no network request.
 
-Rationale: 1082 requests at the rate iNaturalist asks for is a quarter of an hour, which does not
-belong in a build — and a build that needs the network is a build that fails on a plane. Keeping
-resolution separate also keeps selfContainedServer and the no-network-in-tests binding intact without exception.
-The table going stale is the accepted cost; a stale ID fails visibly and the refresh is one
-command.
+Rationale: 1082 requests at the rate iNaturalist asks for take a quarter of an hour, too long for a
+build, and a build that needs the network fails offline. Keeping resolution separate keeps
+selfContainedServer and the no-network-in-tests binding free of exceptions. A stale table is the
+accepted cost: a stale ID fails visibly and the refresh is one command.
 
 ---
 
@@ -38,14 +37,12 @@ command.
 
 Goals: goals.goodDataCitizen
 
-Every input source appears in [requirements.md](../../requirements.md) with its tier, pin, license and status
-*before* code that reads it is written.
+Every input source appears in [requirements.md](../../requirements.md) with its tier, pin, license
+and status *before* code that reads it is written.
 
-Rationale: this project found, after designing around three datasets, that two of them could not
-legally be redistributed and a third did not contain the fields it was chosen for. Recording first
-is cheaper than discovering later.
+Rationale: after designing around three datasets, this project found that two could not legally
+be redistributed and the third lacked the fields it was chosen for.
 
 ---
 
-Project bindings moved to [bindings.md](../../../bindings.md) on adopting River, whose layout gives them
-their own file.
+Project bindings are in [bindings.md](../../../bindings.md).

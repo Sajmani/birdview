@@ -1,22 +1,15 @@
 # How to Contribute
 
-We would love to accept your patches and contributions to this project.
-
 ## Before you begin
 
 ### Sign our Contributor License Agreement
 
-Contributions to this project must be accompanied by a
-[Contributor License Agreement](https://cla.developers.google.com/about) (CLA).
-You (or your employer) retain the copyright to your contribution; this simply
-gives us permission to use and redistribute your contributions as part of the
-project.
-
-If you or your current employer have already signed the Google CLA (even if it
-was for a different project), you probably don't need to do it again.
-
-Visit <https://cla.developers.google.com/> to see your current agreements or to
-sign a new one.
+Contributions must be accompanied by a
+[Contributor License Agreement](https://cla.developers.google.com/about) (CLA). You (or your
+employer) keep the copyright; the CLA gives us permission to use and redistribute your
+contribution as part of the project. If you or your employer have already signed the Google CLA,
+even for another project, you probably don't need to sign again. See or sign your agreements at
+<https://cla.developers.google.com/>.
 
 ### Review our Community Guidelines
 
@@ -27,12 +20,11 @@ Guidelines](https://opensource.google/conduct/).
 
 ### Code Reviews
 
-All submissions, including submissions by project members, require review. We
-use [GitHub pull requests](https://docs.github.com/articles/about-pull-requests)
-for this purpose.
+All submissions, including those by project members, require review through
+[GitHub pull requests](https://docs.github.com/articles/about-pull-requests).
 
 ### Making a change
 
-[docs/building.md](docs/building.md) explains how to build and test BirdView and how changes are
-made here: a change to behavior updates its requirement under `river/` and an acceptance criterion
-in the same pull request, and all four standing checks must pass.
+[docs/building.md](docs/building.md) explains how to build and test BirdView. A change to behavior
+updates its requirement under `river/` and an acceptance criterion in the same pull request, and
+all four standing checks must pass.

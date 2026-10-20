@@ -14,13 +14,11 @@ BirdView runs locally today and may be deployed publicly later. It will not beco
 offering, and source obligations are recorded against the public, non-commercial case so that a
 later deployment needs no licensing re-litigation.
 
-**The ABA licensing gate is gone as of 2026-10-05.** [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence) replaced ABA
-scope with BirdView's own derivation from open occurrence records; [decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba)
-replaced ABA names with AviList. Nothing all-rights-reserved is read at build time, so nothing of
-anyone else's is served. Public deployment is now an engineering task, not a licensing one; see
-`todo.md` for what remains.
+Since 2026-10-05 there is no ABA licensing gate:
+[decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence) and
+[decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba) replaced ABA scope and
+names, so nothing all-rights-reserved is read at build time or served. Public deployment is an
+engineering task; `todo.md` lists what remains.
 
-Rationale: non-commercial is load-bearing, not incidental. Macaulay Library permits embedding for
-non-commercial use only, and iNaturalist's default CC BY-NC corpus is usable on the same basis.
-Either would become a licensing breach the day BirdView took revenue.
-
+Rationale: Macaulay Library permits embedding for non-commercial use only, and iNaturalist's
+default CC BY-NC corpus is usable on the same basis. Taking revenue would breach both.

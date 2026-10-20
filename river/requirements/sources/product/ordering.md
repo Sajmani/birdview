@@ -14,10 +14,9 @@ The user chooses whether the dataset is ordered by total length, wingspan, body 
 tail length, or how often the bird is recorded ([orderByFrequency](presentation.md#orderbyfrequency), [decisions.frequencyMetric](../../decisions.md#frequencymetric)).
 The comparison view offers the same size orderings for the birds it holds.
 
-**Bill and tail are absolute lengths, not proportions.** They are measured for every species, where
-total length is a sum with three segments modeled from mass; a bill or tail "for its size" was
-considered and not offered, because the only plain denominator, total length, would put modeled
-values under every ratio. Added 2026-10-19 at the owner's request.
+**Bill and tail are absolute lengths, not proportions.** They are measured for every species; a
+ratio to total length would put modeled values under every ratio, since three of total length's
+segments are modeled from mass.
 
 ## ascendingOrder
 
@@ -31,11 +30,10 @@ Frequency, captioned under each group of controls rather than one caption that f
 selection. The row aligns on the text baseline, so the heading and every button stay on one
 line and only the captions hang below.
 
-The direction is stated for all four rather than only for the one that departs. Frequency
-ascends a reciprocal — *1 in N* rises as the bird gets scarcer — so ascending the printed
-number descends abundance, and a reader who has learned "smallest first" from three metrics
-would otherwise read the fourth as a defect. See
-[decisions.frequencyMetric](../../decisions.md#frequencymetric) for why renaming it was declined three times.
+The direction is stated for every metric, not only the one that departs: Frequency ascends a
+reciprocal — *1 in N* rises as the bird gets scarcer — so a reader who has learned "smallest
+first" elsewhere would otherwise read it as a defect. See
+[decisions.frequencyMetric](../../decisions.md#frequencymetric) for why renaming it was declined.
 
 ## sectionBreakRule
 
@@ -51,10 +49,9 @@ Frequency is banded by decade instead
 ([orderByFrequency](presentation.md#orderbyfrequency), [decisions.frequencyMetric](../../decisions.md#frequencymetric)): this rule would give it 128 sections, and its
 bands would move whenever the region filter did.
 
-Rationale: bird size follows a power law. Fixed-width bins put hundreds of small birds in one row
-and isolate large raptors in rows of one. A ratio rule produces sections of comparable visual
-span at every scale — and, because a section is by construction no more than N% wide, makes the
-per-section scale of scaleToggle honest.
+Rationale: bird size follows a power law, so fixed-width bins crowd small birds and isolate large
+ones. A ratio rule gives sections of comparable visual span at every scale, and, because a
+section is no more than N% wide, makes the per-section scale of scaleToggle honest.
 
 ## sectionThresholdDefault
 
@@ -70,8 +67,7 @@ Every value the control offers must be one the server accepts, or the control si
 to the default.
 
 **Under Frequency the same control selects a band width in orders of magnitude**, `10×` or
-`100×` ([orderByFrequency](presentation.md#orderbyfrequency)). The percentages are not shown there because they would misdescribe
-the rule: one decade is +900%, and a button reading "900%" explains nothing.
+`100×` ([orderByFrequency](presentation.md#orderbyfrequency)). Percentages would misdescribe it: one decade is +900%.
 
 ## sectionHeadersStateRange
 
@@ -85,15 +81,13 @@ when ordering by Tail. The count follows the range directly, as *N species*, in 
 *K of N species* line at the top of the index.
 
 **The range is the tier's own birds**, smallest to largest; a tier of one bird states one value.
-Tiers do not abut: the next begins only at the first bird more than N% above this tier's smallest,
-and the stretch between can be wide. So every heading on a page carries the same number of
-decimals, the fewest — up to three more than usual — that keep every stated value apart, within a
-heading and from its neighbors, and a gap between tiers shows as a gap between the numbers.
+Tiers do not abut, and the stretch between them can be wide. So every heading on a page carries
+the same number of decimals, the fewest — up to three more than usual — that keep every stated
+value apart, within a heading and from its neighbors, and a gap between tiers shows as a gap
+between the numbers.
 
-Two earlier versions each misled. Rounding heading by heading wrote "0.2 in – 0.3 in" then
-"0.3 in – 0.4 in", which read as an overlap. Running each range on to where the next tier began
-made four herons and an ibis with bills under 6 in read "4.97 in – 8.84 in", because the pelicans
-started at 8.84.
+Rounding heading by heading made adjacent ranges read as overlapping ("0.2 in – 0.3 in", "0.3 in
+– 0.4 in"); running each range on to the next tier's start overstated it.
 
 Rationale: under per-section scaling (scaleToggle) the header is what tells the user that the scale has
 changed between one section and the next. Without it, per-section scaling is misleading.
@@ -112,9 +106,5 @@ species*. It follows the current ordering and filters, so it is the shape of the
 
 Every tier is the same 15% step, so the bars are a histogram of size on a log scale, and **a
 stretch with no birds shows as empty space**: one empty bucket for each whole step between where a
-tier's step ends and the next tier begins. Without them, tiers far apart would stand side by side
-as if they abutted. Frequency's bands are fixed decades and need none. Its shape is
-worth seeing: by length it has two humps, songbirds peaking near 5 in and everything else near a
-foot, crossing over around 7 in; by mass it is a long plateau; tails crowd into a few tiers. Added
-2026-10-19 at the owner's request.
-
+tier's step ends and the next tier begins, so tiers far apart do not stand side by side as if they
+abutted. Frequency's bands are fixed decades and need none.

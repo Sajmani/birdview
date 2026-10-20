@@ -1,29 +1,27 @@
 # Building, running and changing BirdView
 
-BirdView is a single Go module. Two commands do the everyday work: an ingest that compiles the
-dataset from published sources, and a server that embeds and serves the web UI. Five generators
-build the committed tables under `data/` that the ingest and server read. There is no database,
-no data fetch at run time and no JavaScript framework.
+BirdView is one Go module: an ingest that compiles the dataset from published sources, a server
+that embeds and serves the web UI, and five generators that build the committed tables under
+`data/`. There is no database, no data fetch at run time and no JavaScript framework.
 
 ---
 
 ## Prerequisites
 
-- **Go**, at the version `go.mod` requires. No separate minimum is maintained; the version follows
-  what the dependencies need.
-- **Chrome or Chromium**, optional. Tests that render pages in a browser skip without it; set
-  `BIRDVIEW_CHROME` if it is not in a standard place. A skip is not a pass, so check the test
-  output for skip lines when your change affects rendered pages.
+- **Go**, at the version `go.mod` requires.
+- **Chrome or Chromium**, optional. Browser tests skip without it; set `BIRDVIEW_CHROME` if it is
+  not in a standard place. A skip is not a pass, so check the test output for skip lines when your
+  change affects rendered pages.
 - **Python 3, Node and Google Chrome**, only to re-render the pipeline diagram (see below).
 
-The one Go dependency is `goldmark`, for rendering these guides. The source workbooks are read by
-BirdView's own `internal/xlsx`, using only the standard library.
+The only Go dependency is `goldmark`, which renders these guides. The source workbooks are read by
+`internal/xlsx`, using only the standard library.
 
 ---
 
 ## The data and its licenses
 
-Everything the build needs is in the repository; nothing is fetched to build or to serve.
+Everything the build needs is in the repository.
 
 | Source | License | What is in this repository | Used for |
 | --- | --- | --- | --- |
@@ -35,22 +33,19 @@ Everything the build needs is in the repository; nothing is fetched to build or 
 | [Natural Earth](https://www.naturalearthdata.com/) 1:10m states and provinces | public domain | the derived `data/region-boundaries.json`; the source is fetched by hash only to regenerate it | the Here button |
 | [WCAG 2.2](https://www.w3.org/TR/2024/REC-WCAG22-20241212/) | W3C Document License | the Recommendation, in [`third_party/wcag/`](../third_party/wcag) | the accessibility rules BirdView meets, quoted |
 
-**Nothing under `third_party/` is covered by BirdView's Apache 2.0 license.** Each directory carries
-its own license and a README naming the source and how to cite it. The iNaturalist terms are
-openly licensed by no one; they and the WCAG text are kept so every quotation of them in
-[`river/`](../river) can be checked against the exact words. Retrieval details and hashes are
-recorded once, under [`river/requirements/sources/`](../river/requirements/sources), and the
-[source register](../river/requirements/requirements.md) records every source considered, including
-the ones rejected and why.
+**Nothing under `third_party/` is covered by BirdView's Apache 2.0 license.** Each directory has
+its own license and a README naming the source and how to cite it. The iNaturalist terms are not
+openly licensed; they and the WCAG text are kept so every quotation of them in
+[`river/`](../river) can be checked against the exact words. Retrieval details and hashes are in
+[`river/requirements/sources/`](../river/requirements/sources), and the
+[source register](../river/requirements/requirements.md) records every source considered,
+including the rejected ones and why.
 
 **BirdView links to iNaturalist and copies nothing from it**: no photograph is embedded, cached or
 hotlinked, so no contributor's license is engaged.
 
-**Every CC BY source is credited on the page that uses it**, as its license asks: the index footer
+**Every CC BY source is credited on the page that uses it**, as its license asks; the index footer
 names each with its citation.
-
-**The built dataset, `web/data/species.json`, is not committed.** It is reproducible from the
-committed inputs in one command, and a stale copy in the tree would be worse than none.
 
 ---
 
@@ -66,23 +61,18 @@ go run ./cmd/birdview            # serves http://localhost:8080
 The ingest prints a coverage summary: species in scope, and how many traits and wingspans are
 measured, near-match or modeled. Expect **1082 species in 99 families across 27 orders**.
 
-**The server reads `species.json` once, at startup.** After re-running the ingest, restart the
-server, or it keeps serving the old data.
+**The server reads `species.json` once, at startup.** Restart it after re-running the ingest.
 
 **Use `-dev web` while editing the UI.** Templates and static files are embedded with `go:embed`,
-so a normal server serves them as they were when it was built: edit `index.html` or `styles.css`,
-reload, and you see the old page with nothing to say it is stale. `-dev web` reads them from
-`web/static/` in the working tree and re-parses the templates on every request, so an edit shows
-on reload.
+so a normal server keeps serving the versions it was built with, with no sign they are stale.
+`-dev web` reads them from `web/static/` and re-parses the templates on every request.
 
 ```
 go run ./cmd/birdview -dev web
 ```
 
-It is off by default, and `TestEmbedIsTheDefault` checks that. Go code is still compiled in, so
-after changing a Go file (for example, adding a field a template uses), restart the server.
-
-Flags:
+It is off by default, which `TestEmbedIsTheDefault` checks. Go code is still compiled in, so
+restart after changing a Go file (for example, adding a field a template uses).
 
 | Command | Flag | Default |
 | --- | --- | --- |
@@ -104,12 +94,10 @@ The defaults are relative paths, so run both commands from the repository root.
 
 ## The generators
 
-Five commands build committed tables under `data/`. None of them runs as part of the ingest,
-because between them a full run is thousands of requests to other people's servers, tests make no
-network requests, and the build must work offline. Run a generator by hand when its source
-changes, review its output as a diff, and commit the diff.
-[How BirdView's data is built](pipeline.md) shows all of them, and the ingest they feed, in one
-diagram.
+Five commands build committed tables under `data/`. None runs as part of the ingest: together they
+make thousands of requests to other people's servers, tests make no network requests, and the
+build must work offline. Run a generator by hand when its source changes, review the diff, and
+commit it. [How BirdView's data is built](pipeline.md) diagrams them and the ingest they feed.
 
 | Command | Writes | Cost |
 | --- | --- | --- |
@@ -119,29 +107,29 @@ diagram.
 | `birdview-status` | `data/status.tsv`: BirdView's own occurrence status per species | two passes, resumable |
 | `birdview-boundaries` | `data/region-boundaries.json`: region outlines for the Here button, from Natural Earth | one ~15 MB download, hash-checked |
 
-`birdview-inatmap` and `birdview-regions` read the built dataset, so run the ingest first.
+`birdview-inatmap`, `birdview-names` and `birdview-regions` read the built dataset, so run the
+ingest first.
 
-The iNaturalist rate of one request per second is what iNaturalist's API terms ask for; do not
-lower the interval. The GBIF rate is one BirdView sets for itself, and the client slows down
-further whenever GBIF answers 429.
+iNaturalist's API terms ask for one request per second; do not shorten the interval. The GBIF rate
+is BirdView's own, and the client slows further whenever GBIF answers 429.
 
-`birdview-inatmap` leaves out a species that does not resolve confidently, and that species' page
-then shows no iNaturalist link.
+`birdview-inatmap` leaves out a species that does not resolve confidently; its page then shows no
+iNaturalist link.
 
 `birdview-status` caches raw fetches under `/tmp` and skips what it already has, so an interrupted
-run resumes instead of starting over. It refuses to write a partial table, because a species whose
-dates never arrived would otherwise be classified as a vagrant on no evidence.
+run resumes. It refuses to write a partial table, because a species whose dates never arrived would
+be classified as a vagrant on no evidence.
 
 A sixth command, `birdview-names`, writes `data/source-names.tsv`: how many records eBird and
-iNaturalist each hold under each species' name, used to find names the two sources disagree about.
-Nothing in the build reads that table; a test does.
+iNaturalist each hold under each species' name, used to find names the two disagree about. Only a
+test reads it.
 
-**When a command's inputs or outputs change, update the diagram.** It is Mermaid in
-`docs/pipeline.md`, which GitHub draws directly. BirdView serves an SVG rendered from it, because
-drawing Mermaid in the browser would need a script from the network. After editing the Markdown,
-run `python3 docs/render-diagrams.py` and commit the SVG it writes beside the page.
-`TestDiagramsAreCurrent` fails until you do, and `TestPipelineDiagramNamesRealColumns` fails if the
-diagram names a source column no reader asks for.
+**When a command's inputs or outputs change, update the diagram** in `docs/pipeline.md`. GitHub
+draws its Mermaid directly; BirdView serves an SVG rendered from it, because drawing Mermaid in the
+browser would need a script from the network. After editing, run `python3 docs/render-diagrams.py`
+and commit the SVG it writes beside the page. `TestDiagramsAreCurrent` fails until you do, and
+`TestPipelineDiagramNamesRealColumns` fails if the diagram names a source column no reader asks
+for.
 
 ---
 
@@ -156,12 +144,11 @@ gofmt -l .        # must print nothing
 go test ./...
 ```
 
-Every spec check is a Go test in `river/check/` and runs with `go test ./...`: River's checker and
-its shared cases, BirdView's stricter goal rule, the vendored-file hashes, every quotation against
-its vendored source, and every reference, anchor and relative link into the bundle.
-
-These checks cover the bundle's **structure**, not its substance. A green run means the bundle is
-internally consistent, not that it is right.
+Every spec check is a Go test in `river/check/`, run by `go test ./...`: River's checker and its
+shared cases, BirdView's stricter goal rule, the vendored-file hashes, every quotation against its
+vendored source, and every reference, anchor and relative link into the bundle. They cover the
+bundle's **structure**, not its substance: a green run means it is internally consistent, not that
+it is right.
 
 ---
 
@@ -200,19 +187,18 @@ river/                   the requirements bundle; normative, not served
 river/check/             the spec checks, as Go tests
 ```
 
-`internal/view` has no HTML or HTTP so the layout rules can be property-tested directly. If you
-want to format a string there, the code belongs in another package.
+`internal/view` has no HTML or HTTP so the layout rules can be property-tested directly; code that
+formats strings belongs in another package.
 
 ---
 
 ## The spec-driven workflow
 
-**The requirements are normative and live in [`river/`](../river).** Code implements them; it does
-not define them. Where this guide and `river/` disagree, `river/` wins.
+**The requirements are normative and live in [`river/`](../river).** Code implements them; where
+this guide and `river/` disagree, `river/` wins.
 
-[`river/README.md`](../river/README.md) describes the method, River, and is kept in the repository
-so the project does not depend on an external document. You do not need to read all of it to make
-a change, but you do need the loop below.
+[`river/README.md`](../river/README.md) describes the method, River. To make a change you need
+only the loop below.
 
 ### The bundle
 
@@ -231,9 +217,8 @@ a change, but you do need the loop below.
 | [`arch.md`](../river/arch.md) | how the code is organized |
 | [`check/`](../river/check) | the spec checks |
 
-Each requirement has an ID such as `product.scaleToggle`. A requirement's first paragraph is the
-rule and the rest is rationale. Cite IDs in code comments using the literal token, so one search
-finds every use:
+Each requirement has an ID such as `product.scaleToggle`; its first paragraph is the rule and the
+rest is rationale. Cite IDs in code comments as the literal token, so one search finds every use:
 
 ```go
 // Verifies: product.scaleToggle, tech.badgeContrast.
@@ -241,9 +226,8 @@ finds every use:
 
 ### The loop
 
-A change goes requirement first, then acceptance criterion, then code. An agent or contributor may
-draft requirements and criteria; the project owner approves them. Not every change needs all
-three steps:
+A change goes requirement, then acceptance criterion, then code. An agent or contributor may draft
+requirements and criteria; the project owner approves them. Not every change needs all three:
 
 | Change | What it needs |
 | --- | --- |
@@ -259,62 +243,61 @@ starting something new, and add an item for anything you find or leave unfinishe
 ### Three rules
 
 **Never resolve a conflict in code.** If two requirements disagree, or a change reverses something
-the spec states, stop and record it as a new entry in
-[`decisions.md`](../river/requirements/decisions.md). Choosing one silently is the failure this
+the spec states, stop and record a new entry in
+[`decisions.md`](../river/requirements/decisions.md). Silently choosing one is the failure this
 process exists to prevent.
 
 **Never edit a requirement to match code that violates it** without saying so and getting
 agreement. That turns a bug into a feature without anyone deciding it should be one.
 
-**A criterion you have not watched fail is not a criterion.** Break the code on purpose, confirm the
-check fails, and read the failure message to confirm it fails for the right reason. Then record
-how you broke it in the criterion's Status line. Make the deliberate break fail loudly if it does
-not apply, or a no-op edit will look like a passing check. Checks that pass while testing nothing
-are common: a whole-page string search that matches the help text instead of the control, a
-fixture too small to exercise the behavior, a test that still passes after its requirement is
-reversed. They look fine in review.
+**A criterion you have not watched fail is not a criterion.** Break the code on purpose, confirm
+the check fails, and read the message to confirm it fails for the right reason. Record how you
+broke it in the criterion's Status line. Make the deliberate break fail loudly if it does not
+apply, or a no-op edit will look like a passing check. Checks that test nothing are common and
+look fine in review: a whole-page string search that matches the help text instead of the control,
+a fixture too small to exercise the behavior, a test that still passes after its requirement is
+reversed.
 
 ---
 
 ## Hard rules
 
-Most of these are licensing rules; breaking them is not a matter of style.
+Most of these are licensing rules, not style.
 
-- **Never commit the built dataset.** It is reproducible from the committed inputs, and a stale
-  copy in the tree is worse than none.
+- **Never commit the built dataset**, `web/data/species.json`. It is reproducible from the
+  committed inputs in one command, and a stale copy in the tree is worse than none.
 - **Never read or process Wiley Online Library material**, including Ricklefs (2017). Its terms
-  prohibit AI tools from ingesting it and prohibit automated access, and the source is
-  [rejected](../river/requirements/decisions.md#ricklefsprohibited). Do not try to revive it as a
-  length source.
+  prohibit AI ingestion and automated access, and the source is
+  [rejected](../river/requirements/decisions.md#ricklefsprohibited). Do not revive it as a length
+  source.
 - **Never fetch, download or programmatically process anything from BirdLife's DataZone**
   (`datazone.birdlife.org`). Its terms forbid automated access and text and data mining; see
   [the register entry](../river/requirements/requirements.md#birdlife-checklist). AVONET's BirdLife
   sheet is part of AVONET, under CC BY 4.0, and is not affected.
 - **Only AVONET, the Fox wingspan data and AviList may be committed as source data.** All three
   are CC BY 4.0. Before adding a fourth, read
-  [`requirements.md`](../river/requirements/requirements.md): most candidates this project evaluated
-  could not be redistributed. The generated tables under `data/` are not source data; they are the
-  project's own reductions and carry their provenance in their headers. The vendored terms and
-  WCAG text are kept for quotation, not as data.
+  [`requirements.md`](../river/requirements/requirements.md): most candidates evaluated could not
+  be redistributed. The generated tables under `data/` are not source data but the project's own
+  reductions, with their provenance in their headers. The vendored terms and WCAG text are kept for
+  quotation, not as data.
 - **Every third-party file goes under `third_party/<name>/`**, with its own license and README,
   and its provenance under `river/requirements/sources/<name>/`.
 - **Never present a modeled value as a measurement.** Every length and wingspan is marked measured
-  or modeled, and the page shows which. The whole measurement design rests on
+  or modeled, and the page shows which; see
   [this decision](../river/requirements/decisions.md#noopenlengthandwingspan).
 
-`AGENTS.md` carries the same rules in the form AI coding agents read.
+`AGENTS.md` carries the same rules for AI coding agents.
 
 ---
 
 ## Deployment
 
-Every file the build reads is in the repository, so deploying needs only the container image
-below, or the server binary and a built dataset.
+Deploying needs only the container image below, or the server binary and a built dataset.
 
 ### Container image
 
-The `Dockerfile` at the repository root builds in three stages and produces a minimal static image
-based on `gcr.io/distroless/static-debian12:nonroot`:
+The `Dockerfile` at the repository root builds a minimal static image, based on
+`gcr.io/distroless/static-debian12:nonroot`, in three stages:
 
 1. **`ingest`** builds and runs `birdview-ingest`, producing `/out/species.json`.
 2. **`builder`** builds the static `birdview` server binary.
@@ -327,7 +310,7 @@ docker run --rm -p 8080:8080 birdview
 
 By default the container runs `birdview -addr 0.0.0.0:8080 -data /data/species.json`. Arguments
 after the image name replace those defaults entirely, so to add a flag such as `-feedback`, repeat
-`-addr` and `-data` as well:
+`-addr` and `-data`:
 
 ```
 docker run --rm -p 8080:8080 birdview \
@@ -336,12 +319,10 @@ docker run --rm -p 8080:8080 birdview \
   -feedback <issue-tracker-url>
 ```
 
-Without `-feedback`, pages say nothing about feedback.
-
 ### Running without Docker
 
-The server binds `localhost:8080` by default. On a host, build the binary, build the dataset, and
-point `-addr` at the interface and port the host expects:
+The server binds `localhost:8080` by default; on a host, point `-addr` at the interface and port
+the host expects:
 
 ```
 go build -o birdview ./cmd/birdview
@@ -349,11 +330,11 @@ go run ./cmd/birdview-ingest
 ./birdview -addr 0.0.0.0:$PORT -data web/data/species.json
 ```
 
-The templates, static files and these guides are embedded in the binary; the dataset is the only
-file it reads at run time.
+Templates, static files and these guides are embedded in the binary; the dataset is the only file
+it reads at run time.
 
 When a regenerated dataset drops a species, `/species/<code>` answers 404 with a page naming the
-bird and why it is no longer drawn, so old links still explain themselves.
+bird and why it is no longer drawn.
 
 ---
 

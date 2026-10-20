@@ -2,16 +2,13 @@ package app
 
 # app — composed requirements for the BirdView web application
 
-Search `## <id>` for a requirement composed here; a linked one leads to its source, where `## <id>`
-finds it and the first paragraph is the rule.
+Everything the BirdView web application must satisfy. Implementations and releases of the server
+are verified against this package; its criteria are in [acceptance.md](acceptance.md).
 
-Everything the web application must satisfy. Implementations and releases of the server are
-verified against this package; its criteria are in [acceptance.md](acceptance.md).
-
-**Two parts.** First, every source requirement that applies to the application **unchanged**,
-linked to its full text. Then the requirements **composition wrote**, in full, each naming its
-sources in `Composed from:`. A source requirement not listed here belongs to another package or
-is not yet composed.
+**Two parts.** First, every source requirement that applies **unchanged**, linked to its source,
+where `## <id>` finds it and the first paragraph is the rule. Then the requirements **composition
+wrote**, in full, each naming its sources in `Composed from:`. A source requirement not listed here
+belongs to another package or is not yet composed.
 
 **Status: composed by an agent, awaiting the owner's approval.** Not tagged.
 
@@ -26,7 +23,7 @@ is not yet composed.
 
 Precedence is the ranking in [requirements.md](../requirements.md): a mandatory source beats a
 local one. **No conflict arose.** BirdView's local requirements only tighten what WCAG asks, which
-a lower tier may always do; nothing local loosens it.
+a lower tier may do.
 
 ## Applies unchanged
 
@@ -110,8 +107,6 @@ a lower tier may always do; nothing local loosens it.
 
 ## Excluded
 
-Withdrawn with the photograph design; see [decisions.photographsWithdrawn](../decisions.md#photographswithdrawn).
-
 - [product.speciesPhotographs](../sources/product/diagram.md#speciesphotographs) — Species photographs. Excluded by [decisions.photographsWithdrawn](../decisions.md#photographswithdrawn)
 - [product.perchedOrInFlight](../sources/product/diagram.md#perchedorinflight) — Perched and in-flight selection. Excluded by [decisions.photographsWithdrawn](../decisions.md#photographswithdrawn)
 - [product.photoAttribution](../sources/product/diagram.md#photoattribution) — Photograph attribution. Excluded by [decisions.photographsWithdrawn](../decisions.md#photographswithdrawn)
@@ -150,18 +145,17 @@ to read a diagram, and the controls and their states, have 3:1 against adjacent 
 
 Composed from: [tech.textContrastFloor](../sources/tech/accessibility.md#textcontrastfloor), [tech.badgeContrast](../sources/tech/accessibility.md#badgecontrast), [wcag.ContrastRatio](../sources/wcag/requirements.md#contrastratio)
 
-The stylesheet is an intermediary: it meets pagesMeetTextContrast for any page that takes its
-colors from it, so that requirement is checked once on the stylesheet rather than once per page.
+The stylesheet meets pagesMeetTextContrast for any page that takes its colors from it, so that
+requirement is checked once on the stylesheet rather than once per page.
 
 - **Guarantee.** Every text color `styles.css` declares clears 7:1 against both the page and the
   panel background, or against the rule's own background where it sets one, and no link goes
-  uncolored (tech.textContrastFloor). Every badge's generated
-  background clears 7:1 against the text color generated with it (tech.badgeContrast).
+  uncolored (tech.textContrastFloor). Every badge's generated background clears 7:1 against the
+  text color generated with it (tech.badgeContrast).
 - **Assumption.** The page links `styles.css`, has no `<style>` element, and sets a color inline
   only as a badge's generated pair. A page that breaks this is outside the contract and is
   checked on its own.
 - **Scope.** Text, in pages rendered from BirdView's templates. **Not** an SVG document served at
-  its own URL, which carries its own styles, and **not** non-text contrast, which this contract
-  does not guarantee at all.
+  its own URL, which carries its own styles, and **not** non-text contrast.
 - **Override.** Closed. A template may not set a color except through the palette; one that does
   has left the contract, which the assumption check reports.
