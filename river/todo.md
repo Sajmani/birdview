@@ -15,6 +15,32 @@ open" note in a decision record instead.
 move it to [todo-closed.md](todo-closed.md). Items are never deleted: a closed one records why a
 question that looks open is not. Design notes behind items are in [notes.md](notes.md).
 
+## tightenProse
+
+**Tighten all prose and page text; less is more**
+
+Status: open
+Owner: Sameer
+Gate: when convenient
+
+The goals were cut to one sentence each on 2026-10-20. Do the same pass over everything else a
+person reads: requirements, decisions, criteria, docs, README, AGENTS.md, code comments and the
+text on the pages. Keep each rule and its reason; cut the rest.
+
+## stableSurface
+
+**State what BirdView promises to keep stable, so the rest is free to change**
+
+Status: open
+Owner: Sameer
+Gate: before a public deployment, and before [publishDataset](#publishdataset)
+
+[goals.freedomToChange](goals/goals.md#freedomtochange) has one requirement
+(servesOnlyItsPages). Write requirements naming the stable surface (likely `/species/<id>`,
+`/compare` and the documented query parameters) and declaring everything else internal,
+including the shape of `species.json`. This pulls against publishing the dataset: expect a
+separate external schema, versioned and documented, with the internal one free to change.
+
 ## wingspanSectionWidth
 
 **Per-section scale under Wingspan is not bounded in total length**

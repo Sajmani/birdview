@@ -8,7 +8,7 @@ package product
 
 Subject: `dataset.scope`
 Value: `BirdView's regions, status established or rare`
-Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
+Goals: goals.localRelevance, goals.flexibleComparison
 
 The dataset is the species whose observations **recur** in the regions BirdView covers: a
 species is in scope when, in at least one of them, its records fall in repeated episodes across
@@ -59,7 +59,7 @@ separates a feral population from a steady trickle of escapees.
 
 Subject: `dataset.status`
 Value: `established | rare | vagrant | absent, plus withheld and exotic flags`
-Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
+Goals: goals.localRelevance, goals.honestData, goals.giveBack
 
 Each species carries the status [scopeIsRecurringAvifauna](#scopeisrecurringavifauna) derives, and it is shown and filterable
 alongside Habitat and Diet ([decisions.habitatDietSpeciesLevel](../../decisions.md#habitatdietspecieslevel)) rather than consumed silently at
@@ -83,7 +83,7 @@ drawing.
 
 Subject: `dataset.status.exceptions`
 Value: `declared table, each entry with a written reason`
-Goals: goals.comparisonAcrossFamilies, goals.goodDataCitizen
+Goals: goals.honestData
 
 Species whose status cannot be derived carry a declared one instead, from a committed table in
 which every entry names its reason. Two classes qualify, and no others:
@@ -120,7 +120,7 @@ See [lengthAndWingspanSources](measurements.md#lengthandwingspansources).
 
 **Traits carried per species**
 
-Goals: goals.shapeNotOnlySize
+Goals: goals.sizeIntuition, goals.shapeNotOnlySize
 
 Each species record carries scientific name, family, and these AVONET traits: `Beak.Length_Culmen`,
 `Tail.Length`, `Wing.Length`, `Secondary1`, `Mass`.
@@ -140,7 +140,7 @@ flight premise removed them ([decisions.inFlightNoLegs](../../decisions.md#infli
 
 Subject: `dataset.names.source`
 Value: `AviList v2025b`
-Goals: goals.comparisonAcrossFamilies
+Goals: goals.goodDataCitizen, goals.flexibleComparison
 
 English common names in **both locales** ([englishNameChoice](diagram.md#englishnamechoice)), the **eBird species code**, family
 scientific and English names, the order, and the family **sequence** all come from
@@ -171,7 +171,7 @@ would change its URL under a reader ([englishNameChoice](diagram.md#englishnamec
 
 Subject: `badge.color.derivation`
 Value: `generated`
-Goals: goals.comparisonAcrossFamilies
+Goals: goals.flexibleComparison, goals.openToEveryone
 
 Colors are generated as **two palettes**: one per taxonomic order, and one per family *within* its
 order. Both satisfy tech.badgeContrast, and families are visibly different from those listed next to them.
@@ -203,7 +203,7 @@ name.
 
 Subject: `dataset.join.key`
 Value: `scientific binomial, normalized`
-Goals: goals.sizeIntuition
+Goals: goals.honestData
 
 Species are joined across sources on scientific binomial, after stripping `(...)` parentheticals
 and collapsing internal whitespace, with a committed mapping table covering the taxonomic
@@ -223,7 +223,7 @@ engages lengthAndWingspanSources and tileMarksModeled.
 
 **Unmatched species are reported, not silently dropped**
 
-Goals: goals.sizeIntuition
+Goals: goals.honestData
 
 Ingest reports every species that fails to join, by name and count, and fails the build if the
 unmatched fraction exceeds a stated threshold.
@@ -237,13 +237,13 @@ failure, a taxonomy update silently shrinks the dataset and nobody notices.
 
 Subject: `build.join_loss`
 Value: `named and counted on every run; a declared bar above which the run refuses`
-Goals: goals.goodDataCitizen, goals.nothingDisappearsQuietly
+Goals: goals.honestData
 
 Every join between two datasets reports the records it could not match: how many, under what
 names, and whether the loss was intended. Where a loss can be bounded, the bar is declared and
 the run **refuses to write** rather than exceed it.
 
-Rationale: [goals.nothingDisappearsQuietly](../../../goals/goals.md#nothingdisappearsquietly) at the point where data actually disappears. A join is the
+Rationale: [goals.honestData](../../../goals/goals.md#honestdata) at the point where data actually disappears. A join is the
 one place in this pipeline where a record can cease to exist without anyone deciding it should,
 and the failure is invisible on both sides — the input still has the record, the output simply
 never mentions it.
@@ -292,7 +292,7 @@ Warbler (+30,274) from `coronata` and `auduboni`.
 
 Subject: `build.name_correspondence`
 Value: `committed per-source record counts; a declared ratio band`
-Goals: goals.goodDataCitizen, goals.dataAsItIs, goals.nothingDisappearsQuietly
+Goals: goals.honestData
 
 A committed table records how many records each occurrence source holds for every species
 BirdView draws, under the name BirdView serves. A species far outside the usual ratio between

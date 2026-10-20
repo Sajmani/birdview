@@ -6,7 +6,7 @@ package product
 
 **Filter by family**
 
-Goals: goals.comparisonAcrossFamilies
+Goals: goals.flexibleComparison
 
 The user can filter to any subset of families, multi-select. **Everything is selected on arrival**
 — All, every order and every family show as on. An **All** control toggles like an order does,
@@ -47,7 +47,7 @@ ordering the source file provides for free.
 **Filter by region and month**
 
 Subject: `presentation.region_filter`
-Goals: goals.comparisonAcrossFamilies
+Goals: goals.localRelevance, goals.flexibleComparison
 
 The reader filters to any subset of US states and Canadian provinces, multi-select, as the family
 filter works. A species is listed in a region when it reaches 1 record per million of that region's
@@ -104,7 +104,7 @@ no longer describes it.
 **Here selects the region the reader is in**
 
 Subject: `presentation.region_filter.here`
-Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
+Goals: goals.localRelevance
 
 A **Here** button beside **All** in Regions replaces the region selection with the one region the
 reader is in, every other setting kept. If the reader refuses permission, their location cannot
@@ -134,7 +134,7 @@ because a dashed border already marks the Only buttons, which are active.
 **Now selects the current month**
 
 Subject: `presentation.month_filter.now`
-Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
+Goals: goals.localRelevance
 
 A **Now** button beside **All** in Months replaces the month selection with the current month on
 the reader's own clock, every other setting kept. Without JavaScript it uses the server's month.

@@ -3115,7 +3115,7 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 	// two of the four tables, which would have shown a shared name OR a
 	// withheld note had any species ever been both. None is today, and the
 	// chain was still the wrong shape: a disclosure silently suppressed by
-	// another disclosure is exactly what goals.nothingDisappearsQuietly forbids.
+	// another disclosure is exactly what goals.honestData forbids.
 	//
 	// Why a reader wants these and not just the number: a visitor who knows
 	// the bird as Dryobates villosus and finds a page headed Leuconotopicus
@@ -3341,12 +3341,12 @@ type shareCell struct {
 	// declined to judge (decisions.monthPresence), a species eBird withholds in the regions
 	// on screen (decisions.ebirdSilenceNotAbsence). They accompany the Ratio rather than replacing it:
 	// suppressing a count would leave a reader unable to tell it from a bird
-	// genuinely absent (goals.nothingDisappearsQuietly).
+	// genuinely absent (goals.honestData).
 	//
 	// A list, and every caveat that applies is on it. The first version held
 	// one, and the abstention marker replaced the shared-name marker when
 	// both applied -- a disclosure silently suppressed by another, which is
-	// the failure goals.nothingDisappearsQuietly names.
+	// the failure goals.honestData names.
 	Seams []seam
 }
 

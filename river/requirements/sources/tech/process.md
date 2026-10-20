@@ -8,7 +8,7 @@ package tech
 
 Subject: `process.spec_location`
 Value: `river/`
-Goals: goals.goodDataCitizen
+Goals: goals.giveBack, goals.honestData
 
 The repository follows the loop in [README.md](../../../README.md). `AGENTS.md` names `river/` as
 normative so agents reading the instruction file are pointed at it.
@@ -17,7 +17,7 @@ normative so agents reading the instruction file are pointed at it.
 
 **The iNaturalist mapping is built by a separate, paced tool**
 
-Goals: goals.goodDataCitizen
+Goals: goals.goodDataCitizen, goals.rapidIteration
 
 Resolving species to iNaturalist taxon IDs happens in `cmd/birdview-inatmap`, never in
 `birdview-ingest` and never while serving. The tool waits at least one second between requests

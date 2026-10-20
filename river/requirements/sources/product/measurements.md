@@ -7,7 +7,7 @@ package product
 **Where length and wingspan come from**
 
 Subject: `measurement.source`
-Goals: goals.sizeIntuition
+Goals: goals.sizeIntuition, goals.honestData
 
 - **Wingspan, measured** — Fox et al. 2026, filtered to `needs_prediction = 0` so only empirical
   values are taken. Stored as the reported min/mid/max triple rather than a point value.
@@ -40,7 +40,7 @@ the ABA avifauna. Mixing sources of differing authority is acceptable *only* und
 
 **The tile marks any metric that is not measured**
 
-Goals: goals.sizeIntuition
+Goals: goals.honestData
 
 On the tile itself — where numbers and the scaled diagram appear — any metric whose `kind` is not
 `measured` is visibly marked as such, without the tile having to explain why.
@@ -55,7 +55,7 @@ which is the thing the project explicitly rejected. It is load-bearing, not deco
 
 Subject: `measurement.provenance.record`
 Value: `{kind, source, sourceTaxon, model}`
-Goals: goals.sizeIntuition, goals.goodDataCitizen
+Goals: goals.honestData, goals.goodDataCitizen
 
 Every metric BirdView presents — total length, wingspan, mass, and each diagram segment — carries
 a record of where that specific value came from:
@@ -90,7 +90,7 @@ redesign.
 **The diagram shows which lengths are measured and which are modeled**
 
 Subject: `diagram.provenance`
-Goals: goals.sizeIntuition, goals.goodDataCitizen
+Goals: goals.honestData
 
 Stroke style carries provenance. A **solid** stroke is a measured length; a **dashed** stroke is a
 modeled one. `near-match` draws solid: it is a real measurement, of a real bird, taken with
@@ -135,7 +135,7 @@ model is wrong, so all the model's error is attributed to the inner segment, whe
 **The detail diagram is labeled with each segment and its measurement**
 
 Subject: `presentation.detail_view.diagram_labels`
-Goals: goals.sizeIntuition, goals.shapeNotOnlySize
+Goals: goals.sizeIntuition, goals.shapeNotOnlySize, goals.honestData
 
 **Every metric the detail view reports appears in the drawing.** The provenance table below it may
 explain more about a number, but it may not be the only place a number appears: a reader looking
@@ -261,7 +261,7 @@ would be a different and worse thing: it would name a quantity no source states 
 
 **The detail view explains each metric's provenance**
 
-Goals: goals.sizeIntuition, goals.goodDataCitizen
+Goals: goals.honestData, goals.goodDataCitizen
 
 In the detail view (tileOpensDetail), **every** metric — the three main metrics and all five diagram
 segments — is shown with its value and its provenance stated in plain language: naming the source,
@@ -280,7 +280,7 @@ asserts five proportions and explains none of them.
 **The detail view lists every category the bird is in, and where each came from**
 
 Subject: `presentation.detail.categories`
-Goals: goals.sizeIntuition, goals.goodDataCitizen
+Goals: goals.honestData, goals.goodDataCitizen
 
 The detail view names every category a bird is in — its family and order, the regions it is
 listed in, its habitat and niche, and any group BirdView puts it in — and marks each as
@@ -337,7 +337,7 @@ quoted for a record, not ours to republish, and serving them would be the redist
 
 Subject: `presentation.docs.pipeline`
 Value: `docs/pipeline.md: every source and table, its fields, and every step between them`
-Goals: goals.goodDataCitizen, goals.dataAsItIs
+Goals: goals.honestData, goals.giveBack
 
 The documentation carries **one diagram of how the dataset is built**: every published source and
 every intermediate table as a box giving its name and the fields BirdView reads from it, and every
@@ -369,7 +369,7 @@ plain SVG with no script and no link off the server.
 
 Subject: `presentation.shared_measurements`
 Value: `a note on the tile and the detail page of each species, naming the others`
-Goals: goals.shapeNotOnlySize, goals.nothingDisappearsQuietly
+Goals: goals.honestData
 
 Where two or more drawn species take their AVONET traits from **the same row** — a near-match
 borrowing a relative's measurements under [provenancePerMetric](#provenancepermetric), and the relative drawn from that same
@@ -386,7 +386,7 @@ measurements were used and that the other species' drawing comes from the same r
 traits name the same source sheet and source taxon. A new near-match then gets its note without
 anyone remembering to add it.
 
-Rationale: [goals.nothingDisappearsQuietly](../../../goals/goals.md#nothingdisappearsquietly) — a borrowed value is already labeled, but the reason two
+Rationale: [goals.honestData](../../../goals/goals.md#honestdata) — a borrowed value is already labeled, but the reason two
 drawings coincide was visible only to someone who opened both detail pages and compared the
 provenance rows. [decisions.vegaGullBorrows](../../decisions.md#vegagullborrows).
 
@@ -396,7 +396,7 @@ provenance rows. [decisions.vegaGullBorrows](../../decisions.md#vegagullborrows)
 
 Subject: `presentation.index.exotic`
 Value: `declared list; off the index, listed at /excluded, detail pages kept`
-Goals: goals.comparisonAcrossFamilies, goals.nothingDisappearsQuietly
+Goals: goals.localRelevance, goals.honestData
 
 **A bird whose records here are escapes is not drawn on the index.** Recurrence cannot tell a
 wild population from a supply of escapes ([declaredExceptions](dataset.md#declaredexceptions)), so parrots, waxbills, ornamental
@@ -414,6 +414,6 @@ index and why. `/excluded` lists them all, each linked to that page, with its re
 records; the index links to the list. A bird listed here appears in no family, habitat, diet or
 region control, and is not counted by them.
 
-Rationale: [goals.nothingDisappearsQuietly](../../../goals/goals.md#nothingdisappearsquietly) — removing a bird a reader may have seen, with no trace, is
+Rationale: [goals.honestData](../../../goals/goals.md#honestdata) — removing a bird a reader may have seen, with no trace, is
 the failure the goals forbid; a list that says why is the honest version of the same edit.
 [decisions.escapedBirdsOffIndex](../../decisions.md#escapedbirdsoffindex).

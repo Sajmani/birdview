@@ -220,7 +220,7 @@ a change, but you do need the loop below.
 | --- | --- |
 | [`README.md`](../river/README.md) | the method, River, copied in unchanged |
 | [`bindings.md`](../river/bindings.md) | how BirdView applies the method, and where it departs from it |
-| [`goals/`](../river/goals/goals.md) | why the project exists: seven goals, `goals.*` |
+| [`goals/`](../river/goals/goals.md) | why the project exists: fourteen goals, `goals.*` |
 | [`requirements/sources/product/`](../river/requirements/sources/product/product.md) | what it must do, one file per group: `product.*` |
 | [`requirements/sources/tech/`](../river/requirements/sources/tech/tech.md) | technical constraints, one file per group: `tech.*` |
 | [`requirements/app/`](../river/requirements/app/app.md) | every requirement the web application must meet, and their criteria |

@@ -347,7 +347,7 @@ var OrderCommonNames = map[string]string{
 // The records are NOT divided between the two species. eBird distinguishes
 // none of them, so any division would be invented -- 6,245,227 records for
 // the warblers alone, growing by about 827,000 a year. Both species carry
-// the shared count and both say whose it also is (product.namesRecordsFiledUnder, goals.dataAsItIs, goals.nothingDisappearsQuietly).
+// the shared count and both say whose it also is (product.namesRecordsFiledUnder, goals.honestData).
 //
 // Verifies: product.namesRecordsFiledUnder.
 type SharedName struct {

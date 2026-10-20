@@ -346,7 +346,7 @@ func main() {
 		// Every name that reached the denominator and no species. These are
 		// records counted as "some other bird" on every tile, which is
 		// correct for a bird BirdView does not draw and a silent loss for
-		// one it does (goals.nothingDisappearsQuietly, product.joinsReportDrops).
+		// one it does (goals.honestData, product.joinsReportDrops).
 		for n, c := range r.counts {
 			if !drawnName[n] {
 				orphan[n] += c

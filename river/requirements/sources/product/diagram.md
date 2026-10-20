@@ -75,7 +75,7 @@ comparability is unaffected. See [decisions.foldedNeckAsS](../../decisions.md#fo
 
 Subject: `diagram.scale.mode`
 Value: `per-section (default) | global; global is the default under Frequency, Bill and Tail`
-Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
+Goals: goals.sizeIntuition, goals.flexibleComparison
 
 The user switches between a single scale across the entire filtered set, and a scale shared by all
 species within a section. **Per-section is the default, and is listed first.**
@@ -115,7 +115,7 @@ be surprised by the swan.
 
 Subject: `diagram.wingspan.scale`
 Value: `same as vertical axis`
-Goals: goals.sizeIntuition
+Goals: goals.sizeIntuition, goals.shapeNotOnlySize
 
 The crossbar's length represents wingspan at the same scale as the vertical axis, so its length
 relative to the body is literal.
@@ -208,7 +208,7 @@ it does not establish.
 
 Subject: `diagram.neck_ratio`
 Value: `per-family modeling function`
-Goals: goals.sizeIntuition, goals.shapeNotOnlySize, goals.goodDataCitizen
+Goals: goals.shapeNotOnlySize, goals.honestData
 
 The division of the remaining body axis between neck and body uses a per-family ratio. The
 resulting **neck length is presented as a metric like any other**, in the detail view, carrying a
@@ -230,7 +230,7 @@ would be missing. Supersedes the condition in [decisions.neckSplitUnmeasured](..
 **One diagram vocabulary, on every surface that draws one**
 
 Subject: `diagram.vocabulary.shared`
-Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
+Goals: goals.sizeIntuition, goals.flexibleComparison
 
 Four surfaces draw the diagram: the **favicon**, the **index** (its tiles and its legend), the
 **detail view**, and the **comparison view**. A reader meets the same figure on all four, so the
@@ -268,7 +268,7 @@ evidence about the decision, not licence to fork it.
 
 Subject: `presentation.names.locale`
 Value: `na (default) | world`
-Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
+Goals: goals.shareableViews, goals.openToEveryone
 
 A toggle beside Units and Scale chooses between North American English names (eBird/Clements,
 the default) and world English names (AviList, following IOC). A species' id and URL are the same

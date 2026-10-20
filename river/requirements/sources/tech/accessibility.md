@@ -8,7 +8,7 @@ package tech
 
 Subject: `badge.contrast.ratio`
 Value: `>= 7.0`
-Goals: goals.comparisonAcrossFamilies
+Goals: goals.openToEveryone
 
 Every generated badge color yields a contrast ratio of at least 7:1 against **the text it actually
 carries**, which is black or white per badge, computed per WCAG 2.2 relative luminance.
@@ -27,7 +27,7 @@ asserted a conformance level nothing checked. This requirement is checkable and 
 **Link and text colors meet a stated contrast floor**
 
 Subject: `text.contrast.ratio`
-Goals: goals.sizeIntuition
+Goals: goals.openToEveryone
 
 Every text color the stylesheet declares for text on a bare surface clears **7:1** (WCAG 2.2
 SC 1.4.6, Contrast Enhanced) against **both** the page background and the panel background. Links
@@ -75,7 +75,7 @@ went with them. See [decisions.oneContrastFloor](../../decisions.md#onecontrastf
 
 Subject: `pages.domain`
 Binds: wcag.WebPage
-Goals: goals.sizeIntuition, goals.comparisonAcrossFamilies
+Goals: goals.openToEveryone
 
 **Every response the server sends as `text/html`, `image/svg+xml` or `text/plain`, at any route,
 is a BirdView web page**, with everything drawn into it. Today that is the index, the species

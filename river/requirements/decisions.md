@@ -2750,9 +2750,8 @@ its 106 records are on Midway, whose country code is `UM` — excluded by the sw
 withheld from both. The tile prints the figure it has and names the species it is shared with;
 the detail page says which source does not separate them and how many records are involved.
 
-The alternative considered was showing no figure on either, which is defensible under
-[goals.dataAsItIs](../goals/goals.md#dataasitis) alone — a number we cannot attribute is a number we cannot stand
-behind. **[goals.nothingDisappearsQuietly](../goals/goals.md#nothingdisappearsquietly) decides it the other way**: suppressing the figure hides
+The alternative considered was showing no figure on either, on the grounds that a number we
+cannot attribute is a number we cannot stand behind. **[goals.honestData](../goals/goals.md#honestdata) decides it the other way**: suppressing the figure hides
 6.2 million records and one of the commonest warblers in North America, and a reader has no way
 to tell that view from a bird genuinely absent. Showing the count with its seam named tells the
 reader strictly more, and nothing it tells them is false.
