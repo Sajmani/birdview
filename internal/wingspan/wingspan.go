@@ -28,7 +28,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xuri/excelize/v2"
+	"birdview/internal/xlsx"
 )
 
 // Source names this dataset in provenance records.
@@ -55,7 +55,7 @@ type observation struct {
 
 // Open reads the empirical rows and fits the fallback model from them.
 func Open(path string) (Table, *Model, error) {
-	f, err := excelize.OpenFile(path)
+	f, err := xlsx.Open(path)
 	if err != nil {
 		return nil, nil, fmt.Errorf("wingspan.Open %s: %w", path, err)
 	}
@@ -115,7 +115,7 @@ func Open(path string) (Table, *Model, error) {
 }
 
 // isEmpirical reports whether a needs_prediction cell means "we have a real
-// measurement". The column is a spreadsheet boolean, which excelize renders as
+// measurement". The column is a spreadsheet boolean, which internal/xlsx renders as
 // FALSE/TRUE while the underlying XML stores 0/1 -- so both spellings are
 // accepted. Reading only "0" silently matched nothing and produced a dataset
 // with zero measured wingspans, which looked like a coverage problem rather

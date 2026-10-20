@@ -27,7 +27,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xuri/excelize/v2"
+	"birdview/internal/xlsx"
 )
 
 // Sheet names, used verbatim as the Source in a provenance record so a reader
@@ -91,7 +91,7 @@ type Workbook struct {
 // Open reads the sheets BirdView needs. The workbook is 21 MB, so each sheet is
 // streamed rather than materialized.
 func Open(path string) (*Workbook, error) {
-	f, err := excelize.OpenFile(path)
+	f, err := xlsx.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("avonet.Open %s: %w", path, err)
 	}
@@ -121,7 +121,7 @@ func Open(path string) (*Workbook, error) {
 	return wb, nil
 }
 
-func (wb *Workbook) readTraits(f *excelize.File, sheet, spCol, famCol, ordCol string, into map[string]Traits, fams, ords map[string]string) error {
+func (wb *Workbook) readTraits(f *xlsx.File, sheet, spCol, famCol, ordCol string, into map[string]Traits, fams, ords map[string]string) error {
 	rows, err := f.Rows(sheet)
 	if err != nil {
 		return fmt.Errorf("avonet: sheet %s: %w", sheet, err)
@@ -187,7 +187,7 @@ func (wb *Workbook) readTraits(f *excelize.File, sheet, spCol, famCol, ordCol st
 	return nil
 }
 
-func (wb *Workbook) readCrosswalk(f *excelize.File) error {
+func (wb *Workbook) readCrosswalk(f *xlsx.File) error {
 	rows, err := f.Rows(SheetCross)
 	if err != nil {
 		return fmt.Errorf("avonet: sheet %s: %w", SheetCross, err)

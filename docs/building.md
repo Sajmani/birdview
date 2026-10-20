@@ -16,8 +16,8 @@ no data fetch at run time and no JavaScript framework.
   output for skip lines when your change affects rendered pages.
 - **Python 3, Node and Google Chrome**, only to re-render the pipeline diagram (see below).
 
-The Go dependencies are `excelize`, for reading the source workbooks, and `goldmark`, for
-rendering these guides.
+The one Go dependency is `goldmark`, for rendering these guides. The source workbooks are read by
+BirdView's own `internal/xlsx`, using only the standard library.
 
 ---
 

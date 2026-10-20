@@ -34,7 +34,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xuri/excelize/v2"
+	"birdview/internal/xlsx"
 )
 
 // Source names this dataset in provenance records and in the page footer.
@@ -92,14 +92,14 @@ var required = []string{
 
 // Open reads the species rows of an AviList workbook.
 func Open(path string) (Table, error) {
-	f, err := excelize.OpenFile(path)
+	f, err := xlsx.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("avilist.Open %s: %w", path, err)
 	}
 	defer f.Close()
 
 	sheet := ""
-	for _, n := range f.GetSheetList() {
+	for _, n := range f.SheetNames() {
 		if strings.HasPrefix(n, sheetPrefix) {
 			sheet = n
 			break
@@ -107,7 +107,7 @@ func Open(path string) (Table, error) {
 	}
 	if sheet == "" {
 		return nil, fmt.Errorf("avilist: %s has no sheet named %s...; tabs are %v",
-			path, sheetPrefix, f.GetSheetList())
+			path, sheetPrefix, f.SheetNames())
 	}
 
 	rows, err := f.Rows(sheet)

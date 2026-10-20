@@ -18,7 +18,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xuri/excelize/v2"
+	"birdview/internal/xlsx"
 )
 
 // prediction is one of Fox's own published estimates, used only to validate
@@ -29,7 +29,7 @@ type prediction struct {
 }
 
 func publishedPredictions(path string) ([]prediction, error) {
-	f, err := excelize.OpenFile(path)
+	f, err := xlsx.Open(path)
 	if err != nil {
 		return nil, err
 	}
