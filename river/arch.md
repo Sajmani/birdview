@@ -104,3 +104,30 @@ this code's job.
 ## Known rough edges
 
 Listed in [todo.md](todo.md) with the rest of the open work, since 2026-10-13.
+
+## Gotchas
+
+- **The neck/body ratio has no measured basis, and is surfaced anyway** (product.neckModelPerFamily).
+  The neck length is serialized and shown with `kind: modeled` and a `model` naming the function
+  and that family's ratio. Do not drop the model string: naming it is what makes showing the number
+  defensible ([decisions.neckLengthAsMetric](requirements/decisions.md#necklengthasmetric), which
+  superseded decisions.neckSplitUnmeasured).
+- **Per-tile diagram scaling destroys the product** (product.scaleToggle). It makes a hummingbird
+  and a swan identical on screen. Scale is per-section or global, never per-tile.
+- **The wing crossbar is to scale with the vertical axis** (product.crossbarAtVerticalScale), which
+  is why tiles are wide.
+- **AVONET has no common names and no body length or wingspan.** Three designs foundered on
+  assuming otherwise. Names come from AviList (product.namesFromAvilist); length and wingspan from
+  product.lengthAndWingspanSources.
+- **Scope is recurrence, not abundance** (product.scopeIsRecurringAvifauna,
+  decisions.scopeFromRecurrence). A record count measures observer effort, which under-reports
+  pelagics and island endemics and over-reports vagrants.
+- **Identify the client on outbound requests** (tech.identifiedClient). Go's default user agent
+  earns a 403 from Wikimedia.
+
+## Running the local server
+
+`-data` defaults to the relative `web/data/species.json`, so the server must start from the repo
+root. Build to a fixed path and stop that process before restarting; `kill %1` on `go run` leaves
+its child holding the port. A `-dev` server reads templates per request but its Go code is frozen
+at start, so `can't evaluate field X` after a struct change usually means a stale process.

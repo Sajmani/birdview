@@ -254,7 +254,7 @@ three steps:
 | Docs only | No spec change, unless writing the doc shows the spec is wrong |
 
 Open work is tracked in [`todo.md`](../river/todo.md), not in `TODO` comments. Read it before
-starting something new, and add a row for anything you find or leave unfinished.
+starting something new, and add an item for anything you find or leave unfinished.
 
 ### Three rules
 

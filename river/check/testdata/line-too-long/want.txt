@@ -1,0 +1,9 @@
+# A line over 500 characters outside a code block is reported, once per file; one inside a
+# fence is not (seekableArtifacts).
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem line-too-long notes/table.md

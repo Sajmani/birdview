@@ -1,0 +1,9 @@
+# An AGENTS.md beside the bundle longer than 6,000 characters is reported against ../AGENTS.md;
+# a short one, as in the valid case, is not (seekableArtifacts).
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem instructions-too-long ../AGENTS.md

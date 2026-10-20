@@ -1,5 +1,8 @@
 # Decisions
 
+Search `## <id>` for one decision; `grep -n -A2 '^## '` lists them with their titles. Each opens
+with its subject, kind, date and who decided.
+
 Append-only. Entries are never rewritten; a decision that turns out badly is superseded by a new
 entry, not edited.
 
@@ -106,7 +109,7 @@ would come with none of the above restrictions.
 
 **Deferred until BirdView runs**, by decision of 2026-09-21: a demo that shows the app crediting
 its sources and labeling every modeled value as modeled makes a far better case than a description
-of an intention. See [todo.md](../todo.md#why-the-permission-asks-wait-for-a-demo). This is an upside
+of an intention. See [notes.md](../notes.md#why-the-permission-asks-wait-for-a-demo). This is an upside
 path, not a blocker — v1 ships with modeled lengths either way.
 
 **Not relied upon**, and recorded so nobody revives them as shortcuts: that `RS-eco/traitdata`

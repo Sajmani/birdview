@@ -1,4 +1,4 @@
-> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `8024aa2`.
+> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `2e4274e`.
 > Local amendments, if any, are listed in [bindings.md](bindings.md).
 
 # River
@@ -100,6 +100,22 @@ an agent finds the method at all.
 **Everything is plain Markdown.** No database, no server, no format that needs a tool to read.
 Checks are written in a language the project already builds with, so adopting River adds no
 runtime.
+
+**Write every agent-read file to be read in part** (`product.seekableArtifacts`). An agent
+searches and opens ranges; it should not have to read a file whole to find one item.
+
+- **Keep the instruction file short** — under 6,000 characters. It is paid for on every session,
+  so it holds commands, the rules whose breach costs a commit, and a map. No history.
+- **One item per heading, the identifier as the heading**, its title in bold beneath. Then
+  `grep -n -A1 '^## '` is the table of contents and `## <id>` finds one item. Keep no
+  hand-maintained index.
+- **No line over 500 characters** outside a code block. A paragraph in a table row is one search
+  hit that cannot be read by range; give the item a heading instead.
+- **Fixed field names** (`Status:`, `Owner:`) so a search can filter items without opening them.
+- **Separate by lifecycle.** Closed items and background notes go in their own files, out of the
+  path of the open ones.
+- **Say how to search a long file** in one line at its top, and link rather than copy between
+  files.
 
 ---
 
@@ -523,6 +539,7 @@ Run them before calling a change done. At minimum a bundle should check that:
 - identifiers are well formed and unique within their package
 - a pinned source still matches its recorded hash, by whatever means its style allows
 - counts that are claimed are computed, not maintained by hand
+- the instruction file and every line in the bundle stay within `product.seekableArtifacts`' limits
 
 **Every check must have been watched failing.** Plant a violation, see it reported, remove it.
 A check nobody has seen fail is a check nobody has established.

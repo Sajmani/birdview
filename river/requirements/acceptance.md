@@ -1,5 +1,8 @@
 # Acceptance criteria
 
+Search `### <id>` for one criterion; `grep -n -A2 '^### '` lists them with their titles, and
+`grep -n 'Status:'` shows how far each has got. `##` headings group them by area.
+
 For each requirement, a check that would fail if the requirement were violated.
 
 > Per [README.md](../README.md#acceptance-criteria), a criterion you have not seen go red is not

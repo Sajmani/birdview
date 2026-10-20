@@ -15,7 +15,7 @@
 // Package check is River's checker, translated into Go so it runs with
 // BirdView's own tests (River's decisions.checksInRepoLanguage).
 //
-// Translated from River's river/check/goals.py at pin 30ac54a
+// Translated from River's river/check/goals.py at pin 2e4274e
 // (sso://user/sameer/river). What is normative is what the checker reports,
 // not how: a problem's code and path must match the reference exactly, and
 // testdata/ -- River's shared cases, copied at the same pin -- holds that to
@@ -28,7 +28,9 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 // Problem is one thing wrong with a bundle. Code and Path are the contract a
@@ -67,6 +69,13 @@ var (
 	goalsField    = regexp.MustCompile(`(?m)^Goals:\s*(.+)$`)
 	servesField   = regexp.MustCompile(`(?m)^Serves:\s*(.+)$`)
 	goalRef       = regexp.MustCompile(`\bgoals\.([A-Za-z0-9_]+)\b`)
+)
+
+// River's product.seekableArtifacts: an agent reads by searching and opening
+// ranges. Lengths count characters, not bytes.
+const (
+	maxLine         = 500
+	maxInstructions = 6000
 )
 
 type item struct {
@@ -237,6 +246,36 @@ func (c *checker) uniquePackageNames() {
 	}
 }
 
+// seekable reports a .md file with a line over maxLine characters outside a
+// code block, once per file, and an AGENTS.md beside the bundle over
+// maxInstructions characters.
+func (c *checker) seekable() {
+	for _, path := range c.markdown(c.bundle, true) {
+		b, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		fenced, longest := false, 0
+		for _, line := range strings.Split(string(b), "\n") {
+			if strings.HasPrefix(strings.TrimSpace(line), "```") {
+				fenced = !fenced
+			} else if n := utf8.RuneCountInString(line); !fenced && n > longest {
+				longest = n
+			}
+		}
+		if longest > maxLine {
+			c.report("line-too-long", c.rel(path), strconv.Itoa(longest)+" characters on one line outside a code block; "+
+				"the limit is "+strconv.Itoa(maxLine)+", so give a long item a heading")
+		}
+	}
+	if b, err := os.ReadFile(filepath.Join(filepath.Dir(c.bundle), "AGENTS.md")); err == nil {
+		if n := utf8.RuneCount(b); n > maxInstructions {
+			c.report("instructions-too-long", "../AGENTS.md", strconv.Itoa(n)+" characters; the limit is "+
+				strconv.Itoa(maxInstructions)+". Keep commands, damage-preventing rules and a map; move detail out")
+		}
+	}
+}
+
 // Run checks the bundle rooted at dir.
 func Run(dir string) Result {
 	bundle, _ := filepath.Abs(dir)
@@ -246,6 +285,7 @@ func Run(dir string) Result {
 	sources := filepath.Join(bundle, "requirements", "sources")
 
 	c.uniquePackageNames()
+	c.seekable()
 	if b, err := os.ReadFile(reqMD); err != nil {
 		c.report("missing-requirements-md", "requirements/requirements.md", "missing requirements.md")
 	} else if m := moduleBlock.FindStringSubmatch(string(b)); m == nil || !moduleDecl.MatchString(m[1]) {

@@ -2,6 +2,9 @@ package app
 
 # app — composed requirements for the BirdView web application
 
+Search `## <id>` for a requirement composed here; a linked one leads to its source, where `## <id>`
+finds it and the first paragraph is the rule.
+
 Everything the web application must satisfy. Implementations and releases of the server are
 verified against this package; its criteria are in [acceptance.md](acceptance.md).
 

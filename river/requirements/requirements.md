@@ -1,5 +1,8 @@
 # Requirements module — BirdView
 
+Search for a source's heading, such as ``## `avonet` ``; `grep -n '^## '` lists them all. Each opens
+with a field table, and its `Status` row says whether the source is adopted.
+
 Every body of rules or data BirdView is subject to, what tier it sits at, and how far adoption has
 actually got. `Status` is the field that distinguishes an adopted source from a named one — all
 the others can be filled in plausibly from a URL alone.
@@ -85,7 +88,15 @@ data for all birds. *Ecology Letters* 25: 581–597.
 | **Adopted parts** | None. |
 | **Exclusions** | Everything. |
 | **Owner** | American Birding Association |
-| **Status** | **Retired 2026-10-05, and this is the entry that unblocked deployment.** Names, families and sequence moved to AviList ([decisions.avilistReplacesAba](decisions.md#avilistreplacesaba)); scope moved to BirdView's own derivation ([decisions.scopeFromRecurrence](decisions.md#scopefromrecurrence)). `internal/aba` is deleted and nothing fetches the file. The entry stays because the record of why a source was adopted and then dropped is worth more than the space it takes — and because anyone re-reading the terms below should see at the top that they no longer bind this project. |
+| **Status** | **Retired 2026-10-05**; see below the table |
+
+**Status.** **Retired 2026-10-05, and this is the entry that unblocked deployment.** Names, families
+and sequence moved to AviList ([decisions.avilistReplacesAba](decisions.md#avilistreplacesaba));
+scope moved to BirdView's own derivation
+([decisions.scopeFromRecurrence](decisions.md#scopefromrecurrence)). `internal/aba` is deleted and
+nothing fetches the file. The entry stays because the record of why a source was adopted and then
+dropped is worth more than the space it takes — and because anyone re-reading the terms below should
+see at the top that they no longer bind this project.
 
 License, quoted verbatim from row 0 of the CSV itself:
 
@@ -384,9 +395,16 @@ iNaturalist is superseded — see that entry.
 | **Scope** | Empirical wingspan (product.lengthAndWingspanSources) |
 | **Geographic scope** | **Worldwide** — 10,618 species. Its gaps are functional, not regional: flightless birds (Ostrich, Emu, penguins, kiwi) and Galliformes are absent, while flying birds from every continent are present. Measured 2026-10-01. |
 | **Adopted parts** | Rows with `needs_prediction` false only. The column is a spreadsheet boolean: `FALSE`/`TRUE` as excelize renders it, `0`/`1` in the underlying XML, and the reader accepts both. Matching only `"0"` yields **zero** measured wingspans and looks like a coverage problem rather than a parsing one — see `isEmpirical`. |
-| **Exclusions** | **Predicted wingspans are not ingested as values.** The `wingspan_predicted_*` columns are regressions from AVONET wing chord; taking them as data would reintroduce the modeled-as-measured problem decisions.noOpenLengthAndWingspan resolves. They are used for one other purpose: as the reference BirdView's own fitted model is validated against ([decisions.fittedWingspanModel](decisions.md#fittedwingspanmodel)). Reading them to check our arithmetic is not the same as presenting them as measurements. |
+| **Exclusions** | Predicted wingspans; see below the table |
 | **Owner** | Fox, Brunton & Shephard |
 | **Status** | **Adopted 2026-09-21.** Retrieved, hashed, vendored; its MD5 matches figshare's published `computed_md5`. Coverage for BirdView's scope measured and recorded. |
+
+**Exclusions.** **Predicted wingspans are not ingested as values.** The `wingspan_predicted_*`
+columns are regressions from AVONET wing chord; taking them as data would reintroduce the
+modeled-as-measured problem decisions.noOpenLengthAndWingspan resolves. They are used for one other
+purpose: as the reference BirdView's own fitted model is validated against
+([decisions.fittedWingspanModel](decisions.md#fittedwingspanmodel)). Reading them to check our
+arithmetic is not the same as presenting them as measurements.
 
 Coverage, now measured rather than estimated: of BirdView's 841 in-scope species, **301 (35.8%)
 have an empirical wingspan**, 510 have only a predicted value that this project excludes, and 30
@@ -681,21 +699,93 @@ current scope against 13.4% worldwide, so a wider list would be a thinner one.
 
 Recorded so nobody re-litigates them annually.
 
-| Source | Why not |
-| --- | --- |
-| **eBird / Clements taxonomy** | Cornell terms clause 2 forbids reproduction or redistribution without written authorization. Superseded anyway: ABA supplies common names, scientific names and families, so no second taxonomy is needed (product.namesFromAvilist). |
-| **eBird API region species lists** | Would supply scope and geography in AVONET's own taxonomy, but requires an API key and `api.ebird.org/robots.txt` is `Disallow: /`, with the API terms page returning 403. Not evaluated further; a human would need to read the terms. |
-| **AOS / NACC check-list** | Best-shaped data of the three checklists — family, order and subfamily as real columns, plus machine-readable status flags — but covers North *and Middle* America, which is the wrong scope, and carries no license statement anywhere. Absence of a statement is not permission. Re-checked 2026-10-01 against the live CSV: 2,212 species, and filtering to neither accidental nor extinct leaves **1,957** — 1,131 more than the ABA area's 841, because the area runs to Panama and the West Indies. The status flags cannot reconstruct ABA scope; they are relative to a far larger region. |
-| **AviList v2025b** | **CC BY 4.0**, verified on the publisher's own download page 2026-10-01, and the consensus successor to IOC, Clements and BirdLife with the AOS, Cornell, BirdLife, Avibase and the IOU behind it. It would solve names, families and taxonomic sequence outright — 832 of BirdView's 841 match on scientific name. It does **not** solve scope, which is the only thing ABA is actually blocking, and its English names are wrong for this audience. See [below](#why-avilist-does-not-replace-the-aba-checklist). |
-| **iNaturalist species counts** | **Partly reinstated 2026-10-02, and this entry was wrong.** The original objection stands on its own terms — counts overstate rarities, and for birds iNaturalist is about **80× shallower** than eBird (13.4M US bird records against 1.07 billion), so it cannot rank anything. But "superseded by GBIF" does not follow, and was refuted by measurement: eBird's export **withholds conservation-sensitive species entirely**, and iNaturalist is the only open source measured that has them. Spotted Owl: 0 in eBird, 1,061 in iNaturalist. It is not a replacement for eBird; it is the complement that makes eBird usable. See [`gbif`](#gbif). |
-| **GBIF — eBird Observation Dataset** (as a *scope* source) | **CC BY 4.0**, verified from GBIF's dataset record 2026-10-01, no key required, 1.07 billion US records. This is *not* the eBird API rejected above: that was blocked by `robots.txt` and unreadable terms, while the same observations published through GBIF are openly licensed. Technically excellent and the only serious candidate for deriving scope. It still does not work — see [below](#why-occurrence-data-cannot-reproduce-the-aba-scope). **Its taxonomy is a different question and has since been adopted**: [`gbif`](#gbif) above takes the names, not the scope. |
-| **iNaturalist taxonomy** (as a names source) | Distinct from the taxon IDs already adopted, and not covered by them. The `inat-terms` adoption rests on a narrow negative — nothing restricts reusing an *identifier* — while the same terms state the agreement "does not transfer to You any iNaturalist or third party intellectual property", and the CC BY-NC default governs contributor Content, not the taxonomy. No affirmative grant to republish their name list was found. |
-| **Lislevand et al. 2007** | Copyright restrictions: none — genuinely open. Does not contain total length or wingspan, which is what it was originally brought in for. Removed from the project. |
-| **EltonTraits, Amniote DB, BIRDBASE, Dunning** | None carries body length or wingspan. BIRDBASE was checked column by column against a claim that it did. |
-| **Audubon field guide** | Carries exactly the two needed dimensions, in near-parseable form. Terms forbid reproduction, distribution, storage in a retrieval system, and derivative works. |
-| **All About Birds / Birds of the World** | Carries the data; blocks automated retrieval (403) and is subscription-gated respectively. Not assessed further. |
-| **Macaulay Library** | Permits *embedding* for non-commercial use — which BirdView qualifies for — but offers no discovery API, and its media-request path explicitly prunes species lists over 100. Cannot scale to the dataset. Viable later for hand-curated species. |
-| **Wikimedia Commons, iNaturalist, Flickr** | Photo sources, all researched in detail. Out of scope while product.speciesPhotographs is withdrawn; Commons is the recommendation when it returns. |
+### eBird / Clements taxonomy
+
+Cornell terms clause 2 forbids reproduction or redistribution without written authorization.
+Superseded anyway: ABA supplies common names, scientific names and families, so no second taxonomy
+is needed (product.namesFromAvilist).
+
+### eBird API region species lists
+
+Would supply scope and geography in AVONET's own taxonomy, but requires an API key and
+`api.ebird.org/robots.txt` is `Disallow: /`, with the API terms page returning 403. Not evaluated
+further; a human would need to read the terms.
+
+### AOS / NACC check-list
+
+Best-shaped data of the three checklists — family, order and subfamily as real columns, plus
+machine-readable status flags — but covers North *and Middle* America, which is the wrong scope, and
+carries no license statement anywhere. Absence of a statement is not permission. Re-checked
+2026-10-01 against the live CSV: 2,212 species, and filtering to neither accidental nor extinct
+leaves **1,957** — 1,131 more than the ABA area's 841, because the area runs to Panama and the West
+Indies. The status flags cannot reconstruct ABA scope; they are relative to a far larger region.
+
+### AviList v2025b
+
+**CC BY 4.0**, verified on the publisher's own download page 2026-10-01, and the consensus successor
+to IOC, Clements and BirdLife with the AOS, Cornell, BirdLife, Avibase and the IOU behind it. It
+would solve names, families and taxonomic sequence outright — 832 of BirdView's 841 match on
+scientific name. It does **not** solve scope, which is the only thing ABA is actually blocking, and
+its English names are wrong for this audience. See
+[below](#why-avilist-does-not-replace-the-aba-checklist).
+
+### iNaturalist species counts
+
+**Partly reinstated 2026-10-02, and this entry was wrong.** The original objection stands on its own
+terms — counts overstate rarities, and for birds iNaturalist is about **80× shallower** than eBird
+(13.4M US bird records against 1.07 billion), so it cannot rank anything. But "superseded by GBIF"
+does not follow, and was refuted by measurement: eBird's export **withholds conservation-sensitive
+species entirely**, and iNaturalist is the only open source measured that has them. Spotted Owl: 0
+in eBird, 1,061 in iNaturalist. It is not a replacement for eBird; it is the complement that makes
+eBird usable. See [`gbif`](#gbif).
+
+### GBIF — eBird Observation Dataset (as a *scope* source)
+
+**CC BY 4.0**, verified from GBIF's dataset record 2026-10-01, no key required, 1.07 billion US
+records. This is *not* the eBird API rejected above: that was blocked by `robots.txt` and unreadable
+terms, while the same observations published through GBIF are openly licensed. Technically excellent
+and the only serious candidate for deriving scope. It still does not work — see
+[below](#why-occurrence-data-cannot-reproduce-the-aba-scope). **Its taxonomy is a different question
+and has since been adopted**: [`gbif`](#gbif) above takes the names, not the scope.
+
+### iNaturalist taxonomy (as a names source)
+
+Distinct from the taxon IDs already adopted, and not covered by them. The `inat-terms` adoption
+rests on a narrow negative — nothing restricts reusing an *identifier* — while the same terms state
+the agreement "does not transfer to You any iNaturalist or third party intellectual property", and
+the CC BY-NC default governs contributor Content, not the taxonomy. No affirmative grant to
+republish their name list was found.
+
+### Lislevand et al. 2007
+
+Copyright restrictions: none — genuinely open. Does not contain total length or wingspan, which is
+what it was originally brought in for. Removed from the project.
+
+### EltonTraits, Amniote DB, BIRDBASE, Dunning
+
+None carries body length or wingspan. BIRDBASE was checked column by column against a claim that it
+did.
+
+### Audubon field guide
+
+Carries exactly the two needed dimensions, in near-parseable form. Terms forbid reproduction,
+distribution, storage in a retrieval system, and derivative works.
+
+### All About Birds / Birds of the World
+
+Carries the data; blocks automated retrieval (403) and is subscription-gated respectively. Not
+assessed further.
+
+### Macaulay Library
+
+Permits *embedding* for non-commercial use — which BirdView qualifies for — but offers no discovery
+API, and its media-request path explicitly prunes species lists over 100. Cannot scale to the
+dataset. Viable later for hand-curated species.
+
+### Wikimedia Commons, iNaturalist, Flickr
+
+Photo sources, all researched in detail. Out of scope while product.speciesPhotographs is withdrawn;
+Commons is the recommendation when it returns.
 
 ### Why AviList does not replace the ABA checklist
 
