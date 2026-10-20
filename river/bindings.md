@@ -46,6 +46,7 @@ directory names match, so `third_party/avonet/` is described by `river/requireme
 | --- | --- | --- |
 | `avonet/`, `avilist/`, `foxwingspan/` | CC BY 4.0, full text beside each file | the three build inputs |
 | `inatterms/`, `inatapi/` | none granted; © iNaturalist | terms BirdView quotes, kept so each quotation can be checked |
+| `wcag/` | W3C Document License; copied unmodified | the accessibility rules BirdView quotes, kept so each quotation can be checked |
 
 Two reasons, and the second is why this moved from a one-file exception to the rule.
 
