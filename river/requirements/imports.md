@@ -521,7 +521,7 @@ is not.
 
 | Field | Value |
 | --- | --- |
-| **Origin** | https://github.com/Sajmani/specman — `process.md` |
+| **Origin** | https://github.com/Sajmani/specman — `process.md`; the repository has been private since 2026-10-21 |
 | **Version** | Base pin `63bfdecb99a256d2819aa6d0e55bfb0bccf19b96db40e28f72572315e81cbdbc`, upstream `2c41af8`, taken 2026-09-23 |
 | **Integrity** | Not applicable — see below |
 | **Tier** | — it states how requirements are made, and produces none for criteria to cite |
