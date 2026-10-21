@@ -26,11 +26,25 @@ Gate: when convenient
 First pass done 2026-10-20: README, AGENTS.md, CONTRIBUTING, CHANGELOG, the four guides, every
 product and tech requirement, `app.md` and the page templates, about 30% shorter overall. Left:
 `decisions.md` and `acceptance.md` (history and verification records; decide whether to tighten
-them at all), `module.md`, `notes.md`, `arch.md`, `bindings.md`, code comments, and page
+them at all), `imports.md`, `notes.md`, `arch.md`, `bindings.md`, code comments, and page
 text built in Go, chiefly `cmd/birdview/main.go` (group notes, the undrawn page's verdicts, region
 and category row details, record-ratio tooltips, tile notes, and the `/added` and `/excluded`
 intros) and the grouping notes in `internal/region/region.go`. Several of those strings are
 asserted by tests; grep before editing.
+
+## oneVersionRecord
+
+**Record each imported source's version in imports.md only**
+
+Status: open
+Owner: Sameer
+Gate: when convenient
+
+River's decisions.requirementsReadme puts a source's version in `imports.md` and leaves
+`PROVENANCE.md` with retrieval details and the hash. `aba` and `naturalearth` still carry their own
+`Version` row in `PROVENANCE.md`, a second record of the same fact; drop it there, keeping any
+detail `imports.md` lacks (the ABA species count, Natural Earth's `VERSION.txt` evidence). Versions
+inside file names and URLs stay, since they are the files' names.
 
 ## massLabelPlacement
 
@@ -512,8 +526,8 @@ Gate: opportunistic; still the weakest model
 
 24 of 90 families carry a ratio and **66 take the default 0.18, covering 548 species**. This is the
 half of the old entry that is actually tractable, and the one that catches the next short-necked
-Limpkin. ~~Derive the values from [`bohmer-neck`](requirements/module.md#bohmer-neck)
-instead~~ — **withdrawn 2026-10-04**: [`module.md`](requirements/module.md#bohmer-neck)
+Limpkin. ~~Derive the values from [`bohmer-neck`](requirements/imports.md#bohmer-neck)
+instead~~ — **withdrawn 2026-10-04**: [`imports.md`](requirements/imports.md#bohmer-neck)
 already records why, and the old entry ignored it. Böhmer measures the **full cervical column
 including the part inside the body contour**, where
 [product.neckModelPerFamily](requirements/local/product/diagram.md#neckmodelperfamily) models the
@@ -637,7 +651,7 @@ Gate: opportunistic
 
 Where GBIF has not followed a split, its name maps to whichever half kept it: GBIF's `Circus
 cyaneus` maps to the Eurasian Hen Harrier while 3.8 million of its records are Northern Harriers.
-Nine such cases are listed in [module.md](requirements/module.md#gbif); the table has
+Nine such cases are listed in [imports.md](requirements/imports.md#gbif); the table has
 one AviList column and cannot express them, and nothing detects them automatically. Moved from
 [arch.md](arch.md)
 

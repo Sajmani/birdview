@@ -1,7 +1,7 @@
 # aba — provenance
 
 **Nothing is vendored here, and that is deliberate.** See
-[module.md](../../../module.md#aba) for the adoption record.
+[imports.md](../../../imports.md#aba) for the adoption record.
 
 ## Why this directory is empty of documents
 

@@ -15,7 +15,7 @@
 // Package check is River's checker, translated into Go so it runs with
 // BirdView's own tests (River's decisions.checksInRepoLanguage).
 //
-// Translated from River's river/check/goals.py at pin 15e1809
+// Translated from River's river/check/goals.py at pin 5fad157
 // (sso://user/sameer/river). What is normative is what the checker reports,
 // not how: a problem's code and path must match the reference exactly, and
 // testdata/ -- River's shared cases, copied at the same pin -- holds that to
@@ -293,15 +293,15 @@ func Run(dir string) Result {
 	bundle, _ := filepath.Abs(dir)
 	c := &checker{bundle: bundle}
 	goalsDir := filepath.Join(bundle, "goals")
-	reqMD := filepath.Join(bundle, "requirements", "module.md")
+	reqMD := filepath.Join(bundle, "requirements", "README.md")
 	local := filepath.Join(bundle, "requirements", "local")
 
 	c.uniquePackageNames()
 	c.seekable()
 	if b, err := os.ReadFile(reqMD); err != nil {
-		c.report("missing-module-md", "requirements/module.md", "missing module.md")
+		c.report("missing-readme-md", "requirements/README.md", "missing requirements/README.md")
 	} else if m := moduleBlock.FindStringSubmatch(string(b)); m == nil || !moduleDecl.MatchString(m[1]) {
-		c.report("missing-module", "requirements/module.md", "missing `## Module` fenced block with `module <path>`")
+		c.report("missing-module", "requirements/README.md", "missing `## Module` fenced block with `module <path>`")
 	}
 
 	goalItems := c.packageDir(goalsDir, h2Item, nil, "goals")

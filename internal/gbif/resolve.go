@@ -250,7 +250,7 @@ type RegionRecord struct {
 	// Name is the scientific name AS THE PUBLISHER WROTE IT, lowercased by
 	// the facet. Deliberately not GBIF's matched name: the backbone silently
 	// drops what it cannot resolve, which is how Cooper's Hawk came to have
-	// zero records (module.md, `gbif`).
+	// zero records (imports.md, `gbif`).
 	Name    string
 	Records int64
 }

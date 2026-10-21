@@ -394,7 +394,7 @@ In rough order of how much it would change the picture:
    compact songbirds with little exposed neck. All are judged from flight silhouettes. Böhmer et
    al. 2019 measures the full cervical column, including the part inside the body contour, while
    BirdView models the *exposed* neck, and converting between them needs an unmeasured per-family
-   fraction ([source notes](../river/requirements/module.md#bohmer-neck)). Vertebra counts
+   fraction ([source notes](../river/requirements/imports.md#bohmer-neck)). Vertebra counts
    are dimensionless: proportions, never millimeters.
 2. **The head model is unvalidated, and the body model is calibrated but not fitted.** The head
    coefficient is fitted against nothing; the trunk exponent rests on *necks and legs*, since no
@@ -410,7 +410,7 @@ In rough order of how much it would change the picture:
 **If you know a source that fixes any of these**, particularly a validation set for head or trunk
 length or an openly licensed body-length dataset, that is the most useful contribution anyone
 could make. Adopting a source follows the process in
-[river/requirements/module.md](../river/requirements/module.md) and the
+[river/requirements/imports.md](../river/requirements/imports.md) and the
 source-adoption path in [docs/building.md](building.md).
 
 Corrections are welcome, especially to the biology. Report them on the project's issue tracker.

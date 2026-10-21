@@ -488,7 +488,7 @@ Five-fold cross-validation on the same empirical data, comparing candidate forms
 ### The obstacle, and why it was not one
 
 Fox et al. publish exactly this: an order-level regression, with its fitted values shipped in
-`wingspan_predicted_*`. But [requirements.md](module.md#fox-wingspan) excludes those columns, so
+`wingspan_predicted_*`. But [requirements.md](imports.md#fox-wingspan) excludes those columns, so
 ingesting them would have needed an amendment — and spec2code does not get to reinterpret an
 exclusion.
 
@@ -884,7 +884,7 @@ The iNaturalist link of [inaturalistLinkAdopted](#inaturalistlinkadopted) shippe
 browser default: `#0000EE` on a `#0f172a` background, which is **1.90:1**, and `#551A8B` once
 visited, which is **1.62:1**. Effectively invisible. A reader spotted it immediately.
 
-Nothing caught it, and nothing could have. [`wcag`](module.md) was adopted with its scope set to
+Nothing caught it, and nothing could have. [`wcag`](imports.md) was adopted with its scope set to
 *"Family badge colors only"*, on the reasoning that badge colors are **generated** and an unchecked
 generator is obviously dangerous. That reasoning was right and incomplete: hand-written CSS turned
 out to be just as dangerous, and had no check at all.
@@ -1410,9 +1410,9 @@ log mass:
 
 | dimension | n | exponent | 95% CI |
 | --- | ---: | ---: | :---: |
-| measured wingspan ([`fox-wingspan`](module.md#fox-wingspan)) | 301 | 0.368 | — |
-| neck length ([`bohmer-neck`](module.md#bohmer-neck)) | 103 | **0.380** | 0.338 – 0.421 |
-| total leg length ([`bohmer-neck`](module.md#bohmer-neck)) | 103 | **0.364** | 0.328 – 0.401 |
+| measured wingspan ([`fox-wingspan`](imports.md#fox-wingspan)) | 301 | 0.368 | — |
+| neck length ([`bohmer-neck`](imports.md#bohmer-neck)) | 103 | **0.380** | 0.338 – 0.421 |
+| total leg length ([`bohmer-neck`](imports.md#bohmer-neck)) | 103 | **0.364** | 0.328 – 0.401 |
 | | | | |
 | *BirdView trunk, as shipped* | — | *0.310* | — |
 | *BirdView composite total length* | — | *0.302* | — |
@@ -1491,7 +1491,7 @@ apart in review or in a screenshot.
 
 ### What changed
 
-Every name BirdView serves now comes from [AviList](module.md#avilist) (CC BY 4.0) instead of
+Every name BirdView serves now comes from [AviList](imports.md#avilist) (CC BY 4.0) instead of
 the ABA checklist (all rights reserved): both English names, the family scientific and English
 names, the order, and the family sequence. The four-letter alpha code is replaced by the **eBird
 species code**, which also becomes the **species id and URL**.
@@ -1564,7 +1564,7 @@ BirdView derives and owns.
 **It does not touch any measurement.** AVONET and Fox are unaffected, every provenance record is
 unchanged, and no number moved.
 
-**It is not a route into Cornell's data.** [requirements.md](module.md#avilist) records why the
+**It is not a route into Cornell's data.** [requirements.md](imports.md#avilist) records why the
 Clements and Cornell columns are usable here when eBird/Clements itself is rejected: AviList is a
 separate CC BY 4.0 publication, and nothing is taken from Cornell's own distribution.
 
@@ -1589,7 +1589,7 @@ appears twice in the selector.
 product.regionAndMonthFilter said there was "no data-driven way to subdivide the east", citing a 42-member block
 covering everything from Maine to Georgia. **That measurement was an artifact.** It came from
 faceting GBIF's `/occurrence/search` on `speciesKey`, which silently drops records whose names
-the backbone cannot resolve — the same trap recorded in [requirements.md](module.md#gbif), which
+the backbone cannot resolve — the same trap recorded in [requirements.md](imports.md#gbif), which
 reports **zero** US and Canadian records for Cooper's Hawk.
 
 Redone against `data/region-presence.tsv` — built from **verbatim** names, which is the table the
@@ -2053,7 +2053,7 @@ already defines. A query for Black-capped Petrel against North Carolina's land p
 ### Why the weights are declared and never fitted
 
 The obvious way to build this is to fit coefficients so the output reproduces the ABA's 839.
-**That is rejected.** It would re-target exactly what [`requirements.md`](module.md#why-occurrence-data-cannot-reproduce-the-aba-scope)
+**That is rejected.** It would re-target exactly what [`requirements.md`](imports.md#why-occurrence-data-cannot-reproduce-the-aba-scope)
 disclaimed when the owner chose to own the list, and it would launder the ABA's editorial
 judgement into model weights — a list that is theirs in substance and ours in format is not a
 list BirdView owns. There is no other labeled training signal available, so there is no
@@ -3092,7 +3092,7 @@ turned up Long-eared Owl with 15 eBird records in the US against 17,015 in Canad
 
 ### What was wrong
 
-GBIF's eBird export applies eBird's [Sensitive Species list](module.md#ebird-sensitive), and
+GBIF's eBird export applies eBird's [Sensitive Species list](imports.md#ebird-sensitive), and
 the list has **regional and seasonal** entries as well as the nine global ones BirdView already
 knew as `WithheldByEBird`. In a listed region and window, eBird's records are missing by policy.
 
@@ -3104,7 +3104,7 @@ measurement of absence.
 
 ### The decision
 
-1. **eBird's list is a source** ([`ebird-sensitive`](module.md#ebird-sensitive)). The entries
+1. **eBird's list is a source** ([`ebird-sensitive`](imports.md#ebird-sensitive)). The entries
    for species BirdView draws, in the US and Canada, are restated as `taxonomy.EBirdSensitive` —
    9 global and 68 regional, each a species, a region and a date window.
 2. **No entry is acted on until the records confirm it.** `birdview-regions` marks a month as
@@ -3289,7 +3289,7 @@ Russian and Japanese specimens alongside four North American ones.
 
 *(Re-based 2026-10-14 onto the vendored `avilist` and `avonet` workbooks. The 2026-10-13 text cited
 the archived HBW-BirdLife checklist on DataZone, which had been fetched in a way DataZone's terms
-forbid; those quotations are removed and [`birdlife-checklist`](module.md#birdlife-checklist) is
+forbid; those quotations are removed and [`birdlife-checklist`](imports.md#birdlife-checklist) is
 not used.)*
 
 ### The decision

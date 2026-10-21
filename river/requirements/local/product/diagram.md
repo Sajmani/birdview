@@ -159,7 +159,7 @@ Trunk length scales with body mass by a power law. Like every modeled value it n
 
 The **exponent is calibrated against measured skeletons** rather than chosen. It must lie inside
 the 95% confidence interval that published skeletal data give for a *multi-element* linear
-dimension ([`bohmer-neck`](../../module.md#bohmer-neck)) — **0.338 to 0.401**, the intersection of the
+dimension ([`bohmer-neck`](../../imports.md#bohmer-neck)) — **0.338 to 0.401**, the intersection of the
 intervals for neck length and total leg length. Single bones scale near isometry, chains of them
 higher, and a trunk is a chain.
 

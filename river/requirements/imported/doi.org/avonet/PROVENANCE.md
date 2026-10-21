@@ -1,6 +1,6 @@
 # avonet — provenance
 
-Vendored copy of the AVONET morphometric dataset. See [module.md](../../../module.md#avonet)
+Vendored copy of the AVONET morphometric dataset. See [imports.md](../../../imports.md#avonet)
 for the adoption record.
 
 ## What was retrieved

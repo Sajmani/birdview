@@ -17,7 +17,7 @@ Requiring black text would be stricter than WCAG and would cost about a third of
 distinguishable colors available to product.generatedBadgeColors.
 
 Rationale: WCAG is a **mandatory** source scoped to the contrast criteria only — see
-[module.md](../../module.md#wcag). BirdView makes no broader conformance claim.
+[imports.md](../../imports.md#wcag). BirdView makes no broader conformance claim.
 
 ## textContrastFloor
 

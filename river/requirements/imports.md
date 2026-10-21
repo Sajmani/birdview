@@ -1,35 +1,13 @@
-# Module — BirdView
+# Imports — BirdView
 
-This repository's requirements module: every body of rules or data BirdView is subject to, local
-and imported, with its pin and how far adoption has got, and what the module exports. Which tier
-outranks which is in [precedence.md](precedence.md); how each conflict was resolved is in
-[decisions.md](decisions.md).
+Every body of rules or data BirdView is subject to or has evaluated: its origin, the version it is
+pinned to, its tier, and how far adoption has got. Rejected and retired sources stay listed with
+the reason, so nobody evaluates them again.
 
 Search for a source's heading, such as ``## `avonet` ``; `grep -n '^## '` lists them all. Each opens
 with a field table. `Status` is the field that distinguishes an adopted source from a named one —
 all the others can be filled in plausibly from a URL alone. `Integrity` names **where** a content
 hash lives. It never contains one.
-
-## Module
-
-```
-module birdview
-```
-
-Local sources are the packages `product` and `tech`, under [local/](local/). A source BirdView
-transcribed rules from is a package too, under `imported/<origin>/`, named for the source without
-punctuation — `inat-api` is `package inatapi` in
-[imported/inaturalist.org/inatapi/](imported/inaturalist.org/inatapi/) — so a source keeps its
-readable name in this manifest and its package follows Go's rules. `<origin>` is the host of the
-source's `Origin` field. A source that contributes no requirements, such as a dataset, has a
-directory holding only its provenance.
-
-## Exports
-
-None. The one composed package, [`app`](composed/internal/app/app.md), is internal to this
-repository.
-
----
 
 ## Summary
 

@@ -176,7 +176,7 @@ inventing each entry independently and waiting for someone to spot the next Limp
 
 Two things are unknown and should not be assumed: whether a dataset exists at BirdView's coverage,
 and whether its license permits use. Both have sunk candidate sources before. Adoption would follow
-the usual path — a `module.md` entry and a compose-and-resolve pass.
+the usual path — a `imports.md` entry and a compose-and-resolve pass.
 
 ## Sketch: one dash per vertebra
 

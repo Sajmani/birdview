@@ -1335,7 +1335,7 @@ func s2(t *testing.T) *server { t.Helper(); return newTestServer(t) }
 // own readers.
 //
 // Delete this test only when a written grant exists and is recorded in
-// river/requirements/module.md.
+// river/requirements/imports.md.
 //
 // Verifies: goals.goodDataCitizen. Criterion: acceptance.attributionComplete.
 func TestNoUnearnedPermissionClaim(t *testing.T) {

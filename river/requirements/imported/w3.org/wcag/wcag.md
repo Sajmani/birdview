@@ -4,7 +4,7 @@ package wcag
 
 Tier: **mandatory**. Scope: the contrast of what BirdView draws — text, and the graphics a reader
 needs to read a diagram. BirdView adopts these criteria and **claims no conformance level**; the
-other success criteria are not adopted (see [module.md](../../../module.md#wcag)).
+other success criteria are not adopted (see [imports.md](../../../imports.md#wcag)).
 
 Quotations are verbatim from the vendored Recommendation, with its markup removed. Each item says
 what the quotation means for BirdView. Copyright © 2020-2024 World Wide Web Consortium; this file

@@ -97,7 +97,7 @@ Subject: `dataset.traits.source`
 Value: `AVONET, preferring AVONET2_eBird`
 Goals: goals.sizeIntuition, goals.shapeNotOnlySize
 
-Bill, wing, tail and mass measurements come from [AVONET](../../module.md#avonet) — its `AVONET2_eBird`
+Bill, wing, tail and mass measurements come from [AVONET](../../imports.md#avonet) — its `AVONET2_eBird`
 sheet first, then `AVONET1_BirdLife` or `AVONET3_BirdTree` where the eBird sheet lacks a row for
 the species ([decisions.abaSpeciesWithoutAvonet](../../decisions.md#abaspecieswithoutavonet)), or where another sheet holds a narrower concept of the
 species ([decisions.herringGullEuropeanRow](../../decisions.md#herringgulleuropeanrow)) or of its near-match donor ([decisions.whiteTernBorrows](../../decisions.md#whiteternborrows)).
@@ -127,7 +127,7 @@ Goals: goals.goodDataCitizen, goals.flexibleComparison
 
 English common names in **both locales** ([englishNameChoice](diagram.md#englishnamechoice)), the **eBird species code**, family
 scientific and English names, the order, and the family **sequence** all come from
-[AviList](../../module.md#avilist). Scientific names come from the scope list, and are the join key.
+[AviList](../../imports.md#avilist). Scientific names come from the scope list, and are the join key.
 
 Rationale: **licensing.** The ABA checklist supplied all of this but is all rights reserved, so
 it blocked public deployment ([decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba)). AviList is CC BY 4.0 and carries
@@ -266,5 +266,5 @@ percentile 10.7×, 95th 148×** — so every kind of disagreement shows as an ou
 
 **Only 7 of 1,019 species fall outside 1×–1000×, and every one is a real finding**: the band
 caught two unrecorded withheld species, Great Gray Owl and Black Rail, and an error in
-[`module.md`](../../module.md). Each declared exception names which of the four shapes it is, so
+[`imports.md`](../../imports.md). Each declared exception names which of the four shapes it is, so
 the table reads as a statement about taxonomy rather than a list of numbers to ignore.

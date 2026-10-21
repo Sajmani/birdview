@@ -50,7 +50,7 @@ root: `go build -o /tmp/birdview-serve ./cmd/birdview`, stop the old one, run `/
 - **Never fetch or process anything from BirdLife's DataZone**; its terms forbid automated access.
 - **Never commit the built dataset** (tech.datasetNeverCommitted).
 - **Only AVONET, the Fox wingspan data and AviList may be committed as source data.** Check
-  `river/requirements/module.md` before adding any other. The generated tables in `data/`
+  `river/requirements/imports.md` before adding any other. The generated tables in `data/`
   are committed on purpose.
 - **Third-party files live under `third_party/<name>/`** with their own license, no Apache header;
   provenance in `river/requirements/imported/<origin>/<name>/PROVENANCE.md`.

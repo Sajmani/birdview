@@ -91,7 +91,7 @@ checking the same seven files, and watched failing on a changed recorded hash
 **Status: verified — run 2026-09-21, passing** for `avonet` and `fox-wingspan`, **and watched
 failing**: zeroing AVONET's recorded hash produced exit 1 and a recorded-vs-actual diff.
 **Scope exception:** `wiley` is quoted, not vendored, so it has no hash to check — see
-[module.md](module.md#wiley). `aba` is fetched at build and checked by sortsAscending instead.
+[imports.md](imports.md#wiley). `aba` is fetched at build and checked by sortsAscending instead.
 
 ### quotationsAreVerbatim
 
@@ -733,7 +733,7 @@ of the attribution, so an unasserted credit is a licence breach waiting to happe
 The second half exists because the first version of this footer said the ABA checklist was "used by
 permission". It is not — that request has not been sent. Claiming a right you have not been granted
 is worse than claiming none, because it misleads the rights holder's own readers. Remove that
-assertion only when a written grant exists and is recorded in [module.md](module.md).
+assertion only when a written grant exists and is recorded in [imports.md](imports.md).
 
 ### craniumVaries
 
@@ -1468,7 +1468,7 @@ over the real mass range, then check it against an interval taken from published
 
 **Assertions, the exponent:** fitting log trunk on log mass across the dataset's mass range
 recovers an exponent inside **0.338 – 0.401** — the intersection of the 95% confidence intervals
-[`bohmer-neck`](module.md#bohmer-neck) reports for neck length and total leg length, the two
+[`bohmer-neck`](imports.md#bohmer-neck) reports for neck length and total leg length, the two
 multi-element dimensions it measures.
 
 **Assertions, the interval actually discriminates:** the superseded exponent **0.310 lies outside
@@ -2018,7 +2018,7 @@ Honest gaps, rather than criteria that would not bite:
   familyFilterSelectsAndClears and familyListWraps do not close this gap: they check the selector's structure and layout, not
   what clicking a family does.
 - **tech.localNowPublicLater (never commercial).** A standing posture with no code to check. It is enforced by the
-  human gate and by `module.md`, not by a test.
+  human gate and by `imports.md`, not by a test.
 - **product.tileOpensDetail (detail view)** is only partially covered: detailShowsProvenance checks that provenance appears there,
   not that the rest of the view is right.
 

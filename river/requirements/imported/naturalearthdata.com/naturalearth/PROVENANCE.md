@@ -2,7 +2,7 @@
 
 **Nothing is vendored here.** The archive is public domain and could be committed, but it is
 14 MB of worldwide boundaries of which BirdView uses 69 polygons, so it is pinned by hash and
-fetched when the boundary file is regenerated. See [module.md](../../../module.md#natural-earth)
+fetched when the boundary file is regenerated. See [imports.md](../../../imports.md#natural-earth)
 for the adoption record.
 
 ## What is fetched

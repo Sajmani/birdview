@@ -1,7 +1,7 @@
 # inat-api — provenance
 
 Vendored copy of iNaturalist's API recommended practices. See
-[module.md](../../../module.md) for the adoption record and
+[imports.md](../../../imports.md) for the adoption record and
 [inatapi.md](inatapi.md) for the transcription.
 
 ## What was retrieved

@@ -1,0 +1,8 @@
+# requirements/README.md must exist; it declares the module.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem missing-readme-md requirements/README.md

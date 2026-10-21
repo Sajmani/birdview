@@ -37,7 +37,7 @@ accepted cost: a stale ID fails visibly and the refresh is one command.
 
 Goals: goals.goodDataCitizen
 
-Every input source appears in [module.md](../../module.md) with its tier, pin, license
+Every input source appears in [imports.md](../../imports.md) with its tier, pin, license
 and status *before* code that reads it is written.
 
 Rationale: after designing around three datasets, this project found that two could not legally

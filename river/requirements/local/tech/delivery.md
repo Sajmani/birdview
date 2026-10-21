@@ -53,7 +53,7 @@ committed file holding every land region BirdView covers and its sea boxes. It i
 The sea boxes are written from the same Go table as the region filter's, so the two cannot drift.
 The source is fetched and checked against its hash when the file is regenerated, not committed: it
 is 14 MB worldwide, and BirdView needs the United States, Canada and five atolls. See
-[module.md](../../module.md#natural-earth).
+[imports.md](../../imports.md#natural-earth).
 
 ## servesOnLocalhost
 
@@ -73,7 +73,7 @@ Subject: `build.inputs`
 Goals: goals.goodDataCitizen
 
 Inputs whose license forbids redistribution are downloaded onto the building machine at build time,
-verified against the hashes recorded in [module.md](../../module.md), consumed, and
+verified against the hashes recorded in [imports.md](../../imports.md), consumed, and
 never committed. They land under `fetched/`, which `.gitignore` excludes. No build input has used
 this path since [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence) replaced
 the ABA checklist; the rule and the `.gitignore` entry stay for future sources.

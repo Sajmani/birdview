@@ -38,7 +38,7 @@ its own license and a README naming the source and how to cite it. The iNaturali
 openly licensed; they and the WCAG text are kept so every quotation of them in
 [`river/`](../river) can be checked against the exact words. Retrieval details and hashes are in
 [`river/requirements/imported/`](../river/requirements/imported), and the
-[source register](../river/requirements/module.md) records every source considered,
+[source register](../river/requirements/imports.md) records every source considered,
 including the rejected ones and why.
 
 **BirdView links to iNaturalist and copies nothing from it**: no photograph is embedded, cached or
@@ -210,7 +210,8 @@ only the loop below.
 | [`requirements/local/product/`](../river/requirements/local/product/product.md) | what it must do, one file per group: `product.*` |
 | [`requirements/local/tech/`](../river/requirements/local/tech/tech.md) | technical constraints, one file per group: `tech.*` |
 | [`requirements/composed/internal/app/`](../river/requirements/composed/internal/app/app.md) | every requirement the web application must meet, and their criteria |
-| [`requirements/module.md`](../river/requirements/module.md) | every body of rules or data the project is subject to |
+| [`requirements/README.md`](../river/requirements/README.md) | what each requirements file and directory holds, and the module declaration |
+| [`requirements/imports.md`](../river/requirements/imports.md) | every body of rules or data the project is subject to |
 | [`requirements/precedence.md`](../river/requirements/precedence.md) | which tier of source outranks which |
 | [`requirements/decisions.md`](../river/requirements/decisions.md) | how each conflict was resolved: `decisions.*` |
 | [`requirements/acceptance.md`](../river/requirements/acceptance.md) | how each remaining requirement is checked: `acceptance.*` |
@@ -235,7 +236,7 @@ requirements and criteria; the project owner approves them. Not every change nee
 | New feature or changed behavior | Edit the requirement, then the criterion, then the code |
 | Bug fix | If a requirement already forbids the bug, add a criterion under it, then fix. If none does, that is a gap in the spec: add the requirement first |
 | Refactor | No spec change, and the suite stays green. If you must change a check's *assertions*, it is not a refactor |
-| Adopting a new source | An entry in `module.md`, then a pass to compose its requirements and resolve conflicts with the existing ones. Expect conflicts |
+| Adopting a new source | An entry in `imports.md`, then a pass to compose its requirements and resolve conflicts with the existing ones. Expect conflicts |
 | Docs only | No spec change, unless writing the doc shows the spec is wrong |
 
 Open work is tracked in [`todo.md`](../river/todo.md), not in `TODO` comments. Read it before
@@ -273,11 +274,11 @@ Most of these are licensing rules, not style.
   source.
 - **Never fetch, download or programmatically process anything from BirdLife's DataZone**
   (`datazone.birdlife.org`). Its terms forbid automated access and text and data mining; see
-  [the register entry](../river/requirements/module.md#birdlife-checklist). AVONET's BirdLife
+  [the register entry](../river/requirements/imports.md#birdlife-checklist). AVONET's BirdLife
   sheet is part of AVONET, under CC BY 4.0, and is not affected.
 - **Only AVONET, the Fox wingspan data and AviList may be committed as source data.** All three
   are CC BY 4.0. Before adding a fourth, read
-  [`module.md`](../river/requirements/module.md): most candidates evaluated could not
+  [`imports.md`](../river/requirements/imports.md): most candidates evaluated could not
   be redistributed. The generated tables under `data/` are not source data but the project's own
   reductions, with their provenance in their headers. The vendored terms and WCAG text are kept for
   quotation, not as data.

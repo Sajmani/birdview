@@ -26,7 +26,7 @@ waits in `requirements/acceptance.md`. Not yet composed: `dataset` and `internal
 for the remaining 24 local requirements; the four mixed requirements in [todo.md](todo.md) are split
 first.
 
-**Checks.** All in **Go**, run by `go test`: River's checker, translated at River pin `15e1809`,
+**Checks.** All in **Go**, run by `go test`: River's checker, translated at River pin `5fad157`,
 with River's shared cases copied at the same pin; BirdView's stricter goal rule; the vendored-file
 hashes; every quotation against its vendored source; every reference, anchor and relative link; and
 the composition fields. **The rendered contrast check needs Chrome** (`BIRDVIEW_CHROME` to point at
@@ -42,7 +42,7 @@ What this project declares, as [README.md](README.md) asks of every adopter.
 | **ID citation syntax** | Go line comments, preserving the literal token: `// Verifies: product.scaleToggle, tech.badgeContrast.` |
 | **Artifact locations** | `river/`, with one exception below. Not served; the guides link to it in the published repository ([decisions.requirementsNotServed](requirements/decisions.md#requirementsnotserved)). |
 | **Subject vocabulary** | Dotted paths, lowercase, e.g. `diagram.scale.mode`, `badge.contrast.ratio`, `dataset.join.key`. New subjects are added by the project owner. |
-| **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never access or process Wiley Online Library material, by any means including an AI agent (decisions.ricklefsProhibited). Never fetch or process anything from BirdLife's DataZone by any automated means (see `requirements/module.md` and `todo.md`). |
+| **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never access or process Wiley Online Library material, by any means including an AI agent (decisions.ricklefsProhibited). Never fetch or process anything from BirdLife's DataZone by any automated means (see `requirements/imports.md` and `todo.md`). |
 | **External systems** | Tests make no network requests. Any source fetch is exercised against a local fixture or an `httptest` server, never against the live publisher. |
 | **Approval authority** | Sameer — gates, waivers, amendments, source deviations, risk acceptances. |
 | **Supported runtime** | Whatever the dependencies require (tech.goVersionFollowsDeps). No minimum Go version is maintained. |

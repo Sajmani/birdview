@@ -1,6 +1,6 @@
 # wcag — provenance
 
-Vendored copy of the WCAG 2.2 Recommendation. See [module.md](../../../module.md#wcag)
+Vendored copy of the WCAG 2.2 Recommendation. See [imports.md](../../../imports.md#wcag)
 for the adoption record and [wcag.md](wcag.md) for the transcription.
 
 ## What was retrieved

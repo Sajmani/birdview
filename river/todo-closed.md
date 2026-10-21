@@ -16,7 +16,7 @@ onto the two CC BY 4.0 workbooks already vendored (`AVONET_Raw_Data` shows all 6
 *Larus smithsonianus* are from Russia and Japan; AviList v2025b's `Decision_summary` for Proposal
 `2025-1136` states that *L. vegae* is sometimes treated as a subspecies of *L. smithsonianus* and
 that BirdLife's *L. argentatus* is European Herring Gull alone). The DataZone quotations were
-removed and [`birdlife-checklist`](requirements/module.md#birdlife-checklist) moved to
+removed and [`birdlife-checklist`](requirements/imports.md#birdlife-checklist) moved to
 `rejected`
 
 ## dependabotAlerts
@@ -86,7 +86,7 @@ Status: closed
 Owner: Sameer
 Closed: 2026-10-13
 
-**done 2026-10-13**: [`birdlife-checklist`](requirements/module.md#birdlife-checklist).
+**done 2026-10-13**: [`birdlife-checklist`](requirements/imports.md#birdlife-checklist).
 Checking its terms found the problem closed above
 
 ## europeanHerringGullRow
@@ -362,7 +362,7 @@ Closed: 2026-10-04
 
 answered twice, and both answers are no. As a **calibration** anchor: counts are dimensionless and
 the trunk's are conserved, so they cannot do it;
-[`bohmer-neck`](requirements/module.md#bohmer-neck) measures neck *lengths* instead and now
+[`bohmer-neck`](requirements/imports.md#bohmer-neck) measures neck *lengths* instead and now
 calibrates [product.trunkFromMass](requirements/local/product/diagram.md#trunkfrommass). As a
 **display** device — one dash per vertebra in the neck stroke — the neck is too short to carry them,
 measured 2026-10-04 over all 839 species with each bird filling its box: the median neck is **14.8px

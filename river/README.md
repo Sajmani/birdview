@@ -1,4 +1,4 @@
-> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `15e1809`.
+> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `5fad157`.
 > Local amendments, if any, are listed in [bindings.md](bindings.md).
 
 # River
@@ -43,7 +43,7 @@ amendments in `bindings.md` and say what they change.
 
 **The method is not a requirements source.** It is a pinned external document, but it
 contributes no requirements to your composed set. Its pin belongs in the banner above and
-nowhere else: recording it in the source manifest too gives two records of one pin, which a
+nowhere else: recording it in `imports.md` too gives two records of one pin, which a
 single recorded hash exists to prevent.
 
 ---
@@ -81,7 +81,8 @@ river/
   gradients/                 package gradients
   check/                     the checks, in your language
   requirements/
-    module.md                the module: its imports and exports, with pinned versions
+    README.md                what is here, and the module declaration
+    imports.md               every imported source, with its pinned version
     precedence.md            standing rules: which source outranks which
     decisions.md             log of how each conflict and judgment was settled
     local/<name>/            a source written here: one source, one package
@@ -92,7 +93,8 @@ river/
 ```
 
 Each composed file says it is composed and from what, and is changed by recomposing, never by
-hand. These names were chosen by testing candidate layouts on zero-context agents acting as new
+hand. Where a composed package sits is the record of who may import it: moving it into
+`exported/` exports it, and no other file lists exports. These names were chosen by testing candidate layouts on zero-context agents acting as new
 engineers (`usertests/` in River's repository).
 
 **Put the bundle in `river/` at the repository root**, unless you have a reason not to; if you
