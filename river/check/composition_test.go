@@ -27,6 +27,11 @@ type pkgItem struct {
 	pkg, name, file, body string
 }
 
+// inTree reports whether file lies under requirements/<tree>/.
+func inTree(file, tree string) bool {
+	return strings.Contains(filepath.ToSlash(file), "/requirements/"+tree+"/")
+}
+
 // packageItems reads every item in the bundle's packages: the sources, the
 // composed packages, and the decisions.
 func packageItems(t *testing.T) map[string]pkgItem {
@@ -34,11 +39,13 @@ func packageItems(t *testing.T) map[string]pkgItem {
 	bundle, _ := filepath.Abs("..")
 	req := filepath.Join(bundle, "requirements")
 	files := map[string][]string{"decisions": {filepath.Join(req, "decisions.md")}}
-	// Sources are two levels down, composed packages one; PROVENANCE.md
-	// declares no package.
-	sources, _ := filepath.Glob(filepath.Join(req, "sources", "*", "*.md"))
-	composed, _ := filepath.Glob(filepath.Join(req, "*", "*.md"))
-	for _, f := range append(sources, composed...) {
+	// Local sources are under local/<pkg>/, imported ones under
+	// imported/<origin>/<pkg>/, composed packages under composed/<visibility>/<pkg>/;
+	// PROVENANCE.md declares no package.
+	local, _ := filepath.Glob(filepath.Join(req, "local", "*", "*.md"))
+	imported, _ := filepath.Glob(filepath.Join(req, "imported", "*", "*", "*.md"))
+	composed, _ := filepath.Glob(filepath.Join(req, "composed", "*", "*", "*.md"))
+	for _, f := range append(append(local, imported...), composed...) {
 		if filepath.Base(f) == "PROVENANCE.md" {
 			continue
 		}
@@ -55,7 +62,7 @@ func packageItems(t *testing.T) map[string]pkgItem {
 		for _, f := range fs {
 			text := read(t, f)
 			heading := lower
-			if filepath.Base(f) == "requirements.md" && filepath.Base(filepath.Dir(filepath.Dir(f))) == "sources" {
+			if inTree(f, "imported") {
 				heading = upper
 			}
 			locs := heading.FindAllStringSubmatchIndex(text, -1)
@@ -93,10 +100,10 @@ var listLine = regexp.MustCompile(`(?m)^- \[([a-z]+\.[A-Za-z]+)\]\([^)]*\) — (
 func composedLists(t *testing.T) []listed {
 	t.Helper()
 	bundle, _ := filepath.Abs("..")
-	files, _ := filepath.Glob(filepath.Join(bundle, "requirements", "*", "*.md"))
+	files, _ := filepath.Glob(filepath.Join(bundle, "requirements", "composed", "*", "*", "*.md"))
 	var out []listed
 	for _, f := range files {
-		if filepath.Base(filepath.Dir(f)) == "sources" || filepath.Base(f) == "acceptance.md" {
+		if filepath.Base(f) == "acceptance.md" {
 			continue
 		}
 		for _, m := range listLine.FindAllStringSubmatch(read(t, f), -1) {
@@ -208,7 +215,7 @@ func TestCompositionResolves(t *testing.T) {
 	// The lists of what applies unchanged, and what is excluded.
 	accounted := map[string]bool{}
 	for _, it := range items {
-		if filepath.Base(filepath.Dir(filepath.Dir(it.file))) != "sources" {
+		if !inTree(it.file, "local") && !inTree(it.file, "imported") {
 			for _, ref := range field(it.body, "Composed from") {
 				accounted[qualify(it.pkg, ref)] = true
 			}
@@ -254,7 +261,7 @@ func TestCompositionResolves(t *testing.T) {
 	// is not a source and not the decisions.
 	var uncovered []string
 	for key, it := range items {
-		isSource := strings.Contains(it.file, string(filepath.Separator)+"sources"+string(filepath.Separator))
+		isSource := inTree(it.file, "local") || inTree(it.file, "imported")
 		isComposed := !isSource && it.pkg != "decisions" && filepath.Base(it.file) != "acceptance.md"
 		if isComposed && field(it.body, "Covers") == nil && !covered[key] {
 			uncovered = append(uncovered, key)

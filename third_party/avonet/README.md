@@ -20,5 +20,5 @@ International license, whose full text is in [LICENSE](LICENSE).
 > all birds. *Ecology Letters* 25: 581–597.
 
 Retrieval details and the SHA-256 this file is checked against are recorded once, in
-[river/requirements/sources/avonet/PROVENANCE.md](../../river/requirements/sources/avonet/PROVENANCE.md),
+[river/requirements/imported/doi.org/avonet/PROVENANCE.md](../../river/requirements/imported/doi.org/avonet/PROVENANCE.md),
 and verified by `river/check/pins_test.go`.

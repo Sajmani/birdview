@@ -5,4 +5,4 @@ goals 1
 gradients 0
 unjustified 0
 unserved 0
-problem missing-title requirements/sources/product/product.md
+problem missing-title requirements/local/product/product.md

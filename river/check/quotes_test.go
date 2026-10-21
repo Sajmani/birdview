@@ -24,7 +24,7 @@ import (
 )
 
 // TestQuotationsAreVerbatim checks that every block quotation in a transcribed
-// source's requirements.md appears word for word in a file that source
+// source's <pkg>.md appears word for word in a file that source
 // vendors. A transcription is reviewable material, not ground truth, and the
 // vendored copy is there so a quotation can be checked against it; this does
 // the checking.
@@ -38,14 +38,14 @@ import (
 // Verifies: tech.recordBeforeConsuming. Criterion: acceptance.quotationsAreVerbatim.
 func TestQuotationsAreVerbatim(t *testing.T) {
 	row := regexp.MustCompile("\\|\\s*`//([^`]+\\.html)`\\s*\\|")
-	records, err := filepath.Glob(filepath.Join("..", "requirements", "sources", "*", "PROVENANCE.md"))
+	records, err := filepath.Glob(filepath.Join("..", "requirements", "imported", "*", "*", "PROVENANCE.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	checked := 0
 	for _, record := range records {
 		dir := filepath.Dir(record)
-		transcription := filepath.Join(dir, "requirements.md")
+		transcription := filepath.Join(dir, filepath.Base(dir)+".md")
 		if _, err := os.Stat(transcription); err != nil {
 			continue // a source that contributes data, not requirements
 		}

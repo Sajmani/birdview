@@ -48,7 +48,7 @@ import (
 	"birdview/internal/region"
 )
 
-// The pinned source. See river/requirements/sources/naturalearth/PROVENANCE.md.
+// The pinned source. See river/requirements/imported/naturalearthdata.com/naturalearth/PROVENANCE.md.
 const (
 	archiveURL    = "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_admin_1_states_provinces.zip"
 	archiveSHA256 = "efc59726337323058f9446210adc96673179cd344e053666ee3d28cb58ba2b05"

@@ -5,4 +5,4 @@ goals 1
 gradients 0
 unjustified 0
 unserved 0
-problem bad-identifier requirements/sources/product/product.md
+problem bad-identifier requirements/local/product/product.md

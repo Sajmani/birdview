@@ -17,5 +17,5 @@ International license, whose full text is in [LICENSE](LICENSE).
 **Cite as** directed at the DOI above.
 
 Retrieval details and the SHA-256 this file is checked against are recorded once, in
-[river/requirements/sources/foxwingspan/PROVENANCE.md](../../river/requirements/sources/foxwingspan/PROVENANCE.md),
+[river/requirements/imported/doi.org/foxwingspan/PROVENANCE.md](../../river/requirements/imported/doi.org/foxwingspan/PROVENANCE.md),
 and verified by `river/check/pins_test.go`.

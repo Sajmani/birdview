@@ -1335,7 +1335,7 @@ func s2(t *testing.T) *server { t.Helper(); return newTestServer(t) }
 // own readers.
 //
 // Delete this test only when a written grant exists and is recorded in
-// river/requirements/requirements.md.
+// river/requirements/module.md.
 //
 // Verifies: goals.goodDataCitizen. Criterion: acceptance.attributionComplete.
 func TestNoUnearnedPermissionClaim(t *testing.T) {
@@ -3836,7 +3836,7 @@ func stripTags(s string) string {
 // and fetches every internal link in it.
 //
 // The bug it was written for: the guides link to the spec as
-// `../river/requirements/sources/product/`, correct in a repository checkout and a 404 in a
+// `../river/requirements/local/product/`, correct in a repository checkout and a 404 in a
 // browser. Nothing noticed, because acceptance.categoryOriginShown only checks the `/docs/` links
 // on a species page, and these are links between documents.
 //
@@ -3917,7 +3917,7 @@ func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
 
 // TestVendoredTermsAreNotServed is a licensing check, not a routing one.
 //
-// river/requirements/sources/ and third_party/ hold other people's terms — the ABA
+// river/requirements/imported/ and third_party/ hold other people's terms — the ABA
 // checklist's, Wiley's, iNaturalist's — kept for hashing and provenance.
 // The iNaturalist pages moved to third_party/ for the Apache 2.0 release,
 // so both trees are probed: a check that only knew the old home would go on
@@ -4647,11 +4647,11 @@ func TestNoPersonalAddressIsPublished(t *testing.T) {
 	// with the repository, and this check covered them while they were served.
 	// Read the same files from the checkout so that coverage is not lost.
 	// The same files the server used to serve, now spread through the nested
-	// layout. Provenance records and transcriptions under requirements/sources/<pkg>/
+	// layout. Provenance records and transcriptions under requirements/imported/<origin>/<pkg>/
 	// were never served, and are left out so the scope does not silently grow.
 	var docs []string
 	for _, pattern := range []string{"*.md", "goals/*.md", "requirements/*.md",
-		"requirements/sources/product/*.md", "requirements/sources/tech/*.md"} {
+		"requirements/local/product/*.md", "requirements/local/tech/*.md"} {
 		m, err := filepath.Glob(filepath.Join("..", "..", "river", pattern))
 		if err != nil {
 			t.Fatal(err)

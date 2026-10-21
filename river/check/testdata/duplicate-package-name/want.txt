@@ -6,4 +6,4 @@ gradients 0
 unjustified 0
 unserved 0
 problem duplicate-package-name -
-problem package-dir-mismatch requirements/sources/other/other.md
+problem package-dir-mismatch requirements/local/other/other.md

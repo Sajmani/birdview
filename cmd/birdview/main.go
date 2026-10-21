@@ -3935,7 +3935,7 @@ func (s *server) renderMarkdown(w http.ResponseWriter, set, title string, src []
 // repoLinks rewrites the repository-relative links these documents carry
 // into links a browser can follow.
 //
-// **Rewritten at render time, not in the files.** `../river/requirements/sources/product/` is
+// **Rewritten at render time, not in the files.** `../river/requirements/local/product/` is
 // the correct link in a repository checkout, and editing the file to suit a
 // browser would break it for the checkout; these documents are served
 // precisely because they are the files the repository carries.

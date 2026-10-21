@@ -16,7 +16,7 @@ onto the two CC BY 4.0 workbooks already vendored (`AVONET_Raw_Data` shows all 6
 *Larus smithsonianus* are from Russia and Japan; AviList v2025b's `Decision_summary` for Proposal
 `2025-1136` states that *L. vegae* is sometimes treated as a subspecies of *L. smithsonianus* and
 that BirdLife's *L. argentatus* is European Herring Gull alone). The DataZone quotations were
-removed and [`birdlife-checklist`](requirements/requirements.md#birdlife-checklist) moved to
+removed and [`birdlife-checklist`](requirements/module.md#birdlife-checklist) moved to
 `rejected`
 
 ## dependabotAlerts
@@ -40,16 +40,16 @@ Owner: unassigned
 Closed: 2026-10-14
 
 **done 2026-10-14**:
-[tech.fetchRestrictedInputs](requirements/sources/tech/delivery.md#fetchrestrictedinputs),
-[tech.datasetNeverCommitted](requirements/sources/tech/delivery.md#datasetnevercommitted),
-[tech.goVersionFollowsDeps](requirements/sources/tech/delivery.md#goversionfollowsdeps),
-[tech.localNowPublicLater](requirements/sources/tech/posture.md#localnowpubliclater),
-[tech.pacedInaturalistMapping](requirements/sources/tech/process.md#pacedinaturalistmapping) and
-[product.selfDescriptionStaysTrue](requirements/sources/product/presentation.md#selfdescriptionstaystrue)
+[tech.fetchRestrictedInputs](requirements/local/tech/delivery.md#fetchrestrictedinputs),
+[tech.datasetNeverCommitted](requirements/local/tech/delivery.md#datasetnevercommitted),
+[tech.goVersionFollowsDeps](requirements/local/tech/delivery.md#goversionfollowsdeps),
+[tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater),
+[tech.pacedInaturalistMapping](requirements/local/tech/process.md#pacedinaturalistmapping) and
+[product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue)
 updated for post-[decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence);
-[product.traitsFromAvonet](requirements/sources/product/dataset.md#traitsfromavonet) qualified to
+[product.traitsFromAvonet](requirements/local/product/dataset.md#traitsfromavonet) qualified to
 match
-[product.lengthAndWingspanSources](requirements/sources/product/measurements.md#lengthandwingspansources)'s
+[product.lengthAndWingspanSources](requirements/local/product/measurements.md#lengthandwingspansources)'s
 three-sheet lookup;
 [acceptance.scopeMatchesStatusTable](requirements/acceptance.md#scopematchesstatustable),
 [acceptance.noRarityCodes](requirements/acceptance.md#noraritycodes),
@@ -64,7 +64,7 @@ dropped-species count, decisions.scopeFromRecurrence status) and [docs/using.md]
 
 ## keptSpeciesEstablished
 
-**Species kept going by people are drawn as established, which [product.declaredExceptions](requirements/sources/product/dataset.md#declaredexceptions) forbids**
+**Species kept going by people are drawn as established, which [product.declaredExceptions](requirements/local/product/dataset.md#declaredexceptions) forbids**
 
 Status: closed
 Owner: Sameer
@@ -72,7 +72,7 @@ Closed: 2026-10-14
 
 **done 2026-10-14**,
 [decisions.escapedBirdsOffIndex](requirements/decisions.md#escapedbirdsoffindex),
-[product.escapedBirdsListed](requirements/sources/product/measurements.md#escapedbirdslisted),
+[product.escapedBirdsListed](requirements/local/product/measurements.md#escapedbirdslisted),
 [acceptance.escapedBirdsListedAndServed](requirements/acceptance.md#escapedbirdslistedandserved). 41
 escaped cage, aviary and farm birds, Emu among them, are declared in `status.Exotic`, left off the
 index and its controls, and listed at `/excluded`; their pages stay. Long-feral populations such as
@@ -86,7 +86,7 @@ Status: closed
 Owner: Sameer
 Closed: 2026-10-13
 
-**done 2026-10-13**: [`birdlife-checklist`](requirements/requirements.md#birdlife-checklist).
+**done 2026-10-13**: [`birdlife-checklist`](requirements/module.md#birdlife-checklist).
 Checking its terms found the problem closed above
 
 ## europeanHerringGullRow
@@ -128,7 +128,7 @@ Closed: 2026-10-13
 smithsonianus* holds the four Russian and Japanese specimens alongside four North American ones, so
 Vega Gull borrows that row, as American Herring Gull uses it, and both tiles say *Same measurements
 as* the other
-([product.borrowedMeasurementsSaySo](requirements/sources/product/measurements.md#borrowedmeasurementssayso),
+([product.borrowedMeasurementsSaySo](requirements/local/product/measurements.md#borrowedmeasurementssayso),
 [acceptance.sharedMeasurementsDisclosed](requirements/acceptance.md#sharedmeasurementsdisclosed))
 
 ## regionsTrinomials
@@ -202,18 +202,18 @@ drops **985 of the 1,228 presences that rest on iNaturalist today**: 406 species
 and domestic birds (Red Junglefowl in 42 regions, Japanese Quail in 27, Zebra Finch, Indian Peafowl,
 Budgerigar, Emu) and out-of-range strays. The figures barely move — median +0.6% — because
 iNaturalist is 1.24% of land records. It supersedes
-[product.regionAndMonthFilter](requirements/sources/product/filtering.md#regionandmonthfilter)'s "in
+[product.regionAndMonthFilter](requirements/local/product/filtering.md#regionandmonthfilter)'s "in
 either source", which judges iNaturalist against its own small total so one observation passes.
 **(4) Shared names and scope.** With iNaturalist out of the counts, Northern Yellow Warbler loses
 all 53,887 records (eBird files them under *Setophaga petechia*), so both halves of a shared name
 take eBird's shared count and regions, as
-[product.namesRecordsFiledUnder](requirements/sources/product/presentation.md#namesrecordsfiledunder)
+[product.namesRecordsFiledUnder](requirements/local/product/presentation.md#namesrecordsfiledunder)
 already describes. `WithheldByEBird` is derived from the list rather than kept by hand, which
 removes **Desertas Petrel**: it is not on eBird's list, so its missing records are probably a naming
 issue, the error Blue-billed White-Tern was. And `birdview-status` must be re-run to see which
 species leave scope without iNaturalist recurrence; the six mainland globally withheld species
 probably need declaring under
-[product.declaredExceptions](requirements/sources/product/dataset.md#declaredexceptions), as the
+[product.declaredExceptions](requirements/local/product/dataset.md#declaredexceptions), as the
 three Hawaiian ones already are
 
 ## seaShareDenominator
@@ -247,7 +247,7 @@ next. GADM membership does the job exactly and for free. Written up under
 
 ## pelagicExceptionWording
 
-**Reword the four pelagic exceptions in [product.declaredExceptions](requirements/sources/product/dataset.md#declaredexceptions)**
+**Reword the four pelagic exceptions in [product.declaredExceptions](requirements/local/product/dataset.md#declaredexceptions)**
 
 Status: closed
 Owner: Sameer
@@ -292,7 +292,7 @@ Closed: 2026-10-05
 
 **done 2026-10-05**,
 [decisions.speciesUrlOutlivesSpecies](requirements/decisions.md#speciesurloutlivesspecies) and
-[product.undrawnSpeciesAnswer](requirements/sources/product/presentation.md#undrawnspeciesanswer).
+[product.undrawnSpeciesAnswer](requirements/local/product/presentation.md#undrawnspeciesanswer).
 `/species/<id>` for a bird the status table classified but left out of scope now answers **404 with
 the bird named and its measured reason**, covering **328 of the 334 species** the derivation
 rejected — 124 vagrant, 167 absent, 37 historical; the other six have no AviList row, so no name and
@@ -328,7 +328,7 @@ not abundance. `birdview-ingest` reads the committed [`data/status.tsv`](../data
 `internal/aba` is deleted; nothing reads `fetched/`; the ABA credit is gone from all three footers
 because nothing on a page comes from it. **1,083 species in 99 families**, up from 839 — 830 of the
 old list kept on measured evidence, 9 kept by hand under
-[product.declaredExceptions](requirements/sources/product/dataset.md#declaredexceptions), and the
+[product.declaredExceptions](requirements/local/product/dataset.md#declaredexceptions), and the
 rest admitted because they recur. Every input the build reads is now CC BY 4.0 or the project's own
 work
 
@@ -362,15 +362,15 @@ Closed: 2026-10-04
 
 answered twice, and both answers are no. As a **calibration** anchor: counts are dimensionless and
 the trunk's are conserved, so they cannot do it;
-[`bohmer-neck`](requirements/requirements.md#bohmer-neck) measures neck *lengths* instead and now
-calibrates [product.trunkFromMass](requirements/sources/product/diagram.md#trunkfrommass). As a
+[`bohmer-neck`](requirements/module.md#bohmer-neck) measures neck *lengths* instead and now
+calibrates [product.trunkFromMass](requirements/local/product/diagram.md#trunkfrommass). As a
 **display** device — one dash per vertebra in the neck stroke — the neck is too short to carry them,
 measured 2026-10-04 over all 839 species with each bird filling its box: the median neck is **14.8px
 on the detail page and 7.8px on a tile**, which at a typical fourteen cervicals is **1.06px per
 vertebra**. Only American Flamingo (76px), Trumpeter Swan (68px) and Great Blue Heron (65px) reach
 even 4px per vertebra, and only on the detail page. Two further blocks if the geometry had worked:
 dash style already carries provenance
-([product.measuredVersusModeled](requirements/sources/product/measurements.md#measuredversusmodeled)),
+([product.measuredVersusModeled](requirements/local/product/measurements.md#measuredversusmodeled)),
 so dash *count* would overload the one mark that says "not a measurement"; and Böhmer covers 103
 species against BirdView's 839, so ~88% of counts would be invented
 
@@ -428,7 +428,7 @@ Owner: unassigned
 Closed: 2026-10-04
 
 done 2026-10-04,
-[product.oneUnitInComparison](requirements/sources/product/presentation.md#oneunitincomparison) and
+[product.oneUnitInComparison](requirements/local/product/presentation.md#oneunitincomparison) and
 [acceptance.massInOneUnit](requirements/acceptance.md#massinoneunit): the mass unit is now a
 property of the comparison **scope** — a section or the whole set on the index, following the scale
 setting; the birds named in the address on the comparison page — and the **smallest** bird in the
@@ -450,7 +450,7 @@ page, listed two of six commands and eight of fourteen packages, and said the AB
 was "drafted and unsent" when it was sent 2026-09-27; `data.md` claimed "Taxonomy is ABA's" two
 paragraphs after saying every name comes from AviList. README gained the GBIF row and the
 decisions.scopeFromRecurrence status.
-[product.selfDescriptionStaysTrue](requirements/sources/product/presentation.md#selfdescriptionstaystrue)
+[product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue)
 keeps the reading gate: none of this was catchable by
 [acceptance.creditsComplete](requirements/acceptance.md#creditscomplete), which compares counts and
 credits, not whether prose is true

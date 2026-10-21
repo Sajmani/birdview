@@ -1,4 +1,4 @@
-> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `f86936d`.
+> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `15e1809`.
 > Local amendments, if any, are listed in [bindings.md](bindings.md).
 
 # River
@@ -81,14 +81,19 @@ river/
   gradients/                 package gradients
   check/                     the checks, in your language
   requirements/
-    requirements.md          module declaration and precedence
-    decisions.md             how each conflict and judgment was settled
-    sources/                 RESERVED
-      <name>/                one source, one package
-      vendor/                vendored imported modules
-    internal/                RESERVED — unexported composed packages
-    <name>/                  exported composed package, and its criteria
+    module.md                the module: its imports and exports, with pinned versions
+    precedence.md            standing rules: which source outranks which
+    decisions.md             log of how each conflict and judgment was settled
+    local/<name>/            a source written here: one source, one package
+    imported/<origin>/<name>/  another module's source, pinned, with PROVENANCE.md
+    composed/
+      exported/<name>/       a composed package others may import, and its criteria
+      internal/<name>/       a composed package private to this repository
 ```
+
+Each composed file says it is composed and from what, and is changed by recomposing, never by
+hand. These names were chosen by testing candidate layouts on zero-context agents acting as new
+engineers (`usertests/` in River's repository).
 
 **Put the bundle in `river/` at the repository root**, unless you have a reason not to; if you
 put it elsewhere, say where in `bindings.md`. Paths inside it are relative to its root, and your
@@ -217,7 +222,7 @@ deserves to be a package, and if it does not, it is a file.
 
 ### Precedence
 
-`requirements.md` ranks sources in tiers, highest first. Composition uses the ranking to resolve
+`precedence.md` ranks sources in tiers, highest first. Composition uses the ranking to resolve
 a conflict mechanically; anything it cannot resolve goes to a person. A **Governing** tier
 marks a source you may not locally override.
 
@@ -243,11 +248,11 @@ item and giving its title:
 ```markdown
 ### Diagram
 
-- [product.scaleToggle](../sources/product/diagram.md#scaletoggle) — Diagrams scale per section or globally, never per tile
+- [product.scaleToggle](../../../local/product/diagram.md#scaletoggle) — Diagrams scale per section or globally, never per tile
 
 ## Excluded
 
-- [tech.localNowPublicLater](../sources/tech/posture.md#localnowpubliclater) — Local now, public later. Excluded by [decisions.publicDeploymentDeferred](../decisions.md#publicdeploymentdeferred)
+- [tech.localNowPublicLater](../../../local/tech/posture.md#localnowpubliclater) — Local now, public later. Excluded by [decisions.publicDeploymentDeferred](../../../decisions.md#publicdeploymentdeferred)
 ```
 
 What composition wrote — a rule over a domain, an intermediary's contract, a requirement a
@@ -402,9 +407,12 @@ unexplained tests makes the codebase less safe in exchange for a tidier table.
 
 ## Implementation
 
-Implementation produces the code and the **designs that describe it**, generated together and
-stored at the same commit. A design describes the code at the commit it sits in — not a record
-written afterwards, not a plan written before — so an agent can read it as grounding context.
+Implementation produces the code and the **designs that describe it**, kept in step at every
+commit. A design may lead the code: written and reviewed before the code exists, it says it is a
+proposal, and it becomes the code's description in the commit where the code lands. From then on
+a change that makes the two disagree updates both, and a guardrail can detect drift between them.
+A design is never a record written afterwards. This follows the Elephant-Goldfish Model, which
+reviews a design with zero-context agents before code is written and reports where they drift.
 
 **A design lives with the code, not in the bundle.** The bundle holds intent and conformance;
 keeping a design in it would put it where people edit requirements rather than where they edit
@@ -556,8 +564,9 @@ Service is a semantic relation, not a measurement. A green run is not a validate
 
 River assembles a great deal of existing practice and says so: requirements management,
 acceptance criteria, CI gates, progressive rollout, SLOs and error budgets, guardrail metrics,
-dependency pinning, and Go's package and module conventions, which it adopts directly rather
-than inventing syntax.
+dependency pinning, Go's package and module conventions, which it adopts directly rather than
+inventing syntax, and design-first development kept in step with the code, from the
+Elephant-Goldfish Model.
 
 What is new is mostly how these are joined. Requirements are composed from many sources with
 explicit precedence and a durable record of every resolution. Criteria are generated from

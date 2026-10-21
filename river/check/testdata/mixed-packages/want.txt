@@ -5,5 +5,5 @@ goals 1
 gradients 0
 unjustified 0
 unserved 0
-problem package-dir-mismatch requirements/sources/product/extra.md
-problem mixed-packages requirements/sources/product
+problem package-dir-mismatch requirements/local/product/extra.md
+problem mixed-packages requirements/local/product

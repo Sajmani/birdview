@@ -43,7 +43,7 @@ func TestEveryLocalRequirementCitesAGoal(t *testing.T) {
 	withdrawn := regexp.MustCompile(`(?m)^Status: \*\*Withdrawn`)
 	for _, ref := range r.UnjustifiedItems {
 		path, ident, _ := strings.Cut(ref, "#")
-		if !strings.HasPrefix(path, "requirements/sources/product/") && !strings.HasPrefix(path, "requirements/sources/tech/") {
+		if !strings.HasPrefix(path, "requirements/local/product/") && !strings.HasPrefix(path, "requirements/local/tech/") {
 			continue // an imported source's rule
 		}
 		b, err := os.ReadFile(filepath.Join("..", filepath.FromSlash(path)))

@@ -1,0 +1,7 @@
+# An imported package is structure-checked but not counted, and its goal citations are not this module's.
+exit 0
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0

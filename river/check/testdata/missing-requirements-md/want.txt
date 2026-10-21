@@ -1,8 +1,0 @@
-# The module file must exist.
-exit 1
-requirements 1
-goals 1
-gradients 0
-unjustified 0
-unserved 0
-problem missing-requirements-md requirements/requirements.md

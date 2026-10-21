@@ -47,7 +47,6 @@ import (
 func TestReferencesResolve(t *testing.T) {
 	bundle, _ := filepath.Abs("..")
 	repo := filepath.Dir(bundle)
-	sources := filepath.Join(bundle, "requirements", "sources")
 
 	lowerItem := regexp.MustCompile(`(?m)^#{2,3} ([a-z][A-Za-z]+)[ \t]*$`)
 	upperItem := regexp.MustCompile(`(?m)^#{2,3} ([A-Z][A-Za-z]+)[ \t]*$`)
@@ -58,21 +57,22 @@ func TestReferencesResolve(t *testing.T) {
 	}
 	packages := map[string][]string{
 		"goals":      glob("goals/*.md"),
-		"product":    glob("requirements/sources/product/*.md"),
-		"tech":       glob("requirements/sources/tech/*.md"),
+		"product":    glob("requirements/local/product/*.md"),
+		"tech":       glob("requirements/local/tech/*.md"),
 		"decisions":  {filepath.Join(bundle, "requirements", "decisions.md")},
 		"acceptance": {filepath.Join(bundle, "requirements", "acceptance.md")},
 		// A composed package: its requirements and its criteria.
-		"app": glob("requirements/app/*.md"),
+		"app": glob("requirements/composed/internal/app/*.md"),
 	}
 	// A transcribed source is its own package, with exported names.
 	exported := map[string]bool{}
-	dirs, _ := os.ReadDir(sources)
+	dirs, _ := filepath.Glob(filepath.Join(bundle, "requirements", "imported", "*", "*"))
 	for _, d := range dirs {
-		f := filepath.Join(sources, d.Name(), "requirements.md")
+		pkg := filepath.Base(d)
+		f := filepath.Join(d, pkg+".md")
 		if _, err := os.Stat(f); err == nil {
-			packages[d.Name()] = []string{f}
-			exported[d.Name()] = true
+			packages[pkg] = []string{f}
+			exported[pkg] = true
 		}
 	}
 	defined := map[string]map[string]string{}

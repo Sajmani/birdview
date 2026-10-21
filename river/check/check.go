@@ -15,7 +15,7 @@
 // Package check is River's checker, translated into Go so it runs with
 // BirdView's own tests (River's decisions.checksInRepoLanguage).
 //
-// Translated from River's river/check/goals.py at pin f86936d
+// Translated from River's river/check/goals.py at pin 15e1809
 // (sso://user/sameer/river). What is normative is what the checker reports,
 // not how: a problem's code and path must match the reference exactly, and
 // testdata/ -- River's shared cases, copied at the same pin -- holds that to
@@ -105,16 +105,16 @@ func (c *checker) rel(p string) string {
 	return filepath.ToSlash(r)
 }
 
-// skipped reports whether path lies outside the bundle's packages: vendored
-// modules, and the checks' own test bundles under check/.
+// skipped reports whether path lies outside the bundle's packages: the
+// checks' own test bundles under check/.
 func (c *checker) skipped(path string) bool {
-	parts := strings.Split(c.rel(path), "/")
-	for _, p := range parts {
-		if p == "vendor" {
-			return true
-		}
-	}
-	return len(parts) > 0 && parts[0] == "check"
+	return strings.HasPrefix(c.rel(path), "check/")
+}
+
+// imported reports whether path lies under requirements/imported/: another
+// module's package, pinned here.
+func (c *checker) imported(path string) bool {
+	return strings.HasPrefix(c.rel(path), "requirements/imported/")
 }
 
 // markdown lists the .md files under dir, sorted, that belong to the bundle.
@@ -230,11 +230,15 @@ func (c *checker) packageDir(dir string, heading, field *regexp.Regexp, expected
 	return items
 }
 
-// uniquePackageNames reports a package name declared in more than one
-// directory: with no import block, a bare prefix resolves by name alone.
+// uniquePackageNames reports a package name declared in more than one of this
+// module's own directories: with no import block, a bare prefix resolves by
+// name alone. Imported packages belong to other modules and are not counted.
 func (c *checker) uniquePackageNames() {
 	dirs := map[string]map[string]bool{}
 	for _, path := range c.markdown(c.bundle, true) {
+		if c.imported(path) {
+			continue
+		}
 		b, err := os.ReadFile(path)
 		if err != nil {
 			continue
@@ -289,20 +293,23 @@ func Run(dir string) Result {
 	bundle, _ := filepath.Abs(dir)
 	c := &checker{bundle: bundle}
 	goalsDir := filepath.Join(bundle, "goals")
-	reqMD := filepath.Join(bundle, "requirements", "requirements.md")
-	sources := filepath.Join(bundle, "requirements", "sources")
+	reqMD := filepath.Join(bundle, "requirements", "module.md")
+	local := filepath.Join(bundle, "requirements", "local")
 
 	c.uniquePackageNames()
 	c.seekable()
 	if b, err := os.ReadFile(reqMD); err != nil {
-		c.report("missing-requirements-md", "requirements/requirements.md", "missing requirements.md")
+		c.report("missing-module-md", "requirements/module.md", "missing module.md")
 	} else if m := moduleBlock.FindStringSubmatch(string(b)); m == nil || !moduleDecl.MatchString(m[1]) {
-		c.report("missing-module", "requirements/requirements.md", "missing `## Module` fenced block with `module <path>`")
+		c.report("missing-module", "requirements/module.md", "missing `## Module` fenced block with `module <path>`")
 	}
 
 	goalItems := c.packageDir(goalsDir, h2Item, nil, "goals")
 	gradItems := c.packageDir(filepath.Join(bundle, "gradients"), h3Item, servesField, "gradients")
-	reqItems := c.packageDir(sources, h2Item, goalsField, "")
+	reqItems := c.packageDir(local, h2Item, goalsField, "")
+	// Another module's packages: structure only, not counted, citations not
+	// ours to resolve.
+	c.packageDir(filepath.Join(bundle, "requirements", "imported"), h2Item, nil, "")
 
 	goals := map[string]string{}
 	for _, it := range goalItems {
@@ -315,7 +322,7 @@ func Run(dir string) Result {
 			"goal files exist and none parsed -- parser or layout has changed"}}}
 	}
 	if len(reqItems) == 0 {
-		return Result{Stopped: true, Problems: []Problem{{"no-requirements", "requirements/sources",
+		return Result{Stopped: true, Problems: []Problem{{"no-requirements", "requirements/local",
 			"no requirements found -- parser or layout has changed"}}}
 	}
 

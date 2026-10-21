@@ -26,7 +26,7 @@ Gate: when convenient
 First pass done 2026-10-20: README, AGENTS.md, CONTRIBUTING, CHANGELOG, the four guides, every
 product and tech requirement, `app.md` and the page templates, about 30% shorter overall. Left:
 `decisions.md` and `acceptance.md` (history and verification records; decide whether to tighten
-them at all), `requirements.md`, `notes.md`, `arch.md`, `bindings.md`, code comments, and page
+them at all), `module.md`, `notes.md`, `arch.md`, `bindings.md`, code comments, and page
 text built in Go, chiefly `cmd/birdview/main.go` (group notes, the undrawn page's verdicts, region
 and category row details, record-ratio tooltips, tile notes, and the `/added` and `/excluded`
 intros) and the grouping notes in `internal/region/region.go`. Several of those strings are
@@ -40,7 +40,7 @@ Status: open
 Owner: Sameer
 Gate: needs the owner's call
 
-[product.labeledDetailDiagram](requirements/sources/product/measurements.md#labeleddetaildiagram)
+[product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram)
 says total length and mass are labeled below the tail tip, and later that mass is labeled under its
 cube, not in the stack under the tail. Found during the prose pass; it predates it. Check what the
 page does, and correct the statement that is wrong.
@@ -67,7 +67,7 @@ Status: open
 Owner: Sameer
 Gate: when convenient
 
-[product.craniumFromMass](requirements/sources/product/diagram.md#craniumfrommass) said its
+[product.craniumFromMass](requirements/local/product/diagram.md#craniumfrommass) said its
 overestimate at large mass cost nothing because the heaviest bird in scope was 11 kg. Emu is now in
 scope at 34 kg and draws a 243 mm cranium. Check it against a measured emu skull, and if it is far
 off, fit or cap the coefficient.
@@ -81,7 +81,7 @@ Owner: Sameer
 Gate: when convenient
 
 Found 2026-10-19 while setting Bill and Tail's default scale
-([product.scaleToggle](requirements/sources/product/diagram.md#scaletoggle)): with 15% sections, one
+([product.scaleToggle](requirements/local/product/diagram.md#scaletoggle)): with 15% sections, one
 wingspan section runs from the 146 mm Elf Owl to the 1,789 mm Emu, 12.3× in total length, because a
 flightless bird's short wings sort it among small owls. Length sections stay within 1.1× and mass
 within 3.1×. Either Wingspan should default to Global as Bill, Tail and Frequency do, or flightless
@@ -97,10 +97,10 @@ Gate: when a usable sex-specific mass source is found
 
 Mass is the blocker: it is pooled per species in every vendored source, and head, body and the mass
 cube are modeled from it
-([product.craniumFromMass](requirements/sources/product/diagram.md#craniumfrommass),
-[product.trunkFromMass](requirements/sources/product/diagram.md#trunkfrommass)), so per-sex bill,
+([product.craniumFromMass](requirements/local/product/diagram.md#craniumfrommass),
+[product.trunkFromMass](requirements/local/product/diagram.md#trunkfrommass)), so per-sex bill,
 wing and tail on a shared body would draw a bird nobody measured
-([product.tileMarksModeled](requirements/sources/product/measurements.md#tilemarksmodeled)). What
+([product.tileMarksModeled](requirements/local/product/measurements.md#tilemarksmodeled)). What
 exists: AVONET's unused `AVONET_Raw_Data` sheet sexes each specimen for bill, wing chord, secondary,
 tail and tarsus, but only **213 of 1,082** drawn species have five or more of each sex, and **9 of
 61** drawn raptors; Fox's sex-specific wingspan columns are filled for **2** drawn species. Where
@@ -123,8 +123,8 @@ Status: open
 Owner: Sameer
 Gate: before composing `dataset`
 
-[requirements/app/](requirements/app/app.md) composes accessibility only: WCAG 1.4.6 and 1.4.11 over
-every web page as [tech.webPages](requirements/sources/tech/accessibility.md#webpages) defines one,
+[requirements/composed/internal/app/](requirements/composed/internal/app/app.md) composes accessibility only: WCAG 1.4.6 and 1.4.11 over
+every web page as [tech.webPages](requirements/local/tech/accessibility.md#webpages) defines one,
 and the stylesheet's contract. An agent composed it; River requires a person to sign off. The
 rulings it embeds: plain-text error pages are web pages (WCAG's definition leaves no choice), large
 text gets no allowance (decisions.oneContrastFloor), and closed panels are measured open
@@ -137,7 +137,7 @@ Status: open
 Owner: Sameer
 Gate: before any accessibility claim
 
-[app.pagesMeetNonTextContrast](requirements/app/app.md#pagesmeetnontextcontrast) is uncovered: the
+[app.pagesMeetNonTextContrast](requirements/composed/internal/app/app.md#pagesmeetnontextcontrast) is uncovered: the
 stylesheet checks skip shapes on purpose and the rendered check measures text only. Extending the
 rendered check to strokes and fills against adjacent colors is the obvious route; "required to
 understand the content" needs a ruling per diagram part
@@ -150,7 +150,7 @@ Status: open
 Owner: Sameer
 Gate: when CI exists
 
-[app.renderedTextContrast](requirements/app/acceptance.md#renderedtextcontrast) skips without it,
+[app.renderedTextContrast](requirements/composed/internal/app/acceptance.md#renderedtextcontrast) skips without it,
 and BirdView has no CI. A skipped check reads as a pass in `go test ./...` output unless someone
 reads the skip line
 
@@ -203,21 +203,21 @@ Gate: before composition
 
 Classified 2026-10-16, each of the 81 read individually. **Composed — wholly an imported obligation,
 restated:**
-[tech.pacedInaturalistMapping](requirements/sources/tech/process.md#pacedinaturalistmapping)
+[tech.pacedInaturalistMapping](requirements/local/tech/process.md#pacedinaturalistmapping)
 (`inatapi.RequestRate`),
-[tech.identifiedClient](requirements/sources/tech/delivery.md#identifiedclient)
+[tech.identifiedClient](requirements/local/tech/delivery.md#identifiedclient)
 (`inatapi.UserAgent`),
-[tech.badgeContrast](requirements/sources/tech/accessibility.md#badgecontrast) and
-[tech.textContrastFloor](requirements/sources/tech/accessibility.md#textcontrastfloor) (WCAG 2.2 SC
+[tech.badgeContrast](requirements/local/tech/accessibility.md#badgecontrast) and
+[tech.textContrastFloor](requirements/local/tech/accessibility.md#textcontrastfloor) (WCAG 2.2 SC
 1.4.6 and 1.4.11). These belong in a composed package citing the source, not in `tech`. **Mixed — a
 local requirement with an imported obligation inside it, to split:**
-[tech.fetchRestrictedInputs](requirements/sources/tech/delivery.md#fetchrestrictedinputs) (*do not
+[tech.fetchRestrictedInputs](requirements/local/tech/delivery.md#fetchrestrictedinputs) (*do not
 redistribute* is the licences'; *fetch at build time* is BirdView's mechanism),
-[product.selfDescriptionStaysTrue](requirements/sources/product/presentation.md#selfdescriptionstaystrue)
+[product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue)
 (*credit every CC BY source* is a licence condition; docs currency is local),
-[tech.localNowPublicLater](requirements/sources/tech/posture.md#localnowpubliclater) (*never
+[tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater) (*never
 commercial* follows the non-commercial licences), and
-[product.inaturalistLink](requirements/sources/product/presentation.md#inaturalistlink) (*reproduce
+[product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink) (*reproduce
 no photograph* is `inatterms.ContributorKeepsRights`). **The other 73 are local intent**, including
 those that name a source — choosing AviList for names is BirdView's decision, made with licences in
 mind, not an obligation AviList imposes. Two findings on the way: the WCAG manifest entry still says
@@ -226,8 +226,8 @@ other text is held to 4.5:1, which
 floor; and Wikimedia and Macaulay Library are cited as rationale from the photograph era, with no
 code reading either. **Progress 2026-10-16:** WCAG is now vendored and transcribed (`wcag`), the
 stale manifest entry is fixed, and the two contrast requirements serve as the guarantee half of
-[app.stylesheetContract](requirements/app/app.md#stylesheetcontract), with their WCAG obligation
-composed separately as [app.pagesMeetTextContrast](requirements/app/app.md#pagesmeettextcontrast).
+[app.stylesheetContract](requirements/composed/internal/app/app.md#stylesheetcontract), with their WCAG obligation
+composed separately as [app.pagesMeetTextContrast](requirements/composed/internal/app/app.md#pagesmeettextcontrast).
 The four mixed requirements are still to split
 
 ## presenceOverSelection
@@ -246,7 +246,7 @@ the arrival page left unfiltered so scope stays product.scopeIsRecurringAvifauna
 decisions.monthPresence's month rule applied to the summed counts of the selected regions. Measured
 at 1 in 1,000,000: New York 491 → 443, the Northeast's nine states 564 → 470, all land regions 1,057
 → 836. Two defects it would fix, both real today:
-[product.regionAndMonthFilter](requirements/sources/product/filtering.md#regionandmonthfilter)'s "in
+[product.regionAndMonthFilter](requirements/local/product/filtering.md#regionandmonthfilter)'s "in
 either source" judges iNaturalist against its own small total, so one observation passes — 45 of New
 York's species are present on that alone, Diamond Dove among them; and `birdview-regions` discarded
 counts under the bar at write time — **fixed on its own 2026-10-13,
@@ -285,7 +285,7 @@ Owner: unassigned
 Gate: opportunistic
 
 Found drawing
-[product.pipelineDiagram](requirements/sources/product/measurements.md#pipelinediagram)'s pipeline
+[product.pipelineDiagram](requirements/local/product/measurements.md#pipelinediagram)'s pipeline
 diagram, which marks both ✗. `avonet.FamilyOf` is documented as a cross-check against ABA's family,
 and ABA is gone ([decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence));
 `Secondary1` is a required column whose value nothing reads. Either use them — `FamilyOf` could
@@ -306,7 +306,7 @@ iNaturalist's trinomials into their wild species, and the proportional gainers w
 **+11.9%**, `Anser cygnoides` **+20.0%** and `Anser anser` **+6.9%** — the same signature as the
 declared `Columba livia` (+1.3%) and `Cairina moschata` (+10.0%). `taxonomy.DomesticForms` names
 only the latter two, so
-[product.sourceNamingMeasured](requirements/sources/product/dataset.md#sourcenamingmeasured)'s ratio
+[product.sourceNamingMeasured](requirements/local/product/dataset.md#sourcenamingmeasured)'s ratio
 check reads the other three as undeclared disagreements if it ever flags them. Either declare them
 or record why the two are special; measuring it needs a `cmd/birdview-names` run
 
@@ -318,7 +318,7 @@ Status: open
 Owner: Sameer
 Gate: opportunistic
 
-[product.namesRecordsFiledUnder](requirements/sources/product/presentation.md#namesrecordsfiledunder)
+[product.namesRecordsFiledUnder](requirements/local/product/presentation.md#namesrecordsfiledunder)
 asks for each source's binomial *and how many records it holds under it*, and
 [acceptance.disputedNamesShown](requirements/acceptance.md#disputednamesshown) ships only the
 binomial. [`data/source-names.tsv`](../data/source-names.tsv) has per-source counts and no reader,
@@ -380,7 +380,7 @@ Gate: opportunistic; it could retire hand-declared exceptions
 
 `DatesIn` filters by `gadmGid`; GBIF assigns none to open ocean, so no pelagic's at-sea records have
 ever been tested for recurrence. Four
-[product.declaredExceptions](requirements/sources/product/dataset.md#declaredexceptions) exceptions
+[product.declaredExceptions](requirements/local/product/dataset.md#declaredexceptions) exceptions
 exist in that blind spot, and
 [decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence)'s claim that
 recurrence is insensitive to observer effort has never been tested where observers are scarcest. The
@@ -398,7 +398,7 @@ Owner: unassigned
 Gate: with decisions.seaShareDiffers
 
 Nothing does. The server fixture hardcodes `commonestOf` and every test renders it back, so
-[product.shareOfRecords](requirements/sources/product/presentation.md#shareofrecords)'s central
+[product.shareOfRecords](requirements/local/product/presentation.md#shareofrecords)'s central
 claim has never met data — which is why
 [decisions.seaShareDiffers](requirements/decisions.md#seasharediffers)(a) shipped. The check belongs
 over the real dataset, as
@@ -413,7 +413,7 @@ Status: deferred
 Owner: Sameer
 Gate: deferred 2026-10-04; before anyone reads a region list as a range map
 
-[product.regionAndMonthFilter](requirements/sources/product/filtering.md#regionandmonthfilter)'s
+[product.regionAndMonthFilter](requirements/local/product/filtering.md#regionandmonthfilter)'s
 1-ppm rule is anti-correlated with what it measures: the more surprising a bird, the bigger the
 crowd, the more records. **Two examples are in the data as shipped** — American Flamingo in
 Pennsylvania (931 records, one pond, thirteen days, post-Idalia) and **Lucy's Warbler, a Sonoran
@@ -512,11 +512,11 @@ Gate: opportunistic; still the weakest model
 
 24 of 90 families carry a ratio and **66 take the default 0.18, covering 548 species**. This is the
 half of the old entry that is actually tractable, and the one that catches the next short-necked
-Limpkin. ~~Derive the values from [`bohmer-neck`](requirements/requirements.md#bohmer-neck)
-instead~~ — **withdrawn 2026-10-04**: [`requirements.md`](requirements/requirements.md#bohmer-neck)
+Limpkin. ~~Derive the values from [`bohmer-neck`](requirements/module.md#bohmer-neck)
+instead~~ — **withdrawn 2026-10-04**: [`module.md`](requirements/module.md#bohmer-neck)
 already records why, and the old entry ignored it. Böhmer measures the **full cervical column
 including the part inside the body contour**, where
-[product.neckModelPerFamily](requirements/sources/product/diagram.md#neckmodelperfamily) models the
+[product.neckModelPerFamily](requirements/local/product/diagram.md#neckmodelperfamily) models the
 *exposed* neck of a silhouette. Converting one to the other needs the fraction of the column that
 shows in flight, per family, unmeasured — which is exactly what `NeckRatios` already is. It would
 move the guess, not remove it, and add a dependency on a 103-species `.docx` that is
@@ -637,7 +637,7 @@ Gate: opportunistic
 
 Where GBIF has not followed a split, its name maps to whichever half kept it: GBIF's `Circus
 cyaneus` maps to the Eurasian Hen Harrier while 3.8 million of its records are Northern Harriers.
-Nine such cases are listed in [requirements.md](requirements/requirements.md#gbif); the table has
+Nine such cases are listed in [module.md](requirements/module.md#gbif); the table has
 one AviList column and cannot express them, and nothing detects them automatically. Moved from
 [arch.md](arch.md)
 
@@ -676,7 +676,7 @@ Gate: only if build time starts to matter
 
 ## photographsWithdrawn
 
-**Photographs ([product.speciesPhotographs](requirements/sources/product/diagram.md#speciesphotographs)–[product.photoCaching](requirements/sources/product/diagram.md#photocaching)) are withdrawn from v1, not abandoned**
+**Photographs ([product.speciesPhotographs](requirements/local/product/diagram.md#speciesphotographs)–[product.photoCaching](requirements/local/product/diagram.md#photocaching)) are withdrawn from v1, not abandoned**
 
 Status: open
 Owner: unassigned
@@ -684,8 +684,8 @@ Gate: not planned
 
 [decisions.photographsWithdrawn](requirements/decisions.md#photographswithdrawn). Any revival goes
 through the spec first and stays within
-[product.inaturalistLink](requirements/sources/product/presentation.md#inaturalistlink) and
-[tech.selfContainedServer](requirements/sources/tech/delivery.md#selfcontainedserver): BirdView
+[product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink) and
+[tech.selfContainedServer](requirements/local/tech/delivery.md#selfcontainedserver): BirdView
 links to photographs and never embeds, hotlinks or caches one
 
 ## broadEbirdRows

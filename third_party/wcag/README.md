@@ -20,5 +20,5 @@ License, which permits copying it unmodified with the notice below.
 [document use](https://www.w3.org/copyright/document-license/) rules apply.
 
 Retrieval details and the SHA-256 this file is checked against are recorded once, in
-[river/requirements/sources/wcag/PROVENANCE.md](../../river/requirements/sources/wcag/PROVENANCE.md),
+[river/requirements/imported/w3.org/wcag/PROVENANCE.md](../../river/requirements/imported/w3.org/wcag/PROVENANCE.md),
 and verified by `river/check/pins_test.go`.

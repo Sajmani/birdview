@@ -5,4 +5,4 @@ goals 1
 gradients 0
 unjustified 0
 unserved 0
-problem duplicate-identifier requirements/sources/product/product.md
+problem duplicate-identifier requirements/local/product/product.md

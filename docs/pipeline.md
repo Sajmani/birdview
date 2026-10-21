@@ -406,4 +406,4 @@ depends on it.
 
 - For what each figure means and how far to trust it: [where the data comes from](data.md).
 - For running the pipeline yourself: [building BirdView](building.md).
-- For every source's license, version and hash: [the source register](../river/requirements/requirements.md).
+- For every source's license, version and hash: [the source register](../river/requirements/module.md).

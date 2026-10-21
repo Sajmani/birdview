@@ -20,5 +20,5 @@ International license, whose full text is in [LICENSE](LICENSE).
 > <https://doi.org/10.2173/avilist.v2025b>
 
 Retrieval details and the SHA-256 this file is checked against are recorded once, in
-[river/requirements/sources/avilist/PROVENANCE.md](../../river/requirements/sources/avilist/PROVENANCE.md),
+[river/requirements/imported/doi.org/avilist/PROVENANCE.md](../../river/requirements/imported/doi.org/avilist/PROVENANCE.md),
 and verified by `river/check/pins_test.go`.

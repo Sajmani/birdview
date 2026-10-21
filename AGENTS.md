@@ -11,7 +11,7 @@ Names like `product.scaleToggle` are citations: search `river/` for `## scaleTog
 | Need | Read |
 | --- | --- |
 | The method and the change loop | [river/README.md](river/README.md) |
-| Web app requirements | [river/requirements/app/app.md](river/requirements/app/app.md) |
+| Web app requirements | [river/requirements/composed/internal/app/app.md](river/requirements/composed/internal/app/app.md) |
 | Open work | [river/todo.md](river/todo.md) (`grep -n -A1 '^## '`) |
 | Code shape, gotchas, local server | [river/arch.md](river/arch.md) |
 | Settled conflicts | [river/requirements/decisions.md](river/requirements/decisions.md) |
@@ -50,10 +50,10 @@ root: `go build -o /tmp/birdview-serve ./cmd/birdview`, stop the old one, run `/
 - **Never fetch or process anything from BirdLife's DataZone**; its terms forbid automated access.
 - **Never commit the built dataset** (tech.datasetNeverCommitted).
 - **Only AVONET, the Fox wingspan data and AviList may be committed as source data.** Check
-  `river/requirements/requirements.md` before adding any other. The generated tables in `data/`
+  `river/requirements/module.md` before adding any other. The generated tables in `data/`
   are committed on purpose.
 - **Third-party files live under `third_party/<name>/`** with their own license, no Apache header;
-  provenance in `river/requirements/sources/<name>/PROVENANCE.md`.
+  provenance in `river/requirements/imported/<origin>/<name>/PROVENANCE.md`.
 - **Link to iNaturalist; copy nothing from it**, least of all photographs
   (product.inaturalistLink).
 - **Never present a modeled value as a measurement** (product.tileMarksModeled).
@@ -61,4 +61,4 @@ root: `go build -o /tmp/birdview-serve ./cmd/birdview`, stop the old one, run `/
 ## Conventions
 
 American spellings, but **never edit a quotation or a vendored document**, and keep formatters
-away from `third_party/`, `river/requirements/sources/` and `river/README.md`.
+away from `third_party/`, `river/requirements/imported/` and `river/README.md`.

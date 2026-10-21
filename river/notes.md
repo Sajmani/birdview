@@ -7,7 +7,7 @@ Design notes the rows above refer to, moved here from decisions.md with the list
 
 ## A cube of water for mass
 
-*Evaluated 2026-10-01, owner's idea, not a decision.* [product.labeledDetailDiagram](requirements/sources/product/measurements.md#labeleddetaildiagram) rejects drawing
+*Evaluated 2026-10-01, owner's idea, not a decision.* [product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram) rejects drawing
 mass as a shape and gives two reasons. The owner then proposed a specific shape that answers one
 of them completely, so the rejection is narrower than it reads and the measurements are recorded
 here rather than left to be redone.
@@ -176,7 +176,7 @@ inventing each entry independently and waiting for someone to spot the next Limp
 
 Two things are unknown and should not be assumed: whether a dataset exists at BirdView's coverage,
 and whether its license permits use. Both have sunk candidate sources before. Adoption would follow
-the usual path — a `requirements.md` entry and a compose-and-resolve pass.
+the usual path — a `module.md` entry and a compose-and-resolve pass.
 
 ## Sketch: one dash per vertebra
 

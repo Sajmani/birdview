@@ -35,7 +35,7 @@ import (
 func TestVendoredHashesMatch(t *testing.T) {
 	// Table rows of the form | `//path` | origin | `sha256` |
 	row := regexp.MustCompile("\\|\\s*`//([^`]+)`\\s*\\|[^|]*\\|\\s*`([0-9a-f]{64})`\\s*\\|")
-	records, err := filepath.Glob(filepath.Join("..", "requirements", "sources", "*", "PROVENANCE.md"))
+	records, err := filepath.Glob(filepath.Join("..", "requirements", "imported", "*", "*", "PROVENANCE.md"))
 	if err != nil {
 		t.Fatal(err)
 	}

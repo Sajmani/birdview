@@ -1,0 +1,8 @@
+# An imported package is not counted, but its structure is still checked.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem missing-package-decl requirements/imported/example.org/rules/rules.md

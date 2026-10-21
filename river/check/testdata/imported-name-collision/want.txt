@@ -1,0 +1,7 @@
+# An imported package may share a local package's name; uniqueness covers this module's own packages.
+exit 0
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0

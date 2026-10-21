@@ -5,4 +5,4 @@ goals 1
 gradients 0
 unjustified 0
 unserved 0
-problem superseded-heading requirements/sources/product/product.md
+problem superseded-heading requirements/local/product/product.md

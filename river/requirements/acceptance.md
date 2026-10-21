@@ -85,20 +85,20 @@ it fail by lowering a generated color's luminance.
 **Every vendored source matches its recorded hash**
 
 **Verifies:** tech.recordBeforeConsuming, goals.goodDataCitizen · **Level:** spec · **Method:** hash each committed input and compare
-against `river/requirements/sources/*/PROVENANCE.md`
+against `river/requirements/imported/*/*/PROVENANCE.md`
 **Run:** `go test ./river/check/ -run TestVendoredHashesMatch` — translated from Python on 2026-10-16,
 checking the same seven files, and watched failing on a changed recorded hash
 **Status: verified — run 2026-09-21, passing** for `avonet` and `fox-wingspan`, **and watched
 failing**: zeroing AVONET's recorded hash produced exit 1 and a recorded-vs-actual diff.
 **Scope exception:** `wiley` is quoted, not vendored, so it has no hash to check — see
-[requirements.md](requirements.md#wiley). `aba` is fetched at build and checked by sortsAscending instead.
+[module.md](module.md#wiley). `aba` is fetched at build and checked by sortsAscending instead.
 
 ### quotationsAreVerbatim
 
 **Every quotation from a vendored source is word for word**
 
 **Verifies:** tech.recordBeforeConsuming · **Level:** spec · **Method:** every block quotation in a
-transcribed source's `requirements.md` is found in the text of a file that source vendors,
+transcribed source's `<pkg>.md` is found in the text of a file that source vendors,
 ignoring markup, whitespace and the style of quotation mark, and splitting at an ellipsis
 **Run:** `go test ./river/check/ -run TestQuotationsAreVerbatim`
 **Status: verified 2026-10-16, passing, and watched failing** — changing the large-text ratio in
@@ -555,7 +555,7 @@ selects or clears **every** family in it, labeled with its common name; and **Al
 same way over the whole set, clearing the selection when untoggled.
 **Status: verified 2026-09-22 — passing, and watched failing** by alphabetizing the family list,
 and separately by making the order toggle add only its first family. **Counts moved above the
-list 2026-10-02** ([product.familyFilter](sources/product/filtering.md#familyfilter)), watched failing by putting a count back on the
+list 2026-10-02** ([product.familyFilter](local/product/filtering.md#familyfilter)), watched failing by putting a count back on the
 chips — which is the direction the mistake would come from, since the count reads as helpful
 right up until a second filter makes it false.
 
@@ -670,12 +670,12 @@ closed: the region filter made an empty intersection reachable through the UI, a
 **Status: verified 2026-09-22 — passing, and watched failing** both by treating an emptied
 selection as "no filter" (the previous behavior, which showed every bird) and by reverting the
 message to "No species match that filter". **The filter description was added 2026-10-02**
-([product.helpfulEmptyState](sources/product/presentation.md#helpfulemptystate)) and watched failing by describing a filter that narrows nothing, and
+([product.helpfulEmptyState](local/product/presentation.md#helpfulemptystate)) and watched failing by describing a filter that narrows nothing, and
 by making the nothing-selected branch claim a failed match.
 
 **The description is tested through the function, not the page, and that is a gap.** With only a
 family filter the empty-intersection branch is **unreachable through the UI** — one filter cannot
-contradict itself. It becomes reachable when the region filter of [product.regionAndMonthFilter](sources/product/filtering.md#regionandmonthfilter)
+contradict itself. It becomes reachable when the region filter of [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter)
 lands, and this should become a rendering test then. Recorded rather than left for someone to
 discover the branch was never exercised end to end.
 
@@ -688,7 +688,7 @@ discover the branch was never exercised end to end.
 detail page cannot consume the saved position; the detail view ships no script; the controls carry
 an `id` so `#controls` works as a fallback target; both panels carry ids so their collapsed state
 can be keyed on; every panel defaults to **closed** and carries a one-line description in its
-summary ([product.collapsibleControls](sources/product/presentation.md#collapsiblecontrols)); and panel state is restored **before** the scroll.
+summary ([product.collapsibleControls](local/product/presentation.md#collapsiblecontrols)); and panel state is restored **before** the scroll.
 **Status: verified 2026-09-22, amended 2026-10-04 — passing, and watched failing** by
 externalizing the script, by removing its path guard, by dropping a panel's id, and by reordering
 the restores so the scroll runs first. The default was *open* until product.collapsibleControls changed it; the
@@ -733,7 +733,7 @@ of the attribution, so an unasserted credit is a licence breach waiting to happe
 The second half exists because the first version of this footer said the ABA checklist was "used by
 permission". It is not — that request has not been sent. Claiming a right you have not been granted
 is worse than claiming none, because it misleads the rights holder's own readers. Remove that
-assertion only when a written grant exists and is recorded in [requirements.md](requirements.md).
+assertion only when a written grant exists and is recorded in [module.md](module.md).
 
 ### craniumVaries
 
@@ -1058,7 +1058,7 @@ check would have asserted on `class="dlabel est"`, which was present, correct, a
 recorded here as dead on real data — 0 of 841 species needed it — because the detail view draws
 every bird to fill its box, so no two segments are closer than the line height. That note
 predicted "a larger font, a shorter box or a new segment would all wake it". What actually woke it
-was [product.comparisonOneScale](sources/product/presentation.md#comparisononescale), which is none of the three: at a scale set by a larger bird, a
+was [product.comparisonOneScale](local/product/presentation.md#comparisononescale), which is none of the three: at a scale set by a larger bird, a
 small one's five segments collapse into a few pixels and the resolver is the only reason its
 labels can be read at all.
 
@@ -1468,7 +1468,7 @@ over the real mass range, then check it against an interval taken from published
 
 **Assertions, the exponent:** fitting log trunk on log mass across the dataset's mass range
 recovers an exponent inside **0.338 – 0.401** — the intersection of the 95% confidence intervals
-[`bohmer-neck`](requirements.md#bohmer-neck) reports for neck length and total leg length, the two
+[`bohmer-neck`](module.md#bohmer-neck) reports for neck length and total leg length, the two
 multi-element dimensions it measures.
 
 **Assertions, the interval actually discriminates:** the superseded exponent **0.310 lies outside
@@ -1616,8 +1616,8 @@ instead of "the selector is broken". That is the same confusion familyListWraps 
 that depended on the structure under test reported its own failure rather than the defect.
 
 **Status: verified 2026-10-02 — passing, and watched failing** by the live defect it was written
-for: **Names**, added with [product.englishNameChoice](sources/product/diagram.md#englishnamechoice), was a control with no documentation, and
-this criterion is what caught it. **Re-verified after the panel split** ([product.collapsibleControls](sources/product/presentation.md#collapsiblecontrols)),
+for: **Names**, added with [product.englishNameChoice](local/product/diagram.md#englishnamechoice), was a control with no documentation, and
+this criterion is what caught it. **Re-verified after the panel split** ([product.collapsibleControls](local/product/presentation.md#collapsiblecontrols)),
 where it immediately caught the Family documentation left behind in the Controls box. Also watched failing by deleting the Units entry, by adding an
 entry for a control that does not exist, and by breaking the extraction selector so both sets come
 back empty.
@@ -1637,7 +1637,7 @@ the two sets is the only form of this check that fails when someone adds a contr
 others; no parameter shows all; and an explicitly empty `region=` shows none, the same
 absent-versus-empty distinction the family filter draws.
 
-**Assertions, the selector:** the box offers **both groupings** of [product.regionsGroupedTwoWays](sources/product/months.md#regionsgroupedtwoways),
+**Assertions, the selector:** the box offers **both groupings** of [product.regionsGroupedTwoWays](local/product/months.md#regionsgroupedtwoways),
 each labelled and each carrying a note saying whether it is measured or drawn, with
 **Geographic first**; within each,
 regions are grouped into zones, **Pelagic is the last zone**, and every region is present, each
@@ -1649,7 +1649,7 @@ box and checking only the final one passed on the hand-drawn grouping alone and 
 grouping's ordering unchecked — one of the whole-page assertions this file keeps having to
 scope.
 
-**Assertions, composition:** region and family narrow together ([product.filtersCompose](sources/product/months.md#filterscompose)), and
+**Assertions, composition:** region and family narrow together ([product.filtersCompose](local/product/months.md#filterscompose)), and
 an empty intersection renders the empty state naming **both** filters — which is now reachable
 through the UI, where with one filter it was not.
 
@@ -1751,12 +1751,12 @@ than silently vanish from the control.
 
 **The hand-drawn birder grouping this criterion also covered is gone**, retired by
 [decisions.habitatDietSpeciesLevel](decisions.md#habitatdietspecieslevel) in favour of the per-species filters of
-[product.habitatAndDietFilters](sources/product/months.md#habitatanddietfilters). Its distinctness and ordering assertions went with it, and so did
+[product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters). Its distinctness and ordering assertions went with it, and so did
 [decisions.familyInTwoGroups](decisions.md#familyintwogroups)'s cap on duplicate placements — there is no hand-drawn grouping
 left for a family to be placed in twice.
 
 **Assertions, the tile:** a tile carries **exactly one badge**. This is the assertion that
-keeps [product.tileContents](sources/product/presentation.md#tilecontents) true when a third grouping arrives: without a count, "the other
+keeps [product.tileContents](local/product/presentation.md#tilecontents) true when a third grouping arrives: without a count, "the other
 groupings need no badge" is a sentence in a decision record rather than a property of the code.
 It is a count, not a list of forbidden badges, because a list invites one more entry.
 
@@ -1797,7 +1797,7 @@ after names and families moved to AviList.
 **What this cannot check, stated so nobody assumes otherwise:** whether the prose is *true*. A
 test can compare a number against the dataset and a credit against a page; it cannot read
 `docs/using.md` and notice that the control it describes was redesigned. That remains a reading
-task before release, and [product.selfDescriptionStaysTrue](sources/product/presentation.md#selfdescriptionstaystrue) requires it as a release gate rather than
+task before release, and [product.selfDescriptionStaysTrue](local/product/presentation.md#selfdescriptionstaystrue) requires it as a release gate rather than
 pretending a test covers it.
 
 **Counts are checked only where a claim is about the whole dataset** — "N species across M
@@ -1833,7 +1833,7 @@ the failure mode is an opinion of ours sitting unlabelled beside a published fac
 **Assertions, regions:** the regions a bird is listed in are **one row**, not a row apiece.
 They share a single rule, so sixty copies of one sentence would bury the habitat rows where
 BirdView sometimes differs from AVONET. A bird in no region gets **no** Regions row rather than
-an empty one — six species are at sea where no land polygon reaches ([product.regionAndMonthFilter](sources/product/filtering.md#regionandmonthfilter))
+an empty one — six species are at sea where no land polygon reaches ([product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter))
 and must not be shown as placed nowhere by a rule.
 
 **Assertions, links:** where provenance is an algorithm, the cell names the rule and links to a
@@ -1844,7 +1844,7 @@ with a 200 and lands the reader nowhere near the explanation, which is how the r
 to cite a document that said nothing whatever about regions.
 
 **Assertions, between documents:** every internal link in every served document resolves. The
-guides cite the spec as `../river/requirements/sources/product/`, which is right in a checkout and a 404 in a
+guides cite the spec as `../river/requirements/local/product/`, which is right in a checkout and a 404 in a
 browser, and the per-species link check could not see it because these are links between
 documents rather than on a species page. **Relative links are resolved as a browser resolves
 them**, against the page they sit on; until 2026-10-15 the check followed only absolute links,
@@ -1858,8 +1858,8 @@ with an HTML comment and was listed in the index as `<!--`; the requirements are
 served, and the rule stands for the guides.
 
 **Assertions, what is not served:** nothing under `river/` or `third_party/` is served.
-`river/requirements/sources/` and `third_party/` hold other people's terms and must not be reachable
-([tech.fetchRestrictedInputs](sources/tech/delivery.md#fetchrestrictedinputs)). Since [decisions.requirementsNotServed](decisions.md#requirementsnotserved) nothing under `river/` is embedded
+`river/requirements/imported/` and `third_party/` hold other people's terms and must not be reachable
+([tech.fetchRestrictedInputs](local/tech/delivery.md#fetchrestrictedinputs)). Since [decisions.requirementsNotServed](decisions.md#requirementsnotserved) nothing under `river/` is embedded
 at all; the probes remain, so that serving the requirements again cannot quietly bring the
 vendored terms back with them.
 
@@ -1897,7 +1897,7 @@ never shown untranslated.
 
 **Assertions, origin:** every assignment carries an origin. A published one names its source,
 a `birdview` one gives its reason. An assignment with no origin fails: that is the
-opinion-as-finding failure [product.categoryProvenance](sources/product/measurements.md#categoryprovenance) exists to prevent.
+opinion-as-finding failure [product.categoryProvenance](local/product/measurements.md#categoryprovenance) exists to prevent.
 
 **Assertions, the supplementary table:** **every key is a species in the dataset.** This is the
 assertion the table most needs — a key AviList does not use misses silently, adds nothing, and
@@ -2018,7 +2018,7 @@ Honest gaps, rather than criteria that would not bite:
   familyFilterSelectsAndClears and familyListWraps do not close this gap: they check the selector's structure and layout, not
   what clicking a family does.
 - **tech.localNowPublicLater (never commercial).** A standing posture with no code to check. It is enforced by the
-  human gate and by `requirements.md`, not by a test.
+  human gate and by `module.md`, not by a test.
 - **product.tileOpensDetail (detail view)** is only partially covered: detailShowsProvenance checks that provenance appears there,
   not that the rest of the view is right.
 
@@ -2031,7 +2031,7 @@ result here — a check believed but never seen failing is worse than no check.
 
 **"Only" narrows to one group and leaves other sections alone**
 
-**Verifies:** [product.onlyPerGroup](sources/product/presentation.md#onlypergroup) · **Level:** code · **Method:** rendering tests over the
+**Verifies:** [product.onlyPerGroup](local/product/presentation.md#onlypergroup) · **Level:** code · **Method:** rendering tests over the
 index, following each control's own URL
 
 **Assertions:** every group selector in Regions, Diet and Habitat and Families is followed by an
@@ -2057,7 +2057,7 @@ then cleared by a diet click).
 
 **Mass is written in one unit across a comparison**
 
-**Verifies:** [product.oneUnitInComparison](sources/product/presentation.md#oneunitincomparison) · **Level:** code · **Method:** unit tests over
+**Verifies:** [product.oneUnitInComparison](local/product/presentation.md#oneunitincomparison) · **Level:** code · **Method:** unit tests over
 `unitsFor`, plus rendering tests over the index and comparison pages
 
 **Assertions, the rule:** the smallest mass in a scope chooses the unit, so a scope spanning the
@@ -2084,7 +2084,7 @@ per-value unit, which makes sections 36, 37 and 38 render both `oz` and `lb`.
 
 **Every family's neck ratio has been looked at**
 
-**Verifies:** [product.neckModelPerFamily](sources/product/diagram.md#neckmodelperfamily) · **Level:** code · **Method:** test over the compiled
+**Verifies:** [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily) · **Level:** code · **Method:** test over the compiled
 dataset against `internal/morphology`
 
 **Assertions:** every family in the dataset that is **not** in Passeriformes appears either in
@@ -2112,7 +2112,7 @@ both.
 
 **The commonest-region share is a share, and its citation resolves**
 
-**Verifies:** [product.shareOfRecords](sources/product/presentation.md#shareofrecords), [product.categoryProvenance](sources/product/measurements.md#categoryprovenance) · **Level:** code ·
+**Verifies:** [product.shareOfRecords](local/product/presentation.md#shareofrecords), [product.categoryProvenance](local/product/measurements.md#categoryprovenance) · **Level:** code ·
 **Method:** unit tests over the metric, rendering tests over the tile and detail page, and a
 walk of every anchored citation the site emits
 
@@ -2127,7 +2127,7 @@ raises its share. Region ids and their counts travel as parallel slices, so thei
 pinned, no count exceeds its region's total, and every region a species is placed in has a
 total to divide by. The line renders on **every** tile, em dash and all, because a line that
 appears on some tiles and not others makes those tiles shorter and takes the whole flex row out
-of step. The footer stays one line ([product.tileContents](sources/product/presentation.md#tilecontents)) — a fourth cell there wrapped it,
+of step. The footer stays one line ([product.tileContents](local/product/presentation.md#tilecontents)) — a fourth cell there wrapped it,
 which is why the share has its own line.
 
 **Assertions, the citation:** every `#fragment` the site emits resolves to a heading in the
@@ -2152,7 +2152,7 @@ shape it was written to catch.
 
 **No served page publishes a contact address**
 
-**Verifies:** [product.noPersonalAddress](sources/product/presentation.md#nopersonaladdress) · **Level:** code · **Method:** rendering test over every
+**Verifies:** [product.noPersonalAddress](local/product/presentation.md#nopersonaladdress) · **Level:** code · **Method:** rendering test over every
 served page, including every document the two indexes list
 
 **Assertions:** no page matches a plain address, the spelled-out obfuscation, or a mail link.
@@ -2180,7 +2180,7 @@ sentence, which reports it on every page that renders the header.
 
 **A species left out of scope is named and explained, at 404**
 
-**Verifies:** [product.undrawnSpeciesAnswer](sources/product/presentation.md#undrawnspeciesanswer), [decisions.speciesUrlOutlivesSpecies](decisions.md#speciesurloutlivesspecies) · **Level:** code ·
+**Verifies:** [product.undrawnSpeciesAnswer](local/product/presentation.md#undrawnspeciesanswer), [decisions.speciesUrlOutlivesSpecies](decisions.md#speciesurloutlivesspecies) · **Level:** code ·
 **Method:** handler test over the real dataset, plus an ingest test over the real status table
 
 **Assertions:**
@@ -2222,7 +2222,7 @@ an ingest that publishes no evidence at all.
 
 **The eighth mutation is the one worth keeping.** It is not a hypothetical: deriving the
 rejected set from `Status.InScope()` instead of from the complement of `Scope()` is the obvious
-way to write it, and it silently republishes the nine [product.declaredExceptions](sources/product/dataset.md#declaredexceptions) exceptions —
+way to write it, and it silently republishes the nine [product.declaredExceptions](local/product/dataset.md#declaredexceptions) exceptions —
 birds that are in scope *with* an out-of-scope status — as epitaphs for birds the index is
 drawing. Three guards caught it independently, which is the right number for an invariant that
 decides what a URL means.
@@ -2231,7 +2231,7 @@ decides what a URL means.
 
 **The commonest region is the largest share, and the seas are out of the ratio**
 
-**Verifies:** [product.shareOfRecords](sources/product/presentation.md#shareofrecords), [decisions.seaShareDiffers](decisions.md#seasharediffers) · **Level:** code ·
+**Verifies:** [product.shareOfRecords](local/product/presentation.md#shareofrecords), [decisions.seaShareDiffers](decisions.md#seasharediffers) · **Level:** code ·
 **Method:** dataset test over all 1,083 species, plus rendering tests for the wording
 
 **Assertions:**
@@ -2296,7 +2296,7 @@ now catches it is the check nobody had written.
 
 **The peak region and the index share are one calculation**
 
-**Verifies:** [product.shareOfRecords](sources/product/presentation.md#shareofrecords), [decisions.honestSeaDenominator](decisions.md#honestseadenominator) · **Level:** code ·
+**Verifies:** [product.shareOfRecords](local/product/presentation.md#shareofrecords), [decisions.honestSeaDenominator](decisions.md#honestseadenominator) · **Level:** code ·
 **Method:** dataset test over every placed species, plus a client test for the measurement
 
 **Assertions:**
@@ -2349,7 +2349,7 @@ off-land count, silently stored.
 
 **Responses compress, and say that they did**
 
-**Verifies:** [tech.compressedResponses](sources/tech/delivery.md#compressedresponses) · **Level:** code · **Method:** handler test over a page,
+**Verifies:** [tech.compressedResponses](local/tech/delivery.md#compressedresponses) · **Level:** code · **Method:** handler test over a page,
 a detail view, a static file and a served document
 
 **Assertions:**
@@ -2359,7 +2359,7 @@ a detail view, a static file and a served document
 2. Without it, no `Content-Encoding` and the plain body.
 3. `Vary: Accept-Encoding` on **both**.
 4. No `Content-Length` describing the uncompressed body survives.
-5. A [product.undrawnSpeciesAnswer](sources/product/presentation.md#undrawnspeciesanswer) 404 keeps its status **and** its `Content-Encoding`.
+5. A [product.undrawnSpeciesAnswer](local/product/presentation.md#undrawnspeciesanswer) 404 keeps its status **and** its `Content-Encoding`.
 6. Each page saves at least 50%, with the real figure logged rather than asserted.
 
 **The header is asserted before the body, and that order is the criterion.** Reading the body
@@ -2388,7 +2388,7 @@ for a served document.
 
 **Frequency orders commonest first, in tiers of powers of ten**
 
-**Verifies:** [product.orderByFrequency](sources/product/presentation.md#orderbyfrequency), [decisions.frequencyMetric](decisions.md#frequencymetric) · **Level:** code ·
+**Verifies:** [product.orderByFrequency](local/product/presentation.md#orderbyfrequency), [decisions.frequencyMetric](decisions.md#frequencymetric) · **Level:** code ·
 **Method:** rendering test over the real dataset, reading the section headers
 
 **Assertions:**
@@ -2442,7 +2442,7 @@ that varies by metric is the same bug by a different road.
 
 **A count covering two species says so, on the tile and on the page**
 
-**Verifies:** [product.namesRecordsFiledUnder](sources/product/presentation.md#namesrecordsfiledunder), [decisions.sharedCountShownOnBoth](decisions.md#sharedcountshownonboth) · **Level:** code ·
+**Verifies:** [product.namesRecordsFiledUnder](local/product/presentation.md#namesrecordsfiledunder), [decisions.sharedCountShownOnBoth](decisions.md#sharedcountshownonboth) · **Level:** code ·
 **Method:** rendering test over the real dataset, both members of every declared shared name
 
 **Assertions:**
@@ -2474,7 +2474,7 @@ not exist. Nine species are in that state.
 
 **The region join normalizes names, and reports what it could not match**
 
-**Verifies:** [product.joinsReportDrops](sources/product/dataset.md#joinsreportdrops), [decisions.regionJoinNormalizes](decisions.md#regionjoinnormalizes) · **Level:** code and
+**Verifies:** [product.joinsReportDrops](local/product/dataset.md#joinsreportdrops), [decisions.regionJoinNormalizes](decisions.md#regionjoinnormalizes) · **Level:** code and
 build · **Method:** unit test over the shared normalization, plus a bounded report on every run
 
 **Assertions:**
@@ -2511,7 +2511,7 @@ return the project has had on a check written to assert an invariant rather than
 
 **Every species the two sources disagree about is declared**
 
-**Verifies:** [product.sourceNamingMeasured](sources/product/dataset.md#sourcenamingmeasured) · **Level:** code · **Method:** offline test over the
+**Verifies:** [product.sourceNamingMeasured](local/product/dataset.md#sourcenamingmeasured) · **Level:** code · **Method:** offline test over the
 committed correspondence table
 
 **Assertions:**
@@ -2553,7 +2553,7 @@ Re-run with the anchor asserted, it fails as above.
 
 **Both readers of the occurrence data land on the same species**
 
-**Verifies:** [product.joinsReportDrops](sources/product/dataset.md#joinsreportdrops), [decisions.regionJoinNormalizes](decisions.md#regionjoinnormalizes) · **Level:** code ·
+**Verifies:** [product.joinsReportDrops](local/product/dataset.md#joinsreportdrops), [decisions.regionJoinNormalizes](decisions.md#regionjoinnormalizes) · **Level:** code ·
 **Method:** unit test over the two pipelines, from one verbatim name to the name each joins on
 
 **Assertions:**
@@ -2580,7 +2580,7 @@ not a defect, so the criterion compares the name each finally joins on — a che
 intermediate value would report the difference as a bug every run.
 
 **Why a hybrid is kept rather than dropped.** It is a bird somebody saw, so it belongs in the
-denominator of [product.shareOfRecords](sources/product/presentation.md#shareofrecords)'s figure; it is no species BirdView draws, so it
+denominator of [product.shareOfRecords](local/product/presentation.md#shareofrecords)'s figure; it is no species BirdView draws, so it
 belongs in nobody's numerator. Kept verbatim it is both, and it appears in the orphan report
 under a name a reader recognizes as the deliberate loss it is.
 
@@ -2617,7 +2617,7 @@ up, not a new decision about either.
 
 **The figure says what it counts, and it is not individual birds**
 
-**Verifies:** [product.shareOfRecords](sources/product/presentation.md#shareofrecords) · **Level:** code · **Method:** unit test over the
+**Verifies:** [product.shareOfRecords](local/product/presentation.md#shareofrecords) · **Level:** code · **Method:** unit test over the
 rendered tile cell and the tooltip beside it
 
 **Assertions:**
@@ -2650,7 +2650,7 @@ robin's own tile — the vacuous-check shape this project has now paid for about
 
 **The detail page says everything the tile says**
 
-**Verifies:** [product.tileOpensDetail](sources/product/presentation.md#tileopensdetail), [product.shareOfRecords](sources/product/presentation.md#shareofrecords) · **Level:** code ·
+**Verifies:** [product.tileOpensDetail](local/product/presentation.md#tileopensdetail), [product.shareOfRecords](local/product/presentation.md#shareofrecords) · **Level:** code ·
 **Method:** property test comparing rendered tiles against rendered detail pages, under two
 region scopes
 
@@ -2665,9 +2665,9 @@ region scopes
 4. The index parse is floored per scope — 1,000 tiles unfiltered, 300 in Alaska — so a regex
    that silently matched nothing cannot make the rest vacuous.
 
-**The gap this closes.** [product.tileOpensDetail](sources/product/presentation.md#tileopensdetail) described the detail view as a larger
+**The gap this closes.** [product.tileOpensDetail](local/product/presentation.md#tileopensdetail) described the detail view as a larger
 version of the tile "plus" three additions, and the *plus* was read as permission to add to
-the detail page rather than as a floor under it. So when [product.shareOfRecords](sources/product/presentation.md#shareofrecords)'s figure
+the detail page rather than as a floor under it. So when [product.shareOfRecords](local/product/presentation.md#shareofrecords)'s figure
 went onto every tile it never reached the detail page: a reader saw `1 in 23,393 species
 observations (all regions)` on the Northern Yellow Warbler's tile, opened the bird, and found
 only `Top region — 1 in 2,986 there`. A different number, in the same unit, for a scope they
@@ -2698,7 +2698,7 @@ statement about the two functions — they differ only in the seam disclosure, w
 
 **Every name the occurrence data disputes is named on the page**
 
-**Verifies:** [product.namesRecordsFiledUnder](sources/product/presentation.md#namesrecordsfiledunder) · **Level:** code · **Method:** property test over the
+**Verifies:** [product.namesRecordsFiledUnder](local/product/presentation.md#namesrecordsfiledunder) · **Level:** code · **Method:** property test over the
 five naming tables and the rendered detail pages
 
 **Assertions:**
@@ -2715,7 +2715,7 @@ five naming tables and the rendered detail pages
 4. The expected set is floored at 25 species, so emptying the tables cannot make the rest
    vacuous.
 
-**Two of the four kinds were never implemented**, though [product.namesRecordsFiledUnder](sources/product/presentation.md#namesrecordsfiledunder) has named
+**Two of the four kinds were never implemented**, though [product.namesRecordsFiledUnder](local/product/presentation.md#namesrecordsfiledunder) has named
 the alias case since it was written — *"the page names the alias so a reader can find the bird
 in the source."* A visitor who knows the Hairy Woodpecker as *Dryobates villosus* and finds a
 page headed *Leuconotopicus villosus* could not tell a taxonomic update from a mistake, nor go
@@ -2727,7 +2727,7 @@ check would accept exactly that.
 
 **The all-rows rule is not reachable by test today.** No species is in two of the five tables,
 so a regression to the previous `if/else-if` chain would still pass. It is recorded in
-[product.namesRecordsFiledUnder](sources/product/presentation.md#namesrecordsfiledunder) as the required shape rather than asserted here, because the
+[product.namesRecordsFiledUnder](local/product/presentation.md#namesrecordsfiledunder) as the required shape rather than asserted here, because the
 alternative — inventing an overlap in the real tables to exercise it — would put a false entry
 in a published taxonomy to satisfy a test.
 
@@ -2739,7 +2739,7 @@ in a published taxonomy to satisfy a test.
 | the lump row is not emitted | `Numenius hudsonicus (whimbr3)`, `Gygis candida (whiter4)`, `Saxicola maurus (y00427)` |
 | a row is emitted for every species | the other direction: `Acanthis flammea (redpol1) is in none of the naming tables and still carries a "Recorded as" row` |
 
-**Still open: the record counts.** [product.namesRecordsFiledUnder](sources/product/presentation.md#namesrecordsfiledunder) asks for each source's binomial
+**Still open: the record counts.** [product.namesRecordsFiledUnder](local/product/presentation.md#namesrecordsfiledunder) asks for each source's binomial
 **and how many records it holds under it**, and only the binomial is on the page.
 [`data/source-names.tsv`](../../data/source-names.tsv) holds per-source counts and nothing reads
 it — but it counts under the *AviList* name only, so for an alias it reports eBird 0 and not
@@ -2750,7 +2750,7 @@ query the alias too, and a run. Recorded in [todo.md](../todo.md).
 
 **Every response can be revalidated, and the validator is honest**
 
-**Verifies:** [tech.cacheLifetimeStated](sources/tech/delivery.md#cachelifetimestated) · **Level:** code · **Method:** unit test over rendered
+**Verifies:** [tech.cacheLifetimeStated](local/tech/delivery.md#cachelifetimestated) · **Level:** code · **Method:** unit test over rendered
 responses, their headers and their conditional round trip
 
 **Assertions:**
@@ -2789,7 +2789,7 @@ one correctly.
 
 **The name disclosure is legible and its link lands on the explanation**
 
-**Verifies:** [product.namesRecordsFiledUnder](sources/product/presentation.md#namesrecordsfiledunder) · **Level:** code · **Method:** unit test over every
+**Verifies:** [product.namesRecordsFiledUnder](local/product/presentation.md#namesrecordsfiledunder) · **Level:** code · **Method:** unit test over every
 renamed species' rendered row
 
 **Assertions:**
@@ -2847,7 +2847,7 @@ reporting a pass. That is the second time this session and the same cause as the
 
 **Months filter the list, scope the figure, and abstain where they cannot tell**
 
-**Verifies:** [product.regionAndMonthFilter](sources/product/filtering.md#regionandmonthfilter), [product.shareOfRecords](sources/product/presentation.md#shareofrecords),
+**Verifies:** [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.shareOfRecords](local/product/presentation.md#shareofrecords),
 [decisions.monthPresence](decisions.md#monthpresence) · **Level:** code and build · **Method:** unit tests over the
 presence rule and the rendered index, plus a refusal in the build
 
@@ -2875,7 +2875,7 @@ number moving.
 
 **Assertion 3 is the half that is easy to get backwards.** A region with no birding in a month
 says nothing about any species in it, so calling the bird absent would report an absence of
-measurement as a measurement of absence — the distinction [product.undrawnSpeciesAnswer](sources/product/presentation.md#undrawnspeciesanswer) exists for.
+measurement as a measurement of absence — the distinction [product.undrawnSpeciesAnswer](local/product/presentation.md#undrawnspeciesanswer) exists for.
 
 **Assertion 6 earns its own function.** Winter is the selection a birder is most likely to
 make and the one a renderer that walks January to December mangles worst.
@@ -2913,7 +2913,7 @@ time from a known-clean tree.
 
 **A month eBird withholds is shown and explained, not read as absence**
 
-**Verifies:** [product.regionAndMonthFilter](sources/product/filtering.md#regionandmonthfilter), [product.namesRecordsFiledUnder](sources/product/presentation.md#namesrecordsfiledunder),
+**Verifies:** [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.namesRecordsFiledUnder](local/product/presentation.md#namesrecordsfiledunder),
 [decisions.ebirdSilenceNotAbsence](decisions.md#ebirdsilencenotabsence) · **Level:** code and build · **Method:** unit tests over the
 restated list, the confirmation rule and the table format, plus rendered pages on the real
 dataset
@@ -2963,8 +2963,8 @@ measurement.
 
 **eBird is counted; iNaturalist fills only the gaps eBird declares**
 
-**Verifies:** [product.scopeIsRecurringAvifauna](sources/product/dataset.md#scopeisrecurringavifauna), [product.regionAndMonthFilter](sources/product/filtering.md#regionandmonthfilter), [product.shareOfRecords](sources/product/presentation.md#shareofrecords),
-[product.namesRecordsFiledUnder](sources/product/presentation.md#namesrecordsfiledunder), [decisions.countEbirdFirst](decisions.md#countebirdfirst) · **Level:** code and build ·
+**Verifies:** [product.scopeIsRecurringAvifauna](local/product/dataset.md#scopeisrecurringavifauna), [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.shareOfRecords](local/product/presentation.md#shareofrecords),
+[product.namesRecordsFiledUnder](local/product/presentation.md#namesrecordsfiledunder), [decisions.countEbirdFirst](decisions.md#countebirdfirst) · **Level:** code and build ·
 **Method:** unit tests over the counting rule in `birdview-regions` and `birdview-status`, the
 derived `WithheldByEBird`, and the rebuilt tables
 
@@ -3038,7 +3038,7 @@ correctly never reached the join.
 
 **The pipeline diagram is served, current, self-contained and linked**
 
-**Verifies:** [product.pipelineDiagram](sources/product/measurements.md#pipelinediagram), [product.categoryProvenance](sources/product/measurements.md#categoryprovenance), [tech.selfContainedServer](sources/tech/delivery.md#selfcontainedserver) ·
+**Verifies:** [product.pipelineDiagram](local/product/measurements.md#pipelinediagram), [product.categoryProvenance](local/product/measurements.md#categoryprovenance), [tech.selfContainedServer](local/tech/delivery.md#selfcontainedserver) ·
 **Level:** code · **Method:** unit tests over the docs embed and the served pages
 
 **Assertions:**
@@ -3117,7 +3117,7 @@ the column, and the reader still names it where it reads the value.
 
 **Blue-billed White-Tern borrows from BirdLife's White Tern**
 
-**Verifies:** [product.lengthAndWingspanSources](sources/product/measurements.md#lengthandwingspansources), [product.provenancePerMetric](sources/product/measurements.md#provenancepermetric) · **Level:** code ·
+**Verifies:** [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources), [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) · **Level:** code ·
 **Method:** unit test over ingest output
 
 **Assertions:** *Gygis candida*'s bill and tail are `near-match`, with `sourceTaxon` *Gygis alba*
@@ -3144,7 +3144,7 @@ the code. The expected sheet is now written in the test.
 
 **Species drawn from the same measurements say so**
 
-**Verifies:** [product.borrowedMeasurementsSaySo](sources/product/measurements.md#borrowedmeasurementssayso) · **Level:** code · **Method:** unit test over ingest
+**Verifies:** [product.borrowedMeasurementsSaySo](local/product/measurements.md#borrowedmeasurementssayso) · **Level:** code · **Method:** unit test over ingest
 output, and rendering tests over the index and the detail page
 
 **Assertions:**
@@ -3180,7 +3180,7 @@ the tile checks reported tiles missing altogether. The table records the clean d
 
 **European Herring Gull is read from BirdLife's European-only row**
 
-**Verifies:** [product.lengthAndWingspanSources](sources/product/measurements.md#lengthandwingspansources), [product.provenancePerMetric](sources/product/measurements.md#provenancepermetric) · **Level:** code ·
+**Verifies:** [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources), [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) · **Level:** code ·
 **Method:** unit test over ingest output
 
 **Assertions:** *Larus argentatus*'s bill, tail and mass are `measured`, with `source` naming
@@ -3203,7 +3203,7 @@ of falling back to the eBird sheet.
 
 **Records below the presence bar are counted**
 
-**Verifies:** [product.regionAndMonthFilter](sources/product/filtering.md#regionandmonthfilter), [product.shareOfRecords](sources/product/presentation.md#shareofrecords) · **Level:** code ·
+**Verifies:** [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.shareOfRecords](local/product/presentation.md#shareofrecords) · **Level:** code ·
 **Method:** unit tests on the table's reader and writer, and over the built dataset and the
 rendered index
 
@@ -3231,13 +3231,13 @@ rendered index
 The rebuilt table, from GBIF on 2026-10-13, holds 26,847 listed cells and 3,689 below the bar.
 Emu has 19 records in Texas and 14 regions in all, every one below the bar, and is listed under
 none. Of the 47 drawn species that read zero before, only Desertas Petrel still does: it has no
-open record at all ([product.declaredExceptions](sources/product/dataset.md#declaredexceptions)).
+open record at all ([product.declaredExceptions](local/product/dataset.md#declaredexceptions)).
 
 ### escapedBirdsListedAndServed
 
 **Escaped and kept birds are off the index, listed and still served**
 
-**Verifies:** [product.escapedBirdsListed](sources/product/measurements.md#escapedbirdslisted), [product.statusIsPublished](sources/product/dataset.md#statusispublished) · **Level:** code ·
+**Verifies:** [product.escapedBirdsListed](local/product/measurements.md#escapedbirdslisted), [product.statusIsPublished](local/product/dataset.md#statusispublished) · **Level:** code ·
 **Method:** unit test over ingest output, and rendering tests over the index, `/excluded` and
 the detail pages
 
@@ -3272,7 +3272,7 @@ birds: the index shows 1,041 of 1,082, and Casuariidae and Ramphastidae leave th
 
 **Readers are told the drawing is a stick figure**
 
-**Verifies:** [product.segmentComposition](sources/product/diagram.md#segmentcomposition), [decisions.stickFigure](decisions.md#stickfigure) · **Level:** code ·
+**Verifies:** [product.segmentComposition](local/product/diagram.md#segmentcomposition), [decisions.stickFigure](decisions.md#stickfigure) · **Level:** code ·
 **Method:** rendering test over the visible text of the index, a detail page, the comparison page
 and the using guide
 
