@@ -15,8 +15,8 @@
 // Package check is River's checker, translated into Go so it runs with
 // BirdView's own tests (River's decisions.checksInRepoLanguage).
 //
-// Translated from River's river/check/goals.py at pin 6025bee
-// (sso://user/sameer/river). What is normative is what the checker reports,
+// Translated from River's river/check/goals.py at pin 2962084 (River is not
+// yet published). What is normative is what the checker reports,
 // not how: a problem's code and path must match the reference exactly, and
 // testdata/ -- River's shared cases, copied at the same pin -- holds that to
 // account. When River's checker changes, retranslate and move the pin.

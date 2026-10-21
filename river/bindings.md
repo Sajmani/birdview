@@ -26,7 +26,7 @@ waits in `requirements/acceptance.md`. Not yet composed: `dataset` and `internal
 for the remaining 24 local requirements; the four mixed requirements in [todo.md](todo.md) are split
 first.
 
-**Checks.** All in **Go**, run by `go test`: River's checker, translated at River pin `6025bee`,
+**Checks.** All in **Go**, run by `go test`: River's checker, translated at River pin `2962084`,
 with River's shared cases copied at the same pin; BirdView's stricter goal rule; the vendored-file
 hashes; every quotation against its vendored source; every reference, anchor and relative link; and
 the composition fields. **The rendered contrast check needs Chrome** (`BIRDVIEW_CHROME` to point at

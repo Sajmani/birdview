@@ -1,5 +1,6 @@
-> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `6025bee`.
-> Local amendments, if any, are listed in [bindings.md](bindings.md).
+> Project copy of River's `README.md`, pin `2962084`, licensed under Apache 2.0 with the rest of BirdView.
+> River is not yet published; its canonical origin will be recorded here when it is. Local amendments,
+> if any, are listed in [bindings.md](bindings.md).
 
 # River
 
@@ -95,7 +96,7 @@ river/
 Each composed file says it is composed and from what, and is changed by recomposing, never by
 hand. Where a composed package sits is the record of who may import it: moving it into
 `exported/` exports it, and no other file lists exports. These names were chosen by testing candidate layouts on zero-context agents acting as new
-engineers (`usertests/` in River's repository).
+engineers.
 
 **Put the bundle in `river/` at the repository root**, unless you have a reason not to; if you
 put it elsewhere, say where in `bindings.md`. Paths inside it are relative to its root, and your
