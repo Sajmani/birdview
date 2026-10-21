@@ -49,7 +49,7 @@ withhold it there — and its records below the bar still count in its figure.
 
 As with families, everything is selected on arrival, with an **All** control and group toggles.
 The data is GBIF's, which serves eBird and iNaturalist under CC BY 4.0 with GADM regions as a
-queryable field ([decisions.noLocationData](../../decisions.md#nolocationdata)).
+queryable field ([decisions.regionFilterReinstated](../../decisions.md#regionfilterreinstated)).
 
 **Membership is per region and relative.** iNaturalist is judged against its own total, and only
 where eBird is confirmed to withhold the species there

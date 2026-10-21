@@ -205,7 +205,7 @@ length data is, not whether v1 can ship.
 
 Date: 2026-09-20
 Decided by: Sameer
-Status: accepted
+Status: superseded by regionFilterReinstated
 Affects: product.regionAndMonthFilter, product.filtersCompose
 Subject: `filter.location`
 Kind: Over-constraint
@@ -3874,3 +3874,42 @@ tech.cacheLifetimeStated twice.
 - **Now only with JavaScript**, inactive otherwise like Here. It drops the server-month fallback
   the owner accepted.
 
+---
+
+## regionFilterReinstated
+
+**Region filtering returns, because GBIF serves the per-region data noLocationData found missing**
+
+Date: 2026-10-02
+Recorded: 2026-10-21, from commit `396fcff`; the requirement was rewritten then, and no entry was written
+Decided by: Sameer
+Status: accepted
+Supersedes: noLocationData
+Affects: product.regionAndMonthFilter, product.filtersCompose
+
+### Decided
+
+product.regionAndMonthFilter and product.filtersCompose are reinstated. noLocationData withdrew
+them because no freely redistributable per-region occurrence data existed at useful granularity.
+It does now: GBIF serves eBird and iNaturalist under CC BY 4.0 with GADM regions as a queryable
+field, recorded as the `gbif` entry in [imports.md](imports.md#gbif). A species is listed in a
+region when it reaches one record per million of that region's own records. Region and family
+filters compose, and an empty intersection is a real outcome, distinct from nothing being
+selected.
+
+### Why
+
+From the commit that made the change. Each region is asked what bird names were reported there,
+faceting on `verbatimScientificName` rather than `speciesKey`: the `speciesKey` facet drops names
+GBIF's backbone cannot resolve, and reports no records for Cooper's Hawk. iNaturalist is queried
+alongside eBird because eBird withholds conservation-sensitive species outright; Spotted Owl is
+placed in eight western states from iNaturalist alone. Membership is relative, not a fixed count,
+because eBird doubled in five years and California's 114 million records cannot mean what
+Hawaii's 2.5 million do; deciding per region also keeps endemics a continental cut would drop. The
+first run placed 833 of 839 species across 69 regions. Two gaps it found: GADM files the
+Northwestern Hawaiian Islands under the Minor Outlying Islands, so those were added for Laysan Duck
+and Laysan Finch; and six pelagic species fall in no land region, which the requirement states so
+they are not filtered away silently.
+
+Later decisions built on the reinstated filter (regionsTwoWays, seaShareDiffers, monthPresence,
+countEbirdFirst, belowBarCounted) without this entry existing; it records what they assumed.
