@@ -1410,9 +1410,13 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	page := pageData{Feedback: s.feedback, Opt: opt, Total: len(s.ds.Species), Shown: len(filtered),
-		Query:    queryFor(r),
-		Filters:  describeView(s.fams, opt),
-		ClearURL: queryFor(r)("family", "region"),
+		Query:   queryFor(r),
+		Filters: describeView(s.fams, opt),
+		// Every filter, and nothing else: units, order and names are how the
+		// reader wants birds shown, not which. The keys go in queryFor's drop
+		// list; its returned function takes key-value pairs, and passing these
+		// there once set family=region.
+		ClearURL: queryFor(r, filterKeys...)(),
 	}
 	if sp := s.legendSpecies(); sp != nil {
 		lt := labelledTile(sp, legendBox, unitsFor(opt.Metric3, sp.Mass.Value), opt.Locale)
@@ -2346,6 +2350,10 @@ func (s *server) render(w http.ResponseWriter, name string, data any) {
 		log.Printf("birdview: rendering %s: %v", name, err)
 	}
 }
+
+// filterKeys are the query parameters that narrow which species are shown
+// (product.helpfulEmptyState's link clears exactly these).
+var filterKeys = []string{"family", "habitat", "niche", "region", "month"}
 
 // queryFor returns a helper that rewrites the current query string, so a
 // control can toggle one setting without discarding the others.

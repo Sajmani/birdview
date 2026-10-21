@@ -3736,6 +3736,44 @@ func TestFiltersAreNamedOnTheCountLine(t *testing.T) {
 	}
 }
 
+// TestClearTheFiltersClearsThem follows the empty state's link, which no test did: it is the
+// half of product.helpfulEmptyState that gives the dead end an exit. For a year it went nowhere.
+// First it changed nothing, then it set family=region, so a reader who clicked it landed on a page
+// with a nonsense family and the same empty list, and clicking again changed nothing.
+//
+// Verifies: product.helpfulEmptyState. Criterion: acceptance.emptyStateGuides.
+func TestClearTheFiltersClearsThem(t *testing.T) {
+	s := newTestServer(t)
+	filters := []string{"family", "habitat", "niche", "region", "month"}
+	empty := mustGet(t, s, "/?family=Ardeidae&region=AK&niche=Invertivore&habitat=Forest&month=1&units=metric&by=mass")
+	if !strings.Contains(empty, "No birds match") {
+		t.Fatal("Ardeidae in Alaska is no longer an empty intersection; pick another")
+	}
+	m := regexp.MustCompile(`No birds match\. <a href="([^"]+)">`).FindStringSubmatch(empty)
+	if m == nil {
+		t.Fatal("the empty state has no link that clears the filters")
+	}
+	u, err := url.Parse(html.UnescapeString(m[1]))
+	if err != nil {
+		t.Fatal(err)
+	}
+	q := u.Query()
+	for _, f := range filters {
+		if _, ok := q[f]; ok {
+			t.Errorf("Clear the filters keeps %s=%q: %s", f, q[f], m[1])
+		}
+	}
+	for k, want := range map[string]string{"units": "metric", "by": "mass"} {
+		if q.Get(k) != want {
+			t.Errorf("Clear the filters dropped the display setting %s=%s, which is not a filter: %s", k, want, m[1])
+		}
+	}
+	after := mustGet(t, s, u.String())
+	if strings.Contains(after, "No birds match") || strings.Count(tileArea(t, after), "tilewrap") == 0 {
+		t.Errorf("following Clear the filters still shows no birds: %s", m[1])
+	}
+}
+
 // TestDetailListsEveryCategoryWithItsOrigin asserts product.categoryProvenance: the detail page
 // names every group the bird is sorted into and says who decided.
 //

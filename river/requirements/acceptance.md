@@ -661,6 +661,11 @@ none.
 that clears the filters. It does **not** repeat the filter names, which the count line
 immediately above already carries; a test pins that they appear once on the page, not twice.
 
+**Status: the clear link verified 2026-10-21 — passing, and watched failing** against the code
+it replaced (`TestClearTheFiltersClearsThem`). No test had followed the link: it first changed
+nothing, then set `family=region` and kept every other filter, so the dead end had no exit. The
+link now drops month, region, habitat, diet and family, and keeps order, scale, units and names.
+
 **Status: the count-line half verified 2026-10-03 — passing, and watched failing** by removing
 the filter list from the count line, and by leaving it in the empty state as well, which puts
 four filter chips on a page that should carry two. The rendering gap recorded below is now
