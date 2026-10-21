@@ -40,7 +40,7 @@ Status: open
 Owner: Sameer
 Gate: when convenient
 
-River's decisions.requirementsReadme puts a source's version in `imports.md` and leaves
+River's decision `requirementsReadme` puts a source's version in `imports.md` and leaves
 `PROVENANCE.md` with retrieval details and the hash. `aba` and `naturalearth` still carry their own
 `Version` row in `PROVENANCE.md`, a second record of the same fact; drop it there, keeping any
 detail `imports.md` lacks (the ABA species count, Natural Earth's `VERSION.txt` evidence). Versions
