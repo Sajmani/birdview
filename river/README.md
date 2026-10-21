@@ -1,4 +1,4 @@
-> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `09f5eb2`.
+> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `6025bee`.
 > Local amendments, if any, are listed in [bindings.md](bindings.md).
 
 # River
@@ -86,7 +86,7 @@ river/
     precedence.md            standing rules: which source outranks which
     decisions.md             log of how each conflict and judgment was settled
     local/<name>/            a source written here: one source, one package
-    imported/<origin>/<name>/  another module's source, pinned, with PROVENANCE.md
+    imported/<import path>/  another module's source, pinned, with PROVENANCE.md
     composed/
       exported/<name>/       a composed package others may import, and its criteria
       internal/<name>/       a composed package private to this repository
@@ -119,6 +119,61 @@ searches and opens ranges; it should not have to read a file whole to find one i
   path of the open ones.
 - **Say how to search a long file** in one line at its top, and link rather than copy between
   files.
+
+### Keeping the bundle's files
+
+What each file under `requirements/` must contain, so that anyone adding to it keeps it
+consistent. **Read this before writing to any of them.** An existing entry is a good example of
+the format, but it cannot show the rules below that only apply when something changes.
+
+**`decisions.md`** — one entry per decision, oldest first, appended at the end. Each is
+`## <id>`, a bold line stating the decision, then one field per line:
+
+```
+Date: 2026-10-07
+Decided by: <person>
+Status: accepted | amended by <id>, <id> | superseded by <id>
+Supersedes: <id>     (only when it replaces an earlier decision in whole)
+Amends: <id>, <id>   (only when it changes earlier decisions in part)
+Affects: product.x   (the requirements it changes or settles, not ones it merely cites)
+Expires: 2027-01-01  (only for an accepted gap: when it must be looked at again)
+```
+
+Then `### Decided`, the decision itself, before the reasons; `---` ends the entry. If no reason
+was given, say so rather than supplying one. Other fields may follow these, and `Status:` may
+carry a note after a semicolon. **Entries are append-only with one exception:** when a new entry
+supersedes or amends an earlier one, change the earlier entry's `Status:` line to say so, and
+nothing else in it, so that a reader of the old entry learns it is no longer the whole story.
+Accepting a gap is a decision: `Affects:` names the unmet requirement, and `Expires:` is required.
+To seek: `awk '/^## /{id=$2} /^Affects:.*\.offlineMode(,|$)/{print id}' decisions.md` lists what
+touches a requirement, and `awk '/^## /{id=$2} /^Status: (amended|superseded)/{print id": "$0}'`
+lists what is no longer in force as written.
+
+**`imports.md`** — one entry per imported source, `` ## `<name>` ``, then a field table: Name,
+Origin, Version, Integrity, Tier, Import style (`vendored`, `fetched at build`, `queried`,
+`quoted`, `absorbed`, `consulted`), Scope, Adopted parts, Owner, Status. The version is recorded
+here and nowhere else. **Status** is `adopted` when every part named in Adopted parts is in force,
+`partial` when some named part is not yet (not transcribed, not pinned, not checked), `rejected`
+when evaluated and declined, and `retired` when adopted and later removed; adopting one criterion
+of a large standard is a narrow Adopted parts, not `partial`.
+
+**`imported/<import path>/`** — one directory per imported source, at its import path: the host
+that publishes it, then the path naming the publisher's project, ending in the package name, the
+way a Go import path does: `github.com/OWASP/asvs`, `w3.org/wcag`. A source known by a DOI uses
+the publisher behind it (`figshare.com/avonet`), not the resolver. The directory holds
+`<name>.md` (first line `package <name>`, then the transcribed items, each `## <Identifier>` with
+a bold title) and `PROVENANCE.md` (each file's path, origin and SHA-256, and how and when it was
+retrieved). Mark anything not yet retrieved as such; never fill it in from memory. The source's
+tier goes in `precedence.md`.
+
+**`precedence.md`** — one table of tiers, highest first, naming the sources in each. A source is
+added to a tier when it is imported.
+
+**Composed packages** — each opens by saying what it is composed from and that it is changed by
+recomposing. **Without a composition tool, recompose by hand:** rewrite the file from its sources,
+`precedence.md` and `decisions.md`, in a commit that says it recomposed and why. A requirement
+accepted as unmet stays listed, with the decision beside it, as an excluded one is (below):
+`— <title>. Accepted unmet by decisions.<id>`, the decision linked.
 
 ---
 
@@ -293,7 +348,8 @@ their own, and the order they run in is part of the contract, checked where they
 **Never resolve a conflict silently.** Two requirements that disagree go to `decisions.md`:
 what conflicted, which sources, what was decided, by whom, and on what authority. Records are
 append-only: a decision that turns out badly is superseded by a new one, never edited, because
-the record of having been wrong is worth keeping.
+the record of having been wrong is worth keeping. Only its `Status:` line changes, to point at
+what replaced it (*Keeping the bundle's files*, above).
 
 ### Anatomy
 
@@ -490,8 +546,8 @@ at all. The last is the most common, and the usual mistake is to write it down a
 
 **Unsatisfiable** has three dispositions: weaken it to what is achievable, withdraw it, or
 **accept the gap** — keep the requirement and record in `decisions.md` that it is not met, by
-whom, on what grounds, and when it will be looked at again. An accepted gap with no review date
-is indistinguishable from a forgotten one.
+whom, on what grounds, and when it will be looked at again, in its `Expires:` field. An accepted
+gap with no review date is indistinguishable from a forgotten one.
 
 **Release feedback is not a weaker verification.** A guardrail catches only violations of
 criteria that exist, so it cannot see anything outside the written set, and that is where most

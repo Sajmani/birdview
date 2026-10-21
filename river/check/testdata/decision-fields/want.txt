@@ -1,0 +1,11 @@
+# Every decision has Date (YYYY-MM-DD), Decided by, Status and Affects, and Status uses the
+# vocabulary: accepted, amended by <id>, superseded by <id>, optionally followed by "; note".
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem decision-missing-field requirements/decisions.md
+problem decision-missing-field requirements/decisions.md
+problem decision-bad-status requirements/decisions.md

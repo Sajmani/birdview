@@ -1,0 +1,11 @@
+# Supersedes and Amends name earlier decisions that exist, and each side of the link agrees:
+# the replaced entry's Status points back, and a Status pointer is matched by the newer entry.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem decision-status-mismatch requirements/decisions.md
+problem decision-unknown-ref requirements/decisions.md
+problem decision-status-mismatch requirements/decisions.md

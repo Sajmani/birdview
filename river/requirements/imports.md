@@ -43,7 +43,7 @@ alike. Both entries are kept so the evaluations are not repeated.
 | --- | --- |
 | **Origin** | https://doi.org/10.6084/m9.figshare.16586228 |
 | **Version** | v7 |
-| **Integrity** | [river/requirements/imported/doi.org/avonet/PROVENANCE.md](imported/doi.org/avonet/PROVENANCE.md) |
+| **Integrity** | [river/requirements/imported/figshare.com/avonet/PROVENANCE.md](imported/figshare.com/avonet/PROVENANCE.md) |
 | **Tier** | mandatory (copyright license) |
 | **Import style** | By reference; vendored at `//third_party/avonet/AVONET Supplementary dataset 1.xlsx` under the location exception in [bindings.md](../bindings.md#location-exception-the-third_party-directory) |
 | **Scope** | All morphometric traits (product.traitsFromAvonet, product.traitsPerSpecies) |
@@ -159,7 +159,7 @@ image, which [tech.selfContainedServer](local/tech/delivery.md#selfcontainedserv
 | --- | --- |
 | **Origin** | https://doi.org/10.2173/avilist.v2025b |
 | **Version** | v2025b, published 2026-06-11, **extended** release |
-| **Integrity** | [river/requirements/imported/doi.org/avilist/PROVENANCE.md](imported/doi.org/avilist/PROVENANCE.md) |
+| **Integrity** | [river/requirements/imported/avilist.org/avilist/PROVENANCE.md](imported/avilist.org/avilist/PROVENANCE.md) |
 | **Tier** | mandatory (copyright license) |
 | **Import style** | By reference, vendored — CC BY 4.0 permits it, and that permission is the point |
 | **Scope** | Every English name, family and order name, and the eBird species code (product.namesFromAvilist, product.englishNameChoice) |
@@ -375,7 +375,7 @@ iNaturalist is superseded — see that entry.
 | --- | --- |
 | **Origin** | https://doi.org/10.6084/m9.figshare.32089083 |
 | **Version** | v1, published 2026-04-24 |
-| **Integrity** | [river/requirements/imported/doi.org/foxwingspan/PROVENANCE.md](imported/doi.org/foxwingspan/PROVENANCE.md) |
+| **Integrity** | [river/requirements/imported/figshare.com/foxwingspan/PROVENANCE.md](imported/figshare.com/foxwingspan/PROVENANCE.md) |
 | **Tier** | mandatory (copyright license) |
 | **Import style** | By reference, vendored — CC BY 4.0 permits it |
 | **Scope** | Empirical wingspan (product.lengthAndWingspanSources) |

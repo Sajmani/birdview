@@ -1,0 +1,8 @@
+# An Affects entry in one of this module's own packages must name a requirement that package declares.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem decision-unknown-requirement requirements/decisions.md

@@ -1,0 +1,8 @@
+# A decisions.md whose entries have every field, consistent supersession and amendment, and Affects naming
+# real local requirements (or another module's, which is not resolved here), passes.
+exit 0
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0

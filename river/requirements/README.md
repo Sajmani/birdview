@@ -5,7 +5,7 @@ What BirdView must do and how it must be built, and where each requirement came 
 | Path | What it holds |
 | --- | --- |
 | [`local/`](local/) | Sources written here: [`product`](local/product/product.md) (what BirdView must do) and [`tech`](local/tech/tech.md) (how it must be built) |
-| [`imported/`](imported/) | Sources written elsewhere, at `imported/<origin>/<name>/`, each with a `PROVENANCE.md`; `<origin>` is the host of the source's `Origin` field |
+| [`imported/`](imported/) | Sources written elsewhere, at their import path (the publisher's host, then the package name: `w3.org/wcag`, `figshare.com/avonet`), each with a `PROVENANCE.md` |
 | [`composed/internal/app/`](composed/internal/app/app.md) | Everything the web application must satisfy, and its criteria |
 | [`acceptance.md`](acceptance.md) | Criteria not yet moved into a composed package |
 | [`imports.md`](imports.md) | The register of every source BirdView is subject to or has evaluated: version, tier and status. Retrieval details and hashes are in each `PROVENANCE.md` under `imported/` |

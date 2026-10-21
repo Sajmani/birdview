@@ -15,7 +15,7 @@
 // Package check is River's checker, translated into Go so it runs with
 // BirdView's own tests (River's decisions.checksInRepoLanguage).
 //
-// Translated from River's river/check/goals.py at pin 09f5eb2
+// Translated from River's river/check/goals.py at pin 6025bee
 // (sso://user/sameer/river). What is normative is what the checker reports,
 // not how: a problem's code and path must match the reference exactly, and
 // testdata/ -- River's shared cases, copied at the same pin -- holds that to
@@ -77,7 +77,141 @@ var (
 	// A goal's text runs from its title to the next heading or rule.
 	goalEnd   = regexp.MustCompile(`(?m)^(?:#|---)`)
 	paragraph = regexp.MustCompile(`\n\s*\n`)
+	// decisions.md fields, one per line (River's README, "Keeping the bundle's files").
+	decisionDate   = regexp.MustCompile(`(?m)^Date:\s*\d{4}-\d{2}-\d{2}\s*$`)
+	decisionStatus = regexp.MustCompile(`^(accepted|amended by ([A-Za-z]+(?:, [A-Za-z]+)*)|superseded by ([A-Za-z]+))\s*(?:;.*)?$`)
+	identList      = regexp.MustCompile(`[A-Za-z]+`)
 )
+
+// decisionField returns the value of a `Name:` line in an entry, and whether it is present.
+func decisionField(body, name string) (string, bool) {
+	m := regexp.MustCompile(`(?m)^` + regexp.QuoteMeta(name) + `:[ \t]*(.*)$`).FindStringSubmatch(body)
+	if m == nil {
+		return "", false
+	}
+	return strings.TrimSpace(m[1]), true
+}
+
+func decisionIDs(v string) []string {
+	if v == "" || v == "none" || v == "—" {
+		return nil
+	}
+	return identList.FindAllString(v, -1)
+}
+
+func contains(list []string, s string) bool {
+	for _, x := range list {
+		if x == s {
+			return true
+		}
+	}
+	return false
+}
+
+// decisions checks requirements/decisions.md, if present: the fields every entry carries, and
+// supersession and amendment recorded at both ends.
+func (c *checker) decisions(reqItems []item) {
+	path := filepath.Join(c.bundle, "requirements", "decisions.md")
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return
+	}
+	rel := c.rel(path)
+	text := string(b)
+	heads := h2Item.FindAllStringSubmatchIndex(text, -1)
+	var order []string
+	bodies := map[string]string{}
+	for i, h := range heads {
+		end := len(text)
+		if i+1 < len(heads) {
+			end = heads[i+1][0]
+		}
+		id := text[h[2]:h[3]]
+		order = append(order, id)
+		bodies[id] = text[h[1]:end]
+	}
+	declared := map[string]map[string]bool{}
+	for _, it := range reqItems {
+		pkg := filepath.Base(filepath.Dir(it.path))
+		if declared[pkg] == nil {
+			declared[pkg] = map[string]bool{}
+		}
+		declared[pkg][it.ident] = true
+	}
+	type state struct {
+		kind string // accepted, amended, superseded
+		by   []string
+	}
+	status := map[string]state{}
+	supersedes, amends := map[string][]string{}, map[string][]string{}
+	for _, id := range order {
+		body := bodies[id]
+		var missing []string
+		if !decisionDate.MatchString(body) {
+			missing = append(missing, "Date (YYYY-MM-DD)")
+		}
+		for _, n := range []string{"Decided by", "Status", "Affects"} {
+			if _, ok := decisionField(body, n); !ok {
+				missing = append(missing, n)
+			}
+		}
+		if len(missing) > 0 {
+			c.report("decision-missing-field", rel, id+" lacks "+strings.Join(missing, ", "))
+		}
+		st := state{kind: "accepted"}
+		if raw, ok := decisionField(body, "Status"); ok {
+			if m := decisionStatus.FindStringSubmatch(raw); m == nil {
+				c.report("decision-bad-status", rel, id+" has Status `"+raw+"`; use accepted, amended by <id>, "+
+					"or superseded by <id>, optionally followed by `; note`")
+			} else if m[2] != "" {
+				st = state{"amended", decisionIDs(m[2])}
+			} else if m[3] != "" {
+				st = state{"superseded", []string{m[3]}}
+			}
+		}
+		status[id] = st
+		v, _ := decisionField(body, "Supersedes")
+		supersedes[id] = decisionIDs(v)
+		v, _ = decisionField(body, "Amends")
+		amends[id] = decisionIDs(v)
+		aff, _ := decisionField(body, "Affects")
+		for _, q := range qualifiedRef.FindAllString(aff, -1) {
+			pkg, rid, _ := strings.Cut(q, ".")
+			if declared[pkg] != nil && !declared[pkg][rid] {
+				c.report("decision-unknown-requirement", rel, id+" affects "+q+", which package "+pkg+" does not declare")
+			}
+		}
+	}
+	for _, id := range order {
+		for _, link := range []struct {
+			kind    string
+			targets []string
+		}{{"supersedes", supersedes[id]}, {"amends", amends[id]}} {
+			for _, t := range link.targets {
+				st, ok := status[t]
+				if !ok {
+					c.report("decision-unknown-ref", rel, id+" "+link.kind+" "+t+", which is not an entry here")
+					continue
+				}
+				agrees := st.kind == "superseded" && contains(st.by, id)
+				if link.kind == "amends" {
+					agrees = (st.kind == "amended" && contains(st.by, id)) || st.kind == "superseded"
+				}
+				if !agrees {
+					c.report("decision-status-mismatch", rel, id+" "+link.kind+" "+t+", but "+t+"'s Status does not point back")
+				}
+			}
+		}
+		st := status[id]
+		for _, b := range st.by {
+			if _, ok := status[b]; !ok {
+				c.report("decision-unknown-ref", rel, id+"'s Status names "+b+", which is not an entry here")
+			} else if (st.kind == "superseded" && !contains(supersedes[b], id)) || (st.kind == "amended" && !contains(amends[b], id)) {
+				c.report("decision-status-mismatch", rel, id+"'s Status says "+st.kind+" by "+b+", but "+b+" does not say so")
+			}
+		}
+	}
+}
 
 // River's product.seekableArtifacts: an agent reads by searching and opening
 // ranges. Lengths count characters, not bytes.
@@ -326,6 +460,7 @@ func Run(dir string) Result {
 			"no requirements found -- parser or layout has changed"}}}
 	}
 
+	c.decisions(reqItems)
 	r := Result{Requirements: len(reqItems), Goals: len(goals), Gradients: len(gradItems)}
 	citedAnywhere := map[string]bool{}
 	for _, it := range reqItems {
