@@ -1,4 +1,4 @@
-> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `5fad157`.
+> Project copy of River's `README.md`. Canonical origin: `sso://user/sameer/river`, pin `09f5eb2`.
 > Local amendments, if any, are listed in [bindings.md](bindings.md).
 
 # River
@@ -235,9 +235,12 @@ more **composed requirements packages** — explicit, versioned artifacts rather
 state. Each records which sources it came from, at which pins, under which precedence order.
 
 A composed package is named for its **audience or scope**, the way a Go package is, never for a
-version: versions are tags and branches, so a directory called `v1/` is always wrong. Once
-tagged, a composed version is never edited; a later composition makes a new tag, and
-simultaneous milestones live on branches.
+version: a version is a commit, changelist or revision, so a directory called `v1/` is always
+wrong. Once published, a composed version is never edited; a later composition is a new version,
+and simultaneous milestones live on separate lines of development. Identify a version by what
+your version-control system never reassigns (a commit hash, changelist or revision number) and
+check it by its content hash. A tag or label is a readable alias, worth protecting where your
+system allows, but no system makes one immutable by default, so never trust it alone.
 
 Downstream repositories import your **exported composed packages**, never your raw sources, so
 every cross-repository obligation has been through composition with explicit precedence and
