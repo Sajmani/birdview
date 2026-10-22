@@ -620,14 +620,56 @@ differ and sorting by mass shows them as identical. The same holds for every whi
 
 ## deploymentPlumbing
 
-**Deployment plumbing**
+**Launch birdview.site from a personal mirror of this repository**
 
 Status: open
 Owner: Sameer
-Gate: before a public deployment
+Gate: the next step for a public deployment
 
-~~No container image~~ (`Dockerfile` and [docs/building.md](../docs/building.md) added 2026-10-14,
-binding `0.0.0.0:8080` in the container); no host chosen yet
+Decided 2026-10-22: `birdview.site` belongs to Sameer personally and is served at his own expense
+from his own clone, so the site is a personal project rather than something this organization
+operates. The Apache 2.0 license permits that. While this repository stays the source of truth,
+`github.com/Sajmani/birdview` is a **one-way mirror**: changes land here, are pulled into the
+mirror and deployed from it, and nothing is ever committed there directly, or the two would drift.
+A mirror made now postdates the history rewrite, so [prerewriteClones](#prerewriteclones) does not
+apply to it. In order:
+
+1. **Create the mirror** and push this repository's `main` to it.
+2. **Choose a host** that runs the container image (`Dockerfile`, [docs/building.md](../docs/building.md),
+   serving `0.0.0.0:8080`). Deploying from a local checkout with the host's own tooling is enough
+   to launch; automate after.
+3. **Build the dataset for deployment.** It is never committed
+   ([tech.datasetNeverCommitted](requirements/local/tech/delivery.md#datasetnevercommitted)), so the image build or the deploy step runs
+   the ingest and supplies `species.json`. Today that happens only on the maintainer's machine.
+4. **Amend the requirements for public serving**, requirement first:
+   [tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater) (its value is `local`),
+   [tech.servesOnLocalhost](requirements/local/tech/delivery.md#servesonlocalhost), and the stable surface
+   ([stableSurface](#stablesurface)).
+5. **Write the first release criteria**, BirdView's first use of River's Release stage: a health
+   check, monitoring and alerts, a rollback path, and what happens when an ingest input changes.
+6. **Operational checks:** TLS, caching behavior
+   ([decisions.hereAndNowCaching](requirements/decisions.md#hereandnowcaching)), no tracking, a feedback channel that exposes
+   no personal address, basic rate limiting.
+7. **Point `birdview.site` at the host.**
+
+## sourceOfTruth
+
+**Move BirdView's source of truth to the personal repository**
+
+Status: open
+Owner: Sameer
+Gate: before building BirdView's software factory; and once continuing development in a personal
+repository is confirmed as approved
+
+Planned 2026-10-22: an agent-driven software factory for BirdView, run from Sameer's own accounts
+the way a customer would run one, belongs where the code lives; if this repository stayed the
+source of truth, every change the factory made would be an outside contribution to it. So, once
+approved, `github.com/Sajmani/birdview` becomes the source of truth and this repository is archived
+with a note saying where development continues. Exactly one repository receives changes at any
+time. **First, confirm** that continuing development there, on personal time and accounts, is
+approved: the existing files carry this organization's copyright, and serving a clone is not the
+same question as developing one. Afterwards BirdView is an outside adopter of River: re-pins copy
+River's published parts until River itself is public, then come from River's public origin.
 
 ## smallOrderWingspanFit
 
