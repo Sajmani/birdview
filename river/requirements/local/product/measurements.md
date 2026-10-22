@@ -162,6 +162,13 @@ labels; a wide-winged bird is drawn slightly smaller rather than under its own a
 **Total length and mass are labeled horizontally, centred on the axis, below the tail tip**, with no
 leader line, since they name the whole bird rather than a part.
 
+**Where the figure is shorter than the total length, the page says why.** A bird that flies with
+its neck folded has the neck drawn as an S ([decisions.foldedNeckAsS](../../decisions.md#foldedneckass)), so the figure spans less
+height than the total length labeled beneath it. Its detail page says so beside the neck note, with
+the species' own neck length and total length: the S is the same length of line in less height,
+and sorting, sections and every measurement use the full length. A bird drawn at full extent
+carries no such note.
+
 **Mass is drawn as a number, and also as water.** The **cube of water that weighs what the bird
 weighs** is drawn in the **lower-left corner**, in oblique projection, at the diagram's own scale.
 Its side is ∛(mass): one gram of water is one cubic centimeter, so this is a unit conversion, not a

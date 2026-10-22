@@ -78,10 +78,14 @@ const headAspect = 0.72
 // Phalacrocoracidae, Anhingidae. Gulls and shorebirds draw the head in somewhat
 // but do not fold, and their modeled necks are short enough that a stick is not
 // misleading.
-var foldedNecks = map[string]bool{
-	"Ardeidae":    true,
-	"Pelecanidae": true,
+var foldedNecks = map[string]string{
+	"Ardeidae":    "Herons",
+	"Pelecanidae": "Pelicans",
 }
+
+// FoldedNeckGroup names the birds of a family that fly with the neck folded, for prose such as
+// "Herons fly with the neck folded back", or returns "" for a family drawn with a straight neck.
+func FoldedNeckGroup(family string) string { return foldedNecks[family] }
 
 // neckFoldCompression is how much of its own length a folded neck spans
 // vertically: two semicircles of radius r run 2*pi*r of stroke through 4r of
@@ -130,7 +134,7 @@ func Layout(s *dataset.Species, refLength, refWingspan float64, box Box) Geometr
 	// combined path length is exactly the neck, so r = neck/2pi and the pair
 	// spans 4r (product.segmentComposition).
 	neck := seg.Neck.Value * scale
-	if g.NeckFolded = foldedNecks[s.Family]; g.NeckFolded {
+	if g.NeckFolded = foldedNecks[s.Family] != ""; g.NeckFolded {
 		g.NeckArcR = neck / (2 * math.Pi)
 		g.YShoulder = g.YNeckTop + 4*g.NeckArcR
 	} else {

@@ -1006,6 +1006,20 @@ The tail assertion is the one most likely to look redundant and is the most valu
 mean "this is the tail"; anyone restoring that on aesthetic grounds reverses the meaning of the
 whole scheme, and every other assertion here would still pass.
 
+### foldedFigureExplained
+
+**A folded-neck bird's detail page explains why its figure is shorter than its total length**
+
+**Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) · **Level:** code · **Method:** assertions on rendered detail pages
+
+**Assertions:** a heron's detail page says its neck is drawn as an S, gives the species' own neck
+length and total length in the reader's units, and says the full length is what sorting, sections
+and measurements use; a straight-necked bird's page carries no such note.
+
+**Status: verified 2026-10-22, passing, and watched failing** before the note existed
+(`TestFoldedFigureExplained`). Added because the page labeled a 10.1 in total length beneath a
+visibly shorter figure, and said nothing; only the user guide explained the fold.
+
 ### segmentLabelsDontCollide
 
 **Every segment is labeled on the detail diagram, and no two labels collide**

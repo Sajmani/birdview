@@ -1626,6 +1626,11 @@ type detailData struct {
 	// the wingspan is modeled (product.measuredVersusModeled).
 	WingModeled bool
 
+	// FoldNote explains why a folded-neck bird's figure is shorter than the total length labeled
+	// beneath it, with its own numbers; empty for a bird drawn at full extent
+	// (product.labeledDetailDiagram).
+	FoldNote string
+
 	// Labels annotate the detail diagram (product.labeledDetailDiagram); empty on a tile.
 	Labels        []diagramLabel
 	TopOffset     float64
@@ -1726,7 +1731,23 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		Metrics: rows, Categories: s.categories(sp, opt), Opt: opt, Query: queryFor(r), INatURL: inatURL,
 		SameAs:      s.sameMeasurements(sp, opt.Locale),
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
+		FoldNote:    foldNote(sp, lt.Geom, one),
 	})
+}
+
+// foldNote is the sentence that explains a folded neck on the detail page, or "" when the neck is
+// drawn straight. The figure of a folded-neck bird spans less height than its total length
+// (decisions.foldedNeckAsS), and the page labels that total length beneath it, so without this a
+// careful reader sees two numbers that disagree.
+func foldNote(sp *dataset.Species, g view.Geometry, u units) string {
+	group := view.FoldedNeckGroup(sp.Family)
+	if !g.NeckFolded || group == "" {
+		return ""
+	}
+	return fmt.Sprintf("%s fly with the neck folded back, so the neck is drawn as an S: the same %s of "+
+		"line in less height. The figure is shorter than the bird's total length of %s; sorting, "+
+		"sections and every measurement use the full length.",
+		group, u.format(sp.Segments.Neck.Value, view.ByLength), u.format(sp.TotalLength.Value, view.ByLength))
 }
 
 // undrawnData is the page for a bird the derivation rejected (product.undrawnSpeciesAnswer).

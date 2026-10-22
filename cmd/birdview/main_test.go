@@ -6996,3 +6996,29 @@ func TestCountLineNamesEverySetting(t *testing.T) {
 		}
 	}
 }
+
+// TestFoldedFigureExplained asserts the detail page says why a folded-neck bird's figure is shorter
+// than the total length labeled beneath it, with that bird's own numbers, and that a bird drawn at
+// full extent says nothing of the kind.
+//
+// Verifies: product.labeledDetailDiagram. Criterion: acceptance.foldedFigureExplained.
+func TestFoldedFigureExplained(t *testing.T) {
+	s := newTestServer(t)
+	_, heron := get(t, s, "/species/greblu")
+	sp := s.byID["greblu"]
+	u := unitsFor(false, sp.Mass.Value)
+	for _, want := range []string{
+		"drawn as an S",
+		u.format(sp.Segments.Neck.Value, view.ByLength) + " of line",
+		"total length of " + u.format(sp.TotalLength.Value, view.ByLength),
+		"use the full length",
+	} {
+		if !strings.Contains(heron, want) {
+			t.Errorf("a heron's detail page does not say %q", want)
+		}
+	}
+	_, crow := get(t, s, "/species/amecro")
+	if strings.Contains(crow, "drawn as an S") {
+		t.Error("a straight-necked bird's page explains a fold it does not have")
+	}
+}
