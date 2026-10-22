@@ -45,8 +45,8 @@ fails both, exempting withdrawn requirements and the rules transcribed from impo
 rule; watched failing by deleting `familyFilter`'s `Goals:` line.
 **Status: verified — run 2026-09-21, passing, and watched failing.** Three rules: every active
 requirement has a `Goals:` field, every cited goal is declared, every declared goal is cited. It
-found four uncited requirements on first run (tech.servesOnLocalhost, tech.identifiedClient, tech.localNowPublicLater, tech.bundleIsNormative), which is what prompted
-goals.goodDataCitizen. Exercised by deleting tech.servesOnLocalhost's `Goals:` line: exit 1, `requirements with no Goals: field ->
+found four uncited requirements on first run ([tech.servesOnLocalhost](local/tech/delivery.md#servesonlocalhost), [tech.identifiedClient](local/tech/delivery.md#identifiedclient), [tech.localNowPublicLater](local/tech/posture.md#localnowpubliclater), [tech.bundleIsNormative](local/tech/process.md#bundleisnormative)), which is what prompted
+[goals.goodDataCitizen](../goals/goals.md#gooddatacitizen). Exercised by deleting [tech.servesOnLocalhost](local/tech/delivery.md#servesonlocalhost)'s `Goals:` line: exit 1, `requirements with no Goals: field ->
 tech.servesOnLocalhost`.
 
 **This check cannot tell whether a requirement genuinely serves the goal it names.** Goals are not
@@ -57,7 +57,7 @@ looks exactly like a validated one.
 
 **Generated colors are legible and mutually distinguishable**
 
-**Verifies:** tech.badgeContrast, product.generatedBadgeColors, wcag.ContrastEnhanced · **Level:** spec and code · **Method:** pure functions
+**Verifies:** [tech.badgeContrast](local/tech/accessibility.md#badgecontrast), [product.generatedBadgeColors](local/product/dataset.md#generatedbadgecolors), [wcag.ContrastEnhanced](imported/w3.org/wcag/wcag.md#contrastenhanced) · **Level:** spec and code · **Method:** pure functions
 over the color generator
 **Assertions:** WCAG 2.2 contrast ≥ 7:1 against each badge's **own** text color; CIE76 ΔE ≥ 25
 between families adjacent in the selector; both halves of the gamut are used; and the preset cycle
@@ -74,7 +74,7 @@ passed — while every pair adjacent in the selector was visually identical. Exa
 distinguishability, and the entries a reader compares are the ones next to each other.
 
 Two further assertions came from bugs found while fixing that. **Both halves of the gamut**: the
-capacity argument behind product.generatedBadgeColors depends on white text being used where it helps, and a generator
+capacity argument behind [product.generatedBadgeColors](local/product/dataset.md#generatedbadgecolors) depends on white text being used where it helps, and a generator
 that quietly reverted to black-only would give that up invisibly. **Alternation**: an odd-length
 light/dark cycle wraps onto itself, so one pair of hue-adjacent slots shares a lightness — which
 is what left two pale Passeriformes families at ΔE 4.4. Both have been watched failing.
@@ -84,7 +84,7 @@ it fail by lowering a generated color's luminance.
 
 **Every vendored source matches its recorded hash**
 
-**Verifies:** tech.recordBeforeConsuming, goals.goodDataCitizen · **Level:** spec · **Method:** hash each committed input and compare
+**Verifies:** [tech.recordBeforeConsuming](local/tech/process.md#recordbeforeconsuming), [goals.goodDataCitizen](../goals/goals.md#gooddatacitizen) · **Level:** spec · **Method:** hash each committed input and compare
 against `river/requirements/imported/*/*/PROVENANCE.md`
 **Run:** `go test ./river/check/ -run TestVendoredHashesMatch` — translated from Python on 2026-10-16,
 checking the same seven files, and watched failing on a changed recorded hash
@@ -97,7 +97,7 @@ failing**: zeroing AVONET's recorded hash produced exit 1 and a recorded-vs-actu
 
 **Every quotation from a vendored source is word for word**
 
-**Verifies:** tech.recordBeforeConsuming · **Level:** spec · **Method:** every block quotation in a
+**Verifies:** [tech.recordBeforeConsuming](local/tech/process.md#recordbeforeconsuming) · **Level:** spec · **Method:** every block quotation in a
 transcribed source's `<pkg>.md` is found in the text of a file that source vendors,
 ignoring markup, whitespace and the style of quotation mark, and splitting at an ellipsis
 **Run:** `go test ./river/check/ -run TestQuotationsAreVerbatim`
@@ -123,7 +123,7 @@ and an exclusion must name a decision that exists. Composed requirements no crit
 and local requirements no composed package accounts for, are counted and logged, not failed.
 **Run:** `go test ./river/check/ -run TestCompositionResolves`
 **Status: verified 2026-10-16, passing, and watched failing** — deleting `Binds: wcag.WebPage`
-from tech.webPages failed it, naming the three WCAG criteria left applying to nothing; misspelling
+from [tech.webPages](local/tech/accessibility.md#webpages) failed it, naming the three WCAG criteria left applying to nothing; misspelling
 a `Covers:` target failed it, naming the criterion. **The list rules, 2026-10-18:** shortening a
 listed title, excluding by a decision that does not exist, and listing a requirement twice each
 failed it, naming the line.
@@ -158,9 +158,9 @@ tolerating — the failure is loud, immediate, and safer than a checker that gue
 
 **Scope is what the status table says recurs**
 
-**Verifies:** product.scopeIsRecurringAvifauna · **Level:** code · **Method:** unit test over ingest output
+**Verifies:** [product.scopeIsRecurringAvifauna](local/product/dataset.md#scopeisrecurringavifauna) · **Level:** code · **Method:** unit test over ingest output
 **Assertion:** the dataset contains every species `data/status.tsv` marks in scope (`established` or
-`rare`, plus the declared exceptions of product.declaredExceptions), less those AviList has no concept for and the four
+`rare`, plus the declared exceptions of [product.declaredExceptions](local/product/dataset.md#declaredexceptions)), less those AviList has no concept for and the four
 species with no AVONET measurement — **1,082** species today — derived from the inputs rather than
 hardcoded from a run.
 **Status: verified 2026-10-05 — passing (`TestScopeIsWhatTheStatusTableSaysRecurs`).** Previously
@@ -171,7 +171,7 @@ verified 2026-09-22 against ABA checklist 8.19 (841 species); rewritten for
 
 **Rarity codes never reach the dataset**
 
-**Verifies:** product.scopeIsRecurringAvifauna · **Level:** code · **Method:** inspect the serialized record's field names
+**Verifies:** [product.scopeIsRecurringAvifauna](local/product/dataset.md#scopeisrecurringavifauna) · **Level:** code · **Method:** inspect the serialized record's field names
 for anything carrying an ABA rarity code
 **Status: verified 2026-09-22 — no rarity field appears in the serialized record.** Retained as a
 regression guard after [decisions.scopeFromRecurrence](decisions.md#scopefromrecurrence) removed the ABA checklist.
@@ -180,7 +180,7 @@ regression guard after [decisions.scopeFromRecurrence](decisions.md#scopefromrec
 
 **Every record carries all five AVONET traits**
 
-**Verifies:** product.traitsFromAvonet, product.traitsPerSpecies · **Level:** code · **Method:** property test over every record
+**Verifies:** [product.traitsFromAvonet](local/product/dataset.md#traitsfromavonet), [product.traitsPerSpecies](local/product/dataset.md#traitsperspecies) · **Level:** code · **Method:** property test over every record
 **Assertion:** culmen, tail, wing chord, secondary and mass are all present and positive.
 **Status: planned.** Trait coverage across AVONET's three sheets brings **1,082** of the 1,086
 named in-scope species to a complete row (the 4 unmatched species are named in `unmeasurableNames`),
@@ -190,7 +190,7 @@ so any failure on a built record means a join or parse bug rather than missing d
 
 **Names and families are populated from AviList, never defaulted**
 
-**Verifies:** product.namesFromAvilist · **Level:** code · **Method:** property test over the built dataset
+**Verifies:** [product.namesFromAvilist](local/product/dataset.md#namesfromavilist) · **Level:** code · **Method:** property test over the built dataset
 
 **Assertions, names:** the **world** name is non-empty for every species; the **North American**
 name is non-empty *after* the documented fallback, so a species with no Clements concept shows a
@@ -213,7 +213,7 @@ Previously verified 2026-09-22 against the ABA checklist; rewritten for
 
 **A species id is unique, stable and fit for a URL**
 
-**Verifies:** product.englishNameChoice · **Level:** code · **Method:** property test over the built dataset, plus
+**Verifies:** [product.englishNameChoice](local/product/diagram.md#englishnamechoice) · **Level:** code · **Method:** property test over the built dataset, plus
 assertions on the served routes
 
 **Assertions, uniqueness:** no two species share an id. This is not a formality — AviList lumps
@@ -243,7 +243,7 @@ silent deletion, and a species regaining a concept would leave a dead entry nobo
 
 **The name locale is a toggle, and only names move**
 
-**Verifies:** product.englishNameChoice · **Level:** code · **Method:** assertions on the rendered pages under both
+**Verifies:** [product.englishNameChoice](local/product/diagram.md#englishnamechoice) · **Level:** code · **Method:** assertions on the rendered pages under both
 locales
 
 **Assertions, both names are served:** with no parameter the page shows the **North American**
@@ -270,7 +270,7 @@ headers under the default locale.
 
 **The join covers every species, and the direct-match rate is monitored**
 
-**Verifies:** product.joinOnBinomial · **Level:** code · **Method:** unit test over ingest
+**Verifies:** [product.joinOnBinomial](local/product/dataset.md#joinonbinomial) · **Level:** code · **Method:** unit test over ingest
 **Assertions:** (a) after the mapping table is applied, every in-scope species (except the 4 named
 in `unmeasurableNames`) resolves to a trait row; (b) `TestNearMatchesAreExactlyTheMappedOnes`
 verifies that the 9 near-matches in the **1,082**-species dataset match `taxonomy.NearMatches`.
@@ -282,7 +282,7 @@ regression guard, not a target: a drop means a taxonomy moved and the mapping ta
 
 **Unmatched species fail the build above a threshold**
 
-**Verifies:** product.unmatchedSpeciesReported · **Level:** code · **Method:** unit test with a fixture containing a bogus
+**Verifies:** [product.unmatchedSpeciesReported](local/product/dataset.md#unmatchedspeciesreported) · **Level:** code · **Method:** unit test with a fixture containing a bogus
 binomial
 **Assertion:** ingest exits non-zero and names the unmatched species.
 **Status: planned.** Watch it fail by raising the threshold until the bogus fixture passes.
@@ -295,7 +295,7 @@ binomial
 
 **Sorting is ascending by the selected metric**
 
-**Verifies:** product.oneSelectedMetric, product.ascendingOrder · **Level:** code · **Method:** property test for each of the three
+**Verifies:** [product.oneSelectedMetric](local/product/ordering.md#oneselectedmetric), [product.ascendingOrder](local/product/ordering.md#ascendingorder) · **Level:** code · **Method:** property test for each of the three
 metrics
 **Status: verified 2026-09-22 — ascending for all three metrics.** **Bill and Tail, 2026-10-19:**
 the index sorts ascending by each, defaults to the Global scale under each, names it on the count
@@ -314,7 +314,7 @@ watched failing while it sat at the far edge in a smaller size).
 
 **Section boundaries obey the N% rule**
 
-**Verifies:** product.sectionBreakRule, product.sectionThresholdDefault · **Level:** code · **Method:** property test over generated inputs
+**Verifies:** [product.sectionBreakRule](local/product/ordering.md#sectionbreakrule), [product.sectionThresholdDefault](local/product/ordering.md#sectionthresholddefault) · **Level:** code · **Method:** property test over generated inputs
 **Assertions:** for every section, `max / min < 1 + N/100`; and the first member of each section
 is `>= (1 + N/100) x` the **minimum** of the previous section. Both hold for N across its full
 adjustable range, and for N = 15 by default.
@@ -326,7 +326,7 @@ implementation using the previous *maximum* passes casual inspection and fails t
 
 **Section headers match their contents**
 
-**Verifies:** product.sectionHeadersStateRange · **Level:** code · **Method:** unit test
+**Verifies:** [product.sectionHeadersStateRange](local/product/ordering.md#sectionheadersstaterange) · **Level:** code · **Method:** unit test
 **Assertion:** each header's stated range equals the min and max of its members in the selected
 metric, and its count equals the number of members.
 **Status: verified 2026-09-22 — header ranges match their contents.**
@@ -339,7 +339,7 @@ metric, and its count equals the number of members.
 
 **Segments sum exactly to total length**
 
-**Verifies:** product.segmentsSumToLength · **Level:** code · **Method:** property test over every record
+**Verifies:** [product.segmentsSumToLength](local/product/diagram.md#segmentssumtolength) · **Level:** code · **Method:** property test over every record
 **Assertion:** the five **serialized** segment values sum **exactly** to the serialized total
 length — not within a tolerance.
 **Status: verified 2026-09-22 — passing, and watched failing: rounding each segment independently instead of balancing broke the sum for both the property test and the real dataset, by 0.1 mm.**
@@ -351,7 +351,7 @@ stated invariant false.
 
 **Scale is shared within a section, and globally in global mode**
 
-**Verifies:** product.scaleToggle · **Level:** code · **Method:** unit test over computed geometry
+**Verifies:** [product.scaleToggle](local/product/diagram.md#scaletoggle) · **Level:** code · **Method:** unit test over computed geometry
 **Assertions:** in per-section mode every tile in a section has an identical scale factor, and the
 factor differs between at least two sections in a representative dataset; in global mode one
 factor applies to every tile in the filtered set; **per-section is the default**, global is
@@ -368,7 +368,7 @@ default changed. Written that way the parser is correct exactly once.
 
 **The wing crossbar is to scale with the vertical axis**
 
-**Verifies:** product.crossbarAtVerticalScale · **Level:** code · **Method:** property test over computed geometry
+**Verifies:** [product.crossbarAtVerticalScale](local/product/diagram.md#crossbaratverticalscale) · **Level:** code · **Method:** property test over computed geometry
 **Assertion:** `crossbarLength / bodyLength == wingspan / totalLength` for every tile, within
 floating-point tolerance.
 **Status: verified 2026-09-22 — passing, and **watched failing**: restoring the earlier design's formula, with its extra `availableH × scaleY` factor, broke the ratio for every species.**
@@ -379,7 +379,7 @@ species floored out, and they were the 300 largest. This assertion catches that 
 
 **The diagram has the specified parts in the specified order**
 
-**Verifies:** product.segmentComposition · **Level:** code · **Method:** unit test over rendered output
+**Verifies:** [product.segmentComposition](local/product/diagram.md#segmentcomposition) · **Level:** code · **Method:** unit test over rendered output
 **Assertion:** five vertical segments top to bottom — bill, head, neck, body, tail — plus one
 crossbar; the tail is rendered with a stroke style distinct from the body.
 **Status: verified 2026-09-22 — coordinates are monotonic and the head oval is centered between its tangents.**
@@ -388,7 +388,7 @@ crossbar; the tail is rendered with a stroke style distinct from the body.
 
 **Proportions differentiate species as the requirement claims**
 
-**Verifies:** product.proportionDifferentiates · **Level:** code · **Method:** ordering assertions over a small set of
+**Verifies:** [product.proportionDifferentiates](local/product/diagram.md#proportiondifferentiates) · **Level:** code · **Method:** ordering assertions over a small set of
 species pairs
 **Assertion:** a dowitcher's culmen fraction exceeds a robin's; a heron's neck fraction exceeds a
 sparrow's; an accipiter's tail fraction exceeds a duck's.
@@ -400,7 +400,7 @@ is wrong, not the test.
 
 **The neck length is serialized with its model named**
 
-**Verifies:** product.neckModelPerFamily, product.provenancePerMetric · **Level:** code · **Method:** property test over every record
+**Verifies:** [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) · **Level:** code · **Method:** property test over every record
 **Assertions:** every record carries a neck length; its provenance `kind` is `modeled`; its
 `model` is non-empty and **names both the per-family ratio function and the numeric ratio applied
 to that species' family**; and the ratio named matches the table entry for that family.
@@ -417,7 +417,7 @@ looser check while telling the reader nothing they could verify.
 
 **Every presented metric has a well-formed provenance record**
 
-**Verifies:** product.provenancePerMetric · **Level:** code · **Method:** schema validation plus a property test over
+**Verifies:** [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) · **Level:** code · **Method:** schema validation plus a property test over
 every record
 **Assertions:** every metric carries `kind` in `{measured, near-match, modeled}`; `source` is
 non-empty; `sourceTaxon` is non-empty for `measured` and `near-match`; `model` is non-empty for
@@ -429,7 +429,7 @@ something rather than being a label anyone can attach.
 
 **Provenance matches the sources actually used**
 
-**Verifies:** product.lengthAndWingspanSources, product.provenancePerMetric · **Level:** code · **Method:** unit test over ingest output
+**Verifies:** [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources), [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) · **Level:** code · **Method:** unit test over ingest output
 **Assertions:** every length has `kind = modeled`; exactly the species with an empirical Fox value
 have `kind = measured` for wingspan; the six species named in
 [decisions.abaSpeciesWithoutAvonet](decisions.md#abaspecieswithoutavonet) have `kind = near-match` for their AVONET-derived traits.
@@ -442,7 +442,7 @@ dataset omits entirely. These counts come from the sources, not from our output.
 
 **The tile marks every non-measured metric**
 
-**Verifies:** product.tileMarksModeled · **Level:** code · **Method:** rendering test asserting a marker is present
+**Verifies:** [product.tileMarksModeled](local/product/measurements.md#tilemarksmodeled) · **Level:** code · **Method:** rendering test asserting a marker is present
 for each metric whose `kind` is not `measured`, and absent otherwise
 **Status: planned.**
 
@@ -450,7 +450,7 @@ for each metric whose `kind` is not `measured`, and absent otherwise
 
 **The detail view shows every metric and segment with provenance**
 
-**Verifies:** product.metricProvenanceExplained, product.tileOpensDetail · **Level:** code · **Method:** rendering test
+**Verifies:** [product.metricProvenanceExplained](local/product/measurements.md#metricprovenanceexplained), [product.tileOpensDetail](local/product/presentation.md#tileopensdetail) · **Level:** code · **Method:** rendering test
 **Assertions:** the detail view shows all three main metrics **and all five diagram segments**
 with their values; for each it names the source; for a `near-match` it names the taxon actually
 measured; for a `modeled` value it names the model. The detail view reproduces the tile's header,
@@ -461,7 +461,7 @@ diagram and main metrics — it is the same layout enlarged, not a different scr
 
 **Total length is reported as the sum of its segments**
 
-**Verifies:** product.lengthAndWingspanSources, product.provenancePerMetric, product.segmentsSumToLength · **Level:** code · **Method:** property test
+**Verifies:** [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources), [product.provenancePerMetric](local/product/measurements.md#provenancepermetric), [product.segmentsSumToLength](local/product/diagram.md#segmentssumtolength) · **Level:** code · **Method:** property test
 **Assertions:** total length's `kind` is `modeled`; its `model` states that it is the sum of the
 five segments; and the value equals that sum exactly (the same invariant segmentsSumExactly asserts from the
 geometry side).
@@ -473,7 +473,7 @@ explain that rather than leaving the reader to infer it.
 
 **The fitted wingspan model reconstructs Fox's published one**
 
-**Verifies:** product.lengthAndWingspanSources, product.provenancePerMetric · **Level:** code · **Method:** fit the model, then compare its
+**Verifies:** [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources), [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) · **Level:** code · **Method:** fit the model, then compare its
 estimate against `wingspan_predicted_*` for every species Fox predicted
 **Assertions:** mean disagreement ≤ 2%; no more than 2% of species disagree by over 10%.
 **Status: verified 2026-09-22 — passing at 1.32% mean, 1.4% over 10% across 9,194 species.**
@@ -489,25 +489,25 @@ regresses, the dataset does not quietly get worse, the check goes red.
 
 **Nothing restricted is tracked by version control**
 
-**Verifies:** tech.fetchRestrictedInputs, tech.datasetNeverCommitted, goals.goodDataCitizen · **Level:** code · **Method:** `git ls-files` assertion in CI
+**Verifies:** [tech.fetchRestrictedInputs](local/tech/delivery.md#fetchrestrictedinputs), [tech.datasetNeverCommitted](local/tech/delivery.md#datasetnevercommitted), [goals.goodDataCitizen](../goals/goals.md#gooddatacitizen) · **Level:** code · **Method:** `git ls-files` assertion in CI
 **Assertion:** no tracked path lies under `fetched/`, and the built dataset is not tracked.
 **Status: planned, and it is the highest-value check in this document.** It is the only mechanical
-guard on the project's licensing position; everything else protecting tech.fetchRestrictedInputs is a convention
+guard on the project's licensing position; everything else protecting [tech.fetchRestrictedInputs](local/tech/delivery.md#fetchrestrictedinputs) is a convention
 someone can forget. Watch it fail by `git add -f` on a fetched file.
 
 ### noServerNetworkRequest
 
 **The server makes no network request**
 
-**Verifies:** tech.selfContainedServer · **Level:** code · **Method:** rendering test scanning for external
+**Verifies:** [tech.selfContainedServer](local/tech/delivery.md#selfcontainedserver) · **Level:** code · **Method:** rendering test scanning for external
 **subresources** — any `src`, and `href` on a `<link>`
-**Status: verified 2026-09-22 — passing, and **watched failing**: adding the old design's `cdn.tailwindcss.com` script tag was caught. The check scans rendered HTML for off-host `src`/`href`, which is where tech.selfContainedServer actually bites — a self-contained binary serving a page that fetches a CDN stylesheet is not self-contained.**
+**Status: verified 2026-09-22 — passing, and **watched failing**: adding the old design's `cdn.tailwindcss.com` script tag was caught. The check scans rendered HTML for off-host `src`/`href`, which is where [tech.selfContainedServer](local/tech/delivery.md#selfcontainedserver) actually bites — a self-contained binary serving a page that fetches a CDN stylesheet is not self-contained.**
 
 ### outboundRequestsIdentified
 
 **Outbound requests identify the client**
 
-**Verifies:** tech.identifiedClient, goals.goodDataCitizen · **Level:** code · **Method:** unit test against an `httptest` server
+**Verifies:** [tech.identifiedClient](local/tech/delivery.md#identifiedclient), [goals.goodDataCitizen](../goals/goals.md#gooddatacitizen) · **Level:** code · **Method:** unit test against an `httptest` server
 **Assertion:** the `User-Agent` header is present, non-empty, and is not Go's default.
 **Status: planned.**
 
@@ -515,7 +515,7 @@ someone can forget. Watch it fail by `git add -f` on a fetched file.
 
 **The fetched ABA file matches its recorded hash**
 
-**Verifies:** tech.fetchRestrictedInputs, product.scopeIsRecurringAvifauna · **Level:** code · **Method:** the ingest verifies the hash after
+**Verifies:** [tech.fetchRestrictedInputs](local/tech/delivery.md#fetchrestrictedinputs), [product.scopeIsRecurringAvifauna](local/product/dataset.md#scopeisrecurringavifauna) · **Level:** code · **Method:** the ingest verifies the hash after
 download and fails if it differs
 **Assertion:** SHA-256 `9c9539b7…6331d3`, verified against the real file on 2026-09-21.
 **Status: planned.**
@@ -524,7 +524,7 @@ download and fails if it differs
 
 **Both commands build and the server serves**
 
-**Verifies:** tech.twoCommandsOneModule, tech.servesOnLocalhost · **Level:** code · **Method:** covered by the standing checks plus an
+**Verifies:** [tech.twoCommandsOneModule](local/tech/delivery.md#twocommandsonemodule), [tech.servesOnLocalhost](local/tech/delivery.md#servesonlocalhost) · **Level:** code · **Method:** covered by the standing checks plus an
 integration test that starts the server and requests `/`
 **Status: verified 2026-09-22 — every route serves, unknown species 404s.**
 
@@ -532,7 +532,7 @@ integration test that starts the server and requests `/`
 
 **The tile carries the header, diagram and main metrics**
 
-**Verifies:** product.tileContents · **Level:** code · **Method:** rendering test
+**Verifies:** [product.tileContents](local/product/presentation.md#tilecontents) · **Level:** code · **Method:** rendering test
 **Assertions:** every tile shows the common name with its banding code in parentheses, the
 scientific name, a family badge naming both the scientific and common family name, an SVG diagram,
 and the three main metrics **named in full** — `Length`, `Wingspan`, `Mass`, not `L`, `W`, `M`
@@ -545,7 +545,7 @@ the page, so the old check passed whether the tile carried a mass or not.
 
 **The family filter selects and clears**
 
-**Verifies:** product.familyFilter · **Level:** code · **Method:** rendering test over `?family=`
+**Verifies:** [product.familyFilter](local/product/filtering.md#familyfilter) · **Level:** code · **Method:** rendering test over `?family=`
 **Assertions:** filtering to one family shows its species and excludes others; no filter shows
 all; every entry is labeled with its scientific name and its common name; **no entry carries a
 species count**, and a single count sits above the list instead; the selector is grouped by
@@ -574,7 +574,7 @@ The check reads the control's own state and the orders' states instead.
 
 **The unit toggle switches imperial and metric**
 
-**Verifies:** product.imperialByDefault · **Level:** code · **Method:** rendering test over the tile footer, plus a
+**Verifies:** [product.imperialByDefault](local/product/presentation.md#imperialbydefault) · **Level:** code · **Method:** rendering test over the tile footer, plus a
 unit test pinning the conversions
 **Assertions:** the tile footer carries two length values and one mass value in the selected
 system's units, and differs between the two systems; mass converts as `1 oz = 28.349523125 g`.
@@ -590,7 +590,7 @@ contains no `" in"` token, so an exclusion list misses it entirely.
 
 **The detail view draws its bird full scale**
 
-**Verifies:** product.tileOpensDetail · **Level:** code · **Method:** rendering test over the smallest fixture
+**Verifies:** [product.tileOpensDetail](local/product/presentation.md#tileopensdetail) · **Level:** code · **Method:** rendering test over the smallest fixture
 species, with and without an explicit `?scale=`
 **Assertion:** the diagram fills the detail view's height regardless of the index's scale mode.
 **Status: verified 2026-09-22 — passing, and watched failing** by making the detail view adopt the
@@ -600,7 +600,7 @@ dataset-wide reference, which inset the hummingbird by 128 px.
 
 **The page explains every control and the diagram**
 
-**Verifies:** product.pageExplainsItself · **Level:** code · **Method:** rendering test over the help block
+**Verifies:** [product.pageExplainsItself](local/product/presentation.md#pageexplainsitself) · **Level:** code · **Method:** rendering test over the help block
 **Assertions:** the **Controls** panel explains every control it offers (order, scale, step, units,
 family) and both scale modes; the **Presentation** panel's two sections appear in the stated order —
 the diagram, then where the numbers come from; its **rendered legend** names all five segments plus
@@ -614,7 +614,7 @@ sections.
 
 The legend is a **rendered diagram of a real species** rather than a list of colour swatches
 ([decisions.perSectionDefault](decisions.md#persectiondefault)), which closes a rot the old one had: it described the tail as "dashed, to
-tell it from the body", and that stopped being true when decisions.drawingCarriesProvenance gave dash a different meaning.
+tell it from the body", and that stopped being true when [decisions.drawingCarriesProvenance](decisions.md#drawingcarriesprovenance) gave dash a different meaning.
 Nothing caught it, because prose and stylesheet had no connection. A rendered diagram cannot drift
 from the renderer.
 
@@ -625,7 +625,7 @@ fails here. That is deliberate: help text rots silently otherwise.
 
 **Text on a generated background inherits that background's text color**
 
-**Verifies:** product.generatedBadgeColors, tech.badgeContrast · **Level:** code · **Method:** structural check over `styles.css`
+**Verifies:** [product.generatedBadgeColors](local/product/dataset.md#generatedbadgecolors), [tech.badgeContrast](local/tech/accessibility.md#badgecontrast) · **Level:** code · **Method:** structural check over `styles.css`
 **Assertions:** no rule targeting a descendant of `.chip` or `.badge` sets its own `color`, and no
 such rule dims text with `opacity`.
 
@@ -642,7 +642,7 @@ rendering test and this catches it exactly.
 
 **The empty state guides rather than blames**
 
-**Verifies:** product.helpfulEmptyState, product.familyFilter · **Level:** code · **Method:** rendering test after clearing every
+**Verifies:** [product.helpfulEmptyState](local/product/presentation.md#helpfulemptystate), [product.familyFilter](local/product/filtering.md#familyfilter) · **Level:** code · **Method:** rendering test after clearing every
 selection
 **Assertions, nothing selected:** no species are displayed; the page says how to get them back; it
 does **not** say that nothing matched; the count reports zero; and All is no longer marked
@@ -688,7 +688,7 @@ discover the branch was never exercised end to end.
 
 **The scroll script is embedded and scoped to the index**
 
-**Verifies:** product.togglesKeepPlace, tech.selfContainedServer · **Level:** code · **Method:** rendering test
+**Verifies:** [product.togglesKeepPlace](local/product/presentation.md#toggleskeepplace), [tech.selfContainedServer](local/tech/delivery.md#selfcontainedserver) · **Level:** code · **Method:** rendering test
 **Assertions:** the index carries the script inline, never via `src`; it is scoped to `/` so a
 detail page cannot consume the saved position; the detail view ships no script; the controls carry
 an `id` so `#controls` works as a fallback target; both panels carry ids so their collapsed state
@@ -696,7 +696,7 @@ can be keyed on; every panel defaults to **closed** and carries a one-line descr
 summary ([product.collapsibleControls](local/product/presentation.md#collapsiblecontrols)); and panel state is restored **before** the scroll.
 **Status: verified 2026-09-22, amended 2026-10-04 — passing, and watched failing** by
 externalizing the script, by removing its path guard, by dropping a panel's id, and by reordering
-the restores so the scroll runs first. The default was *open* until product.collapsibleControls changed it; the
+the restores so the scroll runs first. The default was *open* until [product.collapsibleControls](local/product/presentation.md#collapsiblecontrols) changed it; the
 amended check was watched failing by restoring `open` to the markup and by deleting a summary
 description.
 
@@ -708,7 +708,7 @@ a declared gap.
 
 **The controls offer what the server accepts, default first**
 
-**Verifies:** product.sectionThresholdDefault, product.scaleToggle · **Level:** code · **Method:** rendering test scoped to the controls
+**Verifies:** [product.sectionThresholdDefault](local/product/ordering.md#sectionthresholddefault), [product.scaleToggle](local/product/diagram.md#scaletoggle) · **Level:** code · **Method:** rendering test scoped to the controls
 panel, plus round-tripping each offered step through `parseOptions`
 **Assertions:** Global is listed before Per section; every offered section step (5, 10, 15, 20,
 30) is parsed as itself rather than falling back to the default.
@@ -723,7 +723,7 @@ buttons reversed. It now reads only the controls panel.
 
 **Attribution is complete, and claims nothing unearned**
 
-**Verifies:** tech.localNowPublicLater, goals.goodDataCitizen · **Level:** code · **Method:** rendering test over the footer
+**Verifies:** [tech.localNowPublicLater](local/tech/posture.md#localnowpubliclater), [goals.goodDataCitizen](../goals/goals.md#gooddatacitizen) · **Level:** code · **Method:** rendering test over the footer
 **Assertions:** each CC BY source is credited with creator, a link to its deposit and a link to the
 license — **AVONET, Fox and AviList by name and DOI**; the ABA checklist is credited for the
 species list and *only* that; the footer discloses that lengths are modeled; the detail view
@@ -744,7 +744,7 @@ assertion only when a written grant exists and is recorded in [imports.md](impor
 
 **The cranium varies with the bird**
 
-**Verifies:** product.craniumFromMass, product.provenancePerMetric · **Level:** code · **Method:** unit test on the model plus a
+**Verifies:** [product.craniumFromMass](local/product/diagram.md#craniumfrommass), [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) · **Level:** code · **Method:** unit test on the model plus a
 distribution check over the built dataset
 **Assertions:** head length matches `7.5 × mass^(1/3)` at stated points, grows strictly across the
 real mass range with no plateau, no single value is shared by more than 5% of species, and the
@@ -776,7 +776,7 @@ said nothing when the premise changed.
 
 **A folded neck is the same stroke in less height**
 
-**Verifies:** product.segmentComposition, product.segmentsSumToLength, product.tileOpensDetail · **Level:** code · **Method:** unit tests over the geometry plus
+**Verifies:** [product.segmentComposition](local/product/diagram.md#segmentcomposition), [product.segmentsSumToLength](local/product/diagram.md#segmentssumtolength), [product.tileOpensDetail](local/product/presentation.md#tileopensdetail) · **Level:** code · **Method:** unit tests over the geometry plus
 assertions on the rendered page
 
 **Assertions, geometry:** for a folding family the neck is an S and for every other family it is a
@@ -810,7 +810,7 @@ other line in that test.
 
 **The iNaturalist link appears only for a confident match**
 
-**Verifies:** product.inaturalistLink, tech.pacedInaturalistMapping · **Level:** code · **Method:** unit tests over the matcher and the
+**Verifies:** [product.inaturalistLink](local/product/presentation.md#inaturalistlink), [tech.pacedInaturalistMapping](local/tech/process.md#pacedinaturalistmapping) · **Level:** code · **Method:** unit tests over the matcher and the
 mapping table, plus assertions on the rendered detail page; the resolver is exercised against an
 `httptest` server, never the live API
 
@@ -838,8 +838,8 @@ placeholder, checked by scoping to the row rather than searching the page; and t
 iNaturalist image — the existing noServerNetworkRequest subresource scan already covers the mechanism, and this
 adds the intent.
 
-**Assertions, courtesy:** the resolver sends a descriptive `User-Agent` (tech.identifiedClient, `inatapi.UserAgent`) and
-waits at least the configured interval between requests (tech.pacedInaturalistMapping, `inatapi.RequestRate`), both observed
+**Assertions, courtesy:** the resolver sends a descriptive `User-Agent` ([tech.identifiedClient](local/tech/delivery.md#identifiedclient), [`inatapi.UserAgent`](imported/inaturalist.org/inatapi/inatapi.md#useragent)) and
+waits at least the configured interval between requests ([tech.pacedInaturalistMapping](local/tech/process.md#pacedinaturalistmapping), [`inatapi.RequestRate`](imported/inaturalist.org/inatapi/inatapi.md#requestrate)), both observed
 against the test server.
 
 **Status: verified 2026-09-27 — passing, and watched failing** by: ignoring the common name;
@@ -858,7 +858,7 @@ project keeps finding in its own tests.
 
 **A family that folds its neck has a neck to fold**
 
-**Verifies:** product.segmentComposition, product.neckModelPerFamily · **Level:** code · **Method:** unit test cross-checking the two neck
+**Verifies:** [product.segmentComposition](local/product/diagram.md#segmentcomposition), [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily) · **Level:** code · **Method:** unit test cross-checking the two neck
 tables
 **Assertion:** every family in the folded-neck set has an **explicit** entry in
 `morphology.NeckRatios`, rather than falling back to the default ratio.
@@ -881,16 +881,16 @@ Recorded here so the limit is not mistaken for coverage.
 
 **No text or link falls below its contrast floor**
 
-**Verifies:** tech.textContrastFloor, wcag.ContrastEnhanced · **Level:** code · **Method:** two checks parsing
+**Verifies:** [tech.textContrastFloor](local/tech/accessibility.md#textcontrastfloor), [wcag.ContrastEnhanced](imported/w3.org/wcag/wcag.md#contrastenhanced) · **Level:** code · **Method:** two checks parsing
 the stylesheet **as embedded in the binary**, not off disk
 
 **Assertions, measured:** every `color` a rule declares — with custom properties resolved — clears
 **7:1** against both `--bg` and `--panel`, or, for a rule that also sets a `background`, against
 that background. **Until 2026-10-16 such rules were excluded** as self-contained and governed by
-tech.badgeContrast; that was true of badges and false of the selected button and the pick
+[tech.badgeContrast](local/tech/accessibility.md#badgecontrast); that was true of badges and false of the selected button and the pick
 control, whose hand-written pairs nothing read. Watched failing since: selected-button text set to
 `#2a7fa8` is reported at 2.42:1 against its own `--accent` background. That change was first
-caught by app.renderedTextContrast, with this check passing.
+caught by [app.renderedTextContrast](composed/internal/app/acceptance.md#renderedtextcontrast), with this check passing.
 
 **Assertions, SVG text:** every `fill` a rule declares **on a text element** clears the same 7:1
 against both surfaces. Which rules those are is derived rather than listed: a class token that any
@@ -939,7 +939,7 @@ parsing, and selectors are split into tokens rather than substring-matched.
 
 **The favicon is BirdView's own, and is actually renderable**
 
-**Verifies:** tech.selfContainedServer · **Level:** code · **Method:** assertions over the served asset and both pages
+**Verifies:** [tech.selfContainedServer](local/tech/delivery.md#selfcontainedserver) · **Level:** code · **Method:** assertions over the served asset and both pages
 
 **Assertions:** `/static/favicon.svg` is served with status 200; it **parses as XML** and its root
 element is `svg` with a `viewBox`; both the index and a detail page reference it; and
@@ -955,7 +955,7 @@ actually see from the server: that the asset is served, parseable and referenced
 the reference, by removing the reference while leaving the asset, by pointing the reference at a
 CDN (which trips noServerNetworkRequest's existing scan, as intended), and by reintroducing the XML defect below.
 
-No new requirement was added. tech.selfContainedServer already forbids fetching a subresource from another host and
+No new requirement was added. [tech.selfContainedServer](local/tech/delivery.md#selfcontainedserver) already forbids fetching a subresource from another host and
 noServerNetworkRequest already scans `<link href>` for it — confirmed here by watching a CDN favicon fail that
 check. What noServerNetworkRequest cannot see is an icon referenced but not served, or served but referenced by
 nothing, so this criterion joins the two ends.
@@ -970,7 +970,7 @@ subresource scan, one layer down.
 
 **The diagram distinguishes measured from modeled, and says so**
 
-**Verifies:** product.measuredVersusModeled, product.segmentComposition · **Level:** code · **Method:** geometry unit tests, a structural check
+**Verifies:** [product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled), [product.segmentComposition](local/product/diagram.md#segmentcomposition) · **Level:** code · **Method:** geometry unit tests, a structural check
 over the stylesheet, and assertions on both rendered pages
 
 **Assertions, geometry:** `ChordTickX` equals the scaled half-span minus the scaled chord exactly;
@@ -984,7 +984,7 @@ is the assertion that catches a revert to the old meaning of dash.
 
 **Assertions, the neck exception:** the neck's dash pattern differs from the body's. Stated as a
 requirement of the check, not merely tolerated by it, because the two look like an inconsistency
-and tidying them into agreement makes short necks render solid (decisions.drawingCarriesProvenance).
+and tidying them into agreement makes short necks render solid ([decisions.drawingCarriesProvenance](decisions.md#drawingcarriesprovenance)).
 
 **Assertions, rendering:** a species with a **measured** wingspan emits no dashed crossbar segment;
 one with a **modeled** wingspan emits exactly one, flanked by two solid segments and marked by two
@@ -1010,7 +1010,7 @@ whole scheme, and every other assertion here would still pass.
 
 **Every segment is labeled on the detail diagram, and no two labels collide**
 
-**Verifies:** product.labeledDetailDiagram · **Level:** code · **Method:** unit tests over the label layout plus
+**Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) · **Level:** code · **Method:** unit tests over the label layout plus
 assertions on the rendered detail page
 
 **Assertions, layout:** all five segments get a label; each label's anchor is the midpoint of its
@@ -1050,7 +1050,7 @@ reproduces the bug where the neck's leader struck through "Wing chord" and "Wing
 the marker, by reverting the `~` to the `.dlabel.est::after` rule it came from and by marking every
 label estimated regardless of provenance.
 
-**The marker assertion was added because the criterion claimed it and never checked it.** product.labeledDetailDiagram has
+**The marker assertion was added because the criterion claimed it and never checked it.** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) has
 required the `~` since these labels were introduced in `a826b96`, which implemented it as
 `.dlabel.est::after` — CSS generated content on an SVG `<text>`, which no browser renders. It was
 found by screenshotting the same detail page twice, once with the rule and once without, and
@@ -1068,7 +1068,7 @@ small one's five segments collapse into a few pixels and the resolver is the onl
 labels can be read at all.
 
 Left here as the worked example of why a branch that is dead *by the current numbers* is worth
-keeping, where one dead *by construction* is not — the distinction decisions.inFlightNoLegs turned on. Deleting it
+keeping, where one dead *by construction* is not — the distinction [decisions.inFlightNoLegs](decisions.md#inflightnolegs) turned on. Deleting it
 while it was unreachable would have meant rediscovering the need for it as a bug, the first time
 two birds were drawn to one scale.
 
@@ -1076,7 +1076,7 @@ two birds were drawn to one scale.
 
 **The detail diagram labels the whole bird's total length, under the tail**
 
-**Verifies:** product.labeledDetailDiagram · **Level:** code · **Method:** geometry assertions over the whole fixture plus
+**Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) · **Level:** code · **Method:** geometry assertions over the whole fixture plus
 assertions on the rendered detail page, the help legend and an index tile
 
 **Assertions, placement:** the label is centred on the drawing axis (`text-anchor="middle"` at the
@@ -1102,7 +1102,7 @@ than hardcoding it, so it keeps working — and starts asserting the opposite �
 is ever granted and the value becomes measured.
 
 **Assertions, scope:** the detail view and the help legend carry the label; an **index tile carries
-none**, like every other annotation of product.labeledDetailDiagram.
+none**, like every other annotation of [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram).
 
 **Status: verified 2026-10-01** — re-verified after mass joined total length under the tail.
 The box-fit check now asserts the **last** label in the stack, since the strip must clear the
@@ -1126,7 +1126,7 @@ firing during this exercise.
 
 **A long family list wraps inside its order's column**
 
-**Verifies:** product.familyFilter · **Level:** code · **Method:** a structural check over the stylesheet and
+**Verifies:** [product.familyFilter](local/product/filtering.md#familyfilter) · **Level:** code · **Method:** a structural check over the stylesheet and
 assertions on the rendered markup
 
 **Assertions, layout:** `.ogroup` is a **grid with exactly two tracks** — the order toggle, then
@@ -1158,7 +1158,7 @@ reports its own confusion instead of the defect.
 
 **The comparison view shares one scale, wraps, and explains itself once**
 
-**Verifies:** product.comparisonOneScale · **Level:** code · **Method:** assertions on the rendered page, a geometry
+**Verifies:** [product.comparisonOneScale](local/product/presentation.md#comparisononescale) · **Level:** code · **Method:** assertions on the rendered page, a geometry
 check over the handler's own output, and a structural check over the stylesheet
 
 **Assertions, shared scale:** every panel is laid out against **the same reference**, and that
@@ -1176,8 +1176,8 @@ rather than an empty one.
 key appears **exactly once** however many birds are shown, and **no provenance table** is emitted.
 
 **Assertions, provenance:** every panel links to its own species detail view, and the estimated
-marker still appears on modeled values — the compare view may omit the *explanation* (product.metricProvenanceExplained) but
-not the *marking* (product.tileMarksModeled).
+marker still appears on modeled values — the compare view may omit the *explanation* ([product.metricProvenanceExplained](local/product/measurements.md#metricprovenanceexplained)) but
+not the *marking* ([product.tileMarksModeled](local/product/measurements.md#tilemarksmodeled)).
 
 **Assertions, leaving:** the link back to the index carries **both the display options and the
 species list** — the picks are live state and returning to add another bird must not discard them
@@ -1210,7 +1210,7 @@ on 2026-10-01 — **watched failing** by restoring the old `queryFor(r, "species
 dropped the picks again, by restoring the 404 on a dead id, by dropping the dead id with no
 notice, and by reverting the back link's wording. The reasoning for the reversal is in
 [decisions.compareUrlContract](decisions.md#compareurlcontract). In short: the back link dropped the species list because the
-index did not read it, and product.pickFromIndex makes the index read it; and the 404 was the honest option until
+index did not read it, and [product.pickFromIndex](local/product/presentation.md#pickfromindex) makes the index read it; and the 404 was the honest option until
 drop-and-name turned out to serve the same goal better. The original reasoning for each is kept
 below rather than deleted, because both were right when written.
 
@@ -1221,7 +1221,7 @@ call leaks them, and the leak is self-propagating rather than cosmetic. It was w
 restoring the original call, and over-dropping to confirm the options half bites.
 
 **The fixture is unfolded on purpose.** A folded neck draws shorter than the bird is long
-(decisions.foldedNeckAsS), so its height is deliberately not proportional to its length and would make the scale
+([decisions.foldedNeckAsS](decisions.md#foldedneckass)), so its height is deliberately not proportional to its length and would make the scale
 assertion wrong rather than strict. The test fails loudly if any of its three species ever starts
 folding, so the constraint cannot be lost silently — the same guard totalLengthLabeled needed for the opposite
 reason.
@@ -1230,7 +1230,7 @@ reason.
 
 **Pick mode is the species list, and the picks survive being navigated through**
 
-**Verifies:** product.pickFromIndex, product.tileContents · **Level:** code · **Method:** assertions on the rendered index and
+**Verifies:** [product.pickFromIndex](local/product/presentation.md#pickfromindex), [product.tileContents](local/product/presentation.md#tilecontents) · **Level:** code · **Method:** assertions on the rendered index and
 detail pages, plus a structural check over the stylesheet
 
 **Assertions, the mode:** with no `species` parameter the index carries **no pick control on any
@@ -1239,7 +1239,7 @@ tile** and no bar. With one or more it carries a control on **every** tile and a
 bar says nothing is picked yet.
 
 **Assertions, the tile is not repurposed:** in **both** modes every tile's own link still points
-at `/species/{id}`. This is product.tileOpensDetail, and it is the assertion that fails if the pick control is ever
+at `/species/{id}`. This is [product.tileOpensDetail](local/product/presentation.md#tileopensdetail), and it is the assertion that fails if the pick control is ever
 implemented by changing the tile's href instead of sitting beside it.
 
 **Assertions, picking:** a tile not yet picked offers a link that adds it; a tile already picked
@@ -1281,7 +1281,7 @@ for.
 
 **Assertions, leaving:** **Clear** removes every `species` parameter and returns the page to
 browsing mode, and **no other control does** except the welcome line's *reset to defaults*, which
-goes to the bare address on purpose (product.pickFromIndex, added 2026-10-19). Links to the bare
+goes to the bare address on purpose ([product.pickFromIndex](local/product/presentation.md#pickfromindex), added 2026-10-19). Links to the bare
 address are checked too: the test once looked only at addresses with a query string, so a link to
 `/` could have dropped the picks unseen — asserted by following every other link on the page
 and confirming the picks survive it.
@@ -1352,7 +1352,7 @@ what else they keep. Watched failing with a stop link that keeps the picks
 
 **Mass is drawn as the cube of water that weighs the same**
 
-**Verifies:** product.labeledDetailDiagram, product.pageExplainsItself · **Level:** code · **Method:** geometry assertions over every fixture
+**Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram), [product.pageExplainsItself](local/product/presentation.md#pageexplainsitself) · **Level:** code · **Method:** geometry assertions over every fixture
 species, plus assertions on the rendered detail and comparison pages
 
 **Assertions, arithmetic:** the square's side is `10 × ∛(mass in grams) × px/mm`, to within a
@@ -1373,7 +1373,7 @@ Flycatcher's 29 px cube renders a ~70 px label, which read "ass 1.4 oz" before i
 and the mass label under the cube — and the reserved strip must clear **whichever reaches
 lower**. Both are asserted; checking one leaves the other free to overrun.
 
-**Assertions, provenance:** solid when the mass is measured, dashed when it is not, as product.measuredVersusModeled
+**Assertions, provenance:** solid when the mass is measured, dashed when it is not, as [product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled)
 requires of every other stroke.
 
 **Assertions, rendering:** the square reaches both the detail page and the comparison page, the
@@ -1384,7 +1384,7 @@ not documentation of the feature, it is the feature.
 **Assertions, the index tiles:** **every** tile carries a cube — counted against the number of
 tiles, not merely found once — and **no tile carries a label of any kind**, the mass being named
 in the footer instead ([decisions.massCubeOnTiles](decisions.md#masscubeontiles)). This reverses what this criterion asserted
-when it was written, which was that tiles carry none; the reasoning is in decisions.massCubeOnTiles.
+when it was written, which was that tiles carry none; the reasoning is in [decisions.massCubeOnTiles](decisions.md#masscubeontiles).
 
 **Assertions, clearance:** across the real dataset the tile cube never reaches the crossbar, at
 every scale and metric the index offers — 839 species × 6 combinations, asserted rather than
@@ -1401,7 +1401,7 @@ technically clear while moving the margin a long way.
 
 **Assertions, the Presentation panel:** it explains the cube in prose, naming what it is and
 warning that a cube root flattens. The diagram key alone is not enough — the Presentation panel
-is where a reader learns to read the drawing (product.pageExplainsItself), and the cube is the one mark that is not a
+is where a reader learns to read the drawing ([product.pageExplainsItself](local/product/presentation.md#pageexplainsitself)), and the cube is the one mark that is not a
 length.
 
 **Status: verified 2026-10-01 — passing, and watched failing** by removing the cube from the
@@ -1436,7 +1436,7 @@ this guards.
 
 **Sorting a comparison rewrites its URL, and nothing else**
 
-**Verifies:** product.comparisonOneScale · **Level:** code · **Method:** assertions on the rendered comparison view,
+**Verifies:** [product.comparisonOneScale](local/product/presentation.md#comparisononescale) · **Level:** code · **Method:** assertions on the rendered comparison view,
 following each sort link
 
 **Assertions, the ordering lives in one place:** each sort link is an ordinary comparison URL
@@ -1468,7 +1468,7 @@ the test says so instead of quietly passing.
 
 **The trunk scales the way measured skeletons do, and is anchored where it was**
 
-**Verifies:** product.trunkFromMass · **Level:** code · **Method:** recover the model's own exponent by regression
+**Verifies:** [product.trunkFromMass](local/product/diagram.md#trunkfrommass) · **Level:** code · **Method:** recover the model's own exponent by regression
 over the real mass range, then check it against an interval taken from published measurement
 
 **Assertions, the exponent:** fitting log trunk on log mass across the dataset's mass range
@@ -1489,7 +1489,7 @@ wrong.
 **Assertions, the direction:** relative to the superseded model, species lighter than the anchor
 get shorter trunks and species heavier than it get longer ones, with the ratio increasing
 monotonically in mass. This is what "a change of proportion, not of scale" means, and it is the
-claim product.trunkFromMass's rationale actually makes.
+claim [product.trunkFromMass](local/product/diagram.md#trunkfrommass)'s rationale actually makes.
 
 **Status: verified 2026-10-02 — passing, and watched failing** four ways:
 
@@ -1516,7 +1516,7 @@ constrains a curve.
 
 **The favicon is painted from the app's palette, not its own**
 
-**Verifies:** product.oneDiagramVocabulary · **Level:** code · **Method:** parse both assets out of the embedded FS and
+**Verifies:** [product.oneDiagramVocabulary](local/product/diagram.md#onediagramvocabulary) · **Level:** code · **Method:** parse both assets out of the embedded FS and
 compare the favicon's colours against the stylesheet's
 
 **Assertions, no invented colours:** every colour literal in `favicon.svg` is one the stylesheet
@@ -1547,7 +1547,7 @@ It fails loudly instead of choosing one.
 **What this does not check.** It verifies the favicon uses *colours from* the palette, not that it
 maps each part to the right one. At 16px the icon has no neck and no separate tail, and it paints
 the body in the head's `#cbd5e1` because the body's own `#64748b` is 3.75:1 and unreadable at that
-size — a size concession product.oneDiagramVocabulary allows. A part-by-part mapping check would have to encode those
+size — a size concession [product.oneDiagramVocabulary](local/product/diagram.md#onediagramvocabulary) allows. A part-by-part mapping check would have to encode those
 omissions and would break every time the icon was redrawn, so the weaker invariant is deliberate.
 It still catches drift, which is the failure that actually occurred.
 
@@ -1561,7 +1561,7 @@ written to prevent went unnoticed until someone looked.
 
 **Nothing in a tile header can wrap to a second line**
 
-**Verifies:** product.tileContents · **Level:** code · **Method:** a structural check over the stylesheet, plus
+**Verifies:** [product.tileContents](local/product/presentation.md#tilecontents) · **Level:** code · **Method:** a structural check over the stylesheet, plus
 assertions on the rendered markup — the pattern [familyListWraps](#familylistwraps) uses, for the same reason
 
 **Assertions, the name line cannot wrap:** `.nameline` declares `flex-wrap: nowrap`, and the
@@ -1588,7 +1588,7 @@ wrapping form.
 
 **Why this is structural and not visual.** Whether text *actually* wraps depends on font metrics
 and the viewport, which this project cannot measure without a browser harness — the gap already
-declared for product.familyFilter and product.diagramOnlyMode–product.firstLoadShowsAll. What is checkable is that the rules making wrapping
+declared for [product.familyFilter](local/product/filtering.md#familyfilter) and [product.diagramOnlyMode](local/product/presentation.md#diagramonlymode)–[product.firstLoadShowsAll](local/product/presentation.md#firstloadshowsall). What is checkable is that the rules making wrapping
 impossible are present and that the markup gives them something to act on. That is weaker than
 seeing it, and it is what caught the bug's shape: the original defect was not a bad measurement
 but a missing declaration.
@@ -1597,7 +1597,7 @@ but a missing declaration.
 
 **Every control is documented, and nothing else is**
 
-**Verifies:** product.pageExplainsItself · **Level:** code · **Method:** compare two sets extracted from the rendered
+**Verifies:** [product.pageExplainsItself](local/product/presentation.md#pageexplainsitself) · **Level:** code · **Method:** compare two sets extracted from the rendered
 index — the control labels, and the terms the Controls panel defines
 
 **Assertions:** the set of control labels **across every panel** and the set of terms the panels'
@@ -1627,7 +1627,7 @@ where it immediately caught the Family documentation left behind in the Controls
 entry for a control that does not exist, and by breaking the extraction selector so both sets come
 back empty.
 
-**This replaces an enumeration in the requirement itself.** product.pageExplainsItself used to name the controls it
+**This replaces an enumeration in the requirement itself.** [product.pageExplainsItself](local/product/presentation.md#pageexplainsitself) used to name the controls it
 covered, and had been updated for neither Compare birds nor Names. A list cannot notice what it
 omits — the requirement, the panel and the controls each looked complete on their own. Comparing
 the two sets is the only form of this check that fails when someone adds a control and forgets.
@@ -1636,7 +1636,7 @@ the two sets is the only form of this check that fails when someone adds a contr
 
 **The region filter selects, groups and composes**
 
-**Verifies:** product.regionAndMonthFilter, product.filtersCompose · **Level:** code · **Method:** rendering tests over `?region=`
+**Verifies:** [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.filtersCompose](local/product/months.md#filterscompose) · **Level:** code · **Method:** rendering tests over `?region=`
 
 **Assertions, filtering:** filtering to one region shows species reported there and excludes
 others; no parameter shows all; and an explicitly empty `region=` shows none, the same
@@ -1673,7 +1673,7 @@ note, which leaves the two indistinguishable.
 
 **The derived zones answer to the data**
 
-**Verifies:** product.regionsGroupedTwoWays · **Level:** code · **Method:** recomputation over `data/region-presence.tsv`
+**Verifies:** [product.regionsGroupedTwoWays](local/product/months.md#regionsgroupedtwoways) · **Level:** code · **Method:** recomputation over `data/region-presence.tsv`
 
 The "Common birds" grouping is a **claim about the records**, so it is checked against the
 records — the same committed table the filter itself uses, not a fixture, because a fixture
@@ -1711,7 +1711,7 @@ Hawaii break, which is why it was replaced.
 
 **A region's URL is readable, unique, and round-trips**
 
-**Verifies:** product.regionAndMonthFilter · **Level:** code · **Method:** unit tests over the region table, plus a
+**Verifies:** [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter) · **Level:** code · **Method:** unit tests over the region table, plus a
 rendering test over the selector
 
 **Assertions, the slug:** every region's slug is its postal code where it has one and its
@@ -1745,7 +1745,7 @@ it is recorded here because "watched failing" meant watching a panic, not a red 
 
 **The family grouping covers every family, and stays off the tile**
 
-**Verifies:** product.familiesByOrder, product.tileContents · **Level:** code · **Method:** unit tests over the grouping against
+**Verifies:** [product.familiesByOrder](local/product/months.md#familiesbyorder), [product.tileContents](local/product/presentation.md#tilecontents) · **Level:** code · **Method:** unit tests over the grouping against
 the compiled dataset, plus a rendering test over the selector and a tile
 
 **Assertions, coverage:** every family of the dataset sits in exactly one taxonomic order, and
@@ -1775,14 +1775,14 @@ here rather than deleted, because a criterion that quietly loses most of its ass
 say so.
 
 The coverage check **skips** rather than fails when `web/data/species.json` is absent, since
-the dataset is a build artifact and is not committed (tech.datasetNeverCommitted). That is a real gap: on a machine
+the dataset is a build artifact and is not committed ([tech.datasetNeverCommitted](local/tech/delivery.md#datasetnevercommitted)). That is a real gap: on a machine
 that has never run the ingest, this criterion is silent.
 
 ### creditsComplete
 
 **Credits are complete and the docs are not stale**
 
-**Verifies:** product.selfDescriptionStaysTrue · **Level:** code · **Method:** tests over the rendered pages and over
+**Verifies:** [product.selfDescriptionStaysTrue](local/product/presentation.md#selfdescriptionstaystrue) · **Level:** code · **Method:** tests over the rendered pages and over
 `README.md` and `docs/`, against the compiled dataset
 
 **Assertions, credits:** **every page that shows a CC BY source's output credits that source on
@@ -1828,7 +1828,7 @@ anything — visible only because the deliberate break failed to go red.
 
 **Every category on the detail page says where it came from**
 
-**Verifies:** product.categoryProvenance · **Level:** code · **Method:** rendering test over the detail view
+**Verifies:** [product.categoryProvenance](local/product/measurements.md#categoryprovenance) · **Level:** code · **Method:** rendering test over the detail view
 
 **Assertions:** the detail page lists the bird's family, order, regions, habitat and niche, and
 any group it is in; **each carries a provenance of published, derived or ours**; and a published
@@ -1892,7 +1892,7 @@ moved somewhere it never looks.
 
 **Habitat and diet filter per species, and say where each value came from**
 
-**Verifies:** product.habitatAndDietFilters · **Level:** code · **Method:** unit tests over the trait table against the
+**Verifies:** [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters) · **Level:** code · **Method:** unit tests over the trait table against the
 compiled dataset, plus rendering tests over the controls
 
 **Assertions, the vocabulary:** every value assigned to a species is one the control offers, so
@@ -1938,7 +1938,7 @@ count assertion exists beside the key assertion.
 
 **`/static/` serves the files pages load, never a template**
 
-**Verifies:** tech.servesOnlyItsPages · **Level:** code · **Method:** request the bare directory and
+**Verifies:** [tech.servesOnlyItsPages](local/tech/delivery.md#servesonlyitspages) · **Level:** code · **Method:** request the bare directory and
 every page template under `/static/` and expect 404; request the stylesheet and the favicon and
 expect 200
 **Run:** `go test ./cmd/birdview/ -run TestStaticServesAssetsOnly`
@@ -1950,81 +1950,81 @@ template returned 200 with its source, `/static/` returned `index.html`'s, and
 
 | Requirement | Criteria | |
 | --- | --- | --- |
-| tech.servesOnlyItsPages | staticServesAssetsOnly | |
-| tech.webPages | app.everyPageIsFound | |
-| product.scopeIsRecurringAvifauna | scopeMatchesStatusTable, noRarityCodes, abaFileHashMatches | |
-| product.traitsFromAvonet, product.traitsPerSpecies | allFiveTraits | |
-| product.namesFromAvilist | namesNeverDefaulted | |
-| product.englishNameChoice | nameLocaleToggle, stableSpeciesId | |
-| product.generatedBadgeColors | legibleDistinctColors, badgeTextInheritsColor | |
-| product.joinOnBinomial | joinCoversEverySpecies | |
-| product.unmatchedSpeciesReported | unmatchedFailsBuild | |
-| product.familyFilter | familyFilterSelectsAndClears, familyListWraps | |
-| product.regionAndMonthFilter, product.filtersCompose | regionFilterBehaves, regionUrlRoundTrips, belowBarCountsKept | |
-| product.regionsGroupedTwoWays | regionFilterBehaves, zonesAnswerToData | |
-| product.familiesByOrder | familyGroupingComplete | |
-| product.habitatAndDietFilters | habitatDietFilterPerSpecies | |
-| product.categoryProvenance | categoryOriginShown | |
-| product.oneSelectedMetric, product.ascendingOrder | sortsAscending | |
-| product.sectionBreakRule, product.sectionThresholdDefault | sectionBoundariesObeyRule | |
-| product.sectionHeadersStateRange | sectionHeadersMatch | |
-| product.diagramOnlyMode | bothCommandsBuild | |
-| product.tileContents | tileCarriesHeaderAndMetrics, pickModeSurvivesNavigation, tileHeaderNeverWraps, familyGroupingComplete | |
-| product.imperialByDefault | unitToggleSwitches | |
-| product.firstLoadShowsAll | familyFilterSelectsAndClears | |
-| product.tileOpensDetail | detailShowsProvenance, bothCommandsBuild, detailDrawsFullScale | |
-| product.pageExplainsItself | pageExplainsControls, massDrawnAsWaterCube, everyControlDocumented | |
-| product.collapsibleControls | scrollScriptScoped | |
-| product.helpfulEmptyState | emptyStateGuides | |
-| product.togglesKeepPlace | scrollScriptScoped | partial — behavior unverifiable without a browser |
-| product.segmentComposition | diagramPartsInOrder, foldedNeckSameStroke, foldingFamiliesHaveNecks, diagramDistinguishesModeled | legsFromTarsusWithdrawn withdrawn (decisions.inFlightNoLegs) |
-| product.segmentsSumToLength | segmentsSumExactly, foldedNeckSameStroke | |
-| product.scaleToggle | sharedScale, controlsMatchServer | |
-| product.crossbarAtVerticalScale | crossbarToScale | |
-| product.proportionDifferentiates | proportionsDifferentiate | |
-| product.neckModelPerFamily | neckLengthSerialized, foldingFamiliesHaveNecks | |
-| product.craniumFromMass | craniumVaries | |
-| product.trunkFromMass | trunkScalesLikeSkeletons | |
-| product.oneDiagramVocabulary | faviconFromPalette | |
-| product.lengthAndWingspanSources (composite) | totalIsSumOfSegments | |
-| product.lengthAndWingspanSources (wingspan model) | wingspanModelReconstructsFox | |
-| product.speciesPhotographs – product.photoCaching | — | withdrawn |
-| product.lengthAndWingspanSources | provenanceMatchesSources, whiteTernFromBirdlife, herringGullFromEuropeanRow | |
-| product.borrowedMeasurementsSaySo | sharedMeasurementsDisclosed | |
-| product.escapedBirdsListed | escapedBirdsListedAndServed | |
-| product.tileMarksModeled | tileMarksNonMeasured | |
-| product.provenancePerMetric | provenanceWellFormed | |
-| product.metricProvenanceExplained | detailShowsProvenance | |
-| product.inaturalistLink | inaturalistLinkConfidentOnly | |
-| product.measuredVersusModeled | diagramDistinguishesModeled | |
-| product.labeledDetailDiagram | segmentLabelsDontCollide, totalLengthLabeled, massDrawnAsWaterCube | |
-| product.comparisonOneScale | comparisonSharesScale, comparisonSortRewritesUrl | |
-| product.pickFromIndex | pickModeSurvivesNavigation | |
-| tech.twoCommandsOneModule, tech.servesOnLocalhost | bothCommandsBuild | |
-| tech.selfContainedServer | noServerNetworkRequest, ownRenderableFavicon | |
-| tech.fetchRestrictedInputs | nothingRestrictedTracked, abaFileHashMatches | |
-| tech.datasetNeverCommitted | nothingRestrictedTracked | |
-| tech.identifiedClient | outboundRequestsIdentified | |
-| tech.badgeContrast | legibleDistinctColors | |
-| tech.textContrastFloor | noTextBelowContrastFloor | |
-| product.selfDescriptionStaysTrue | creditsComplete | |
-| tech.localNowPublicLater | attributionComplete | partial — the non-commercial posture itself is still untestable |
-| tech.bundleIsNormative, tech.recordBeforeConsuming | everyRequirementCitesGoal, vendoredHashesMatch, decisionReferencesExist, quotationsAreVerbatim, compositionResolves | |
-| wcag.ContrastEnhanced | legibleDistinctColors | |
+| [tech.servesOnlyItsPages](local/tech/delivery.md#servesonlyitspages) | staticServesAssetsOnly | |
+| [tech.webPages](local/tech/accessibility.md#webpages) | [app.everyPageIsFound](composed/internal/app/acceptance.md#everypageisfound) | |
+| [product.scopeIsRecurringAvifauna](local/product/dataset.md#scopeisrecurringavifauna) | scopeMatchesStatusTable, noRarityCodes, abaFileHashMatches | |
+| [product.traitsFromAvonet](local/product/dataset.md#traitsfromavonet), [product.traitsPerSpecies](local/product/dataset.md#traitsperspecies) | allFiveTraits | |
+| [product.namesFromAvilist](local/product/dataset.md#namesfromavilist) | namesNeverDefaulted | |
+| [product.englishNameChoice](local/product/diagram.md#englishnamechoice) | nameLocaleToggle, stableSpeciesId | |
+| [product.generatedBadgeColors](local/product/dataset.md#generatedbadgecolors) | legibleDistinctColors, badgeTextInheritsColor | |
+| [product.joinOnBinomial](local/product/dataset.md#joinonbinomial) | joinCoversEverySpecies | |
+| [product.unmatchedSpeciesReported](local/product/dataset.md#unmatchedspeciesreported) | unmatchedFailsBuild | |
+| [product.familyFilter](local/product/filtering.md#familyfilter) | familyFilterSelectsAndClears, familyListWraps | |
+| [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.filtersCompose](local/product/months.md#filterscompose) | regionFilterBehaves, regionUrlRoundTrips, belowBarCountsKept | |
+| [product.regionsGroupedTwoWays](local/product/months.md#regionsgroupedtwoways) | regionFilterBehaves, zonesAnswerToData | |
+| [product.familiesByOrder](local/product/months.md#familiesbyorder) | familyGroupingComplete | |
+| [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters) | habitatDietFilterPerSpecies | |
+| [product.categoryProvenance](local/product/measurements.md#categoryprovenance) | categoryOriginShown | |
+| [product.oneSelectedMetric](local/product/ordering.md#oneselectedmetric), [product.ascendingOrder](local/product/ordering.md#ascendingorder) | sortsAscending | |
+| [product.sectionBreakRule](local/product/ordering.md#sectionbreakrule), [product.sectionThresholdDefault](local/product/ordering.md#sectionthresholddefault) | sectionBoundariesObeyRule | |
+| [product.sectionHeadersStateRange](local/product/ordering.md#sectionheadersstaterange) | sectionHeadersMatch | |
+| [product.diagramOnlyMode](local/product/presentation.md#diagramonlymode) | bothCommandsBuild | |
+| [product.tileContents](local/product/presentation.md#tilecontents) | tileCarriesHeaderAndMetrics, pickModeSurvivesNavigation, tileHeaderNeverWraps, familyGroupingComplete | |
+| [product.imperialByDefault](local/product/presentation.md#imperialbydefault) | unitToggleSwitches | |
+| [product.firstLoadShowsAll](local/product/presentation.md#firstloadshowsall) | familyFilterSelectsAndClears | |
+| [product.tileOpensDetail](local/product/presentation.md#tileopensdetail) | detailShowsProvenance, bothCommandsBuild, detailDrawsFullScale | |
+| [product.pageExplainsItself](local/product/presentation.md#pageexplainsitself) | pageExplainsControls, massDrawnAsWaterCube, everyControlDocumented | |
+| [product.collapsibleControls](local/product/presentation.md#collapsiblecontrols) | scrollScriptScoped | |
+| [product.helpfulEmptyState](local/product/presentation.md#helpfulemptystate) | emptyStateGuides | |
+| [product.togglesKeepPlace](local/product/presentation.md#toggleskeepplace) | scrollScriptScoped | partial — behavior unverifiable without a browser |
+| [product.segmentComposition](local/product/diagram.md#segmentcomposition) | diagramPartsInOrder, foldedNeckSameStroke, foldingFamiliesHaveNecks, diagramDistinguishesModeled | legsFromTarsusWithdrawn withdrawn ([decisions.inFlightNoLegs](decisions.md#inflightnolegs)) |
+| [product.segmentsSumToLength](local/product/diagram.md#segmentssumtolength) | segmentsSumExactly, foldedNeckSameStroke | |
+| [product.scaleToggle](local/product/diagram.md#scaletoggle) | sharedScale, controlsMatchServer | |
+| [product.crossbarAtVerticalScale](local/product/diagram.md#crossbaratverticalscale) | crossbarToScale | |
+| [product.proportionDifferentiates](local/product/diagram.md#proportiondifferentiates) | proportionsDifferentiate | |
+| [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily) | neckLengthSerialized, foldingFamiliesHaveNecks | |
+| [product.craniumFromMass](local/product/diagram.md#craniumfrommass) | craniumVaries | |
+| [product.trunkFromMass](local/product/diagram.md#trunkfrommass) | trunkScalesLikeSkeletons | |
+| [product.oneDiagramVocabulary](local/product/diagram.md#onediagramvocabulary) | faviconFromPalette | |
+| [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources) (composite) | totalIsSumOfSegments | |
+| [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources) (wingspan model) | wingspanModelReconstructsFox | |
+| [product.speciesPhotographs](local/product/diagram.md#speciesphotographs) – [product.photoCaching](local/product/diagram.md#photocaching) | — | withdrawn |
+| [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources) | provenanceMatchesSources, whiteTernFromBirdlife, herringGullFromEuropeanRow | |
+| [product.borrowedMeasurementsSaySo](local/product/measurements.md#borrowedmeasurementssayso) | sharedMeasurementsDisclosed | |
+| [product.escapedBirdsListed](local/product/measurements.md#escapedbirdslisted) | escapedBirdsListedAndServed | |
+| [product.tileMarksModeled](local/product/measurements.md#tilemarksmodeled) | tileMarksNonMeasured | |
+| [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) | provenanceWellFormed | |
+| [product.metricProvenanceExplained](local/product/measurements.md#metricprovenanceexplained) | detailShowsProvenance | |
+| [product.inaturalistLink](local/product/presentation.md#inaturalistlink) | inaturalistLinkConfidentOnly | |
+| [product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled) | diagramDistinguishesModeled | |
+| [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) | segmentLabelsDontCollide, totalLengthLabeled, massDrawnAsWaterCube | |
+| [product.comparisonOneScale](local/product/presentation.md#comparisononescale) | comparisonSharesScale, comparisonSortRewritesUrl | |
+| [product.pickFromIndex](local/product/presentation.md#pickfromindex) | pickModeSurvivesNavigation | |
+| [tech.twoCommandsOneModule](local/tech/delivery.md#twocommandsonemodule), [tech.servesOnLocalhost](local/tech/delivery.md#servesonlocalhost) | bothCommandsBuild | |
+| [tech.selfContainedServer](local/tech/delivery.md#selfcontainedserver) | noServerNetworkRequest, ownRenderableFavicon | |
+| [tech.fetchRestrictedInputs](local/tech/delivery.md#fetchrestrictedinputs) | nothingRestrictedTracked, abaFileHashMatches | |
+| [tech.datasetNeverCommitted](local/tech/delivery.md#datasetnevercommitted) | nothingRestrictedTracked | |
+| [tech.identifiedClient](local/tech/delivery.md#identifiedclient) | outboundRequestsIdentified | |
+| [tech.badgeContrast](local/tech/accessibility.md#badgecontrast) | legibleDistinctColors | |
+| [tech.textContrastFloor](local/tech/accessibility.md#textcontrastfloor) | noTextBelowContrastFloor | |
+| [product.selfDescriptionStaysTrue](local/product/presentation.md#selfdescriptionstaystrue) | creditsComplete | |
+| [tech.localNowPublicLater](local/tech/posture.md#localnowpubliclater) | attributionComplete | partial — the non-commercial posture itself is still untestable |
+| [tech.bundleIsNormative](local/tech/process.md#bundleisnormative), [tech.recordBeforeConsuming](local/tech/process.md#recordbeforeconsuming) | everyRequirementCitesGoal, vendoredHashesMatch, decisionReferencesExist, quotationsAreVerbatim, compositionResolves | |
+| [wcag.ContrastEnhanced](imported/w3.org/wcag/wcag.md#contrastenhanced) | legibleDistinctColors | |
 
 ### Declared gaps
 
 Honest gaps, rather than criteria that would not bite:
 
-- **product.familyFilter (family filter), product.diagramOnlyMode–product.firstLoadShowsAll (modes, tile contents, units, first load).** These are
+- **[product.familyFilter](local/product/filtering.md#familyfilter) (family filter), [product.diagramOnlyMode](local/product/presentation.md#diagramonlymode)–[product.firstLoadShowsAll](local/product/presentation.md#firstloadshowsall) (modes, tile contents, units, first load).** These are
   interaction behaviors. They are testable, but only with a browser harness this project does not
   have, and a unit test asserting that a template contains a string verifies the template rather
   than the behavior. Covered by human review until a harness exists; promote them when one does.
   familyFilterSelectsAndClears and familyListWraps do not close this gap: they check the selector's structure and layout, not
   what clicking a family does.
-- **tech.localNowPublicLater (never commercial).** A standing posture with no code to check. It is enforced by the
+- **[tech.localNowPublicLater](local/tech/posture.md#localnowpubliclater) (never commercial).** A standing posture with no code to check. It is enforced by the
   human gate and by `imports.md`, not by a test.
-- **product.tileOpensDetail (detail view)** is only partially covered: detailShowsProvenance checks that provenance appears there,
+- **[product.tileOpensDetail](local/product/presentation.md#tileopensdetail) (detail view)** is only partially covered: detailShowsProvenance checks that provenance appears there,
   not that the rest of the view is right.
 
 ### Criteria that cannot yet fail
@@ -2216,7 +2216,7 @@ an ingest that publishes no evidence at all.
 | --- | --- |
 | `detail` restored to a bare `http.NotFound` | all three verdicts, "no verdict on the page" |
 | the handler writes 200 | "the address serves no bird, and 200 would tell every cache otherwise" |
-| the handler writes 410 | both the status assertion and the decisions.speciesUrlOutlivesSpecies one |
+| the handler writes 410 | both the status assertion and the [decisions.speciesUrlOutlivesSpecies](decisions.md#speciesurloutlivesspecies) one |
 | the historical sentence drops `LastSeen` | `page does not say "18 May 1902"` |
 | the `absent` branch is given the evidence sentence | four separate count-shaped strings on the page |
 | an unmatched id is handed a synthesized record | "unknown id gets the named page" |
@@ -2242,7 +2242,7 @@ decides what a URL means.
 **Assertions:**
 
 1. For every species carrying a `commonest`, **no land region it occupies has a larger share**.
-   This is product.shareOfRecords's central claim and nothing asserted it before.
+   This is [product.shareOfRecords](local/product/presentation.md#shareofrecords)'s central claim and nothing asserted it before.
 2. `RegionTotals` carries **no marine entry**, so nothing can divide by one.
 3. A species' share is computed over regions the totals have an entry for, on **both** sides:
    no region contributes to the numerator without contributing to the denominator.
@@ -2310,7 +2310,7 @@ now catches it is the check nobody had written.
    detail page's figure exactly.**
 2. The peak is always **a region the species is listed in**. The old figure could name one the
    reader would not find in the filter at all.
-3. At least one species peaks at sea, or the case decisions.honestSeaDenominator exists for is unexercised. (45 do.)
+3. At least one species peaks at sea, or the case [decisions.honestSeaDenominator](decisions.md#honestseadenominator) exists for is unexercised. (45 do.)
 4. The row is labelled **Top region**, and none of its superseded names survives — not
    `Commonest in`, not `Commonest land region`. Rejecting the old forms as well as requiring
    the new one is what would have caught `Commonest land region` outliving
@@ -2318,7 +2318,7 @@ now catches it is the check nobody had written.
    for.
 4. Every region has a record total, seas included.
 5. A sea's total **exceeds the sum of the species placed there**. A denominator built out of
-   its own numerators is the shape of the decisions.seaShareDiffers bug, and the only part of it a test can see
+   its own numerators is the shape of the [decisions.seaShareDiffers](decisions.md#seasharediffers) bug, and the only part of it a test can see
    without the network.
 6. `CountOffLandInBox` subtracts the land, and **refuses** a facet whose rows sum past the box
    rather than returning a negative count.
@@ -2943,7 +2943,7 @@ dataset
 6. Greater Sage-Grouse in Wyoming in March carries **no** caveat: its records are in the export.
 7. **Controls:** Bobolink in New York in January and Snow Bunting in New York in June stay
    hidden. They are not withheld, just gone.
-8. The species page lists the withheld regions and months (product.tileOpensDetail).
+8. The species page lists the withheld regions and months ([product.tileOpensDetail](local/product/presentation.md#tileopensdetail)).
 
 **Assertion 7 is what keeps the fix honest.** Abstaining is easy to get right by abstaining
 everywhere, which would quietly switch the month filter off; the controls are the birds it must

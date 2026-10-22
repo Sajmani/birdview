@@ -1,0 +1,8 @@
+# A link for a qualified reference must lead to a file and heading that exist.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem broken-reference-link requirements/local/product/product.md

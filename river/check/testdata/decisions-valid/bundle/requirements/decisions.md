@@ -7,7 +7,7 @@
 Date: 2026-01-01
 Decided by: Sam
 Status: superseded by newRule
-Affects: product.doThing
+Affects: [product.doThing](local/product/product.md#dothing)
 
 ### Decided
 
@@ -23,7 +23,7 @@ Date: 2026-02-01
 Decided by: Sam
 Status: amended by narrowRule; one part still open
 Supersedes: oldRule
-Affects: product.doThing
+Affects: [product.doThing](local/product/product.md#dothing)
 
 ### Decided
 
@@ -39,7 +39,7 @@ Date: 2026-03-01
 Decided by: Sam
 Status: accepted
 Amends: newRule
-Affects: product.doThing, wcag.ContrastEnhanced
+Affects: [product.doThing](local/product/product.md#dothing), wcag.ContrastEnhanced
 Expires: 2027-01-01
 
 ### Decided

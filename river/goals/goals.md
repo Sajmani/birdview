@@ -98,4 +98,4 @@ Maintain BirdView without exposing anyone's personal details.
 - **Songs and calls.**
 - **Range maps.** Regions filter the list; BirdView draws no maps.
 - **Personal data.** No accounts, sightings or life lists.
-- **Commercial use.** BirdView is not and will not become commercial (tech.localNowPublicLater).
+- **Commercial use.** BirdView is not and will not become commercial ([tech.localNowPublicLater](../requirements/local/tech/posture.md#localnowpubliclater)).

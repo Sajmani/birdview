@@ -16,7 +16,7 @@ here rather than left to be redone.
 of anything: one gram of water is one cubic centimetre, by the historical definition of the gram,
 so the side is a unit conversion and carries no assumption about avian density. It is a real
 length, so it can be drawn at the diagram's own scale and does not introduce the second,
-arbitrary scale product.crossbarAtVerticalScale refuses. product.labeledDetailDiagram's objection on that count does not apply to it.
+arbitrary scale [product.crossbarAtVerticalScale](requirements/local/product/diagram.md#crossbaratverticalscale) refuses. [product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram)'s objection on that count does not apply to it.
 
 **Measured on the real data, at the detail view's geometry** (drawing area 668 × 281):
 
@@ -35,15 +35,15 @@ dense diving birds — and the smallest to long-tailed, light-bodied species, Fo
 Scissor-tailed Flycatcher and Black-billed Magpie. The cube read against the bird's own length is
 **bulk against elongation**, which is exactly the thing a length-and-wingspan diagram cannot say.
 
-**What it still does not do**, and the reason product.labeledDetailDiagram's second objection stands: it compresses. A
+**What it still does not do**, and the reason [product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram)'s second objection stands: it compresses. A
 Bushtit and a Common Raven differ 175× in mass and their cubes differ 5.6×. That is arithmetically
 correct for equal-volume cubes and visually understates the gap. It matters less now that the
 number is on the figure — the label can carry the magnitude and the cube the tangibility — but a
 reader who takes the cubes as the mass comparison will read them wrong.
 
 Open if it is taken up: what labels it, whether it appears on index tiles (it should not — the
-tile is dense by design and this is detail-view furniture, as product.labeledDetailDiagram's labels already are), and
-whether it is drawn solid or dashed for the 10 near-match masses, which product.measuredVersusModeled's vocabulary already
+tile is dense by design and this is detail-view furniture, as [product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram)'s labels already are), and
+whether it is drawn solid or dashed for the 10 near-match masses, which [product.measuredVersusModeled](requirements/local/product/measurements.md#measuredversusmodeled)'s vocabulary already
 answers.
 
 ## Mass as a proportional line, replacing the cube — parked
@@ -52,7 +52,7 @@ answers.
 still true; pick it up from this section rather than re-deriving it.
 
 **The complaint is correct and is already in the spec.** The cube root flattens: a Bushtit and a
-Common Raven differ in mass by 175× and their cubes by 5.6×. product.labeledDetailDiagram admits this and answers it with
+Common Raven differ in mass by 175× and their cubes by 5.6×. [product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram) admits this and answers it with
 the printed number. The proposal was to answer it with the drawing instead — a horizontal line
 below the bird, from the lower-left, ticks at both ends, and the Mass label at the far end as the
 Wingspan label already sits at the end of the crossbar.
@@ -74,13 +74,13 @@ subtle. **The cube root is mild compression over the range a reader actually com
 That reframes the Bushtit-and-Raven example this section opens with. Those two differ 175× in
 mass — and they are 11 sections apart, never drawn side by side at a shared scale. The complaint
 is strongest exactly where the comparison is not being made, and weakest where it is. Per-section
-scale is the default (product.scaleToggle), so the common case is the favourable one.
+scale is the default ([product.scaleToggle](requirements/local/product/diagram.md#scaletoggle)), so the common case is the favourable one.
 
 **It also rescues a comparison the numbers break.** In that same section the Pigeon Guillemot's
 mass prints as `1.2 lb` and the Eared Grebe's as `14.5 oz`, because the formatter switches unit at
 16 oz. Two birds of the same length, one third heavier, in units a reader has to convert before
 comparing. The cubes are directly comparable where the labels are not — an argument for the shape
-that nobody made when decisions.massAsWaterCube adopted it.
+that nobody made when [decisions.massAsWaterCube](requirements/decisions.md#massaswatercube) adopted it.
 
 **Where that leaves the line.** The case for it is weaker than when this section was written: it
 would buy proportionality over a range where the cube is already legible, and pay the price set
@@ -109,30 +109,30 @@ within the 20 sections at the default 15% step:
 | sections above 50× | **0 of 20** |
 
 Comfortably drawable. Note what is and is not given up: **the bird is already drawn at a
-per-section scale** (product.scaleToggle), and so is the cube, so a per-section mass scale is not a new kind of
+per-section scale** ([product.scaleToggle](requirements/local/product/diagram.md#scaletoggle)), and so is the cube, so a per-section mass scale is not a new kind of
 relativity. What the cube has that a normalized bar would not is that its size *means* something
 absolute — you could measure it against the bird with one ruler. A normalized bar is a bar-chart
 row: very readable, making no physical claim.
 
-**It therefore needs a CR, because it reverses rather than extends decisions.massAsWaterCube.** product.labeledDetailDiagram currently
+**It therefore needs a CR, because it reverses rather than extends [decisions.massAsWaterCube](requirements/decisions.md#massaswatercube).** [product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram) currently
 states that "a disc or bar sized by mass — a second, arbitrary scale — is still refused", and
-product.crossbarAtVerticalScale's rationale is that a mark on its own convenient scale "looks authoritative and says
+[product.crossbarAtVerticalScale](requirements/local/product/diagram.md#crossbaratverticalscale)'s rationale is that a mark on its own convenient scale "looks authoritative and says
 something false". Those are the sentences a CR would have to overturn, not work around.
 
 **The hard case is the comparison view**, where a reader may pick a hummingbird against a swan and
 the lighter line goes sub-pixel. That is arguably the correct message — the cube is precisely what
 hides it — but invisible reads as broken. The mitigation is to draw the origin tick
-unconditionally, so there is always a mark, and to let the number carry the magnitude as product.labeledDetailDiagram
+unconditionally, so there is always a mark, and to let the number carry the magnitude as [product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram)
 already says it must.
 
 **Styling, as far as it was worked out:**
 
-- **Solid.** Mass is measured for 831 of 841, and product.measuredVersusModeled draws `near-match` solid too.
+- **Solid.** Mass is measured for 831 of 841, and [product.measuredVersusModeled](requirements/local/product/measurements.md#measuredversusmodeled) draws `near-match` solid too.
 - **Not a heavier weight.** Stroke weight carries no meaning in this diagram today, and the
   heaviest mark on a bird diagram should not be the one that is not the bird.
 - **A different colour, and this is the load-bearing one.** A horizontal solid ticked line will
   otherwise read as a second crossbar — another length to scale, which is the exact false claim
-  product.crossbarAtVerticalScale exists to prevent. Contrast measured against the `#0f172a` background, and against the
+  [product.crossbarAtVerticalScale](requirements/local/product/diagram.md#crossbaratverticalscale) exists to prevent. Contrast measured against the `#0f172a` background, and against the
   wing's `#0ea5e9`, because a hue-only difference fails for colour-blind readers:
 
   | candidate | vs background | vs wing |
@@ -143,8 +143,8 @@ already says it must.
   | violet `#a78bfa` | 6.6:1 | 1.0:1 |
 
   Lime has the best luminance separation from the crossbar; the others differ by hue alone.
-- **Ticks at both ends** — consistent with the chord-tick vocabulary of product.measuredVersusModeled.
-- **Label at the far end** — consistent with the wingspan label in product.labeledDetailDiagram.
+- **Ticks at both ends** — consistent with the chord-tick vocabulary of [product.measuredVersusModeled](requirements/local/product/measurements.md#measuredversusmodeled).
+- **Label at the far end** — consistent with the wingspan label in [product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram).
 
 **Two things found along the way that are worth acting on whether or not this is ever built:**
 
@@ -154,11 +154,11 @@ already says it must.
 2. **There is no clear band below the bird on a tile.** The tallest bird in each section fills the
    tile height exactly. The cube works because it occupies the empty lower-left *beside* a narrow
    figure; a full-width horizontal line would cross the tail unless the tile grows downward, as
-   the detail view's bottom strip already does for product.labeledDetailDiagram's labels.
+   the detail view's bottom strip already does for [product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram)'s labels.
 
 ## Cervical vertebra counts, and why they are worth chasing
 
-*Recorded 2026-09-23.* The per-family neck ratios of product.neckModelPerFamily are the largest unforced assumption in
+*Recorded 2026-09-23.* The per-family neck ratios of [product.neckModelPerFamily](requirements/local/product/diagram.md#neckmodelperfamily) are the largest unforced assumption in
 the project: invented, unvalidated, and visibly driving the silhouette of every long-necked family.
 Three families have now been corrected by eye — Aramidae and Pelecanidae after a reader noticed a
 short-necked Limpkin, Sulidae on review — which is a sign the table is guesswork with a slow error
@@ -210,12 +210,12 @@ goal, and would be the thing to test.
 A perched bird needs two things BirdView does not have.
 
 **Legs.** [decisions.inFlightNoLegs](requirements/decisions.md#inflightnolegs) removed them because a flight silhouette does not show them; a perched
-silhouette is mostly leg. Restoring them restores every problem decisions.inFlightNoLegs recorded — the femur, the
+silhouette is mostly leg. Restoring them restores every problem [decisions.inFlightNoLegs](requirements/decisions.md#inflightnolegs) recorded — the femur, the
 toes and the hip position are unmeasured, and the tarsus alone understates the visible leg most in
-the birds whose legs define them. A perched view would need the exposed-leg model that decisions.legFromTarsus
-invented and decisions.inFlightNoLegs deleted, and it would still have no source to validate against.
+the birds whose legs define them. A perched view would need the exposed-leg model that [decisions.legFromTarsus](requirements/decisions.md#legfromtarsus)
+invented and [decisions.inFlightNoLegs](requirements/decisions.md#inflightnolegs) deleted, and it would still have no source to validate against.
 
-**A second neck model.** The current ratios are a standing-posture model used, until decisions.foldedNeckAsS, in a
+**A second neck model.** The current ratios are a standing-posture model used, until [decisions.foldedNeckAsS](requirements/decisions.md#foldedneckass), in a
 flight drawing. A perched view needs the perched extension for every family, which is a different
 invented table again — a perched heron's neck is neither folded flat nor fully extended, and where
 it sits between those is not published at this coverage.
@@ -240,8 +240,8 @@ Neither ask blocks v1, which is what makes waiting free:
 - **Ricklefs / ESA** would *add* capability. Every length is currently `modeled`
   ([decisions.ricklefsProhibited](requirements/decisions.md#ricklefsprohibited)); a grant would make roughly half of them measured. Nothing breaks without
   it.
-- **ABA** would *simplify the build*. Fetch-at-build already works under tech.fetchRestrictedInputs, so a grant would
-  only remove the network step and let tech.datasetNeverCommitted relax. Nothing breaks without it either.
+- **ABA** would *simplify the build*. Fetch-at-build already works under [tech.fetchRestrictedInputs](requirements/local/tech/delivery.md#fetchrestrictedinputs), so a grant would
+  only remove the network step and let [tech.datasetNeverCommitted](requirements/local/tech/delivery.md#datasetnevercommitted) relax. Nothing breaks without it either.
 
 Sending them together after a demo also means one conversation per organization rather than two
 rounds of the same explanation.
@@ -254,5 +254,5 @@ still outstanding.
 
 **The cost of waiting**, recorded so it is a choice rather than a drift: if ESA grants permission
 late, the length column changes from wholly `modeled` to half `measured`, which will move diagrams
-and re-sort sections. Builders should treat the provenance model (product.provenancePerMetric) as the thing that stays
+and re-sort sections. Builders should treat the provenance model ([product.provenancePerMetric](requirements/local/product/measurements.md#provenancepermetric)) as the thing that stays
 fixed and the mix of kinds as the thing that moves.

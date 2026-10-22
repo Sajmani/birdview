@@ -7,7 +7,7 @@
 Date: 2026-01-01
 Decided by: Sam
 Status: accepted
-Affects: product.doThing
+Affects: [product.doThing](local/product/product.md#dothing)
 
 ### Decided
 
@@ -24,7 +24,7 @@ Decided by: Sam
 Status: accepted
 Supersedes: firstRule
 Amends: ghostRule
-Affects: product.doThing
+Affects: [product.doThing](local/product/product.md#dothing)
 
 ### Decided
 
@@ -39,7 +39,7 @@ Something was decided.
 Date: 2026-03-01
 Decided by: Sam
 Status: amended by secondRule
-Affects: product.doThing
+Affects: [product.doThing](local/product/product.md#dothing)
 
 ### Decided
 

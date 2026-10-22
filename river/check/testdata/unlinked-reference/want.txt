@@ -1,0 +1,8 @@
+# A qualified reference to an item the module declares must be a link to it.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem unlinked-reference requirements/local/product/product.md

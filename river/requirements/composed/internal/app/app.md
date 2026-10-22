@@ -125,10 +125,10 @@ a lower tier may do.
 
 Composed from: [wcag.ContrastEnhanced](../../../imported/w3.org/wcag/wcag.md#contrastenhanced), [wcag.FullPages](../../../imported/w3.org/wcag/wcag.md#fullpages), [wcag.ContrastRatio](../../../imported/w3.org/wcag/wcag.md#contrastratio), [tech.webPages](../../../local/tech/accessibility.md#webpages), [decisions.oneContrastFloor](../../../decisions.md#onecontrastfloor)
 
-Every web page, as tech.webPages defines one, meets wcag.ContrastEnhanced over every part of the
-page (wcag.FullPages), measured as wcag.ContrastRatio defines. All text is held to 7:1, large text
-included: wcag.ContrastEnhanced allows 4.5:1 for large text, and decisions.oneContrastFloor gives
-that up. Meeting this meets wcag.ContrastMinimum too.
+Every web page, as [tech.webPages](../../../local/tech/accessibility.md#webpages) defines one, meets [wcag.ContrastEnhanced](../../../imported/w3.org/wcag/wcag.md#contrastenhanced) over every part of the
+page ([wcag.FullPages](../../../imported/w3.org/wcag/wcag.md#fullpages)), measured as [wcag.ContrastRatio](../../../imported/w3.org/wcag/wcag.md#contrastratio) defines. All text is held to 7:1, large text
+included: [wcag.ContrastEnhanced](../../../imported/w3.org/wcag/wcag.md#contrastenhanced) allows 4.5:1 for large text, and [decisions.oneContrastFloor](../../../decisions.md#onecontrastfloor) gives
+that up. Meeting this meets [wcag.ContrastMinimum](../../../imported/w3.org/wcag/wcag.md#contrastminimum) too.
 
 **No page is excepted.** A page that sets no colors, such as a plain-text error response, is drawn
 in the reader's own colors and meets this with nothing to measure.
@@ -139,7 +139,7 @@ in the reader's own colors and meets this with nothing to measure.
 
 Composed from: [wcag.NonTextContrast](../../../imported/w3.org/wcag/wcag.md#nontextcontrast), [wcag.FullPages](../../../imported/w3.org/wcag/wcag.md#fullpages), [tech.webPages](../../../local/tech/accessibility.md#webpages)
 
-Every web page meets wcag.NonTextContrast over every part of the page: the graphics a reader needs
+Every web page meets [wcag.NonTextContrast](../../../imported/w3.org/wcag/wcag.md#nontextcontrast) over every part of the page: the graphics a reader needs
 to read a diagram, and the controls and their states, have 3:1 against adjacent colors.
 
 ## stylesheetContract
@@ -153,8 +153,8 @@ requirement is checked once on the stylesheet rather than once per page.
 
 - **Guarantee.** Every text color `styles.css` declares clears 7:1 against both the page and the
   panel background, or against the rule's own background where it sets one, and no link goes
-  uncolored (tech.textContrastFloor). Every badge's generated background clears 7:1 against the
-  text color generated with it (tech.badgeContrast).
+  uncolored ([tech.textContrastFloor](../../../local/tech/accessibility.md#textcontrastfloor)). Every badge's generated background clears 7:1 against the
+  text color generated with it ([tech.badgeContrast](../../../local/tech/accessibility.md#badgecontrast)).
 - **Assumption.** The page links `styles.css`, has no `<style>` element, and sets a color inline
   only as a badge's generated pair. A page that breaks this is outside the contract and is
   checked on its own.

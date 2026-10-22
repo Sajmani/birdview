@@ -6,4 +6,4 @@ package product
 
 **Do the thing** *(withdrawn)*
 
-Goals: goals.shipIt
+Goals: [goals.shipIt](../../../goals/goals.md#shipit)

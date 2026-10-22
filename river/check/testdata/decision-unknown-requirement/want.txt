@@ -1,4 +1,4 @@
-# An Affects entry in one of this module's own packages must name a requirement that package declares.
+# An Affects entry in one of this module's own packages must name a requirement that package declares. The same name is also an unknown reference (product.linkedReferences).
 exit 1
 requirements 1
 goals 1
@@ -6,3 +6,4 @@ gradients 0
 unjustified 0
 unserved 0
 problem decision-unknown-requirement requirements/decisions.md
+problem unknown-reference requirements/decisions.md

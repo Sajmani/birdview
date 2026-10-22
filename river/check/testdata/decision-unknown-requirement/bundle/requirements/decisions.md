@@ -7,7 +7,7 @@
 Date: 2026-01-01
 Decided by: Sam
 Status: accepted
-Affects: product.doThing, product.doThings
+Affects: [product.doThing](local/product/product.md#dothing), product.doThings
 
 ### Decided
 

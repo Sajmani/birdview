@@ -6,6 +6,6 @@ package product
 
 **Do the thing**
 
-Goals: goals.shipIt
+Goals: [goals.shipIt](../../../goals/goals.md#shipit)
 
 ## oldThing — Written the old way

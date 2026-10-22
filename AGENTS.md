@@ -4,7 +4,7 @@
 Go module: `birdview-ingest` builds the dataset, `birdview` serves it.
 
 **The requirements in [river/](river/) are normative; where this file disagrees, `river/` wins.**
-Names like `product.scaleToggle` are citations: search `river/` for `## scaleToggle`.
+Names like `product.scaleToggle` are citations, linked to their definitions; follow the link, or search `river/` for `## scaleToggle`.
 
 ## Where to look
 

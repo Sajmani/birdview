@@ -7,7 +7,7 @@ package product
 **Where length and wingspan come from**
 
 Subject: `measurement.source`
-Goals: goals.sizeIntuition, goals.honestData
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.honestData](../../../goals/goals.md#honestdata)
 
 - **Wingspan, measured** — Fox et al. 2026, filtered to `needs_prediction = 0` so only empirical
   values are taken. Stored as the reported min/mid/max triple rather than a point value.
@@ -42,7 +42,7 @@ See [decisions.noOpenLengthAndWingspan](../../decisions.md#noopenlengthandwingsp
 
 **The tile marks any metric that is not measured**
 
-Goals: goals.honestData
+Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 On the tile itself — where numbers and the scaled diagram appear — any metric whose `kind` is not
 `measured` is visibly marked as such, without the tile having to explain why.
@@ -56,7 +56,7 @@ metadata nobody sees, and BirdView presents modeled numbers as data, which the p
 
 Subject: `measurement.provenance.record`
 Value: `{kind, source, sourceTaxon, model}`
-Goals: goals.honestData, goals.goodDataCitizen
+Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 Every metric BirdView presents — total length, wingspan, mass, and each diagram segment — carries
 a record of where that specific value came from:
@@ -79,8 +79,8 @@ The three kinds:
 - **`modeled`** — computed rather than measured. `model` names the computation, and where the
   model's accuracy has been measured it states that too.
 
-Rationale: one record covers what decisions.noOpenLengthAndWingspan solved for lengths and
-decisions.abaSpeciesWithoutAvonet for split taxa, so each later gap is a labeling problem rather
+Rationale: one record covers what [decisions.noOpenLengthAndWingspan](../../decisions.md#noopenlengthandwingspan) solved for lengths and
+[decisions.abaSpeciesWithoutAvonet](../../decisions.md#abaspecieswithoutavonet) for split taxa, so each later gap is a labeling problem rather
 than a redesign.
 
 ## measuredVersusModeled
@@ -88,7 +88,7 @@ than a redesign.
 **The diagram shows which lengths are measured and which are modeled**
 
 Subject: `diagram.provenance`
-Goals: goals.honestData
+Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Stroke style carries provenance. A **solid** stroke is a measured length; a **dashed** stroke is a
 modeled one. `near-match` draws solid: it is a real measurement of a sibling taxon, which the
@@ -118,7 +118,7 @@ available the crossbar is drawn whole, dashed if the span is modeled.
 Rationale: the `~` markers of tileMarksModeled sit on the numbers, so a reader looking at the shape
 — a heron's long neck, entirely modeled — had no cue. A silent drawing was the largest remaining
 gap in the commitment that a modeled value is never presented as a measurement
-(decisions.noOpenLengthAndWingspan). The crossbar split keeps the outer segment true even when the
+([decisions.noOpenLengthAndWingspan](../../decisions.md#noopenlengthandwingspan)). The crossbar split keeps the outer segment true even when the
 span model is wrong, so the model's error falls on the inner segment. See
 [decisions.drawingCarriesProvenance](../../decisions.md#drawingcarriesprovenance).
 
@@ -127,7 +127,7 @@ span model is wrong, so the model's error falls on the inner segment. See
 **The detail diagram is labeled with each segment and its measurement**
 
 Subject: `presentation.detail_view.diagram_labels`
-Goals: goals.sizeIntuition, goals.shapeNotOnlySize, goals.honestData
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.honestData](../../../goals/goals.md#honestdata)
 
 **Every metric the detail view reports appears in the drawing.** The provenance table may explain
 more about a number but may not be the only place it appears, so adding a metric to the table
@@ -183,7 +183,7 @@ times as heavy.
 wider than the face and is held clear of the left edge rather than centered past it.
 
 The **index tiles carry the cube too**, unlabeled ([tileContents](presentation.md#tilecontents),
-decisions.massCubeOnTiles), for what length and wingspan cannot show: **bulk against elongation**.
+[decisions.massCubeOnTiles](../../decisions.md#masscubeontiles)), for what length and wingspan cannot show: **bulk against elongation**.
 Read against the bird's own length, it is about **27%** of the drawing height for alcids, dense
 divers, and **10–13%** for long-tailed light-bodied species like the Scissor-tailed Flycatcher and
 the magpie (measured after
@@ -200,7 +200,7 @@ Mass is **measured for 831 of 841 species**, so it is usually the only unmarked 
 figure and the only solid-stroked whole-bird mark.
 
 Total length is labeled because it is the number BirdView exists to give intuition about
-(goals.sizeIntuition). A **bottom strip is added** for it; without one, a bird whose height binds
+([goals.sizeIntuition](../../../goals/goals.md#sizeintuition)). A **bottom strip is added** for it; without one, a bird whose height binds
 has its tail tip on the bottom edge and the label is clipped. The strip **extends the box downward
 rather than shrinking the bird into it**: width is fixed by the page column, but height is not, so
 the bird keeps the size [tileOpensDetail](presentation.md#tileopensdetail) requires instead of
@@ -209,14 +209,14 @@ losing 8.5% of it to a one-line label.
 **Total length states the bird's length, not the drawing's height.** For the folded-neck families
 of [decisions.foldedNeckAsS](../../decisions.md#foldedneckass) these differ: the neck's S spans 2/π
 of its length, so the figure is 6–9% shorter than the labeled number across the 14 species
-affected. The neck label already follows this rule (decisions.foldedNeckAsS); a label taken from
+affected. The neck label already follows this rule ([decisions.foldedNeckAsS](../../decisions.md#foldedneckass)); a label taken from
 the drawn extent would name a quantity no source states.
 
 ## metricProvenanceExplained
 
 **The detail view explains each metric's provenance**
 
-Goals: goals.honestData, goals.goodDataCitizen
+Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 In the detail view (tileOpensDetail), **every** metric — the three main metrics and all five diagram
 segments — is shown with its value and its provenance stated in plain language: naming the source,
@@ -232,7 +232,7 @@ Showing the segments individually is what makes the diagram auditable.
 **The detail view lists every category the bird is in, and where each came from**
 
 Subject: `presentation.detail.categories`
-Goals: goals.honestData, goals.goodDataCitizen
+Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 The detail view names every category a bird is in — its family and order, the regions it is
 listed in, its habitat and niche, and any group BirdView puts it in — and marks each as
@@ -279,7 +279,7 @@ hashing. Serving them would be the redistribution
 
 Subject: `presentation.docs.pipeline`
 Value: `docs/pipeline.md: every source and table, its fields, and every step between them`
-Goals: goals.honestData, goals.giveBack
+Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.giveBack](../../../goals/goals.md#giveback)
 
 The documentation carries **one diagram of how the dataset is built**: every published source and
 every intermediate table as a box giving its name and the fields BirdView reads from it, and every
@@ -312,7 +312,7 @@ off the server.
 
 Subject: `presentation.shared_measurements`
 Value: `a note on the tile and the detail page of each species, naming the others`
-Goals: goals.honestData
+Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Where two or more drawn species take their AVONET traits from **the same row** — a near-match
 borrowing a relative's measurements under [provenancePerMetric](#provenancepermetric), and the
@@ -339,7 +339,7 @@ drawings coincide is visible only by comparing two detail pages.
 
 Subject: `presentation.index.exotic`
 Value: `declared list; off the index, listed at /excluded, detail pages kept`
-Goals: goals.localRelevance, goals.honestData
+Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata)
 
 **A bird whose records here are escapes is not drawn on the index.** Recurrence cannot tell a
 wild population from a supply of escapes ([declaredExceptions](dataset.md#declaredexceptions)), so

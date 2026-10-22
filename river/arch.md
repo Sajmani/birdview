@@ -54,7 +54,7 @@ Fox wingspans ─────────► empirical value, else the fitted �
                          order-level regression
 ```
 
-Resolution order is the substance of decisions.abaSpeciesWithoutAvonet: prefer any row that is genuinely *this* taxon —
+Resolution order is the substance of [decisions.abaSpeciesWithoutAvonet](requirements/decisions.md#abaspecieswithoutavonet): prefer any row that is genuinely *this* taxon —
 whatever name or sheet it is filed under — over borrowing a relative's measurements. Only when no
 such row exists anywhere does a near-match apply, and the label then says so.
 
@@ -71,7 +71,7 @@ independently leaves up to 0.2 mm adrift; the previous design did that and broke
 `view.Sections` groups; `view.Scales` picks one reference length per group — the section's largest
 bird, or the whole set's in global mode. `view.Layout` turns a reference into pixels. Keeping the
 reference separate from the pixel conversion is what lets acceptance.sharedScale assert that every bird in a
-section shares a scale factor, which is the property product.scaleToggle actually requires.
+section shares a scale factor, which is the property [product.scaleToggle](requirements/local/product/diagram.md#scaletoggle) actually requires.
 
 The server also computes a *width* reference per group, because a to-scale crossbar on a
 wide-winged bird in a section of short ones would otherwise overflow. Both references come from
@@ -81,7 +81,7 @@ the same group, so one scale still serves the whole section.
 
 `birdview-inatmap` and `birdview-gbifmap` both resolve BirdView's species against somebody else's
 taxonomy over the network, and both write a committed table rather than running at build time
-(tech.pacedInaturalistMapping). The reasons are the same in each case: tests make no network request, a build that needs
+([tech.pacedInaturalistMapping](requirements/local/tech/process.md#pacedinaturalistmapping)). The reasons are the same in each case: tests make no network request, a build that needs
 the network fails on a plane, and a quarter of an hour of someone else's server time does not
 belong in a `go build`. The tables go stale; a stale row fails visibly and the refresh is one
 command.
@@ -107,22 +107,22 @@ Listed in [todo.md](todo.md) with the rest of the open work, since 2026-10-13.
 
 ## Gotchas
 
-- **The neck/body ratio has no measured basis, and is surfaced anyway** (product.neckModelPerFamily).
+- **The neck/body ratio has no measured basis, and is surfaced anyway** ([product.neckModelPerFamily](requirements/local/product/diagram.md#neckmodelperfamily)).
   The neck length is serialized and shown with `kind: modeled` and a `model` naming the function
   and that family's ratio. Do not drop the model string: naming it is what makes showing the number
   defensible ([decisions.neckLengthAsMetric](requirements/decisions.md#necklengthasmetric), which
-  superseded decisions.neckSplitUnmeasured).
-- **Per-tile diagram scaling destroys the product** (product.scaleToggle). It makes a hummingbird
+  superseded [decisions.neckSplitUnmeasured](requirements/decisions.md#necksplitunmeasured)).
+- **Per-tile diagram scaling destroys the product** ([product.scaleToggle](requirements/local/product/diagram.md#scaletoggle)). It makes a hummingbird
   and a swan identical on screen. Scale is per-section or global, never per-tile.
-- **The wing crossbar is to scale with the vertical axis** (product.crossbarAtVerticalScale), which
+- **The wing crossbar is to scale with the vertical axis** ([product.crossbarAtVerticalScale](requirements/local/product/diagram.md#crossbaratverticalscale)), which
   is why tiles are wide.
 - **AVONET has no common names and no body length or wingspan.** Three designs foundered on
-  assuming otherwise. Names come from AviList (product.namesFromAvilist); length and wingspan from
-  product.lengthAndWingspanSources.
-- **Scope is recurrence, not abundance** (product.scopeIsRecurringAvifauna,
-  decisions.scopeFromRecurrence). A record count measures observer effort, which under-reports
+  assuming otherwise. Names come from AviList ([product.namesFromAvilist](requirements/local/product/dataset.md#namesfromavilist)); length and wingspan from
+  [product.lengthAndWingspanSources](requirements/local/product/measurements.md#lengthandwingspansources).
+- **Scope is recurrence, not abundance** ([product.scopeIsRecurringAvifauna](requirements/local/product/dataset.md#scopeisrecurringavifauna),
+  [decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence)). A record count measures observer effort, which under-reports
   pelagics and island endemics and over-reports vagrants.
-- **Identify the client on outbound requests** (tech.identifiedClient). Go's default user agent
+- **Identify the client on outbound requests** ([tech.identifiedClient](requirements/local/tech/delivery.md#identifiedclient)). Go's default user agent
   earns a 403 from Wikimedia.
 
 ## Running the local server

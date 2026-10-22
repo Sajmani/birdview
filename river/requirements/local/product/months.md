@@ -55,7 +55,7 @@ sea, where no land polygon reaches. They are not errors and must not be filtered
 **Filters compose**
 
 Subject: `presentation.filters`
-Goals: goals.flexibleComparison
+Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 What is shown is what every active filter admits: region and family narrow the list together.
 Selecting Hawaii and Parulidae shows the warblers of Hawaii, and shows nothing if there are none.
@@ -71,7 +71,7 @@ can tell which one emptied the page.
 **Regions are grouped two ways**
 
 Subject: `presentation.region_filter.zones`
-Goals: goals.localRelevance, goals.flexibleComparison
+Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The selector offers **two groupings** of the same regions, and the reader picks from either
 ([decisions.regionsTwoWays](../../decisions.md#regionstwoways)). Each is a **partition**: every region sits in exactly one zone
@@ -101,7 +101,7 @@ computed per region, never per zone.
 **Families are grouped by taxonomic order**
 
 Subject: `presentation.family_filter.groups`
-Goals: goals.flexibleComparison
+Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The family selector groups families by **AviList's taxonomic order**, in checklist sequence.
 Every family has exactly one order, so the grouping is a partition and no family is
@@ -125,7 +125,7 @@ with every habitat their species use drops the precision of "Fresh Water" to **3
 **Filter by habitat and by diet**
 
 Subject: `presentation.trait_filter`
-Goals: goals.flexibleComparison
+Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Two more filters, **assigned per species**: where a bird mostly lives and what it mostly eats.
 Both are multi-select and compose with region and family ([filtersCompose](#filterscompose)). Selecting two

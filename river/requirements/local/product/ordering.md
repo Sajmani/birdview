@@ -8,7 +8,7 @@ package product
 
 Subject: `ordering.metric`
 Value: `length | wingspan | mass | bill | tail | frequency`
-Goals: goals.sizeIntuition, goals.shapeNotOnlySize, goals.flexibleComparison
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The user chooses whether the dataset is ordered by total length, wingspan, body mass, bill length,
 tail length, or how often the bird is recorded ([orderByFrequency](presentation.md#orderbyfrequency), [decisions.frequencyMetric](../../decisions.md#frequencymetric)).
@@ -22,7 +22,7 @@ segments are modeled from mass.
 
 **Ascending order**
 
-Goals: goals.sizeIntuition
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition)
 
 Species are sorted ascending by the selected metric, **and the page says which way that
 runs**: *smallest first* under length, wingspan, mass, bill and tail, *most common first* under
@@ -40,7 +40,7 @@ first" elsewhere would otherwise read it as a defect. See
 **Sections break at N% above the section minimum**
 
 Subject: `sectioning.rule`
-Goals: goals.sizeIntuition, goals.flexibleComparison
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Under the three size metrics, a new section begins at the first species more than N% larger than
 the **minimum** species of the previous section.
@@ -59,7 +59,7 @@ section is no more than N% wide, makes the per-section scale of scaleToggle hone
 
 Subject: `sectioning.step_percent`
 Value: `15`
-Goals: goals.flexibleComparison
+Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The section step N defaults to 15% and the reader can change it, among values from 5% to 30%.
 
@@ -73,7 +73,7 @@ to the default.
 
 **Section headers state range and count**
 
-Goals: goals.sizeIntuition
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition)
 
 Each section shows its range in the currently selected metric and the number of species in it,
 under a heading that names the ordering as Order by does and the section's number: *Tail Tier 1*
@@ -97,7 +97,7 @@ changed between one section and the next. Without it, per-section scaling is mis
 **A histogram shows how many species each tier holds**
 
 Subject: `sectioning.histogram`
-Goals: goals.localRelevance
+Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 Under the species-count line, a histogram has one bar per tier, in tier order, each as tall as its
 tier's species count against the largest tier's, and each linking to its tier. A bar's label names

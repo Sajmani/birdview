@@ -8,13 +8,13 @@ package tech
 
 Subject: `badge.contrast.ratio`
 Value: `>= 7.0`
-Goals: goals.openToEveryone
+Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Every generated badge color yields a contrast ratio of at least 7:1 against **the text it actually
 carries**, which is black or white per badge, computed per WCAG 2.2 relative luminance.
 
 Requiring black text would be stricter than WCAG and would cost about a third of the
-distinguishable colors available to product.generatedBadgeColors.
+distinguishable colors available to [product.generatedBadgeColors](../product/dataset.md#generatedbadgecolors).
 
 Rationale: WCAG is a **mandatory** source scoped to the contrast criteria only — see
 [imports.md](../../imports.md#wcag). BirdView makes no broader conformance claim.
@@ -24,7 +24,7 @@ Rationale: WCAG is a **mandatory** source scoped to the contrast criteria only �
 **Link and text colors meet a stated contrast floor**
 
 Subject: `text.contrast.ratio`
-Goals: goals.openToEveryone
+Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Every text color the stylesheet declares for text on a bare surface clears **7:1** (WCAG 2.2
 SC 1.4.6, Contrast Enhanced) against **both** the page background and the panel background. Links
@@ -41,13 +41,13 @@ an element the stylesheet gives a font property.
 A badge's background and text color are generated together and set inline, so that pair is
 badgeContrast's; a pair written in the stylesheet, such as a selected button's dark text on
 `--accent`, is this requirement's. Stylesheet checks once missed such a pair at 2.42:1; only
-rendering the page caught it (app.renderedTextContrast).
+rendering the page caught it ([app.renderedTextContrast](../../composed/internal/app/acceptance.md#renderedtextcontrast)).
 
 **No link may go uncolored.** A link with no rule inherits the browser default — `#0000EE`
 unvisited and `#551A8B` visited — which on this background is 1.90:1 and 1.62:1.
 
 Rationale: hand-written CSS is as dangerous as a generated palette; the iNaturalist link of
-product.inaturalistLink shipped with no color rule and was effectively invisible. One floor covers
+[product.inaturalistLink](../product/presentation.md#inaturalistlink) shipped with no color rule and was effectively invisible. One floor covers
 all text, with no lower floor for secondary text; see
 [decisions.oneContrastFloor](../../decisions.md#onecontrastfloor).
 
@@ -58,8 +58,8 @@ all text, with no lower floor for secondary text; see
 **What counts as a BirdView web page**
 
 Subject: `pages.domain`
-Binds: wcag.WebPage
-Goals: goals.openToEveryone
+Binds: [wcag.WebPage](../../imported/w3.org/wcag/wcag.md#webpage)
+Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 **Every response the server sends as `text/html`, `image/svg+xml` or `text/plain`, at any route,
 is a BirdView web page**, with everything drawn into it. Today that is the index, the species
@@ -77,4 +77,4 @@ would excuse it from a mandatory source, which takes an accepted gap in
 
 Rationale: treating "the pages" as what the stylesheet styles left out the pipeline diagram,
 served as its own SVG document with its own colors, and the page templates, served as raw source
-under `/static/` (tech.servesOnlyItsPages).
+under `/static/` ([tech.servesOnlyItsPages](delivery.md#servesonlyitspages)).

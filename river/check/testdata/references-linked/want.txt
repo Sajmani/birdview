@@ -1,0 +1,8 @@
+# Qualified references that are links to existing headings pass; a name in code that resolves to
+# nothing is an example, not a reference.
+exit 0
+requirements 2
+goals 1
+gradients 0
+unjustified 0
+unserved 0

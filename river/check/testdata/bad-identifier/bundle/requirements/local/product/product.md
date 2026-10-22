@@ -6,10 +6,10 @@ package product
 
 **Do the thing**
 
-Goals: goals.shipIt
+Goals: [goals.shipIt](../../../goals/goals.md#shipit)
 
 ## doThing2
 
 **Numbered**
 
-Goals: goals.shipIt
+Goals: [goals.shipIt](../../../goals/goals.md#shipit)

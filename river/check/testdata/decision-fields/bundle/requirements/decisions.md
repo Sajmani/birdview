@@ -20,7 +20,7 @@ Something was decided.
 Date: 2026-01-02
 Decided by: Sam
 Status: **Accepted**
-Affects: product.doThing
+Affects: [product.doThing](local/product/product.md#dothing)
 
 ### Decided
 
@@ -35,7 +35,7 @@ Something was decided.
 Date: January 3
 Decided by: Sam
 Status: accepted
-Affects: product.doThing
+Affects: [product.doThing](local/product/product.md#dothing)
 
 ### Decided
 

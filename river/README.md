@@ -1,4 +1,4 @@
-> Project copy of River's `README.md`, pin `2962084`, licensed under Apache 2.0 with the rest of BirdView.
+> Project copy of River's `README.md`, pin `fc69e6c`, licensed under Apache 2.0 with the rest of BirdView.
 > River is not yet published; its canonical origin will be recorded here when it is. Local amendments,
 > if any, are listed in [bindings.md](bindings.md).
 
@@ -120,6 +120,10 @@ searches and opens ranges; it should not have to read a file whole to find one i
   path of the open ones.
 - **Say how to search a long file** in one line at its top, and link rather than copy between
   files.
+- **Link every reference to its definition.** A name such as `product.noSilentFailures` is written
+  as a Markdown link to the heading that defines it, in prose and in `Goals:` fields alike, so a
+  reader follows it in one step and a renamed item breaks a link the checker reports. Exported and
+  imported packages, which move between modules, link only within their own directory.
 
 ### Keeping the bundle's files
 

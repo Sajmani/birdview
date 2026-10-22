@@ -1,0 +1,8 @@
+# Inside code formatting, only a span that is exactly one name is a reference; longer code is code.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem unlinked-reference requirements/local/product/product.md

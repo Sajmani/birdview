@@ -8,7 +8,7 @@ package product
 
 Subject: `diagram.segments`
 Value: `bill, head, neck, body, tail, wing crossbar`
-Goals: goals.shapeNotOnlySize
+Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The diagram is a top-down view of a bird in flight, drawn as a vertical cross: top to bottom a bill
 stick, a head oval, a neck, a body stick and a tail stick, with one horizontal crossbar for the
@@ -37,7 +37,7 @@ parameter; see [decisions.foldedNeckAsS](../../decisions.md#foldedneckass).
 cranes, storks, ibises, flamingos, stilts, rails, loons, grebes — what shows is the projection past
 the tail tip. That depends on the femur, the toes and the hip's position, which no source
 measures, and on the feathered tibiotarsus, which a standing-posture leg model leaves out.
-decisions.inFlightNoLegs records the evidence and
+[decisions.inFlightNoLegs](../../decisions.md#inflightnolegs) records the evidence and
 what the removal costs.
 
 Rationale: the tail is a stick rather than a triangle because no trait in any source gives a tail
@@ -48,7 +48,7 @@ width, and a triangle would assert a fan shape the data does not support.
 **Segments abut exactly and sum to total length**
 
 Subject: `diagram.segments.sum`
-Goals: goals.sizeIntuition, goals.shapeNotOnlySize
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The five vertical segments meet without gap or overlap, and their lengths sum to the species'
 total length.
@@ -69,7 +69,7 @@ detail view — uses the full total length, so comparability is unaffected. See
 
 Subject: `diagram.scale.mode`
 Value: `per-section (default) | global; global is the default under Frequency, Bill and Tail`
-Goals: goals.sizeIntuition, goals.flexibleComparison
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The user switches between a single scale across the entire filtered set, and a scale shared by all
 species within a section. **Per-section is the default, and is listed first.**
@@ -87,7 +87,7 @@ within 3.1×.
 Whichever is chosen, the scale is set by the largest total length in the group. Since the segments
 sum to total length (segmentsSumToLength) and nothing is drawn outside them, that is the whole vertical extent.
 
-Rationale: goals.sizeIntuition depends on this. A per-tile scale — every bird drawn to fill its
+Rationale: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition) depends on this. A per-tile scale — every bird drawn to fill its
 tile — makes a hummingbird and a swan identical on screen.
 
 Per-section is the default because at global scale a median bird is a few pixels tall, too small
@@ -101,7 +101,7 @@ best, and stays one click away and named first in the help.
 
 Subject: `diagram.wingspan.scale`
 Value: `same as vertical axis`
-Goals: goals.sizeIntuition, goals.shapeNotOnlySize
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The crossbar's length represents wingspan at the same scale as the vertical axis, so its length
 relative to the body is literal.
@@ -114,7 +114,7 @@ authoritative.
 
 **Proportion differentiates species**
 
-Goals: goals.shapeNotOnlySize
+Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 A species' drawn proportions distinguish it by shape, not only by size: a dowitcher reads as
 long-billed, an accipiter as long-tailed, a heron as long-necked.
@@ -125,7 +125,7 @@ long-billed, an accipiter as long-tailed, a heron as long-necked.
 
 Subject: `diagram.head_model`
 Value: `isometric on mass`
-Goals: goals.shapeNotOnlySize
+Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Head length scales isometrically with body mass. Like every modeled value it names its function
 (provenancePerMetric) and claims no measurement.
@@ -152,7 +152,7 @@ stands unvalidated. It is no longer moot: Emu, now in scope at 34 kg, draws a 24
 
 Subject: `diagram.trunk_model`
 Value: `14.0329 x mass^0.37`
-Goals: goals.sizeIntuition, goals.shapeNotOnlySize
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Trunk length scales with body mass by a power law. Like every modeled value it names its function
 (provenancePerMetric) and claims no measurement.
@@ -172,7 +172,7 @@ changes the median moves, and the drawing must not move with it silently; re-anc
 decision, recorded as one.
 
 Rationale: three of the five segments are driven by mass, so this exponent governs how much longer
-a big bird is drawn than a small one, which is what goals.sizeIntuition exists to convey. The
+a big bird is drawn than a small one, which is what [goals.sizeIntuition](../../../goals/goals.md#sizeintuition) exists to convey. The
 original unvalidated 0.31 understated the large end of the current scope by about 1.65×. See
 [decisions.trunkExponentCalibrated](../../decisions.md#trunkexponentcalibrated) for the measurement, and for what it does not establish.
 
@@ -182,7 +182,7 @@ original unvalidated 0.31 understated the large end of the current scope by abou
 
 Subject: `diagram.neck_ratio`
 Value: `per-family modeling function`
-Goals: goals.shapeNotOnlySize, goals.honestData
+Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.honestData](../../../goals/goals.md#honestdata)
 
 The division of the remaining body axis between neck and body uses a per-family ratio. The
 resulting **neck length is presented as a metric like any other**, in the detail view, carrying a
@@ -192,7 +192,7 @@ the ratio applied to that bird's family** — for example, "per-family neck rati
 The ratio table is recorded in the code with this requirement cited beside it.
 
 Rationale: no source measures avian neck length at this coverage, and one ratio for every species
-would make every bird the same shape, defeating goals.shapeNotOnlySize. Naming the per-family
+would make every bird the same shape, defeating [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize). Naming the per-family
 constant is what makes it acceptable: the reader sees the neck either way, and can read the exact
 function that drew it. Supersedes the condition in [decisions.neckSplitUnmeasured](../../decisions.md#necksplitunmeasured); see
 [decisions.neckLengthAsMetric](../../decisions.md#necklengthasmetric).
@@ -202,7 +202,7 @@ function that drew it. Supersedes the condition in [decisions.neckSplitUnmeasure
 **One diagram vocabulary, on every surface that draws one**
 
 Subject: `diagram.vocabulary.shared`
-Goals: goals.sizeIntuition, goals.flexibleComparison
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Four surfaces draw the diagram: the **favicon**, the **index** (its tiles and its legend), the
 **detail view**, and the **comparison view**. A reader meets the same figure on all four, so the
@@ -224,7 +224,7 @@ checked**, by [acceptance.faviconFromPalette](../../acceptance.md#faviconfrompal
 
 Rationale: the favicon once drew its crossbar `#5ccbfa` while the app drew `#0ea5e9`, lightened
 locally because the app's blue failed the icon's contrast standard. The app's blue also failed
-for its own labels (tech.textContrastFloor), so the local fix concealed a real defect. When one
+for its own labels ([tech.textContrastFloor](../tech/accessibility.md#textcontrastfloor)), so the local fix concealed a real defect. When one
 surface cannot live with a shared decision, that is evidence about the decision, not license to
 fork it.
 
@@ -234,7 +234,7 @@ fork it.
 
 Subject: `presentation.names.locale`
 Value: `na (default) | world`
-Goals: goals.shareableViews, goals.openToEveryone
+Goals: [goals.shareableViews](../../../goals/goals.md#shareableviews), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 A toggle beside Units and Scale chooses between North American English names (eBird/Clements,
 the default) and world English names (AviList, following IOC). A species' id and URL are the same

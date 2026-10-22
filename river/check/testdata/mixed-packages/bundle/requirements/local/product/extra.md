@@ -4,4 +4,4 @@ package tech
 
 **Do the thing**
 
-Goals: goals.shipIt
+Goals: [goals.shipIt](../../../goals/goals.md#shipit)

@@ -8,7 +8,7 @@ package product
 
 Subject: `presentation.mode`
 Value: `diagram`
-Goals: goals.sizeIntuition, goals.shapeNotOnlySize
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The diagram is the only way BirdView presents a species in v1. There is no photograph mode.
 
@@ -20,7 +20,7 @@ and shape comparable; photographs were always the enrichment.
 **Tile contents**
 
 Subject: `presentation.tile`
-Goals: goals.sizeIntuition, goals.shapeNotOnlySize, goals.flexibleComparison
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Each species is one **tile**, laid out top to bottom:
 
@@ -62,7 +62,7 @@ reconstruct:
 The species code is 4 to 8 characters, **not the fixed six its name suggests**, and cannot be
 guessed from a truncation, so it never truncates. Nothing laying it out may assume a width.
 
-Rationale: goals.sizeIntuition. One taller tile offsets every diagram in its row and spoils reading
+Rationale: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition). One taller tile offsets every diagram in its row and spoils reading
 down a section. Eight of the 841 common names are long enough to wrap, and the longest family badge
 comes within a few pixels of the tile's inner width.
 
@@ -81,7 +81,7 @@ scientific name, never an identifier.
 
 Subject: `units.default`
 Value: `imperial`
-Goals: goals.sizeIntuition, goals.openToEveryone
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 One toggle switches the whole interface between:
 
@@ -100,7 +100,7 @@ a 12 g kinglet both round to 0.1 oz.
 
 **First load shows everything**
 
-Goals: goals.flexibleComparison
+Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The initial view has every family selected and shows all species, ordered by length.
 
@@ -112,7 +112,7 @@ for. Opening filtered or empty would hide it.
 **Toggling a control keeps your place**
 
 Subject: `presentation.scroll`
-Goals: goals.openToEveryone
+Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Changing any control preserves the scroll position **and the collapsed state of the Presentation
 and Controls panels**, as does returning from a detail view.
@@ -130,7 +130,7 @@ ordering, sectioning and geometry stay in Go where they are property-tested (see
 **The empty state says what to do**
 
 Subject: `presentation.empty_state`
-Goals: goals.openToEveryone
+Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 With nothing selected, the display area reads *"Select birds to display in Controls above"*.
 
@@ -156,7 +156,7 @@ describe the same filters differently.
 **The controls collapse**
 
 Subject: `presentation.controls`
-Goals: goals.openToEveryone
+Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 The controls are **several collapsible panels**, each starting **closed** and each remembering its
 own state across navigations (togglesKeepPlace): **Controls** for the display toggles, **Regions**, **Diet
@@ -178,7 +178,7 @@ falls on the reader who wants a filter rather than on every reader.
 **Every group offers "Only"**
 
 Subject: `presentation.filter_only`
-Goals: goals.flexibleComparison
+Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Beside each group selector in **Regions**, **Diet and Habitat** and **Families** sits an
 **Only** control that selects that group and deselects everything else **within its own
@@ -199,7 +199,7 @@ arrival state took two steps, the first of which emptied the page.
 
 Subject: `presentation.units`
 Value: `mass unit fixed per comparison scope, smallest bird decides`
-Goals: goals.sizeIntuition, goals.flexibleComparison
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Mass is written in **one unit across everything a page is comparing**. The scope is what the
 page claims to compare: on the index, a section or the whole set, following the **scale**
@@ -223,7 +223,7 @@ value — a 3 g hummingbird is `0.11 oz` — because that is precision, not a se
 
 Subject: `presentation.share`
 Value: `one species' observations over all species observations, for the regions and months in view`
-Goals: goals.localRelevance, goals.honestData
+Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata)
 
 Every species says how much of what people record in view is that bird, as **one in N**.
 
@@ -327,7 +327,7 @@ counts.
 
 Subject: `presentation.species_url.out_of_scope`
 Value: `404 with a named bird and its measured reason`
-Goals: goals.honestData, goals.shareableViews
+Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 
 `/species/<id>` for a bird the derivation classified but left out of scope returns **404 with a
 page that names the bird and says why it is not drawn**, rather than the bare "404 page not
@@ -365,7 +365,7 @@ records why the status code nevertheless differs from `/compare`'s.
 
 Subject: `ordering.frequency`
 Value: `ascending by one-in-N, banded by decade`
-Goals: goals.localRelevance
+Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 **Frequency** is a fourth ordering, over the number every tile already shows
 ([shareOfRecords](#shareofrecords)), and it follows the month selection exactly as it follows the
@@ -396,7 +396,7 @@ Rationale: [shareOfRecords](#shareofrecords) put the share on every tile but gav
 
 Subject: `presentation.name_provenance`
 Value: `per-source binomial and count, shown where the sources disagree`
-Goals: goals.honestData
+Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Where the occurrence sources do not use the name BirdView serves, the species page says so,
 naming **each source's binomial and how many records it holds under it**.
@@ -448,7 +448,7 @@ disagreement is not transient: eBird filed 827,098 records under the shared name
 **The page explains itself**
 
 Subject: `presentation.help`
-Goals: goals.openToEveryone
+Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Below the title, a **Presentation** panel carries two sections side by side, each half the page:
 **the diagram**, then **where the numbers come from**.
@@ -486,7 +486,7 @@ controls.
 **A tile opens a detail view**
 
 Subject: `presentation.detail_view`
-Goals: goals.sizeIntuition, goals.shapeNotOnlySize
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Clicking a tile opens a detail view that is **a larger version of the same tile** — same header,
 same diagram, same main metrics, same layout — with the bird drawn **as large as the view allows,
@@ -520,10 +520,10 @@ pixels tall, and the view of one bird has nothing to compare it against.
 
 Subject: `presentation.compare_view`
 Value: `/compare?species=<id>&species=<id>…`
-Goals: goals.flexibleComparison, goals.sizeIntuition, goals.shapeNotOnlySize
+Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 A **comparison view** draws any number of chosen species together **on a single shared scale**, so
-they can be read directly against one another. It answers goals.flexibleComparison's question — *is a Merlin
+they can be read directly against one another. It answers [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)'s question — *is a Merlin
 bigger than a Blue Jay?* — which the index answers only for birds that happen to land in the same
 section, and the detail view cannot answer at all.
 
@@ -564,7 +564,7 @@ metricProvenanceExplained is left out because a table per bird would bury the co
 
 Subject: `presentation.pick_mode`
 Value: `?species=<id>&species=<id>… — present, even empty, means picking`
-Goals: goals.flexibleComparison, goals.shareableViews
+Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 
 A reader assembles a comparison by **picking birds from the index**, where the diagrams and the
 family filter already are, rather than from a separate chooser that would duplicate both.
@@ -633,7 +633,7 @@ filtered index to an unfiltered one.
 **What the project says about itself stays true**
 
 Subject: `docs.currency`
-Goals: goals.honestData, goals.goodDataCitizen
+Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 **Every CC BY source whose output appears on a page is credited on that page.** This is a licence
 condition, not a courtesy: AviList, AVONET and Fox are all CC BY 4.0. It covers `detail.html` and
@@ -645,7 +645,7 @@ condition, not a courtesy: AviList, AVONET and Fox are all CC BY 4.0. It covers 
 - **A count that no longer matches the dataset**, such as 841 species after
   [decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba) cut the list to 839.
 - **A source credited for something it no longer supplies**, such as the ABA Checklist credited
-  for names and families after decisions.avilistReplacesAba, or for scope after
+  for names and families after [decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba), or for scope after
   [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence).
 
 **Before any public deployment, the docs are checked against the spec**, since a release makes the
@@ -660,7 +660,7 @@ does the mechanical part, and records that prose accuracy is not something a tes
 **No personal address is published**
 
 Subject: `deploy.contact`
-Goals: goals.giveBack, goals.maintainerPrivacy
+Goals: [goals.giveBack](../../../goals/goals.md#giveback), [goals.maintainerPrivacy](../../../goals/goals.md#maintainerprivacy)
 
 No page BirdView serves carries a contact address. Reader feedback goes to the project's issue
 tracker, whose URL is a deployment setting (`-feedback`) rather than a constant in the markup.
@@ -691,7 +691,7 @@ does not publish their mail.
 **The detail view links to the species on iNaturalist**
 
 Subject: `presentation.detail_view.external_link`
-Goals: goals.goodDataCitizen
+Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 The detail view carries a link to the species' iNaturalist taxon page, so a reader who has just
 learned how big a bird is can go and see one.
@@ -714,7 +714,7 @@ species that stops resolving is a fault to investigate rather than an absence to
 
 BirdView **links and never copies**. No photograph is embedded, hotlinked, cached or reproduced;
 the reader arrives on iNaturalist, where each image carries its own license.
-tech.selfContainedServer forbids the embedding independently.
+[tech.selfContainedServer](../tech/delivery.md#selfcontainedserver) forbids the embedding independently.
 
 Rationale: BirdView will never have photographs, and a reader surprised by a size wants to see the
 bird. A link to the *wrong* bird is worse than none, and an absent link is legible where a search

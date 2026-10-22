@@ -141,7 +141,7 @@ Gate: before composing `dataset`
 every web page as [tech.webPages](requirements/local/tech/accessibility.md#webpages) defines one,
 and the stylesheet's contract. An agent composed it; River requires a person to sign off. The
 rulings it embeds: plain-text error pages are web pages (WCAG's definition leaves no choice), large
-text gets no allowance (decisions.oneContrastFloor), and closed panels are measured open
+text gets no allowance ([decisions.oneContrastFloor](requirements/decisions.md#onecontrastfloor)), and closed panels are measured open
 
 ## nonTextContrastCheck
 
@@ -179,8 +179,8 @@ Gate: after `app` is approved
 , which must account for the 24 local requirements no package lists yet (`TestCompositionResolves`
 logs them), then move each criterion out of [acceptance.md](requirements/acceptance.md) into its
 package with `Covers:` and delete the Traceability table once nothing is left in it. **Four wait on
-the morphometric-model ruling** — product.craniumFromMass, product.trunkFromMass,
-product.neckModelPerFamily and product.generatedBadgeColors: each produces a value the app draws,
+the morphometric-model ruling** — [product.craniumFromMass](requirements/local/product/diagram.md#craniumfrommass), [product.trunkFromMass](requirements/local/product/diagram.md#trunkfrommass),
+[product.neckModelPerFamily](requirements/local/product/diagram.md#neckmodelperfamily) and [product.generatedBadgeColors](requirements/local/product/dataset.md#generatedbadgecolors): each produces a value the app draws,
 and whether it is data (`dataset`) or a drawing instruction (`app`) is the owner's call
 
 ## largeSourceFiles
@@ -203,7 +203,7 @@ Status: open
 Owner: Sameer
 Gate: with the split
 
-product.selfDescriptionStaysTrue opens with the CC BY credit rule, which is the imported half of a
+[product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue) opens with the CC BY credit rule, which is the imported half of a
 mixed requirement; its statement is fixed when it is split (row above on separating restated
 imports)
 
@@ -218,9 +218,9 @@ Gate: before composition
 Classified 2026-10-16, each of the 81 read individually. **Composed — wholly an imported obligation,
 restated:**
 [tech.pacedInaturalistMapping](requirements/local/tech/process.md#pacedinaturalistmapping)
-(`inatapi.RequestRate`),
+([`inatapi.RequestRate`](requirements/imported/inaturalist.org/inatapi/inatapi.md#requestrate)),
 [tech.identifiedClient](requirements/local/tech/delivery.md#identifiedclient)
-(`inatapi.UserAgent`),
+([`inatapi.UserAgent`](requirements/imported/inaturalist.org/inatapi/inatapi.md#useragent)),
 [tech.badgeContrast](requirements/local/tech/accessibility.md#badgecontrast) and
 [tech.textContrastFloor](requirements/local/tech/accessibility.md#textcontrastfloor) (WCAG 2.2 SC
 1.4.6 and 1.4.11). These belong in a composed package citing the source, not in `tech`. **Mixed — a
@@ -232,7 +232,7 @@ redistribute* is the licences'; *fetch at build time* is BirdView's mechanism),
 [tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater) (*never
 commercial* follows the non-commercial licences), and
 [product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink) (*reproduce
-no photograph* is `inatterms.ContributorKeepsRights`). **The other 73 are local intent**, including
+no photograph* is [`inatterms.ContributorKeepsRights`](requirements/imported/inaturalist.org/inatterms/inatterms.md#contributorkeepsrights)). **The other 73 are local intent**, including
 those that name a source — choosing AviList for names is BirdView's decision, made with licences in
 mind, not an obligation AviList imposes. Two findings on the way: the WCAG manifest entry still says
 other text is held to 4.5:1, which
@@ -256,8 +256,8 @@ Chosen in principle 2026-10-09 (option B of the regions-scaling design) and park
 implementation. A species is present when its share of the selection's records — the tile's own *1
 in N* — beats a threshold shown as a control: *show birds at least* 1 in 10,000 · 100,000 ·
 1,000,000 · 10,000,000 · 100,000,000 · any record. Proposed defaults, **undecided**: 1 in 1,000,000;
-the arrival page left unfiltered so scope stays product.scopeIsRecurringAvifauna's job; and
-decisions.monthPresence's month rule applied to the summed counts of the selected regions. Measured
+the arrival page left unfiltered so scope stays [product.scopeIsRecurringAvifauna](requirements/local/product/dataset.md#scopeisrecurringavifauna)'s job; and
+[decisions.monthPresence](requirements/decisions.md#monthpresence)'s month rule applied to the summed counts of the selected regions. Measured
 at 1 in 1,000,000: New York 491 → 443, the Northeast's nine states 564 → 470, all land regions 1,057
 → 836. Two defects it would fix, both real today:
 [product.regionAndMonthFilter](requirements/local/product/filtering.md#regionandmonthfilter)'s "in
@@ -409,7 +409,7 @@ shore records as sea
 
 Status: open
 Owner: unassigned
-Gate: with decisions.seaShareDiffers
+Gate: with [decisions.seaShareDiffers](requirements/decisions.md#seasharediffers)
 
 Nothing does. The server fixture hardcodes `commonestOf` and every test renders it back, so
 [product.shareOfRecords](requirements/local/product/presentation.md#shareofrecords)'s central
@@ -544,7 +544,7 @@ Status: open
 Owner: unassigned
 Gate: opportunistic; would upgrade a calibration to a fit
 
-decisions.trunkExponentCalibrated's exponent is inferred from neck and leg, and that is its weakest
+[decisions.trunkExponentCalibrated](requirements/decisions.md#trunkexponentcalibrated)'s exponent is inferred from neck and leg, and that is its weakest
 link
 
 ## massAsLine
@@ -557,7 +557,7 @@ Gate: parked 2026-10-02 — resume from that section, do not re-derive
 
 Replace the cube with a mass **line** proportional to mass. Measured and written up in [Mass as a
 proportional line](notes.md#mass-as-a-proportional-line-replacing-the-cube--parked); needs a CR,
-because it reverses decisions.massAsWaterCube
+because it reverses [decisions.massAsWaterCube](requirements/decisions.md#massaswatercube)
 
 ## criteriaNeverFailed
 

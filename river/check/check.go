@@ -15,7 +15,7 @@
 // Package check is River's checker, translated into Go so it runs with
 // BirdView's own tests (River's decisions.checksInRepoLanguage).
 //
-// Translated from River's river/check/goals.py at pin 2962084 (River is not
+// Translated from River's river/check/goals.py at pin fc69e6c (River is not
 // yet published). What is normative is what the checker reports,
 // not how: a problem's code and path must match the reference exactly, and
 // testdata/ -- River's shared cases, copied at the same pin -- holds that to
@@ -71,7 +71,6 @@ var (
 	moduleDecl    = regexp.MustCompile(`(?m)^module\s+\S+\s*$`)
 	goalsField    = regexp.MustCompile(`(?m)^Goals:\s*(.+)$`)
 	servesField   = regexp.MustCompile(`(?m)^Serves:\s*(.+)$`)
-	goalRef       = regexp.MustCompile(`\bgoals\.([A-Za-z0-9_]+)\b`)
 	// A qualified reference such as product.stableSurface.
 	qualifiedRef = regexp.MustCompile(`\b[a-z][a-z0-9]*\.[a-z][a-z0-9]*[A-Z][A-Za-z0-9]*\b`)
 	// A goal's text runs from its title to the next heading or rule.
@@ -81,7 +80,211 @@ var (
 	decisionDate   = regexp.MustCompile(`(?m)^Date:\s*\d{4}-\d{2}-\d{2}\s*$`)
 	decisionStatus = regexp.MustCompile(`^(accepted|amended by ([A-Za-z]+(?:, [A-Za-z]+)*)|superseded by ([A-Za-z]+))\s*(?:;.*)?$`)
 	identList      = regexp.MustCompile(`[A-Za-z]+`)
+	// River's product.linkedReferences: a qualified reference is package.identifier, the
+	// identifier camelCase or Exported. Go has no lookbehind, so findRefs filters the characters
+	// around each match by hand, as goals.py's pattern does with lookarounds.
+	refPattern  = regexp.MustCompile(`([a-z][a-z0-9]*)\.([a-z]+[A-Z][A-Za-z0-9]*|[A-Z][A-Za-z0-9]*)\b`)
+	goalPattern = regexp.MustCompile(`(goals)\.([A-Za-z][A-Za-z0-9_]*)\b`)
+	linkRe      = regexp.MustCompile(`\[([^\]]*)\]\(([^)\s]*)\)`)
+	headingRe   = regexp.MustCompile(`(?m)^#{1,6} (.+?)[ \t]*$`)
+	codeSpanRe  = regexp.MustCompile("`[^`]*`")
+	slugDrop    = regexp.MustCompile(`[^\w\- ]`)
 )
+
+type ref struct {
+	start, end int
+	pkg, ident string
+}
+
+func isWordByte(b byte) bool {
+	return b == '_' || b >= '0' && b <= '9' || b >= 'a' && b <= 'z' || b >= 'A' && b <= 'Z'
+}
+
+// findRefs returns the qualified references in s that are not part of a path, a URL or a longer
+// name: not preceded by a word character, '/', '#', '.' or '-', and not followed by a word
+// character, '(' or '/'.
+func findRefs(s string) []ref { return findWith(refPattern, s) }
+
+func findWith(pattern *regexp.Regexp, s string) []ref {
+	var out []ref
+	for _, m := range pattern.FindAllStringSubmatchIndex(s, -1) {
+		if m[0] > 0 {
+			if b := s[m[0]-1]; isWordByte(b) || strings.IndexByte("/#.-", b) >= 0 {
+				continue
+			}
+		}
+		if m[1] < len(s) {
+			if b := s[m[1]]; isWordByte(b) || b == '(' || b == '/' {
+				continue
+			}
+		}
+		out = append(out, ref{m[0], m[1], s[m[2]:m[3]], s[m[4]:m[5]]})
+	}
+	return out
+}
+
+// goalRefs returns the goal identifiers cited in s.
+func goalRefs(s string) []string {
+	var out []string
+	for _, r := range findWith(goalPattern, s) {
+		out = append(out, r.ident)
+	}
+	return out
+}
+
+func anchorSlug(heading string) string {
+	return strings.ReplaceAll(slugDrop.ReplaceAllString(strings.ToLower(strings.TrimSpace(heading)), ""), " ", "-")
+}
+
+func inSpans(pos int, spans [][]int) bool {
+	for _, s := range spans {
+		if pos >= s[0] && pos < s[1] {
+			return true
+		}
+	}
+	return false
+}
+
+// symbolTable maps package -> identifier -> the file defining it, for every item the module can
+// resolve: goals, gradients, local, imported and composed packages, and decisions.
+func (c *checker) symbolTable() map[string]map[string]string {
+	table := map[string]map[string]string{}
+	add := func(pkg, path string, heading *regexp.Regexp) {
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return
+		}
+		for _, m := range heading.FindAllStringSubmatch(string(b), -1) {
+			if table[pkg] == nil {
+				table[pkg] = map[string]string{}
+			}
+			table[pkg][m[1]] = path
+		}
+	}
+	for _, p := range c.markdown(filepath.Join(c.bundle, "goals"), true) {
+		add("goals", p, h2Item)
+	}
+	for _, p := range c.markdown(filepath.Join(c.bundle, "gradients"), true) {
+		add("gradients", p, h3Item)
+	}
+	for _, sub := range []string{"local", "imported", "composed"} {
+		for _, p := range c.markdown(filepath.Join(c.bundle, "requirements", sub), false) {
+			b, err := os.ReadFile(p)
+			if err != nil {
+				continue
+			}
+			if m := packageDecl.FindStringSubmatch(firstLine(string(b))); m != nil {
+				add(m[1], p, h2Item)
+			}
+		}
+	}
+	add("decisions", filepath.Join(c.bundle, "requirements", "decisions.md"), h2Item)
+	return table
+}
+
+// references reports, outside the method README and the packages that travel between modules,
+// a qualified reference the module can resolve that is not a link, one naming nothing its
+// package declares, and a link whose file or heading does not exist (River's
+// product.linkedReferences).
+func (c *checker) references() {
+	table := c.symbolTable()
+	anchors := map[string]map[string]bool{}
+	anchorsOf := func(path string) map[string]bool {
+		if a, ok := anchors[path]; ok {
+			return a
+		}
+		b, err := os.ReadFile(path)
+		if err != nil {
+			anchors[path] = nil
+			return nil
+		}
+		a := map[string]bool{}
+		for _, m := range headingRe.FindAllStringSubmatch(string(b), -1) {
+			a[anchorSlug(m[1])] = true
+		}
+		anchors[path] = a
+		return a
+	}
+	for _, path := range c.markdown(c.bundle, true) {
+		rel := c.rel(path)
+		if rel == "README.md" || strings.HasPrefix(rel, "requirements/composed/exported/") || c.imported(path) {
+			continue
+		}
+		b, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		fenced, openCode := false, false
+		for i, line := range strings.Split(string(b), "\n") {
+			n := strconv.Itoa(i + 1)
+			if strings.HasPrefix(strings.TrimSpace(line), "```") {
+				fenced = !fenced
+				continue
+			}
+			if fenced || strings.HasPrefix(strings.TrimLeft(line, " \t"), "#") {
+				continue
+			}
+			// Padding marks a carried piece as part of a longer span, never one bare name.
+			if openCode {
+				line = "`… " + line
+			}
+			openCode = strings.Count(line, "`")%2 == 1
+			if openCode {
+				line += " …`"
+			}
+			code := codeSpanRe.FindAllStringIndex(line, -1)
+			var spans [][]int
+			for _, m := range linkRe.FindAllStringSubmatchIndex(line, -1) {
+				if inSpans(m[0], code) {
+					continue
+				}
+				spans = append(spans, m[:2])
+				text := strings.Trim(line[m[2]:m[3]], "`")
+				rs := findRefs(text)
+				if len(rs) != 1 || rs[0].start != 0 || rs[0].end != len(text) || table[rs[0].pkg] == nil {
+					continue
+				}
+				r := rs[0]
+				if _, ok := table[r.pkg][r.ident]; !ok {
+					c.report("unknown-reference", rel, "line "+n+": "+r.pkg+"."+r.ident+" names nothing package "+r.pkg+" declares")
+					continue
+				}
+				dest := line[m[4]:m[5]]
+				target, frag, _ := strings.Cut(dest, "#")
+				file := path
+				if target != "" {
+					file = filepath.Join(filepath.Dir(path), filepath.FromSlash(target))
+				}
+				if a := anchorsOf(file); a == nil || frag != "" && !a[frag] {
+					c.report("broken-reference-link", rel, "line "+n+": the link for "+r.pkg+"."+r.ident+" leads to "+dest+", which does not exist")
+				}
+			}
+			for _, r := range findRefs(line) {
+				if inSpans(r.start, spans) || table[r.pkg] == nil {
+					continue
+				}
+				// Inside code formatting, only a span that is exactly the name is a reference;
+				// longer code (a comment, a field, a quoted message) is code.
+				var span []int
+				for _, cs := range code {
+					if r.start >= cs[0] && r.start < cs[1] {
+						span = cs
+					}
+				}
+				if span != nil && line[span[0]+1:span[1]-1] != line[r.start:r.end] {
+					continue
+				}
+				if _, ok := table[r.pkg][r.ident]; ok {
+					c.report("unlinked-reference", rel, "line "+n+": "+r.pkg+"."+r.ident+" is not a link to its definition")
+				} else if span == nil {
+					// In code formatting, a name that resolves to nothing is an example or a name
+					// from the past, not a reference.
+					c.report("unknown-reference", rel, "line "+n+": "+r.pkg+"."+r.ident+" names nothing package "+r.pkg+" declares")
+				}
+			}
+		}
+	}
+}
 
 // decisionField returns the value of a `Name:` line in an entry, and whether it is present.
 func decisionField(body, name string) (string, bool) {
@@ -336,9 +539,7 @@ func (c *checker) packageDir(dir string, heading, field *regexp.Regexp, expected
 					end = heads[i+1][0]
 				}
 				if f := field.FindStringSubmatch(text[h[1]:end]); f != nil {
-					for _, g := range goalRef.FindAllStringSubmatch(f[1], -1) {
-						cited = append(cited, g[1])
-					}
+					cited = append(cited, goalRefs(f[1])...)
 				}
 			}
 			items = append(items, item{rel, ident, title, cited})
@@ -461,6 +662,7 @@ func Run(dir string) Result {
 	}
 
 	c.decisions(reqItems)
+	c.references()
 	r := Result{Requirements: len(reqItems), Goals: len(goals), Gradients: len(gradItems)}
 	citedAnywhere := map[string]bool{}
 	for _, it := range reqItems {

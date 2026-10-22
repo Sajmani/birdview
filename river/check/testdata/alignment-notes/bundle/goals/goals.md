@@ -38,4 +38,4 @@ Run `make release` to ship.
 
 **Maintainers can change the internals**
 
-Keep product.stableSurface small.
+Keep [product.stableSurface](../requirements/local/product/product.md#stablesurface) small.

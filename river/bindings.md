@@ -13,7 +13,7 @@ migration finishes, these are deliberate local departures from `README.md`, not 
 | --- | --- | --- |
 | **Method** | River's `README.md`, pin in its banner | — |
 | **Layout** | River's nested layout: `goals/`, `requirements/`, one package per source under `requirements/local/` or `requirements/imported/<origin>/` ([decisions.nestedLayout](requirements/decisions.md#nestedlayout)) | — |
-| **Identifiers** | Descriptive camelCase, qualified by kind outside their own file: `goals.*`, `product.*`, `tech.*`, `decisions.*`, `acceptance.*`; a transcribed source is its own package with exported names, `inatapi.RequestRate` ([decisions.descriptiveIdentifiers](requirements/decisions.md#descriptiveidentifiers)) | — |
+| **Identifiers** | Descriptive camelCase, qualified by kind outside their own file: `goals.*`, `product.*`, `tech.*`, `decisions.*`, `acceptance.*`; a transcribed source is its own package with exported names, [`inatapi.RequestRate`](requirements/imported/inaturalist.org/inatapi/inatapi.md#requestrate) ([decisions.descriptiveIdentifiers](requirements/decisions.md#descriptiveidentifiers)) | — |
 | **Composition** | `app` composed; see below the table | `dataset` and `internal/repo`; see below |
 | **Checks** | All in Go; see below the table | River's checker does not read composed packages yet, so BirdView checks its own |
 | **Stage adoption** | **Requirements**, **Implementation** and **Verification** adopted; **Release informal** | BirdView is not deployed. It has a Dockerfile but no rollout policy, monitoring or alerting — none of the release guardrails River's Release stage produces. Decided 2026-10-16; revisit when the site goes live |
@@ -26,7 +26,7 @@ waits in `requirements/acceptance.md`. Not yet composed: `dataset` and `internal
 for the remaining 24 local requirements; the four mixed requirements in [todo.md](todo.md) are split
 first.
 
-**Checks.** All in **Go**, run by `go test`: River's checker, translated at River pin `2962084`,
+**Checks.** All in **Go**, run by `go test`: River's checker, translated at River pin `fc69e6c`,
 with River's shared cases copied at the same pin; BirdView's stricter goal rule; the vendored-file
 hashes; every quotation against its vendored source; every reference, anchor and relative link; and
 the composition fields. **The rendered contrast check needs Chrome** (`BIRDVIEW_CHROME` to point at
@@ -42,11 +42,11 @@ What this project declares, as [README.md](README.md) asks of every adopter.
 | **ID citation syntax** | Go line comments, preserving the literal token: `// Verifies: product.scaleToggle, tech.badgeContrast.` |
 | **Artifact locations** | `river/`, with one exception below. Not served; the guides link to it in the published repository ([decisions.requirementsNotServed](requirements/decisions.md#requirementsnotserved)). |
 | **Subject vocabulary** | Dotted paths, lowercase, e.g. `diagram.scale.mode`, `badge.contrast.ratio`, `dataset.join.key`. New subjects are added by the project owner. |
-| **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never access or process Wiley Online Library material, by any means including an AI agent (decisions.ricklefsProhibited). Never fetch or process anything from BirdLife's DataZone by any automated means (see `requirements/imports.md` and `todo.md`). |
+| **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never access or process Wiley Online Library material, by any means including an AI agent ([decisions.ricklefsProhibited](requirements/decisions.md#ricklefsprohibited)). Never fetch or process anything from BirdLife's DataZone by any automated means (see `requirements/imports.md` and `todo.md`). |
 | **External systems** | Tests make no network requests. Any source fetch is exercised against a local fixture or an `httptest` server, never against the live publisher. |
 | **Approval authority** | Sameer — gates, waivers, amendments, source deviations, risk acceptances. |
-| **Supported runtime** | Whatever the dependencies require (tech.goVersionFollowsDeps). No minimum Go version is maintained. |
-| **Source refresh cadence** | Annually. AviList, AOS and eBird/Clements each revise on roughly yearly cycles, and product.joinOnBinomial's synonym table depends on all three. |
+| **Supported runtime** | Whatever the dependencies require ([tech.goVersionFollowsDeps](requirements/local/tech/delivery.md#goversionfollowsdeps)). No minimum Go version is maintained. |
+| **Source refresh cadence** | Annually. AviList, AOS and eBird/Clements each revise on roughly yearly cycles, and [product.joinOnBinomial](requirements/local/product/dataset.md#joinonbinomial)'s synonym table depends on all three. |
 | **Existing docs** | `river/` owns requirements. `PROVENANCE` files under `river/requirements/imported/` own retrieval facts and hashes. A README, when written, owns usage instructions and duplicates neither. |
 
 ## Location exception: the third_party directory

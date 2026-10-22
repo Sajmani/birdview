@@ -4,7 +4,7 @@ Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
 ## vegaGullEvidence
 
-**decisions.vegaGullBorrows's evidence was gathered in a way BirdLife's terms forbid**
+**[decisions.vegaGullBorrows](requirements/decisions.md#vegagullborrows)'s evidence was gathered in a way BirdLife's terms forbid**
 
 Status: closed
 Owner: Sameer
@@ -59,7 +59,7 @@ code" notes in [acceptance.md](requirements/acceptance.md) updated to the 1,082-
 scope; `AGENTS.md`, `README.md`, `web/web.go`, [docs/building.md](../docs/building.md)
 ([decisions.speciesUrlOutlivesSpecies](requirements/decisions.md#speciesurloutlivesspecies) bookmark
 note), [docs/data.md](../docs/data.md) (1,082 counts, withdrawn Böhmer neck derivation,
-dropped-species count, decisions.scopeFromRecurrence status) and [docs/using.md](../docs/using.md)
+dropped-species count, [decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence) status) and [docs/using.md](../docs/using.md)
 (rarity codes sentence) updated
 
 ## keptSpeciesEstablished
@@ -296,7 +296,7 @@ Closed: 2026-10-05
 `/species/<id>` for a bird the status table classified but left out of scope now answers **404 with
 the bird named and its measured reason**, covering **328 of the 334 species** the derivation
 rejected — 124 vagrant, 167 absent, 37 historical; the other six have no AviList row, so no name and
-no stable id. decisions.compareUrlContract's *name what was lost* carries over; its **200 does
+no stable id. [decisions.compareUrlContract](requirements/decisions.md#compareurlcontract)'s *name what was lost* carries over; its **200 does
 not**, because a comparison minus one bird is still a comparison and a detail page minus its bird is
 nothing. 410 was rejected for overclaiming: scope is regenerated, so a bird out today can be in
 after the next run. Cost a tenth column in `data/status.tsv` — the date last recorded — without
@@ -449,7 +449,7 @@ page, and documented none of Regions, Diet and Habitat, compare, `/added` or the
 page, listed two of six commands and eight of fourteen packages, and said the ABA permission request
 was "drafted and unsent" when it was sent 2026-09-27; `data.md` claimed "Taxonomy is ABA's" two
 paragraphs after saying every name comes from AviList. README gained the GBIF row and the
-decisions.scopeFromRecurrence status.
+[decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence) status.
 [product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue)
 keeps the reading gate: none of this was catchable by
 [acceptance.creditsComplete](requirements/acceptance.md#creditscomplete), which compares counts and

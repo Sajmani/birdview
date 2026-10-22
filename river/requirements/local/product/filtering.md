@@ -6,7 +6,7 @@ package product
 
 **Filter by family**
 
-Goals: goals.flexibleComparison
+Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The user can filter to any subset of families, multi-select. **Everything is selected on arrival**
 — All, every order and every family show as on. An **All** control toggles like an order does,
@@ -40,7 +40,7 @@ birder already knows, and the source provides it for free.
 **Filter by region and month**
 
 Subject: `presentation.region_filter`
-Goals: goals.localRelevance, goals.flexibleComparison
+Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The reader filters to any subset of US states and Canadian provinces, multi-select, as the family
 filter works. A species is listed in a region when it reaches 1 record per million of that region's
@@ -86,7 +86,7 @@ than stored, so a renamed region cannot keep a URL that no longer describes it.
 **Here selects the region the reader is in**
 
 Subject: `presentation.region_filter.here`
-Goals: goals.localRelevance
+Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 A **Here** button beside **All** in Regions replaces the region selection with the one region the
 reader is in, every other setting kept. If the reader refuses permission, their location cannot
@@ -95,7 +95,7 @@ leaves the region selection unchanged.
 
 The reader's position is tested against the land regions first and the sea regions second, so a
 reader on a ferry in the Gulf gets the Gulf and a reader in Tampa gets Florida. The boundaries come
-from a different source than the occurrence records (tech.regionBoundaries), so within a few
+from a different source than the occurrence records ([tech.regionBoundaries](../tech/delivery.md#regionboundaries)), so within a few
 hundred meters of a border or coast, Here may pick the neighbor.
 
 **A link ending in `#here-and-now` presses Here and Now on arrival**, together: the browser asks
@@ -106,7 +106,7 @@ the link landed and says why, beside the link that was followed rather than insi
 panel, which starts closed. Without JavaScript the link simply lands.
 
 **Without JavaScript, Here is shown inactive** — dotted border, no background, text at the full
-contrast floor (decisions.oneContrastFloor) — and focusable, with a tooltip saying it needs
+contrast floor ([decisions.oneContrastFloor](../../decisions.md#onecontrastfloor)) — and focusable, with a tooltip saying it needs
 JavaScript and permission to use the reader's location. It does nothing when pressed. Dotted,
 because a dashed border already marks the Only buttons, which are active.
 
@@ -115,7 +115,7 @@ because a dashed border already marks the Only buttons, which are active.
 **Now selects the current month**
 
 Subject: `presentation.month_filter.now`
-Goals: goals.localRelevance
+Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 A **Now** button beside **All** in Months replaces the month selection with the current month on
 the reader's own clock, every other setting kept. Without JavaScript it uses the server's month.
@@ -125,14 +125,14 @@ then the twelve months.
 Without JavaScript the button links to `/now`, which redirects to the index for the server's
 current month and is never cached; with it, the script points the button at the reader's month
 directly, and `/now` is not requested. Either way no page carries a month taken from the server's
-clock, which tech.cacheLifetimeStated depends on ([decisions.hereAndNowCaching](../../decisions.md#hereandnowcaching)).
+clock, which [tech.cacheLifetimeStated](../tech/delivery.md#cachelifetimestated) depends on ([decisions.hereAndNowCaching](../../decisions.md#hereandnowcaching)).
 
 ## locationStaysInBrowser
 
 **The reader's location never leaves the browser**
 
 Subject: `privacy.location`
-Goals: goals.readerPrivacy
+Goals: [goals.readerPrivacy](../../../goals/goals.md#readerprivacy)
 
 The reader's position is used only inside the browser to choose a region, and is never sent,
 stored or logged. The region boundaries load with every index page whether or not Here is

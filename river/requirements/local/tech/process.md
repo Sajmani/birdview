@@ -8,7 +8,7 @@ package tech
 
 Subject: `process.spec_location`
 Value: `river/`
-Goals: goals.giveBack, goals.honestData
+Goals: [goals.giveBack](../../../goals/goals.md#giveback), [goals.honestData](../../../goals/goals.md#honestdata)
 
 The repository follows the loop in [README.md](../../../README.md). `AGENTS.md` names `river/` as
 normative so agents reading the instruction file are pointed at it.
@@ -17,11 +17,11 @@ normative so agents reading the instruction file are pointed at it.
 
 **The iNaturalist mapping is built by a separate, paced tool**
 
-Goals: goals.goodDataCitizen, goals.rapidIteration
+Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen), [goals.rapidIteration](../../../goals/goals.md#rapiditeration)
 
 Resolving species to iNaturalist taxon IDs happens in `cmd/birdview-inatmap`, never in
 `birdview-ingest` and never while serving. The tool waits at least one second between requests
-(`inatapi.RequestRate`) and identifies itself (identifiedClient). Its output is a table committed
+([`inatapi.RequestRate`](../../imported/inaturalist.org/inatapi/inatapi.md#requestrate)) and identifies itself (identifiedClient). Its output is a table committed
 to the repository; the ingest joins against that table and makes no network request.
 
 Rationale: 1082 requests at the rate iNaturalist asks for take a quarter of an hour, too long for a
@@ -35,7 +35,7 @@ accepted cost: a stale ID fails visibly and the refresh is one command.
 
 **No source is consumed before it is recorded**
 
-Goals: goals.goodDataCitizen
+Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 Every input source appears in [imports.md](../../imports.md) with its tier, pin, license
 and status *before* code that reads it is written.
