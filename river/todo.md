@@ -621,7 +621,10 @@ A mirror made now postdates the history rewrite, so [prerewriteClones](#prerewri
 apply to it. In order:
 
 1. ~~**Create the mirror** and push this repository's `main` to it.~~ Done 2026-10-22:
-   `github.com/Sajmani/birdview`, its `main` at `c34edc5`.
+   `github.com/Sajmani/birdview`, a GitHub fork. Sync it by pulling, never by pushing to it: after
+   `git push origin main`, run `gh repo sync Sajmani/birdview --branch main` (or the fork's "Sync
+   fork" button), which only fast-forwards from `google:main`. A ruleset on its `main` blocks
+   deletion and force-pushes; issues, pull requests, wiki and projects are off.
 2. **Choose a host** that runs the container image (`Dockerfile`, [docs/building.md](../docs/building.md),
    serving `0.0.0.0:8080`). Deploying from a local checkout with the host's own tooling is enough
    to launch; automate after.
