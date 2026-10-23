@@ -1,0 +1,62 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# The standing checks, on every push to main and every pull request
+# (tech.checksOnEveryChange). The dataset is built first and Chrome is on the
+# runner, so no test has a reason to skip, and a skip fails the run.
+#
+# Only GitHub's own actions, pinned to commits; read-only; no secrets.
+# TestChecksWorkflow holds this file to that.
+
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Named explicitly: only then does GitHub add -o pipefail, without
+        # which `go test | tee` would pass a failing run.
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: go build
+        run: go build ./...
+      - name: go vet
+        run: go vet ./...
+      - name: gofmt
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then echo "$unformatted"; exit 1; fi
+      - name: Build the dataset
+        run: go run ./cmd/birdview-ingest
+      - name: go test
+        run: go test -v ./... 2>&1 | tee test.log
+      - name: No test skipped
+        run: |
+          if grep -E '^\s*--- SKIP' test.log; then
+            echo "A skip is not a pass: every test can run here."
+            exit 1
+          fi

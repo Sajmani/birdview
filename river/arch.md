@@ -6,7 +6,7 @@ is wrong.
 ## Shape
 
 Two commands over a shared set of internal packages, plus six generators that write the committed
-tables under `data/`. Generators run by hand, never by the build.
+tables under `data/`, and a checker for deployments. Generators run by hand, never by the build.
 
 ```
 cmd/birdview-ingest      compiles sources and data/ tables into web/data/species.json (a build artifact)
@@ -17,6 +17,7 @@ cmd/birdview-inatmap     generator: data/inat-taxa.tsv, one iNaturalist taxon ID
 cmd/birdview-gbifmap     generator: data/gbif-taxa.tsv, the GBIF -> AviList name bridge
 cmd/birdview-boundaries  generator: data/region-boundaries.json, from Natural Earth
 cmd/birdview-names       generator: data/source-names.tsv; only a test reads it
+cmd/birdview-smoke       checks a running deployment from outside, after each deploy
 internal/avilist         names, families, orders, sequence and eBird codes from AviList
 internal/avonet          traits from all three AVONET taxonomy sheets, with habitat and niche
 internal/wingspan        empirical wingspans, and the regression fitted from them
@@ -33,9 +34,12 @@ internal/palette         generated order and family colors under the contrast ru
 internal/dataset         the record and the provenance vocabulary
 internal/view            ordering, sectioning, scale and diagram geometry; pure, no HTML
 internal/xlsx            the standard-library workbook reader behind the three source readers
+internal/smoke           the post-deploy checks; a package so the server's tests can run them
 web/static/              embedded templates, CSS, here.js and the favicon
 data/                    the committed generated tables; region-boundaries.json is embedded
 docs/                    the guides, embedded and served at /docs
+.github/workflows/       CI: the standing checks on every push and pull request
+Dockerfile               ingest, test, build; the test stage gates every image
 ```
 
 ## Why rendering is server-side

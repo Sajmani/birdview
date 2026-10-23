@@ -14,7 +14,8 @@
 # limitations under the License.
 #
 # Multi-stage build: stage `ingest` compiles and runs birdview-ingest to produce
-# species.json; stage `builder` compiles the server binary; the final image
+# species.json; stage `test` runs the tests against it; stage `builder` compiles
+# the server binary once they pass; the final image
 # copies only the static binary and the compiled dataset (tech.twoCommandsOneModule, tech.selfContainedServer, tech.datasetNeverCommitted).
 # Each stage copies every package its command imports (tech.containerImageBuilds);
 # TestDockerStagesCopyWhatTheyBuild checks that, so a new import needs a COPY here.
@@ -38,6 +39,27 @@ RUN CGO_ENABLED=0 go build -o /usr/local/bin/birdview-ingest ./cmd/birdview-inge
     mkdir -p /out && \
     birdview-ingest -out /out/species.json
 
+# Stage `test` runs every test but the spec checks against the dataset the
+# image will carry, and the server build below depends on it, so a failing
+# test stops the deploy (tech.testedBeforeDeploy). The spec checks read git
+# history, which a build context lacks; they run on every push and pull
+# request instead (tech.checksOnEveryChange). Tests that need Chrome skip here.
+#
+# To deploy despite failing tests, put an empty SKIP_TESTS file in the build
+# context (never commit it). The build log says so.
+FROM golang:1.26.9 AS test
+
+WORKDIR /src
+COPY . .
+COPY --from=ingest /out/species.json web/data/species.json
+
+RUN if [ -e SKIP_TESTS ]; then \
+      echo '!!! SKIP_TESTS is present: this image was built WITHOUT running the tests (tech.testedBeforeDeploy)'; \
+    else \
+      go test $(go list ./... | grep -v '/river/check$'); \
+    fi && \
+    touch /tested
+
 FROM golang:1.26.9 AS builder
 
 WORKDIR /src
@@ -49,6 +71,8 @@ COPY internal ./internal
 COPY data ./data
 COPY web ./web
 COPY docs ./docs
+# Depend on the test stage, so the server is not built until it has passed.
+COPY --from=test /tested /tested
 
 RUN CGO_ENABLED=0 go build -o /usr/local/bin/birdview ./cmd/birdview
 

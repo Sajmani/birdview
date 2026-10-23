@@ -151,6 +151,10 @@ vendored source, and every reference, anchor and relative link into the bundle. 
 bundle's **structure**, not its substance: a green run means it is internally consistent, not that
 it is right.
 
+**CI runs the same four on every push to `main` and every pull request**
+([`.github/workflows/checks.yml`](../.github/workflows/checks.yml)), with the dataset built and
+Chrome installed, so every test can run there. A skipped test fails the run.
+
 ---
 
 ## Repository layout
@@ -164,6 +168,7 @@ cmd/birdview-regions/    generator: per-region presence
 cmd/birdview-status/     generator: BirdView's own occurrence status
 cmd/birdview-boundaries/ generator: region boundaries for the Here button
 cmd/birdview-names/      measures how eBird and iNaturalist name each species
+cmd/birdview-smoke/      checks a running deployment from outside, after each deploy
 internal/avilist/        the AviList workbook reader: names, families, codes, sequence
 internal/avonet/         the trait workbook reader, including habitat and trophic niche
 internal/wingspan/       the Fox dataset and the fitted wingspan regression
@@ -179,6 +184,7 @@ internal/status/         recurrence: episodes, and the status they imply
 internal/view/           ordering, sectioning, diagram geometry; pure, no HTML
 internal/dataset/        the serialized types and the provenance kinds
 internal/palette/        family and order colors, with contrast guarantees
+internal/smoke/          the post-deploy checks birdview-smoke runs
 data/                    the committed generated tables
 web/static/              templates, CSS, the Here script and the favicon, embedded
 web/data/                the built species.json (gitignored)
@@ -186,6 +192,7 @@ docs/                    this documentation, also served at /docs
 third_party/             vendored sources, each under its own license
 river/                   the requirements bundle; normative, not served
 river/check/             the spec checks, as Go tests
+.github/workflows/       CI: the standing checks on every push and pull request
 ```
 
 `internal/view` has no HTML or HTTP so the layout rules can be property-tested directly; code that
@@ -300,11 +307,18 @@ Deploying needs only the container image below, or the server binary and a built
 ### Container image
 
 The `Dockerfile` at the repository root builds a minimal static image, based on
-`gcr.io/distroless/static-debian12:nonroot`, in three stages:
+`gcr.io/distroless/static-debian12:nonroot`, in four stages:
 
 1. **`ingest`** builds and runs `birdview-ingest`, producing `/out/species.json`.
-2. **`builder`** builds the static `birdview` server binary.
-3. **The final image** copies in only the binary and the dataset, as `/data/species.json`.
+2. **`test`** runs every test except the spec checks against that dataset. If one fails, the
+   build stops, so a failing change cannot be deployed. Tests that need Chrome skip here; CI runs
+   them.
+3. **`builder`** builds the static `birdview` server binary, and only after `test` has passed.
+4. **The final image** copies in only the binary and the dataset, as `/data/species.json`.
+
+**To deploy despite failing tests**, for an urgent fix past an unrelated failure, put an empty
+file named `SKIP_TESTS` in the directory you build from, and delete it afterwards. Never commit
+it. The build log then says the tests were skipped.
 
 ```
 docker build -t birdview .
@@ -321,6 +335,30 @@ docker run --rm -p 8080:8080 birdview \
   -data /data/species.json \
   -feedback <issue-tracker-url>
 ```
+
+### After deploying
+
+Check the deployment from outside. The first argument is its address; any others are addresses
+that should redirect to it:
+
+```
+go run ./cmd/birdview-smoke https://birdview.example https://www.birdview.example
+```
+
+It prints one line per check and exits non-zero if any fails. It fetches the index once, gzipped,
+and nothing else larger than a page, so running it after every deploy costs little egress.
+
+### Rolling back
+
+On Cloud Run, every deploy is kept as a revision, and sending traffic back to the previous one is
+one command:
+
+```
+gcloud run revisions list --service <service> --region <region>
+gcloud run services update-traffic <service> --region <region> --to-revisions <revision>=100
+```
+
+Traffic stays pinned to that revision until you send it back with `--to-latest`.
 
 ### Running without Docker
 

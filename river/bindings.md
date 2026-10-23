@@ -23,7 +23,7 @@ that apply to the web application unchanged, excludes the four withdrawn photogr
 and writes out WCAG's contrast criteria over every web page and the stylesheet's contract. Its
 criteria for the composed items are in `requirements/composed/internal/app/acceptance.md`; every other criterion still
 waits in `requirements/acceptance.md`. Not yet composed: `dataset` and `internal/repo`, which account
-for the remaining 25 local requirements; the four mixed requirements in [todo.md](todo.md) are split
+for the remaining 28 local requirements; the four mixed requirements in [todo.md](todo.md) are split
 first.
 
 **Checks.** All in **Go**, run by `go test`: River's checker, translated at River pin `f8252f5`,

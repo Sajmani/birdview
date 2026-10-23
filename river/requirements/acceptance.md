@@ -2032,10 +2032,59 @@ and `birdview.site` is served however it is cased and with a port.
 **Status: verified 2026-10-23, passing, and watched failing** — before the redirect existed,
 every other host answered 200.
 
+### checksWorkflowIsSound
+
+**The checks workflow runs the standing checks on every change, and is safe to run**
+
+**Verifies:** [tech.checksOnEveryChange](local/tech/release.md#checksoneverychange) · **Level:** code · **Method:** assertions over `.github/workflows/checks.yml`
+**Assertions:** it runs on pushes to `main` and on pull requests, never on `pull_request_target`;
+its permissions are `contents: read` and it reads no secret; every action is `actions/*` pinned to
+a 40-character commit; it builds, vets, checks formatting, builds the dataset before testing, runs
+`go test -v` under an explicitly named `bash`, which is what gives GitHub's shell `pipefail`, and
+fails if the test log shows a skip.
+**Does not cover:** that GitHub runs it as written; the first run's result is recorded here.
+**Run:** `go test ./cmd/birdview/ -run TestChecksWorkflow`
+**Status: verified 2026-10-23, passing, and watched failing** — with `actions/checkout` pinned to
+the tag `v7` instead of a commit, it reported the unpinned action.
+
+### dockerTestStageGates
+
+**The image cannot be built unless the tests pass, or the bypass is visibly taken**
+
+**Verifies:** [tech.testedBeforeDeploy](local/tech/release.md#testedbeforedeploy) · **Level:** code · **Method:** assertions over the `Dockerfile`, and its test stage run by hand
+**Assertions:** a `test` stage runs `go test` over every package but `river/check`, against the
+dataset the `ingest` stage built; `SKIP_TESTS` is its only bypass and the bypass prints that the
+tests were skipped; the `builder` stage copies from `test`, and the final image from `builder`, so
+no build can leave the test stage out.
+**Does not cover:** a real `docker build`, since Docker is not installed on the maintainer's
+machine; tests that need Chrome skip in the image and gate in CI instead.
+**Run:** `go test ./cmd/birdview/ -run TestDockerTestStageGatesTheBuild`
+**Status: verified 2026-10-23, passing, and watched failing** — with the builder's `COPY
+--from=test` deleted, it reported that nothing makes the tests run. The stage's command was run by
+hand on a copy of the tree with no `.git` and no built dataset: every package passed, and with
+`SKIP_TESTS` present it printed the warning and ran nothing.
+
+### smokeChecksDeployment
+
+**The smoke checks pass on a healthy deployment, and each fails for the breakage it guards**
+
+**Verifies:** [tech.smokeCheckAfterDeploy](local/tech/release.md#smokecheckafterdeploy) · **Level:** code · **Method:** run the checks over real HTTP against this server, a canonical-host redirect to it, and broken variants
+**Assertions:** against the server and a second one redirecting to it, all of at least eight
+checks pass; with `robots.txt` gone, the index uncompressed, an unknown species answered or a
+guide gone, the check written for that breakage fails; and a host that serves the site instead of
+redirecting fails the redirect check.
+**Run:** `go test ./cmd/birdview/ -run TestSmokeChecksTheServer`
+**Status: verified 2026-10-23, passing, and watched failing** by the broken variants above, which
+the test keeps. Run against birdview.site the same day, with `www.birdview.site` and the Cloud Run
+address as redirecting hosts: nine checks, all passing.
+
 ## Traceability
 
 | Requirement | Criteria | |
 | --- | --- | --- |
+| [tech.checksOnEveryChange](local/tech/release.md#checksoneverychange) | checksWorkflowIsSound | |
+| [tech.testedBeforeDeploy](local/tech/release.md#testedbeforedeploy) | dockerTestStageGates | partial — no real `docker build` has run it |
+| [tech.smokeCheckAfterDeploy](local/tech/release.md#smokecheckafterdeploy) | smokeChecksDeployment | |
 | [tech.stableUrls](local/tech/delivery.md#stableurls) | stableUrlsKeepWorking | partial — that a URL shows what it showed is not decidable as data moves |
 | [tech.oneCanonicalHost](local/tech/delivery.md#onecanonicalhost) | canonicalHostRedirects | |
 | [tech.servesOnlyItsPages](local/tech/delivery.md#servesonlyitspages) | staticServesAssetsOnly, robotsKeepsCrawlersToPages | |

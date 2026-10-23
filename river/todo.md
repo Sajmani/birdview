@@ -563,6 +563,21 @@ already cited by tests, so they may only need the mutation run and a status;
 [decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence) removed the ABA
 input, and wants withdrawing rather than verifying
 
+## inatPacingFlake
+
+**The iNaturalist pacing test can fail under load**
+
+Status: open
+Owner: unassigned
+Gate: if CI goes red on it
+
+Found 2026-10-23. `TestLookupHonorsTheSourceRequirements` measured two requests 114 ms apart against
+a 120 ms interval and a 5 ms tolerance, during a full `go test ./...`; alone it passed five runs of
+five. The gaps are timed at the fake server, so a first request delayed in arriving shortens the
+next gap without the client pacing any faster. Now that
+[tech.checksOnEveryChange](requirements/local/tech/release.md#checksoneverychange) fails CI on any failure, a flake here would read as a broken
+change. Measure the gap at the client's send instead, or widen the tolerance with that reason
+
 ## attributionCriterionNamesAba
 
 **[acceptance.attributionComplete](requirements/acceptance.md#attributioncomplete) still asserts an ABA credit**
