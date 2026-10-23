@@ -690,9 +690,10 @@ apply to it. In order:
    check, monitoring and alerts, a rollback path, and what happens when an ingest input changes.
    **Done 2026-10-23** (`7fcea0b`): [tech/release.md](requirements/local/tech/release.md) — CI on every change, a Dockerfile test stage
    gating every image, and `birdview-smoke` after every deploy; rollback documented in
-   `docs/building.md`; Release adopted in `bindings.md`. The deployment's own settings, its health
-   probe on `/robots.txt` and its uptime check on a species page, are one-time commands in the
-   private `Sajmani/birdview-deploy` runbook, for Sameer to run.
+   `docs/building.md`; Release adopted in `bindings.md`. The deployment's own settings are in
+   place since 2026-10-23, recorded in the private `Sajmani/birdview-deploy`: a startup probe on
+   `/robots.txt`, an uptime check on a species page from three regions every 15 minutes, and an
+   email alert when it fails.
 6. **Operational checks:** TLS, caching behavior
    ([decisions.hereAndNowCaching](requirements/decisions.md#hereandnowcaching)), no tracking, a feedback channel that exposes
    no personal address, basic rate limiting. If step 7 puts Firebase Hosting in front, check
