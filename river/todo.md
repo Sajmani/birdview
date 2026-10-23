@@ -625,15 +625,25 @@ apply to it. In order:
    `git push origin main`, run `gh repo sync Sajmani/birdview --branch main` (or the fork's "Sync
    fork" button), which only fast-forwards from `google:main`. A ruleset on its `main` blocks
    deletion and force-pushes; issues, pull requests, wiki and projects are off.
-2. **Deploy to Cloud Run**, decided 2026-10-22, from a Google Cloud project billed to Sameer.
-   Still to choose: the project and region. **Choose the region with step 7 in mind**: Cloud Run
-   domain mappings exist only in some regions. The image (`Dockerfile`,
-   [docs/building.md](../docs/building.md)) serves `0.0.0.0:8080`, Cloud Run's default port; the
-   server reads `-addr`, never `PORT`, so leave the port at 8080. Set `-feedback` to this
-   repository's issue tracker, and **pass every flag when you do**: Cloud Run's `--args` replaces the
-   image's `CMD` entirely, so `--args=-feedback,<url>` alone would leave the server on
-   `localhost:8080`, unreachable. Deploy the first time by hand from a checkout of the mirror
-   (`gcloud run deploy --source .` builds the `Dockerfile` with Cloud Build); automate in step 8.
+2. ~~**Deploy to Cloud Run**~~, decided 2026-10-22, from a Google Cloud project billed to Sameer.
+   **Done 2026-10-22:** project `birdview-site`, region `us-central1`, service `birdview`,
+   revision `birdview-00001-hfm` at `f1fa369`, serving <https://birdview-570018079643.us-central1.run.app>.
+   Deployed by hand from a clone of the mirror (`~/src/birdview-site`, SSH remote) with:
+
+   ```
+   gcloud run deploy birdview --source . --region us-central1 --allow-unauthenticated \
+     --args=-addr,0.0.0.0:8080,-data,/data/species.json,-feedback,https://github.com/google/birdview/issues
+   ```
+
+   Pass every flag: `--args` replaces the image's `CMD` entirely, so `--args=-feedback,<url>` alone
+   would leave the server on `localhost:8080`, unreachable. The server reads `-addr`, never `PORT`,
+   so leave Cloud Run's port at 8080. `us-central1` was chosen with step 7 in mind; confirm it
+   supports domain mappings before relying on one. Checked on the live service: every page
+   answers, an unknown species 404s, the index carries the same 1,041 species links as a local
+   build and arrives gzipped (277 KB) with `Vary`, `Cache-Control: no-cache` and an ETag that
+   revalidates to 304, the boundary file is served `immutable`, HTTP redirects to HTTPS, no
+   cookie is set, no script, stylesheet or image on the index loads from another host, and the
+   feedback link names `google/birdview` issues.
 3. ~~**Build the dataset for deployment.**~~ Done: the `Dockerfile`'s first stage runs the ingest
    and copies `species.json` into the image, so no deploy step supplies it
    ([tech.datasetNeverCommitted](requirements/local/tech/delivery.md#datasetnevercommitted)).
