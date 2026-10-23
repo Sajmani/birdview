@@ -370,20 +370,6 @@ binary. As a committed command it would catch the next split the week it lands, 
 reader notices a mangrove warbler in Ontario. Note its blind spot: a `country=US,CA` filter hides
 the outlying islands, which is why *Sternula albifrons* looked like a finding and was not
 
-## marineShareDefinition
-
-**Decide how a marine region's share is defined, or that it has none**
-
-Status: open
-Owner: Sameer
-Gate: next — it is live and misleading
-
-[decisions.seaShareDiffers](requirements/decisions.md#seasharediffers). The index inflates every
-marine share by 15–4,472× because a sea's denominator sums only the pelagic species, where a land
-region's counts every bird. Option A (presence at sea, no share) is recommended and costs almost
-nothing; option B costs a regenerated `region-presence.tsv` and `status.tsv` plus a coordinate-box
-form of the `eventDate` facet. **Until this lands the index is wrong for any marine selection**
-
 ## recurrenceCoordinateBox
 
 **Give the recurrence test a coordinate-box form, and find out whether the pelagics clear the bar on their own**
@@ -651,6 +637,23 @@ apply to it. In order:
    ([decisions.hereAndNowCaching](requirements/decisions.md#hereandnowcaching)), no tracking, a feedback channel that exposes
    no personal address, basic rate limiting.
 7. **Point `birdview.site` at the host.**
+
+## dockerBuildMissesData
+
+**The container image does not build: its server stage omits `data/`**
+
+Status: open
+Owner: unassigned
+Gate: before step 2 of [deploymentPlumbing](#deploymentplumbing)
+
+Found 2026-10-22. The `builder` stage of the `Dockerfile` copies `cmd/birdview`, `internal`, `web`
+and `docs`, but `cmd/birdview` imports `birdview/data`, which embeds `region-boundaries.json`; a
+build with exactly those directories fails with `package birdview/data is not in std`. The
+`Dockerfile` was last changed 2026-10-16; the import arrived 2026-10-18 with the Here button
+(`db8d1e7`), and nothing builds the image: no test, no CI, and Docker is not installed on the
+maintainer's machine. Fix with `COPY data ./data` in that stage, and add a check that the stages'
+`COPY` lists cover every package the two commands import, so the next new import cannot break it
+silently. Note for step 3: the `ingest` stage already runs the ingest inside the image build
 
 ## sourceOfTruth
 

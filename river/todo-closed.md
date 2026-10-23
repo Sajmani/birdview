@@ -2,6 +2,22 @@
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## marineShareDefinition
+
+**Decide how a marine region's share is defined, or that it has none**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-10-05, by [decisions.honestSeaDenominator](requirements/decisions.md#honestseadenominator); moved here 2026-10-22
+
+**done 2026-10-05**, option B: a sea's total is every bird record on open water inside its box,
+taken by faceting the box by `gadmLevel0Gid` and subtracting the land (`gbif.CountOffLandInBox`), so
+it is the same quantity a land region's total is. All five seas carry `total` rows in
+`data/region-presence.tsv`, and `Commonest` is computed in the ingest from the same numbers the
+index divides ([acceptance.peakAndShareOneCalculation](requirements/acceptance.md#peakandshareonecalculation)).
+The item stayed open by oversight after the decision landed. What the fix does not cover, records on
+estuaries counting as sea, is in that decision
+
 ## vegaGullEvidence
 
 **[decisions.vegaGullBorrows](requirements/decisions.md#vegagullborrows)'s evidence was gathered in a way BirdLife's terms forbid**
