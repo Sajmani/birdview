@@ -4,21 +4,22 @@ package tech
 
 ## localNowPublicLater
 
-**Local now, public later; never commercial**
+**Public as a personal site; never commercial**
 
 Subject: `deployment.posture`
-Value: `local; non-commercial in perpetuity`
+Value: `public at birdview.site, a personal deployment; non-commercial in perpetuity`
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
-BirdView runs locally today and may be deployed publicly later. It will not become a commercial
-offering, and source obligations are recorded against the public, non-commercial case so that a
-later deployment needs no licensing re-litigation.
+BirdView is served publicly at `birdview.site`, as Sameer's personal site, and will not become a
+commercial offering. Source obligations are recorded against this public, non-commercial case.
 
-Since 2026-10-05 there is no ABA licensing gate:
-[decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence) and
+It ran locally until 2026-10-22, when it went public
+([decisions.publicPersonalDeployment](../../decisions.md#publicpersonaldeployment)); the identifier is kept from then so that every
+link to it still resolves. Going public needed no licensing re-litigation, because the obligations
+had been recorded against the public case all along, and since 2026-10-05 there has been no ABA
+licensing gate: [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence) and
 [decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba) replaced ABA scope and
-names, so nothing all-rights-reserved is read at build time or served. Public deployment is an
-engineering task; `todo.md` lists what remains.
+names, so nothing all-rights-reserved is read at build time or served.
 
 Rationale: Macaulay Library permits embedding for non-commercial use only, and iNaturalist's
 default CC BY-NC corpus is usable on the same basis. Taking revenue would breach both.

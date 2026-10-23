@@ -124,13 +124,18 @@ is 14 MB worldwide, and BirdView needs the United States, Canada and five atolls
 
 ## servesOnLocalhost
 
-**Serves on localhost:8080**
+**Listens on localhost:8080 unless told otherwise**
 
 Subject: `server.address`
-Value: `localhost:8080`
+Value: `localhost:8080` by default; a deployment sets `-addr`
 Goals: [goals.rapidIteration](../../../goals/goals.md#rapiditeration), goals.secure
 
-The server listens on localhost:8080 by default.
+The server listens on localhost:8080 unless `-addr` names another address. A deployment names one;
+a local run never needs to.
+
+Rationale: birdview.site runs with `-addr 0.0.0.0:8080`, because Cloud Run must reach it, while a
+local run keeps the default and is reachable from its own machine only
+([decisions.publicPersonalDeployment](../../decisions.md#publicpersonaldeployment)).
 
 ## fetchRestrictedInputs
 

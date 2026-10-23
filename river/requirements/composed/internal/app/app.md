@@ -106,7 +106,7 @@ a lower tier may do.
 - [tech.crawlersSkipFilteredViews](../../../local/tech/delivery.md#crawlersskipfilteredviews) — Crawlers are asked to skip filtered views
 - [tech.stableUrls](../../../local/tech/delivery.md#stableurls) — These URLs keep working; everything else may change
 - [tech.oneCanonicalHost](../../../local/tech/delivery.md#onecanonicalhost) — A deployment answers at one address
-- [tech.servesOnLocalhost](../../../local/tech/delivery.md#servesonlocalhost) — Serves on localhost:8080
+- [tech.servesOnLocalhost](../../../local/tech/delivery.md#servesonlocalhost) — Listens on localhost:8080 unless told otherwise
 - [tech.compressedResponses](../../../local/tech/delivery.md#compressedresponses) — Responses are compressed when the client asks
 - [tech.cacheLifetimeStated](../../../local/tech/delivery.md#cachelifetimestated) — Every response says how long it may be reused
 - [tech.regionBoundaries](../../../local/tech/delivery.md#regionboundaries) — Region boundaries are generated from Natural Earth and kept small

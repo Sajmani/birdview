@@ -3913,3 +3913,41 @@ they are not filtered away silently.
 
 Later decisions built on the reinstated filter (regionsTwoWays, seaShareDiffers, monthPresence,
 countEbirdFirst, belowBarCounted) without this entry existing; it records what they assumed.
+
+---
+
+## publicPersonalDeployment
+
+**BirdView is served publicly at birdview.site, as Sameer's personal, non-commercial site**
+
+Date: 2026-10-22
+Recorded: 2026-10-23, from the launch plan in `deploymentPlumbing` (commit `aeb08a5`), where it was first written down
+Decided by: Sameer
+Status: accepted
+Affects: [tech.localNowPublicLater](local/tech/posture.md#localnowpubliclater), [tech.servesOnLocalhost](local/tech/delivery.md#servesonlocalhost)
+
+### Decided
+
+BirdView is deployed publicly at `birdview.site`. The domain is Sameer's, the site is served at his
+expense from his Google Cloud project on Cloud Run, and it is deployed from his one-way mirror,
+`github.com/Sajmani/birdview`, while this repository stays the source of truth. It is a personal
+project, not a service this organization operates. It stays non-commercial.
+
+[tech.localNowPublicLater](local/tech/posture.md#localnowpubliclater)'s value moves from `local` to public, keeping its never-commercial clause
+unchanged. [tech.servesOnLocalhost](local/tech/delivery.md#servesonlocalhost) keeps `localhost:8080` as the default, and the deployment sets
+`-addr` instead.
+
+### Why
+
+As the launch plan records it: `birdview.site` belongs to Sameer personally and is served at his
+own expense from his own clone, so the site is a personal project rather than something this
+organization operates, and the Apache 2.0 license permits that. Nothing further was given.
+
+What made it possible was already recorded: [tech.localNowPublicLater](local/tech/posture.md#localnowpubliclater) kept every source's obligations
+against the public, non-commercial case so that going public "needs no licensing re-litigation",
+and since [scopeFromRecurrence](#scopefromrecurrence) and [avilistReplacesAba](#avilistreplacesaba) nothing all-rights-reserved is read or served.
+
+Keeping [tech.servesOnLocalhost](local/tech/delivery.md#servesonlocalhost)'s default was drafted by an agent on 2026-10-23, with this reason, for Sameer to
+approve: a default is what a local run gets without anyone choosing, and a server listening on
+every interface by default would expose a developer's machine to its network, so the deployment
+states its address instead, `-addr 0.0.0.0:8080`, because Cloud Run must reach it.

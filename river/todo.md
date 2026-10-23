@@ -561,6 +561,20 @@ acceptance.abaFileHashMatches is probably obsolete since
 [decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence) removed the ABA
 input, and wants withdrawing rather than verifying
 
+## attributionCriterionNamesAba
+
+**acceptance.attributionComplete still asserts an ABA credit**
+
+Status: open
+Owner: unassigned
+Gate: opportunistic
+
+Found 2026-10-23 during step 4 of [deploymentPlumbing](#deploymentplumbing). Its assertions say "the ABA checklist is credited
+for the species list and *only* that", but
+[decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence) removed ABA on
+2026-10-05 and the footer credits GBIF for scope. Check what `TestAttributionIsComplete` actually
+asserts, then correct whichever of the two is wrong, and add GBIF to the named credits
+
 ## nearMatchSplits
 
 **Four near-matches are splits awaiting a human taxonomic check**
@@ -633,10 +647,12 @@ apply to it. In order:
 3. ~~**Build the dataset for deployment.**~~ Done: the `Dockerfile`'s first stage runs the ingest
    and copies `species.json` into the image, so no deploy step supplies it
    ([tech.datasetNeverCommitted](requirements/local/tech/delivery.md#datasetnevercommitted)).
-4. **Amend the requirements for public serving**, requirement first:
+4. ~~**Amend the requirements for public serving**~~, requirement first:
    [tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater) (its value is `local`) and
    [tech.servesOnLocalhost](requirements/local/tech/delivery.md#servesonlocalhost). The stable surface is done:
-   [tech.stableUrls](requirements/local/tech/delivery.md#stableurls), 2026-10-23.
+   [tech.stableUrls](requirements/local/tech/delivery.md#stableurls), 2026-10-23. **Done 2026-10-23:** both amended under
+   [decisions.publicPersonalDeployment](requirements/decisions.md#publicpersonaldeployment), which records the 2026-10-22 decision to go public; the
+   stage-adoption row of `bindings.md` no longer says BirdView is undeployed.
 5. **Write the first release criteria**, BirdView's first use of River's Release stage: a health
    check, monitoring and alerts, a rollback path, and what happens when an ingest input changes.
 6. **Operational checks:** TLS, caching behavior

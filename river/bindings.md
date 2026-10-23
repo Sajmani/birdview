@@ -16,7 +16,7 @@ migration finishes, these are deliberate local departures from `README.md`, not 
 | **Identifiers** | Descriptive camelCase, qualified by kind outside their own file: `goals.*`, `product.*`, `tech.*`, `decisions.*`, `acceptance.*`; a transcribed source is its own package with exported names, [`inatapi.RequestRate`](requirements/imported/inaturalist.org/inatapi/inatapi.md#requestrate) ([decisions.descriptiveIdentifiers](requirements/decisions.md#descriptiveidentifiers)) | — |
 | **Composition** | `app` composed; see below the table | `dataset` and `internal/repo`; see below |
 | **Checks** | All in Go; see below the table | River's checker does not read composed packages yet, so BirdView checks its own |
-| **Stage adoption** | **Requirements**, **Implementation** and **Verification** adopted; **Release informal** | BirdView is not deployed. It has a Dockerfile but no rollout policy, monitoring or alerting — none of the release guardrails River's Release stage produces. Decided 2026-10-16; revisit when the site goes live |
+| **Stage adoption** | **Requirements**, **Implementation** and **Verification** adopted; **Release informal** | Public at `birdview.site` since 2026-10-22 ([decisions.publicPersonalDeployment](requirements/decisions.md#publicpersonaldeployment)), deployed by hand, with no rollout policy, monitoring or alerting yet. Declared informal 2026-10-16, to revisit on going live: due now, with step 5 of `deploymentPlumbing` |
 
 **Composition.** **`app` composed** in River's normalized form: it links the 60 local requirements
 that apply to the web application unchanged, excludes the four withdrawn photograph requirements,
