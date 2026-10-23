@@ -625,12 +625,15 @@ apply to it. In order:
    `git push origin main`, run `gh repo sync Sajmani/birdview --branch main` (or the fork's "Sync
    fork" button), which only fast-forwards from `google:main`. A ruleset on its `main` blocks
    deletion and force-pushes; issues, pull requests, wiki and projects are off.
-2. **Choose a host** that runs the container image (`Dockerfile`, [docs/building.md](../docs/building.md),
-   serving `0.0.0.0:8080`). Deploying from a local checkout with the host's own tooling is enough
-   to launch; automate after.
-3. **Build the dataset for deployment.** It is never committed
-   ([tech.datasetNeverCommitted](requirements/local/tech/delivery.md#datasetnevercommitted)), so the image build or the deploy step runs
-   the ingest and supplies `species.json`. Today that happens only on the maintainer's machine.
+2. **Deploy to Cloud Run**, decided 2026-10-22, from a Google Cloud project billed to Sameer.
+   Still to choose: the project and region. The image (`Dockerfile`,
+   [docs/building.md](../docs/building.md)) serves `0.0.0.0:8080`, Cloud Run's default port. Set
+   `-feedback` to this repository's issue tracker. Deploy the first time by hand from a checkout
+   of the mirror (`gcloud run deploy --source .` builds the `Dockerfile` with Cloud Build);
+   automate in step 8.
+3. ~~**Build the dataset for deployment.**~~ Done: the `Dockerfile`'s first stage runs the ingest
+   and copies `species.json` into the image, so no deploy step supplies it
+   ([tech.datasetNeverCommitted](requirements/local/tech/delivery.md#datasetnevercommitted)).
 4. **Amend the requirements for public serving**, requirement first:
    [tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater) (its value is `local`),
    [tech.servesOnLocalhost](requirements/local/tech/delivery.md#servesonlocalhost), and the stable surface
@@ -640,7 +643,21 @@ apply to it. In order:
 6. **Operational checks:** TLS, caching behavior
    ([decisions.hereAndNowCaching](requirements/decisions.md#hereandnowcaching)), no tracking, a feedback channel that exposes
    no personal address, basic rate limiting.
-7. **Point `birdview.site` at the host.**
+7. **Point `birdview.site` at the host.** Three ways onto Cloud Run with TLS: a Cloud Run domain
+   mapping (simplest, but preview and in some regions only); Firebase Hosting rewriting to the
+   service (free, certificate included); or a global external load balancer (about $18 a month).
+8. **Sync and deploy automatically.** A push to the mirror's `main` fires a Cloud Build trigger,
+   connected through the Cloud Build GitHub app installed on the `Sajmani` account, that builds
+   the image and deploys it. The sync that feeds it should also run from Google Cloud: Cloud
+   Scheduler starts a small Cloud Build job, hourly say, that runs `gh repo sync` with a
+   fine-grained token for the mirror alone, kept in Secret Manager. Nothing is committed to
+   either repository. A scheduled GitHub Action was considered and is worse here: its workflow
+   file would have to be committed to the mirror, which breaks the one-way rule, or to this
+   repository, which puts personal deployment plumbing in this organization's repository; and
+   GitHub turns scheduled workflows off in forks until enabled. Either way, a token without the
+   `workflow` scope cannot sync a change to `.github/workflows/`, so the sync fails the day this
+   repository adds a workflow. If [sourceOfTruth](#sourceoftruth) moves development to the mirror,
+   the sync job goes and the deploy trigger stays.
 
 ## sourceOfTruth
 
