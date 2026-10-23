@@ -620,7 +620,8 @@ mirror and deployed from it, and nothing is ever committed there directly, or th
 A mirror made now postdates the history rewrite, so [prerewriteClones](#prerewriteclones) does not
 apply to it. In order:
 
-1. **Create the mirror** and push this repository's `main` to it.
+1. ~~**Create the mirror** and push this repository's `main` to it.~~ Done 2026-10-22:
+   `github.com/Sajmani/birdview`, its `main` at `c34edc5`.
 2. **Choose a host** that runs the container image (`Dockerfile`, [docs/building.md](../docs/building.md),
    serving `0.0.0.0:8080`). Deploying from a local checkout with the host's own tooling is enough
    to launch; automate after.
