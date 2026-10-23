@@ -34,6 +34,7 @@ import (
 	"io/fs"
 	"log"
 	"math"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -84,6 +85,10 @@ func main() {
 	// dead link -- a site can go up before its tracker exists, but it must
 	// not invite a reader to a page that does not.
 	feedback := flag.String("feedback", "", "issue tracker URL for reader feedback; omitted from the page when unset")
+	// The deployment's one public host, e.g. birdview.site; requests for any
+	// other host are redirected to it (tech.oneCanonicalHost). A flag, not a
+	// constant, because the host belongs to whoever deploys, not to the code.
+	canonical := flag.String("canonical", "", "the one host to answer at; other hosts are redirected to it over HTTPS. Unset serves every host")
 	flag.Parse()
 
 	if *dev != "" {
@@ -101,6 +106,7 @@ func main() {
 	srv, err := newServer(ds)
 	if err == nil {
 		srv.feedback = *feedback
+		srv.canonical = *canonical
 	}
 	if err != nil {
 		log.Fatalf("birdview: %v", err)
@@ -163,6 +169,9 @@ type server struct {
 	// feedback is the issue tracker readers are pointed at, or empty, in
 	// which case no page says anything about feedback at all (product.noPersonalAddress).
 	feedback string
+	// canonical is the one host this deployment answers at; a request for
+	// any other is redirected there (tech.oneCanonicalHost). Empty serves every host.
+	canonical string
 	// build fingerprints everything a response is rendered from: the
 	// dataset, the templates and the static files. It is the first half of
 	// every ETag (tech.cacheLifetimeStated).
@@ -290,7 +299,23 @@ func (s *server) groupFamilies(r *http.Request, selected map[string]bool, rows [
 }
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if s.canonical != "" && !sameHost(r.Host, s.canonical) {
+		// Permanent, so bookmarks and search engines move to the one address;
+		// path and query kept, so every view lands where it was going
+		// (tech.oneCanonicalHost).
+		http.Redirect(w, r, "https://"+s.canonical+r.URL.RequestURI(), http.StatusMovedPermanently)
+		return
+	}
 	compressed(s.revalidated(s.mux)).ServeHTTP(w, r)
+}
+
+// sameHost reports whether a request's Host names the canonical host,
+// ignoring case and any port.
+func sameHost(requested, canonical string) bool {
+	if h, _, err := net.SplitHostPort(requested); err == nil {
+		requested = h
+	}
+	return strings.EqualFold(requested, canonical)
 }
 
 // revalidated gives every response a validator and tells caches to check it

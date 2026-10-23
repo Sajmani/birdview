@@ -58,6 +58,53 @@ a thousand species pages, the guides, and the added and excluded lists. The comp
 nothing without the birds its query names. A `robots.txt` is a request that well-behaved crawlers
 honor, not a limit; what bounds the cost of one that ignores it is the deployment's instance cap.
 
+## stableUrls
+
+**These URLs keep working; everything else may change**
+
+Subject: `server.public_interface`
+Goals: [goals.shareableViews](../../../goals/goals.md#shareableviews), [goals.freedomToChange](../../../goals/goals.md#freedomtochange)
+
+BirdView's public interface is its URLs: the index `/`, a species page `/species/<eBird code>`, the
+comparison `/compare`, the current-month link `/now`, the guides `/docs` and `/docs/<guide>`, the
+lists `/added` and `/excluded`, and the query parameters the pages' own links write (`by`,
+`scale`, `step`, `units`, `names`, `species`, `family`, `region`, `month`, `habitat`, `niche`),
+with the values those links write. A URL of that form keeps working across releases. Everything
+else is internal and may change without notice: page markup, wording and styling, anything under
+`/static/` or `/boundaries/`, and the shape of `species.json`.
+
+**Keeps working** means the URL still shows what it showed, or the nearest thing the data now
+allows, and says what changed, as a species that leaves scope already does
+([decisions.speciesUrlOutlivesSpecies](../../decisions.md#speciesurloutlivesspecies),
+[decisions.compareUrlContract](../../decisions.md#compareurlcontract)). Renaming a path, a parameter
+or a value it accepts needs a decision, and the old form keeps answering, read as before or
+redirected.
+
+Rationale: every view is a URL ([goals.shareableViews](../../../goals/goals.md#shareableviews)), and
+once BirdView is public, people bookmark and send them; a link that breaks is a promise broken.
+Naming exactly what is promised is what leaves the rest free to change
+([goals.freedomToChange](../../../goals/goals.md#freedomtochange)). `species.json` is a serving
+artifact; a dataset others may build on is a separate, documented publication
+([publishDataset](../../../todo.md#publishdataset)).
+
+## oneCanonicalHost
+
+**A deployment answers at one address**
+
+Subject: `server.canonical_host`
+Value: `-canonical <host>`; unset by default
+Goals: [goals.shareableViews](../../../goals/goals.md#shareableviews)
+
+Given a canonical host, the server answers a request addressed to any other host with a permanent
+redirect to the same path and query on the canonical host, over HTTPS. Given none, it serves
+whatever host it is asked for.
+
+Rationale: birdview.site answers at `birdview.site`, `www.birdview.site` and its Cloud Run address,
+so one view has three URLs, bookmarks split between them, and search engines index each as a
+duplicate. Redirecting makes the canonical one the address every share ends up at. The host
+belongs to the deployment, not the code, so it is a flag: running locally, or deploying a copy
+elsewhere, needs no change.
+
 ## regionBoundaries
 
 **Region boundaries are generated from Natural Earth and kept small**

@@ -1998,10 +1998,44 @@ instance cap is what bounds one that does not.
 /robots.txt` answered 404; with `Disallow: /*?` deleted, it reported each filtered view of the
 index as allowed. Removing the crawl's `/robots.txt` seed failed `TestEveryKindOfPageIsDiscovered`.
 
+### stableUrlsKeepWorking
+
+**Every stable path answers, and every stable parameter is still read**
+
+**Verifies:** [tech.stableUrls](local/tech/delivery.md#stableurls) · **Level:** code · **Method:** request each stable path; set each stable
+parameter to a value the pages write and compare the index's settings summary with the default's
+**Assertions:** `/`, a species page, a two-bird comparison, `/docs` and each of its four guides,
+`/added` and `/excluded` answer 200; `/now?region=NY` answers 303 to the index for this month in
+NY; and each of `by`, `scale`, `step`, `units`, `names`, `species`, `family`, `region`, `month`,
+`habitat` and `niche` changes the index's count line, which names every setting. The count line
+is compared rather than the page, because every link on the page carries the query, so any
+parameter at all would change the page.
+**Does not cover:** that a URL shows the same birds it did, which moves with the data by design;
+and older value forms, of which none has been retired yet. The first rename adds its old form
+here.
+**Run:** `go test ./cmd/birdview/ -run TestStableUrlsKeepWorking`
+**Status: verified 2026-10-23, passing, and watched failing** — with the index reading `diet`
+where it read `niche`, it reported `?niche=Frugivore` as no longer read.
+
+### canonicalHostRedirects
+
+**Given a canonical host, every other host is redirected to it**
+
+**Verifies:** [tech.oneCanonicalHost](local/tech/delivery.md#onecanonicalhost) · **Level:** code · **Method:** requests with set `Host` headers
+**Assertions:** with no canonical host, `www.birdview.site`, `birdview.site` and `localhost:8080`
+are each served; with `birdview.site` canonical, `www.birdview.site`, the Cloud Run address and
+`localhost:8080` each answer 301 to `https://birdview.site` with the path and query unchanged,
+and `birdview.site` is served however it is cased and with a port.
+**Run:** `go test ./cmd/birdview/ -run TestCanonicalHostRedirects`
+**Status: verified 2026-10-23, passing, and watched failing** — before the redirect existed,
+every other host answered 200.
+
 ## Traceability
 
 | Requirement | Criteria | |
 | --- | --- | --- |
+| [tech.stableUrls](local/tech/delivery.md#stableurls) | stableUrlsKeepWorking | partial — that a URL shows what it showed is not decidable as data moves |
+| [tech.oneCanonicalHost](local/tech/delivery.md#onecanonicalhost) | canonicalHostRedirects | |
 | [tech.servesOnlyItsPages](local/tech/delivery.md#servesonlyitspages) | staticServesAssetsOnly, robotsKeepsCrawlersToPages | |
 | [tech.crawlersSkipFilteredViews](local/tech/delivery.md#crawlersskipfilteredviews) | robotsKeepsCrawlersToPages | partial — obeying it is the crawler's choice |
 | [tech.webPages](local/tech/accessibility.md#webpages) | [app.everyPageIsFound](composed/internal/app/acceptance.md#everypageisfound) | |

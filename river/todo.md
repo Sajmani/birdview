@@ -59,20 +59,6 @@ says total length and mass are labeled below the tail tip, and later that mass i
 cube, not in the stack under the tail. Found during the prose pass; it predates it. Check what the
 page does, and correct the statement that is wrong.
 
-## stableSurface
-
-**State what BirdView promises to keep stable, so the rest is free to change**
-
-Status: open
-Owner: Sameer
-Gate: before a public deployment, and before [publishDataset](#publishdataset)
-
-[goals.freedomToChange](goals/goals.md#freedomtochange) has one requirement
-(servesOnlyItsPages). Write requirements naming the stable surface (likely `/species/<id>`,
-`/compare` and the documented query parameters) and declaring everything else internal,
-including the shape of `species.json`. This pulls against publishing the dataset: expect a
-separate external schema, versioned and documented, with the internal one free to change.
-
 ## craniumAtLargeMass
 
 **The cranium model overdraws the largest birds, and one is now in scope**
@@ -648,9 +634,9 @@ apply to it. In order:
    and copies `species.json` into the image, so no deploy step supplies it
    ([tech.datasetNeverCommitted](requirements/local/tech/delivery.md#datasetnevercommitted)).
 4. **Amend the requirements for public serving**, requirement first:
-   [tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater) (its value is `local`),
-   [tech.servesOnLocalhost](requirements/local/tech/delivery.md#servesonlocalhost), and the stable surface
-   ([stableSurface](#stablesurface)).
+   [tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater) (its value is `local`) and
+   [tech.servesOnLocalhost](requirements/local/tech/delivery.md#servesonlocalhost). The stable surface is done:
+   [tech.stableUrls](requirements/local/tech/delivery.md#stableurls), 2026-10-23.
 5. **Write the first release criteria**, BirdView's first use of River's Release stage: a health
    check, monitoring and alerts, a rollback path, and what happens when an ingest input changes.
 6. **Operational checks:** TLS, caching behavior
@@ -672,9 +658,10 @@ apply to it. In order:
    records (4-hour TTL) were still published. **Next time, change DNS first and map second.**
    Checked on both hosts on 2026-10-23: the same results as the `run.app` checks in step 2, and
    HTTP redirects to HTTPS on each. The service is capped at 2 instances
-   (`--max-instances=2`) and the project has a $10 budget alert. Left open: `www` serves the site
-   itself rather than redirecting to `birdview.site`, so the site has two addresses; choose one
-   with [stableSurface](#stablesurface). ~~And there is no `robots.txt`~~: added 2026-10-23 under
+   (`--max-instances=2`) and the project has a $10 budget alert. ~~`www` serves the site itself~~:
+   since 2026-10-23 the server takes `-canonical` ([tech.oneCanonicalHost](requirements/local/tech/delivery.md#onecanonicalhost)), so deploying with
+   `--args=-addr,0.0.0.0:8080,-data,/data/species.json,-feedback,https://github.com/google/birdview/issues,-canonical,birdview.site`
+   redirects `www` and the Cloud Run address to `birdview.site`. ~~And there is no `robots.txt`~~: added 2026-10-23 under
    [tech.crawlersSkipFilteredViews](requirements/local/tech/delivery.md#crawlersskipfilteredviews), asking crawlers to skip every URL with a query string.
 8. **Sync and deploy automatically.** A push to the mirror's `main` fires a Cloud Build trigger,
    connected through the Cloud Build GitHub app installed on the `Sajmani` account, that builds

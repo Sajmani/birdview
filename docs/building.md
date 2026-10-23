@@ -87,6 +87,7 @@ restart after changing a Go file (for example, adding a field a template uses).
 | | `-data` | `web/data/species.json` |
 | | `-dev` | off |
 | | `-feedback` | none; the issue tracker URL pages point readers to, omitted when unset |
+| | `-canonical` | none; the one host to answer at, e.g. `birdview.site`; requests for any other host are redirected there over HTTPS |
 
 The defaults are relative paths, so run both commands from the repository root.
 

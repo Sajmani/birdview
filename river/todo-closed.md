@@ -2,6 +2,21 @@
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## stableSurface
+
+**State what BirdView promises to keep stable, so the rest is free to change**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-10-23, by [tech.stableUrls](requirements/local/tech/delivery.md#stableurls) and [tech.oneCanonicalHost](requirements/local/tech/delivery.md#onecanonicalhost)
+
+**done 2026-10-23**: [tech.stableUrls](requirements/local/tech/delivery.md#stableurls) names the
+public interface (the index, species pages, the comparison, `/now`, the guides, the added and
+excluded lists, and the eleven query parameters the pages write) and declares everything else
+internal, `species.json` included. [tech.oneCanonicalHost](requirements/local/tech/delivery.md#onecanonicalhost)
+gives a deployment one address. Its expected tension with publishing the dataset stays with
+[publishDataset](todo.md#publishdataset): a publication is a separate, documented schema
+
 ## dockerBuildMissesData
 
 **The container image does not build: its server stage omits `data/`**
