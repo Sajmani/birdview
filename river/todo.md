@@ -659,9 +659,25 @@ apply to it. In order:
    through it too: its CDN caches by `Cache-Control`, so confirm pages still revalidate
    ([tech.cacheLifetimeStated](requirements/local/tech/delivery.md#cachelifetimestated)) and arrive gzipped with `Vary` intact
    ([tech.compressedResponses](requirements/local/tech/delivery.md#compressedresponses)).
-7. **Point `birdview.site` at the host.** Three ways onto Cloud Run with TLS: a Cloud Run domain
+7. ~~**Point `birdview.site` at the host.**~~ Three ways onto Cloud Run with TLS: a Cloud Run domain
    mapping (simplest, but preview and in some regions only); Firebase Hosting rewriting to the
    service (free, certificate included); or a global external load balancer (about $18 a month).
+   **Done 2026-10-23 with Cloud Run domain mappings** in `us-central1`, which supports them:
+   `birdview.site` (four A and four AAAA records at Squarespace, replacing the "Squarespace
+   Defaults" preset, including its `HTTPS` record) and `www.birdview.site` (CNAME to
+   `ghs.googlehosted.com`). Ownership verified in Search Console by the `google-site-verification`
+   TXT on `@`, which must stay. Certificates from Google Trust Services; `www` was issued within
+   23 minutes, `birdview.site` after 1 h 41 m, reporting "challenge data was not visible" until
+   then. The likeliest cause: its mapping was created before the DNS change, while the old
+   records (4-hour TTL) were still published. **Next time, change DNS first and map second.**
+   Checked on both hosts on 2026-10-23: the same results as the `run.app` checks in step 2, and
+   HTTP redirects to HTTPS on each. The service is capped at 2 instances
+   (`--max-instances=2`) and the project has a $10 budget alert. Left open: `www` serves the site
+   itself rather than redirecting to `birdview.site`, so the site has two addresses; choose one
+   with [stableSurface](#stablesurface). And there is no `robots.txt`, so a crawler may wander
+   every filtered view; it needs a requirement first, since
+   [tech.servesOnlyItsPages](requirements/local/tech/delivery.md#servesonlyitspages) allows no
+   such route.
 8. **Sync and deploy automatically.** A push to the mirror's `main` fires a Cloud Build trigger,
    connected through the Cloud Build GitHub app installed on the `Sajmani` account, that builds
    the image and deploys it. The sync that feeds it should also run from Google Cloud: Cloud
