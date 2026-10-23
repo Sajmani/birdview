@@ -626,11 +626,14 @@ apply to it. In order:
    fork" button), which only fast-forwards from `google:main`. A ruleset on its `main` blocks
    deletion and force-pushes; issues, pull requests, wiki and projects are off.
 2. **Deploy to Cloud Run**, decided 2026-10-22, from a Google Cloud project billed to Sameer.
-   Still to choose: the project and region. The image (`Dockerfile`,
-   [docs/building.md](../docs/building.md)) serves `0.0.0.0:8080`, Cloud Run's default port. Set
-   `-feedback` to this repository's issue tracker. Deploy the first time by hand from a checkout
-   of the mirror (`gcloud run deploy --source .` builds the `Dockerfile` with Cloud Build);
-   automate in step 8.
+   Still to choose: the project and region. **Choose the region with step 7 in mind**: Cloud Run
+   domain mappings exist only in some regions. The image (`Dockerfile`,
+   [docs/building.md](../docs/building.md)) serves `0.0.0.0:8080`, Cloud Run's default port; the
+   server reads `-addr`, never `PORT`, so leave the port at 8080. Set `-feedback` to this
+   repository's issue tracker, and **pass every flag when you do**: Cloud Run's `--args` replaces the
+   image's `CMD` entirely, so `--args=-feedback,<url>` alone would leave the server on
+   `localhost:8080`, unreachable. Deploy the first time by hand from a checkout of the mirror
+   (`gcloud run deploy --source .` builds the `Dockerfile` with Cloud Build); automate in step 8.
 3. ~~**Build the dataset for deployment.**~~ Done: the `Dockerfile`'s first stage runs the ingest
    and copies `species.json` into the image, so no deploy step supplies it
    ([tech.datasetNeverCommitted](requirements/local/tech/delivery.md#datasetnevercommitted)).
@@ -642,7 +645,10 @@ apply to it. In order:
    check, monitoring and alerts, a rollback path, and what happens when an ingest input changes.
 6. **Operational checks:** TLS, caching behavior
    ([decisions.hereAndNowCaching](requirements/decisions.md#hereandnowcaching)), no tracking, a feedback channel that exposes
-   no personal address, basic rate limiting.
+   no personal address, basic rate limiting. If step 7 puts Firebase Hosting in front, check
+   through it too: its CDN caches by `Cache-Control`, so confirm pages still revalidate
+   ([tech.cacheLifetimeStated](requirements/local/tech/delivery.md#cachelifetimestated)) and arrive gzipped with `Vary` intact
+   ([tech.compressedResponses](requirements/local/tech/delivery.md#compressedresponses)).
 7. **Point `birdview.site` at the host.** Three ways onto Cloud Run with TLS: a Cloud Run domain
    mapping (simplest, but preview and in some regions only); Firebase Hosting rewriting to the
    service (free, certificate included); or a global external load balancer (about $18 a month).
@@ -654,10 +660,10 @@ apply to it. In order:
    either repository. A scheduled GitHub Action was considered and is worse here: its workflow
    file would have to be committed to the mirror, which breaks the one-way rule, or to this
    repository, which puts personal deployment plumbing in this organization's repository; and
-   GitHub turns scheduled workflows off in forks until enabled. Either way, a token without the
-   `workflow` scope cannot sync a change to `.github/workflows/`, so the sync fails the day this
-   repository adds a workflow. If [sourceOfTruth](#sourceoftruth) moves development to the mirror,
-   the sync job goes and the deploy trigger stays.
+   GitHub turns scheduled workflows off in forks until enabled. **Grant the token Contents and
+   Workflows, read and write, on the mirror alone**: without Workflows, the sync fails the day
+   this repository adds a file under `.github/workflows/`. If [sourceOfTruth](#sourceoftruth) moves
+   development to the mirror, the sync job goes and the deploy trigger stays.
 
 ## sourceOfTruth
 
