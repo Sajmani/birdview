@@ -28,7 +28,9 @@ All spec checks are Go tests in `river/check/`. `TestRenderedTextContrast` skips
 without Chrome (`BIRDVIEW_CHROME`); a skip is not a pass.
 
 **End every turn with a freshly built server on <http://localhost:8080>**, started from the repo
-root: `go build -o /tmp/birdview-serve ./cmd/birdview`, stop the old one, run `/tmp/birdview-serve`.
+root: `go build -o /tmp/birdview-serve ./cmd/birdview`, stop the old one, then start it **detached**
+so the command returns: `nohup /tmp/birdview-serve > /tmp/birdview-serve.log 2>&1 &`. Never leave
+it running as a foreground or tracked background task; that holds the turn open.
 
 ## Making a change
 

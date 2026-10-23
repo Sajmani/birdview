@@ -5,23 +5,37 @@ is wrong.
 
 ## Shape
 
-Two commands over a shared set of internal packages.
+Two commands over a shared set of internal packages, plus six generators that write the committed
+tables under `data/`. Generators run by hand, never by the build.
 
 ```
-cmd/birdview-ingest   compiles sources into web/data/species.json (a build artifact)
-cmd/birdview          serves it on localhost, rendering HTML server-side
-cmd/birdview-inatmap  builds data/inat-taxa.tsv; run by hand, never by the build
-cmd/birdview-gbifmap  builds data/gbif-taxa.tsv; likewise
-internal/status       recurrence: episodes, the status they imply, and the committed table
-internal/avonet       reads traits from all three AVONET taxonomy sheets + the crosswalk
-internal/wingspan     empirical wingspans, and the regression fitted from them
-internal/taxonomy     the name mapping: renames vs near-matches
-internal/gbif         the GBIF -> AviList name bridge, and the paced API client
-internal/morphology   the segment models, and the rounding that keeps them summing
-internal/palette      generated family colors under the contrast rule
-internal/dataset      the record and the provenance vocabulary
-internal/view         ordering, sectioning, scale and diagram geometry
-web/                  embedded templates and CSS
+cmd/birdview-ingest      compiles sources and data/ tables into web/data/species.json (a build artifact)
+cmd/birdview             serves it on localhost, rendering HTML server-side
+cmd/birdview-status      generator: data/status.tsv, BirdView's own occurrence status (the scope)
+cmd/birdview-regions     generator: data/region-presence.tsv, per-region and per-month presence
+cmd/birdview-inatmap     generator: data/inat-taxa.tsv, one iNaturalist taxon ID per species
+cmd/birdview-gbifmap     generator: data/gbif-taxa.tsv, the GBIF -> AviList name bridge
+cmd/birdview-boundaries  generator: data/region-boundaries.json, from Natural Earth
+cmd/birdview-names       generator: data/source-names.tsv; only a test reads it
+internal/avilist         names, families, orders, sequence and eBird codes from AviList
+internal/avonet          traits from all three AVONET taxonomy sheets, with habitat and niche
+internal/wingspan        empirical wingspans, and the regression fitted from them
+internal/taxonomy        the name mapping: renames, near-matches, synonyms in both directions
+internal/status          recurrence: episodes, the status they imply, and the committed table
+internal/region          the regions, their two groupings, and their IDs
+internal/month           the twelve months and the rule for presence in one
+internal/boundary        the region boundary file and the reference lookup over it
+internal/trait           the habitat and diet vocabularies, and BirdView's additions
+internal/gbif            the GBIF -> AviList name bridge, and the paced API client
+internal/inat            the iNaturalist taxon lookup, and the links built from it
+internal/morphology      the segment models, and the rounding that keeps them summing
+internal/palette         generated order and family colors under the contrast rule
+internal/dataset         the record and the provenance vocabulary
+internal/view            ordering, sectioning, scale and diagram geometry; pure, no HTML
+internal/xlsx            the standard-library workbook reader behind the three source readers
+web/static/              embedded templates, CSS, here.js and the favicon
+data/                    the committed generated tables; region-boundaries.json is embedded
+docs/                    the guides, embedded and served at /docs
 ```
 
 ## Why rendering is server-side
@@ -35,28 +49,43 @@ So the server computes sections and geometry and renders HTML. Every control is 
 and every detail view is a URL, which also makes any view shareable. The cost is a page load per
 interaction, which is unnoticeable on localhost.
 
-**One exception, added deliberately.** A page load per interaction means the browser lands at the
-top each time, discarding your place in a list of 841 birds. A dozen inline lines save the scroll
-position on leaving the index and restore it on return. It is the only script in the project and
-holds no application logic — the rule it protects is that *logic* stays in Go, not that the client
-is inert.
+**Two exceptions, both deliberate.** A page load per interaction means the browser lands at the
+top each time, discarding your place in a list of over a thousand birds. An inline script in
+`index.html` remembers, for the session, the scroll position and which panels are collapsed, and
+restores them on return. It holds no application logic.
+
+The other is `here.js`, behind the Here button. It looks up the reader's region in the browser so
+their position never reaches the server ([product.locationStaysInBrowser](requirements/local/product/filtering.md#locationstaysinbrowser)), and a test holds
+it to the Go lookup in `internal/boundary`. The rule both protect is that *logic* stays in Go, not
+that the client is inert; without JavaScript the page still works, minus these two.
 
 This is what let acceptance.familyFilterSelectsAndClears and acceptance.unitToggleSwitches be real checks rather than declared gaps.
 
 ## Data flow
 
+The ingest, in outline; [docs/pipeline.md](../docs/pipeline.md) draws every source, field and step.
+
 ```
-ABA checklist ──┐
-                ├─► resolve each species to a trait row ──► segments ──► species.json ──► server
-AVONET ─────────┘        (eBird, then BirdLife, then           │
-                          BirdTree, then a near-match)         │
-Fox wingspans ─────────► empirical value, else the fitted ─────┘
-                         order-level regression
+data/status.tsv ─────────► scope: which species are drawn, and which are not and why
+AviList ─────────────────► names, family, order, sequence, eBird code
+AVONET ──────────────────► resolve each species to a trait row ──► segments ──┐
+                             (own row, then renamed row, then a near-match)   │
+Fox wingspans ───────────► empirical value, else the fitted order-level ──────┤
+                             regression                                       ├─► species.json ─► server
+data/inat-taxa.tsv ──────► iNaturalist link ──────────────────────────────────┤
+data/region-presence.tsv ► regions, months, share of records ─────────────────┘
 ```
 
-Resolution order is the substance of [decisions.abaSpeciesWithoutAvonet](requirements/decisions.md#abaspecieswithoutavonet): prefer any row that is genuinely *this* taxon —
-whatever name or sheet it is filed under — over borrowing a relative's measurements. Only when no
-such row exists anywhere does a near-match apply, and the label then says so.
+The generators that write those `data/` tables query GBIF (eBird and iNaturalist records) and
+iNaturalist over the network; the ingest itself reads only files in the repository.
+
+Resolution order (`resolve` in `cmd/birdview-ingest`) is the substance of [decisions.abaSpeciesWithoutAvonet](requirements/decisions.md#abaspecieswithoutavonet): prefer any row that is genuinely *this* taxon —
+whatever name or sheet it is filed under — over borrowing a relative's measurements. In order: a
+sheet pinned per species (`taxonomy.OwnRowSheets`, [decisions.herringGullEuropeanRow](requirements/decisions.md#herringgulleuropeanrow)); the AviList
+name in `AVONET2_eBird`; then that name, the name AviList renamed it from, and AVONET's older
+labels, each across the eBird, BirdLife and BirdTree sheets. All of these are `measured`. Only when
+no such row exists does a near-match to the pre-split parent apply (`taxonomy.NearMatches`, with
+`NearMatchSheets` pinning a narrower sheet, [decisions.whiteTernBorrows](requirements/decisions.md#whiteternborrows)), and the label then says so.
 
 ## The invariant that shapes the code
 
@@ -68,8 +97,9 @@ independently leaves up to 0.2 mm adrift; the previous design did that and broke
 
 ## Where the scale decisions live
 
-`view.Sections` groups; `view.Scales` picks one reference length per group — the section's largest
-bird, or the whole set's in global mode. `view.Layout` turns a reference into pixels. Keeping the
+`view.Sections` groups by a metric's step rule, and `view.SectionsBy` by any key and break rule
+(frequency uses it, breaking by decade). `view.Scales` picks one reference length per group — the
+section's largest bird, or the whole set's in global mode. `view.Layout` turns a reference into pixels. Keeping the
 reference separate from the pixel conversion is what lets acceptance.sharedScale assert that every bird in a
 section shares a scale factor, which is the property [product.scaleToggle](requirements/local/product/diagram.md#scaletoggle) actually requires.
 
@@ -77,16 +107,17 @@ The server also computes a *width* reference per group, because a to-scale cross
 wide-winged bird in a section of short ones would otherwise overflow. Both references come from
 the same group, so one scale still serves the whole section.
 
-## The two mapping tools, and why they are not in the ingest
+## The network generators, and why they are not in the ingest
 
-`birdview-inatmap` and `birdview-gbifmap` both resolve BirdView's species against somebody else's
-taxonomy over the network, and both write a committed table rather than running at build time
+`birdview-inatmap`, `birdview-gbifmap`, `birdview-regions`, `birdview-status` and
+`birdview-names` all ask somebody else's server about BirdView's species, and all write a committed
+table rather than running at build time
 ([tech.pacedInaturalistMapping](requirements/local/tech/process.md#pacedinaturalistmapping)). The reasons are the same in each case: tests make no network request, a build that needs
 the network fails on a plane, and a quarter of an hour of someone else's server time does not
 belong in a `go build`. The tables go stale; a stale row fails visibly and the refresh is one
-command.
+command. `birdview-boundaries` makes one hash-checked download of Natural Earth.
 
-They differ in what a miss means. iNaturalist supplies a *link*, so a miss costs a link and
+The two mapping tools differ in what a miss means. iNaturalist supplies a *link*, so a miss costs a link and
 nothing else, and `inat.Table` simply omits the species. GBIF supplies a *name correspondence*,
 where the set of things that did not resolve is the interesting output — so `gbif.Table` carries
 every species GBIF reported, with a tier saying how it resolved or why it did not.
@@ -129,5 +160,14 @@ Listed in [todo.md](todo.md) with the rest of the open work, since 2026-10-13.
 
 `-data` defaults to the relative `web/data/species.json`, so the server must start from the repo
 root. Build to a fixed path and stop that process before restarting; `kill %1` on `go run` leaves
-its child holding the port. A `-dev` server reads templates per request but its Go code is frozen
-at start, so `can't evaluate field X` after a struct change usually means a stale process.
+its child holding the port. Start it detached, with its output in a file, so the shell that
+launched it returns at once:
+
+```
+pkill -f /tmp/birdview-serve; go build -o /tmp/birdview-serve ./cmd/birdview && \
+  nohup /tmp/birdview-serve > /tmp/birdview-serve.log 2>&1 &
+```
+
+A `-dev web` server reads templates and static files from `web/static/` per request but its Go
+code is frozen at start, so `can't evaluate field X` after a struct change usually means a stale
+process.
