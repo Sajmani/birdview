@@ -661,7 +661,9 @@ apply to it. In order:
    (`--max-instances=2`) and the project has a $10 budget alert. ~~`www` serves the site itself~~:
    since 2026-10-23 the server takes `-canonical` ([tech.oneCanonicalHost](requirements/local/tech/delivery.md#onecanonicalhost)), so deploying with
    `--args=-addr,0.0.0.0:8080,-data,/data/species.json,-feedback,https://github.com/google/birdview/issues,-canonical,birdview.site`
-   redirects `www` and the Cloud Run address to `birdview.site`. ~~And there is no `robots.txt`~~: added 2026-10-23 under
+   redirects `www` and the Cloud Run address to `birdview.site`; deployed 2026-10-23 as revision
+   `birdview-00004-z2b`, and checked: both answer 301 with path and query intact, plain HTTP takes
+   one more hop through Google's own HTTPS redirect, and `birdview.site` serves as before. ~~And there is no `robots.txt`~~: added 2026-10-23 under
    [tech.crawlersSkipFilteredViews](requirements/local/tech/delivery.md#crawlersskipfilteredviews), asking crawlers to skip every URL with a query string.
 8. **Sync and deploy automatically.** A push to the mirror's `main` fires a Cloud Build trigger,
    connected through the Cloud Build GitHub app installed on the `Sajmani` account, that builds
