@@ -1,0 +1,9 @@
+# A file outside a package directory is named for its package, up to any hyphen.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem package-file-mismatch requirements/decisions.md
+problem package-file-mismatch todo-closed.md

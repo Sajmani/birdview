@@ -15,7 +15,7 @@
 // Package check is River's checker, translated into Go so it runs with
 // BirdView's own tests (River's decisions.checksInRepoLanguage).
 //
-// Translated from River's river/check/goals.py at pin fc69e6c (River is not
+// Translated from River's river/check/goals.py at pin f8252f5 (River is not
 // yet published). What is normative is what the checker reports,
 // not how: a problem's code and path must match the reference exactly, and
 // testdata/ -- River's shared cases, copied at the same pin -- holds that to
@@ -66,6 +66,7 @@ var (
 	titleLine     = regexp.MustCompile(`(?m)\A\s*\*\*(.+?)\*\*(?:[ \t]+\*\([a-z ]+\)\*)?[ \t]*$`)
 	oldForm       = regexp.MustCompile(`(?m)^#{2,3} [A-Za-z]+ — .+$`)
 	descriptiveID = regexp.MustCompile(`^[A-Za-z]+$`)
+	fencedBlock   = regexp.MustCompile("(?ms)^\\s*```.*?^\\s*```")
 	packageDecl   = regexp.MustCompile(`^package\s+([A-Za-z][A-Za-z0-9]*)\s*$`)
 	moduleBlock   = regexp.MustCompile("(?ms)^## Module\\s+```[^\\n]*\\n(.*?)^```")
 	moduleDecl    = regexp.MustCompile(`(?m)^module\s+\S+\s*$`)
@@ -146,7 +147,8 @@ func inSpans(pos int, spans [][]int) bool {
 }
 
 // symbolTable maps package -> identifier -> the file defining it, for every item the module can
-// resolve: goals, gradients, local, imported and composed packages, and decisions.
+// resolve: goals, gradients, local, imported and composed packages, and standalone files
+// such as decisions.md, under the package each declares.
 func (c *checker) symbolTable() map[string]map[string]string {
 	table := map[string]map[string]string{}
 	add := func(pkg, path string, heading *regexp.Regexp) {
@@ -178,8 +180,99 @@ func (c *checker) symbolTable() map[string]map[string]string {
 			}
 		}
 	}
-	add("decisions", filepath.Join(c.bundle, "requirements", "decisions.md"), h2Item)
+	// River's tech.declaredPackages: a file outside the package directories is a package named
+	// by its declaration. One that lacks it is reported once, and resolved under its file's name
+	// so that its references do not fail a second time.
+	for _, p := range c.standaloneItemFiles() {
+		b, err := os.ReadFile(p)
+		if err != nil {
+			continue
+		}
+		text := string(b)
+		pkg := filePackage(p)
+		if m := packageDecl.FindStringSubmatch(firstLine(text)); m != nil {
+			pkg = m[1]
+		}
+		add(pkg, p, h2Item)
+		for _, h := range h3Item.FindAllStringSubmatchIndex(text, -1) {
+			if titleLine.MatchString(text[h[1]:]) {
+				if table[pkg] == nil {
+					table[pkg] = map[string]string{}
+				}
+				table[pkg][text[h[2]:h[3]]] = p
+			}
+		}
+	}
 	return table
+}
+
+// filePackage is the package a standalone file is named for: its name up to any
+// hyphen, lowercased. decisions.md is decisions; todo.md and todo-closed.md are todo.
+func filePackage(path string) string {
+	name := strings.TrimSuffix(filepath.Base(path), ".md")
+	name, _, _ = strings.Cut(name, "-")
+	return strings.ToLower(name)
+}
+
+// inPackageDir reports whether path is under goals/, gradients/, or a requirements
+// package directory, where a package is named by its directory.
+func (c *checker) inPackageDir(path string) bool {
+	rel := c.rel(path)
+	for _, d := range []string{"goals/", "gradients/", "requirements/local/", "requirements/imported/", "requirements/composed/"} {
+		if strings.HasPrefix(rel, d) {
+			return true
+		}
+	}
+	return false
+}
+
+// definesItems reports an identifier-shaped ## or ### heading with a bold title
+// beneath it, outside code blocks.
+func definesItems(text string) bool {
+	text = fencedBlock.ReplaceAllString(text, "")
+	for _, re := range []*regexp.Regexp{h2Item, h3Item} {
+		for _, h := range re.FindAllStringIndex(text, -1) {
+			if titleLine.MatchString(text[h[1]:]) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// standaloneItemFiles lists the files outside the package directories whose
+// headings define items (River's tech.declaredPackages). The bundle's README.md is
+// the method, copied unchanged, and its items are examples; PROVENANCE.md defines
+// nothing.
+func (c *checker) standaloneItemFiles() []string {
+	var out []string
+	for _, p := range c.markdown(c.bundle, false) {
+		if c.inPackageDir(p) || c.rel(p) == "README.md" {
+			continue
+		}
+		if b, err := os.ReadFile(p); err == nil && definesItems(string(b)) {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+// standalonePackages reports a standalone item file that does not declare the
+// package it is named for.
+func (c *checker) standalonePackages() {
+	for _, p := range c.standaloneItemFiles() {
+		b, err := os.ReadFile(p)
+		if err != nil {
+			continue
+		}
+		want := filePackage(p)
+		if m := packageDecl.FindStringSubmatch(firstLine(string(b))); m == nil {
+			c.report("missing-package-decl", c.rel(p), "defines items, so its first non-empty line must be `package "+want+"`")
+		} else if m[1] != want {
+			c.report("package-file-mismatch", c.rel(p), "declares package "+m[1]+"; a file outside a package directory "+
+				"is named for its package, so this one is "+want)
+		}
+	}
 }
 
 // references reports, outside the method README and the packages that travel between modules,
@@ -633,6 +726,7 @@ func Run(dir string) Result {
 
 	c.uniquePackageNames()
 	c.seekable()
+	c.standalonePackages()
 	if b, err := os.ReadFile(reqMD); err != nil {
 		c.report("missing-readme-md", "requirements/README.md", "missing requirements/README.md")
 	} else if m := moduleBlock.FindStringSubmatch(string(b)); m == nil || !moduleDecl.MatchString(m[1]) {

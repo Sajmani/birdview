@@ -1,3 +1,5 @@
+package todo
+
 # Open work
 
 Search `## <id>` for one item, or `grep -n -A1 '^## ' river/todo.md` for the list. `Status:` is
@@ -537,7 +539,7 @@ because it reverses [decisions.massAsWaterCube](requirements/decisions.md#massas
 
 Status: open
 Owner: unassigned
-Gate: opportunistic; acceptance.tileMarksNonMeasured and acceptance.nothingRestrictedTracked guard hard rules
+Gate: opportunistic; [acceptance.tileMarksNonMeasured](requirements/acceptance.md#tilemarksnonmeasured) and [acceptance.nothingRestrictedTracked](requirements/acceptance.md#nothingrestrictedtracked) guard hard rules
 
 Still `planned` in [acceptance.md](requirements/acceptance.md):
 [acceptance.allFiveTraits](requirements/acceptance.md#allfivetraits) (all five AVONET traits on
@@ -555,15 +557,15 @@ restricted is tracked — the document calls it its highest-value check),
 [acceptance.outboundRequestsIdentified](requirements/acceptance.md#outboundrequestsidentified)
 (outbound requests identify the client) and
 [acceptance.abaFileHashMatches](requirements/acceptance.md#abafilehashmatches) (the fetched ABA file
-matches its hash). acceptance.joinCoversEverySpecies and acceptance.proportionsDifferentiate are
+matches its hash). [acceptance.joinCoversEverySpecies](requirements/acceptance.md#joincoverseveryspecies) and [acceptance.proportionsDifferentiate](requirements/acceptance.md#proportionsdifferentiate) are
 already cited by tests, so they may only need the mutation run and a status;
-acceptance.abaFileHashMatches is probably obsolete since
+[acceptance.abaFileHashMatches](requirements/acceptance.md#abafilehashmatches) is probably obsolete since
 [decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence) removed the ABA
 input, and wants withdrawing rather than verifying
 
 ## attributionCriterionNamesAba
 
-**acceptance.attributionComplete still asserts an ABA credit**
+**[acceptance.attributionComplete](requirements/acceptance.md#attributioncomplete) still asserts an ABA credit**
 
 Status: open
 Owner: unassigned

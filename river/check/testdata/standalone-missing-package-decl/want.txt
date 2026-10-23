@@ -1,0 +1,9 @@
+# A file outside a package directory that defines items must still declare its package.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem missing-package-decl requirements/decisions.md
+problem missing-package-decl todo.md

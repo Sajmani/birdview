@@ -1,3 +1,5 @@
+package decisions
+
 # Decisions
 
 How each conflict was settled, each judgment made and each gap knowingly accepted, by whom and
@@ -477,7 +479,7 @@ binary, after [noOpenLengthAndWingspan](#noopenlengthandwingspan) on modeled len
 - **[product.tileOpensDetail](local/product/presentation.md#tileopensdetail)** amended: the detail view is a larger version of the same tile, plus per-segment
   measurements and provenance.
 - **[product.tileContents](local/product/presentation.md#tilecontents)** amended: the tile header carries scientific name as well as common name and badge.
-- **acceptance.neckLengthSerialized** inverted: it asserted the neck length never leaves the drawing layer; it now asserts
+- **[acceptance.neckLengthSerialized](acceptance.md#necklengthserialized)** inverted: it asserted the neck length never leaves the drawing layer; it now asserts
   the neck length *is* serialized, with a `model` naming the family ratio.
 - **neckSplitUnmeasured** stands as history. Its reasoning was right for the constraints of its time; only its
   condition is superseded.
@@ -535,7 +537,7 @@ Fitted this way and asked for the same 9,194 species Fox predicted, BirdView's m
 theirs to a **mean of 1.32%** and a median under 1%, with 1.4% of species differing by more than
 10% — mostly extreme-aspect seabirds. It is, in effect, their model reconstructed.
 
-That comparison is now a standing check (acceptance.wingspanModelReconstructsFox), so a regression in the fitting code shows up as
+That comparison is now a standing check ([acceptance.wingspanModelReconstructsFox](acceptance.md#wingspanmodelreconstructsfox)), so a regression in the fitting code shows up as
 disagreement with an external published reference rather than as a silently worse dataset.
 
 Note what could **not** be tested: Fox report no predicted value for species that have an
@@ -554,7 +556,7 @@ about 5%, and the figure falls out of the fitting already being done.
 
 - **[product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources)** amended: the modeled-wingspan branch names the fitted regression.
 - **[product.provenancePerMetric](local/product/measurements.md#provenancepermetric)** amended: a `model` states the computation *and its measured error* where one exists.
-- **acceptance.wingspanModelReconstructsFox** added: agreement with Fox's published predictions stays within 2% mean.
+- **[acceptance.wingspanModelReconstructsFox](acceptance.md#wingspanmodelreconstructsfox)** added: agreement with Fox's published predictions stays within 2% mean.
 - `morphology.Wingspan`, the invented model, is deleted rather than left for someone to reach for.
 - Coverage is unchanged at 301 measured, 7 near-match, 533 modeled; only the modeled values move.
 
@@ -607,7 +609,7 @@ named in the provenance of every value they produce, never presented as measurem
 
 ### Consequence the renderer had to absorb
 
-acceptance.legsFromTarsusWithdrawn recorded an invariant: feet never fall below the tail tip, which is what let the renderer
+[acceptance.legsFromTarsusWithdrawn](acceptance.md#legsfromtarsuswithdrawn) recorded an invariant: feet never fall below the tail tip, which is what let the renderer
 center a diagram on its bill-to-tail extent. **The modeled leg makes that false** for 11 of the
 841 species — an American Flamingo by 30% of its own length, then Whooping Crane, Reddish Egret
 and Black-necked Stilt. That is correct anatomy, so the renderer accommodates it: `VerticalExtent`
@@ -622,7 +624,7 @@ behind the body rather than crossing it and the junction mark.
 
 - **[product.segmentComposition](local/product/diagram.md#segmentcomposition)** amended: legs are the modeled exposed leg, not the measured tarsus; the rejection
   above is superseded; the draw order is stated.
-- **acceptance.legsFromTarsusWithdrawn** rewritten: the feet-above-tail assertion is inverted into a drawn-extent invariant,
+- **[acceptance.legsFromTarsusWithdrawn](acceptance.md#legsfromtarsuswithdrawn)** rewritten: the feet-above-tail assertion is inverted into a drawn-extent invariant,
   and the leg model gains dataset-wide checks.
 - **[product.provenancePerMetric](local/product/measurements.md#provenancepermetric)** unchanged but newly load-bearing: `Species.Leg` is modeled, `Species.Tarsus` measured,
   and both are serialized and shown.
@@ -713,8 +715,8 @@ whose entire premise is that everything in it is to scale. That cost is higher t
 - **[product.segmentComposition](local/product/diagram.md#segmentcomposition)** amended: five segments and a crossbar. No legs. The flight premise is stated there.
 - **[product.scaleToggle](local/product/diagram.md#scaletoggle)** reverted: the scale reference is the largest total length again, not the drawn extent.
 - **product.traitsFromAvonet/product.traitsPerSpecies** amended: `Tarsus.Length` is no longer ingested, leaving five AVONET traits.
-- **acceptance.legsFromTarsusWithdrawn** withdrawn — the requirement it verified no longer exists.
-- **acceptance.allFiveTraits** amended: five traits, not six.
+- **[acceptance.legsFromTarsusWithdrawn](acceptance.md#legsfromtarsuswithdrawn)** withdrawn — the requirement it verified no longer exists.
+- **[acceptance.allFiveTraits](acceptance.md#allfivetraits)** amended: five traits, not six.
 - Deleted from the code: `morphology.LegFactors`, `DefaultLegFactor`, `LegLength`;
   `dataset.Species.Leg` and `.Tarsus`; `avonet.Traits.Tarsus`; `view.VerticalExtent`,
   `Geometry.DrawnHeight`, `LegCos`, `legRake`, `legSin` and the leg coordinates; the leg strokes,
@@ -797,7 +799,7 @@ a stick is not misleading.
 - **[product.segmentComposition](local/product/diagram.md#segmentcomposition)** amended: the neck is a stick or an S depending on the family's flight posture.
 - **[product.segmentsSumToLength](local/product/diagram.md#segmentssumtolength)** amended: the rationale is qualified — drawn extent equals total length except where the
   neck is folded, and the sum over the *metrics* is unaffected.
-- **acceptance.foldedNeckSameStroke** added.
+- **[acceptance.foldedNeckSameStroke](acceptance.md#foldednecksamestroke)** added.
 - No change to [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), the neck-ratio model, or to any serialized value.
 
 ---
@@ -911,8 +913,8 @@ independently, which is a useful accident: two unrelated rules point the same wa
 - **[product.inaturalistLink](local/product/presentation.md#inaturalistlink)** added: the detail view links to iNaturalist when, and only when, the match is
   confident.
 - **[tech.pacedInaturalistMapping](local/tech/process.md#pacedinaturalistmapping)** added: the mapping tool paces its requests and identifies itself.
-- **acceptance.inaturalistLinkConfidentOnly** added.
-- The existing **[tech.identifiedClient](local/tech/delivery.md#identifiedclient)** (identify the client) and **acceptance.outboundRequestsIdentified** already discharge [`inatapi.UserAgent`](imported/inaturalist.org/inatapi/inatapi.md#useragent),
+- **[acceptance.inaturalistLinkConfidentOnly](acceptance.md#inaturalistlinkconfidentonly)** added.
+- The existing **[tech.identifiedClient](local/tech/delivery.md#identifiedclient)** (identify the client) and **[acceptance.outboundRequestsIdentified](acceptance.md#outboundrequestsidentified)** already discharge [`inatapi.UserAgent`](imported/inaturalist.org/inatapi/inatapi.md#useragent),
   which is why that requirement needed no new work.
 
 ---
@@ -966,7 +968,7 @@ runs.
 ### The second assertion, which is the one that matters
 
 A contrast check over *declared* colors is blind to the colour nobody declared — which is precisely
-how this bug shipped. So acceptance.noTextBelowContrastFloor also asserts the stylesheet carries top-level `a` and `a:visited`
+how this bug shipped. So [acceptance.noTextBelowContrastFloor](acceptance.md#notextbelowcontrastfloor) also asserts the stylesheet carries top-level `a` and `a:visited`
 rules, making "someone forgot" impossible rather than merely unlikely.
 
 Colors are now set by a global rule rather than per component, so a new link inherits a good color
@@ -986,7 +988,7 @@ accent.
 - **`sources.md`**: the `wcag` scope widens from badges to badges *plus* link and text colors. Both
   already-adopted criteria are now used, at the two floors above.
 - **[tech.textContrastFloor](local/tech/accessibility.md#textcontrastfloor)** added.
-- **acceptance.noTextBelowContrastFloor** added, watched failing three ways, including against the original defect.
+- **[acceptance.noTextBelowContrastFloor](acceptance.md#notextbelowcontrastfloor)** added, watched failing three ways, including against the original defect.
 - `--accent-visited` added; link colors moved to global `a` / `a:visited` rules; `.tile`, `.btn` and
   `.chip` given explicit `:visited` rules so the global rule cannot recolor them.
 - Still excluded, and still claimed nowhere: keyboard access, focus order, timing, reading level.
@@ -1045,7 +1047,7 @@ the next time an exception looks cheaper than a fix.
 ### Resulting status
 
 - **[tech.textContrastFloor](local/tech/accessibility.md#textcontrastfloor)** amended: one floor, 7:1, links and text alike, against both surfaces.
-- **acceptance.noTextBelowContrastFloor** amended: the measured assertion is now a single floor, and the watched-failing list
+- **[acceptance.noTextBelowContrastFloor](acceptance.md#notextbelowcontrastfloor)** amended: the measured assertion is now a single floor, and the watched-failing list
   gains the two restored colors.
 - The test's two-tier machinery — a separate link floor, and the selector tokenizer that decided
   which rules were links — is deleted rather than left switched off. It is recoverable from history
@@ -1142,7 +1144,7 @@ which a reader can only ask once but must be able to answer.
 ### Resulting status
 
 - **[product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled)** added; **[product.segmentComposition](local/product/diagram.md#segmentcomposition)** amended, since the tail's stroke style now means something else.
-- **acceptance.diagramDistinguishesModeled** added.
+- **[acceptance.diagramDistinguishesModeled](acceptance.md#diagramdistinguishesmodeled)** added.
 - `dataset.Species.WingChord` added: AVONET's `Wing.Length`, previously consumed by the wingspan
   model and discarded. Note this is the **ornithological** chord, carpal joint to primary tip, not
   the aerodynamic chord of leading edge to trailing edge — the two share a name, and only the first
@@ -1222,7 +1224,7 @@ the other cannot.
 ### Resulting status
 
 - **[product.inaturalistLink](local/product/presentation.md#inaturalistlink)** amended: both names must still agree, but each is compared more thoroughly.
-- **acceptance.inaturalistLinkConfidentOnly** extended: a case per bucket, plus the assertion that a differing genus is refused when
+- **[acceptance.inaturalistLinkConfidentOnly](acceptance.md#inaturalistlinkconfidentonly)** extended: a case per bucket, plus the assertion that a differing genus is refused when
   the common name does not agree.
 - Coverage is now a **required** 841 of 841, asserted over the built dataset rather than reported.
   A species that stops resolving is a fault, not an absence.
@@ -1282,7 +1284,7 @@ diagram cannot drift from the renderer.
 - **[product.scaleToggle](local/product/diagram.md#scaletoggle)** amended: per-section is the default and is listed first.
 - **[product.pageExplainsItself](local/product/presentation.md#pageexplainsitself)** amended: three sections in a stated order, and the diagram section is a rendered,
   labeled diagram.
-- **acceptance.sharedScale** and **acceptance.pageExplainsControls** amended, and the tests that asserted the global default inverted.
+- **[acceptance.sharedScale](acceptance.md#sharedscale)** and **[acceptance.pageExplainsControls](acceptance.md#pageexplainscontrols)** amended, and the tests that asserted the global default inverted.
 - The help diagram is drawn from a real species with a **modeled** wingspan, so the dashed inner
   crossbar of [product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled) is visible in the legend rather than only in the prose beside it.
 
@@ -3649,7 +3651,7 @@ from outside. `repoLinks` in `cmd/birdview` maps one to the other, so neither na
 
 ### What the move exposed
 
-`TestServedDocumentsHaveNoBrokenLinks` (acceptance.categoryOriginShown) was written for exactly the bug a move like this
+`TestServedDocumentsHaveNoBrokenLinks` ([acceptance.categoryOriginShown](acceptance.md#categoryoriginshown)) was written for exactly the bug a move like this
 causes — a repository link like `../river/product.md` left unrewritten, so a browser gets a 404 —
 and passed over 53 of them, because it followed only links that began with `/`. An unrewritten
 link is relative, so it was skipped rather than fetched. The test could never have caught its own
@@ -3716,7 +3718,7 @@ requirement linked to source code or a data table the site could not serve.
 
 ### Guardrails, and one coverage gap closed
 
-The broken-links check (acceptance.categoryOriginShown) now confirms that every repository link names a file that
+The broken-links check ([acceptance.categoryOriginShown](acceptance.md#categoryoriginshown)) now confirms that every repository link names a file that
 exists in the checkout, and was watched failing on a misspelled one. The 26 known-broken links
 are gone, and the list that held them is deleted.
 
@@ -3856,7 +3858,7 @@ Here and Now ([product.hereSelectsLocalRegion](local/product/filtering.md#herese
    said `no-cache` and an ETag on *every* response.
 2. **A Now link carrying the server's month would put a clock into the page.** The requirement's
    ETag is a fingerprint of the build and the URL, sound only because a page has "no clock
-   anywhere in the render path", which acceptance.honestRevalidation checks. After a month ended,
+   anywhere in the render path", which [acceptance.honestRevalidation](acceptance.md#honestrevalidation) checks. After a month ended,
    a browser revalidating a cached index would get 304 and keep last month's Now link.
 
 ### Decided

@@ -59,7 +59,7 @@ their position never reaches the server ([product.locationStaysInBrowser](requir
 it to the Go lookup in `internal/boundary`. The rule both protect is that *logic* stays in Go, not
 that the client is inert; without JavaScript the page still works, minus these two.
 
-This is what let acceptance.familyFilterSelectsAndClears and acceptance.unitToggleSwitches be real checks rather than declared gaps.
+This is what let [acceptance.familyFilterSelectsAndClears](requirements/acceptance.md#familyfilterselectsandclears) and [acceptance.unitToggleSwitches](requirements/acceptance.md#unittoggleswitches) be real checks rather than declared gaps.
 
 ## Data flow
 
@@ -100,7 +100,7 @@ independently leaves up to 0.2 mm adrift; the previous design did that and broke
 `view.Sections` groups by a metric's step rule, and `view.SectionsBy` by any key and break rule
 (frequency uses it, breaking by decade). `view.Scales` picks one reference length per group — the
 section's largest bird, or the whole set's in global mode. `view.Layout` turns a reference into pixels. Keeping the
-reference separate from the pixel conversion is what lets acceptance.sharedScale assert that every bird in a
+reference separate from the pixel conversion is what lets [acceptance.sharedScale](requirements/acceptance.md#sharedscale) assert that every bird in a
 section shares a scale factor, which is the property [product.scaleToggle](requirements/local/product/diagram.md#scaletoggle) actually requires.
 
 The server also computes a *width* reference per group, because a to-scale crossbar on a

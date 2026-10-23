@@ -1,0 +1,9 @@
+# Files outside package directories declare a package named for the file: decisions.md is
+# decisions, acceptance.md is acceptance, and todo.md and todo-closed.md share todo. Their items
+# resolve under that name. A prose file defining no items declares nothing.
+exit 0
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0

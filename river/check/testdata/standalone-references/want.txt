@@ -1,0 +1,8 @@
+# A standalone package is in the symbol table, so a reference to its items must be a link.
+exit 1
+requirements 1
+goals 1
+gradients 0
+unjustified 0
+unserved 0
+problem unlinked-reference requirements/local/product/product.md

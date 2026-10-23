@@ -1,3 +1,5 @@
+package acceptance
+
 # Acceptance criteria
 
 Search `### <id>` for one criterion; `grep -n -A2 '^### '` lists them with their titles, and

@@ -1,4 +1,4 @@
-> Project copy of River's `README.md`, pin `fc69e6c`, licensed under Apache 2.0 with the rest of BirdView.
+> Project copy of River's `README.md`, pin `f8252f5`, licensed under Apache 2.0 with the rest of BirdView.
 > River is not yet published; its canonical origin will be recorded here when it is. Local amendments,
 > if any, are listed in [bindings.md](bindings.md).
 
@@ -131,8 +131,8 @@ What each file under `requirements/` must contain, so that anyone adding to it k
 consistent. **Read this before writing to any of them.** An existing entry is a good example of
 the format, but it cannot show the rules below that only apply when something changes.
 
-**`decisions.md`** — one entry per decision, oldest first, appended at the end. Each is
-`## <id>`, a bold line stating the decision, then one field per line:
+**`decisions.md`** — `package decisions`, then one entry per decision, oldest first, appended at
+the end. Each is `## <id>`, a bold line stating the decision, then one field per line:
 
 ```
 Date: 2026-10-07
@@ -381,6 +381,12 @@ Identifiers are descriptive CamelCase — `noSilentFailures`, not `P-014`. Insid
 own names are bare; everywhere else they are qualified, `product.noSilentFailures`. Package
 names are unique within a module, which is what lets a bare prefix resolve without an import
 block.
+
+**Every file that defines identifiers opens with `package <name>`** (`tech.declaredPackages`),
+and that name is the prefix. A file in a package directory takes the directory's name; a file
+standing alone takes its own, up to any hyphen: `decisions.md` is `package decisions`, and
+`todo.md` and `todo-closed.md` are both `package todo`, so an item keeps its name when it closes.
+This README is the one exception; its items are examples.
 
 **The heading is the identifier and nothing else; the title is the bold line beneath it.** A
 heading's anchor is derived from its text, so this makes every item's anchor its identifier
