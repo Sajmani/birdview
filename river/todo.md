@@ -144,18 +144,6 @@ stylesheet checks skip shapes on purpose and the rendered check measures text on
 rendered check to strokes and fills against adjacent colors is the obvious route; "required to
 understand the content" needs a ruling per diagram part
 
-## contrastCheckNeedsChrome
-
-**The rendered contrast check gates only where Chrome is installed**
-
-Status: open
-Owner: Sameer
-Gate: when CI exists
-
-[app.renderedTextContrast](requirements/composed/internal/app/acceptance.md#renderedtextcontrast) skips without it,
-and BirdView has no CI. A skipped check reads as a pass in `go test ./...` output unless someone
-reads the skip line
-
 ## composeDatasetAndRepo
 
 **Compose `dataset` and `internal/repo`**
@@ -563,6 +551,34 @@ already cited by tests, so they may only need the mutation run and a status;
 [decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence) removed the ABA
 input, and wants withdrawing rather than verifying
 
+## riverReleaseFindings
+
+**What adopting River's Release stage taught, to send upstream**
+
+Status: open
+Owner: Sameer
+Gate: next River session
+
+Found 2026-10-22 and 23, taking birdview.site public and adopting Release. Each is a place River's
+README was silent or assumed something BirdView did not have:
+
+- **A decision recorded after it was made.** [decisions.publicPersonalDeployment](requirements/decisions.md#publicpersonaldeployment) and
+  [decisions.regionFilterReinstated](requirements/decisions.md#regionfilterreinstated) needed a `Recorded:` field River's entry format does not define.
+- **Guardrails in a private repository.** River says the bundle cites guardrails from a mutable
+  record. BirdView's health probe and uptime check live in `Sajmani/birdview-deploy`, which is
+  private, so the citation names something most readers cannot open. River should say whether
+  that is acceptable, and what the bundle must then state itself.
+- **Code owner and release owner differ.** The code is this organization's; the deployment is
+  Sameer's own. River's "Who decides" assumes one owner over every stage.
+- **Spec checks need version control.** River's checks read what the VCS tracks, so they cannot run
+  in a build context. BirdView runs them in CI and the rest in the image build; River could name
+  that split.
+- **Adopting a stage that was informal.** River says to declare an unadopted stage informal, but
+  not what triggers a revisit or what adopting it requires. BirdView's trigger was going public;
+  adoption meant requirements, criteria and the deployment's own settings.
+- **A one-way mirror as the deployed copy.** Deploying from a fork that is synced, never committed
+  to, kept one source of truth; River's Release stage might name it as a pattern
+
 ## inatPacingFlake
 
 **The iNaturalist pacing test can fail under load**
@@ -670,8 +686,13 @@ apply to it. In order:
    [tech.stableUrls](requirements/local/tech/delivery.md#stableurls), 2026-10-23. **Done 2026-10-23:** both amended under
    [decisions.publicPersonalDeployment](requirements/decisions.md#publicpersonaldeployment), which records the 2026-10-22 decision to go public; the
    stage-adoption row of `bindings.md` no longer says BirdView is undeployed.
-5. **Write the first release criteria**, BirdView's first use of River's Release stage: a health
+5. ~~**Write the first release criteria**~~, BirdView's first use of River's Release stage: a health
    check, monitoring and alerts, a rollback path, and what happens when an ingest input changes.
+   **Done 2026-10-23** (`7fcea0b`): [tech/release.md](requirements/local/tech/release.md) — CI on every change, a Dockerfile test stage
+   gating every image, and `birdview-smoke` after every deploy; rollback documented in
+   `docs/building.md`; Release adopted in `bindings.md`. The deployment's own settings, its health
+   probe on `/robots.txt` and its uptime check on a species page, are one-time commands in the
+   private `Sajmani/birdview-deploy` runbook, for Sameer to run.
 6. **Operational checks:** TLS, caching behavior
    ([decisions.hereAndNowCaching](requirements/decisions.md#hereandnowcaching)), no tracking, a feedback channel that exposes
    no personal address, basic rate limiting. If step 7 puts Firebase Hosting in front, check

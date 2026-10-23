@@ -2045,7 +2045,8 @@ fails if the test log shows a skip.
 **Does not cover:** that GitHub runs it as written; the first run's result is recorded here.
 **Run:** `go test ./cmd/birdview/ -run TestChecksWorkflow`
 **Status: verified 2026-10-23, passing, and watched failing** — with `actions/checkout` pinned to
-the tag `v7` instead of a commit, it reported the unpinned action.
+the tag `v7` instead of a commit, it reported the unpinned action. **First run on GitHub**, on
+`7fcea0b`: green in one minute, no test skipped, the rendered contrast check run over 15 pages.
 
 ### dockerTestStageGates
 

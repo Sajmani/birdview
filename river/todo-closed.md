@@ -4,6 +4,18 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## contrastCheckNeedsChrome
+
+**The rendered contrast check gates only where Chrome is installed**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-10-23, by [tech.checksOnEveryChange](requirements/local/tech/release.md#checksoneverychange)
+
+**done 2026-10-23**: CI (`.github/workflows/checks.yml`) runs on every push and pull request with
+Chrome installed and fails on any skipped test. Its first run, on `7fcea0b`, ran
+[app.renderedTextContrast](requirements/composed/internal/app/acceptance.md#renderedtextcontrast) over 15 pages and passed, with no test skipped
+
 ## stableSurface
 
 **State what BirdView promises to keep stable, so the rest is free to change**

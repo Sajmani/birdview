@@ -16,7 +16,7 @@ migration finishes, these are deliberate local departures from `README.md`, not 
 | **Identifiers** | Descriptive camelCase, qualified by kind outside their own file: `goals.*`, `product.*`, `tech.*`, `decisions.*`, `acceptance.*`; a transcribed source is its own package with exported names, [`inatapi.RequestRate`](requirements/imported/inaturalist.org/inatapi/inatapi.md#requestrate) ([decisions.descriptiveIdentifiers](requirements/decisions.md#descriptiveidentifiers)) | — |
 | **Composition** | `app` composed; see below the table | `dataset` and `internal/repo`; see below |
 | **Checks** | All in Go; see below the table | River's checker does not read composed packages yet, so BirdView checks its own |
-| **Stage adoption** | **Requirements**, **Implementation** and **Verification** adopted; **Release informal** | Public at `birdview.site` since 2026-10-22 ([decisions.publicPersonalDeployment](requirements/decisions.md#publicpersonaldeployment)), deployed by hand, with no rollout policy, monitoring or alerting yet. Declared informal 2026-10-16, to revisit on going live: due now, with step 5 of `deploymentPlumbing` |
+| **Stage adoption** | All four adopted: **Requirements**, **Implementation**, **Verification**, and **Release** since 2026-10-23 | Release was declared informal 2026-10-16 and adopted by Sameer on 2026-10-23, once birdview.site was public. Guardrails in [tech/release.md](requirements/local/tech/release.md); the deployment's probe, uptime check, alerting and runbook live in the private `Sajmani/birdview-deploy` |
 
 **Composition.** **`app` composed** in River's normalized form: it links the 60 local requirements
 that apply to the web application unchanged, excludes the four withdrawn photograph requirements,
@@ -30,7 +30,8 @@ first.
 with River's shared cases copied at the same pin; BirdView's stricter goal rule; the vendored-file
 hashes; every quotation against its vendored source; every reference, anchor and relative link; and
 the composition fields. **The rendered contrast check needs Chrome** (`BIRDVIEW_CHROME` to point at
-one) and skips without it, so it gates on the owner's machine and nowhere else until there is CI.
+one) and skips without it; CI has Chrome and fails on any skip, so since 2026-10-23 it gates on
+every push and pull request ([tech.checksOnEveryChange](requirements/local/tech/release.md#checksoneverychange)).
 
 ## Project bindings
 
