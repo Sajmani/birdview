@@ -638,23 +638,6 @@ apply to it. In order:
    no personal address, basic rate limiting.
 7. **Point `birdview.site` at the host.**
 
-## dockerBuildMissesData
-
-**The container image does not build: its server stage omits `data/`**
-
-Status: open
-Owner: unassigned
-Gate: before step 2 of [deploymentPlumbing](#deploymentplumbing)
-
-Found 2026-10-22. The `builder` stage of the `Dockerfile` copies `cmd/birdview`, `internal`, `web`
-and `docs`, but `cmd/birdview` imports `birdview/data`, which embeds `region-boundaries.json`; a
-build with exactly those directories fails with `package birdview/data is not in std`. The
-`Dockerfile` was last changed 2026-10-16; the import arrived 2026-10-18 with the Here button
-(`db8d1e7`), and nothing builds the image: no test, no CI, and Docker is not installed on the
-maintainer's machine. Fix with `COPY data ./data` in that stage, and add a check that the stages'
-`COPY` lists cover every package the two commands import, so the next new import cannot break it
-silently. Note for step 3: the `ingest` stage already runs the ingest inside the image build
-
 ## sourceOfTruth
 
 **Move BirdView's source of truth to the personal repository**

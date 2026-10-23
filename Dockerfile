@@ -16,6 +16,8 @@
 # Multi-stage build: stage `ingest` compiles and runs birdview-ingest to produce
 # species.json; stage `builder` compiles the server binary; the final image
 # copies only the static binary and the compiled dataset (tech.twoCommandsOneModule, tech.selfContainedServer, tech.datasetNeverCommitted).
+# Each stage copies every package its command imports (tech.containerImageBuilds);
+# TestDockerStagesCopyWhatTheyBuild checks that, so a new import needs a COPY here.
 #
 # Usage:
 #   docker build -t birdview .
@@ -44,6 +46,7 @@ RUN go mod download
 
 COPY cmd/birdview ./cmd/birdview
 COPY internal ./internal
+COPY data ./data
 COPY web ./web
 COPY docs ./docs
 

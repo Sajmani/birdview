@@ -99,6 +99,21 @@ It is reproducible from the committed inputs in one command, and a stale copy in
 than none. (It was first excluded for carrying ABA-derived values, which
 [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence) removed.)
 
+## containerImageBuilds
+
+**The container image builds from a clean checkout**
+
+Subject: `build.image`
+Goals: [goals.secure](../../../goals/goals.md#secure), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
+
+The `Dockerfile` at the repository root builds BirdView's image from a clean checkout and nothing
+else: every stage copies in all the packages and files its command needs, and the ingest runs
+inside the build, so the image carries a dataset no one had to supply.
+
+Rationale: the image is how BirdView deploys ([docs/building.md](../../../../docs/building.md)),
+and a fix that cannot ship is not quick to ship. Nothing built it, so when `cmd/birdview` began
+importing `data/` on 2026-10-18 the server stage stopped building and nobody noticed for four days.
+
 ## identifiedClient
 
 **Identify the client on every outbound request**

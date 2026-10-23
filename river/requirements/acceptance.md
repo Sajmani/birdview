@@ -528,6 +528,24 @@ download and fails if it differs
 integration test that starts the server and requests `/`
 **Status: verified 2026-09-22 — every route serves, unknown species 404s.**
 
+### dockerStagesCopyWhatTheyBuild
+
+**Every Dockerfile stage copies in what its command imports**
+
+**Verifies:** [tech.containerImageBuilds](local/tech/delivery.md#containerimagebuilds) · **Level:** code · **Method:** test reading the `Dockerfile` and the Go sources
+**Assertions:** each stage that runs `go build ./cmd/…` copies `go.mod`, `go.sum` and the directory
+of every package in this module the command imports, directly or not, reading every non-test file
+whatever its build tags; and stages building both `./cmd/birdview` and `./cmd/birdview-ingest` are
+found, so a `Dockerfile` the test can no longer parse fails rather than passing empty.
+**Does not cover**, because tests must not need Docker or the network: that the base images exist,
+that a `COPY` lands where the build expects it (the test assumes each copies to the same relative
+path, as all do today), that the ingest finds its input files at run time inside the stage, and that
+the final image starts. Counted as **partial** until something runs `docker build`.
+**Status: verified 2026-10-22, passing, and watched failing** (`TestDockerStagesCopyWhatTheyBuild`):
+against the `Dockerfile` as it stood, it reported that the `builder` stage needs `birdview/data`
+and does not copy it, the defect it was written for; with `go build` misspelled in the file, it
+reported finding no stage for either command.
+
 ### tileCarriesHeaderAndMetrics
 
 **The tile carries the header, diagram and main metrics**
@@ -2018,6 +2036,7 @@ template returned 200 with its source, `/static/` returned `index.html`'s, and
 | [tech.selfContainedServer](local/tech/delivery.md#selfcontainedserver) | noServerNetworkRequest, ownRenderableFavicon | |
 | [tech.fetchRestrictedInputs](local/tech/delivery.md#fetchrestrictedinputs) | nothingRestrictedTracked, abaFileHashMatches | |
 | [tech.datasetNeverCommitted](local/tech/delivery.md#datasetnevercommitted) | nothingRestrictedTracked | |
+| [tech.containerImageBuilds](local/tech/delivery.md#containerimagebuilds) | dockerStagesCopyWhatTheyBuild | partial — nothing runs `docker build` |
 | [tech.identifiedClient](local/tech/delivery.md#identifiedclient) | outboundRequestsIdentified | |
 | [tech.badgeContrast](local/tech/accessibility.md#badgecontrast) | legibleDistinctColors | |
 | [tech.textContrastFloor](local/tech/accessibility.md#textcontrastfloor) | noTextBelowContrastFloor | |

@@ -2,6 +2,22 @@
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## dockerBuildMissesData
+
+**The container image does not build: its server stage omits `data/`**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-10-22, by `COPY data ./data` in the `builder` stage and [tech.containerImageBuilds](requirements/local/tech/delivery.md#containerimagebuilds)
+
+Found and fixed 2026-10-22. `cmd/birdview` has imported `birdview/data`, which embeds
+`region-boundaries.json`, since the Here button (`db8d1e7`, 2026-10-18), and the `builder` stage
+did not copy it, so `docker build` failed. [acceptance.dockerStagesCopyWhatTheyBuild](requirements/acceptance.md#dockerstagescopywhattheybuild) now checks
+every stage's `COPY` list against what its command imports. Docker is not installed on the
+maintainer's machine, so the fix was confirmed by building both stages from exactly the directories
+they copy, running the ingest as the image does (1,082 species), and serving from the binary and
+dataset alone. Nothing has yet run `docker build` itself
+
 ## marineShareDefinition
 
 **Decide how a marine region's share is defined, or that it has none**

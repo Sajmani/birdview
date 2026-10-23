@@ -18,12 +18,12 @@ migration finishes, these are deliberate local departures from `README.md`, not 
 | **Checks** | All in Go; see below the table | River's checker does not read composed packages yet, so BirdView checks its own |
 | **Stage adoption** | **Requirements**, **Implementation** and **Verification** adopted; **Release informal** | BirdView is not deployed. It has a Dockerfile but no rollout policy, monitoring or alerting — none of the release guardrails River's Release stage produces. Decided 2026-10-16; revisit when the site goes live |
 
-**Composition.** **`app` composed** in River's normalized form: it links the 52 local requirements
+**Composition.** **`app` composed** in River's normalized form: it links the 57 local requirements
 that apply to the web application unchanged, excludes the four withdrawn photograph requirements,
 and writes out WCAG's contrast criteria over every web page and the stylesheet's contract. Its
 criteria for the composed items are in `requirements/composed/internal/app/acceptance.md`; every other criterion still
 waits in `requirements/acceptance.md`. Not yet composed: `dataset` and `internal/repo`, which account
-for the remaining 24 local requirements; the four mixed requirements in [todo.md](todo.md) are split
+for the remaining 25 local requirements; the four mixed requirements in [todo.md](todo.md) are split
 first.
 
 **Checks.** All in **Go**, run by `go test`: River's checker, translated at River pin `fc69e6c`,
