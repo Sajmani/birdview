@@ -33,10 +33,30 @@ Subject: `server.routes`
 Goals: [goals.freedomToChange](../../../goals/goals.md#freedomtochange), goals.secure
 
 Under `/static/` the server serves the stylesheet and the favicon. It never serves a page template
-or a directory listing, though the templates are embedded in the same directory.
+or a directory listing, though the templates are embedded in the same directory. The one route
+that is neither a page nor something a page loads is `/robots.txt`
+([crawlersSkipFilteredViews](#crawlersskipfilteredviews)).
 
 Rationale: a plain file server over that directory served every page's Go template source as an
 HTML page of its own, and `index.html`'s source at the bare `/static/`.
+
+## crawlersSkipFilteredViews
+
+**Crawlers are asked to skip filtered views**
+
+Subject: `server.robots`
+Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
+
+The server answers `/robots.txt` with a policy that lets every crawler fetch each page that has no
+query string, except the comparison, and asks it to fetch nothing with a query string, nor `/now`
+or the region boundary file.
+
+Rationale: every control is a query parameter, so the index links to hundreds of variants of
+itself, each linking to hundreds more: an unbounded set of near-duplicate pages, each costing the
+egress a public deployment pays for. What is worth indexing has no query string: the index, about
+a thousand species pages, the guides, and the added and excluded lists. The comparison is
+nothing without the birds its query names. A `robots.txt` is a request that well-behaved crawlers
+honor, not a limit; what bounds the cost of one that ignores it is the deployment's instance cap.
 
 ## regionBoundaries
 

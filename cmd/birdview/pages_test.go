@@ -103,7 +103,7 @@ func discoverPages(t *testing.T, s *server) []webPage {
 
 	queue := []string{"/", "/?species=", "/?species=amecro&species=annhum&family=Corvidae",
 		"/docs", "/added", "/excluded", "/compare?species=amecro&species=annhum",
-		"/species/" + undrawnFixture()[0].ID, "/no-such-page"}
+		"/species/" + undrawnFixture()[0].ID, "/no-such-page", "/robots.txt"}
 	seen := map[string]bool{}
 	visits := map[string]int{}
 	var pages []webPage

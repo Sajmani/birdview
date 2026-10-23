@@ -662,6 +662,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		{"/compare", http.HandlerFunc(s.compare)},
 		{"/now", http.HandlerFunc(s.now)},
 		{"/boundaries/", http.HandlerFunc(s.boundaries)},
+		{"/robots.txt", http.HandlerFunc(robots)},
 		{"/species/", http.HandlerFunc(s.detail)},
 		{"/", http.HandlerFunc(s.index)},
 	}
@@ -2721,6 +2722,25 @@ func (s *server) boundaries(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 	w.Write(data.Boundaries)
+}
+
+// robotsPolicy asks crawlers to skip every URL with a query string, which is
+// every filtered view of the index, and the routes that are no page to index.
+// Everything else stays open, /static/ included, since a crawler renders a
+// page with its stylesheet. Wildcards are RFC 9309's.
+const robotsPolicy = `# BirdView: every control is a query parameter, so filtered views are endless.
+# Index the pages without one: the index, each species, the guides.
+User-agent: *
+Disallow: /*?
+Disallow: /compare
+Disallow: /now
+Disallow: /boundaries/
+`
+
+// robots serves robotsPolicy (tech.crawlersSkipFilteredViews).
+func robots(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	io.WriteString(w, robotsPolicy)
 }
 
 // monthURL is regionURL for the twelve (product.regionAndMonthFilter). Same three cases: all of

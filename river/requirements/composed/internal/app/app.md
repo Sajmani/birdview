@@ -103,6 +103,7 @@ a lower tier may do.
 
 - [tech.selfContainedServer](../../../local/tech/delivery.md#selfcontainedserver) — The server is self-contained at runtime
 - [tech.servesOnlyItsPages](../../../local/tech/delivery.md#servesonlyitspages) — The server serves its pages and what they load, and nothing else
+- [tech.crawlersSkipFilteredViews](../../../local/tech/delivery.md#crawlersskipfilteredviews) — Crawlers are asked to skip filtered views
 - [tech.servesOnLocalhost](../../../local/tech/delivery.md#servesonlocalhost) — Serves on localhost:8080
 - [tech.compressedResponses](../../../local/tech/delivery.md#compressedresponses) — Responses are compressed when the client asks
 - [tech.cacheLifetimeStated](../../../local/tech/delivery.md#cachelifetimestated) — Every response says how long it may be reused

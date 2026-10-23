@@ -674,10 +674,8 @@ apply to it. In order:
    HTTP redirects to HTTPS on each. The service is capped at 2 instances
    (`--max-instances=2`) and the project has a $10 budget alert. Left open: `www` serves the site
    itself rather than redirecting to `birdview.site`, so the site has two addresses; choose one
-   with [stableSurface](#stablesurface). And there is no `robots.txt`, so a crawler may wander
-   every filtered view; it needs a requirement first, since
-   [tech.servesOnlyItsPages](requirements/local/tech/delivery.md#servesonlyitspages) allows no
-   such route.
+   with [stableSurface](#stablesurface). ~~And there is no `robots.txt`~~: added 2026-10-23 under
+   [tech.crawlersSkipFilteredViews](requirements/local/tech/delivery.md#crawlersskipfilteredviews), asking crawlers to skip every URL with a query string.
 8. **Sync and deploy automatically.** A push to the mirror's `main` fires a Cloud Build trigger,
    connected through the Cloud Build GitHub app installed on the `Sajmani` account, that builds
    the image and deploys it. The sync that feeds it should also run from Google Cloud: Cloud

@@ -1978,11 +1978,32 @@ expect 200
 template returned 200 with its source, `/static/` returned `index.html`'s, and
 `/static/index.html` redirected to it.
 
+### robotsKeepsCrawlersToPages
+
+**`/robots.txt` opens every query-free page but the comparison, and closes every filtered view**
+
+**Verifies:** [tech.crawlersSkipFilteredViews](local/tech/delivery.md#crawlersskipfilteredviews), [tech.servesOnlyItsPages](local/tech/delivery.md#servesonlyitspages) · **Level:** code · **Method:** parse the served policy and judge
+every page the accessibility crawl discovers by RFC 9309's matching rules
+**Assertions:** `/robots.txt` answers 200 as `text/plain`; under `User-agent: *`, every discovered
+page without a query string is allowed except `/compare`, and every one with a query string is
+disallowed, as are `/now` and the boundary file; `/`, a species page, the guides and the
+stylesheet are allowed. The crawl must offer at least three of each kind, or the check fails
+rather than passing on nothing. An unknown field in the policy fails it too, so a typo cannot drop
+a rule. `TestRobotsMatcher` pins the matcher to RFC 9309's precedence: the longest match wins,
+Allow wins a tie, `*` and `$` are wildcards, and paths are case-sensitive.
+**Does not cover:** whether any crawler obeys it, which no test can decide; the deployment's
+instance cap is what bounds one that does not.
+**Run:** `go test ./cmd/birdview/ -run TestRobots`
+**Status: verified 2026-10-23, passing, and watched failing** — before the route existed, `GET
+/robots.txt` answered 404; with `Disallow: /*?` deleted, it reported each filtered view of the
+index as allowed. Removing the crawl's `/robots.txt` seed failed `TestEveryKindOfPageIsDiscovered`.
+
 ## Traceability
 
 | Requirement | Criteria | |
 | --- | --- | --- |
-| [tech.servesOnlyItsPages](local/tech/delivery.md#servesonlyitspages) | staticServesAssetsOnly | |
+| [tech.servesOnlyItsPages](local/tech/delivery.md#servesonlyitspages) | staticServesAssetsOnly, robotsKeepsCrawlersToPages | |
+| [tech.crawlersSkipFilteredViews](local/tech/delivery.md#crawlersskipfilteredviews) | robotsKeepsCrawlersToPages | partial — obeying it is the crawler's choice |
 | [tech.webPages](local/tech/accessibility.md#webpages) | [app.everyPageIsFound](composed/internal/app/acceptance.md#everypageisfound) | |
 | [product.scopeIsRecurringAvifauna](local/product/dataset.md#scopeisrecurringavifauna) | scopeMatchesStatusTable, noRarityCodes, abaFileHashMatches | |
 | [product.traitsFromAvonet](local/product/dataset.md#traitsfromavonet), [product.traitsPerSpecies](local/product/dataset.md#traitsperspecies) | allFiveTraits | |
