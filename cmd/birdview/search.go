@@ -62,15 +62,11 @@ func searchMatches(text string, words []string) bool {
 }
 
 // searchTexts builds every species' search text: its English names in both
-// locales, its species code, its scientific name, and its family's and
-// order's scientific and English names.
+// locales, its species code, its scientific name, and the scientific names
+// of its family and order. Not their English descriptions, which list other
+// birds: Accipitridae's "Kites, Old World Vultures, Eagles, and Hawks" would
+// make "hawk" find every kite.
 func searchTexts(ds *dataset.Dataset) map[string]string {
-	orderCommon := map[string]string{}
-	famCommon := map[string]string{}
-	for _, f := range ds.Families {
-		orderCommon[f.Order] = f.OrderCommon
-		famCommon[f.Name] = f.Common
-	}
 	out := make(map[string]string, len(ds.Species))
 	for i := range ds.Species {
 		sp := &ds.Species[i]
@@ -79,8 +75,7 @@ func searchTexts(ds *dataset.Dataset) map[string]string {
 			names = append(names, n)
 		}
 		sort.Strings(names) // map order would make the page differ run to run
-		parts := append(names, sp.SpeciesCode, sp.ScientificName,
-			sp.Family, famCommon[sp.Family], sp.Order, orderCommon[sp.Order])
+		parts := append(names, sp.SpeciesCode, sp.ScientificName, sp.Family, sp.Order)
 		out[sp.ID] = normalizeSearch(strings.Join(parts, " "))
 	}
 	return out

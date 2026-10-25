@@ -76,12 +76,18 @@ func TestSearchMatchesNamesCodesAndTaxa(t *testing.T) {
 	if got := normalizeSearch("  Chuck-will's-widow  "); got != "chuck will s widow" {
 		t.Errorf("normalizeSearch = %q", got)
 	}
-	// The order is searchable by its English name too.
-	sp := s.byID["amecro"]
-	for _, f := range s.ds.Families {
-		if f.Name == sp.Family && !strings.Contains(s.search["amecro"], normalizeSearch(f.OrderCommon)) {
-			t.Errorf("the crow's search text %q lacks its order's English name %q", s.search["amecro"], f.OrderCommon)
+	// Families and orders are searched by their scientific names only: the
+	// English descriptions list other birds. The fixture's are "<Family>
+	// family" and "<Order> (group)", so neither word may be searchable.
+	for id, text := range s.search {
+		for _, w := range []string{"family", "group"} {
+			if strings.Contains(text, w) {
+				t.Errorf("%s's search text %q includes a family's or order's English description", id, text)
+			}
 		}
+	}
+	if got := goMatches(s, "passeriformes"); len(got) == 0 {
+		t.Error("no bird matches its order's scientific name")
 	}
 }
 

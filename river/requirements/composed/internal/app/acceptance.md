@@ -123,7 +123,8 @@ Covers: [product.searchBox](../../../local/product/filtering.md#searchbox)
 
 **Method:** in Go, eight queries against the fixture with the birds each must keep: a name, a word
 two names share, a scientific name, a code in capitals, a name typed without its punctuation, words
-out of order, a family and nothing; and the order's English name is in the searchable text. In
+out of order, a family and nothing; an order's scientific name matches, and no family's or order's
+English description is searchable. In
 headless Chrome, the same queries typed into the box: the birds left showing must be exactly the
 Go matcher's, the count line must count them and name the search, no empty section may show and
 no section with birds may have a 0% bar, and the nothing-matches note shows exactly when nothing
@@ -134,7 +135,8 @@ line's links, reset to defaults and a guide must not. It gates where Chrome is i
 **Status: verified 2026-10-25, passing.**
 Watched failing: 2026-10-25, by not lowercasing what is typed in the script ("AMECRO" kept all six).
 Watched failing: 2026-10-25, by removing the script's click handler (the control, tile and Here went without the search).
-Watched failing: 2026-10-25, by leaving the order's English name out of the searchable text.
+Watched failing: 2026-10-25, by leaving the order's English name out of the searchable text (when the rule included it).
+Watched failing: 2026-10-25, by restoring the families' and orders' English descriptions to the searchable text.
 
 ## searchFromTheAddress
 

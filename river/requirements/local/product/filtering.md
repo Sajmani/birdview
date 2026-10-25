@@ -151,9 +151,11 @@ Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 **A text box above the count line keeps the birds that match what is typed and hides the rest.** A
 bird matches when every word typed appears, ignoring case and punctuation, somewhere in its English
-names (North American and world), its species code, its scientific name, or its family's or
-order's scientific or English name. The count line, each section's count and the histogram count
-only the matches, a section with none is hidden, and the count line names the search.
+names (North American and world), its species code, its scientific name, or the scientific
+name of its family or order. Not their English descriptions: "Kites, Old World Vultures, Eagles,
+and Hawks" would make "hawk" find every kite (Sameer, 2026-10-25). The count line, each section's count
+and the histogram count only the matches, a section with none is hidden, and the count line names
+the search.
 
 **It filters in the browser as the reader types**, with no request to the server. Matches keep
 their places: sections and scales are the ones the other filters made, so what remains does not
