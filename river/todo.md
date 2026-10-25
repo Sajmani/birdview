@@ -169,20 +169,6 @@ candidate is hosted before touching it. Dunning's handbook and Birds of the Worl
 cheaper step that needs no new source: per-sex wing chord and tail as numbers, with specimen counts,
 on the detail page
 
-## approveAppComposition
-
-**Approve the first composition, `app`, and decide whether to tag it**
-
-Status: open
-Owner: Sameer
-Gate: before composing `dataset`
-
-[requirements/composed/internal/app/](requirements/composed/internal/app/app.md) composes accessibility only: WCAG 1.4.6 and 1.4.11 over
-every web page as [tech.webPages](requirements/local/tech/accessibility.md#webpages) defines one,
-and the stylesheet's contract. An agent composed it; River requires a person to sign off. The
-rulings it embeds: plain-text error pages are web pages (WCAG's definition leaves no choice), large
-text gets no allowance ([decisions.oneContrastFloor](requirements/decisions.md#onecontrastfloor)), and closed panels are measured open
-
 ## nonTextContrastCheck
 
 **WCAG 1.4.11 has no check**
@@ -202,7 +188,7 @@ understand the content" needs a ruling per diagram part
 
 Status: open
 Owner: Sameer
-Gate: after `app` is approved
+Gate: ready; `app` was approved 2026-10-25
 
 , which must account for the 24 local requirements no package lists yet (`TestCompositionResolves`
 logs them), then move each criterion out of [acceptance.md](requirements/acceptance.md) into its

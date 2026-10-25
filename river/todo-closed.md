@@ -4,6 +4,23 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## approveAppComposition
+
+**Approve the first composition, `app`, and decide whether to tag it**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-10-25, approved by Sameer
+
+[requirements/composed/internal/app/](requirements/composed/internal/app/app.md) composes accessibility only: WCAG 1.4.6 and 1.4.11 over
+every web page as [tech.webPages](requirements/local/tech/accessibility.md#webpages) defines one,
+and the stylesheet's contract. An agent composed it; River requires a person to sign off. The
+rulings it embeds: plain-text error pages are web pages (WCAG's definition leaves no choice), large
+text gets no allowance ([decisions.oneContrastFloor](requirements/decisions.md#onecontrastfloor)), and closed panels are measured open
+
+**done 2026-10-25**: approved as composed, rulings included. Not tagged: the commit that records the
+approval identifies the published version.
+
 ## contrastCheckNeedsChrome
 
 **The rendered contrast check gates only where Chrome is installed**

@@ -13,7 +13,8 @@ where `## <id>` finds it and the first paragraph is the rule. Then the requireme
 wrote**, in full, each naming its sources in `Composed from:`. A source requirement not listed here
 belongs to another package or is not yet composed.
 
-**Status: composed by an agent, awaiting the owner's approval.** Not tagged.
+**Status: composed by an agent; approved by Sameer on 2026-10-25.** Published at the commit that
+records this approval, which identifies it; not tagged, since a tag is only an alias.
 
 ## Composition record
 
