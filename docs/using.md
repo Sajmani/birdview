@@ -228,13 +228,31 @@ another. Per section is one click away.
   region itself, and selects it with the current month; your location never leaves the browser.
   Without sharing it, try [New York in October](/?by=frequency&scale=global&region=NY&month=Oct),
   or press **Here** and **Now** under **Regions and months**.
-- **[Jay vs kestrel vs thrasher vs dove vs kingfisher vs nightjar](/compare?species=blujay&species=amekes&species=calthr&species=moudov&species=belkin1&species=chwwid).**
-  Blue Jay, American Kestrel, California Thrasher, Mourning Dove, Belted Kingfisher and
-  Chuck-will's-widow, all 272 to 292 mm long, on one scale. Their wingspans run from 307 mm for the
-  thrasher to 655 mm for the nightjar, more than double, and their bills from 15 mm for the
-  nightjar to 59 mm for the kingfisher, nearly four times. To compare any birds this way, turn on
-  **Compare birds** in Controls and pick them from the index.
-- **[Herons and ducks together](/?family=Ardeidae&family=Anatidae).** Similar lengths, different
+- **Compare some [small birds](/compare?species=leasan&species=houspa&species=dowwoo&species=houfin&species=barswa&species=easpho),
+  [medium birds](/compare?species=blujay&species=amekes&species=calthr&species=moudov&species=belkin1&species=chwwid),
+  [large birds](/compare?species=turvul&species=gbbgul&species=greegr&species=cangoo&species=grecor&species=rosspo1),
+  [huge birds](/compare?species=calcon&species=amwpel&species=mutswa&species=magfri&species=baleag&species=bkfalb).**
+  All on one scale. The first three sets are each birds of about one length, so what differs is
+  their build; the huge birds all have wings over two metres across.
+  - *Small:* Least Sandpiper, House Sparrow, Downy Woodpecker, House Finch, Barn Swallow and
+    Eastern Phoebe, all 141 to 158 mm long. The swallow is the lightest, 18 g, yet has the widest
+    wings, 325 mm against 234 mm for the finch.
+  - *Medium:* Blue Jay, American Kestrel, California Thrasher, Mourning Dove, Belted Kingfisher
+    and Chuck-will's-widow, all 272 to 292 mm long. Their wingspans run from 307 mm for the
+    thrasher to 655 mm for the nightjar, more than double, and their bills from 15 mm for the
+    nightjar to 59 mm for the kingfisher, nearly four times.
+  - *Large:* Turkey Vulture, Great Black-backed Gull, Great Egret, Canada Goose, Great Cormorant
+    and Roseate Spoonbill, all 614 to 728 mm long. The vulture, the shortest, has the widest
+    wings, 1805 mm, against 1280 mm for the spoonbill, and the goose weighs more than three times
+    as much as the egret, 2.8 kg against 0.87 kg. The spoonbill's bill, 160 mm, is the longest.
+  - *Huge:* California Condor, American White Pelican, Mute Swan, Magnificent Frigatebird, Bald
+    Eagle and Black-footed Albatross, with wingspans from 2059 mm for the eagle to 2800 mm for
+    the condor. The albatross is the shortest, 709 mm, yet spans 2265 mm; the frigatebird, at
+    1.5 kg, weighs about a seventh of the swan's 10.7 kg; and the pelican's bill is 320 mm.
+
+  To compare any birds this way, turn on **Compare birds** in Controls and pick them from the
+  index.
+- **See all [herons and ducks](/?family=Ardeidae&family=Anatidae) together.** Similar lengths, different
   birds: herons are nearly all neck and leg, ducks nearly all body. Herons and pelicans are the
   only families whose neck is drawn as an S, because they fly with it folded back onto the
   shoulders, which separates a heron from a crane or an ibis in the air.
