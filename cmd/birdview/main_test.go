@@ -3224,7 +3224,7 @@ func TestNameFallsBackToWorldWhenNoNorthAmericanName(t *testing.T) {
 // there blames the data for their click. acceptance.emptyStateGuides already pins that direction;
 // this pins the other.
 //
-// Verifies: product.helpfulEmptyState. Criterion: acceptance.emptyStateGuides.
+// Verifies: product.helpfulEmptyState. Criterion: acceptance.nothingMatchedOffersAWayOut.
 func TestEmptyStateNamesTheFiltersThatEmptiedIt(t *testing.T) {
 	s := newTestServer(t)
 
@@ -3685,11 +3685,11 @@ func TestTileCarriesExactlyOneBadge(t *testing.T) {
 // while the list still has birds in it: what is narrowing the view is stated
 // next to the count, not only once nothing matches.
 //
-// This is the rendering test acceptance.emptyStateGuides recorded as missing. It was unreachable
+// This is the rendering test acceptance.nothingMatchedOffersAWayOut recorded as missing. It was unreachable
 // when only the family filter existed -- one filter cannot contradict itself
 // -- and the region filter of product.regionAndMonthFilter made the empty intersection reachable.
 //
-// Verifies: product.helpfulEmptyState. Criterion: acceptance.emptyStateGuides.
+// Verifies: product.helpfulEmptyState. Criterion: acceptance.countLineNamesEverySetting.
 func TestFiltersAreNamedOnTheCountLine(t *testing.T) {
 	s := newTestServer(t)
 
@@ -3738,7 +3738,7 @@ func TestFiltersAreNamedOnTheCountLine(t *testing.T) {
 // First it changed nothing, then it set family=region, so a reader who clicked it landed on a page
 // with a nonsense family and the same empty list, and clicking again changed nothing.
 //
-// Verifies: product.helpfulEmptyState. Criterion: acceptance.emptyStateGuides.
+// Verifies: product.helpfulEmptyState. Criterion: acceptance.nothingMatchedOffersAWayOut.
 func TestClearTheFiltersClearsThem(t *testing.T) {
 	s := newTestServer(t)
 	filters := []string{"family", "habitat", "niche", "region", "month"}
@@ -6958,7 +6958,7 @@ func TestStaticServesAssetsOnly(t *testing.T) {
 // every setting, defaults included, one box each, in the order the controls
 // appear, each labeled as its control is; Comparing only while picking.
 //
-// Verifies: product.helpfulEmptyState. Criterion: acceptance.emptyStateGuides.
+// Verifies: product.helpfulEmptyState. Criterion: acceptance.countLineNamesEverySetting.
 func TestCountLineNamesEverySetting(t *testing.T) {
 	s := newTestServer(t)
 	boxes := func(path string) []string {

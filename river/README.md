@@ -1,15 +1,54 @@
-> Project copy of River's `README.md`, pin `f8252f5`, licensed under Apache 2.0 with the rest of BirdView.
+> Project copy of River's `README.md`, pin `3edc893`, licensed under Apache 2.0 with the rest of BirdView.
 > River is not yet published; its canonical origin will be recorded here when it is. Local amendments,
 > if any, are listed in [bindings.md](bindings.md).
 
 # River
 
-**River is a software development methodology with four stages — Requirements, Implementation,
-Verification, Release — that run continuously rather than in sequence.** It keeps intent in
-version control, next to the code, in a form an agent can read and a person can argue with.
+**River is a methodology for keeping software factories (the people, agents and automation that
+change your software) aligned with your organization's goals and bound by its requirements.**
+Goals, requirements and the criteria your guardrails enforce live in the repository next to the
+code, and govern every change the factory makes; people decide what agents should not. River
+composes requirements from many sources (product, engineering, security, compliance, branding)
+into one consistent set, flags contradictions for a person to settle, and keeps that set and its
+guardrails current as the sources change.
 
 This file is the method. It is identical in every project that uses River, so it says nothing
 about any particular project; what is true of yours goes in `bindings.md`.
+
+---
+
+## How River works
+
+**River is a process whose state lives in your repository.** Its goals, requirements, the
+decisions that settled their conflicts, and the record of what has been built against which
+version are plain files in a `river/` directory beside the code they govern. Every change to
+them is reviewed and versioned the way code is, and nothing about the process lives only in a
+server, a tracker or someone's memory.
+
+A **software factory** is the people, agents and automation that change a piece of software:
+whatever writes, reviews, tests and ships it. River does not replace any of them. All of them
+read the same files, so the factory works from one statement of what the software is for and
+what it must do, and is checked against it.
+
+River works in four stages, which run continuously rather than in sequence:
+
+| Stage | Produces | So that |
+| --- | --- | --- |
+| **Requirements** | What must be true, composed from sources, with acceptance criteria | Obligations from many sources become one consistent set, none dropped silently |
+| **Implementation** | Code and the designs that describe it | The software meets a published version of that set |
+| **Verification** | Guardrails that check criteria | No change silently breaks a requirement |
+| **Release** | A running system, ramped under rollout policy | What reaches users stays aligned with the goals |
+
+Four processes act on the arcs between them:
+
+| Process | Where it acts |
+| --- | --- |
+| **Composition** | Sources → Requirements. Assemble, resolve conflicts, generate criteria |
+| **Optimization** | Every stage. Reduce the cost of future change |
+| **Experimentation** | Release → Goals. Align releases with intent |
+| **Revision** | Back to Goals and Sources. Return what the other stages learned |
+
+The stages are not phases: a project is normally doing all four at once, on different changes.
 
 ---
 
@@ -46,28 +85,6 @@ amendments in `bindings.md` and say what they change.
 contributes no requirements to your composed set. Its pin belongs in the banner above and
 nowhere else: recording it in `imports.md` too gives two records of one pin, which a
 single recorded hash exists to prevent.
-
----
-
-## The loop
-
-Four stages, and four processes that act on the arcs between them.
-
-| Stage | Produces |
-| --- | --- |
-| **Requirements** | What must be true, composed from sources, with acceptance criteria |
-| **Implementation** | Code and the designs that describe it |
-| **Verification** | Guardrails that check criteria |
-| **Release** | A running system, ramped under rollout policy |
-
-| Process | Where it acts |
-| --- | --- |
-| **Composition** | Sources → Requirements. Assemble, resolve conflicts, generate criteria |
-| **Optimization** | Every stage. Reduce the cost of future change |
-| **Experimentation** | Release → Goals. Align releases with intent |
-| **Revision** | Back to Goals and Sources. Return what the other stages learned |
-
-The stages are not phases: a project is normally doing all four at once, on different changes.
 
 ---
 
@@ -418,6 +435,19 @@ indistinguishable from one that passes, and it is worse than nothing because it 
 Likewise, a criterion's expected value comes from the requirement, never from a run of the
 current code: a check built from existing output can only confirm that behavior has not
 changed, including when it was wrong.
+
+**Record each observation in the criterion, in a fixed field**, one line each:
+
+```
+Watched failing: 2026-10-16, by adding color:#777777 to an inline style; every species page failed
+```
+
+A criterion with no such line has not been watched failing. Prose elsewhere in the criterion may
+tell the story, but a person or a tool deciding whether the criterion is trusted reads this field.
+
+**A criterion is met or not as a whole.** Where parts of a claim can be met at different times (two
+behaviors, two pages, an original check and a later extension), make each part its own criterion,
+so each is watched failing, met and protected from regression on its own.
 
 ### When a requirement cannot be verified
 

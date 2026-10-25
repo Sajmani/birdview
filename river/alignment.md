@@ -2,7 +2,7 @@
 
 > **Draft, 2026-10-25**, trying River's proposed alignment record on a real project. Not yet part
 > of River's method; generated, so regenerate rather than edit.
-> Generated from the bundle, the tests' `Criterion:` comments and the history at `0fb5d12`.
+> Generated from the bundle, the tests' `Criterion:` comments and the history.
 
 Which version of each layer the layer below it is aligned with, since when, and who said so; and,
 for the implementation, where each criterion of the targeted requirements stands. A version is a
@@ -14,7 +14,7 @@ commit. Search `## ` for the sections.
 | --- | --- | --- | --- | --- |
 | Goals, [`goals/`](goals/goals.md) | Nothing above them: BirdView imports no values. In force: goals at [`dbe250e`](https://github.com/google/birdview/commit/dbe250e) | 2026-10-22 | sameer@, who committed them; no separate review recorded | 14 goals |
 | Requirements: [`app`](requirements/composed/internal/app/app.md) | [Goals](goals/goals.md) at [`dbe250e`](https://github.com/google/birdview/commit/dbe250e) | 2026-10-25 | Composed by an agent; approved by Sameer | Published at [`99c0811`](https://github.com/google/birdview/commit/99c0811); [criteria](requirements/composed/internal/app/acceptance.md); `dataset` and `internal/repo` not yet composed |
-| Implementation, at [`0fb5d12`](https://github.com/google/birdview/commit/0fb5d12) | [`app`](requirements/composed/internal/app/app.md) at [`99c0811`](https://github.com/google/birdview/commit/99c0811) | 2026-10-25 | Generated from the criteria's recorded statuses | 79 of 86 criteria met ([below](#implementation-app-at-99c0811)) |
+| Implementation, at the commit this file is in | [`app`](requirements/composed/internal/app/app.md) at [`99c0811`](https://github.com/google/birdview/commit/99c0811) | 2026-10-25 | Generated from the criteria's recorded statuses | 86 of 93 criteria met ([below](#implementation-app-at-99c0811)) |
 | Release, [birdview.site](https://birdview.site) | Not recorded here; release guardrails in [`tech/release.md`](requirements/local/tech/release.md) | — | — | The deployed version is recorded only in the private `Sajmani/birdview-deploy` ([bindings](bindings.md)) |
 
 Implementation targets only a published version: `app` at `99c0811`, the commit that approved it.
@@ -23,7 +23,7 @@ Implementation targets only a published version: `app` at `99c0811`, the commit 
 
 One entry per acceptance criterion that verifies a requirement `app` includes, or that `app` composed.
 **Blocks** is *blocks once met*, the default, everywhere; no criterion records otherwise yet. A
-criterion is **met since** the date its status records it verified and watched failing, and from
+criterion is **met since** its first `Watched failing:` line, once its status says verified, and from
 then on a regression blocks: *(currently blocking)*. A person has not yet confirmed any of them under
 the new rule.
 
@@ -69,14 +69,56 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
   - [`product.oneSelectedMetric`](requirements/local/product/ordering.md#oneselectedmetric)
   - [`product.ascendingOrder`](requirements/local/product/ordering.md#ascendingorder)
 - Guardrails:
-  - [`TestBillAndTailOrderings`](../cmd/birdview/herenow_test.go#L578)
-  - [`TestTierHeadersNameTheOrdering`](../cmd/birdview/herenow_test.go#L621)
-  - [`TestHeadingDigits`](../cmd/birdview/herenow_test.go#L649)
-  - [`TestTierRangesHoldTheirBirds`](../cmd/birdview/herenow_test.go#L674)
-  - [`TestTierCountFollowsTheRange`](../cmd/birdview/herenow_test.go#L728)
   - [`TestSortedAscending`](../internal/view/view_test.go#L55)
 - Blocks: blocks once met
-- State: met since 2026-09-22 (currently blocking)
+- State: passing since 2026-09-22, never recorded failing: not yet met
+
+### [`acceptance.billAndTailOrderings`](requirements/acceptance.md#billandtailorderings)
+
+- Verifies requirements:
+  - [`product.oneSelectedMetric`](requirements/local/product/ordering.md#oneselectedmetric)
+  - [`product.ascendingOrder`](requirements/local/product/ordering.md#ascendingorder)
+  - [`product.scaleToggle`](requirements/local/product/diagram.md#scaletoggle)
+- Guardrails:
+  - [`TestBillAndTailOrderings`](../cmd/birdview/herenow_test.go#L578)
+- Blocks: blocks once met
+- State: met since 2026-10-19 (currently blocking)
+
+### [`acceptance.tierHeadingsNameTheOrdering`](requirements/acceptance.md#tierheadingsnametheordering)
+
+- Verifies requirements:
+  - [`product.sectionHeadersStateRange`](requirements/local/product/ordering.md#sectionheadersstaterange)
+- Guardrails:
+  - [`TestTierHeadersNameTheOrdering`](../cmd/birdview/herenow_test.go#L621)
+- Blocks: blocks once met
+- State: met since 2026-10-19 (currently blocking)
+
+### [`acceptance.tierHeadingsHoldTheirBirds`](requirements/acceptance.md#tierheadingsholdtheirbirds)
+
+- Verifies requirements:
+  - [`product.sectionHeadersStateRange`](requirements/local/product/ordering.md#sectionheadersstaterange)
+- Guardrails:
+  - [`TestTierRangesHoldTheirBirds`](../cmd/birdview/herenow_test.go#L674)
+- Blocks: blocks once met
+- State: met since 2026-10-19 (currently blocking)
+
+### [`acceptance.tierHeadingDigits`](requirements/acceptance.md#tierheadingdigits)
+
+- Verifies requirements:
+  - [`product.sectionHeadersStateRange`](requirements/local/product/ordering.md#sectionheadersstaterange)
+- Guardrails:
+  - [`TestHeadingDigits`](../cmd/birdview/herenow_test.go#L649)
+- Blocks: blocks once met
+- State: met since 2026-10-19 (currently blocking)
+
+### [`acceptance.tierCountFollowsTheRange`](requirements/acceptance.md#tiercountfollowstherange)
+
+- Verifies requirements:
+  - [`product.sectionHeadersStateRange`](requirements/local/product/ordering.md#sectionheadersstaterange)
+- Guardrails:
+  - [`TestTierCountFollowsTheRange`](../cmd/birdview/herenow_test.go#L728)
+- Blocks: blocks once met
+- State: met since 2026-10-19 (currently blocking)
 
 ### [`acceptance.sectionBoundariesObeyRule`](requirements/acceptance.md#sectionboundariesobeyrule)
 
@@ -96,7 +138,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - [`TestSectionRangeMatchesContents`](../internal/view/view_test.go#L134)
 - Blocks: blocks once met
-- State: passing since 2026-09-22, not watched failing: not yet met
+- State: passing since 2026-09-22, never recorded failing: not yet met
 
 ### [`acceptance.segmentsSumExactly`](requirements/acceptance.md#segmentssumexactly)
 
@@ -136,7 +178,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - none cited
 - Blocks: blocks once met
-- State: passing since 2026-09-22, not watched failing: not yet met
+- State: passing since 2026-09-22, never recorded failing: not yet met
 
 ### [`acceptance.proportionsDifferentiate`](requirements/acceptance.md#proportionsdifferentiate)
 
@@ -175,7 +217,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - [`TestTotalLengthSaysItIsASum`](../cmd/birdview-ingest/main_test.go#L340)
 - Blocks: blocks once met
-- State: passing since 2026-09-22, not watched failing: not yet met
+- State: passing since 2026-09-22, never recorded failing: not yet met
 
 ### [`acceptance.noServerNetworkRequest`](requirements/acceptance.md#noservernetworkrequest)
 
@@ -194,7 +236,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - [`TestRoutesServe`](../cmd/birdview/main_test.go#L365)
 - Blocks: blocks once met
-- State: passing since 2026-09-22, not watched failing: not yet met
+- State: passing since 2026-09-22, never recorded failing: not yet met
 
 ### [`acceptance.tileCarriesHeaderAndMetrics`](requirements/acceptance.md#tilecarriesheaderandmetrics)
 
@@ -267,12 +309,28 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
   - [`product.familyFilter`](requirements/local/product/filtering.md#familyfilter)
 - Guardrails:
   - [`TestClearingEverythingShowsGuidance`](../cmd/birdview/main_test.go#L1105)
-  - [`TestEmptyStateNamesTheFiltersThatEmptiedIt`](../cmd/birdview/main_test.go#L3228)
+- Blocks: blocks once met
+- State: met since 2026-09-22 (currently blocking)
+
+### [`acceptance.countLineNamesEverySetting`](requirements/acceptance.md#countlinenameseverysetting)
+
+- Verifies requirements:
+  - [`product.helpfulEmptyState`](requirements/local/product/presentation.md#helpfulemptystate)
+- Guardrails:
   - [`TestFiltersAreNamedOnTheCountLine`](../cmd/birdview/main_test.go#L3693)
-  - [`TestClearTheFiltersClearsThem`](../cmd/birdview/main_test.go#L3742)
   - [`TestCountLineNamesEverySetting`](../cmd/birdview/main_test.go#L6962)
 - Blocks: blocks once met
-- State: partly met: clear link verified 2026-10-21
+- State: met since 2026-10-03 (currently blocking)
+
+### [`acceptance.nothingMatchedOffersAWayOut`](requirements/acceptance.md#nothingmatchedoffersawayout)
+
+- Verifies requirements:
+  - [`product.helpfulEmptyState`](requirements/local/product/presentation.md#helpfulemptystate)
+- Guardrails:
+  - [`TestEmptyStateNamesTheFiltersThatEmptiedIt`](../cmd/birdview/main_test.go#L3228)
+  - [`TestClearTheFiltersClearsThem`](../cmd/birdview/main_test.go#L3742)
+- Blocks: blocks once met
+- State: met since 2026-10-02 (currently blocking)
 
 ### [`acceptance.scrollScriptScoped`](requirements/acceptance.md#scrollscriptscoped)
 
@@ -283,7 +341,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
   - [`TestScrollRestorationIsInlineAndSelfContained`](../cmd/birdview/main_test.go#L1147)
   - [`TestCollapsiblePanelsPersist`](../cmd/birdview/main_test.go#L1188)
 - Blocks: blocks once met
-- State: met since 2026-09-22 (currently blocking)
+- State: met since 2026-10-04 (currently blocking)
 
 ### [`acceptance.controlsMatchServer`](requirements/acceptance.md#controlsmatchserver)
 
@@ -402,7 +460,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
   - [`TestDetailDiagramLabelsTotalLength`](../cmd/birdview/main_test.go#L1818)
   - [`TestTotalLengthLabelStaysInTheBox`](../cmd/birdview/main_test.go#L1898)
 - Blocks: blocks once met
-- State: met since 2026-10-01 (currently blocking)
+- State: met since 2026-09-28 (currently blocking)
 
 ### [`acceptance.familyListWraps`](requirements/acceptance.md#familylistwraps)
 
@@ -885,7 +943,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - [`TestEveryKindOfPageIsDiscovered`](../cmd/birdview/pages_test.go#L159)
 - Blocks: blocks once met
-- State: met since 2026-10-16 (currently blocking)
+- State: met since 2026-10-16 (currently blocking); recorded in prose, awaiting the field when `app` is next recomposed
 
 ### [`app.pagesKeepToTheStylesheet`](requirements/composed/internal/app/acceptance.md#pageskeeptothestylesheet)
 
@@ -894,7 +952,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - [`TestPagesKeepToTheStylesheetContract`](../cmd/birdview/pages_test.go#L223)
 - Blocks: blocks once met
-- State: met since 2026-10-16 (currently blocking)
+- State: met since 2026-10-16 (currently blocking); recorded in prose, awaiting the field when `app` is next recomposed
 
 ### [`app.renderedTextContrast`](requirements/composed/internal/app/acceptance.md#renderedtextcontrast)
 
@@ -903,7 +961,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - [`TestRenderedTextContrast`](../cmd/birdview/pages_test.go#L320)
 - Blocks: blocks once met
-- State: met since 2026-10-16 (currently blocking)
+- State: met since 2026-10-16 (currently blocking); recorded in prose, awaiting the field when `app` is next recomposed
 
 ### [`app.pagesFitAPhone`](requirements/composed/internal/app/acceptance.md#pagesfitaphone)
 
@@ -912,7 +970,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - [`TestPagesFitAPhone`](../cmd/birdview/phone_test.go#L61)
 - Blocks: blocks once met
-- State: met since 2026-10-25 (currently blocking)
+- State: met since 2026-10-25 (currently blocking); recorded in prose, awaiting the field when `app` is next recomposed
 
 ### [`app.boundariesResolveKnownPoints`](requirements/composed/internal/app/acceptance.md#boundariesresolveknownpoints)
 
@@ -921,7 +979,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - [`TestKnownPoints`](../cmd/birdview-boundaries/main_test.go#L39)
 - Blocks: blocks once met
-- State: met since 2026-10-18 (currently blocking)
+- State: met since 2026-10-18 (currently blocking); recorded in prose, awaiting the field when `app` is next recomposed
 
 ### [`app.boundariesCoverEveryRegion`](requirements/composed/internal/app/acceptance.md#boundariescovereveryregion)
 
@@ -930,7 +988,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - [`TestCoverage`](../cmd/birdview-boundaries/main_test.go#L53)
 - Blocks: blocks once met
-- State: met since 2026-10-18 (currently blocking)
+- State: met since 2026-10-18 (currently blocking); recorded in prose, awaiting the field when `app` is next recomposed
 
 ### [`app.hereAndNowSitBesideAll`](requirements/composed/internal/app/acceptance.md#hereandnowsitbesideall)
 
@@ -943,7 +1001,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
   - [`TestWelcomeLine`](../cmd/birdview/herenow_test.go#L372)
   - [`TestWelcomeLineWhilePicking`](../cmd/birdview/herenow_test.go#L551)
 - Blocks: blocks once met
-- State: met since 2026-10-18 (currently blocking)
+- State: met since 2026-10-18 (currently blocking); recorded in prose, awaiting the field when `app` is next recomposed
 
 ### [`app.hereLookupAgreesInTheBrowser`](requirements/composed/internal/app/acceptance.md#herelookupagreesinthebrowser)
 
@@ -952,7 +1010,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - [`TestHereAndNowLink`](../cmd/birdview/herenow_test.go#L435)
 - Blocks: blocks once met
-- State: met since 2026-10-18 (currently blocking)
+- State: met since 2026-10-18 (currently blocking); recorded in prose, awaiting the field when `app` is next recomposed
 
 ### [`app.hereSendsNothingExtra`](requirements/composed/internal/app/acceptance.md#heresendsnothingextra)
 
@@ -961,7 +1019,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - none cited
 - Blocks: blocks once met
-- State: met since 2026-10-18 (currently blocking)
+- State: met since 2026-10-18 (currently blocking); recorded in prose, awaiting the field when `app` is next recomposed
 
 ### [`app.tierHistogramMatchesTiers`](requirements/composed/internal/app/acceptance.md#tierhistogrammatchestiers)
 
@@ -970,8 +1028,17 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - [`TestTierHistogram`](../cmd/birdview/herenow_test.go#L755)
 - Blocks: blocks once met
-- State: met since 2026-10-19 (currently blocking)
+- State: met since 2026-10-19 (currently blocking); recorded in prose, awaiting the field when `app` is next recomposed
 
+
+## Changed since the target
+
+`app` was edited after its approval, at [`5e105c8`](https://github.com/google/birdview/commit/5e105c8), and that version is not
+approved: composed files change by recomposing, and a published version by a new one. Until it is
+approved, implementation still targets `99c0811`, and these are reported, not counted:
+
+- [`app.searchMatchesInGoAndTheBrowser`](requirements/composed/internal/app/acceptance.md#searchmatchesingoandthebrowser): met since 2026-10-25 (not blocking: outside the target)
+- [`app.searchFromTheAddress`](requirements/composed/internal/app/acceptance.md#searchfromtheaddress): met since 2026-10-25 (not blocking: outside the target)
 
 ## Not in this target
 

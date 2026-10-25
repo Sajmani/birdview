@@ -574,7 +574,7 @@ func TestWelcomeLineWhilePicking(t *testing.T) {
 // so on the count line, and the comparison view can sort by either.
 //
 // Verifies: product.oneSelectedMetric, product.ascendingOrder, product.scaleToggle.
-// Criterion: acceptance.sortsAscending.
+// Criterion: acceptance.billAndTailOrderings.
 func TestBillAndTailOrderings(t *testing.T) {
 	s := newTestServer(t)
 	for _, c := range []struct {
@@ -617,7 +617,7 @@ func TestBillAndTailOrderings(t *testing.T) {
 // TestTierHeadersNameTheOrdering checks every section heading names the
 // ordering it belongs to, as Order by labels it: "Tail Tier 1" under Tail.
 //
-// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.sortsAscending.
+// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.tierHeadingsNameTheOrdering.
 func TestTierHeadersNameTheOrdering(t *testing.T) {
 	s := newTestServer(t)
 	for by, label := range map[string]string{"": "Length", "length": "Length", "wingspan": "Wingspan",
@@ -645,7 +645,7 @@ func TestTierHeadersNameTheOrdering(t *testing.T) {
 // ends already differ at two decimals of an inch; a page of wide tiers with
 // wide gaps gets none.
 //
-// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.sortsAscending.
+// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.tierHeadingDigits.
 func TestHeadingDigits(t *testing.T) {
 	u := unitsFor(false, 10)
 	narrow := []tierSpan{{5.0, 6.0, u}, {6.05, 7.0, u}, {8.0, 9.0, u}}
@@ -670,7 +670,7 @@ func TestHeadingDigits(t *testing.T) {
 // A heading once ran on to where the next tier began, which made four herons
 // and an ibis look as if they spanned the five inches up to the pelicans.
 //
-// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.sortsAscending.
+// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.tierHeadingsHoldTheirBirds.
 func TestTierRangesHoldTheirBirds(t *testing.T) {
 	s := newTestServer(t)
 	heading := regexp.MustCompile(`<span class="tier">[^<]+</span>\s*([^<&]+?)(?: &ndash; ([^<]+?))?\s*<span class="n">`)
@@ -724,7 +724,7 @@ func TestTierRangesHoldTheirBirds(t *testing.T) {
 // after the range in the count line's style, not pushed to the far edge in
 // its own, where it read as part of something else or was not seen at all.
 //
-// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.sortsAscending.
+// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.tierCountFollowsTheRange.
 func TestTierCountFollowsTheRange(t *testing.T) {
 	css, err := fs.ReadFile(assetFS, "static/styles.css")
 	if err != nil {
