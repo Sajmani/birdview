@@ -3909,6 +3909,9 @@ func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
 			// A link into the published repository must name a file that
 			// exists in this checkout, or it is a 404 waiting for publication.
 			if rest, ok := strings.CutPrefix(ref.String(), repository+"/"); ok {
+				if rest == "issues" || strings.HasPrefix(rest, "issues/") {
+					continue // the issue tracker: under the repository's address, not a file in it
+				}
 				repoLinks++
 				parts := strings.SplitN(rest, "/", 3) // blob|tree, main, path
 				if len(parts) != 3 {

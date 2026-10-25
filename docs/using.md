@@ -87,7 +87,7 @@ combine, and everything is selected when you arrive:
 
 ### Months
 
-**Now** selects the current month. June shows the birds present in June. A bird with too few records
+**Now** selects the current month. A bird with too few records
 to tell is shown in every month, and says so.
 
 ### Regions

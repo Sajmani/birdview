@@ -381,4 +381,4 @@ bird and why it is no longer drawn.
 
 ## Contact
 
-Through the project's issue tracker.
+Through [the project's issue tracker](https://github.com/google/birdview/issues).
