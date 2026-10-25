@@ -2,7 +2,7 @@
 
 > **Draft, 2026-10-25**, trying River's proposed alignment record on a real project. Not yet part
 > of River's method; generated, so regenerate rather than edit.
-> Generated from the bundle, the tests' `Criterion:` comments and the history at `99c0811`.
+> Generated from the bundle, the tests' `Criterion:` comments and the history at `0fb5d12`.
 
 Which version of each layer the layer below it is aligned with, since when, and who said so; and,
 for the implementation, where each criterion of the targeted requirements stands. A version is a
@@ -14,7 +14,7 @@ commit. Search `## ` for the sections.
 | --- | --- | --- | --- | --- |
 | Goals, [`goals/`](goals/goals.md) | Nothing above them: BirdView imports no values. In force: goals at [`dbe250e`](https://github.com/google/birdview/commit/dbe250e) | 2026-10-22 | sameer@, who committed them; no separate review recorded | 14 goals |
 | Requirements: [`app`](requirements/composed/internal/app/app.md) | [Goals](goals/goals.md) at [`dbe250e`](https://github.com/google/birdview/commit/dbe250e) | 2026-10-25 | Composed by an agent; approved by Sameer | Published at [`99c0811`](https://github.com/google/birdview/commit/99c0811); [criteria](requirements/composed/internal/app/acceptance.md); `dataset` and `internal/repo` not yet composed |
-| Implementation, at [`99c0811`](https://github.com/google/birdview/commit/99c0811) | [`app`](requirements/composed/internal/app/app.md) at [`99c0811`](https://github.com/google/birdview/commit/99c0811) | 2026-10-25 | Generated from the criteria's recorded statuses | 74 of 86 criteria met ([below](#implementation-app-at-99c0811)) |
+| Implementation, at [`0fb5d12`](https://github.com/google/birdview/commit/0fb5d12) | [`app`](requirements/composed/internal/app/app.md) at [`99c0811`](https://github.com/google/birdview/commit/99c0811) | 2026-10-25 | Generated from the criteria's recorded statuses | 79 of 86 criteria met ([below](#implementation-app-at-99c0811)) |
 | Release, [birdview.site](https://birdview.site) | Not recorded here; release guardrails in [`tech/release.md`](requirements/local/tech/release.md) | — | — | The deployed version is recorded only in the private `Sajmani/birdview-deploy` ([bindings](bindings.md)) |
 
 Implementation targets only a published version: `app` at `99c0811`, the commit that approved it.
@@ -76,7 +76,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
   - [`TestTierCountFollowsTheRange`](../cmd/birdview/herenow_test.go#L728)
   - [`TestSortedAscending`](../internal/view/view_test.go#L55)
 - Blocks: blocks once met
-- State: passing since 2026-09-22, not watched failing: not yet met
+- State: met since 2026-09-22 (currently blocking)
 
 ### [`acceptance.sectionBoundariesObeyRule`](requirements/acceptance.md#sectionboundariesobeyrule)
 
@@ -402,7 +402,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
   - [`TestDetailDiagramLabelsTotalLength`](../cmd/birdview/main_test.go#L1818)
   - [`TestTotalLengthLabelStaysInTheBox`](../cmd/birdview/main_test.go#L1898)
 - Blocks: blocks once met
-- State: passing since 2026-10-01, not watched failing: not yet met
+- State: met since 2026-10-01 (currently blocking)
 
 ### [`acceptance.familyListWraps`](requirements/acceptance.md#familylistwraps)
 
@@ -546,7 +546,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
   - [`TestDocsCountsMatchTheDataset`](../web/docs_test.go#L146)
   - [`TestNoDocCreditsASourceForWhatItNoLongerSupplies`](../web/docs_test.go#L180)
 - Blocks: blocks once met
-- State: passing since 2026-10-03, not watched failing: not yet met
+- State: met since 2026-10-03 (currently blocking)
 
 ### [`acceptance.categoryOriginShown`](requirements/acceptance.md#categoryoriginshown)
 
@@ -894,7 +894,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - [`TestPagesKeepToTheStylesheetContract`](../cmd/birdview/pages_test.go#L223)
 - Blocks: blocks once met
-- State: passing since 2026-10-16, not watched failing: not yet met
+- State: met since 2026-10-16 (currently blocking)
 
 ### [`app.renderedTextContrast`](requirements/composed/internal/app/acceptance.md#renderedtextcontrast)
 
@@ -930,7 +930,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Guardrails:
   - [`TestCoverage`](../cmd/birdview-boundaries/main_test.go#L53)
 - Blocks: blocks once met
-- State: passing since 2026-10-18, not watched failing: not yet met
+- State: met since 2026-10-18 (currently blocking)
 
 ### [`app.hereAndNowSitBesideAll`](requirements/composed/internal/app/acceptance.md#hereandnowsitbesideall)
 
