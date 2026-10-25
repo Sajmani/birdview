@@ -74,6 +74,7 @@ a lower tier may do.
 - [product.hereSelectsLocalRegion](../../../local/product/filtering.md#hereselectslocalregion) — Here selects the region the reader is in
 - [product.nowSelectsCurrentMonth](../../../local/product/filtering.md#nowselectscurrentmonth) — Now selects the current month
 - [product.locationStaysInBrowser](../../../local/product/filtering.md#locationstaysinbrowser) — The reader's location never leaves the browser
+- [product.searchBox](../../../local/product/filtering.md#searchbox) — A search box narrows the index as you type
 
 ### Ordering and sections
 

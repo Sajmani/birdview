@@ -11,9 +11,11 @@ Under the title, **New here? Try** offers a few views to start with, **more idea
 [Some things to try](#some-things-to-try), and **reset to defaults** returns the page to how it was
 when you arrived.
 
-Below the panels, the **count line** says how many species are shown and names every setting. Under
-it, a **histogram** has one bar per section, each linking to its section. Each section heading names
-the measurement and section, such as **Tail Tier 3**, its range and its species count.
+Below the panels, a **search box** keeps the birds whose names, code, family or order contain every
+word you type, as you type. The **count line** says how many species are shown and names every
+setting. Under it, a **histogram** has one bar per section, each linking to its section. Each
+section heading names the measurement and section, such as **Tail Tier 3**, its range and its
+species count.
 
 ---
 

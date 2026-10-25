@@ -141,6 +141,10 @@ type server struct {
 	onRender func(template string)
 	// hereJS is web/static/here.js, inlined into every index page.
 	hereJS template.JS
+	// searchJS is web/static/search.js, inlined likewise (product.searchBox).
+	searchJS template.JS
+	// search is each species' normalized search text, by id (product.searchBox).
+	search map[string]string
 	// boundaryURL is where the region boundary file is served: its path
 	// carries the file's hash, so it can be cached for a year
 	// (tech.regionBoundaries, decisions.hereAndNowCaching).
@@ -609,6 +613,12 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		return nil, fmt.Errorf("reading here.js: %w", err)
 	}
 	s.hereJS = template.JS(js)
+	js, err = fs.ReadFile(assetFS, "static/search.js")
+	if err != nil {
+		return nil, fmt.Errorf("reading search.js: %w", err)
+	}
+	s.searchJS = template.JS(js)
+	s.search = searchTexts(ds)
 
 	// Once, at startup: every response's ETag is built from this (tech.cacheLifetimeStated).
 	// In dev mode the templates are re-read per request, so a fingerprint
@@ -755,6 +765,9 @@ type options struct {
 	// order given -- that order is the reader's and no page reorders it.
 	Picking bool
 	Picks   []string
+
+	// Query is product.searchBox's search, as typed; empty when there is none.
+	Query string
 }
 
 func parseOptions(r *http.Request) options {
@@ -870,6 +883,7 @@ func parseOptions(r *http.Request) options {
 			o.Months[i] = true
 		}
 	}
+	o.Query = strings.TrimSpace(q.Get("q"))
 	return o
 }
 
@@ -897,6 +911,11 @@ type tile struct {
 	// WingModeled drives the crossbar split: the inner span is dashed only when
 	// the wingspan is modeled (product.measuredVersusModeled).
 	WingModeled bool
+
+	// Search is the tile's normalized search text, and Hidden is set when
+	// the address's search does not match it (product.searchBox).
+	Search string
+	Hidden bool
 
 	// Labels and ChordLabel are empty on an index tile: the annotations of product.labeledDetailDiagram
 	// need room, so they appear only in the detail view and in the help legend,
@@ -947,8 +966,11 @@ func tileAnchor(id string) string { return "s-" + id }
 type sectionView struct {
 	Index    int
 	Min, Max string
-	Count    int
-	Tiles    []tile
+	// Count is the section's birds that the search matches; Hidden is set
+	// when it matches none of them (product.searchBox).
+	Count  int
+	Hidden bool
+	Tiles  []tile
 	// Note replaces the range where there is no range to state: the birds
 	// with no records in the regions selected have no ratio and so no tier
 	// (product.orderByFrequency).
@@ -990,6 +1012,13 @@ type familyRow struct {
 }
 
 type pageData struct {
+	// SearchScript is search.js; SearchFields carry every other setting
+	// through the search form; SearchEmpty is set when the search matches
+	// none of the birds the other filters keep (product.searchBox).
+	SearchScript template.JS
+	SearchFields []hiddenField
+	SearchEmpty  bool
+
 	// Feedback is the issue tracker URL, or empty. Empty publishes nothing
 	// (product.noPersonalAddress): a site may go up before its tracker exists, but must not
 	// invite a reader somewhere that does not.
@@ -1502,6 +1531,8 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	page.HereURL = slotURL(r, "region", hereSlot)
 	page.BoundaryURL = s.boundaryURL
 	page.HereScript = s.hereJS
+	page.SearchScript = s.searchJS
+	page.SearchFields = searchFormFields(r)
 	page.MetricLabel = metricLabel(opt.Metric)
 	page.HereNowTemplate = slotsURL(r, "region", hereSlot, "month", nowSlot)
 	page.WelcomeNear = withPicks(r, "/?by=frequency&scale=global") + "#here-and-now"
@@ -1576,6 +1607,11 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	// formatted after the loop, all with one precision, so a gap between
 	// tiers shows as a gap between the numbers (product.sectionHeadersStateRange).
 	spans := make([]tierSpan, len(secs))
+	// The search hides tiles rather than dropping them, so sections and
+	// scales stay those of the other filters and nothing moves while the
+	// reader types (product.searchBox).
+	words := searchWords(opt.Query)
+	shown := 0
 	for i, sec := range secs {
 		u := globalUnits
 		if opt.Scale != view.Global {
@@ -1585,7 +1621,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 			}
 			u = unitsFor(opt.Metric3, ms...)
 		}
-		sv := sectionView{Index: i + 1, Count: len(sec.Species)}
+		sv := sectionView{Index: i + 1}
 		spans[i] = tierSpan{sec.Min, sec.Max, u}
 		if opt.Metric == view.ByFrequency {
 			sv.Min, sv.Max, sv.Note = frequencyBand(sec.Min, sec.Max, opt.Decades)
@@ -1613,10 +1649,19 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				MassStr:     u.format(sp.Mass.Value, view.ByMass),
 				Commonest:   s.shareWithSeams(sp, opt),
 				SameAs:      s.sameMeasurements(sp, opt.Locale),
+				Search:      s.search[sp.ID],
+				Hidden:      !searchMatches(s.search[sp.ID], words),
 			})
+			if searchMatches(s.search[sp.ID], words) {
+				sv.Count++
+			}
 		}
+		sv.Hidden = sv.Count == 0
+		shown += sv.Count
 		page.Sections = append(page.Sections, sv)
 	}
+	page.Shown = shown
+	page.SearchEmpty = shown == 0 && len(secs) > 0
 	if opt.Metric != view.ByFrequency {
 		extra := headingDigits(spans, opt.Metric)
 		for i, sp := range spans {
@@ -2388,7 +2433,7 @@ func (s *server) render(w http.ResponseWriter, name string, data any) {
 
 // filterKeys are the query parameters that narrow which species are shown
 // (product.helpfulEmptyState's link clears exactly these).
-var filterKeys = []string{"family", "habitat", "niche", "region", "month"}
+var filterKeys = []string{"family", "habitat", "niche", "region", "month", "q"}
 
 // queryFor returns a helper that rewrites the current query string, so a
 // control can toggle one setting without discarding the others.
@@ -2490,7 +2535,7 @@ type histBar struct {
 // them two tiers far apart would stand side by side as if they abutted.
 // Frequency's bands are fixed and need none.
 func histogram(metric string, secs []sectionView, raw []view.Section, m view.Metric, stepPercent float64) []histBar {
-	largest := 0
+	largest := 1 // not 0: a search can hide every bird, and a bar is then 0%, not NaN
 	for _, sv := range secs {
 		largest = max(largest, sv.Count)
 	}

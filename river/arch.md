@@ -53,15 +53,21 @@ So the server computes sections and geometry and renders HTML. Every control is 
 and every detail view is a URL, which also makes any view shareable. The cost is a page load per
 interaction, which is unnoticeable on localhost.
 
-**Two exceptions, both deliberate.** A page load per interaction means the browser lands at the
+**Three exceptions, all deliberate.** A page load per interaction means the browser lands at the
 top each time, discarding your place in a list of over a thousand birds. An inline script in
 `index.html` remembers, for the session, the scroll position and which panels are collapsed, and
 restores them on return. It holds no application logic.
 
-The other is `here.js`, behind the Here button. It looks up the reader's region in the browser so
+The second is `here.js`, behind the Here button. It looks up the reader's region in the browser so
 their position never reaches the server ([product.locationStaysInBrowser](requirements/local/product/filtering.md#locationstaysinbrowser)), and a test holds
-it to the Go lookup in `internal/boundary`. The rule both protect is that *logic* stays in Go, not
-that the client is inert; without JavaScript the page still works, minus these two.
+it to the Go lookup in `internal/boundary`.
+
+The third is `search.js`, the search box ([product.searchBox](requirements/local/product/filtering.md#searchbox)), which filters as the reader
+types. The server writes each tile's normalized words into `data-search` and applies `q` itself
+when it is in the address; the script only checks that every typed word occurs, and a test holds
+it to the Go matcher in `cmd/birdview/search.go`. The rule all three protect is that *logic* stays
+in Go, not that the client is inert; without JavaScript the page still works, minus these three
+(the search then needs Enter).
 
 This is what let [acceptance.familyFilterSelectsAndClears](requirements/acceptance.md#familyfilterselectsandclears) and [acceptance.unitToggleSwitches](requirements/acceptance.md#unittoggleswitches) be real checks rather than declared gaps.
 

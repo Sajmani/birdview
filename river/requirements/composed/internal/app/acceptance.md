@@ -115,6 +115,43 @@ caught by the width guard, and text clipped with an ellipsis by its own element 
 dataset has is not drawn; a page at its default settings, so a view only some filters produce is
 not drawn either; and text overlapping other text inside one box is not looked for.
 
+## searchMatchesInGoAndTheBrowser
+
+**The search keeps the same birds in Go and in the browser, and travels on the next link**
+
+Covers: [product.searchBox](../../../local/product/filtering.md#searchbox)
+
+**Method:** in Go, eight queries against the fixture with the birds each must keep: a name, a word
+two names share, a scientific name, a code in capitals, a name typed without its punctuation, words
+out of order, a family and nothing; and the order's English name is in the searchable text. In
+headless Chrome, the same queries typed into the box: the birds left showing must be exactly the
+Go matcher's, the count line must count them and name the search, no empty section may show and
+no section with birds may have a 0% bar, and the nothing-matches note shows exactly when nothing
+does. Then, with a search in the box, a control, a tile and Here must carry it, and the welcome
+line's links, reset to defaults and a guide must not. It gates where Chrome is installed.
+
+**Run:** `go test ./cmd/birdview/ -run 'TestSearchMatchesNamesCodesAndTaxa|TestSearchInTheBrowser'`
+**Status: verified 2026-10-25, passing.**
+Watched failing: 2026-10-25, by not lowercasing what is typed in the script ("AMECRO" kept all six).
+Watched failing: 2026-10-25, by removing the script's click handler (the control, tile and Here went without the search).
+Watched failing: 2026-10-25, by leaving the order's English name out of the searchable text.
+
+## searchFromTheAddress
+
+**An address with a search shows only the matches, without JavaScript**
+
+Covers: [product.searchBox](../../../local/product/filtering.md#searchbox)
+
+**Method:** render the index with `q` and check, in the HTML alone: only the matching tiles are
+unhidden while every tile carries its search text; the count line counts the matches and names the
+search; a section is hidden exactly when it counts none; the form carries every other setting and
+the box shows the search; the controls carry `q`, while the welcome line's links and *Clear the
+filters* do not; and a search that matches nothing says so.
+
+**Run:** `go test ./cmd/birdview/ -run TestSearchFromTheAddress`
+**Status: verified 2026-10-25, passing.**
+Watched failing: 2026-10-25, by never hiding a tile the search does not match.
+
 ## boundariesResolveKnownPoints
 
 **Known places resolve to the regions they are in**

@@ -141,3 +141,31 @@ pressed, and pressing Here produces exactly the request that choosing that regio
 So the server cannot tell that Here was used, let alone where the reader is. Loading the
 boundaries only when Here is pressed would leak the first; sending the position to the server
 would leak both.
+
+## searchBox
+
+**A search box narrows the index as you type**
+
+Subject: `presentation.search`
+Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
+
+**A text box above the count line keeps the birds that match what is typed and hides the rest.** A
+bird matches when every word typed appears, ignoring case and punctuation, somewhere in its English
+names (North American and world), its species code, its scientific name, or its family's or
+order's scientific or English name. The count line, each section's count and the histogram count
+only the matches, a section with none is hidden, and the count line names the search.
+
+**It filters in the browser as the reader types**, with no request to the server. Matches keep
+their places: sections and scales are the ones the other filters made, so what remains does not
+move while the reader types.
+
+**The search goes into the address as `q` on the reader's next click that changes the address**
+— a control, a tile, a pick — not while typing. The welcome line's things to try, *reset to
+defaults* and *Clear the filters* drop it. Opened from an address with `q`, the page shows the same
+matches with or without JavaScript; without it, Enter in the box loads the page with the search.
+
+Rationale: the first readers asked for a search bar to pick birds by name
+([#3](https://github.com/google/birdview/issues/3)), and a box keeps working at ten times the
+species where scrolling and chips do not. The words to match are prepared by the server, so the
+rule lives in Go; the browser only looks them up, and a test holds it to the Go matcher (Sameer,
+2026-10-25: filter in the browser; add `q` on the next click).

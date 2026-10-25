@@ -355,14 +355,23 @@
 {{/* Every setting the address carries, one box each, on the count line
      (product.helpfulEmptyState). When nothing matches, "No birds match"
      follows immediately below and reads as a continuation of this line. */}}
-<p class="count">{{.Shown}} of {{.Total}} species{{range .Filters}}<span class="fsum"><b>{{.Label}}</b> {{.Value}}</span>{{end}}</p>
+{{/* product.searchBox. A form, so Enter works without JavaScript; with it,
+     search.js filters as the reader types and adds q to the next link
+     followed. The hidden fields keep every other setting. */}}
+<form class="search" action="/" method="get" role="search">
+  {{range .SearchFields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
+  <input type="search" name="q" value="{{.Opt.Query}}" placeholder="Search names, codes and families"
+         aria-label="Search birds by name, code or family" autocomplete="off" spellcheck="false">
+</form>
+<p class="count"><span class="shown" data-total="{{.Total}}">{{.Shown}} of {{.Total}} species</span>{{range .Filters}}<span class="fsum"><b>{{.Label}}</b> {{.Value}}</span>{{end}}<span class="fsum fsearch"{{if not .Opt.Query}} hidden{{end}}><b>Search</b> <span class="fsq">{{.Opt.Query}}</span></span></p>
+<p class="empty searchempty"{{if not .SearchEmpty}} hidden{{end}}>Nothing matches the search.</p>
 {{/* One bar per tier, as tall as its count against the largest, each a link
      to its tier (product.tierHistogram). Heights are inline because they are
      data; no color is set here. */}}
 {{if .Histogram}}<nav class="hist" aria-label="Species in each tier">{{range .Histogram}}{{if .Empty}}<span class="gap"></span>{{else}}<a href="#tier-{{.Index}}" style="height:{{.Percent}}%" aria-label="{{.Label}}" title="{{.Label}}"></a>{{end}}{{end}}</nav>{{end}}
 
 {{range .Sections}}
-<section id="tier-{{.Index}}">
+<section id="tier-{{.Index}}"{{if .Hidden}} hidden{{end}}>
   {{/* Three shapes, because a frequency tier is not always a range
        (product.orderByFrequency): a closed band, an open last band, and the birds with no
        ratio at all, which have no band to state. */}}
@@ -434,6 +443,7 @@
 {{template "pickbar" .Bar}}
 
 <script>{{.HereScript}}</script>
+<script>{{.SearchScript}}</script>
 <script>
 /* Keep the page still across navigations.
  *
@@ -498,7 +508,7 @@
      importantly the tile must keep opening the detail view in both modes
      (product.tileOpensDetail). Absent entirely outside pick mode, so ordinary browsing sees the
      tile it always has (product.tileContents). */}}
-<div class="tilewrap" id="{{.Anchor}}">
+<div class="tilewrap" id="{{.Anchor}}" data-search="{{.Search}}"{{if .Hidden}} hidden{{end}}>
 <a class="tile" href="{{.DetailURL}}">
   <div class="hd">
     <div class="nameline">

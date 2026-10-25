@@ -42,9 +42,10 @@ A redesign needs a decision first. The panels already start closed
 ([product.collapsibleControls](requirements/local/product/presentation.md#collapsiblecontrols)), and the 2026-10-25 prose pass cut the page text; beyond that,
 from smallest to largest: move Presentation to the guide and leave a one-line key, or make
 search-and-compare the landing view and the full index the advanced one. Region choice at county scale needs search or a map, not chips.
-[#3](https://github.com/google/birdview/issues/3), a text box that filters the index as you type, is
-a first step either way; its requirement should settle whether the text is in the address, whether
-the counts and histogram follow it, and whether typing picks birds in compare mode.
+The search box ([product.searchBox](requirements/local/product/filtering.md#searchbox), [#3](https://github.com/google/birdview/issues/3)) is the first
+step, done 2026-10-25. Next, decided 2026-10-25: move Presentation to the guide and leave a one-line
+key (option (a)); option (b) waits for a discussion of options and for
+[simulatedUserTests](#simulatedusertests).
 [tightenProse](#tightenprose) is the text half of the same complaint.
 
 ## simulatedUserTests

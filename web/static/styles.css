@@ -147,6 +147,15 @@ details[open] > summary .sumdesc { display: none; }
 .chip em::before { content: "\00b7"; margin: 0 5px; }
 .chip b::before { content: ""; margin-left: 7px; }
 .count { margin: 4px 0 0; }
+/* The search box (product.searchBox). [hidden] must beat every display rule,
+   or a tile the search hides would stay on screen as a .tilewrap block. */
+[hidden] { display: none !important; }
+.search { margin: 8px 0 0; }
+.search input { width: min(420px, 100%); box-sizing: border-box; font: inherit; font-size: 14px;
+  color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  padding: 7px 10px; }
+.search input::placeholder { color: var(--dim); opacity: 1; }
+.search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* Pick mode (product.pickFromIndex). The control is a sibling of the tile link, laid over the
    free right end of the metrics footer -- the tile itself still opens the
