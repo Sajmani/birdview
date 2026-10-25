@@ -14,9 +14,10 @@
 
 // The search box (product.searchBox), inlined into the index.
 //
-// The rule is Go's: the server writes each tile's normalized words into
-// data-search, and this only checks that every typed word occurs there,
-// normalizing what is typed as normalizeSearch does. TestSearchInTheBrowser
+// The rule is Go's: the server writes each tile's normalized fields into
+// data-search, joined by "|", and this only checks that what is typed,
+// normalized as normalizeSearch does, occurs there. It can never contain "|",
+// so it cannot match across two fields. TestSearchInTheBrowser
 // holds the two together.
 //
 // It hides and shows tiles, keeps the counts and histogram in step, and puts
@@ -29,15 +30,8 @@
   function normalize(s) {
     return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
   }
-  function words(s) {
-    var n = normalize(s);
-    return n ? n.split(" ") : [];
-  }
-  function matches(text, ws) {
-    for (var i = 0; i < ws.length; i++) {
-      if (text.indexOf(ws[i]) < 0) return false;
-    }
-    return true;
+  function matches(text, q) {
+    return text.indexOf(q) >= 0;
   }
 
   var shownEl = document.querySelector(".count .shown");
@@ -47,13 +41,13 @@
   var sections = Array.prototype.slice.call(document.querySelectorAll("section[id^='tier-']"));
 
   function apply() {
-    var ws = words(box.value);
+    var q = normalize(box.value);
     var counts = {};
     var total = 0, largest = 1;
     sections.forEach(function (sec) {
       var n = 0;
       sec.querySelectorAll("[data-search]").forEach(function (t) {
-        var ok = matches(t.getAttribute("data-search") || "", ws);
+        var ok = matches(t.getAttribute("data-search") || "", q);
         t.hidden = !ok;
         if (ok) n++;
       });
@@ -72,10 +66,10 @@
       a.setAttribute("title", l);
     });
     if (shownEl) shownEl.textContent = total + " of " + shownEl.getAttribute("data-total") + " species";
-    var q = box.value.trim();
+    var typed = box.value.trim();
     if (fsum) {
-      fsum.hidden = !q;
-      fsq.textContent = q;
+      fsum.hidden = !typed;
+      fsq.textContent = typed;
     }
     if (empty) empty.hidden = !(total === 0 && sections.length > 0);
   }

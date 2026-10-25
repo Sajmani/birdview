@@ -32,20 +32,23 @@ import (
 )
 
 // searchCases are queries and the fixture birds each must leave showing:
-// a name, a word shared by two names, a scientific name, a code in capitals,
-// a name typed without its punctuation, words out of order, a family, and
-// nothing at all.
+// a name, a word shared by two names, the end of one word and the start of
+// the next, a scientific name, a code in capitals, a name typed without its
+// punctuation, a family; and three that must match nothing: words out of
+// order, a query running from one field into the next, and nonsense.
 var searchCases = []struct {
 	q    string
 	want []string
 }{
 	{"crow", []string{"amecro"}},
 	{"american", []string{"amecro", "amerob"}},
-	{"corvus", []string{"amecro"}},
+	{"n robin", []string{"amerob"}},
+	{"corvus brachy", []string{"amecro"}},
 	{"AMECRO", []string{"amecro"}},
 	{"black necked", []string{"blasti"}},
-	{"heron great", []string{"greblu"}},
 	{"ardeidae", []string{"greblu"}},
+	{"heron great", nil},
+	{"heron ardea", nil},
 	{"zzz", nil},
 }
 
@@ -53,7 +56,7 @@ var searchCases = []struct {
 func goMatches(s *server, q string) []string {
 	var out []string
 	for i := range s.ds.Species {
-		if id := s.ds.Species[i].ID; searchMatches(s.search[id], searchWords(q)) {
+		if id := s.ds.Species[i].ID; searchMatches(s.search[id], q) {
 			out = append(out, id)
 		}
 	}

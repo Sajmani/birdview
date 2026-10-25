@@ -1610,7 +1610,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	// The search hides tiles rather than dropping them, so sections and
 	// scales stay those of the other filters and nothing moves while the
 	// reader types (product.searchBox).
-	words := searchWords(opt.Query)
+	query := opt.Query
 	shown := 0
 	for i, sec := range secs {
 		u := globalUnits
@@ -1650,9 +1650,9 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				Commonest:   s.shareWithSeams(sp, opt),
 				SameAs:      s.sameMeasurements(sp, opt.Locale),
 				Search:      s.search[sp.ID],
-				Hidden:      !searchMatches(s.search[sp.ID], words),
+				Hidden:      !searchMatches(s.search[sp.ID], query),
 			})
-			if searchMatches(s.search[sp.ID], words) {
+			if searchMatches(s.search[sp.ID], query) {
 				sv.Count++
 			}
 		}

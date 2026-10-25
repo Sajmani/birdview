@@ -12,7 +12,7 @@ Under the title, **New here? Try** offers a few views to start with, **more idea
 when you arrived.
 
 Below the panels, a **search box** keeps the birds whose English or scientific name, code, family or
-order contains every word you type, as you type. The **count line** says how many species are shown
+order contains what you type, as you type. The **count line** says how many species are shown
 and names every setting. Under it, a **histogram** has one bar per section, each linking to its section. Each
 section heading names the measurement and section, such as **Tail Tier 3**, its range and its
 species count.
