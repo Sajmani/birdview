@@ -94,6 +94,7 @@ a lower tier may do.
 - [product.undrawnSpeciesAnswer](../../../local/product/presentation.md#undrawnspeciesanswer) — A species BirdView does not draw still answers for itself
 - [product.escapedBirdsListed](../../../local/product/measurements.md#escapedbirdslisted) — Escaped and kept birds are left off the index, and listed
 - [product.pageExplainsItself](../../../local/product/presentation.md#pageexplainsitself) — The page explains itself
+- [product.fitsAPhone](../../../local/product/presentation.md#fitsaphone) — Every page fits a phone held upright
 - [product.collapsibleControls](../../../local/product/presentation.md#collapsiblecontrols) — The controls collapse
 - [product.togglesKeepPlace](../../../local/product/presentation.md#toggleskeepplace) — Toggling a control keeps your place
 - [product.inaturalistLink](../../../local/product/presentation.md#inaturalistlink) — The detail view links to the species on iNaturalist

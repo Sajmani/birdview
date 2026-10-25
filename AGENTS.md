@@ -24,8 +24,8 @@ Read a requirement by its heading, not its file; its first paragraph is the rule
 go build ./... && go vet ./... && gofmt -l . && go test ./...   # gofmt must print nothing
 ```
 
-All spec checks are Go tests in `river/check/`. `TestRenderedTextContrast` skips
-without Chrome (`BIRDVIEW_CHROME`); a skip is not a pass.
+All spec checks are Go tests in `river/check/`. `TestRenderedTextContrast` and
+`TestPagesFitAPhone` skip without Chrome (`BIRDVIEW_CHROME`); a skip is not a pass.
 
 **End every turn with a freshly built server on <http://localhost:8080>**, started from the repo
 root: `go build -o /tmp/birdview-serve ./cmd/birdview`, stop the old one, then start it **detached**

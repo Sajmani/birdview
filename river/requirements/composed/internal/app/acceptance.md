@@ -82,6 +82,39 @@ panels, laid out but not drawn, measured against whatever was drawn there.
 on a thin line drawn behind it is measured against the line; an SVG drawn into a page as an image
 is measured only as its own page.
 
+## pagesFitAPhone
+
+**Pages drawn 360 pixels wide stay inside the window and inside their boxes**
+
+Covers: [product.fitsAPhone](../../../local/product/presentation.md#fitsaphone)
+
+**Method:** render two HTML pages of every kind (route and template) in headless Chrome, each in a
+frame 360 pixels wide, which is a viewport of its own (Chrome will not open a window narrower than
+500), with every `<details>` open. Fail on any element that reaches past the frame's right edge,
+reporting only the outermost, and on any run of text that extends outside the nearest ancestor with
+a background or a border, unless an element between them clips or scrolls. Fail too if the page is
+wider than the frame, and refuse to judge a page laid out at any other width.
+
+It gates where Chrome is installed and skips without it, like renderedTextContrast.
+
+**Run:** `go test ./cmd/birdview/ -run TestPagesFitAPhone`
+**Status: verified 2026-10-25, passing, and watched failing:**
+
+- Its first run, before the fix, failed on 7 of the 12 pages. The index was 588 pixels wide: region and
+  family rows ran to 499, the Presentation panel's columns to 419 with their text outside the
+  panel, the diet and habitat definitions to 387 and the tiles to 420. Species pages' tables ran to
+  393, `/added`'s to 415, a guide's table to 366, and an example address on the empty comparison
+  page to 423. These are the failures [#2](https://github.com/google/birdview/issues/2) reported.
+- Restoring the Presentation panel's fixed 380-pixel column minimum failed it on the index: the
+  panel's section at 419 pixels and three runs of its text outside the panel.
+
+Its first runs failed for reasons in the check, each fixed: Chrome's 500-pixel minimum window,
+caught by the width guard, and text clipped with an ellipsis by its own element counted as bleeding.
+
+**Known limits:** two pages of each kind, from the test fixture, so a long name only the full
+dataset has is not drawn; a page at its default settings, so a view only some filters produce is
+not drawn either; and text overlapping other text inside one box is not looked for.
+
 ## boundariesResolveKnownPoints
 
 **Known places resolve to the regions they are in**

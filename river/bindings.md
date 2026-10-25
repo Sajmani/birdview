@@ -18,7 +18,7 @@ migration finishes, these are deliberate local departures from `README.md`, not 
 | **Checks** | All in Go; see below the table | River's checker does not read composed packages yet, so BirdView checks its own |
 | **Stage adoption** | All four adopted: **Requirements**, **Implementation**, **Verification**, and **Release** since 2026-10-23 | Release was declared informal 2026-10-16 and adopted by Sameer on 2026-10-23, once birdview.site was public. Guardrails in [tech/release.md](requirements/local/tech/release.md); the deployment's probe, uptime check, alerting and runbook live in the private `Sajmani/birdview-deploy` |
 
-**Composition.** **`app` composed** in River's normalized form: it links the 60 local requirements
+**Composition.** **`app` composed** in River's normalized form: it links the 61 local requirements
 that apply to the web application unchanged, excludes the four withdrawn photograph requirements,
 and writes out WCAG's contrast criteria over every web page and the stylesheet's contract. Its
 criteria for the composed items are in `requirements/composed/internal/app/acceptance.md`; every other criterion still
@@ -29,8 +29,8 @@ first.
 **Checks.** All in **Go**, run by `go test`: River's checker, translated at River pin `f8252f5`,
 with River's shared cases copied at the same pin; BirdView's stricter goal rule; the vendored-file
 hashes; every quotation against its vendored source; every reference, anchor and relative link; and
-the composition fields. **The rendered contrast check needs Chrome** (`BIRDVIEW_CHROME` to point at
-one) and skips without it; CI has Chrome and fails on any skip, so since 2026-10-23 it gates on
+the composition fields. **The rendered contrast and phone-width checks need Chrome**
+(`BIRDVIEW_CHROME` to point at one) and skip without it; CI has Chrome and fails on any skip, so since 2026-10-23 they gate on
 every push and pull request ([tech.checksOnEveryChange](requirements/local/tech/release.md#checksoneverychange)).
 
 ## Project bindings

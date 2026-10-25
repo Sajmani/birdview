@@ -481,6 +481,28 @@ what the app is *saying*, is the least discoverable control. A labeled example p
 the drawing itself; that needs two half-page columns, so the control descriptions sit with the
 controls.
 
+## fitsAPhone
+
+**Every page fits a phone held upright**
+
+Subject: `presentation.fit`
+Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
+
+**Down to 360 CSS pixels wide, nothing on any page reaches past the edge of the window, and no text
+is drawn outside the box it sits in**, with every collapsible panel open. A box is anything drawn
+with a background or a border. Text that is cut off with an ellipsis, or that scrolls inside its own
+container, is not outside its box: a table too wide for a phone may scroll sideways inside itself,
+but the page may not.
+
+Rows laid out for a laptop stack on a phone instead of shrinking past reading: a group's header
+shares its line with its Only button and its members wrap below, and a category's definition goes
+under its toggle.
+
+Rationale: most people who reach birdview.site are on phones, and the first readers' first
+complaint was text running out of its panels and region rows running off the screen
+([#2](https://github.com/google/birdview/issues/2)). 360 pixels is a small Android phone; an iPhone
+is 375 to 430.
+
 ## tileOpensDetail
 
 **A tile opens a detail view**
