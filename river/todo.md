@@ -17,6 +17,55 @@ open" note in a decision record instead.
 move it to [todo-closed.md](todo-closed.md). Items are never deleted: a closed one records why a
 question that looks open is not. Design notes behind items are in [notes.md](notes.md).
 
+## scalableInterface
+
+**The interface is sized for North America by state, not for the world by county**
+
+Status: open
+Owner: Sameer
+Gate: before worldwide species or county-sized regions; the readers' complaints make it due sooner
+
+The dataset can grow to the whole world (about ten times the species) and to county-sized regions
+(a hundred times the regions or more). The interface would not survive either: every region is a
+chip listed under its zone, every family a chip under its order, the index is one scroll of every
+tile, and the Presentation panel explains everything at once.
+
+The first readers' feedback (2026-10-25) says it is already too much at 1,041 species and about 75
+regions. Ryan found it "pretty intimidating with all of that text" and suggested a simpler interface
+that just compares stick figures, picked from a list or a search bar; advanced filters behind a menu,
+as in the iNaturalist app; and the explanations on their own page, as in the Sibley app. Joe doubted
+the average field birder wants "so much info". Karen and Ryan both hit the phone layout
+([#2](https://github.com/google/birdview/issues/2), fixed by
+[product.fitsAPhone](requirements/local/product/presentation.md#fitsaphone)).
+
+This conflicts with [product.pageExplainsItself](requirements/local/product/presentation.md#pageexplainsitself), whose help "starts open", and needs a
+decision before a redesign: from smallest to largest, start the help closed; move Presentation to
+the guide and leave a one-line key; or make search-and-compare the landing view and the full index
+the advanced one. Region choice at county scale needs search or a map, not chips.
+[#3](https://github.com/google/birdview/issues/3), a text box that filters the index as you type, is
+a first step either way; its requirement should settle whether the text is in the address, whether
+the counts and histogram follow it, and whether typing picks birds in compare mode.
+[tightenProse](#tightenprose) is the text half of the same complaint.
+
+## simulatedUserTests
+
+**Test the interface with simulated users**
+
+Status: open
+Owner: Sameer
+Gate: before a redesign under [scalableInterface](#scalableinterface) is accepted
+
+Agents given a persona and a task drive the site in headless Chrome, at phone and laptop widths,
+and report what they did, where they got stuck, and their answer with a confidence; answers are
+scored against expected ones, as in River's concept suite (`usertests/concepts` in River). Personas:
+a new birder on a phone, an experienced field birder, an ornithologist, someone outside North
+America. Tasks such as: which is bigger, a Cooper's Hawk or an American Crow; which birds are around
+you in October; compare three ducks; what does a dashed line mean.
+
+Calibrate before trusting it: run it against `4f25193`, the revision the first readers saw, and see
+whether the simulated users report what they did (the phone layout, the density, the missing
+search). Then use it to compare designs.
+
 ## tightenProse
 
 **Tighten all prose and page text; less is more**
