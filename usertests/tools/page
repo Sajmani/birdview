@@ -1,0 +1,196 @@
+#!/usr/bin/env python3
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Read a BirdView page as a simulated user sees it: its text and its links.
+
+    usertests/tools/page URL [--open ID,ID] [--find TEXT] [--tiles N]
+
+Collapsed panels show only their summary, as they do on screen; --open opens
+them by id, as clicking would. Hidden elements are left out. Each drawing is
+shown as [drawing]; use usertests/tools/shot to see it. Links are numbered,
+with the address each goes to. --find shows only the lines containing TEXT,
+as a browser's find-in-page would. --tiles caps how many bird tiles are
+printed (default 25), because the index holds over a thousand.
+"""
+
+import argparse
+import html.parser
+import sys
+import urllib.parse
+import urllib.request
+
+SKIP = {"script", "style", "noscript", "head", "title"}
+BLOCK = {"p", "div", "li", "h1", "h2", "h3", "h4", "tr", "section", "header", "footer",
+         "dt", "dd", "summary", "details", "form", "table", "ul", "dl", "nav"}
+VOID = {"br", "img", "input", "meta", "link", "hr", "source", "wbr", "area", "col",
+        "path", "line", "rect", "circle", "ellipse", "polygon", "stop", "use"}
+
+
+class Reader(html.parser.HTMLParser):
+    def __init__(self, base, opened, max_tiles):
+        super().__init__(convert_charrefs=True)
+        self.base, self.opened, self.max_tiles = base, opened, max_tiles
+        self.lines, self.cur = [], []
+        self.links = []
+        self.stack = []  # (tag, hides)
+        self.hidden = 0
+        self.tiles = 0
+        self.tiles_skipped = 0
+        self.in_svg = 0
+        self.link = None
+        self.label = ""
+        self.mark = 0
+
+    def flush(self):
+        text = " ".join("".join(self.cur).split())
+        if text:
+            self.lines.append(text)
+        self.cur = []
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        hides = False
+        if self.hidden:
+            hides = True
+        elif "hidden" in a or (a.get("aria-hidden") == "true"):
+            hides = True
+        elif tag == "details" and "open" not in a and a.get("id") not in self.opened:
+            # Show the summary only.
+            self.flush()
+            self.stack.append((tag, False, "collapsed"))
+            self.lines.append("")
+            return
+        elif "tilewrap" in (a.get("class") or "").split():
+            self.tiles += 1
+            if self.tiles > self.max_tiles:
+                hides = True
+                self.tiles_skipped += 1
+        if tag in VOID:
+            if tag == "input" and not self.hidden and a.get("type") not in ("hidden",):
+                self.cur.append(f" [text box: {a.get('aria-label') or a.get('placeholder') or a.get('name')}"
+                                f"{' = ' + repr(a['value']) if a.get('value') else ''}] ")
+            return
+        if self.stack and self.stack[-1][2] == "collapsed" and tag != "summary":
+            hides = True
+        self.stack.append((tag, hides, ""))
+        if hides:
+            self.hidden += 1
+            return
+        if tag == "svg":
+            self.in_svg += 1
+            if self.in_svg == 1:
+                self.cur.append(" [drawing] ")
+        if tag in BLOCK:
+            self.flush()
+            if tag == "h1":
+                self.cur.append("# ")
+            elif tag == "h2":
+                self.cur.append("## ")
+            elif tag == "h3":
+                self.cur.append("### ")
+            elif tag == "li" or tag == "dt":
+                self.cur.append("- ")
+            elif tag == "summary":
+                self.cur.append("▶ ")
+        if tag == "button":
+            self.cur.append(" [button: ")
+        if tag == "a" and a.get("href") is not None:
+            href = urllib.parse.urljoin(self.base, a["href"])
+            self.links.append(href)
+            self.link = len(self.links)
+            self.label = a.get("aria-label") or a.get("title") or ""
+            self.cur.append("[")
+            self.mark = len(self.cur)
+        elif tag not in BLOCK:
+            self.cur.append(" ")
+
+    def handle_endtag(self, tag):
+        if tag in VOID:
+            return
+        # Pop to the matching tag.
+        while self.stack:
+            t, hides, mark = self.stack.pop()
+            if mark == "collapsed":
+                if t == tag:
+                    self.flush()
+                    did = self.lines and self.lines[-1]
+                    self.lines.append("   (panel collapsed)")
+                    break
+                continue
+            if hides:
+                self.hidden -= 1
+            elif t == "svg":
+                self.in_svg -= 1
+            elif t == "a" and self.link:
+                if not "".join(self.cur[self.mark:]).strip():
+                    self.cur.append(self.label)
+                self.cur.append(f"]({self.link})")
+                self.link = None
+            elif t == "button":
+                self.cur.append("] ")
+            elif t in BLOCK:
+                self.flush()
+            if t == tag:
+                break
+
+    def handle_data(self, data):
+        if self.hidden or self.in_svg:
+            return
+        if self.stack and self.stack[-1][0] in SKIP:
+            return
+        self.cur.append(data)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("url")
+    ap.add_argument("--open", default="", help="comma-separated ids of panels to open")
+    ap.add_argument("--find", default="", help="show only lines containing this text")
+    ap.add_argument("--tiles", type=int, default=25)
+    args = ap.parse_args()
+    req = urllib.request.Request(args.url, headers={"User-Agent": "birdview-usertest"})
+    try:
+        with urllib.request.urlopen(req) as r:
+            body = r.read().decode("utf-8", "replace")
+            final = r.geturl()
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", "replace")
+        final = args.url
+        print(f"(the page answered {e.code})")
+    rd = Reader(final, set(filter(None, args.open.split(","))), args.tiles)
+    rd.feed(body)
+    rd.flush()
+    print(f"PAGE {final}\n")
+    lines = rd.lines
+    if args.find:
+        lines = [l for l in lines if args.find.lower() in l.lower()]
+        print(f"(find in page: {args.find!r}, {len(lines)} lines)\n")
+    for l in lines:
+        print(l)
+    if rd.tiles_skipped:
+        print(f"\n... and {rd.tiles_skipped} more bird tiles below; scroll with --tiles N or find with --find")
+    print("\nLINKS")
+    used = set()
+    for l in lines:
+        for i in range(len(rd.links)):
+            if f"]({i + 1})" in l:
+                used.add(i)
+    for i, href in enumerate(rd.links):
+        if i in used:
+            print(f"({i + 1}) {href}")
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -67,6 +67,40 @@ Calibrate before trusting it: run it against `4f25193`, the revision the first r
 whether the simulated users report what they did (the phone layout, the density, the missing
 search). Then use it to compare designs.
 
+Built and first run 2026-10-25 ([usertests/](../usertests/README.md),
+[summary](../usertests/results/2026-10-25/summary.md)): four readers on `4f25193` and on
+`b3b2f93`. The old run found the missing search, the density and the backwards month toggle, but
+saw the phone overflow only weakly; mean ease rose from 2.25 to 3.1. Left: run it before and after
+Presentation moves to the guide, and decide whether results stay in the repository.
+
+## togglesStartSelected
+
+**Tapping a month or region when all are selected removes it**
+
+Status: open
+Owner: Sameer
+Gate: needs the owner's call; the most-reported problem in the first simulated-user run
+
+All four simulated readers, on both revisions, tapped October or New York and lost it, because
+everything starts selected and a tap drops one ([product.regionAndMonthFilter](requirements/local/product/filtering.md#regionandmonthfilter)); three of the
+four built the address by hand instead. Karen's wording complaint
+([#1](https://github.com/google/birdview/issues/1)) was the same problem seen from the help text.
+One answer: when everything is selected, a tap on one item selects only it, as Only does, and
+later taps add and remove. That changes the requirement, and families too.
+
+## compareNumbersUnreadable
+
+**The comparison's numbers cannot be read on a phone**
+
+Status: open
+Owner: unassigned
+Gate: before the testers are asked back
+
+Both phone readers, on both revisions, could not read the length, wingspan and mass labels inside
+the comparison's drawings, and opened each bird's page instead
+([product.comparisonOneScale](requirements/local/product/presentation.md#comparisononescale)). Show the three numbers as text under each panel, or scale the
+labels with the drawing.
+
 ## tightenProse
 
 **Tighten all prose and page text; less is more**
