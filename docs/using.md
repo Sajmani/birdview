@@ -92,8 +92,8 @@ to tell is shown in every month, and says so.
 
 ### Regions
 
-States, provinces and stretches of open sea. A bird is listed where it is reported often enough to
-be worth looking for.
+States, provinces and stretches of open sea. A bird is listed in a region when at least 1 in a
+million of the region's bird records are of it.
 
 **Here** selects the region you are in. Your browser works out the region itself, so your location
 never reaches the server. Here needs JavaScript.
