@@ -879,12 +879,10 @@ func TestHelpCoversEveryControl(t *testing.T) {
 	// The mass cube: a shape with no label of its own, so the panel that
 	// shows it has to say what it is. Checked in the Presentation panel and
 	// not merely in the diagram key, since this is where a reader is taught
-	// to read the drawing (product.pageExplainsItself).
-	// Whitespace-normalised: these are phrases, and the template wraps its
-	// prose, so a reflow that put "cube" and "root" on separate lines would
-	// fail a raw match and look like the explanation had been deleted.
+	// to read the drawing (product.pageExplainsItself). Whitespace-normalised:
+	// the template wraps its prose.
 	flat := strings.Join(strings.Fields(help), " ")
-	for _, s := range []string{"mass drawn as water", "cube root"} {
+	for _, s := range []string{"mass drawn as water"} {
 		if !strings.Contains(flat, s) {
 			t.Errorf("the Presentation panel does not explain the mass cube: no %q", s)
 		}
@@ -896,9 +894,8 @@ func TestHelpCoversEveryControl(t *testing.T) {
 			t.Errorf("Presentation panel does not explain %q", concept)
 		}
 	}
-	if !strings.Contains(help, "open") {
-		t.Error("help should start expanded")
-	}
+	// Whether the panel starts open or closed is product.collapsibleControls',
+	// checked with the other panels.
 }
 
 // TestChipTextInheritsItsBackgroundsTextColor guards a bug that shipped: chips
@@ -2193,8 +2190,8 @@ func TestCompareSelectsAndExplainsItself(t *testing.T) {
 	if len(drawnSpans(t, none)) != 0 {
 		t.Error("/compare with no species drew a panel")
 	}
-	if !strings.Contains(none, "species") || !strings.Contains(none, "compare?species=") {
-		t.Error("/compare with no species does not say how to name one")
+	if !strings.Contains(none, "Compare birds") || !regexp.MustCompile(`<a href="/[^"]*">index</a>`).MatchString(none) {
+		t.Error("/compare with no species does not say how to pick birds, or link to the index")
 	}
 
 	// The diagram key is a page-level explanation: once, however many birds.
@@ -7009,9 +7006,8 @@ func TestFoldedFigureExplained(t *testing.T) {
 	u := unitsFor(false, sp.Mass.Value)
 	for _, want := range []string{
 		"drawn as an S",
-		u.format(sp.Segments.Neck.Value, view.ByLength) + " of line",
+		u.format(sp.Segments.Neck.Value, view.ByLength) + " neck",
 		"total length of " + u.format(sp.TotalLength.Value, view.ByLength),
-		"use the full length",
 	} {
 		if !strings.Contains(heron, want) {
 			t.Errorf("a heron's detail page does not say %q", want)

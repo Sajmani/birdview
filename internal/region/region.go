@@ -146,7 +146,7 @@ type Grouping struct {
 var Groupings = []Grouping{
 	{
 		Name: ByGeography,
-		Note: "The usual map, for finding your state quickly. Drawn by hand, not measured.",
+		Note: "By the map.",
 		Zones: []string{
 			"Alaska & the North",
 			"Pacific",
@@ -162,7 +162,7 @@ var Groupings = []Grouping{
 	},
 	{
 		Name: ByBirds,
-		Note: "Grouped by how much their bird lists actually overlap, measured from the records.",
+		Note: "By how much their bird lists overlap.",
 		Zones: []string{
 			"Hawaiian Islands",
 			"Tropical Pacific Atolls",

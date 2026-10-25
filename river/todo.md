@@ -38,10 +38,10 @@ the average field birder wants "so much info". Karen and Ryan both hit the phone
 ([#2](https://github.com/google/birdview/issues/2), fixed by
 [product.fitsAPhone](requirements/local/product/presentation.md#fitsaphone)).
 
-This conflicts with [product.pageExplainsItself](requirements/local/product/presentation.md#pageexplainsitself), whose help "starts open", and needs a
-decision before a redesign: from smallest to largest, start the help closed; move Presentation to
-the guide and leave a one-line key; or make search-and-compare the landing view and the full index
-the advanced one. Region choice at county scale needs search or a map, not chips.
+A redesign needs a decision first. The panels already start closed
+([product.collapsibleControls](requirements/local/product/presentation.md#collapsiblecontrols)), and the 2026-10-25 prose pass cut the page text; beyond that,
+from smallest to largest: move Presentation to the guide and leave a one-line key, or make
+search-and-compare the landing view and the full index the advanced one. Region choice at county scale needs search or a map, not chips.
 [#3](https://github.com/google/birdview/issues/3), a text box that filters the index as you type, is
 a first step either way; its requirement should settle whether the text is in the address, whether
 the counts and histogram follow it, and whether typing picks birds in compare mode.
@@ -74,7 +74,10 @@ Status: open
 Owner: Sameer
 Gate: when convenient
 
-First pass done 2026-10-20: README, AGENTS.md, CONTRIBUTING, CHANGELOG, the four guides, every
+Second pass 2026-10-25, on what readers see: the page templates, the text built in Go
+(`main.go` notes, verdicts, tooltips, `/added` and `/excluded`), the region grouping notes and
+`docs/using.md`. Design reasoning left the pages for river/; two requirements were amended to
+allow it ([product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram)'s cube and folded-neck notes). First pass done 2026-10-20: README, AGENTS.md, CONTRIBUTING, CHANGELOG, the four guides, every
 product and tech requirement, `app.md` and the page templates, about 30% shorter overall. Left:
 `decisions.md` and `acceptance.md` (history and verification records; decide whether to tighten
 them at all), `imports.md`, `notes.md`, `arch.md`, `bindings.md`, code comments, and page

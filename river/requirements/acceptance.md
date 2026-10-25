@@ -1032,9 +1032,10 @@ whole scheme, and every other assertion here would still pass.
 
 **Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) · **Level:** code · **Method:** assertions on rendered detail pages
 
-**Assertions:** a heron's detail page says its neck is drawn as an S, gives the species' own neck
-length and total length in the reader's units, and says the full length is what sorting, sections
-and measurements use; a straight-necked bird's page carries no such note.
+**Assertions:** a heron's detail page says its neck is drawn as an S and gives the species' own neck
+length and total length in the reader's units; a straight-necked bird's page carries no such note.
+(Until 2026-10-25 it also had to say the full length is what sorting, sections and measurements
+use.)
 
 **Status: verified 2026-10-22, passing, and watched failing** before the note existed
 (`TestFoldedFigureExplained`). Added because the page labeled a 10.1 in total length beneath a
@@ -1433,10 +1434,11 @@ bottom-left and the crossbar crosses the upper middle, so floating the cube to t
 tile, sliding it 120px right, tripling the projection depth and scaling it by 1.6 all leave it
 technically clear while moving the margin a long way.
 
-**Assertions, the Presentation panel:** it explains the cube in prose, naming what it is and
-warning that a cube root flattens. The diagram key alone is not enough — the Presentation panel
+**Assertions, the Presentation panel:** it explains the cube in prose, naming what it is: the
+bird's mass drawn as water. The diagram key alone is not enough — the Presentation panel
 is where a reader learns to read the drawing ([product.pageExplainsItself](local/product/presentation.md#pageexplainsitself)), and the cube is the one mark that is not a
-length.
+length. (Until 2026-10-25 it also had to warn that a cube root flattens; that warning left the
+page with the requirement's amendment.)
 
 **Status: verified 2026-10-01 — passing, and watched failing** by removing the cube from the
 index tiles, which left 0 across 6; by giving a tile the label too; by removing that prose; by

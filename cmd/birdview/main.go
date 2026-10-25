@@ -1547,15 +1547,15 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		rows = append(rows, familyRow{familyOption: f, Selected: selected[f.Name], URL: s.familyURL(r, next)})
 	}
 	page.Traits = []traitBlock{
-		s.traitControl(r, "Diet", "What the bird mostly eats. AVONET's classification, quoted — except Drinks sap, which is BirdView's own: AVONET has no category for birds that live off tree sap.",
+		s.traitControl(r, "Diet", "What the bird mostly eats, as AVONET classifies it. Drinks sap is BirdView's own.",
 			"niche", trait.Niches, opt.Niches, opt.HasNiches,
 			func(sp *dataset.Species) []dataset.Assignment { return sp.Niches }),
-		s.traitControl(r, "Habitat", "Where the bird mostly lives. AVONET's classification, quoted; BirdView adds a second habitat for a few birds and marks those as its own.",
+		s.traitControl(r, "Habitat", "Where the bird mostly lives, as AVONET classifies it. BirdView adds a second habitat for a few birds.",
 			"habitat", trait.Habitats, opt.Habitats, opt.HasHabitats,
 			func(sp *dataset.Species) []dataset.Assignment { return sp.Habitats }),
 	}
 	page.FamilyGroupings = []familyGroupingBlock{
-		{Name: "Taxonomic order", Note: "AviList's taxonomy, in checklist sequence — the order a field guide runs in.",
+		{Name: "Taxonomic order", Note: "AviList's taxonomy, in field-guide order.",
 			Groups: s.groupFamilies(r, selected, rows, nil,
 				func(f familyOption) []groupKey {
 					return []groupKey{{Name: f.Order, Common: f.OrderCommon}}
@@ -1770,9 +1770,8 @@ func foldNote(sp *dataset.Species, g view.Geometry, u units) string {
 	if !g.NeckFolded || group == "" {
 		return ""
 	}
-	return fmt.Sprintf("%s fly with the neck folded back, so the neck is drawn as an S: the same %s of "+
-		"line in less height. The figure is shorter than the bird's total length of %s; sorting, "+
-		"sections and every measurement use the full length.",
+	return fmt.Sprintf("%s fly with the neck folded, so the %s neck is drawn as an S and the figure is "+
+		"shorter than the bird's total length of %s.",
 		group, u.format(sp.Segments.Neck.Value, view.ByLength), u.format(sp.TotalLength.Value, view.ByLength))
 }
 
@@ -1840,27 +1839,16 @@ func (s *server) undrawn(w http.ResponseWriter, r *http.Request, u *dataset.Undr
 	case string(status.Vagrant):
 		d.Verdict = "it has turned up, but it does not come back"
 		d.Evidence = "Recorded in " + recurs + "."
-		d.Why = "BirdView draws the birds whose records recur: repeated arrivals, across " +
-			"several years, somewhere in the regions it covers. The bar is " + bar +
-			", and this bird has not reached it. A crowd of records is not evidence " +
-			"against that — a twitchable rarity draws observers, so a single arrival can " +
-			"out-record a resident."
+		d.Why = "BirdView draws the birds whose records recur, at least " + bar +
+			" in one region. This bird has not reached that."
 	case string(status.Historical):
 		d.Verdict = "its records recur, but they stopped"
 		d.Evidence = "Recorded in " + recurs + ", the last of them on " + prettyDate(u.LastSeen) + "."
-		d.Why = fmt.Sprintf("Recurrence alone cannot tell a resident from an extinct bird. "+
-			"GBIF carries museum specimens and old sight records under their original "+
-			"collection dates, so a species can satisfy every test for coming back and "+
-			"still not have been seen in a lifetime. A bird last recorded more than %d "+
-			"years before the occurrence data ends is filed as historical rather than "+
-			"present.", status.RecentYears)
+		d.Why = fmt.Sprintf("A bird last recorded more than %d years before the records "+
+			"end is counted as historical, not present.", status.RecentYears)
 	default:
 		d.Verdict = "the open record holds nothing that can be measured"
-		d.Why = "BirdView decides scope from the dates on which a species was recorded, " +
-			"and for this bird there are too few of them anywhere it covers to ask the " +
-			"question. No episode count is shown because none was computed: there are " +
-			"no zeros here that were measured. The name is known at all only because " +
-			"the occurrence data mentions it in passing."
+		d.Why = "There are too few dated records of it, anywhere BirdView covers, to judge."
 	}
 
 	// The body says what the status code says, and the status code is set
@@ -3372,11 +3360,9 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 			Origin: string(dataset.Derived),
 			// Both halves of the contrast, because the first on its own only
 			// says what the number is NOT. A share is where the bird is.
-			Detail: fmt.Sprintf("%s of the %s species observations from %s, in eBird via GBIF -- and "+
-				"iNaturalist where eBird withholds the bird. That is how much of what people record there is this bird, not "+
-				"how many of them there are: a plain count says where the birdwatchers are. "+
-				"A sea's records are those on open water inside its box, so a bird watched "+
-				"from the shore counts to the shore.",
+			Detail: fmt.Sprintf("%s of the %s species observations from %s, from eBird and "+
+				"iNaturalist via GBIF: how much of what people record there is this bird, not how "+
+				"many there are.",
 				comma(c.Records), comma(c.RegionRecords), where),
 			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "what this measures",
 		})
@@ -3546,10 +3532,8 @@ func shareOf(sp *dataset.Species, ds *dataset.Dataset, opt options) *shareCell {
 			// North Pacific, and would land here reading "no records" if
 			// that sea's total ever went missing again -- which is a
 			// statement about the bird, and false.
-			Note: "No data for these regions yet",
-			Title: "BirdView does not know how many birds have been recorded in the regions " +
-				"selected, so it cannot say what part of them this one is. That is a gap in " +
-				"BirdView's data, not a statement about the bird.",
+			Note:  "No data for these regions yet",
+			Title: "BirdView has no record totals for these regions yet.",
 		}
 	}
 	where, scope := "in the selected regions", "the selected regions"
@@ -3584,9 +3568,7 @@ func shareOf(sp *dataset.Species, ds *dataset.Dataset, opt options) *shareCell {
 	return &shareCell{
 		Where: where,
 		Ratio: ratio,
-		Title: fmt.Sprintf("%s of the %s species observations from %s are this species. "+
-			"That is how much of what people record is this bird, not how many of them "+
-			"are out there.",
+		Title: fmt.Sprintf("%s of the %s species observations from %s are this species.",
 			detail, comma(den), scope),
 	}
 }
@@ -3754,14 +3736,11 @@ func (s *server) sameMeasurements(sp *dataset.Species, loc dataset.Locale) []sea
 		var why string
 		switch {
 		case sp.Segments.Bill.Prov.Kind == dataset.NearMatch && o.Segments.Bill.Prov.Kind != dataset.NearMatch:
-			why = fmt.Sprintf("AVONET has no measurements of this bird, so it is drawn from %s's (%s). "+
-				"The two drawings are alike because the measurements are the same.", name, where)
+			why = fmt.Sprintf("AVONET has no measurements of this bird, so it is drawn from %s's (%s).", name, where)
 		case o.Segments.Bill.Prov.Kind == dataset.NearMatch && sp.Segments.Bill.Prov.Kind != dataset.NearMatch:
-			why = fmt.Sprintf("AVONET has no measurements of %s, so it is drawn from this bird's (%s). "+
-				"The two drawings are alike because the measurements are the same.", name, where)
+			why = fmt.Sprintf("AVONET has no measurements of %s, so it is drawn from this bird's (%s).", name, where)
 		default:
-			why = fmt.Sprintf("This bird and %s are both drawn from one AVONET row (%s). "+
-				"The two drawings are alike because the measurements are the same.", name, where)
+			why = fmt.Sprintf("This bird and %s are both drawn from one AVONET row (%s).", name, where)
 		}
 		out = append(out, seam{"Same measurements as " + name, why})
 	}
@@ -4138,14 +4117,9 @@ func (s *server) added(w http.ResponseWriter, r *http.Request) {
 
 	var b bytes.Buffer
 	b.WriteString("# What BirdView adds to its sources\n\n")
-	fmt.Fprintf(&b, "Every category on this site comes from a published source except the %d below. "+
-		"These are BirdView's own, listed here so they can be read in one place rather than "+
-		"found one bird at a time. Each also appears on that bird's own page.\n\n", len(rows))
-	b.WriteString("`derived` means BirdView computed it from published data by a stated rule. " +
-		"`birdview` means BirdView decided it and no source says it.\n\n")
-	b.WriteString("Everything else — habitat, diet, family, order — is AVONET's or AviList's, " +
-		"unchanged. The regions each bird is listed in are derived in bulk from GBIF records " +
-		"and are described in [the data document](/docs/data) rather than repeated here.\n\n")
+	fmt.Fprintf(&b, "Every category on this site comes from a published source except these %d, "+
+		"which are BirdView's own. `derived` means computed from published data by a stated rule; "+
+		"`birdview` means BirdView decided it.\n\n", len(rows))
 	b.WriteString("| | Species | Category | Origin | Why |\n|---|---|---|---|---|\n")
 	for _, r := range rows {
 		fmt.Fprintf(&b, "| %s | %s | %s | `%s` | %s |\n",
@@ -4169,14 +4143,11 @@ func (s *server) excluded(w http.ResponseWriter, r *http.Request) {
 	})
 	var b bytes.Buffer
 	b.WriteString("# Birds left off the index\n\n")
-	fmt.Fprintf(&b, "These %d birds recur in the records BirdView reads, so they pass its scope "+
-		"rule, but their records here are escapes, releases or birds kept by people: none has a "+
-		"population of its own anywhere BirdView covers. They are left off the index so they do "+
-		"not crowd out the birds a reader can expect to meet, and listed here so that leaving "+
-		"them off is not a silent edit. Each keeps its own page.\n\n", len(rows))
-	b.WriteString("The list is BirdView's own judgement, not a measurement: the records cannot say " +
-		"where a bird came from. Long-feral populations, such as Indian Peafowl in Florida, are " +
-		"not on it, and neither is any wild vagrant. See [how the data is made](/docs/data#scope).\n\n")
+	fmt.Fprintf(&b, "These %d birds pass BirdView's scope rule, but their records here are of "+
+		"escaped, released or kept birds, with no population of their own, so they are left off "+
+		"the index. Each keeps its own page. The list is BirdView's judgement; long-feral "+
+		"populations, such as Indian Peafowl in Florida, are not on it. See "+
+		"[how the data is made](/docs/data#scope).\n\n", len(rows))
 	b.WriteString("| Bird | Scientific name | Records | Why it is left off |\n|---|---|---:|---|\n")
 	for _, sp := range rows {
 		var n int64

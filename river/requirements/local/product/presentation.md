@@ -466,7 +466,8 @@ the two sets. It is a rule rather than a list because a list cannot notice what 
 Documentation for a removed control is worse than none: it sends a reader looking for something
 that is not there.
 
-The help is collapsible and starts open, so a returning user can dismiss it without losing it.
+The help is collapsible and, like every panel, starts closed
+([collapsibleControls](#collapsiblecontrols)); its summary says what opening it gets you.
 
 **A welcome line under the title offers a few things to try**, each a link, then a link to the
 full list in the guide's *Some things to try*, and last **reset to defaults**, a link to the bare

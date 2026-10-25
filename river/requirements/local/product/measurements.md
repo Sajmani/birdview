@@ -165,9 +165,9 @@ leader line, since they name the whole bird rather than a part.
 **Where the figure is shorter than the total length, the page says why.** A bird that flies with
 its neck folded has the neck drawn as an S ([decisions.foldedNeckAsS](../../decisions.md#foldedneckass)), so the figure spans less
 height than the total length labeled beneath it. Its detail page says so beside the neck note, with
-the species' own neck length and total length: the S is the same length of line in less height,
-and sorting, sections and every measurement use the full length. A bird drawn at full extent
-carries no such note.
+the species' own neck length and total length. That the S is the same length of line in less
+height, and that sorting, sections and every measurement use the full length, stays here rather
+than on the page (Sameer, 2026-10-25). A bird drawn at full extent carries no such note.
 
 **Mass is drawn as a number, and also as water.** The **cube of water that weighs what the bird
 weighs** is drawn in the **lower-left corner**, in oblique projection, at the diagram's own scale.
@@ -182,9 +182,11 @@ depth is 0.4 of the side: cabinet projection's 0.5 also clears the crossbar ever
 
 The **Presentation panel explains the cube**, not only the diagram key, since that panel teaches
 the drawing ([pageExplainsItself](presentation.md#pageexplainsitself)) and the cube is its one mark
-that is not a length. It says what the cube is, that every cube stands on the floor of its own
-diagram so two can be compared, and that a cube root flattens: a cube twice as wide is a bird eight
-times as heavy.
+that is not a length. Both say **what the cube is — the bird's mass drawn as water, at the same
+scale as the bird — and no more.** That every cube stands on the floor of its own diagram so two
+can be compared, and that a cube root flattens (a cube twice as wide is a bird eight times as
+heavy), is design reasoning, recorded here and not on the page; the number under the cube gives the
+mass (Sameer, 2026-10-25).
 
 **Mass is labeled under its cube, not in the stack under the tail.** On a small cube the label is
 wider than the face and is held clear of the left edge rather than centered past it.
