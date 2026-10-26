@@ -110,17 +110,22 @@
 
   // Arriving by a link ending in #here-and-now presses Here and Now
   // together. On load, so a test can stand in for the browser's location
-  // first. The fragment is dropped either way, so a reload or the Back button
-  // does not ask again.
+  // first, and when the fragment changes to it, since the home page's link
+  // is its own address with the fragment added, which a browser follows
+  // without loading the page. The fragment is dropped either way, so a
+  // reload or the Back button does not ask again.
   var welcome = document.querySelector(".welcomestatus[data-template]");
-  if (welcome && new URLSearchParams(location.hash.slice(1)).has("here-and-now")) {
+  function asked() { return new URLSearchParams(location.hash.slice(1)).has("here-and-now"); }
+  if (welcome) {
     // The page names where a region is chosen by hand; the classic view's
-    // Regions and months panel unless it says otherwise. The home page,
-    // already in this month, names its Region setting and offers no Now.
+    // Regions and months panel unless it says otherwise. On the home page,
+    // which names its Region setting, a failure leaves the page as it was.
+    var home = welcome.hasAttribute("data-where");
     var where = welcome.getAttribute("data-where") || "Regions and months";
-    var nowHint = welcome.hasAttribute("data-where") ? "" : " Press Now under Regions and months for this month.";
-    var scope = welcome.hasAttribute("data-where") ? "every region" : "every region and month";
-    window.addEventListener("load", function () {
+    var nowHint = home ? "" : " Press Now under Regions and months for this month.";
+    var shows = home ? "the page is unchanged" : "this shows every region and month";
+    var showsRegions = home ? "the page is unchanged" : "this shows every region";
+    var arrive = function () {
       var tell = function (text) {
         welcome.textContent = text;
         history.replaceState(null, "", location.pathname + location.search);
@@ -130,20 +135,22 @@
         ready.then(function () {
           var slug = lookup(pos.coords.latitude, pos.coords.longitude);
           if (!slug) {
-            tell("You are outside every region BirdView covers, so this shows every region." + nowHint);
+            tell("You are outside every region BirdView covers, so " + showsRegions + "." + nowHint);
             return;
           }
           window.location.replace(welcome.getAttribute("data-template")
             .replace("__REGION__", slug).replace("__MONTH__", MONTHS[new Date().getMonth()]));
         }, function () {
-          tell("The region boundaries did not load, so this shows every region.");
+          tell("The region boundaries did not load, so " + showsRegions + ".");
         });
       }, function (err) {
         tell(err.code === 1
-          ? "Permission to use your location was refused, so this shows " + scope + ". Choose yours under " + where + "."
-          : "Your location could not be found, so this shows " + scope + ". Choose yours under " + where + ".");
+          ? "Permission to use your location was refused, so " + shows + ". Choose yours under " + where + "."
+          : "Your location could not be found, so " + shows + ". Choose yours under " + where + ".");
       }, { timeout: 15000, maximumAge: 600000 });
-    });
+    };
+    if (asked()) window.addEventListener("load", arrive);
+    window.addEventListener("hashchange", function () { if (asked()) arrive(); });
   }
 
   here.addEventListener("click", function () {

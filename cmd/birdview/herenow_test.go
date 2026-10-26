@@ -446,13 +446,23 @@ func TestHereAndNowLink(t *testing.T) {
 	byMonth := httptest.NewRequest(http.MethodGet, string(s.monthURL(r, map[int]bool{thisMonth: true})), nil)
 	wantCA := string(s.regionURL(byMonth, map[string]bool{ca.ID: true}))
 
+	frag := func(geo string) string {
+		if strings.HasPrefix(geo, "follow=1&") {
+			return "#probe=1&" + geo
+		}
+		return "#here-and-now&probe=1&geo=" + geo
+	}
 	// On the home page, the link chooses the region and sets the month to
 	// Now, which names no month, keeping every other setting.
 	for _, c := range []struct{ name, start, geo, lands, says string }{
 		{"in California", start, "38.5816,-121.4944", wantCA, ""},
 		{"refused", start, "denied", start, "refused"},
 		{"home in California", "/?by=mass&month=May", "38.5816,-121.4944", "/?by=mass&region=CA", ""},
-		{"home refused", "/", "denied", "/", "refused, so this shows every region. Choose yours under Region."},
+		{"home refused", "/", "denied", "/", "refused, so the page is unchanged. Choose yours under Region."},
+		// Clicked on the page, not arrived by: the link only adds the
+		// fragment, so the page must answer its change.
+		{"home clicked in California", "/?by=mass&month=May", "follow=1&geo=38.5816,-121.4944", "/?by=mass&region=CA", ""},
+		{"home clicked refused", "/?region=FL", "follow=1&geo=denied", "/?region=FL", "refused, so the page is unchanged. Choose yours under Region."},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			t.Parallel()
@@ -468,7 +478,7 @@ func TestHereAndNowLink(t *testing.T) {
 				"--no-default-browser-check", "--disable-background-networking",
 				"--disable-component-update", "--disable-sync", "--disable-extensions",
 				"--user-data-dir="+t.TempDir(), "--virtual-time-budget=3000", "--dump-dom",
-				ts.URL+c.start+"#here-and-now&probe=1&geo="+c.geo)
+				ts.URL+c.start+frag(c.geo))
 			var dom string
 			if c.lands != c.start {
 				// Navigating leaves headless Chrome waiting; read the server's log.

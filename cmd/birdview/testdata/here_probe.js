@@ -22,6 +22,8 @@
 //                    stub the browser's location that way, then press Here
 //   geo=lat,lon | denied | unavailable
 //                    stub the location as the page loads, for #here-and-now
+//   follow=1         click the welcome line's #here-and-now link, as a reader
+//                    would, instead of arriving with the fragment
 //
 // The fragment is read as soon as this runs, because the page may drop it on
 // load before this script's own load handler sees it.
@@ -52,6 +54,9 @@ window.addEventListener("load", function () {
     out.lookups = JSON.parse(params.get("points") || "[]").map(function (p) {
       return window.BirdViewHere.lookup(p[0], p[1]);
     });
+    if (params.has("follow")) {
+      document.querySelector('.welcome a[href$="#here-and-now"]').click();
+    }
     var click = params.get("click");
     if (click) {
       stubLocation(click);

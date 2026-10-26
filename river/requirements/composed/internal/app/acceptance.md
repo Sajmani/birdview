@@ -303,7 +303,8 @@ key line; New here? Try's four comparisons each pin six real birds shown alone b
 and ducks draw only those families in every month, and the birds around you now is the address
 with #here-and-now, its template replacing the region and dropping the month (Now) and keeping
 every other setting; in headless Chrome, from /?by=mass&month=May in California it lands on
-/?by=mass&region=CA and, refused, says to choose under Region. In headless Chrome, the script's × goes where the server's does, and a
+/?by=mass&region=CA and, refused, says the page is unchanged and to choose under Region. The
+same holds when the link is clicked on the page, which changes only the fragment. In headless Chrome, the script's × goes where the server's does, and a
 tile's pin clicked with text in the box carries the text. In headless Chrome, clicking the First button or the First choice's edge
 sends the typed count, and clicking into its box does not; without the script, First is a submit
 button. The chosen order links to its reverse and back, every other
@@ -347,6 +348,7 @@ Watched failing: 2026-10-26, by Here keeping clear=1, by renaming its button, an
 Watched failing: 2026-10-26, by show=pinned that hid nothing, and by Here keeping show=pinned.
 Watched failing: 2026-10-26, by a Reset that dropped the pins, and by a Clear pins that kept them.
 Watched failing: 2026-10-26, by a pin that jumps to its tile, by not keeping the scroll ("the new page opened at 0"), and by dropping the pinned list or its entries.
+Watched failing: 2026-10-26, by here.js answering #here-and-now only on load (a click on the home page's link did nothing: "the welcome line says \"\"").
 Watched failing: 2026-10-26, by the birds around you now keeping the month ("want /?by=mass&region=CA next").
 Watched failing: 2026-10-26, by a comparison without show=pinned ("106 drawn"), by an unknown bird in one ("5 known"), by keeping "Drawn to scale", and by here.js ignoring the page's Region setting.
 Watched failing: 2026-10-26, by a tile's pin dropping the typed text, by the script's list links leaving it out, and by pinning emptying the box ("pinning went to /?family=Ardeidae&pin=shshaw").
