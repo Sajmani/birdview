@@ -770,7 +770,9 @@ is unchanged and does not link to it.
   JavaScript, Enter does the same.
 - **Filters are the count line.** The line under the box names each setting. Each is a control
   that opens the choices for that one setting directly under itself, as a `<details>`, so it
-  works without JavaScript. Family draws each family as its badge, with its description. Only one
+  works without JavaScript. **Clear pins**, there when something is pinned, unpins every bird and
+  keeps the settings; **Reset**, after it, returns every setting to its default and keeps the
+  pins. Family draws each family as its badge, with its description. Only one
   is open at a time, and a tap elsewhere closes it. A choice
   loads a new page, and the setting it was chosen in is open there, at the same place on the page,
   so several choices can be made in a row. Region

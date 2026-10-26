@@ -88,7 +88,8 @@
   </details>
   {{end}}
   <a class="reset show" href="{{.ShowURL}}" title="{{if .PinnedOnly}}Every bird the settings match, with your pinned birds{{else}}Only the birds you have pinned{{end}}">{{if .PinnedOnly}}Show all matching birds{{else}}Show only pinned{{end}}</a>
-  <a class="reset" href="{{.ResetURL}}" title="Back to this month's birds, most often recorded first">Reset</a>
+  {{with .ClearPinsURL}}<a class="reset" href="{{.}}" title="Unpin every bird, keeping the settings">Clear pins</a>{{end}}
+  <a class="reset" href="{{.ResetURL}}" title="Every setting back to its default: this month's birds, most often recorded first. Pins are kept.">Reset</a>
 </div>
 
 {{if .Tiles}}

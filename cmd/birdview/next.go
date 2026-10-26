@@ -20,6 +20,7 @@ import (
 	"math"
 	"net/http"
 	"net/url"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -129,7 +130,11 @@ type nextData struct {
 	FindLimit  int
 	FindScript template.JS
 	HereScript template.JS
-	ResetURL   template.URL
+	// ResetURL returns every setting to its default and keeps the pins;
+	// ClearPinsURL drops the pins and keeps every setting, empty when
+	// nothing is pinned.
+	ResetURL     template.URL
+	ClearPinsURL template.URL
 
 	// included are the pinned birds.
 	included map[string]bool
@@ -341,7 +346,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 	})
 
 	page := nextData{Feedback: s.feedback, Count: len(base), Total: len(s.ds.Species),
-		ResetURL: "/next", included: added, FindLimit: nextFindLimit,
+		included: added, FindLimit: nextFindLimit,
 		FindScript: s.nextFindJS}
 	tq := cloneValues(q)
 	tq.Del("find")
@@ -386,6 +391,17 @@ func (s *server) nextPage(r *http.Request) nextData {
 	}
 	sort.Strings(pinned)
 	page.PinnedIDs = strings.Join(pinned, " ")
+	keep := url.Values{}
+	for _, id := range nextValues(q, "pin") {
+		if added[id] && !slices.Contains(keep["pin"], id) {
+			keep.Add("pin", id)
+		}
+	}
+	page.ResetURL = nextURL(keep)
+	if len(added) > 0 {
+		// Showing only the pinned birds means nothing once none are.
+		page.ClearPinsURL = nextSet(q, "pin", "", "show", "all", "find")
+	}
 	page.PinnedOnly = pinnedOnly
 	if pinnedOnly {
 		page.ShowURL = nextSet(q, "show", "", "all")

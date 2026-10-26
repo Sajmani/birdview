@@ -789,3 +789,28 @@ func TestNextFamilyBadges(t *testing.T) {
 		t.Errorf("%s is not drawn as a badge with its description", f.Name)
 	}
 }
+
+// TestNextResetKeepsPins checks Reset and Clear pins: Reset returns every
+// setting to its default and keeps the pins, in their order; Clear pins
+// drops the pins and keeps every setting, and appears only when something
+// is pinned.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextResetKeepsPins(t *testing.T) {
+	s := newTestServer(t)
+	p := nextAt(s, "/next?by=mass&region=FL&month=May&pin=annhum&pin=amecro&show=pinned&rev=1")
+	if string(p.ResetURL) != "/next?pin=annhum&pin=amecro" {
+		t.Errorf("Reset links to %s, want the defaults with both pins, in order", p.ResetURL)
+	}
+	if string(p.ClearPinsURL) != "/next?by=mass&month=May&region=FL&rev=1" {
+		t.Errorf("Clear pins links to %s, want every setting kept and no pins", p.ClearPinsURL)
+	}
+	if p := nextAt(s, "/next?by=mass"); p.ClearPinsURL != "" || string(p.ResetURL) != "/next" {
+		t.Errorf("with nothing pinned: Clear pins %q, Reset %q; want no Clear pins and Reset to /next", p.ClearPinsURL, p.ResetURL)
+	}
+	_, body := get(t, s, "/next?pin=amecro")
+	clear, reset := strings.Index(body, ">Clear pins</a>"), strings.Index(body, ">Reset</a>")
+	if clear < 0 || reset < 0 || clear > reset {
+		t.Errorf("Clear pins at %d, Reset at %d; want Clear pins just before Reset", clear, reset)
+	}
+}
