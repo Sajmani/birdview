@@ -447,7 +447,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
   - [`TestDetailDiagramIsLabeled`](../cmd/birdview/main_test.go#L1598)
   - [`TestWingLabelsClearTheColumn`](../cmd/birdview/main_test.go#L1677)
   - [`TestDiagramTextPaintsOverLines`](../cmd/birdview/main_test.go#L1744)
-  - [`TestEveryReportedMetricIsLabelled`](../cmd/birdview/main_test.go#L2834)
+  - [`TestEveryReportedMetricIsLabeled`](../cmd/birdview/main_test.go#L2834)
   - [`TestDetailLabelsDoNotCollide`](../internal/view/view_test.go#L489)
 - Blocks: blocks once met
 - State: met since 2026-09-28 (currently blocking)
@@ -496,7 +496,7 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
   - [`TestComparisonKeepsTheFilter`](../cmd/birdview/main_test.go#L2468)
   - [`TestPicksSurviveTheDetailRoundTrip`](../cmd/birdview/main_test.go#L2508)
   - [`TestOnlyClearLeavesPickMode`](../cmd/birdview/main_test.go#L2533)
-  - [`TestUnrecognisedPicksAreDroppedAndNamed`](../cmd/birdview/main_test.go#L2598)
+  - [`TestUnrecognizedPicksAreDroppedAndNamed`](../cmd/birdview/main_test.go#L2598)
   - [`TestDetailPagePickStates`](../cmd/birdview/main_test.go#L2641)
   - [`TestCompareBirdsToggle`](../cmd/birdview/main_test.go#L2721)
   - [`TestPickLinksAnchorAtTheirTile`](../cmd/birdview/main_test.go#L2798)

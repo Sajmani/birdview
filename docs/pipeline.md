@@ -73,7 +73,7 @@ flowchart LR
     Trophic.Level ★ *a second diet, where it says Omnivore*
     Family1-3 ✗
     Secondary1 ✗`"]
-    FOX["`Fox, Brunton and Shephard wingspans
+    FOX["`Fox, Brunton, and Shephard wingspans
     *third_party/foxwingspan, CC BY 4.0*
     ─────────────
     Species1 · *join key, BirdLife names*

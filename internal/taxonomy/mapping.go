@@ -317,7 +317,7 @@ var OrderCommonNames = map[string]string{
 	"Accipitriformes":     "Hawks and Eagles",
 	// AviList separates the New World vultures into their own order, where
 	// ABA and AVONET had them among the hawks (decisions.avilistReplacesAba). Accipitriformes is
-	// relabelled to match: it no longer contains a vulture.
+	// relabeled to match: it no longer contains a vulture.
 	"Cathartiformes": "New World Vultures",
 	"Strigiformes":   "Owls",
 	"Trogoniformes":  "Trogons",

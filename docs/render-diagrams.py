@@ -72,16 +72,28 @@ def left_align_tables(svg: str) -> str:
 # before layout lets Dagre stack S1..S9 in one vertical column and wire
 # `S9 --> JSON`; `draw_step_arrows` then draws the vertical arrows S1 -> ... -> S9.
 STEP_CHAIN = "S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> JSON"
-STEP_NODE = re.compile(
-    r'<g [^>]*id="[^"]*flowchart-(S[1-9])-\d+"[^>]*'
-    r'transform="translate\(([-\d.]+),\s*([-\d.]+)\)"[^>]*>'
-    r'<g class="basic label-container outer-path"><path d="M[-\d.]+ ([-\d.]+)'
-)
+# A step box is a <g> whose id names the step and whose transform places it;
+# Mermaid versions differ in the order of those attributes, and in drawing the
+# box as a path ("M<x> <y>", y the top edge) or a rect (y the top edge too).
+STEP_G = re.compile(r'<g [^>]*>')
+STEP_ID = re.compile(r'id="[^"]*flowchart-(S[1-9])-\d+"')
+STEP_AT = re.compile(r'transform="translate\(([-\d.]+),\s*([-\d.]+)\)"')
+STEP_TOP = re.compile(r'\A(?:<g class="basic label-container[^"]*">)?'
+                      r'(?:<path d="M[-\d.]+ ([-\d.]+)|<rect [^>]*?\by="([-\d.]+)")')
 
 
 def draw_step_arrows(svg: str) -> str:
-    geom = {m.group(1): (float(m.group(2)), float(m.group(3)), abs(float(m.group(4))))
-            for m in STEP_NODE.finditer(svg)}
+    geom = {}
+    for g in STEP_G.finditer(svg):
+        tag = g.group(0)
+        sid, at = STEP_ID.search(tag), STEP_AT.search(tag)
+        if not (sid and at):
+            continue
+        top = STEP_TOP.search(svg[g.end():g.end() + 400])
+        if not top:
+            continue
+        half = abs(float(top.group(1) or top.group(2)))
+        geom[sid.group(1)] = (float(at.group(1)), float(at.group(2)), half)
     if len(geom) != 9:
         sys.exit(f"expected S1..S9 in SVG, found {sorted(geom)}")
     arrows = []

@@ -1833,7 +1833,7 @@ func TestDetailDiagramLabelsTotalLength(t *testing.T) {
 	// Centered on the BIRD's axis, not the box's. The two differ by half the
 	// label gutter, so a label centered on the box sits well to the right of the
 	// bird it names.
-	lt := labelledTile(findSpecies(t, "greblu"), view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{metric: true}, dataset.LocaleNA)
+	lt := labeledTile(findSpecies(t, "greblu"), view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{metric: true}, dataset.LocaleNA)
 	if x := attrF(t, el, "x"); math.Abs(x-lt.Geom.CX) > 0.05 {
 		t.Errorf("total length label at x=%.1f; the bird's axis is %.1f (box center is %.1f)",
 			x, lt.Geom.CX, lt.Box.W/2)
@@ -1903,7 +1903,7 @@ func TestTotalLengthLabelStaysInTheBox(t *testing.T) {
 	ds := testDataset()
 	for i := range ds.Species {
 		sp := &ds.Species[i]
-		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{metric: true}, dataset.LocaleNA)
+		lt := labeledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{metric: true}, dataset.LocaleNA)
 		if len(lt.FootLabels) == 0 {
 			t.Fatalf("%s: no whole-bird labels at all", sp.Name(dataset.LocaleNA))
 		}
@@ -2057,7 +2057,7 @@ func drawnSpans(t *testing.T, body string) []struct {
 // TestCompareSharesOneScale is the assertion the comparison view exists for:
 // every bird is laid out against the largest in the set, not against itself.
 //
-// This is the failure the code is one argument away from: labelledTileAt with
+// This is the failure the code is one argument away from: labeledTileAt with
 // the bird's own length produces a page that looks completely correct, with
 // every panel neatly filled, and compares nothing. No assertion on the markup
 // can see it -- only the drawn geometry can.
@@ -2588,14 +2588,14 @@ func TestOnlyClearLeavesPickMode(t *testing.T) {
 	}
 }
 
-// TestUnrecognisedPicksAreDroppedAndNamed asserts the rot handling of product.pickFromIndex
+// TestUnrecognizedPicksAreDroppedAndNamed asserts the rot handling of product.pickFromIndex
 // and decisions.compareUrlContract.
 //
 // The set mixes a good id with a dead one on purpose: with only a dead id,
 // "dropped it and carried on" and "refused the page" look the same.
 //
 // Verifies: product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
-func TestUnrecognisedPicksAreDroppedAndNamed(t *testing.T) {
+func TestUnrecognizedPicksAreDroppedAndNamed(t *testing.T) {
 	s := newTestServer(t)
 	code, body := get(t, s, "/?species=annhum&species=grus_canadensis")
 	if code != http.StatusOK {
@@ -2821,7 +2821,7 @@ func TestPickLinksAnchorAtTheirTile(t *testing.T) {
 	}
 }
 
-// TestEveryReportedMetricIsLabelled asserts product.labeledDetailDiagram's general rule: the diagram
+// TestEveryReportedMetricIsLabeled asserts product.labeledDetailDiagram's general rule: the diagram
 // carries every metric the detail view reports, not a chosen subset.
 //
 // Written against the provenance table rather than a list of metric names, so
@@ -2831,7 +2831,7 @@ func TestPickLinksAnchorAtTheirTile(t *testing.T) {
 // now fails this until the drawing carries it too.
 //
 // Verifies: product.labeledDetailDiagram. Criterion: acceptance.segmentLabelsDontCollide.
-func TestEveryReportedMetricIsLabelled(t *testing.T) {
+func TestEveryReportedMetricIsLabeled(t *testing.T) {
 	for _, units := range []string{"metric", "imperial"} {
 		body := mustGet(t, newTestServer(t), "/species/greblu?units="+units)
 
@@ -2899,7 +2899,7 @@ func TestMassCubeIsWaterToScale(t *testing.T) {
 
 	for i := range ds.Species {
 		sp := &ds.Species[i]
-		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{}, dataset.LocaleNA)
+		lt := labeledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{}, dataset.LocaleNA)
 
 		// One gram of water is one cubic centimeter, so the cube of water
 		// weighing massG grams has side cbrt(massG) cm = 10*cbrt(massG) mm.
@@ -2985,7 +2985,7 @@ func TestMassCubeIsRenderedAndExplained(t *testing.T) {
 		}
 	}
 
-	// On index tiles too, since decisions.massCubeOnTiles -- but unlabelled. A tile carries no
+	// On index tiles too, since decisions.massCubeOnTiles -- but unlabeled. A tile carries no
 	// labels at all and names the mass in its footer, so the cube appears
 	// with no text of its own.
 	_, index := get(t, s, "/")

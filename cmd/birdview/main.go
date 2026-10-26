@@ -463,7 +463,7 @@ var gzipPool = sync.Pool{New: func() any { return gzip.NewWriter(io.Discard) }}
 // The headers are decided in WriteHeader, not at the first Write, and that
 // ordering is the whole of the type. Setting Content-Encoding from Write is
 // too late for any handler that calls WriteHeader itself -- the header map is
-// already committed -- so the body goes out compressed and unlabelled, and a
+// already committed -- so the body goes out compressed and unlabeled, and a
 // browser renders binary. Both of BirdView's static files and every page of
 // product.undrawnSpeciesAnswer's 404 did exactly that in the first version of this.
 type gzipResponse struct {
@@ -578,7 +578,7 @@ func staticFiles(assets fs.FS) http.Handler {
 // running server holds the templates and CSS as they were when it STARTED, so
 // editing one and reloading shows the old page with no sign anything is stale.
 // It cost three wrong observations in one afternoon -- a recalibrated dataset,
-// a recoloured favicon and a footer credit, each reported from a page that no
+// a recolored favicon and a footer credit, each reported from a page that no
 // longer matched the repository.
 var assetFS fs.FS = web.Static
 
@@ -919,7 +919,7 @@ type tile struct {
 
 	// Labels and ChordLabel are empty on an index tile: the annotations of product.labeledDetailDiagram
 	// need room, so they appear only in the detail view and in the help legend,
-	// both of which build this struct through labelledTile.
+	// both of which build this struct through labeledTile.
 	Labels     []diagramLabel
 	TopOffset  float64
 	ChordLabel string
@@ -1474,7 +1474,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 		ClearURL: queryFor(r, filterKeys...)(),
 	}
 	if sp := s.legendSpecies(); sp != nil {
-		lt := labelledTile(sp, legendBox, unitsFor(opt.Metric3, sp.Mass.Value), opt.Locale)
+		lt := labeledTile(sp, legendBox, unitsFor(opt.Metric3, sp.Mass.Value), opt.Locale)
 		page.Legend = &lt
 	}
 
@@ -1640,7 +1640,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 				PickURL:   pickOf(sp.ID),
 				Picked:    pickedSet[sp.ID],
 				Anchor:    tileAnchor(sp.ID),
-				// Unlabelled: the tile carries no labels and its footer names
+				// Unlabeled: the tile carries no labels and its footer names
 				// the mass already (product.tileContents, decisions.massCubeOnTiles).
 				MassCube:    newMassCube(sp, tileBox.H, g.PxPerMm, ""),
 				WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
@@ -1775,7 +1775,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		row("Body", sp.Segments.Body, view.ByLength, one),
 		row("Tail", sp.Segments.Tail, view.ByLength, one),
 	}
-	lt := labelledTile(sp, box, one, opt.Locale)
+	lt := labeledTile(sp, box, one, opt.Locale)
 
 	// Only a confident match gets a link; zero means none was found (product.inaturalistLink).
 	var inatURL string
@@ -1987,7 +1987,7 @@ func (s *server) compare(w http.ResponseWriter, r *http.Request) {
 	panels := make([]comparePanel, 0, len(chosen))
 	for _, sp := range chosen {
 		panels = append(panels, comparePanel{
-			tile:      labelledTileAt(sp, box, u, refLength, refWingspan, opt.Locale),
+			tile:      labeledTileAt(sp, box, u, refLength, refWingspan, opt.Locale),
 			DetailURL: detailLink(r, sp.ID),
 			RemoveURL: compareWithout(r, sp.ID),
 		})
@@ -2302,14 +2302,14 @@ func (s *server) legendSpecies() *dataset.Species {
 	return nil
 }
 
-// labelledTile builds the annotated diagram for a bird drawn at its own scale:
+// labeledTile builds the annotated diagram for a bird drawn at its own scale:
 // the detail view and the help legend, each of which shows one bird with
 // nothing to measure it against (product.tileOpensDetail).
-func labelledTile(sp *dataset.Species, box view.Box, u units, loc dataset.Locale) tile {
-	return labelledTileAt(sp, box, u, sp.TotalLength.Value, sp.Wingspan.Value, loc)
+func labeledTile(sp *dataset.Species, box view.Box, u units, loc dataset.Locale) tile {
+	return labeledTileAt(sp, box, u, sp.TotalLength.Value, sp.Wingspan.Value, loc)
 }
 
-// labelledTileAt is the same diagram laid out against an EXTERNAL reference, so
+// labeledTileAt is the same diagram laid out against an EXTERNAL reference, so
 // several birds can share one scale (product.comparisonOneScale).
 //
 // That reference is the whole of the difference between the two views: the
@@ -2317,7 +2317,7 @@ func labelledTile(sp *dataset.Species, box view.Box, u units, loc dataset.Locale
 // a comparison mean something. Getting the argument wrong yields a page that
 // looks entirely correct and compares nothing, which is why acceptance.comparisonSharesScale asserts
 // drawn heights against the length ratio rather than asserting on the markup.
-func labelledTileAt(sp *dataset.Species, box view.Box, u units, refLength, refWingspan float64, loc dataset.Locale) tile {
+func labeledTileAt(sp *dataset.Species, box view.Box, u units, refLength, refWingspan float64, loc dataset.Locale) tile {
 	// draw is the area the bird gets; the emitted box is that plus the strip the
 	// total length label sits in, so the label costs the bird nothing. Going the
 	// other way -- keeping the box and shrinking the bird into it -- would take
