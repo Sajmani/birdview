@@ -540,6 +540,14 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 .next .count { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; position: relative; }
 .next .count .shown { margin-right: 4px; }
 .next .count .showall { margin-right: 6px; }
+/* The cap's box reads as part of the sentence: "First [100] of 1006 birds". */
+.capform { margin: 0; display: inline; }
+.capform .cap { width: 5.5ch; font: inherit; color: var(--ink); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; text-align: right;
+  -moz-appearance: textfield; appearance: textfield; }
+.capform .cap::-webkit-inner-spin-button, .capform .cap::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.capform .cap::placeholder { color: var(--dim); opacity: 1; }
+.capform .cap:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 /* Under its own setting. On a phone without the placing script, under the
    whole count line instead, since a setting at the right would open its
    choices off the screen. */

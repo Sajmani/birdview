@@ -41,13 +41,14 @@ import (
 // the checks can fix the month.
 var nextClock = time.Now
 
-// nextShowAll is how many birds /next draws, the top of the order, before
-// it offers to show the rest (product.nextView): a reader's first screens,
-// not the whole set (Sameer, 2026-10-26). Speed does not force it: measured
+// nextCap is how many birds /next draws by default, the top of the order,
+// before it offers to show the rest (product.nextView): a reader's first
+// screens, not the whole set (Sameer, 2026-10-26). The address can change it
+// (cap=50), or lift it (cap=none); the default is left out of addresses. Speed does not force it: measured
 // 2026-10-26 with Lighthouse's mobile throttling (4x CPU, 100 Mbps, 20 ms),
 // all 1,041 birds paint in 0.73 s (1.05 s at 6x), 229 KiB transferred. A
 // variable so the checks can change it.
-var nextShowAll = 100
+var nextCap = 100
 
 // nextFindLimit is the most name matches the find box lists; above it, the
 // box gives only their number (product.nextView). A variable so the checks
@@ -119,7 +120,13 @@ type nextData struct {
 	Controls []nextControl
 	Tiles    []tile
 	Items    []nextItem
-	// MoreURL shows every bird in the set; empty when all are shown. First
+	// Cap is the cap's box: the count drawn before the gap rows, or empty
+	// when there is no cap (cap=none). CapFields are the address's other
+	// settings, which the box's form sends with it.
+	Cap       string
+	CapFields []hiddenField
+	// MoreURL shows every bird in the set (cap=none); empty when all are
+	// shown. First
 	// is how many the filters chose that are drawn, Hidden how many are not,
 	// and AddedPast how many pinned birds are drawn from past the first.
 	MoreURL   template.URL
@@ -180,8 +187,8 @@ func nextValues(q url.Values, key string) []string {
 // nextToggle is the address with value v of key toggled under
 // product.nextView's rule: nothing selected is all, so choosing from all
 // selects only v; choosing a selected value removes it, and removing the last
-// returns to all. Changing which birds are shown also drops the find box and
-// the Show all, which belonged to the set before.
+// returns to all. Changing which birds are shown also drops the find box,
+// which belonged to the set before; the cap is kept.
 func nextToggle(q url.Values, key, v string) template.URL {
 	q = cloneValues(q)
 	cur := nextValues(q, key)
@@ -202,7 +209,6 @@ func nextToggle(q url.Values, key, v string) template.URL {
 		q.Add(key, c)
 	}
 	q.Del("find")
-	q.Del("all")
 	q.Del("show")
 	return nextURL(q)
 }
@@ -256,11 +262,35 @@ func nextOptions(r *http.Request) options {
 }
 
 func (s *server) next(w http.ResponseWriter, r *http.Request) {
-	if q := r.URL.Query(); q.Has("bird") {
+	q := r.URL.Query()
+	if q.Has("bird") {
 		http.Redirect(w, r, s.nextToggleBird(r), http.StatusSeeOther)
 		return
 	}
+	// The cap's box sends cap= whatever was typed: the default, a blank, or
+	// something not a count all mean the default, which addresses leave out.
+	if q.Has("cap") {
+		if _, _, ok := nextCapOf(q); !ok {
+			q.Del("cap")
+			http.Redirect(w, r, string(nextURL(q)), http.StatusSeeOther)
+			return
+		}
+	}
 	s.render(w, "next.html", s.nextPage(r))
+}
+
+// nextCapOf reads cap: how many birds to draw before the gap rows, or none
+// for no cap. ok is false when cap is absent or reads as the default, so the
+// address can leave it out.
+func nextCapOf(q url.Values) (n int, none, ok bool) {
+	v := strings.TrimSpace(q.Get("cap"))
+	if v == "none" {
+		return 0, true, true
+	}
+	if c, err := strconv.Atoi(v); err == nil && c > 0 && c != nextCap {
+		return c, false, true
+	}
+	return nextCap, false, false
 }
 
 // nextToggleBird is where bird=<id> goes: the same address with that bird
@@ -377,7 +407,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 	if opt.Locale == dataset.LocaleWorld {
 		page.BirdsURL += "?names=" + string(dataset.LocaleWorld)
 	}
-	// The first nextShowAll birds of the order, and every pinned bird past
+	// The first cap birds of the order, and every pinned bird past
 	// them, with a gap row wherever unpinned birds are left out (including
 	// after the last pinned bird).
 	type pick struct {
@@ -386,7 +416,20 @@ func (s *server) nextPage(r *http.Request) nextData {
 	}
 	var picks []pick
 	after := 0
-	if q.Get("all") == "1" {
+	capN, capNone, _ := nextCapOf(q)
+	page.Cap = strconv.Itoa(capN)
+	if capNone {
+		page.Cap = ""
+	}
+	for _, k := range sortedKeys(q) {
+		if k == "cap" || k == "find" {
+			continue
+		}
+		for _, v := range q[k] {
+			page.CapFields = append(page.CapFields, hiddenField{k, v})
+		}
+	}
+	if capNone {
 		for _, sp := range base {
 			picks = append(picks, pick{sp: sp})
 		}
@@ -394,7 +437,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 		gap := 0
 		for i, sp := range base {
 			switch {
-			case i < nextShowAll:
+			case i < capN:
 				picks = append(picks, pick{sp: sp})
 			case added[sp.ID]:
 				picks = append(picks, pick{sp: sp, before: gap})
@@ -407,8 +450,8 @@ func (s *server) nextPage(r *http.Request) nextData {
 		}
 		after = gap
 		if page.Hidden > 0 {
-			page.MoreURL = nextSet(q, "all", "1")
-			page.First = nextShowAll
+			page.MoreURL = nextSet(q, "cap", "none")
+			page.First = capN
 		}
 	}
 	pinned := make([]string, 0, len(added))
@@ -438,13 +481,13 @@ func (s *server) nextPage(r *http.Request) nextData {
 	})
 	if len(added) > 0 {
 		// Showing only the pinned birds means nothing once none are.
-		page.ClearPinsURL = nextSet(q, "pin", "", "show", "all", "find")
+		page.ClearPinsURL = nextSet(q, "pin", "", "show", "find")
 	}
 	page.PinnedOnly = pinnedOnly
 	if pinnedOnly {
-		page.ShowURL = nextSet(q, "show", "", "all")
+		page.ShowURL = nextSet(q, "show", "")
 	} else {
-		page.ShowURL = nextSet(q, "show", "pinned", "all", "find")
+		page.ShowURL = nextSet(q, "show", "pinned", "find")
 	}
 
 	// One scale: every bird shown is drawn to the longest and widest of them.
@@ -519,7 +562,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 	for i := range page.Controls {
 		if page.Controls[i].Label == "Region" {
 			hq := cloneValues(q)
-			for _, k := range []string{"region", "all", "find", "show"} {
+			for _, k := range []string{"region", "find", "show"} {
 				hq.Del(k)
 			}
 			hq.Set("region", hereSlot)
@@ -631,19 +674,19 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 	// All is a choice like the rest rather than the setting's All link, so
 	// every option sits on the one line.
 	allMonths := nextChoice{Label: "All", Title: "Every month", On: !opt.HasMonths,
-		URL: nextSet(q, "month", "all", "all", "find", "show")}
+		URL: nextSet(q, "month", "all", "find", "show")}
 	// Now is no month named: this month, whichever it is when the page is
 	// loaded, so a shared address keeps meaning the current month.
 	mch[0].Sep = true
 	mch = append([]nextChoice{allMonths, {Label: "Now", Title: "This month, " + month.Full[nowMonth] + ", whenever the page is loaded",
-		On: defaultMonth, URL: nextSet(q, "month", "", "all", "find", "show")}}, mch...)
+		On: defaultMonth, URL: nextSet(q, "month", "", "find", "show")}}, mch...)
 	mc.Groups = []nextChoiceGroup{{Choices: mch, OneLine: true}}
 	out = append(out, mc)
 
 	rc := nextControl{Label: "Region", Value: "everywhere"}
 	if opt.HasRegions {
 		rc.Value = nextList(s.regionNames(opt.Regions))
-		rc.AllURL = nextSet(q, "region", "", "all", "find", "show")
+		rc.AllURL = nextSet(q, "region", "", "find", "show")
 	}
 	g := region.Groupings[0]
 	for _, z := range g.Zones {
@@ -678,7 +721,7 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 	}
 	if opt.HasSelection {
 		fc.Value = nextList(fnames)
-		fc.AllURL = nextSet(q, "family", "", "all", "find", "show")
+		fc.AllURL = nextSet(q, "family", "", "find", "show")
 	}
 	out = append(out, fc)
 
@@ -696,7 +739,7 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 		}
 		if has {
 			c.Value = nextList(names)
-			c.AllURL = nextSet(q, param, "", "all", "find", "show")
+			c.AllURL = nextSet(q, param, "", "find", "show")
 		}
 		c.Groups = []nextChoiceGroup{{Choices: ch}}
 		return c

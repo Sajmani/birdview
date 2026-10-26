@@ -71,7 +71,15 @@
 
 <h2 class="settitle">{{.Title}}</h2>
 <div class="count">
-  <span class="shown">{{if .MoreURL}}First {{.First}} of {{end}}{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{with .AddedPast}}, and {{.}} added{{end}}</span>
+  {{/* The cap, editable: a form of its own, so Enter sends it with every
+       other setting, with or without JavaScript (product.nextView). Empty
+       means no cap; the server reads a blank as the default. */}}
+  <form class="shown capform" action="/next" method="get">
+    {{range .CapFields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
+    <label>First <input class="cap" type="number" name="cap" min="1" step="1" inputmode="numeric"
+      value="{{.Cap}}" placeholder="all" aria-label="How many birds to show before the rest are hidden"
+      title="How many birds to show; Enter to apply"></label> of {{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{with .AddedPast}}, and {{.}} added{{end}}
+  </form>
   {{with .MoreURL}}<a class="showall" href="{{.}}">Show all</a>{{end}}
   {{range .Controls}}
   {{/* One name for all, so opening one closes the others. */}}

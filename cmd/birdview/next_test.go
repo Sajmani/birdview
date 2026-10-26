@@ -64,9 +64,9 @@ func tileIDs(p nextData) []string {
 func TestNextLandingIsThisMonthByFrequency(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	old := nextShowAll
-	nextShowAll = 5000 // every bird drawn, so every admitted bird can be looked for
-	t.Cleanup(func() { nextShowAll = old })
+	old := nextCap
+	nextCap = 5000 // every bird drawn, so every admitted bird can be looked for
+	t.Cleanup(func() { nextCap = old })
 	for _, c := range []struct {
 		target string
 		months []int
@@ -423,7 +423,7 @@ func TestNextToggle(t *testing.T) {
 		{"region=FL&region=ME", "FL", "/next?region=ME"},
 		{"region=ME", "ME", "/next"},
 		{"region=", "ME", "/next?region=ME"},
-		{"region=FL&find=hawk&all=1&by=mass", "FL", "/next?by=mass"},
+		{"region=FL&find=hawk&cap=50&by=mass", "FL", "/next?by=mass&cap=50"},
 		{"pin=blujay&show=pinned", "FL", "/next?pin=blujay&region=FL"},
 	} {
 		if got := string(nextToggle(q(c.from), "region", c.v)); got != c.want {
@@ -432,24 +432,28 @@ func TestNextToggle(t *testing.T) {
 	}
 }
 
-// TestNextShowAll checks the cap: a set larger than nextShowAll draws the
-// top of its order and a link that shows them all, in the same order, and a
-// set within it draws every bird with no link.
+// TestNextShowAll checks the cap: a set larger than nextCap draws the top of
+// its order and a link that shows them all (cap=none), in the same order; a
+// set within it draws every bird with no link; cap=<n> draws n and is kept
+// across a filter and Show only pinned, and dropped by Reset; the count line
+// carries the cap as a box in a form that sends every other setting; and an
+// address naming the default, a blank, or nonsense redirects to one without
+// a cap. There is no all= any more.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextShowAll(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
 	p := nextAt(s, "/next")
-	if p.Count <= nextShowAll {
-		t.Fatalf("/next has %d birds; the check needs more than %d", p.Count, nextShowAll)
+	if p.Count <= nextCap {
+		t.Fatalf("/next has %d birds; the check needs more than %d", p.Count, nextCap)
 	}
-	if len(p.Tiles) != nextShowAll || p.MoreURL == "" || p.Hidden != p.Count-nextShowAll {
-		t.Errorf("/next draws %d of %d, hides %d, more link %q", len(p.Tiles), p.Count, p.Hidden, p.MoreURL)
+	if len(p.Tiles) != nextCap || string(p.MoreURL) != "/next?cap=none" || p.Hidden != p.Count-nextCap || p.Cap != "100" {
+		t.Errorf("/next draws %d of %d, hides %d, cap box %q, more link %q", len(p.Tiles), p.Count, p.Hidden, p.Cap, p.MoreURL)
 	}
 	all := nextAt(s, string(p.MoreURL))
-	if len(all.Tiles) != p.Count || all.MoreURL != "" {
-		t.Errorf("%s draws %d of %d", p.MoreURL, len(all.Tiles), p.Count)
+	if len(all.Tiles) != p.Count || all.MoreURL != "" || all.Cap != "" {
+		t.Errorf("%s draws %d of %d, cap box %q", p.MoreURL, len(all.Tiles), p.Count, all.Cap)
 	}
 	for i := range p.Tiles {
 		if p.Tiles[i].S != all.Tiles[i].S {
@@ -457,13 +461,68 @@ func TestNextShowAll(t *testing.T) {
 			break
 		}
 	}
-	_, body := get(t, s, "/next")
-	if want := `<span class="shown">First 100 of ` + strconv.Itoa(p.Count) + ` birds</span>
-  <a class="showall" href="` + html.EscapeString(string(p.MoreURL)) + `">Show all</a>`; !strings.Contains(body, want) {
-		t.Errorf("the count line has no Show all after its count; want %q", want)
+	if old := nextAt(s, "/next?all=1"); len(old.Tiles) != nextCap {
+		t.Errorf("/next?all=1 draws %d; all= is gone, so it draws the default %d", len(old.Tiles), nextCap)
 	}
-	if strings.Count(body, `href="`+html.EscapeString(string(p.MoreURL))+`"`) != 2 {
-		t.Error("Show all is not both on the count line and at the end")
+
+	// cap=50: fifty drawn, the box says so, and it survives a filter and
+	// Show only pinned but not Reset.
+	c := nextAt(s, "/next?by=mass&cap=50")
+	if len(c.Tiles) != 50 || c.First != 50 || c.Hidden != c.Count-50 || c.Cap != "50" ||
+		string(c.MoreURL) != "/next?by=mass&cap=none" {
+		t.Errorf("cap=50: %d drawn, first %d, hidden %d of %d, box %q, more %s",
+			len(c.Tiles), c.First, c.Hidden, c.Count, c.Cap, c.MoreURL)
+	}
+	if got := string(nextToggle(url.Values{"cap": {"50"}, "by": {"mass"}}, "region", "FL")); got != "/next?by=mass&cap=50&region=FL" {
+		t.Errorf("a filter from cap=50 goes to %s; the cap is kept", got)
+	}
+	if string(c.ShowURL) != "/next?by=mass&cap=50&show=pinned" || string(c.ResetURL) != "/next" {
+		t.Errorf("cap=50: Show only pinned %s, Reset %s", c.ShowURL, c.ResetURL)
+	}
+
+	// The count line: First [box] of N, the box in a form with the other
+	// settings, and Show all right after it.
+	_, body := get(t, s, "/next?by=mass&cap=50&find=jay")
+	form := regexp.MustCompile(`(?s)<form class="shown capform" action="/next" method="get">(.*?)</form>`).FindStringSubmatch(body)
+	if form == nil {
+		t.Fatal("the count line has no cap form")
+	}
+	hidden := regexp.MustCompile(`<input type="hidden" name="([^"]+)" value="([^"]*)">`).FindAllStringSubmatch(form[1], -1)
+	if len(hidden) != 1 || hidden[0][1] != "by" || hidden[0][2] != "mass" {
+		t.Errorf("the cap form sends %v; want by=mass alone (not cap, not find)", hidden)
+	}
+	if !strings.Contains(form[1], `name="cap"`) || !strings.Contains(form[1], `value="50"`) ||
+		!strings.Contains(form[1], `>First <input class="cap"`) || !strings.Contains(form[1], " of "+strconv.Itoa(c.Count)+" birds") {
+		t.Errorf("the cap form does not read First [50] of %d birds:\n%s", c.Count, form[1])
+	}
+	more := `href="` + html.EscapeString(string(nextAt(s, "/next?by=mass&cap=50&find=jay").MoreURL)) + `"`
+	if !strings.Contains(body, "</form>\n  <a class=\"showall\" "+more+">Show all</a>") {
+		t.Error("Show all does not follow the cap form")
+	}
+	if strings.Count(body, more) != 2 {
+		t.Error("Show all is not both on the count line and in the gap row at the end")
+	}
+	// The box is there even when nothing is hidden, so a small set can be capped.
+	if _, body := get(t, s, "/next?family=Ardeidae&cap=none"); !strings.Contains(body, `<input class="cap" type="number" name="cap"`) {
+		t.Error("with no cap, the count line has no cap box")
+	}
+
+	for from, to := range map[string]string{
+		"/next?cap=100&by=mass": "/next?by=mass", "/next?by=mass&cap=": "/next?by=mass",
+		"/next?cap=zero": "/next", "/next?cap=0": "/next", "/next?cap=-3": "/next",
+	} {
+		w := httptest.NewRecorder()
+		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, from, nil))
+		if w.Code != http.StatusSeeOther || w.Header().Get("Location") != to {
+			t.Errorf("GET %s = %d to %q, want 303 to %s", from, w.Code, w.Header().Get("Location"), to)
+		}
+	}
+	for _, ok := range []string{"/next?cap=50", "/next?cap=none"} {
+		w := httptest.NewRecorder()
+		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, ok, nil))
+		if w.Code != http.StatusOK {
+			t.Errorf("GET %s = %d, want 200", ok, w.Code)
+		}
 	}
 	if p := nextAt(s, "/next?family=Ardeidae"); p.MoreURL != "" || len(p.Tiles) != p.Count {
 		t.Errorf("the herons, %d birds, draw %d and offer Show all %q", p.Count, len(p.Tiles), p.MoreURL)
@@ -567,7 +626,7 @@ func TestNextControlsOpenOneAtATime(t *testing.T) {
 }
 
 // TestNextAddedPastTheFirstIsDrawn checks that a bird pinned from past the
-// first nextShowAll is drawn in its place in the order, with gap rows where
+// first nextCap is drawn in its place in the order, with gap rows where
 // unpinned birds are left out before, between, and after pinned birds, and
 // none once Show all is chosen.
 //
@@ -576,10 +635,10 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
 	before := nextAt(s, "/next")
-	all := nextAt(s, "/next?all=1")
+	all := nextAt(s, "/next?cap=none")
 	last := all.Tiles[len(all.Tiles)-1].S // the least recorded: far past the first
 	if hasTile(before, last.ID) {
-		t.Fatalf("%s is drawn already; the check needs a bird past the first %d", last.ID, nextShowAll)
+		t.Fatalf("%s is drawn already; the check needs a bird past the first %d", last.ID, nextCap)
 	}
 	m := nextAt(s, "/next?find="+url.QueryEscape(last.ScientificName)).Matches
 	if len(m) != 1 || m[0].Pinned {
@@ -587,17 +646,17 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	}
 	after := nextAt(s, follow(t, s, string(m[0].URL)))
 	if !hasTile(after, last.ID) {
-		t.Errorf("after adding %s from past the first %d, it is not drawn", last.ID, nextShowAll)
+		t.Errorf("after adding %s from past the first %d, it is not drawn", last.ID, nextCap)
 	}
 	// It was the very last of the hidden birds, so one fewer is hidden, all
 	// of them sit in one gap before it, and none sit after it.
-	if after.AddedPast != 1 || after.First != nextShowAll || after.Hidden != before.Hidden-1 {
+	if after.AddedPast != 1 || after.First != nextCap || after.Hidden != before.Hidden-1 {
 		t.Errorf("after adding: first %d, added past it %d, hidden %d (was %d)", after.First, after.AddedPast, after.Hidden, before.Hidden)
 	}
 	if len(after.Tiles) != len(before.Tiles)+1 {
 		t.Errorf("after adding one bird, %d drawn (was %d)", len(after.Tiles), len(before.Tiles))
 	}
-	if n := len(after.Items); n != nextShowAll+2 || after.Items[n-2].Hidden != after.Hidden || after.Items[n-1].Tile == nil {
+	if n := len(after.Items); n != nextCap+2 || after.Items[n-2].Hidden != after.Hidden || after.Items[n-1].Tile == nil {
 		t.Errorf("pinning the last bird leaves items ending %+v, %+v; want a gap of %d then its tile",
 			after.Items[n-2], after.Items[n-1], after.Hidden)
 	}
@@ -609,12 +668,12 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	_, body := get(t, s, two)
 	tokens := regexp.MustCompile(`id="(s-[a-z0-9]+)"|<p class="gap">([0-9]+) birds? hidden — <a href="([^"]+)">Show all</a></p>`).
 		FindAllStringSubmatch(body, -1)
-	if len(tokens) != nextShowAll+5 {
-		t.Fatalf("%s has %d tiles and gaps, want %d tiles and 3 gaps", two, len(tokens), nextShowAll+2)
+	if len(tokens) != nextCap+5 {
+		t.Fatalf("%s has %d tiles and gaps, want %d tiles and 3 gaps", two, len(tokens), nextCap+2)
 	}
-	tail := tokens[nextShowAll:]
+	tail := tokens[nextCap:]
 	if tail[0][2] == "" || tail[1][1] != "s-amecro" || tail[2][2] == "" || tail[3][1] != "s-fuwduc" || tail[4][2] == "" {
-		t.Fatalf("after the first %d, got %v; want gap, amecro, gap, fuwduc, gap", nextShowAll, tail)
+		t.Fatalf("after the first %d, got %v; want gap, amecro, gap, fuwduc, gap", nextCap, tail)
 	}
 	sum := 0
 	for _, g := range []int{0, 2, 4} {
@@ -634,10 +693,7 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	// A gap of one bird reads "1 bird hidden", and a gap after the last pin
 	// reads "birds hidden".
 	small := newTestServer(t)
-	old := nextShowAll
-	nextShowAll = 2
-	t.Cleanup(func() { nextShowAll = old })
-	_, sbody := get(t, small, "/next?month=all&by=mass&pin=amecro")
+	_, sbody := get(t, small, "/next?month=all&by=mass&pin=amecro&cap=2")
 	if !strings.Contains(sbody, `<p class="gap">1 bird hidden — `) || !strings.Contains(sbody, `<p class="gap">2 birds hidden — `) {
 		t.Errorf("with 1 hidden before amecro and 2 after, the gaps do not say so:\n%s", sbody)
 	}
@@ -653,9 +709,9 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 func TestNextShowPinned(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	start := nextAt(s, "/next?by=mass&all=1")
-	if string(start.ShowURL) != "/next?by=mass&show=pinned" {
-		t.Errorf("Show only pinned links to %s, want the order kept", start.ShowURL)
+	start := nextAt(s, "/next?by=mass&cap=none")
+	if string(start.ShowURL) != "/next?by=mass&cap=none&show=pinned" {
+		t.Errorf("Show only pinned links to %s, want the order and cap kept", start.ShowURL)
 	}
 	if a, b := nextAt(s, "/next?by=mass&show=all").Count, nextAt(s, "/next?by=mass").Count; a != b {
 		t.Errorf("show=all draws from %d birds, the default from %d; all is the default", a, b)

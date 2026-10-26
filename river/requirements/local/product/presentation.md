@@ -790,10 +790,14 @@ is unchanged and does not link to it.
 - **Order.** By how often recorded (the default, most often first), or by length, wingspan,
   mass, bill, or tail (smallest first). Choosing the chosen order again reverses it (`rev=1`).
   Order by is the first setting on the count line.
-- **Show all.** The page draws the first 100 birds of the order, plus any pinned birds past them.
-  Wherever unpinned birds are left out—after the first 100, between pinned birds past them, or
-  after the last pinned bird—a gap row says how many are hidden there and links to **Show all**
-  (`all=1`); **Show all** also follows the count ("First 100 of 1006 birds") on the count line. 100 is a reader's first
+- **The cap.** The page draws the first 100 birds of the order (`cap=100`, the default, which the
+  address leaves out), plus any pinned birds past them. The count line reads "First 100 of 1006
+  birds", and the 100 is a box: typing another count and pressing Enter sets `cap` to it, with or
+  without JavaScript; a blank, 100, or anything not a count returns to the default. Wherever
+  unpinned birds are left out (after the cap, between pinned birds past it, or after the last
+  pinned bird), a gap row says how many are hidden there and links to **Show all**
+  (`cap=none`), which also follows the count. The box is there for any set, so a small one can be
+  capped too. The cap is kept when a setting changes and dropped by Reset. 100 is a reader's first
   screens, not a limit of speed: all 1,041 birds paint in 0.73 s on a phone-class CPU over 5G
   (measured 2026-10-26 under Lighthouse's mobile throttling, 229 KiB).
 - **Stateless.** Every view is its address. `/next` with no month changes with the month, so it is
