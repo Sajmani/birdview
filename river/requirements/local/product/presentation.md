@@ -757,10 +757,10 @@ is unchanged and does not link to it.
 
 - **The set.** With no filter, it is every bird recorded in the month, most often recorded first.
   The month is the server's own unless the address names some; `month=all` is every month. Every
-  filter (family, region, month, habitat, diet) narrows the set, and birds added or removed by
-  name change it. **Clear** empties the set the settings choose, so only pinned birds are drawn,
-  for a comparison of the reader's own picks; **Undo clear** brings the settings' birds
-  back, and choosing a filter leaves the cleared view.
+  filter (family, region, month, habitat, diet) narrows the set, and pinned birds join it.
+  **Show only pinned** (`show=pinned`) draws only the pinned birds, for a comparison of the
+  reader's own picks; **Show all matching birds** returns to `show=all`, the default, which the
+  address leaves out. Choosing a filter also returns to it.
 - **Pins.** Every drawn bird has a pin, a push pin in a box, filled when the bird is pinned. A
   pinned bird (`pin=<id>`) is drawn whatever the settings, wherever the order puts it, even past
   the first 100, and the count line says how many are. Unpinning returns the bird to the settings'

@@ -422,7 +422,7 @@ func TestNextToggle(t *testing.T) {
 		{"region=ME", "ME", "/next"},
 		{"region=", "ME", "/next?region=ME"},
 		{"region=FL&find=hawk&all=1&by=mass", "FL", "/next?by=mass"},
-		{"clear=1&pin=blujay", "FL", "/next?pin=blujay&region=FL"},
+		{"pin=blujay&show=pinned", "FL", "/next?pin=blujay&region=FL"},
 	} {
 		if got := string(nextToggle(q(c.from), "region", c.v)); got != c.want {
 			t.Errorf("toggling %s from %q = %s, want %s", c.v, c.from, got, c.want)
@@ -596,40 +596,44 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	}
 }
 
-// TestNextClear checks Clear: it empties the set the settings choose, so
-// only birds added by name are drawn; adding and removing then works on
-// those alone; Undo clear brings the settings' birds back with the added
-// ones; and choosing a filter leaves the cleared view.
+// TestNextShowPinned checks show=pinned: it empties the set the settings
+// choose, so only pinned birds are drawn; pinning and unpinning then work on
+// those alone; Show all matching birds brings the settings' birds back with
+// the pinned ones; show=all is the default; and choosing a filter leaves the
+// pinned-only view.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
-func TestNextClear(t *testing.T) {
+func TestNextShowPinned(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
 	start := nextAt(s, "/next?by=mass&all=1")
-	if string(start.ClearURL) != "/next?by=mass&clear=1" {
-		t.Errorf("Clear links to %s, want the order kept", start.ClearURL)
+	if string(start.ShowURL) != "/next?by=mass&show=pinned" {
+		t.Errorf("Show only pinned links to %s, want the order kept", start.ShowURL)
 	}
-	empty := nextAt(s, string(start.ClearURL))
-	if !empty.Cleared || len(empty.Tiles) != 0 || empty.Count != 0 || empty.Title != "Birds you chose" {
-		t.Errorf("cleared: %d drawn of %d, title %q", len(empty.Tiles), empty.Count, empty.Title)
+	if a, b := nextAt(s, "/next?by=mass&show=all").Count, nextAt(s, "/next?by=mass").Count; a != b {
+		t.Errorf("show=all draws from %d birds, the default from %d; all is the default", a, b)
 	}
-	two := "/next?by=mass&clear=1&pin=amecro&pin=annhum"
+	empty := nextAt(s, string(start.ShowURL))
+	if !empty.PinnedOnly || len(empty.Tiles) != 0 || empty.Count != 0 || empty.Title != "Birds you chose" {
+		t.Errorf("pinned only: %d drawn of %d, title %q", len(empty.Tiles), empty.Count, empty.Title)
+	}
+	two := "/next?by=mass&pin=amecro&pin=annhum&show=pinned"
 	p := nextAt(s, two)
 	if got := tileIDs(p); !slices.Equal(got, []string{"annhum", "amecro"}) {
-		t.Errorf("cleared with two added draws %v, want annhum and amecro by mass", got)
+		t.Errorf("pinned only, with two pinned, draws %v, want annhum and amecro by mass", got)
 	}
-	if back := follow(t, s, two+"&bird=amecro"); back != "/next?by=mass&clear=1&pin=annhum" {
+	if back := follow(t, s, two+"&bird=amecro"); back != "/next?by=mass&pin=annhum&show=pinned" {
 		t.Errorf("removing one of two goes to %s", back)
 	}
-	undo := nextAt(s, string(p.ClearURL))
-	if undo.Cleared || !hasTile(undo, "amecro") || !hasTile(undo, "annhum") || undo.Count < 500 {
-		t.Errorf("Undo clear (%s): cleared %t, %d birds", p.ClearURL, undo.Cleared, undo.Count)
+	undo := nextAt(s, string(p.ShowURL))
+	if undo.PinnedOnly || !hasTile(undo, "amecro") || !hasTile(undo, "annhum") || undo.Count < 500 {
+		t.Errorf("Show all matching birds (%s): pinned only %t, %d birds", p.ShowURL, undo.PinnedOnly, undo.Count)
 	}
 }
 
 // TestNextHereAndNow checks the Region setting's Here and the Month
 // setting's Now. Here's address, filled with a region, is the page with only
-// that region chosen, every other setting kept, and the cleared view left;
+// that region chosen, every other setting kept, and the pinned-only view left;
 // the page carries here.js and the boundary file to find the region with.
 // Now is the first month choice, chosen when no month is named, and links
 // to no month named.
@@ -638,7 +642,7 @@ func TestNextClear(t *testing.T) {
 func TestNextHereAndNow(t *testing.T) {
 	s := newTestServer(t)
 	fixNextClock(t, time.October)
-	p := nextAt(s, "/next?by=mass&region=CA&clear=1&month=May")
+	p := nextAt(s, "/next?by=mass&region=CA&show=pinned&month=May")
 	var region, mon *nextControl
 	for i := range p.Controls {
 		switch p.Controls[i].Label {

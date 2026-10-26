@@ -87,7 +87,7 @@
     </div>
   </details>
   {{end}}
-  <a class="reset clear" href="{{.ClearURL}}" title="{{if .Cleared}}Show the birds the settings choose, with yours{{else}}Show only birds you add by name{{end}}">{{if .Cleared}}Undo clear{{else}}Clear{{end}}</a>
+  <a class="reset show" href="{{.ShowURL}}" title="{{if .PinnedOnly}}Every bird the settings match, with your pinned birds{{else}}Only the birds you have pinned{{end}}">{{if .PinnedOnly}}Show all matching birds{{else}}Show only pinned{{end}}</a>
   <a class="reset" href="{{.ResetURL}}" title="Back to this month's birds, most often recorded first">Reset</a>
 </div>
 
@@ -95,8 +95,8 @@
 <div class="tiles">
   {{range .Tiles}}{{template "tile" .}}{{end}}
 </div>
-{{else if .Cleared}}
-<p class="empty">No birds yet. Find a bird above to add it.</p>
+{{else if .PinnedOnly}}
+<p class="empty">No birds are pinned yet. Find a bird above to pin it, or show all matching birds.</p>
 {{else}}
 <p class="empty">No birds match. <a href="{{.ResetURL}}">Reset</a>.</p>
 {{end}}

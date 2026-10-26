@@ -297,11 +297,12 @@ the most recorded duck last. Without a month the page is
 no-store with no validator; with one it carries an ETag. The index does not link to /next. Every
 count-line setting is a `<details>` sharing one name, so the browser opens one at a time, and
 Reset links to /next. The phone-width and contrast checks reach /next through the crawl, open
-every setting at once, and measure after the placing script has run. Adding the October set's
-least recorded bird, past the first 100, draws it and the count line says one was added. Clear
-keeps the order and draws nothing; with two added it draws those two by mass,
-removing one leaves the other, and Undo clear brings the October birds back with both. Here,
-filled with FL, is the page with only Florida chosen, every other setting kept, and the cleared
+every setting at once, and measure after the placing script has run. Pinning the October set's
+least recorded bird, past the first 100, draws it and the count line says one was added. Show
+only pinned links to `show=pinned` with the order kept and draws nothing; with two pinned it
+draws those two by mass, unpinning one leaves the other, and Show all matching birds brings the
+October birds back with both; `show=all` draws what the default does. Here, filled with FL, is
+the page with only Florida chosen, every other setting kept, and the pinned-only
 view left, and the page carries the button, its status, and here.js. Month's choices are one
 line, All, Now, and the twelve months, with a rule only before January; Now is chosen with no
 month named and links to none, and All is chosen with `month=all`. In headless Chrome, choosing
@@ -323,6 +324,7 @@ Watched failing: 2026-10-26, by dropping Show all from the count line.
 Watched failing: 2026-10-26, by capping added birds with the rest ("after adding tersan from past the first 100, it is not drawn"), and by a toggle that only undid a removal.
 Watched failing: 2026-10-26, by Clear that cleared nothing ("cleared: 100 drawn of 1006"), and by a filter that kept the cleared view.
 Watched failing: 2026-10-26, by Here keeping clear=1, by renaming its button, and by dropping Now.
+Watched failing: 2026-10-26, by show=pinned that hid nothing, and by Here keeping show=pinned.
 Watched failing: 2026-10-26, by not reopening the setting ("with [] open"), by never forgetting it ("a plain reload opened [Month]"), and by dropping the rule and the one line.
 Watched failing: 2026-10-26, by restoring the 1,200 cap ("/next has 1006 birds; the check needs more than 1200").
 Watched failing: 2026-10-26, by caching /next without a month like any page.

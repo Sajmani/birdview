@@ -110,10 +110,10 @@ type nextData struct {
 	Hidden    int
 	First     int
 	AddedPast int
-	// Cleared is set when only pinned birds are shown; ClearURL
-	// clears the set, or, once cleared, brings the filters' birds back.
-	Cleared  bool
-	ClearURL template.URL
+	// PinnedOnly is set when only pinned birds are shown (show=pinned);
+	// ShowURL switches to that, or back to every bird the settings match.
+	PinnedOnly bool
+	ShowURL    template.URL
 	// Find is the find box's text and Found how many birds it matches;
 	// Matches lists them when there are nextFindLimit or fewer.
 	Find    string
@@ -180,7 +180,7 @@ func nextToggle(q url.Values, key, v string) template.URL {
 	}
 	q.Del("find")
 	q.Del("all")
-	q.Del("clear")
+	q.Del("show")
 	return nextURL(q)
 }
 
@@ -290,11 +290,11 @@ func (s *server) nextPage(r *http.Request) nextData {
 		opt.Months = map[int]bool{nowMonth: true}
 	}
 
-	// Clear empties the set the filters choose, so only pinned birds are
-	// shown: a comparison of the reader's own picks.
-	cleared := q.Get("clear") == "1"
+	// show=pinned draws only the pinned birds: a comparison of the reader's
+	// own picks. show=all, the default, draws every bird the settings match.
+	pinnedOnly := q.Get("show") == "pinned"
 	var base []*dataset.Species
-	if !cleared {
+	if !pinnedOnly {
 		base, _ = s.filterSpecies(opt)
 	}
 	share := func(sp *dataset.Species) float64 {
@@ -386,11 +386,11 @@ func (s *server) nextPage(r *http.Request) nextData {
 	}
 	sort.Strings(pinned)
 	page.PinnedIDs = strings.Join(pinned, " ")
-	page.Cleared = cleared
-	if cleared {
-		page.ClearURL = nextSet(q, "clear", "", "all")
+	page.PinnedOnly = pinnedOnly
+	if pinnedOnly {
+		page.ShowURL = nextSet(q, "show", "", "all")
 	} else {
-		page.ClearURL = nextSet(q, "clear", "1", "all", "find")
+		page.ShowURL = nextSet(q, "show", "pinned", "all", "find")
 	}
 
 	// One scale: every bird shown is drawn to the longest and widest of them.
@@ -449,14 +449,14 @@ func (s *server) nextPage(r *http.Request) nextData {
 	}
 
 	page.Title = s.nextTitle(opt)
-	if cleared {
+	if pinnedOnly {
 		page.Title = "Birds you chose"
 	}
 	page.Controls = s.nextControls(q, opt, defaultMonth, nowMonth)
 	for i := range page.Controls {
 		if page.Controls[i].Label == "Region" {
 			hq := cloneValues(q)
-			for _, k := range []string{"region", "all", "find", "clear"} {
+			for _, k := range []string{"region", "all", "find", "show"} {
 				hq.Del(k)
 			}
 			hq.Set("region", hereSlot)
@@ -568,19 +568,19 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 	// All is a choice like the rest rather than the setting's All link, so
 	// every option sits on the one line.
 	allMonths := nextChoice{Label: "All", Title: "Every month", On: !opt.HasMonths,
-		URL: nextSet(q, "month", "all", "all", "find", "clear")}
+		URL: nextSet(q, "month", "all", "all", "find", "show")}
 	// Now is no month named: this month, whichever it is when the page is
 	// loaded, so a shared address keeps meaning the current month.
 	mch[0].Sep = true
 	mch = append([]nextChoice{allMonths, {Label: "Now", Title: "This month, " + month.Full[nowMonth] + ", whenever the page is loaded",
-		On: defaultMonth, URL: nextSet(q, "month", "", "all", "find", "clear")}}, mch...)
+		On: defaultMonth, URL: nextSet(q, "month", "", "all", "find", "show")}}, mch...)
 	mc.Groups = []nextChoiceGroup{{Choices: mch, OneLine: true}}
 	out = append(out, mc)
 
 	rc := nextControl{Label: "Region", Value: "everywhere"}
 	if opt.HasRegions {
 		rc.Value = nextList(s.regionNames(opt.Regions))
-		rc.AllURL = nextSet(q, "region", "", "all", "find", "clear")
+		rc.AllURL = nextSet(q, "region", "", "all", "find", "show")
 	}
 	g := region.Groupings[0]
 	for _, z := range g.Zones {
@@ -615,7 +615,7 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 	}
 	if opt.HasSelection {
 		fc.Value = nextList(fnames)
-		fc.AllURL = nextSet(q, "family", "", "all", "find", "clear")
+		fc.AllURL = nextSet(q, "family", "", "all", "find", "show")
 	}
 	out = append(out, fc)
 
@@ -633,7 +633,7 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 		}
 		if has {
 			c.Value = nextList(names)
-			c.AllURL = nextSet(q, param, "", "all", "find", "clear")
+			c.AllURL = nextSet(q, param, "", "all", "find", "show")
 		}
 		c.Groups = []nextChoiceGroup{{Choices: ch}}
 		return c
