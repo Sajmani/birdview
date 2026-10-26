@@ -559,6 +559,7 @@
 {{if .PickURL}}<a class="pick{{if .Picked}} on{{end}}" href="{{.PickURL}}"
    title="{{if .Picked}}Remove from the comparison{{else}}Pick for comparison{{end}}"
    >{{if .Picked}}&check; Picked{{else}}+ Pick{{end}}</a>{{end}}
+{{if .RemoveURL}}<a class="pick on" href="{{.RemoveURL}}" title="Take this bird back out">&times; Remove</a>{{end}}
 </div>
 {{end}}
 

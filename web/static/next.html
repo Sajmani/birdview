@@ -1,0 +1,98 @@
+{{- /*
+  Copyright 2026 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/ -}}
+{{/* The /next prototype (product.nextView). Every control is a link or a
+     form, and every popover is a <details>, so it works without JavaScript. */}}
+{{define "next.html"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BirdView</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="next">
+<header>
+  <h1>BirdView</h1>
+  <p class="sub">BirdView draws birds as stick figures to scale, so you can compare their
+  sizes.{{with .Feedback}}
+  Found something wrong? <a href="{{.}}">Report it</a>.{{end}}</p>
+  <p class="key">Drawn to scale. <b>Solid is measured, dashed is estimated.</b>
+  Click a bird for its numbers and sources. <a href="/docs/using">How to read a drawing</a>.</p>
+</header>
+
+<form class="search" action="/next" method="get" role="search">
+  {{range .Fields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
+  <input type="search" name="find" value="{{.Find}}" placeholder="Add a bird by name"
+         aria-label="Find a bird by name to add" autocomplete="off" spellcheck="false">
+</form>
+{{if .Find}}
+<div class="finds" role="region" aria-label="Birds found">
+  {{if .Matches}}
+  <ul>
+    {{range .Matches}}<li>{{if .Shown}}<span class="have">&check; shown</span>{{else}}<a class="btn" href="{{.AddURL}}">+ Add</a>{{end}}
+      {{.Name}} <i>{{.Scientific}}</i></li>
+    {{end}}
+  </ul>
+  {{if .FindMore}}<p class="hint">and {{.FindMore}} more; type more of the name.</p>{{end}}
+  {{else}}
+  <p class="hint">No bird's name contains &ldquo;{{.Find}}&rdquo;.</p>
+  {{end}}
+</div>
+{{end}}
+
+<h2 class="settitle">{{.Title}}</h2>
+<div class="count">
+  <span class="shown">{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}</span>
+  {{range .Controls}}
+  <details class="ctl">
+    <summary><b>{{.Label}}</b> {{.Value}}</summary>
+    <div class="pop">
+      {{with .Note}}<p class="hint">{{.}}</p>{{end}}
+      {{with .AllURL}}<p><a class="btn" href="{{.}}">All</a></p>{{end}}
+      {{range .Groups}}
+      <div class="popgroup">
+        {{with .Name}}<span class="lbl">{{.}}</span>{{end}}
+        {{range .Choices}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}>{{.Label}}</a>
+        {{end}}
+      </div>
+      {{end}}
+    </div>
+  </details>
+  {{end}}
+  <a class="reset" href="{{.ResetURL}}">Start over</a>
+</div>
+
+{{if .Tiles}}
+<div class="tiles">
+  {{range .Tiles}}{{template "tile" .}}{{end}}
+</div>
+{{else}}
+<p class="empty">No birds match. <a href="{{.ResetURL}}">Start over</a>.</p>
+{{end}}
+{{if .MoreURL}}
+<p class="more"><a class="btn" href="{{.MoreURL}}">Show all {{.Count}}</a>
+  <span class="hint">{{.Hidden}} more, in the same order</span></p>
+{{end}}
+
+<footer>
+  <p><b>BirdView</b> is non-commercial. It is built on freely available sources, credited with
+  thanks on <a href="/">the index</a> and in <a href="/docs/data">how the data is made</a>.</p>
+  <p class="caveat"><b>Every length here is modeled</b>, as are most wingspans. Click any bird to
+  see where each number comes from.</p>
+</footer>
+</body>
+</html>{{end}}

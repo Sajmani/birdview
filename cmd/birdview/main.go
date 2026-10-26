@@ -350,7 +350,9 @@ func (s *server) revalidated(h http.Handler) http.Handler {
 		// -dev mode has no fingerprint to trust, and /now answers from the
 		// clock: neither may be stored, and neither gets a validator that
 		// would let a stale answer be confirmed (decisions.hereAndNowCaching).
-		if s.build == "" || r.URL.Path == "/now" {
+		// /next without a month answers from the clock as well (product.nextView).
+		if s.build == "" || r.URL.Path == "/now" ||
+			(r.URL.Path == "/next" && r.URL.Query().Get("month") == "") {
 			w.Header().Set("Cache-Control", "no-store")
 			h.ServeHTTP(w, r)
 			return
@@ -695,6 +697,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		{"/docs", http.HandlerFunc(s.document)},
 		{"/docs/", http.HandlerFunc(s.document)},
 		{"/compare", http.HandlerFunc(s.compare)},
+		{"/next", http.HandlerFunc(s.next)},
 		{"/now", http.HandlerFunc(s.now)},
 		{"/boundaries/", http.HandlerFunc(s.boundaries)},
 		{"/robots.txt", http.HandlerFunc(robots)},
@@ -952,6 +955,9 @@ type tile struct {
 	// keeps the tile unchanged during ordinary browsing (product.tileContents).
 	PickURL template.URL
 	Picked  bool
+	// RemoveURL takes a bird added by name back out of /next's set
+	// (product.nextView). Empty everywhere else.
+	RemoveURL template.URL
 	// Anchor is this tile's fragment id. Picking navigates to it, so the
 	// browser restores the reading position itself during load instead of the
 	// scroll script jumping there after the page has already painted -- which
@@ -1331,92 +1337,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	// prevents: the notice appeared while 970 links still carried the dead id.
 	missingPicks := s.healPicks(r, &opt)
 
-	// A fresh page selects everything; an emptied selection selects nothing.
-	selected := opt.Families
-	if !opt.HasSelection {
-		selected = make(map[string]bool, len(s.fams))
-		for _, f := range s.fams {
-			selected[f.Name] = true
-		}
-	}
-	// Region works the same way, and composes with family (product.filtersCompose): a bird is
-	// shown when every active filter admits it.
-	inRegion := func(sp *dataset.Species) bool {
-		if !opt.HasRegions {
-			return true
-		}
-		for _, id := range sp.Regions {
-			if opt.Regions[id] {
-				return true
-			}
-		}
-		return false
-	}
-	// Months narrow the list as every other filter does (product.regionAndMonthFilter, decisions.monthPresence).
-	// A species is shown when SOME selected region admits it in SOME
-	// selected month, which is the same "any" the region and habitat
-	// filters use: picking two places asks for birds in either.
-	allMonths := !opt.HasMonths || len(opt.Months) == month.Count
-	inMonth := func(sp *dataset.Species) bool {
-		if allMonths {
-			return true
-		}
-		for i, id := range sp.Regions {
-			if opt.HasRegions && !opt.Regions[id] {
-				continue
-			}
-			if i >= len(sp.RegionMonths) {
-				continue
-			}
-			// A month eBird withholds this species here is missing by
-			// policy, so it is not judged: the species is shown, and its
-			// tile says why (decisions.ebirdSilenceNotAbsence). Painted Bunting was hidden from
-			// Florida in January this way -- eBird publishes none of its
-			// Florida records from October to March.
-			withheld := sp.WithheldIn(id)
-			for m := range withheld {
-				if withheld[m] && opt.Months[m] {
-					return true
-				}
-			}
-			in, ok := month.Present(sp.RegionMonths[i], s.ds.RegionMonthlyTotals[id])
-			if !ok {
-				// Too thin to say when. Shown in every month rather than
-				// hidden from any, and the tile says so (decisions.monthPresence).
-				return true
-			}
-			for m := range in {
-				if in[m] && opt.Months[m] {
-					return true
-				}
-			}
-		}
-		return false
-	}
-	// Habitat and niche compose the same way (product.habitatAndDietFilters, product.filtersCompose). A species
-	// matches when ANY of its assignments is selected, and the assignment's
-	// origin is irrelevant here: a habitat BirdView added is still a habitat
-	// the bird uses, and filtering it out would make the addition pointless.
-	anyAssigned := func(as []dataset.Assignment, want map[string]bool, active bool) bool {
-		if !active {
-			return true
-		}
-		for _, a := range as {
-			if want[a.Value] {
-				return true
-			}
-		}
-		return false
-	}
-	var filtered []*dataset.Species
-	for i := range s.ds.Species {
-		sp := &s.ds.Species[i]
-		if selected[sp.Family] && inRegion(sp) && inMonth(sp) &&
-			anyAssigned(sp.Habitats, opt.Habitats, opt.HasHabitats) &&
-			anyAssigned(sp.Niches, opt.Niches, opt.HasNiches) {
-			filtered = append(filtered, sp)
-		}
-	}
+	filtered, selected := s.filterSpecies(opt)
 	// Frequency is not a property of a bird, it is a ratio over the regions
 	// the reader has selected (product.shareOfRecords), so it is computed once here for the
 	// current selection rather than read off the species. Once per species,
@@ -1671,6 +1592,100 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	}
 	page.Histogram = histogram(page.MetricLabel, page.Sections, secs, opt.Metric, opt.Step)
 	s.render(w, "index.html", page)
+}
+
+// filterSpecies applies every filter the address carries to the index's
+// birds, and returns the ones every active filter admits, in dataset order,
+// with the families selected (product.filtersCompose). Shared by the index and
+// /next (product.nextView).
+func (s *server) filterSpecies(opt options) ([]*dataset.Species, map[string]bool) {
+	// A fresh page selects everything; an emptied selection selects nothing.
+	selected := opt.Families
+	if !opt.HasSelection {
+		selected = make(map[string]bool, len(s.fams))
+		for _, f := range s.fams {
+			selected[f.Name] = true
+		}
+	}
+	// Region works the same way, and composes with family (product.filtersCompose): a bird is
+	// shown when every active filter admits it.
+	inRegion := func(sp *dataset.Species) bool {
+		if !opt.HasRegions {
+			return true
+		}
+		for _, id := range sp.Regions {
+			if opt.Regions[id] {
+				return true
+			}
+		}
+		return false
+	}
+	// Months narrow the list as every other filter does (product.regionAndMonthFilter, decisions.monthPresence).
+	// A species is shown when SOME selected region admits it in SOME
+	// selected month, which is the same "any" the region and habitat
+	// filters use: picking two places asks for birds in either.
+	allMonths := !opt.HasMonths || len(opt.Months) == month.Count
+	inMonth := func(sp *dataset.Species) bool {
+		if allMonths {
+			return true
+		}
+		for i, id := range sp.Regions {
+			if opt.HasRegions && !opt.Regions[id] {
+				continue
+			}
+			if i >= len(sp.RegionMonths) {
+				continue
+			}
+			// A month eBird withholds this species here is missing by
+			// policy, so it is not judged: the species is shown, and its
+			// tile says why (decisions.ebirdSilenceNotAbsence). Painted Bunting was hidden from
+			// Florida in January this way -- eBird publishes none of its
+			// Florida records from October to March.
+			withheld := sp.WithheldIn(id)
+			for m := range withheld {
+				if withheld[m] && opt.Months[m] {
+					return true
+				}
+			}
+			in, ok := month.Present(sp.RegionMonths[i], s.ds.RegionMonthlyTotals[id])
+			if !ok {
+				// Too thin to say when. Shown in every month rather than
+				// hidden from any, and the tile says so (decisions.monthPresence).
+				return true
+			}
+			for m := range in {
+				if in[m] && opt.Months[m] {
+					return true
+				}
+			}
+		}
+		return false
+	}
+	// Habitat and niche compose the same way (product.habitatAndDietFilters, product.filtersCompose). A species
+	// matches when ANY of its assignments is selected, and the assignment's
+	// origin is irrelevant here: a habitat BirdView added is still a habitat
+	// the bird uses, and filtering it out would make the addition pointless.
+	anyAssigned := func(as []dataset.Assignment, want map[string]bool, active bool) bool {
+		if !active {
+			return true
+		}
+		for _, a := range as {
+			if want[a.Value] {
+				return true
+			}
+		}
+		return false
+	}
+	var filtered []*dataset.Species
+	for i := range s.ds.Species {
+		sp := &s.ds.Species[i]
+		if selected[sp.Family] && inRegion(sp) && inMonth(sp) &&
+			anyAssigned(sp.Habitats, opt.Habitats, opt.HasHabitats) &&
+			anyAssigned(sp.Niches, opt.Niches, opt.HasNiches) {
+			filtered = append(filtered, sp)
+		}
+	}
+	return filtered, selected
 }
 
 type detailData struct {
@@ -2791,6 +2806,7 @@ const robotsPolicy = `# BirdView: every control is a query parameter, so filtere
 User-agent: *
 Disallow: /*?
 Disallow: /compare
+Disallow: /next
 Disallow: /now
 Disallow: /boundaries/
 `

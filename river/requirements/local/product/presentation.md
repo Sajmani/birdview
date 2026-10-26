@@ -743,3 +743,44 @@ Rationale: BirdView will never have photographs, and a reader surprised by a siz
 bird. A link to the *wrong* bird is worse than none, and an absent link is legible where a search
 URL that always "works" hides the failure. See
 [decisions.inaturalistLinkAdopted](../../decisions.md#inaturalistlinkadopted).
+
+## nextView
+
+**A prototype of one view of birds, at /next**
+
+Subject: `presentation.next`
+Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
+
+**`/next` draws one set of birds, at one scale, with no sections or tiers**, beside the index
+until simulated readers have compared the two (Sameer, 2026-10-26; [scalableInterface](../../../todo.md#scalableinterface)). The index
+is unchanged and does not link to it.
+
+- **The set.** With no filter, it is the birds most often recorded in the month: of the birds at
+  1 in 1,000 or more of that month's records across every region, the most frequent in each
+  family. The month is the server's own unless the address names one, and a region narrows the
+  records counted, so the set is the commonest birds of that place. A **Show** setting switches
+  between this and every bird. Choosing a family, habitat, or diet shows every bird of that kind
+  unless the address asks otherwise. Every filter (family, region, month, habitat, diet) narrows
+  either set, and birds added by name join it.
+- **Adding a bird.** A box above the set finds birds by name as the search box does
+  ([searchBox](filtering.md#searchbox)). Matches are listed, each with a link that adds it
+  (`include=<id>`), and an added bird has a link that removes it.
+- **Filters are the count line.** The line under the box names each setting. Each is a control
+  that opens, in place, the choices for that one setting, as a `<details>`, so it works without
+  JavaScript. Choosing one option selects only it; choosing more adds them; choosing every
+  selected option again returns to all. Nothing selected means all.
+- **One scale.** Every bird shown is drawn to the scale of the longest. Its length, wingspan, and
+  mass are text under the drawing.
+- **Order.** By length (the default), wingspan, mass, bill, tail, or how often recorded.
+- **Show all.** A set larger than a threshold shows its first birds in order and ends with a link
+  that shows them all; that address says so, so it can be shared. The threshold is 1,200, the
+  most that paint in about a second on a phone-class CPU over 5G (measured 2026-10-26 under
+  Lighthouse's mobile throttling: 1,041 birds in 0.73 s, 229 KiB), so no North American set
+  reaches it yet.
+- **Stateless.** Every view is its address. `/next` with no month changes with the month, so it is
+  not stored or revalidated, as `/now` is not.
+
+Rationale: the first readers and the simulated ones found the index dense and its toggles
+backward, wanted search first, and could not read the comparison on a phone. A prototype beside
+the index lets the two be compared before any requirement of the index changes. See the proposal
+recorded with [scalableInterface](../../../todo.md#scalableinterface).

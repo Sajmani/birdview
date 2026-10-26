@@ -113,7 +113,7 @@ func TestRobotsKeepsCrawlersToPages(t *testing.T) {
 			continue
 		}
 		path, query, _ := strings.Cut(p.url, "?")
-		blocked := strings.HasPrefix(path, "/compare")
+		blocked := strings.HasPrefix(path, "/compare") || path == "/next"
 		want := query == "" && !blocked
 		if strings.Contains(p.url, "?") {
 			filtered++

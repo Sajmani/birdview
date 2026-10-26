@@ -267,3 +267,35 @@ whole 15% step it spans, between the bars on either side.
 ids existed, and with bars sized by raw count instead of by share of the largest tier. The empty
 buckets were watched failing by removing them: "0 empty buckets before tier 2, want 4".
 
+## nextViewDrawsOneSet
+
+**/next draws the set its address names, at one scale, and every control on its count line keeps to the rule**
+
+Covers: [product.nextView](../../../local/product/presentation.md#nextview)
+
+**Method:** over the real dataset, with the clock fixed to October. The landing set is worked out
+again in the check from the monthly counts, in October and in the May the address names: one bird
+per family, each the family's most often recorded at 1 in 1,000 or more, and no family missing.
+Every bird on four pages is drawn at one pixels-per-millimeter, and the longest fits its tile.
+Ordering by mass runs smallest first; ordering by frequency runs most often recorded first.
+Family and region narrow together, and an emptied filter shows all, not nothing. A name finds
+Sharp-shinned Hawk; its link adds it, keeps the filters, and drops the box; its remove link
+takes it out and nothing else; a bird already shown is not offered. Choosing from all selects
+only that one, choosing again removes it, and changing a filter drops the box and Show all.
+With the threshold lowered to 200, every bird draws 200 and a link to all 1,041 in the same
+order, and the landing set offers no link. Without a month the page is
+no-store with no validator; with one it carries an ETag. The index does not link to /next. The
+phone-width and contrast checks reach /next through the crawl.
+
+**Run:** `go test ./cmd/birdview/ -run 'TestNext'`
+**Status: verified 2026-10-26, passing.**
+Watched failing: 2026-10-26, by lowering the floor to 1 in 10,000 ("70 birds, want 47, one per family").
+Watched failing: 2026-10-26, by keeping each family's first bird instead of its commonest (Tree Swallow missing).
+Watched failing: 2026-10-26, by scaling each bird to its own length.
+Watched failing: 2026-10-26, by ordering frequency least recorded first.
+Watched failing: 2026-10-26, by letting an empty family filter mean none ("/next?family= shows 0 birds").
+Watched failing: 2026-10-26, by a remove link that removed nothing, and by an add link that kept the box.
+Watched failing: 2026-10-26, by a toggle that kept the find box and Show all.
+Watched failing: 2026-10-26, by ignoring all=1 ("draws 200 of 1041").
+Watched failing: 2026-10-26, by caching /next without a month like any page.
+Watched failing: 2026-10-26, by anchoring each popover to its own setting (the phone-width check: "the page is 543px wide in a 360px window").
