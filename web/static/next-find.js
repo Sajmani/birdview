@@ -18,7 +18,9 @@
 // there are few enough, each with its pin. The rule is Go's, as in search.js: the names file carries each bird's
 // normalized search text, and this only checks that what is typed,
 // normalized as normalizeSearch does, occurs in it. The pins go to the
-// server's bird= toggle, which decides what pinning means.
+// server's bird= toggle, which decides what pinning means, with the typed
+// text, so the list stays open for more pins until its × closes it. A pin
+// elsewhere on the page carries the text too.
 // TestNextFindInTheBrowser holds this to the Go page.
 (function () {
   var box = document.querySelector('form.search input[name="find"]');
@@ -26,6 +28,9 @@
   if (!box || !out) return;
   var limit = parseInt(out.getAttribute("data-limit"), 10) || 8;
   var toggle = out.getAttribute("data-toggle");
+  var close = out.getAttribute("data-close");
+  // Form-encoded, as Go's url.QueryEscape writes it.
+  function enc(s) { return new URLSearchParams({ v: s }).toString().slice(2); }
   var pinned = {};
   (out.getAttribute("data-pinned") || "").split(" ").forEach(function (id) {
     if (id) pinned[id] = true;
@@ -60,14 +65,21 @@
     var msg = n === 0 ? "No bird\u2019s name contains \u201c" + typed + "\u201d."
       : n === 1 ? "1 bird matches." : n + " birds match.";
     if (n > limit) msg += " Type more to list them.";
-    out.appendChild(el("p", "found", msg));
+    var p = el("p", "found");
+    var x = el("a", "findclose", "\u00d7");
+    x.href = close;
+    x.title = "Close the list";
+    x.setAttribute("aria-label", x.title);
+    p.appendChild(x);
+    p.appendChild(document.createTextNode(msg));
+    out.appendChild(p);
     if (n === 0 || n > limit) return;
     var ul = el("ul");
     found.forEach(function (b) {
       var li = el("li");
       var on = !!pinned[b[0]];
       var a = el("a", on ? "pin on" : "pin");
-      a.href = toggle + encodeURIComponent(b[0]);
+      a.href = toggle + "find=" + enc(typed) + "&bird=" + encodeURIComponent(b[0]);
       a.setAttribute("aria-pressed", on ? "true" : "false");
       a.title = (on ? "Unpin " : "Pin ") + b[1];
       a.setAttribute("aria-label", a.title);
@@ -79,6 +91,15 @@
     });
     out.appendChild(ul);
   }
+  // A pin on a tile or in the pinned list keeps the list open too.
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a.pin");
+    var typed = box.value.trim();
+    if (!a || !typed || out.contains(a)) return;
+    var u = new URL(a.href, location.href);
+    u.searchParams.set("find", typed);
+    a.href = u.pathname + u.search;
+  }, true);
   box.addEventListener("focus", load);
   box.addEventListener("input", render);
 })();

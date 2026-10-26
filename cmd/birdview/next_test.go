@@ -272,19 +272,23 @@ func TestNextPins(t *testing.T) {
 	if len(m) != 1 || m[0].ID != "shshaw" || m[0].Pinned {
 		t.Fatalf("find=sharp-shinned lists %+v, want Sharp-shinned Hawk unpinned", m)
 	}
-	pinned := follow(t, s, string(m[0].URL)+"&find=sharp-shinned")
-	if u, _ := url.Parse(pinned); u.Query().Get("find") != "" || u.Query().Get("family") != "Ardeidae" {
-		t.Errorf("pinning went to %s: want the family kept and the box emptied", pinned)
+	pinned := follow(t, s, string(m[0].URL))
+	if u, _ := url.Parse(pinned); u.Query().Get("find") != "sharp-shinned" || len(u.Query()["find"]) != 1 || u.Query().Get("family") != "Ardeidae" {
+		t.Errorf("pinning went to %s: want the family kept and the find box's text kept once", pinned)
+	}
+	if again := nextAt(s, pinned); len(again.Matches) != 1 || !again.Matches[0].Pinned || string(again.CloseURL) != "/?family=Ardeidae&pin=shshaw" {
+		t.Errorf("after pinning from the list, it lists %+v and its × goes to %s; want the hawk pinned, and × to the page without find",
+			again.Matches, again.CloseURL)
 	}
 	withHawk := nextAt(s, pinned)
 	unpin, on, drawn := pinOf(withHawk, "shshaw")
 	if !drawn || !on || withHawk.Count != before.Count+1 {
 		t.Fatalf("after pinning, %d birds (was %d), hawk drawn %t pinned %t", withHawk.Count, before.Count, drawn, on)
 	}
-	if back, _, _ := strings.Cut(string(unpin), "#"); back != start {
-		t.Errorf("unpinning the hawk goes to %s, want %s", unpin, start)
+	if back := string(unpin); back != start+"&find=sharp-shinned" {
+		t.Errorf("unpinning the hawk goes to %s, want %s with the text kept", unpin, start+"&find=sharp-shinned")
 	}
-	if m := nextAt(s, pinned+"&find=sharp-shinned").Matches; len(m) != 1 || !m[0].Pinned {
+	if m := nextAt(s, pinned).Matches; len(m) != 1 || !m[0].Pinned {
 		t.Errorf("a pinned bird found again is %+v; want it shown pinned", m)
 	}
 
@@ -368,8 +372,10 @@ func TestNextFindInTheBrowser(t *testing.T) {
 		Typed []struct {
 			Q     string   `json:"q"`
 			Found string   `json:"found"`
+			Close string   `json:"close"`
 			Items []string `json:"items"`
 		} `json:"typed"`
+		TilePin string `json:"tilePin"`
 	}
 	if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
 		t.Fatalf("reading the probe: %v", err)
@@ -386,8 +392,16 @@ func TestNextFindInTheBrowser(t *testing.T) {
 		if fm == nil {
 			t.Fatalf("the server's page for find=%q has no count", r.Q)
 		}
-		if want := html.UnescapeString(fm[1]); r.Found != want {
+		closer := regexp.MustCompile(`^<a class="findclose" href="([^"]*)"[^>]*>&times;</a>`)
+		cm := closer.FindStringSubmatch(fm[1])
+		if cm == nil {
+			t.Fatalf("the server's list for find=%q has no × first", r.Q)
+		}
+		if want := html.UnescapeString(closer.ReplaceAllString(fm[1], "")); r.Found != want {
 			t.Errorf("typing %q: the script says %q, the server %q", r.Q, r.Found, want)
+		}
+		if want := html.UnescapeString(cm[1]); r.Close != want || want != start {
+			t.Errorf("typing %q: the script's × goes to %q, the server's to %q; want %s", r.Q, r.Close, want, start)
 		}
 		var want []string
 		finds := body[strings.Index(body, `<div class="finds"`):]
@@ -407,6 +421,9 @@ func TestNextFindInTheBrowser(t *testing.T) {
 	}
 	if lists < 3 {
 		t.Errorf("only %d queries listed birds; the check proves little", lists)
+	}
+	if u, err := url.Parse(res.TilePin); err != nil || u.Query().Get("find") != "crow" || u.Query().Get("month") != "all" {
+		t.Errorf("a tile's pin clicked with \"crow\" in the box goes to %q; want the text kept with the settings", res.TilePin)
 	}
 }
 

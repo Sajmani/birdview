@@ -771,7 +771,9 @@ the classic view.
   choice; nothing removes a bird the settings choose. A box above the set finds birds by name as
   the search box does ([searchBox](filtering.md#searchbox)): as the reader types, it says how many
   birds match, and once there are 10 or fewer it lists them, each with its pin. Without
-  JavaScript, Enter does the same.
+  JavaScript, Enter does the same. Pinning keeps the box's text, so the list stays open and
+  several of its birds can be pinned and unpinned in turn, from the list or from their tiles;
+  the list's **×** closes it, dropping the text.
 - **Filters are the count line.** The line under the box names each setting. Each is a control
   that opens the choices for that one setting directly under itself, as a `<details>`, so it
   works without JavaScript. **Clear pins**, there when something is pinned, unpins every bird and

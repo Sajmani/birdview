@@ -29,12 +29,20 @@ window.addEventListener("load", function () {
       box.value = q;
       box.dispatchEvent(new Event("input", { bubbles: true }));
       var f = document.querySelector(".finds .found");
-      var r = { q: q, found: f ? f.textContent : "", items: [] };
+      var x = f && f.querySelector("a.findclose");
+      var r = { q: q, found: f ? f.textContent.replace(x ? x.textContent : "", "") : "",
+        close: x ? x.getAttribute("href") : "", items: [] };
       document.querySelectorAll(".finds li a").forEach(function (a) {
         r.items.push(a.className + " " + a.getAttribute("href"));
       });
       out.typed.push(r);
     });
+    // A tile's pin, clicked with text in the box, carries the text.
+    box.value = "crow";
+    var tp = document.querySelector(".tilewrap > a.pin");
+    document.addEventListener("click", function (e) { e.preventDefault(); });
+    tp.click();
+    out.tilePin = tp.getAttribute("href");
     done();
   }, 1000);
 });

@@ -155,10 +155,13 @@ type nextData struct {
 	Found   int
 	Matches []nextMatch
 	Fields  []hiddenField
-	// ToggleURL is this address with bird= last and empty: a bird's id
-	// appended pins or unpins it. PinnedIDs are the pinned birds,
-	// space-separated, and BirdsURL the names the script searches.
+	// ToggleURL is this address without find or bird, ready for more:
+	// find=<text>&bird=<id> appended pins or unpins the bird and keeps the
+	// list open on the text. CloseURL closes the list: this address without
+	// find. PinnedIDs are the pinned birds, space-separated, and BirdsURL the
+	// names the script searches.
 	ToggleURL  string
+	CloseURL   template.URL
 	PinnedIDs  string
 	BirdsURL   string
 	FindLimit  int
@@ -320,7 +323,7 @@ func nextShowOf(q url.Values) (mode string, n int, ok bool) {
 }
 
 // nextToggleBird is where bird=<id> goes: the same address with that bird
-// pinned, or unpinned if it was, and the find box emptied. The find box's
+// pinned, or unpinned if it was, the find box's text kept. The find box's
 // script links here, so the rule stays in Go.
 func (s *server) nextToggleBird(r *http.Request) string {
 	q := r.URL.Query()
@@ -333,12 +336,12 @@ func (s *server) nextToggleBird(r *http.Request) string {
 	return string(nextPin(q, id))
 }
 
-// nextPin is the address with bird id pinned, or unpinned if it was, and
-// the find box emptied. It stays where it is on the page: the pinned list
-// under the find box names the bird and links to its tile.
+// nextPin is the address with bird id pinned, or unpinned if it was. The
+// find box keeps its text, so its list stays open for more pins until it is
+// closed. It stays where it is on the page: the pinned list under the find
+// box names the bird and links to its tile.
 func nextPin(q url.Values, id string) template.URL {
 	q = cloneValues(q)
-	q.Del("find")
 	pins := nextValues(q, "pin")
 	q.Del("pin")
 	was := false
@@ -428,10 +431,11 @@ func (s *server) nextPage(r *http.Request) nextData {
 	tq := cloneValues(q)
 	tq.Del("find")
 	tq.Del("bird")
-	page.ToggleURL = "/?bird="
+	page.ToggleURL = "/?"
 	if len(tq) > 0 {
-		page.ToggleURL = "/?" + tq.Encode() + "&bird="
+		page.ToggleURL = "/?" + tq.Encode() + "&"
 	}
+	page.CloseURL = nextURL(tq)
 	page.BirdsURL = "/birds.json"
 	if opt.Locale == dataset.LocaleWorld {
 		page.BirdsURL += "?names=" + string(dataset.LocaleWorld)
@@ -575,7 +579,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 			for _, sp := range found {
 				page.Matches = append(page.Matches, nextMatch{ID: sp.ID, Name: sp.Name(opt.Locale),
 					Scientific: sp.ScientificName, Pinned: added[sp.ID],
-					URL: template.URL(page.ToggleURL + url.QueryEscape(sp.ID))})
+					URL: template.URL(page.ToggleURL + "find=" + url.QueryEscape(page.Find) + "&bird=" + url.QueryEscape(sp.ID))})
 			}
 		}
 	}

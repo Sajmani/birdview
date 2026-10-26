@@ -37,16 +37,17 @@
 {{/* The find box. With JavaScript, next-find.js counts the matches as the
      reader types and lists them once there are FindLimit or fewer; without
      it, Enter does the same on the server. Each listed bird links to
-     bird=<id>, which adds it or removes it. */}}
+     bird=<id>, which pins or unpins it and keeps the text, so the list
+     stays open for more pins until its × closes it. */}}
 <form class="search" action="/" method="get" role="search">
   {{range .Fields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
   <input type="search" name="find" value="{{.Find}}" placeholder="Find a bird to pin"
          aria-label="Find a bird by name to pin" autocomplete="off" spellcheck="false">
 </form>
 <div class="finds" role="status" aria-live="polite" data-birds="{{.BirdsURL}}"
-     data-toggle="{{.ToggleURL}}" data-pinned="{{.PinnedIDs}}" data-limit="{{.FindLimit}}">
+     data-toggle="{{.ToggleURL}}" data-close="{{.CloseURL}}" data-pinned="{{.PinnedIDs}}" data-limit="{{.FindLimit}}">
   {{if .Find}}
-  <p class="found">{{if eq .Found 0}}No bird&rsquo;s name contains &ldquo;{{.Find}}&rdquo;.{{else if eq .Found 1}}1 bird matches.{{else}}{{.Found}} birds match.{{end}}{{if gt .Found .FindLimit}} Type more to list them.{{end}}</p>
+  <p class="found"><a class="findclose" href="{{.CloseURL}}" title="Close the list" aria-label="Close the list">&times;</a>{{if eq .Found 0}}No bird&rsquo;s name contains &ldquo;{{.Find}}&rdquo;.{{else if eq .Found 1}}1 bird matches.{{else}}{{.Found}} birds match.{{end}}{{if gt .Found .FindLimit}} Type more to list them.{{end}}</p>
   {{if .Matches}}
   <ul>
     {{range .Matches}}<li><a class="pin{{if .Pinned}} on{{end}}" href="{{.URL}}" aria-pressed="{{if .Pinned}}true{{else}}false{{end}}"
@@ -196,7 +197,7 @@
   // A pin loads a new page too; it keeps the reader's place on it, so
   // pinning a bird does not move the page.
   document.addEventListener("click", function (e) {
-    var a = e.target.closest && e.target.closest("a.pin");
+    var a = e.target.closest && e.target.closest("a.pin, a.findclose");
     if (!a) return;
     try {
       sessionStorage.setItem(KEY, JSON.stringify({ ctl: "", y: window.scrollY }));

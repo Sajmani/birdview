@@ -281,8 +281,9 @@ Every bird on four pages is drawn at one pixels-per-millimeter, and the longest 
 Ordering by mass runs smallest first; ordering by frequency runs most often recorded first.
 Family and region narrow together, and an emptied filter shows all, not nothing. Every drawn
 heron has an unpinned pin, and no pin excludes a bird. Sharp-shinned Hawk, found by name, pins
-from the find list with the family kept and the box emptied, is drawn pinned, is found again
-pinned, and unpins to the address it came from; a heron already drawn pins in place and unpins
+from the find list with the family and the box's text kept, so the list stays open with the hawk
+pinned and its × goes to the page without the text; it is drawn pinned and unpins to the address
+it came from, text kept; a heron already drawn pins in place and unpins
 back. Without JavaScript, five queries give the matcher's count and list the birds only at 10 or
 fewer. In headless Chrome, typing six queries (one in capitals, one over a lowered limit, one
 matching nothing) shows the same count line and lists the same birds, with the same pins, on or
@@ -297,7 +298,8 @@ setting but show and the find box, beside All with the count the settings match 
 (2), the chosen one marked, and its summary names the choice. The count line is two rows: what is
 drawn, Show, Clear pins, and Reset, then Order by through Names; it has no Show all of its own.
 `show=100`, `show=`, `show=0`, `show=-3`, and `show=zero` redirect to the address without show;
-`show=50`, `show=all`, and `show=pinned` do not. In headless Chrome, clicking the First button or the First choice's edge
+`show=50`, `show=all`, and `show=pinned` do not. In headless Chrome, the script's × goes where the server's does, and a
+tile's pin clicked with text in the box carries the text. In headless Chrome, clicking the First button or the First choice's edge
 sends the typed count, and clicking into its box does not; without the script, First is a submit
 button. The chosen order links to its reverse and back, every other
 order links to itself unreversed, reversed mass runs largest first, and reversed frequency puts
@@ -340,6 +342,7 @@ Watched failing: 2026-10-26, by Here keeping clear=1, by renaming its button, an
 Watched failing: 2026-10-26, by show=pinned that hid nothing, and by Here keeping show=pinned.
 Watched failing: 2026-10-26, by a Reset that dropped the pins, and by a Clear pins that kept them.
 Watched failing: 2026-10-26, by a pin that jumps to its tile, by not keeping the scroll ("the new page opened at 0"), and by dropping the pinned list or its entries.
+Watched failing: 2026-10-26, by a tile's pin dropping the typed text, by the script's list links leaving it out, and by pinning emptying the box ("pinning went to /?family=Ardeidae&pin=shshaw").
 Watched failing: 2026-10-26, by dropping the edge click's script, by sending on every click ("box 1"), and by First not being a submit button.
 Watched failing: 2026-10-26, by a filter dropping every show, by ignoring a count ("show=50: 100 drawn"), by the First form sending show twice, by All counting only the drawn birds ("under Pinned only, All offers 0 birds"), by one count-line row, and by an unmarked First.
 Watched failing: 2026-10-26, by the count line saying "and 1 added" instead of "plus 1 pin".
