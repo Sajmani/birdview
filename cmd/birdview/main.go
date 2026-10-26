@@ -963,9 +963,10 @@ type tile struct {
 	// keeps the tile unchanged during ordinary browsing (product.tileContents).
 	PickURL template.URL
 	Picked  bool
-	// RemoveURL takes a bird added by name back out of /next's set
+	// PinURL pins the bird on /next, or unpins it when Pinned
 	// (product.nextView). Empty everywhere else.
-	RemoveURL template.URL
+	PinURL template.URL
+	Pinned bool
 	// Anchor is this tile's fragment id. Picking navigates to it, so the
 	// browser restores the reading position itself during load instead of the
 	// scroll script jumping there after the page has already painted -- which

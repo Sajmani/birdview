@@ -15,11 +15,10 @@
 // /next's find box (product.nextView), inlined into the page.
 //
 // As the reader types, it says how many birds match and lists them once
-// there are few enough, each with a link that adds it to the set or removes
-// it. The rule is Go's, as in search.js: the names file carries each bird's
+// there are few enough, each with its pin. The rule is Go's, as in search.js: the names file carries each bird's
 // normalized search text, and this only checks that what is typed,
-// normalized as normalizeSearch does, occurs in it. The links go to the
-// server's bird= toggle, which decides what adding or removing means.
+// normalized as normalizeSearch does, occurs in it. The pins go to the
+// server's bird= toggle, which decides what pinning means.
 // TestNextFindInTheBrowser holds this to the Go page.
 (function () {
   var box = document.querySelector('form.search input[name="find"]');
@@ -27,10 +26,11 @@
   if (!box || !out) return;
   var limit = parseInt(out.getAttribute("data-limit"), 10) || 8;
   var toggle = out.getAttribute("data-toggle");
-  var shown = {};
-  (out.getAttribute("data-shown") || "").split(" ").forEach(function (id) {
-    if (id) shown[id] = true;
+  var pinned = {};
+  (out.getAttribute("data-pinned") || "").split(" ").forEach(function (id) {
+    if (id) pinned[id] = true;
   });
+  var icon = document.getElementById("pinicon");
   var birds = null, loading = null;
 
   function normalize(s) {
@@ -65,8 +65,13 @@
     var ul = el("ul");
     found.forEach(function (b) {
       var li = el("li");
-      var a = el("a", shown[b[0]] ? "btn rm" : "btn", shown[b[0]] ? "\u2212 Remove" : "+ Add");
+      var on = !!pinned[b[0]];
+      var a = el("a", on ? "pin on" : "pin");
       a.href = toggle + encodeURIComponent(b[0]);
+      a.setAttribute("aria-pressed", on ? "true" : "false");
+      a.title = (on ? "Unpin " : "Pin ") + b[1];
+      a.setAttribute("aria-label", a.title);
+      if (icon) a.appendChild(icon.content.cloneNode(true));
       li.appendChild(a);
       li.appendChild(document.createTextNode(" " + b[1] + " "));
       li.appendChild(el("i", "", b[2]));

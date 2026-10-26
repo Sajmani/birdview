@@ -559,9 +559,16 @@
 {{if .PickURL}}<a class="pick{{if .Picked}} on{{end}}" href="{{.PickURL}}"
    title="{{if .Picked}}Remove from the comparison{{else}}Pick for comparison{{end}}"
    >{{if .Picked}}&check; Picked{{else}}+ Pick{{end}}</a>{{end}}
-{{if .RemoveURL}}<a class="pick on" href="{{.RemoveURL}}" title="Take this bird back out">&times; Remove</a>{{end}}
+{{if .PinURL}}{{template "pin" .}}{{end}}
 </div>
 {{end}}
+
+{{/* A push pin in a box: pinning keeps a bird on /next whatever the
+     settings (product.nextView). Filled when pinned. The find box's script
+     copies the icon from the page, so it is drawn once, here. */}}
+{{define "pin"}}<a class="pin{{if .Pinned}} on{{end}}" href="{{.PinURL}}" aria-pressed="{{if .Pinned}}true{{else}}false{{end}}"
+   title="{{if .Pinned}}Unpin{{else}}Pin{{end}} {{.Name}}" aria-label="{{if .Pinned}}Unpin{{else}}Pin{{end}} {{.Name}}">{{template "pinicon"}}</a>{{end}}
+{{define "pinicon"}}<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M10.2 1.5l4.3 4.3-1.4.5-2.3 2.3.6 3.6-1.3 1.3-2.9-2.9-4.1 4.1-.9-.9 4.1-4.1-2.9-2.9 1.3-1.3 3.6.6 2.3-2.3z"/></svg>{{end}}
 
 {{define "diagram"}}
 {{$g := .Geom}}{{$b := .Box}}

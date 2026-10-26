@@ -279,14 +279,15 @@ those months' birds or every bird; each most often recorded first. October narro
 all. The count line has no Show setting and starts with Order by, set to frequency.
 Every bird on four pages is drawn at one pixels-per-millimeter, and the longest fits its tile.
 Ordering by mass runs smallest first; ordering by frequency runs most often recorded first.
-Family and region narrow together, and an emptied filter shows all, not nothing. A name finds
-Sharp-shinned Hawk; its link adds it, keeps the filters, and empties the box; found again, it is
-offered to remove, and removing it returns the address it came from. A heron the filters chose
-is offered to remove, removing it takes out that bird and nothing else, and putting it back
-returns the address it came from. Without JavaScript, five queries give the matcher's count and
-list the birds only at 8 or fewer. In headless Chrome, typing six queries (one in capitals, one
-over a lowered limit, one matching nothing) shows the same count line and lists the same birds,
-with the same Add or Remove links, as the server's page for each. Choosing from all selects
+Family and region narrow together, and an emptied filter shows all, not nothing. Every drawn
+heron has an unpinned pin, and no pin excludes a bird. Sharp-shinned Hawk, found by name, pins
+from the find list with the family kept and the box emptied, is drawn pinned, is found again
+pinned, and unpins to the address it came from; a heron already drawn pins in place and unpins
+back. Without JavaScript, five queries give the matcher's count and list the birds only at 10 or
+fewer. In headless Chrome, typing six queries (one in capitals, one over a lowered limit, one
+matching nothing) shows the same count line and lists the same birds, with the same pins, on or
+off, as the server's page for each. The Family setting draws every family in its badge's colors
+with its description. Choosing from all selects
 only that one, choosing again removes it, and changing a filter drops the box and Show all.
 /next draws the first 100 of October's 1,006 and a link to all of them in the same order, both
 right after "First 100 of 1006 birds" on the count line and at the end; the
@@ -298,7 +299,7 @@ count-line setting is a `<details>` sharing one name, so the browser opens one a
 Reset links to /next. The phone-width and contrast checks reach /next through the crawl, open
 every setting at once, and measure after the placing script has run. Adding the October set's
 least recorded bird, past the first 100, draws it and the count line says one was added. Clear
-keeps the order, drops removals, and draws nothing; with two added it draws those two by mass,
+keeps the order and draws nothing; with two added it draws those two by mass,
 removing one leaves the other, and Undo clear brings the October birds back with both. Here,
 filled with FL, is the page with only Florida chosen, every other setting kept, and the cleared
 view left, and the page carries the button, its status, and here.js. Month's choices are one
@@ -326,6 +327,7 @@ Watched failing: 2026-10-26, by not reopening the setting ("with [] open"), by n
 Watched failing: 2026-10-26, by restoring the 1,200 cap ("/next has 1006 birds; the check needs more than 1200").
 Watched failing: 2026-10-26, by caching /next without a month like any page.
 Watched failing: 2026-10-26, by anchoring each popover to its own setting with no placing script (the phone-width check: "the page is 543px wide in a 360px window").
+Watched failing: 2026-10-26, by never marking a pin pinned, by a pin that never unpins, by dropping the families' colors, and by the script drawing every pin unpinned.
 Watched failing: 2026-10-26, by dropping the shared name ("0 of 9 count-line settings share the name ctl").
 Watched failing: 2026-10-26, by not lowercasing what is typed in the script ("AMECRO": the script says "", the server "1 bird matches.").
 Watched failing: 2026-10-26, by the script listing matches over the limit, and by its offering Add for a bird already shown.

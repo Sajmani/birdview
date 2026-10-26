@@ -51,7 +51,7 @@ var nextShowAll = 100
 // nextFindLimit is the most name matches the find box lists; above it, the
 // box gives only their number (product.nextView). A variable so the checks
 // can lower it below the fixture's size.
-var nextFindLimit = 8
+var nextFindLimit = 10
 
 // nextChoice is one option inside a count-line control.
 type nextChoice struct {
@@ -61,6 +61,9 @@ type nextChoice struct {
 	URL   template.URL
 	// Sep draws a rule before the choice, setting it apart from those before.
 	Sep bool
+	// Color and TextColor draw the choice as the family's badge, with its
+	// description beside its name, as on the tiles.
+	Color, TextColor string
 }
 
 // nextChoiceGroup is a labeled run of choices, such as the regions of one zone.
@@ -86,11 +89,10 @@ type nextControl struct {
 	HereURL, Boundaries string
 }
 
-// nextMatch is one bird the find box found, with the link that adds it to
-// the set or removes it.
+// nextMatch is one bird the find box found, with its pin.
 type nextMatch struct {
 	ID, Name, Scientific string
-	Shown                bool
+	Pinned               bool
 	URL                  template.URL
 }
 
@@ -103,12 +105,12 @@ type nextData struct {
 	Tiles    []tile
 	// MoreURL shows every bird in the set; empty when all are shown. First
 	// is how many the filters chose that are drawn, Hidden how many are not,
-	// and AddedPast how many added birds are drawn from past the first.
+	// and AddedPast how many pinned birds are drawn from past the first.
 	MoreURL   template.URL
 	Hidden    int
 	First     int
 	AddedPast int
-	// Cleared is set when only birds added by name are shown; ClearURL
+	// Cleared is set when only pinned birds are shown; ClearURL
 	// clears the set, or, once cleared, brings the filters' birds back.
 	Cleared  bool
 	ClearURL template.URL
@@ -119,19 +121,18 @@ type nextData struct {
 	Matches []nextMatch
 	Fields  []hiddenField
 	// ToggleURL is this address with bird= last and empty: a bird's id
-	// appended adds it or removes it. ShownIDs are the birds in the set,
+	// appended pins or unpins it. PinnedIDs are the pinned birds,
 	// space-separated, and BirdsURL the names the script searches.
 	ToggleURL  string
-	ShownIDs   string
+	PinnedIDs  string
 	BirdsURL   string
 	FindLimit  int
 	FindScript template.JS
 	HereScript template.JS
 	ResetURL   template.URL
 
-	// drawn are the birds drawn on the page, and included those added by
-	// name; for the bird= toggle and the find box's labels.
-	drawn, included map[string]bool
+	// included are the pinned birds.
+	included map[string]bool
 }
 
 // nextURL is /next with q.
@@ -240,46 +241,40 @@ func (s *server) next(w http.ResponseWriter, r *http.Request) {
 }
 
 // nextToggleBird is where bird=<id> goes: the same address with that bird
-// added to the set, or removed from it if it was there, and the find box
-// emptied. An added bird is listed with include=; a bird of the set removed
-// is listed with exclude=. Undoing either deletes the entry rather than
-// adding its opposite, so the address stays short.
+// pinned, or unpinned if it was, and the find box emptied. The find box's
+// script links here, so the rule stays in Go.
 func (s *server) nextToggleBird(r *http.Request) string {
 	q := r.URL.Query()
 	id := q.Get("bird")
 	q.Del("bird")
-	q.Del("find")
 	if _, ok := s.byID[id]; !ok {
+		q.Del("find")
 		return string(nextURL(q))
 	}
-	r2 := r.Clone(r.Context())
-	r2.URL.RawQuery = q.Encode()
-	page := s.nextPage(r2)
-	without := func(key string) {
-		keep := nextValues(q, key)
-		q.Del(key)
-		for _, v := range keep {
-			if v != id {
-				q.Add(key, v)
-			}
+	return string(nextPin(q, id))
+}
+
+// nextPin is the address with bird id pinned, or unpinned if it was, and
+// the find box emptied. Pinning goes to the bird's tile, so the reader sees
+// it; a pinned bird is drawn wherever the order puts it.
+func nextPin(q url.Values, id string) template.URL {
+	q = cloneValues(q)
+	q.Del("find")
+	pins := nextValues(q, "pin")
+	q.Del("pin")
+	was := false
+	for _, v := range pins {
+		if v == id {
+			was = true
+			continue
 		}
+		q.Add("pin", v)
 	}
-	switch {
-	case page.drawn[id] && page.included[id]:
-		without("include")
-	case page.drawn[id]:
-		q.Add("exclude", id)
-	default:
-		// Not drawn: removed, or past the first birds, or outside the
-		// filters. Undoing a removal may be enough; if it is not, add it.
-		without("exclude")
-		r2.URL.RawQuery = q.Encode()
-		if !s.nextPage(r2).drawn[id] {
-			q.Add("include", id)
-		}
-		return string(nextURL(q)) + "#" + tileAnchor(id)
+	if was {
+		return nextURL(q)
 	}
-	return string(nextURL(q))
+	q.Add("pin", id)
+	return nextURL(q) + template.URL("#"+tileAnchor(id))
 }
 
 // nextPage builds /next for the address r carries.
@@ -295,8 +290,8 @@ func (s *server) nextPage(r *http.Request) nextData {
 		opt.Months = map[int]bool{nowMonth: true}
 	}
 
-	// Clear empties the set the filters choose, so only birds added by
-	// name are shown: a comparison of the reader's own picks.
+	// Clear empties the set the filters choose, so only pinned birds are
+	// shown: a comparison of the reader's own picks.
 	cleared := q.Get("clear") == "1"
 	var base []*dataset.Species
 	if !cleared {
@@ -309,29 +304,15 @@ func (s *server) nextPage(r *http.Request) nextData {
 		}
 		return float64(num) / float64(den)
 	}
-	// Birds removed by name leave the set; birds added by name join it,
-	// once each. A bird both added and removed is removed.
-	baseIn := map[string]bool{}
-	for _, sp := range base {
-		baseIn[sp.ID] = true
-	}
-	removed := map[string]bool{}
-	for _, id := range nextValues(q, "exclude") {
-		removed[id] = true
-	}
+	// Pinned birds join the set, once each.
 	in := map[string]bool{}
-	kept := base[:0:0]
 	for _, sp := range base {
-		if !removed[sp.ID] {
-			kept = append(kept, sp)
-			in[sp.ID] = true
-		}
+		in[sp.ID] = true
 	}
-	base = kept
 	added := map[string]bool{}
-	for _, id := range nextValues(q, "include") {
+	for _, id := range nextValues(q, "pin") {
 		sp, ok := s.byID[id]
-		if !ok || added[id] || removed[id] {
+		if !ok || added[id] {
 			continue
 		}
 		added[id] = true
@@ -373,9 +354,8 @@ func (s *server) nextPage(r *http.Request) nextData {
 	if opt.Locale == dataset.LocaleWorld {
 		page.BirdsURL += "?names=" + string(dataset.LocaleWorld)
 	}
-	toggle := func(id string) template.URL { return template.URL(page.ToggleURL + url.QueryEscape(id)) }
-	// The first nextShowAll birds the filters chose, and every bird added
-	// by name wherever it falls in the order: a bird just added must show.
+	// The first nextShowAll birds the filters chose, and every pinned bird
+	// wherever it falls in the order: a bird just pinned must show.
 	shown := base
 	if q.Get("all") != "1" {
 		shown = nil
@@ -400,21 +380,17 @@ func (s *server) nextPage(r *http.Request) nextData {
 			page.First = nextShowAll
 		}
 	}
-	page.drawn = map[string]bool{}
-	ids := make([]string, 0, len(shown))
-	for _, sp := range shown {
-		page.drawn[sp.ID] = true
-		ids = append(ids, sp.ID)
+	pinned := make([]string, 0, len(added))
+	for id := range added {
+		pinned = append(pinned, id)
 	}
-	sort.Strings(ids)
-	page.ShownIDs = strings.Join(ids, " ")
+	sort.Strings(pinned)
+	page.PinnedIDs = strings.Join(pinned, " ")
 	page.Cleared = cleared
 	if cleared {
 		page.ClearURL = nextSet(q, "clear", "", "all")
 	} else {
-		cq := cloneValues(q)
-		cq.Del("exclude")
-		page.ClearURL = nextSet(cq, "clear", "1", "all", "find")
+		page.ClearURL = nextSet(q, "clear", "1", "all", "find")
 	}
 
 	// One scale: every bird shown is drawn to the longest and widest of them.
@@ -441,9 +417,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 			Commonest:   s.shareWithSeams(sp, opt),
 			SameAs:      s.sameMeasurements(sp, opt.Locale),
 		}
-		if added[sp.ID] {
-			t.RemoveURL = toggle(sp.ID)
-		}
+		t.PinURL, t.Pinned = nextPin(q, sp.ID), added[sp.ID]
 		page.Tiles = append(page.Tiles, t)
 	}
 
@@ -460,7 +434,8 @@ func (s *server) nextPage(r *http.Request) nextData {
 		if len(found) <= nextFindLimit {
 			for _, sp := range found {
 				page.Matches = append(page.Matches, nextMatch{ID: sp.ID, Name: sp.Name(opt.Locale),
-					Scientific: sp.ScientificName, Shown: page.drawn[sp.ID], URL: toggle(sp.ID)})
+					Scientific: sp.ScientificName, Pinned: added[sp.ID],
+					URL: template.URL(page.ToggleURL + url.QueryEscape(sp.ID))})
 			}
 		}
 	}
@@ -636,7 +611,7 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 		}
 		last := &fc.Groups[len(fc.Groups)-1]
 		last.Choices = append(last.Choices, nextChoice{Label: f.Name, Title: f.Common, On: on,
-			URL: nextToggle(q, "family", f.Name)})
+			URL: nextToggle(q, "family", f.Name), Color: f.Color, TextColor: f.TextColor})
 	}
 	if opt.HasSelection {
 		fc.Value = nextList(fnames)

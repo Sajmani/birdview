@@ -758,18 +758,20 @@ is unchanged and does not link to it.
 - **The set.** With no filter, it is every bird recorded in the month, most often recorded first.
   The month is the server's own unless the address names some; `month=all` is every month. Every
   filter (family, region, month, habitat, diet) narrows the set, and birds added or removed by
-  name change it. **Clear** empties the set the settings choose, so only birds added by name are
-  drawn, for a comparison of the reader's own picks; **Undo clear** brings the settings' birds
+  name change it. **Clear** empties the set the settings choose, so only pinned birds are drawn,
+  for a comparison of the reader's own picks; **Undo clear** brings the settings' birds
   back, and choosing a filter leaves the cleared view.
-- **Adding and removing a bird.** A box above the set finds birds by name as the search box does
-  ([searchBox](filtering.md#searchbox)). As the reader types, it says how many birds match, and
-  once there are 8 or fewer it lists them. Each listed bird has a link that adds it (`include=<id>`)
-  or, if it is drawn, removes it (`exclude=<id>` for a bird the filters chose). An added bird is
-  always drawn, even past the first 100, and the count line says how many are. An added bird's tile also has a link that removes it. Without JavaScript, Enter does
-  the same.
+- **Pins.** Every drawn bird has a pin, a push pin in a box, filled when the bird is pinned. A
+  pinned bird (`pin=<id>`) is drawn whatever the settings, wherever the order puts it, even past
+  the first 100, and the count line says how many are. Unpinning returns the bird to the settings'
+  choice; nothing removes a bird the settings choose. A box above the set finds birds by name as
+  the search box does ([searchBox](filtering.md#searchbox)): as the reader types, it says how many
+  birds match, and once there are 10 or fewer it lists them, each with its pin. Without
+  JavaScript, Enter does the same.
 - **Filters are the count line.** The line under the box names each setting. Each is a control
   that opens the choices for that one setting directly under itself, as a `<details>`, so it
-  works without JavaScript. Only one is open at a time, and a tap elsewhere closes it. A choice
+  works without JavaScript. Family draws each family as its badge, with its description. Only one
+  is open at a time, and a tap elsewhere closes it. A choice
   loads a new page, and the setting it was chosen in is open there, at the same place on the page,
   so several choices can be made in a row. Region
   offers **Here**, which finds the reader's region in the browser as on the index

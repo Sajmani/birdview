@@ -40,22 +40,24 @@
      bird=<id>, which adds it or removes it. */}}
 <form class="search" action="/next" method="get" role="search">
   {{range .Fields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
-  <input type="search" name="find" value="{{.Find}}" placeholder="Find a bird to add or remove"
-         aria-label="Find a bird by name to add or remove" autocomplete="off" spellcheck="false">
+  <input type="search" name="find" value="{{.Find}}" placeholder="Find a bird to pin"
+         aria-label="Find a bird by name to pin" autocomplete="off" spellcheck="false">
 </form>
 <div class="finds" role="status" aria-live="polite" data-birds="{{.BirdsURL}}"
-     data-toggle="{{.ToggleURL}}" data-shown="{{.ShownIDs}}" data-limit="{{.FindLimit}}">
+     data-toggle="{{.ToggleURL}}" data-pinned="{{.PinnedIDs}}" data-limit="{{.FindLimit}}">
   {{if .Find}}
   <p class="found">{{if eq .Found 0}}No bird&rsquo;s name contains &ldquo;{{.Find}}&rdquo;.{{else if eq .Found 1}}1 bird matches.{{else}}{{.Found}} birds match.{{end}}{{if gt .Found .FindLimit}} Type more to list them.{{end}}</p>
   {{if .Matches}}
   <ul>
-    {{range .Matches}}<li><a class="btn{{if .Shown}} rm{{end}}" href="{{.URL}}">{{if .Shown}}&minus; Remove{{else}}+ Add{{end}}</a>
+    {{range .Matches}}<li><a class="pin{{if .Pinned}} on{{end}}" href="{{.URL}}" aria-pressed="{{if .Pinned}}true{{else}}false{{end}}"
+      title="{{if .Pinned}}Unpin{{else}}Pin{{end}} {{.Name}}" aria-label="{{if .Pinned}}Unpin{{else}}Pin{{end}} {{.Name}}">{{template "pinicon"}}</a>
       {{.Name}} <i>{{.Scientific}}</i></li>
     {{end}}
   </ul>
   {{end}}
   {{end}}
 </div>
+<template id="pinicon">{{template "pinicon"}}</template>
 
 <h2 class="settitle">{{.Title}}</h2>
 <div class="count">
@@ -77,7 +79,8 @@
       {{range .Groups}}
       <div class="popgroup{{if .OneLine}} oneline{{end}}">
         {{with .Name}}<span class="lbl">{{.}}</span>{{end}}
-        {{range .Choices}}{{if .Sep}}<span class="sep" aria-hidden="true"></span>{{end}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}>{{.Label}}</a>
+        {{range .Choices}}{{if .Sep}}<span class="sep" aria-hidden="true"></span>{{end}}{{if .Color}}<a class="chip{{if .On}} on{{end}}" href="{{.URL}}"
+          style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">{{.Label}}<em>{{.Title}}</em></a>{{else}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}>{{.Label}}</a>{{end}}
         {{end}}
       </div>
       {{end}}

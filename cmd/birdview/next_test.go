@@ -19,6 +19,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"html"
+	"html/template"
 	"math"
 	"net/http"
 	"net/http/httptest"
@@ -235,60 +236,70 @@ func hasTile(p nextData, id string) bool {
 	return false
 }
 
-// TestNextAddsAndRemovesByName checks the find box's links: a bird not in
-// the set is offered to add, and adding it keeps the filters and empties
-// the box; a bird in the set, added or not, is offered to remove, and
-// removing it takes out that bird and nothing else; undoing either returns
-// the address it came from.
+// at is nextAt for an address that may carry a fragment, which a browser
+// keeps to itself.
+func at(s *server, target string) nextData {
+	target, _, _ = strings.Cut(target, "#")
+	return nextAt(s, target)
+}
+
+func pinOf(p nextData, id string) (template.URL, bool, bool) {
+	for _, tl := range p.Tiles {
+		if tl.S.ID == id {
+			return tl.PinURL, tl.Pinned, true
+		}
+	}
+	return "", false, false
+}
+
+// TestNextPins checks the pins: every drawn bird has one; pinning a bird
+// the settings do not choose draws it, pinned, with the settings kept and
+// the find box emptied; pinning a bird already drawn marks it pinned; and
+// unpinning either returns the address it came from. Nothing excludes a bird.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
-func TestNextAddsAndRemovesByName(t *testing.T) {
+func TestNextPins(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
 	start := "/next?family=Ardeidae"
 	before := nextAt(s, start)
-	p := nextAt(s, start+"&find=sharp-shinned")
-	if len(p.Matches) != 1 || p.Matches[0].ID != "shshaw" || p.Matches[0].Shown {
-		t.Fatalf("find=sharp-shinned lists %+v, want Sharp-shinned Hawk to add", p.Matches)
-	}
-	added := follow(t, s, string(p.Matches[0].URL))
-	u, _ := url.Parse(added)
-	if u.Query().Get("find") != "" || u.Query().Get("family") != "Ardeidae" {
-		t.Errorf("adding went to %s: want the family kept and the box emptied", added)
-	}
-	withHawk := nextAt(s, added)
-	if !hasTile(withHawk, "shshaw") || withHawk.Count != before.Count+1 {
-		t.Fatalf("after adding, %d birds (was %d), hawk shown %t", withHawk.Count, before.Count, hasTile(withHawk, "shshaw"))
-	}
-	for _, tl := range withHawk.Tiles {
-		if (tl.RemoveURL != "") != (tl.S.ID == "shshaw") {
-			t.Errorf("%s: remove link %q; only the added bird has one on its tile", tl.S.ID, tl.RemoveURL)
+	for _, tl := range before.Tiles {
+		if tl.PinURL == "" || tl.Pinned {
+			t.Fatalf("%s: pin %q, pinned %t; every drawn bird has an unpinned pin", tl.S.ID, tl.PinURL, tl.Pinned)
 		}
 	}
-	m := nextAt(s, added+"&find=sharp-shinned").Matches
-	if len(m) != 1 || !m[0].Shown {
-		t.Fatalf("an added bird found again is %+v; want it offered to remove", m)
+	m := nextAt(s, start+"&find=sharp-shinned").Matches
+	if len(m) != 1 || m[0].ID != "shshaw" || m[0].Pinned {
+		t.Fatalf("find=sharp-shinned lists %+v, want Sharp-shinned Hawk unpinned", m)
 	}
-	if back := follow(t, s, string(m[0].URL)); back != start {
-		t.Errorf("removing the added bird went to %s, want %s", back, start)
+	pinned := follow(t, s, string(m[0].URL)+"&find=sharp-shinned")
+	if u, _ := url.Parse(pinned); u.Query().Get("find") != "" || u.Query().Get("family") != "Ardeidae" {
+		t.Errorf("pinning went to %s: want the family kept and the box emptied", pinned)
+	}
+	withHawk := nextAt(s, pinned)
+	unpin, on, drawn := pinOf(withHawk, "shshaw")
+	if !drawn || !on || withHawk.Count != before.Count+1 {
+		t.Fatalf("after pinning, %d birds (was %d), hawk drawn %t pinned %t", withHawk.Count, before.Count, drawn, on)
+	}
+	if back, _, _ := strings.Cut(string(unpin), "#"); back != start {
+		t.Errorf("unpinning the hawk goes to %s, want %s", unpin, start)
+	}
+	if m := nextAt(s, pinned+"&find=sharp-shinned").Matches; len(m) != 1 || !m[0].Pinned {
+		t.Errorf("a pinned bird found again is %+v; want it shown pinned", m)
 	}
 
-	// A bird of the set, not added by name, is removed too, and put back.
-	m = nextAt(s, start+"&find=great+blue+heron").Matches
-	if len(m) != 1 || !m[0].Shown {
-		t.Fatalf("find=great blue heron lists %+v; want Great Blue Heron to remove", m)
+	// A bird already drawn is pinned in place, and unpinned back.
+	heron := before.Tiles[0]
+	p := at(s, string(heron.PinURL))
+	unpin, on, drawn = pinOf(p, heron.S.ID)
+	if !drawn || !on || p.Count != before.Count {
+		t.Errorf("pinning %s: drawn %t, pinned %t, %d birds (was %d)", heron.S.ID, drawn, on, p.Count, before.Count)
 	}
-	gone := follow(t, s, string(m[0].URL))
-	without := nextAt(s, gone)
-	if hasTile(without, m[0].ID) || without.Count != before.Count-1 {
-		t.Errorf("after removing, %d birds (was %d), heron shown %t", without.Count, before.Count, hasTile(without, m[0].ID))
+	if back, _, _ := strings.Cut(string(unpin), "#"); back != start {
+		t.Errorf("unpinning %s goes to %s, want %s", heron.S.ID, unpin, start)
 	}
-	m2 := nextAt(s, gone+"&find=great+blue+heron").Matches
-	if len(m2) != 1 || m2[0].Shown {
-		t.Fatalf("a removed bird found again is %+v; want it offered to add", m2)
-	}
-	if back := follow(t, s, string(m2[0].URL)); back != start {
-		t.Errorf("putting the heron back went to %s, want %s", back, start)
+	if strings.Contains(string(heron.PinURL), "exclude") {
+		t.Errorf("a pin links to %s; nothing excludes a bird", heron.PinURL)
 	}
 }
 
@@ -338,7 +349,7 @@ func TestNextFindInTheBrowser(t *testing.T) {
 	js, _ := json.Marshal(qs)
 	ts := httptest.NewServer(instrument(s, nextFindProbe, nil))
 	defer ts.Close()
-	start := "/next?month=all&exclude=annhum"
+	start := "/next?month=all&pin=annhum"
 	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancel()
 	out, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
@@ -379,7 +390,7 @@ func TestNextFindInTheBrowser(t *testing.T) {
 			t.Errorf("typing %q: the script says %q, the server %q", r.Q, r.Found, want)
 		}
 		var want []string
-		for _, l := range regexp.MustCompile(`<li><a class="(btn(?: rm)?)" href="([^"]*)">`).FindAllStringSubmatch(body, -1) {
+		for _, l := range regexp.MustCompile(`<li><a class="(pin(?: on)?)" href="([^"]*)"`).FindAllStringSubmatch(body, -1) {
 			want = append(want, l[1]+" "+html.UnescapeString(l[2]))
 		}
 		if !slices.Equal(r.Items, want) {
@@ -411,7 +422,7 @@ func TestNextToggle(t *testing.T) {
 		{"region=ME", "ME", "/next"},
 		{"region=", "ME", "/next?region=ME"},
 		{"region=FL&find=hawk&all=1&by=mass", "FL", "/next?by=mass"},
-		{"clear=1&include=blujay", "FL", "/next?include=blujay&region=FL"},
+		{"clear=1&pin=blujay", "FL", "/next?pin=blujay&region=FL"},
 	} {
 		if got := string(nextToggle(q(c.from), "region", c.v)); got != c.want {
 			t.Errorf("toggling %s from %q = %s, want %s", c.v, c.from, got, c.want)
@@ -569,8 +580,8 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 		t.Fatalf("%s is drawn already; the check needs a bird past the first %d", last.ID, nextShowAll)
 	}
 	m := nextAt(s, "/next?find="+url.QueryEscape(last.ScientificName)).Matches
-	if len(m) != 1 || m[0].Shown {
-		t.Fatalf("finding %s, a bird not drawn, lists %+v; want it offered to add", last.ScientificName, m)
+	if len(m) != 1 || m[0].Pinned {
+		t.Fatalf("finding %s, a bird not drawn, lists %+v; want it unpinned", last.ScientificName, m)
 	}
 	after := nextAt(s, follow(t, s, string(m[0].URL)))
 	if !hasTile(after, last.ID) {
@@ -594,20 +605,20 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 func TestNextClear(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	start := nextAt(s, "/next?by=mass&exclude=blujay")
+	start := nextAt(s, "/next?by=mass&all=1")
 	if string(start.ClearURL) != "/next?by=mass&clear=1" {
-		t.Errorf("Clear links to %s, want the order kept and the removals dropped", start.ClearURL)
+		t.Errorf("Clear links to %s, want the order kept", start.ClearURL)
 	}
 	empty := nextAt(s, string(start.ClearURL))
 	if !empty.Cleared || len(empty.Tiles) != 0 || empty.Count != 0 || empty.Title != "Birds you chose" {
 		t.Errorf("cleared: %d drawn of %d, title %q", len(empty.Tiles), empty.Count, empty.Title)
 	}
-	two := "/next?by=mass&clear=1&include=amecro&include=annhum"
+	two := "/next?by=mass&clear=1&pin=amecro&pin=annhum"
 	p := nextAt(s, two)
 	if got := tileIDs(p); !slices.Equal(got, []string{"annhum", "amecro"}) {
 		t.Errorf("cleared with two added draws %v, want annhum and amecro by mass", got)
 	}
-	if back := follow(t, s, two+"&bird=amecro"); back != "/next?by=mass&clear=1&include=annhum" {
+	if back := follow(t, s, two+"&bird=amecro"); back != "/next?by=mass&clear=1&pin=annhum" {
 		t.Errorf("removing one of two goes to %s", back)
 	}
 	undo := nextAt(s, string(p.ClearURL))
@@ -729,5 +740,48 @@ func TestNextSettingStaysOpen(t *testing.T) {
 	}
 	if len(res.Reload) != 0 {
 		t.Errorf("a plain reload opened %v; want nothing", res.Reload)
+	}
+}
+
+// TestNextFamilyBadges checks that the Family setting draws each family as
+// its badge does on the tiles: its color, its name, and its description.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextFamilyBadges(t *testing.T) {
+	s := newTestServer(t)
+	var fam *nextControl
+	p := nextAt(s, "/next")
+	for i := range p.Controls {
+		if p.Controls[i].Label == "Family" {
+			fam = &p.Controls[i]
+		}
+	}
+	if fam == nil {
+		t.Fatal("no Family setting")
+	}
+	n := 0
+	for _, g := range fam.Groups {
+		for _, c := range g.Choices {
+			n++
+			var want familyOption
+			for _, f := range s.fams {
+				if f.Name == c.Label {
+					want = f
+				}
+			}
+			if c.Color != want.Color || c.TextColor != want.TextColor || c.Title != want.Common || want.Common == "" {
+				t.Errorf("family %s: color %q on %q, description %q; want %q on %q, %q",
+					c.Label, c.TextColor, c.Color, c.Title, want.TextColor, want.Color, want.Common)
+			}
+		}
+	}
+	if n != len(s.fams) {
+		t.Errorf("the Family setting offers %d families of %d", n, len(s.fams))
+	}
+	_, body := get(t, s, "/next")
+	f := s.fams[0]
+	if !strings.Contains(body, `<a class="chip" href="/next?family=`+f.Name+`"`) ||
+		!strings.Contains(body, f.Name+`<em>`+html.EscapeString(f.Common)+`</em></a>`) {
+		t.Errorf("%s is not drawn as a badge with its description", f.Name)
 	}
 }
