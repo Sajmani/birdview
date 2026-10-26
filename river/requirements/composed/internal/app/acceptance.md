@@ -273,9 +273,10 @@ buckets were watched failing by removing them: "0 empty buckets before tier 2, w
 
 Covers: [product.nextView](../../../local/product/presentation.md#nextview)
 
-**Method:** over the real dataset, with the clock fixed to October. The landing set is worked out
-again in the check from the monthly counts, in October and in the May the address names: one bird
-per family, each the family's most often recorded at 1 in 1,000 or more, and no family missing.
+**Method:** over the real dataset, with the clock fixed to October. With no month, the page shows
+exactly the birds the month filter admits for October; with May, May and June, or `month=all`,
+those months' birds or every bird; each most often recorded first. October narrows the set from
+all. The count line has no Show setting and starts with Order by, set to frequency.
 Every bird on four pages is drawn at one pixels-per-millimeter, and the longest fits its tile.
 Ordering by mass runs smallest first; ordering by frequency runs most often recorded first.
 Family and region narrow together, and an emptied filter shows all, not nothing. A name finds
@@ -287,8 +288,8 @@ list the birds only at 8 or fewer. In headless Chrome, typing six queries (one i
 over a lowered limit, one matching nothing) shows the same count line and lists the same birds,
 with the same Add or Remove links, as the server's page for each. Choosing from all selects
 only that one, choosing again removes it, and changing a filter drops the box and Show all.
-With the threshold lowered to 200, every bird draws 200 and a link to all 1,041 in the same
-order, and the landing set offers no link. Without a month the page is
+With the threshold lowered to 200, `month=all` draws 200 and a link to all 1,041 in the same
+order; at the measured threshold, all 1,041 offer no link. Without a month the page is
 no-store with no validator; with one it carries an ETag. The index does not link to /next. Every
 count-line setting is a `<details>` sharing one name, so the browser opens one at a time, and
 Reset links to /next. The phone-width and contrast checks reach /next through the crawl, open
@@ -296,8 +297,8 @@ every setting at once, and measure after the placing script has run.
 
 **Run:** `go test ./cmd/birdview/ -run 'TestNext'` (the browser check gates where Chrome is installed)
 **Status: verified 2026-10-26, passing.**
-Watched failing: 2026-10-26, by lowering the floor to 1 in 10,000 ("70 birds, want 47, one per family").
-Watched failing: 2026-10-26, by keeping each family's first bird instead of its commonest (Tree Swallow missing).
+Watched failing: 2026-10-26, by dropping the frequency default ("coshum (0.000207) follows a bird at 0.000015").
+Watched failing: 2026-10-26, by dropping the month default ("1041 birds, the month filter admits 1006"), and by leaving Order by off the count line.
 Watched failing: 2026-10-26, by scaling each bird to its own length.
 Watched failing: 2026-10-26, by ordering frequency least recorded first.
 Watched failing: 2026-10-26, by letting an empty family filter mean none ("/next?family= shows 0 birds").

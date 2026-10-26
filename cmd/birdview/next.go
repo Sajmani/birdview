@@ -48,10 +48,6 @@ var nextClock = time.Now
 // lower it below the dataset's size.
 var nextShowAll = 1200
 
-// nextCommonShare is the landing rule's floor: a bird is a candidate when it
-// is at least 1 in 1,000 of the records in the month and regions selected.
-const nextCommonShare = 1e-3
-
 // nextFindLimit is the most name matches the find box lists; above it, the
 // box gives only their number (product.nextView). A variable so the checks
 // can lower it below the fixture's size.
@@ -211,20 +207,11 @@ func nextOptions(r *http.Request) options {
 	if len(opt.Niches) == 0 {
 		opt.HasNiches = false
 	}
-	return opt
-}
-
-// nextCommon reports whether the address asks for the commonest bird of each
-// family rather than every bird. It does by default unless a family,
-// habitat, or diet is chosen, which ask for every bird of that kind.
-func nextCommon(q url.Values, opt options) bool {
-	switch q.Get("set") {
-	case "common":
-		return true
-	case "every":
-		return false
+	// Most often recorded first unless the address names another order.
+	if r.URL.Query().Get("by") == "" {
+		opt.Metric = view.ByFrequency
 	}
-	return !opt.HasSelection && !opt.HasHabitats && !opt.HasNiches
+	return opt
 }
 
 func (s *server) next(w http.ResponseWriter, r *http.Request) {
@@ -280,12 +267,10 @@ func (s *server) nextToggleBird(r *http.Request) string {
 func (s *server) nextPage(r *http.Request) nextData {
 	q := r.URL.Query()
 	opt := nextOptions(r)
-	common := nextCommon(q, opt)
-
-	// The commonest-of-each-family set is of one month: the server's own
-	// unless the address names some.
+	// The birds of this month, the server's own, unless the address names
+	// months; month=all is every month.
 	nowMonth := int(nextClock().Month()) - 1
-	defaultMonth := common && !opt.HasMonths
+	defaultMonth := len(nextValues(q, "month")) == 0
 	if defaultMonth {
 		opt.HasMonths = true
 		opt.Months = map[int]bool{nowMonth: true}
@@ -299,28 +284,6 @@ func (s *server) nextPage(r *http.Request) nextData {
 		}
 		return float64(num) / float64(den)
 	}
-	if common {
-		best := map[string]*dataset.Species{}
-		bestShare := map[string]float64{}
-		var order []string
-		for _, sp := range base {
-			f := share(sp)
-			if f < nextCommonShare {
-				continue
-			}
-			if _, ok := best[sp.Family]; !ok {
-				order = append(order, sp.Family)
-			}
-			if f > bestShare[sp.Family] {
-				best[sp.Family], bestShare[sp.Family] = sp, f
-			}
-		}
-		base = base[:0:0]
-		for _, fam := range order {
-			base = append(base, best[fam])
-		}
-	}
-
 	// Birds removed by name leave the set; birds added by name join it,
 	// once each. A bird both added and removed is removed.
 	baseIn := map[string]bool{}
@@ -453,8 +416,8 @@ func (s *server) nextPage(r *http.Request) nextData {
 		}
 	}
 
-	page.Title = s.nextTitle(opt, common, defaultMonth)
-	page.Controls = s.nextControls(q, opt, common, defaultMonth, nowMonth)
+	page.Title = s.nextTitle(opt)
+	page.Controls = s.nextControls(q, opt, defaultMonth, nowMonth)
 	return page
 }
 
@@ -468,13 +431,9 @@ func sortedKeys(q url.Values) []string {
 }
 
 // nextTitle says in words which birds these are.
-func (s *server) nextTitle(opt options, common, defaultMonth bool) string {
+func (s *server) nextTitle(opt options) string {
 	var b strings.Builder
-	if common {
-		b.WriteString("The most often recorded bird of each family")
-	} else {
-		b.WriteString("Every bird")
-	}
+	b.WriteString("Birds")
 	if opt.HasRegions {
 		b.WriteString(" in " + nextList(s.regionNames(opt.Regions)))
 	}
@@ -486,6 +445,8 @@ func (s *server) nextTitle(opt options, common, defaultMonth bool) string {
 			}
 		}
 		b.WriteString(" in " + nextList(ms))
+	} else {
+		b.WriteString(" in every month")
 	}
 	return b.String()
 }
@@ -522,24 +483,21 @@ func (s *server) regionNames(sel map[string]bool) []string {
 }
 
 // nextControls builds the count line: one control per setting.
-func (s *server) nextControls(q url.Values, opt options, common, defaultMonth bool, nowMonth int) []nextControl {
+func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowMonth int) []nextControl {
 	var out []nextControl
+	out = append(out, nextOrderControl(q, opt))
 
-	set := nextControl{Label: "Show"}
-	set.Value = "every bird"
-	if common {
-		set.Value = "commonest of each family"
-	}
-	set.Groups = []nextChoiceGroup{{Choices: []nextChoice{
-		{Label: "Commonest of each family", Title: "The most often recorded bird of each family, of those at 1 in 1,000 or more of the records",
-			On: common, URL: nextSet(q, "set", "common", "all", "find")},
-		{Label: "Every bird", On: !common, URL: nextSet(q, "set", "every", "all", "find")},
-	}}}
-	out = append(out, set)
-
-	// Months. The default month is shown as chosen, but choosing from it
-	// works as choosing from all: it selects only the month chosen.
+	// Months. With none named, this month is chosen, and choosing another
+	// month selects only that one. "All" is month=all, so that it can be
+	// told apart from naming none.
 	mc := nextControl{Label: "Month", Value: "all"}
+	mq := cloneValues(q)
+	mq.Del("month")
+	for _, v := range nextValues(q, "month") {
+		if v != "all" {
+			mq.Add("month", v)
+		}
+	}
 	var ms []string
 	var mch []nextChoice
 	for m := 0; m < month.Count; m++ {
@@ -547,18 +505,22 @@ func (s *server) nextControls(q url.Values, opt options, common, defaultMonth bo
 		if on {
 			ms = append(ms, month.Full[m])
 		}
-		mch = append(mch, nextChoice{Label: month.Abbrev[m], Title: month.Full[m], On: on,
-			URL: nextToggle(q, "month", month.Abbrev[m])})
+		base := mq
+		if defaultMonth {
+			base = q
+		}
+		mch = append(mch, nextChoice{Label: month.Abbrev[m], Title: month.Full[m], On: on && !defaultMonth,
+			URL: nextToggle(base, "month", month.Abbrev[m])})
 	}
 	if len(ms) > 0 {
 		mc.Value = nextList(ms)
 	}
 	if defaultMonth {
 		mc.Value = month.Full[nowMonth] + " (now)"
-		mc.Note = "Choose a month to see its birds instead of this month's."
+		mch[nowMonth].On = true
 	}
-	if len(nextValues(q, "month")) > 0 {
-		mc.AllURL = nextSet(q, "month", "", "all", "find")
+	if opt.HasMonths {
+		mc.AllURL = nextSet(q, "month", "all", "all", "find")
 	}
 	mc.Groups = []nextChoiceGroup{{Choices: mch}}
 	out = append(out, mc)
@@ -628,28 +590,6 @@ func (s *server) nextControls(q url.Values, opt options, common, defaultMonth bo
 		traitCtl("Habitat", "habitat", trait.Habitats, opt.Habitats, opt.HasHabitats),
 		traitCtl("Diet", "niche", trait.Niches, opt.Niches, opt.HasNiches))
 
-	oc := nextControl{Label: "Order by"}
-	var och []nextChoice
-	for _, m := range []struct {
-		m     view.Metric
-		label string
-	}{
-		{view.ByLength, "Length"}, {view.ByWingspan, "Wingspan"}, {view.ByMass, "Mass"},
-		{view.ByBill, "Bill"}, {view.ByTail, "Tail"}, {view.ByFrequency, "Frequency"},
-	} {
-		v := string(m.m)
-		if m.m == view.ByLength {
-			v = ""
-		}
-		if opt.Metric == m.m {
-			oc.Value = strings.ToLower(m.label)
-		}
-		och = append(och, nextChoice{Label: m.label, On: opt.Metric == m.m, URL: nextSet(q, "by", v)})
-	}
-	oc.Note = "Sizes run smallest first; frequency runs most often recorded first."
-	oc.Groups = []nextChoiceGroup{{Choices: och}}
-	out = append(out, oc)
-
 	uc := nextControl{Label: "Units", Value: "inches and ounces"}
 	if opt.Metric3 {
 		uc.Value = "centimeters and grams"
@@ -690,4 +630,31 @@ func (s *server) nextBirds(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(out)
+}
+
+// nextOrderControl is the Order by setting: frequency, the default, and the
+// five sizes.
+func nextOrderControl(q url.Values, opt options) nextControl {
+	oc := nextControl{Label: "Order by"}
+	var och []nextChoice
+	for _, m := range []struct {
+		m     view.Metric
+		label string
+	}{
+		{view.ByFrequency, "Frequency"}, {view.ByLength, "Length"}, {view.ByWingspan, "Wingspan"},
+		{view.ByMass, "Mass"}, {view.ByBill, "Bill"}, {view.ByTail, "Tail"},
+	} {
+		v := string(m.m)
+		if m.m == view.ByFrequency {
+			v = ""
+		}
+		if opt.Metric == m.m {
+			oc.Value = strings.ToLower(m.label)
+		}
+		och = append(och, nextChoice{Label: m.label, On: opt.Metric == m.m, URL: nextSet(q, "by", v)})
+	}
+	oc.Note = "Frequency runs most often recorded first; sizes run smallest first."
+	oc.Groups = []nextChoiceGroup{{Choices: och}}
+	return oc
+
 }

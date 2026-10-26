@@ -53,74 +53,68 @@ func tileIDs(p nextData) []string {
 	return out
 }
 
-// TestNextLandingIsCommonestOfEachFamily checks /next with no filter against
-// the rule, worked out here from the counts: of the birds at 1 in 1,000 or
-// more of the month's records across every region, the most often recorded
-// in each family, one per family. The month is the clock's, or the
-// address's when it names one.
+// TestNextLandingIsThisMonthByFrequency checks /next with no filter: every
+// bird the month filter admits for the clock's month, or the months the
+// address names, or every bird with month=all, most often recorded first.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
-func TestNextLandingIsCommonestOfEachFamily(t *testing.T) {
+func TestNextLandingIsThisMonthByFrequency(t *testing.T) {
 	s := newTestServerReal(t)
+	fixNextClock(t, time.October)
 	for _, c := range []struct {
-		clock  time.Month
 		target string
-		month  int
+		months []int
 	}{
-		{time.October, "/next", 9},
-		{time.October, "/next?month=May", 4},
+		{"/next", []int{9}},
+		{"/next?month=May", []int{4}},
+		{"/next?month=May&month=Jun", []int{4, 5}},
+		{"/next?month=all", nil},
 	} {
-		fixNextClock(t, c.clock)
+		opt := nextOptions(httptest.NewRequest(http.MethodGet, "/next", nil))
+		opt.HasMonths = c.months != nil
+		opt.Months = map[int]bool{}
+		for _, m := range c.months {
+			opt.Months[m] = true
+		}
+		want, _ := s.filterSpecies(opt)
 		p := nextAt(s, c.target)
-		share := map[string]float64{}
-		best := map[string]string{}
-		for i := range s.ds.Species {
-			sp := &s.ds.Species[i]
-			var num, den int64
-			for j, id := range append(append([]string{}, sp.Regions...), sp.BelowRegions...) {
-				var months [][12]int64
-				k := j
-				if j < len(sp.Regions) {
-					months = sp.RegionMonths
-				} else {
-					months, k = sp.BelowMonths, j-len(sp.Regions)
-				}
-				if _, ok := s.ds.RegionTotals[id]; ok && k < len(months) {
-					num += months[k][c.month]
-				}
-			}
-			for id := range s.ds.RegionTotals {
-				den += s.ds.RegionMonthlyTotals[id][c.month]
-			}
-			if den == 0 || float64(num)/float64(den) < 1e-3 {
-				continue
-			}
-			f := float64(num) / float64(den)
-			if b, ok := best[sp.Family]; !ok || f > share[b] {
-				best[sp.Family] = sp.ID
-			}
-			share[sp.ID] = f
+		if p.Count != len(want) {
+			t.Errorf("%s: %d birds, the month filter admits %d", c.target, p.Count, len(want))
 		}
 		got := map[string]bool{}
-		fams := map[string]bool{}
+		for _, id := range tileIDs(p) {
+			got[id] = true
+		}
+		for _, sp := range want {
+			if !got[sp.ID] {
+				t.Errorf("%s: %s is admitted but not shown", c.target, sp.ID)
+				break
+			}
+		}
+		prev := math.Inf(1)
 		for _, tl := range p.Tiles {
-			if fams[tl.S.Family] {
-				t.Errorf("%s: two birds of %s", c.target, tl.S.Family)
+			num, den := shareIn(tl.S, s.ds, opt)
+			f := 0.0
+			if den > 0 {
+				f = float64(num) / float64(den)
 			}
-			fams[tl.S.Family] = true
-			got[tl.S.ID] = true
-		}
-		for fam, id := range best {
-			if !got[id] {
-				t.Errorf("%s: %s is the commonest of %s at %.4f but is not shown", c.target, id, fam, share[id])
+			if f > prev+1e-15 {
+				t.Errorf("%s: %s (%.6f) follows a bird at %.6f; want most often recorded first", c.target, tl.S.ID, f, prev)
+				break
 			}
+			prev = f
 		}
-		if len(p.Tiles) != len(best) {
-			t.Errorf("%s: %d birds, want %d, one per family", c.target, len(p.Tiles), len(best))
+	}
+	if a, b := nextAt(s, "/next").Count, nextAt(s, "/next?month=all").Count; a >= b {
+		t.Errorf("/next shows %d birds and month=all %d; the month does not narrow", a, b)
+	}
+	for _, c := range nextAt(s, "/next").Controls {
+		if c.Label == "Show" {
+			t.Error("the count line still has a Show setting")
 		}
-		if len(best) < 20 {
-			t.Errorf("%s: only %d families qualify; the check proves little", c.target, len(best))
-		}
+	}
+	if c := nextAt(s, "/next").Controls; len(c) == 0 || c[0].Label != "Order by" || c[0].Value != "frequency" {
+		t.Errorf("the count line starts with %+v; want Order by frequency", c[0])
 	}
 }
 
@@ -131,7 +125,7 @@ func TestNextLandingIsCommonestOfEachFamily(t *testing.T) {
 func TestNextDrawsOneScale(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	for _, target := range []string{"/next", "/next?by=frequency", "/next?family=Ardeidae&family=Trochilidae", "/next?set=every&by=mass"} {
+	for _, target := range []string{"/next", "/next?by=frequency", "/next?family=Ardeidae&family=Trochilidae", "/next?month=all&by=mass"} {
 		p := nextAt(s, target)
 		if len(p.Tiles) < 2 {
 			t.Fatalf("%s: %d birds; too few to compare", target, len(p.Tiles))
@@ -164,7 +158,7 @@ func TestNextDrawsOneScale(t *testing.T) {
 func TestNextOrders(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	p := nextAt(s, "/next?by=mass")
+	p := nextAt(s, "/next?by=mass&family=Parulidae")
 	for i := 1; i < len(p.Tiles); i++ {
 		if p.Tiles[i].S.Mass.Value < p.Tiles[i-1].S.Mass.Value {
 			t.Errorf("by mass: %s after %s", p.Tiles[i].S.ID, p.Tiles[i-1].S.ID)
@@ -339,7 +333,7 @@ func TestNextFindInTheBrowser(t *testing.T) {
 	js, _ := json.Marshal(qs)
 	ts := httptest.NewServer(instrument(s, nextFindProbe, nil))
 	defer ts.Close()
-	start := "/next?set=every&exclude=annhum"
+	start := "/next?month=all&exclude=annhum"
 	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancel()
 	out, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
@@ -429,12 +423,12 @@ func TestNextShowAll(t *testing.T) {
 	old := nextShowAll
 	nextShowAll = 200 // below the dataset's 1,041, so the cap is exercised
 	t.Cleanup(func() { nextShowAll = old })
-	p := nextAt(s, "/next?set=every")
+	p := nextAt(s, "/next?month=all")
 	if p.Count <= nextShowAll {
-		t.Fatalf("set=every has %d birds; the check needs more than %d", p.Count, nextShowAll)
+		t.Fatalf("month=all has %d birds; the check needs more than %d", p.Count, nextShowAll)
 	}
 	if len(p.Tiles) != nextShowAll || p.MoreURL == "" || p.Hidden != p.Count-nextShowAll {
-		t.Errorf("set=every draws %d of %d, hides %d, more link %q", len(p.Tiles), p.Count, p.Hidden, p.MoreURL)
+		t.Errorf("month=all draws %d of %d, hides %d, more link %q", len(p.Tiles), p.Count, p.Hidden, p.MoreURL)
 	}
 	all := nextAt(s, string(p.MoreURL))
 	if len(all.Tiles) != p.Count || all.MoreURL != "" {
@@ -446,8 +440,9 @@ func TestNextShowAll(t *testing.T) {
 			break
 		}
 	}
-	if p := nextAt(s, "/next"); p.MoreURL != "" {
-		t.Errorf("the landing set of %d offers Show all", p.Count)
+	nextShowAll = old
+	if p := nextAt(s, "/next?month=all"); p.MoreURL != "" {
+		t.Errorf("all %d birds offer Show all under the measured threshold", p.Count)
 	}
 }
 

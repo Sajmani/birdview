@@ -755,13 +755,10 @@ Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flex
 until simulated readers have compared the two (Sameer, 2026-10-26; [scalableInterface](../../../todo.md#scalableinterface)). The index
 is unchanged and does not link to it.
 
-- **The set.** With no filter, it is the birds most often recorded in the month: of the birds at
-  1 in 1,000 or more of that month's records across every region, the most frequent in each
-  family. The month is the server's own unless the address names one, and a region narrows the
-  records counted, so the set is the commonest birds of that place. A **Show** setting switches
-  between this and every bird. Choosing a family, habitat, or diet shows every bird of that kind
-  unless the address asks otherwise. Every filter (family, region, month, habitat, diet) narrows
-  either set, and birds added by name join it.
+- **The set.** With no filter, it is every bird recorded in the month, most often recorded first.
+  The month is the server's own unless the address names some; `month=all` is every month. Every
+  filter (family, region, month, habitat, diet) narrows the set, and birds added or removed by
+  name change it.
 - **Adding and removing a bird.** A box above the set finds birds by name as the search box does
   ([searchBox](filtering.md#searchbox)). As the reader types, it says how many birds match, and
   once there are 8 or fewer it lists them. Each listed bird has a link that adds it to the set
@@ -775,7 +772,8 @@ is unchanged and does not link to it.
   selected option again returns to all. Nothing selected means all.
 - **One scale.** Every bird shown is drawn to the scale of the longest. Its length, wingspan, and
   mass are text under the drawing.
-- **Order.** By length (the default), wingspan, mass, bill, tail, or how often recorded.
+- **Order.** By how often recorded (the default, most often first), or by length, wingspan,
+  mass, bill, or tail (smallest first). Order by is the first setting on the count line.
 - **Show all.** A set larger than a threshold shows its first birds in order and ends with a link
   that shows them all; that address says so, so it can be shared. The threshold is 1,200, the
   most that paint in about a second on a phone-class CPU over 5G (measured 2026-10-26 under
