@@ -563,5 +563,7 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 .reset:hover { border-color: #f87171; }
 .finds ul { list-style: none; padding: 0; margin: 8px 0; }
 .finds li { margin: 4px 0; }
-.finds .have { color: var(--dim); display: inline-block; min-width: 4.5em; }
+.finds .found { margin: 6px 0 0; color: var(--dim); }
+.finds a.btn { min-width: 6.2em; justify-content: center; }
+.finds a.btn.rm, .finds a.btn.rm:visited { background: #3f1d1d; border-color: #8b3a3a; color: var(--ink); }
 .more { margin: 18px 0; }

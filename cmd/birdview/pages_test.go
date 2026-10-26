@@ -146,8 +146,9 @@ func discoverPages(t *testing.T, s *server) []webPage {
 // noPages are the routes that serve no web page, and why. Each is probed to
 // confirm it, so an exemption cannot hide a page added there later.
 var noPages = map[string]string{
-	"/now":         "a redirect to the index for the current month",
-	"/boundaries/": "the region boundary file, JSON",
+	"/now":             "a redirect to the index for the current month",
+	"/boundaries/":     "the region boundary file, JSON",
+	"/next/birds.json": "the names /next's find box searches, JSON",
 }
 
 // TestEveryKindOfPageIsDiscovered checks the discovery the other page checks

@@ -15,10 +15,17 @@
 package main
 
 import (
+	"context"
+	_ "embed"
+	"encoding/json"
+	"html"
 	"math"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os/exec"
+	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -207,52 +214,187 @@ func TestNextFiltersCombineAndEmptyIsAll(t *testing.T) {
 	}
 }
 
-// TestNextAddsAndRemovesByName checks the add box: a name finds the bird,
-// its link adds it to the set and drops the box, and the added bird's link
-// removes it again and keeps everything else.
+// follow requests target from s and returns where its redirect leads,
+// fragment dropped, or target itself when it does not redirect.
+func follow(t *testing.T, s *server, target string) string {
+	t.Helper()
+	w := httptest.NewRecorder()
+	s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, target, nil))
+	if w.Code/100 != 3 {
+		return target
+	}
+	loc, _, _ := strings.Cut(w.Header().Get("Location"), "#")
+	return loc
+}
+
+func hasTile(p nextData, id string) bool {
+	for _, tl := range p.Tiles {
+		if tl.S.ID == id {
+			return true
+		}
+	}
+	return false
+}
+
+// TestNextAddsAndRemovesByName checks the find box's links: a bird not in
+// the set is offered to add, and adding it keeps the filters and empties
+// the box; a bird in the set, added or not, is offered to remove, and
+// removing it takes out that bird and nothing else; undoing either returns
+// the address it came from.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextAddsAndRemovesByName(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	p := nextAt(s, "/next?family=Ardeidae&find=sharp-shinned")
-	var add string
-	for _, m := range p.Matches {
-		if m.Name == "Sharp-shinned Hawk" {
-			add = string(m.AddURL)
+	start := "/next?family=Ardeidae"
+	before := nextAt(s, start)
+	p := nextAt(s, start+"&find=sharp-shinned")
+	if len(p.Matches) != 1 || p.Matches[0].ID != "shshaw" || p.Matches[0].Shown {
+		t.Fatalf("find=sharp-shinned lists %+v, want Sharp-shinned Hawk to add", p.Matches)
+	}
+	added := follow(t, s, string(p.Matches[0].URL))
+	u, _ := url.Parse(added)
+	if u.Query().Get("find") != "" || u.Query().Get("family") != "Ardeidae" {
+		t.Errorf("adding went to %s: want the family kept and the box emptied", added)
+	}
+	withHawk := nextAt(s, added)
+	if !hasTile(withHawk, "shshaw") || withHawk.Count != before.Count+1 {
+		t.Fatalf("after adding, %d birds (was %d), hawk shown %t", withHawk.Count, before.Count, hasTile(withHawk, "shshaw"))
+	}
+	for _, tl := range withHawk.Tiles {
+		if (tl.RemoveURL != "") != (tl.S.ID == "shshaw") {
+			t.Errorf("%s: remove link %q; only the added bird has one on its tile", tl.S.ID, tl.RemoveURL)
 		}
 	}
-	if add == "" {
-		t.Fatalf("find=sharp-shinned lists %+v, without an add link for Sharp-shinned Hawk", p.Matches)
+	m := nextAt(s, added+"&find=sharp-shinned").Matches
+	if len(m) != 1 || !m[0].Shown {
+		t.Fatalf("an added bird found again is %+v; want it offered to remove", m)
 	}
-	u, _ := url.Parse(add)
-	if u.Path != "/next" || u.Query().Get("find") != "" || u.Query().Get("family") != "Ardeidae" {
-		t.Errorf("add link %s: want /next keeping family and dropping find", add)
+	if back := follow(t, s, string(m[0].URL)); back != start {
+		t.Errorf("removing the added bird went to %s, want %s", back, start)
 	}
-	p = nextAt(s, add)
-	var remove string
-	for _, tl := range p.Tiles {
-		if tl.S.Name(dataset.LocaleNA) == "Sharp-shinned Hawk" {
-			remove = string(tl.RemoveURL)
-		} else if tl.RemoveURL != "" {
-			t.Errorf("%s was not added but has a remove link", tl.S.ID)
+
+	// A bird of the set, not added by name, is removed too, and put back.
+	m = nextAt(s, start+"&find=great+blue+heron").Matches
+	if len(m) != 1 || !m[0].Shown {
+		t.Fatalf("find=great blue heron lists %+v; want Great Blue Heron to remove", m)
+	}
+	gone := follow(t, s, string(m[0].URL))
+	without := nextAt(s, gone)
+	if hasTile(without, m[0].ID) || without.Count != before.Count-1 {
+		t.Errorf("after removing, %d birds (was %d), heron shown %t", without.Count, before.Count, hasTile(without, m[0].ID))
+	}
+	m2 := nextAt(s, gone+"&find=great+blue+heron").Matches
+	if len(m2) != 1 || m2[0].Shown {
+		t.Fatalf("a removed bird found again is %+v; want it offered to add", m2)
+	}
+	if back := follow(t, s, string(m2[0].URL)); back != start {
+		t.Errorf("putting the heron back went to %s, want %s", back, start)
+	}
+}
+
+// TestNextFindCountsThenLists checks the find box without JavaScript: it
+// says how many birds match, and lists them only when there are
+// nextFindLimit or fewer.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextFindCountsThenLists(t *testing.T) {
+	s := newTestServerReal(t)
+	fixNextClock(t, time.October)
+	for _, q := range []string{"hawk", "sharp", "warbler", "zzzz", "d hawk"} {
+		want := 0
+		for i := range s.ds.Species {
+			if searchMatches(s.search[s.ds.Species[i].ID], q) {
+				want++
+			}
+		}
+		p := nextAt(s, "/next?find="+url.QueryEscape(q))
+		if p.Found != want {
+			t.Errorf("find=%q: %d found, the matcher finds %d", q, p.Found, want)
+		}
+		if listed := len(p.Matches); (want <= nextFindLimit && listed != want) || (want > nextFindLimit && listed != 0) {
+			t.Errorf("find=%q: %d listed of %d found; list all at %d or fewer, none above", q, listed, want, nextFindLimit)
 		}
 	}
-	if remove == "" {
-		t.Fatalf("after %s, Sharp-shinned Hawk is not shown with a remove link", add)
+}
+
+//go:embed testdata/next_find_probe.js
+var nextFindProbe string
+
+// TestNextFindInTheBrowser types into /next's find box in headless Chrome
+// and checks that, for each query, the script says what the server's page
+// says for the same find=, and lists the same birds with the same links.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextFindInTheBrowser(t *testing.T) {
+	chrome := findChrome()
+	if chrome == "" {
+		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); the find box was not tested in a browser")
 	}
-	after := nextAt(s, remove)
-	for _, tl := range after.Tiles {
-		if tl.S.Family != "Ardeidae" {
-			t.Errorf("after removing, %s is still shown", tl.S.ID)
+	s := newTestServer(t)
+	old := nextFindLimit
+	nextFindLimit = 2 // the fixture is small; "a" must be over the limit
+	t.Cleanup(func() { nextFindLimit = old })
+	qs := []string{"crow", "AMECRO", "a", "hummingbird", "zzzz", "Corvus brachy"}
+	js, _ := json.Marshal(qs)
+	ts := httptest.NewServer(instrument(s, nextFindProbe, nil))
+	defer ts.Close()
+	start := "/next?set=every&exclude=annhum"
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
+		"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
+		"--disable-component-update", "--disable-sync", "--disable-extensions",
+		"--user-data-dir="+t.TempDir(), "--virtual-time-budget=5000",
+		"--dump-dom", ts.URL+start+"#queries="+url.QueryEscape(string(js))).Output()
+	if err != nil {
+		t.Fatalf("chrome: %v", err)
+	}
+	m := dataAttr("data-probe").FindSubmatch(out)
+	if m == nil {
+		t.Fatal("no result from the probe; it did not run")
+	}
+	var res struct {
+		Typed []struct {
+			Q     string   `json:"q"`
+			Found string   `json:"found"`
+			Items []string `json:"items"`
+		} `json:"typed"`
+	}
+	if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
+		t.Fatalf("reading the probe: %v", err)
+	}
+	if len(res.Typed) != len(qs) {
+		t.Fatalf("the probe typed %d of %d queries", len(res.Typed), len(qs))
+	}
+	lists := 0
+	for _, r := range res.Typed {
+		w := httptest.NewRecorder()
+		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, start+"&find="+url.QueryEscape(r.Q), nil))
+		body := w.Body.String()
+		fm := regexp.MustCompile(`<p class="found">([^<]*(?:<[^>]*>[^<]*)*?)</p>`).FindStringSubmatch(body)
+		if fm == nil {
+			t.Fatalf("the server's page for find=%q has no count", r.Q)
+		}
+		if want := html.UnescapeString(fm[1]); r.Found != want {
+			t.Errorf("typing %q: the script says %q, the server %q", r.Q, r.Found, want)
+		}
+		var want []string
+		for _, l := range regexp.MustCompile(`<li><a class="(btn(?: rm)?)" href="([^"]*)">`).FindAllStringSubmatch(body, -1) {
+			want = append(want, l[1]+" "+html.UnescapeString(l[2]))
+		}
+		if !slices.Equal(r.Items, want) {
+			t.Errorf("typing %q: the script lists %v, the server %v", r.Q, r.Items, want)
+		}
+		if len(want) > 0 {
+			lists++
 		}
 	}
-	if len(after.Tiles) != len(p.Tiles)-1 {
-		t.Errorf("removing one bird left %d of %d", len(after.Tiles), len(p.Tiles))
+	if !strings.Contains(res.Typed[2].Found, "Type more") {
+		t.Errorf("typing \"a\" found %q; the check needs a query over the limit", res.Typed[2].Found)
 	}
-	shown := nextAt(s, "/next?family=Ardeidae&find=great+blue+heron")
-	if len(shown.Matches) == 0 || !shown.Matches[0].Shown || shown.Matches[0].AddURL != "" {
-		t.Errorf("a bird already shown is offered to add again: %+v", shown.Matches)
+	if lists < 3 {
+		t.Errorf("only %d queries listed birds; the check proves little", lists)
 	}
 }
 

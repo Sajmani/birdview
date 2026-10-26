@@ -762,9 +762,12 @@ is unchanged and does not link to it.
   between this and every bird. Choosing a family, habitat, or diet shows every bird of that kind
   unless the address asks otherwise. Every filter (family, region, month, habitat, diet) narrows
   either set, and birds added by name join it.
-- **Adding a bird.** A box above the set finds birds by name as the search box does
-  ([searchBox](filtering.md#searchbox)). Matches are listed, each with a link that adds it
-  (`include=<id>`), and an added bird has a link that removes it.
+- **Adding and removing a bird.** A box above the set finds birds by name as the search box does
+  ([searchBox](filtering.md#searchbox)). As the reader types, it says how many birds match, and
+  once there are 8 or fewer it lists them. Each listed bird has a link that adds it to the set
+  (`include=<id>`) or, if it is already there, removes it (`exclude=<id>` for a bird the filters
+  chose). An added bird's tile also has a link that removes it. Without JavaScript, Enter does
+  the same.
 - **Filters are the count line.** The line under the box names each setting. Each is a control
   that opens the choices for that one setting directly under itself, as a `<details>`, so it
   works without JavaScript. Only one is open at a time, and a tap elsewhere closes it. A **Reset**

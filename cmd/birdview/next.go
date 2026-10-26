@@ -15,6 +15,7 @@
 package main
 
 import (
+	"encoding/json"
 	"html/template"
 	"math"
 	"net/http"
@@ -51,8 +52,10 @@ var nextShowAll = 1200
 // is at least 1 in 1,000 of the records in the month and regions selected.
 const nextCommonShare = 1e-3
 
-// nextFindLimit is how many name matches the add box lists.
-const nextFindLimit = 12
+// nextFindLimit is the most name matches the find box lists; above it, the
+// box gives only their number (product.nextView). A variable so the checks
+// can lower it below the fixture's size.
+var nextFindLimit = 8
 
 // nextChoice is one option inside a count-line control.
 type nextChoice struct {
@@ -79,11 +82,12 @@ type nextControl struct {
 	AllURL template.URL
 }
 
-// nextMatch is one bird the add box found.
+// nextMatch is one bird the find box found, with the link that adds it to
+// the set or removes it.
 type nextMatch struct {
-	Name, Scientific string
-	AddURL           template.URL
-	Shown            bool
+	ID, Name, Scientific string
+	Shown                bool
+	URL                  template.URL
 }
 
 type nextData struct {
@@ -96,13 +100,26 @@ type nextData struct {
 	// MoreURL shows every bird in the set; empty when all are shown.
 	MoreURL template.URL
 	Hidden  int
-	// Find is the add box's text; Matches what it found, and FindMore how
-	// many more it found than are listed.
-	Find     string
-	Matches  []nextMatch
-	FindMore int
-	Fields   []hiddenField
-	ResetURL template.URL
+	// Find is the find box's text and Found how many birds it matches;
+	// Matches lists them when there are nextFindLimit or fewer.
+	Find    string
+	Found   int
+	Matches []nextMatch
+	Fields  []hiddenField
+	// ToggleURL is this address with bird= last and empty: a bird's id
+	// appended adds it or removes it. ShownIDs are the birds in the set,
+	// space-separated, and BirdsURL the names the script searches.
+	ToggleURL  string
+	ShownIDs   string
+	BirdsURL   string
+	FindLimit  int
+	FindScript template.JS
+	ResetURL   template.URL
+
+	// in and base are the birds in the set, and in it before any added or
+	// removed by name; for the bird= toggle.
+	in, base map[string]bool
+	included map[string]bool
 }
 
 // nextURL is /next with q.
@@ -211,7 +228,52 @@ func nextCommon(q url.Values, opt options) bool {
 }
 
 func (s *server) next(w http.ResponseWriter, r *http.Request) {
+	if q := r.URL.Query(); q.Has("bird") {
+		http.Redirect(w, r, s.nextToggleBird(r), http.StatusSeeOther)
+		return
+	}
 	s.render(w, "next.html", s.nextPage(r))
+}
+
+// nextToggleBird is where bird=<id> goes: the same address with that bird
+// added to the set, or removed from it if it was there, and the find box
+// emptied. An added bird is listed with include=; a bird of the set removed
+// is listed with exclude=. Undoing either deletes the entry rather than
+// adding its opposite, so the address stays short.
+func (s *server) nextToggleBird(r *http.Request) string {
+	q := r.URL.Query()
+	id := q.Get("bird")
+	q.Del("bird")
+	q.Del("find")
+	if _, ok := s.byID[id]; !ok {
+		return string(nextURL(q))
+	}
+	r2 := r.Clone(r.Context())
+	r2.URL.RawQuery = q.Encode()
+	page := s.nextPage(r2)
+	without := func(key string) {
+		keep := nextValues(q, key)
+		q.Del(key)
+		for _, v := range keep {
+			if v != id {
+				q.Add(key, v)
+			}
+		}
+	}
+	anchor := ""
+	switch {
+	case page.in[id] && page.included[id]:
+		without("include")
+	case page.in[id]:
+		q.Add("exclude", id)
+	default:
+		without("exclude")
+		if !page.base[id] {
+			q.Add("include", id)
+		}
+		anchor = "#" + tileAnchor(id)
+	}
+	return string(nextURL(q)) + anchor
 }
 
 // nextPage builds /next for the address r carries.
@@ -259,15 +321,29 @@ func (s *server) nextPage(r *http.Request) nextData {
 		}
 	}
 
-	// Birds added by name join the set, once each.
-	in := map[string]bool{}
+	// Birds removed by name leave the set; birds added by name join it,
+	// once each. A bird both added and removed is removed.
+	baseIn := map[string]bool{}
 	for _, sp := range base {
-		in[sp.ID] = true
+		baseIn[sp.ID] = true
 	}
+	removed := map[string]bool{}
+	for _, id := range nextValues(q, "exclude") {
+		removed[id] = true
+	}
+	in := map[string]bool{}
+	kept := base[:0:0]
+	for _, sp := range base {
+		if !removed[sp.ID] {
+			kept = append(kept, sp)
+			in[sp.ID] = true
+		}
+	}
+	base = kept
 	added := map[string]bool{}
 	for _, id := range nextValues(q, "include") {
 		sp, ok := s.byID[id]
-		if !ok || added[id] {
+		if !ok || added[id] || removed[id] {
 			continue
 		}
 		added[id] = true
@@ -294,7 +370,26 @@ func (s *server) nextPage(r *http.Request) nextData {
 	})
 
 	page := nextData{Feedback: s.feedback, Count: len(base), Total: len(s.ds.Species),
-		ResetURL: "/next"}
+		ResetURL: "/next", in: in, base: baseIn, included: added, FindLimit: nextFindLimit,
+		FindScript: s.nextFindJS}
+	tq := cloneValues(q)
+	tq.Del("find")
+	tq.Del("bird")
+	page.ToggleURL = "/next?bird="
+	if len(tq) > 0 {
+		page.ToggleURL = "/next?" + tq.Encode() + "&bird="
+	}
+	page.BirdsURL = "/next/birds.json"
+	if opt.Locale == dataset.LocaleWorld {
+		page.BirdsURL += "?names=" + string(dataset.LocaleWorld)
+	}
+	ids := make([]string, 0, len(base))
+	for _, sp := range base {
+		ids = append(ids, sp.ID)
+	}
+	sort.Strings(ids)
+	page.ShownIDs = strings.Join(ids, " ")
+	toggle := func(id string) template.URL { return template.URL(page.ToggleURL + url.QueryEscape(id)) }
 	shown := base
 	if len(shown) > nextShowAll && q.Get("all") != "1" {
 		shown = shown[:nextShowAll]
@@ -327,31 +422,26 @@ func (s *server) nextPage(r *http.Request) nextData {
 			SameAs:      s.sameMeasurements(sp, opt.Locale),
 		}
 		if added[sp.ID] {
-			t.RemoveURL = nextRemove(q, sp.ID)
+			t.RemoveURL = toggle(sp.ID)
 		}
 		page.Tiles = append(page.Tiles, t)
 	}
 
-	// The add box.
+	// The find box: how many birds match, and which once few enough.
 	page.Find = strings.TrimSpace(q.Get("find"))
 	if normalizeSearch(page.Find) != "" {
+		var found []*dataset.Species
 		for i := range s.ds.Species {
-			sp := &s.ds.Species[i]
-			if !searchMatches(s.search[sp.ID], page.Find) {
-				continue
+			if sp := &s.ds.Species[i]; searchMatches(s.search[sp.ID], page.Find) {
+				found = append(found, sp)
 			}
-			if len(page.Matches) == nextFindLimit {
-				page.FindMore++
-				continue
+		}
+		page.Found = len(found)
+		if len(found) <= nextFindLimit {
+			for _, sp := range found {
+				page.Matches = append(page.Matches, nextMatch{ID: sp.ID, Name: sp.Name(opt.Locale),
+					Scientific: sp.ScientificName, Shown: in[sp.ID], URL: toggle(sp.ID)})
 			}
-			m := nextMatch{Name: sp.Name(opt.Locale), Scientific: sp.ScientificName, Shown: in[sp.ID]}
-			if !m.Shown {
-				aq := cloneValues(q)
-				aq.Add("include", sp.ID)
-				aq.Del("find")
-				m.AddURL = nextURL(aq)
-			}
-			page.Matches = append(page.Matches, m)
 		}
 	}
 	for _, k := range sortedKeys(q) {
@@ -366,19 +456,6 @@ func (s *server) nextPage(r *http.Request) nextData {
 	page.Title = s.nextTitle(opt, common, defaultMonth)
 	page.Controls = s.nextControls(q, opt, common, defaultMonth, nowMonth)
 	return page
-}
-
-// nextRemove is the address without one added bird.
-func nextRemove(q url.Values, id string) template.URL {
-	q = cloneValues(q)
-	keep := q["include"]
-	q.Del("include")
-	for _, v := range keep {
-		if v != id && v != "" {
-			q.Add("include", v)
-		}
-	}
-	return nextURL(q)
 }
 
 func sortedKeys(q url.Values) []string {
@@ -594,4 +671,23 @@ func (s *server) nextControls(q url.Values, opt options, common, defaultMonth bo
 	}}}
 	out = append(out, nc)
 	return out
+}
+
+// nextBirds serves the names /next's find box searches as the reader types
+// (product.nextView): for every bird of the index, its id, English name in
+// the locale asked for, scientific name, and search text, as searchTexts
+// builds it. The matching stays the Go rule; the script only looks for the
+// typed text, normalized, in the text given here.
+func (s *server) nextBirds(w http.ResponseWriter, r *http.Request) {
+	loc := dataset.LocaleNA
+	if dataset.Locale(r.URL.Query().Get("names")) == dataset.LocaleWorld {
+		loc = dataset.LocaleWorld
+	}
+	out := make([][4]string, 0, len(s.ds.Species))
+	for i := range s.ds.Species {
+		sp := &s.ds.Species[i]
+		out = append(out, [4]string{sp.ID, sp.Name(loc), sp.ScientificName, s.search[sp.ID]})
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(out)
 }

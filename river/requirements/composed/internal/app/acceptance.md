@@ -279,8 +279,13 @@ per family, each the family's most often recorded at 1 in 1,000 or more, and no 
 Every bird on four pages is drawn at one pixels-per-millimeter, and the longest fits its tile.
 Ordering by mass runs smallest first; ordering by frequency runs most often recorded first.
 Family and region narrow together, and an emptied filter shows all, not nothing. A name finds
-Sharp-shinned Hawk; its link adds it, keeps the filters, and drops the box; its remove link
-takes it out and nothing else; a bird already shown is not offered. Choosing from all selects
+Sharp-shinned Hawk; its link adds it, keeps the filters, and empties the box; found again, it is
+offered to remove, and removing it returns the address it came from. A heron the filters chose
+is offered to remove, removing it takes out that bird and nothing else, and putting it back
+returns the address it came from. Without JavaScript, five queries give the matcher's count and
+list the birds only at 8 or fewer. In headless Chrome, typing six queries (one in capitals, one
+over a lowered limit, one matching nothing) shows the same count line and lists the same birds,
+with the same Add or Remove links, as the server's page for each. Choosing from all selects
 only that one, choosing again removes it, and changing a filter drops the box and Show all.
 With the threshold lowered to 200, every bird draws 200 and a link to all 1,041 in the same
 order, and the landing set offers no link. Without a month the page is
@@ -289,7 +294,7 @@ count-line setting is a `<details>` sharing one name, so the browser opens one a
 Reset links to /next. The phone-width and contrast checks reach /next through the crawl, open
 every setting at once, and measure after the placing script has run.
 
-**Run:** `go test ./cmd/birdview/ -run 'TestNext'`
+**Run:** `go test ./cmd/birdview/ -run 'TestNext'` (the browser check gates where Chrome is installed)
 **Status: verified 2026-10-26, passing.**
 Watched failing: 2026-10-26, by lowering the floor to 1 in 10,000 ("70 birds, want 47, one per family").
 Watched failing: 2026-10-26, by keeping each family's first bird instead of its commonest (Tree Swallow missing).
@@ -302,3 +307,7 @@ Watched failing: 2026-10-26, by ignoring all=1 ("draws 200 of 1041").
 Watched failing: 2026-10-26, by caching /next without a month like any page.
 Watched failing: 2026-10-26, by anchoring each popover to its own setting with no placing script (the phone-width check: "the page is 543px wide in a 360px window").
 Watched failing: 2026-10-26, by dropping the shared name ("0 of 9 count-line settings share the name ctl").
+Watched failing: 2026-10-26, by not lowercasing what is typed in the script ("AMECRO": the script says "", the server "1 bird matches.").
+Watched failing: 2026-10-26, by the script listing matches over the limit, and by its offering Add for a bird already shown.
+Watched failing: 2026-10-26, by the toggle not removing a bird the filters chose, and by ignoring exclude=.
+Watched failing: 2026-10-26, by the server listing 23 matches for "hawk".

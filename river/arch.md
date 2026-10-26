@@ -65,12 +65,15 @@ it to the Go lookup in `internal/boundary`.
 The third is `search.js`, the search box ([product.searchBox](requirements/local/product/filtering.md#searchbox)), which filters as the reader
 types. The server writes each tile's normalized words into `data-search` and applies `q` itself
 when it is in the address; the script only checks that the typed text occurs within one field, and a test holds
-it to the Go matcher in `cmd/birdview/search.go`. The fourth is the placing script on `/next`
-([product.nextView](requirements/local/product/presentation.md#nextview)): it moves an opened
-setting's choices left only as far as keeps them on the screen, and closes them on a tap elsewhere.
-The rule all four protect is that *logic* stays in Go, not that the client is inert; without
-JavaScript the page still works, minus these four (the search then needs Enter, and a phone shows
-a setting's choices under the whole count line).
+it to the Go matcher in `cmd/birdview/search.go`. The fourth and fifth are on `/next`
+([product.nextView](requirements/local/product/presentation.md#nextview)). The placing script moves
+an opened setting's choices left only as far as keeps them on the screen, and closes them on a tap
+elsewhere. `next-find.js` counts and lists the birds the find box matches as the reader types. It
+reads each bird's search text from `/next/birds.json`, which the server builds, and its links go to
+the server's `bird=` toggle, which decides what adding or removing means. A test holds it to the
+server's page for the same query. The rule all five protect is that *logic* stays in Go, not that
+the client is inert; without JavaScript the page still works, minus these five (the searches then
+need Enter, and a phone shows a setting's choices under the whole count line).
 
 This is what let [acceptance.familyFilterSelectsAndClears](requirements/acceptance.md#familyfilterselectsandclears) and [acceptance.unitToggleSwitches](requirements/acceptance.md#unittoggleswitches) be real checks rather than declared gaps.
 

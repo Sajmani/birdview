@@ -143,6 +143,8 @@ type server struct {
 	hereJS template.JS
 	// searchJS is web/static/search.js, inlined likewise (product.searchBox).
 	searchJS template.JS
+	// nextFindJS is web/static/next-find.js, inlined into /next (product.nextView).
+	nextFindJS template.JS
 	// search is each species' normalized search text, by id (product.searchBox).
 	search map[string]string
 	// boundaryURL is where the region boundary file is served: its path
@@ -620,6 +622,11 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		return nil, fmt.Errorf("reading search.js: %w", err)
 	}
 	s.searchJS = template.JS(js)
+	js, err = fs.ReadFile(assetFS, "static/next-find.js")
+	if err != nil {
+		return nil, fmt.Errorf("reading next-find.js: %w", err)
+	}
+	s.nextFindJS = template.JS(js)
 	s.search = searchTexts(ds)
 
 	// Once, at startup: every response's ETag is built from this (tech.cacheLifetimeStated).
@@ -698,6 +705,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		{"/docs/", http.HandlerFunc(s.document)},
 		{"/compare", http.HandlerFunc(s.compare)},
 		{"/next", http.HandlerFunc(s.next)},
+		{"/next/birds.json", http.HandlerFunc(s.nextBirds)},
 		{"/now", http.HandlerFunc(s.now)},
 		{"/boundaries/", http.HandlerFunc(s.boundaries)},
 		{"/robots.txt", http.HandlerFunc(robots)},

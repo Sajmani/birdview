@@ -34,25 +34,28 @@
   Click a bird for its numbers and sources. <a href="/docs/using">How to read a drawing</a>.</p>
 </header>
 
+{{/* The find box. With JavaScript, next-find.js counts the matches as the
+     reader types and lists them once there are FindLimit or fewer; without
+     it, Enter does the same on the server. Each listed bird links to
+     bird=<id>, which adds it or removes it. */}}
 <form class="search" action="/next" method="get" role="search">
   {{range .Fields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
-  <input type="search" name="find" value="{{.Find}}" placeholder="Add a bird by name"
-         aria-label="Find a bird by name to add" autocomplete="off" spellcheck="false">
+  <input type="search" name="find" value="{{.Find}}" placeholder="Find a bird to add or remove"
+         aria-label="Find a bird by name to add or remove" autocomplete="off" spellcheck="false">
 </form>
-{{if .Find}}
-<div class="finds" role="region" aria-label="Birds found">
+<div class="finds" role="status" aria-live="polite" data-birds="{{.BirdsURL}}"
+     data-toggle="{{.ToggleURL}}" data-shown="{{.ShownIDs}}" data-limit="{{.FindLimit}}">
+  {{if .Find}}
+  <p class="found">{{if eq .Found 0}}No bird&rsquo;s name contains &ldquo;{{.Find}}&rdquo;.{{else if eq .Found 1}}1 bird matches.{{else}}{{.Found}} birds match.{{end}}{{if gt .Found .FindLimit}} Type more to list them.{{end}}</p>
   {{if .Matches}}
   <ul>
-    {{range .Matches}}<li>{{if .Shown}}<span class="have">&check; shown</span>{{else}}<a class="btn" href="{{.AddURL}}">+ Add</a>{{end}}
+    {{range .Matches}}<li><a class="btn{{if .Shown}} rm{{end}}" href="{{.URL}}">{{if .Shown}}&minus; Remove{{else}}+ Add{{end}}</a>
       {{.Name}} <i>{{.Scientific}}</i></li>
     {{end}}
   </ul>
-  {{if .FindMore}}<p class="hint">and {{.FindMore}} more; type more of the name.</p>{{end}}
-  {{else}}
-  <p class="hint">No bird's name contains &ldquo;{{.Find}}&rdquo;.</p>
+  {{end}}
   {{end}}
 </div>
-{{end}}
 
 <h2 class="settitle">{{.Title}}</h2>
 <div class="count">
@@ -95,6 +98,7 @@
   <p class="caveat"><b>Every length here is modeled</b>, as are most wingspans. Click any bird to
   see where each number comes from.</p>
 </footer>
+<script>{{.FindScript}}</script>
 <script>
 /* Places an opened setting's choices under it, moved left only as far as
    keeps them on the screen, and closes them on a tap elsewhere or Escape,
