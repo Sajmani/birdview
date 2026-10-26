@@ -297,7 +297,9 @@ setting but show and the find box, beside All with the count the settings match 
 (2), the chosen one marked, and its summary names the choice. The count line is two rows: what is
 drawn, Show, Clear pins, and Reset, then Order by through Names; it has no Show all of its own.
 `show=100`, `show=`, `show=0`, `show=-3`, and `show=zero` redirect to the address without show;
-`show=50`, `show=all`, and `show=pinned` do not. The chosen order links to its reverse and back, every other
+`show=50`, `show=all`, and `show=pinned` do not. In headless Chrome, clicking the First button or the First choice's edge
+sends the typed count, and clicking into its box does not; without the script, First is a submit
+button. The chosen order links to its reverse and back, every other
 order links to itself unreversed, reversed mass runs largest first, and reversed frequency puts
 the most recorded duck last. Without a month the page is
 no-store with no validator; with one it carries an ETag. The classic view is at /classic. Every
@@ -338,6 +340,7 @@ Watched failing: 2026-10-26, by Here keeping clear=1, by renaming its button, an
 Watched failing: 2026-10-26, by show=pinned that hid nothing, and by Here keeping show=pinned.
 Watched failing: 2026-10-26, by a Reset that dropped the pins, and by a Clear pins that kept them.
 Watched failing: 2026-10-26, by a pin that jumps to its tile, by not keeping the scroll ("the new page opened at 0"), and by dropping the pinned list or its entries.
+Watched failing: 2026-10-26, by dropping the edge click's script, by sending on every click ("box 1"), and by First not being a submit button.
 Watched failing: 2026-10-26, by a filter dropping every show, by ignoring a count ("show=50: 100 drawn"), by the First form sending show twice, by All counting only the drawn birds ("under Pinned only, All offers 0 birds"), by one count-line row, and by an unmarked First.
 Watched failing: 2026-10-26, by the count line saying "and 1 added" instead of "plus 1 pin".
 Watched failing: 2026-10-26, by ignoring cap, by a filter dropping it, by not redirecting cap=100, by Show all naming cap=all, and by the cap form sending cap twice.

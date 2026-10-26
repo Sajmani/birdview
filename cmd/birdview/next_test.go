@@ -495,7 +495,7 @@ func TestNextShowAll(t *testing.T) {
 	if !slices.Equal(sent, []string{"by=mass", "pin=amecro", "pin=annhum"}) {
 		t.Errorf("the First form sends %v; want every setting but show and find", sent)
 	}
-	if !strings.Contains(form[1], `>First <input class="cap" type="number" name="show"`) || !strings.Contains(form[1], `value="50"`) {
+	if !strings.Contains(form[1], ">First</button>\n          <input class=\"cap\" type=\"number\" name=\"show\"") || !strings.Contains(form[1], `value="50"`) {
 		t.Errorf("the First form does not read First [50]:\n%s", form[1])
 	}
 	pp := nextAt(s, "/?by=mass&show=50&find=jay&pin=amecro&pin=annhum")
@@ -1086,5 +1086,57 @@ func TestNextPinAlignsWithCube(t *testing.T) {
 		if len(res.Off) > 0 {
 			t.Errorf("at %s, %d of %d pins are not level with the mass cube: %v", size, len(res.Off), res.Tiles, res.Off)
 		}
+	}
+}
+
+//go:embed testdata/next_first_probe.js
+var nextFirstProbe string
+
+// TestNextFirstCommitsOnClick checks, in headless Chrome, that the Show
+// setting's First choice is sent by clicking it, as the other choices are,
+// not only by Enter: clicking the First button or the choice's edge sends the
+// typed count, and clicking into the box does not. Without the script, First
+// is still a submit button.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextFirstCommitsOnClick(t *testing.T) {
+	s := newTestServer(t)
+	if body := mustGet(t, s, "/"); !strings.Contains(body, `<button type="submit" title="Show the first this many birds">First</button>`) {
+		t.Error("First is not a submit button")
+	}
+	chrome := findChrome()
+	if chrome == "" {
+		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); First was not clicked in a browser")
+	}
+	ts := httptest.NewServer(instrument(s, nextFirstProbe, nil))
+	defer ts.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
+		"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
+		"--disable-component-update", "--disable-sync", "--disable-extensions",
+		"--user-data-dir="+t.TempDir(), "--window-size=1280,800", "--virtual-time-budget=5000",
+		"--dump-dom", ts.URL+"/?by=mass").Output()
+	if err != nil {
+		t.Fatalf("chrome: %v", err)
+	}
+	m := dataAttr("data-probe").FindSubmatch(out)
+	if m == nil {
+		t.Fatal("no result from the probe; it did not finish")
+	}
+	var res struct {
+		Box, Button, Edge int
+		EdgeHit           bool
+		Sent              []string
+	}
+	if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
+		t.Fatalf("reading the probe: %v", err)
+	}
+	if !res.EdgeHit {
+		t.Fatal("the probe's edge click landed on something other than the First choice")
+	}
+	if res.Box != 0 || res.Button != 1 || res.Edge != 1 || !slices.Equal(res.Sent, []string{"7", "7"}) {
+		t.Errorf("clicks sent: box %d, First %d, edge %d, counts %v; want only First and the edge, each sending 7",
+			res.Box, res.Button, res.Edge, res.Sent)
 	}
 }

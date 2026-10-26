@@ -85,9 +85,10 @@
       <div class="popgroup">
         <form class="showfirst btn{{if eq .Show "first"}} on{{end}}" action="/" method="get">
           {{range .ShowFields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
-          <label>First <input class="cap" type="number" name="show" min="1" step="1" inputmode="numeric"
+          <button type="submit" title="Show the first this many birds">First</button>
+          <input class="cap" type="number" name="show" min="1" step="1" inputmode="numeric"
             value="{{.Cap}}" aria-label="How many birds to show before the rest are hidden"
-            title="How many birds to show; Enter to apply"></label>
+            title="How many birds to show; click First or press Enter to apply">
         </form>
         <a class="btn{{if eq .Show "all"}} on{{end}}" href="{{.ShowAllURL}}" title="Every bird the settings match, with your pins">All {{.Matching}}</a>
         <a class="btn{{if eq .Show "pinned"}} on{{end}}" href="{{.ShowPinnedURL}}" title="Only the birds you have pinned">Pinned only ({{len .Pinned}})</a>
@@ -200,6 +201,14 @@
     try {
       sessionStorage.setItem(KEY, JSON.stringify({ ctl: "", y: window.scrollY }));
     } catch (e) { /* as above */ }
+  });
+  // The First choice is sent by clicking anywhere on it but its box, as
+  // the other choices are by clicking them; its First button does the same
+  // without the script.
+  line.querySelectorAll("form.showfirst").forEach(function (f) {
+    f.addEventListener("click", function (e) {
+      if (e.target === f && f.requestSubmit) f.requestSubmit();
+    });
   });
   line.addEventListener("submit", function (e) {
     var d = e.target.closest && e.target.closest("details.ctl");

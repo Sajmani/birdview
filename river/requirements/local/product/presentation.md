@@ -794,7 +794,8 @@ the classic view.
 - **Show.** Which birds are drawn is one setting, **Show**, with three answers, and one parameter,
   `show`: **First [100]** draws the first 100 of the order plus any pinned birds past them
   (`show=<n>`; 100 is the default, which the address leaves out), and the 100 is a box: typing
-  another count and pressing Enter sets it, with or without JavaScript, and a blank, 100, or
+  another count and clicking First (anywhere on the choice but its box) or pressing Enter sets it,
+  with or without JavaScript, and a blank, 100, or
   anything not a count returns to the default. **All N** draws every bird the settings match
   (`show=all`), N counting them with the pins. **Pinned only (k)** draws only the pinned birds
   (`show=pinned`), for a comparison of the reader's own picks. Wherever unpinned birds are left

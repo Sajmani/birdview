@@ -542,8 +542,8 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 .next .countrow + .countrow { margin-top: 6px; }
 .next .count .shown { margin-right: 4px; }
 /* The First choice in Show: a button holding the count's box. */
-.showfirst { margin: 0; cursor: default; }
-.showfirst label { cursor: text; }
+.showfirst { margin: 0; cursor: pointer; }
+.showfirst button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 .showfirst .cap { width: 5.5ch; font: inherit; color: var(--ink); background: var(--panel);
   border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; text-align: right;
   -moz-appearance: textfield; appearance: textfield; }
