@@ -48,6 +48,44 @@ key (option (a)); option (b) waits for a discussion of options and for
 [simulatedUserTests](#simulatedusertests).
 [tightenProse](#tightenprose) is the text half of the same complaint.
 
+Done 2026-10-26, option (b), by the owner's call and without the simulated comparison: the one-set
+view built at `/next` became the home page ([product.nextView](requirements/local/product/presentation.md#nextview)), with search-and-pin, one
+scale, a Show setting, and each setting on one count line; the index is the classic view at
+`/classic`. Deployed as `82821a6`. Left: region choice at county scale (search or a map, not
+chips) and the worldwide dataset; [homeSpeckScale](#homespeckscale) and
+[classicViewFate](#classicviewfate) follow from the redesign.
+
+## homeSpeckScale
+
+**At one scale, small birds draw as specks beside large ones**
+
+Status: open
+Owner: Sameer
+Gate: owner's call; before the testers are asked back
+
+The home page draws every bird to the longest shown. When a heron, goose, swan, crane, or vulture
+is among the first 100 (as in most months' default sets), the commonest songbirds are about 13 px
+long and hard to read. Raised 2026-10-26, not yet answered. Options: keep one scale (the point of
+the comparison); shrink each tile's height to its bird so specks at least sit in small tiles; or
+scale per run of similar sizes and say so. Pinned only and the welcome line's size comparisons
+already avoid it by choosing similar birds.
+
+## classicViewFate
+
+**Keep, change, or retire the classic view at /classic**
+
+Status: open
+Owner: Sameer
+Gate: when the home page has had readers
+
+The index moved to `/classic` on 2026-10-26, unchanged, with its own links, `/now`, compare mode
+(`/compare`), and the guide's examples (`docs/using.md`'s Some things to try) pointing at it. It is
+not linked from the home page except in the credits. Decide whether it stays, and if it goes, what
+replaces compare mode and the guide's examples. Either way, the requirements still say "the index"
+in about 37 places; [product.nextView](requirements/local/product/presentation.md#nextview) says that now means the classic view, but a pass
+should name the classic view or the home page in each. `docs/using.md` also still describes the
+classic view's panels (Regions and months, Presentation) as the way in.
+
 ## simulatedUserTests
 
 **Test the interface with simulated users**
@@ -71,7 +109,10 @@ Built and first run 2026-10-25 ([usertests/](../usertests/README.md),
 [summary](../usertests/results/2026-10-25/summary.md)): four readers on `4f25193` and on
 `b3b2f93`. The old run found the missing search, the density, and the backwards month toggle, but
 saw the phone overflow only weakly; mean ease rose from 2.25 to 3.1. Left: run it before and after
-Presentation moves to the guide, and decide whether results stay in the repository.
+Presentation moves to the guide, and decide whether results stay in the repository. Since
+2026-10-26 the comparison to run is the new home page (`/`) against the classic view (`/classic`),
+which shipped first on the owner's call; the readers' tasks will need new instructions for pins and
+the Show setting.
 
 ## togglesStartSelected
 
@@ -86,7 +127,9 @@ everything starts selected and a tap drops one ([product.regionAndMonthFilter](r
 four built the address by hand instead. Karen's wording complaint
 ([#1](https://github.com/google/birdview/issues/1)) was the same problem seen from the help text.
 One answer: when everything is selected, a tap on one item selects only it, as Only does, and
-later taps add and remove. That changes the requirement, and families too.
+later taps add and remove. That changes the requirement, and families too. The home page adopted
+this rule on 2026-10-26 ([product.nextView](requirements/local/product/presentation.md#nextview)); what is left is the classic view, if it stays
+([classicViewFate](#classicviewfate)).
 
 ## compareNumbersUnreadable
 
@@ -99,7 +142,22 @@ Gate: before the testers are asked back
 Both phone readers, on both revisions, could not read the length, wingspan, and mass labels inside
 the comparison's drawings, and opened each bird's page instead
 ([product.comparisonOneScale](requirements/local/product/presentation.md#comparisononescale)). Show the three numbers as text under each panel, or scale the
-labels with the drawing.
+labels with the drawing. The home page writes the three numbers as text under every drawing;
+what is left is `/compare`, which the classic view's compare mode reaches
+([classicViewFate](#classicviewfate)).
+
+## testersAskedBack
+
+**Ask the first readers back to the new home page**
+
+Status: open
+Owner: Sameer
+Gate: owner's call, once [homeSpeckScale](#homespeckscale) is settled
+
+Ryan, Karen, and Joe gave the first feedback (2026-10-25), and Shai Mitra is also to be asked; none
+has seen the home page that answers it. They were deliberately not contacted while the redesign
+was in progress. Ask them to try birdview.site on a phone and a laptop, with the same questions as
+before, and record what they say under [scalableInterface](#scalableinterface).
 
 ## tightenProse
 
@@ -663,7 +721,9 @@ Gate: if CI goes red on it
 Found 2026-10-23. `TestLookupHonorsTheSourceRequirements` measured two requests 114 ms apart against
 a 120 ms interval and a 5 ms tolerance, during a full `go test ./...`; alone it passed five runs of
 five. The gaps are timed at the fake server, so a first request delayed in arriving shortens the
-next gap without the client pacing any faster. Now that
+next gap without the client pacing any faster. The GBIF client's test has the same shape and
+flaked the same way on 2026-10-26: `TestTaxonIdentifiesItselfAndPaces` measured 53.8 ms against a
+60 ms interval in a full run, and passed three runs alone. Now that
 [tech.checksOnEveryChange](requirements/local/tech/release.md#checksoneverychange) fails CI on any failure, a flake here would read as a broken
 change. Measure the gap at the client's send instead, or widen the tolerance with that reason
 
