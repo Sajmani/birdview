@@ -390,7 +390,9 @@ func TestNextFindInTheBrowser(t *testing.T) {
 			t.Errorf("typing %q: the script says %q, the server %q", r.Q, r.Found, want)
 		}
 		var want []string
-		for _, l := range regexp.MustCompile(`<li><a class="(pin(?: on)?)" href="([^"]*)"`).FindAllStringSubmatch(body, -1) {
+		finds := body[strings.Index(body, `<div class="finds"`):]
+		finds = finds[:strings.Index(finds, "</div>")]
+		for _, l := range regexp.MustCompile(`<li><a class="(pin(?: on)?)" href="([^"]*)"`).FindAllStringSubmatch(finds, -1) {
 			want = append(want, l[1]+" "+html.UnescapeString(l[2]))
 		}
 		if !slices.Equal(r.Items, want) {
@@ -812,5 +814,94 @@ func TestNextResetKeepsPins(t *testing.T) {
 	clear, reset := strings.Index(body, ">Clear pins</a>"), strings.Index(body, ">Reset</a>")
 	if clear < 0 || reset < 0 || clear > reset {
 		t.Errorf("Clear pins at %d, Reset at %d; want Clear pins just before Reset", clear, reset)
+	}
+}
+
+// TestNextPinnedList checks the list of pinned birds under the find box: one
+// entry per pinned bird, in the order pinned, its name linking to its tile
+// and its pin unpinning it; and that no pin link jumps the page to a tile.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextPinnedList(t *testing.T) {
+	s := newTestServer(t)
+	p := nextAt(s, "/next?by=mass&month=all&pin=annhum&pin=amecro&pin=nosuchbird")
+	var names []string
+	for _, e := range p.Pinned {
+		names = append(names, e.Anchor)
+	}
+	if !slices.Equal(names, []string{"s-annhum", "s-amecro"}) {
+		t.Fatalf("the pinned list links to %v, want s-annhum and s-amecro, in that order", names)
+	}
+	if string(p.Pinned[0].URL) != "/next?by=mass&month=all&pin=amecro&pin=nosuchbird" {
+		t.Errorf("the first entry's pin goes to %s, want the page without that pin", p.Pinned[0].URL)
+	}
+	unpinned := 0
+	for _, tl := range p.Tiles {
+		if !tl.Pinned {
+			unpinned++
+		}
+		if strings.Contains(string(tl.PinURL), "#") {
+			t.Errorf("%s's pin goes to %s, which jumps the page", tl.S.ID, tl.PinURL)
+		}
+	}
+	if unpinned == 0 {
+		t.Error("no unpinned bird is drawn, so no pin that pins was checked")
+	}
+	_, body := get(t, s, "/next?pin=amecro")
+	if !strings.Contains(body, `<div class="pinned" role="region" aria-label="Pinned birds">`) {
+		t.Error("with a bird pinned, the page draws no pinned list")
+	}
+	if !strings.Contains(body, `<a class="pinname" href="#s-amecro"`) || !strings.Contains(body, `id="s-amecro"`) {
+		t.Error("the pinned list's name does not link to the bird's tile")
+	}
+	if p := nextAt(s, "/next"); len(p.Pinned) != 0 {
+		t.Errorf("with nothing pinned, the list has %d entries", len(p.Pinned))
+	}
+	if _, body := get(t, s, "/next"); strings.Contains(body, `class="pinned"`) {
+		t.Error("with nothing pinned, the page still draws the pinned list")
+	}
+}
+
+//go:embed testdata/next_pin_probe.js
+var nextPinProbe string
+
+// TestNextPinKeepsPlace checks, in headless Chrome, that pinning a bird
+// leaves the page where it was: the probe scrolls down, clicks a tile's pin
+// with the navigation cancelled, and loads its address in a frame, which
+// shares the session's storage; the frame opens scrolled to the same place.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextPinKeepsPlace(t *testing.T) {
+	chrome := findChrome()
+	if chrome == "" {
+		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); keeping place was not tested in a browser")
+	}
+	s := newTestServer(t)
+	ts := httptest.NewServer(instrument(s, nextPinProbe, nil))
+	defer ts.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
+		"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
+		"--disable-component-update", "--disable-sync", "--disable-extensions",
+		"--user-data-dir="+t.TempDir(), "--window-size=800,600", "--virtual-time-budget=8000",
+		"--dump-dom", ts.URL+"/next?month=all").Output()
+	if err != nil {
+		t.Fatalf("chrome: %v", err)
+	}
+	m := dataAttr("data-probe").FindSubmatch(out)
+	if m == nil {
+		t.Fatal("no result from the probe; it did not finish")
+	}
+	var res struct {
+		Href   string `json:"href"`
+		Before int    `json:"before"`
+		After  int    `json:"after"`
+	}
+	if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
+		t.Fatalf("reading the probe: %v", err)
+	}
+	if res.Before < 100 || res.After != res.Before || strings.Contains(res.Href, "#") {
+		t.Errorf("pinned at scroll %d by %s; the new page opened at %d", res.Before, res.Href, res.After)
 	}
 }

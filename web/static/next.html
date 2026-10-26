@@ -58,6 +58,16 @@
   {{end}}
 </div>
 <template id="pinicon">{{template "pinicon"}}</template>
+{{/* The pinned birds, in the order pinned: the name goes to the bird's tile,
+     the pin unpins it (product.nextView). */}}
+{{with .Pinned}}<div class="pinned" role="region" aria-label="Pinned birds">
+  <span class="lbl">Pinned</span>
+  <ul>
+    {{range .}}<li><a class="pin on" href="{{.URL}}" aria-pressed="true" title="Unpin {{.Name}}" aria-label="Unpin {{.Name}}">{{template "pinicon"}}</a>
+      <a class="pinname" href="#{{.Anchor}}" title="{{.Scientific}}">{{.Name}}</a></li>
+    {{end}}
+  </ul>
+</div>{{end}}
 
 <h2 class="settitle">{{.Title}}</h2>
 <div class="count">
@@ -120,6 +130,7 @@
    since on a phone they cover the settings below. A choice loads a new
    page, so the setting it was chosen in is reopened there, at the same
    scroll position, for the session; it stays open until a tap elsewhere.
+   Pinning or unpinning a bird keeps the scroll position the same way.
    It holds no logic. Without it, a phone shows
    the choices under the whole count line instead (the "placed" rule in
    styles.css). */
@@ -162,6 +173,15 @@
   } catch (e) {
     /* storage unavailable: the setting closes, as without the script */
   }
+  // A pin loads a new page too; it keeps the reader's place on it, so
+  // pinning a bird does not move the page.
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a.pin");
+    if (!a) return;
+    try {
+      sessionStorage.setItem(KEY, JSON.stringify({ ctl: "", y: window.scrollY }));
+    } catch (e) { /* as above */ }
+  });
   line.addEventListener("click", function (e) {
     var a = e.target.closest && e.target.closest(".pop a, .pop button.here");
     if (!a) return;

@@ -90,6 +90,13 @@ type nextControl struct {
 	HereURL, Boundaries string
 }
 
+// nextPinned is one pinned bird in the list under the find box.
+type nextPinned struct {
+	Name, Scientific string
+	Anchor           string
+	URL              template.URL
+}
+
 // nextMatch is one bird the find box found, with its pin.
 type nextMatch struct {
 	ID, Name, Scientific string
@@ -115,6 +122,9 @@ type nextData struct {
 	// ShowURL switches to that, or back to every bird the settings match.
 	PinnedOnly bool
 	ShowURL    template.URL
+	// Pinned lists the pinned birds, in the order pinned, each with its
+	// pin and a link to its tile.
+	Pinned []nextPinned
 	// Find is the find box's text and Found how many birds it matches;
 	// Matches lists them when there are nextFindLimit or fewer.
 	Find    string
@@ -260,8 +270,8 @@ func (s *server) nextToggleBird(r *http.Request) string {
 }
 
 // nextPin is the address with bird id pinned, or unpinned if it was, and
-// the find box emptied. Pinning goes to the bird's tile, so the reader sees
-// it; a pinned bird is drawn wherever the order puts it.
+// the find box emptied. It stays where it is on the page: the pinned list
+// under the find box names the bird and links to its tile.
 func nextPin(q url.Values, id string) template.URL {
 	q = cloneValues(q)
 	q.Del("find")
@@ -279,7 +289,7 @@ func nextPin(q url.Values, id string) template.URL {
 		return nextURL(q)
 	}
 	q.Add("pin", id)
-	return nextURL(q) + template.URL("#"+tileAnchor(id))
+	return nextURL(q)
 }
 
 // nextPage builds /next for the address r carries.
@@ -398,6 +408,11 @@ func (s *server) nextPage(r *http.Request) nextData {
 		}
 	}
 	page.ResetURL = nextURL(keep)
+	for _, id := range keep["pin"] {
+		sp := s.byID[id]
+		page.Pinned = append(page.Pinned, nextPinned{Name: sp.Name(opt.Locale), Scientific: sp.ScientificName,
+			Anchor: tileAnchor(id), URL: nextPin(q, id)})
+	}
 	if len(added) > 0 {
 		// Showing only the pinned birds means nothing once none are.
 		page.ClearPinsURL = nextSet(q, "pin", "", "show", "all", "find")

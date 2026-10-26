@@ -763,7 +763,9 @@ is unchanged and does not link to it.
   address leaves out. Choosing a filter also returns to it.
 - **Pins.** Every drawn bird has a pin, a push pin in a box, filled when the bird is pinned. A
   pinned bird (`pin=<id>`) is drawn whatever the settings, wherever the order puts it, even past
-  the first 100, and the count line says how many are. Unpinning returns the bird to the settings'
+  the first 100, and the count line says how many are. Pinning or unpinning leaves the page where
+  it was. The pinned birds are listed under the find box, in the order pinned: a bird's name goes
+  to its tile, and its pin unpins it. Unpinning returns the bird to the settings'
   choice; nothing removes a bird the settings choose. A box above the set finds birds by name as
   the search box does ([searchBox](filtering.md#searchbox)): as the reader types, it says how many
   birds match, and once there are 10 or fewer it lists them, each with its pin. Without
