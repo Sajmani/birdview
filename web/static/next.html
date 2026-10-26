@@ -58,7 +58,8 @@
 <div class="count">
   <span class="shown">{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}</span>
   {{range .Controls}}
-  <details class="ctl">
+  {{/* One name for all, so opening one closes the others. */}}
+  <details class="ctl" name="ctl">
     <summary><b>{{.Label}}</b> {{.Value}}</summary>
     <div class="pop">
       {{with .Note}}<p class="hint">{{.}}</p>{{end}}
@@ -73,7 +74,7 @@
     </div>
   </details>
   {{end}}
-  <a class="reset" href="{{.ResetURL}}">Start over</a>
+  <a class="reset" href="{{.ResetURL}}" title="Back to the commonest birds of this month">Reset</a>
 </div>
 
 {{if .Tiles}}
@@ -81,7 +82,7 @@
   {{range .Tiles}}{{template "tile" .}}{{end}}
 </div>
 {{else}}
-<p class="empty">No birds match. <a href="{{.ResetURL}}">Start over</a>.</p>
+<p class="empty">No birds match. <a href="{{.ResetURL}}">Reset</a>.</p>
 {{end}}
 {{if .MoreURL}}
 <p class="more"><a class="btn" href="{{.MoreURL}}">Show all {{.Count}}</a>
@@ -94,5 +95,39 @@
   <p class="caveat"><b>Every length here is modeled</b>, as are most wingspans. Click any bird to
   see where each number comes from.</p>
 </footer>
+<script>
+/* Places an opened setting's choices under it, moved left only as far as
+   keeps them on the screen, and closes them on a tap elsewhere or Escape,
+   since on a phone they cover the settings below. It holds no logic. Without it, a phone shows
+   the choices under the whole count line instead (the "placed" rule in
+   styles.css). */
+(function () {
+  var line = document.querySelector(".count");
+  if (!line) return;
+  line.classList.add("placed");
+  function place(d) {
+    var p = d.querySelector(".pop");
+    if (!p) return;
+    p.style.left = "0px";
+    if (!d.open) return;
+    var r = p.getBoundingClientRect(), w = document.documentElement.clientWidth, m = 8;
+    p.style.left = Math.max(m - r.left, Math.min(0, w - m - r.right)) + "px";
+  }
+  var ctls = line.querySelectorAll("details.ctl");
+  function closeAll(except) {
+    ctls.forEach(function (d) { if (d !== except) d.open = false; });
+  }
+  ctls.forEach(function (d) {
+    d.addEventListener("toggle", function () { place(d); });
+    place(d);
+  });
+  document.addEventListener("click", function (e) {
+    closeAll(e.target.closest ? e.target.closest("details.ctl") : null);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeAll(null);
+  });
+})();
+</script>
 </body>
 </html>{{end}}

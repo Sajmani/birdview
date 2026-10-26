@@ -284,8 +284,10 @@ takes it out and nothing else; a bird already shown is not offered. Choosing fro
 only that one, choosing again removes it, and changing a filter drops the box and Show all.
 With the threshold lowered to 200, every bird draws 200 and a link to all 1,041 in the same
 order, and the landing set offers no link. Without a month the page is
-no-store with no validator; with one it carries an ETag. The index does not link to /next. The
-phone-width and contrast checks reach /next through the crawl.
+no-store with no validator; with one it carries an ETag. The index does not link to /next. Every
+count-line setting is a `<details>` sharing one name, so the browser opens one at a time, and
+Reset links to /next. The phone-width and contrast checks reach /next through the crawl, open
+every setting at once, and measure after the placing script has run.
 
 **Run:** `go test ./cmd/birdview/ -run 'TestNext'`
 **Status: verified 2026-10-26, passing.**
@@ -298,4 +300,5 @@ Watched failing: 2026-10-26, by a remove link that removed nothing, and by an ad
 Watched failing: 2026-10-26, by a toggle that kept the find box and Show all.
 Watched failing: 2026-10-26, by ignoring all=1 ("draws 200 of 1041").
 Watched failing: 2026-10-26, by caching /next without a month like any page.
-Watched failing: 2026-10-26, by anchoring each popover to its own setting (the phone-width check: "the page is 543px wide in a 360px window").
+Watched failing: 2026-10-26, by anchoring each popover to its own setting with no placing script (the phone-width check: "the page is 543px wide in a 360px window").
+Watched failing: 2026-10-26, by dropping the shared name ("0 of 9 count-line settings share the name ctl").

@@ -37,7 +37,8 @@ window.addEventListener('load', function () {
   (document.head || document.documentElement).appendChild(st);
   // A closed panel's contents are part of the page (wcag.FullPages), drawn
   // when the reader opens it, so every panel is measured open.
-  document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  // Their names are dropped first: details sharing one open one at a time.
+  document.querySelectorAll('details').forEach(function (d) { d.removeAttribute('name'); d.open = true; });
 
   function parse(c) {
     var m = /rgba?\(([^)]+)\)/.exec(c || '');

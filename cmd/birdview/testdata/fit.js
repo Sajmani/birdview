@@ -27,9 +27,15 @@
 //     or scrolled, deliberately.
 //
 // Every <details> is opened first: a closed panel's contents are part of the
-// page, drawn when the reader opens it.
+// page, drawn when the reader opens it. The page is measured a moment later,
+// once its own toggle handlers have placed what opened.
 window.addEventListener('load', function () {
-  document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  // Their names are dropped first: details sharing one open one at a time.
+  document.querySelectorAll('details').forEach(function (d) { d.removeAttribute('name'); d.open = true; });
+  setTimeout(measure, 50);
+});
+
+function measure() {
   var W = document.documentElement.clientWidth;
   var out = { width: W, pageWidth: document.documentElement.scrollWidth, checked: 0, failures: [] };
 
@@ -102,4 +108,4 @@ window.addEventListener('load', function () {
     }
   }
   document.documentElement.setAttribute('data-contrast', JSON.stringify(out));
-});
+}

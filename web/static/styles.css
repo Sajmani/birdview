@@ -539,9 +539,11 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 .settitle { font-size: 16px; font-weight: 600; margin: 14px 0 4px; }
 .next .count { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; position: relative; }
 .next .count .shown { margin-right: 4px; }
-/* Anchored to the count line, not to the setting: a setting at the right of
-   a phone's line would open its choices off the screen. */
-.ctl { position: static; }
+/* Under its own setting. On a phone without the placing script, under the
+   whole count line instead, since a setting at the right would open its
+   choices off the screen. */
+.ctl { position: relative; }
+@media (max-width: 600px) { .count:not(.placed) .ctl { position: static; } }
 .ctl > summary { list-style: none; cursor: pointer; background: var(--panel);
   border: 1px solid var(--line); border-radius: 4px; padding: 1px 7px; color: var(--ink); }
 .ctl > summary::-webkit-details-marker { display: none; }
@@ -549,13 +551,16 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 .ctl[open] > summary { border-color: var(--accent); }
 .ctl > summary b { font-weight: 600; margin-right: 5px; }
 .pop { position: absolute; z-index: 5; top: calc(100% + 4px); left: 0; width: max-content;
-  max-width: min(560px, 100%); max-height: 60vh; overflow: auto;
+  max-width: min(560px, calc(100vw - 16px)); max-height: 60vh; overflow: auto;
   background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
   padding: 10px 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, .45); }
 .pop p { margin: 0 0 8px; }
 .popgroup { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-bottom: 8px; }
 .popgroup .lbl { flex-basis: 100%; margin: 4px 0 0; }
-.reset { margin-left: 6px; }
+/* Reset looks like a setting, set apart by its color. */
+.reset, .reset:visited { background: #3f1d1d; border: 1px solid #8b3a3a; border-radius: 4px;
+  padding: 1px 7px; color: var(--ink); text-decoration: none; font-weight: 600; }
+.reset:hover { border-color: #f87171; }
 .finds ul { list-style: none; padding: 0; margin: 8px 0; }
 .finds li { margin: 4px 0; }
 .finds .have { color: var(--dim); display: inline-block; min-width: 4.5em; }

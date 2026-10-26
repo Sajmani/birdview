@@ -64,10 +64,13 @@ it to the Go lookup in `internal/boundary`.
 
 The third is `search.js`, the search box ([product.searchBox](requirements/local/product/filtering.md#searchbox)), which filters as the reader
 types. The server writes each tile's normalized words into `data-search` and applies `q` itself
-when it is in the address; the script only checks that every typed word occurs, and a test holds
-it to the Go matcher in `cmd/birdview/search.go`. The rule all three protect is that *logic* stays
-in Go, not that the client is inert; without JavaScript the page still works, minus these three
-(the search then needs Enter).
+when it is in the address; the script only checks that the typed text occurs within one field, and a test holds
+it to the Go matcher in `cmd/birdview/search.go`. The fourth is the placing script on `/next`
+([product.nextView](requirements/local/product/presentation.md#nextview)): it moves an opened
+setting's choices left only as far as keeps them on the screen, and closes them on a tap elsewhere.
+The rule all four protect is that *logic* stays in Go, not that the client is inert; without
+JavaScript the page still works, minus these four (the search then needs Enter, and a phone shows
+a setting's choices under the whole count line).
 
 This is what let [acceptance.familyFilterSelectsAndClears](requirements/acceptance.md#familyfilterselectsandclears) and [acceptance.unitToggleSwitches](requirements/acceptance.md#unittoggleswitches) be real checks rather than declared gaps.
 

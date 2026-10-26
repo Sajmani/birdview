@@ -339,3 +339,21 @@ func TestNextWithoutAMonthIsNotStored(t *testing.T) {
 		t.Error("the index links to /next; the prototype is not linked until it is compared")
 	}
 }
+
+// TestNextControlsOpenOneAtATime checks that every setting on the count line
+// is a <details> sharing one name, which is what makes the browser close the
+// others when one opens, and that Reset is there and goes to the landing set.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextControlsOpenOneAtATime(t *testing.T) {
+	s := newTestServer(t)
+	_, body := get(t, s, "/next?region=FL")
+	n := strings.Count(body, `<details class="ctl"`)
+	named := strings.Count(body, `<details class="ctl" name="ctl">`)
+	if n < 8 || named != n {
+		t.Errorf("%d of %d count-line settings share the name ctl; want all, and at least 8", named, n)
+	}
+	if !strings.Contains(body, `<a class="reset" href="/next"`) || !strings.Contains(body, ">Reset</a>") {
+		t.Error("no Reset control linking to /next")
+	}
+}

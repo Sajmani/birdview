@@ -766,8 +766,9 @@ is unchanged and does not link to it.
   ([searchBox](filtering.md#searchbox)). Matches are listed, each with a link that adds it
   (`include=<id>`), and an added bird has a link that removes it.
 - **Filters are the count line.** The line under the box names each setting. Each is a control
-  that opens, in place, the choices for that one setting, as a `<details>`, so it works without
-  JavaScript. Choosing one option selects only it; choosing more adds them; choosing every
+  that opens the choices for that one setting directly under itself, as a `<details>`, so it
+  works without JavaScript. Only one is open at a time, and a tap elsewhere closes it. A **Reset**
+  control, colored apart from the settings, returns to the landing set. Choosing one option selects only it; choosing more adds them; choosing every
   selected option again returns to all. Nothing selected means all.
 - **One scale.** Every bird shown is drawn to the scale of the longest. Its length, wingspan, and
   mass are text under the drawing.
