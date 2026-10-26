@@ -97,6 +97,13 @@ type nextPinned struct {
 	URL              template.URL
 }
 
+// nextItem is one entry in /next's grid: either a bird tile, or a gap row
+// saying how many unpinned birds were omitted there.
+type nextItem struct {
+	Tile   *tile
+	Hidden int
+}
+
 // nextMatch is one bird the find box found, with its pin.
 type nextMatch struct {
 	ID, Name, Scientific string
@@ -111,6 +118,7 @@ type nextData struct {
 	Total    int
 	Controls []nextControl
 	Tiles    []tile
+	Items    []nextItem
 	// MoreURL shows every bird in the set; empty when all are shown. First
 	// is how many the filters chose that are drawn, Hidden how many are not,
 	// and AddedPast how many pinned birds are drawn from past the first.
@@ -122,7 +130,7 @@ type nextData struct {
 	// ShowURL switches to that, or back to every bird the settings match.
 	PinnedOnly bool
 	ShowURL    template.URL
-	// Pinned lists the pinned birds, in the order pinned, each with its
+	// Pinned lists the pinned birds in alphabetical order, each with its
 	// pin and a link to its tile.
 	Pinned []nextPinned
 	// Find is the find box's text and Found how many birds it matches;
@@ -369,27 +377,35 @@ func (s *server) nextPage(r *http.Request) nextData {
 	if opt.Locale == dataset.LocaleWorld {
 		page.BirdsURL += "?names=" + string(dataset.LocaleWorld)
 	}
-	// The first nextShowAll birds the filters chose, and every pinned bird
-	// wherever it falls in the order: a bird just pinned must show.
-	shown := base
-	if q.Get("all") != "1" {
-		shown = nil
-		chosen := 0
+	// The first nextShowAll birds of the order, and every pinned bird past
+	// them, with a gap row wherever unpinned birds are left out (including
+	// after the last pinned bird).
+	type pick struct {
+		sp     *dataset.Species
+		before int
+	}
+	var picks []pick
+	after := 0
+	if q.Get("all") == "1" {
 		for _, sp := range base {
+			picks = append(picks, pick{sp: sp})
+		}
+	} else {
+		gap := 0
+		for i, sp := range base {
 			switch {
+			case i < nextShowAll:
+				picks = append(picks, pick{sp: sp})
 			case added[sp.ID]:
-				shown = append(shown, sp)
-				if chosen >= nextShowAll {
-					page.AddedPast++
-				}
-			case chosen < nextShowAll:
-				shown = append(shown, sp)
-				chosen++
+				picks = append(picks, pick{sp: sp, before: gap})
+				gap = 0
+				page.AddedPast++
 			default:
-				chosen++
+				gap++
 				page.Hidden++
 			}
 		}
+		after = gap
 		if page.Hidden > 0 {
 			page.MoreURL = nextSet(q, "all", "1")
 			page.First = nextShowAll
@@ -413,6 +429,13 @@ func (s *server) nextPage(r *http.Request) nextData {
 		page.Pinned = append(page.Pinned, nextPinned{Name: sp.Name(opt.Locale), Scientific: sp.ScientificName,
 			Anchor: tileAnchor(id), URL: nextPin(q, id)})
 	}
+	sort.Slice(page.Pinned, func(i, j int) bool {
+		li, lj := strings.ToLower(page.Pinned[i].Name), strings.ToLower(page.Pinned[j].Name)
+		if li != lj {
+			return li < lj
+		}
+		return page.Pinned[i].Name < page.Pinned[j].Name
+	})
 	if len(added) > 0 {
 		// Showing only the pinned birds means nothing once none are.
 		page.ClearPinsURL = nextSet(q, "pin", "", "show", "all", "find")
@@ -426,14 +449,19 @@ func (s *server) nextPage(r *http.Request) nextData {
 
 	// One scale: every bird shown is drawn to the longest and widest of them.
 	var refLen, refSpan float64
-	masses := make([]float64, 0, len(shown))
-	for _, sp := range shown {
-		refLen = math.Max(refLen, sp.TotalLength.Value)
-		refSpan = math.Max(refSpan, sp.Wingspan.Value)
-		masses = append(masses, sp.Mass.Value)
+	masses := make([]float64, 0, len(picks))
+	for _, pk := range picks {
+		refLen = math.Max(refLen, pk.sp.TotalLength.Value)
+		refSpan = math.Max(refSpan, pk.sp.Wingspan.Value)
+		masses = append(masses, pk.sp.Mass.Value)
 	}
 	u := unitsFor(opt.Metric3, masses...)
-	for _, sp := range shown {
+	page.Tiles = make([]tile, len(picks))
+	for i, pk := range picks {
+		if pk.before > 0 {
+			page.Items = append(page.Items, nextItem{Hidden: pk.before})
+		}
+		sp := pk.sp
 		g := view.Layout(sp, refLen, refSpan, tileBox)
 		t := tile{
 			S: sp, Name: sp.Name(opt.Locale), Geom: g, Box: tileBox,
@@ -449,7 +477,11 @@ func (s *server) nextPage(r *http.Request) nextData {
 			SameAs:      s.sameMeasurements(sp, opt.Locale),
 		}
 		t.PinURL, t.Pinned = nextPin(q, sp.ID), added[sp.ID]
-		page.Tiles = append(page.Tiles, t)
+		page.Tiles[i] = t
+		page.Items = append(page.Items, nextItem{Tile: &page.Tiles[i]})
+	}
+	if after > 0 {
+		page.Items = append(page.Items, nextItem{Hidden: after})
 	}
 
 	// The find box: how many birds match, and which once few enough.

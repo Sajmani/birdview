@@ -764,7 +764,7 @@ is unchanged and does not link to it.
 - **Pins.** Every drawn bird has a pin, a push pin in a box, filled when the bird is pinned. A
   pinned bird (`pin=<id>`) is drawn whatever the settings, wherever the order puts it, even past
   the first 100, and the count line says how many are. Pinning or unpinning leaves the page where
-  it was. The pinned birds are listed under the find box, in the order pinned: a bird's name goes
+  it was. The pinned birds are listed under the find box in alphabetical order: a bird's name goes
   to its tile, and its pin unpins it. Unpinning returns the bird to the settings'
   choice; nothing removes a bird the settings choose. A box above the set finds birds by name as
   the search box does ([searchBox](filtering.md#searchbox)): as the reader types, it says how many
@@ -789,8 +789,10 @@ is unchanged and does not link to it.
 - **Order.** By how often recorded (the default, most often first), or by length, wingspan,
   mass, bill, or tail (smallest first). Choosing the chosen order again reverses it (`rev=1`).
   Order by is the first setting on the count line.
-- **Show all.** The page draws the first 100 birds of the order. For a larger set, a link that
-  shows them all follows the count ("First 100 of 1006 birds") and ends the page; that address says so, so it can be shared. 100 is a reader's first
+- **Show all.** The page draws the first 100 birds of the order, plus any pinned birds past them.
+  Wherever unpinned birds are left out—after the first 100, between pinned birds past them, or
+  after the last pinned bird—a gap row says how many are hidden there and links to **Show all**
+  (`all=1`); **Show all** also follows the count ("First 100 of 1006 birds") on the count line. 100 is a reader's first
   screens, not a limit of speed: all 1,041 birds paint in 0.73 s on a phone-class CPU over 5G
   (measured 2026-10-26 under Lighthouse's mobile throttling, 229 KiB).
 - **Stateless.** Every view is its address. `/next` with no month changes with the month, so it is

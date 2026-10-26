@@ -58,7 +58,7 @@
   {{end}}
 </div>
 <template id="pinicon">{{template "pinicon"}}</template>
-{{/* The pinned birds, in the order pinned: the name goes to the bird's tile,
+{{/* The pinned birds, in alphabetical order: the name goes to the bird's tile,
      the pin unpins it (product.nextView). */}}
 {{with .Pinned}}<div class="pinned" role="region" aria-label="Pinned birds">
   <span class="lbl">Pinned</span>
@@ -104,16 +104,12 @@
 
 {{if .Tiles}}
 <div class="tiles">
-  {{range .Tiles}}{{template "tile" .}}{{end}}
+  {{range .Items}}{{if .Tile}}{{template "tile" .Tile}}{{else}}<p class="gap">{{.Hidden}} {{if eq .Hidden 1}}bird{{else}}birds{{end}} hidden — <a href="{{$.MoreURL}}">Show all</a></p>{{end}}{{end}}
 </div>
 {{else if .PinnedOnly}}
 <p class="empty">No birds are pinned yet. Find a bird above to pin it, or show all matching birds.</p>
 {{else}}
 <p class="empty">No birds match. <a href="{{.ResetURL}}">Reset</a>.</p>
-{{end}}
-{{if .MoreURL}}
-<p class="more"><a class="btn" href="{{.MoreURL}}">Show all {{.Count}} birds</a>
-  <span class="hint">{{.Hidden}} more, in the same order</span></p>
 {{end}}
 
 <footer>

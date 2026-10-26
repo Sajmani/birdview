@@ -566,10 +566,10 @@ func TestNextControlsOpenOneAtATime(t *testing.T) {
 	}
 }
 
-// TestNextAddedPastTheFirstIsDrawn checks that a bird added by name is drawn
-// even when the order puts it past the first nextShowAll: the find box
-// offers to add it, adding it draws it and says so on the count line, and
-// the birds the filters chose are drawn as before.
+// TestNextAddedPastTheFirstIsDrawn checks that a bird pinned from past the
+// first nextShowAll is drawn in its place in the order, with gap rows where
+// unpinned birds are left out before, between, and after pinned birds, and
+// none once Show all is chosen.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
@@ -589,12 +589,57 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	if !hasTile(after, last.ID) {
 		t.Errorf("after adding %s from past the first %d, it is not drawn", last.ID, nextShowAll)
 	}
-	// It was one of the hidden birds, so one fewer is hidden.
+	// It was the very last of the hidden birds, so one fewer is hidden, all
+	// of them sit in one gap before it, and none sit after it.
 	if after.AddedPast != 1 || after.First != nextShowAll || after.Hidden != before.Hidden-1 {
 		t.Errorf("after adding: first %d, added past it %d, hidden %d (was %d)", after.First, after.AddedPast, after.Hidden, before.Hidden)
 	}
 	if len(after.Tiles) != len(before.Tiles)+1 {
 		t.Errorf("after adding one bird, %d drawn (was %d)", len(after.Tiles), len(before.Tiles))
+	}
+	if n := len(after.Items); n != nextShowAll+2 || after.Items[n-2].Hidden != after.Hidden || after.Items[n-1].Tile == nil {
+		t.Errorf("pinning the last bird leaves items ending %+v, %+v; want a gap of %d then its tile",
+			after.Items[n-2], after.Items[n-1], after.Hidden)
+	}
+
+	// Two birds mid-order by length: gaps sit before the shorter, between the
+	// two, and after the longer, summing to Hidden, each linking to Show all.
+	two := "/next?by=length&pin=fuwduc&pin=amecro"
+	p := nextAt(s, two)
+	_, body := get(t, s, two)
+	tokens := regexp.MustCompile(`id="(s-[a-z0-9]+)"|<p class="gap">([0-9]+) birds? hidden — <a href="([^"]+)">Show all</a></p>`).
+		FindAllStringSubmatch(body, -1)
+	if len(tokens) != nextShowAll+5 {
+		t.Fatalf("%s has %d tiles and gaps, want %d tiles and 3 gaps", two, len(tokens), nextShowAll+2)
+	}
+	tail := tokens[nextShowAll:]
+	if tail[0][2] == "" || tail[1][1] != "s-amecro" || tail[2][2] == "" || tail[3][1] != "s-fuwduc" || tail[4][2] == "" {
+		t.Fatalf("after the first %d, got %v; want gap, amecro, gap, fuwduc, gap", nextShowAll, tail)
+	}
+	sum := 0
+	for _, g := range []int{0, 2, 4} {
+		n, _ := strconv.Atoi(tail[g][2])
+		if n <= 0 || html.UnescapeString(tail[g][3]) != string(p.MoreURL) {
+			t.Errorf("gap %d: %q birds, link %q (want %s)", g, tail[g][2], tail[g][3], p.MoreURL)
+		}
+		sum += n
+	}
+	if sum != p.Hidden {
+		t.Errorf("the three gaps hide %d birds, Hidden says %d", sum, p.Hidden)
+	}
+	if _, allBody := get(t, s, string(p.MoreURL)); strings.Contains(allBody, `class="gap"`) {
+		t.Error("Show all still draws a gap row")
+	}
+
+	// A gap of one bird reads "1 bird hidden", and a gap after the last pin
+	// reads "birds hidden".
+	small := newTestServer(t)
+	old := nextShowAll
+	nextShowAll = 2
+	t.Cleanup(func() { nextShowAll = old })
+	_, sbody := get(t, small, "/next?month=all&by=mass&pin=amecro")
+	if !strings.Contains(sbody, `<p class="gap">1 bird hidden — `) || !strings.Contains(sbody, `<p class="gap">2 birds hidden — `) {
+		t.Errorf("with 1 hidden before amecro and 2 after, the gaps do not say so:\n%s", sbody)
 	}
 }
 
@@ -818,8 +863,9 @@ func TestNextResetKeepsPins(t *testing.T) {
 }
 
 // TestNextPinnedList checks the list of pinned birds under the find box: one
-// entry per pinned bird, in the order pinned, its name linking to its tile
-// and its pin unpinning it; and that no pin link jumps the page to a tile.
+// entry per pinned bird, in alphabetical order by name, its name linking to
+// its tile and its pin unpinning it; and that no pin link jumps the page to a
+// tile.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextPinnedList(t *testing.T) {
@@ -829,11 +875,17 @@ func TestNextPinnedList(t *testing.T) {
 	for _, e := range p.Pinned {
 		names = append(names, e.Anchor)
 	}
-	if !slices.Equal(names, []string{"s-annhum", "s-amecro"}) {
-		t.Fatalf("the pinned list links to %v, want s-annhum and s-amecro, in that order", names)
+	if !slices.Equal(names, []string{"s-amecro", "s-annhum"}) {
+		t.Fatalf("the pinned list links to %v, want s-amecro then s-annhum (alphabetical, not pin or mass order)", names)
 	}
-	if string(p.Pinned[0].URL) != "/next?by=mass&month=all&pin=amecro&pin=nosuchbird" {
+	if string(p.Pinned[0].URL) != "/next?by=mass&month=all&pin=annhum&pin=nosuchbird" {
 		t.Errorf("the first entry's pin goes to %s, want the page without that pin", p.Pinned[0].URL)
+	}
+	// Under IOC names, thimur ("Murre Thick-billed") precedes amerob ("Robin
+	// American"), though amerob precedes thimur by id, pin order, and mass.
+	wp := nextAt(s, "/next?by=mass&month=all&names=world&pin=amerob&pin=thimur")
+	if len(wp.Pinned) != 2 || wp.Pinned[0].Anchor != "s-thimur" || wp.Pinned[1].Anchor != "s-amerob" {
+		t.Errorf("under IOC names, the pinned list is %+v, want thimur before amerob", wp.Pinned)
 	}
 	unpinned := 0
 	for _, tl := range p.Tiles {

@@ -296,12 +296,12 @@ order links to itself unreversed, reversed mass runs largest first, and reversed
 the most recorded duck last. Without a month the page is
 no-store with no validator; with one it carries an ETag. The index does not link to /next. Every
 count-line setting is a `<details>` sharing one name, so the browser opens one at a time, and
-Reset links to /next. The pinned list names each pinned bird in the order pinned, linking to its tile, with a pin
+Reset links to /next. The pinned list names each pinned bird in alphabetical order by displayed name, linking to its tile, with a pin
 that unpins it; no pin link jumps the page, and in headless Chrome a page loaded by a pin opens
 scrolled where the pin was clicked. Reset keeps the pins, in order, and drops every setting; Clear pins,
 before it and only when something is pinned, drops the pins and keeps every setting. The phone-width and contrast checks reach /next through the crawl, open
 every setting at once, and measure after the placing script has run. Pinning the October set's
-least recorded bird, past the first 100, draws it and the count line says one was added. Show
+least recorded bird, past the first 100, draws it after one gap row and none after it, and the count line says one was added; pinning two mid-order birds by length draws gap rows before, between, and after them summing to Hidden, each linking to Show all, and Show all draws no gaps. Show
 only pinned links to `show=pinned` with the order kept and draws nothing; with two pinned it
 draws those two by mass, unpinning one leaves the other, and Show all matching birds brings the
 October birds back with both; `show=all` draws what the default does. Here, filled with FL, is
@@ -330,6 +330,7 @@ Watched failing: 2026-10-26, by Here keeping clear=1, by renaming its button, an
 Watched failing: 2026-10-26, by show=pinned that hid nothing, and by Here keeping show=pinned.
 Watched failing: 2026-10-26, by a Reset that dropped the pins, and by a Clear pins that kept them.
 Watched failing: 2026-10-26, by a pin that jumps to its tile, by not keeping the scroll ("the new page opened at 0"), and by dropping the pinned list or its entries.
+Watched failing: 2026-10-26, by dropping the gap after the last pin ("has 104 tiles and gaps, want 102 tiles and 3 gaps"), by dropping gaps before pins, by keeping pin order in the pinned list, and by sorting it by id instead of displayed name.
 Watched failing: 2026-10-26, by not reopening the setting ("with [] open"), by never forgetting it ("a plain reload opened [Month]"), and by dropping the rule and the one line.
 Watched failing: 2026-10-26, by restoring the 1,200 cap ("/next has 1006 birds; the check needs more than 1200").
 Watched failing: 2026-10-26, by caching /next without a month like any page.
