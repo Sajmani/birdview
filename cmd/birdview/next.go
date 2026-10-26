@@ -120,12 +120,23 @@ type nextData struct {
 	Controls []nextControl
 	Tiles    []tile
 	Items    []nextItem
-	// Cap is the cap's box: the count drawn before the gap rows, or empty
-	// when there is no cap (cap=none). CapFields are the address's other
-	// settings, which the box's form sends with it.
-	Cap       string
-	CapFields []hiddenField
-	// MoreURL shows every bird in the set (cap=none); empty when all are
+	// Show is which birds are drawn, the one setting show= carries: "first"
+	// (the first Cap of the order, and pins past them; show=<n>, 100 the
+	// default), "all" (show=all), or "pinned" (only the pinned birds,
+	// show=pinned). ShowValue names it on the Show setting's summary,
+	// ShowFields are the address's other settings, which the First box's
+	// form sends with it, and ShowAllURL and ShowPinnedURL are the other
+	// two choices. Matching is how many birds the settings match, pins
+	// included, whatever is shown.
+	Show          string
+	ShowValue     string
+	Cap           string
+	ShowFields    []hiddenField
+	ShowAllURL    template.URL
+	ShowPinnedURL template.URL
+	ShowFirstURL  template.URL
+	Matching      int
+	// MoreURL shows every bird in the set (show=all); empty when all are
 	// shown. First
 	// is how many the filters chose that are drawn, Hidden how many are not,
 	// and AddedPast how many pinned birds are drawn from past the first.
@@ -133,10 +144,8 @@ type nextData struct {
 	Hidden    int
 	First     int
 	AddedPast int
-	// PinnedOnly is set when only pinned birds are shown (show=pinned);
-	// ShowURL switches to that, or back to every bird the settings match.
+	// PinnedOnly is set when only pinned birds are shown (show=pinned).
 	PinnedOnly bool
-	ShowURL    template.URL
 	// Pinned lists the pinned birds in alphabetical order, each with its
 	// pin and a link to its tile.
 	Pinned []nextPinned
@@ -209,8 +218,17 @@ func nextToggle(q url.Values, key, v string) template.URL {
 		q.Add(key, c)
 	}
 	q.Del("find")
-	q.Del("show")
+	leavePinnedOnly(q)
 	return nextURL(q)
+}
+
+// leavePinnedOnly drops show=pinned and keeps any other show: choosing a
+// setting returns from the pinned birds to the birds the settings match,
+// keeping how many of them are shown.
+func leavePinnedOnly(q url.Values) {
+	if q.Get("show") == "pinned" {
+		q.Del("show")
+	}
 }
 
 // nextSet is the address with key set to v, or removed when v is empty.
@@ -222,6 +240,10 @@ func nextSet(q url.Values, key, v string, drop ...string) template.URL {
 		q.Set(key, v)
 	}
 	for _, d := range drop {
+		if d == "show" {
+			leavePinnedOnly(q) // a count or all is kept
+			continue
+		}
 		q.Del(d)
 	}
 	return nextURL(q)
@@ -271,11 +293,11 @@ func (s *server) next(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, s.nextToggleBird(r), http.StatusSeeOther)
 		return
 	}
-	// The cap's box sends cap= whatever was typed: the default, a blank, or
+	// The First box sends show= whatever was typed: the default, a blank, or
 	// something not a count all mean the default, which addresses leave out.
-	if q.Has("cap") {
-		if _, _, ok := nextCapOf(q); !ok {
-			q.Del("cap")
+	if q.Has("show") {
+		if _, _, ok := nextShowOf(q); !ok {
+			q.Del("show")
 			http.Redirect(w, r, string(nextURL(q)), http.StatusSeeOther)
 			return
 		}
@@ -283,18 +305,18 @@ func (s *server) next(w http.ResponseWriter, r *http.Request) {
 	s.render(w, "next.html", s.nextPage(r))
 }
 
-// nextCapOf reads cap: how many birds to draw before the gap rows, or none
-// for no cap. ok is false when cap is absent or reads as the default, so the
-// address can leave it out.
-func nextCapOf(q url.Values) (n int, none, ok bool) {
-	v := strings.TrimSpace(q.Get("cap"))
-	if v == "none" {
-		return 0, true, true
+// nextShowOf reads show: "pinned", "all", or "first" with the count to draw
+// before the gap rows. ok is false when show is absent or reads as the
+// default, the first nextCap, so the address can leave it out.
+func nextShowOf(q url.Values) (mode string, n int, ok bool) {
+	v := strings.TrimSpace(q.Get("show"))
+	if v == "pinned" || v == "all" {
+		return v, nextCap, true
 	}
 	if c, err := strconv.Atoi(v); err == nil && c > 0 && c != nextCap {
-		return c, false, true
+		return "first", c, true
 	}
-	return nextCap, false, false
+	return "first", nextCap, false
 }
 
 // nextToggleBird is where bird=<id> goes: the same address with that bird
@@ -348,11 +370,14 @@ func (s *server) nextPage(r *http.Request) nextData {
 	}
 
 	// show=pinned draws only the pinned birds: a comparison of the reader's
-	// own picks. show=all, the default, draws every bird the settings match.
-	pinnedOnly := q.Get("show") == "pinned"
+	// own picks. Otherwise the birds the settings match are drawn, the first
+	// of them or all (show=all).
+	mode, capN, _ := nextShowOf(q)
+	pinnedOnly := mode == "pinned"
+	matched, _ := s.filterSpecies(opt)
 	var base []*dataset.Species
 	if !pinnedOnly {
-		base, _ = s.filterSpecies(opt)
+		base = matched
 	}
 	share := func(sp *dataset.Species) float64 {
 		num, den := shareIn(sp, s.ds, opt)
@@ -420,20 +445,30 @@ func (s *server) nextPage(r *http.Request) nextData {
 	}
 	var picks []pick
 	after := 0
-	capN, capNone, _ := nextCapOf(q)
-	page.Cap = strconv.Itoa(capN)
-	if capNone {
-		page.Cap = ""
-	}
+	page.Show, page.Cap = mode, strconv.Itoa(capN)
+	page.ShowValue = map[string]string{"first": "first " + page.Cap, "all": "all", "pinned": "pinned only"}[mode]
 	for _, k := range sortedKeys(q) {
-		if k == "cap" || k == "find" {
+		if k == "show" || k == "find" {
 			continue
 		}
 		for _, v := range q[k] {
-			page.CapFields = append(page.CapFields, hiddenField{k, v})
+			page.ShowFields = append(page.ShowFields, hiddenField{k, v})
 		}
 	}
-	if capNone {
+	page.ShowAllURL = nextSet(q, "show", "all")
+	page.ShowPinnedURL = nextSet(q, "show", "pinned", "find")
+	page.ShowFirstURL = nextSet(q, "show", "")
+	page.Matching = len(matched)
+	inMatched := map[string]bool{}
+	for _, sp := range matched {
+		inMatched[sp.ID] = true
+	}
+	for id := range added {
+		if !inMatched[id] {
+			page.Matching++
+		}
+	}
+	if mode != "first" {
 		for _, sp := range base {
 			picks = append(picks, pick{sp: sp})
 		}
@@ -454,7 +489,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 		}
 		after = gap
 		if page.Hidden > 0 {
-			page.MoreURL = nextSet(q, "cap", "none")
+			page.MoreURL = page.ShowAllURL
 			page.First = capN
 		}
 	}
@@ -488,11 +523,6 @@ func (s *server) nextPage(r *http.Request) nextData {
 		page.ClearPinsURL = nextSet(q, "pin", "", "show", "find")
 	}
 	page.PinnedOnly = pinnedOnly
-	if pinnedOnly {
-		page.ShowURL = nextSet(q, "show", "")
-	} else {
-		page.ShowURL = nextSet(q, "show", "pinned", "find")
-	}
 
 	// One scale: every bird shown is drawn to the longest and widest of them.
 	var refLen, refSpan float64
@@ -566,9 +596,9 @@ func (s *server) nextPage(r *http.Request) nextData {
 	for i := range page.Controls {
 		if page.Controls[i].Label == "Region" {
 			hq := cloneValues(q)
-			for _, k := range []string{"region", "find", "show"} {
-				hq.Del(k)
-			}
+			hq.Del("region")
+			hq.Del("find")
+			leavePinnedOnly(hq)
 			hq.Set("region", hereSlot)
 			page.Controls[i].HereURL = strings.Replace(string(nextURL(hq)), url.QueryEscape(hereSlot), hereSlot, 1)
 			page.Controls[i].Boundaries = s.boundaryURL

@@ -423,7 +423,7 @@ func TestNextToggle(t *testing.T) {
 		{"region=FL&region=ME", "FL", "/?region=ME"},
 		{"region=ME", "ME", "/"},
 		{"region=", "ME", "/?region=ME"},
-		{"region=FL&find=hawk&cap=50&by=mass", "FL", "/?by=mass&cap=50"},
+		{"region=FL&find=hawk&show=50&by=mass", "FL", "/?by=mass&show=50"},
 		{"pin=blujay&show=pinned", "FL", "/?pin=blujay&region=FL"},
 	} {
 		if got := string(nextToggle(q(c.from), "region", c.v)); got != c.want {
@@ -432,13 +432,16 @@ func TestNextToggle(t *testing.T) {
 	}
 }
 
-// TestNextShowAll checks the cap: a set larger than nextCap draws the top of
-// its order and a link that shows them all (cap=none), in the same order; a
-// set within it draws every bird with no link; cap=<n> draws n and is kept
-// across a filter and Show only pinned, and dropped by Reset; the count line
-// carries the cap as a box in a form that sends every other setting; and an
-// address naming the default, a blank, or nonsense redirects to one without
-// a cap.
+// TestNextShowAll checks the Show setting, the one show= parameter: by
+// default the first nextCap of the order and a link that shows them all
+// (show=all), in the same order; a set within the cap draws every bird with
+// no link; show=<n> draws n and is kept across a filter but not Reset; the
+// Show setting's First choice is a box in a form that sends every other
+// setting, beside All with the count the settings match and Pinned only
+// with the count pinned, the chosen one marked; an address naming the
+// default, a blank, or nonsense redirects to one without show; and the count
+// line is two rows, what is drawn with Show, Clear pins, and Reset, then the
+// settings.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextShowAll(t *testing.T) {
@@ -448,12 +451,14 @@ func TestNextShowAll(t *testing.T) {
 	if p.Count <= nextCap {
 		t.Fatalf("/ has %d birds; the check needs more than %d", p.Count, nextCap)
 	}
-	if len(p.Tiles) != nextCap || string(p.MoreURL) != "/?cap=none" || p.Hidden != p.Count-nextCap || p.Cap != "100" {
-		t.Errorf("/ draws %d of %d, hides %d, cap box %q, more link %q", len(p.Tiles), p.Count, p.Hidden, p.Cap, p.MoreURL)
+	if len(p.Tiles) != nextCap || string(p.MoreURL) != "/?show=all" || p.Hidden != p.Count-nextCap ||
+		p.Show != "first" || p.Cap != "100" || p.ShowValue != "first 100" {
+		t.Errorf("/ draws %d of %d, hides %d, show %q %q (%q), more link %q",
+			len(p.Tiles), p.Count, p.Hidden, p.Show, p.Cap, p.ShowValue, p.MoreURL)
 	}
 	all := nextAt(s, string(p.MoreURL))
-	if len(all.Tiles) != p.Count || all.MoreURL != "" || all.Cap != "" {
-		t.Errorf("%s draws %d of %d, cap box %q", p.MoreURL, len(all.Tiles), p.Count, all.Cap)
+	if len(all.Tiles) != p.Count || all.MoreURL != "" || all.Show != "all" || all.ShowValue != "all" {
+		t.Errorf("%s draws %d of %d, show %q", p.MoreURL, len(all.Tiles), p.Count, all.Show)
 	}
 	for i := range p.Tiles {
 		if p.Tiles[i].S != all.Tiles[i].S {
@@ -462,51 +467,67 @@ func TestNextShowAll(t *testing.T) {
 		}
 	}
 
-	// cap=50: fifty drawn, the box says so, and it survives a filter and
-	// Show only pinned but not Reset.
-	c := nextAt(s, "/?by=mass&cap=50")
+	// show=50: fifty drawn, the box says so, kept by a filter, not Reset.
+	c := nextAt(s, "/?by=mass&show=50")
 	if len(c.Tiles) != 50 || c.First != 50 || c.Hidden != c.Count-50 || c.Cap != "50" ||
-		string(c.MoreURL) != "/?by=mass&cap=none" {
-		t.Errorf("cap=50: %d drawn, first %d, hidden %d of %d, box %q, more %s",
+		string(c.MoreURL) != "/?by=mass&show=all" {
+		t.Errorf("show=50: %d drawn, first %d, hidden %d of %d, box %q, more %s",
 			len(c.Tiles), c.First, c.Hidden, c.Count, c.Cap, c.MoreURL)
 	}
-	if got := string(nextToggle(url.Values{"cap": {"50"}, "by": {"mass"}}, "region", "FL")); got != "/?by=mass&cap=50&region=FL" {
-		t.Errorf("a filter from cap=50 goes to %s; the cap is kept", got)
+	if got := string(nextToggle(url.Values{"show": {"all"}, "by": {"mass"}}, "region", "FL")); got != "/?by=mass&region=FL&show=all" {
+		t.Errorf("a filter from show=all goes to %s; how many are shown is kept", got)
 	}
-	if string(c.ShowURL) != "/?by=mass&cap=50&show=pinned" || string(c.ResetURL) != "/" {
-		t.Errorf("cap=50: Show only pinned %s, Reset %s", c.ShowURL, c.ResetURL)
+	if string(c.ShowPinnedURL) != "/?by=mass&show=pinned" || string(c.ShowAllURL) != "/?by=mass&show=all" || string(c.ResetURL) != "/" {
+		t.Errorf("show=50: Pinned only %s, All %s, Reset %s", c.ShowPinnedURL, c.ShowAllURL, c.ResetURL)
 	}
 
-	// The count line: First [box] of N, the box in a form with the other
-	// settings, and Show all right after it.
-	_, body := get(t, s, "/?by=mass&cap=50&find=jay")
-	form := regexp.MustCompile(`(?s)<form class="shown capform" action="/" method="get">(.*?)</form>`).FindStringSubmatch(body)
+	// The Show setting: First [box] in a form with the other settings, All
+	// N, Pinned only (k), the chosen one marked; and the two rows.
+	_, body := get(t, s, "/?by=mass&show=50&find=jay&pin=amecro&pin=annhum")
+	form := regexp.MustCompile(`(?s)<form class="showfirst btn on" action="/" method="get">(.*?)</form>`).FindStringSubmatch(body)
 	if form == nil {
-		t.Fatal("the count line has no cap form")
+		t.Fatal("the Show setting has no First form, marked chosen")
 	}
-	hidden := regexp.MustCompile(`<input type="hidden" name="([^"]+)" value="([^"]*)">`).FindAllStringSubmatch(form[1], -1)
-	if len(hidden) != 1 || hidden[0][1] != "by" || hidden[0][2] != "mass" {
-		t.Errorf("the cap form sends %v; want by=mass alone (not cap, not find)", hidden)
+	var sent []string
+	for _, m := range regexp.MustCompile(`<input type="hidden" name="([^"]+)" value="([^"]*)">`).FindAllStringSubmatch(form[1], -1) {
+		sent = append(sent, m[1]+"="+m[2])
 	}
-	if !strings.Contains(form[1], `name="cap"`) || !strings.Contains(form[1], `value="50"`) ||
-		!strings.Contains(form[1], `>First <input class="cap"`) || !strings.Contains(form[1], " of "+strconv.Itoa(c.Count)+" birds") {
-		t.Errorf("the cap form does not read First [50] of %d birds:\n%s", c.Count, form[1])
+	if !slices.Equal(sent, []string{"by=mass", "pin=amecro", "pin=annhum"}) {
+		t.Errorf("the First form sends %v; want every setting but show and find", sent)
 	}
-	more := `href="` + html.EscapeString(string(nextAt(s, "/?by=mass&cap=50&find=jay").MoreURL)) + `"`
-	if !strings.Contains(body, "</form>\n  <a class=\"showall\" "+more+">Show all</a>") {
-		t.Error("Show all does not follow the cap form")
+	if !strings.Contains(form[1], `>First <input class="cap" type="number" name="show"`) || !strings.Contains(form[1], `value="50"`) {
+		t.Errorf("the First form does not read First [50]:\n%s", form[1])
 	}
-	if strings.Count(body, more) != 2 {
-		t.Error("Show all is not both on the count line and in the gap row at the end")
+	pp := nextAt(s, "/?by=mass&show=50&find=jay&pin=amecro&pin=annhum")
+	if !strings.Contains(body, ">All "+strconv.Itoa(pp.Matching)+"</a>") || !strings.Contains(body, ">Pinned only (2)</a>") {
+		t.Errorf("the Show setting does not offer All %d and Pinned only (2)", pp.Matching)
 	}
-	// The box is there even when nothing is hidden, so a small set can be capped.
-	if _, body := get(t, s, "/?family=Ardeidae&cap=none"); !strings.Contains(body, `<input class="cap" type="number" name="cap"`) {
-		t.Error("with no cap, the count line has no cap box")
+	if !strings.Contains(body, "<summary><b>Show</b> first 50</summary>") {
+		t.Error("the Show setting's summary does not say first 50")
+	}
+	rows := regexp.MustCompile(`(?s)<div class="countrow">(.*?)\n  </div>`).FindAllStringSubmatch(body, -1)
+	if len(rows) != 2 {
+		t.Fatalf("the count line has %d rows, want 2", len(rows))
+	}
+	first, second := rows[0][1], rows[1][1]
+	for _, want := range []string{`<span class="shown">First 50 of`, `data-ctl="Show"`, ">Clear pins</a>", ">Reset</a>"} {
+		if !strings.Contains(first, want) {
+			t.Errorf("the first row lacks %s", want)
+		}
+	}
+	if strings.Contains(first, `data-ctl="Order by"`) || !strings.Contains(second, `data-ctl="Order by"`) || !strings.Contains(second, `data-ctl="Names"`) {
+		t.Error("Order by through Names are not on the second row alone")
+	}
+	if strings.Contains(body, ">Show all</a>\n") && strings.Index(body, ">Show all</a>") < strings.Index(body, `<div class="tiles">`) {
+		t.Error("the count line still has its own Show all; it is a Show choice now")
+	}
+	if p := nextAt(s, "/?show=all"); p.Show != "all" || !strings.Contains(mustGet(t, s, "/?show=all"), `<span class="shown">All `+strconv.Itoa(p.Count)+` birds</span>`) {
+		t.Error("show=all does not say All N birds")
 	}
 
 	for from, to := range map[string]string{
-		"/?cap=100&by=mass": "/?by=mass", "/?by=mass&cap=": "/?by=mass",
-		"/?cap=zero": "/", "/?cap=0": "/", "/?cap=-3": "/",
+		"/?show=100&by=mass": "/?by=mass", "/?by=mass&show=": "/?by=mass",
+		"/?show=zero": "/", "/?show=0": "/", "/?show=-3": "/",
 	} {
 		w := httptest.NewRecorder()
 		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, from, nil))
@@ -514,7 +535,7 @@ func TestNextShowAll(t *testing.T) {
 			t.Errorf("GET %s = %d to %q, want 303 to %s", from, w.Code, w.Header().Get("Location"), to)
 		}
 	}
-	for _, ok := range []string{"/?cap=50", "/?cap=none"} {
+	for _, ok := range []string{"/?show=50", "/?show=all", "/?show=pinned"} {
 		w := httptest.NewRecorder()
 		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, ok, nil))
 		if w.Code != http.StatusOK {
@@ -628,7 +649,7 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
 	before := nextAt(s, "/")
-	all := nextAt(s, "/?cap=none")
+	all := nextAt(s, "/?show=all")
 	last := all.Tiles[len(all.Tiles)-1].S // the least recorded: far past the first
 	if hasTile(before, last.ID) {
 		t.Fatalf("%s is drawn already; the check needs a bird past the first %d", last.ID, nextCap)
@@ -646,10 +667,10 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	if after.AddedPast != 1 || after.First != nextCap || after.Hidden != before.Hidden-1 {
 		t.Errorf("after adding: first %d, added past it %d, hidden %d (was %d)", after.First, after.AddedPast, after.Hidden, before.Hidden)
 	}
-	if _, body := get(t, s, follow(t, s, string(m[0].URL))); !strings.Contains(body, " of "+strconv.Itoa(after.Count)+" birds, plus 1 pin\n") {
+	if _, body := get(t, s, follow(t, s, string(m[0].URL))); !strings.Contains(body, " of "+strconv.Itoa(after.Count)+" birds, plus 1 pin</span>") {
 		t.Errorf("the count line does not say \"plus 1 pin\" after %d birds", after.Count)
 	}
-	if _, body := get(t, s, "/?cap=2&month=all&pin="+last.ID+"&pin="+all.Tiles[len(all.Tiles)-2].S.ID); !strings.Contains(body, " birds, plus 2 pins\n") {
+	if _, body := get(t, s, "/?show=2&month=all&pin="+last.ID+"&pin="+all.Tiles[len(all.Tiles)-2].S.ID); !strings.Contains(body, " birds, plus 2 pins</span>") {
 		t.Error("with two pins past the cap, the count line does not say \"plus 2 pins\"")
 	}
 	if len(after.Tiles) != len(before.Tiles)+1 {
@@ -692,7 +713,7 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	// A gap of one bird reads "1 bird hidden", and a gap after the last pin
 	// reads "birds hidden".
 	small := newTestServer(t)
-	_, sbody := get(t, small, "/?month=all&by=mass&pin=amecro&cap=2")
+	_, sbody := get(t, small, "/?month=all&by=mass&pin=amecro&show=2")
 	if !strings.Contains(sbody, `<p class="gap">1 bird hidden — `) || !strings.Contains(sbody, `<p class="gap">2 birds hidden — `) {
 		t.Errorf("with 1 hidden before amecro and 2 after, the gaps do not say so:\n%s", sbody)
 	}
@@ -708,14 +729,17 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 func TestNextShowPinned(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	start := nextAt(s, "/?by=mass&cap=none")
-	if string(start.ShowURL) != "/?by=mass&cap=none&show=pinned" {
-		t.Errorf("Show only pinned links to %s, want the order and cap kept", start.ShowURL)
+	start := nextAt(s, "/?by=mass&show=all")
+	if string(start.ShowPinnedURL) != "/?by=mass&show=pinned" {
+		t.Errorf("Pinned only links to %s, want the order kept", start.ShowPinnedURL)
 	}
 	if a, b := nextAt(s, "/?by=mass&show=all").Count, nextAt(s, "/?by=mass").Count; a != b {
-		t.Errorf("show=all draws from %d birds, the default from %d; all is the default", a, b)
+		t.Errorf("show=all draws from %d birds, the default from %d; they match the same birds", a, b)
 	}
-	empty := nextAt(s, string(start.ShowURL))
+	empty := nextAt(s, string(start.ShowPinnedURL))
+	if empty.Matching != start.Matching || empty.Matching < 500 {
+		t.Errorf("under Pinned only, All offers %d birds; the settings match %d", empty.Matching, start.Matching)
+	}
 	if !empty.PinnedOnly || len(empty.Tiles) != 0 || empty.Count != 0 || empty.Title != "Birds you chose" {
 		t.Errorf("pinned only: %d drawn of %d, title %q", len(empty.Tiles), empty.Count, empty.Title)
 	}
@@ -727,9 +751,9 @@ func TestNextShowPinned(t *testing.T) {
 	if back := follow(t, s, two+"&bird=amecro"); back != "/?by=mass&pin=annhum&show=pinned" {
 		t.Errorf("removing one of two goes to %s", back)
 	}
-	undo := nextAt(s, string(p.ShowURL))
+	undo := nextAt(s, string(p.ShowFirstURL))
 	if undo.PinnedOnly || !hasTile(undo, "amecro") || !hasTile(undo, "annhum") || undo.Count < 500 {
-		t.Errorf("Show all matching birds (%s): pinned only %t, %d birds", p.ShowURL, undo.PinnedOnly, undo.Count)
+		t.Errorf("Show all matching birds (%s): pinned only %t, %d birds", p.ShowFirstURL, undo.PinnedOnly, undo.Count)
 	}
 }
 

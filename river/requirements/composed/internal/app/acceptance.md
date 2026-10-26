@@ -288,14 +288,16 @@ fewer. In headless Chrome, typing six queries (one in capitals, one over a lower
 matching nothing) shows the same count line and lists the same birds, with the same pins, on or
 off, as the server's page for each. The Family setting draws every family in its badge's colors
 with its description. Choosing from all selects
-only that one, choosing again removes it, and changing a filter drops the find box and keeps the cap.
-The home page draws the first 100 of October's 1,006 and a link to all of them (`cap=none`) in the same
-order, both right after the cap form on the count line and in the gap row at the end; the
-herons draw every heron with no link. `cap=50` draws 50,
-says 50 in the box, and is kept by a filter and Show only pinned but not Reset. The cap form
-reads First [box] of N birds and sends every other setting but the find box; the box is there
-with no cap too. `cap=100`, `cap=`, `cap=0`, `cap=-3`, and `cap=zero` redirect to the address
-without a cap; `cap=50` and `cap=none` do not. The chosen order links to its reverse and back, every other
+only that one, choosing again removes it, and changing a filter drops the find box and keeps how many are shown.
+The home page draws the first 100 of October's 1,006 and a link to all of them (`show=all`) in
+the same order, in the gap row at the end; the herons draw every heron with no link. `show=50`
+draws 50, says 50 in the box, and is kept by a filter but not Reset; `show=all` is kept by a
+filter too. The Show setting's First choice is a form reading First [box] that sends every other
+setting but show and the find box, beside All with the count the settings match and Pinned only
+(2), the chosen one marked, and its summary names the choice. The count line is two rows: what is
+drawn, Show, Clear pins, and Reset, then Order by through Names; it has no Show all of its own.
+`show=100`, `show=`, `show=0`, `show=-3`, and `show=zero` redirect to the address without show;
+`show=50`, `show=all`, and `show=pinned` do not. The chosen order links to its reverse and back, every other
 order links to itself unreversed, reversed mass runs largest first, and reversed frequency puts
 the most recorded duck last. Without a month the page is
 no-store with no validator; with one it carries an ETag. The classic view is at /classic. Every
@@ -305,10 +307,10 @@ that unpins it; no pin link jumps the page, and in headless Chrome a page loaded
 scrolled where the pin was clicked. Reset keeps the pins, in order, and drops every setting; Clear pins,
 before it and only when something is pinned, drops the pins and keeps every setting. The phone-width and contrast checks reach the home page through the crawl, open
 every setting at once, and measure after the placing script has run. Pinning the October set's
-least recorded bird, past the first 100, draws it after one gap row and none after it, and the count line says "plus 1 pin" ("plus 2 pins" for two); pinning two mid-order birds by length draws gap rows before, between, and after them summing to Hidden, each linking to Show all, and Show all draws no gaps. Show
-only pinned links to `show=pinned` with the order kept and draws nothing; with two pinned it
-draws those two by mass, unpinning one leaves the other, and Show all matching birds brings the
-October birds back with both; `show=all` draws what the default does. Here, filled with FL, is
+least recorded bird, past the first 100, draws it after one gap row and none after it, and the count line says "plus 1 pin" ("plus 2 pins" for two); pinning two mid-order birds by length draws gap rows before, between, and after them summing to Hidden, each linking to Show all, and Show all draws no gaps. Pinned
+only links to `show=pinned` with the order kept and draws nothing; with two pinned it
+draws those two by mass, unpinning one leaves the other, and First brings the
+October birds back with both; `show=all` matches what the default does. Here, filled with FL, is
 the page with only Florida chosen, every other setting kept, and the pinned-only
 view left, and the page carries the button, its status, and here.js. Month's choices are one
 line, All, Now, and the twelve months, with a rule only before January; Now is chosen with no
@@ -336,6 +338,7 @@ Watched failing: 2026-10-26, by Here keeping clear=1, by renaming its button, an
 Watched failing: 2026-10-26, by show=pinned that hid nothing, and by Here keeping show=pinned.
 Watched failing: 2026-10-26, by a Reset that dropped the pins, and by a Clear pins that kept them.
 Watched failing: 2026-10-26, by a pin that jumps to its tile, by not keeping the scroll ("the new page opened at 0"), and by dropping the pinned list or its entries.
+Watched failing: 2026-10-26, by a filter dropping every show, by ignoring a count ("show=50: 100 drawn"), by the First form sending show twice, by All counting only the drawn birds ("under Pinned only, All offers 0 birds"), by one count-line row, and by an unmarked First.
 Watched failing: 2026-10-26, by the count line saying "and 1 added" instead of "plus 1 pin".
 Watched failing: 2026-10-26, by ignoring cap, by a filter dropping it, by not redirecting cap=100, by Show all naming cap=all, and by the cap form sending cap twice.
 Watched failing: 2026-10-26, by placing the pin a fixed 60px above the tile's bottom ("28 of 100 pins are not level with the mass cube", 16px high), and by sharing a stretched tile's height among all its rows ("20 of 100", 4px).
