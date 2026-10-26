@@ -539,6 +539,7 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 .settitle { font-size: 16px; font-weight: 600; margin: 14px 0 4px; }
 .next .count { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; position: relative; }
 .next .count .shown { margin-right: 4px; }
+.next .count .showall { margin-right: 6px; }
 /* Under its own setting. On a phone without the placing script, under the
    whole count line instead, since a setting at the right would open its
    choices off the screen. */

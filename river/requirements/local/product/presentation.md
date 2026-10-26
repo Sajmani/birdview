@@ -775,8 +775,8 @@ is unchanged and does not link to it.
 - **Order.** By how often recorded (the default, most often first), or by length, wingspan,
   mass, bill, or tail (smallest first). Choosing the chosen order again reverses it (`rev=1`).
   Order by is the first setting on the count line.
-- **Show all.** The page draws the first 100 birds of the order, and a larger set ends with a
-  link that shows them all; that address says so, so it can be shared. 100 is a reader's first
+- **Show all.** The page draws the first 100 birds of the order. For a larger set, a link that
+  shows them all follows the count ("First 100 of 1006 birds") and ends the page; that address says so, so it can be shared. 100 is a reader's first
   screens, not a limit of speed: all 1,041 birds paint in 0.73 s on a phone-class CPU over 5G
   (measured 2026-10-26 under Lighthouse's mobile throttling, 229 KiB).
 - **Stateless.** Every view is its address. `/next` with no month changes with the month, so it is

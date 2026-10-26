@@ -26,6 +26,7 @@ import (
 	"os/exec"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -440,6 +441,14 @@ func TestNextShowAll(t *testing.T) {
 			t.Errorf("Show all reorders: %s at %d, was %s", all.Tiles[i].S.ID, i, p.Tiles[i].S.ID)
 			break
 		}
+	}
+	_, body := get(t, s, "/next")
+	if want := `<span class="shown">First 100 of ` + strconv.Itoa(p.Count) + ` birds</span>
+  <a class="showall" href="` + html.EscapeString(string(p.MoreURL)) + `">Show all</a>`; !strings.Contains(body, want) {
+		t.Errorf("the count line has no Show all after its count; want %q", want)
+	}
+	if strings.Count(body, `href="`+html.EscapeString(string(p.MoreURL))+`"`) != 2 {
+		t.Error("Show all is not both on the count line and at the end")
 	}
 	if p := nextAt(s, "/next?family=Ardeidae"); p.MoreURL != "" || len(p.Tiles) != p.Count {
 		t.Errorf("the herons, %d birds, draw %d and offer Show all %q", p.Count, len(p.Tiles), p.MoreURL)
