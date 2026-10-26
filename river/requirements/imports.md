@@ -9,32 +9,6 @@ with a field table. `Status` is the field that distinguishes an adopted source f
 all the others can be filled in plausibly from a URL alone. `Integrity` names **where** a content
 hash lives. It never contains one.
 
-## Summary
-
-| Name | Tier | Import | Status |
-| --- | --- | --- | --- |
-| [`avonet`](#avonet) | mandatory | by reference, vendored | **adopted** — pinned, vendored, hashed; no criteria yet |
-| [`aba`](#aba) | mandatory | by reference, **not** vendored | **partial** — terms read and quoted, pinned by hash; redistribution refused, so fetched at build |
-| [`fox-wingspan`](#fox-wingspan) | mandatory | by reference, vendored | **adopted** — retrieved, hashed against the publisher's MD5, vendored |
-| [`bohmer-neck`](#bohmer-neck) | mandatory | consulted, not ingested | **adopted** — CC BY 4.0 verified; calibrates one constant, contributes no data |
-| [`avilist`](#avilist) | mandatory | by reference, vendored | **adopted** — CC BY 4.0, vendored and hashed; supplies every name and the species code |
-| [`gbif`](#gbif) | mandatory | by reference, queried, not vendored | **adopted** — CC BY 4.0 verified from the API; supplies the GBIF→AviList name bridge only |
-| [`ricklefs`](#ricklefs) | mandatory | **rejected** | **rejected** — Wiley terms prohibit the use, see [decisions.ricklefsProhibited](decisions.md#ricklefsprohibited) |
-| [`wiley`](#wiley) | mandatory | quoted only, not vendored | **adopted** — terms read and transcribed; the reason `ricklefs` is rejected |
-| [`wcag`](#wcag) | mandatory | by reference, vendored | **partial by design** — three contrast criteria transcribed; no conformance level claimed |
-| [`inat-api`](#inat-api) | governing | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; governs the mapping tool |
-| [`inat-terms`](#inat-terms) | mandatory | by reference, vendored | **adopted** — copied from `birdsync` and hash-verified; almost nothing in it reaches BirdView |
-| [`specman`](#specman) | — (method) | project copy | **retired** 2026-10-15 — replaced by River, whose pin is in `process.md`'s banner |
-| [`ebird-sensitive`](#ebird-sensitive) | mandatory | absorbed as facts, not vendored | **adopted** — the US and Canada entries restated in `taxonomy.EBirdSensitive`, each confirmed against the export ([decisions.ebirdSilenceNotAbsence](decisions.md#ebirdsilencenotabsence)) |
-| [`natural-earth`](#natural-earth) | mandatory | by reference, pinned by hash, **not** vendored | **adopted** 2026-10-18 — public domain; fetched and hash-checked by `cmd/birdview-boundaries` for the Here button's region boundaries |
-| [`birdlife-checklist`](#birdlife-checklist) | mandatory | **rejected** | **rejected** — DataZone terms forbid automated access; [decisions.vegaGullBorrows](decisions.md#vegagullborrows) re-based 2026-10-14 onto the vendored `avilist` and `avonet` workbooks |
-
-Two of the fifteen are rejected, and neither blocks v1. `birdlife-checklist` was consulted in a
-way DataZone's terms forbid; its quotations were removed and [decisions.vegaGullBorrows](decisions.md#vegagullborrows) was
-re-based on the vendored CC BY 4.0 workbooks. `ricklefs` was evaluated and
-**rejected**: its platform terms prohibit extraction, integration, storage, and redistribution
-alike. Both entries are kept so the evaluations are not repeated.
-
 ---
 
 ## `avonet`
@@ -92,9 +66,6 @@ License, quoted verbatim from row 0 of the CSV itself:
 
 No other terms document governs it: `aba.org/terms-of-use/`, `/copyright/`, and `/legal/` all 404,
 and the checklist landing page carries no license statement at all.
-
-**Open action:** ask ABA for written permission. It is the only input v1 genuinely depends on that
-cannot be committed, and a non-commercial, attributed, open-source request costs an email.
 
 ---
 
