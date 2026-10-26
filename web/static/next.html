@@ -34,9 +34,9 @@
   {{/* Things to try, as on the classic view, with its comparisons made
        with pins: each pins six birds and shows only them, by length. The
        first finds the reader's region in the browser (#here-and-now, in
-       here.js), in this month, which the home page shows by default. */}}
+       here.js) and sets the month to Now, keeping every other setting. */}}
   <p class="welcome"><b>New here? Try</b>
-    <a href="/#here-and-now">the birds around you now</a> &middot;
+    <a href="{{.HereNowURL}}">the birds around you now</a> &middot;
     compare some
     <a href="/?by=length&amp;pin=leasan&amp;pin=houspa&amp;pin=dowwoo&amp;pin=houfin&amp;pin=barswa&amp;pin=easpho&amp;show=pinned">small birds</a>,
     <a href="/?by=length&amp;pin=blujay&amp;pin=amekes&amp;pin=calthr&amp;pin=moudov&amp;pin=belkin1&amp;pin=chwwid&amp;show=pinned">medium birds</a>,
@@ -45,7 +45,7 @@
     see all <a href="/?family=Ardeidae&amp;family=Anatidae&amp;month=all">herons and ducks</a> &middot;
     <a href="/docs/using#some-things-to-try">more ideas</a>
     <span class="welcomestatus" role="status" aria-live="polite" data-where="Region"
-          data-template="/?region=__REGION__"></span></p>
+          data-template="{{.HereNowTemplate}}"></span></p>
 </header>
 
 {{/* The find box. With JavaScript, next-find.js counts the matches as the

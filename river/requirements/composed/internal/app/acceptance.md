@@ -300,9 +300,10 @@ drawn, Show, Clear pins, and Reset, then Order by through Names; it has no Show 
 `show=100`, `show=`, `show=0`, `show=-3`, and `show=zero` redirect to the address without show;
 `show=50`, `show=all`, and `show=pinned` do not. The header ends with Click a bird and How to read a drawing and has no
 key line; New here? Try's four comparisons each pin six real birds shown alone by length, herons
-and ducks draw only those families in every month, and the birds around you now is
-/#here-and-now, which in headless Chrome lands on /?region=CA from California and, refused, says
-to choose under Region. In headless Chrome, the script's × goes where the server's does, and a
+and ducks draw only those families in every month, and the birds around you now is the address
+with #here-and-now, its template replacing the region and dropping the month (Now) and keeping
+every other setting; in headless Chrome, from /?by=mass&month=May in California it lands on
+/?by=mass&region=CA and, refused, says to choose under Region. In headless Chrome, the script's × goes where the server's does, and a
 tile's pin clicked with text in the box carries the text. In headless Chrome, clicking the First button or the First choice's edge
 sends the typed count, and clicking into its box does not; without the script, First is a submit
 button. The chosen order links to its reverse and back, every other
@@ -346,6 +347,7 @@ Watched failing: 2026-10-26, by Here keeping clear=1, by renaming its button, an
 Watched failing: 2026-10-26, by show=pinned that hid nothing, and by Here keeping show=pinned.
 Watched failing: 2026-10-26, by a Reset that dropped the pins, and by a Clear pins that kept them.
 Watched failing: 2026-10-26, by a pin that jumps to its tile, by not keeping the scroll ("the new page opened at 0"), and by dropping the pinned list or its entries.
+Watched failing: 2026-10-26, by the birds around you now keeping the month ("want /?by=mass&region=CA next").
 Watched failing: 2026-10-26, by a comparison without show=pinned ("106 drawn"), by an unknown bird in one ("5 known"), by keeping "Drawn to scale", and by here.js ignoring the page's Region setting.
 Watched failing: 2026-10-26, by a tile's pin dropping the typed text, by the script's list links leaving it out, and by pinning emptying the box ("pinning went to /?family=Ardeidae&pin=shshaw").
 Watched failing: 2026-10-26, by dropping the edge click's script, by sending on every click ("box 1"), and by First not being a submit button.

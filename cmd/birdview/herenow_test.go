@@ -428,8 +428,8 @@ func TestWelcomeLine(t *testing.T) {
 // TestHereAndNowLink follows a #here-and-now link in headless Chrome, with
 // the browser's location stood in for: found, the browser goes to the page
 // choosing the region and the month by hand would; refused, it stays and says
-// so in the welcome line. On the home page, already in this month, it chooses
-// the region alone, and a refusal names the Region setting.
+// so in the welcome line. On the home page it chooses the region and sets
+// the month to Now, keeping the rest, and a refusal names the Region setting.
 //
 // Verifies: product.hereSelectsLocalRegion, product.locationStaysInBrowser.
 // Criterion: app.hereLookupAgreesInTheBrowser.
@@ -446,12 +446,12 @@ func TestHereAndNowLink(t *testing.T) {
 	byMonth := httptest.NewRequest(http.MethodGet, string(s.monthURL(r, map[int]bool{thisMonth: true})), nil)
 	wantCA := string(s.regionURL(byMonth, map[string]bool{ca.ID: true}))
 
-	// The home page's link, /#here-and-now, chooses the region alone: the
-	// page is already in this month.
+	// On the home page, the link chooses the region and sets the month to
+	// Now, which names no month, keeping every other setting.
 	for _, c := range []struct{ name, start, geo, lands, says string }{
 		{"in California", start, "38.5816,-121.4944", wantCA, ""},
 		{"refused", start, "denied", start, "refused"},
-		{"home in California", "/", "38.5816,-121.4944", "/?region=CA", ""},
+		{"home in California", "/?by=mass&month=May", "38.5816,-121.4944", "/?by=mass&region=CA", ""},
 		{"home refused", "/", "denied", "/", "refused, so this shows every region. Choose yours under Region."},
 	} {
 		t.Run(c.name, func(t *testing.T) {

@@ -1190,6 +1190,13 @@ func TestNextWelcomeLine(t *testing.T) {
 		!strings.Contains(w[1], `<a href="/docs/using#some-things-to-try">more ideas</a>`) {
 		t.Errorf("the welcome line lacks the birds around you now, its status, or more ideas:\n%s", w[1])
 	}
+	// From an address with settings changed, the link keeps them, and its
+	// template replaces the region and sets the month to Now.
+	if p := nextAt(s, "/?by=mass&month=May&region=FL&pin=amecro&show=pinned&find=crow"); string(p.HereNowURL) != "/?by=mass&month=May&pin=amecro&region=FL&show=pinned#here-and-now" ||
+		p.HereNowTemplate != "/?by=mass&pin=amecro&region=__REGION__" {
+		t.Errorf("from a changed address, the birds around you now is %s with template %s; want every setting kept, then the region replaced and the month Now",
+			p.HereNowURL, p.HereNowTemplate)
+	}
 	links := regexp.MustCompile(`<a href="([^"]+)">([^<]+)</a>`).FindAllStringSubmatch(w[1], -1)
 	sizes := 0
 	for _, l := range links {

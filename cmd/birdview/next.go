@@ -146,6 +146,13 @@ type nextData struct {
 	AddedPast int
 	// PinnedOnly is set when only pinned birds are shown (show=pinned).
 	PinnedOnly bool
+	// HereNowURL is the welcome line's "the birds around you now": this
+	// address, its find box closed, with #here-and-now, which here.js
+	// answers by going to HereNowTemplate with the reader's region filled
+	// in. The template keeps every setting but the region, which it
+	// replaces, and the month, which it sets to Now by naming none.
+	HereNowURL      template.URL
+	HereNowTemplate string
 	// Pinned lists the pinned birds in alphabetical order, each with its
 	// pin and a link to its tile.
 	Pinned []nextPinned
@@ -608,6 +615,15 @@ func (s *server) nextPage(r *http.Request) nextData {
 			page.Controls[i].Boundaries = s.boundaryURL
 		}
 	}
+	hn := cloneValues(q)
+	hn.Del("find")
+	hn.Del("bird")
+	page.HereNowURL = nextURL(hn) + "#here-and-now"
+	hn.Del("region")
+	hn.Del("month")
+	leavePinnedOnly(hn)
+	hn.Set("region", hereSlot)
+	page.HereNowTemplate = strings.Replace(string(nextURL(hn)), url.QueryEscape(hereSlot), hereSlot, 1)
 	page.HereScript = s.hereJS
 	return page
 }
