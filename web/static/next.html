@@ -28,10 +28,24 @@
 <header>
   <h1>BirdView</h1>
   <p class="sub">BirdView draws birds as stick figures to scale, so you can compare their
-  sizes and shapes.{{with .Feedback}}
+  sizes and shapes. Click a bird for its numbers and sources.
+  <a href="/docs/using">How to read a drawing</a>.{{with .Feedback}}
   Found something wrong? <a href="{{.}}">Report it</a>.{{end}}</p>
-  <p class="key">Drawn to scale. <b>Solid is measured, dashed is estimated.</b>
-  Click a bird for its numbers and sources. <a href="/docs/using">How to read a drawing</a>.</p>
+  {{/* Things to try, as on the classic view, with its comparisons made
+       with pins: each pins six birds and shows only them, by length. The
+       first finds the reader's region in the browser (#here-and-now, in
+       here.js), in this month, which the home page shows by default. */}}
+  <p class="welcome"><b>New here? Try</b>
+    <a href="/#here-and-now">the birds around you now</a> &middot;
+    compare some
+    <a href="/?by=length&amp;pin=leasan&amp;pin=houspa&amp;pin=dowwoo&amp;pin=houfin&amp;pin=barswa&amp;pin=easpho&amp;show=pinned">small birds</a>,
+    <a href="/?by=length&amp;pin=blujay&amp;pin=amekes&amp;pin=calthr&amp;pin=moudov&amp;pin=belkin1&amp;pin=chwwid&amp;show=pinned">medium birds</a>,
+    <a href="/?by=length&amp;pin=turvul&amp;pin=gbbgul&amp;pin=greegr&amp;pin=cangoo&amp;pin=grecor&amp;pin=rosspo1&amp;show=pinned">large birds</a>,
+    <a href="/?by=length&amp;pin=calcon&amp;pin=amwpel&amp;pin=mutswa&amp;pin=magfri&amp;pin=baleag&amp;pin=bkfalb&amp;show=pinned">huge birds</a> &middot;
+    see all <a href="/?family=Ardeidae&amp;family=Anatidae&amp;month=all">herons and ducks</a> &middot;
+    <a href="/docs/using#some-things-to-try">more ideas</a>
+    <span class="welcomestatus" role="status" aria-live="polite" data-where="Region"
+          data-template="/?region=__REGION__"></span></p>
 </header>
 
 {{/* The find box. With JavaScript, next-find.js counts the matches as the

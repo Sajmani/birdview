@@ -1157,3 +1157,70 @@ func TestNextFirstCommitsOnClick(t *testing.T) {
 			res.Box, res.Button, res.Edge, res.Sent)
 	}
 }
+
+// TestNextWelcomeLine checks the home page's header: one line saying what
+// BirdView draws, with Click a bird and How to read a drawing, and no key
+// line ("Drawn to scale", "Solid is measured"); then New here? Try, whose
+// four comparisons each pin six real birds and show only them, by length,
+// whose herons and ducks draw only those two families in every month, and
+// whose birds around you now is /#here-and-now with its status naming the
+// Region setting.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextWelcomeLine(t *testing.T) {
+	s := newTestServerReal(t)
+	fixNextClock(t, time.October)
+	body := mustGet(t, s, "/")
+	sub := regexp.MustCompile(`(?s)<p class="sub">(.*?)</p>`).FindStringSubmatch(body)
+	if sub == nil || !strings.Contains(sub[1], "Click a bird for its numbers and sources.") ||
+		!strings.Contains(sub[1], `<a href="/docs/using">How to read a drawing</a>`) {
+		t.Errorf("the header's line does not end with Click a bird and How to read a drawing: %v", sub)
+	}
+	for _, gone := range []string{`class="key"`, "Drawn to scale", "Solid is measured"} {
+		if strings.Contains(body, gone) {
+			t.Errorf("the home page still says %q", gone)
+		}
+	}
+	w := regexp.MustCompile(`(?s)<p class="welcome"><b>New here\? Try</b>(.*?)</p>`).FindStringSubmatch(body)
+	if w == nil {
+		t.Fatal("the home page has no New here? Try line")
+	}
+	if !strings.Contains(w[1], `<a href="/#here-and-now">the birds around you now</a>`) ||
+		!strings.Contains(w[1], `data-where="Region"`) || !strings.Contains(w[1], `data-template="/?region=__REGION__"`) ||
+		!strings.Contains(w[1], `<a href="/docs/using#some-things-to-try">more ideas</a>`) {
+		t.Errorf("the welcome line lacks the birds around you now, its status, or more ideas:\n%s", w[1])
+	}
+	links := regexp.MustCompile(`<a href="([^"]+)">([^<]+)</a>`).FindAllStringSubmatch(w[1], -1)
+	sizes := 0
+	for _, l := range links {
+		href, text := html.UnescapeString(l[1]), l[2]
+		switch {
+		case strings.HasSuffix(text, " birds"):
+			sizes++
+			u, _ := url.Parse(href)
+			pins := u.Query()["pin"]
+			p := nextAt(s, href)
+			if len(pins) != 6 || u.Query().Get("show") != "pinned" || u.Query().Get("by") != "length" ||
+				len(p.Pinned) != 6 || len(p.Tiles) != 6 {
+				t.Errorf("%s (%s): %d pins, %d known, %d drawn; want six real birds shown alone by length",
+					text, href, len(pins), len(p.Pinned), len(p.Tiles))
+			}
+		case text == "herons and ducks":
+			p := nextAt(s, href)
+			if len(p.Tiles) < 20 {
+				t.Errorf("herons and ducks draw %d birds", len(p.Tiles))
+			}
+			for _, tl := range p.Tiles {
+				if f := tl.S.Family; f != "Ardeidae" && f != "Anatidae" {
+					t.Errorf("herons and ducks draw %s, of %s", tl.S.ID, f)
+				}
+			}
+			if !strings.Contains(href, "month=all") {
+				t.Errorf("herons and ducks is %s; want every month", href)
+			}
+		}
+	}
+	if sizes != 4 {
+		t.Errorf("the welcome line compares %d sizes of birds, want 4 (small, medium, large, huge)", sizes)
+	}
+}

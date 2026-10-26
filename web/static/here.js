@@ -114,6 +114,12 @@
   // does not ask again.
   var welcome = document.querySelector(".welcomestatus[data-template]");
   if (welcome && new URLSearchParams(location.hash.slice(1)).has("here-and-now")) {
+    // The page names where a region is chosen by hand; the classic view's
+    // Regions and months panel unless it says otherwise. The home page,
+    // already in this month, names its Region setting and offers no Now.
+    var where = welcome.getAttribute("data-where") || "Regions and months";
+    var nowHint = welcome.hasAttribute("data-where") ? "" : " Press Now under Regions and months for this month.";
+    var scope = welcome.hasAttribute("data-where") ? "every region" : "every region and month";
     window.addEventListener("load", function () {
       var tell = function (text) {
         welcome.textContent = text;
@@ -124,7 +130,7 @@
         ready.then(function () {
           var slug = lookup(pos.coords.latitude, pos.coords.longitude);
           if (!slug) {
-            tell("You are outside every region BirdView covers, so this shows every region. Press Now under Regions and months for this month.");
+            tell("You are outside every region BirdView covers, so this shows every region." + nowHint);
             return;
           }
           window.location.replace(welcome.getAttribute("data-template")
@@ -134,8 +140,8 @@
         });
       }, function (err) {
         tell(err.code === 1
-          ? "Permission to use your location was refused, so this shows every region and month. Choose yours under Regions and months."
-          : "Your location could not be found, so this shows every region and month. Choose yours under Regions and months.");
+          ? "Permission to use your location was refused, so this shows " + scope + ". Choose yours under " + where + "."
+          : "Your location could not be found, so this shows " + scope + ". Choose yours under " + where + ".");
       }, { timeout: 15000, maximumAge: 600000 });
     });
   }

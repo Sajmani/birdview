@@ -759,6 +759,12 @@ and not linked from the home page except in its credits. A species page's "back 
 goes to the home page with the same settings. Elsewhere in these requirements, "the index" names
 the classic view.
 
+- **The header.** One line says what BirdView draws, then "Click a bird for its numbers and
+  sources" and **How to read a drawing**; what solid and dashed mean is left to that guide and to
+  each species page. Under it, **New here? Try** offers the classic view's things to try, its
+  comparisons made with pins: the birds around you now (`/#here-and-now`, the reader's region
+  found in the browser, in this month), small, medium, large, and huge birds (six pinned and shown
+  alone, by length), all herons and ducks (every month), and more ideas.
 - **The set.** With no filter, it is every bird recorded in the month, most often recorded first.
   The month is the server's own unless the address names some; `month=all` is every month. Every
   filter (family, region, month, habitat, diet) narrows the set, and pinned birds join it.

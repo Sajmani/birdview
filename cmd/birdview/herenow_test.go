@@ -428,7 +428,8 @@ func TestWelcomeLine(t *testing.T) {
 // TestHereAndNowLink follows a #here-and-now link in headless Chrome, with
 // the browser's location stood in for: found, the browser goes to the page
 // choosing the region and the month by hand would; refused, it stays and says
-// so in the welcome line.
+// so in the welcome line. On the home page, already in this month, it chooses
+// the region alone, and a refusal names the Region setting.
 //
 // Verifies: product.hereSelectsLocalRegion, product.locationStaysInBrowser.
 // Criterion: app.hereLookupAgreesInTheBrowser.
@@ -445,9 +446,13 @@ func TestHereAndNowLink(t *testing.T) {
 	byMonth := httptest.NewRequest(http.MethodGet, string(s.monthURL(r, map[int]bool{thisMonth: true})), nil)
 	wantCA := string(s.regionURL(byMonth, map[string]bool{ca.ID: true}))
 
-	for _, c := range []struct{ name, geo, lands, says string }{
-		{"in California", "38.5816,-121.4944", wantCA, ""},
-		{"refused", "denied", start, "refused"},
+	// The home page's link, /#here-and-now, chooses the region alone: the
+	// page is already in this month.
+	for _, c := range []struct{ name, start, geo, lands, says string }{
+		{"in California", start, "38.5816,-121.4944", wantCA, ""},
+		{"refused", start, "denied", start, "refused"},
+		{"home in California", "/", "38.5816,-121.4944", "/?region=CA", ""},
+		{"home refused", "/", "denied", "/", "refused, so this shows every region. Choose yours under Region."},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			t.Parallel()
@@ -463,9 +468,9 @@ func TestHereAndNowLink(t *testing.T) {
 				"--no-default-browser-check", "--disable-background-networking",
 				"--disable-component-update", "--disable-sync", "--disable-extensions",
 				"--user-data-dir="+t.TempDir(), "--virtual-time-budget=3000", "--dump-dom",
-				ts.URL+start+"#here-and-now&probe=1&geo="+c.geo)
+				ts.URL+c.start+"#here-and-now&probe=1&geo="+c.geo)
 			var dom string
-			if c.lands != start {
+			if c.lands != c.start {
 				// Navigating leaves headless Chrome waiting; read the server's log.
 				if err := cmd.Start(); err != nil {
 					t.Fatal(err)
@@ -503,7 +508,7 @@ func TestHereAndNowLink(t *testing.T) {
 					pages = append(pages, q)
 				}
 			}
-			if c.lands != start {
+			if c.lands != c.start {
 				if len(pages) < 2 || pages[1] != c.lands {
 					t.Errorf("arriving by #here-and-now requested pages %v; want %s next", pages, c.lands)
 				}
