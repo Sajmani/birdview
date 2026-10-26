@@ -1181,7 +1181,7 @@ func TestNextWelcomeLine(t *testing.T) {
 			t.Errorf("the home page still says %q", gone)
 		}
 	}
-	w := regexp.MustCompile(`(?s)<p class="welcome"><b>New here\? Try</b>(.*?)</p>`).FindStringSubmatch(body)
+	w := regexp.MustCompile(`(?s)<p class="welcome"><b>New here\?</b> Try(.*?)</p>`).FindStringSubmatch(body)
 	if w == nil {
 		t.Fatal("the home page has no New here? Try line")
 	}
