@@ -288,8 +288,10 @@ list the birds only at 8 or fewer. In headless Chrome, typing six queries (one i
 over a lowered limit, one matching nothing) shows the same count line and lists the same birds,
 with the same Add or Remove links, as the server's page for each. Choosing from all selects
 only that one, choosing again removes it, and changing a filter drops the box and Show all.
-With the threshold lowered to 200, `month=all` draws 200 and a link to all 1,041 in the same
-order; at the measured threshold, all 1,041 offer no link. Without a month the page is
+/next draws the first 100 of October's 1,006 and a link to all of them in the same order; the
+herons draw every heron with no link. The chosen order links to its reverse and back, every other
+order links to itself unreversed, reversed mass runs largest first, and reversed frequency puts
+the most recorded duck last. Without a month the page is
 no-store with no validator; with one it carries an ETag. The index does not link to /next. Every
 count-line setting is a `<details>` sharing one name, so the browser opens one at a time, and
 Reset links to /next. The phone-width and contrast checks reach /next through the crawl, open
@@ -305,6 +307,8 @@ Watched failing: 2026-10-26, by letting an empty family filter mean none ("/next
 Watched failing: 2026-10-26, by a remove link that removed nothing, and by an add link that kept the box.
 Watched failing: 2026-10-26, by a toggle that kept the find box and Show all.
 Watched failing: 2026-10-26, by ignoring all=1 ("draws 200 of 1041").
+Watched failing: 2026-10-26, by ignoring rev=1 ("reversed mass: gnwtea after gargan"), by a chosen order that never reverses back, and by other orders keeping rev.
+Watched failing: 2026-10-26, by restoring the 1,200 cap ("/next has 1006 birds; the check needs more than 1200").
 Watched failing: 2026-10-26, by caching /next without a month like any page.
 Watched failing: 2026-10-26, by anchoring each popover to its own setting with no placing script (the phone-width check: "the page is 543px wide in a 360px window").
 Watched failing: 2026-10-26, by dropping the shared name ("0 of 9 count-line settings share the name ctl").

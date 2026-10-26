@@ -59,7 +59,7 @@
 
 <h2 class="settitle">{{.Title}}</h2>
 <div class="count">
-  <span class="shown">{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}</span>
+  <span class="shown">{{if .MoreURL}}First {{len .Tiles}} of {{end}}{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}</span>
   {{range .Controls}}
   {{/* One name for all, so opening one closes the others. */}}
   <details class="ctl" name="ctl">
@@ -88,7 +88,7 @@
 <p class="empty">No birds match. <a href="{{.ResetURL}}">Reset</a>.</p>
 {{end}}
 {{if .MoreURL}}
-<p class="more"><a class="btn" href="{{.MoreURL}}">Show all {{.Count}}</a>
+<p class="more"><a class="btn" href="{{.MoreURL}}">Show all {{.Count}} birds</a>
   <span class="hint">{{.Hidden}} more, in the same order</span></p>
 {{end}}
 

@@ -40,13 +40,13 @@ import (
 // the checks can fix the month.
 var nextClock = time.Now
 
-// nextShowAll is how many birds /next draws before it offers to show the
-// rest (product.nextView): the most that paint in about a second on a
-// phone-class CPU over 5G. Measured 2026-10-26 with Lighthouse's mobile
-// throttling (4x CPU, 100 Mbps, 20 ms): about 0.6 ms a bird, 1,041 birds in
-// 0.73 s (1.05 s at 6x), 229 KiB transferred. A variable so the checks can
-// lower it below the dataset's size.
-var nextShowAll = 1200
+// nextShowAll is how many birds /next draws, the top of the order, before
+// it offers to show the rest (product.nextView): a reader's first screens,
+// not the whole set (Sameer, 2026-10-26). Speed does not force it: measured
+// 2026-10-26 with Lighthouse's mobile throttling (4x CPU, 100 Mbps, 20 ms),
+// all 1,041 birds paint in 0.73 s (1.05 s at 6x), 229 KiB transferred. A
+// variable so the checks can change it.
+var nextShowAll = 100
 
 // nextFindLimit is the most name matches the find box lists; above it, the
 // box gives only their number (product.nextView). A variable so the checks
@@ -316,7 +316,9 @@ func (s *server) nextPage(r *http.Request) nextData {
 		}
 	}
 
-	// Order. Sizes smallest first; frequency most often recorded first.
+	// Order. Sizes smallest first; frequency most often recorded first;
+	// rev=1 reverses either.
+	rev := nextReversed(q)
 	key := map[*dataset.Species]float64{}
 	for _, sp := range base {
 		if opt.Metric == view.ByFrequency {
@@ -327,7 +329,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 	}
 	sort.SliceStable(base, func(i, j int) bool {
 		if key[base[i]] != key[base[j]] {
-			return key[base[i]] < key[base[j]]
+			return (key[base[i]] < key[base[j]]) != rev
 		}
 		return base[i].ScientificName < base[j].ScientificName
 	})
@@ -636,6 +638,7 @@ func (s *server) nextBirds(w http.ResponseWriter, r *http.Request) {
 // five sizes.
 func nextOrderControl(q url.Values, opt options) nextControl {
 	oc := nextControl{Label: "Order by"}
+	rev := nextReversed(q)
 	var och []nextChoice
 	for _, m := range []struct {
 		m     view.Metric
@@ -648,13 +651,49 @@ func nextOrderControl(q url.Values, opt options) nextControl {
 		if m.m == view.ByFrequency {
 			v = ""
 		}
+		c := nextChoice{Label: m.label, URL: nextSet(q, "by", v, "rev"),
+			Title: nextDirection(m.m, false)}
 		if opt.Metric == m.m {
-			oc.Value = strings.ToLower(m.label)
+			// The chosen order is a toggle of its direction.
+			c.On = true
+			c.Label += " " + nextArrow(m.m, rev)
+			c.Title = nextDirection(m.m, rev) + "; choose again for " + nextDirection(m.m, !rev)
+			flip := "1"
+			if rev {
+				flip = ""
+			}
+			c.URL = nextSet(q, "rev", flip)
+			oc.Value = strings.ToLower(m.label) + ", " + nextDirection(m.m, rev)
 		}
-		och = append(och, nextChoice{Label: m.label, On: opt.Metric == m.m, URL: nextSet(q, "by", v)})
+		och = append(och, c)
 	}
-	oc.Note = "Frequency runs most often recorded first; sizes run smallest first."
+	oc.Note = "Choose the order again to reverse it."
 	oc.Groups = []nextChoiceGroup{{Choices: och}}
 	return oc
+}
 
+// nextReversed reports whether the address reverses the order.
+func nextReversed(q url.Values) bool { return q.Get("rev") == "1" }
+
+// nextDirection says which birds come first.
+func nextDirection(m view.Metric, rev bool) string {
+	if m == view.ByFrequency {
+		if rev {
+			return "least often recorded first"
+		}
+		return "most often recorded first"
+	}
+	if rev {
+		return "largest first"
+	}
+	return "smallest first"
+}
+
+// nextArrow says which way the chosen order runs: down when the numbers fall
+// down the page (largest or most often recorded first), up when they rise.
+func nextArrow(m view.Metric, rev bool) string {
+	if (m == view.ByFrequency) != rev {
+		return "\u2193"
+	}
+	return "\u2191"
 }

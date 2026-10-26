@@ -61,6 +61,9 @@ func tileIDs(p nextData) []string {
 func TestNextLandingIsThisMonthByFrequency(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
+	old := nextShowAll
+	nextShowAll = 5000 // every bird drawn, so every admitted bird can be looked for
+	t.Cleanup(func() { nextShowAll = old })
 	for _, c := range []struct {
 		target string
 		months []int
@@ -113,7 +116,7 @@ func TestNextLandingIsThisMonthByFrequency(t *testing.T) {
 			t.Error("the count line still has a Show setting")
 		}
 	}
-	if c := nextAt(s, "/next").Controls; len(c) == 0 || c[0].Label != "Order by" || c[0].Value != "frequency" {
+	if c := nextAt(s, "/next").Controls; len(c) == 0 || c[0].Label != "Order by" || !strings.HasPrefix(c[0].Value, "frequency") {
 		t.Errorf("the count line starts with %+v; want Order by frequency", c[0])
 	}
 }
@@ -413,22 +416,20 @@ func TestNextToggle(t *testing.T) {
 	}
 }
 
-// TestNextShowAll checks the threshold: a set larger than nextShowAll shows
-// its first birds and a link that shows them all, and that address does.
+// TestNextShowAll checks the cap: a set larger than nextShowAll draws the
+// top of its order and a link that shows them all, in the same order, and a
+// set within it draws every bird with no link.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextShowAll(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	old := nextShowAll
-	nextShowAll = 200 // below the dataset's 1,041, so the cap is exercised
-	t.Cleanup(func() { nextShowAll = old })
-	p := nextAt(s, "/next?month=all")
+	p := nextAt(s, "/next")
 	if p.Count <= nextShowAll {
-		t.Fatalf("month=all has %d birds; the check needs more than %d", p.Count, nextShowAll)
+		t.Fatalf("/next has %d birds; the check needs more than %d", p.Count, nextShowAll)
 	}
 	if len(p.Tiles) != nextShowAll || p.MoreURL == "" || p.Hidden != p.Count-nextShowAll {
-		t.Errorf("month=all draws %d of %d, hides %d, more link %q", len(p.Tiles), p.Count, p.Hidden, p.MoreURL)
+		t.Errorf("/next draws %d of %d, hides %d, more link %q", len(p.Tiles), p.Count, p.Hidden, p.MoreURL)
 	}
 	all := nextAt(s, string(p.MoreURL))
 	if len(all.Tiles) != p.Count || all.MoreURL != "" {
@@ -440,9 +441,55 @@ func TestNextShowAll(t *testing.T) {
 			break
 		}
 	}
-	nextShowAll = old
-	if p := nextAt(s, "/next?month=all"); p.MoreURL != "" {
-		t.Errorf("all %d birds offer Show all under the measured threshold", p.Count)
+	if p := nextAt(s, "/next?family=Ardeidae"); p.MoreURL != "" || len(p.Tiles) != p.Count {
+		t.Errorf("the herons, %d birds, draw %d and offer Show all %q", p.Count, len(p.Tiles), p.MoreURL)
+	}
+}
+
+// TestNextOrderReverses checks the Order by setting: the chosen order links
+// to its reverse and back, the others link to themselves in their usual
+// direction, and a reversed order runs the other way.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextOrderReverses(t *testing.T) {
+	s := newTestServerReal(t)
+	fixNextClock(t, time.October)
+	choices := func(target string) map[string]nextChoice {
+		out := map[string]nextChoice{}
+		for _, c := range nextAt(s, target).Controls[0].Groups[0].Choices {
+			out[strings.Fields(c.Label)[0]] = c
+		}
+		return out
+	}
+	c := choices("/next?by=mass&family=Anatidae")
+	if !c["Mass"].On || string(c["Mass"].URL) != "/next?by=mass&family=Anatidae&rev=1" {
+		t.Errorf("chosen Mass links to %s, want its reverse", c["Mass"].URL)
+	}
+	if string(c["Length"].URL) != "/next?by=length&family=Anatidae" {
+		t.Errorf("Length links to %s", c["Length"].URL)
+	}
+	c = choices("/next?by=mass&family=Anatidae&rev=1")
+	if string(c["Mass"].URL) != "/next?by=mass&family=Anatidae" || string(c["Length"].URL) != "/next?by=length&family=Anatidae" {
+		t.Errorf("reversed: Mass links to %s and Length to %s; want back, and Length unreversed", c["Mass"].URL, c["Length"].URL)
+	}
+	up, down := nextAt(s, "/next?by=mass&family=Anatidae"), nextAt(s, "/next?by=mass&family=Anatidae&rev=1")
+	if len(up.Tiles) < 5 || len(up.Tiles) != len(down.Tiles) {
+		t.Fatalf("%d and %d ducks", len(up.Tiles), len(down.Tiles))
+	}
+	for i := 1; i < len(down.Tiles); i++ {
+		if down.Tiles[i].S.Mass.Value > down.Tiles[i-1].S.Mass.Value {
+			t.Errorf("reversed mass: %s after %s", down.Tiles[i].S.ID, down.Tiles[i-1].S.ID)
+		}
+	}
+	if up.Tiles[0].S == down.Tiles[0].S {
+		t.Errorf("%s leads both directions", up.Tiles[0].S.ID)
+	}
+	fwd, rev := nextAt(s, "/next?family=Anatidae"), nextAt(s, "/next?family=Anatidae&rev=1")
+	if fwd.Tiles[0].S != rev.Tiles[len(rev.Tiles)-1].S {
+		t.Errorf("the most recorded duck, %s, is not at the end of the reversed order", fwd.Tiles[0].S.ID)
+	}
+	if v := nextAt(s, "/next?rev=1").Controls[0].Value; v != "frequency, least often recorded first" {
+		t.Errorf("reversed frequency reads %q", v)
 	}
 }
 
