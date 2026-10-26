@@ -562,6 +562,9 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 .reset, .reset:visited { background: #3f1d1d; border: 1px solid #8b3a3a; border-radius: 4px;
   padding: 1px 7px; color: var(--ink); text-decoration: none; font-weight: 600; }
 .reset:hover { border-color: #f87171; }
+/* Clear sits beside Reset, in the settings' blue-gray rather than Reset's red. */
+.reset.clear, .reset.clear:visited { background: #1e3a5f; border-color: #3b6ea5; }
+.reset.clear:hover { border-color: var(--accent); }
 .finds ul { list-style: none; padding: 0; margin: 8px 0; }
 .finds li { margin: 4px 0; }
 .finds .found { margin: 6px 0 0; color: var(--dim); }

@@ -59,7 +59,7 @@
 
 <h2 class="settitle">{{.Title}}</h2>
 <div class="count">
-  <span class="shown">{{if .MoreURL}}First {{len .Tiles}} of {{end}}{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}</span>
+  <span class="shown">{{if .MoreURL}}First {{.First}} of {{end}}{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{with .AddedPast}}, and {{.}} added{{end}}</span>
   {{with .MoreURL}}<a class="showall" href="{{.}}">Show all</a>{{end}}
   {{range .Controls}}
   {{/* One name for all, so opening one closes the others. */}}
@@ -67,7 +67,13 @@
     <summary><b>{{.Label}}</b> {{.Value}}</summary>
     <div class="pop">
       {{with .Note}}<p class="hint">{{.}}</p>{{end}}
-      {{with .AllURL}}<p><a class="btn" href="{{.}}">All</a></p>{{end}}
+      {{if or .AllURL .HereURL}}<p>{{with .AllURL}}<a class="btn" href="{{.}}">All</a>{{end}}
+        {{if .HereURL}}{{/* here.js finds the reader's region in the browser and
+             asks for this address with it, as choosing it by hand would
+             (product.hereSelectsLocalRegion, product.locationStaysInBrowser). */}}<button type="button" class="btn here" aria-disabled="true"
+          data-template="{{.HereURL}}" data-boundaries="{{.Boundaries}}"
+          title="Here needs JavaScript and permission to use your location">Here</button>
+        <span class="herestatus" role="status" aria-live="polite"></span>{{end}}</p>{{end}}
       {{range .Groups}}
       <div class="popgroup">
         {{with .Name}}<span class="lbl">{{.}}</span>{{end}}
@@ -78,6 +84,7 @@
     </div>
   </details>
   {{end}}
+  <a class="reset clear" href="{{.ClearURL}}" title="{{if .Cleared}}Show the birds the settings choose, with yours{{else}}Show only birds you add by name{{end}}">{{if .Cleared}}Undo clear{{else}}Clear{{end}}</a>
   <a class="reset" href="{{.ResetURL}}" title="Back to this month's birds, most often recorded first">Reset</a>
 </div>
 
@@ -85,6 +92,8 @@
 <div class="tiles">
   {{range .Tiles}}{{template "tile" .}}{{end}}
 </div>
+{{else if .Cleared}}
+<p class="empty">No birds yet. Find a bird above to add it.</p>
 {{else}}
 <p class="empty">No birds match. <a href="{{.ResetURL}}">Reset</a>.</p>
 {{end}}
@@ -100,6 +109,7 @@
   see where each number comes from.</p>
 </footer>
 <script>{{.FindScript}}</script>
+<script>{{.HereScript}}</script>
 <script>
 /* Places an opened setting's choices under it, moved left only as far as
    keeps them on the screen, and closes them on a tap elsewhere or Escape,

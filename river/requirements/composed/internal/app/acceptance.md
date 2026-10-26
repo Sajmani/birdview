@@ -296,7 +296,13 @@ the most recorded duck last. Without a month the page is
 no-store with no validator; with one it carries an ETag. The index does not link to /next. Every
 count-line setting is a `<details>` sharing one name, so the browser opens one at a time, and
 Reset links to /next. The phone-width and contrast checks reach /next through the crawl, open
-every setting at once, and measure after the placing script has run.
+every setting at once, and measure after the placing script has run. Adding the October set's
+least recorded bird, past the first 100, draws it and the count line says one was added. Clear
+keeps the order, drops removals, and draws nothing; with two added it draws those two by mass,
+removing one leaves the other, and Undo clear brings the October birds back with both. Here,
+filled with FL, is the page with only Florida chosen, every other setting kept, and the cleared
+view left, and the page carries the button, its status, and here.js. Now is the first month
+choice, chosen with no month named, and links to no month named.
 
 **Run:** `go test ./cmd/birdview/ -run 'TestNext'` (the browser check gates where Chrome is installed)
 **Status: verified 2026-10-26, passing.**
@@ -310,6 +316,9 @@ Watched failing: 2026-10-26, by a toggle that kept the find box and Show all.
 Watched failing: 2026-10-26, by ignoring all=1 ("draws 200 of 1041").
 Watched failing: 2026-10-26, by ignoring rev=1 ("reversed mass: gnwtea after gargan"), by a chosen order that never reverses back, and by other orders keeping rev.
 Watched failing: 2026-10-26, by dropping Show all from the count line.
+Watched failing: 2026-10-26, by capping added birds with the rest ("after adding tersan from past the first 100, it is not drawn"), and by a toggle that only undid a removal.
+Watched failing: 2026-10-26, by Clear that cleared nothing ("cleared: 100 drawn of 1006"), and by a filter that kept the cleared view.
+Watched failing: 2026-10-26, by Here keeping clear=1, by renaming its button, and by dropping Now.
 Watched failing: 2026-10-26, by restoring the 1,200 cap ("/next has 1006 birds; the check needs more than 1200").
 Watched failing: 2026-10-26, by caching /next without a month like any page.
 Watched failing: 2026-10-26, by anchoring each popover to its own setting with no placing script (the phone-width check: "the page is 543px wide in a 360px window").

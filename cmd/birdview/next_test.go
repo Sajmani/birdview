@@ -410,6 +410,7 @@ func TestNextToggle(t *testing.T) {
 		{"region=ME", "ME", "/next"},
 		{"region=", "ME", "/next?region=ME"},
 		{"region=FL&find=hawk&all=1&by=mass", "FL", "/next?by=mass"},
+		{"clear=1&include=blujay", "FL", "/next?include=blujay&region=FL"},
 	} {
 		if got := string(nextToggle(q(c.from), "region", c.v)); got != c.want {
 			t.Errorf("toggling %s from %q = %s, want %s", c.v, c.from, got, c.want)
@@ -548,5 +549,112 @@ func TestNextControlsOpenOneAtATime(t *testing.T) {
 	}
 	if !strings.Contains(body, `<a class="reset" href="/next"`) || !strings.Contains(body, ">Reset</a>") {
 		t.Error("no Reset control linking to /next")
+	}
+}
+
+// TestNextAddedPastTheFirstIsDrawn checks that a bird added by name is drawn
+// even when the order puts it past the first nextShowAll: the find box
+// offers to add it, adding it draws it and says so on the count line, and
+// the birds the filters chose are drawn as before.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
+	s := newTestServerReal(t)
+	fixNextClock(t, time.October)
+	before := nextAt(s, "/next")
+	all := nextAt(s, "/next?all=1")
+	last := all.Tiles[len(all.Tiles)-1].S // the least recorded: far past the first
+	if hasTile(before, last.ID) {
+		t.Fatalf("%s is drawn already; the check needs a bird past the first %d", last.ID, nextShowAll)
+	}
+	m := nextAt(s, "/next?find="+url.QueryEscape(last.ScientificName)).Matches
+	if len(m) != 1 || m[0].Shown {
+		t.Fatalf("finding %s, a bird not drawn, lists %+v; want it offered to add", last.ScientificName, m)
+	}
+	after := nextAt(s, follow(t, s, string(m[0].URL)))
+	if !hasTile(after, last.ID) {
+		t.Errorf("after adding %s from past the first %d, it is not drawn", last.ID, nextShowAll)
+	}
+	// It was one of the hidden birds, so one fewer is hidden.
+	if after.AddedPast != 1 || after.First != nextShowAll || after.Hidden != before.Hidden-1 {
+		t.Errorf("after adding: first %d, added past it %d, hidden %d (was %d)", after.First, after.AddedPast, after.Hidden, before.Hidden)
+	}
+	if len(after.Tiles) != len(before.Tiles)+1 {
+		t.Errorf("after adding one bird, %d drawn (was %d)", len(after.Tiles), len(before.Tiles))
+	}
+}
+
+// TestNextClear checks Clear: it empties the set the settings choose, so
+// only birds added by name are drawn; adding and removing then works on
+// those alone; Undo clear brings the settings' birds back with the added
+// ones; and choosing a filter leaves the cleared view.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextClear(t *testing.T) {
+	s := newTestServerReal(t)
+	fixNextClock(t, time.October)
+	start := nextAt(s, "/next?by=mass&exclude=blujay")
+	if string(start.ClearURL) != "/next?by=mass&clear=1" {
+		t.Errorf("Clear links to %s, want the order kept and the removals dropped", start.ClearURL)
+	}
+	empty := nextAt(s, string(start.ClearURL))
+	if !empty.Cleared || len(empty.Tiles) != 0 || empty.Count != 0 || empty.Title != "Birds you chose" {
+		t.Errorf("cleared: %d drawn of %d, title %q", len(empty.Tiles), empty.Count, empty.Title)
+	}
+	two := "/next?by=mass&clear=1&include=amecro&include=annhum"
+	p := nextAt(s, two)
+	if got := tileIDs(p); !slices.Equal(got, []string{"annhum", "amecro"}) {
+		t.Errorf("cleared with two added draws %v, want annhum and amecro by mass", got)
+	}
+	if back := follow(t, s, two+"&bird=amecro"); back != "/next?by=mass&clear=1&include=annhum" {
+		t.Errorf("removing one of two goes to %s", back)
+	}
+	undo := nextAt(s, string(p.ClearURL))
+	if undo.Cleared || !hasTile(undo, "amecro") || !hasTile(undo, "annhum") || undo.Count < 500 {
+		t.Errorf("Undo clear (%s): cleared %t, %d birds", p.ClearURL, undo.Cleared, undo.Count)
+	}
+}
+
+// TestNextHereAndNow checks the Region setting's Here and the Month
+// setting's Now. Here's address, filled with a region, is the page with only
+// that region chosen, every other setting kept, and the cleared view left;
+// the page carries here.js and the boundary file to find the region with.
+// Now is the first month choice, chosen when no month is named, and links
+// to no month named.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextHereAndNow(t *testing.T) {
+	s := newTestServer(t)
+	fixNextClock(t, time.October)
+	p := nextAt(s, "/next?by=mass&region=CA&clear=1&month=May")
+	var region, mon *nextControl
+	for i := range p.Controls {
+		switch p.Controls[i].Label {
+		case "Region":
+			region = &p.Controls[i]
+		case "Month":
+			mon = &p.Controls[i]
+		}
+	}
+	if region == nil || mon == nil {
+		t.Fatal("no Region or Month setting")
+	}
+	if got := strings.Replace(region.HereURL, hereSlot, "FL", 1); got != "/next?by=mass&month=May&region=FL" {
+		t.Errorf("Here, filled with FL, is %s", got)
+	}
+	if region.Boundaries != s.boundaryURL {
+		t.Errorf("Here looks regions up in %q, want %q", region.Boundaries, s.boundaryURL)
+	}
+	_, body := get(t, s, "/next")
+	if !strings.Contains(body, `class="btn here"`) || !strings.Contains(body, `class="herestatus"`) ||
+		!strings.Contains(body, string(s.hereJS)[:200]) {
+		t.Error("/next has no Here button, status, or here.js")
+	}
+	now := mon.Groups[0].Choices[0]
+	if now.Label != "Now" || now.On || string(now.URL) != "/next?by=mass&region=CA" {
+		t.Errorf("with May named, the first month choice is %+v; want Now, off, linking to no month", now)
+	}
+	if now := nextAt(s, "/next").Controls[1].Groups[0].Choices[0]; now.Label != "Now" || !now.On {
+		t.Errorf("with no month named, Now is %+v; want it chosen", now)
 	}
 }

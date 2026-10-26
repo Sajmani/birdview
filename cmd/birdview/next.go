@@ -76,6 +76,9 @@ type nextControl struct {
 	Groups []nextChoiceGroup
 	// AllURL returns this setting to all; empty when it already is.
 	AllURL template.URL
+	// HereURL is this address with the region a placeholder for here.js to
+	// fill, and Boundaries the file it looks the region up in; Region only.
+	HereURL, Boundaries string
 }
 
 // nextMatch is one bird the find box found, with the link that adds it to
@@ -93,9 +96,17 @@ type nextData struct {
 	Total    int
 	Controls []nextControl
 	Tiles    []tile
-	// MoreURL shows every bird in the set; empty when all are shown.
-	MoreURL template.URL
-	Hidden  int
+	// MoreURL shows every bird in the set; empty when all are shown. First
+	// is how many the filters chose that are drawn, Hidden how many are not,
+	// and AddedPast how many added birds are drawn from past the first.
+	MoreURL   template.URL
+	Hidden    int
+	First     int
+	AddedPast int
+	// Cleared is set when only birds added by name are shown; ClearURL
+	// clears the set, or, once cleared, brings the filters' birds back.
+	Cleared  bool
+	ClearURL template.URL
 	// Find is the find box's text and Found how many birds it matches;
 	// Matches lists them when there are nextFindLimit or fewer.
 	Find    string
@@ -110,12 +121,12 @@ type nextData struct {
 	BirdsURL   string
 	FindLimit  int
 	FindScript template.JS
+	HereScript template.JS
 	ResetURL   template.URL
 
-	// in and base are the birds in the set, and in it before any added or
-	// removed by name; for the bird= toggle.
-	in, base map[string]bool
-	included map[string]bool
+	// drawn are the birds drawn on the page, and included those added by
+	// name; for the bird= toggle and the find box's labels.
+	drawn, included map[string]bool
 }
 
 // nextURL is /next with q.
@@ -163,6 +174,7 @@ func nextToggle(q url.Values, key, v string) template.URL {
 	}
 	q.Del("find")
 	q.Del("all")
+	q.Del("clear")
 	return nextURL(q)
 }
 
@@ -247,20 +259,22 @@ func (s *server) nextToggleBird(r *http.Request) string {
 			}
 		}
 	}
-	anchor := ""
 	switch {
-	case page.in[id] && page.included[id]:
+	case page.drawn[id] && page.included[id]:
 		without("include")
-	case page.in[id]:
+	case page.drawn[id]:
 		q.Add("exclude", id)
 	default:
+		// Not drawn: removed, or past the first birds, or outside the
+		// filters. Undoing a removal may be enough; if it is not, add it.
 		without("exclude")
-		if !page.base[id] {
+		r2.URL.RawQuery = q.Encode()
+		if !s.nextPage(r2).drawn[id] {
 			q.Add("include", id)
 		}
-		anchor = "#" + tileAnchor(id)
+		return string(nextURL(q)) + "#" + tileAnchor(id)
 	}
-	return string(nextURL(q)) + anchor
+	return string(nextURL(q))
 }
 
 // nextPage builds /next for the address r carries.
@@ -276,7 +290,13 @@ func (s *server) nextPage(r *http.Request) nextData {
 		opt.Months = map[int]bool{nowMonth: true}
 	}
 
-	base, _ := s.filterSpecies(opt)
+	// Clear empties the set the filters choose, so only birds added by
+	// name are shown: a comparison of the reader's own picks.
+	cleared := q.Get("clear") == "1"
+	var base []*dataset.Species
+	if !cleared {
+		base, _ = s.filterSpecies(opt)
+	}
 	share := func(sp *dataset.Species) float64 {
 		num, den := shareIn(sp, s.ds, opt)
 		if den == 0 {
@@ -335,7 +355,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 	})
 
 	page := nextData{Feedback: s.feedback, Count: len(base), Total: len(s.ds.Species),
-		ResetURL: "/next", in: in, base: baseIn, included: added, FindLimit: nextFindLimit,
+		ResetURL: "/next", included: added, FindLimit: nextFindLimit,
 		FindScript: s.nextFindJS}
 	tq := cloneValues(q)
 	tq.Del("find")
@@ -348,18 +368,48 @@ func (s *server) nextPage(r *http.Request) nextData {
 	if opt.Locale == dataset.LocaleWorld {
 		page.BirdsURL += "?names=" + string(dataset.LocaleWorld)
 	}
-	ids := make([]string, 0, len(base))
-	for _, sp := range base {
+	toggle := func(id string) template.URL { return template.URL(page.ToggleURL + url.QueryEscape(id)) }
+	// The first nextShowAll birds the filters chose, and every bird added
+	// by name wherever it falls in the order: a bird just added must show.
+	shown := base
+	if q.Get("all") != "1" {
+		shown = nil
+		chosen := 0
+		for _, sp := range base {
+			switch {
+			case added[sp.ID]:
+				shown = append(shown, sp)
+				if chosen >= nextShowAll {
+					page.AddedPast++
+				}
+			case chosen < nextShowAll:
+				shown = append(shown, sp)
+				chosen++
+			default:
+				chosen++
+				page.Hidden++
+			}
+		}
+		if page.Hidden > 0 {
+			page.MoreURL = nextSet(q, "all", "1")
+			page.First = nextShowAll
+		}
+	}
+	page.drawn = map[string]bool{}
+	ids := make([]string, 0, len(shown))
+	for _, sp := range shown {
+		page.drawn[sp.ID] = true
 		ids = append(ids, sp.ID)
 	}
 	sort.Strings(ids)
 	page.ShownIDs = strings.Join(ids, " ")
-	toggle := func(id string) template.URL { return template.URL(page.ToggleURL + url.QueryEscape(id)) }
-	shown := base
-	if len(shown) > nextShowAll && q.Get("all") != "1" {
-		shown = shown[:nextShowAll]
-		page.Hidden = len(base) - nextShowAll
-		page.MoreURL = nextSet(q, "all", "1")
+	page.Cleared = cleared
+	if cleared {
+		page.ClearURL = nextSet(q, "clear", "", "all")
+	} else {
+		cq := cloneValues(q)
+		cq.Del("exclude")
+		page.ClearURL = nextSet(cq, "clear", "1", "all", "find")
 	}
 
 	// One scale: every bird shown is drawn to the longest and widest of them.
@@ -405,7 +455,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 		if len(found) <= nextFindLimit {
 			for _, sp := range found {
 				page.Matches = append(page.Matches, nextMatch{ID: sp.ID, Name: sp.Name(opt.Locale),
-					Scientific: sp.ScientificName, Shown: in[sp.ID], URL: toggle(sp.ID)})
+					Scientific: sp.ScientificName, Shown: page.drawn[sp.ID], URL: toggle(sp.ID)})
 			}
 		}
 	}
@@ -419,7 +469,22 @@ func (s *server) nextPage(r *http.Request) nextData {
 	}
 
 	page.Title = s.nextTitle(opt)
+	if cleared {
+		page.Title = "Birds you chose"
+	}
 	page.Controls = s.nextControls(q, opt, defaultMonth, nowMonth)
+	for i := range page.Controls {
+		if page.Controls[i].Label == "Region" {
+			hq := cloneValues(q)
+			for _, k := range []string{"region", "all", "find", "clear"} {
+				hq.Del(k)
+			}
+			hq.Set("region", hereSlot)
+			page.Controls[i].HereURL = strings.Replace(string(nextURL(hq)), url.QueryEscape(hereSlot), hereSlot, 1)
+			page.Controls[i].Boundaries = s.boundaryURL
+		}
+	}
+	page.HereScript = s.hereJS
 	return page
 }
 
@@ -519,10 +584,13 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 	}
 	if defaultMonth {
 		mc.Value = month.Full[nowMonth] + " (now)"
-		mch[nowMonth].On = true
 	}
+	// Now is no month named: this month, whichever it is when the page is
+	// loaded, so a shared address keeps meaning the current month.
+	mch = append([]nextChoice{{Label: "Now", Title: "This month, " + month.Full[nowMonth] + ", whenever the page is loaded",
+		On: defaultMonth, URL: nextSet(q, "month", "", "all", "find", "clear")}}, mch...)
 	if opt.HasMonths {
-		mc.AllURL = nextSet(q, "month", "all", "all", "find")
+		mc.AllURL = nextSet(q, "month", "all", "all", "find", "clear")
 	}
 	mc.Groups = []nextChoiceGroup{{Choices: mch}}
 	out = append(out, mc)
@@ -530,7 +598,7 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 	rc := nextControl{Label: "Region", Value: "everywhere"}
 	if opt.HasRegions {
 		rc.Value = nextList(s.regionNames(opt.Regions))
-		rc.AllURL = nextSet(q, "region", "", "all", "find")
+		rc.AllURL = nextSet(q, "region", "", "all", "find", "clear")
 	}
 	g := region.Groupings[0]
 	for _, z := range g.Zones {
@@ -565,7 +633,7 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 	}
 	if opt.HasSelection {
 		fc.Value = nextList(fnames)
-		fc.AllURL = nextSet(q, "family", "", "all", "find")
+		fc.AllURL = nextSet(q, "family", "", "all", "find", "clear")
 	}
 	out = append(out, fc)
 
@@ -583,7 +651,7 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 		}
 		if has {
 			c.Value = nextList(names)
-			c.AllURL = nextSet(q, param, "", "all", "find")
+			c.AllURL = nextSet(q, param, "", "all", "find", "clear")
 		}
 		c.Groups = []nextChoiceGroup{{Choices: ch}}
 		return c

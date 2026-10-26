@@ -758,16 +758,21 @@ is unchanged and does not link to it.
 - **The set.** With no filter, it is every bird recorded in the month, most often recorded first.
   The month is the server's own unless the address names some; `month=all` is every month. Every
   filter (family, region, month, habitat, diet) narrows the set, and birds added or removed by
-  name change it.
+  name change it. **Clear** empties the set the settings choose, so only birds added by name are
+  drawn, for a comparison of the reader's own picks; **Undo clear** brings the settings' birds
+  back, and choosing a filter leaves the cleared view.
 - **Adding and removing a bird.** A box above the set finds birds by name as the search box does
   ([searchBox](filtering.md#searchbox)). As the reader types, it says how many birds match, and
-  once there are 8 or fewer it lists them. Each listed bird has a link that adds it to the set
-  (`include=<id>`) or, if it is already there, removes it (`exclude=<id>` for a bird the filters
-  chose). An added bird's tile also has a link that removes it. Without JavaScript, Enter does
+  once there are 8 or fewer it lists them. Each listed bird has a link that adds it (`include=<id>`)
+  or, if it is drawn, removes it (`exclude=<id>` for a bird the filters chose). An added bird is
+  always drawn, even past the first 100, and the count line says how many are. An added bird's tile also has a link that removes it. Without JavaScript, Enter does
   the same.
 - **Filters are the count line.** The line under the box names each setting. Each is a control
   that opens the choices for that one setting directly under itself, as a `<details>`, so it
-  works without JavaScript. Only one is open at a time, and a tap elsewhere closes it. A **Reset**
+  works without JavaScript. Only one is open at a time, and a tap elsewhere closes it. Region
+  offers **Here**, which finds the reader's region in the browser as on the index
+  ([hereSelectsLocalRegion](filtering.md#hereselectslocalregion)); Month offers **Now**, which
+  names no month, so the page shows whatever month it is loaded in. A **Reset**
   control, colored apart from the settings, returns to the landing set. Choosing one option selects only it; choosing more adds them; choosing every
   selected option again returns to all. Nothing selected means all.
 - **One scale.** Every bird shown is drawn to the scale of the longest. Its length, wingspan, and
