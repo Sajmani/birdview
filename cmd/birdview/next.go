@@ -147,10 +147,11 @@ type nextData struct {
 	// PinnedOnly is set when only pinned birds are shown (show=pinned).
 	PinnedOnly bool
 	// HereNowURL is the welcome line's "the birds around you now": this
-	// address, its find box closed, with #here-and-now, which here.js
+	// address with #here-and-now, which here.js
 	// answers by going to HereNowTemplate with the reader's region filled
-	// in. The template keeps every setting but the region, which it
-	// replaces, and the month, which it sets to Now by naming none.
+	// in. The template replaces the region, sets the month to Now by naming
+	// none, and leaves Pinned only, since the birds around the reader are
+	// not pins; every other parameter is kept.
 	HereNowURL      template.URL
 	HereNowTemplate string
 	// Pinned lists the pinned birds in alphabetical order, each with its
@@ -206,8 +207,8 @@ func nextValues(q url.Values, key string) []string {
 // nextToggle is the address with value v of key toggled under
 // product.nextView's rule: nothing selected is all, so choosing from all
 // selects only v; choosing a selected value removes it, and removing the last
-// returns to all. Changing which birds are shown also drops the find box,
-// which belonged to the set before; the cap is kept.
+// returns to all. Every other parameter is kept: Show, the pins, and the
+// find box's text included.
 func nextToggle(q url.Values, key, v string) template.URL {
 	q = cloneValues(q)
 	cur := nextValues(q, key)
@@ -227,14 +228,12 @@ func nextToggle(q url.Values, key, v string) template.URL {
 	for _, c := range next {
 		q.Add(key, c)
 	}
-	q.Del("find")
-	leavePinnedOnly(q)
 	return nextURL(q)
 }
 
-// leavePinnedOnly drops show=pinned and keeps any other show: choosing a
-// setting returns from the pinned birds to the birds the settings match,
-// keeping how many of them are shown.
+// leavePinnedOnly drops show=pinned and keeps any other show: for the two
+// transitions that mean to leave the pinned birds, Clear pins (nothing is
+// pinned after it) and the birds around you now (which are not pins).
 func leavePinnedOnly(q url.Values) {
 	if q.Get("show") == "pinned" {
 		q.Del("show")
@@ -251,7 +250,7 @@ func nextSet(q url.Values, key, v string, drop ...string) template.URL {
 	}
 	for _, d := range drop {
 		if d == "show" {
-			leavePinnedOnly(q) // a count or all is kept
+			leavePinnedOnly(q) // only show=pinned; a count or all is kept
 			continue
 		}
 		q.Del(d)
@@ -341,6 +340,19 @@ func (s *server) nextToggleBird(r *http.Request) string {
 		return string(nextURL(q))
 	}
 	return string(nextPin(q, id))
+}
+
+// nextDetailLink is a bird's species page with every parameter of the home
+// page, so its "back to all birds" returns to the same page. The classic
+// view drops the family from these links to keep its page small; the home
+// page draws a hundred tiles, not a thousand, and keeps it.
+func nextDetailLink(q url.Values, id string) template.URL {
+	q = cloneValues(q)
+	q.Del("bird")
+	if len(q) == 0 {
+		return template.URL("/species/" + id)
+	}
+	return template.URL("/species/" + id + "?" + q.Encode())
 }
 
 // nextPin is the address with bird id pinned, or unpinned if it was. The
@@ -459,7 +471,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 	page.Show, page.Cap = mode, strconv.Itoa(capN)
 	page.ShowValue = map[string]string{"first": "first " + page.Cap, "all": "all", "pinned": "pinned only"}[mode]
 	for _, k := range sortedKeys(q) {
-		if k == "show" || k == "find" {
+		if k == "show" || k == "bird" {
 			continue
 		}
 		for _, v := range q[k] {
@@ -467,7 +479,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 		}
 	}
 	page.ShowAllURL = nextSet(q, "show", "all")
-	page.ShowPinnedURL = nextSet(q, "show", "pinned", "find")
+	page.ShowPinnedURL = nextSet(q, "show", "pinned")
 	page.ShowFirstURL = nextSet(q, "show", "")
 	page.Matching = len(matched)
 	inMatched := map[string]bool{}
@@ -531,7 +543,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 	})
 	if len(added) > 0 {
 		// Showing only the pinned birds means nothing once none are.
-		page.ClearPinsURL = nextSet(q, "pin", "", "show", "find")
+		page.ClearPinsURL = nextSet(q, "pin", "", "show")
 	}
 	page.PinnedOnly = pinnedOnly
 
@@ -554,7 +566,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 		t := tile{
 			S: sp, Name: sp.Name(opt.Locale), Geom: g, Box: tileBox,
 			TopOffset:   (tileBox.H - g.TotalHeight()) / 2,
-			DetailURL:   detailLink(r, sp.ID),
+			DetailURL:   nextDetailLink(q, sp.ID),
 			Anchor:      tileAnchor(sp.ID),
 			MassCube:    newMassCube(sp, tileBox.H, g.PxPerMm, ""),
 			WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
@@ -608,15 +620,12 @@ func (s *server) nextPage(r *http.Request) nextData {
 		if page.Controls[i].Label == "Region" {
 			hq := cloneValues(q)
 			hq.Del("region")
-			hq.Del("find")
-			leavePinnedOnly(hq)
 			hq.Set("region", hereSlot)
 			page.Controls[i].HereURL = strings.Replace(string(nextURL(hq)), url.QueryEscape(hereSlot), hereSlot, 1)
 			page.Controls[i].Boundaries = s.boundaryURL
 		}
 	}
 	hn := cloneValues(q)
-	hn.Del("find")
 	hn.Del("bird")
 	page.HereNowURL = nextURL(hn) + "#here-and-now"
 	hn.Del("region")
@@ -710,7 +719,7 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 	for m := 0; m < month.Count; m++ {
 		on := opt.HasMonths && opt.Months[m]
 		if on {
-			ms = append(ms, month.Full[m])
+			ms = append(ms, month.Abbrev[m])
 		}
 		base := mq
 		if defaultMonth {
@@ -723,24 +732,24 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 		mc.Value = nextList(ms)
 	}
 	if defaultMonth {
-		mc.Value = month.Full[nowMonth] + " (now)"
+		mc.Value = month.Abbrev[nowMonth] + " (now)"
 	}
 	// All is a choice like the rest rather than the setting's All link, so
 	// every option sits on the one line.
 	allMonths := nextChoice{Label: "All", Title: "Every month", On: !opt.HasMonths,
-		URL: nextSet(q, "month", "all", "find", "show")}
+		URL: nextSet(q, "month", "all")}
 	// Now is no month named: this month, whichever it is when the page is
 	// loaded, so a shared address keeps meaning the current month.
 	mch[0].Sep = true
 	mch = append([]nextChoice{allMonths, {Label: "Now", Title: "This month, " + month.Full[nowMonth] + ", whenever the page is loaded",
-		On: defaultMonth, URL: nextSet(q, "month", "", "find", "show")}}, mch...)
+		On: defaultMonth, URL: nextSet(q, "month", "")}}, mch...)
 	mc.Groups = []nextChoiceGroup{{Choices: mch, OneLine: true}}
 	out = append(out, mc)
 
-	rc := nextControl{Label: "Region", Value: "everywhere"}
+	rc := nextControl{Label: "Region", Value: "all"}
 	if opt.HasRegions {
 		rc.Value = nextList(s.regionNames(opt.Regions))
-		rc.AllURL = nextSet(q, "region", "", "find", "show")
+		rc.AllURL = nextSet(q, "region", "")
 	}
 	g := region.Groupings[0]
 	for _, z := range g.Zones {
@@ -775,7 +784,7 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 	}
 	if opt.HasSelection {
 		fc.Value = nextList(fnames)
-		fc.AllURL = nextSet(q, "family", "", "find", "show")
+		fc.AllURL = nextSet(q, "family", "")
 	}
 	out = append(out, fc)
 
@@ -793,7 +802,7 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 		}
 		if has {
 			c.Value = nextList(names)
-			c.AllURL = nextSet(q, param, "", "find", "show")
+			c.AllURL = nextSet(q, param, "")
 		}
 		c.Groups = []nextChoiceGroup{{Choices: ch}}
 		return c
@@ -802,9 +811,9 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 		traitCtl("Habitat", "habitat", trait.Habitats, opt.Habitats, opt.HasHabitats),
 		traitCtl("Diet", "niche", trait.Niches, opt.Niches, opt.HasNiches))
 
-	uc := nextControl{Label: "Units", Value: "inches and ounces"}
+	uc := nextControl{Label: "Units", Value: "imperial"}
 	if opt.Metric3 {
-		uc.Value = "centimeters and grams"
+		uc.Value = "metric"
 	}
 	uc.Groups = []nextChoiceGroup{{Choices: []nextChoice{
 		{Label: "Inches and ounces", On: !opt.Metric3, URL: nextSet(q, "units", "")},
@@ -812,7 +821,7 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 	}}}
 	out = append(out, uc)
 
-	nc := nextControl{Label: "Names", Value: "North American"}
+	nc := nextControl{Label: "Names", Value: "North Amer"}
 	world := opt.Locale == dataset.LocaleWorld
 	if world {
 		nc.Value = "world"
@@ -873,7 +882,7 @@ func nextOrderControl(q url.Values, opt options) nextControl {
 				flip = ""
 			}
 			c.URL = nextSet(q, "rev", flip)
-			oc.Value = strings.ToLower(m.label) + ", " + nextDirection(m.m, rev)
+			oc.Value = strings.ToLower(m.label) + " " + nextArrow(m.m, rev)
 		}
 		och = append(och, c)
 	}

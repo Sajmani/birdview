@@ -759,9 +759,9 @@ and not linked from the home page except in its credits. A species page's "back 
 goes to the home page with the same settings. Elsewhere in these requirements, "the index" names
 the classic view.
 
-- **The header.** One line says what BirdView draws, then "Click a bird for its numbers and
-  sources" and **How to read a drawing**; what solid and dashed mean is left to that guide and to
-  each species page. Under it, **New here? Try** offers the classic view's things to try, its
+- **The header.** One line says what BirdView draws, its "stick figures" linking to the guide to
+  reading a drawing, then "Click a bird for its numbers and sources"; what solid and dashed mean
+  is left to that guide and to each species page. Under it, **New here? Try** offers the classic view's things to try, its
   comparisons made with pins: the birds around you now (this address with `#here-and-now`: the
   reader's region found in the browser replaces the region, the month is set to Now, and every
   other setting is kept), small, medium, large, and huge birds (six pinned and shown
@@ -809,12 +809,21 @@ the classic view.
   (`show=all`), N counting them with the pins. **Pinned only (k)** draws only the pinned birds
   (`show=pinned`), for a comparison of the reader's own picks. Wherever unpinned birds are left
   out (after the first, between pinned birds past them, or after the last pinned bird), a gap row
-  says how many are hidden there and links to `show=all`. Choosing a setting leaves Pinned only and
-  keeps a count or All; Reset returns to the default. The count line is two rows: what is drawn
+  says how many are hidden there and links to `show=all`. Choosing a setting keeps Show as it is,
+  Pinned only included; Reset returns to the default. The count line is two rows: what is drawn
   ("First 100 of 1006 birds, plus 2 pins", "All 1006 birds", "2 pinned birds") with Show, Clear
   pins, and Reset; then Order by through Names. 100 is a reader's first
   screens, not a limit of speed: all 1,041 birds paint in 0.73 s on a phone-class CPU over 5G
   (measured 2026-10-26 under Lighthouse's mobile throttling, 229 KiB).
+- **Every transition keeps what it does not change.** A setting's choice changes only that
+  setting (Order by, also its direction); a pin, the pins; Show, show. Every other parameter is
+  kept: Show, the pins, and the find box's text included. Only these drop more, on purpose:
+  Reset keeps only the pins; Clear pins also leaves Pinned only; the find list's × drops its text;
+  the birds around you now replaces the region, sets the month to Now, and leaves Pinned only. A
+  tile's species page carries every parameter, so "back to all birds" returns to the same page.
+- **Short summaries.** Each setting's summary is brief: the order's name and an arrow (↓ largest
+  or most often recorded first, ↑ the reverse), months by three letters ("Oct (now)"), "all" for
+  every region, "imperial" or "metric", "North Amer" or "world".
 - **Stateless.** Every view is its address. The home page with no month changes with the month, so it is
   not stored or revalidated, as `/now` is not.
 

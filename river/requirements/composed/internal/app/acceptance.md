@@ -298,7 +298,14 @@ setting but show and the find box, beside All with the count the settings match 
 (2), the chosen one marked, and its summary names the choice. The count line is two rows: what is
 drawn, Show, Clear pins, and Reset, then Order by through Names; it has no Show all of its own.
 `show=100`, `show=`, `show=0`, `show=-3`, and `show=zero` redirect to the address without show;
-`show=50`, `show=all`, and `show=pinned` do not. The header ends with Click a bird and How to read a drawing and has no
+`show=50`, `show=all`, and `show=pinned` do not. From an address setting every parameter, under Pinned only and under a
+count, every link on the page changes only its own setting (Order by, also rev), none but × and
+Reset drops the find box's text, Reset keeps only the pins, Clear pins drops them (and Pinned
+only), × drops the text, the forms send every parameter but their own, Here replaces only the
+region, the birds around you now replaces the region and month (and leaves Pinned only), and a
+tile's species page and its way back keep every parameter; choosing Nov from Pinned only stays
+Pinned only. The summaries read frequency ↓, length ↑, mass ↓ reversed, Oct (now), May or Jun,
+all, imperial or metric, and North Amer or world; the header links stick figures to the guide. The header ends with Click a bird and How to read a drawing and has no
 key line; New here? Try's four comparisons each pin six real birds shown alone by length, herons
 and ducks draw only those families in every month, and the birds around you now is the address
 with #here-and-now, its template replacing the region and dropping the month (Now) and keeping
@@ -348,6 +355,7 @@ Watched failing: 2026-10-26, by Here keeping clear=1, by renaming its button, an
 Watched failing: 2026-10-26, by show=pinned that hid nothing, and by Here keeping show=pinned.
 Watched failing: 2026-10-26, by a Reset that dropped the pins, and by a Clear pins that kept them.
 Watched failing: 2026-10-26, by a pin that jumps to its tile, by not keeping the scroll ("the new page opened at 0"), and by dropping the pinned list or its entries.
+Watched failing: 2026-10-26, by a filter leaving Pinned only (the reported bug), by an All dropping the find box's text, by species pages dropping the family, by Here leaving Pinned only, and by Pinned only dropping the text (which first passed, as × under Pinned only; the audit now runs under a count too).
 Watched failing: 2026-10-26, by here.js answering #here-and-now only on load (a click on the home page's link did nothing: "the welcome line says \"\"").
 Watched failing: 2026-10-26, by the birds around you now keeping the month ("want /?by=mass&region=CA next").
 Watched failing: 2026-10-26, by a comparison without show=pinned ("106 drawn"), by an unknown bird in one ("5 known"), by keeping "Drawn to scale", and by here.js ignoring the page's Region setting.

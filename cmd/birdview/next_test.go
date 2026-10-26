@@ -440,8 +440,8 @@ func TestNextToggle(t *testing.T) {
 		{"region=FL&region=ME", "FL", "/?region=ME"},
 		{"region=ME", "ME", "/"},
 		{"region=", "ME", "/?region=ME"},
-		{"region=FL&find=hawk&show=50&by=mass", "FL", "/?by=mass&show=50"},
-		{"pin=blujay&show=pinned", "FL", "/?pin=blujay&region=FL"},
+		{"region=FL&find=hawk&show=50&by=mass", "FL", "/?by=mass&find=hawk&show=50"},
+		{"pin=blujay&show=pinned", "FL", "/?pin=blujay&region=FL&show=pinned"},
 	} {
 		if got := string(nextToggle(q(c.from), "region", c.v)); got != c.want {
 			t.Errorf("toggling %s from %q = %s, want %s", c.v, c.from, got, c.want)
@@ -509,8 +509,8 @@ func TestNextShowAll(t *testing.T) {
 	for _, m := range regexp.MustCompile(`<input type="hidden" name="([^"]+)" value="([^"]*)">`).FindAllStringSubmatch(form[1], -1) {
 		sent = append(sent, m[1]+"="+m[2])
 	}
-	if !slices.Equal(sent, []string{"by=mass", "pin=amecro", "pin=annhum"}) {
-		t.Errorf("the First form sends %v; want every setting but show and find", sent)
+	if !slices.Equal(sent, []string{"by=mass", "find=jay", "pin=amecro", "pin=annhum"}) {
+		t.Errorf("the First form sends %v; want every parameter but show", sent)
 	}
 	if !strings.Contains(form[1], ">First</button>\n          <input class=\"cap\" type=\"number\" name=\"show\"") || !strings.Contains(form[1], `value="50"`) {
 		t.Errorf("the First form does not read First [50]:\n%s", form[1])
@@ -606,7 +606,7 @@ func TestNextOrderReverses(t *testing.T) {
 	if fwd.Tiles[0].S != rev.Tiles[len(rev.Tiles)-1].S {
 		t.Errorf("the most recorded duck, %s, is not at the end of the reversed order", fwd.Tiles[0].S.ID)
 	}
-	if v := nextAt(s, "/?rev=1").Controls[0].Value; v != "frequency, least often recorded first" {
+	if v := nextAt(s, "/?rev=1").Controls[0].Value; v != "frequency \u2191" {
 		t.Errorf("reversed frequency reads %q", v)
 	}
 }
@@ -776,7 +776,7 @@ func TestNextShowPinned(t *testing.T) {
 
 // TestNextHereAndNow checks the Region setting's Here and the Month
 // setting's Now. Here's address, filled with a region, is the page with only
-// that region chosen, every other setting kept, and the pinned-only view left;
+// that region chosen and every other parameter kept, Pinned only included;
 // the page carries here.js and the boundary file to find the region with.
 // Now is the first month choice, chosen when no month is named, and links
 // to no month named.
@@ -798,7 +798,7 @@ func TestNextHereAndNow(t *testing.T) {
 	if region == nil || mon == nil {
 		t.Fatal("no Region or Month setting")
 	}
-	if got := strings.Replace(region.HereURL, hereSlot, "FL", 1); got != "/?by=mass&month=May&region=FL" {
+	if got := strings.Replace(region.HereURL, hereSlot, "FL", 1); got != "/?by=mass&month=May&region=FL&show=pinned" {
 		t.Errorf("Here, filled with FL, is %s", got)
 	}
 	if region.Boundaries != s.boundaryURL {
@@ -825,10 +825,10 @@ func TestNextHereAndNow(t *testing.T) {
 	if want := append([]string{"All", "Now"}, month.Abbrev[:]...); !slices.Equal(labels, want) {
 		t.Errorf("the month choices are %v, want %v", labels, want)
 	}
-	if now := ch[1]; now.On || string(now.URL) != "/?by=mass&region=CA" {
+	if now := ch[1]; now.On || string(now.URL) != "/?by=mass&region=CA&show=pinned" {
 		t.Errorf("with May named, Now is %+v; want it off, linking to no month", now)
 	}
-	if all := ch[0]; all.On || string(all.URL) != "/?by=mass&month=all&region=CA" {
+	if all := ch[0]; all.On || string(all.URL) != "/?by=mass&month=all&region=CA&show=pinned" {
 		t.Errorf("with May named, All is %+v; want it off, linking to month=all", all)
 	}
 	if ch := nextAt(s, "/").Controls[1].Groups[0].Choices; !ch[1].On || ch[0].On || ch[11].On {
@@ -1173,10 +1173,10 @@ func TestNextWelcomeLine(t *testing.T) {
 	body := mustGet(t, s, "/")
 	sub := regexp.MustCompile(`(?s)<p class="sub">(.*?)</p>`).FindStringSubmatch(body)
 	if sub == nil || !strings.Contains(sub[1], "Click a bird for its numbers and sources.") ||
-		!strings.Contains(sub[1], `<a href="/docs/using">How to read a drawing</a>`) {
-		t.Errorf("the header's line does not end with Click a bird and How to read a drawing: %v", sub)
+		!strings.Contains(sub[1], `birds as <a href="/docs/using">stick figures</a> to scale`) {
+		t.Errorf("the header's line does not link stick figures to the guide and say Click a bird: %v", sub)
 	}
-	for _, gone := range []string{`class="key"`, "Drawn to scale", "Solid is measured"} {
+	for _, gone := range []string{`class="key"`, "Drawn to scale", "Solid is measured", "How to read a drawing"} {
 		if strings.Contains(body, gone) {
 			t.Errorf("the home page still says %q", gone)
 		}
@@ -1192,8 +1192,8 @@ func TestNextWelcomeLine(t *testing.T) {
 	}
 	// From an address with settings changed, the link keeps them, and its
 	// template replaces the region and sets the month to Now.
-	if p := nextAt(s, "/?by=mass&month=May&region=FL&pin=amecro&show=pinned&find=crow"); string(p.HereNowURL) != "/?by=mass&month=May&pin=amecro&region=FL&show=pinned#here-and-now" ||
-		p.HereNowTemplate != "/?by=mass&pin=amecro&region=__REGION__" {
+	if p := nextAt(s, "/?by=mass&month=May&region=FL&pin=amecro&show=pinned&find=crow"); string(p.HereNowURL) != "/?by=mass&find=crow&month=May&pin=amecro&region=FL&show=pinned#here-and-now" ||
+		p.HereNowTemplate != "/?by=mass&find=crow&pin=amecro&region=__REGION__" {
 		t.Errorf("from a changed address, the birds around you now is %s with template %s; want every setting kept, then the region replaced and the month Now",
 			p.HereNowURL, p.HereNowTemplate)
 	}
@@ -1229,5 +1229,176 @@ func TestNextWelcomeLine(t *testing.T) {
 	}
 	if sizes != 4 {
 		t.Errorf("the welcome line compares %d sizes of birds, want 4 (small, medium, large, huge)", sizes)
+	}
+}
+
+// TestNextKeepsEveryParameter audits every transition on the home page: from
+// an address setting every parameter, each link changes only the setting it
+// belongs to and keeps every other parameter, show=pinned and the find box's
+// text included. A setting's choice may change its own key (Order by, its
+// key and rev); a pin, the pins; Show, show. The transitions meant to drop
+// something drop exactly that: Reset keeps only the pins, Clear pins drops
+// them and Pinned only, ×  drops the find box's text, and the birds around
+// you now replaces the region, sets the month to Now, and leaves Pinned only.
+// A tile's species page carries every parameter, so its way back returns to
+// the same page.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextKeepsEveryParameter(t *testing.T) {
+	s := newTestServerReal(t)
+	fixNextClock(t, time.October)
+	const every = "/?by=mass&family=Corvidae&find=crow&habitat=Forest&month=May&names=world&niche=Omnivore&pin=amecro&pin=blujay&region=NY&rev=1&units=metric"
+	// From Pinned only and from a count, so that no broken link can pass
+	// for one that changes the same keys on purpose.
+	for _, c := range []struct {
+		from               string
+		clearPins, hereNow []string
+	}{
+		{every + "&show=pinned", []string{"pin", "show"}, []string{"month", "region", "show"}},
+		{every + "&show=50", []string{"pin"}, []string{"month", "region"}},
+	} {
+		from, clearPins, hereNow := c.from, c.clearPins, c.hereNow
+		orig, _ := url.ParseQuery(strings.TrimPrefix(from, "/?"))
+		p := nextAt(s, from)
+		if len(p.Tiles) == 0 {
+			t.Fatal("the audit page draws nothing; its links prove little")
+		}
+		body := mustGet(t, s, from)
+		diff := func(q url.Values) []string {
+			var changed []string
+			keys := map[string]bool{}
+			for k := range orig {
+				keys[k] = true
+			}
+			for k := range q {
+				keys[k] = true
+			}
+			for k := range keys {
+				if !slices.Equal(orig[k], q[k]) {
+					changed = append(changed, k)
+				}
+			}
+			slices.Sort(changed)
+			return changed
+		}
+		special := map[string][]string{
+			string(p.ResetURL):     {"by", "family", "find", "habitat", "month", "names", "niche", "region", "rev", "show", "units"},
+			string(p.ClearPinsURL): clearPins,
+			string(p.CloseURL):     {"find"},
+		}
+		// The welcome line's examples are fixed starting points, not
+		// transitions; its birds around you now is checked here.
+		welcome := regexp.MustCompile(`(?s)<p class="welcome">.*?</p>`).FindString(body)
+		if strings.Contains(welcome, html.EscapeString(string(p.HereNowURL))) == false {
+			t.Errorf("the welcome line does not link to %s", p.HereNowURL)
+		}
+		if u, _ := url.Parse(string(p.HereNowURL)); u.Fragment != "here-and-now" || len(diff(u.Query())) != 0 {
+			t.Errorf("the birds around you now links to %s; want this address with #here-and-now", p.HereNowURL)
+		}
+		checked := 0
+		for _, m := range regexp.MustCompile(`href="(/(?:\?[^"]*)?)"`).FindAllStringSubmatch(strings.Replace(body, welcome, "", 1), -1) {
+			href, frag, _ := strings.Cut(html.UnescapeString(m[1]), "#")
+			m = []string{m[0], href, frag}
+			u, _ := url.Parse(href)
+			q := u.Query()
+			changed := diff(q)
+			checked++
+			if want, ok := special[href]; ok {
+				if !slices.Equal(changed, want) {
+					t.Errorf("%s changes %v, want exactly %v", href, changed, want)
+				}
+				continue
+			}
+			// The find box's text is no setting's: only × and Reset drop it.
+			if slices.Contains(changed, "find") {
+				t.Errorf("%s drops the find box's text; only × and Reset may", href)
+				continue
+			}
+			switch {
+			case len(changed) == 0:
+			case len(changed) == 1:
+			case len(changed) == 2 && changed[0] == "by" && changed[1] == "rev":
+			default:
+				t.Errorf("%s changes %v; a control may change only its own setting", href, changed)
+			}
+		}
+		if checked < 100 {
+			t.Errorf("only %d links audited", checked)
+		}
+		// The forms send every parameter but their own.
+		for _, f := range regexp.MustCompile(`(?s)<form class="([^"]+)" action="/" method="get">(.*?)</form>`).FindAllStringSubmatch(body, -1) {
+			q := url.Values{}
+			for _, h := range regexp.MustCompile(`<input type="hidden" name="([^"]+)" value="([^"]*)">`).FindAllStringSubmatch(f[2], -1) {
+				q.Add(h[1], html.UnescapeString(h[2]))
+			}
+			own := "show"
+			if strings.HasPrefix(f[1], "search") {
+				own = "find"
+			}
+			q[own] = orig[own]
+			if c := diff(q); len(c) != 0 {
+				t.Errorf("the %s form loses %v", f[1], c)
+			}
+		}
+		// The templates the browser fills in.
+		here := p.Controls[2].HereURL
+		if p.Controls[2].Label != "Region" {
+			t.Fatalf("control 2 is %s, not Region", p.Controls[2].Label)
+		}
+		hq, _ := url.ParseQuery(strings.TrimPrefix(strings.Replace(here, hereSlot, "CA", 1), "/?"))
+		if c := diff(hq); !slices.Equal(c, []string{"region"}) {
+			t.Errorf("Here changes %v, want only the region", c)
+		}
+		nq, _ := url.ParseQuery(strings.TrimPrefix(strings.Replace(p.HereNowTemplate, hereSlot, "CA", 1), "/?"))
+		if c := diff(nq); !slices.Equal(c, hereNow) {
+			t.Errorf("the birds around you now changes %v, want the region, the month, and leaving Pinned only", c)
+		}
+		// A species page and its way back.
+		tl := p.Tiles[0]
+		du, _ := url.Parse(string(tl.DetailURL))
+		if c := diff(du.Query()); len(c) != 0 {
+			t.Errorf("%s's species page loses %v", tl.S.ID, c)
+		}
+		back := regexp.MustCompile(`class="backlink" href="([^"]+)"`).FindStringSubmatch(mustGet(t, s, string(tl.DetailURL)))
+		if back == nil {
+			t.Fatal("the species page has no way back")
+		}
+		bu, _ := url.Parse(html.UnescapeString(back[1]))
+		if c := diff(bu.Query()); bu.Path != "/" || len(c) != 0 {
+			t.Errorf("back from %s's species page goes to %s, losing %v", tl.S.ID, back[1], c)
+		}
+	}
+	// The reported bug: a month from Pinned only stays Pinned only.
+	if got := string(nextToggle(url.Values{"by": {"length"}, "pin": {"blujay"}, "show": {"pinned"}}, "month", "Nov")); got != "/?by=length&month=Nov&pin=blujay&show=pinned" {
+		t.Errorf("choosing Nov from Pinned only goes to %s", got)
+	}
+}
+
+// TestNextShortValues checks what each setting's summary says, kept short:
+// the order as its name and an arrow, months by their three letters, all
+// for every region, imperial or metric, and North Amer or world.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextShortValues(t *testing.T) {
+	s := newTestServer(t)
+	fixNextClock(t, time.October)
+	values := func(target string) map[string]string {
+		out := map[string]string{}
+		for _, c := range nextAt(s, target).Controls {
+			out[c.Label] = c.Value
+		}
+		return out
+	}
+	for target, want := range map[string]map[string]string{
+		"/": {"Order by": "frequency \u2193", "Month": "Oct (now)", "Region": "all", "Units": "imperial", "Names": "North Amer"},
+		"/?by=length&month=May&month=Jun&units=metric&names=world": {"Order by": "length \u2191", "Month": "May or Jun", "Units": "metric", "Names": "world"},
+		"/?by=mass&rev=1": {"Order by": "mass \u2193"},
+	} {
+		got := values(target)
+		for k, v := range want {
+			if got[k] != v {
+				t.Errorf("%s: %s reads %q, want %q", target, k, got[k], v)
+			}
+		}
 	}
 }
