@@ -574,17 +574,25 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 .finds li { margin: 4px 0; }
 .finds .found { margin: 6px 0 0; color: var(--dim); }
 /* The pin: a push pin in a box, filled when the bird is pinned. On a tile it
-   sits in the drawing's lower right corner, opposite the mass cube and just
-   above the footer's rule: measured from the bottom, because the footer is
-   the same height on every tile (60px puts its foot level with the cube's;
-   19px in, as the cube is from the left). */
+   sits in the drawing's lower right corner, opposite the mass cube, its foot
+   level with the cube's. The tile's four parts (header, drawing, footer,
+   share line) are rows of the wrapper's grid, shared through subgrid, and
+   the pin sits at the end of the drawing's row: the footer and share line
+   vary in height (a note, a borrowed measurement), so an offset from the
+   tile's bottom put the pin 16px high on such tiles. 16px up is the
+   drawing's 8px margin plus the cube's 8px above the drawing's foot; 19px
+   in, as the cube is from the left. A tile stretched to its row's tallest
+   neighbor gives the extra height to the share line's row, which is last. */
 .pin, .pin:visited { display: inline-flex; align-items: center; justify-content: center;
   width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 6px;
   background: var(--bg); color: var(--dim); vertical-align: middle; }
 .pin svg { fill: currentColor; }
 .pin:hover { border-color: var(--accent); color: var(--ink); }
 .pin.on, .pin.on:visited { background: var(--accent); border-color: var(--accent); color: #06283d; }
-.tilewrap > .pin { position: absolute; right: 19px; bottom: 60px; z-index: 1; }
+.next .tilewrap { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(3, auto) 1fr; }
+.next .tilewrap > .tile { grid-area: 1 / 1 / 5 / 2; display: grid; grid-template-rows: subgrid; }
+.next .tilewrap > .pin { grid-area: 2 / 1 / 3 / 2; justify-self: end; align-self: end;
+  margin: 0 19px 16px 0; z-index: 1; }
 .finds li { display: flex; align-items: center; gap: 8px; }
 /* The pinned birds, under the find box: one line that wraps. */
 .pinned { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 8px 0 0; }

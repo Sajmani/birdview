@@ -310,7 +310,9 @@ view left, and the page carries the button, its status, and here.js. Month's cho
 line, All, Now, and the twelve months, with a rule only before January; Now is chosen with no
 month named and links to none, and All is chosen with `month=all`. In headless Chrome, choosing
 May in Month loads a page with Month open and nothing else, and loading it again after no choice
-opens nothing.
+opens nothing. In headless Chrome at 1280 and 390 px, every pin on October's birds by length
+stands within a pixel of its tile's mass cube, tiles with a note under the footer and tiles
+stretched to a taller neighbor included.
 
 **Run:** `go test ./cmd/birdview/ -run 'TestNext'` (the browser check gates where Chrome is installed)
 **Status: verified 2026-10-26, passing.**
@@ -330,6 +332,7 @@ Watched failing: 2026-10-26, by Here keeping clear=1, by renaming its button, an
 Watched failing: 2026-10-26, by show=pinned that hid nothing, and by Here keeping show=pinned.
 Watched failing: 2026-10-26, by a Reset that dropped the pins, and by a Clear pins that kept them.
 Watched failing: 2026-10-26, by a pin that jumps to its tile, by not keeping the scroll ("the new page opened at 0"), and by dropping the pinned list or its entries.
+Watched failing: 2026-10-26, by placing the pin a fixed 60px above the tile's bottom ("28 of 100 pins are not level with the mass cube", 16px high), and by sharing a stretched tile's height among all its rows ("20 of 100", 4px).
 Watched failing: 2026-10-26, by dropping the gap after the last pin ("has 104 tiles and gaps, want 102 tiles and 3 gaps"), by dropping gaps before pins, by keeping pin order in the pinned list, and by sorting it by id instead of displayed name.
 Watched failing: 2026-10-26, by not reopening the setting ("with [] open"), by never forgetting it ("a plain reload opened [Month]"), and by dropping the rule and the one line.
 Watched failing: 2026-10-26, by restoring the 1,200 cap ("/next has 1006 birds; the check needs more than 1200").

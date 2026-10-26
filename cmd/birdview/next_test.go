@@ -957,3 +957,55 @@ func TestNextPinKeepsPlace(t *testing.T) {
 		t.Errorf("pinned at scroll %d by %s; the new page opened at %d", res.Before, res.Href, res.After)
 	}
 }
+
+//go:embed testdata/next_pin_align_probe.js
+var nextPinAlignProbe string
+
+// TestNextPinAlignsWithCube checks, in headless Chrome at a laptop's width
+// and a phone's, that every tile's pin stands level with its mass cube: the
+// foot of one within a pixel of the other's. The page is October's birds by
+// length, whose first tiles include ones with a note under the footer and
+// ones stretched to a taller neighbor in their row, the two cases that once
+// put the pin high.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextPinAlignsWithCube(t *testing.T) {
+	chrome := findChrome()
+	if chrome == "" {
+		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); pin alignment was not tested in a browser")
+	}
+	s := newTestServerReal(t)
+	fixNextClock(t, time.October)
+	ts := httptest.NewServer(instrument(s, nextPinAlignProbe, nil))
+	defer ts.Close()
+	for _, size := range []string{"1280,800", "390,844"} {
+		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+		out, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
+			"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
+			"--disable-component-update", "--disable-sync", "--disable-extensions",
+			"--user-data-dir="+t.TempDir(), "--window-size="+size, "--virtual-time-budget=8000",
+			"--dump-dom", ts.URL+"/next?by=length").Output()
+		cancel()
+		if err != nil {
+			t.Fatalf("chrome at %s: %v", size, err)
+		}
+		m := dataAttr("data-probe").FindSubmatch(out)
+		if m == nil {
+			t.Fatalf("at %s: no result from the probe; it did not finish", size)
+		}
+		var res struct {
+			Tiles int      `json:"tiles"`
+			Notes int      `json:"notes"`
+			Off   []string `json:"off"`
+		}
+		if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
+			t.Fatalf("reading the probe: %v", err)
+		}
+		if res.Tiles < 50 || res.Notes == 0 {
+			t.Fatalf("at %s: %d tiles measured, %d with a note; the check needs both", size, res.Tiles, res.Notes)
+		}
+		if len(res.Off) > 0 {
+			t.Errorf("at %s, %d of %d pins are not level with the mass cube: %v", size, len(res.Off), res.Tiles, res.Off)
+		}
+	}
+}

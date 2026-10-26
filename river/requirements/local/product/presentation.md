@@ -761,7 +761,8 @@ is unchanged and does not link to it.
   **Show only pinned** (`show=pinned`) draws only the pinned birds, for a comparison of the
   reader's own picks; **Show all matching birds** returns to `show=all`, the default, which the
   address leaves out. Choosing a filter also returns to it.
-- **Pins.** Every drawn bird has a pin, a push pin in a box, filled when the bird is pinned. A
+- **Pins.** Every drawn bird has a pin, a push pin in a box, filled when the bird is pinned, in
+  the drawing's lower right corner, level with the mass cube opposite it on every tile. A
   pinned bird (`pin=<id>`) is drawn whatever the settings, wherever the order puts it, even past
   the first 100, and the count line says how many are. Pinning or unpinning leaves the page where
   it was. The pinned birds are listed under the find box in alphabetical order: a bird's name goes
