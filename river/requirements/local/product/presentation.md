@@ -764,7 +764,7 @@ is unchanged and does not link to it.
 - **Pins.** Every drawn bird has a pin, a push pin in a box, filled when the bird is pinned, in
   the drawing's lower right corner, level with the mass cube opposite it on every tile. A
   pinned bird (`pin=<id>`) is drawn whatever the settings, wherever the order puts it, even past
-  the first 100, and the count line says how many are. Pinning or unpinning leaves the page where
+  the first 100, and the count line says how many are ("First 100 of 1006 birds, plus 2 pins"). Pinning or unpinning leaves the page where
   it was. The pinned birds are listed under the find box in alphabetical order: a bird's name goes
   to its tile, and its pin unpins it. Unpinning returns the bird to the settings'
   choice; nothing removes a bird the settings choose. A box above the set finds birds by name as

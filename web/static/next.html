@@ -78,7 +78,7 @@
     {{range .CapFields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
     <label>First <input class="cap" type="number" name="cap" min="1" step="1" inputmode="numeric"
       value="{{.Cap}}" placeholder="all" aria-label="How many birds to show before the rest are hidden"
-      title="How many birds to show; Enter to apply"></label> of {{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{with .AddedPast}}, and {{.}} added{{end}}
+      title="How many birds to show; Enter to apply"></label> of {{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{with .AddedPast}}, plus {{.}} {{if eq . 1}}pin{{else}}pins{{end}}{{end}}
   </form>
   {{with .MoreURL}}<a class="showall" href="{{.}}">Show all</a>{{end}}
   {{range .Controls}}

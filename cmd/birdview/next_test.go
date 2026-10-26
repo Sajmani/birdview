@@ -438,7 +438,7 @@ func TestNextToggle(t *testing.T) {
 // across a filter and Show only pinned, and dropped by Reset; the count line
 // carries the cap as a box in a form that sends every other setting; and an
 // address naming the default, a blank, or nonsense redirects to one without
-// a cap. There is no all= any more.
+// a cap.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextShowAll(t *testing.T) {
@@ -460,9 +460,6 @@ func TestNextShowAll(t *testing.T) {
 			t.Errorf("Show all reorders: %s at %d, was %s", all.Tiles[i].S.ID, i, p.Tiles[i].S.ID)
 			break
 		}
-	}
-	if old := nextAt(s, "/next?all=1"); len(old.Tiles) != nextCap {
-		t.Errorf("/next?all=1 draws %d; all= is gone, so it draws the default %d", len(old.Tiles), nextCap)
 	}
 
 	// cap=50: fifty drawn, the box says so, and it survives a filter and
@@ -652,6 +649,12 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	// of them sit in one gap before it, and none sit after it.
 	if after.AddedPast != 1 || after.First != nextCap || after.Hidden != before.Hidden-1 {
 		t.Errorf("after adding: first %d, added past it %d, hidden %d (was %d)", after.First, after.AddedPast, after.Hidden, before.Hidden)
+	}
+	if _, body := get(t, s, follow(t, s, string(m[0].URL))); !strings.Contains(body, " of "+strconv.Itoa(after.Count)+" birds, plus 1 pin\n") {
+		t.Errorf("the count line does not say \"plus 1 pin\" after %d birds", after.Count)
+	}
+	if _, body := get(t, s, "/next?cap=2&month=all&pin="+last.ID+"&pin="+all.Tiles[len(all.Tiles)-2].S.ID); !strings.Contains(body, " birds, plus 2 pins\n") {
+		t.Error("with two pins past the cap, the count line does not say \"plus 2 pins\"")
 	}
 	if len(after.Tiles) != len(before.Tiles)+1 {
 		t.Errorf("after adding one bird, %d drawn (was %d)", len(after.Tiles), len(before.Tiles))

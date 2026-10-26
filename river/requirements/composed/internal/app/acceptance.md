@@ -291,7 +291,7 @@ with its description. Choosing from all selects
 only that one, choosing again removes it, and changing a filter drops the find box and keeps the cap.
 /next draws the first 100 of October's 1,006 and a link to all of them (`cap=none`) in the same
 order, both right after the cap form on the count line and in the gap row at the end; the
-herons draw every heron with no link, and `all=1` no longer means anything. `cap=50` draws 50,
+herons draw every heron with no link. `cap=50` draws 50,
 says 50 in the box, and is kept by a filter and Show only pinned but not Reset. The cap form
 reads First [box] of N birds and sends every other setting but the find box; the box is there
 with no cap too. `cap=100`, `cap=`, `cap=0`, `cap=-3`, and `cap=zero` redirect to the address
@@ -305,7 +305,7 @@ that unpins it; no pin link jumps the page, and in headless Chrome a page loaded
 scrolled where the pin was clicked. Reset keeps the pins, in order, and drops every setting; Clear pins,
 before it and only when something is pinned, drops the pins and keeps every setting. The phone-width and contrast checks reach /next through the crawl, open
 every setting at once, and measure after the placing script has run. Pinning the October set's
-least recorded bird, past the first 100, draws it after one gap row and none after it, and the count line says one was added; pinning two mid-order birds by length draws gap rows before, between, and after them summing to Hidden, each linking to Show all, and Show all draws no gaps. Show
+least recorded bird, past the first 100, draws it after one gap row and none after it, and the count line says "plus 1 pin" ("plus 2 pins" for two); pinning two mid-order birds by length draws gap rows before, between, and after them summing to Hidden, each linking to Show all, and Show all draws no gaps. Show
 only pinned links to `show=pinned` with the order kept and draws nothing; with two pinned it
 draws those two by mass, unpinning one leaves the other, and Show all matching birds brings the
 October birds back with both; `show=all` draws what the default does. Here, filled with FL, is
@@ -336,6 +336,7 @@ Watched failing: 2026-10-26, by Here keeping clear=1, by renaming its button, an
 Watched failing: 2026-10-26, by show=pinned that hid nothing, and by Here keeping show=pinned.
 Watched failing: 2026-10-26, by a Reset that dropped the pins, and by a Clear pins that kept them.
 Watched failing: 2026-10-26, by a pin that jumps to its tile, by not keeping the scroll ("the new page opened at 0"), and by dropping the pinned list or its entries.
+Watched failing: 2026-10-26, by the count line saying "and 1 added" instead of "plus 1 pin".
 Watched failing: 2026-10-26, by ignoring cap, by a filter dropping it, by not redirecting cap=100, by Show all naming cap=all, and by the cap form sending cap twice.
 Watched failing: 2026-10-26, by placing the pin a fixed 60px above the tile's bottom ("28 of 100 pins are not level with the mass cube", 16px high), and by sharing a stretched tile's height among all its rows ("20 of 100", 4px).
 Watched failing: 2026-10-26, by dropping the gap after the last pin ("has 104 tiles and gaps, want 102 tiles and 3 gaps"), by dropping gaps before pins, by keeping pin order in the pinned list, and by sorting it by id instead of displayed name.
