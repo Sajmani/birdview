@@ -102,7 +102,7 @@ func TestSearchMatchesNamesCodesAndTaxa(t *testing.T) {
 // Verifies: product.searchBox. Criterion: app.searchFromTheAddress.
 func TestSearchFromTheAddress(t *testing.T) {
 	s := newTestServer(t)
-	body := mustGet(t, s, "/?by=mass&q=american")
+	body := mustGet(t, s, "/classic?by=mass&q=american")
 	shown := regexp.MustCompile(`<div class="tilewrap" id="s-(\w+)" data-search="[^"]*">`).FindAllStringSubmatch(body, -1)
 	var ids []string
 	for _, m := range shown {
@@ -148,13 +148,13 @@ func TestSearchFromTheAddress(t *testing.T) {
 	if !strings.Contains(controls, "q=american") {
 		t.Error("the controls drop the search")
 	}
-	if got := mustGet(t, s, "/?family=Ardeidae&region=AK&q=heron"); !regexp.MustCompile(`No birds match\. <a href="[^"]*"`).MatchString(got) {
+	if got := mustGet(t, s, "/classic?family=Ardeidae&region=AK&q=heron"); !regexp.MustCompile(`No birds match\. <a href="[^"]*"`).MatchString(got) {
 		t.Fatal("Ardeidae in Alaska no longer empties the page; pick another")
 	} else if clear := mustMatch(t, got, `No birds match\. <a href="([^"]*)"`, "Clear the filters"); strings.Contains(html.UnescapeString(clear), "q=") {
 		t.Errorf("Clear the filters keeps the search: %s", clear)
 	}
 
-	none := mustGet(t, s, "/?q=zzz")
+	none := mustGet(t, s, "/classic?q=zzz")
 	if !strings.Contains(none, `<p class="empty searchempty">`) || !strings.Contains(none, ">0 of 6 species<") {
 		t.Error("a search that matches nothing does not say so")
 	}
@@ -190,7 +190,7 @@ func TestSearchInTheBrowser(t *testing.T) {
 		"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
 		"--disable-component-update", "--disable-sync", "--disable-extensions",
 		"--user-data-dir="+t.TempDir(), "--virtual-time-budget=5000",
-		"--dump-dom", ts.URL+"/?by=mass#queries="+url.QueryEscape(string(js))).Output()
+		"--dump-dom", ts.URL+"/classic?by=mass#queries="+url.QueryEscape(string(js))).Output()
 	if err != nil {
 		t.Fatalf("chrome: %v", err)
 	}

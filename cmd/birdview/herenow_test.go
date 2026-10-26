@@ -45,7 +45,7 @@ import (
 
 // A page with settings of every kind, so "every other setting kept" has
 // something to keep.
-const busyIndex = "/?by=mass&family=Corvidae&family=Trochilidae&month=Jun&month=Jul&region=CA&step=10"
+const busyIndex = "/classic?by=mass&family=Corvidae&family=Trochilidae&month=Jun&month=Jul&region=CA&step=10"
 
 // TestHereAndNow checks what the server renders for Here and Now: where they
 // sit, the URLs they carry, the /now redirect, and the boundary file.
@@ -158,7 +158,7 @@ func TestHereInTheBrowser(t *testing.T) {
 		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); Here was not tested in a browser")
 	}
 	s := newTestServer(t)
-	const start = "/?by=mass&step=10"
+	const start = "/classic?by=mass&step=10"
 	r := httptest.NewRequest(http.MethodGet, start, nil)
 	ca, _ := region.BySlug("CA")
 	pressedCA := string(s.regionURL(r, map[string]bool{ca.ID: true}))
@@ -333,7 +333,7 @@ func TestHereInTheBrowser(t *testing.T) {
 //
 // Verifies: product.nowSelectsCurrentMonth. Criterion: app.hereAndNowSitBesideAll.
 func TestMonthsFoldIntoTwoLines(t *testing.T) {
-	body := mustGet(t, newTestServer(t), "/")
+	body := mustGet(t, newTestServer(t), "/classic")
 	rows := regexp.MustCompile(`(?s)<div class="row[^"]*">(.*?)</div>`).FindAllStringSubmatch(body, -1)
 	first := -1
 	for i, r := range rows {
@@ -371,7 +371,7 @@ func TestMonthsFoldIntoTwoLines(t *testing.T) {
 // Criterion: app.hereAndNowSitBesideAll.
 func TestWelcomeLine(t *testing.T) {
 	s := newTestServer(t)
-	body := mustGet(t, s, "/?by=frequency&scale=global")
+	body := mustGet(t, s, "/classic?by=frequency&scale=global")
 	welcome := mustMatch(t, body, `(?s)<p class="welcome">(.*?)</p>`, "the welcome line")
 	guide, err := docs.Files.ReadFile("using.md")
 	if err != nil {
@@ -392,7 +392,7 @@ func TestWelcomeLine(t *testing.T) {
 	}
 	// The last goes back to the defaults: the bare address, which carries no
 	// setting. It is not something to try, so the guide's list need not have it.
-	if last := links[len(links)-1]; last[1] != "/" || last[2] != "reset to defaults" {
+	if last := links[len(links)-1]; last[1] != "/classic" || last[2] != "reset to defaults" {
 		t.Errorf("the welcome line ends with %q -> %s; want \"reset to defaults\" -> /", last[2], last[1])
 	} else {
 		links = links[:len(links)-1]
@@ -411,7 +411,7 @@ func TestWelcomeLine(t *testing.T) {
 	}
 
 	tmpl := html.UnescapeString(mustMatch(t, welcome, `data-template="([^"]+)"`, "the #here-and-now template"))
-	r := httptest.NewRequest(http.MethodGet, "/?by=frequency&scale=global", nil)
+	r := httptest.NewRequest(http.MethodGet, "/classic?by=frequency&scale=global", nil)
 	for i, m := range month.Abbrev {
 		byMonth := httptest.NewRequest(http.MethodGet, string(s.monthURL(r, map[int]bool{i: true})), nil)
 		for _, id := range append(region.LandIDs(), region.MarineIDs()...) {
@@ -438,7 +438,7 @@ func TestHereAndNowLink(t *testing.T) {
 		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); the #here-and-now link was not tested")
 	}
 	s := newTestServer(t)
-	const start = "/?by=frequency&scale=global"
+	const start = "/classic?by=frequency&scale=global"
 	r := httptest.NewRequest(http.MethodGet, start, nil)
 	ca, _ := region.BySlug("CA")
 	thisMonth := int(time.Now().Month()) - 1
@@ -550,14 +550,14 @@ func TestGuidesReflow(t *testing.T) {
 // Verifies: product.pageExplainsItself, product.pickFromIndex. Criterion: app.hereAndNowSitBesideAll.
 func TestWelcomeLineWhilePicking(t *testing.T) {
 	s := newTestServer(t)
-	body := mustGet(t, s, "/?species=amecro&species=annhum")
+	body := mustGet(t, s, "/classic?species=amecro&species=annhum")
 	welcome := mustMatch(t, body, `(?s)<p class="welcome">(.*?)</p>`, "the welcome line while picking")
 	for _, l := range regexp.MustCompile(`<a href="([^"]+)">([^<]+)</a>`).FindAllStringSubmatch(welcome, -1) {
 		href := html.UnescapeString(l[1])
 		u, _ := url.Parse(href)
 		switch {
 		case l[2] == "reset to defaults":
-			if href != "/" {
+			if href != "/classic" {
 				t.Errorf("reset to defaults goes to %s while picking; want /", href)
 			}
 		case u.Path == "/compare", strings.HasPrefix(u.Path, "/docs/"):
@@ -585,8 +585,8 @@ func TestBillAndTailOrderings(t *testing.T) {
 		{"bill", "Bill", func(sp *dataset.Species) float64 { return sp.Segments.Bill.Value }},
 		{"tail", "Tail", func(sp *dataset.Species) float64 { return sp.Segments.Tail.Value }},
 	} {
-		body := mustGet(t, s, "/?by="+c.by)
-		if !regexp.MustCompile(`(?s)<a class="btn on" href="/\?by=` + c.by + `"[^>]*>` + c.label + `</a>`).MatchString(body) {
+		body := mustGet(t, s, "/classic?by="+c.by)
+		if !regexp.MustCompile(`(?s)<a class="btn on" href="/classic\?by=` + c.by + `"[^>]*>` + c.label + `</a>`).MatchString(body) {
 			t.Errorf("Order by has no selected %s button", c.label)
 		}
 		// Ascending by the part, read off the tiles in page order.
@@ -622,9 +622,9 @@ func TestTierHeadersNameTheOrdering(t *testing.T) {
 	s := newTestServer(t)
 	for by, label := range map[string]string{"": "Length", "length": "Length", "wingspan": "Wingspan",
 		"mass": "Mass", "bill": "Bill", "tail": "Tail", "frequency": "Frequency"} {
-		path := "/"
+		path := "/classic"
 		if by != "" {
-			path = "/?by=" + by
+			path = "/classic?by=" + by
 		}
 		tiers := regexp.MustCompile(`<span class="tier">([^<]+)</span>`).FindAllStringSubmatch(mustGet(t, s, path), -1)
 		if len(tiers) == 0 {
@@ -693,7 +693,7 @@ func TestTierRangesHoldTheirBirds(t *testing.T) {
 		m view.Metric
 	}{{"by=length", view.ByLength}, {"by=bill", view.ByBill}, {"by=tail", view.ByTail},
 		{"by=wingspan", view.ByWingspan}, {"by=length&units=metric", view.ByLength}} {
-		hs := heading.FindAllStringSubmatch(mustGet(t, s, "/?"+c.q+"&scale=global"), -1)
+		hs := heading.FindAllStringSubmatch(mustGet(t, s, "/classic?"+c.q+"&scale=global"), -1)
 		secs := view.Sections(drawn, c.m, view.DefaultStepPercent)
 		if len(hs) != len(secs) || len(hs) < 2 {
 			t.Fatalf("%s: %d headings for %d tiers", c.q, len(hs), len(secs))
@@ -740,7 +740,7 @@ func TestTierCountFollowsTheRange(t *testing.T) {
 			t.Errorf("the tier count and the count line differ on %q: %q vs %q", decl, rule, count)
 		}
 	}
-	body := mustGet(t, newTestServer(t), "/")
+	body := mustGet(t, newTestServer(t), "/classic")
 	if !regexp.MustCompile(`&ndash; [^<]+</?[^>]*>?\s*<span class="n">\d+ species</span>`).MatchString(body) &&
 		!regexp.MustCompile(`in\s*<span class="n">\d+ species</span>`).MatchString(body) {
 		t.Error("no tier heading has its species count right after the range")
@@ -756,14 +756,14 @@ func TestTierHistogram(t *testing.T) {
 	s := newTestServer(t)
 	bar := regexp.MustCompile(`<a href="#tier-(\d+)" style="height:(\d+)%" aria-label="([^"]+)"`)
 	for _, q := range []string{"", "by=bill", "by=mass", "by=frequency", "family=Ardeidae"} {
-		body := mustGet(t, s, "/?"+q)
+		body := mustGet(t, s, "/classic?"+q)
 		bars := bar.FindAllStringSubmatch(body, -1)
 		secs := regexp.MustCompile(`(?s)<section id="tier-(\d+)">.*?<span class="n">(\d+) species</span>`).FindAllStringSubmatch(body, -1)
 		if len(secs) == 0 {
-			t.Fatalf("/?%s: no tier sections with ids", q)
+			t.Fatalf("/classic?%s: no tier sections with ids", q)
 		}
 		if len(bars) != len(secs) {
-			t.Fatalf("/?%s: %d bars for %d tiers", q, len(bars), len(secs))
+			t.Fatalf("/classic?%s: %d bars for %d tiers", q, len(bars), len(secs))
 		}
 		// A stretch with no birds is one empty bucket per whole 15% step it
 		// spans, between the bars on either side, under the size orderings.
@@ -799,7 +799,7 @@ func TestTierHistogram(t *testing.T) {
 					want = 0
 				}
 				if gaps[k] != want {
-					t.Errorf("/?%s: %d empty buckets before tier %d, want %d for the stretch from %.1f to %.1f",
+					t.Errorf("/classic?%s: %d empty buckets before tier %d, want %d for the stretch from %.1f to %.1f",
 						q, gaps[k], k+1, want, raw[k-1].Min*1.15, raw[k].Min)
 				}
 			}
@@ -812,14 +812,14 @@ func TestTierHistogram(t *testing.T) {
 		for i, b := range bars {
 			n, _ := strconv.Atoi(secs[i][2])
 			if b[1] != secs[i][1] || b[1] != strconv.Itoa(i+1) {
-				t.Errorf("/?%s: bar %d links to tier %s; tiers are in order", q, i+1, b[1])
+				t.Errorf("/classic?%s: bar %d links to tier %s; tiers are in order", q, i+1, b[1])
 			}
 			if h, _ := strconv.Atoi(b[2]); h != int(math.Round(100*float64(n)/float64(largest))) {
-				t.Errorf("/?%s: bar %d is %d%% tall for %d of the largest tier's %d species", q, i+1, h, n, largest)
+				t.Errorf("/classic?%s: bar %d is %d%% tall for %d of the largest tier's %d species", q, i+1, h, n, largest)
 			}
 			if label := html.UnescapeString(b[3]); !strings.Contains(label, fmt.Sprintf("Tier %d", i+1)) ||
 				!strings.HasSuffix(label, fmt.Sprintf("%d species", n)) {
-				t.Errorf("/?%s: bar %d is labeled %q", q, i+1, label)
+				t.Errorf("/classic?%s: bar %d is labeled %q", q, i+1, label)
 			}
 		}
 	}

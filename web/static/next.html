@@ -38,7 +38,7 @@
      reader types and lists them once there are FindLimit or fewer; without
      it, Enter does the same on the server. Each listed bird links to
      bird=<id>, which adds it or removes it. */}}
-<form class="search" action="/next" method="get" role="search">
+<form class="search" action="/" method="get" role="search">
   {{range .Fields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
   <input type="search" name="find" value="{{.Find}}" placeholder="Find a bird to pin"
          aria-label="Find a bird by name to pin" autocomplete="off" spellcheck="false">
@@ -74,7 +74,7 @@
   {{/* The cap, editable: a form of its own, so Enter sends it with every
        other setting, with or without JavaScript (product.nextView). Empty
        means no cap; the server reads a blank as the default. */}}
-  <form class="shown capform" action="/next" method="get">
+  <form class="shown capform" action="/" method="get">
     {{range .CapFields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
     <label>First <input class="cap" type="number" name="cap" min="1" step="1" inputmode="numeric"
       value="{{.Cap}}" placeholder="all" aria-label="How many birds to show before the rest are hidden"
@@ -122,7 +122,7 @@
 
 <footer>
   <p><b>BirdView</b> is non-commercial. It is built on freely available sources, credited with
-  thanks on <a href="/">the index</a> and in <a href="/docs/data">how the data is made</a>.</p>
+  thanks on <a href="/classic">the classic view</a> and in <a href="/docs/data">how the data is made</a>.</p>
   <p class="caveat"><b>Every length here is modeled</b>, as are most wingspans. Click any bird to
   see where each number comes from.</p>
 </footer>

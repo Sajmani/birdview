@@ -139,9 +139,9 @@ using the *1 in N* figure on every tile. The tiers are powers of ten: 1 in 10 to
 
 ## Some things to try
 
-- **[The birds around you now](/?by=frequency&scale=global#here-and-now).** The commonest birds
+- **[The birds around you now](/classic?by=frequency&scale=global#here-and-now).** The commonest birds
   where you are this month, on one scale. Without sharing your location, try
-  [New York in October](/?by=frequency&scale=global&region=NY&month=Oct).
+  [New York in October](/classic?by=frequency&scale=global&region=NY&month=Oct).
 - **Compare some [small birds](/compare?species=leasan&species=houspa&species=dowwoo&species=houfin&species=barswa&species=easpho),
   [medium birds](/compare?species=blujay&species=amekes&species=calthr&species=moudov&species=belkin1&species=chwwid),
   [large birds](/compare?species=turvul&species=gbbgul&species=greegr&species=cangoo&species=grecor&species=rosspo1),
@@ -160,10 +160,10 @@ using the *1 in N* figure on every tile. The tiers are powers of ten: 1 in 10 to
   - *Huge:* California Condor, American White Pelican, Mute Swan, Magnificent Frigatebird, Bald
     Eagle, and Black-footed Albatross, all with wings over two meters. The albatross is the
     shortest, 709 mm, yet spans 2265 mm; the frigatebird weighs about a seventh of the swan.
-- **See all [herons and ducks](/?family=Ardeidae&family=Anatidae) together.** Similar lengths,
+- **See all [herons and ducks](/classic?family=Ardeidae&family=Anatidae) together.** Similar lengths,
   different builds: herons are nearly all neck and leg, ducks nearly all body.
-- **"Big" depends on the measure.** Sort by [length](/?by=length), then
-  [wingspan](/?by=wingspan), then [mass, scale Global](/?by=mass&scale=global).
+- **"Big" depends on the measure.** Sort by [length](/classic?by=length), then
+  [wingspan](/classic?by=wingspan), then [mass, scale Global](/classic?by=mass&scale=global).
 
 ---
 

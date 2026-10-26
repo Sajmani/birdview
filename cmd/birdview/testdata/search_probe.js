@@ -56,7 +56,7 @@ window.addEventListener("load", function () {
   clicked("control", document.querySelector(".row.ordering a.btn:not(.on)"));
   clicked("tile", document.querySelector("a.tile"));
   clicked("welcome", document.querySelector(".welcome a"));
-  clicked("reset", document.querySelector('.welcome a[href="/"]'));
+  clicked("reset", document.querySelector('.welcome a[href="/classic"]'));
   clicked("here", document.querySelector("button.here[data-template]"));
   clicked("docs", document.querySelector('a[href^="/docs"]'));
   document.documentElement.setAttribute("data-probe", JSON.stringify(out));

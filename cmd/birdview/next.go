@@ -168,9 +168,9 @@ type nextData struct {
 // nextURL is /next with q.
 func nextURL(q url.Values) template.URL {
 	if len(q) == 0 {
-		return "/next"
+		return "/"
 	}
-	return template.URL("/next?" + q.Encode())
+	return template.URL("/?" + q.Encode())
 }
 
 // nextValues is the non-empty values of key, in order.
@@ -262,6 +262,10 @@ func nextOptions(r *http.Request) options {
 }
 
 func (s *server) next(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
 	q := r.URL.Query()
 	if q.Has("bird") {
 		http.Redirect(w, r, s.nextToggleBird(r), http.StatusSeeOther)
@@ -399,11 +403,11 @@ func (s *server) nextPage(r *http.Request) nextData {
 	tq := cloneValues(q)
 	tq.Del("find")
 	tq.Del("bird")
-	page.ToggleURL = "/next?bird="
+	page.ToggleURL = "/?bird="
 	if len(tq) > 0 {
-		page.ToggleURL = "/next?" + tq.Encode() + "&bird="
+		page.ToggleURL = "/?" + tq.Encode() + "&bird="
 	}
-	page.BirdsURL = "/next/birds.json"
+	page.BirdsURL = "/birds.json"
 	if opt.Locale == dataset.LocaleWorld {
 		page.BirdsURL += "?names=" + string(dataset.LocaleWorld)
 	}

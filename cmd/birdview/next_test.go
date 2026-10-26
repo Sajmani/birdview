@@ -56,7 +56,7 @@ func tileIDs(p nextData) []string {
 	return out
 }
 
-// TestNextLandingIsThisMonthByFrequency checks /next with no filter: every
+// TestNextLandingIsThisMonthByFrequency checks / with no filter: every
 // bird the month filter admits for the clock's month, or the months the
 // address names, or every bird with month=all, most often recorded first.
 //
@@ -71,12 +71,12 @@ func TestNextLandingIsThisMonthByFrequency(t *testing.T) {
 		target string
 		months []int
 	}{
-		{"/next", []int{9}},
-		{"/next?month=May", []int{4}},
-		{"/next?month=May&month=Jun", []int{4, 5}},
-		{"/next?month=all", nil},
+		{"/", []int{9}},
+		{"/?month=May", []int{4}},
+		{"/?month=May&month=Jun", []int{4, 5}},
+		{"/?month=all", nil},
 	} {
-		opt := nextOptions(httptest.NewRequest(http.MethodGet, "/next", nil))
+		opt := nextOptions(httptest.NewRequest(http.MethodGet, "/", nil))
 		opt.HasMonths = c.months != nil
 		opt.Months = map[int]bool{}
 		for _, m := range c.months {
@@ -111,27 +111,27 @@ func TestNextLandingIsThisMonthByFrequency(t *testing.T) {
 			prev = f
 		}
 	}
-	if a, b := nextAt(s, "/next").Count, nextAt(s, "/next?month=all").Count; a >= b {
-		t.Errorf("/next shows %d birds and month=all %d; the month does not narrow", a, b)
+	if a, b := nextAt(s, "/").Count, nextAt(s, "/?month=all").Count; a >= b {
+		t.Errorf("/ shows %d birds and month=all %d; the month does not narrow", a, b)
 	}
-	for _, c := range nextAt(s, "/next").Controls {
+	for _, c := range nextAt(s, "/").Controls {
 		if c.Label == "Show" {
 			t.Error("the count line still has a Show setting")
 		}
 	}
-	if c := nextAt(s, "/next").Controls; len(c) == 0 || c[0].Label != "Order by" || !strings.HasPrefix(c[0].Value, "frequency") {
+	if c := nextAt(s, "/").Controls; len(c) == 0 || c[0].Label != "Order by" || !strings.HasPrefix(c[0].Value, "frequency") {
 		t.Errorf("the count line starts with %+v; want Order by frequency", c[0])
 	}
 }
 
-// TestNextDrawsOneScale checks that every bird /next shows is drawn at the
+// TestNextDrawsOneScale checks that every bird / shows is drawn at the
 // same pixels per millimeter, the longest bird's, whatever the order.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextDrawsOneScale(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	for _, target := range []string{"/next", "/next?by=frequency", "/next?family=Ardeidae&family=Trochilidae", "/next?month=all&by=mass"} {
+	for _, target := range []string{"/", "/?by=frequency", "/?family=Ardeidae&family=Trochilidae", "/?month=all&by=mass"} {
 		p := nextAt(s, target)
 		if len(p.Tiles) < 2 {
 			t.Fatalf("%s: %d birds; too few to compare", target, len(p.Tiles))
@@ -164,14 +164,14 @@ func TestNextDrawsOneScale(t *testing.T) {
 func TestNextOrders(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	p := nextAt(s, "/next?by=mass&family=Parulidae")
+	p := nextAt(s, "/?by=mass&family=Parulidae")
 	for i := 1; i < len(p.Tiles); i++ {
 		if p.Tiles[i].S.Mass.Value < p.Tiles[i-1].S.Mass.Value {
 			t.Errorf("by mass: %s after %s", p.Tiles[i].S.ID, p.Tiles[i-1].S.ID)
 		}
 	}
-	opt := nextOptions(httptest.NewRequest(http.MethodGet, "/next?month=Oct", nil))
-	p = nextAt(s, "/next?by=frequency&month=Oct")
+	opt := nextOptions(httptest.NewRequest(http.MethodGet, "/?month=Oct", nil))
+	p = nextAt(s, "/?by=frequency&month=Oct")
 	prev := math.Inf(1)
 	for _, tl := range p.Tiles {
 		num, den := shareIn(tl.S, s.ds, opt)
@@ -191,12 +191,12 @@ func TestNextOrders(t *testing.T) {
 func TestNextFiltersCombineAndEmptyIsAll(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	herons := nextAt(s, "/next?family=Ardeidae")
+	herons := nextAt(s, "/?family=Ardeidae")
 	if len(herons.Tiles) < 5 {
 		t.Fatalf("family=Ardeidae shows %d birds, want every heron", len(herons.Tiles))
 	}
-	fl := nextAt(s, "/next?family=Ardeidae&region=FL")
-	me := nextAt(s, "/next?family=Ardeidae&region=ME")
+	fl := nextAt(s, "/?family=Ardeidae&region=FL")
+	me := nextAt(s, "/?family=Ardeidae&region=ME")
 	if len(fl.Tiles) == 0 || len(me.Tiles) >= len(herons.Tiles) {
 		t.Errorf("herons: %d everywhere, %d in Florida, %d in Maine; region does not narrow",
 			len(herons.Tiles), len(fl.Tiles), len(me.Tiles))
@@ -206,11 +206,11 @@ func TestNextFiltersCombineAndEmptyIsAll(t *testing.T) {
 			t.Errorf("family=Ardeidae&region=FL shows %s, of %s", tl.S.ID, tl.S.Family)
 		}
 	}
-	if got, want := len(nextAt(s, "/next?family=").Tiles), len(nextAt(s, "/next").Tiles); got != want {
-		t.Errorf("/next?family= shows %d birds, /next %d; an empty filter must mean all", got, want)
+	if got, want := len(nextAt(s, "/?family=").Tiles), len(nextAt(s, "/").Tiles); got != want {
+		t.Errorf("/?family= shows %d birds, / %d; an empty filter must mean all", got, want)
 	}
-	if got := len(nextAt(s, "/next?region=&month=").Tiles); got == 0 {
-		t.Error("/next?region=&month= shows nothing; an empty filter must mean all")
+	if got := len(nextAt(s, "/?region=&month=").Tiles); got == 0 {
+		t.Error("/?region=&month= shows nothing; an empty filter must mean all")
 	}
 }
 
@@ -261,7 +261,7 @@ func pinOf(p nextData, id string) (template.URL, bool, bool) {
 func TestNextPins(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	start := "/next?family=Ardeidae"
+	start := "/?family=Ardeidae"
 	before := nextAt(s, start)
 	for _, tl := range before.Tiles {
 		if tl.PinURL == "" || tl.Pinned {
@@ -318,7 +318,7 @@ func TestNextFindCountsThenLists(t *testing.T) {
 				want++
 			}
 		}
-		p := nextAt(s, "/next?find="+url.QueryEscape(q))
+		p := nextAt(s, "/?find="+url.QueryEscape(q))
 		if p.Found != want {
 			t.Errorf("find=%q: %d found, the matcher finds %d", q, p.Found, want)
 		}
@@ -349,7 +349,7 @@ func TestNextFindInTheBrowser(t *testing.T) {
 	js, _ := json.Marshal(qs)
 	ts := httptest.NewServer(instrument(s, nextFindProbe, nil))
 	defer ts.Close()
-	start := "/next?month=all&pin=annhum"
+	start := "/?month=all&pin=annhum"
 	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancel()
 	out, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
@@ -418,13 +418,13 @@ func TestNextFindInTheBrowser(t *testing.T) {
 func TestNextToggle(t *testing.T) {
 	q := func(s string) url.Values { v, _ := url.ParseQuery(s); return v }
 	for _, c := range []struct{ from, v, want string }{
-		{"", "FL", "/next?region=FL"},
-		{"region=FL", "ME", "/next?region=FL&region=ME"},
-		{"region=FL&region=ME", "FL", "/next?region=ME"},
-		{"region=ME", "ME", "/next"},
-		{"region=", "ME", "/next?region=ME"},
-		{"region=FL&find=hawk&cap=50&by=mass", "FL", "/next?by=mass&cap=50"},
-		{"pin=blujay&show=pinned", "FL", "/next?pin=blujay&region=FL"},
+		{"", "FL", "/?region=FL"},
+		{"region=FL", "ME", "/?region=FL&region=ME"},
+		{"region=FL&region=ME", "FL", "/?region=ME"},
+		{"region=ME", "ME", "/"},
+		{"region=", "ME", "/?region=ME"},
+		{"region=FL&find=hawk&cap=50&by=mass", "FL", "/?by=mass&cap=50"},
+		{"pin=blujay&show=pinned", "FL", "/?pin=blujay&region=FL"},
 	} {
 		if got := string(nextToggle(q(c.from), "region", c.v)); got != c.want {
 			t.Errorf("toggling %s from %q = %s, want %s", c.v, c.from, got, c.want)
@@ -444,12 +444,12 @@ func TestNextToggle(t *testing.T) {
 func TestNextShowAll(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	p := nextAt(s, "/next")
+	p := nextAt(s, "/")
 	if p.Count <= nextCap {
-		t.Fatalf("/next has %d birds; the check needs more than %d", p.Count, nextCap)
+		t.Fatalf("/ has %d birds; the check needs more than %d", p.Count, nextCap)
 	}
-	if len(p.Tiles) != nextCap || string(p.MoreURL) != "/next?cap=none" || p.Hidden != p.Count-nextCap || p.Cap != "100" {
-		t.Errorf("/next draws %d of %d, hides %d, cap box %q, more link %q", len(p.Tiles), p.Count, p.Hidden, p.Cap, p.MoreURL)
+	if len(p.Tiles) != nextCap || string(p.MoreURL) != "/?cap=none" || p.Hidden != p.Count-nextCap || p.Cap != "100" {
+		t.Errorf("/ draws %d of %d, hides %d, cap box %q, more link %q", len(p.Tiles), p.Count, p.Hidden, p.Cap, p.MoreURL)
 	}
 	all := nextAt(s, string(p.MoreURL))
 	if len(all.Tiles) != p.Count || all.MoreURL != "" || all.Cap != "" {
@@ -464,23 +464,23 @@ func TestNextShowAll(t *testing.T) {
 
 	// cap=50: fifty drawn, the box says so, and it survives a filter and
 	// Show only pinned but not Reset.
-	c := nextAt(s, "/next?by=mass&cap=50")
+	c := nextAt(s, "/?by=mass&cap=50")
 	if len(c.Tiles) != 50 || c.First != 50 || c.Hidden != c.Count-50 || c.Cap != "50" ||
-		string(c.MoreURL) != "/next?by=mass&cap=none" {
+		string(c.MoreURL) != "/?by=mass&cap=none" {
 		t.Errorf("cap=50: %d drawn, first %d, hidden %d of %d, box %q, more %s",
 			len(c.Tiles), c.First, c.Hidden, c.Count, c.Cap, c.MoreURL)
 	}
-	if got := string(nextToggle(url.Values{"cap": {"50"}, "by": {"mass"}}, "region", "FL")); got != "/next?by=mass&cap=50&region=FL" {
+	if got := string(nextToggle(url.Values{"cap": {"50"}, "by": {"mass"}}, "region", "FL")); got != "/?by=mass&cap=50&region=FL" {
 		t.Errorf("a filter from cap=50 goes to %s; the cap is kept", got)
 	}
-	if string(c.ShowURL) != "/next?by=mass&cap=50&show=pinned" || string(c.ResetURL) != "/next" {
+	if string(c.ShowURL) != "/?by=mass&cap=50&show=pinned" || string(c.ResetURL) != "/" {
 		t.Errorf("cap=50: Show only pinned %s, Reset %s", c.ShowURL, c.ResetURL)
 	}
 
 	// The count line: First [box] of N, the box in a form with the other
 	// settings, and Show all right after it.
-	_, body := get(t, s, "/next?by=mass&cap=50&find=jay")
-	form := regexp.MustCompile(`(?s)<form class="shown capform" action="/next" method="get">(.*?)</form>`).FindStringSubmatch(body)
+	_, body := get(t, s, "/?by=mass&cap=50&find=jay")
+	form := regexp.MustCompile(`(?s)<form class="shown capform" action="/" method="get">(.*?)</form>`).FindStringSubmatch(body)
 	if form == nil {
 		t.Fatal("the count line has no cap form")
 	}
@@ -492,7 +492,7 @@ func TestNextShowAll(t *testing.T) {
 		!strings.Contains(form[1], `>First <input class="cap"`) || !strings.Contains(form[1], " of "+strconv.Itoa(c.Count)+" birds") {
 		t.Errorf("the cap form does not read First [50] of %d birds:\n%s", c.Count, form[1])
 	}
-	more := `href="` + html.EscapeString(string(nextAt(s, "/next?by=mass&cap=50&find=jay").MoreURL)) + `"`
+	more := `href="` + html.EscapeString(string(nextAt(s, "/?by=mass&cap=50&find=jay").MoreURL)) + `"`
 	if !strings.Contains(body, "</form>\n  <a class=\"showall\" "+more+">Show all</a>") {
 		t.Error("Show all does not follow the cap form")
 	}
@@ -500,13 +500,13 @@ func TestNextShowAll(t *testing.T) {
 		t.Error("Show all is not both on the count line and in the gap row at the end")
 	}
 	// The box is there even when nothing is hidden, so a small set can be capped.
-	if _, body := get(t, s, "/next?family=Ardeidae&cap=none"); !strings.Contains(body, `<input class="cap" type="number" name="cap"`) {
+	if _, body := get(t, s, "/?family=Ardeidae&cap=none"); !strings.Contains(body, `<input class="cap" type="number" name="cap"`) {
 		t.Error("with no cap, the count line has no cap box")
 	}
 
 	for from, to := range map[string]string{
-		"/next?cap=100&by=mass": "/next?by=mass", "/next?by=mass&cap=": "/next?by=mass",
-		"/next?cap=zero": "/next", "/next?cap=0": "/next", "/next?cap=-3": "/next",
+		"/?cap=100&by=mass": "/?by=mass", "/?by=mass&cap=": "/?by=mass",
+		"/?cap=zero": "/", "/?cap=0": "/", "/?cap=-3": "/",
 	} {
 		w := httptest.NewRecorder()
 		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, from, nil))
@@ -514,14 +514,14 @@ func TestNextShowAll(t *testing.T) {
 			t.Errorf("GET %s = %d to %q, want 303 to %s", from, w.Code, w.Header().Get("Location"), to)
 		}
 	}
-	for _, ok := range []string{"/next?cap=50", "/next?cap=none"} {
+	for _, ok := range []string{"/?cap=50", "/?cap=none"} {
 		w := httptest.NewRecorder()
 		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, ok, nil))
 		if w.Code != http.StatusOK {
 			t.Errorf("GET %s = %d, want 200", ok, w.Code)
 		}
 	}
-	if p := nextAt(s, "/next?family=Ardeidae"); p.MoreURL != "" || len(p.Tiles) != p.Count {
+	if p := nextAt(s, "/?family=Ardeidae"); p.MoreURL != "" || len(p.Tiles) != p.Count {
 		t.Errorf("the herons, %d birds, draw %d and offer Show all %q", p.Count, len(p.Tiles), p.MoreURL)
 	}
 }
@@ -541,18 +541,18 @@ func TestNextOrderReverses(t *testing.T) {
 		}
 		return out
 	}
-	c := choices("/next?by=mass&family=Anatidae")
-	if !c["Mass"].On || string(c["Mass"].URL) != "/next?by=mass&family=Anatidae&rev=1" {
+	c := choices("/?by=mass&family=Anatidae")
+	if !c["Mass"].On || string(c["Mass"].URL) != "/?by=mass&family=Anatidae&rev=1" {
 		t.Errorf("chosen Mass links to %s, want its reverse", c["Mass"].URL)
 	}
-	if string(c["Length"].URL) != "/next?by=length&family=Anatidae" {
+	if string(c["Length"].URL) != "/?by=length&family=Anatidae" {
 		t.Errorf("Length links to %s", c["Length"].URL)
 	}
-	c = choices("/next?by=mass&family=Anatidae&rev=1")
-	if string(c["Mass"].URL) != "/next?by=mass&family=Anatidae" || string(c["Length"].URL) != "/next?by=length&family=Anatidae" {
+	c = choices("/?by=mass&family=Anatidae&rev=1")
+	if string(c["Mass"].URL) != "/?by=mass&family=Anatidae" || string(c["Length"].URL) != "/?by=length&family=Anatidae" {
 		t.Errorf("reversed: Mass links to %s and Length to %s; want back, and Length unreversed", c["Mass"].URL, c["Length"].URL)
 	}
-	up, down := nextAt(s, "/next?by=mass&family=Anatidae"), nextAt(s, "/next?by=mass&family=Anatidae&rev=1")
+	up, down := nextAt(s, "/?by=mass&family=Anatidae"), nextAt(s, "/?by=mass&family=Anatidae&rev=1")
 	if len(up.Tiles) < 5 || len(up.Tiles) != len(down.Tiles) {
 		t.Fatalf("%d and %d ducks", len(up.Tiles), len(down.Tiles))
 	}
@@ -564,16 +564,16 @@ func TestNextOrderReverses(t *testing.T) {
 	if up.Tiles[0].S == down.Tiles[0].S {
 		t.Errorf("%s leads both directions", up.Tiles[0].S.ID)
 	}
-	fwd, rev := nextAt(s, "/next?family=Anatidae"), nextAt(s, "/next?family=Anatidae&rev=1")
+	fwd, rev := nextAt(s, "/?family=Anatidae"), nextAt(s, "/?family=Anatidae&rev=1")
 	if fwd.Tiles[0].S != rev.Tiles[len(rev.Tiles)-1].S {
 		t.Errorf("the most recorded duck, %s, is not at the end of the reversed order", fwd.Tiles[0].S.ID)
 	}
-	if v := nextAt(s, "/next?rev=1").Controls[0].Value; v != "frequency, least often recorded first" {
+	if v := nextAt(s, "/?rev=1").Controls[0].Value; v != "frequency, least often recorded first" {
 		t.Errorf("reversed frequency reads %q", v)
 	}
 }
 
-// TestNextWithoutAMonthIsNotStored checks that /next with no month, which
+// TestNextWithoutAMonthIsNotStored checks that / with no month, which
 // answers from the clock, is neither stored nor revalidated, and that with a
 // month it is cached as any page is.
 //
@@ -582,8 +582,8 @@ func TestNextWithoutAMonthIsNotStored(t *testing.T) {
 	s := newTestServer(t)
 	s.build = "test-build"
 	for target, store := range map[string]bool{
-		"/next": false, "/next?region=FL": false, "/next?month=": false,
-		"/next?month=Oct": true, "/next?month=Oct&region=FL": true,
+		"/": false, "/?region=FL": false, "/?month=": false,
+		"/?month=Oct": true, "/?month=Oct&region=FL": true,
 	} {
 		w := httptest.NewRecorder()
 		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, target, nil))
@@ -598,10 +598,6 @@ func TestNextWithoutAMonthIsNotStored(t *testing.T) {
 			t.Errorf("%s: Cache-Control %q, ETag %q; want no-store and no validator", target, cc, etag)
 		}
 	}
-	_, body := get(t, s, "/")
-	if strings.Contains(body, `href="/next`) {
-		t.Error("the index links to /next; the prototype is not linked until it is compared")
-	}
 }
 
 // TestNextControlsOpenOneAtATime checks that every setting on the count line
@@ -611,14 +607,14 @@ func TestNextWithoutAMonthIsNotStored(t *testing.T) {
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextControlsOpenOneAtATime(t *testing.T) {
 	s := newTestServer(t)
-	_, body := get(t, s, "/next?region=FL")
+	_, body := get(t, s, "/?region=FL")
 	n := strings.Count(body, `<details class="ctl"`)
 	named := len(regexp.MustCompile(`<details class="ctl" name="ctl"[ >]`).FindAllString(body, -1))
 	if n < 8 || named != n {
 		t.Errorf("%d of %d count-line settings share the name ctl; want all, and at least 8", named, n)
 	}
-	if !strings.Contains(body, `<a class="reset" href="/next"`) || !strings.Contains(body, ">Reset</a>") {
-		t.Error("no Reset control linking to /next")
+	if !strings.Contains(body, `<a class="reset" href="/"`) || !strings.Contains(body, ">Reset</a>") {
+		t.Error("no Reset control linking to /")
 	}
 }
 
@@ -631,13 +627,13 @@ func TestNextControlsOpenOneAtATime(t *testing.T) {
 func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	before := nextAt(s, "/next")
-	all := nextAt(s, "/next?cap=none")
+	before := nextAt(s, "/")
+	all := nextAt(s, "/?cap=none")
 	last := all.Tiles[len(all.Tiles)-1].S // the least recorded: far past the first
 	if hasTile(before, last.ID) {
 		t.Fatalf("%s is drawn already; the check needs a bird past the first %d", last.ID, nextCap)
 	}
-	m := nextAt(s, "/next?find="+url.QueryEscape(last.ScientificName)).Matches
+	m := nextAt(s, "/?find="+url.QueryEscape(last.ScientificName)).Matches
 	if len(m) != 1 || m[0].Pinned {
 		t.Fatalf("finding %s, a bird not drawn, lists %+v; want it unpinned", last.ScientificName, m)
 	}
@@ -653,7 +649,7 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	if _, body := get(t, s, follow(t, s, string(m[0].URL))); !strings.Contains(body, " of "+strconv.Itoa(after.Count)+" birds, plus 1 pin\n") {
 		t.Errorf("the count line does not say \"plus 1 pin\" after %d birds", after.Count)
 	}
-	if _, body := get(t, s, "/next?cap=2&month=all&pin="+last.ID+"&pin="+all.Tiles[len(all.Tiles)-2].S.ID); !strings.Contains(body, " birds, plus 2 pins\n") {
+	if _, body := get(t, s, "/?cap=2&month=all&pin="+last.ID+"&pin="+all.Tiles[len(all.Tiles)-2].S.ID); !strings.Contains(body, " birds, plus 2 pins\n") {
 		t.Error("with two pins past the cap, the count line does not say \"plus 2 pins\"")
 	}
 	if len(after.Tiles) != len(before.Tiles)+1 {
@@ -666,7 +662,7 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 
 	// Two birds mid-order by length: gaps sit before the shorter, between the
 	// two, and after the longer, summing to Hidden, each linking to Show all.
-	two := "/next?by=length&pin=fuwduc&pin=amecro"
+	two := "/?by=length&pin=fuwduc&pin=amecro"
 	p := nextAt(s, two)
 	_, body := get(t, s, two)
 	tokens := regexp.MustCompile(`id="(s-[a-z0-9]+)"|<p class="gap">([0-9]+) birds? hidden — <a href="([^"]+)">Show all</a></p>`).
@@ -696,7 +692,7 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	// A gap of one bird reads "1 bird hidden", and a gap after the last pin
 	// reads "birds hidden".
 	small := newTestServer(t)
-	_, sbody := get(t, small, "/next?month=all&by=mass&pin=amecro&cap=2")
+	_, sbody := get(t, small, "/?month=all&by=mass&pin=amecro&cap=2")
 	if !strings.Contains(sbody, `<p class="gap">1 bird hidden — `) || !strings.Contains(sbody, `<p class="gap">2 birds hidden — `) {
 		t.Errorf("with 1 hidden before amecro and 2 after, the gaps do not say so:\n%s", sbody)
 	}
@@ -712,23 +708,23 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 func TestNextShowPinned(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	start := nextAt(s, "/next?by=mass&cap=none")
-	if string(start.ShowURL) != "/next?by=mass&cap=none&show=pinned" {
+	start := nextAt(s, "/?by=mass&cap=none")
+	if string(start.ShowURL) != "/?by=mass&cap=none&show=pinned" {
 		t.Errorf("Show only pinned links to %s, want the order and cap kept", start.ShowURL)
 	}
-	if a, b := nextAt(s, "/next?by=mass&show=all").Count, nextAt(s, "/next?by=mass").Count; a != b {
+	if a, b := nextAt(s, "/?by=mass&show=all").Count, nextAt(s, "/?by=mass").Count; a != b {
 		t.Errorf("show=all draws from %d birds, the default from %d; all is the default", a, b)
 	}
 	empty := nextAt(s, string(start.ShowURL))
 	if !empty.PinnedOnly || len(empty.Tiles) != 0 || empty.Count != 0 || empty.Title != "Birds you chose" {
 		t.Errorf("pinned only: %d drawn of %d, title %q", len(empty.Tiles), empty.Count, empty.Title)
 	}
-	two := "/next?by=mass&pin=amecro&pin=annhum&show=pinned"
+	two := "/?by=mass&pin=amecro&pin=annhum&show=pinned"
 	p := nextAt(s, two)
 	if got := tileIDs(p); !slices.Equal(got, []string{"annhum", "amecro"}) {
 		t.Errorf("pinned only, with two pinned, draws %v, want annhum and amecro by mass", got)
 	}
-	if back := follow(t, s, two+"&bird=amecro"); back != "/next?by=mass&pin=annhum&show=pinned" {
+	if back := follow(t, s, two+"&bird=amecro"); back != "/?by=mass&pin=annhum&show=pinned" {
 		t.Errorf("removing one of two goes to %s", back)
 	}
 	undo := nextAt(s, string(p.ShowURL))
@@ -748,7 +744,7 @@ func TestNextShowPinned(t *testing.T) {
 func TestNextHereAndNow(t *testing.T) {
 	s := newTestServer(t)
 	fixNextClock(t, time.October)
-	p := nextAt(s, "/next?by=mass&region=CA&show=pinned&month=May")
+	p := nextAt(s, "/?by=mass&region=CA&show=pinned&month=May")
 	var region, mon *nextControl
 	for i := range p.Controls {
 		switch p.Controls[i].Label {
@@ -761,16 +757,16 @@ func TestNextHereAndNow(t *testing.T) {
 	if region == nil || mon == nil {
 		t.Fatal("no Region or Month setting")
 	}
-	if got := strings.Replace(region.HereURL, hereSlot, "FL", 1); got != "/next?by=mass&month=May&region=FL" {
+	if got := strings.Replace(region.HereURL, hereSlot, "FL", 1); got != "/?by=mass&month=May&region=FL" {
 		t.Errorf("Here, filled with FL, is %s", got)
 	}
 	if region.Boundaries != s.boundaryURL {
 		t.Errorf("Here looks regions up in %q, want %q", region.Boundaries, s.boundaryURL)
 	}
-	_, body := get(t, s, "/next")
+	_, body := get(t, s, "/")
 	if !strings.Contains(body, `class="btn here"`) || !strings.Contains(body, `class="herestatus"`) ||
 		!strings.Contains(body, string(s.hereJS)[:200]) {
-		t.Error("/next has no Here button, status, or here.js")
+		t.Error("/ has no Here button, status, or here.js")
 	}
 	// One line: All, Now, a rule, and the twelve months.
 	if len(mon.Groups) != 1 || !mon.Groups[0].OneLine || mon.AllURL != "" {
@@ -788,16 +784,16 @@ func TestNextHereAndNow(t *testing.T) {
 	if want := append([]string{"All", "Now"}, month.Abbrev[:]...); !slices.Equal(labels, want) {
 		t.Errorf("the month choices are %v, want %v", labels, want)
 	}
-	if now := ch[1]; now.On || string(now.URL) != "/next?by=mass&region=CA" {
+	if now := ch[1]; now.On || string(now.URL) != "/?by=mass&region=CA" {
 		t.Errorf("with May named, Now is %+v; want it off, linking to no month", now)
 	}
-	if all := ch[0]; all.On || string(all.URL) != "/next?by=mass&month=all&region=CA" {
+	if all := ch[0]; all.On || string(all.URL) != "/?by=mass&month=all&region=CA" {
 		t.Errorf("with May named, All is %+v; want it off, linking to month=all", all)
 	}
-	if ch := nextAt(s, "/next").Controls[1].Groups[0].Choices; !ch[1].On || ch[0].On || ch[11].On {
+	if ch := nextAt(s, "/").Controls[1].Groups[0].Choices; !ch[1].On || ch[0].On || ch[11].On {
 		t.Errorf("with no month named, All %t, Now %t, Oct %t; want only Now chosen", ch[0].On, ch[1].On, ch[11].On)
 	}
-	if ch := nextAt(s, "/next?month=all").Controls[1].Groups[0].Choices; !ch[0].On || ch[1].On {
+	if ch := nextAt(s, "/?month=all").Controls[1].Groups[0].Choices; !ch[0].On || ch[1].On {
 		t.Errorf("with month=all, All %t and Now %t; want only All chosen", ch[0].On, ch[1].On)
 	}
 }
@@ -827,7 +823,7 @@ func TestNextSettingStaysOpen(t *testing.T) {
 		"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
 		"--disable-component-update", "--disable-sync", "--disable-extensions",
 		"--user-data-dir="+t.TempDir(), "--virtual-time-budget=8000",
-		"--dump-dom", ts.URL+"/next?by=mass").Output()
+		"--dump-dom", ts.URL+"/?by=mass").Output()
 	if err != nil {
 		t.Fatalf("chrome: %v", err)
 	}
@@ -845,8 +841,8 @@ func TestNextSettingStaysOpen(t *testing.T) {
 	if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
 		t.Fatalf("reading the probe: %v", err)
 	}
-	if res.URL != "/next?by=mass&month=May" || !slices.Equal(res.Open, []string{"Month"}) {
-		t.Errorf("after choosing %s, the page is %s with %v open; want /next?by=mass&month=May with Month open", res.Chosen, res.URL, res.Open)
+	if res.URL != "/?by=mass&month=May" || !slices.Equal(res.Open, []string{"Month"}) {
+		t.Errorf("after choosing %s, the page is %s with %v open; want /?by=mass&month=May with Month open", res.Chosen, res.URL, res.Open)
 	}
 	if len(res.Reload) != 0 {
 		t.Errorf("a plain reload opened %v; want nothing", res.Reload)
@@ -860,7 +856,7 @@ func TestNextSettingStaysOpen(t *testing.T) {
 func TestNextFamilyBadges(t *testing.T) {
 	s := newTestServer(t)
 	var fam *nextControl
-	p := nextAt(s, "/next")
+	p := nextAt(s, "/")
 	for i := range p.Controls {
 		if p.Controls[i].Label == "Family" {
 			fam = &p.Controls[i]
@@ -888,9 +884,9 @@ func TestNextFamilyBadges(t *testing.T) {
 	if n != len(s.fams) {
 		t.Errorf("the Family setting offers %d families of %d", n, len(s.fams))
 	}
-	_, body := get(t, s, "/next")
+	_, body := get(t, s, "/")
 	f := s.fams[0]
-	if !strings.Contains(body, `<a class="chip" href="/next?family=`+f.Name+`"`) ||
+	if !strings.Contains(body, `<a class="chip" href="/?family=`+f.Name+`"`) ||
 		!strings.Contains(body, f.Name+`<em>`+html.EscapeString(f.Common)+`</em></a>`) {
 		t.Errorf("%s is not drawn as a badge with its description", f.Name)
 	}
@@ -904,17 +900,17 @@ func TestNextFamilyBadges(t *testing.T) {
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextResetKeepsPins(t *testing.T) {
 	s := newTestServer(t)
-	p := nextAt(s, "/next?by=mass&region=FL&month=May&pin=annhum&pin=amecro&show=pinned&rev=1")
-	if string(p.ResetURL) != "/next?pin=annhum&pin=amecro" {
+	p := nextAt(s, "/?by=mass&region=FL&month=May&pin=annhum&pin=amecro&show=pinned&rev=1")
+	if string(p.ResetURL) != "/?pin=annhum&pin=amecro" {
 		t.Errorf("Reset links to %s, want the defaults with both pins, in order", p.ResetURL)
 	}
-	if string(p.ClearPinsURL) != "/next?by=mass&month=May&region=FL&rev=1" {
+	if string(p.ClearPinsURL) != "/?by=mass&month=May&region=FL&rev=1" {
 		t.Errorf("Clear pins links to %s, want every setting kept and no pins", p.ClearPinsURL)
 	}
-	if p := nextAt(s, "/next?by=mass"); p.ClearPinsURL != "" || string(p.ResetURL) != "/next" {
-		t.Errorf("with nothing pinned: Clear pins %q, Reset %q; want no Clear pins and Reset to /next", p.ClearPinsURL, p.ResetURL)
+	if p := nextAt(s, "/?by=mass"); p.ClearPinsURL != "" || string(p.ResetURL) != "/" {
+		t.Errorf("with nothing pinned: Clear pins %q, Reset %q; want no Clear pins and Reset to /", p.ClearPinsURL, p.ResetURL)
 	}
-	_, body := get(t, s, "/next?pin=amecro")
+	_, body := get(t, s, "/?pin=amecro")
 	clear, reset := strings.Index(body, ">Clear pins</a>"), strings.Index(body, ">Reset</a>")
 	if clear < 0 || reset < 0 || clear > reset {
 		t.Errorf("Clear pins at %d, Reset at %d; want Clear pins just before Reset", clear, reset)
@@ -929,7 +925,7 @@ func TestNextResetKeepsPins(t *testing.T) {
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextPinnedList(t *testing.T) {
 	s := newTestServer(t)
-	p := nextAt(s, "/next?by=mass&month=all&pin=annhum&pin=amecro&pin=nosuchbird")
+	p := nextAt(s, "/?by=mass&month=all&pin=annhum&pin=amecro&pin=nosuchbird")
 	var names []string
 	for _, e := range p.Pinned {
 		names = append(names, e.Anchor)
@@ -937,12 +933,12 @@ func TestNextPinnedList(t *testing.T) {
 	if !slices.Equal(names, []string{"s-amecro", "s-annhum"}) {
 		t.Fatalf("the pinned list links to %v, want s-amecro then s-annhum (alphabetical, not pin or mass order)", names)
 	}
-	if string(p.Pinned[0].URL) != "/next?by=mass&month=all&pin=annhum&pin=nosuchbird" {
+	if string(p.Pinned[0].URL) != "/?by=mass&month=all&pin=annhum&pin=nosuchbird" {
 		t.Errorf("the first entry's pin goes to %s, want the page without that pin", p.Pinned[0].URL)
 	}
 	// Under IOC names, thimur ("Murre Thick-billed") precedes amerob ("Robin
 	// American"), though amerob precedes thimur by id, pin order, and mass.
-	wp := nextAt(s, "/next?by=mass&month=all&names=world&pin=amerob&pin=thimur")
+	wp := nextAt(s, "/?by=mass&month=all&names=world&pin=amerob&pin=thimur")
 	if len(wp.Pinned) != 2 || wp.Pinned[0].Anchor != "s-thimur" || wp.Pinned[1].Anchor != "s-amerob" {
 		t.Errorf("under IOC names, the pinned list is %+v, want thimur before amerob", wp.Pinned)
 	}
@@ -958,17 +954,17 @@ func TestNextPinnedList(t *testing.T) {
 	if unpinned == 0 {
 		t.Error("no unpinned bird is drawn, so no pin that pins was checked")
 	}
-	_, body := get(t, s, "/next?pin=amecro")
+	_, body := get(t, s, "/?pin=amecro")
 	if !strings.Contains(body, `<div class="pinned" role="region" aria-label="Pinned birds">`) {
 		t.Error("with a bird pinned, the page draws no pinned list")
 	}
 	if !strings.Contains(body, `<a class="pinname" href="#s-amecro"`) || !strings.Contains(body, `id="s-amecro"`) {
 		t.Error("the pinned list's name does not link to the bird's tile")
 	}
-	if p := nextAt(s, "/next"); len(p.Pinned) != 0 {
+	if p := nextAt(s, "/"); len(p.Pinned) != 0 {
 		t.Errorf("with nothing pinned, the list has %d entries", len(p.Pinned))
 	}
-	if _, body := get(t, s, "/next"); strings.Contains(body, `class="pinned"`) {
+	if _, body := get(t, s, "/"); strings.Contains(body, `class="pinned"`) {
 		t.Error("with nothing pinned, the page still draws the pinned list")
 	}
 }
@@ -996,7 +992,7 @@ func TestNextPinKeepsPlace(t *testing.T) {
 		"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
 		"--disable-component-update", "--disable-sync", "--disable-extensions",
 		"--user-data-dir="+t.TempDir(), "--window-size=800,600", "--virtual-time-budget=8000",
-		"--dump-dom", ts.URL+"/next?month=all").Output()
+		"--dump-dom", ts.URL+"/?month=all").Output()
 	if err != nil {
 		t.Fatalf("chrome: %v", err)
 	}
@@ -1043,7 +1039,7 @@ func TestNextPinAlignsWithCube(t *testing.T) {
 			"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
 			"--disable-component-update", "--disable-sync", "--disable-extensions",
 			"--user-data-dir="+t.TempDir(), "--window-size="+size, "--virtual-time-budget=8000",
-			"--dump-dom", ts.URL+"/next?by=length").Output()
+			"--dump-dom", ts.URL+"/?by=length").Output()
 		cancel()
 		if err != nil {
 			t.Fatalf("chrome at %s: %v", size, err)

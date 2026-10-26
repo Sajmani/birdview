@@ -43,7 +43,7 @@
     <a href="/compare?species=calcon&amp;species=amwpel&amp;species=mutswa&amp;species=magfri&amp;species=baleag&amp;species=bkfalb">huge birds</a> &middot;
     see all <a href="{{.WelcomeHerons}}">herons and ducks</a> &middot;
     <a href="/docs/using#some-things-to-try">more ideas</a> &middot;
-    <a href="/">reset to defaults</a>
+    <a href="/classic">reset to defaults</a>
     <span class="welcomestatus" role="status" aria-live="polite"
           data-template="{{.HereNowTemplate}}"></span></p>
 </header>
@@ -358,7 +358,7 @@
 {{/* product.searchBox. A form, so Enter works without JavaScript; with it,
      search.js filters as the reader types and adds q to the next link
      followed. The hidden fields keep every other setting. */}}
-<form class="search" action="/" method="get" role="search">
+<form class="search" action="/classic" method="get" role="search">
   {{range .SearchFields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
   <input type="search" name="q" value="{{.Opt.Query}}" placeholder="Search names, codes, and families"
          aria-label="Search birds by name, code, or family" autocomplete="off" spellcheck="false">
@@ -461,7 +461,7 @@
  * and is held to the Go lookup's answers by a test. Without JavaScript the
  * page still works, minus this and Here. */
 (function () {
-  if (window.location.pathname !== "/") return;
+  if (window.location.pathname !== "/classic") return;
 
   /* Panels first. Collapsing one after the scroll has been restored would
      shift everything under it, which is the jump this is here to avoid. */

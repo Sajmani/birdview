@@ -73,9 +73,21 @@ func TestSmokeChecksTheServer(t *testing.T) {
 			}
 			return false
 		}},
-		{"index not compressed", "the index", func(w http.ResponseWriter, r *http.Request) bool {
+		{"home page not compressed", "the home page", func(w http.ResponseWriter, r *http.Request) bool {
 			if r.URL.Path == "/" {
 				r.Header.Del("Accept-Encoding")
+			}
+			return false
+		}},
+		{"home page cached", "the home page", func(w http.ResponseWriter, r *http.Request) bool {
+			if r.URL.Path == "/" {
+				r.URL.RawQuery = "month=Oct" // a named month is cacheable
+			}
+			return false
+		}},
+		{"classic view not revalidated", "the classic view", func(w http.ResponseWriter, r *http.Request) bool {
+			if r.URL.Path == "/classic" {
+				r.Header.Del("If-None-Match")
 			}
 			return false
 		}},

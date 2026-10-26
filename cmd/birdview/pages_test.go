@@ -101,8 +101,8 @@ func discoverPages(t *testing.T, s *server) []webPage {
 	s.onRender = func(name string) { rendered = name }
 	defer func() { s.onRender = nil }()
 
-	queue := []string{"/", "/?species=", "/?species=amecro&species=annhum&family=Corvidae",
-		"/docs", "/added", "/excluded", "/compare?species=amecro&species=annhum", "/next",
+	queue := []string{"/classic", "/classic?species=", "/classic?species=amecro&species=annhum&family=Corvidae",
+		"/docs", "/added", "/excluded", "/compare?species=amecro&species=annhum", "/",
 		"/species/" + undrawnFixture()[0].ID, "/no-such-page", "/robots.txt"}
 	seen := map[string]bool{}
 	visits := map[string]int{}
@@ -146,9 +146,9 @@ func discoverPages(t *testing.T, s *server) []webPage {
 // noPages are the routes that serve no web page, and why. Each is probed to
 // confirm it, so an exemption cannot hide a page added there later.
 var noPages = map[string]string{
-	"/now":             "a redirect to the index for the current month",
-	"/boundaries/":     "the region boundary file, JSON",
-	"/next/birds.json": "the names /next's find box searches, JSON",
+	"/now":         "a redirect to the classic view for the current month",
+	"/boundaries/": "the region boundary file, JSON",
+	"/birds.json":  "the names the home page's find box searches, JSON",
 }
 
 // TestEveryKindOfPageIsDiscovered checks the discovery the other page checks

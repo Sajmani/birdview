@@ -113,7 +113,7 @@ func TestRobotsKeepsCrawlersToPages(t *testing.T) {
 			continue
 		}
 		path, query, _ := strings.Cut(p.url, "?")
-		blocked := strings.HasPrefix(path, "/compare") || path == "/next"
+		blocked := strings.HasPrefix(path, "/compare") || path == "/classic"
 		want := query == "" && !blocked
 		if strings.Contains(p.url, "?") {
 			filtered++
@@ -148,18 +148,18 @@ func TestRobotsMatcher(t *testing.T) {
 		{false, "/*?"}, {false, "/compare"}, {true, "/page"}, {false, "/*.php$"}, {false, "/fish"}, {true, "/fish.html"},
 	}
 	for path, want := range map[string]bool{
-		"/":                 true,
-		"/?family=Corvidae": false,
-		"/species/x?u=1":    false,
-		"/compare":          false,
-		"/compareX":         false,
-		"/page":             true,
-		"/index.php":        false,
-		"/index.php?x":      false, // "/*?" matches; "/*.php$" does not, since $ anchors the end
-		"/index.phpx":       true,
-		"/fish":             false,
-		"/fish.html":        true, // longer Allow beats shorter Disallow
-		"/Fish":             true, // paths are case-sensitive
+		"/classic":                 true,
+		"/classic?family=Corvidae": false,
+		"/species/x?u=1":           false,
+		"/compare":                 false,
+		"/compareX":                false,
+		"/page":                    true,
+		"/index.php":               false,
+		"/index.php?x":             false, // "/*?" matches; "/*.php$" does not, since $ anchors the end
+		"/index.phpx":              true,
+		"/fish":                    false,
+		"/fish.html":               true, // longer Allow beats shorter Disallow
+		"/Fish":                    true, // paths are case-sensitive
 	} {
 		if got := robotsAllowed(rules, path); got != want {
 			t.Errorf("robotsAllowed(%q) = %v, want %v", path, got, want)

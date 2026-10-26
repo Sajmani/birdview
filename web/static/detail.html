@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body class="detail">
-<p class="back"><a class="backlink" href="{{call .Query}}">&larr;
+<p class="back"><a class="backlink" href="{{if .Bar.Picking}}{{call .Query}}{{else}}{{.Home}}{{end}}">&larr;
   {{if .Bar.Picking}}back to picking birds{{else}}back to all birds{{end}}</a></p>
 
 <div class="tile big">

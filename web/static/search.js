@@ -77,7 +77,7 @@
   box.addEventListener("input", apply);
 
   // The search reaches the address on the next click that changes it.
-  var carries = /^\/(compare|now|species\/.*)?$/;
+  var carries = /^\/(classic|compare|now|species\/.*)$/;
   function withQuery(href) {
     var u = new URL(href, location.href);
     if (u.origin !== location.origin || !carries.test(u.pathname)) return null;

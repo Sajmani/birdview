@@ -269,7 +269,7 @@ buckets were watched failing by removing them: "0 empty buckets before tier 2, w
 
 ## nextViewDrawsOneSet
 
-**/next draws the set its address names, at one scale, and every control on its count line keeps to the rule**
+**The home page draws the set its address names, at one scale, and every control on its count line keeps to the rule**
 
 Covers: [product.nextView](../../../local/product/presentation.md#nextview)
 
@@ -289,7 +289,7 @@ matching nothing) shows the same count line and lists the same birds, with the s
 off, as the server's page for each. The Family setting draws every family in its badge's colors
 with its description. Choosing from all selects
 only that one, choosing again removes it, and changing a filter drops the find box and keeps the cap.
-/next draws the first 100 of October's 1,006 and a link to all of them (`cap=none`) in the same
+The home page draws the first 100 of October's 1,006 and a link to all of them (`cap=none`) in the same
 order, both right after the cap form on the count line and in the gap row at the end; the
 herons draw every heron with no link. `cap=50` draws 50,
 says 50 in the box, and is kept by a filter and Show only pinned but not Reset. The cap form
@@ -298,12 +298,12 @@ with no cap too. `cap=100`, `cap=`, `cap=0`, `cap=-3`, and `cap=zero` redirect t
 without a cap; `cap=50` and `cap=none` do not. The chosen order links to its reverse and back, every other
 order links to itself unreversed, reversed mass runs largest first, and reversed frequency puts
 the most recorded duck last. Without a month the page is
-no-store with no validator; with one it carries an ETag. The index does not link to /next. Every
+no-store with no validator; with one it carries an ETag. The classic view is at /classic. Every
 count-line setting is a `<details>` sharing one name, so the browser opens one at a time, and
-Reset links to /next. The pinned list names each pinned bird in alphabetical order by displayed name, linking to its tile, with a pin
+Reset links to /. The pinned list names each pinned bird in alphabetical order by displayed name, linking to its tile, with a pin
 that unpins it; no pin link jumps the page, and in headless Chrome a page loaded by a pin opens
 scrolled where the pin was clicked. Reset keeps the pins, in order, and drops every setting; Clear pins,
-before it and only when something is pinned, drops the pins and keeps every setting. The phone-width and contrast checks reach /next through the crawl, open
+before it and only when something is pinned, drops the pins and keeps every setting. The phone-width and contrast checks reach the home page through the crawl, open
 every setting at once, and measure after the placing script has run. Pinning the October set's
 least recorded bird, past the first 100, draws it after one gap row and none after it, and the count line says "plus 1 pin" ("plus 2 pins" for two); pinning two mid-order birds by length draws gap rows before, between, and after them summing to Hidden, each linking to Show all, and Show all draws no gaps. Show
 only pinned links to `show=pinned` with the order kept and draws nothing; with two pinned it

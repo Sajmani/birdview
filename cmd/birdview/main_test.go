@@ -365,8 +365,8 @@ func get(t *testing.T, s *server, path string) (int, string) {
 func TestRoutesServe(t *testing.T) {
 	s := newTestServer(t)
 	for _, path := range []string{
-		"/", "/static/styles.css", "/species/greblu",
-		"/?family=Ardeidae", "/?by=mass&scale=global&units=metric&step=30",
+		"/classic", "/static/styles.css", "/species/greblu",
+		"/classic?family=Ardeidae", "/classic?by=mass&scale=global&units=metric&step=30",
 	} {
 		if code, body := get(t, s, path); code != http.StatusOK {
 			t.Errorf("%s: status %d", path, code)
@@ -402,7 +402,7 @@ var externalSubresource = regexp.MustCompile(
 // Verifies: tech.selfContainedServer. Criterion: acceptance.noServerNetworkRequest.
 func TestNoExternalResources(t *testing.T) {
 	s := newTestServer(t)
-	for _, path := range []string{"/", "/species/greblu"} {
+	for _, path := range []string{"/classic", "/species/greblu"} {
 		_, body := get(t, s, path)
 		if m := externalSubresource.FindAllString(body, -1); len(m) > 0 {
 			t.Errorf("%s fetches external resources: %v", path, m)
@@ -412,7 +412,7 @@ func TestNoExternalResources(t *testing.T) {
 
 // Verifies: product.tileContents. Criterion: acceptance.tileCarriesHeaderAndMetrics.
 func TestTileShowsHeaderAndMetrics(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
+	_, body := get(t, newTestServer(t), "/classic")
 	for _, want := range []string{
 		"American Robin",     // common name
 		"(amerob)",           // eBird species code, in parentheses after it
@@ -493,7 +493,7 @@ func TestDiagramStaysInsideItsBox(t *testing.T) {
 			"see a wrong scale reference -- widen the fixture's size range", step)
 	}
 
-	_, body := get(t, newTestServer(t), fmt.Sprintf("/?scale=section&step=%d", step))
+	_, body := get(t, newTestServer(t), fmt.Sprintf("/classic?scale=section&step=%d", step))
 
 	coord := regexp.MustCompile(`\b(?:y1|y2|cy)="(-?[0-9.]+)"`)
 	for _, d := range diagrams(t, body) {
@@ -537,7 +537,7 @@ func TestDiagramStaysInsideItsBox(t *testing.T) {
 //
 // Verifies: product.tileContents. Criterion: acceptance.tileCarriesHeaderAndMetrics.
 func TestDiagramIsVerticallyCentered(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/?scale=global")
+	_, body := get(t, newTestServer(t), "/classic?scale=global")
 
 	if strings.Contains(body, "xMidYMax") {
 		t.Error("diagram is bottom-anchored (xMidYMax); it should be centered")
@@ -592,11 +592,11 @@ func TestDetailShowsEverySegmentWithProvenance(t *testing.T) {
 // Verifies: product.familyFilter. Criterion: acceptance.familyFilterSelectsAndClears.
 func TestFamilyFilter(t *testing.T) {
 	s := newTestServer(t)
-	_, all := get(t, s, "/")
+	_, all := get(t, s, "/classic")
 	if !strings.Contains(all, "American Robin") || !strings.Contains(all, "Great Blue Heron") {
 		t.Fatal("unfiltered view should show every species")
 	}
-	_, one := get(t, s, "/?family=Ardeidae")
+	_, one := get(t, s, "/classic?family=Ardeidae")
 	if strings.Contains(one, "American Robin") {
 		t.Error("filtering to Ardeidae still shows a Turdidae species")
 	}
@@ -700,11 +700,11 @@ func TestUnitToggle(t *testing.T) {
 			t.Errorf("%s: footer %q has %d of the one mass value in %v", path, f, n, wantMass)
 		}
 	}
-	check("/", []string{" in"}, []string{" oz", " lb"})
-	check("/?units=metric", []string{" cm"}, []string{" g", " kg"})
+	check("/classic", []string{" in"}, []string{" oz", " lb"})
+	check("/classic?units=metric", []string{" cm"}, []string{" g", " kg"})
 
-	_, a := get(t, s, "/")
-	_, b := get(t, s, "/?units=metric")
+	_, a := get(t, s, "/classic")
+	_, b := get(t, s, "/classic?units=metric")
 	if footer(t, a) == footer(t, b) {
 		t.Error("tile footer is identical in both unit systems; the toggle does nothing")
 	}
@@ -756,12 +756,12 @@ func TestMassUnitsBySystem(t *testing.T) {
 //
 // Verifies: product.scaleToggle. Criterion: acceptance.sharedScale.
 func TestDefaultScaleIsPerSection(t *testing.T) {
-	if got := parseOptions(httptest.NewRequest(http.MethodGet, "/", nil)).Scale; got != view.PerSection {
+	if got := parseOptions(httptest.NewRequest(http.MethodGet, "/classic", nil)).Scale; got != view.PerSection {
 		t.Errorf("default scale is %q, want %q", got, view.PerSection)
 	}
 	// And the toggle must still reach the other mode: global is one click away,
 	// which is the premise the default change rests on.
-	r := httptest.NewRequest(http.MethodGet, "/?scale=global", nil)
+	r := httptest.NewRequest(http.MethodGet, "/classic?scale=global", nil)
 	if got := parseOptions(r).Scale; got != view.Global {
 		t.Errorf("?scale=global gave %q, want %q", got, view.Global)
 	}
@@ -805,7 +805,7 @@ func TestDetailDrawsFullScale(t *testing.T) {
 //
 // Verifies: product.pageExplainsItself. Criterion: acceptance.pageExplainsControls.
 func TestHelpCoversEveryControl(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
+	_, body := get(t, newTestServer(t), "/classic")
 	i := strings.Index(body, `<details class="help"`)
 	if i < 0 {
 		t.Fatal("no help block on the page")
@@ -976,7 +976,7 @@ func descendantOfColored(selector string) bool {
 // Verifies: product.familyFilter. Criterion: acceptance.familyFilterSelectsAndClears.
 func TestOrderToggles(t *testing.T) {
 	s := newTestServer(t)
-	_, body := get(t, s, "/")
+	_, body := get(t, s, "/classic")
 
 	// Each order is a link carrying its common name, not inert text, and starts
 	// selected.
@@ -1039,7 +1039,7 @@ func mustMatch(t *testing.T, body, pattern, what string) string {
 func TestAllToggle(t *testing.T) {
 	s := newTestServer(t)
 
-	_, fresh := get(t, s, "/")
+	_, fresh := get(t, s, "/classic")
 	// The Regions box carries an All control too and comes first on the page,
 	// so this must say which selector it means (product.regionAndMonthFilter).
 	clear := html.UnescapeString(mustMatch(t, grouping(t, box(t, fresh, "families"), "Taxonomic order"),
@@ -1074,7 +1074,7 @@ func TestAllToggle(t *testing.T) {
 // Verifies: product.familyFilter, product.firstLoadShowsAll. Criterion: acceptance.familyFilterSelectsAndClears.
 func TestDefaultSelectsEverything(t *testing.T) {
 	s := newTestServer(t)
-	_, body := get(t, s, "/")
+	_, body := get(t, s, "/classic")
 	fams := box(t, body, "families")
 	if !regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(fams) {
 		t.Error("All is not selected on a fresh page")
@@ -1104,7 +1104,7 @@ func TestDefaultSelectsEverything(t *testing.T) {
 // Verifies: product.familyFilter. Criterion: acceptance.emptyStateGuides.
 func TestClearingEverythingShowsGuidance(t *testing.T) {
 	s := newTestServer(t)
-	_, body := get(t, s, "/")
+	_, body := get(t, s, "/classic")
 	// Scoped to the family block. The Species panel now opens with the
 	// habitat and diet controls, each with its own All, so an unscoped
 	// first-match grabs the wrong one and clears nothing (product.habitatAndDietFilters).
@@ -1146,7 +1146,7 @@ func TestClearingEverythingShowsGuidance(t *testing.T) {
 // Verifies: tech.selfContainedServer, product.togglesKeepPlace. Criterion: acceptance.scrollScriptScoped.
 func TestScrollRestorationIsInlineAndSelfContained(t *testing.T) {
 	s := newTestServer(t)
-	_, body := get(t, s, "/")
+	_, body := get(t, s, "/classic")
 
 	if !strings.Contains(body, "birdview.scroll") {
 		t.Error("index carries no scroll-restoration script")
@@ -1159,7 +1159,7 @@ func TestScrollRestorationIsInlineAndSelfContained(t *testing.T) {
 		}
 	}
 	// Scoped to the index, so a detail page does not consume the saved position.
-	if !strings.Contains(body, `window.location.pathname !== "/"`) {
+	if !strings.Contains(body, `window.location.pathname !== "/classic"`) {
 		t.Error("script is not scoped to the index; a detail page would eat the saved scroll")
 	}
 	// The detail view ships no script at all.
@@ -1186,7 +1186,7 @@ func TestScrollRestorationIsInlineAndSelfContained(t *testing.T) {
 //
 // Verifies: product.pageExplainsItself, product.collapsibleControls, product.togglesKeepPlace. Criterion: acceptance.scrollScriptScoped.
 func TestCollapsiblePanelsPersist(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
+	_, body := get(t, newTestServer(t), "/classic")
 
 	for _, id := range []string{"presentation", "controls"} {
 		if !strings.Contains(body, `id="`+id+`"`) {
@@ -1225,7 +1225,7 @@ func TestCollapsiblePanelsPersist(t *testing.T) {
 //
 // Verifies: product.sectionThresholdDefault, product.scaleToggle. Criterion: acceptance.controlsMatchServer.
 func TestControlOrderAndOptions(t *testing.T) {
-	_, page := get(t, newTestServer(t), "/")
+	_, page := get(t, newTestServer(t), "/classic")
 
 	// Scope to the controls panel. The Presentation panel above it also names both
 	// scale modes, in the same order -- searching the whole page matched the
@@ -1255,7 +1255,7 @@ func TestControlOrderAndOptions(t *testing.T) {
 		if !strings.Contains(body, `>`+step+`%<`) {
 			t.Errorf("section step %s%% is not offered", step)
 		}
-		r := httptest.NewRequest(http.MethodGet, "/?step="+step, nil)
+		r := httptest.NewRequest(http.MethodGet, "/classic?step="+step, nil)
 		if got := parseOptions(r).Step; got != mustFloat(t, step) {
 			t.Errorf("step=%s parsed as %v; the control offers a value the server rejects", step, got)
 		}
@@ -1280,7 +1280,7 @@ func mustFloat(t *testing.T, s string) float64 {
 //
 // Verifies: tech.localNowPublicLater, goals.goodDataCitizen. Criterion: acceptance.attributionComplete.
 func TestAttributionIsComplete(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
+	_, body := get(t, newTestServer(t), "/classic")
 	f := body[strings.Index(body, "<footer>"):]
 
 	for _, want := range []string{
@@ -1336,7 +1336,7 @@ func s2(t *testing.T) *server { t.Helper(); return newTestServer(t) }
 //
 // Verifies: goals.goodDataCitizen. Criterion: acceptance.attributionComplete.
 func TestNoUnearnedPermissionClaim(t *testing.T) {
-	for _, page := range []string{"/", "/species/greblu"} {
+	for _, page := range []string{"/classic", "/species/greblu"} {
 		_, body := get(t, newTestServer(t), page)
 		for _, claim := range []string{"used by permission", "with permission", "licensed from", "under licence", "under license"} {
 			if strings.Contains(strings.ToLower(body), claim) {
@@ -1367,7 +1367,7 @@ func neckRow(t *testing.T, body string) string {
 // Verifies: product.segmentComposition, product.segmentsSumToLength, product.tileOpensDetail. Criterion: acceptance.foldedNeckSameStroke.
 func TestFoldedNeckRendersAsAnArc(t *testing.T) {
 	s := newTestServer(t)
-	_, body := get(t, s, "/")
+	_, body := get(t, s, "/classic")
 
 	var folded, straight int
 	for _, d := range diagrams(t, body) {
@@ -1510,7 +1510,7 @@ func TestFaviconIsServedLocally(t *testing.T) {
 	// now derived from the stylesheet in web.TestFaviconUsesTheAppPalette
 	// (product.oneDiagramVocabulary, acceptance.faviconFromPalette), which lives where both assets are embedded.
 
-	for _, path := range []string{"/", "/species/greblu"} {
+	for _, path := range []string{"/classic", "/species/greblu"} {
 		_, page := get(t, s, path)
 		if !strings.Contains(page, `href="/static/favicon.svg"`) {
 			t.Errorf("%s does not reference the favicon", path)
@@ -1575,7 +1575,7 @@ func TestCrossbarSplitsAtTheChord(t *testing.T) {
 // Verifies: product.measuredVersusModeled. Criterion: acceptance.diagramDistinguishesModeled.
 func TestBothPagesExplainTheStrokeCode(t *testing.T) {
 	s := newTestServer(t)
-	for _, path := range []string{"/", "/species/greblu"} {
+	for _, path := range []string{"/classic", "/species/greblu"} {
 		_, body := get(t, s, path)
 		low := strings.ToLower(body)
 		for _, want := range []string{"solid", "dashed", "tick", "chord"} {
@@ -1657,7 +1657,7 @@ func TestDetailDiagramIsLabeled(t *testing.T) {
 		t.Errorf("%d leader lines, want 5", n)
 	}
 	// A tile has none: the index is dense on purpose.
-	_, index := get(t, newTestServer(t), "/")
+	_, index := get(t, newTestServer(t), "/classic")
 	if strings.Contains(tileArea(t, index), `class="dlabel`) {
 		t.Error("index tiles carry diagram labels; those belong to the detail view and the legend")
 	}
@@ -1713,7 +1713,7 @@ func TestWingLabelsClearTheColumn(t *testing.T) {
 //
 // Verifies: product.pageExplainsItself. Criterion: acceptance.pageExplainsControls.
 func TestEveryControlEntryIsWrapped(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
+	_, body := get(t, newTestServer(t), "/classic")
 	i := strings.Index(body, `<div class="ctrlhelp">`)
 	if i < 0 {
 		t.Fatal("no control explanation block")
@@ -1773,7 +1773,7 @@ func TestDiagramTextPaintsOverLines(t *testing.T) {
 //
 // Verifies: product.pageExplainsItself. Criterion: acceptance.pageExplainsControls.
 func TestHeaderNamesThePanelsThatExist(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
+	_, body := get(t, newTestServer(t), "/classic")
 	intro := mustMatch(t, body, `(?s)<p class="sub">(.*?)</p>`, "the header intro")
 
 	// The title is the text before any markup: a summary now also carries a
@@ -1877,7 +1877,7 @@ func TestDetailDiagramLabelsTotalLength(t *testing.T) {
 	}
 
 	// The legend carries it; an index tile does not.
-	_, index := get(t, newTestServer(t), "/")
+	_, index := get(t, newTestServer(t), "/classic")
 	if !strings.Contains(index, `class="dlabel total`) {
 		t.Error("the help legend has no total length label; it renders through the same builder")
 	}
@@ -1962,7 +1962,7 @@ func attrF(t *testing.T, el, name string) float64 {
 //
 // Verifies: product.familyFilter. Criterion: acceptance.familyListWraps.
 func TestEveryOrderGroupWrapsItsFamilies(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
+	_, body := get(t, newTestServer(t), "/classic")
 
 	// Split on the group opener rather than matching balanced </div>s: the
 	// nesting is exactly what this test exists to check, so a parse that
@@ -2285,7 +2285,7 @@ func tileHrefs(t *testing.T, body string) []string {
 func TestTileLinksCarryViewState(t *testing.T) {
 	s := newTestServer(t)
 	// A filter is active, so `family` is present and would leak if carried.
-	const q = "/?units=metric&by=wingspan&scale=global&step=30" +
+	const q = "/classic?units=metric&by=wingspan&scale=global&step=30" +
 		"&family=Trochilidae&family=Turdidae&species=amecro"
 	_, body := get(t, s, q)
 
@@ -2365,7 +2365,7 @@ func pickControls(body string) []string {
 func TestPickModeIsTheSpeciesParameter(t *testing.T) {
 	s := newTestServer(t)
 
-	_, browsing := get(t, s, "/")
+	_, browsing := get(t, s, "/classic")
 	if n := len(pickControls(browsing)); n != 0 {
 		t.Errorf("browsing mode shows %d pick controls; the tile a reader sees almost all "+
 			"the time should be unchanged", n)
@@ -2376,7 +2376,7 @@ func TestPickModeIsTheSpeciesParameter(t *testing.T) {
 
 	// Bare species=: picking, nothing picked. The mode must hold open or
 	// unpicking your last bird drops you out mid-task.
-	_, empty := get(t, s, "/?species=")
+	_, empty := get(t, s, "/classic?species=")
 	if n, want := len(pickControls(empty)), len(tileHrefs(t, empty)); n != want {
 		t.Errorf("a bare species= gave %d pick controls for %d tiles", n, want)
 	}
@@ -2385,7 +2385,7 @@ func TestPickModeIsTheSpeciesParameter(t *testing.T) {
 	}
 
 	// Populated: a control on every tile, and the picked one says so.
-	_, picking := get(t, s, "/?species=annhum")
+	_, picking := get(t, s, "/classic?species=annhum")
 	if n, want := len(pickControls(picking)), len(tileHrefs(t, picking)); n != want {
 		t.Errorf("%d pick controls for %d tiles; every tile needs one", n, want)
 	}
@@ -2412,7 +2412,7 @@ func TestPickingIsReversibleAndKeepsTheFilter(t *testing.T) {
 	s := newTestServer(t)
 
 	// Add, then remove, returns the original set in the original order.
-	start := "/?species=amecro&species=annhum"
+	start := "/classic?species=amecro&species=annhum"
 	_, body := get(t, s, start)
 	var addURL string
 	for _, h := range pickControls(body) {
@@ -2444,7 +2444,7 @@ func TestPickingIsReversibleAndKeepsTheFilter(t *testing.T) {
 	}
 
 	// The filter survives a pick, and the bar names a pick the filter hides.
-	_, filtered := get(t, s, "/?family=Trochilidae&species=greblu")
+	_, filtered := get(t, s, "/classic?family=Trochilidae&species=greblu")
 	for _, h := range pickControls(filtered) {
 		u, _ := url.Parse(h)
 		if got := u.Query()["family"]; !slices.Equal(got, []string{"Trochilidae"}) {
@@ -2468,7 +2468,7 @@ func TestPickingIsReversibleAndKeepsTheFilter(t *testing.T) {
 func TestComparisonKeepsTheFilter(t *testing.T) {
 	s := newTestServer(t)
 	want := []string{"Corvidae", "Trochilidae"}
-	index := mustGet(t, s, "/?by=mass&family=Corvidae&family=Trochilidae"+
+	index := mustGet(t, s, "/classic?by=mass&family=Corvidae&family=Trochilidae"+
 		"&species=amecro&species=annhum&step=10")
 
 	keeps := func(what, h string) {
@@ -2508,7 +2508,7 @@ func TestComparisonKeepsTheFilter(t *testing.T) {
 func TestPicksSurviveTheDetailRoundTrip(t *testing.T) {
 	s := newTestServer(t)
 	want := []string{"amecro", "annhum"}
-	_, body := get(t, s, "/?species=amecro&species=annhum")
+	_, body := get(t, s, "/classic?species=amecro&species=annhum")
 
 	_, detail := get(t, s, tileHrefs(t, body)[0])
 	back := html.UnescapeString(mustMatch(t, detail,
@@ -2532,7 +2532,7 @@ func TestPicksSurviveTheDetailRoundTrip(t *testing.T) {
 // Verifies: product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
 func TestOnlyClearLeavesPickMode(t *testing.T) {
 	s := newTestServer(t)
-	_, body := get(t, s, "/?species=annhum&units=metric")
+	_, body := get(t, s, "/classic?species=annhum&units=metric")
 
 	clear := html.UnescapeString(mustMatch(t, body,
 		`<a class="btn pickclear" href="([^"]+)"`, "the Clear link"))
@@ -2557,19 +2557,19 @@ func TestOnlyClearLeavesPickMode(t *testing.T) {
 	}
 	// Reset to defaults leaves on purpose, resetting every setting
 	// (product.pickFromIndex). It is the only link to the bare address.
-	if !strings.Contains(body, `<a href="/">reset to defaults</a>`) {
+	if !strings.Contains(body, `<a href="/classic">reset to defaults</a>`) {
 		t.Error("no reset to defaults on the index while picking")
 	}
 	resets := 0
 	checked := 0
-	// The bare address included: a link to "/" drops the picks as surely
+	// The bare address included: a link to "/classic" drops the picks as surely
 	// as one with a query, and this once looked only at the latter.
-	for _, m := range regexp.MustCompile(`href="(/(?:\?[^"]*)?)"`).FindAllStringSubmatch(body, -1) {
+	for _, m := range regexp.MustCompile(`href="(/classic(?:\?[^"]*)?)"`).FindAllStringSubmatch(body, -1) {
 		h := html.UnescapeString(m[1])
 		if edits[h] {
 			continue
 		}
-		if h == "/" {
+		if h == "/classic" {
 			if resets++; resets > 1 {
 				t.Error("more than one link to the bare address; only reset to defaults may leave this way")
 			}
@@ -2597,7 +2597,7 @@ func TestOnlyClearLeavesPickMode(t *testing.T) {
 // Verifies: product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
 func TestUnrecognizedPicksAreDroppedAndNamed(t *testing.T) {
 	s := newTestServer(t)
-	code, body := get(t, s, "/?species=annhum&species=grus_canadensis")
+	code, body := get(t, s, "/classic?species=annhum&species=grus_canadensis")
 	if code != http.StatusOK {
 		t.Fatalf("a set with one dead id gave %d; it should render what it recognizes", code)
 	}
@@ -2744,7 +2744,7 @@ func TestCompareBirdsToggle(t *testing.T) {
 	}
 
 	// Off while browsing, and it turns the mode on with nothing picked.
-	class, href := find(mustGet(t, s, "/?units=metric"))
+	class, href := find(mustGet(t, s, "/classic?units=metric"))
 	if strings.Contains(class, "on") {
 		t.Errorf("the toggle reads as on while browsing (class %q)", class)
 	}
@@ -2763,10 +2763,10 @@ func TestCompareBirdsToggle(t *testing.T) {
 
 	// On once picking, whether or not anything is picked, and it leaves by
 	// exactly the link Clear uses -- same behavior, so the same URL.
-	// units= matters: with no other parameter, Clear and a hardcoded "/?"
+	// units= matters: with no other parameter, Clear and a hardcoded "/classic?"
 	// are the same string, and the comparison below cannot tell a shared link
 	// from a coincidence.
-	for _, u := range []string{"/?species=&units=metric", "/?species=annhum&units=metric"} {
+	for _, u := range []string{"/classic?species=&units=metric", "/classic?species=annhum&units=metric"} {
 		body := mustGet(t, s, u)
 		class, href = find(body)
 		if !strings.Contains(class, "on") {
@@ -2797,7 +2797,7 @@ func TestCompareBirdsToggle(t *testing.T) {
 // Verifies: product.togglesKeepPlace, product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
 func TestPickLinksAnchorAtTheirTile(t *testing.T) {
 	s := newTestServer(t)
-	body := mustGet(t, s, "/?species=")
+	body := mustGet(t, s, "/classic?species=")
 
 	ids := regexp.MustCompile(`<div class="tilewrap" id="([^"]+)"`).FindAllStringSubmatch(body, -1)
 	picks := pickControls(body)
@@ -2988,7 +2988,7 @@ func TestMassCubeIsRenderedAndExplained(t *testing.T) {
 	// On index tiles too, since decisions.massCubeOnTiles -- but unlabeled. A tile carries no
 	// labels at all and names the mass in its footer, so the cube appears
 	// with no text of its own.
-	_, index := get(t, s, "/")
+	_, index := get(t, s, "/classic")
 	tiles := tileArea(t, index)
 	cubes := strings.Count(tiles, `<g class="masscube`)
 	if n := strings.Count(tiles, `<a class="tile"`); cubes != n {
@@ -3171,8 +3171,8 @@ func TestNameLocaleTogglesNamesAndNothingElse(t *testing.T) {
 func TestNameLocaleControlOffersBothAndMarksTheActive(t *testing.T) {
 	s := newTestServer(t)
 	for _, c := range []struct{ query, onHref string }{
-		{"/", "names=na"},
-		{"/?names=world", "names=world"},
+		{"/classic", "names=na"},
+		{"/classic?names=world", "names=world"},
 	} {
 		_, body := get(t, s, c.query)
 		for _, want := range []string{`"names" "na"`, `"names" "world"`} {
@@ -3232,13 +3232,13 @@ func TestEmptyStateNamesTheFiltersThatEmptiedIt(t *testing.T) {
 	// no bird falls in. The fixture has no way to empty a family selection on
 	// its own, which is why this needs the second filter to exist at all --
 	// see the note below.
-	_, body := get(t, s, "/?family=Ardeidae&family=Turdidae")
+	_, body := get(t, s, "/classic?family=Ardeidae&family=Turdidae")
 	if strings.Contains(body, "No birds match") {
 		t.Fatal("a selection with species in it reported no matches")
 	}
 
 	// Nothing selected: the other message, and emphatically not this one.
-	_, none := get(t, s, "/?family=")
+	_, none := get(t, s, "/classic?family=")
 	if !strings.Contains(none, "Select birds to display") {
 		t.Error("an emptied selection does not say how to get birds back")
 	}
@@ -3287,7 +3287,7 @@ func TestEmptyStateNamesTheFiltersThatEmptiedIt(t *testing.T) {
 //
 // Verifies: product.pageExplainsItself. Criterion: acceptance.everyControlDocumented.
 func TestEveryControlIsDocumented(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
+	_, body := get(t, newTestServer(t), "/classic")
 
 	// Locate before slicing. A missing marker makes strings.Index return -1,
 	// and body[-1:] panics before any assertion below can run -- so a broken
@@ -3402,7 +3402,7 @@ func TestRegionFilter(t *testing.T) {
 	s := newTestServer(t)
 
 	// One region shows what is reported there and excludes the rest.
-	_, ca := get(t, s, "/?region=CA")
+	_, ca := get(t, s, "/classic?region=CA")
 	// Unescaped: the fixture's names carry apostrophes, which the template
 	// writes as &#39; and a raw substring search then misses.
 	tiles := html.UnescapeString(tileArea(t, ca))
@@ -3420,8 +3420,8 @@ func TestRegionFilter(t *testing.T) {
 	// Absent means everywhere; explicitly empty means nowhere. The family
 	// filter draws the same distinction, and conflating them is the bug it
 	// had first.
-	_, all := get(t, s, "/")
-	_, none := get(t, s, "/?region=")
+	_, all := get(t, s, "/classic")
+	_, none := get(t, s, "/classic?region=")
 	if strings.Count(tileArea(t, all), "tilewrap") == 0 {
 		t.Fatal("no species with no region parameter")
 	}
@@ -3431,7 +3431,7 @@ func TestRegionFilter(t *testing.T) {
 
 	// Composition: region and family narrow together, and an empty
 	// intersection names both filters rather than blaming one.
-	_, both := get(t, s, "/?region=CA&family=Corvidae")
+	_, both := get(t, s, "/classic?region=CA&family=Corvidae")
 	if n := strings.Count(tileArea(t, both), "tilewrap"); n != 0 {
 		t.Errorf("California plus Corvidae showed %d species; the crow is not in California", n)
 	}
@@ -3445,11 +3445,11 @@ func TestRegionFilter(t *testing.T) {
 	}
 
 	// A seabird appears under its ocean as well as the coast it is seen from.
-	_, sea := get(t, s, "/?region=NorthPacific")
+	_, sea := get(t, s, "/classic?region=NorthPacific")
 	if !strings.Contains(html.UnescapeString(tileArea(t, sea)), "Thick-billed Murre") {
 		t.Error("the Pacific shows no murre; a pelagic species has nowhere else to be")
 	}
-	_, ak := get(t, s, "/?region=AK")
+	_, ak := get(t, s, "/classic?region=AK")
 	if !strings.Contains(html.UnescapeString(tileArea(t, ak)), "Thick-billed Murre") {
 		t.Error("Alaska omits the murre, which is seen from shore there as well as at sea")
 	}
@@ -3466,7 +3466,7 @@ func TestRegionFilter(t *testing.T) {
 //
 // Verifies: product.regionAndMonthFilter, product.regionsGroupedTwoWays. Criterion: acceptance.regionFilterBehaves.
 func TestRegionSelectorIsGroupedWithPelagicLast(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
+	_, body := get(t, newTestServer(t), "/classic")
 	sel := box(t, body, "regions")
 
 	// Split the box into its grouping blocks, so each is checked on its own.
@@ -3527,7 +3527,7 @@ func TestRegionSelectorIsGroupedWithPelagicLast(t *testing.T) {
 //
 // Verifies: product.regionAndMonthFilter. Criterion: acceptance.regionUrlRoundTrips.
 func TestRegionURLsCarrySlugsNotGADMIDs(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
+	_, body := get(t, newTestServer(t), "/classic")
 	sel := box(t, body, "regions")
 
 	// No GADM id anywhere in a link. Checked against the real table rather
@@ -3575,7 +3575,7 @@ func TestRegionURLsCarrySlugsNotGADMIDs(t *testing.T) {
 //
 // Verifies: product.habitatAndDietFilters, product.familiesByOrder. Criterion: acceptance.habitatDietFilterPerSpecies.
 func TestTraitAndFamilyPanels(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
+	_, body := get(t, newTestServer(t), "/classic")
 
 	traits := box(t, body, "traits")
 	fams := box(t, body, "families")
@@ -3653,7 +3653,7 @@ func TestTraitAndFamilyPanels(t *testing.T) {
 // Verifies: product.tileContents. Criterion: acceptance.familyGroupingComplete.
 func TestTileCarriesExactlyOneBadge(t *testing.T) {
 	s := newTestServer(t)
-	for _, path := range []string{"/", "/species/greblu", "/compare?species=greblu&species=annhum"} {
+	for _, path := range []string{"/classic", "/species/greblu", "/compare?species=greblu&species=annhum"} {
 		code, body := get(t, s, path)
 		if code != http.StatusOK {
 			t.Fatalf("%s: HTTP %d", path, code)
@@ -3667,7 +3667,7 @@ func TestTileCarriesExactlyOneBadge(t *testing.T) {
 		// the detail and compare pages it is one per species panel.
 		var want int
 		switch path {
-		case "/":
+		case "/classic":
 			want = strings.Count(body, `<a class="tile" href=`)
 		case "/species/greblu":
 			want = 1
@@ -3701,12 +3701,12 @@ func TestFiltersAreNamedOnTheCountLine(t *testing.T) {
 	// Arrival: every setting at its default, named as such. Until
 	// 2026-10-19 nothing was named here; the owner asked for every setting,
 	// defaults included (TestCountLineNamesEverySetting has the full list).
-	if got := countLine(mustGet(t, s, "/")); !strings.Contains(got, "<b>Family</b> All") {
+	if got := countLine(mustGet(t, s, "/classic")); !strings.Contains(got, "<b>Family</b> All") {
 		t.Errorf("the arrival page does not name its family filter as All: %q", got)
 	}
 
 	// One filter set, and birds still matching: named anyway.
-	full := mustGet(t, s, "/?family=Ardeidae")
+	full := mustGet(t, s, "/classic?family=Ardeidae")
 	line := countLine(full)
 	if !strings.Contains(line, "Ardeidae") {
 		t.Errorf("a narrowed list does not name its filter on the count line: %q", line)
@@ -3717,7 +3717,7 @@ func TestFiltersAreNamedOnTheCountLine(t *testing.T) {
 
 	// Two filters whose intersection is empty: the count line still names
 	// both, and the empty message does not repeat them.
-	empty := mustGet(t, s, "/?family=Ardeidae&region=AK")
+	empty := mustGet(t, s, "/classic?family=Ardeidae&region=AK")
 	line = countLine(empty)
 	for _, want := range []string{"Ardeidae", "Alaska"} {
 		if !strings.Contains(html.UnescapeString(line), want) {
@@ -3742,7 +3742,7 @@ func TestFiltersAreNamedOnTheCountLine(t *testing.T) {
 func TestClearTheFiltersClearsThem(t *testing.T) {
 	s := newTestServer(t)
 	filters := []string{"family", "habitat", "niche", "region", "month"}
-	empty := mustGet(t, s, "/?family=Ardeidae&region=AK&niche=Invertivore&habitat=Forest&month=1&units=metric&by=mass")
+	empty := mustGet(t, s, "/classic?family=Ardeidae&region=AK&niche=Invertivore&habitat=Forest&month=1&units=metric&by=mass")
 	if !strings.Contains(empty, "No birds match") {
 		t.Fatal("Ardeidae in Alaska is no longer an empty intersection; pick another")
 	}
@@ -4076,7 +4076,7 @@ func onlyLink(t *testing.T, scope, afterLabel string) string {
 // Verifies: product.onlyPerGroup. Criterion: acceptance.onlyNarrowsOneGroup.
 func TestOnlyNarrowsToOneGroup(t *testing.T) {
 	s := newTestServer(t)
-	_, body := get(t, s, "/")
+	_, body := get(t, s, "/classic")
 
 	// A region zone: its regions stay, every other region goes.
 	regions := box(t, body, "regions")
@@ -4130,7 +4130,7 @@ func TestOnlyNarrowsToOneGroup(t *testing.T) {
 
 	// Independence from the current selection: the same group yields the same
 	// Only target from a different starting state.
-	_, narrowed := get(t, s, "/?region=CA")
+	_, narrowed := get(t, s, "/classic?region=CA")
 	g2 := grouping(t, box(t, narrowed, "regions"), "Geographic")
 	if h2 := onlyLink(t, g2, zone); h2 != href {
 		t.Errorf("Only for %q differs by starting selection:\n  from all: %s\n  from CA:  %s",
@@ -4166,7 +4166,7 @@ func onlyZone(t *testing.T, grouping, zone string) string {
 //
 // Verifies: product.sectionThresholdDefault. Criterion: acceptance.controlsMatchServer.
 func TestUnitButtonsNameTheUnitsRendered(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/")
+	_, body := get(t, newTestServer(t), "/classic")
 
 	for _, tc := range []struct {
 		metric3 bool
@@ -4369,9 +4369,9 @@ func TestNoSectionMixesMassUnits(t *testing.T) {
 	unit := regexp.MustCompile(`\b\d[\d.,]*\s*(oz|lb|kg|g)\b`)
 
 	for _, q := range []string{
-		"/?by=mass&scale=section", "/?by=mass&scale=global",
-		"/?by=length&scale=section", "/?by=length&scale=global",
-		"/?by=mass&scale=section&units=metric",
+		"/classic?by=mass&scale=section", "/classic?by=mass&scale=global",
+		"/classic?by=length&scale=section", "/classic?by=length&scale=global",
+		"/classic?by=mass&scale=section&units=metric",
 	} {
 		_, body := get(t, srv, q)
 		// Each section is a <section> block; check them one at a time, since
@@ -4485,7 +4485,7 @@ func TestCitedAnchorsResolve(t *testing.T) {
 	// Every anchored citation anywhere on the site.
 	cite := regexp.MustCompile(`href="(/docs/[^"#]+)#([^"]+)"`)
 	checked := 0
-	for _, page := range []string{"/", "/species/greblu", "/species/amerob", "/added",
+	for _, page := range []string{"/classic", "/species/greblu", "/species/amerob", "/added",
 		"/docs/", "/docs/data", "/docs/using", "/excluded"} {
 		body := mustGet(t, s, page)
 		for _, m := range cite.FindAllStringSubmatch(body, -1) {
@@ -4541,8 +4541,8 @@ func TestTileShareFollowsTheRegionFilter(t *testing.T) {
 		return m[1]
 	}
 
-	all := oneIn("/", "American Robin")
-	ontario := oneIn("/?region=ON", "American Robin")
+	all := oneIn("/classic", "American Robin")
+	ontario := oneIn("/classic?region=ON", "American Robin")
 	if all == ontario {
 		t.Errorf("the robin's figure is %q both with all regions and in Ontario "+
 			"alone; the figure is not following the filter", all)
@@ -4576,7 +4576,7 @@ func TestTileShareFollowsTheRegionFilter(t *testing.T) {
 // Verifies: product.shareOfRecords. Criterion: acceptance.figureSaysWhatItCounts.
 func TestTheUnitSaysSpeciesAndNotBird(t *testing.T) {
 	s := newTestServer(t)
-	_, body := get(t, s, "/")
+	_, body := get(t, s, "/classic")
 	i := strings.Index(body, ">American Robin")
 	if i < 0 {
 		t.Fatal("the robin is not on the index")
@@ -4652,7 +4652,7 @@ func atoiComma(t *testing.T, s string) int {
 // Verifies: product.noPersonalAddress. Criterion: acceptance.noContactAddressPublished.
 func TestNoPersonalAddressIsPublished(t *testing.T) {
 	s := newTestServer(t)
-	pages := []string{"/", "/species/greblu", "/species/amerob", "/added",
+	pages := []string{"/classic", "/species/greblu", "/species/amerob", "/added",
 		"/compare?species=amerob&species=blujay", "/docs/"}
 	guides := regexp.MustCompile(`href="(/docs/[^"#]+)"`).FindAllStringSubmatch(mustGet(t, s, "/docs/"), -1)
 	if len(guides) < 4 {
@@ -5045,7 +5045,7 @@ func TestShareStatesZeroRatherThanDashing(t *testing.T) {
 
 	// The fixture heron is in no region at all, so it has nothing in any
 	// selection and is the zero case on every view.
-	_, body := get(t, s, "/")
+	_, body := get(t, s, "/classic")
 	if strings.Contains(body, "&mdash;</span></div>") {
 		t.Error("a share cell still renders a bare em-dash; absence is stated as a number")
 	}
@@ -5071,7 +5071,7 @@ func TestShareStatesZeroRatherThanDashing(t *testing.T) {
 			seas = append(seas, "region="+rg.Slug())
 		}
 	}
-	_, body = get(t, s, "/?"+strings.Join(seas, "&"))
+	_, body = get(t, s, "/classic?"+strings.Join(seas, "&"))
 	if !regexp.MustCompile(`<b>[01] in [\d,]+</b>`).MatchString(body) {
 		t.Error("selecting the seas yields no figure; they have had a denominator since decisions.honestSeaDenominator")
 	}
@@ -5085,7 +5085,7 @@ func TestShareStatesZeroRatherThanDashing(t *testing.T) {
 // This is the check that would have caught the bug the owner reported. The
 // two numbers came from different tables with different denominators and
 // different membership rules, so `/species/yenalb2` could say "commonest in
-// Maine" while `/?region=NorthAtlantic` said something that looked like a
+// Maine" while `/classic?region=NorthAtlantic` said something that looked like a
 // flat contradiction -- and nothing compared them, because each was tested
 // against its own source.
 //
@@ -5248,7 +5248,7 @@ func TestMissingTotalsDoNotClaimTheBirdIsAbsent(t *testing.T) {
 func TestInterfaceNeverSaysShare(t *testing.T) {
 	s := newTestServer(t)
 	pages := []string{
-		"/", "/?region=AK", "/?by=mass&scale=global",
+		"/classic", "/classic?region=AK", "/classic?by=mass&scale=global",
 		"/species/greblu", "/species/amerob", "/species/thimur",
 		"/compare?species=amerob&species=greblu", "/added", "/docs/",
 	}
@@ -5298,7 +5298,7 @@ func TestResponsesCompressWhenAsked(t *testing.T) {
 		return res, body
 	}
 
-	for _, path := range []string{"/", "/species/greblu", "/static/styles.css", "/docs/data"} {
+	for _, path := range []string{"/classic", "/species/greblu", "/static/styles.css", "/docs/data"} {
 		plainRes, plain := fetch(path, false)
 		gzRes, packed := fetch(path, true)
 
@@ -5376,7 +5376,7 @@ func TestResponsesCompressWhenAsked(t *testing.T) {
 	}
 
 	// A status that may carry no body must not carry a gzip header either.
-	plainRes, _ := fetch("/", false)
+	plainRes, _ := fetch("/classic", false)
 	if plainRes.Header.Get("Content-Encoding") != "" {
 		t.Error("an unasked-for response is labeled compressed")
 	}
@@ -5403,7 +5403,7 @@ func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 		return out
 	}
 
-	got := heads("/?by=frequency")
+	got := heads("/classic?by=frequency")
 	if len(got) < 5 {
 		t.Fatalf("only %d sections; frequency spans 7.5 decades and should band into "+
 			"about nine: %v", len(got), got)
@@ -5496,7 +5496,7 @@ func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 
 	// 100x halves the tier count, and the same control under a size metric
 	// still means percent.
-	if wide := heads("/?by=frequency&step=100"); len(wide) >= len(got) {
+	if wide := heads("/classic?by=frequency&step=100"); len(wide) >= len(got) {
 		t.Errorf("100x gave %d sections against 10x's %d; it should be coarser",
 			len(wide), len(got))
 	}
@@ -5505,7 +5505,7 @@ func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 	// under every filter. A data-anchored band would start at whichever bird
 	// is commonest in the selection, and "1 in 1,000 – 9,999" would denote
 	// one set nationally and another in Alaska.
-	ak := heads("/?by=frequency&region=AK")
+	ak := heads("/classic?by=frequency&region=AK")
 	national := map[string]bool{}
 	for _, h := range got {
 		if m := edge.FindStringSubmatch(h); m != nil {
@@ -5562,7 +5562,7 @@ func TestFrequencyTiersAreNotNamed(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
-	_, body := get(t, srv, "/?by=frequency")
+	_, body := get(t, srv, "/classic?by=frequency")
 	heads := regexp.MustCompile(`(?s)<h2>(.*?)</h2>`).FindAllString(body, -1)
 	if len(heads) == 0 {
 		t.Fatal("no section headers")
@@ -5592,14 +5592,14 @@ func TestFrequencyDefaultsToGlobalScale(t *testing.T) {
 		query string
 		want  view.ScaleMode
 	}{
-		{"/", view.PerSection},
-		{"/?by=mass", view.PerSection},
-		{"/?by=frequency", view.Global},
+		{"/classic", view.PerSection},
+		{"/classic?by=mass", view.PerSection},
+		{"/classic?by=frequency", view.Global},
 		// Both directions explicit, under both orderings.
-		{"/?by=frequency&scale=section", view.PerSection},
-		{"/?by=frequency&scale=global", view.Global},
-		{"/?by=length&scale=global", view.Global},
-		{"/?by=length&scale=section", view.PerSection},
+		{"/classic?by=frequency&scale=section", view.PerSection},
+		{"/classic?by=frequency&scale=global", view.Global},
+		{"/classic?by=length&scale=global", view.Global},
+		{"/classic?by=length&scale=section", view.PerSection},
 	} {
 		req := httptest.NewRequest(http.MethodGet, tc.query, nil)
 		if got := parseOptions(req).Scale; got != tc.want {
@@ -5609,7 +5609,7 @@ func TestFrequencyDefaultsToGlobalScale(t *testing.T) {
 
 	// And it reaches the page: under Frequency the control must show Global
 	// as the active one without the reader having asked.
-	_, body := get(t, newTestServer(t), "/?by=frequency")
+	_, body := get(t, newTestServer(t), "/classic?by=frequency")
 	global := regexp.MustCompile(`<a class="btn on"[^>]*scale=global`)
 	if !global.MatchString(body) {
 		section := regexp.MustCompile(`<a class="btn on"[^>]*scale=section`)
@@ -5663,7 +5663,7 @@ func TestSharedNamesAreDisclosed(t *testing.T) {
 
 			// And the index tile carries the seam, with the other bird's
 			// common name in reach of a reader who never opens the page.
-			_, idx := get(t, srv, "/")
+			_, idx := get(t, srv, "/classic")
 			i := strings.Index(idx, id)
 			if i < 0 {
 				t.Errorf("%s is not on the index at all", id)
@@ -5736,7 +5736,7 @@ func TestSharedNamesAreDisclosed(t *testing.T) {
 // Verifies: product.ascendingOrder, product.orderByFrequency. Criterion: acceptance.frequencyTiers.
 func TestOrderByStatesItsDirection(t *testing.T) {
 	s := newTestServer(t)
-	for _, query := range []string{"/", "/?by=length", "/?by=mass", "/?by=frequency"} {
+	for _, query := range []string{"/classic", "/classic?by=length", "/classic?by=mass", "/classic?by=frequency"} {
 		_, body := get(t, s, query)
 		i := strings.Index(body, `class="lbl">Order by`)
 		if i < 0 {
@@ -5801,7 +5801,7 @@ func TestOrderingRowAlignsOnTheBaseline(t *testing.T) {
 			"drag ORDER BY down level with the rules")
 	}
 	// And the row has to carry the class, or the rule applies to nothing.
-	_, body := get(t, newTestServer(t), "/")
+	_, body := get(t, newTestServer(t), "/classic")
 	if !strings.Contains(body, `class="row ordering"`) {
 		t.Error("no row carries the ordering class, so the alignment rule matches nothing")
 	}
@@ -5859,7 +5859,7 @@ func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
 		{"", "(all regions)", 1000},
 		{"?region=AK", "in Alaska", 300},
 	} {
-		_, index := get(t, s, "/"+scope.query)
+		_, index := get(t, s, "/classic"+scope.query)
 		tiles := tile.FindAllStringSubmatch(index, -1)
 		// A parse that silently matched nothing would make every assertion
 		// below vacuous, which is the shape this project keeps paying for.
@@ -6054,7 +6054,7 @@ func TestResponsesCarryAValidator(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
-	paths := []string{"/", "/species/yelwar1", "/species/haiwoo", "/?region=AK",
+	paths := []string{"/classic", "/species/yelwar1", "/species/haiwoo", "/classic?region=AK",
 		"/static/styles.css"}
 
 	tags := map[string]string{}
@@ -6126,10 +6126,10 @@ func TestResponsesCarryAValidator(t *testing.T) {
 		t.Fatalf("newServer: %v", err)
 	}
 	w := httptest.NewRecorder()
-	s2.ServeHTTP(w, httptest.NewRequest("GET", "/", nil))
-	if w.Header().Get("ETag") == tags["/"] {
+	s2.ServeHTTP(w, httptest.NewRequest("GET", "/classic", nil))
+	if w.Header().Get("ETag") == tags["/classic"] {
 		t.Errorf("the index keeps ETag %s after the dataset changed; every reader "+
-			"with a cached copy would keep it", tags["/"])
+			"with a cached copy would keep it", tags["/classic"])
 	}
 }
 
@@ -6420,9 +6420,9 @@ func TestMonthsNarrowTheListAndTheFigureTogether(t *testing.T) {
 		_, body := get(t, s, path)
 		return strings.Count(body, `class="tilewrap"`)
 	}
-	all := count("/")
-	june := count("/?month=Jun")
-	jan := count("/?month=Jan")
+	all := count("/classic")
+	june := count("/classic?month=Jun")
+	jan := count("/classic?month=Jan")
 	if all < 1000 {
 		t.Fatalf("the unfiltered index shows %d tiles", all)
 	}
@@ -6440,12 +6440,12 @@ func TestMonthsNarrowTheListAndTheFigureTogether(t *testing.T) {
 	for i := 0; i < month.Count; i++ {
 		months = append(months, "month="+month.Abbrev[i])
 	}
-	if n := count("/?" + strings.Join(months, "&")); n != all {
+	if n := count("/classic?" + strings.Join(months, "&")); n != all {
 		t.Errorf("all twelve months show %d species and the whole year shows %d", n, all)
 	}
 
 	// The figure narrows with the list, and says which months it covers.
-	_, body := get(t, s, "/?region=NY&month=Jun&month=Jul&month=Aug")
+	_, body := get(t, s, "/classic?region=NY&month=Jun&month=Jul&month=Aug")
 	if !strings.Contains(body, "Jun-Aug") {
 		t.Error("a three-month selection does not say so on the tiles")
 	}
@@ -6481,7 +6481,7 @@ func newTestServerReal(t *testing.T) *server {
 // Verifies: product.regionAndMonthFilter, product.tileOpensDetail, decisions.monthPresence. Criterion: acceptance.monthsFilterAndAbstain.
 func TestAbstainedTilesSayWhy(t *testing.T) {
 	s := newTestServerReal(t)
-	const path = "/?region=HI&month=Jun"
+	const path = "/classic?region=HI&month=Jun"
 	_, body := get(t, s, path)
 
 	tileOf := func(id string) string {
@@ -6510,7 +6510,7 @@ func TestAbstainedTilesSayWhy(t *testing.T) {
 	}
 	// And the page says it too, because anything a tile shows the detail
 	// page must (product.tileOpensDetail).
-	_, page := get(t, s, "/species/miller"+strings.TrimPrefix(path, "/"))
+	_, page := get(t, s, "/species/miller"+strings.TrimPrefix(path, "/classic"))
 	if !strings.Contains(stripTags(page), marker) {
 		t.Error("Millerbird's detail page, opened under the same filter, does not say " +
 			"the month filter abstained")
@@ -6577,7 +6577,7 @@ func TestComparisonOffersAWayOutOfPickMode(t *testing.T) {
 
 	// And it is the bar's own Clear, so the two cannot drift apart.
 	bar := html.UnescapeString(mustMatch(t, mustGet(t, s,
-		"/?species=annhum&species=amecro&region=CA&metric=mass"),
+		"/classic?species=annhum&species=amecro&region=CA&metric=mass"),
 		`<a class="btn pickclear" href="([^"]+)"`, "the bar's Clear"))
 	if bar != stop {
 		t.Errorf("the bar's Clear goes to %q and the comparison's stop link to %q; two "+
@@ -6615,8 +6615,8 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 	}
 
 	for _, c := range []struct{ path, id, want string }{
-		{"/?region=FL&month=Jan", "paibun", "Withheld by eBird in Florida, Jan"},
-		{"/?region=NY&month=Jun", "sheowl", "Withheld by eBird in New York, Jun"},
+		{"/classic?region=FL&month=Jan", "paibun", "Withheld by eBird in Florida, Jan"},
+		{"/classic?region=NY&month=Jun", "sheowl", "Withheld by eBird in New York, Jun"},
 	} {
 		shown, text := tile(c.path, c.id)
 		if !shown {
@@ -6631,7 +6631,7 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 
 	// Without a month filter the caveat names the whole window, and it wraps
 	// the year end rather than listing six months.
-	if _, text := tile("/?region=FL", "paibun"); !strings.Contains(text, "Withheld by eBird in Florida, Oct-Mar") {
+	if _, text := tile("/classic?region=FL", "paibun"); !strings.Contains(text, "Withheld by eBird in Florida, Oct-Mar") {
 		t.Errorf("Painted Bunting in Florida, all year, reads: %s", text)
 	}
 
@@ -6639,15 +6639,15 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 	// from February to May, but Wyoming's records run 302 a month inside the
 	// window against 269 outside: eBird published them, and saying otherwise
 	// would be false.
-	if _, text := tile("/?region=WY&month=Mar", "saggro"); strings.Contains(text, "Withheld by eBird") {
+	if _, text := tile("/classic?region=WY&month=Mar", "saggro"); strings.Contains(text, "Withheld by eBird") {
 		t.Errorf("Greater Sage-Grouse in Wyoming is marked withheld, but its records are in "+
 			"the export: %s", text)
 	}
 
 	// Controls: birds genuinely absent in a month stay hidden.
 	for _, c := range []struct{ path, id string }{
-		{"/?region=NY&month=Jan", "boboli"},
-		{"/?region=NY&month=Jun", "snobun"},
+		{"/classic?region=NY&month=Jan", "boboli"},
+		{"/classic?region=NY&month=Jun", "snobun"},
 	} {
 		if shown, _ := tile(c.path, c.id); shown {
 			t.Errorf("%s is shown under %s; it is not withheld there, just gone, and the month "+
@@ -6706,7 +6706,7 @@ func TestSameMeasurementsAreNoted(t *testing.T) {
 		t.Fatalf("BirdLife's Larus smithsonianus row draws %d species, want Vega and American Herring Gull", len(gulls))
 	}
 
-	_, idx := get(t, srv, "/")
+	_, idx := get(t, srv, "/classic")
 	want := 0
 	for _, group := range byRow {
 		if len(group) < 2 {
@@ -6759,7 +6759,7 @@ func TestSameMeasurementsNeedNoTable(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
-	_, idx := get(t, srv, "/")
+	_, idx := get(t, srv, "/classic")
 	for _, c := range []struct{ sp, other *dataset.Species }{{donor, borrower}, {borrower, donor}} {
 		name := html.EscapeString(c.other.Name(dataset.LocaleNA))
 		if !strings.Contains(tileOf(t, idx, c.sp.ID), "Same measurements as "+name) {
@@ -6836,7 +6836,7 @@ func TestExoticsAreOffTheIndexAndListed(t *testing.T) {
 		t.Fatalf("only %d flagged species in the dataset; the check has too little to assert", len(exotic))
 	}
 
-	_, idx := get(t, srv, "/")
+	_, idx := get(t, srv, "/classic")
 	if !strings.Contains(idx, `href="/excluded"`) {
 		t.Error("the index does not link to /excluded")
 	}
@@ -6915,7 +6915,7 @@ func TestReadersAreToldItIsAStickFigure(t *testing.T) {
 		return html.UnescapeString(page)
 	}
 	word := regexp.MustCompile(`(?i)\bdiagrams?\b`)
-	for _, path := range []string{"/", "/species/amerob", "/compare?species=amerob&species=blujay"} {
+	for _, path := range []string{"/classic", "/species/amerob", "/compare?species=amerob&species=blujay"} {
 		text := visible(mustGet(t, s, path))
 		for _, m := range word.FindAllStringIndex(text, -1) {
 			lo, hi := max(0, m[0]-40), min(len(text), m[1]+40)
@@ -6923,7 +6923,7 @@ func TestReadersAreToldItIsAStickFigure(t *testing.T) {
 				path, strings.Join(strings.Fields(text[lo:hi]), " "))
 		}
 	}
-	if !strings.Contains(visible(mustGet(t, s, "/")), "stick figure") {
+	if !strings.Contains(visible(mustGet(t, s, "/classic")), "stick figure") {
 		t.Error("the index never calls the drawing a stick figure")
 	}
 	if !strings.Contains(visible(mustGet(t, s, "/docs/using")), "stick figure") {
@@ -6972,10 +6972,10 @@ func TestCountLineNamesEverySetting(t *testing.T) {
 	}
 	defaults := []string{"Order by: Length", "Scale: Per section", "Units: in / oz", "Names: N. America",
 		"Section step: 15%", "Month: All", "Region: All", "Habitat: All", "Diet: All", "Family: All"}
-	if got := boxes("/"); !slices.Equal(got, defaults) {
+	if got := boxes("/classic"); !slices.Equal(got, defaults) {
 		t.Errorf("the arrival page names\n  %v\nwant every default\n  %v", got, defaults)
 	}
-	everything := "/?by=mass&scale=global&units=metric&names=world&step=20&species=amecro" +
+	everything := "/classic?by=mass&scale=global&units=metric&names=world&step=20&species=amecro" +
 		"&month=Jun&region=CA&habitat=" + trait.Habitats[0].Value + "&niche=" + trait.Niches[0].Value +
 		"&family=Corvidae"
 	want := []string{"Order by: Mass", "Scale: Global", "Units: cm / g", "Names: World",
@@ -6985,11 +6985,11 @@ func TestCountLineNamesEverySetting(t *testing.T) {
 		t.Errorf("the count line names\n  %v\nwant\n  %v", got, want)
 	}
 	// Frequency's own defaults: global scale, bands of one decade.
-	if got := boxes("/?by=frequency"); !slices.Contains(got, "Scale: Global") || !slices.Contains(got, "Section step: 10×") {
+	if got := boxes("/classic?by=frequency"); !slices.Contains(got, "Scale: Global") || !slices.Contains(got, "Section step: 10×") {
 		t.Errorf("under Frequency the count line names %v; want its defaults, Global and 10×", got)
 	}
 	// Each label is a control's own, so the line reads in the page's words.
-	page := mustGet(t, s, "/")
+	page := mustGet(t, s, "/classic")
 	for _, label := range []string{"Order by", "Scale", "Units", "Names", "Section step", "Month", "Region", "Family"} {
 		if !strings.Contains(page, `<span class="lbl">`+label+`</span>`) {
 			t.Errorf("the count line's label %q is no control's label", label)

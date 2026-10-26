@@ -55,6 +55,7 @@ func Run(base string, redirectFrom []string, client *http.Client) []Result {
 	c.client = &cl
 
 	index := c.index()
+	c.classic()
 	c.page("a species page", firstMatch(speciesLink, index, "/species/amecro"), "text/html")
 	c.page("a guide", "/docs/using", "text/html")
 	c.robots()
@@ -107,14 +108,15 @@ func (c *checker) get(method, path string, header http.Header) (*http.Response, 
 	return resp, body, err
 }
 
-// index fetches / once, gzipped, checks how it was served, revalidates it,
-// and returns its body for the checks that follow links from it.
+// index fetches the home page once, gzipped, checks how it was served, and
+// returns its body for the checks that follow links from it. With no month
+// named it answers from the clock, so it is never stored (product.nextView).
 func (c *checker) index() string {
 	// The transport asks for gzip and decompresses, reporting it in
 	// Uncompressed; asking explicitly would turn that off.
 	resp, body, err := c.get(http.MethodGet, "/", nil)
 	if err != nil {
-		c.record("the index", err)
+		c.record("the home page", err)
 		return ""
 	}
 	var problems []string
@@ -127,19 +129,37 @@ func (c *checker) index() string {
 	if !strings.Contains(resp.Header.Get("Vary"), "Accept-Encoding") {
 		problems = append(problems, "no Vary: Accept-Encoding")
 	}
+	if resp.Header.Get("Cache-Control") != "no-store" {
+		problems = append(problems, fmt.Sprintf("Cache-Control %q, want no-store: with no month it answers from the clock", resp.Header.Get("Cache-Control")))
+	}
+	c.record("the home page", joined(problems))
+	return string(body)
+}
+
+// classic fetches the classic view, which is a pure function of its address,
+// and checks that it is revalidated rather than stored.
+func (c *checker) classic() {
+	resp, _, err := c.get(http.MethodGet, "/classic", nil)
+	if err != nil {
+		c.record("the classic view", err)
+		return
+	}
+	var problems []string
+	if resp.StatusCode != http.StatusOK {
+		problems = append(problems, fmt.Sprintf("status %d, want 200", resp.StatusCode))
+	}
 	if resp.Header.Get("Cache-Control") != "no-cache" {
 		problems = append(problems, fmt.Sprintf("Cache-Control %q, want no-cache (tech.cacheLifetimeStated)", resp.Header.Get("Cache-Control")))
 	}
 	etag := resp.Header.Get("ETag")
 	if etag == "" {
 		problems = append(problems, "no ETag")
-	} else if again, _, err := c.get(http.MethodGet, "/", http.Header{"If-None-Match": {etag}}); err != nil {
+	} else if again, _, err := c.get(http.MethodGet, "/classic", http.Header{"If-None-Match": {etag}}); err != nil {
 		problems = append(problems, "revalidating: "+err.Error())
 	} else if again.StatusCode != http.StatusNotModified {
 		problems = append(problems, fmt.Sprintf("revalidating with its ETag gave %d, want 304", again.StatusCode))
 	}
-	c.record("the index", joined(problems))
-	return string(body)
+	c.record("the classic view", joined(problems))
 }
 
 func (c *checker) page(name, path, ctype string) {
@@ -178,7 +198,7 @@ func (c *checker) unknownSpecies() {
 // static file, and only its headers are in question.
 func (c *checker) boundaryFile(path string) {
 	if path == "" {
-		c.record("the boundary file", fmt.Errorf("the index links no /boundaries/ file"))
+		c.record("the boundary file", fmt.Errorf("the home page links no /boundaries/ file"))
 		return
 	}
 	resp, _, err := c.get(http.MethodHead, path, nil)
@@ -195,8 +215,8 @@ func (c *checker) boundaryFile(path string) {
 func (c *checker) now() {
 	resp, _, err := c.get(http.MethodGet, "/now", nil)
 	if err == nil {
-		if loc := resp.Header.Get("Location"); resp.StatusCode != http.StatusSeeOther || !strings.HasPrefix(loc, "/?") {
-			err = fmt.Errorf("status %d to %q, want 303 to the index", resp.StatusCode, loc)
+		if loc := resp.Header.Get("Location"); resp.StatusCode != http.StatusSeeOther || !strings.HasPrefix(loc, "/classic?") {
+			err = fmt.Errorf("status %d to %q, want 303 to the classic view", resp.StatusCode, loc)
 		}
 	}
 	c.record("/now", err)

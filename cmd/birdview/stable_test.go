@@ -45,7 +45,7 @@ func countLine(t *testing.T, s *server, path string) string {
 func TestStableUrlsKeepWorking(t *testing.T) {
 	s := newTestServer(t)
 	for _, p := range []string{
-		"/", "/species/amecro", "/compare?species=amecro&species=annhum",
+		"/classic", "/species/amecro", "/compare?species=amecro&species=annhum",
 		"/docs", "/docs/using", "/docs/data", "/docs/pipeline", "/docs/building",
 		"/added", "/excluded",
 	} {
@@ -56,17 +56,17 @@ func TestStableUrlsKeepWorking(t *testing.T) {
 	w := httptest.NewRecorder()
 	s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/now?region=NY", nil))
 	if loc := w.Header().Get("Location"); w.Code != http.StatusSeeOther ||
-		!strings.HasPrefix(loc, "/?") || !strings.Contains(loc, "month=") || !strings.Contains(loc, "region=NY") {
+		!strings.HasPrefix(loc, "/classic?") || !strings.Contains(loc, "month=") || !strings.Contains(loc, "region=NY") {
 		t.Errorf("GET /now?region=NY = %d to %q, want a 303 to the index for this month in NY", w.Code, loc)
 	}
 
-	base := countLine(t, s, "/")
+	base := countLine(t, s, "/classic")
 	for param, value := range map[string]string{
 		"by": "mass", "scale": "global", "step": "30", "units": "metric", "names": "world",
 		"species": "amecro", "family": "Corvidae", "region": "NY", "month": "Oct",
 		"habitat": "Marine", "niche": "Frugivore",
 	} {
-		if got := countLine(t, s, "/?"+param+"="+value); got == base {
+		if got := countLine(t, s, "/classic?"+param+"="+value); got == base {
 			t.Errorf("?%s=%s leaves the index's settings as they were; the parameter is no longer read", param, value)
 		}
 	}

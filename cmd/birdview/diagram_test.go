@@ -236,7 +236,7 @@ func TestPipelineDiagramNamesEveryTaxonomyTable(t *testing.T) {
 // Verifies: product.pipelineDiagram. Criterion: acceptance.pipelineDiagramServed.
 func TestPipelineDiagramIsLinked(t *testing.T) {
 	s := newTestServer(t)
-	for _, path := range []string{"/docs/data", "/docs/building", "/docs/using", "/"} {
+	for _, path := range []string{"/docs/data", "/docs/building", "/docs/using", "/classic"} {
 		if !strings.Contains(mustGet(t, s, path), `href="/docs/pipeline"`) {
 			t.Errorf("%s does not link to the pipeline diagram", path)
 		}

@@ -97,7 +97,7 @@ a lower tier may do.
 - [product.escapedBirdsListed](../../../local/product/measurements.md#escapedbirdslisted) — Escaped and kept birds are left off the index, and listed
 - [product.pageExplainsItself](../../../local/product/presentation.md#pageexplainsitself) — The page explains itself
 - [product.fitsAPhone](../../../local/product/presentation.md#fitsaphone) — Every page fits a phone held upright
-- [product.nextView](../../../local/product/presentation.md#nextview) — A prototype of one view of birds, at /next
+- [product.nextView](../../../local/product/presentation.md#nextview) — The home page: one view of birds
 - [product.collapsibleControls](../../../local/product/presentation.md#collapsiblecontrols) — The controls collapse
 - [product.togglesKeepPlace](../../../local/product/presentation.md#toggleskeepplace) — Toggling a control keeps your place
 - [product.inaturalistLink](../../../local/product/presentation.md#inaturalistlink) — The detail view links to the species on iNaturalist

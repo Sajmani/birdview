@@ -65,12 +65,12 @@ it to the Go lookup in `internal/boundary`.
 The third is `search.js`, the search box ([product.searchBox](requirements/local/product/filtering.md#searchbox)), which filters as the reader
 types. The server writes each tile's normalized words into `data-search` and applies `q` itself
 when it is in the address; the script only checks that the typed text occurs within one field, and a test holds
-it to the Go matcher in `cmd/birdview/search.go`. `/next` carries `here.js` too, behind Here in its Region setting. The fourth and fifth are on `/next`
+it to the Go matcher in `cmd/birdview/search.go`. The home page carries `here.js` too, behind Here in its Region setting. The fourth and fifth are on the home page
 ([product.nextView](requirements/local/product/presentation.md#nextview)). The placing script moves
 an opened setting's choices left only as far as keeps them on the screen, and closes them on a tap
 elsewhere. `next-find.js` counts and lists the birds the find box matches as the reader types, each with its
 pin. It
-reads each bird's search text from `/next/birds.json`, which the server builds, and its links go to
+reads each bird's search text from `/birds.json`, which the server builds, and its links go to
 the server's `bird=` toggle, which decides what pinning means. A test holds it to the
 server's page for the same query. The rule all five protect is that *logic* stays in Go, not that
 the client is inert; without JavaScript the page still works, minus these five (the searches then

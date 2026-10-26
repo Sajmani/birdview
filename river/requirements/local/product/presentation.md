@@ -746,14 +746,18 @@ URL that always "works" hides the failure. See
 
 ## nextView
 
-**A prototype of one view of birds, at /next**
+**The home page: one view of birds**
 
 Subject: `presentation.next`
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
-**`/next` draws one set of birds, at one scale, with no sections or tiers**, beside the index
-until simulated readers have compared the two (Sameer, 2026-10-26; [scalableInterface](../../../todo.md#scalableinterface)). The index
-is unchanged and does not link to it.
+**The home page, `/`, draws one set of birds, at one scale, with no sections or tiers**
+(Sameer, 2026-10-26; [scalableInterface](../../../todo.md#scalableinterface)). It was built as a
+prototype at `/next` and replaced the index as the home page the same day. The index, with its
+sections and tiers, is now **the classic view** at `/classic`: unchanged, its links staying on it,
+and not linked from the home page except in its credits. A species page's "back to all birds"
+goes to the home page with the same settings. Elsewhere in these requirements, "the index" names
+the classic view.
 
 - **The set.** With no filter, it is every bird recorded in the month, most often recorded first.
   The month is the server's own unless the address names some; `month=all` is every month. Every
@@ -800,7 +804,7 @@ is unchanged and does not link to it.
   capped too. The cap is kept when a setting changes and dropped by Reset. 100 is a reader's first
   screens, not a limit of speed: all 1,041 birds paint in 0.73 s on a phone-class CPU over 5G
   (measured 2026-10-26 under Lighthouse's mobile throttling, 229 KiB).
-- **Stateless.** Every view is its address. `/next` with no month changes with the month, so it is
+- **Stateless.** Every view is its address. The home page with no month changes with the month, so it is
   not stored or revalidated, as `/now` is not.
 
 Rationale: the first readers and the simulated ones found the index dense and its toggles

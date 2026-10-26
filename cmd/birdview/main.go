@@ -352,9 +352,9 @@ func (s *server) revalidated(h http.Handler) http.Handler {
 		// -dev mode has no fingerprint to trust, and /now answers from the
 		// clock: neither may be stored, and neither gets a validator that
 		// would let a stale answer be confirmed (decisions.hereAndNowCaching).
-		// /next without a month answers from the clock as well (product.nextView).
+		// The home page without a month answers from the clock as well (product.nextView).
 		if s.build == "" || r.URL.Path == "/now" ||
-			(r.URL.Path == "/next" && r.URL.Query().Get("month") == "") {
+			(r.URL.Path == "/" && r.URL.Query().Get("month") == "") {
 			w.Header().Set("Cache-Control", "no-store")
 			h.ServeHTTP(w, r)
 			return
@@ -704,13 +704,13 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		{"/docs", http.HandlerFunc(s.document)},
 		{"/docs/", http.HandlerFunc(s.document)},
 		{"/compare", http.HandlerFunc(s.compare)},
-		{"/next", http.HandlerFunc(s.next)},
-		{"/next/birds.json", http.HandlerFunc(s.nextBirds)},
+		{"/birds.json", http.HandlerFunc(s.nextBirds)},
+		{classicPath, http.HandlerFunc(s.index)},
 		{"/now", http.HandlerFunc(s.now)},
 		{"/boundaries/", http.HandlerFunc(s.boundaries)},
 		{"/robots.txt", http.HandlerFunc(robots)},
 		{"/species/", http.HandlerFunc(s.detail)},
-		{"/", http.HandlerFunc(s.index)},
+		{"/", http.HandlerFunc(s.next)},
 	}
 	for _, rt := range s.routes {
 		s.mux.Handle(rt.pattern, rt.handler)
@@ -1328,8 +1328,14 @@ const pickBarNames = 8
 // vertical scale rather than shrinking it to fit.
 var tileBox = view.Box{W: 380, H: 148}
 
+// classicPath is where the index, the original view of every bird in
+// sections and tiers, is served now that the home page is the one set of
+// product.nextView (Sameer, 2026-10-26). It is not linked from the home
+// page; every link it builds stays on it.
+const classicPath = "/classic"
+
 func (s *server) index(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
+	if r.URL.Path != classicPath {
 		http.NotFound(w, r)
 		return
 	}
@@ -1465,10 +1471,10 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	page.SearchFields = searchFormFields(r)
 	page.MetricLabel = metricLabel(opt.Metric)
 	page.HereNowTemplate = slotsURL(r, "region", hereSlot, "month", nowSlot)
-	page.WelcomeNear = withPicks(r, "/?by=frequency&scale=global") + "#here-and-now"
-	page.WelcomeHerons = withPicks(r, "/?family=Ardeidae&family=Anatidae")
+	page.WelcomeNear = withPicks(r, classicPath+"?by=frequency&scale=global") + "#here-and-now"
+	page.WelcomeHerons = withPicks(r, classicPath+"?family=Ardeidae&family=Anatidae")
 	page.NowTemplate = slotURL(r, "month", nowSlot)
-	page.NowURL = template.URL("/now" + strings.TrimPrefix(slotURL(r, "month", ""), "/"))
+	page.NowURL = template.URL("/now" + strings.TrimPrefix(slotURL(r, "month", ""), classicPath))
 
 	bar, live := s.buildPickBar(r, opt, missingPicks)
 	page.Bar = bar
@@ -1712,6 +1718,9 @@ type detailData struct {
 	SameAs []seam
 	Opt    options
 	Query  func(...string) template.URL
+	// Home is the home page with the address's settings: "back to all
+	// birds" when not picking.
+	Home template.URL
 
 	// INatURL is empty when no confident iNaturalist match exists, and the
 	// template then renders nothing at all rather than a placeholder (product.inaturalistLink).
@@ -1823,7 +1832,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		PickURL:    pickURL(r, toggled(live, sp.ID)),
 		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
 		FootLabels: lt.FootLabels, MassCube: lt.MassCube,
-		Metrics: rows, Categories: s.categories(sp, opt), Opt: opt, Query: queryFor(r), INatURL: inatURL,
+		Metrics: rows, Categories: s.categories(sp, opt), Opt: opt, Query: queryFor(r), Home: homeLink(r), INatURL: inatURL,
 		SameAs:      s.sameMeasurements(sp, opt.Locale),
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 		FoldNote:    foldNote(sp, lt.Geom, one),
@@ -1853,6 +1862,7 @@ func foldNote(sp *dataset.Species, g view.Geometry, u units) string {
 type undrawnData struct {
 	Feedback string
 	Query    func(...string) template.URL
+	Home     template.URL
 	Opt      options
 
 	Name string
@@ -1901,7 +1911,7 @@ func (s *server) undrawn(w http.ResponseWriter, r *http.Request, u *dataset.Undr
 		comma(int64(u.Episodes)), comma(int64(u.Years)), where, comma(u.Records))
 
 	d := undrawnData{
-		Feedback: s.feedback, Query: queryFor(r), Opt: opt,
+		Feedback: s.feedback, Query: queryFor(r), Home: homeLink(r), Opt: opt,
 		Name: name, AlsoCalled: other, U: u,
 	}
 	switch u.Status {
@@ -2059,7 +2069,7 @@ func pickURL(r *http.Request, ids []string) template.URL {
 	for _, id := range ids {
 		q.Add("species", id)
 	}
-	return template.URL("/?" + q.Encode())
+	return template.URL(classicPath + "?" + q.Encode())
 }
 
 // sortedIDs is the species reordered by one metric, ascending and stably, as
@@ -2152,6 +2162,14 @@ func detailLink(r *http.Request, id string) template.URL {
 		return template.URL("/species/" + id)
 	}
 	return template.URL("/species/" + id + "?" + q.Encode())
+}
+
+// homeLink is the home page with the request's settings, less any picks,
+// which belong to the classic view's comparison (product.nextView).
+func homeLink(r *http.Request) template.URL {
+	q := r.URL.Query()
+	q.Del("species")
+	return nextURL(q)
 }
 
 // compareWithout is the same comparison minus one bird. Every other parameter
@@ -2480,7 +2498,7 @@ func queryFor(r *http.Request, drop ...string) func(...string) template.URL {
 				q.Set(kv[i], kv[i+1])
 			}
 		}
-		return template.URL("/?" + q.Encode())
+		return template.URL(classicPath + "?" + q.Encode())
 	}
 }
 
@@ -2730,9 +2748,9 @@ func (s *server) regionURL(r *http.Request, want map[string]bool) template.URL {
 		}
 	}
 	if len(q) == 0 {
-		return "/"
+		return classicPath
 	}
-	return template.URL("/?" + q.Encode())
+	return template.URL(classicPath + "?" + q.Encode())
 }
 
 // The placeholders the browser replaces in HereURL and NowTemplate. Both are
@@ -2763,9 +2781,9 @@ func slotsURL(r *http.Request, kv ...string) string {
 		}
 	}
 	if len(q) == 0 {
-		return "/"
+		return classicPath
 	}
-	return "/?" + q.Encode()
+	return classicPath + "?" + q.Encode()
 }
 
 // withPicks is a fixed index address carrying the request's picks, if it has
@@ -2811,11 +2829,11 @@ func (s *server) boundaries(w http.ResponseWriter, r *http.Request) {
 // Everything else stays open, /static/ included, since a crawler renders a
 // page with its stylesheet. Wildcards are RFC 9309's.
 const robotsPolicy = `# BirdView: every control is a query parameter, so filtered views are endless.
-# Index the pages without one: the index, each species, the guides.
+# Index the pages without one: the home page, each species, the guides.
 User-agent: *
 Disallow: /*?
+Disallow: /classic
 Disallow: /compare
-Disallow: /next
 Disallow: /now
 Disallow: /boundaries/
 `
@@ -2848,9 +2866,9 @@ func (s *server) monthURL(r *http.Request, want map[int]bool) template.URL {
 		}
 	}
 	if len(q) == 0 {
-		return "/"
+		return classicPath
 	}
-	return template.URL("/?" + q.Encode())
+	return template.URL(classicPath + "?" + q.Encode())
 }
 
 // monthChip is one of the twelve in the control.
@@ -2991,7 +3009,7 @@ func (s *server) familyURL(r *http.Request, fams map[string]bool) template.URL {
 			q.Add("family", f)
 		}
 	}
-	return template.URL("/?" + q.Encode())
+	return template.URL(classicPath + "?" + q.Encode())
 }
 
 var funcs = template.FuncMap{
@@ -3081,9 +3099,9 @@ func (s *server) traitURL(r *http.Request, param string, want map[string]bool, t
 		}
 	}
 	if len(q) == 0 {
-		return "/"
+		return classicPath
 	}
-	return template.URL("/?" + q.Encode())
+	return template.URL(classicPath + "?" + q.Encode())
 }
 
 // traitControl builds one categorical block.
