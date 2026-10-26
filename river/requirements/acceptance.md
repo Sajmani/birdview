@@ -109,7 +109,7 @@ Watched failing: 2026-09-21, zeroing AVONET's recorded hash produced exit 1 and 
 
 **Verifies:** [tech.recordBeforeConsuming](local/tech/process.md#recordbeforeconsuming) · **Level:** spec · **Method:** every block quotation in a
 transcribed source's `<pkg>.md` is found in the text of a file that source vendors,
-ignoring markup, whitespace and the style of quotation mark, and splitting at an ellipsis
+ignoring markup, whitespace, and the style of quotation mark, and splitting at an ellipsis
 **Run:** `go test ./river/check/ -run TestQuotationsAreVerbatim`
 **Status: verified 2026-10-16, passing, and watched failing** — changing the large-text ratio in
 the quotation of WCAG 1.4.6 from 4.5:1 to 3:1 failed it, naming the quotation. Its first run also
@@ -199,7 +199,7 @@ regression guard after [decisions.scopeFromRecurrence](decisions.md#scopefromrec
 **Every record carries all five AVONET traits**
 
 **Verifies:** [product.traitsFromAvonet](local/product/dataset.md#traitsfromavonet), [product.traitsPerSpecies](local/product/dataset.md#traitsperspecies) · **Level:** code · **Method:** property test over every record
-**Assertion:** culmen, tail, wing chord, secondary and mass are all present and positive.
+**Assertion:** culmen, tail, wing chord, secondary, and mass are all present and positive.
 **Status: planned.** Trait coverage across AVONET's three sheets brings **1,082** of the 1,086
 named in-scope species to a complete row (the 4 unmatched species are named in `unmeasurableNames`),
 so any failure on a built record means a join or parse bug rather than missing data.
@@ -231,7 +231,7 @@ Watched failing: 2026-10-02, by blanking the world name, which leaves the fallba
 
 ### stableSpeciesId
 
-**A species id is unique, stable and fit for a URL**
+**A species id is unique, stable, and fit for a URL**
 
 **Verifies:** [product.englishNameChoice](local/product/diagram.md#englishnamechoice) · **Level:** code · **Method:** property test over the built dataset, plus
 assertions on the served routes
@@ -439,7 +439,7 @@ Watched failing: 2026-09-22, scaling each bird to its own length was caught by t
 
 The default moved from global to per-section in [decisions.perSectionDefault](decisions.md#persectiondefault), and the tests asserting the
 old default were inverted rather than deleted. Flipping it exposed a real bug: `parseOptions`
-recognised only the **non**-default value, so the toggle stopped working entirely the moment the
+recognized only the **non**-default value, so the toggle stopped working entirely the moment the
 default changed. Written that way the parser is correct exactly once.
 
 ### crossbarToScale
@@ -538,7 +538,7 @@ for each metric whose `kind` is not `measured`, and absent otherwise
 **Assertions:** the detail view shows all three main metrics **and all five diagram segments**
 with their values; for each it names the source; for a `near-match` it names the taxon actually
 measured; for a `modeled` value it names the model. The detail view reproduces the tile's header,
-diagram and main metrics — it is the same layout enlarged, not a different screen.
+diagram, and main metrics — it is the same layout enlarged, not a different screen.
 **Status: verified 2026-09-22 — all eight metrics appear with provenance, and **watched failing**: removing the neck disclosure was caught.**
 
 Watched failing: 2026-09-22, removing the neck disclosure was caught.
@@ -638,7 +638,7 @@ Watched failing: 2026-10-22, `TestDockerStagesCopyWhatTheyBuild`): against the `
 
 ### tileCarriesHeaderAndMetrics
 
-**The tile carries the header, diagram and main metrics**
+**The tile carries the header, diagram, and main metrics**
 
 **Verifies:** [product.tileContents](local/product/presentation.md#tilecontents) · **Level:** code · **Method:** rendering test
 **Assertions:** every tile shows the common name with its banding code in parentheses, the
@@ -731,7 +731,7 @@ sections.
 
 Watched failing: 2026-09-27, by removing the scale explanation, by removing the tail from the legend, by suppressing the legend diagram, and by swapping two sections.
 
-The legend is a **rendered diagram of a real species** rather than a list of colour swatches
+The legend is a **rendered diagram of a real species** rather than a list of color swatches
 ([decisions.perSectionDefault](decisions.md#persectiondefault)), which closes a rot the old one had: it described the tail as "dashed, to
 tell it from the body", and that stopped being true when [decisions.drawingCarriesProvenance](decisions.md#drawingcarriesprovenance) gave dash a different meaning.
 Nothing caught it, because prose and stylesheet had no connection. A rendered diagram cannot drift
@@ -748,12 +748,12 @@ fails here. That is deliberate: help text rots silently otherwise.
 **Assertions:** no rule targeting a descendant of `.chip` or `.badge` sets its own `color`, and no
 such rule dims text with `opacity`.
 
-**Status: verified 2026-09-22 — passing, and watched failing** by restoring the fixed grey.
+**Status: verified 2026-09-22 — passing, and watched failing** by restoring the fixed gray.
 
-Watched failing: 2026-09-22, by restoring the fixed grey.
+Watched failing: 2026-09-22, by restoring the fixed gray.
 
 Chips and badges carry a generated background paired with a black-or-white text color chosen so
-the pair clears 7:1. The stylesheet set the family common name to a fixed grey, which ignores
+the pair clears 7:1. The stylesheet set the family common name to a fixed gray, which ignores
 which half of the palette a chip landed on and went unreadable on both — the common name vanished
 on roughly a dozen chips. Hierarchy has to come from weight and size; dimming undoes the very
 ratio the background was selected for. Checking CSS is crude, but the defect is invisible to a
@@ -801,8 +801,8 @@ Watched failing: 2026-10-19, by leaving months out when the address carries none
 
 **Verifies:** [product.helpfulEmptyState](local/product/presentation.md#helpfulemptystate) · **Level:** code · **Method:** rendering test, following the link
 **Assertions:** the message says the intersection is empty, describes the filters that emptied it,
-and offers a link that clears them. The link drops month, region, habitat, diet and family, and
-keeps order, scale, units and names. Nothing selected is never described as a failed match.
+and offers a link that clears them. The link drops month, region, habitat, diet, and family, and
+keeps order, scale, units, and names. Nothing selected is never described as a failed match.
 **Run:** `go test ./cmd/birdview/ -run 'TestClearTheFiltersClearsThem|TestEmptyStateNamesTheFiltersThatEmptiedIt'`
 **Status: verified 2026-10-21, passing, and watched failing.** The description was added 2026-10-02.
 No test had followed the link until 2026-10-21: it first changed nothing, then set `family=region`
@@ -832,7 +832,7 @@ Watched failing: 2026-10-04, by externalizing the script, by removing its path g
 Watched failing: 2026-10-04, by restoring `open` to the markup and by deleting a summary description.
 
 **This does not check that scrolling works.** That needs a browser, which this project does not
-have. The criterion covers presence, self-containment and scoping only, and the behavior itself is
+have. The criterion covers presence, self-containment, and scoping only, and the behavior itself is
 a declared gap.
 
 ### controlsMatchServer
@@ -858,7 +858,7 @@ buttons reversed. It now reads only the controls panel.
 
 **Verifies:** [tech.localNowPublicLater](local/tech/posture.md#localnowpubliclater), [goals.goodDataCitizen](../goals/goals.md#gooddatacitizen) · **Level:** code · **Method:** rendering test over the footer
 **Assertions:** each CC BY source is credited with creator, a link to its deposit and a link to the
-license — **AVONET, Fox and AviList by name and DOI**; the ABA checklist is credited for the
+license — **AVONET, Fox, and AviList by name and DOI**; the ABA checklist is credited for the
 species list and *only* that; the footer discloses that lengths are modeled; the detail view
 carries credit too, being a shareable URL of its own; and **no page claims a permission the
 project does not hold**.
@@ -866,10 +866,10 @@ project does not hold**.
 by reinstating a "used by permission" claim. **AviList added 2026-10-02**
 ([decisions.avilistReplacesAba](decisions.md#avilistreplacesaba)) and watched failing by deleting its credit while leaving its names
 on every tile — which is the shape the obligation actually has: CC BY permits the use *because*
-of the attribution, so an unasserted credit is a licence breach waiting to happen.
+of the attribution, so an unasserted credit is a license breach waiting to happen.
 
 Watched failing: 2026-09-22, by stripping the license links and by reinstating a "used by permission" claim.
-Watched failing: 2026-10-02, by deleting its credit while leaving its names on every tile — which is the shape the obligation actually has: CC BY permits the use *because* of the attribution, so an unasserted credit is a licence breach waiting to happen.
+Watched failing: 2026-10-02, by deleting its credit while leaving its names on every tile — which is the shape the obligation actually has: CC BY permits the use *because* of the attribution, so an unasserted credit is a license breach waiting to happen.
 
 The second half exists because the first version of this footer said the ABA checklist was "used by
 permission". It is not — that request has not been sent. Claiming a right you have not been granted
@@ -1097,7 +1097,7 @@ pinning.
 **The palette assertion moved to [faviconFromPalette](#faviconfrompalette)**, where it is derived from the stylesheet. It
 lived here as a search for three hardcoded literals, one of which existed only in the favicon, so
 it compared the icon against a copy of itself and could not fail. This criterion keeps what it can
-actually see from the server: that the asset is served, parseable and referenced.
+actually see from the server: that the asset is served, parseable, and referenced.
 
 **Status: verified 2026-09-23 — passing, and watched failing** by removing the asset while leaving
 the reference, by removing the reference while leaving the asset, by pointing the reference at a
@@ -1138,7 +1138,7 @@ and tidying them into agreement makes short necks render solid ([decisions.drawi
 
 **Assertions, rendering:** a species with a **measured** wingspan emits no dashed crossbar segment;
 one with a **modeled** wingspan emits exactly one, flanked by two solid segments and marked by two
-ticks; and the index and detail pages each carry text explaining what solid, dashed and the tick
+ticks; and the index and detail pages each carry text explaining what solid, dashed, and the tick
 mean.
 
 **Status: verified 2026-09-24 — passing, and watched failing** by: restoring the tail's dash;
@@ -1166,7 +1166,7 @@ whole scheme, and every other assertion here would still pass.
 
 **Assertions:** a heron's detail page says its neck is drawn as an S and gives the species' own neck
 length and total length in the reader's units; a straight-necked bird's page carries no such note.
-(Until 2026-10-25 it also had to say the full length is what sorting, sections and measurements
+(Until 2026-10-25 it also had to say the full length is what sorting, sections, and measurements
 use.)
 
 **Status: verified 2026-10-22, passing, and watched failing** before the note existed
@@ -1201,10 +1201,10 @@ for it — read out of the table rather than recomputed, so the two cannot drift
 count is matched on the segment labels alone, so a missing segment cannot hide behind the chord. A
 tile carries none.
 
-**Assertions, completeness:** **every row of the provenance table is labelled in the diagram**,
+**Assertions, completeness:** **every row of the provenance table is labeled in the diagram**,
 with the same value, in both unit systems. Written against the table rather than a list of metric
-names, so it maintains itself: adding a row without labelling it fails. Watched failing by
-removing the mass label — which is the state this check was written to catch — and by labelling
+names, so it maintains itself: adding a row without labeling it fails. Watched failing by
+removing the mass label — which is the state this check was written to catch — and by labeling
 mass with the wingspan's value.
 
 **Assertions, the estimated marker:** a diagram label whose value is modeled carries the `~` **in
@@ -1219,7 +1219,7 @@ reproduces the bug where the neck's leader struck through "Wing chord" and "Wing
 the marker, by reverting the `~` to the `.dlabel.est::after` rule it came from and by marking every
 label estimated regardless of provenance.
 
-Watched failing: 2026-09-28, by removing the mass label — which is the state this check was written to catch — and by labelling mass with the wingspan's value.
+Watched failing: 2026-09-28, by removing the mass label — which is the state this check was written to catch — and by labeling mass with the wingspan's value.
 Watched failing: 2026-09-28, by anchoring every label at the same y, by removing the minimum-gap pass, by dropping a segment from the list, by removing the reserved gutter and by inflating it, by moving the wing labels back inside the centering group — which reproduces the bug where the neck's leader struck through "Wing chord" and "Wingspan" — and, for the marker, by reverting the `~` to the `.dlabel.est::after` rule it came from and by marking every label estimated regardless of provenance.
 
 **The marker assertion was added because the criterion claimed it and never checked it.** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) has
@@ -1249,10 +1249,10 @@ two birds were drawn to one scale.
 **The detail diagram labels the whole bird's total length, under the tail**
 
 **Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) · **Level:** code · **Method:** geometry assertions over the whole fixture plus
-assertions on the rendered detail page, the help legend and an index tile
+assertions on the rendered detail page, the help legend, and an index tile
 
-**Assertions, placement:** the label is centred on the drawing axis (`text-anchor="middle"` at the
-bird's centreline, not the box's — they differ, because the bird is laid out left of the label
+**Assertions, placement:** the label is centered on the drawing axis (`text-anchor="middle"` at the
+bird's centerline, not the box's — they differ, because the bird is laid out left of the label
 gutter) and sits **below the tail tip**. It is horizontal: no `transform`/`rotate` on the element.
 It has **no leader line**, so the leader count stays at one per segment.
 
@@ -1281,7 +1281,7 @@ The box-fit check now asserts the **last** label in the stack, since the strip m
 whole stack and not just its first line; watched failing by sizing the strip for one line, which
 overran by 4px on every species. Originally **verified 2026-09-28 — passing, and watched
 failing** by removing the label from the
-template; by centring it on the box centre, which put it at x=494 against the bird's axis at x=334,
+template; by centering it on the box center, which put it at x=494 against the bird's axis at x=334,
 exactly half the gutter adrift; by placing it above the tail tip (y=254.3 against a tail tip at
 269.3); by removing the reserved strip, which overran the box for **all five fixture species**, the
 worst by 15 px; by labeling `TotalHeight()/PxPerMm` instead of the reported length, which the Great
@@ -1289,7 +1289,7 @@ Blue Heron caught at 78.7 cm against a table reading 86.0 cm; and by dropping th
 
 Watched failing: 2026-10-01, by sizing the strip for one line, which overran by 4px on every species.
 Watched failing: 2026-09-28, by removing the label from the template.
-Watched failing: 2026-09-28, by centring it on the box centre, which put it at x=494 against the bird's axis at x=334, exactly half the gutter adrift.
+Watched failing: 2026-09-28, by centering it on the box center, which put it at x=494 against the bird's axis at x=334, exactly half the gutter adrift.
 Watched failing: 2026-09-28, by placing it above the tail tip (y=254.3 against a tail tip at 269.3).
 Watched failing: 2026-09-28, by removing the reserved strip, which overran the box for all five fixture species, the worst by 15 px.
 Watched failing: 2026-09-28, by labeling `TotalHeight()/PxPerMm` instead of the reported length, which the Great Blue Heron caught at 78.7 cm against a table reading 86.0 cm.
@@ -1367,7 +1367,7 @@ species list** — the picks are live state and returning to add another bird mu
 all. The two cannot be told apart by URL shape, since both point at `/?…`, so the markup has to
 distinguish them and the check matches on that.
 
-**Assertions, unrecognised ids:** an id matching no species is **dropped with the rest of the set
+**Assertions, unrecognized ids:** an id matching no species is **dropped with the rest of the set
 rendered**, is **named on the page**, and appears in **no link the page builds** — so the set
 repairs itself on the next click. Asserted with a set mixing valid and invalid ids, because a set
 of one invalid id cannot tell "dropped it" from "refused the page".
@@ -1459,9 +1459,9 @@ from an index filtered to two families, the Compare link, and the comparison vie
 sort links, all carry both `family` values. Watched failing on 2026-10-16 against the code as
 reported, where `compareURL` dropped `family` as a tile link does.
 
-**Assertions, the Controls entry point:** the toggle is a **labelled control set of its own** and
+**Assertions, the Controls entry point:** the toggle is a **labeled control set of its own** and
 its button **states the mode** — `Off` while browsing, `On` while picking, matching its styling.
-Both, because an unlabelled button beside the Section step percentages reads as a sixth step
+Both, because an unlabeled button beside the Section step percentages reads as a sixth step
 option. The check finds the button by class rather than by text, since the name is now on the
 label and matching the text would find that instead. The toggle is off while browsing and on
 while picking; following it from browsing enters pick mode with nothing picked; and following
@@ -1482,7 +1482,7 @@ address are checked too: the test once looked only at addresses with a query str
 `/` could have dropped the picks unseen — asserted by following every other link on the page
 and confirming the picks survive it.
 
-**Assertions, unrecognised ids:** a set mixing a good id with a dead one renders the good bird,
+**Assertions, unrecognized ids:** a set mixing a good id with a dead one renders the good bird,
 **names the dead one on the page**, and emits **no link containing it**. Asserted with a mixed set
 because an all-invalid set cannot distinguish dropping from refusing.
 
@@ -1568,7 +1568,7 @@ species, plus assertions on the rendered detail and comparison pages
 
 **Assertions, arithmetic:** the square's side is `10 × ∛(mass in grams) × px/mm`, to within a
 twentieth of a pixel, for every species. Derived from the definition of the gram — one gram of
-water is one cubic centimetre — and never read off a run. This is the criterion that makes the
+water is one cubic centimeter — and never read off a run. This is the criterion that makes the
 square's claim checkable: it is a real volume at the diagram's own scale, not a glyph on a scale
 of its own, and only the arithmetic can tell those apart.
 
@@ -1577,7 +1577,7 @@ diagram** — that fixed corner is the whole point of the cube form, since it gi
 common origin and lets two cubes be compared directly; a base that drifted with the bird would
 cost that without changing any number. The projection has **non-zero depth**, or it is the square
 this replaced. It stays inside the drawing area above and never reaches the bird's axis to the
-right. Its label is centred under the face but **held clear of the left edge**: a Scissor-tailed
+right. Its label is centered under the face but **held clear of the left edge**: a Scissor-tailed
 Flycatcher's 29 px cube renders a ~70 px label, which read "ass 1.4 oz" before it was clamped.
 
 **Assertions, the strip below:** two things now hang under the drawing — the stack under the tail
@@ -1607,7 +1607,7 @@ What is asserted is a **clearance greater than zero**, taken from the requiremen
 margin measured is logged rather than asserted, so a change that halves it is visible without
 pinning today's number as a rule. A boolean overlap check proved a poor guard — the cube sits
 bottom-left and the crossbar crosses the upper middle, so floating the cube to the top of the
-tile, sliding it 120px right, tripling the projection depth and scaling it by 1.6 all leave it
+tile, sliding it 120px right, tripling the projection depth, and scaling it by 1.6 all leave it
 technically clear while moving the margin a long way.
 
 **Assertions, the Presentation panel:** it explains the cube in prose, naming what it is: the
@@ -1623,7 +1623,7 @@ than its cube root; by giving the cube a scale of its own instead of the diagram
 drawing a near-match mass as measured; by removing the key's description of it; by moving it to
 the lower-right, where it reached x=980 against a bird axis at x=334; by standing the face on the
 tail tip instead of the floor, so the base moved per bird; by zeroing the depth, which is the
-square this replaced; and by centring the label without the clamp, which clipped it to
+square this replaced; and by centering the label without the clamp, which clipped it to
 "ass 0.14 oz" on the hummingbird.
 
 Watched failing: 2026-10-01, by removing the cube from the index tiles, which left 0 across 6.
@@ -1636,7 +1636,7 @@ Watched failing: 2026-10-01, by removing the key's description of it.
 Watched failing: 2026-10-01, by moving it to the lower-right, where it reached x=980 against a bird axis at x=334.
 Watched failing: 2026-10-01, by standing the face on the tail tip instead of the floor, so the base moved per bird.
 Watched failing: 2026-10-01, by zeroing the depth, which is the square this replaced.
-Watched failing: 2026-10-01, by centring the label without the clamp, which clipped it to "ass 0.14 oz" on the hummingbird.
+Watched failing: 2026-10-01, by centering the label without the clamp, which clipped it to "ass 0.14 oz" on the hummingbird.
 
 **The provenance assertion was vacuous when written, and breaking the code is what showed it.**
 Every fixture mass was `measured`, so the dashed branch never rendered and drawing a near-match
@@ -1725,7 +1725,7 @@ Watched failing: 2026-10-02, four ways:
 | --- | --- |
 | restore the superseded model whole — `18.0 × mass^0.31` | exponent and direction. **The anchor assertion passed.** |
 | keep 0.37, restore the 18.0 coefficient | anchor and direction. **The exponent assertion passed.** |
-| overcorrect the exponent to 0.45 | exponent, anchor and direction together |
+| overcorrect the exponent to 0.45 | exponent, anchor, and direction together |
 | widen the band to 0.30 – 0.45 | sharpness, before any model is evaluated |
 
 **The first two rows are the point, and the first one corrected a wrong guess.** This criterion
@@ -1745,18 +1745,18 @@ constrains a curve.
 **The favicon is painted from the app's palette, not its own**
 
 **Verifies:** [product.oneDiagramVocabulary](local/product/diagram.md#onediagramvocabulary) · **Level:** code · **Method:** parse both assets out of the embedded FS and
-compare the favicon's colours against the stylesheet's
+compare the favicon's colors against the stylesheet's
 
-**Assertions, no invented colours:** every colour literal in `favicon.svg` is one the stylesheet
+**Assertions, no invented colors:** every color literal in `favicon.svg` is one the stylesheet
 declares — as a diagram part's `stroke`/`fill`, or as a surface custom property. A shade that
 exists only in the icon fails, which is the exact drift this criterion exists for.
 
-**Assertions, the parts it does draw:** the favicon contains the **crossbar** colour and the
-**bill** colour, both read from the stylesheet's `.wing` and `.bill` rules rather than written
+**Assertions, the parts it does draw:** the favicon contains the **crossbar** color and the
+**bill** color, both read from the stylesheet's `.wing` and `.bill` rules rather than written
 here. Change either in the stylesheet alone and this goes red.
 
 **Assertions, the comparison can still bite:** the stylesheet must yield a non-empty palette and
-the favicon a non-empty set of colours, so a parser that silently matches nothing fails loudly
+the favicon a non-empty set of colors, so a parser that silently matches nothing fails loudly
 instead of passing.
 
 **Status: verified 2026-10-02 — passing, and watched failing** three ways:
@@ -1765,16 +1765,16 @@ Watched failing: 2026-10-02, three ways:
 
 | breakage | what went red |
 | --- | --- |
-| restore the favicon's old `#5ccbfa` crossbar | **both** assertions — the colour paints no diagram part, *and* the wing colour is absent. The real, shipped drift, not a planted one |
-| change `.wing` in the stylesheet alone, leaving the icon behind | the part assertion, naming the new colour. This is the direction the next drift will come from |
+| restore the favicon's old `#5ccbfa` crossbar | **both** assertions — the color paints no diagram part, *and* the wing color is absent. The real, shipped drift, not a planted one |
+| change `.wing` in the stylesheet alone, leaving the icon behind | the part assertion, naming the new color. This is the direction the next drift will come from |
 | rename the `{{define "diagram"}}` block the part set is derived from | `the part set cannot be derived` — a fatal, rather than an empty part set quietly matching nothing |
 
 The third matters because the derivation runs in two steps: the parts come from the template, the
-colours come from the stylesheet rules naming those parts. If step one yields nothing, step two
-yields an empty palette and the check either flags every favicon colour or, just as easily, none.
+colors come from the stylesheet rules naming those parts. If step one yields nothing, step two
+yields an empty palette and the check either flags every favicon color or, just as easily, none.
 It fails loudly instead of choosing one.
 
-**What this does not check.** It verifies the favicon uses *colours from* the palette, not that it
+**What this does not check.** It verifies the favicon uses *colors from* the palette, not that it
 maps each part to the right one. At 16px the icon has no neck and no separate tail, and it paints
 the body in the head's `#cbd5e1` because the body's own `#64748b` is 3.75:1 and unreadable at that
 size — a size concession [product.oneDiagramVocabulary](local/product/diagram.md#onediagramvocabulary) allows. A part-by-part mapping check would have to encode those
@@ -1784,7 +1784,7 @@ It still catches drift, which is the failure that actually occurred.
 **This replaces an assertion that could not fail.** ownRenderableFavicon claimed the favicon "is drawn in the
 diagram's palette" and implemented it as a search for three hardcoded literals — one of which,
 `#5ccbfa`, appeared nowhere but the favicon. It compared the icon against a copy of itself, so it
-would have passed through any change to the app's colours whatever. That is why the drift it was
+would have passed through any change to the app's colors whatever. That is why the drift it was
 written to prevent went unnoticed until someone looked.
 
 ### tileHeaderNeverWraps
@@ -1864,12 +1864,12 @@ Watched failing: 2026-10-02, by deleting the Units entry, by adding an entry for
 
 **This replaces an enumeration in the requirement itself.** [product.pageExplainsItself](local/product/presentation.md#pageexplainsitself) used to name the controls it
 covered, and had been updated for neither Compare birds nor Names. A list cannot notice what it
-omits — the requirement, the panel and the controls each looked complete on their own. Comparing
+omits — the requirement, the panel, and the controls each looked complete on their own. Comparing
 the two sets is the only form of this check that fails when someone adds a control and forgets.
 
 ### regionFilterBehaves
 
-**The region filter selects, groups and composes**
+**The region filter selects, groups, and composes**
 
 **Verifies:** [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.filtersCompose](local/product/months.md#filterscompose) · **Level:** code · **Method:** rendering tests over `?region=`
 
@@ -1878,7 +1878,7 @@ others; no parameter shows all; and an explicitly empty `region=` shows none, th
 absent-versus-empty distinction the family filter draws.
 
 **Assertions, the selector:** the box offers **both groupings** of [product.regionsGroupedTwoWays](local/product/months.md#regionsgroupedtwoways),
-each labelled and each carrying a note saying whether it is measured or drawn, with
+each labeled and each carrying a note saying whether it is measured or drawn, with
 **Geographic first**; within each,
 regions are grouped into zones, **Pelagic is the last zone**, and every region is present, each
 grouping being a partition. Each zone header toggles its whole group; **All** toggles
@@ -1939,7 +1939,7 @@ misfiled, but a misfiled region drags its new zone-mates down everyone's ranking
 
 **What is deliberately not asserted:** that every region's own zone is its best match. That is
 false here, and recording it as a target would be dishonest. Nine regions sit closer to a
-neighbouring zone than to their own, by margins as small as 0.001; reassigning them iteratively
+neighboring zone than to their own, by margins as small as 0.001; reassigning them iteratively
 does **not** converge but cycles, five regions moving every sweep. The mainland is a smooth
 gradient and any cut is a choice of where to slice ([decisions.regionsTwoWays](decisions.md#regionstwoways)).
 
@@ -2037,7 +2037,7 @@ that has never run the ingest, this criterion is silent.
 that page.** Checked per page rather than site-wide, because that is how the obligation works
 and because the gap this criterion was written for was exactly a per-page one — the index
 credited AviList and `detail.html` and `compare.html` did not, while showing AviList names,
-families and species codes throughout.
+families, and species codes throughout.
 
 **Assertions, counts:** every species or family count stated in `README.md` or `docs/` matches
 the compiled dataset. `docs/data.md` said 841 species after [decisions.avilistReplacesAba](decisions.md#avilistreplacesaba) cut
@@ -2081,10 +2081,10 @@ anything — visible only because the deliberate break failed to go red.
 
 **Verifies:** [product.categoryProvenance](local/product/measurements.md#categoryprovenance) · **Level:** code · **Method:** rendering test over the detail view
 
-**Assertions:** the detail page lists the bird's family, order, regions, habitat and niche, and
-any group it is in; **each carries a provenance of published, derived or ours**; and a published
+**Assertions:** the detail page lists the bird's family, order, regions, habitat, and niche, and
+any group it is in; **each carries a provenance of published, derived, or ours**; and a published
 one names its source. A category rendered with no provenance fails, which is the whole point —
-the failure mode is an opinion of ours sitting unlabelled beside a published fact.
+the failure mode is an opinion of ours sitting unlabeled beside a published fact.
 
 **Assertions, regions:** the regions a bird is listed in are **one row**, not a row apiece.
 They share a single rule, so sixty copies of one sentence would bury the habitat rows where
@@ -2220,7 +2220,7 @@ Watched failing: 2026-10-16, against the code as found, every template returned 
 every page the accessibility crawl discovers by RFC 9309's matching rules
 **Assertions:** `/robots.txt` answers 200 as `text/plain`; under `User-agent: *`, every discovered
 page without a query string is allowed except `/compare`, and every one with a query string is
-disallowed, as are `/now` and the boundary file; `/`, a species page, the guides and the
+disallowed, as are `/now` and the boundary file; `/`, a species page, the guides, and the
 stylesheet are allowed. The crawl must offer at least three of each kind, or the check fails
 rather than passing on nothing. An unknown field in the policy fails it too, so a typo cannot drop
 a rule. `TestRobotsMatcher` pins the matcher to RFC 9309's precedence: the longest match wins,
@@ -2313,7 +2313,7 @@ Watched failing: 2026-10-23, with the builder's `COPY --from=test` deleted, it r
 
 **Verifies:** [tech.smokeCheckAfterDeploy](local/tech/release.md#smokecheckafterdeploy) · **Level:** code · **Method:** run the checks over real HTTP against this server, a canonical-host redirect to it, and broken variants
 **Assertions:** against the server and a second one redirecting to it, all of at least eight
-checks pass; with `robots.txt` gone, the index uncompressed, an unknown species answered or a
+checks pass; with `robots.txt` gone, the index uncompressed, an unknown species answered, or a
 guide gone, the check written for that breakage fails; and a host that serves the site instead of
 redirecting fails the redirect check.
 **Run:** `go test ./cmd/birdview/ -run TestSmokeChecksTheServer`
@@ -2423,14 +2423,14 @@ result here — a check believed but never seen failing is worse than no check.
 **Verifies:** [product.onlyPerGroup](local/product/presentation.md#onlypergroup) · **Level:** code · **Method:** rendering tests over the
 index, following each control's own URL
 
-**Assertions:** every group selector in Regions, Diet and Habitat and Families is followed by an
+**Assertions:** every group selector in Regions, Diet and Habitat, and Families is followed by an
 **Only** link. Following one leaves exactly that group's members selected within its section and
 nothing else: Only beside a region zone selects that zone's regions and drops every other
 region; Only beside an order selects that order's families and drops every other family.
 
 **Assertions, section independence:** Only on a diet value leaves the habitat selection
 untouched, and the reverse. Only on a region touches neither families nor traits. This is the
-assertion that matters — a narrowing control that quietly empties a neighbouring filter returns
+assertion that matters — a narrowing control that quietly empties a neighboring filter returns
 an empty page and looks like a data bug.
 
 **Assertions, independence from current state:** the target is built from the group, not from
@@ -2469,9 +2469,9 @@ which was found in a screenshot rather than by any check.
 **Status: verified 2026-10-04 — passing, and watched failing** by choosing the unit from the
 largest mass instead of the smallest — a 27 g House Sparrow beside a Trumpeter Swan then
 renders `0.1 lb`, one significant figure for a whole bird — and by reverting the index to a
-per-value unit, which makes sections 36, 37 and 38 render both `oz` and `lb`.
+per-value unit, which makes sections 36, 37, and 38 render both `oz` and `lb`.
 
-Watched failing: 2026-10-04, by choosing the unit from the largest mass instead of the smallest — a 27 g House Sparrow beside a Trumpeter Swan then renders `0.1 lb`, one significant figure for a whole bird — and by reverting the index to a per-value unit, which makes sections 36, 37 and 38 render both `oz` and `lb`.
+Watched failing: 2026-10-04, by choosing the unit from the largest mass instead of the smallest — a 27 g House Sparrow beside a Trumpeter Swan then renders `0.1 lb`, one significant figure for a whole bird — and by reverting the index to a per-value unit, which makes sections 36, 37, and 38 render both `oz` and `lb`.
 
 ### neckRatiosReviewed
 
@@ -2585,8 +2585,8 @@ Watched failing: 2026-10-05, by restoring the old header sentence, which reports
 **Assertions:**
 
 1. `GET /species/<id>` for an out-of-scope species returns **404** and a body naming the bird,
-   its scientific name and its status. Not 200 and not 410.
-2. The body carries the evidence the status rests on — episodes, years and records for
+   its scientific name, and its status. Not 200 and not 410.
+2. The body carries the evidence the status rests on — episodes, years, and records for
    `vagrant` and `historical` — and for `historical` the **date last recorded**.
 3. For `absent` the body carries **no counts at all**, because none were measured.
 4. An id matching nothing gets the bare `404 page not found`, with no bird named.
@@ -2709,7 +2709,7 @@ now catches it is the check nobody had written.
 2. The peak is always **a region the species is listed in**. The old figure could name one the
    reader would not find in the filter at all.
 3. At least one species peaks at sea, or the case [decisions.honestSeaDenominator](decisions.md#honestseadenominator) exists for is unexercised. (45 do.)
-4. The row is labelled **Top region**, and none of its superseded names survives — not
+4. The row is labeled **Top region**, and none of its superseded names survives — not
    `Commonest in`, not `Commonest land region`. Rejecting the old forms as well as requiring
    the new one is what would have caught `Commonest land region` outliving
    [decisions.honestSeaDenominator](decisions.md#honestseadenominator), which gave the seas the denominator that qualifier existed
@@ -2742,7 +2742,7 @@ Watched failing: 2026-10-05, under every mutation in the table below, each shown
 | `CountOffLandInBox` returns the box count instead of the off-land count | `off land 1000, want 100` |
 | the multi-GADM-level guard removed | `returned -220 and no error` |
 | the ingest drops marine totals again | every sea reported as having no total |
-| the row relabelled `Commonest land region` | `does not label the peak row "Top region"` **and** `still says "Commonest land region"` |
+| the row relabeled `Commonest land region` | `does not label the peak row "Top region"` **and** `still says "Commonest land region"` |
 
 **The second mutation is the live one.** Faceting plain `gadmGid` rather than `gadmLevel0Gid`
 returns every administrative level at once — a record in Virginia counted under `USA`,
@@ -2755,7 +2755,7 @@ off-land count, silently stored.
 **Responses compress, and say that they did**
 
 **Verifies:** [tech.compressedResponses](local/tech/delivery.md#compressedresponses) · **Level:** code · **Method:** handler test over a page,
-a detail view, a static file and a served document
+a detail view, a static file, and a served document
 
 **Assertions:**
 
@@ -2768,11 +2768,11 @@ a detail view, a static file and a served document
 6. Each page saves at least 50%, with the real figure logged rather than asserted.
 
 **The header is asserted before the body, and that order is the criterion.** Reading the body
-with `gzip.NewReader` does not catch an unlabelled response — the stream is perfectly valid,
+with `gzip.NewReader` does not catch an unlabeled response — the stream is perfectly valid,
 it is simply unannounced — so a check that looks at the body first passes over the exact bug
 this was written during. It did: the first version of the middleware set `Content-Encoding`
 from `Write`, which is too late for any handler that calls `WriteHeader` itself, and the
-static files and all 328 undrawn-species pages went out as compressed bodies labelled as HTML.
+static files and all 328 undrawn-species pages went out as compressed bodies labeled as HTML.
 Confirmed live before the fix: `HTTP/1.1 404`, no `Content-Encoding`, `file` reporting
 `gzip compressed data`.
 
@@ -2810,7 +2810,7 @@ Watched failing: 2026-10-05, under every mutation in the table below, each shown
 6. No tier header contains `common`, `scarce`, `rare`, `abundant`, `uncommon` or `everyday`.
 7. Scale defaults to **global** under Frequency and **per-section** under the size metrics
    ([decisions.frequencyGlobalScale](decisions.md#frequencyglobalscale)), and **both** values remain selectable under both.
-8. The Order by row **aligns on the text baseline**, so the label, the size buttons and the
+8. The Order by row **aligns on the text baseline**, so the label, the size buttons, and the
    Frequency button sit on one line with the captions hanging below. Both the declaration and
    the class that carries it are asserted: either alone matches nothing.
 9. The Order by row **states its direction for every metric** — *smallest first* under the
@@ -2820,7 +2820,7 @@ Watched failing: 2026-10-05, under every mutation in the table below, each shown
 
 **Assertion 2 is the one with teeth, and it was added after the first version passed a
 mutation it should have caught.** The header is written by `frequencyBand` and the banding done
-by `SectionsBy`, so a tier can be labelled `1 in 1,000 – 1 in 9,999` while holding whatever the
+by `SectionsBy`, so a tier can be labeled `1 in 1,000 – 1 in 9,999` while holding whatever the
 sectioning rule actually put in it. Replacing the decade rule with a proportional one left
 every label a tidy power of ten; only the tier *count* gave it away, and only because
 `step=100` then stopped changing anything. Checking membership turns that into five explicit
@@ -2840,7 +2840,7 @@ Watched failing: 2026-10-05, under every mutation in the table below, each shown
 | one caption that follows the selection instead of two standing ones | `1 direction captions, want 2` |
 | drop `align-items: baseline` from the ordering row | `does not align on the baseline; its two-line groups will drag ORDER BY down level with the rules` |
 | drop the `ordering` class from the row | `no row carries the ordering class, so the alignment rule matches nothing` |
-| recognise only the non-default scale value, as the parser did before | `/?by=frequency&scale=section: scale "global", want "section"` — *Per section* is a dead button |
+| recognize only the non-default scale value, as the parser did before | `/?by=frequency&scale=section: scale "global", want "section"` — *Per section* is a dead button |
 
 **The last of those is why both scale values are now parsed explicitly.** The old code read
 only the non-default, with a comment warning that this disables the toggle whenever the
@@ -2879,7 +2879,7 @@ Watched failing: 2026-10-05, under every mutation in the table below, each shown
 | Mutation | What went red |
 | --- | --- |
 | the tile marker is suppressed, leaving only the detail page | `the index tile for yelwar1 (Setophaga aestiva) carries no shared-count marker` |
-| a withheld species is labelled as a shared name | `/species/gyrfal (Gyrfalcon) does not say eBird withholds it` **and** `is withheld, not shared, but is reported as shared` |
+| a withheld species is labeled as a shared name | `/species/gyrfal (Gyrfalcon) does not say eBird withholds it` **and** `is withheld, not shared, but is reported as shared` |
 
 ### regionJoinReportsUnmatched
 
@@ -3174,7 +3174,7 @@ query the alias too, and a run. Recorded in [todo.md](../todo.md).
 **Every response can be revalidated, and the validator is honest**
 
 **Verifies:** [tech.cacheLifetimeStated](local/tech/delivery.md#cachelifetimestated) · **Level:** code · **Method:** unit test over rendered
-responses, their headers and their conditional round trip
+responses, their headers, and their conditional round trip
 
 **Assertions:**
 
@@ -3345,7 +3345,7 @@ time from a known-clean tree.
 
 **Verifies:** [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.namesRecordsFiledUnder](local/product/presentation.md#namesrecordsfiledunder),
 [decisions.ebirdSilenceNotAbsence](decisions.md#ebirdsilencenotabsence) · **Level:** code and build · **Method:** unit tests over the
-restated list, the confirmation rule and the table format, plus rendered pages on the real
+restated list, the confirmation rule, and the table format, plus rendered pages on the real
 dataset
 
 **Assertions:**
@@ -3470,7 +3470,7 @@ Watched failing: 2026-10-12, under every mutation in the table below, each shown
 
 ### pipelineDiagramServed
 
-**The pipeline diagram is served, current, self-contained and linked**
+**The pipeline diagram is served, current, self-contained, and linked**
 
 **Verifies:** [product.pipelineDiagram](local/product/measurements.md#pipelinediagram), [product.categoryProvenance](local/product/measurements.md#categoryprovenance), [tech.selfContainedServer](local/tech/delivery.md#selfcontainedserver) ·
 **Level:** code · **Method:** unit tests over the docs embed and the served pages
@@ -3484,7 +3484,7 @@ Watched failing: 2026-10-12, under every mutation in the table below, each shown
 3. **Served.** `/docs/pipeline` shows the picture, linked to itself full size, in place of the
    Mermaid source; `/docs/pipeline.svg` answers as `image/svg+xml`; the index lists the page and
    not the picture.
-4. **Faithful to the readers.** Every column the diagram names for AviList, AVONET and the Fox
+4. **Faithful to the readers.** Every column the diagram names for AviList, AVONET, and the Fox
    wingspans is a column the reader code asks for, so a renamed or dropped column cannot leave
    the diagram describing a pipeline that no longer exists.
 5. **Linked** from `docs/data.md`, `docs/building.md` and `docs/using.md` as served, from the
@@ -3590,12 +3590,12 @@ output, and rendering tests over the index and the detail page
 
 1. **The groups are derived.** Grouping the built dataset by the bill's `source` and
    `sourceTaxon` gives exactly the pairs the page notes, and includes Vega Gull with American
-   Herring Gull, both at `AVONET1_BirdLife` *Larus smithsonianus*, with the same bill, tail, mass
+   Herring Gull, both at `AVONET1_BirdLife` *Larus smithsonianus*, with the same bill, tail, mass,
    and wingspan.
 2. **Every tile in a group says so.** The tile of each member carries *Same measurements as* and
    the English name of every other member, inside that tile's own markup. A tile outside every
    group carries no such line.
-3. **Every detail page in a group says so,** naming the other members, the source sheet and the
+3. **Every detail page in a group says so,** naming the other members, the source sheet, and the
    source taxon.
 4. **No hand table.** A species given a near-match to a drawn relative in a test dataset gets
    the note on both tiles without any other change.
@@ -3624,7 +3624,7 @@ the tile checks reported tiles missing altogether. The table records the clean d
 **Verifies:** [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources), [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) · **Level:** code ·
 **Method:** unit test over ingest output
 
-**Assertions:** *Larus argentatus*'s bill, tail and mass are `measured`, with `source` naming
+**Assertions:** *Larus argentatus*'s bill, tail, and mass are `measured`, with `source` naming
 `AVONET1_BirdLife` and `sourceTaxon` *Larus argentatus*, and carry that row's values, read from
 the workbook. The workbook's eBird and BirdLife rows must differ, or the check cannot tell them
 apart. American Herring Gull is unchanged: `AVONET1_BirdLife` *Larus smithsonianus*, `measured`.
@@ -3653,7 +3653,7 @@ rendered index
 **Assertions:**
 
 1. **The table keeps them.** A cell marked below the bar round-trips through the writer and
-   `region.LoadPresence` with its counts, its months and its mark, and an unmarked cell reads as
+   `region.LoadPresence` with its counts, its months, and its mark, and an unmarked cell reads as
    present.
 2. **The ingest separates them.** A below-bar cell never appears in `regions`, so region and
    month filtering are unchanged, and its counts appear in the species' below-bar fields.
@@ -3680,7 +3680,7 @@ open record at all ([product.declaredExceptions](local/product/dataset.md#declar
 
 ### escapedBirdsListedAndServed
 
-**Escaped and kept birds are off the index, listed and still served**
+**Escaped and kept birds are off the index, listed, and still served**
 
 **Verifies:** [product.escapedBirdsListed](local/product/measurements.md#escapedbirdslisted), [product.statusIsPublished](local/product/dataset.md#statusispublished) · **Level:** code ·
 **Method:** unit test over ingest output, and rendering tests over the index, `/excluded` and
@@ -3691,7 +3691,7 @@ the detail pages
 1. **Flagged from the list.** Every species in `status.Exotic` is drawn and carries its reason as
    `exotic`; no other species carries one. A listed name that is not drawn fails the build.
 2. **Off the index.** No flagged species has a tile on the index, and none is offered or counted
-   by the family, habitat, diet or region controls. A family whose every species is flagged is
+   by the family, habitat, diet, or region controls. A family whose every species is flagged is
    not offered.
 3. **Listed.** `/excluded` names every flagged species with its reason and links to its detail
    page, and the index links to `/excluded`.
@@ -3720,12 +3720,12 @@ birds: the index shows 1,041 of 1,082, and Casuariidae and Ramphastidae leave th
 **Readers are told the drawing is a stick figure**
 
 **Verifies:** [product.segmentComposition](local/product/diagram.md#segmentcomposition), [decisions.stickFigure](decisions.md#stickfigure) · **Level:** code ·
-**Method:** rendering test over the visible text of the index, a detail page, the comparison page
+**Method:** rendering test over the visible text of the index, a detail page, the comparison page,
 and the using guide
 
 **Assertions:**
 
-1. No visible text on the index, a detail page or the comparison page says *diagram* or
+1. No visible text on the index, a detail page, or the comparison page says *diagram* or
    *diagrams*, except the link to the data-pipeline diagram. Class names, template comments and
    scripts are not visible text and are not checked.
 2. The index and `docs/using.md` call the drawing a *stick figure*.

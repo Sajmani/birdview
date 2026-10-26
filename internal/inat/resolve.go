@@ -43,7 +43,7 @@ const UserAgent = "birdview-inatmap/1.0 (contact: birdview@ajmani.net)"
 
 // Client is a paced, identified, read-only iNaturalist API client. It sends no
 // credential: BirdView has no account and needs none, which satisfies
-// inatapi.JwtAuthorization, R6 and R7 by construction.
+// inatapi.JwtAuthorization, R6, and R7 by construction.
 type Client struct {
 	BaseURL   string
 	UserAgent string

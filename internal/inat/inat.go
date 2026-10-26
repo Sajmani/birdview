@@ -16,7 +16,7 @@
 // them into links.
 //
 // BirdView links to iNaturalist and copies nothing from it: no photograph is
-// embedded, hotlinked, cached or reproduced, so no contributor's CC BY-NC
+// embedded, hotlinked, cached, or reproduced, so no contributor's CC BY-NC
 // license is engaged (inatterms.ContributorKeepsRights, decisions.inaturalistLinkAdopted). tech.selfContainedServer forbids the embedding
 // independently.
 //

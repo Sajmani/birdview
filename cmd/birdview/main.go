@@ -177,7 +177,7 @@ type server struct {
 	// any other is redirected there (tech.oneCanonicalHost). Empty serves every host.
 	canonical string
 	// build fingerprints everything a response is rendered from: the
-	// dataset, the templates and the static files. It is the first half of
+	// dataset, the templates, and the static files. It is the first half of
 	// every ETag (tech.cacheLifetimeStated).
 	build string
 }
@@ -205,7 +205,7 @@ type orderGroup struct {
 }
 
 // familyGroupingBlock is one way of carving the families up, rendered as its
-// own labelled block (product.familiesByOrder). The same shape as the region selector's
+// own labeled block (product.familiesByOrder). The same shape as the region selector's
 // groupingBlock, and it reuses that CSS.
 type familyGroupingBlock struct {
 	Name   string
@@ -325,7 +325,7 @@ func sameHost(requested, canonical string) bool {
 // revalidated gives every response a validator and tells caches to check it
 // before reusing it (tech.cacheLifetimeStated).
 //
-// BirdView sent no Cache-Control, no ETag and no Last-Modified at all, which
+// BirdView sent no Cache-Control, no ETag, and no Last-Modified at all, which
 // does not mean "do not cache" -- it means the browser may apply its own
 // heuristic and has nothing to revalidate against when it does. The symptom
 // is a reader reloading a page after a rebuild and being served the old one,
@@ -806,7 +806,7 @@ func parseOptions(r *http.Request) options {
 	if o.Metric == view.ByFrequency || o.Metric == view.ByBill || o.Metric == view.ByTail {
 		o.Scale = view.Global
 	}
-	// BOTH values recognised, not just the non-default. The old comment here
+	// BOTH values recognized, not just the non-default. The old comment here
 	// warned that reading only the non-default silently disables the toggle
 	// when the default moves -- which is what happened when decisions.perSectionDefault moved it.
 	// With a default that now varies by metric, reading only Global would
@@ -831,7 +831,7 @@ func parseOptions(r *http.Request) options {
 		o.Step = v
 	}
 	o.Metric3 = q.Get("units") == "metric"
-	// Recognise the non-default, as with scale above: writing this the other
+	// Recognize the non-default, as with scale above: writing this the other
 	// way round disables the toggle the moment the default moves.
 	if dataset.Locale(q.Get("names")) == dataset.LocaleWorld {
 		o.Locale = dataset.LocaleWorld
@@ -1033,7 +1033,7 @@ type pageData struct {
 	// right where a family-level grouping could not (decisions.habitatDietSpeciesLevel).
 	Traits []traitBlock
 	// RegionGroupings is the region selector (product.regionAndMonthFilter): two groupings of the
-	// same regions (product.regionsGroupedTwoWays), each a labelled block of zones.
+	// same regions (product.regionsGroupedTwoWays), each a labeled block of zones.
 	RegionGroupings []groupingBlock
 	AllRegions      bool
 	AllRegionsURL   template.URL
@@ -1133,7 +1133,7 @@ func metricLabel(m view.Metric) string {
 // Verifies: product.helpfulEmptyState.
 func describeView(fams []familyOption, opt options) []activeFilter {
 	// Past a handful the names stop being readable and the count is the
-	// useful fact. The threshold is a presentation judgement, not a rule.
+	// useful fact. The threshold is a presentation judgment, not a rule.
 	const nameLimit = 6
 	describe := func(picked []string, total int) string {
 		switch {
@@ -1467,7 +1467,7 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	page := pageData{Feedback: s.feedback, Opt: opt, Total: len(s.ds.Species), Shown: len(filtered),
 		Query:   queryFor(r),
 		Filters: describeView(s.fams, opt),
-		// Every filter, and nothing else: units, order and names are how the
+		// Every filter, and nothing else: units, order, and names are how the
 		// reader wants birds shown, not which. The keys go in queryFor's drop
 		// list; its returned function takes key-value pairs, and passing these
 		// there once set family=region.
@@ -2194,7 +2194,7 @@ type footLabel struct {
 // corner that never moves, so only the cube's size differs between birds.
 type massCube struct {
 	X, Y, Side, Depth float64
-	// The mass label sits centred under the face rather than in the stack
+	// The mass label sits centered under the face rather than in the stack
 	// under the tail, so the number is beside the shape it describes.
 	Label          string
 	LabelX, LabelY float64
@@ -2220,7 +2220,7 @@ const massCubeDepth = 0.4
 const massLabelGap = 18
 
 // massLabelCharWidth approximates one character of the 11px label, used only
-// to stop a small cube's centred label running off the left edge of the
+// to stop a small cube's centered label running off the left edge of the
 // drawing -- a Scissor-tailed Flycatcher's cube is 29px wide and its label
 // about 70px, which rendered as "ass 1.4 oz".
 //
@@ -2228,9 +2228,9 @@ const massLabelGap = 18
 // underestimating clips it again.
 const massLabelCharWidth = 6.2
 
-// massCubeSide is the side of that cube, in millimetres, for a mass in grams.
+// massCubeSide is the side of that cube, in millimeters, for a mass in grams.
 //
-// One gram of water is one cubic centimetre, by the historical definition of
+// One gram of water is one cubic centimeter, by the historical definition of
 // the gram, so this is a unit conversion and not a model: it assumes nothing
 // about the density of birds. That is what lets the square share the diagram's
 // own scale instead of needing one of its own, which product.crossbarAtVerticalScale would refuse.
@@ -2264,7 +2264,7 @@ func newMassCube(sp *dataset.Species, drawH, pxPerMm float64, label string) mass
 	}
 	if label != "" {
 		c.Label = label
-		// Centred under the face, but never far enough left to be clipped.
+		// Centered under the face, but never far enough left to be clipped.
 		c.LabelX = math.Max(massCubeMargin+side/2, float64(len(label))*massLabelCharWidth/2)
 		c.LabelY = base + massLabelGap
 	}
@@ -2481,7 +2481,7 @@ const gramsPerOunce = 28.349523125
 // on the comparison page. A detail page compares nothing, so its scope is
 // the one bird.
 type units struct {
-	// metric selects centimetres and grams over inches and ounces.
+	// metric selects centimeters and grams over inches and ounces.
 	metric bool
 	// big selects kilograms or pounds over grams or ounces.
 	big bool
@@ -2646,7 +2646,7 @@ func (u units) formatDigits(v float64, as view.Metric, extra int) string {
 
 // regionRow is one region chip, and zoneGroup one block of them. They mirror
 // familyRow and orderGroup exactly: zones play the part orders play, so the
-// two selectors share markup, CSS and the wrap criterion (product.regionAndMonthFilter, acceptance.familyListWraps).
+// two selectors share markup, CSS, and the wrap criterion (product.regionAndMonthFilter, acceptance.familyListWraps).
 type regionRow struct {
 	ID   string
 	Code string
@@ -2671,7 +2671,7 @@ type zoneGroup struct {
 }
 
 // groupingBlock is one way of carving the regions up, rendered as its own
-// labelled block of chips (product.regionsGroupedTwoWays). The Note is not decoration: it is where
+// labeled block of chips (product.regionsGroupedTwoWays). The Note is not decoration: it is where
 // the derived grouping and the hand-drawn one are told apart.
 type groupingBlock struct {
 	Name  string
@@ -2895,7 +2895,7 @@ func (s *server) regionGroups(r *http.Request, opt options) []groupingBlock {
 				}
 			}
 			// The group toggle clears its zone when the whole zone is on, and
-			// selects it otherwise -- an order header's behaviour exactly.
+			// selects it otherwise -- an order header's behavior exactly.
 			next := map[string]bool{}
 			for k, v := range sel {
 				if v {
@@ -3320,7 +3320,7 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 			parts[i] = w.name + " (" + w.months + ")"
 		}
 		seam(value, "eBird keeps this species out of its public records in "+
-			strings.Join(parts, ", ")+", to protect it from trapping, disturbance or targeted "+
+			strings.Join(parts, ", ")+", to protect it from trapping, disturbance, or targeted "+
 			"hunting. In those months the counts here are iNaturalist's alone and far below "+
 			"the bird's real record, and the month filter does not judge them: a month with "+
 			"no eBird records by policy is not a month without the bird.")
@@ -3424,7 +3424,7 @@ type shareCell struct {
 	//
 	// Not "the ABA Area", which this is not. That area includes St-Pierre
 	// et Miquelon, which BirdView has no region for, and excludes Johnston,
-	// Palmyra, Wake and Navassa, which it has regions for. Naming someone
+	// Palmyra, Wake, and Navassa, which it has regions for. Naming someone
 	// else's boundary would also re-attribute BirdView's scope to the
 	// authority decisions.scopeFromRecurrence just removed it from. The selection describes itself.
 	Where string
@@ -3832,7 +3832,7 @@ func (s *server) withheldSeam(sp *dataset.Species, opt options) (text, title str
 		return "", "", false
 	}
 	title = "eBird keeps this species out of its public records here, to protect it -- " +
-		"from trapping, disturbance or targeted hunting -- so the figure counts only what " +
+		"from trapping, disturbance, or targeted hunting -- so the figure counts only what " +
 		"iNaturalist holds in those months and is far below the bird's real record. That " +
 		"is a gap in what BirdView can see, not a statement about the bird."
 	if len(w) == 1 {
@@ -4189,8 +4189,8 @@ func (s *server) excluded(w http.ResponseWriter, r *http.Request) {
 	var b bytes.Buffer
 	b.WriteString("# Birds left off the index\n\n")
 	fmt.Fprintf(&b, "These %d birds pass BirdView's scope rule, but their records here are of "+
-		"escaped, released or kept birds, with no population of their own, so they are left off "+
-		"the index. Each keeps its own page. The list is BirdView's judgement; long-feral "+
+		"escaped, released, or kept birds, with no population of their own, so they are left off "+
+		"the index. Each keeps its own page. The list is BirdView's judgment; long-feral "+
 		"populations, such as Indian Peafowl in Florida, are not on it. See "+
 		"[how the data is made](/docs/data#scope).\n\n", len(rows))
 	b.WriteString("| Bird | Scientific name | Records | Why it is left off |\n|---|---|---:|---|\n")

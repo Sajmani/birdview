@@ -258,7 +258,7 @@ var Declared = map[string]string{
 // (decisions.scopeFromRecurrence). It began from the drawn species that reach the presence bar in
 // no region and kept out the wild ones there -- Little Curlew, Ruddy
 // Quail-Dove, Desertas Petrel -- and three whose origin is doubtful rather
-// than plainly escaped: West Indian Whistling-Duck, Cuban Grassquit and
+// than plainly escaped: West Indian Whistling-Duck, Cuban Grassquit, and
 // Cinnamon-rumped Seedeater (decisions.escapedBirdsOffIndex). Long-feral populations, such as Indian
 // Peafowl in Florida, are not escapes and are not listed.
 //
@@ -278,7 +278,7 @@ var Exotic = map[string]string{
 	"Cacatua sanguinea":        "A pet parrot from Australia; the birds seen here are escapes.",
 	"Chloebia gouldiae":        "A cage bird from Australia; the birds seen here are escapes.",
 	"Chrysolophus amherstiae":  "An ornamental pheasant from China and Myanmar; the birds seen here are escapes and releases.",
-	"Coturnix coturnix":        "A gamebird from Europe, Asia and Africa, raised and released; the birds seen here are escapes and releases.",
+	"Coturnix coturnix":        "A gamebird from Europe, Asia, and Africa, raised and released; the birds seen here are escapes and releases.",
 	"Dromaius novaehollandiae": "An Australian bird farmed for meat and oil; the birds seen here are escapes from farms.",
 	"Eudocimus ruber":          "A zoo and collection bird from South America; the birds seen here are escapes.",
 	"Euodice malabarica":       "A cage bird from South Asia and Arabia; the birds seen here are escapes.",

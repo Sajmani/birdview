@@ -66,7 +66,7 @@ func goMatches(s *server, q string) []string {
 
 // TestSearchMatchesNamesCodesAndTaxa checks the matching rule: every word
 // must occur, ignoring case and punctuation, in a bird's names, code,
-// scientific name, family or order.
+// scientific name, family, or order.
 //
 // Verifies: product.searchBox. Criterion: app.searchMatchesInGoAndTheBrowser.
 func TestSearchMatchesNamesCodesAndTaxa(t *testing.T) {
@@ -137,7 +137,7 @@ func TestSearchFromTheAddress(t *testing.T) {
 	if !strings.Contains(body, `name="q" value="american"`) {
 		t.Error("the box does not show the search it was opened with")
 	}
-	// Controls keep q; the welcome line, reset and Clear do not.
+	// Controls keep q; the welcome line, reset, and Clear do not.
 	welcome := mustMatch(t, body, `(?s)<p class="welcome">(.*?)</p>`, "the welcome line")
 	for _, h := range regexp.MustCompile(`href="([^"]*)"`).FindAllStringSubmatch(welcome, -1) {
 		if strings.Contains(html.UnescapeString(h[1]), "q=") {

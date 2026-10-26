@@ -3,11 +3,11 @@
 BirdView draws precise-looking figures from data that is, in places, thin. This page says which
 parts of each figure are observations and which are arithmetic.
 
-In short: of the five segments in each figure, **bill and tail are measured; head, neck and body
+In short: of the five segments in each figure, **bill and tail are measured; head, neck, and body
 are modeled.** Every total length is modeled, and so are nearly two thirds of the wingspans. The
 UI labels each value with its status.
 
-For every source, field, join, filter and model in one place, see
+For every source, field, join, filter, and model in one place, see
 [how BirdView's data is built](pipeline.md).
 
 ---
@@ -28,9 +28,9 @@ sources](../river/requirements/decisions.md#noopenlengthandwingspan).
 
 **Near-match** applies to nine drawn species that are recent splits AVONET does not yet treat
 separately: American Goshawk, Vega Gull, Hudsonian Whimbrel, Western Cattle-Egret, American Barn
-Owl, Chihuahuan Meadowlark, Cocos Booby, Siberian Pipit and Blue-billed White-Tern. Each borrows
+Owl, Chihuahuan Meadowlark, Cocos Booby, Siberian Pipit, and Blue-billed White-Tern. Each borrows
 the parent taxon's measurements, and the detail page names that taxon. For the goshawk,
-cattle-egret, barn owl and white-tern, whether AviList's change is a split or only a rename still
+cattle-egret, barn owl, and white-tern, whether AviList's change is a split or only a rename still
 needs a taxonomic check; near-match is the conservative label until then.
 
 Where the parent is drawn too, the two drawings are identical, and both tiles say *Same
@@ -59,7 +59,7 @@ five segments sum to total length; mass and wingspan are not part of the sum.
 
 AVONET, the only openly licensed morphology dataset with this coverage, **has no body length and
 no wingspan**. Field-guide lengths are not openly licensed, and Ricklefs (2017), the one
-comprehensive academic source, prohibits extraction, storage and redistribution.
+comprehensive academic source, prohibits extraction, storage, and redistribution.
 
 So BirdView builds length from parts, two measured and three modeled. The segments sum exactly to
 the total, so a figure's height is the bird's length and figures at one scale are directly
@@ -97,7 +97,7 @@ species-dependent margin, and BirdView never does it.
 
 **Body (trunk) — `14.0329 × mass^0.37`.** Mass is AVONET's only whole-animal measurement, and no
 dataset of trunk lengths exists to fit against, so the exponent is **calibrated** against measured
-skeletons: wingspan 0.368 (n=301), neck length 0.380 and total leg length 0.364 (n=103, Böhmer et
+skeletons: wingspan 0.368 (n=301), neck length 0.380, and total leg length 0.364 (n=103, Böhmer et
 al. 2019) agree on how a linear measure grows with mass, and the model sits inside the interval
 they imply. The coefficient keeps a 63.4 g bird's trunk where an earlier, uncalibrated model put
 it, so calibration changed proportions across sizes but not overall scale. There is still no
@@ -125,13 +125,13 @@ plane, so one scale for both is accurate.
 
 **There are no legs.** Most birds tuck them in flight. For those that trail them — herons, cranes,
 storks, ibises, flamingos, stilts, rails, loons, grebes — the projection past the tail depends on
-the femur, toes, hip and *full* tibiotarsus, but AVONET measures only the tarsometatarsus; a leg
+the femur, toes, hip, and *full* tibiotarsus, but AVONET measures only the tarsometatarsus; a leg
 modeled from it gives a White Ibis −14 mm of projection, though its legs visibly trail.
 [The decision record](../river/requirements/decisions.md#inflightnolegs) has the numbers.
 
 **Herons and pelicans get an S-shaped neck**, because they fly with the head drawn back, the field
-mark that separates a heron from a crane, stork or ibis. Two semicircles fit the full neck length
-into `2/π ≈ 63.7%` of that height; the stroke stays to scale. Sorting, sectioning and the detail
+mark that separates a heron from a crane, stork, or ibis. Two semicircles fit the full neck length
+into `2/π ≈ 63.7%` of that height; the stroke stays to scale. Sorting, sectioning, and the detail
 view use the full length.
 
 **The head is an oval 0.72 as wide as long**; tail and body are single strokes, because no source
@@ -154,7 +154,7 @@ on common name (the miss was a hyphen); Wikimedia Commons failed three of six ha
 lags recent splits. See
 [the decision record](../river/requirements/decisions.md#inaturalistlinkadopted).
 
-BirdView **links and never copies**: no photograph is embedded, hotlinked or cached. Images on
+BirdView **links and never copies**: no photograph is embedded, hotlinked, or cached. Images on
 iNaturalist carry their own licenses, often CC BY-NC, which covers contributors' work, not the
 taxonomy we take an identifier from.
 
@@ -162,14 +162,14 @@ taxonomy we take an identifier from.
 
 **1082 species**: every bird whose records recur in the regions BirdView covers, by BirdView's
 own rule rather than anyone else's checklist. The regions are the 50 US states and DC, 13 Canadian
-provinces and territories, 5 US outlying islands and 5 stretches of open sea. **They are not the
+provinces and territories, 5 US outlying islands, and 5 stretches of open sea. **They are not the
 ABA Area**, which includes St-Pierre et Miquelon (no BirdView region) and excludes Johnston,
-Palmyra, Wake and Navassa (covered by BirdView). A species is in scope when, in at least one
+Palmyra, Wake, and Navassa (covered by BirdView). A species is in scope when, in at least one
 region, its observations fall in repeated episodes across years. Nine are kept by hand because
 the open record cannot speak for them, each named with its reason.
 
 **41 of them are not on the index**, which shows 1041. Recurrence cannot tell a wild population
-from a steady supply of escapes, so parrots, waxbills, ornamental waterfowl, zoo birds and a
+from a steady supply of escapes, so parrots, waxbills, ornamental waterfowl, zoo birds, and a
 farmed Emu pass the rule too. They are on a declared list with reasons and left off the index and
 its controls; [the list](/excluded) links to their pages, which stay up. Long-feral populations
 and wild vagrants are not on it.
@@ -189,7 +189,7 @@ on request. The **species id in the URL is the eBird code** (`amerob`, not
 `turdus_migratorius`), which is assigned rather than derived from the English name, so it does not
 change with the vocabulary.
 
-**Taxonomy is AviList's**: names, families and family order. Where AVONET's BirdLife taxonomy
+**Taxonomy is AviList's**: names, families, and family order. Where AVONET's BirdLife taxonomy
 disagrees, AviList wins, joined through explicit synonym tables rather than fuzzy matching: one
 maps a current name back to the older label AVONET measured under, the other maps BirdView's name
 forward to a newer label AviList adopted.
@@ -221,7 +221,7 @@ omit the birds readers most often look up; iNaturalist everywhere would count es
 cannot resolve and reports **zero** US and Canadian records for Cooper's Hawk.
 
 **Some species are correctly listed only at sea**: Townsend's Storm-Petrel, Bermuda Petrel,
-Trindade Petrel, Craveri's Murrelet, Guadalupe Murrelet and Atlantic Yellow-nosed Albatross are
+Trindade Petrel, Craveri's Murrelet, Guadalupe Murrelet, and Atlantic Yellow-nosed Albatross are
 seen beyond any land polygon. Six species on the index, among them Desertas Petrel and Little
 Curlew, reach the bar nowhere; their pages show no Regions row.
 
@@ -255,7 +255,7 @@ as **one in N**.
 species is thirty observations.
 
 **The number of individuals is deliberately ignored**: twelve White-throated Sparrows, one Northern
-Cardinal and fifty thousand Snow Geese are one observation each. So *1 in N* measures **how often a
+Cardinal, and fifty thousand Snow Geese are one observation each. So *1 in N* measures **how often a
 bird is logged**, not how many there are. It understates flocking birds such as waterfowl and
 blackbirds and overstates chickadees and cardinals. The denominator also grows with how many
 *kinds* of bird people report; dividing by each region's own total cancels that out.
@@ -269,7 +269,7 @@ species, so the robin is on roughly **half to three-fifths of outings**. Where f
 about, lists are shorter and the same *1 in N* means fewer outings; the ordering is unaffected.
 
 BirdView does not publish this figure because GBIF's eBird export has no checklist id. Checklists
-must be reconstructed from observer, date and rounded coordinates over a complete slice of the
+must be reconstructed from observer, date, and rounded coordinates over a complete slice of the
 data (a partial slice makes almost every checklist look like one species), and doing that for
 every region would mean downloading all the records.
 
@@ -301,9 +301,9 @@ six million records under *Setophaga petechia* cover both the northern and the m
 none under *Setophaga aestiva*, and **nobody knows how they divide.** Both birds show the shared
 count and name each other. The Elegant and Coppery-tailed Trogons are the same case.
 
-**eBird withholds some species** to protect them from trapping, disturbance or hunting, and
+**eBird withholds some species** to protect them from trapping, disturbance, or hunting, and
 publishes a list. Ten are withheld everywhere BirdView looks: Spotted Owl, Great Gray Owl,
-Gyrfalcon, Northern Hawk Owl, Lesser Prairie-Chicken, Gunnison Sage-Grouse, Black Rail and three
+Gyrfalcon, Northern Hawk Owl, Lesser Prairie-Chicken, Gunnison Sage-Grouse, Black Rail, and three
 Hawaiian endemics. Others only in some places or seasons: Long-eared Owl across the United States,
 Painted Bunting in Florida from October to mid-April, Short-eared Owl in New York in spring and
 summer. There the counts are iNaturalist's alone and far below the real record, the month filter
@@ -357,7 +357,7 @@ It is **not abundance** or a rarity rank, but how often a bird is *reported* rel
 reported in the same place: the closest open data gets to "how often would I see this", and not
 the same claim.
 
-Two distortions are uncorrected. Species eBird **withholds**, such as Spotted Owl, Gyrfalcon and
+Two distortions are uncorrected. Species eBird **withholds**, such as Spotted Owl, Gyrfalcon, and
 Northern Hawk Owl, look rarer than they are, because the denominator counts observers whose
 sightings of them were suppressed. And a bird that draws a crowd is over-reported against a quiet
 resident, the bias that keeps record counts out of the scope rule; see [Scope](#scope).
@@ -404,7 +404,7 @@ In rough order of how much it would change the picture:
    what the tool needs, but do not quote them.
 4. **Nearly two thirds of wingspans are modeled**, with a stated error.
 5. **The flight posture is uniform**: the same implied wing position and body axis for every bird.
-6. **One figure per species.** No sex, age, subspecies or individual variation, though some
+6. **One figure per species.** No sex, age, subspecies, or individual variation, though some
    species differ by 30% between sexes.
 
 **If you know a source that fixes any of these**, particularly a validation set for head or trunk

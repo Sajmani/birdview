@@ -417,7 +417,7 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 			TotalLength: dataset.Metric{
 				Value: total,
 				Prov: modeled("sum of the five drawn segments; bill and tail measured, " +
-					"head, neck and trunk modeled"),
+					"head, neck, and trunk modeled"),
 			},
 		}
 
@@ -577,7 +577,7 @@ func flagExotic(out []dataset.Species, exotic map[string]string) error {
 	return nil
 }
 
-// rejected turns the out-of-scope rows into servable records: a name, an id
+// rejected turns the out-of-scope rows into servable records: a name, an id,
 // and the evidence behind the verdict (product.undrawnSpeciesAnswer).
 //
 // Two refusals, both deliberate:

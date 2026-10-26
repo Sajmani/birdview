@@ -18,7 +18,7 @@ cmd/birdview-gbifmap     generator: data/gbif-taxa.tsv, the GBIF -> AviList name
 cmd/birdview-boundaries  generator: data/region-boundaries.json, from Natural Earth
 cmd/birdview-names       generator: data/source-names.tsv; only a test reads it
 cmd/birdview-smoke       checks a running deployment from outside, after each deploy
-internal/avilist         names, families, orders, sequence and eBird codes from AviList
+internal/avilist         names, families, orders, sequence, and eBird codes from AviList
 internal/avonet          traits from all three AVONET taxonomy sheets, with habitat and niche
 internal/wingspan        empirical wingspans, and the regression fitted from them
 internal/taxonomy        the name mapping: renames, near-matches, synonyms in both directions
@@ -32,10 +32,10 @@ internal/inat            the iNaturalist taxon lookup, and the links built from 
 internal/morphology      the segment models, and the rounding that keeps them summing
 internal/palette         generated order and family colors under the contrast rule
 internal/dataset         the record and the provenance vocabulary
-internal/view            ordering, sectioning, scale and diagram geometry; pure, no HTML
+internal/view            ordering, sectioning, scale, and diagram geometry; pure, no HTML
 internal/xlsx            the standard-library workbook reader behind the three source readers
 internal/smoke           the post-deploy checks; a package so the server's tests can run them
-web/static/              embedded templates, CSS, here.js and the favicon
+web/static/              embedded templates, CSS, here.js, and the favicon
 data/                    the committed generated tables; region-boundaries.json is embedded
 docs/                    the guides, embedded and served at /docs
 .github/workflows/       CI: the standing checks on every push and pull request
@@ -44,7 +44,7 @@ Dockerfile               ingest, test, build; the test stage gates every image
 
 ## Why rendering is server-side
 
-The ordering, sectioning and geometry rules carry acceptance criteria, and property tests over
+The ordering, sectioning, and geometry rules carry acceptance criteria, and property tests over
 pure Go functions are the cheapest checker that would actually catch a violation. Putting those
 rules in JavaScript would have meant either duplicating them in Go for the tests, or testing them
 through a browser harness the project does not have.
@@ -73,7 +73,7 @@ This is what let [acceptance.familyFilterSelectsAndClears](requirements/acceptan
 
 ## Data flow
 
-The ingest, in outline; [docs/pipeline.md](../docs/pipeline.md) draws every source, field and step.
+The ingest, in outline; [docs/pipeline.md](../docs/pipeline.md) draws every source, field, and step.
 
 ```
 data/status.tsv ─────────► scope: which species are drawn, and which are not and why
@@ -93,7 +93,7 @@ Resolution order (`resolve` in `cmd/birdview-ingest`) is the substance of [decis
 whatever name or sheet it is filed under — over borrowing a relative's measurements. In order: a
 sheet pinned per species (`taxonomy.OwnRowSheets`, [decisions.herringGullEuropeanRow](requirements/decisions.md#herringgulleuropeanrow)); the AviList
 name in `AVONET2_eBird`; then that name, the name AviList renamed it from, and AVONET's older
-labels, each across the eBird, BirdLife and BirdTree sheets. All of these are `measured`. Only when
+labels, each across the eBird, BirdLife, and BirdTree sheets. All of these are `measured`. Only when
 no such row exists does a near-match to the pre-split parent apply (`taxonomy.NearMatches`, with
 `NearMatchSheets` pinning a narrower sheet, [decisions.whiteTernBorrows](requirements/decisions.md#whiteternborrows)), and the label then says so.
 
@@ -119,7 +119,7 @@ the same group, so one scale still serves the whole section.
 
 ## The network generators, and why they are not in the ingest
 
-`birdview-inatmap`, `birdview-gbifmap`, `birdview-regions`, `birdview-status` and
+`birdview-inatmap`, `birdview-gbifmap`, `birdview-regions`, `birdview-status`, and
 `birdview-names` all ask somebody else's server about BirdView's species, and all write a committed
 table rather than running at build time
 ([tech.pacedInaturalistMapping](requirements/local/tech/process.md#pacedinaturalistmapping)). The reasons are the same in each case: tests make no network request, a build that needs

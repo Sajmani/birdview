@@ -44,10 +44,10 @@ assumption.
 **No month is grouped or named.** No seasons, no "breeding", no "migration".
 [orderByFrequency](presentation.md#orderbyfrequency) already forbids naming a band where the range can be stated, and season
 names invert between hemispheres: the Central Pacific region spans −10° to 40°, and for Hawaii,
-Palmyra, Navassa, Wake and Johnston temperate season names are the wrong kind of category.
+Palmyra, Navassa, Wake, and Johnston temperate season names are the wrong kind of category.
 
 **Six species belong to no region, and that is structural.** Bermuda Petrel, Desertas Petrel,
-Trindade Petrel, Townsend's Storm-Petrel, Craveri's Murrelet and Guadalupe Murrelet are seen at
+Trindade Petrel, Townsend's Storm-Petrel, Craveri's Murrelet, and Guadalupe Murrelet are seen at
 sea, where no land polygon reaches. They are not errors and must not be filtered away silently.
 
 ## filtersCompose
@@ -159,7 +159,7 @@ no badge: the definition already says whose category it is.
 
 The threshold is **the bird's own living**, not contact with the food — the same ≥60% standard
 AVONET holds its own niches to. Sapsuckers excavate and defend sap wells; chickadees, nuthatches,
-kinglets and warblers that drink from them opportunistically are **not** given this category. A
+kinglets, and warblers that drink from them opportunistically are **not** given this category. A
 test caps how many coined terms exist.
 
 **Everything BirdView adds is listed in one place, at `/added`.** The detail pages say it bird

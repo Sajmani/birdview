@@ -15,7 +15,7 @@
 // Package region names the places a bird can be filtered to.
 //
 // Two kinds sit side by side. **Land** regions are GADM level-1 units — US
-// states, Canadian provinces and the outlying islands — identified by GADM's
+// states, Canadian provinces, and the outlying islands — identified by GADM's
 // own id and labeled with the standard postal abbreviation. **Marine** regions
 // are BirdView's own, and exist because six species belong to no land region
 // at all: Bermuda Petrel has 384 records offshore and zero inside any
@@ -184,7 +184,7 @@ var Groupings = []Grouping{
 			//
 			// It is not. Rhode Island's single closest region anywhere is
 			// Delaware, ahead of Connecticut and New Hampshire. Connecticut
-			// is the genuinely marginal one -- its three nearest neighbours
+			// is the genuinely marginal one -- its three nearest neighbors
 			// are all in New England -- but it still loses the group
 			// comparison, because the northern group reaches Newfoundland
 			// (0.800 from Connecticut) and Prince Edward Island (0.742) and
@@ -343,8 +343,8 @@ func init() {
 		// Outlying Islands -- no postal code exists, so the code is a short
 		// name. Too small to place against the mainland (4 to 128 species,
 		// against a mainland floor of 182), they are grouped against each
-		// other: Midway's closest neighbour anywhere is Hawaii at 0.378, and
-		// it is in the Hawaiian chain; Johnston, Palmyra and Wake match each
+		// other: Midway's closest neighbor anywhere is Hawaii at 0.378, and
+		// it is in the Hawaiian chain; Johnston, Palmyra, and Wake match each
 		// other at 0.44 to 0.55; Navassa shares zero species with any of them.
 		{"UMI.4_1", "", "Johnston Atoll", "Tropical Pacific Atolls", "Outlying Islands"},
 		{"UMI.6_1", "", "Midway Atoll", "Hawaiian Islands", "Outlying Islands"},

@@ -59,7 +59,7 @@ var NeckRatios = map[string]float64{
 	"Phalacrocoracidae": 0.55,
 	// Gannets and boobies fly the "cigar" silhouette: the neck is genuinely
 	// extended ahead of the wings, but less snaky than a cormorant's. Placed
-	// between Laridae and Phalacrocoracidae, the two neighbours already here.
+	// between Laridae and Phalacrocoracidae, the two neighbors already here.
 	"Sulidae":          0.45,
 	"Anatidae":         0.70,
 	"Podicipedidae":    0.45,
@@ -67,7 +67,7 @@ var NeckRatios = map[string]float64{
 	"Phoenicopteridae": 0.95,
 	"Pelecanidae":      0.75,
 	"Aramidae":         0.70,
-	// Shorebirds, gulls and rails: intermediate.
+	// Shorebirds, gulls, and rails: intermediate.
 	"Scolopacidae":     0.35,
 	"Charadriidae":     0.30,
 	"Recurvirostridae": 0.45,
@@ -75,7 +75,7 @@ var NeckRatios = map[string]float64{
 	// Jaegers and skuas are gulls in build, in the same order, and were
 	// taking the default: a 474 mm Pomarine Jaeger drew a 28.4 mm neck where
 	// a 474 mm California Gull drew 55.0 mm. That gap was an omission from
-	// this table, not a judgement about birds, so this matches Laridae.
+	// this table, not a judgment about birds, so this matches Laridae.
 	"Stercorariidae": 0.35,
 	"Rallidae":       0.35,
 	"Burhinidae":     0.35,

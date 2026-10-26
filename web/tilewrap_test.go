@@ -20,7 +20,7 @@ import (
 	"testing"
 )
 
-// A tile header that wraps makes its tile taller than its neighbours, and
+// A tile header that wraps makes its tile taller than its neighbors, and
 // .tiles is a flex row, so one tall tile leaves the whole row ragged with the
 // diagrams at different offsets. Reading down a section is what the index is
 // for (product.tileContents).

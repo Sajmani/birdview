@@ -65,7 +65,7 @@ type Geometry struct {
 const headAspect = 0.72
 
 // foldedNecks are the families that fly with the neck folded back rather than
-// extended -- the field mark that separates a heron from a crane, a stork or an
+// extended -- the field mark that separates a heron from a crane, a stork, or an
 // ibis in the air (product.segmentComposition, decisions.foldedNeckAsS).
 //
 // This is a posture, not a measurement, and it produces no metric: the neck

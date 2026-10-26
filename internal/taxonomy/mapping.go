@@ -123,7 +123,7 @@ var AwaitingTaxonomicCheck = []string{
 
 // AviListRenames maps the name BirdView carries onto the name AviList files
 // the SAME taxon under. These are one-to-one renamings -- a genus move or a
-// corrected epithet -- so the name, code and family resolved through them
+// corrected epithet -- so the name, code, and family resolved through them
 // belong to this bird and nothing is borrowed (decisions.avilistReplacesAba).
 //
 // This is a second synonym table and not an extension of Renames above,

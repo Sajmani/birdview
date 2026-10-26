@@ -23,7 +23,7 @@
 //
 //   - eBird, for depth: 1.24 billion records across the US and Canada.
 //   - iNaturalist, because eBird's export WITHHOLDS conservation-sensitive
-//     species entirely. Spotted Owl, Gyrfalcon, Northern Hawk Owl and the
+//     species entirely. Spotted Owl, Gyrfalcon, Northern Hawk Owl, and the
 //     critically endangered Hawaiian endemics have zero eBird records and
 //     hundreds in iNaturalist. An eBird-only table omits exactly the birds a
 //     reader is most likely to look up. See river/requirements/imports.md, `gbif`.
@@ -518,7 +518,7 @@ type measured struct {
 // one real effect on the counts was to admit birds into regions on its own
 // much smaller total: one photo of an escaped pet cleared a bar of 0.43
 // records in New York. 985 of the 1,228 presences that rested on
-// iNaturalist alone were escapes, domestic birds and strays.
+// iNaturalist alone were escapes, domestic birds, and strays.
 //
 // **iNaturalist where eBird is silent by policy.** In a month eBird withholds
 // a species in a region -- named by its Sensitive Species list and confirmed

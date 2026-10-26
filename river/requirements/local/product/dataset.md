@@ -23,13 +23,13 @@ recur on evidence eBird's reviewers never saw.
 [`region`](../../../../internal/region/region.go) holds the 50 US states and the District of Columbia, 13
 Canadian provinces and territories, 5 US Minor Outlying Islands, and 5 stretches of open sea.
 The ABA Area additionally includes **St-Pierre et Miquelon**, for which BirdView has no region;
-BirdView additionally covers **Johnston Atoll, Palmyra Atoll, Wake Island and Navassa Island**,
+BirdView additionally covers **Johnston Atoll, Palmyra Atoll, Wake Island, and Navassa Island**,
 which lie well outside it. The product does not name that boundary: the page says *(all
 regions)* ([decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence)).
 
 Status is derived by [`birdview-status`](../../../../cmd/birdview-status) and committed to
 [`data/status.tsv`](../../../../data/status.tsv); `established` and `rare` are in scope, `vagrant`,
-`historical` and `absent` are not. A species the table classifies but leaves out still has a
+`historical`, and `absent` are not. A species the table classifies but leaves out still has a
 page saying so ([undrawnSpeciesAnswer](presentation.md#undrawnspeciesanswer)). See [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence).
 
 Rationale: a bird a reader will actually meet is one that keeps turning up, and **recurrence
@@ -62,7 +62,7 @@ and `exotic` are orthogonal to the status, because a bird can be withheld *and* 
 `exotic` is a declared list, not a measurement, and what it does is [escapedBirdsListed](measurements.md#escapedbirdslisted).
 
 Rationale: unlike the ABA codes, BirdView's status is its own to republish. Showing it lets a
-reader exclude vagrants, or see only them, and makes the judgement auditable: a status shown
+reader exclude vagrants, or see only them, and makes the judgment auditable: a status shown
 next to its evidence invites correction where a hidden ingest filter does not.
 
 ## declaredExceptions
@@ -76,18 +76,18 @@ Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 Species whose status cannot be derived carry a declared one instead, from a committed table in
 which every entry names its reason. Two classes qualify, and no others:
 
-- **No open record exists.** Laysan Duck, Laysan Finch, Bermuda Petrel and Desertas Petrel have
+- **No open record exists.** Laysan Duck, Laysan Finch, Bermuda Petrel, and Desertas Petrel have
   zero records in both eBird and iNaturalist; eBird withholds some sensitive species outright
   and iNaturalist obscures dates for others, so Akohekohe has 7 records and no parseable date.
 - **Presence is maintained by people.** Indian Peafowl in New York recurs on every measure — 47
   episodes across 33 years — because ornamental birds are continuously replenished; recurrence
-  is blind to origin. Escaped cage, aviary and farm birds with no
+  is blind to origin. Escaped cage, aviary, and farm birds with no
   self-sustaining population anywhere BirdView covers are declared `exotic` and left off the
   index ([escapedBirdsListed](measurements.md#escapedbirdslisted)); their status is still the derived one.
 
 Rationale: a declared, visible exception can be argued with. The alternative is what
 [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence) rejected for the whole model: tuning a coefficient until the
-output looks right, which hides the judgement inside a number.
+output looks right, which hides the judgment inside a number.
 
 ## traitsFromAvonet
 
@@ -97,7 +97,7 @@ Subject: `dataset.traits.source`
 Value: `AVONET, preferring AVONET2_eBird`
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
-Bill, wing, tail and mass measurements come from [AVONET](../../imports.md#avonet) — its `AVONET2_eBird`
+Bill, wing, tail, and mass measurements come from [AVONET](../../imports.md#avonet) — its `AVONET2_eBird`
 sheet first, then `AVONET1_BirdLife` or `AVONET3_BirdTree` where the eBird sheet lacks a row for
 the species ([decisions.abaSpeciesWithoutAvonet](../../decisions.md#abaspecieswithoutavonet)), or where another sheet holds a narrower concept of the
 species ([decisions.herringGullEuropeanRow](../../decisions.md#herringgulleuropeanrow)) or of its near-match donor ([decisions.whiteTernBorrows](../../decisions.md#whiteternborrows)).
@@ -200,7 +200,7 @@ Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 Ingest reports every species that fails to join, by name and count, and fails the build if the
 unmatched fraction exceeds a stated threshold.
 
-Rationale: ABA, AOS and eBird/Clements revise on independent annual cycles. Without a loud
+Rationale: ABA, AOS, and eBird/Clements revise on independent annual cycles. Without a loud
 failure, a taxonomy update silently shrinks the dataset and nobody notices.
 
 ## joinsReportDrops

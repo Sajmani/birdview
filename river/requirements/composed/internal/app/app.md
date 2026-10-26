@@ -2,7 +2,7 @@ package app
 
 # app — composed requirements for the BirdView web application
 
-Composed from `wcag`, `product`, `tech` and `decisions`; do not edit, recompose. Its criteria, in
+Composed from `wcag`, `product`, `tech`, and `decisions`; do not edit, recompose. Its criteria, in
 [acceptance.md](acceptance.md), are composed with it.
 
 Everything the BirdView web application must satisfy. Implementations and releases of the server

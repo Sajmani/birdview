@@ -233,7 +233,7 @@ func worstOwnZoneRank(sp map[string]map[string]bool, grouping string) (int, stri
 // down everyone's ranking, so the worst rank jumps.
 //
 // **Neither measure demands rank 1 everywhere, because that is not true of
-// this data.** Nine regions sit closer to a neighbouring zone than to their
+// this data.** Nine regions sit closer to a neighboring zone than to their
 // own, by margins as small as 0.001; reassigning them iteratively does not
 // converge but cycles, five regions moving every sweep. The mainland is a
 // smooth gradient and any cut is a choice of where to slice (decisions.regionsTwoWays).

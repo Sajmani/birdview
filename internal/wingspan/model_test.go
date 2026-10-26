@@ -77,7 +77,7 @@ func TestModelAgreesWithFoxPublishedPredictions(t *testing.T) {
 }
 
 // TestPredictAlwaysExplainsItself checks every estimate names its model, its
-// scope and its error -- the detail view has nothing else to show (product.metricProvenanceExplained).
+// scope, and its error -- the detail view has nothing else to show (product.metricProvenanceExplained).
 func TestPredictAlwaysExplainsItself(t *testing.T) {
 	if _, err := os.Stat(foxFile); err != nil {
 		t.Skip("skipping: Fox wingspan workbook not present")

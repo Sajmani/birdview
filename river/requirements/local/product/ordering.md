@@ -25,7 +25,7 @@ segments are modeled from mass.
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition)
 
 Species are sorted ascending by the selected metric, **and the page says which way that
-runs**: *smallest first* under length, wingspan, mass, bill and tail, *most common first* under
+runs**: *smallest first* under length, wingspan, mass, bill, and tail, *most common first* under
 Frequency, captioned under each group of controls rather than one caption that follows the
 selection. The row aligns on the text baseline, so the heading and every button stay on one
 line and only the captions hang below.
@@ -101,7 +101,7 @@ Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 Under the species-count line, a histogram has one bar per tier, in tier order, each as tall as its
 tier's species count against the largest tier's, and each linking to its tier. A bar's label names
-the tier as its heading does, its range and its count: *Bill Tier 4: 0.35 in – 0.41 in, 72
+the tier as its heading does, its range, and its count: *Bill Tier 4: 0.35 in – 0.41 in, 72
 species*. It follows the current ordering and filters, so it is the shape of the view on screen.
 
 Every tier is the same 15% step, so the bars are a histogram of size on a log scale, and **a

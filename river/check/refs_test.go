@@ -27,7 +27,7 @@ import (
 )
 
 // TestReferencesResolve checks that every reference to a goal, requirement,
-// criterion or decision resolves, across every tracked file outside
+// criterion, or decision resolves, across every tracked file outside
 // third_party/:
 //
 //   - every qualified reference -- a goal, product, tech, decision or
@@ -38,7 +38,7 @@ import (
 //   - a link whose text names an item lands on that item: the file that
 //     defines it, at its anchor;
 //   - no identifier in a superseded form survives anywhere: a letter code and
-//     three digits, or a source name, a slash and an R number.
+//     three digits, or a source name, a slash, and an R number.
 //
 // It catches a name that was renamed, one invented in a decision record and
 // never written down, and a link that lands nowhere.

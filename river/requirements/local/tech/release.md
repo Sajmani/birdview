@@ -3,7 +3,7 @@ package tech
 # Release
 
 How a change reaches birdview.site, and what checks it on the way. The deployment's own settings —
-its health probe, uptime check, alerts and runbook — belong to the deployment, not to this
+its health probe, uptime check, alerts, and runbook — belong to the deployment, not to this
 repository, and live with it (`bindings.md`, Stage adoption).
 
 ## checksOnEveryChange
@@ -56,6 +56,6 @@ policy; an unknown species is not found; the boundary file is cached as immutabl
 redirects to the index; and each other address named redirects permanently to the canonical one.
 It fetches the index once and nothing else larger than a page, and it runs after every deploy.
 
-Rationale: the tests check the code, not the deployment; flags, domains and the platform in front
+Rationale: the tests check the code, not the deployment; flags, domains, and the platform in front
 can each break a page the tests never see, as a missing `-addr` would have. Egress is what the
 site pays for, so a check run after every deploy must not cost what a crawler would.

@@ -102,7 +102,7 @@ It gates where Chrome is installed and skips without it, like renderedTextContra
 
 - Its first run, before the fix, failed on 7 of the 12 pages. The index was 588 pixels wide: region and
   family rows ran to 499, the Presentation panel's columns to 419 with their text outside the
-  panel, the diet and habitat definitions to 387 and the tiles to 420. Species pages' tables ran to
+  panel, the diet and habitat definitions to 387, and the tiles to 420. Species pages' tables ran to
   393, `/added`'s to 415, a guide's table to 366, and an example address on the empty comparison
   page to 423. These are the failures [#2](https://github.com/google/birdview/issues/2) reported.
 - Restoring the Presentation panel's fixed 380-pixel column minimum failed it on the index: the
@@ -129,13 +129,13 @@ English description is searchable. In
 headless Chrome, the same queries typed into the box: the birds left showing must be exactly the
 Go matcher's, the count line must count them and name the search, no empty section may show and
 no section with birds may have a 0% bar, and the nothing-matches note shows exactly when nothing
-does. Then, with a search in the box, a control, a tile and Here must carry it, and the welcome
-line's links, reset to defaults and a guide must not. It gates where Chrome is installed.
+does. Then, with a search in the box, a control, a tile, and Here must carry it, and the welcome
+line's links, reset to defaults, and a guide must not. It gates where Chrome is installed.
 
 **Run:** `go test ./cmd/birdview/ -run 'TestSearchMatchesNamesCodesAndTaxa|TestSearchInTheBrowser'`
 **Status: verified 2026-10-25, passing.**
 Watched failing: 2026-10-25, by not lowercasing what is typed in the script ("AMECRO" kept all six).
-Watched failing: 2026-10-25, by removing the script's click handler (the control, tile and Here went without the search).
+Watched failing: 2026-10-25, by removing the script's click handler (the control, tile, and Here went without the search).
 Watched failing: 2026-10-25, by leaving the order's English name out of the searchable text (when the rule included it).
 Watched failing: 2026-10-25, by restoring the families' and orders' English descriptions to the searchable text.
 Watched failing: 2026-10-25, by matching each word anywhere, in Go and then in the script ("heron great" kept the heron).
@@ -197,7 +197,7 @@ Covers: [product.hereSelectsLocalRegion](../../../local/product/filtering.md#her
 **Method:** on the rendered index, Here is the control after All in Regions and Now the control
 after All in Months. Now links to `/now` with every other setting kept, and `/now` redirects to
 the index with the server's month as the only month, marked `no-store`. Here carries a URL
-template keeping every other setting, and without JavaScript is marked inactive, focusable and
+template keeping every other setting, and without JavaScript is marked inactive, focusable, and
 labeled with why.
 
 **The welcome line** ([product.pageExplainsItself](../../../local/product/presentation.md#pageexplainsitself)): it ends with *reset to defaults*, linking the
@@ -206,7 +206,7 @@ guide's *Some things to try*, its link to that list lands on the heading, and th
 template, filled in, equals choosing the region and month by hand (`TestWelcomeLine`, watched
 failing on a welcome link the guide lacks and on a template missing the month).
 
-The Months control folds into two lines — the label, All, Now and the explanation, then the
+The Months control folds into two lines — the label, All, Now, and the explanation, then the
 twelve months (`TestMonthsFoldIntoTwoLines`, watched failing against the one-line layout).
 
 **Run:** `go test ./cmd/birdview/ -run 'TestHereAndNow|TestMonthsFoldIntoTwoLines|TestWelcomeLine'`

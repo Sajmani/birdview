@@ -80,7 +80,7 @@ details[open] > summary .sumdesc { display: none; }
 .chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .hint { color: var(--dim); font-size: 11px; font-style: italic; }
 /* One of the two region groupings (product.regionsGroupedTwoWays). The heading is what tells a derived
-   grouping from a hand-drawn one, so it is labelled text rather than a divider
+   grouping from a hand-drawn one, so it is labeled text rather than a divider
    -- and the note uses --dim, which the contrast check can see, not an opacity
    the check is blind to. */
 .grouping { margin-top: 10px; }
@@ -138,8 +138,8 @@ details[open] > summary .sumdesc { display: none; }
 .ohdr b { font-weight: 600; margin-left: auto; padding-left: 8px; }
 .btn b { font-weight: 600; margin-left: 6px; opacity: .8; }
 /* Sub-text inside a colored chip inherits the chip's own text color. A fixed
-   grey ignores whether the chip is light or dark and goes unreadable on both --
-   it made the common name invisible on Anatidae, Columbidae and a dozen others.
+   gray ignores whether the chip is light or dark and goes unreadable on both --
+   it made the common name invisible on Anatidae, Columbidae, and a dozen others.
    Hierarchy comes from weight and size, not from dimming, so every character
    keeps the 7:1 ratio the background was chosen for (tech.badgeContrast). */
 .chip:visited em, .chip em { font-style: normal; color: inherit; font-weight: 400; font-size: 11.5px; }
@@ -228,7 +228,7 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 /* The header is ONE line (product.tileContents), and stays one line at any name length.
 
    It did not. "Greater Necklaced Laughingthrush (GNLA)" wrapped its banding
-   code onto a second line, which made that tile taller than its neighbours --
+   code onto a second line, which made that tile taller than its neighbors --
    and because .tiles is a flex row, one tall tile leaves the rest of the row
    ragged, with the diagrams no longer at a common vertical offset. Comparing
    down a section is what the index is for, so a tile out of step costs more
@@ -254,7 +254,7 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
    enough to it that this is not hypothetical. The family's scientific name
    leads, so truncation eats the common name, which is the half a reader can
    do without. */
-/* Region chips carry no family colour, so they take the panel treatment and
+/* Region chips carry no family color, so they take the panel treatment and
    lean on the code rather than on hue. The code is the standard postal
    abbreviation; the full name follows it, as a family chip carries its common
    name (product.regionAndMonthFilter). */
@@ -308,9 +308,9 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
    crossbar was #0ea5e9 and the cube #38bdf8 -- near-identical hue and
    luminance -- so the one mark that is NOT a length looked like a matched set
    with the mark whose entire point is that it IS a length to scale (product.crossbarAtVerticalScale).
-   This colour is dE 86 from the cube and 92 from the amber bill.
+   This color is dE 86 from the cube and 92 from the amber bill.
 
-   #0ea5e9 was also 6.44:1 on the page and 5.28:1 on a panel, and this colour
+   #0ea5e9 was also 6.44:1 on the page and 5.28:1 on a panel, and this color
    is used as TEXT: the chord and wingspan labels below take their fill from
    the same vocabulary. That shipped under a 7:1 floor (tech.textContrastFloor) because the
    contrast check matched `color:` and SVG text has no `color`. See
@@ -373,7 +373,7 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 /* Same box metrics as .controls, and the same bottom margin: the Presentation
    panel sits in the same stack, so a different margin here made the first gap
    16px against 24px for the rest. Margins collapse, so it is the larger of the
-   two neighbours that shows. */
+   two neighbors that shows. */
 .help { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
   padding: 10px 14px; margin: 16px 0 24px; }
 .help summary { cursor: pointer; font-size: 12px; text-transform: uppercase;
@@ -413,13 +413,13 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 
 /* Stroke style carries provenance (product.measuredVersusModeled): solid measured, dashed modeled.
 
-   Head, neck and body are modeled for ALL 841 species, so that signal is
+   Head, neck, and body are modeled for ALL 841 species, so that signal is
    CONSTANT. Only the wingspan varies, which is why the crossbar splits: its
    outer thirds are the measured chord and stay solid, and only the inner span
    -- which absorbs the whole model error -- is dashed.
 
    The body takes the crossbar's treatment: 2.5px, 6/3 dash, round caps, with
-   colour alone separating them (body #64748b, wing #4ade80).
+   color alone separating them (body #64748b, wing #4ade80).
 
    The NECK keeps a finer 3/2 pattern on butt caps, and that is not an
    inconsistency to tidy away. Round caps extend every dash by half the stroke
@@ -482,7 +482,7 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
    a source does not separate them (product.namesRecordsFiledUnder), or a bird the month filter
    declined to judge (decisions.monthPresence). Marked on the tile, not only on the detail
    page: the index is where the misreading happens. Amber on the tile's own
-   surface, checked against the 7:1 floor like every other text colour.
+   surface, checked against the 7:1 floor like every other text color.
 
    5px above, the same gap the figure keeps from the measurements: .share
    sets line-height 1, so without it the caveat sits flush against the
@@ -491,22 +491,22 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 
 /* The ordering direction, captioned under each group of Order by buttons.
    Frequency runs the opposite way from the three size metrics, so both are
-   labelled at once rather than left to be inferred from the majority.
+   labeled at once rather than left to be inferred from the majority.
 
    The group is an inline-flex COLUMN, which is what makes the rule the
    width of whichever is wider, the buttons or the caption -- a column sizes
    to its widest child, so the Frequency group's rule tracks its own text
    without either being measured. */
-/* Baseline, not centre, on the row that carries the captioned groups. The
-   groups are two lines tall and everything else is one, so centring makes
+/* Baseline, not center, on the row that carries the captioned groups. The
+   groups are two lines tall and everything else is one, so centering makes
    the row's height follow the captions and drags ORDER BY down level with
-   the rules. Aligning on the text baseline puts the label, the buttons and
+   the rules. Aligning on the text baseline puts the label, the buttons, and
    the Frequency button all on one line and lets the captions hang below.
    A baseline rather than a padding nudge because it self-corrects: the
    label is 11px and a button 12.5px, and no offset has to be maintained. */
 .row.ordering { align-items: baseline; }
 .dirgroup { display: inline-flex; flex-direction: column; }
-/* Centred, so a single button narrower than its caption sits over the
+/* Centered, so a single button narrower than its caption sits over the
    middle of the rule rather than at its left edge. */
 .dirbtns { display: flex; gap: 6px; justify-content: center; }
 .dirn { margin-top: 4px; padding-top: 3px; border-top: 1px solid var(--dim);

@@ -129,7 +129,7 @@ func Measure(records int64, dates []time.Time, truncated bool) Shape {
 // Thresholds separating the statuses. Declared coefficients, each with a
 // reason; nothing here is fitted to reproduce anyone else's list, because the
 // only available training signal would have been the ABA checklist and
-// fitting to it would launder its editorial judgement into our weights
+// fitting to it would launder its editorial judgment into our weights
 // (decisions.scopeFromRecurrence).
 const (
 	// MinEpisodes and MinYears are the bar for recurrence at all. Two

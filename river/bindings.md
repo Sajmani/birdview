@@ -16,7 +16,7 @@ migration finishes, these are deliberate local departures from `README.md`, not 
 | **Identifiers** | Descriptive camelCase, qualified by kind outside their own file: `goals.*`, `product.*`, `tech.*`, `decisions.*`, `acceptance.*`; a transcribed source is its own package with exported names, [`inatapi.RequestRate`](requirements/imported/inaturalist.org/inatapi/inatapi.md#requestrate) ([decisions.descriptiveIdentifiers](requirements/decisions.md#descriptiveidentifiers)) | — |
 | **Composition** | `app` composed; see below the table | `dataset` and `internal/repo`; see below |
 | **Checks** | All in Go; see below the table | River's checker does not read composed packages yet, so BirdView checks its own |
-| **Stage adoption** | All four adopted: **Requirements**, **Implementation**, **Verification**, and **Release** since 2026-10-23 | Release was declared informal 2026-10-16 and adopted by Sameer on 2026-10-23, once birdview.site was public. Guardrails in [tech/release.md](requirements/local/tech/release.md); the deployment's probe, uptime check, alerting and runbook live in the private `Sajmani/birdview-deploy` |
+| **Stage adoption** | All four adopted: **Requirements**, **Implementation**, **Verification**, and **Release** since 2026-10-23 | Release was declared informal 2026-10-16 and adopted by Sameer on 2026-10-23, once birdview.site was public. Guardrails in [tech/release.md](requirements/local/tech/release.md); the deployment's probe, uptime check, alerting, and runbook live in the private `Sajmani/birdview-deploy` |
 
 **Composition.** **`app` composed** in River's normalized form: it links the 62 local requirements
 that apply to the web application unchanged, excludes the four withdrawn photograph requirements,
@@ -28,7 +28,7 @@ first.
 
 **Checks.** All in **Go**, run by `go test`: River's checker, translated at River pin `f8252f5`,
 with River's shared cases copied at the same pin; BirdView's stricter goal rule; the vendored-file
-hashes; every quotation against its vendored source; every reference, anchor and relative link; and
+hashes; every quotation against its vendored source; every reference, anchor, and relative link; and
 the composition fields. **The rendered contrast and phone-width checks need Chrome**
 (`BIRDVIEW_CHROME` to point at one) and skip without it; CI has Chrome and fails on any skip, so since 2026-10-23 they gate on
 every push and pull request ([tech.checksOnEveryChange](requirements/local/tech/release.md#checksoneverychange)).
@@ -47,7 +47,7 @@ What this project declares, as [README.md](README.md) asks of every adopter.
 | **External systems** | Tests make no network requests. Any source fetch is exercised against a local fixture or an `httptest` server, never against the live publisher. |
 | **Approval authority** | Sameer — gates, waivers, amendments, source deviations, risk acceptances. |
 | **Supported runtime** | Whatever the dependencies require ([tech.goVersionFollowsDeps](requirements/local/tech/delivery.md#goversionfollowsdeps)). No minimum Go version is maintained. |
-| **Source refresh cadence** | Annually. AviList, AOS and eBird/Clements each revise on roughly yearly cycles, and [product.joinOnBinomial](requirements/local/product/dataset.md#joinonbinomial)'s synonym table depends on all three. |
+| **Source refresh cadence** | Annually. AviList, AOS, and eBird/Clements each revise on roughly yearly cycles, and [product.joinOnBinomial](requirements/local/product/dataset.md#joinonbinomial)'s synonym table depends on all three. |
 | **Existing docs** | `river/` owns requirements. `PROVENANCE` files under `river/requirements/imported/` own retrieval facts and hashes. A README, when written, owns usage instructions and duplicates neither. |
 
 ## Location exception: the third_party directory

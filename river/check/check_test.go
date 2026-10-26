@@ -42,7 +42,7 @@ func TestBundle(t *testing.T) {
 }
 
 // TestCases holds this translation to River's shared cases: each must report
-// the same exit status, counts, problems and notes, by code and path, as River's
+// the same exit status, counts, problems, and notes, by code and path, as River's
 // Python reference does. The cases are copied from River at the pin check.go
 // records.
 func TestCases(t *testing.T) {

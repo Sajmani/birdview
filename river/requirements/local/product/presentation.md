@@ -38,7 +38,7 @@ line on every tile, and the badge belongs to the single vocabulary
 [oneDiagramVocabulary](diagram.md#onediagramvocabulary) holds the UI to. It is stated as a count
 because a list invites one more entry.
 
-The metrics are **spelled out**, not abbreviated to `L`, `W` and `M`: they fit at full width, and
+The metrics are **spelled out**, not abbreviated to `L`, `W`, and `M`: they fit at full width, and
 initials cost every new reader.
 
 The **cube** needs only a corner the drawing does not use, and no label, since the footer names the
@@ -48,7 +48,7 @@ section, a run of birds of similar length, which is where bulk against elongatio
 Tiles wrap to fill the available display width.
 
 **Every tile is the same height, and nothing inside one may wrap to make it taller.** The header,
-the family badge and the footer are one line each and the diagram has a fixed aspect. Where text
+the family badge, and the footer are one line each and the diagram has a fixed aspect. Where text
 does not fit, it **truncates on that one line**, giving way in order of what a reader can
 reconstruct:
 
@@ -90,7 +90,7 @@ One toggle switches the whole interface between:
 | imperial (default) | inches | ounces, pounds above 16 oz |
 | metric | centimeters | grams, kilograms above 1 kg |
 
-**Every** displayed number honors it — tile footers, section headers and the detail view alike.
+**Every** displayed number honors it — tile footers, section headers, and the detail view alike.
 
 Rationale: the audience is predominantly US; the toggle serves Canadian users and anyone who thinks
 in centimeters. Ounces below one are shown to two decimals, because otherwise a 3 g hummingbird and
@@ -122,7 +122,7 @@ birds, and the panel markup reopens a panel the reader collapsed. Panel state is
 **before** the scroll, since collapsing a panel afterwards would move everything beneath it.
 
 The restoration is the only client-side script in BirdView and holds no application logic;
-ordering, sectioning and geometry stay in Go where they are property-tested (see
+ordering, sectioning, and geometry stay in Go where they are property-tested (see
 [arch.md](../../../arch.md)). Without JavaScript the page behaves as it did before.
 
 ## helpfulEmptyState
@@ -167,7 +167,7 @@ would push the birds far below the fold and could not put away one finished filt
 carries the documentation for its own controls (pageExplainsItself).
 
 **A closed panel names what it holds.** Its summary carries a one-line description of what opening
-it gets the reader — *narrow to states, provinces or stretches of open sea* — shown only while
+it gets the reader — *narrow to states, provinces, or stretches of open sea* — shown only while
 closed.
 
 Rationale: the birds are the product. Opening a panel is one click and is remembered, so the cost
@@ -180,7 +180,7 @@ falls on the reader who wants a filter rather than on every reader.
 Subject: `presentation.filter_only`
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
-Beside each group selector in **Regions**, **Diet and Habitat** and **Families** sits an
+Beside each group selector in **Regions**, **Diet and Habitat**, and **Families** sits an
 **Only** control that selects that group and deselects everything else **within its own
 section**. Clicking Only beside *The High Arctic* leaves Nunavut selected and every other region
 dropped; Only beside *Waterfowl* leaves that order's families and no others. Diet and habitat
@@ -202,7 +202,7 @@ Value: `mass unit fixed per comparison scope, smallest bird decides`
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Mass is written in **one unit across everything a page is comparing**. The scope is what the
-page claims to compare: on the index, a section or the whole set, following the **scale**
+page claims to compare: on the index, a section, or the whole set, following the **scale**
 setting ([scaleToggle](diagram.md#scaletoggle)); on the comparison page, the birds named in the address; on a detail
 page, the one bird, which compares nothing.
 
@@ -280,7 +280,7 @@ with no total is skipped on both sides, so its numerator reads zero only as an a
 Shearwater has 39,143 records in the North Pacific). No selection reaches this today.
 
 **On the detail page the scope is every region at once**, and the page also names the one
-where the species peaks, labelled **Top region**.
+where the species peaks, labeled **Top region**.
 
 **The peak and the index share are one calculation, not two that agree.** Both use the same
 per-region counts and totals, so selecting the named region on the index reproduces the detail
@@ -337,7 +337,7 @@ The page carries both English names, the scientific name, the status
 [scopeIsRecurringAvifauna](dataset.md#scopeisrecurringavifauna) derived, and the evidence that
 status rests on:
 
-- **vagrant** — the episodes, years and records in the region that decided it, against the bar
+- **vagrant** — the episodes, years, and records in the region that decided it, against the bar
   it did not clear.
 - **historical** — the same, plus **the date it was last recorded**, which makes the verdict
   checkable: Passenger Pigeon recurs across 89 episodes in 52 years, every one ending in 1902.
@@ -454,7 +454,7 @@ Below the title, a **Presentation** panel carries two sections side by side, eac
 **the diagram**, then **where the numbers come from**.
 
 The diagram section is **a real labeled diagram**, the same one the detail view draws, rather than
-a list of colour swatches: every part named and measured against an actual bird. The numbers
+a list of color swatches: every part named and measured against an actual bird. The numbers
 section explains solid against dashed, the wing chord and its ticks, and the estimate marker.
 
 **The controls explain themselves where they are.** Every control is described inside the Controls
@@ -521,7 +521,7 @@ whatever scale the index is using**, plus:
 - the **provenance of every metric shown**, main metrics and segments alike (metricProvenanceExplained).
 
 **The detail view is a superset of the tile, and that is binding.** Every piece of information a
-tile carries about a species appears on that species' detail page — not merely the header, diagram
+tile carries about a species appears on that species' detail page — not merely the header, diagram,
 and main metrics named above, but anything a tile ever gains. The *plus* above is a floor: when
 [shareOfRecords](#shareofrecords)'s figure reached the tiles but not the detail page, a reader
 opening a bird found a different number for a different scope.
@@ -570,7 +570,7 @@ false. A hummingbird beside a swan is a few pixels tall; its detail view is one 
 **Panels wrap** onto as many lines as they need rather than squeezing into one row.
 
 **Layout, in order:** the diagrams first, as a wrapping row of panels; then the diagram key — the
-explanation of solid, dashed, hollow and the chord ticks — **once for the page**, not once per
+explanation of solid, dashed, hollow, and the chord ticks — **once for the page**, not once per
 bird.
 
 **There is no provenance table.** Each panel instead **links to that species' detail view**, which
@@ -612,7 +612,7 @@ with pick mode off, by the same URL as the bar's Clear.
 on the index that leaves pick mode, since it resets every setting and compare mode is one. Every
 other link keeps the picks.
 
-It is **its own labelled control set**, and the button reads **On** or **Off**; an unlabeled
+It is **its own labeled control set**, and the button reads **On** or **Off**; an unlabeled
 button after the Section step percentages read as a sixth step option.
 
 **Picking does not move the reader.** A pick link navigates to the picked bird's own tile, so the
@@ -622,13 +622,13 @@ then jumping. The scroll script stands down whenever the URL names an anchor.
 **The tile still opens the detail view in both modes.** The pick control is a separate target
 beside it, so [tileOpensDetail](#tileopensdetail) holds without exception.
 
-**Picking preserves everything else**: filter, ordering, scale and units. The bar lists picks the
+**Picking preserves everything else**: filter, ordering, scale, and units. The bar lists picks the
 filter is hiding, because a filter that appeared to discard them would be worse than useless.
 
 **Vocabulary: a bird is *picked*, a family is *selected*.** Both sets are live at once and mean
 unrelated things, so they do not share a verb.
 
-### Unrecognised ids are dropped and named
+### Unrecognized ids are dropped and named
 
 An id that matches no species is **dropped, and the page says which ids it dropped**, on the index
 and in the comparison view alike. Every link the page then builds omits it, so the set repairs
@@ -647,7 +647,7 @@ on its length: a 90-family selection is about 1.7 KB, which across 841 tiles add
 to a page. So the in-page back link restores everything except **the filter**; the browser's Back
 button restores that.
 
-**The Compare link does carry it**, and so do the comparison view's back, stop and sort links. Each
+**The Compare link does carry it**, and so do the comparison view's back, stop, and sort links. Each
 appears once per page, and dropping `family` there would return a reader who picked from a
 filtered index to an unfiltered one.
 
@@ -658,9 +658,9 @@ filtered index to an unfiltered one.
 Subject: `docs.currency`
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
-**Every CC BY source whose output appears on a page is credited on that page.** This is a licence
-condition, not a courtesy: AviList, AVONET and Fox are all CC BY 4.0. It covers `detail.html` and
-`compare.html`, whose names, families and species codes all come from AviList.
+**Every CC BY source whose output appears on a page is credited on that page.** This is a license
+condition, not a courtesy: AviList, AVONET, and Fox are all CC BY 4.0. It covers `detail.html` and
+`compare.html`, whose names, families, and species codes all come from AviList.
 
 **User-facing documentation describes the project as it is, not as it was.** `README.md` and
 `docs/` are read before the code and trusted first. Two kinds of staleness are forbidden:
@@ -693,7 +693,7 @@ not invite a reader somewhere that does not.
 
 Rationale: a plain address on a public page gets harvested, which argues for not publishing one
 rather than obfuscating it. A public issue tracker is also the better channel: a report there can
-be read, searched, corrected and closed. The owner's personal mailbox is not the project's contact
+be read, searched, corrected, and closed. The owner's personal mailbox is not the project's contact
 point.
 
 *(This requirement does not quote the address it removed: the requirements are published with the
@@ -724,7 +724,7 @@ The link is shown **only where the match is confident**, which requires **both**
 - **Scientific name** — identical, or differing only in genus while sharing a species epithet, which
   is a generic reassignment one authority has made and the other has not.
 - **Common name** — ABA's matches **any** English name iNaturalist holds for the taxon, not merely
-  its preferred one, once case, punctuation and British spelling are normalized and any ABA
+  its preferred one, once case, punctuation, and British spelling are normalized and any ABA
   parenthetical alternate is set aside.
 
 A species that fails **either** test shows **no link at all** — not a search URL, not a genus page,
@@ -735,7 +735,7 @@ name becoming a link to the wrong bird.
 species that stops resolving is a fault to investigate rather than an absence to accept — see
 [decisions.fullInaturalistCoverage](../../decisions.md#fullinaturalistcoverage).
 
-BirdView **links and never copies**. No photograph is embedded, hotlinked, cached or reproduced;
+BirdView **links and never copies**. No photograph is embedded, hotlinked, cached, or reproduced;
 the reader arrives on iNaturalist, where each image carries its own license.
 [tech.selfContainedServer](../tech/delivery.md#selfcontainedserver) forbids the embedding independently.
 

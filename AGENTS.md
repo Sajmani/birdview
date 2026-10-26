@@ -51,7 +51,7 @@ it running as a foreground or tracked background task; that holds the turn open.
   (decisions.ricklefsProhibited).
 - **Never fetch or process anything from BirdLife's DataZone**; its terms forbid automated access.
 - **Never commit the built dataset** (tech.datasetNeverCommitted).
-- **Only AVONET, the Fox wingspan data and AviList may be committed as source data.** Check
+- **Only AVONET, the Fox wingspan data, and AviList may be committed as source data.** Check
   `river/requirements/imports.md` before adding any other. The generated tables in `data/`
   are committed on purpose.
 - **Third-party files live under `third_party/<name>/`** with their own license, no Apache header;
@@ -62,5 +62,6 @@ it running as a foreground or tracked background task; that holds the turn open.
 
 ## Conventions
 
-American spellings, but **never edit a quotation or a vendored document**, and keep formatters
-away from `third_party/`, `river/requirements/imported/` and `river/README.md`.
+In prose, use American English and the Oxford comma. But **never edit a quotation or a vendored
+document**, and keep formatters away from `third_party/`, `river/requirements/imported/`,
+and `river/README.md`.

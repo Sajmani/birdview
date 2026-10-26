@@ -7,7 +7,7 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 
 ### Changed
 
-- The README introduces BirdView, how to run it and where to read more, instead of project
+- The README introduces BirdView, how to run it, and where to read more, instead of project
   status. Data sources and their licenses moved to the building guide, with a current list.
 - The guides describe BirdView as it is now, without project history.
 
@@ -33,7 +33,7 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
   one precision for the whole page, and the species count.
 - The guides flow as paragraphs instead of breaking at every source line.
 - The comparison example is six birds of one length: Blue Jay, American Kestrel, California
-  Thrasher, Mourning Dove, Belted Kingfisher and Chuck-will's-widow.
+  Thrasher, Mourning Dove, Belted Kingfisher, and Chuck-will's-widow.
 - The month buttons sit on their own line, under All and Now.
 
 ## 2026-10-14 to 2026-10-16 — Stick figures, accessibility, and a new process
@@ -76,7 +76,7 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 
 ### Added
 
-- Filter by region: US states, Canadian provinces, five US outlying islands and five stretches of
+- Filter by region: US states, Canadian provinces, five US outlying islands, and five stretches of
   open sea, grouped two ways — on the map, and by which birds they share.
 - Filter by habitat and diet, assigned per species from AVONET, with BirdView's own additions
   marked as such.
@@ -88,7 +88,7 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 
 ### Changed
 
-- Names, families, taxonomic sequence and species codes come from
+- Names, families, taxonomic sequence, and species codes come from
   [AviList](https://doi.org/10.2173/avilist.v2025b), and a species' address is its eBird code.
 - **Scope is BirdView's own**: a species is in when its records recur — repeated episodes across
   years — in at least one region, derived from open occurrence records through GBIF.
@@ -105,7 +105,7 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 
 ### Added
 
-- A comparison view drawing any number of chosen birds on one scale, sortable by length, wingspan
+- A comparison view drawing any number of chosen birds on one scale, sortable by length, wingspan,
   or mass, picked from the index with a Compare birds toggle and a pick bar.
 - Mass drawn as a cube of water that weighs the same, on the tiles and the species page.
 - The drawing marks measured lengths solid and modeled ones dashed; the species page labels every
@@ -123,9 +123,9 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 
 - The ingest, building the dataset from [AVONET](https://doi.org/10.6084/m9.figshare.16586228.v7)
   morphology and [Fox et al. 2026](https://doi.org/10.6084/m9.figshare.32089083) wingspans, and the
-  server drawing each bird as a scaled figure — bill, head, neck, body, tail and a wing crossbar.
-- A species page showing where every number came from: measured, near-match or modeled.
-- Ordering by length, wingspan or mass, in sections of similar size, at a per-section or global
+  server drawing each bird as a scaled figure — bill, head, neck, body, tail, and a wing crossbar.
+- A species page showing where every number came from: measured, near-match, or modeled.
+- Ordering by length, wingspan, or mass, in sections of similar size, at a per-section or global
   scale; a family filter with generated colors per order and family.
 - A link from each species to iNaturalist, for photographs.
 - Text held to a 7:1 contrast floor everywhere.

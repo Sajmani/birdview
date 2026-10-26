@@ -8,7 +8,7 @@ What BirdView must do and how it must be built, and where each requirement came 
 | [`imported/`](imported/) | Sources written elsewhere, at their import path (the publisher's host, then the package name: `w3.org/wcag`, `figshare.com/avonet`), each with a `PROVENANCE.md` |
 | [`composed/internal/app/`](composed/internal/app/app.md) | Everything the web application must satisfy, and its criteria |
 | [`acceptance.md`](acceptance.md) | Criteria not yet moved into a composed package |
-| [`imports.md`](imports.md) | The register of every source BirdView is subject to or has evaluated: version, tier and status. Retrieval details and hashes are in each `PROVENANCE.md` under `imported/` |
+| [`imports.md`](imports.md) | The register of every source BirdView is subject to or has evaluated: version, tier, and status. Retrieval details and hashes are in each `PROVENANCE.md` under `imported/` |
 | [`precedence.md`](precedence.md) | The standing rules for which tier of source outranks which |
 | [`decisions.md`](decisions.md) | The log of rulings, append-only: how a particular conflict or judgment was settled, and every gap knowingly accepted, by whom and why |
 

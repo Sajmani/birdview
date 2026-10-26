@@ -664,7 +664,7 @@ func bestRegion(shapes map[string]status.Shape, since time.Time) (string, status
 	// Ordered, not a bare map walk. Ranking on (status, episodes) alone left
 	// ties, and a tie was broken by Go's randomized map iteration: ten rows
 	// of the committed table named a different region on every run, carrying
-	// their episode, year, record and last-seen figures with them. Cooper's
+	// their episode, year, record, and last-seen figures with them. Cooper's
 	// Hawk recurs in 39 episodes in both Alaska and Arizona, and the table
 	// reported 24 years and 216,391 records one run and 18 and 119,194 the
 	// next. A generated table that two runs over identical inputs disagree

@@ -2,7 +2,7 @@
 
 Every number on a BirdView page comes from a published source through the commands shown below.
 Each source and table is a box listing its fields; each arrow says what a step does: a filter, a
-join or a model.
+join, or a model.
 
 **How to read the fields.** Each box lists one field per line, with one mark: ★ it reaches a page
 (and may also be used), · the pipeline uses it without showing it (a join key, a filter, a
@@ -349,7 +349,7 @@ page needs no network.
 **Scope comes from recurrence.** `birdview-status` asks GBIF which names each land region records,
 then fetches the dates behind each species in its three regions with the most records. From how
 those dates fall into episodes and years it assigns a status: *established*, *rare*, *vagrant*,
-*historical* or *absent*. Established and rare species are in scope. eBird's dates count
+*historical*, or *absent*. Established and rare species are in scope. eBird's dates count
 everywhere; iNaturalist's count only in a region and month where eBird is confirmed to withhold
 the species. `status.Declared`, a short list in code, adds species the open records cannot speak
 for, each with its reason. See [where the data comes from](data.md#scope) and the
@@ -376,7 +376,7 @@ Where a name table applies to a species, its page says so under *Recorded as*.
 the segments no source measures (4), assigns habitat and diet (5), takes wingspan from Fox where it
 was measured and estimates it where it was not (6), records the species it does not draw and why
 (7), and attaches the iNaturalist link (8) and the region counts (9). Every metric carries its
-provenance (*measured*, *near-match* or *modeled*), and the page shows which. See
+provenance (*measured*, *near-match*, or *modeled*), and the page shows which. See
 [what is measured and what is modeled](data.md).
 
 **AVONET has three taxonomy sheets, and step 3 chooses between them.** A species' own row comes
@@ -406,4 +406,4 @@ depends on it.
 
 - For what each figure means and how far to trust it: [where the data comes from](data.md).
 - For running the pipeline yourself: [building BirdView](building.md).
-- For every source's license, version and hash: [the source register](../river/requirements/imports.md).
+- For every source's license, version, and hash: [the source register](../river/requirements/imports.md).

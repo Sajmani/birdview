@@ -137,7 +137,7 @@ func testDataset() *dataset.Dataset {
 		// The murre is heavier than the crow while being shorter and
 		// narrower-winged, and it is the only species here for which the
 		// three metrics disagree. Without it the fixture is monotonic in
-		// length, wingspan and mass alike, so every sort produces the same
+		// length, wingspan, and mass alike, so every sort produces the same
 		// order and a Sort by control that ignored its metric entirely would
 		// pass its own test. Real values: Uria lomvia is a dense diver.
 		mk("thimur", "Thick-billed Murre", "Uria lomvia", "Alcidae", 32, 40, 28, 200, 46, 726, 964, 206, dataset.Measured),
@@ -282,7 +282,7 @@ func undrawnFixture() []dataset.Undrawn {
 	}}
 }
 
-// fixtureCounts reports how many species, families and orders testDataset
+// fixtureCounts reports how many species, families, and orders testDataset
 // holds. The selector checks state a relationship against these rather than a
 // literal, which would go quietly stale the next time the fixture grows a
 // species -- and growing it is how those checks get sharper, not weaker.
@@ -736,7 +736,7 @@ func TestMassUnitsBySystem(t *testing.T) {
 		{2400, "5.3 lb", "2.40 kg"}, // heron
 	}
 	for _, c := range cases {
-		// One bird is its own scope, which is the old per-value behaviour.
+		// One bird is its own scope, which is the old per-value behavior.
 		if got := unitsFor(false, c.g).format(c.g, view.ByMass); got != c.imperial {
 			t.Errorf("%.0f g imperial: got %q, want %q", c.g, got, c.imperial)
 		}
@@ -845,13 +845,13 @@ func TestHelpCoversEveryControl(t *testing.T) {
 	// Matched against the legend's own LABELS, not against any text in the
 	// panel. The cube carries a <title> tooltip reading "Mass as water: ...",
 	// which satisfied a raw ">Mass " search even with the label blanked --
-	// so the check passed against a legend that labelled nothing.
+	// so the check passed against a legend that labeled nothing.
 	var legendLabels []string
 	for _, m := range regexp.MustCompile(`<text class="dlabel[^"]*"[^>]*>([^<]*)</text>`).
 		FindAllStringSubmatch(help, -1) {
 		legendLabels = append(legendLabels, strings.TrimSpace(html.UnescapeString(m[1])))
 	}
-	// Mass included: it is labelled on the legend like every other metric
+	// Mass included: it is labeled on the legend like every other metric
 	// (product.labeledDetailDiagram), and it is the one that went missing before.
 	for _, part := range []string{"Bill", "Head", "Neck", "Body", "Tail", "Wingspan", "Wing chord", "Mass"} {
 		if !slices.ContainsFunc(legendLabels, func(l string) bool {
@@ -879,7 +879,7 @@ func TestHelpCoversEveryControl(t *testing.T) {
 	// The mass cube: a shape with no label of its own, so the panel that
 	// shows it has to say what it is. Checked in the Presentation panel and
 	// not merely in the diagram key, since this is where a reader is taught
-	// to read the drawing (product.pageExplainsItself). Whitespace-normalised:
+	// to read the drawing (product.pageExplainsItself). Whitespace-normalized:
 	// the template wraps its prose.
 	flat := strings.Join(strings.Fields(help), " ")
 	for _, s := range []string{"mass drawn as water"} {
@@ -900,7 +900,7 @@ func TestHelpCoversEveryControl(t *testing.T) {
 
 // TestChipTextInheritsItsBackgroundsTextColor guards a bug that shipped: chips
 // carry a generated background with a matching black-or-white text color, and
-// the stylesheet set the family common name to a fixed grey. Grey is unreadable
+// the stylesheet set the family common name to a fixed gray. Gray is unreadable
 // on both halves of the palette, so the common name vanished on roughly a
 // dozen chips.
 //
@@ -1069,7 +1069,7 @@ func TestAllToggle(t *testing.T) {
 }
 
 // TestDefaultSelectsEverything asserts that a fresh page has everything on:
-// All, every order and every family (product.familyFilter, product.firstLoadShowsAll).
+// All, every order, and every family (product.familyFilter, product.firstLoadShowsAll).
 //
 // Verifies: product.familyFilter, product.firstLoadShowsAll. Criterion: acceptance.familyFilterSelectsAndClears.
 func TestDefaultSelectsEverything(t *testing.T) {
@@ -1326,7 +1326,7 @@ func s2(t *testing.T) *server { t.Helper(); return newTestServer(t) }
 // the project does not hold.
 //
 // The ABA checklist is all rights reserved and BirdView has not asked for a
-// licence yet. A footer reading "used by permission" was written during the
+// license yet. A footer reading "used by permission" was written during the
 // attribution pass and is simply false; claiming a right you have not been
 // granted is worse than claiming none, because it misleads the rights holder's
 // own readers.
@@ -1348,7 +1348,7 @@ func TestNoUnearnedPermissionClaim(t *testing.T) {
 
 // neckRow pulls the Neck row's displayed value out of a detail page, so the
 // assertion is scoped to that row rather than to the whole document. A bare
-// search for a formatted number matches the bill, the tail or a section header
+// search for a formatted number matches the bill, the tail, or a section header
 // just as happily, which is how several checks in this suite previously passed
 // without testing anything.
 func neckRow(t *testing.T, body string) string {
@@ -1787,7 +1787,7 @@ func TestHeaderNamesThePanelsThatExist(t *testing.T) {
 	if len(have) == 0 {
 		t.Fatal("no collapsible panels found")
 	}
-	// Any capitalised panel-ish word the intro points the reader at must be a
+	// Any capitalized panel-ish word the intro points the reader at must be a
 	// panel that exists.
 	for _, word := range regexp.MustCompile(`\b(Instructions|Presentation|Controls)\b`).FindAllString(intro, -1) {
 		if !have[word] {
@@ -1827,15 +1827,15 @@ func TestDetailDiagramLabelsTotalLength(t *testing.T) {
 		t.Errorf("the total length label is rotated; product.labeledDetailDiagram requires it horizontal: %s", el)
 	}
 	if !strings.Contains(el, `text-anchor="middle"`) {
-		t.Errorf("the total length label is not centred: %s", el)
+		t.Errorf("the total length label is not centered: %s", el)
 	}
 
-	// Centred on the BIRD's axis, not the box's. The two differ by half the
-	// label gutter, so a label centred on the box sits well to the right of the
+	// Centered on the BIRD's axis, not the box's. The two differ by half the
+	// label gutter, so a label centered on the box sits well to the right of the
 	// bird it names.
 	lt := labelledTile(findSpecies(t, "greblu"), view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{metric: true}, dataset.LocaleNA)
 	if x := attrF(t, el, "x"); math.Abs(x-lt.Geom.CX) > 0.05 {
-		t.Errorf("total length label at x=%.1f; the bird's axis is %.1f (box centre is %.1f)",
+		t.Errorf("total length label at x=%.1f; the bird's axis is %.1f (box center is %.1f)",
 			x, lt.Geom.CX, lt.Box.W/2)
 	}
 	// Below the tail tip, not above it.
@@ -2025,7 +2025,7 @@ func TestEveryOrderGroupWrapsItsFamilies(t *testing.T) {
 	}
 }
 
-// drawnSpans pulls each compare panel's species name, drawn bill-to-tail height
+// drawnSpans pulls each compare panel's species name, drawn bill-to-tail height,
 // and crossbar half-width out of the rendered page, in document order.
 func drawnSpans(t *testing.T, body string) []struct {
 	Name   string
@@ -2167,14 +2167,14 @@ func TestCompareSelectsAndExplainsItself(t *testing.T) {
 		t.Errorf("a species named twice drew %d panels, want 1", n)
 	}
 
-	// An unrecognised id is dropped and named, not refused (decisions.compareUrlContract). Checked
+	// An unrecognized id is dropped and named, not refused (decisions.compareUrlContract). Checked
 	// with a mixed set: an all-invalid one cannot tell dropping from refusing.
 	code, msg := get(t, s, "/compare?species=annhum&species=no_such_bird")
 	if code != http.StatusOK {
-		t.Errorf("a set with one dead id gave %d; it should render what it recognises", code)
+		t.Errorf("a set with one dead id gave %d; it should render what it recognizes", code)
 	}
 	if n := len(drawnSpans(t, msg)); n != 1 {
-		t.Errorf("%d panels, want the one recognised bird", n)
+		t.Errorf("%d panels, want the one recognized bird", n)
 	}
 	if !strings.Contains(msg, "no_such_bird") {
 		t.Errorf("the page does not name the dropped id: a rotted link must say what it lost")
@@ -2599,7 +2599,7 @@ func TestUnrecognisedPicksAreDroppedAndNamed(t *testing.T) {
 	s := newTestServer(t)
 	code, body := get(t, s, "/?species=annhum&species=grus_canadensis")
 	if code != http.StatusOK {
-		t.Fatalf("a set with one dead id gave %d; it should render what it recognises", code)
+		t.Fatalf("a set with one dead id gave %d; it should render what it recognizes", code)
 	}
 
 	bar := pickBarOf(t, body)
@@ -2844,10 +2844,10 @@ func TestEveryReportedMetricIsLabelled(t *testing.T) {
 			`<th>([^<]+)</th>\s*<td class="v">([^<]+)</td>`).FindAllStringSubmatch(metrics, -1)
 		if len(rows) < 9 {
 			t.Fatalf("%s: only %d rows in the provenance table; the fixture cannot show that "+
-				"EVERY reported metric is labelled", units, len(rows))
+				"EVERY reported metric is labeled", units, len(rows))
 		}
 
-		// Every label the diagram draws, whitespace-normalised and stripped of
+		// Every label the diagram draws, whitespace-normalized and stripped of
 		// the estimated marker, which the table does not carry.
 		drawn := map[string]bool{}
 		for _, m := range regexp.MustCompile(
@@ -2901,7 +2901,7 @@ func TestMassCubeIsWaterToScale(t *testing.T) {
 		sp := &ds.Species[i]
 		lt := labelledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{}, dataset.LocaleNA)
 
-		// One gram of water is one cubic centimetre, so the cube of water
+		// One gram of water is one cubic centimeter, so the cube of water
 		// weighing massG grams has side cbrt(massG) cm = 10*cbrt(massG) mm.
 		want := 10 * math.Cbrt(sp.Mass.Value) * lt.Geom.PxPerMm
 		if math.Abs(lt.MassCube.Side-want) > 0.05 {
@@ -2936,7 +2936,7 @@ func TestMassCubeIsWaterToScale(t *testing.T) {
 		if lt.MassCube.Depth <= 0 {
 			t.Errorf("%s: the cube has no depth, so it is a square", sp.Name(dataset.LocaleNA))
 		}
-		// Its label must be centred under the face without being clipped --
+		// Its label must be centered under the face without being clipped --
 		// a Scissor-tailed Flycatcher's 29px cube once rendered "ass 1.4 oz".
 		if left := lt.MassCube.LabelX - float64(len(lt.MassCube.Label))*massLabelCharWidth/2; left < -0.01 {
 			t.Errorf("%s: the mass label %q starts at x=%.1f and is clipped",
@@ -3042,7 +3042,7 @@ func TestCompareSortReordersTheURL(t *testing.T) {
 
 	opts := sortControls(t, body)
 	if len(opts) != 5 {
-		t.Fatalf("%d sort options, want length, wingspan, mass, bill and tail", len(opts))
+		t.Fatalf("%d sort options, want length, wingspan, mass, bill, and tail", len(opts))
 	}
 	ds := testDataset()
 	byID := map[string]*dataset.Species{}
@@ -3786,7 +3786,7 @@ func TestDetailListsEveryCategoryWithItsOrigin(t *testing.T) {
 		`(?s)<th>([^<]*)</th>\s*<td class="v">(.*?)</td>.*?t-([a-z]+)">[^<]*</span></td>\s*<td class="d">(.*?)</td>`).
 		FindAllStringSubmatch(tbl, -1)
 	if len(rows) < 4 {
-		t.Fatalf("only %d category rows; want at least family, order, habitat and diet", len(rows))
+		t.Fatalf("only %d category rows; want at least family, order, habitat, and diet", len(rows))
 	}
 
 	labels := map[string]bool{}
@@ -4057,7 +4057,7 @@ func onlyLink(t *testing.T, scope, afterLabel string) string {
 	t.Helper()
 	i := strings.Index(scope, ">"+afterLabel)
 	if i < 0 {
-		t.Fatalf("no group toggle labelled %q in this scope", afterLabel)
+		t.Fatalf("no group toggle labeled %q in this scope", afterLabel)
 	}
 	m := regexp.MustCompile(`<a class="btn only" href="([^"]+)"`).FindStringSubmatch(scope[i:])
 	if m == nil {
@@ -4153,7 +4153,7 @@ func onlyZone(t *testing.T, grouping, zone string) string {
 }
 
 // The unit buttons must name the units the page actually renders. They did
-// not: imperial was labelled "in / g" while every imperial mass on the page
+// not: imperial was labeled "in / g" while every imperial mass on the page
 // was in ounces, so the control advertised a combination the site never
 // produced.
 //
@@ -4183,7 +4183,7 @@ func TestUnitButtonsNameTheUnitsRendered(t *testing.T) {
 			`href="[^"]*units=`+tc.param+`[^"]*">([^<]+)</a>`,
 			"the "+tc.param+" units button")
 		if !strings.Contains(label, unit) {
-			t.Errorf("the %s button is labelled %q, but %s masses render as %q (unit %q)",
+			t.Errorf("the %s button is labeled %q, but %s masses render as %q (unit %q)",
 				tc.param, label, tc.param, rendered, unit)
 		}
 	}
@@ -4225,7 +4225,7 @@ func realDataset(t *testing.T) *dataset.Dataset {
 //
 // Watched fail: sizing the side on raw mass instead of its cube root --
 // acceptance.massDrawnAsWaterCube's own mutation for the arithmetic -- overlaps on 785 of 839 species
-// by length, 730 by wingspan and 790 by mass.
+// by length, 730 by wingspan, and 790 by mass.
 //
 // Verifies: product.labeledDetailDiagram. Criterion: acceptance.massDrawnAsWaterCube.
 func TestTileCubeNeverReachesTheCrossbar(t *testing.T) {
@@ -4401,8 +4401,8 @@ func TestNoSectionMixesMassUnits(t *testing.T) {
 // beside it: product.measuredVersusModeled draws near-match SOLID precisely because callipers
 // touched a real bird. It also told the reader nothing they could act on --
 // the Chihuahuan Meadowlark and the Eastern Meadowlark render identical
-// length, wingspan and mass, and the only thing on the index distinguishing
-// them was one tilde labelled with the wrong reason.
+// length, wingspan, and mass, and the only thing on the index distinguishing
+// them was one tilde labeled with the wrong reason.
 //
 // Watched fail: returning "estimated" from whyNotMeasured for NearMatch
 // reports the donor missing.
@@ -4798,7 +4798,7 @@ func TestUndrawnSpeciesNamesItselfAt404(t *testing.T) {
 
 	// An id that matches no species at all keeps the terse answer. The named
 	// page is for a bird BirdView knows of and chose not to draw, and
-	// inventing one to apologise for would be worse than saying nothing.
+	// inventing one to apologize for would be worse than saying nothing.
 	code, body := get(t, s, "/species/nosuchbird")
 	if code != http.StatusNotFound {
 		t.Errorf("unknown id: status %d, want 404", code)
@@ -4841,11 +4841,11 @@ func TestNoIDIsBothDrawnAndNot(t *testing.T) {
 			t.Errorf("id %q is both %s (drawn) and %s (not drawn)", u.ID, other, u.ScientificName)
 		}
 		if u.ID == "" || u.ScientificName == "" || u.Status == "" {
-			t.Errorf("%+v: a rejected species needs an id, a name and a verdict "+
+			t.Errorf("%+v: a rejected species needs an id, a name, and a verdict "+
 				"before it can explain itself", u)
 		}
 		if u.Name(dataset.LocaleWorld) == "" {
-			t.Errorf("%s has no English name, so its page would apologise for a binomial",
+			t.Errorf("%s has no English name, so its page would apologize for a binomial",
 				u.ScientificName)
 		}
 	}
@@ -5363,7 +5363,7 @@ func TestResponsesCompressWhenAsked(t *testing.T) {
 	// not catch that -- the stream is valid, it is simply unannounced -- so
 	// checking the body first would pass over exactly this bug. It did.
 	if enc := res.Header.Get("Content-Encoding"); enc != "gzip" {
-		t.Errorf("the 404 page is compressed but labelled %q; a browser would "+
+		t.Errorf("the 404 page is compressed but labeled %q; a browser would "+
 			"render the gzip stream as binary", enc)
 	}
 	zr, err := gzip.NewReader(bytes.NewReader(packed))
@@ -5378,7 +5378,7 @@ func TestResponsesCompressWhenAsked(t *testing.T) {
 	// A status that may carry no body must not carry a gzip header either.
 	plainRes, _ := fetch("/", false)
 	if plainRes.Header.Get("Content-Encoding") != "" {
-		t.Error("an unasked-for response is labelled compressed")
+		t.Error("an unasked-for response is labeled compressed")
 	}
 }
 
@@ -5438,7 +5438,7 @@ func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 	}
 
 	// Membership, not just labels. The header is written by one function and
-	// the banding done by another, so a tier can be labelled "1 in 1,000 -
+	// the banding done by another, so a tier can be labeled "1 in 1,000 -
 	// 1 in 9,999" while holding whatever the sectioning rule actually put
 	// there. Replacing the decade rule with a proportional one left every
 	// label a tidy power of ten and only the tier COUNT gave it away.
@@ -5579,7 +5579,7 @@ func TestFrequencyTiersAreNotNamed(t *testing.T) {
 // TestFrequencyDefaultsToGlobalScale asserts decisions.frequencyGlobalScale: the scale default
 // depends on the ordering, and BOTH scale values stay selectable under it.
 //
-// The second half is the one that bites. The parser used to recognise only
+// The second half is the one that bites. The parser used to recognize only
 // the non-default value, with a comment warning that this silently disables
 // the toggle whenever the default moves -- which is what happened when
 // decisions.perSectionDefault moved it. A default that varies by metric is the same bug arriving
@@ -5781,7 +5781,7 @@ func TestOrderByStatesItsDirection(t *testing.T) {
 // under the stylesheet's default `align-items: center` the row's height
 // follows the captions and ORDER BY sits level with the rules instead of
 // with the buttons. Baseline alignment puts the label, the three size
-// buttons and the Frequency button on one line and lets the captions hang
+// buttons, and the Frequency button on one line and lets the captions hang
 // below it.
 //
 // Asserted because it is invisible to every other check here: the markup is
@@ -6039,7 +6039,7 @@ func TestEveryNameDisagreementIsOnThePage(t *testing.T) {
 // TestResponsesCarryAValidator asserts tech.cacheLifetimeStated: every response says how long
 // it may be reused and gives a cache something to check it against.
 //
-// BirdView sent no Cache-Control, no ETag and no Last-Modified at all,
+// BirdView sent no Cache-Control, no ETag, and no Last-Modified at all,
 // which does not mean "do not cache". It means the browser may apply its
 // own heuristic and has nothing to revalidate against when it does, so a
 // reader who reloads after a rebuild can be served the old page with no
@@ -6748,7 +6748,7 @@ func TestSameMeasurementsAreNoted(t *testing.T) {
 func TestSameMeasurementsNeedNoTable(t *testing.T) {
 	ds := testDataset()
 	if len(ds.Species) < 3 {
-		t.Fatal("the fixture needs three species: a donor, a borrower and a bystander")
+		t.Fatal("the fixture needs three species: a donor, a borrower, and a bystander")
 	}
 	donor, borrower, bystander := &ds.Species[0], &ds.Species[1], &ds.Species[2]
 	borrowed := donor.Segments.Bill.Prov
@@ -6895,7 +6895,7 @@ func TestExoticsAreOffTheIndexAndListed(t *testing.T) {
 // TestReadersAreToldItIsAStickFigure pins the reader-facing term. On the
 // pages a reader sees, the drawing is a stick figure, and the only
 // "diagram" left is the link to the data-pipeline diagram, which product.pipelineDiagram owns.
-// Visible text only: class names, template comments and the code keep
+// Visible text only: class names, template comments, and the code keep
 // "diagram", by design.
 //
 // Verifies: product.segmentComposition. Criterion: acceptance.readersToldStickFigure.

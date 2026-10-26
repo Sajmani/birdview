@@ -41,7 +41,7 @@ import (
 const Source = "AviList v2025b (CC BY 4.0)"
 
 // sheetPrefix finds the taxonomy tab. The workbook has six; the rest are
-// decision summaries, citations and usage notes.
+// decision summaries, citations, and usage notes.
 //
 // Matched by prefix rather than named exactly, because the tab carries the
 // version AND the release in its name -- "AviList v2025b extended" -- so a

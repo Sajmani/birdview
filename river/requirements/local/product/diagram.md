@@ -11,7 +11,7 @@ Value: `bill, head, neck, body, tail, wing crossbar`
 Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The diagram is a top-down view of a bird in flight, drawn as a vertical cross: top to bottom a bill
-stick, a head oval, a neck, a body stick and a tail stick, with one horizontal crossbar for the
+stick, a head oval, a neck, a body stick, and a tail stick, with one horizontal crossbar for the
 wings. The tail is visibly distinguished from the body; the neck is an S where the family folds it
 in flight; there are no legs.
 
@@ -23,7 +23,7 @@ The flight premise is stated because leaving it unstated made the leg question u
 after that. *Diagram* stays the word in this spec and in the code, and on the site it means only
 the data-pipeline diagram ([pipelineDiagram](measurements.md#pipelinediagram)); see [decisions.stickFigure](../../decisions.md#stickfigure).
 
-The tail is distinguished from the body by stroke style, color and a mark at the junction between
+The tail is distinguished from the body by stroke style, color, and a mark at the junction between
 them. Under measuredVersusModeled the tail is measured and so solid, the body modeled and so
 dashed; the junction mark carries the distinction on its own if the two ever share a stroke style.
 
@@ -35,7 +35,7 @@ parameter; see [decisions.foldedNeckAsS](../../decisions.md#foldedneckass).
 
 **There are no legs.** Most birds tuck them in flight, and for those that trail them — herons,
 cranes, storks, ibises, flamingos, stilts, rails, loons, grebes — what shows is the projection past
-the tail tip. That depends on the femur, the toes and the hip's position, which no source
+the tail tip. That depends on the femur, the toes, and the hip's position, which no source
 measures, and on the feathered tibiotarsus, which a standing-posture leg model leaves out.
 [decisions.inFlightNoLegs](../../decisions.md#inflightnolegs) records the evidence and
 what the removal costs.
@@ -58,7 +58,7 @@ same scale can be compared directly.
 
 **Qualification.** The equality holds for segment *lengths* without exception, and for the drawn
 vertical extent of 827 of 841 species. The folded-neck families of segmentComposition draw shorter
-than their catalogued length, because the S occupies less height than the neck is long. Everything
+than their cataloged length, because the S occupies less height than the neck is long. Everything
 that treats length as data — ordering, sectioning, the scale reference of scaleToggle, and the
 detail view — uses the full total length, so comparability is unaffected. See
 [decisions.foldedNeckAsS](../../decisions.md#foldedneckass).
@@ -91,7 +91,7 @@ Rationale: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition) depends 
 tile — makes a hummingbird and a swan identical on screen.
 
 Per-section is the default because at global scale a median bird is a few pixels tall, too small
-to show the stroke styles of measuredVersusModeled, the chord ticks or the labels of
+to show the stroke styles of measuredVersusModeled, the chord ticks, or the labels of
 labeledDetailDiagram ([decisions.perSectionDefault](../../decisions.md#persectiondefault)). Global still makes the cross-family comparison
 best, and stays one click away and named first in the help.
 
@@ -136,7 +136,7 @@ whole-animal measurement available, and a linear dimension scaling as its cube r
 default. There is deliberately **no floor**: a floor would only conceal a bad coefficient.
 
 Known limitation: birds of similar mass get similar heads, so within a size tier the shape signal
-comes from bill, tail, neck and wingspan.
+comes from bill, tail, neck, and wingspan.
 
 **[decisions.trunkExponentCalibrated](../../decisions.md#trunkexponentcalibrated) leaves the cube root alone.** Single skeletal elements
 scale at 0.314–0.325, chains of them higher; the head is one element and keeps 1/3, the trunk is a
@@ -212,12 +212,12 @@ figure means the same thing on all four.
 crossbar, mass cube — has one color, and every surface uses that color for that part. A surface
 may not pick its own shade of a part, however good its local reason.
 
-**Size-dependent geometry is not shared.** Stroke weight, dash pattern and which parts appear may
-be tuned per surface: the favicon drops the dashes and collapses neck, body and tail into one
+**Size-dependent geometry is not shared.** Stroke weight, dash pattern, and which parts appear may
+be tuned per surface: the favicon drops the dashes and collapses neck, body, and tail into one
 stroke, and the detail view retunes the body's dash for its scale. Any such divergence carries its
 reason beside it.
 
-**The mechanism is most of the guarantee.** The index, detail and comparison views share one
+**The mechanism is most of the guarantee.** The index, detail, and comparison views share one
 `diagram` template and one stylesheet, so they cannot diverge. The favicon is the only exception: a
 standalone asset that restates the palette by hand. **That restatement is what has to be
 checked**, by [acceptance.faviconFromPalette](../../acceptance.md#faviconfrompalette).

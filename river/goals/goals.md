@@ -24,7 +24,7 @@ See how birds differ in proportion and build, not only in size.
 
 **Compare the birds you care about**
 
-Compare any set of birds side by side, whether a family, a habitat or a few you picked.
+Compare any set of birds side by side, whether a family, a habitat, or a few you picked.
 
 ## localRelevance
 
@@ -36,13 +36,13 @@ Learn which birds you could meet in a place and season, and how common each one 
 
 **Trust what you see**
 
-Know where each figure comes from, how certain it is, where sources disagree and what is missing.
+Know where each figure comes from, how certain it is, where sources disagree, and what is missing.
 
 ## openToEveryone
 
 **Usable by anyone, anywhere**
 
-Read BirdView whatever your eyesight, device or connection.
+Read BirdView whatever your eyesight, device, or connection.
 
 ## shareableViews
 
@@ -66,13 +66,13 @@ Honor the terms of, and credit, every person and project whose data BirdView use
 
 **Give back to the commons**
 
-Make what BirdView derives open for others to check, reuse and improve.
+Make what BirdView derives open for others to check, reuse, and improve.
 
 ## rapidIteration
 
 **Iterate quickly**
 
-Build, run and test BirdView on one machine, without refetching its data.
+Build, run, and test BirdView on one machine, without refetching its data.
 
 ## freedomToChange
 
@@ -97,5 +97,5 @@ Maintain BirdView without exposing anyone's personal details.
 - **Bird identification.** BirdView assumes you know the bird.
 - **Songs and calls.**
 - **Range maps.** Regions filter the list; BirdView draws no maps.
-- **Personal data.** No accounts, sightings or life lists.
+- **Personal data.** No accounts, sightings, or life lists.
 - **Commercial use.** BirdView is not and will not become commercial ([tech.localNowPublicLater](../requirements/local/tech/posture.md#localnowpubliclater)).

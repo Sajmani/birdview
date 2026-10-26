@@ -16,7 +16,7 @@
 // rule that decides whether a species is present in one (product.regionAndMonthFilter, decisions.monthPresence).
 //
 // A package of its own, small as it is, because the rule has three callers
-// that must agree — the index's species list, the tile's figure and the
+// that must agree — the index's species list, the tile's figure, and the
 // detail page's — and the last time one measure had two implementations the
 // index and the detail page disagreed about where a bird was commonest
 // (decisions.honestSeaDenominator).

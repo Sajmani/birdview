@@ -58,7 +58,7 @@
       <div class="legenddia">{{template "diagram" .Legend}}</div>
       <p class="hint">{{.Legend.Name}}, labeled as on its own page.</p>
       {{else}}
-      <p>Each bird is drawn to scale, seen from above in flight: bill, head, neck, body and tail
+      <p>Each bird is drawn to scale, seen from above in flight: bill, head, neck, body, and tail
       down the middle, and the wingspan as a crossbar.</p>
       {{end}}
     </section>
@@ -77,11 +77,11 @@
 </details>
 
 <details class="controls" id="controls">
-  <summary>Controls<span class="sumdesc">order, scale, units and how birds are named</span></summary>
+  <summary>Controls<span class="sumdesc">order, scale, units, and how birds are named</span></summary>
   <div class="ctrlhelp">
       <dl>
         <div class="ctrl"><dt>Order by</dt>
-        <dd>Sort by length, wingspan, mass, bill or tail, in sections of similar size.
+        <dd>Sort by length, wingspan, mass, bill, or tail, in sections of similar size.
           <b>Frequency</b> sorts by how much of what people record is that bird, most common first.</dd></div>
         <div class="ctrl"><dt>Scale</dt>
         <dd><b>Per section</b> scales each section to its largest bird, to compare shape.
@@ -104,7 +104,7 @@
   <div class="row ordering">
     <span class="lbl">Order by</span>
     {{$q := .Query}}
-    {{/* Two labelled groups, both captioned at once rather than one caption
+    {{/* Two labeled groups, both captioned at once rather than one caption
          that changes with the selection. Frequency ascends a reciprocal --
          "1 in N" rises as the bird gets scarcer -- so it runs the opposite
          way from the three size metrics, and a reader who has learned
@@ -166,8 +166,8 @@
       {{end}}
     {{end}}
 
-    {{/* Its own labelled control set, not a trailing button: beside the
-         Section step percentages an unlabelled "Compare birds" read as a sixth
+    {{/* Its own labeled control set, not a trailing button: beside the
+         Section step percentages an unlabeled "Compare birds" read as a sixth
          step option. The button states the mode rather than naming the
          control, which the label now does (product.pickFromIndex). */}}
     <span class="lbl">Compare birds</span>
@@ -179,7 +179,7 @@
 </details>
 
 <details class="controls" id="regions">
-  <summary>Regions and months<span class="sumdesc">narrow by state, province, open sea or month</span></summary>
+  <summary>Regions and months<span class="sumdesc">narrow by state, province, open sea, or month</span></summary>
   <div class="ctrlhelp">
       <dl>
         <div class="ctrl"><dt>Month</dt>
@@ -201,7 +201,7 @@
   {{/* The twelve, ungrouped and unnamed. No seasons: product.orderByFrequency forbids naming a
        band where the range can be stated, and a season name inverts between
        hemispheres and means nothing in the tropics -- Hawaii, Palmyra,
-       Navassa, Wake and Johnston -- while the Central Pacific region spans
+       Navassa, Wake, and Johnston -- while the Central Pacific region spans
        -10 to 40 degrees and crosses the equator (decisions.monthPresence).
 
        No "Only" either. It earns its place for 74 regions in 8 zones and
@@ -360,8 +360,8 @@
      followed. The hidden fields keep every other setting. */}}
 <form class="search" action="/" method="get" role="search">
   {{range .SearchFields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
-  <input type="search" name="q" value="{{.Opt.Query}}" placeholder="Search names, codes and families"
-         aria-label="Search birds by name, code or family" autocomplete="off" spellcheck="false">
+  <input type="search" name="q" value="{{.Opt.Query}}" placeholder="Search names, codes, and families"
+         aria-label="Search birds by name, code, or family" autocomplete="off" spellcheck="false">
 </form>
 <p class="count"><span class="shown" data-total="{{.Total}}">{{.Shown}} of {{.Total}} species</span>{{range .Filters}}<span class="fsum"><b>{{.Label}}</b> {{.Value}}</span>{{end}}<span class="fsum fsearch"{{if not .Opt.Query}} hidden{{end}}><b>Search</b> <span class="fsq">{{.Opt.Query}}</span></span></p>
 <p class="empty searchempty"{{if not .SearchEmpty}} hidden{{end}}>Nothing matches the search.</p>
@@ -417,7 +417,7 @@
     <li><b>Region boundaries</b> &mdash; Made with
       <a href="https://www.naturalearthdata.com/">Natural Earth</a>, in the public domain.
       Used only by the Here button, in your browser.</li>
-    <li><b>Names, families and species codes</b> &mdash; AviList Core Team (2026).
+    <li><b>Names, families, and species codes</b> &mdash; AviList Core Team (2026).
       <i>AviList: The Global Avian Checklist, v2025b.</i>
       <a href="https://doi.org/10.2173/avilist.v2025b">doi:10.2173/avilist.v2025b</a>,
       licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
@@ -427,12 +427,12 @@
       <a href="https://doi.org/10.15468/aomfnb">doi:10.15468/aomfnb</a>, and the iNaturalist
       research-grade observations, both licensed
       <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
-      Only the derived list of regions per species is kept; no record, coordinate, date or
+      Only the derived list of regions per species is kept; no record, coordinate, date, or
       observer reaches this site.</li>
     <li><b>Which species are in scope</b> &mdash; BirdView's own, derived from the occurrence
       records above, not from a checklist: a species is drawn when its records <b>recur</b> in
       some region, in repeated episodes across years. Method and limits:
-      <a href="/docs/data#scope">how the data is made</a>. Escaped cage, aviary and farm birds
+      <a href="/docs/data#scope">how the data is made</a>. Escaped cage, aviary, and farm birds
       also pass that rule; they are left off this page and
       <a href="/excluded">listed with the reason for each</a>.</li>
   </ul>
@@ -455,7 +455,7 @@
  * Both are remembered for the session. Panels are restored before the scroll,
  * since collapsing one afterwards would move everything beneath it.
  *
- * It holds no logic: ordering, sectioning and geometry stay in Go where they
+ * It holds no logic: ordering, sectioning, and geometry stay in Go where they
  * are property-tested. The one exception is here.js, which looks up the
  * reader's region in the browser so their position never reaches the server,
  * and is held to the Go lookup's answers by a test. Without JavaScript the
@@ -525,7 +525,7 @@
 
          `whynot` supplies the tooltip. All three used to say "estimated" for
          anything not measured, which was false for a near-match: that is a
-         real measurement with callipers, of a sibling taxon, and product.measuredVersusModeled draws
+         real measurement with calipers, of a sibling taxon, and product.measuredVersusModeled draws
          it SOLID for exactly that reason. The footer calling it an estimate
          contradicted the stroke beside it, and named no reason a reader
          could act on -- the Chihuahuan Meadowlark's mass is the Eastern
@@ -618,7 +618,7 @@
         y="{{f1 (add .TopOffset $g.YShoulder)}}">{{.WingspanLabel}}{{if .WingspanEst}} ~{{end}}</text>
   {{end}}
   {{if and .ChordLabel $g.ChordTickX}}
-  {{/* Centred over the LEFT outer segment. Both outer segments are the measured
+  {{/* Centered over the LEFT outer segment. Both outer segments are the measured
        chord, so either names it; the left keeps it clear of the wingspan label,
        which sits off the right end of the bar. */}}
   <text class="dlabel chord" text-anchor="middle" y="{{f1 (add .TopOffset (sub $g.YShoulder 7))}}"
@@ -628,8 +628,8 @@
   <text class="dlabel{{if .Est}} est{{end}}" x="{{f1 (sub $b.W 144)}}" y="{{f1 .TextY}}"
         dominant-baseline="middle">{{.Text}}{{if .Est}} ~{{end}}</text>
   {{end}}
-  {{/* The whole bird, named under the foot of the figure and centred on the
-       drawing axis -- $g.CX, not the box centre: the bird is laid out left of
+  {{/* The whole bird, named under the foot of the figure and centered on the
+       drawing axis -- $g.CX, not the box center: the bird is laid out left of
        the label gutter, so the two are 160px apart. No leader lines; there is
        no part to point at. Mass sits here rather than in the stack beside the
        drawing because it is not a length (product.labeledDetailDiagram). */}}

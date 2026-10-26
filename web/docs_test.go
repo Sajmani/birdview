@@ -76,9 +76,9 @@ func datasetCounts(t *testing.T) (species, families int) {
 }
 
 // ccBySources are the CC BY sources whose output reaches a page, each with
-// the marker that counts as crediting it. Attribution is the licence
+// the marker that counts as crediting it. Attribution is the license
 // condition these sources ask for in return, so a page that shows their work
-// and omits the credit is a licence breach, not a styling lapse (product.selfDescriptionStaysTrue).
+// and omits the credit is a license breach, not a styling lapse (product.selfDescriptionStaysTrue).
 //
 // `pages` names the pages a source's output actually reaches; nil means all
 // of them. GBIF is the reason this field exists: region membership is derived
@@ -95,14 +95,14 @@ var ccBySources = []struct {
 	name, marker, shows string
 	pages               []string
 }{
-	{"AviList", "AviList", "every English name, scientific name, family and species code", nil},
-	{"AVONET", "AVONET", "mass, wing chord and the measured segments", nil},
+	{"AviList", "AviList", "every English name, scientific name, family, and species code", nil},
+	{"AVONET", "AVONET", "mass, wing chord, and the measured segments", nil},
 	{"Fox et al.", "Fox", "empirical wingspans", nil},
 	{"GBIF", "GBIF", "which regions each bird is found in",
 		[]string{"index.html", "detail.html"}},
 }
 
-// TestEveryPageCreditsWhatItShows asserts the licence half of product.selfDescriptionStaysTrue.
+// TestEveryPageCreditsWhatItShows asserts the license half of product.selfDescriptionStaysTrue.
 //
 // Checked **per page**, because that is how attribution works and because
 // the gap it was written for was per-page: the index carried full credits

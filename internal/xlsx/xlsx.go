@@ -17,7 +17,7 @@
 // It does only what BirdView's three source readers need: list the sheets,
 // and stream one sheet's rows as strings placed by column. Numbers come back
 // as the text stored in the file, unformatted; booleans as TRUE or FALSE.
-// Styles, formulas, dates and writing are out of scope. A workbook is a zip
+// Styles, formulas, dates, and writing are out of scope. A workbook is a zip
 // of XML parts, so the standard library is enough, and the vendored sources
 // are read without a third-party parser.
 package xlsx

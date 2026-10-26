@@ -33,7 +33,7 @@ and ordinary text are held to the same floor, which is also the floor badgeContr
 **"Text color" means `fill` as well as `color`.** SVG text is painted with `fill`, so a diagram
 label, such as those of
 [product.labeledDetailDiagram](../product/measurements.md#labeleddetaildiagram), is text and is
-held to this floor. Shapes are not: a stroke or fill on a line, a polygon or the
+held to this floor. Shapes are not: a stroke or fill on a line, a polygon, or the
 mass cube is a graphical object, governed by WCAG 1.4.11's 3:1. A rule styles text when it styles
 an element the stylesheet gives a font property.
 
@@ -61,7 +61,7 @@ Subject: `pages.domain`
 Binds: [wcag.WebPage](../../imported/w3.org/wcag/wcag.md#webpage)
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
-**Every response the server sends as `text/html`, `image/svg+xml` or `text/plain`, at any route,
+**Every response the server sends as `text/html`, `image/svg+xml`, or `text/plain`, at any route,
 is a BirdView web page**, with everything drawn into it. Today that is the index, the species
 page in its drawn and undrawn forms, the comparison, the guides and their index, the added-values
 and excluded-birds pages, the pipeline diagram and the favicon opened at their own URLs, and the

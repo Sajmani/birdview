@@ -47,7 +47,7 @@ func pct(total int64, shares [Count]float64) [Count]int64 {
 // The Pacific Golden-Plover is the case worth keeping. It leaves Hawaii in
 // late April for Alaska and returns in August, and the rule recovers
 // exactly that from record counts, with nothing about the species, its
-// migration or its breeding range encoded anywhere.
+// migration, or its breeding range encoded anywhere.
 //
 // Watched fail: see acceptance.monthsFilterAndAbstain.
 //
@@ -107,7 +107,7 @@ func TestPresentRecoversKnownSeasons(t *testing.T) {
 // species with too little evidence gets no verdict at all.
 //
 // Millerbird is the case. It holds 28 records in Hawaii, every one in
-// March, April, August, September or October, and lives on Nihoa the year
+// March, April, August, September, or October, and lives on Nihoa the year
 // round — so those months record when anyone last got to Nihoa. Returning
 // "absent in June" would state something about the bird out of a fact
 // about the survey.

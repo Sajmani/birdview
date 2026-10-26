@@ -3,14 +3,14 @@ package todo
 # Open work
 
 Search `## <id>` for one item, or `grep -n -A1 '^## ' river/todo.md` for the list. `Status:` is
-open, parked or deferred; `Gate:` says when it is due.
+open, parked, or deferred; `Gate:` says when it is due.
 
 Everything outstanding in BirdView: unfinished work, open questions, known defects, criteria not
-yet watched failing, and stale spec or doc text. Each item points at the requirement, decision or
+yet watched failing, and stale spec or doc text. Each item points at the requirement, decision, or
 criterion that holds its reasoning.
 
 **Adding an item.** Add it the moment the work is found: a camelCase identifier as the heading,
-the title in bold, then `Status:`, `Owner:` and `Gate:`. Never leave a `TODO` in code or a "left
+the title in bold, then `Status:`, `Owner:`, and `Gate:`. Never leave a `TODO` in code or a "left
 open" note in a decision record instead.
 
 **Closing an item.** Set `Status: closed`, replace `Gate:` with `Closed:` and what closed it, and
@@ -69,7 +69,7 @@ search). Then use it to compare designs.
 
 Built and first run 2026-10-25 ([usertests/](../usertests/README.md),
 [summary](../usertests/results/2026-10-25/summary.md)): four readers on `4f25193` and on
-`b3b2f93`. The old run found the missing search, the density and the backwards month toggle, but
+`b3b2f93`. The old run found the missing search, the density, and the backwards month toggle, but
 saw the phone overflow only weakly; mean ease rose from 2.25 to 3.1. Left: run it before and after
 Presentation moves to the guide, and decide whether results stay in the repository.
 
@@ -96,7 +96,7 @@ Status: open
 Owner: unassigned
 Gate: before the testers are asked back
 
-Both phone readers, on both revisions, could not read the length, wingspan and mass labels inside
+Both phone readers, on both revisions, could not read the length, wingspan, and mass labels inside
 the comparison's drawings, and opened each bird's page instead
 ([product.comparisonOneScale](requirements/local/product/presentation.md#comparisononescale)). Show the three numbers as text under each panel, or scale the
 labels with the drawing.
@@ -110,10 +110,10 @@ Owner: Sameer
 Gate: when convenient
 
 Second pass 2026-10-25, on what readers see: the page templates, the text built in Go
-(`main.go` notes, verdicts, tooltips, `/added` and `/excluded`), the region grouping notes and
+(`main.go` notes, verdicts, tooltips, `/added` and `/excluded`), the region grouping notes, and
 `docs/using.md`. Design reasoning left the pages for river/; two requirements were amended to
 allow it ([product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram)'s cube and folded-neck notes). First pass done 2026-10-20: README, AGENTS.md, CONTRIBUTING, CHANGELOG, the four guides, every
-product and tech requirement, `app.md` and the page templates, about 30% shorter overall. Left:
+product and tech requirement, `app.md`, and the page templates, about 30% shorter overall. Left:
 `decisions.md` and `acceptance.md` (history and verification records; decide whether to tighten
 them at all), `imports.md`, `notes.md`, `arch.md`, `bindings.md`, code comments, and page
 text built in Go, chiefly `cmd/birdview/main.go` (group notes, the undrawn page's verdicts, region
@@ -173,7 +173,7 @@ Found 2026-10-19 while setting Bill and Tail's default scale
 ([product.scaleToggle](requirements/local/product/diagram.md#scaletoggle)): with 15% sections, one
 wingspan section runs from the 146 mm Elf Owl to the 1,789 mm Emu, 12.3× in total length, because a
 flightless bird's short wings sort it among small owls. Length sections stay within 1.1× and mass
-within 3.1×. Either Wingspan should default to Global as Bill, Tail and Frequency do, or flightless
+within 3.1×. Either Wingspan should default to Global as Bill, Tail, and Frequency do, or flightless
 birds need handling in the wingspan sort
 
 ## sexSpecificDrawings
@@ -184,17 +184,17 @@ Status: open
 Owner: Sameer
 Gate: when a usable sex-specific mass source is found
 
-Mass is the blocker: it is pooled per species in every vendored source, and head, body and the mass
+Mass is the blocker: it is pooled per species in every vendored source, and head, body, and the mass
 cube are modeled from it
 ([product.craniumFromMass](requirements/local/product/diagram.md#craniumfrommass),
 [product.trunkFromMass](requirements/local/product/diagram.md#trunkfrommass)), so per-sex bill,
-wing and tail on a shared body would draw a bird nobody measured
+wing, and tail on a shared body would draw a bird nobody measured
 ([product.tileMarksModeled](requirements/local/product/measurements.md#tilemarksmodeled)). What
 exists: AVONET's unused `AVONET_Raw_Data` sheet sexes each specimen for bill, wing chord, secondary,
-tail and tarsus, but only **213 of 1,082** drawn species have five or more of each sex, and **9 of
+tail, and tarsus, but only **213 of 1,082** drawn species have five or more of each sex, and **9 of
 61** drawn raptors; Fox's sex-specific wingspan columns are filled for **2** drawn species. Where
 samples suffice, raptor females run larger in wing chord (Sharp-shinned Hawk +15%, Peregrine +9%)
-and males larger in grackles, cowbirds, Ruff and pheasant (+11–22%); a 5–9% gap in a passerine from
+and males larger in grackles, cowbirds, Ruff, and pheasant (+11–22%); a 5–9% gap in a passerine from
 five specimens per sex is likely noise. **Leads for sex-specific mass, none checked:** Myhrvold et
 al. 2015's amniote database (believed public domain, with a figshare copy; license and coverage
 unverified). Lislevand et al. 2007 and Ecology's data papers generally sit on **Wiley, which
@@ -229,7 +229,7 @@ Gate: ready; `app` was approved 2026-10-25
 logs them), then move each criterion out of [acceptance.md](requirements/acceptance.md) into its
 package with `Covers:` and delete the Traceability table once nothing is left in it. **Four wait on
 the morphometric-model ruling** — [product.craniumFromMass](requirements/local/product/diagram.md#craniumfrommass), [product.trunkFromMass](requirements/local/product/diagram.md#trunkfrommass),
-[product.neckModelPerFamily](requirements/local/product/diagram.md#neckmodelperfamily) and [product.generatedBadgeColors](requirements/local/product/dataset.md#generatedbadgecolors): each produces a value the app draws,
+[product.neckModelPerFamily](requirements/local/product/diagram.md#neckmodelperfamily), and [product.generatedBadgeColors](requirements/local/product/dataset.md#generatedbadgecolors): each produces a value the app draws,
 and whether it is data (`dataset`) or a drawing instruction (`app`) is the owner's call
 
 ## largeSourceFiles
@@ -246,7 +246,7 @@ whole-file reads
 
 ## licenseConditionFirst
 
-**Statement-first: one requirement still leads with a licence condition**
+**Statement-first: one requirement still leads with a license condition**
 
 Status: open
 Owner: Sameer
@@ -270,19 +270,19 @@ restated:**
 ([`inatapi.RequestRate`](requirements/imported/inaturalist.org/inatapi/inatapi.md#requestrate)),
 [tech.identifiedClient](requirements/local/tech/delivery.md#identifiedclient)
 ([`inatapi.UserAgent`](requirements/imported/inaturalist.org/inatapi/inatapi.md#useragent)),
-[tech.badgeContrast](requirements/local/tech/accessibility.md#badgecontrast) and
+[tech.badgeContrast](requirements/local/tech/accessibility.md#badgecontrast), and
 [tech.textContrastFloor](requirements/local/tech/accessibility.md#textcontrastfloor) (WCAG 2.2 SC
 1.4.6 and 1.4.11). These belong in a composed package citing the source, not in `tech`. **Mixed — a
 local requirement with an imported obligation inside it, to split:**
 [tech.fetchRestrictedInputs](requirements/local/tech/delivery.md#fetchrestrictedinputs) (*do not
-redistribute* is the licences'; *fetch at build time* is BirdView's mechanism),
+redistribute* is the licenses'; *fetch at build time* is BirdView's mechanism),
 [product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue)
-(*credit every CC BY source* is a licence condition; docs currency is local),
+(*credit every CC BY source* is a license condition; docs currency is local),
 [tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater) (*never
-commercial* follows the non-commercial licences), and
+commercial* follows the non-commercial licenses), and
 [product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink) (*reproduce
 no photograph* is [`inatterms.ContributorKeepsRights`](requirements/imported/inaturalist.org/inatterms/inatterms.md#contributorkeepsrights)). **The other 73 are local intent**, including
-those that name a source — choosing AviList for names is BirdView's decision, made with licences in
+those that name a source — choosing AviList for names is BirdView's decision, made with licenses in
 mind, not an obligation AviList imposes. Two findings on the way: the WCAG manifest entry still says
 other text is held to 4.5:1, which
 [decisions.oneContrastFloor](requirements/decisions.md#onecontrastfloor) replaced with one 7:1
@@ -366,7 +366,7 @@ Gate: opportunistic
 The rank fold of
 [acceptance.occurrenceReadersAgree](requirements/acceptance.md#occurrencereadersagree) moved
 iNaturalist's trinomials into their wild species, and the proportional gainers were `Gallus gallus`
-**+11.9%**, `Anser cygnoides` **+20.0%** and `Anser anser` **+6.9%** — the same signature as the
+**+11.9%**, `Anser cygnoides` **+20.0%**, and `Anser anser` **+6.9%** — the same signature as the
 declared `Columba livia` (+1.3%) and `Cairina moschata` (+10.0%). `taxonomy.DomesticForms` names
 only the latter two, so
 [product.sourceNamingMeasured](requirements/local/product/dataset.md#sourcenamingmeasured)'s ratio
@@ -476,7 +476,7 @@ vagrant with four records are the same shape. *(3) Local abundance against conti
 Flamingo/PA scores 1.61, above several birds that must be kept, because flamingos are rare
 everywhere so the baseline is tiny. A composite — drop if ≥20 records **and** (≤2 places **or** ≤1
 year) — keeps every endemic and withheld species correctly and catches Lucy's and the flamingo, but
-still misses Wood Stork/NS, Spoonbill/ME, Fork-tailed Flycatcher/DE and Baltimore Oriole/NT.
+still misses Wood Stork/NS, Spoonbill/ME, Fork-tailed Flycatcher/DE, and Baltimore Oriole/NT.
 **Measurement caveat for whoever resumes**: these figures came from one GBIF page of ≤300 records,
 which is a *contiguous slice in GBIF's own ordering, not a random sample* — all 300 American Robin
 records for Pennsylvania fell in January 2024, and a page-derived year count read 1 where the true
@@ -502,10 +502,10 @@ and nothing is misfiled. Two findings make it tractable, both measured 2026-10-0
 export carries **no `eventID`**, but a checklist reconstructs from `recordedBy` + `eventDate` +
 rounded coordinates **only from a complete slice** — a 0.1% sample of a state-month gives 96%
 singleton checklists, while one county-day (1–3k records) gives real ones, median 19 species. A
-602-checklist probe already separated waterbirds, woodland songbirds, open country, feeder birds and
-**town birds** (pigeons, House Sparrows, starlings), leaving hawks and crows unattached because they
-occur with everything. Expect the rare pelagic and Hawaiian families to be unplaceable, as the
-atolls were
+602-checklist probe already separated waterbirds, woodland songbirds, open country, feeder birds,
+and **town birds** (pigeons, House Sparrows, starlings), leaving hawks and crows unattached because
+they occur with everything. Expect the rare pelagic and Hawaiian families to be unplaceable, as
+the atolls were
 
 ## publishDataset
 
@@ -524,7 +524,7 @@ be is the open question, not whether.** `web/data/species.json` is a serving art
 publication: it nests provenance inside every metric, repeats source strings across 1,083 species,
 and carries presentation fields — `familyColor`, `familyTextColor`, `id` — that mean nothing outside
 this app. A publication probably wants CSV, one table per thing, keys that join: `species.csv` (the
-identity columns), `measurements.csv` (one row per species per metric, with its kind, source and
+identity columns), `measurements.csv` (one row per species per metric, with its kind, source, and
 model, so provenance is a column rather than a nest), `categories.csv` (habitat and diet with
 origin), `regions.csv` (species, region, records), `status.csv` (what `data/status.tsv` already is).
 Plus the thing none of our own sources gave us and all of them needed: a `PROVENANCE.md` stating the
@@ -616,7 +616,7 @@ every non-measured metric),
 [acceptance.nothingRestrictedTracked](requirements/acceptance.md#nothingrestrictedtracked) (nothing
 restricted is tracked — the document calls it its highest-value check),
 [acceptance.outboundRequestsIdentified](requirements/acceptance.md#outboundrequestsidentified)
-(outbound requests identify the client) and
+(outbound requests identify the client), and
 [acceptance.abaFileHashMatches](requirements/acceptance.md#abafilehashmatches) (the fetched ABA file
 matches its hash). [acceptance.joinCoversEverySpecies](requirements/acceptance.md#joincoverseveryspecies) and [acceptance.proportionsDifferentiate](requirements/acceptance.md#proportionsdifferentiate) are
 already cited by tests, so they may only need the mutation run and a status;
@@ -648,7 +648,7 @@ README was silent or assumed something BirdView did not have:
   that split.
 - **Adopting a stage that was informal.** River says to declare an unadopted stage informal, but
   not what triggers a revisit or what adopting it requires. BirdView's trigger was going public;
-  adoption meant requirements, criteria and the deployment's own settings.
+  adoption meant requirements, criteria, and the deployment's own settings.
 - **A one-way mirror as the deployed copy.** Deploying from a fork that is synced, never committed
   to, kept one source of truth; River's Release stage might name it as a pattern
 
@@ -690,7 +690,7 @@ Owner: Sameer
 Gate: needs the owner's call
 
 [decisions.abaSpeciesWithoutAvonet](requirements/decisions.md#abaspecieswithoutavonet), *Still
-unresolved*. *Astur atricapillus*, *Ardea ibis*, *Gygis candida* and *Tyto furcata* borrow from
+unresolved*. *Astur atricapillus*, *Ardea ibis*, *Gygis candida*, and *Tyto furcata* borrow from
 AVONET rows for the combined pre-split taxon. Checked 2026-10-13: AviList v2025b lists each parent
 and daughter as separate species, and no AVONET sheet has a row for any daughter, so `near-match` is
 the right label. Closing it means recording that in a decision, folding the four into the main
@@ -707,7 +707,7 @@ Gate: opportunistic
 
 [decisions.abaSpeciesWithoutAvonet](requirements/decisions.md#abaspecieswithoutavonet)'s caveat,
 carried forward and never closed: *Larus smithsonianus*/*argentatus*, *Calonectris
-borealis*/*diomedea* and *Pterodroma deserta*/*feae* each share one mass, so their linear traits
+borealis*/*diomedea*, and *Pterodroma deserta*/*feae* each share one mass, so their linear traits
 differ and sorting by mass shows them as identical. The same holds for every white tern (117 g)
 
 ## deploymentPlumbing
@@ -730,7 +730,7 @@ apply to it. In order:
    `github.com/Sajmani/birdview`, a GitHub fork. Sync it by pulling, never by pushing to it: after
    `git push origin main`, run `gh repo sync Sajmani/birdview --branch main` (or the fork's "Sync
    fork" button), which only fast-forwards from `google:main`. A ruleset on its `main` blocks
-   deletion and force-pushes; issues, pull requests, wiki and projects are off.
+   deletion and force-pushes; issues, pull requests, wiki, and projects are off.
 2. ~~**Deploy to Cloud Run**~~, decided 2026-10-22, from a Google Cloud project billed to Sameer.
    **Done 2026-10-22:** project `birdview-site`, region `us-central1`, service `birdview`,
    revision `birdview-00001-hfm` at `f1fa369`, serving <https://birdview-570018079643.us-central1.run.app>.
@@ -746,9 +746,9 @@ apply to it. In order:
    so leave Cloud Run's port at 8080. `us-central1` was chosen with step 7 in mind; confirm it
    supports domain mappings before relying on one. Checked on the live service: every page
    answers, an unknown species 404s, the index carries the same 1,041 species links as a local
-   build and arrives gzipped (277 KB) with `Vary`, `Cache-Control: no-cache` and an ETag that
+   build and arrives gzipped (277 KB) with `Vary`, `Cache-Control: no-cache`, and an ETag that
    revalidates to 304, the boundary file is served `immutable`, HTTP redirects to HTTPS, no
-   cookie is set, no script, stylesheet or image on the index loads from another host, and the
+   cookie is set, no script, stylesheet, or image on the index loads from another host, and the
    feedback link names `google/birdview` issues.
 3. ~~**Build the dataset for deployment.**~~ Done: the `Dockerfile`'s first stage runs the ingest
    and copies `species.json` into the image, so no deploy step supplies it
@@ -896,7 +896,7 @@ Gate: not planned
 through the spec first and stays within
 [product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink) and
 [tech.selfContainedServer](requirements/local/tech/delivery.md#selfcontainedserver): BirdView
-links to photographs and never embeds, hotlinks or caches one
+links to photographs and never embeds, hotlinks, or caches one
 
 ## broadEbirdRows
 
@@ -935,8 +935,8 @@ Owner: Sameer
 Gate: needs the owner's call
 
 [decisions.escapedBirdsOffIndex](requirements/decisions.md#escapedbirdsoffindex) left West Indian
-Whistling-Duck (15 records: Alabama, Texas, Florida, Virginia), Cuban Grassquit (22, all Florida)
+Whistling-Duck (15 records: Alabama, Texas, Florida, Virginia), Cuban Grassquit (22, all Florida),
 and Cinnamon-rumped Seedeater (131, mostly California and Arizona) off `status.Exotic` because their
-records may be wild vagrants. Each needs a judgement: add it to the list with a reason, or leave it.
+records may be wild vagrants. Each needs a judgment: add it to the list with a reason, or leave it.
 The seedeater may also be a naming question, since AviList's *Sporophila torqueola* is the west
 Mexican bird and Morelet's Seedeater is the one native to Texas

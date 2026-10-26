@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package view computes what the page shows: ordering, sectioning and diagram
+// Package view computes what the page shows: ordering, sectioning, and diagram
 // geometry. It is deliberately pure -- no HTML, no HTTP -- so the rules in
 // product.oneSelectedMetric through product.sectionHeadersStateRange and product.segmentComposition through product.crossbarAtVerticalScale can be property-tested directly.
 //

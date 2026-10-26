@@ -76,9 +76,9 @@ else is internal and may change without notice: page markup, wording and styling
 **Keeps working** means the URL still shows what it showed, or the nearest thing the data now
 allows, and says what changed, as a species that leaves scope already does
 ([decisions.speciesUrlOutlivesSpecies](../../decisions.md#speciesurloutlivesspecies),
-[decisions.compareUrlContract](../../decisions.md#compareurlcontract)). Renaming a path, a parameter
-or a value it accepts needs a decision, and the old form keeps answering, read as before or
-redirected.
+[decisions.compareUrlContract](../../decisions.md#compareurlcontract)). Renaming a path,
+a parameter, or a value it accepts needs a decision, and the old form keeps answering, read as
+before or redirected.
 
 Rationale: every view is a URL ([goals.shareableViews](../../../goals/goals.md#shareableviews)), and
 once BirdView is public, people bookmark and send them; a link that breaks is a promise broken.
@@ -119,7 +119,7 @@ committed file holding every land region BirdView covers and its sea boxes. It i
 
 The sea boxes are written from the same Go table as the region filter's, so the two cannot drift.
 The source is fetched and checked against its hash when the file is regenerated, not committed: it
-is 14 MB worldwide, and BirdView needs the United States, Canada and five atolls. See
+is 14 MB worldwide, and BirdView needs the United States, Canada, and five atolls. See
 [imports.md](../../imports.md#natural-earth).
 
 ## servesOnLocalhost
@@ -275,7 +275,7 @@ here: validation is cheap and staleness is never acceptable, since a figure like
 **The ETag is a fingerprint of the build and the URL, not a hash of the body.** Hashing the body
 means buffering it, and the index is 3.3 MB before compression, memory
 [compressedResponses](#compressedresponses) exists to avoid spending. This is sound only because a
-page is a pure function of the dataset, the templates, the static files and the request URI, with
+page is a pure function of the dataset, the templates, the static files, and the request URI, with
 no clock in the render path; [acceptance.honestRevalidation](../../acceptance.md#honestrevalidation)
 asserts that.
 

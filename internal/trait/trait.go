@@ -128,15 +128,15 @@ var Supplementary = map[string][]extra{
 	"Ardea herodias":            {{Habitat: "Coastal", Why: "forages on tidal flats and estuaries as readily as on fresh water"}},
 	"Pandion haliaetus": {
 		{Habitat: "Coastal", Why: "fishes estuaries and sheltered salt water as well as fresh"},
-		{Habitat: "Human Modified", Why: "nests routinely on poles, pylons and purpose-built platforms"},
+		{Habitat: "Human Modified", Why: "nests routinely on poles, pylons, and purpose-built platforms"},
 	},
-	"Larus smithsonianus": {{Habitat: "Human Modified", Why: "feeds routinely at landfill, docks and town rooftops"}},
+	"Larus smithsonianus": {{Habitat: "Human Modified", Why: "feeds routinely at landfill, docks, and town rooftops"}},
 
 	// Birds whose everyday haunt is not the one AVONET records. Chimney
 	// Swift and Barn Swallow were on this list too and came off it: AVONET
 	// already codes both Human Modified, and an addition that restates the
 	// published value adds nothing.
-	"Branta canadensis":  {{Habitat: "Human Modified", Why: "parks, playing fields and golf courses are now its commonest North American habitat"}},
+	"Branta canadensis":  {{Habitat: "Human Modified", Why: "parks, playing fields, and golf courses are now its commonest North American habitat"}},
 	"Anas platyrhynchos": {{Habitat: "Human Modified", Why: "town ponds and park lakes throughout the range"}},
 	"Columba livia":      {{Habitat: "Rock", Why: "a cliff-nester by ancestry, still using cliffs and quarries away from towns"}},
 	"Falco peregrinus":   {{Habitat: "Human Modified", Why: "city buildings and bridges are a primary nest site"}},

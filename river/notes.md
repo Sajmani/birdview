@@ -13,7 +13,7 @@ of them completely, so the rejection is narrower than it reads and the measureme
 here rather than left to be redone.
 
 **Draw the cube of water that weighs what the bird weighs**, side = ∛(mass). This is not a model
-of anything: one gram of water is one cubic centimetre, by the historical definition of the gram,
+of anything: one gram of water is one cubic centimeter, by the historical definition of the gram,
 so the side is a unit conversion and carries no assumption about avian density. It is a real
 length, so it can be drawn at the diagram's own scale and does not introduce the second,
 arbitrary scale [product.crossbarAtVerticalScale](requirements/local/product/diagram.md#crossbaratverticalscale) refuses. [product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram)'s objection on that count does not apply to it.
@@ -31,9 +31,10 @@ It fits. Placed in the lower-left corner with an 8px margin, the crossbar intrud
 
 **What it would add that nothing else shows.** The extremes are not arbitrary: the largest cubes
 belong to alcids — Thick-billed Murre, Parakeet Auklet, Crested Auklet, Marbled Murrelet, all
-dense diving birds — and the smallest to long-tailed, light-bodied species, Fork-tailed and
-Scissor-tailed Flycatcher and Black-billed Magpie. The cube read against the bird's own length is
-**bulk against elongation**, which is exactly the thing a length-and-wingspan diagram cannot say.
+dense diving birds — and the smallest to long-tailed, light-bodied species, Fork-tailed
+Flycatcher, Scissor-tailed Flycatcher, and Black-billed Magpie. The cube read against the bird's
+own length is **bulk against elongation**, which is exactly the thing a length-and-wingspan
+diagram cannot say.
 
 **What it still does not do**, and the reason [product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram)'s second objection stands: it compresses. A
 Bushtit and a Common Raven differ 175× in mass and their cubes differ 5.6×. That is arithmetically
@@ -68,13 +69,13 @@ it is recorded first. Measured on the section in that screenshot — #9, 51 spec
 | cube edge spread | **2.02×** |
 | apparent area spread | **4.10×** |
 
-A cube twice as wide as its neighbour, in a row of birds that are all the same length, is not
+A cube twice as wide as its neighbor, in a row of birds that are all the same length, is not
 subtle. **The cube root is mild compression over the range a reader actually compares across.**
 
 That reframes the Bushtit-and-Raven example this section opens with. Those two differ 175× in
 mass — and they are 11 sections apart, never drawn side by side at a shared scale. The complaint
 is strongest exactly where the comparison is not being made, and weakest where it is. Per-section
-scale is the default ([product.scaleToggle](requirements/local/product/diagram.md#scaletoggle)), so the common case is the favourable one.
+scale is the default ([product.scaleToggle](requirements/local/product/diagram.md#scaletoggle)), so the common case is the favorable one.
 
 **It also rescues a comparison the numbers break.** In that same section the Pigeon Guillemot's
 mass prints as `1.2 lb` and the Eared Grebe's as `14.5 oz`, because the formatter switches unit at
@@ -93,9 +94,9 @@ dynamic range of roughly **180×**. With the Trumpeter Swan's line at 300 px the
 Hummingbird's is **0.07 px**.
 
 Nor is there a physically honest way out. The cube's whole elegance is that one gram of water is
-one cubic centimetre *by definition*, so its edge is a true length drawn at the figure's own
+one cubic centimeter *by definition*, so its edge is a true length drawn at the figure's own
 scale and invents no second scale. The line equivalent is a water column of fixed cross-section,
-where length in centimetres equals mass in grams — and the swan's column is **92× its own body
+where length in centimeters equals mass in grams — and the swan's column is **92× its own body
 length**. No choice of cross-section helps, because the range to be spanned exceeds the range a
 tile can draw by 24×.
 
@@ -130,10 +131,10 @@ already says it must.
 - **Solid.** Mass is measured for 831 of 841, and [product.measuredVersusModeled](requirements/local/product/measurements.md#measuredversusmodeled) draws `near-match` solid too.
 - **Not a heavier weight.** Stroke weight carries no meaning in this diagram today, and the
   heaviest mark on a bird diagram should not be the one that is not the bird.
-- **A different colour, and this is the load-bearing one.** A horizontal solid ticked line will
+- **A different color, and this is the load-bearing one.** A horizontal solid ticked line will
   otherwise read as a second crossbar — another length to scale, which is the exact false claim
   [product.crossbarAtVerticalScale](requirements/local/product/diagram.md#crossbaratverticalscale) exists to prevent. Contrast measured against the `#0f172a` background, and against the
-  wing's `#0ea5e9`, because a hue-only difference fails for colour-blind readers:
+  wing's `#0ea5e9`, because a hue-only difference fails for color-blind readers:
 
   | candidate | vs background | vs wing |
   | --- | ---: | ---: |
@@ -149,7 +150,7 @@ already says it must.
 **Two things found along the way that are worth acting on whether or not this is ever built:**
 
 1. **The cube is `#38bdf8` and the crossbar `#0ea5e9`.** The one mark that is *not* a length is
-   near-identical in colour to the mark whose entire point is that it *is* a length to scale.
+   near-identical in color to the mark whose entire point is that it *is* a length to scale.
    That is backwards, and it is a defect in what ships today.
 2. **There is no clear band below the bird on a tile.** The tallest bird in each section fills the
    tile height exactly. The cube works because it occupies the empty lower-left *beside* a narrow
@@ -195,7 +196,7 @@ rediscovered:
   different things on one figure. The tail would need another treatment; there are options.
 - **It cannot work on the index tiles.** The neck is a fixed fraction of a bird that fills its tile,
   so its drawn length is roughly scale-independent: about 31 px for the longest-necked species in
-  the set, and under 2 px for a median bird. Twenty dashes in 31 px is a grey blur.
+  the set, and under 2 px for a median bird. Twenty dashes in 31 px is a gray blur.
 - **On the detail view it is marginal**, at 1.9× the tile: a heron's neck is about 62 px, giving
   roughly 3 px per vertebra.
 
@@ -211,7 +212,7 @@ A perched bird needs two things BirdView does not have.
 
 **Legs.** [decisions.inFlightNoLegs](requirements/decisions.md#inflightnolegs) removed them because a flight silhouette does not show them; a perched
 silhouette is mostly leg. Restoring them restores every problem [decisions.inFlightNoLegs](requirements/decisions.md#inflightnolegs) recorded — the femur, the
-toes and the hip position are unmeasured, and the tarsus alone understates the visible leg most in
+toes, and the hip position are unmeasured, and the tarsus alone understates the visible leg most in
 the birds whose legs define them. A perched view would need the exposed-leg model that [decisions.legFromTarsus](requirements/decisions.md#legfromtarsus)
 invented and [decisions.inFlightNoLegs](requirements/decisions.md#inflightnolegs) deleted, and it would still have no source to validate against.
 
@@ -230,7 +231,7 @@ not to buy. Worth revisiting only if a source appears that measures posture, not
 
 A request that describes an intended use is weaker than one that demonstrates it. Showing a
 rights-holder the actual application — what it does with their data, how the data is credited,
-that it is non-commercial and that every value carries visible provenance — answers most of what
+that it is non-commercial, and that every value carries visible provenance — answers most of what
 they would otherwise have to take on trust. It also lets them see that BirdView labels a modeled
 length as modeled, which is the strongest available evidence that their measured data would be
 handled honestly.

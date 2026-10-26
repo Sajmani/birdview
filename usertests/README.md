@@ -6,7 +6,7 @@ tried before real readers see it ([simulatedUserTests](../river/todo.md#simulate
 - [personas.md](personas.md): who the readers are, one per heading.
 - [tasks.md](tasks.md): what each is asked to do. This is all a reader is shown.
 - [answers.md](answers.md): the expected answers, for scoring; never shown to a reader.
-- [prompt.md](prompt.md): the prompt each agent is given, with the persona, the address and the
+- [prompt.md](prompt.md): the prompt each agent is given, with the persona, the address, and the
   tasks filled in.
 - `tools/page URL [--open ID] [--find TEXT] [--tiles N]`: a page as text, with collapsed panels
   collapsed and links numbered, as a reader sees it. `--find` is find-in-page.
@@ -15,7 +15,7 @@ tried before real readers see it ([simulatedUserTests](../river/todo.md#simulate
 - `results/<date>/<version>/<persona>.md`: one report per run, and `results/<date>/summary.md`.
 
 **Rules for a reader.** Only the two tools, only the address it is given, and no repository files:
-a reader knows nothing of the code, the requirements or this directory beyond its own prompt. It
+a reader knows nothing of the code, the requirements, or this directory beyond its own prompt. It
 reaches a page the way a person would, by following links or typing an address it has seen on a
 page; typing into the search box is the same as adding `q=` to the address.
 
@@ -27,5 +27,5 @@ phones, no way to search.
 **Running.** Serve each revision on its own port (the current tree on 8080; an old revision from a
 `git worktree`, built and started with `-addr localhost:8081 -data web/data/species.json`), then
 give each agent [prompt.md](prompt.md) filled in. Score each report against
-[answers.md](answers.md): per task, correct, partly correct or wrong; the confidence given; and
+[answers.md](answers.md): per task, correct, partly correct, or wrong; the confidence given; and
 whether the reader found the answer on the page or guessed.

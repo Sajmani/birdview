@@ -101,9 +101,9 @@ func isWordByte(b byte) bool {
 	return b == '_' || b >= '0' && b <= '9' || b >= 'a' && b <= 'z' || b >= 'A' && b <= 'Z'
 }
 
-// findRefs returns the qualified references in s that are not part of a path, a URL or a longer
-// name: not preceded by a word character, '/', '#', '.' or '-', and not followed by a word
-// character, '(' or '/'.
+// findRefs returns the qualified references in s that are not part of a path, a URL, or a
+// longer name: not preceded by a word character, '/', '#', '.', or '-', and not followed by a
+// word character, '(', or '/'.
 func findRefs(s string) []ref { return findWith(refPattern, s) }
 
 func findWith(pattern *regexp.Regexp, s string) []ref {
@@ -147,7 +147,7 @@ func inSpans(pos int, spans [][]int) bool {
 }
 
 // symbolTable maps package -> identifier -> the file defining it, for every item the module can
-// resolve: goals, gradients, local, imported and composed packages, and standalone files
+// resolve: goals, gradients, local, imported, and composed packages, and standalone files
 // such as decisions.md, under the package each declares.
 func (c *checker) symbolTable() map[string]map[string]string {
 	table := map[string]map[string]string{}
@@ -711,7 +711,7 @@ func (c *checker) seekable() {
 	if b, err := os.ReadFile(filepath.Join(filepath.Dir(c.bundle), "AGENTS.md")); err == nil {
 		if n := utf8.RuneCount(b); n > maxInstructions {
 			c.report("instructions-too-long", "../AGENTS.md", strconv.Itoa(n)+" characters; the limit is "+
-				strconv.Itoa(maxInstructions)+". Keep commands, damage-preventing rules and a map; move detail out")
+				strconv.Itoa(maxInstructions)+". Keep commands, damage-preventing rules, and a map; move detail out")
 		}
 	}
 }

@@ -149,7 +149,7 @@ func TestLumpsMergeIntoTheSpeciesBirdViewCarries(t *testing.T) {
 // The bug: bestRegion ranked on (status, episodes) and walked the shapes map
 // directly, so two regions tied on both were separated by whichever came out
 // first. Fifteen rows of the committed table named a different region on
-// every run and carried their episode, year, record and last-seen figures
+// every run and carried their episode, year, record, and last-seen figures
 // with them. Cooper's Hawk recurs in 39 episodes in both Alaska and Arizona,
 // and the table reported 24 years and 216,391 records on one run and 18 and
 // 119,194 on the next -- a generated table two runs over identical inputs

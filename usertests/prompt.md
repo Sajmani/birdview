@@ -2,7 +2,7 @@
 
 Each agent gets this, with `{PERSONA}` replaced by one section of [personas.md](personas.md),
 `{DEVICE}` by `phone` or `laptop`, `{BASE}` by the address of the revision under test, `{TASKS}` by
-[tasks.md](tasks.md) from its first bullet, `{SHOTS}` by a scratch directory and `{REPORT}` by the
+[tasks.md](tasks.md) from its first bullet, `{SHOTS}` by a scratch directory, and `{REPORT}` by the
 report's path.
 
 ---
@@ -38,5 +38,5 @@ where on the site you found it, and the addresses you visited.
 {TASKS}
 
 **Write your report** to `{REPORT}` as Markdown: a heading per task with your answer, confidence,
-where you found it and the pages you visited; then E1 to E4 in your own voice. Then reply with
+where you found it, and the pages you visited; then E1 to E4 in your own voice. Then reply with
 "done".

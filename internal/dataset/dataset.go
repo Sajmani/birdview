@@ -306,7 +306,7 @@ type Undrawn struct {
 	Names          map[Locale]string `json:"names"`
 	ScientificName string            `json:"scientificName"`
 
-	// Status is the verdict: vagrant, historical or absent. A string rather
+	// Status is the verdict: vagrant, historical, or absent. A string rather
 	// than the status package's own type because that package imports this
 	// one, and the dependency may not run both ways.
 	Status string `json:"status"`

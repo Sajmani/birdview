@@ -247,7 +247,7 @@ func Withholdings(species, gid string) []Withholding {
 // Confirmation thresholds (decisions.ebirdSilenceNotAbsence). Neither is load-bearing for the cases
 // that motivated them -- Painted Bunting in Florida runs at zero inside its
 // window against thousands a month outside -- and both are recorded so the
-// borderline cases have a stated rule rather than a judgement call.
+// borderline cases have a stated rule rather than a judgment call.
 const (
 	// withheldRate is how far eBird's monthly rate inside a seasonal window
 	// must fall, as a share of its rate in the same region's other months.

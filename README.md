@@ -7,8 +7,8 @@ crossbar — at one shared scale, so you can see size differences instead of ima
 numbers. Is a Merlin bigger than a Blue Jay? Line them up and look.
 
 It covers over a thousand species: those whose records recur in the US states, the Canadian
-provinces, five US outlying islands and five stretches of open sea. Each figure is an abstract
-top-down view of a bird in flight, showing only what the data supports: no plumage, posture or
+provinces, five US outlying islands, and five stretches of open sea. Each figure is an abstract
+top-down view of a bird in flight, showing only what the data supports: no plumage, posture, or
 shape the sources cannot justify.
 
 ## Try it
@@ -34,9 +34,9 @@ Then open <http://localhost:8080> and follow one of the suggestions under the ti
 ## What is measured and what is modeled
 
 No openly licensed dataset publishes body length for these birds, so **every length in BirdView is
-a model** built from measured parts. Bill, tail and mass are measured for almost every species;
-wingspan is measured for about a third and estimated for the rest; head, neck and body are modeled
-from mass. Every value is marked `measured`, `near-match` or `modeled`, and clicking a bird shows
+a model** built from measured parts. Bill, tail, and mass are measured for almost every species;
+wingspan is measured for about a third and estimated for the rest; head, neck, and body are modeled
+from mass. Every value is marked `measured`, `near-match`, or `modeled`, and clicking a bird shows
 the source or formula behind each number. [docs/data.md](docs/data.md) gives the full accounting,
 including what is invented and
 [where the models are most likely to be wrong](docs/data.md#where-this-is-most-likely-to-be-wrong).

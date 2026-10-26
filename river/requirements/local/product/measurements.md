@@ -30,7 +30,7 @@ Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.hone
 - **Everything not covered above** — modeled.
 
 **Total length is a composite.** It is the sum of the five segments (segmentsSumToLength), of
-which bill and tail are measured from AVONET while head, neck and body are modeled. Its `kind` is
+which bill and tail are measured from AVONET while head, neck, and body are modeled. Its `kind` is
 therefore `modeled`, and its `model` says so, so a reader can see how a measured bill sits inside a
 modeled total.
 
@@ -96,7 +96,7 @@ detail view says and the drawing does not.
 
 **That holds even where two tiles come out identical** (settled 2026-10-05). Of nine near-match
 species, three have their donor on screen beside them — Chihuahuan and Eastern Meadowlark, Cocos
-and Brown Booby, Siberian and American Pipit — and render the same length, wingspan and mass. The
+and Brown Booby, Siberian and American Pipit — and render the same length, wingspan, and mass. The
 index adds no marker: the detail page names the donor on every affected row (*"measured on
 Sturnella magna, a different species this one was split from — no measurement exists for it"*),
 and a tile marker would add a mark to the six whose donor is not on screen.
@@ -159,14 +159,14 @@ labels; a wide-winged bird is drawn slightly smaller rather than under its own a
 
 ### The whole-bird labels: total length and mass
 
-**Total length and mass are labeled horizontally, centred on the axis, below the tail tip**, with no
-leader line, since they name the whole bird rather than a part.
+**Total length and mass are labeled horizontally, centered on the axis, below the tail tip**, with
+no leader line, since they name the whole bird rather than a part.
 
 **Where the figure is shorter than the total length, the page says why.** A bird that flies with
 its neck folded has the neck drawn as an S ([decisions.foldedNeckAsS](../../decisions.md#foldedneckass)), so the figure spans less
 height than the total length labeled beneath it. Its detail page says so beside the neck note, with
 the species' own neck length and total length. That the S is the same length of line in less
-height, and that sorting, sections and every measurement use the full length, stays here rather
+height, and that sorting, sections, and every measurement use the full length, stays here rather
 than on the page (Sameer, 2026-10-25). A bird drawn at full extent carries no such note.
 
 **Mass is drawn as a number, and also as water.** The **cube of water that weighs what the bird
@@ -245,7 +245,7 @@ Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCi
 
 The detail view names every category a bird is in — its family and order, the regions it is
 listed in, its habitat and niche, and any group BirdView puts it in — and marks each as
-**published**, **derived** or **`birdview`**, saying where it came from.
+**published**, **derived**, or **`birdview`**, saying where it came from.
 
 [metricProvenanceExplained](#metricprovenanceexplained) does this for numbers; a category is as
 much a claim as a measurement.
@@ -302,7 +302,7 @@ forgotten.
 **Linked from wherever the documentation says where the data comes from**, and from the guides for
 readers and for developers.
 
-**Kept in step with the code.** A change to what the pipeline reads, joins, models or writes
+**Kept in step with the code.** A change to what the pipeline reads, joins, models, or writes
 updates the diagram and its step descriptions in the same change, as
 [product.selfDescriptionStaysTrue](presentation.md#selfdescriptionstaystrue) requires of all
 documentation. Tests compare what they can: every source column the diagram names is one a reader
@@ -352,12 +352,12 @@ Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.ho
 
 **A bird whose records here are escapes is not drawn on the index.** Recurrence cannot tell a
 wild population from a supply of escapes ([declaredExceptions](dataset.md#declaredexceptions)), so
-parrots, waxbills, ornamental waterfowl, zoo birds and a farmed Emu crowded out the birds a reader
+parrots, waxbills, ornamental waterfowl, zoo birds, and a farmed Emu crowded out the birds a reader
 can expect to meet.
 
 **Which birds are left off is a declared list, with a reason for each** — the kind of bird, where
 it comes from, and how its records here arise. The rule: no self-sustaining population in any
-region BirdView covers, so that its records are escapes, releases or birds kept by people. A
+region BirdView covers, so that its records are escapes, releases, or birds kept by people. A
 long-feral population, such as Indian Peafowl in Florida or Red Junglefowl on Kauai, does not
 qualify; nor does a wild vagrant, however rare.
 

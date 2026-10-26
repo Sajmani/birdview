@@ -1,8 +1,8 @@
-# Building, running and changing BirdView
+# Building, running, and changing BirdView
 
 BirdView is one Go module: an ingest that compiles the dataset from published sources, a server
 that embeds and serves the web UI, and five generators that build the committed tables under
-`data/`. There is no database, no data fetch at run time and no JavaScript framework.
+`data/`. There is no database, no data fetch at run time, and no JavaScript framework.
 
 ---
 
@@ -12,7 +12,7 @@ that embeds and serves the web UI, and five generators that build the committed 
 - **Chrome or Chromium**, optional. Browser tests skip without it; set `BIRDVIEW_CHROME` if it is
   not in a standard place. A skip is not a pass, so check the test output for skip lines when your
   change affects rendered pages.
-- **Python 3, Node and Google Chrome**, only to re-render the pipeline diagram (see below).
+- **Python 3, Node, and Google Chrome**, only to re-render the pipeline diagram (see below).
 
 The only Go dependency is `goldmark`, which renders these guides. The source workbooks are read by
 `internal/xlsx`, using only the standard library.
@@ -41,7 +41,7 @@ openly licensed; they and the WCAG text are kept so every quotation of them in
 [source register](../river/requirements/imports.md) records every source considered,
 including the rejected ones and why.
 
-**BirdView links to iNaturalist and copies nothing from it**: no photograph is embedded, cached or
+**BirdView links to iNaturalist and copies nothing from it**: no photograph is embedded, cached, or
 hotlinked, so no contributor's license is engaged.
 
 **Every CC BY source is credited on the page that uses it**, as its license asks; the index footer
@@ -59,7 +59,7 @@ go run ./cmd/birdview            # serves http://localhost:8080
 ```
 
 The ingest prints a coverage summary: species in scope, and how many traits and wingspans are
-measured, near-match or modeled. Expect **1082 species in 99 families across 27 orders**.
+measured, near-match, or modeled. Expect **1082 species in 99 families across 27 orders**.
 
 **The server reads `species.json` once, at startup.** Restart it after re-running the ingest.
 
@@ -108,7 +108,7 @@ commit it. [How BirdView's data is built](pipeline.md) diagrams them and the ing
 | `birdview-status` | `data/status.tsv`: BirdView's own occurrence status per species | two passes, resumable |
 | `birdview-boundaries` | `data/region-boundaries.json`: region outlines for the Here button, from Natural Earth | one ~15 MB download, hash-checked |
 
-`birdview-inatmap`, `birdview-names` and `birdview-regions` read the built dataset, so run the
+`birdview-inatmap`, `birdview-names`, and `birdview-regions` read the built dataset, so run the
 ingest first.
 
 iNaturalist's API terms ask for one request per second; do not shorten the interval. The GBIF rate
@@ -147,7 +147,7 @@ go test ./...
 
 Every spec check is a Go test in `river/check/`, run by `go test ./...`: River's checker and its
 shared cases, BirdView's stricter goal rule, the vendored-file hashes, every quotation against its
-vendored source, and every reference, anchor and relative link into the bundle. They cover the
+vendored source, and every reference, anchor, and relative link into the bundle. They cover the
 bundle's **structure**, not its substance: a green run means it is internally consistent, not that
 it is right.
 
@@ -186,7 +186,7 @@ internal/dataset/        the serialized types and the provenance kinds
 internal/palette/        family and order colors, with contrast guarantees
 internal/smoke/          the post-deploy checks birdview-smoke runs
 data/                    the committed generated tables
-web/static/              templates, CSS, the Here script and the favicon, embedded
+web/static/              templates, CSS, the Here script, and the favicon, embedded
 web/data/                the built species.json (gitignored)
 docs/                    this documentation, also served at /docs
 third_party/             vendored sources, each under its own license
@@ -280,11 +280,11 @@ Most of these are licensing rules, not style.
   prohibit AI ingestion and automated access, and the source is
   [rejected](../river/requirements/decisions.md#ricklefsprohibited). Do not revive it as a length
   source.
-- **Never fetch, download or programmatically process anything from BirdLife's DataZone**
+- **Never fetch, download, or programmatically process anything from BirdLife's DataZone**
   (`datazone.birdlife.org`). Its terms forbid automated access and text and data mining; see
   [the register entry](../river/requirements/imports.md#birdlife-checklist). AVONET's BirdLife
   sheet is part of AVONET, under CC BY 4.0, and is not affected.
-- **Only AVONET, the Fox wingspan data and AviList may be committed as source data.** All three
+- **Only AVONET, the Fox wingspan data, and AviList may be committed as source data.** All three
   are CC BY 4.0. Before adding a fourth, read
   [`imports.md`](../river/requirements/imports.md): most candidates evaluated could not
   be redistributed. The generated tables under `data/` are not source data but the project's own
@@ -371,7 +371,7 @@ go run ./cmd/birdview-ingest
 ./birdview -addr 0.0.0.0:$PORT -data web/data/species.json
 ```
 
-Templates, static files and these guides are embedded in the binary; the dataset is the only file
+Templates, static files, and these guides are embedded in the binary; the dataset is the only file
 it reads at run time.
 
 When a regenerated dataset drops a species, `/species/<code>` answers 404 with a page naming the

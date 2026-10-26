@@ -21,7 +21,7 @@ import (
 )
 
 // The favicon is the one surface that cannot reference the stylesheet, so it
-// restates the diagram's palette by hand (product.oneDiagramVocabulary). Index, detail and comparison
+// restates the diagram's palette by hand (product.oneDiagramVocabulary). Index, detail, and comparison
 // share one `diagram` template and one stylesheet and cannot diverge at all.
 //
 // Verifies: product.oneDiagramVocabulary. Criterion: acceptance.faviconFromPalette.
@@ -58,10 +58,10 @@ func diagramParts(t *testing.T) map[string]bool {
 	return parts
 }
 
-// diagramPalette is every colour the stylesheet paints a diagram part with,
+// diagramPalette is every color the stylesheet paints a diagram part with,
 // plus the surfaces a drawing sits on. This is the set the favicon may draw
-// from -- deliberately narrower than "every colour in the stylesheet", so that
-// borrowing an interface colour such as --accent counts as drift.
+// from -- deliberately narrower than "every color in the stylesheet", so that
+// borrowing an interface color such as --accent counts as drift.
 func diagramPalette(t *testing.T) map[string]bool {
 	t.Helper()
 	css := stripComments(string(mustReadStyles(t)))
@@ -111,7 +111,7 @@ func partColor(t *testing.T, part string) string {
 	}
 	h := reHexAny.FindString(m[1])
 	if h == "" {
-		t.Fatalf(".%s declares no colour literal; the palette cannot be derived", part)
+		t.Fatalf(".%s declares no color literal; the palette cannot be derived", part)
 	}
 	return strings.ToLower(h)
 }
@@ -121,14 +121,14 @@ func TestFaviconUsesTheAppPalette(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reading the embedded favicon: %v", err)
 	}
-	// The icon's comments name colours -- including the superseded one, on
+	// The icon's comments name colors -- including the superseded one, on
 	// purpose -- and a comment is not a usage. stripComments handles CSS
 	// /* */; this file is XML.
 	body := reXMLComm.ReplaceAllString(string(icon), "")
 
 	palette := diagramPalette(t)
 	if len(palette) < 2 {
-		t.Fatalf("the stylesheet yielded only %d diagram colours; the comparison cannot bite", len(palette))
+		t.Fatalf("the stylesheet yielded only %d diagram colors; the comparison cannot bite", len(palette))
 	}
 
 	used := map[string]bool{}
@@ -136,23 +136,23 @@ func TestFaviconUsesTheAppPalette(t *testing.T) {
 		used[strings.ToLower(h)] = true
 	}
 	if len(used) == 0 {
-		t.Fatal("the favicon yielded no colours; the comparison cannot bite")
+		t.Fatal("the favicon yielded no colors; the comparison cannot bite")
 	}
 
-	// No colour of its own: not an invented shade, and not one borrowed from
+	// No color of its own: not an invented shade, and not one borrowed from
 	// the interface either. The crossbar was painted --accent for days.
 	for h := range used {
 		if !palette[h] {
 			t.Errorf("favicon uses %s, which paints no part of the diagram — "+
-				"the icon has a colour of its own instead of the app's (product.oneDiagramVocabulary)", h)
+				"the icon has a color of its own instead of the app's (product.oneDiagramVocabulary)", h)
 		}
 	}
 
-	// The parts it does draw take the app's colours for those parts, read from
+	// The parts it does draw take the app's colors for those parts, read from
 	// the stylesheet so that changing one there and not here goes red.
 	for _, part := range []string{"wing", "bill"} {
 		if want := partColor(t, part); !used[want] {
-			t.Errorf("favicon does not use the %s colour %s; the icon is behind the app (product.oneDiagramVocabulary)",
+			t.Errorf("favicon does not use the %s color %s; the icon is behind the app (product.oneDiagramVocabulary)",
 				part, want)
 		}
 	}

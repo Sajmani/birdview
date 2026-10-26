@@ -288,7 +288,7 @@ func TestPipelineFieldsCarryOneMark(t *testing.T) {
 		for _, line := range strings.Split(fields, "\n") {
 			line = strings.TrimSpace(line)
 			if !field.MatchString(line) {
-				t.Errorf("%s: %q is not one field, one mark and an optional italic note", name, line)
+				t.Errorf("%s: %q is not one field, one mark, and an optional italic note", name, line)
 			}
 		}
 	}

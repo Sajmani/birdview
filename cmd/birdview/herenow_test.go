@@ -146,7 +146,7 @@ var dataAttr = func(name string) *regexp.Regexp { return regexp.MustCompile(name
 // location stubbed, and records every request the browser makes.
 //
 // The lookup must give the Go lookup's answer at every known point; a press
-// must land on the URL choosing the region by hand gives; a refusal, a failure
+// must land on the URL choosing the region by hand gives; a refusal, a failure,
 // and a point outside every region must each say so and go nowhere; and no
 // request may carry the position, or show that Here was pressed.
 //
@@ -329,7 +329,7 @@ func TestHereInTheBrowser(t *testing.T) {
 }
 
 // TestMonthsFoldIntoTwoLines checks the Months control's layout: the label,
-// All, Now and the explanation on one line, the twelve months on the next.
+// All, Now, and the explanation on one line, the twelve months on the next.
 //
 // Verifies: product.nowSelectsCurrentMonth. Criterion: app.hereAndNowSitBesideAll.
 func TestMonthsFoldIntoTwoLines(t *testing.T) {

@@ -9,7 +9,7 @@ package product
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The user can filter to any subset of families, multi-select. **Everything is selected on arrival**
-— All, every order and every family show as on. An **All** control toggles like an order does,
+— All, every order, and every family show as on. An **All** control toggles like an order does,
 over the whole set: untoggling it deselects everything and **no birds are displayed**.
 
 Selection is therefore always literal: what is shown is what is selected. There is no separate
@@ -119,7 +119,7 @@ Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 A **Now** button beside **All** in Months replaces the month selection with the current month on
 the reader's own clock, every other setting kept. Without JavaScript it uses the server's month.
-The Months control is two lines: the label, All, Now and the explanation of what a month means,
+The Months control is two lines: the label, All, Now, and the explanation of what a month means,
 then the twelve months.
 
 Without JavaScript the button links to `/now`, which redirects to the index for the server's
@@ -135,7 +135,7 @@ Subject: `privacy.location`
 Goals: [goals.readerPrivacy](../../../goals/goals.md#readerprivacy)
 
 The reader's position is used only inside the browser to choose a region, and is never sent,
-stored or logged. The region boundaries load with every index page whether or not Here is
+stored, or logged. The region boundaries load with every index page whether or not Here is
 pressed, and pressing Here produces exactly the request that choosing that region by hand would.
 
 So the server cannot tell that Here was used, let alone where the reader is. Loading the
@@ -156,7 +156,7 @@ name of its family or order. So "d hawk" finds Sharp-shinned Hawk and the other 
 not the nighthawks, whose family is Caprimulgidae. Families and orders are matched by their
 scientific names only, since their English descriptions list other birds: "Kites, Old World
 Vultures, Eagles, and Hawks" would make "hawk" find every kite (Sameer, 2026-10-25, on both). The
-count line, each section's count and the histogram count only the matches, a section with none is
+count line, each section's count, and the histogram count only the matches, a section with none is
 hidden, and the count line names the search.
 
 **It filters in the browser as the reader types**, with no request to the server. Matches keep
@@ -165,7 +165,7 @@ move while the reader types.
 
 **The search goes into the address as `q` on the reader's next click that changes the address**
 — a control, a tile, a pick — not while typing. The welcome line's things to try, *reset to
-defaults* and *Clear the filters* drop it. Opened from an address with `q`, the page shows the same
+defaults*, and *Clear the filters* drop it. Opened from an address with `q`, the page shows the same
 matches with or without JavaScript; without it, Enter in the box loads the page with the search.
 
 Rationale: the first readers asked for a search bar to pick birds by name

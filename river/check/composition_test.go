@@ -245,7 +245,7 @@ func TestCompositionResolves(t *testing.T) {
 	if len(lists) == 0 {
 		t.Fatal("no listed requirements found in any composed package; the list form has changed")
 	}
-	// Every local requirement is included, excluded or composed from by some
+	// Every local requirement is included, excluded, or composed from by some
 	// package. Counted rather than failed while dataset and internal/repo are
 	// still to compose (river/todo.md).
 	var unaccounted []string
