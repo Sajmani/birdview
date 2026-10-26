@@ -769,10 +769,13 @@ is unchanged and does not link to it.
   the same.
 - **Filters are the count line.** The line under the box names each setting. Each is a control
   that opens the choices for that one setting directly under itself, as a `<details>`, so it
-  works without JavaScript. Only one is open at a time, and a tap elsewhere closes it. Region
+  works without JavaScript. Only one is open at a time, and a tap elsewhere closes it. A choice
+  loads a new page, and the setting it was chosen in is open there, at the same place on the page,
+  so several choices can be made in a row. Region
   offers **Here**, which finds the reader's region in the browser as on the index
-  ([hereSelectsLocalRegion](filtering.md#hereselectslocalregion)); Month offers **Now**, which
-  names no month, so the page shows whatever month it is loaded in. A **Reset**
+  ([hereSelectsLocalRegion](filtering.md#hereselectslocalregion)). Month's choices sit on one
+  line: **All**, **Now**, which names no month, so the page shows whatever month it is loaded in,
+  a rule, and the twelve months. On a phone too narrow for them, the line scrolls sideways. A **Reset**
   control, colored apart from the settings, returns to the landing set. Choosing one option selects only it; choosing more adds them; choosing every
   selected option again returns to all. Nothing selected means all.
 - **One scale.** Every bird shown is drawn to the scale of the longest. Its length, wingspan, and

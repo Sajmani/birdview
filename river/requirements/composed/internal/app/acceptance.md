@@ -301,8 +301,11 @@ least recorded bird, past the first 100, draws it and the count line says one wa
 keeps the order, drops removals, and draws nothing; with two added it draws those two by mass,
 removing one leaves the other, and Undo clear brings the October birds back with both. Here,
 filled with FL, is the page with only Florida chosen, every other setting kept, and the cleared
-view left, and the page carries the button, its status, and here.js. Now is the first month
-choice, chosen with no month named, and links to no month named.
+view left, and the page carries the button, its status, and here.js. Month's choices are one
+line, All, Now, and the twelve months, with a rule only before January; Now is chosen with no
+month named and links to none, and All is chosen with `month=all`. In headless Chrome, choosing
+May in Month loads a page with Month open and nothing else, and loading it again after no choice
+opens nothing.
 
 **Run:** `go test ./cmd/birdview/ -run 'TestNext'` (the browser check gates where Chrome is installed)
 **Status: verified 2026-10-26, passing.**
@@ -319,6 +322,7 @@ Watched failing: 2026-10-26, by dropping Show all from the count line.
 Watched failing: 2026-10-26, by capping added birds with the rest ("after adding tersan from past the first 100, it is not drawn"), and by a toggle that only undid a removal.
 Watched failing: 2026-10-26, by Clear that cleared nothing ("cleared: 100 drawn of 1006"), and by a filter that kept the cleared view.
 Watched failing: 2026-10-26, by Here keeping clear=1, by renaming its button, and by dropping Now.
+Watched failing: 2026-10-26, by not reopening the setting ("with [] open"), by never forgetting it ("a plain reload opened [Month]"), and by dropping the rule and the one line.
 Watched failing: 2026-10-26, by restoring the 1,200 cap ("/next has 1006 birds; the check needs more than 1200").
 Watched failing: 2026-10-26, by caching /next without a month like any page.
 Watched failing: 2026-10-26, by anchoring each popover to its own setting with no placing script (the phone-width check: "the page is 543px wide in a 360px window").

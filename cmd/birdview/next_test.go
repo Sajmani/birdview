@@ -32,6 +32,7 @@ import (
 	"time"
 
 	"birdview/internal/dataset"
+	"birdview/internal/month"
 )
 
 // fixNextClock sets /next's clock to a day in m for the rest of the test.
@@ -543,7 +544,7 @@ func TestNextControlsOpenOneAtATime(t *testing.T) {
 	s := newTestServer(t)
 	_, body := get(t, s, "/next?region=FL")
 	n := strings.Count(body, `<details class="ctl"`)
-	named := strings.Count(body, `<details class="ctl" name="ctl">`)
+	named := len(regexp.MustCompile(`<details class="ctl" name="ctl"[ >]`).FindAllString(body, -1))
 	if n < 8 || named != n {
 		t.Errorf("%d of %d count-line settings share the name ctl; want all, and at least 8", named, n)
 	}
@@ -650,11 +651,83 @@ func TestNextHereAndNow(t *testing.T) {
 		!strings.Contains(body, string(s.hereJS)[:200]) {
 		t.Error("/next has no Here button, status, or here.js")
 	}
-	now := mon.Groups[0].Choices[0]
-	if now.Label != "Now" || now.On || string(now.URL) != "/next?by=mass&region=CA" {
-		t.Errorf("with May named, the first month choice is %+v; want Now, off, linking to no month", now)
+	// One line: All, Now, a rule, and the twelve months.
+	if len(mon.Groups) != 1 || !mon.Groups[0].OneLine || mon.AllURL != "" {
+		t.Fatalf("the Month setting has %d groups, one line %t, All link %q; want its choices on one line",
+			len(mon.Groups), len(mon.Groups) > 0 && mon.Groups[0].OneLine, mon.AllURL)
 	}
-	if now := nextAt(s, "/next").Controls[1].Groups[0].Choices[0]; now.Label != "Now" || !now.On {
-		t.Errorf("with no month named, Now is %+v; want it chosen", now)
+	ch := mon.Groups[0].Choices
+	var labels []string
+	for i, c := range ch {
+		labels = append(labels, c.Label)
+		if c.Sep != (i == 2) {
+			t.Errorf("month choice %s has a rule before it: %t; want one only between Now and Jan", c.Label, c.Sep)
+		}
+	}
+	if want := append([]string{"All", "Now"}, month.Abbrev[:]...); !slices.Equal(labels, want) {
+		t.Errorf("the month choices are %v, want %v", labels, want)
+	}
+	if now := ch[1]; now.On || string(now.URL) != "/next?by=mass&region=CA" {
+		t.Errorf("with May named, Now is %+v; want it off, linking to no month", now)
+	}
+	if all := ch[0]; all.On || string(all.URL) != "/next?by=mass&month=all&region=CA" {
+		t.Errorf("with May named, All is %+v; want it off, linking to month=all", all)
+	}
+	if ch := nextAt(s, "/next").Controls[1].Groups[0].Choices; !ch[1].On || ch[0].On || ch[11].On {
+		t.Errorf("with no month named, All %t, Now %t, Oct %t; want only Now chosen", ch[0].On, ch[1].On, ch[11].On)
+	}
+	if ch := nextAt(s, "/next?month=all").Controls[1].Groups[0].Choices; !ch[0].On || ch[1].On {
+		t.Errorf("with month=all, All %t and Now %t; want only All chosen", ch[0].On, ch[1].On)
+	}
+}
+
+//go:embed testdata/next_stay_probe.js
+var nextStayProbe string
+
+// TestNextSettingStaysOpen checks, in headless Chrome, that a setting stays
+// open across the page its choice loads: the probe opens Month and chooses
+// May, and on the page that loads, Month is open and nothing else is; the
+// same page loaded again, after no choice, opens nothing. The pages load in
+// frames, which share the session's storage, since headless Chrome does not
+// finish a dump across navigations.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextSettingStaysOpen(t *testing.T) {
+	chrome := findChrome()
+	if chrome == "" {
+		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); staying open was not tested in a browser")
+	}
+	s := newTestServer(t)
+	ts := httptest.NewServer(instrument(s, nextStayProbe, nil))
+	defer ts.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
+		"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
+		"--disable-component-update", "--disable-sync", "--disable-extensions",
+		"--user-data-dir="+t.TempDir(), "--virtual-time-budget=8000",
+		"--dump-dom", ts.URL+"/next?by=mass").Output()
+	if err != nil {
+		t.Fatalf("chrome: %v", err)
+	}
+	m := dataAttr("data-probe").FindSubmatch(out)
+	if m == nil {
+		t.Fatal("no result from the probe; it did not finish")
+	}
+	var res struct {
+		Chosen  string   `json:"chosen"`
+		Open    []string `json:"open"`
+		URL     string   `json:"url"`
+		Reload  []string `json:"reload"`
+		Visited int      `json:"visited"`
+	}
+	if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
+		t.Fatalf("reading the probe: %v", err)
+	}
+	if res.URL != "/next?by=mass&month=May" || !slices.Equal(res.Open, []string{"Month"}) {
+		t.Errorf("after choosing %s, the page is %s with %v open; want /next?by=mass&month=May with Month open", res.Chosen, res.URL, res.Open)
+	}
+	if len(res.Reload) != 0 {
+		t.Errorf("a plain reload opened %v; want nothing", res.Reload)
 	}
 }

@@ -59,12 +59,17 @@ type nextChoice struct {
 	Title string
 	On    bool
 	URL   template.URL
+	// Sep draws a rule before the choice, setting it apart from those before.
+	Sep bool
 }
 
 // nextChoiceGroup is a labeled run of choices, such as the regions of one zone.
 type nextChoiceGroup struct {
 	Name    string
 	Choices []nextChoice
+	// OneLine keeps the choices on one line, scrolling sideways where the
+	// screen is too narrow for them, as the twelve months are.
+	OneLine bool
 }
 
 // nextControl is one setting on the count line: its name, what it is set to,
@@ -585,14 +590,16 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 	if defaultMonth {
 		mc.Value = month.Full[nowMonth] + " (now)"
 	}
+	// All is a choice like the rest rather than the setting's All link, so
+	// every option sits on the one line.
+	allMonths := nextChoice{Label: "All", Title: "Every month", On: !opt.HasMonths,
+		URL: nextSet(q, "month", "all", "all", "find", "clear")}
 	// Now is no month named: this month, whichever it is when the page is
 	// loaded, so a shared address keeps meaning the current month.
-	mch = append([]nextChoice{{Label: "Now", Title: "This month, " + month.Full[nowMonth] + ", whenever the page is loaded",
+	mch[0].Sep = true
+	mch = append([]nextChoice{allMonths, {Label: "Now", Title: "This month, " + month.Full[nowMonth] + ", whenever the page is loaded",
 		On: defaultMonth, URL: nextSet(q, "month", "", "all", "find", "clear")}}, mch...)
-	if opt.HasMonths {
-		mc.AllURL = nextSet(q, "month", "all", "all", "find", "clear")
-	}
-	mc.Groups = []nextChoiceGroup{{Choices: mch}}
+	mc.Groups = []nextChoiceGroup{{Choices: mch, OneLine: true}}
 	out = append(out, mc)
 
 	rc := nextControl{Label: "Region", Value: "everywhere"}
