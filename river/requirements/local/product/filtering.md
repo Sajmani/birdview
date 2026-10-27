@@ -8,17 +8,13 @@ package product
 
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
-The user can filter to any subset of families, multi-select. **Everything is selected on arrival**
-— All, every order, and every family show as on. An **All** control toggles like an order does,
-over the whole set: untoggling it deselects everything and **no birds are displayed**.
-
-Selection is therefore always literal: what is shown is what is selected. There is no separate
-"unfiltered" state that happens to look like everything being chosen.
+The user can filter to any subset of families, multi-select, by the home page's rule
+([nextView](presentation.md#nextview)): **nothing selected means every family**, choosing a
+family from all selects only it, choosing more adds them, and choosing a selected family again
+removes it. No address can empty the page by filtering.
 
 The selector is **grouped by taxonomic order, in the checklist's own sequence** rather than
-alphabetically. Each group is headed by a **toggle that selects or clears every family in that
-order**, labeled with the order's scientific name and its common name, and styled like the other
-controls rather than like a family chip.
+alphabetically, each group labeled with the order's scientific name and its common name.
 
 Order common names are **the project's own editorial labels**, since no source BirdView uses
 publishes them; several are deliberately loose, and nothing is derived from them. Each family is
@@ -47,8 +43,7 @@ filter works. A species is listed in a region when it reaches 1 record per milli
 bird observations, counted from eBird — or from iNaturalist only where eBird is confirmed to
 withhold it there — and its records below the bar still count in its figure.
 
-As with families, everything is selected on arrival, with an **All** control and group toggles.
-The data is GBIF's, which serves eBird and iNaturalist under CC BY 4.0 with GADM regions as a
+It follows the same rule as families: nothing selected means every region. The data is GBIF's, which serves eBird and iNaturalist under CC BY 4.0 with GADM regions as a
 queryable field ([decisions.regionFilterReinstated](../../decisions.md#regionfilterreinstated)).
 
 **Membership is per region and relative.** iNaturalist is judged against its own total, and only
@@ -66,16 +61,16 @@ read *0 in 1,237,352,304* ([decisions.belowBarCounted](../../decisions.md#belowb
 **Deciding membership per region keeps the endemics** without a special case: the Millerbird's
 handful of records is nothing against a continental billion, and 22 per million within Hawaii.
 
-**Regions are gathered into zones so a reader can select an area in one click**, and zones mix
-the two countries — British Columbia sits with Washington and Oregon, not with Nova Scotia. What
-a zone *means* is [regionsGroupedTwoWays](months.md#regionsgroupedtwoways).
+**Regions are listed by geographic zone**, and zones mix the two countries — British Columbia
+sits with Washington and Oregon, not with Nova Scotia. Zones are presentation only: which birds a
+region holds is decided per region, never per zone.
 
 **A region appears in a URL as its postal abbreviation, or as its name** — `?region=CA`,
 `?region=GulfOfMexico` ([decisions.regionUrlIsPostalCode](../../decisions.md#regionurlispostalcode)). Where a standard abbreviation exists it
 is used, and where none does the name is used in PascalCase. **No code is invented**: the obvious
 ones are taken (Midway cannot be `MI`, Palmyra cannot be `PA`), and an invented code would sit
 beside 64 official ones with nothing marking it as a guess. A region with no standard code shows
-**no code** on its chip, only its name.
+**no code**, only its name.
 
 The GADM id stays the internal key — it keys the presence table and is what GBIF is queried
 with — but does not belong in a URL. The slug is **derived** from the code or the name rather
@@ -88,8 +83,8 @@ than stored, so a renamed region cannot keep a URL that no longer describes it.
 Subject: `presentation.region_filter.here`
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
-A **Here** button beside **All** in Regions replaces the region selection with the one region the
-reader is in, every other setting kept. If the reader refuses permission, their location cannot
+A **Here** button in the home page's Region setting replaces the region selection with the one
+region the reader is in, every other setting kept. If the reader refuses permission, their location cannot
 be found, or it falls in no region BirdView covers, the page says which of the three happened and
 leaves the region selection unchanged.
 
@@ -98,17 +93,18 @@ reader on a ferry in the Gulf gets the Gulf and a reader in Tampa gets Florida. 
 from a different source than the occurrence records ([tech.regionBoundaries](../tech/delivery.md#regionboundaries)), so within a few
 hundred meters of a border or coast, Here may pick the neighbor.
 
-**A link ending in `#here-and-now` presses Here and Now on arrival**, together: the browser asks
-for the reader's location and goes to the page with their region and the current month, exactly
-as choosing both by hand would. The fragment is never sent to the server, so the link reveals
-nothing locationStaysInBrowser does not allow. If the region cannot be found the page stays where
-the link landed and says why, beside the link that was followed rather than inside the Regions
-panel, which starts closed. Without JavaScript the link simply lands.
+**A link ending in `#here-and-now` presses Here on arrival, and sets the month to Now**: the
+browser asks for the reader's location and goes to the page with their region and no month named,
+which is the current month ([nextView](presentation.md#nextview)). The fragment is never sent to
+the server, so the link reveals nothing locationStaysInBrowser does not allow. If the region cannot
+be found the page stays where the link landed and says why, beside the link that was followed
+rather than inside the Region setting, which starts closed. Without JavaScript the link simply
+lands.
 
 **Without JavaScript, Here is shown inactive** — dotted border, no background, text at the full
 contrast floor ([decisions.oneContrastFloor](../../decisions.md#onecontrastfloor)) — and focusable, with a tooltip saying it needs
 JavaScript and permission to use the reader's location. It does nothing when pressed. Dotted,
-because a dashed border already marks the Only buttons, which are active.
+because a dashed border once marked buttons that were active.
 
 ## nowSelectsCurrentMonth
 
@@ -116,6 +112,7 @@ because a dashed border already marks the Only buttons, which are active.
 
 Subject: `presentation.month_filter.now`
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
 A **Now** button beside **All** in Months replaces the month selection with the current month on
 the reader's own clock, every other setting kept. Without JavaScript it uses the server's month.
@@ -135,7 +132,7 @@ Subject: `privacy.location`
 Goals: [goals.readerPrivacy](../../../goals/goals.md#readerprivacy)
 
 The reader's position is used only inside the browser to choose a region, and is never sent,
-stored, or logged. The region boundaries load with every index page whether or not Here is
+stored, or logged. The region boundaries load with every home page whether or not Here is
 pressed, and pressing Here produces exactly the request that choosing that region by hand would.
 
 So the server cannot tell that Here was used, let alone where the reader is. Loading the
@@ -148,6 +145,7 @@ would leak both.
 
 Subject: `presentation.search`
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
 **A text box above the count line keeps the birds that match what is typed and hides the rest.** A
 bird matches when what is typed, ignoring case and punctuation, appears unbroken within one of its

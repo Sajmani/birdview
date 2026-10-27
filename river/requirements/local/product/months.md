@@ -2,10 +2,10 @@ package product
 
 # Months
 
-**The reader also filters to any subset of the twelve months**, multi-select, on the same
-control and the same rules as regions — everything selected on arrival, an **All** toggle,
-and the two composing as [filtersCompose](#filterscompose) requires. A month appears in a URL by its
-three-letter abbreviation: `?month=Jun&month=Jul`.
+**The reader also filters to any subset of the twelve months**, multi-select, by the same rule as
+regions, the two composing as [filtersCompose](#filterscompose) requires. On the home page no month
+named means the current month, and `month=all` every month ([nextView](presentation.md#nextview)).
+A month appears in a URL by its three-letter abbreviation: `?month=Jun&month=Jul`.
 
 **Months decide which birds are drawn, not only the figure**, as every other filter narrows the
 list.
@@ -62,9 +62,8 @@ Selecting Hawaii and Parulidae shows the warblers of Hawaii, and shows nothing i
 
 Reinstated with [regionAndMonthFilter](filtering.md#regionandmonthfilter).
 
-An empty intersection is a real outcome and is **not** the same as nothing being selected
-([helpfulEmptyState](presentation.md#helpfulemptystate)). The empty state names each filter and what it is set to, so a reader
-can tell which one emptied the page.
+An empty intersection is a real outcome: the page says no birds match, its count line naming each
+filter and what it is set to, so a reader can tell which one emptied the page.
 
 ## regionsGroupedTwoWays
 
@@ -72,6 +71,7 @@ can tell which one emptied the page.
 
 Subject: `presentation.region_filter.zones`
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
 The selector offers **two groupings** of the same regions, and the reader picks from either
 ([decisions.regionsTwoWays](../../decisions.md#regionstwoways)). Each is a **partition**: every region sits in exactly one zone
@@ -133,12 +133,9 @@ options shows birds in **either**, because picking two places asks for the birds
 and not for the birds that use both.
 
 **The classification is AVONET's, taken verbatim, and the definitions are quoted.** The values
-are AVONET's own strings; the control shows a plain-English label beside each — "Eats insects"
-for `Invertivore` — and AVONET's own definition as the description, **led by AVONET's own term
-in bold**: *Invertivore: Species obtaining at least 60% of food resources from invertebrates…*
-
-Naming the term attributes the definition to its word, and the term **is the value in the URL**
-— `?niche=Invertivore` — so the control explains its own query string. Translating the word
+are AVONET's own strings, and the value in the URL — `?niche=Invertivore`; the control shows a
+plain-English label for each — "Eats insects" for `Invertivore` — with AVONET's own definition as
+its description: *Species obtaining at least 60% of food resources from invertebrates…* Translating the word
 while keeping the classification is a far lighter liberty than inventing a classification, which
 is what [decisions.familiesTwoWays](../../decisions.md#familiestwoways) records.
 
@@ -171,6 +168,4 @@ AVONET taxonomy sheet that says so, or a fact derivable from BirdView's own data
 supported only by seeming right is the failure [decisions.familiesTwoWays](../../decisions.md#familiestwoways) was written about,
 and is not permitted however it is tagged.
 
-**Counts beside each option are of the whole dataset, not the current view.** How many birds
-there are of a kind is a fact about the data; how many are still showing is what the species
-count above the list already says.
+**No option carries a count.** How many birds are still showing is what the count line says.

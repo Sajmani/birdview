@@ -282,22 +282,6 @@ func undrawnFixture() []dataset.Undrawn {
 	}}
 }
 
-// fixtureCounts reports how many species, families, and orders testDataset
-// holds. The selector checks state a relationship against these rather than a
-// literal, which would go quietly stale the next time the fixture grows a
-// species -- and growing it is how those checks get sharper, not weaker.
-func fixtureCounts() (species, families, orders int) {
-	ds := testDataset()
-	seen := map[string]bool{}
-	for _, f := range ds.Families {
-		if !seen[f.Order] {
-			seen[f.Order] = true
-			orders++
-		}
-	}
-	return len(ds.Species), len(ds.Families), orders
-}
-
 // code builds a plausible eBird species code from a common name, so the
 // fixture exercises the same rendering path as real data.
 //
@@ -365,8 +349,8 @@ func get(t *testing.T, s *server, path string) (int, string) {
 func TestRoutesServe(t *testing.T) {
 	s := newTestServer(t)
 	for _, path := range []string{
-		"/classic", "/static/styles.css", "/species/greblu",
-		"/classic?family=Ardeidae", "/classic?by=mass&scale=global&units=metric&step=30",
+		"/?month=all&show=all", "/static/styles.css", "/species/greblu",
+		"/?month=all&show=all&family=Ardeidae", "/?month=all&show=all&by=mass&units=metric&step=30",
 	} {
 		if code, body := get(t, s, path); code != http.StatusOK {
 			t.Errorf("%s: status %d", path, code)
@@ -402,7 +386,7 @@ var externalSubresource = regexp.MustCompile(
 // Verifies: tech.selfContainedServer. Criterion: acceptance.noServerNetworkRequest.
 func TestNoExternalResources(t *testing.T) {
 	s := newTestServer(t)
-	for _, path := range []string{"/classic", "/species/greblu"} {
+	for _, path := range []string{"/?month=all&show=all", "/species/greblu"} {
 		_, body := get(t, s, path)
 		if m := externalSubresource.FindAllString(body, -1); len(m) > 0 {
 			t.Errorf("%s fetches external resources: %v", path, m)
@@ -412,7 +396,7 @@ func TestNoExternalResources(t *testing.T) {
 
 // Verifies: product.tileContents. Criterion: acceptance.tileCarriesHeaderAndMetrics.
 func TestTileShowsHeaderAndMetrics(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/classic")
+	_, body := get(t, newTestServer(t), "/?month=all&show=all")
 	for _, want := range []string{
 		"American Robin",     // common name
 		"(amerob)",           // eBird species code, in parentheses after it
@@ -493,7 +477,7 @@ func TestDiagramStaysInsideItsBox(t *testing.T) {
 			"see a wrong scale reference -- widen the fixture's size range", step)
 	}
 
-	_, body := get(t, newTestServer(t), fmt.Sprintf("/classic?scale=section&step=%d", step))
+	_, body := get(t, newTestServer(t), fmt.Sprintf("/?month=all&show=all&step=%d", step))
 
 	coord := regexp.MustCompile(`\b(?:y1|y2|cy)="(-?[0-9.]+)"`)
 	for _, d := range diagrams(t, body) {
@@ -537,7 +521,7 @@ func TestDiagramStaysInsideItsBox(t *testing.T) {
 //
 // Verifies: product.tileContents. Criterion: acceptance.tileCarriesHeaderAndMetrics.
 func TestDiagramIsVerticallyCentered(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/classic?scale=global")
+	_, body := get(t, newTestServer(t), "/?month=all&show=all")
 
 	if strings.Contains(body, "xMidYMax") {
 		t.Error("diagram is bottom-anchored (xMidYMax); it should be centered")
@@ -592,11 +576,11 @@ func TestDetailShowsEverySegmentWithProvenance(t *testing.T) {
 // Verifies: product.familyFilter. Criterion: acceptance.familyFilterSelectsAndClears.
 func TestFamilyFilter(t *testing.T) {
 	s := newTestServer(t)
-	_, all := get(t, s, "/classic")
+	_, all := get(t, s, "/?month=all&show=all")
 	if !strings.Contains(all, "American Robin") || !strings.Contains(all, "Great Blue Heron") {
 		t.Fatal("unfiltered view should show every species")
 	}
-	_, one := get(t, s, "/classic?family=Ardeidae")
+	_, one := get(t, s, "/?month=all&show=all&family=Ardeidae")
 	if strings.Contains(one, "American Robin") {
 		t.Error("filtering to Ardeidae still shows a Turdidae species")
 	}
@@ -606,7 +590,7 @@ func TestFamilyFilter(t *testing.T) {
 
 	// The selector labels each family with both names (product.familyFilter): the scientific
 	// name alone makes the user translate before they can choose.
-	sel := box(t, all, "families")
+	sel := box(t, all, "Family")
 	for _, want := range []string{"Ardeidae", "Ardeidae family", "Turdidae", "Trochilidae"} {
 		if !strings.Contains(sel, want) {
 			t.Errorf("family selector is missing %q", want)
@@ -615,13 +599,11 @@ func TestFamilyFilter(t *testing.T) {
 	// And carries NO per-control count. One count sits above the list instead,
 	// because a per-chip count is only true while family is the only filter:
 	// add a region and "Parulidae 51" is false in Hawaii (product.familyFilter).
-	// Look at the chips, not the whole box: the help text above them uses <b>
-	// legitimately. A chip count rendered as "<em>common</em><b>51</b>".
-	chips := sel[strings.Index(sel, `class="ordergroups"`):]
-	if strings.Contains(chips, "</em><b>") {
+	// A chip count rendered as "<em>common</em><b>51</b>".
+	if strings.Contains(sel, "</em><b>") {
 		t.Error("the family selector still carries per-entry counts; they belong above the list")
 	}
-	if !strings.Contains(all, `<p class="count">`) {
+	if !strings.Contains(all, `<span class="shown">`) {
 		t.Error("no count above the list, so the counts were removed and not replaced")
 	}
 
@@ -638,7 +620,7 @@ func TestFamilyFilter(t *testing.T) {
 	}
 	// Each family chip sits inside its order's group.
 	gi := strings.Index(sel, "Passeriformes")
-	next := strings.Index(sel[gi:], `class="ogroup"`)
+	next := strings.Index(sel[gi+1:], `<span class="lbl">`)
 	if next < 0 {
 		next = len(sel) - gi
 	}
@@ -647,17 +629,15 @@ func TestFamilyFilter(t *testing.T) {
 	}
 }
 
-// tileArea returns the part of the index below the help and controls panels.
-//
-// The help now contains a real labeled diagram of a real species (product.pageExplainsItself), so a
-// whole-page search for a bird's name or for a diagram label finds the legend
-// as well as the tiles. Every assertion about what is DISPLAYED has to be
-// scoped here, or it silently answers a different question.
+// tileArea returns the part of the home page below its count line's
+// settings, whose choices name families and regions. Every assertion about
+// which birds are DISPLAYED has to be scoped here, or it silently answers a
+// different question.
 func tileArea(t *testing.T, body string) string {
 	t.Helper()
 	i := strings.LastIndex(body, "</details>")
 	if i < 0 {
-		t.Fatal("no collapsible panels on the page; cannot locate the tile area")
+		t.Fatal("no count-line settings on the page; cannot locate the tile area")
 	}
 	return body[i:]
 }
@@ -700,11 +680,11 @@ func TestUnitToggle(t *testing.T) {
 			t.Errorf("%s: footer %q has %d of the one mass value in %v", path, f, n, wantMass)
 		}
 	}
-	check("/classic", []string{" in"}, []string{" oz", " lb"})
-	check("/classic?units=metric", []string{" cm"}, []string{" g", " kg"})
+	check("/?month=all&show=all", []string{" in"}, []string{" oz", " lb"})
+	check("/?month=all&show=all&units=metric", []string{" cm"}, []string{" g", " kg"})
 
-	_, a := get(t, s, "/classic")
-	_, b := get(t, s, "/classic?units=metric")
+	_, a := get(t, s, "/?month=all&show=all")
+	_, b := get(t, s, "/?month=all&show=all&units=metric")
 	if footer(t, a) == footer(t, b) {
 		t.Error("tile footer is identical in both unit systems; the toggle does nothing")
 	}
@@ -746,27 +726,6 @@ func TestMassUnitsBySystem(t *testing.T) {
 	}
 }
 
-// TestDefaultScaleIsPerSection asserts product.scaleToggle's default, which decisions.perSectionDefault moved.
-//
-// Global still makes the cross-family argument better than anything else, and
-// this test asserted it for good reasons. What changed is that the diagram
-// acquired a vocabulary -- dashed for modeled, chord ticks, labels -- and at
-// global scale a median bird is a couple of pixels tall, so the landing page
-// was hiding the drawing's own language from every first-time reader.
-//
-// Verifies: product.scaleToggle. Criterion: acceptance.sharedScale.
-func TestDefaultScaleIsPerSection(t *testing.T) {
-	if got := parseOptions(httptest.NewRequest(http.MethodGet, "/classic", nil)).Scale; got != view.PerSection {
-		t.Errorf("default scale is %q, want %q", got, view.PerSection)
-	}
-	// And the toggle must still reach the other mode: global is one click away,
-	// which is the premise the default change rests on.
-	r := httptest.NewRequest(http.MethodGet, "/classic?scale=global", nil)
-	if got := parseOptions(r).Scale; got != view.Global {
-		t.Errorf("?scale=global gave %q, want %q", got, view.Global)
-	}
-}
-
 // TestDetailDrawsFullScale asserts product.tileOpensDetail: the detail view fills its box with
 // the one bird it is about, whatever scale the index is using.
 //
@@ -794,108 +753,6 @@ func TestDetailDrawsFullScale(t *testing.T) {
 			t.Errorf("%s: diagram inset by %.1f px; it should fill the view", path, v)
 		}
 	}
-}
-
-// TestHelpCoversEveryControl asserts product.pageExplainsItself: the page explains its own controls
-// and its diagram, rather than assuming the reader can infer them.
-//
-// The list is deliberately tied to the controls that exist. If a control is
-// added and this check is not updated, the new control is undocumented and
-// this test is the reminder.
-//
-// Verifies: product.pageExplainsItself. Criterion: acceptance.pageExplainsControls.
-func TestHelpCoversEveryControl(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/classic")
-	i := strings.Index(body, `<details class="help"`)
-	if i < 0 {
-		t.Fatal("no help block on the page")
-	}
-	help := body[i:]
-	help = help[:strings.Index(help, "</details>")]
-
-	// The control explanations now sit WITH the controls rather than in the
-	// Presentation panel, so they are checked in their own scope (decisions.perSectionDefault).
-	// Scope to the EXPLANATION block, not the whole controls panel. Every
-	// control name also appears as its own button label a few lines below, so a
-	// panel-wide search is satisfied by the control existing rather than by it
-	// being explained -- which is how the first version of this passed with the
-	// explanations deleted outright.
-	// Each panel documents its own controls (product.pageExplainsItself), so this searches all of
-	// them rather than the one that used to hold everything.
-	if !strings.Contains(body, `<div class="ctrlhelp">`) {
-		t.Fatal("no panel carries an explanation block")
-	}
-	controls := body
-	for _, control := range []string{"Order by", "Scale", "Section step", "Units", "Names",
-		"Family", "Region", "Compare birds"} {
-		if !strings.Contains(controls, "<dt>"+control+"</dt>") {
-			t.Errorf("no panel explains the %q control", control)
-		}
-	}
-	// And both scale modes, which is the one control a reader cannot discover
-	// by clicking: it changes what the app is saying, not what it shows.
-	for _, mode := range []string{"Global", "Per section"} {
-		if !strings.Contains(controls, mode) {
-			t.Errorf("the controls panel does not explain %q", mode)
-		}
-	}
-	// Every part of the diagram, since none of it is self-evident. These are now
-	// labels on a rendered example rather than swatches in a list, so each is
-	// matched as the start of its label text.
-	// Matched against the legend's own LABELS, not against any text in the
-	// panel. The cube carries a <title> tooltip reading "Mass as water: ...",
-	// which satisfied a raw ">Mass " search even with the label blanked --
-	// so the check passed against a legend that labeled nothing.
-	var legendLabels []string
-	for _, m := range regexp.MustCompile(`<text class="dlabel[^"]*"[^>]*>([^<]*)</text>`).
-		FindAllStringSubmatch(help, -1) {
-		legendLabels = append(legendLabels, strings.TrimSpace(html.UnescapeString(m[1])))
-	}
-	// Mass included: it is labeled on the legend like every other metric
-	// (product.labeledDetailDiagram), and it is the one that went missing before.
-	for _, part := range []string{"Bill", "Head", "Neck", "Body", "Tail", "Wingspan", "Wing chord", "Mass"} {
-		if !slices.ContainsFunc(legendLabels, func(l string) bool {
-			return strings.HasPrefix(l, part+" ")
-		}) {
-			t.Errorf("diagram legend omits %q; its labels are %v", part, legendLabels)
-		}
-	}
-	// Two sections, in a stated order (product.pageExplainsItself): the thing on screen, then what
-	// its strokes mean. How to change it moved down to the controls.
-	order := []string{"The stick figure", "Where the numbers come from"}
-	at := make([]int, len(order))
-	for i, h := range order {
-		if at[i] = strings.Index(help, ">"+h+"<"); at[i] < 0 {
-			t.Errorf("help has no %q section", h)
-		}
-	}
-	for i := 1; i < len(order); i++ {
-		if at[i-1] >= 0 && at[i] >= 0 && at[i] < at[i-1] {
-			t.Errorf("help section %q comes before %q; the order is %v",
-				order[i], order[i-1], order)
-		}
-	}
-
-	// The mass cube: a shape with no label of its own, so the panel that
-	// shows it has to say what it is. Checked in the Presentation panel and
-	// not merely in the diagram key, since this is where a reader is taught
-	// to read the drawing (product.pageExplainsItself). Whitespace-normalized:
-	// the template wraps its prose.
-	flat := strings.Join(strings.Fields(help), " ")
-	for _, s := range []string{"mass drawn as water"} {
-		if !strings.Contains(flat, s) {
-			t.Errorf("the Presentation panel does not explain the mass cube: no %q", s)
-		}
-	}
-
-	// What the estimate marker means: the other thing a reader cannot infer.
-	for _, concept := range []string{"estimated"} {
-		if !strings.Contains(help, concept) {
-			t.Errorf("Presentation panel does not explain %q", concept)
-		}
-	}
-	// Whether the panel starts open or closed is product.collapsibleControls',
-	// checked with the other panels.
 }
 
 // TestChipTextInheritsItsBackgroundsTextColor guards a bug that shipped: chips
@@ -963,58 +820,6 @@ func descendantOfColored(selector string) bool {
 	return false
 }
 
-// TestOrderToggles asserts product.familyFilter's order control: each order is a real toggle
-// over its whole group, labeled with its common name.
-//
-// Since a fresh page selects everything, the first click on an order REMOVES
-// it. This replaces a check that asserted the opposite -- that order labels
-// were inert text. When that requirement inverted, the check kept passing,
-// because it searched for `<a class="ohdr` and the markup had become
-// `<a class="btn ohdr`. A test that survives the reversal of its own
-// requirement is worse than none.
-//
-// Verifies: product.familyFilter. Criterion: acceptance.familyFilterSelectsAndClears.
-func TestOrderToggles(t *testing.T) {
-	s := newTestServer(t)
-	_, body := get(t, s, "/classic")
-
-	// Each order is a link carrying its common name, not inert text, and starts
-	// selected.
-	for _, order := range []string{"Apodiformes", "Passeriformes", "Pelecaniformes"} {
-		if !strings.Contains(body, order+`<em>`+order+" (group)") {
-			t.Errorf("%s toggle does not show its common name", order)
-		}
-		if !regexp.MustCompile(`<a class="btn ohdr on"[^>]*>` + order).MatchString(body) {
-			t.Errorf("%s does not start selected", order)
-		}
-	}
-
-	// Clicking an order drops EVERY family in it. Passeriformes holds two, so a
-	// control that touches only the first fails here.
-	href := html.UnescapeString(mustMatch(t, body,
-		`<a class="btn ohdr on"[^>]*href="([^"]+)"[^>]*>Passeriformes`, "the Passeriformes toggle"))
-	_, dropped := get(t, s, href)
-	for _, gone := range []string{"American Robin", "American Crow"} {
-		if strings.Contains(tileArea(t, dropped), gone) {
-			t.Errorf("dropping Passeriformes left %s visible", gone)
-		}
-	}
-	if !strings.Contains(tileArea(t, dropped), "Great Blue Heron") {
-		t.Error("dropping Passeriformes removed another order's species")
-	}
-
-	// And the same control puts them back.
-	back := html.UnescapeString(mustMatch(t, dropped,
-		`<a class="btn ohdr"[^>]*href="([^"]+)"[^>]*>Passeriformes`,
-		"the Passeriformes toggle once cleared"))
-	_, restored := get(t, s, back)
-	for _, want := range []string{"American Robin", "American Crow", "Great Blue Heron"} {
-		if !strings.Contains(restored, want) {
-			t.Errorf("restoring Passeriformes did not bring back %s", want)
-		}
-	}
-}
-
 // mustMatch returns the first capture group, failing the test rather than
 // panicking when the pattern does not match -- a break that changes the markup
 // should report what it could not find, not an index-out-of-range.
@@ -1027,251 +832,6 @@ func mustMatch(t *testing.T, body, pattern, what string) string {
 	return m[1]
 }
 
-// TestAllToggle asserts the All control round-trips: from the default, where
-// everything is selected, it clears the lot; from cleared, it selects them all
-// again.
-//
-// The species count cannot distinguish the endpoints on its own -- "everything
-// selected" and a restored selection both show every bird -- so the check reads
-// the control states as well.
-//
-// Verifies: product.familyFilter. Criterion: acceptance.familyFilterSelectsAndClears.
-func TestAllToggle(t *testing.T) {
-	s := newTestServer(t)
-
-	_, fresh := get(t, s, "/classic")
-	// The Regions box carries an All control too and comes first on the page,
-	// so this must say which selector it means (product.regionAndMonthFilter).
-	clear := html.UnescapeString(mustMatch(t, grouping(t, box(t, fresh, "families"), "Taxonomic order"),
-		`<a class="btn on"[^>]*href="([^"]+)"[^>]*>All`, "the family All control on a fresh page"))
-
-	_, empty := get(t, s, clear)
-	taxoEmpty := grouping(t, box(t, empty, "families"), "Taxonomic order")
-	if strings.Count(taxoEmpty, `class="btn ohdr on"`) != 0 {
-		t.Error("orders still show as selected after clearing")
-	}
-	if strings.Count(taxoEmpty, `class="chip on"`) != 0 {
-		t.Error("families still show as selected after clearing")
-	}
-
-	// Back again: All selects every family, and every order lights up.
-	restore := html.UnescapeString(mustMatch(t, box(t, empty, "families"),
-		`<a class="btn"[^>]*href="([^"]+)"[^>]*>All`, "the family All control on an emptied page"))
-	_, all := get(t, s, restore)
-	_, _, wantOrders := fixtureCounts()
-	taxo := grouping(t, box(t, all, "families"), "Taxonomic order")
-	if n := strings.Count(taxo, `class="btn ohdr on"`); n != wantOrders {
-		t.Errorf("%d of %d orders selected after re-selecting All", n, wantOrders)
-	}
-	if !strings.Contains(all, "Great Blue Heron") {
-		t.Error("re-selecting All did not restore the species")
-	}
-}
-
-// TestDefaultSelectsEverything asserts that a fresh page has everything on:
-// All, every order, and every family (product.familyFilter, product.firstLoadShowsAll).
-//
-// Verifies: product.familyFilter, product.firstLoadShowsAll. Criterion: acceptance.familyFilterSelectsAndClears.
-func TestDefaultSelectsEverything(t *testing.T) {
-	s := newTestServer(t)
-	_, body := get(t, s, "/classic")
-	fams := box(t, body, "families")
-	if !regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(fams) {
-		t.Error("All is not selected on a fresh page")
-	}
-	_, wantFams, wantOrders := fixtureCounts()
-	taxo := grouping(t, fams, "Taxonomic order")
-	if n := strings.Count(taxo, `class="btn ohdr on"`); n != wantOrders {
-		t.Errorf("%d of %d orders selected on a fresh page", n, wantOrders)
-	}
-	if n := strings.Count(taxo, `class="chip on"`); n != wantFams {
-		t.Errorf("%d of %d families selected on a fresh page", n, wantFams)
-	}
-	// Everywhere is selected on arrival too, and by the same rule (product.regionAndMonthFilter).
-	if !regexp.MustCompile(`<a class="btn on"[^>]*>All`).MatchString(box(t, body, "regions")) {
-		t.Error("All regions is not selected on a fresh page")
-	}
-	if !strings.Contains(body, "Great Blue Heron") {
-		t.Error("fresh page should show every species")
-	}
-}
-
-// TestClearingEverythingShowsGuidance asserts the empty state: with nothing
-// selected the page shows no birds and says what to do about it, rather than
-// reporting that nothing matched -- the user turned them off, they did not
-// fail to match.
-//
-// Verifies: product.familyFilter. Criterion: acceptance.emptyStateGuides.
-func TestClearingEverythingShowsGuidance(t *testing.T) {
-	s := newTestServer(t)
-	_, body := get(t, s, "/classic")
-	// Scoped to the family block. The Species panel now opens with the
-	// habitat and diet controls, each with its own All, so an unscoped
-	// first-match grabs the wrong one and clears nothing (product.habitatAndDietFilters).
-	clear := html.UnescapeString(mustMatch(t, grouping(t, box(t, body, "families"), "Taxonomic order"),
-		`<a class="btn on"[^>]*href="([^"]+)"[^>]*>All`, "the family All control on a fresh page"))
-
-	_, empty := get(t, s, clear)
-	for _, gone := range []string{"Great Blue Heron", "American Robin", "American Crow"} {
-		if strings.Contains(tileArea(t, empty), gone) {
-			t.Errorf("%s is still displayed after clearing every selection", gone)
-		}
-	}
-	if !strings.Contains(empty, "Select birds to display in") {
-		t.Error("empty state does not tell the user how to get birds back")
-	}
-	if strings.Contains(empty, "No species match") {
-		t.Error("empty state blames a failed match; the user cleared the selection")
-	}
-	nSpecies, _, _ := fixtureCounts()
-	if want := fmt.Sprintf("0 of %d species", nSpecies); !strings.Contains(empty, want) {
-		t.Errorf("count line should report nothing shown as %q", want)
-	}
-	// And All must offer the way back. Scoped to the family block: the
-	// habitat and diet controls are untouched by clearing families, so
-	// their All buttons are legitimately still on (product.habitatAndDietFilters).
-	if regexp.MustCompile(`<a class="btn on"[^>]*>All`).
-		MatchString(grouping(t, box(t, empty, "families"), "Taxonomic order")) {
-		t.Error("All is still marked selected with nothing selected")
-	}
-}
-
-// TestScrollRestorationIsInlineAndSelfContained checks the one script BirdView
-// ships is embedded rather than fetched, and that it is scoped to the index.
-//
-// It cannot check that scrolling actually works -- that needs a browser this
-// project does not have -- so acceptance.scrollScriptScoped is honest about covering presence and
-// self-containment only.
-//
-// Verifies: tech.selfContainedServer, product.togglesKeepPlace. Criterion: acceptance.scrollScriptScoped.
-func TestScrollRestorationIsInlineAndSelfContained(t *testing.T) {
-	s := newTestServer(t)
-	_, body := get(t, s, "/classic")
-
-	if !strings.Contains(body, "birdview.scroll") {
-		t.Error("index carries no scroll-restoration script")
-	}
-	// Inline only: an external script would break tech.selfContainedServer the same way a CDN
-	// stylesheet would, and acceptance.noServerNetworkRequest only looks at src/href attributes.
-	for _, tag := range regexp.MustCompile(`<script[^>]*>`).FindAllString(body, -1) {
-		if strings.Contains(tag, "src=") {
-			t.Errorf("script is fetched rather than embedded: %s", tag)
-		}
-	}
-	// Scoped to the index, so a detail page does not consume the saved position.
-	if !strings.Contains(body, `window.location.pathname !== "/classic"`) {
-		t.Error("script is not scoped to the index; a detail page would eat the saved scroll")
-	}
-	// The detail view's one script is Back's, inline, and it touches no
-	// saved scroll position.
-	_, detail := get(t, s, "/species/greblu")
-	if strings.Count(detail, "<script") != 1 || strings.Contains(detail, "<script src") || strings.Contains(detail, "birdview.scroll") {
-		t.Error("detail view carries a script other than Back's, inline")
-	}
-	// And the controls remain addressable for anyone who prefers an anchor.
-	if !strings.Contains(body, `id="controls"`) {
-		t.Error("controls have no id; #controls should work as a fallback target")
-	}
-}
-
-// TestCollapsiblePanelsPersist checks the panels can hold their collapsed state
-// across a navigation.
-//
-// The markup says `open`, so without this every reload reopened a panel the
-// reader had deliberately collapsed, pushing the page down -- the same class of
-// defect as losing the scroll position, and visible in the same moment.
-//
-// Both panels need an id for the state to be keyed on, and the restore must run
-// before the scroll restore, or collapsing a panel shifts everything under it
-// after the position has already been set.
-//
-// Verifies: product.pageExplainsItself, product.collapsibleControls, product.togglesKeepPlace. Criterion: acceptance.scrollScriptScoped.
-func TestCollapsiblePanelsPersist(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/classic")
-
-	for _, id := range []string{"presentation", "controls"} {
-		if !strings.Contains(body, `id="`+id+`"`) {
-			t.Errorf("panel %q has no id; its collapsed state cannot be remembered", id)
-		}
-	}
-	if !strings.Contains(body, "birdview.open.") {
-		t.Error("no script remembers the panels' collapsed state")
-	}
-	// Ordering: panels before scroll.
-	if p, s := strings.Index(body, "birdview.open."), strings.Index(body, "birdview.scroll"); p > s {
-		t.Error("scroll is restored before the panels; collapsing one would then shift the page")
-	}
-	// Every panel defaults to CLOSED (product.collapsibleControls): four open panels put the birds
-	// below the fold before the reader has chosen anything.
-	for _, id := range []string{"presentation", "controls", "regions", "traits", "families"} {
-		open := regexp.MustCompile(`<details[^>]*id="` + id + `"[^>]*\bopen\b`)
-		if open.MatchString(body) {
-			t.Errorf("panel %q defaults to open; product.collapsibleControls says closed", id)
-		}
-	}
-	// A closed panel is a bare word unless it says what it holds, so each
-	// summary carries a one-line description.
-	for _, id := range []string{"presentation", "controls", "regions", "traits", "families"} {
-		sum := mustMatch(t, body, `(?s)<details[^>]*id="`+id+`">\s*<summary>(.*?)</summary>`,
-			"the "+id+" summary")
-		if !strings.Contains(sum, `class="sumdesc"`) {
-			t.Errorf("panel %q has no description in its summary: %q", id, sum)
-		}
-	}
-}
-
-// TestControlOrderAndOptions pins two presentation choices that are easy to
-// undo by accident: the default scale is listed first, and the section step
-// offers its full range.
-//
-// Verifies: product.sectionThresholdDefault, product.scaleToggle. Criterion: acceptance.controlsMatchServer.
-func TestControlOrderAndOptions(t *testing.T) {
-	_, page := get(t, newTestServer(t), "/classic")
-
-	// Scope to the controls panel. The Presentation panel above it also names both
-	// scale modes, in the same order -- searching the whole page matched the
-	// prose and passed even with the buttons reversed.
-	ci := strings.Index(page, `<details class="controls"`)
-	if ci < 0 {
-		t.Fatal("controls panel not found")
-	}
-	body := page[ci:]
-
-	// Per section is the default (product.scaleToggle, decisions.perSectionDefault), so it leads the pair.
-	g := strings.Index(body, `"scale" "global"`)
-	if g < 0 {
-		g = strings.Index(body, `scale=global`)
-	}
-	p := strings.Index(body, `scale=section`)
-	if g < 0 || p < 0 {
-		t.Fatalf("scale controls not found in the panel (global=%d section=%d)", g, p)
-	}
-	if p > g {
-		t.Error("Global is listed before Per section; the default leads the pair")
-	}
-
-	// Every offered step must be one the server actually accepts, or the
-	// control silently falls back to the default.
-	for _, step := range []string{"5", "10", "15", "20", "30"} {
-		if !strings.Contains(body, `>`+step+`%<`) {
-			t.Errorf("section step %s%% is not offered", step)
-		}
-		r := httptest.NewRequest(http.MethodGet, "/classic?step="+step, nil)
-		if got := parseOptions(r).Step; got != mustFloat(t, step) {
-			t.Errorf("step=%s parsed as %v; the control offers a value the server rejects", step, got)
-		}
-	}
-}
-
-func mustFloat(t *testing.T, s string) float64 {
-	t.Helper()
-	v, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return v
-}
-
 // TestAttributionIsComplete checks every CC BY source is credited the way that
 // license asks: creator, title, a link to the source, and a link to the license.
 //
@@ -1281,8 +841,8 @@ func mustFloat(t *testing.T, s string) float64 {
 //
 // Verifies: tech.localNowPublicLater, goals.goodDataCitizen. Criterion: acceptance.attributionComplete.
 func TestAttributionIsComplete(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/classic")
-	f := body[strings.Index(body, "<footer>"):]
+	_, body := get(t, newTestServer(t), "/?month=all&show=all")
+	f := body[strings.Index(body, "<footer"):]
 
 	for _, want := range []string{
 		"Tobias",                              // AVONET creator
@@ -1337,7 +897,7 @@ func s2(t *testing.T) *server { t.Helper(); return newTestServer(t) }
 //
 // Verifies: goals.goodDataCitizen. Criterion: acceptance.attributionComplete.
 func TestNoUnearnedPermissionClaim(t *testing.T) {
-	for _, page := range []string{"/classic", "/species/greblu"} {
+	for _, page := range []string{"/?month=all&show=all", "/species/greblu"} {
 		_, body := get(t, newTestServer(t), page)
 		for _, claim := range []string{"used by permission", "with permission", "licensed from", "under licence", "under license"} {
 			if strings.Contains(strings.ToLower(body), claim) {
@@ -1368,7 +928,7 @@ func neckRow(t *testing.T, body string) string {
 // Verifies: product.segmentComposition, product.segmentsSumToLength, product.tileOpensDetail. Criterion: acceptance.foldedNeckSameStroke.
 func TestFoldedNeckRendersAsAnArc(t *testing.T) {
 	s := newTestServer(t)
-	_, body := get(t, s, "/classic")
+	_, body := get(t, s, "/?month=all&show=all")
 
 	var folded, straight int
 	for _, d := range diagrams(t, body) {
@@ -1511,7 +1071,7 @@ func TestFaviconIsServedLocally(t *testing.T) {
 	// now derived from the stylesheet in web.TestFaviconUsesTheAppPalette
 	// (product.oneDiagramVocabulary, acceptance.faviconFromPalette), which lives where both assets are embedded.
 
-	for _, path := range []string{"/classic", "/species/greblu"} {
+	for _, path := range []string{"/?month=all&show=all", "/species/greblu"} {
 		_, page := get(t, s, path)
 		if !strings.Contains(page, `href="/static/favicon.svg"`) {
 			t.Errorf("%s does not reference the favicon", path)
@@ -1571,12 +1131,14 @@ func TestCrossbarSplitsAtTheChord(t *testing.T) {
 }
 
 // TestBothPagesExplainTheStrokeCode asserts the other half of product.measuredVersusModeled: a visual
-// code nobody documents is decoration.
+// code nobody documents is decoration. The species page explains it under its
+// drawing, and the guide the home page links its "stick figures" to explains it
+// for the tiles.
 //
 // Verifies: product.measuredVersusModeled. Criterion: acceptance.diagramDistinguishesModeled.
 func TestBothPagesExplainTheStrokeCode(t *testing.T) {
 	s := newTestServer(t)
-	for _, path := range []string{"/classic", "/species/greblu"} {
+	for _, path := range []string{"/docs/using", "/species/greblu"} {
 		_, body := get(t, s, path)
 		low := strings.ToLower(body)
 		for _, want := range []string{"solid", "dashed", "tick", "chord"} {
@@ -1658,7 +1220,7 @@ func TestDetailDiagramIsLabeled(t *testing.T) {
 		t.Errorf("%d leader lines, want 5", n)
 	}
 	// A tile has none: the index is dense on purpose.
-	_, index := get(t, newTestServer(t), "/classic")
+	_, index := get(t, newTestServer(t), "/?month=all&show=all")
 	if strings.Contains(tileArea(t, index), `class="dlabel`) {
 		t.Error("index tiles carry diagram labels; those belong to the detail view and the legend")
 	}
@@ -1708,31 +1270,6 @@ func TestWingLabelsClearTheColumn(t *testing.T) {
 	}
 }
 
-// TestEveryControlEntryIsWrapped is the markup half of the column-break fix:
-// the CSS rule only helps if every heading-and-text pair is actually inside a
-// wrapper for it to act on.
-//
-// Verifies: product.pageExplainsItself. Criterion: acceptance.pageExplainsControls.
-func TestEveryControlEntryIsWrapped(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/classic")
-	i := strings.Index(body, `<div class="ctrlhelp">`)
-	if i < 0 {
-		t.Fatal("no control explanation block")
-	}
-	block := body[i:]
-	block = block[:strings.Index(block, "</details>")]
-
-	dts := strings.Count(block, "<dt>")
-	wrapped := strings.Count(block, `<div class="ctrl"><dt>`)
-	if dts == 0 {
-		t.Fatal("no control entries found")
-	}
-	if wrapped != dts {
-		t.Errorf("%d of %d control entries are wrapped for break-inside; an unwrapped one can "+
-			"have its heading split from its text across the column break", wrapped, dts)
-	}
-}
-
 // TestDiagramTextPaintsOverLines asserts the paint order of the annotated
 // diagram: every line is emitted before every label, so a leader that crosses a
 // label passes behind the words.
@@ -1761,39 +1298,6 @@ func TestDiagramTextPaintsOverLines(t *testing.T) {
 	// satisfied by a diagram with no text at all.
 	if n := strings.Count(svg, "<text"); n < 7 {
 		t.Errorf("only %d labels in the diagram; expected five segments plus chord and wingspan", n)
-	}
-}
-
-// TestHeaderNamesThePanelsThatExist guards against the header pointing at a
-// panel by a name it no longer has.
-//
-// The intro read "Read the Instructions for details" for a while after the
-// panel was retitled Presentation, so it directed the reader to something that
-// was not on the page. Nothing caught it: the panel had a test, the header had
-// a test, and neither knew about the other.
-//
-// Verifies: product.pageExplainsItself. Criterion: acceptance.pageExplainsControls.
-func TestHeaderNamesThePanelsThatExist(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/classic")
-	intro := mustMatch(t, body, `(?s)<p class="sub">(.*?)</p>`, "the header intro")
-
-	// The title is the text before any markup: a summary now also carries a
-	// <span class="sumdesc"> describing what the panel holds (product.collapsibleControls), so
-	// anchoring on </summary> matches nothing.
-	titles := regexp.MustCompile(`<summary>([^<]+)`).FindAllStringSubmatch(body, -1)
-	have := map[string]bool{}
-	for _, m := range titles {
-		have[strings.TrimSpace(m[1])] = true
-	}
-	if len(have) == 0 {
-		t.Fatal("no collapsible panels found")
-	}
-	// Any capitalized panel-ish word the intro points the reader at must be a
-	// panel that exists.
-	for _, word := range regexp.MustCompile(`\b(Instructions|Presentation|Controls)\b`).FindAllString(intro, -1) {
-		if !have[word] {
-			t.Errorf("the header sends the reader to %q, but the panels are %v", word, keysOf(have))
-		}
 	}
 }
 
@@ -1877,13 +1381,10 @@ func TestDetailDiagramLabelsTotalLength(t *testing.T) {
 		t.Errorf("%d leader lines; the total length label should not add one", n)
 	}
 
-	// The legend carries it; an index tile does not.
-	_, index := get(t, newTestServer(t), "/classic")
-	if !strings.Contains(index, `class="dlabel total`) {
-		t.Error("the help legend has no total length label; it renders through the same builder")
-	}
+	// A home page tile does not.
+	_, index := get(t, newTestServer(t), "/?month=all&show=all")
 	if strings.Contains(tileArea(t, index), `class="dlabel`) {
-		t.Error("index tiles carry diagram labels; those belong to the detail view and the legend")
+		t.Error("home page tiles carry diagram labels; those belong to the detail view")
 	}
 }
 
@@ -1953,747 +1454,6 @@ func attrF(t *testing.T, el, name string) float64 {
 	return v
 }
 
-// TestEveryOrderGroupWrapsItsFamilies is the markup half of the wrapped-family
-// indent: the two-column grid only indents anything if the families are in a
-// box of their own, and every group's chips are in it.
-//
-// A chip left as a direct child of .ogroup becomes a third grid item, which
-// lands in a new implicit row at the page margin -- the exact bug the grid was
-// added to fix, reintroduced for one order.
-//
-// Verifies: product.familyFilter. Criterion: acceptance.familyListWraps.
-func TestEveryOrderGroupWrapsItsFamilies(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/classic")
-
-	// Split on the group opener rather than matching balanced </div>s: the
-	// nesting is exactly what this test exists to check, so a parse that
-	// depends on it reports a mangled structure as "no groups" instead of as
-	// the defect it is.
-	block := body[strings.Index(body, `<div class="ordergroups">`):]
-	block = block[:strings.Index(block, `<p class="count">`)]
-	parts := strings.Split(block, `<div class="ogroup">`)[1:]
-	groups := make([][]string, 0, len(parts))
-	for _, p := range parts {
-		groups = append(groups, []string{"", p})
-	}
-	if len(groups) == 0 {
-		t.Fatal("no order groups on the page")
-	}
-	// The fixture spans several orders; if it ever collapses to one this test
-	// stops covering the multi-order case and should say so.
-	if len(groups) < 2 {
-		t.Fatalf("only %d order group in the fixture; this cannot show that EVERY group "+
-			"wraps its families", len(groups))
-	}
-
-	totalChips := 0
-	for _, g := range groups {
-		inner := g[1]
-		if n := strings.Count(inner, `<div class="ofams">`); n != 1 {
-			t.Errorf("an order group has %d family boxes, want exactly 1:\n%.200s", n, inner)
-			continue
-		}
-		// Every chip must sit after the wrapper opens. A chip before it is a
-		// direct child of the grid and wraps to the margin.
-		open := strings.Index(inner, `<div class="ofams">`)
-		if before := strings.Count(inner[:open], `class="chip`); before > 0 {
-			t.Errorf("%d family chips sit outside the .ofams box, so they wrap to the "+
-				"page margin instead of indenting", before)
-		}
-		n := strings.Count(inner, `class="chip`)
-		if n == 0 {
-			t.Error("an order group has no family chips at all")
-		}
-		totalChips += n
-		// The order header stays out of the families' box: it is the first
-		// grid column, and inside .ofams it would wrap along with the chips.
-		if hdr := strings.Index(inner, `class="btn ohdr`); hdr < 0 || hdr > open {
-			t.Error("the order header is missing or sits inside the family box; it must be " +
-				"the grid's first column")
-		}
-	}
-	// Month chips are deliberately outside any group: twelve items in a row
-	// need no zones, and decisions.monthPresence rejected season groups outright because a
-	// season name inverts between hemispheres and means nothing in the
-	// tropics. They are subtracted rather than folded in, so this still
-	// catches a family or region chip that escapes its box.
-	outside := strings.Count(body, `class="chip`) -
-		strings.Count(tileArea(t, body), `class="chip`) -
-		strings.Count(body, `class="chip mchip`)
-	if want := outside; totalChips != want {
-		t.Errorf("the groups account for %d chips but the page has %d; some chip is outside "+
-			"an order group entirely", totalChips, want)
-	}
-}
-
-// drawnSpans pulls each compare panel's species name, drawn bill-to-tail height,
-// and crossbar half-width out of the rendered page, in document order.
-func drawnSpans(t *testing.T, body string) []struct {
-	Name   string
-	Height float64
-	Half   float64
-} {
-	t.Helper()
-	var out []struct {
-		Name   string
-		Height float64
-		Half   float64
-	}
-	for _, m := range regexp.MustCompile(`(?s)<svg class="dia".*?</svg>`).FindAllString(body, -1) {
-		name := html.UnescapeString(
-			mustMatch(t, m, `aria-label="scaled outline of ([^"]+)"`, "the panel's species"))
-		tail := attrF(t, mustMatch(t, m, `(<line class="tail"[^>]*>)`, "the tail line"), "y2")
-		bill := attrF(t, mustMatch(t, m, `(<line class="bill"[^>]*>)`, "the bill line"), "y1")
-		wing := mustMatch(t, m, `(<line class="wing[^"]*"[^>]*>)`, "a wing line")
-		cx := attrF(t, mustMatch(t, m, `(<line class="bill"[^>]*>)`, "the bill line"), "x1")
-		out = append(out, struct {
-			Name   string
-			Height float64
-			Half   float64
-		}{name, tail - bill, cx - attrF(t, wing, "x1")})
-	}
-	return out
-}
-
-// TestCompareSharesOneScale is the assertion the comparison view exists for:
-// every bird is laid out against the largest in the set, not against itself.
-//
-// This is the failure the code is one argument away from: labeledTileAt with
-// the bird's own length produces a page that looks completely correct, with
-// every panel neatly filled, and compares nothing. No assertion on the markup
-// can see it -- only the drawn geometry can.
-//
-// Verifies: product.comparisonOneScale. Criterion: acceptance.comparisonSharesScale.
-func TestCompareSharesOneScale(t *testing.T) {
-	s := newTestServer(t)
-	// Unfolded families only. A folded neck draws shorter than the bird is
-	// long (decisions.foldedNeckAsS), so its height is deliberately NOT proportional and would
-	// make this test wrong rather than strict.
-	const q = "/compare?units=metric&species=annhum&species=amerob&species=amecro"
-	_, body := get(t, s, q)
-
-	got := drawnSpans(t, body)
-	if len(got) != 3 {
-		t.Fatalf("%d panels, want 3", len(got))
-	}
-	for _, p := range got {
-		if sp := findSpeciesByName(t, p.Name); view.Layout(sp, sp.TotalLength.Value,
-			sp.Wingspan.Value, view.Box{W: 100, H: 100}).NeckFolded {
-			t.Fatalf("%s folds its neck, so its drawn height is not proportional to its "+
-				"length and this fixture can no longer test the scale", p.Name)
-		}
-	}
-
-	// Drawn height must track total length by one constant across the set.
-	// Derived from the requirement -- one scale for the group -- not from a run.
-	var scale float64
-	for _, p := range got {
-		sp := findSpeciesByName(t, p.Name)
-		px := p.Height / sp.TotalLength.Value
-		if scale == 0 {
-			scale = px
-			continue
-		}
-		if math.Abs(px-scale)/scale > 0.005 {
-			t.Errorf("%s is drawn at %.5f px/mm but the first bird at %.5f; the panels do not "+
-				"share a scale", p.Name, px, scale)
-		}
-	}
-
-	// Proportionality alone does not prove the reference is the LARGEST bird:
-	// every panel at half scale would pass it too. The largest bird pins it --
-	// at ref = max it is drawn exactly as it is on its own detail page, where
-	// it is laid out against itself.
-	big := findSpecies(t, "amecro")
-	_, solo := get(t, s2(t), "/species/amecro?units=metric")
-	soloH := drawnSpans(t, solo)[0].Height
-	var bigH float64
-	for _, p := range got {
-		if p.Name == big.Name(dataset.LocaleNA) {
-			bigH = p.Height
-		}
-	}
-	if math.Abs(bigH-soloH) > 0.2 {
-		t.Errorf("the largest bird is drawn %.1fpx here but %.1fpx on its own page; the shared "+
-			"scale is not set by the largest bird in the set", bigH, soloH)
-	}
-	// And every other bird must be strictly smaller, or the scale is per-panel.
-	for _, p := range got {
-		if p.Name != big.Name(dataset.LocaleNA) && p.Height >= bigH {
-			t.Errorf("%s is drawn %.1fpx, not smaller than the largest bird's %.1fpx",
-				p.Name, p.Height, bigH)
-		}
-	}
-}
-
-// findSpeciesByName looks a fixture species up by common name, which is what
-// the rendered diagram carries.
-func findSpeciesByName(t *testing.T, common string) *dataset.Species {
-	t.Helper()
-	ds := testDataset()
-	for i := range ds.Species {
-		if ds.Species[i].Name(dataset.LocaleNA) == common {
-			return &ds.Species[i]
-		}
-	}
-	t.Fatalf("no fixture species named %q", common)
-	return nil
-}
-
-// TestCompareSelectsAndExplainsItself covers the rest of acceptance.comparisonSharesScale: which birds
-// appear, in what order, and what the page does and does not carry.
-//
-// Verifies: product.comparisonOneScale. Criterion: acceptance.comparisonSharesScale.
-func TestCompareSelectsAndExplainsItself(t *testing.T) {
-	s := newTestServer(t)
-
-	// Named order is the reader's and is preserved.
-	_, body := get(t, s, "/compare?species=greblu&species=annhum")
-	names := []string{}
-	for _, p := range drawnSpans(t, body) {
-		names = append(names, p.Name)
-	}
-	if want := []string{"Great Blue Heron", "Anna's Hummingbird"}; !slices.Equal(names, want) {
-		t.Errorf("panels are %v, want %v in the order named", names, want)
-	}
-	// Reversing the URL reverses the page, or the order is not being honored.
-	_, rev := get(t, s, "/compare?species=annhum&species=greblu")
-	if first := drawnSpans(t, rev)[0].Name; first != "Anna's Hummingbird" {
-		t.Errorf("reversing the URL gave %q first; the page is imposing its own order", first)
-	}
-
-	// A bird named twice is drawn once.
-	_, dup := get(t, s, "/compare?species=annhum&species=annhum")
-	if n := len(drawnSpans(t, dup)); n != 1 {
-		t.Errorf("a species named twice drew %d panels, want 1", n)
-	}
-
-	// An unrecognized id is dropped and named, not refused (decisions.compareUrlContract). Checked
-	// with a mixed set: an all-invalid one cannot tell dropping from refusing.
-	code, msg := get(t, s, "/compare?species=annhum&species=no_such_bird")
-	if code != http.StatusOK {
-		t.Errorf("a set with one dead id gave %d; it should render what it recognizes", code)
-	}
-	if n := len(drawnSpans(t, msg)); n != 1 {
-		t.Errorf("%d panels, want the one recognized bird", n)
-	}
-	if !strings.Contains(msg, "no_such_bird") {
-		t.Errorf("the page does not name the dropped id: a rotted link must say what it lost")
-	}
-	for _, m := range regexp.MustCompile(`href="([^"]+)"`).FindAllStringSubmatch(msg, -1) {
-		if strings.Contains(html.UnescapeString(m[1]), "no_such_bird") {
-			t.Errorf("link %q still carries the dead id; the set does not self-heal", m[1])
-		}
-	}
-
-	// Naming none explains itself rather than rendering an empty page.
-	_, none := get(t, s, "/compare")
-	if len(drawnSpans(t, none)) != 0 {
-		t.Error("/compare with no species drew a panel")
-	}
-	if !strings.Contains(none, "Compare birds") || !regexp.MustCompile(`<a href="/[^"]*">index</a>`).MatchString(none) {
-		t.Error("/compare with no species does not say how to pick birds, or link to the index")
-	}
-
-	// The diagram key is a page-level explanation: once, however many birds.
-	for _, q := range []string{
-		"/compare?species=annhum",
-		"/compare?species=annhum&species=amerob&species=greblu",
-	} {
-		_, b := get(t, s, q)
-		if n := strings.Count(b, `class="note diagramkey"`); n != 1 {
-			t.Errorf("%s carries the diagram key %d times, want exactly 1", q, n)
-		}
-	}
-
-	// No provenance table: product.comparisonOneScale trades it for a link to each detail view.
-	_, three := get(t, s, "/compare?species=annhum&species=amerob")
-	if strings.Contains(three, `class="prov"`) {
-		t.Error("the compare page carries a provenance table; product.comparisonOneScale defers that to the detail view")
-	}
-	for _, id := range []string{"annhum", "amerob"} {
-		if !strings.Contains(three, `href="/species/`+id) {
-			t.Errorf("no link to /species/%s; that link is what makes omitting the table honest", id)
-		}
-	}
-	// Marking survives even though explaining does not (product.tileMarksModeled).
-	if !strings.Contains(three, " ~</text>") {
-		t.Error("no estimated marker on any label; the compare view may omit the explanation " +
-			"of provenance but not the marking of it")
-	}
-}
-
-// TestCompareBackLinkKeepsTheComparison asserts the reversal in decisions.compareUrlContract: the
-// species list goes back with the reader.
-//
-// It used to be dropped, and that was right while the index had no use for it
-// -- a parameter that means nothing where it lands is litter, and the index
-// copies whatever it is handed into every control link. product.pickFromIndex makes the index
-// the picker, so the list is now live state and "back" means "add another
-// bird". Dropping it would break the plainest flow the picker has.
-//
-// The display options must still survive, or back has stopped keeping the
-// reader's place (product.togglesKeepPlace).
-//
-// Verifies: product.comparisonOneScale, product.pickFromIndex, product.togglesKeepPlace. Criterion: acceptance.comparisonSharesScale.
-func TestCompareBackLinkKeepsTheComparison(t *testing.T) {
-	s := newTestServer(t)
-	want := []string{"annhum", "greblu"}
-	_, body := get(t, s, "/compare?units=metric&scale=global&species=annhum&species=greblu")
-
-	href := html.UnescapeString(mustMatch(t, body,
-		`<a class="backlink" href="([^"]+)"`, "the back link"))
-	q := mustQuery(t, href)
-	if got := q["species"]; !slices.Equal(got, want) {
-		t.Errorf("back link carries species=%v, want %v: returning to the picker must not "+
-			"discard the comparison", got, want)
-	}
-	if q.Get("units") != "metric" || q.Get("scale") != "global" {
-		t.Errorf("back link %q dropped the display options", href)
-	}
-
-	// And it says where it goes, since the index is now a picker mid-task.
-	label := mustMatch(t, body, `class="backlink"[^>]*>(?s)(.*?)</a>`, "the back link text")
-	if !strings.Contains(label, "picking") {
-		t.Errorf("back link reads %q; it returns to the picker, not to an unfiltered list",
-			strings.TrimSpace(label))
-	}
-}
-
-// tileHrefs returns every index tile's own link.
-func tileHrefs(t *testing.T, body string) []string {
-	t.Helper()
-	var out []string
-	for _, m := range regexp.MustCompile(`<a class="tile" href="([^"]+)"`).FindAllStringSubmatch(body, -1) {
-		out = append(out, html.UnescapeString(m[1]))
-	}
-	return out
-}
-
-// TestTileLinksCarryViewState asserts the half of product.pickFromIndex that is about what a
-// link into the detail view carries.
-//
-// Before this, a tile link was a bare /species/{id}: opening a bird from a
-// filtered, metric index landed on an unfiltered imperial page, and coming
-// back landed on the unfiltered 841. The picker makes that fatal rather than
-// merely untidy, because the picks would be lost on the way in -- before the
-// back link is ever reached.
-//
-// `family` is the deliberate exception and is asserted as such: it is the only
-// unbounded parameter, and carrying it would add ~1.4 MB to one page.
-//
-// Verifies: product.pickFromIndex, product.tileContents. Criterion: acceptance.pickModeSurvivesNavigation.
-func TestTileLinksCarryViewState(t *testing.T) {
-	s := newTestServer(t)
-	// A filter is active, so `family` is present and would leak if carried.
-	const q = "/classic?units=metric&by=wingspan&scale=global&step=30" +
-		"&family=Trochilidae&family=Turdidae&species=amecro"
-	_, body := get(t, s, q)
-
-	hrefs := tileHrefs(t, body)
-	if len(hrefs) == 0 {
-		t.Fatal("no tiles on the page")
-	}
-	for _, h := range hrefs {
-		u, err := url.Parse(h)
-		if err != nil {
-			t.Fatalf("unparseable tile href %q: %v", h, err)
-		}
-		if !strings.HasPrefix(u.Path, "/species/") {
-			t.Errorf("tile href %q does not point at a detail view", h)
-		}
-		got := u.Query()
-		for k, want := range map[string]string{
-			"units": "metric", "by": "wingspan", "scale": "global", "step": "30",
-			"species": "amecro",
-		} {
-			if got.Get(k) != want {
-				t.Errorf("tile href %q: %s=%q, want %q", h, k, got.Get(k), want)
-			}
-		}
-		if fam := got["family"]; len(fam) > 0 {
-			t.Errorf("tile href %q carries family=%v; it is the one unbounded parameter and "+
-				"would add ~1.4 MB across 841 tiles", h, fam)
-		}
-	}
-
-	// And the state actually survives the hop: follow a tile, read its back
-	// link. This is the round trip the picker depends on.
-	_, detail := get(t, s, hrefs[0])
-	back := html.UnescapeString(mustMatch(t, detail,
-		`<a class="backlink" href="([^"]+)"`, "the detail page's back link"))
-	bq, err := url.Parse(back)
-	if err != nil {
-		t.Fatalf("unparseable back link %q: %v", back, err)
-	}
-	for k, want := range map[string]string{
-		"units": "metric", "by": "wingspan", "scale": "global", "step": "30",
-		"species": "amecro",
-	} {
-		if bq.Query().Get(k) != want {
-			t.Errorf("back link %q lost %s (got %q, want %q)", back, k, bq.Query().Get(k), want)
-		}
-	}
-}
-
-// pickBar returns just the pick bar's markup, or "" when there is none.
-//
-// Matched by its own container rather than by searching the page for "picked":
-// that word is on every tile control too, so a page-wide search would report a
-// bar that is not there. This trap is recorded in acceptance.pickModeSurvivesNavigation.
-func pickBarOf(t *testing.T, body string) string {
-	t.Helper()
-	m := regexp.MustCompile(`(?s)<div class="pickbar">(.*?)</div>\s*</div>`).FindString(body)
-	return m
-}
-
-func pickControls(body string) []string {
-	var out []string
-	// href="([^"]*)", not +: a control rendered with an EMPTY href is still a
-	// control on the page, and a regex that skipped it would let "shown in
-	// browsing mode" pass as "not shown at all".
-	for _, m := range regexp.MustCompile(`<a class="pick( on)?" href="([^"]*)"`).
-		FindAllStringSubmatch(body, -1) {
-		out = append(out, html.UnescapeString(m[2]))
-	}
-	return out
-}
-
-// TestPickModeIsTheSpeciesParameter asserts the mode itself: absent, present
-// and empty, present and populated.
-//
-// Verifies: product.pickFromIndex, product.tileContents. Criterion: acceptance.pickModeSurvivesNavigation.
-func TestPickModeIsTheSpeciesParameter(t *testing.T) {
-	s := newTestServer(t)
-
-	_, browsing := get(t, s, "/classic")
-	if n := len(pickControls(browsing)); n != 0 {
-		t.Errorf("browsing mode shows %d pick controls; the tile a reader sees almost all "+
-			"the time should be unchanged", n)
-	}
-	if pickBarOf(t, browsing) != "" {
-		t.Error("browsing mode shows the pick bar")
-	}
-
-	// Bare species=: picking, nothing picked. The mode must hold open or
-	// unpicking your last bird drops you out mid-task.
-	_, empty := get(t, s, "/classic?species=")
-	if n, want := len(pickControls(empty)), len(tileHrefs(t, empty)); n != want {
-		t.Errorf("a bare species= gave %d pick controls for %d tiles", n, want)
-	}
-	if bar := pickBarOf(t, empty); !strings.Contains(bar, "No birds picked yet") {
-		t.Errorf("a bare species= does not hold the mode open with an empty bar; got %q", bar)
-	}
-
-	// Populated: a control on every tile, and the picked one says so.
-	_, picking := get(t, s, "/classic?species=annhum")
-	if n, want := len(pickControls(picking)), len(tileHrefs(t, picking)); n != want {
-		t.Errorf("%d pick controls for %d tiles; every tile needs one", n, want)
-	}
-	if n := strings.Count(picking, `class="pick on"`); n != 1 {
-		t.Errorf("%d tiles render as picked, want exactly 1", n)
-	}
-
-	// product.tileOpensDetail in both modes: the tile itself still opens the detail view. This
-	// is what fails if the control is ever built by rewriting the tile's href.
-	for _, body := range []string{browsing, picking} {
-		for _, h := range tileHrefs(t, body) {
-			if u, _ := url.Parse(h); !strings.HasPrefix(u.Path, "/species/") {
-				t.Errorf("a tile links to %q rather than a detail view", h)
-			}
-		}
-	}
-}
-
-// TestPickingIsReversibleAndKeepsTheFilter covers adding, removing, and the
-// interaction with the family filter.
-//
-// Verifies: product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
-func TestPickingIsReversibleAndKeepsTheFilter(t *testing.T) {
-	s := newTestServer(t)
-
-	// Add, then remove, returns the original set in the original order.
-	start := "/classic?species=amecro&species=annhum"
-	_, body := get(t, s, start)
-	var addURL string
-	for _, h := range pickControls(body) {
-		if q, _ := url.Parse(h); len(q.Query()["species"]) == 3 {
-			addURL = h
-			break
-		}
-	}
-	if addURL == "" {
-		t.Fatal("no pick control adds a third bird")
-	}
-	_, added := get(t, s, addURL)
-	var removeURL string
-	for _, h := range pickControls(added) {
-		if q, _ := url.Parse(h); len(q.Query()["species"]) == 2 {
-			if u, _ := url.Parse(addURL); slices.Equal(q.Query()["species"],
-				u.Query()["species"][:2]) {
-				removeURL = h
-			}
-		}
-	}
-	if removeURL == "" {
-		t.Fatal("after adding, no control removes it again")
-	}
-	back, _ := url.Parse(removeURL)
-	if got, want := back.Query()["species"],
-		[]string{"amecro", "annhum"}; !slices.Equal(got, want) {
-		t.Errorf("add then remove gave %v, want the original %v in the original order", got, want)
-	}
-
-	// The filter survives a pick, and the bar names a pick the filter hides.
-	_, filtered := get(t, s, "/classic?family=Trochilidae&species=greblu")
-	for _, h := range pickControls(filtered) {
-		u, _ := url.Parse(h)
-		if got := u.Query()["family"]; !slices.Equal(got, []string{"Trochilidae"}) {
-			t.Errorf("a pick link carries family=%v; picking must not drop the filter "+
-				"the reader is picking from", got)
-		}
-	}
-	if bar := pickBarOf(t, filtered); !strings.Contains(bar, "Great Blue Heron") {
-		t.Error("the bar omits a pick the filter is hiding; a filter that appeared to " +
-			"discard picks would be worse than one that refused to run")
-	}
-}
-
-// TestComparisonKeepsTheFilter follows Compare from a filtered index and back.
-// The tile links' reason for dropping `family` is their count; the Compare link
-// and the comparison view's links each appear once, so they carry it, and the
-// reader comes back to the filter they were picking from. Two families, so a
-// link that kept only the first value would fail too.
-//
-// Verifies: product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
-func TestComparisonKeepsTheFilter(t *testing.T) {
-	s := newTestServer(t)
-	want := []string{"Corvidae", "Trochilidae"}
-	index := mustGet(t, s, "/classic?by=mass&family=Corvidae&family=Trochilidae"+
-		"&species=amecro&species=annhum&step=10")
-
-	keeps := func(what, h string) {
-		t.Helper()
-		u, err := url.Parse(html.UnescapeString(h))
-		if err != nil {
-			t.Fatalf("%s %q: %v", what, h, err)
-		}
-		if got := u.Query()["family"]; !slices.Equal(got, want) {
-			t.Errorf("%s %q carries family=%v, want %v; it is one link, so the "+
-				"tile links' size bound does not apply", what, h, got, want)
-		}
-	}
-	cmp := mustMatch(t, index, `<a class="btn on pickgo" href="([^"]+)"`, "the Compare link")
-	keeps("the Compare link", cmp)
-
-	body := mustGet(t, s, html.UnescapeString(cmp))
-	keeps("the back link", mustMatch(t, body, `<a class="backlink" href="([^"]+)"`, "the back link"))
-	keeps("the stop link", mustMatch(t, body, `<a class="stoplink" href="([^"]+)"`, "the stop link"))
-	sorts := regexp.MustCompile(`<a class="btn(?: on)?" href="(/compare\?[^"]+)"`).
-		FindAllStringSubmatch(body, -1)
-	if len(sorts) != 5 {
-		t.Fatalf("found %d sort links on the comparison, want 5", len(sorts))
-	}
-	for _, m := range sorts {
-		keeps("a sort link", m[1])
-	}
-}
-
-// TestPicksSurviveTheDetailRoundTrip is the flow the whole picker rests on:
-// open a bird to look at it, go back, pick something.
-//
-// Two picks, not one: with a single pick, "preserved the set" and "rebuilt a
-// set of one" are indistinguishable. Recorded as a trap in acceptance.pickModeSurvivesNavigation.
-//
-// Verifies: product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
-func TestPicksSurviveTheDetailRoundTrip(t *testing.T) {
-	s := newTestServer(t)
-	want := []string{"amecro", "annhum"}
-	_, body := get(t, s, "/classic?species=amecro&species=annhum")
-
-	_, detail := get(t, s, tileHrefs(t, body)[0])
-	back := html.UnescapeString(mustMatch(t, detail,
-		`<a class="backlink" href="([^"]+)"`, "the back link"))
-	u, err := url.Parse(back)
-	if err != nil {
-		t.Fatalf("unparseable back link %q: %v", back, err)
-	}
-	if got := u.Query()["species"]; !slices.Equal(got, want) {
-		t.Errorf("after index -> detail -> back the picks are %v, want %v", got, want)
-	}
-	_, returned := get(t, s, back)
-	if pickBarOf(t, returned) == "" {
-		t.Error("returning from a detail view left pick mode")
-	}
-}
-
-// TestOnlyClearLeavesPickMode asserts that the picks are sticky against every
-// control except the one meant to drop them.
-//
-// Verifies: product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
-func TestOnlyClearLeavesPickMode(t *testing.T) {
-	s := newTestServer(t)
-	_, body := get(t, s, "/classic?species=annhum&units=metric")
-
-	clear := html.UnescapeString(mustMatch(t, body,
-		`<a class="btn pickclear" href="([^"]+)"`, "the Clear link"))
-	cu, _ := url.Parse(clear)
-	if _, present := cu.Query()["species"]; present {
-		t.Errorf("Clear leaves a species parameter behind (%q), so it does not leave pick mode",
-			clear)
-	}
-
-	// Every link EXCEPT the ones whose job is to change the picks must keep
-	// them. The pick controls and the bar's chips are exempt by definition --
-	// they are how a reader edits the set — so they are gathered by class and
-	// excluded, leaving the ordinary controls: units, scale, ordering, step,
-	// the family chips and the back-to-index links.
-	edits := map[string]bool{clear: true}
-	for _, h := range pickControls(body) {
-		edits[h] = true
-	}
-	for _, m := range regexp.MustCompile(`<a class="pickchip" href="([^"]+)"`).
-		FindAllStringSubmatch(body, -1) {
-		edits[html.UnescapeString(m[1])] = true
-	}
-	// Reset to defaults leaves on purpose, resetting every setting
-	// (product.pickFromIndex). It is the only link to the bare address.
-	if !strings.Contains(body, `<a href="/classic">reset to defaults</a>`) {
-		t.Error("no reset to defaults on the index while picking")
-	}
-	resets := 0
-	checked := 0
-	// The bare address included: a link to "/classic" drops the picks as surely
-	// as one with a query, and this once looked only at the latter.
-	for _, m := range regexp.MustCompile(`href="(/classic(?:\?[^"]*)?)"`).FindAllStringSubmatch(body, -1) {
-		h := html.UnescapeString(m[1])
-		if edits[h] {
-			continue
-		}
-		if h == "/classic" {
-			if resets++; resets > 1 {
-				t.Error("more than one link to the bare address; only reset to defaults may leave this way")
-			}
-			continue
-		}
-		checked++
-		u, _ := url.Parse(h)
-		if got := u.Query()["species"]; !slices.Equal(got, []string{"annhum"}) {
-			t.Errorf("control link %q carries species=%v; only Clear may drop the picks", h, got)
-		}
-	}
-	// Guard the guard: if the exclusions ever swallow everything, this test
-	// passes while checking nothing.
-	if checked == 0 {
-		t.Fatal("no ordinary control links were checked; the exclusions have eaten the test")
-	}
-}
-
-// TestUnrecognizedPicksAreDroppedAndNamed asserts the rot handling of product.pickFromIndex
-// and decisions.compareUrlContract.
-//
-// The set mixes a good id with a dead one on purpose: with only a dead id,
-// "dropped it and carried on" and "refused the page" look the same.
-//
-// Verifies: product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
-func TestUnrecognizedPicksAreDroppedAndNamed(t *testing.T) {
-	s := newTestServer(t)
-	code, body := get(t, s, "/classic?species=annhum&species=grus_canadensis")
-	if code != http.StatusOK {
-		t.Fatalf("a set with one dead id gave %d; it should render what it recognizes", code)
-	}
-
-	bar := pickBarOf(t, body)
-	if !strings.Contains(bar, "Anna") {
-		t.Error("the surviving pick is not shown")
-	}
-	if !strings.Contains(bar, "grus_canadensis") {
-		t.Error("the dropped id is not named; a reader cannot tell what the link lost")
-	}
-
-	// And it is gone from every link, so the set repairs itself on the next
-	// click. This is the half that silently failed first time: the notice
-	// rendered while 970 links still carried the dead id.
-	for _, m := range regexp.MustCompile(`href="([^"]+)"`).FindAllStringSubmatch(body, -1) {
-		if strings.Contains(html.UnescapeString(m[1]), "grus_canadensis") {
-			t.Errorf("link %q still carries the dead id; the set does not self-heal", m[1])
-		}
-	}
-}
-
-// detailAction returns the detail page's pick control: its label and its href.
-func detailAction(t *testing.T, body string) (label, href string) {
-	t.Helper()
-	m := regexp.MustCompile(`<p class="pickaction"><a class="[^"]*" href="([^"]+)">([^<]+)</a>`).
-		FindStringSubmatch(body)
-	if m == nil {
-		t.Fatal("the detail page has no pick control")
-	}
-	return html.UnescapeString(m[2]), html.UnescapeString(m[1])
-}
-
-// TestDetailPagePickStates asserts the three states of product.pickFromIndex, and that the
-// back link says which mode it is returning to.
-//
-// Three and not two: offering "add" for a bird already in the set would be a
-// click that silently does nothing, because the comparison view deduplicates.
-//
-// Verifies: product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
-func TestDetailPagePickStates(t *testing.T) {
-	s := newTestServer(t)
-
-	// Browsing: the entry point, which seeds a new comparison with this bird.
-	label, href := detailAction(t, mustGet(t, s, "/species/annhum"))
-	if !strings.Contains(label, "Compare with another bird") {
-		t.Errorf("browsing-mode action is %q, want the entry point", label)
-	}
-	if got := mustQuery(t, href)["species"]; !slices.Equal(got, []string{"annhum"}) {
-		t.Errorf("the entry point seeds species=%v, want just this bird", got)
-	}
-
-	// Pick mode, this bird not in the set: add it, keeping the others.
-	body := mustGet(t, s, "/species/annhum?species=amecro")
-	label, href = detailAction(t, body)
-	if !strings.Contains(label, "Pick for comparison") {
-		t.Errorf("pick-mode action is %q, want an add", label)
-	}
-	if got, want := mustQuery(t, href)["species"],
-		[]string{"amecro", "annhum"}; !slices.Equal(got, want) {
-		t.Errorf("adding gave species=%v, want %v — the existing picks must survive", got, want)
-	}
-
-	// Pick mode, already in the set: remove, not a second add.
-	body = mustGet(t, s, "/species/annhum?species=amecro&species=annhum")
-	label, href = detailAction(t, body)
-	if !strings.Contains(label, "remove") {
-		t.Errorf("a bird already picked offers %q; adding it again would silently do nothing, "+
-			"because the comparison view deduplicates", label)
-	}
-	if got, want := mustQuery(t, href)["species"],
-		[]string{"amecro"}; !slices.Equal(got, want) {
-		t.Errorf("removing gave species=%v, want %v", got, want)
-	}
-
-	// The back link names the mode it returns to.
-	for _, c := range []struct{ url, want string }{
-		{"/species/annhum", "\u2190 back"},
-		{"/species/annhum?species=amecro", "back to picking birds"},
-	} {
-		got := html.UnescapeString(mustMatch(t, mustGet(t, s, c.url), `class="backlink"[^>]*>(?s)(.*?)</a>`, "the back link"))
-		if !strings.Contains(strings.Join(strings.Fields(got), " "), c.want) {
-			t.Errorf("%s: back link reads %q, want %q", c.url, strings.TrimSpace(got), c.want)
-		}
-	}
-
-	// The bar rides along, so Compare is reachable without going back first.
-	if pickBarOf(t, mustGet(t, s, "/species/annhum?species=amecro")) == "" {
-		t.Error("no pick bar on the detail page in pick mode")
-	}
-	if pickBarOf(t, mustGet(t, s, "/species/annhum")) != "" {
-		t.Error("the detail page shows a pick bar while browsing")
-	}
-}
-
 func mustGet(t *testing.T, s *server, path string) string {
 	t.Helper()
 	code, body := get(t, s, path)
@@ -2701,125 +1461,6 @@ func mustGet(t *testing.T, s *server, path string) string {
 		t.Fatalf("GET %s: %d", path, code)
 	}
 	return body
-}
-
-func mustQuery(t *testing.T, href string) url.Values {
-	t.Helper()
-	u, err := url.Parse(href)
-	if err != nil {
-		t.Fatalf("unparseable href %q: %v", href, err)
-	}
-	return u.Query()
-}
-
-// TestCompareBirdsToggle asserts the Controls entry point of product.pickFromIndex: a way into
-// pick mode for a reader who has no particular bird in mind yet.
-//
-// The empty state it enters is only reachable because a bare `species=` holds
-// the mode open, so this control and that decision stand or fall together.
-//
-// Verifies: product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
-func TestCompareBirdsToggle(t *testing.T) {
-	s := newTestServer(t)
-	find := func(body string) (class, href string) {
-		t.Helper()
-		// Found by class, not by its text: the button now states the mode
-		// ("On"/"Off") and the control set's label carries the name, so
-		// matching on "Compare birds" would find the label instead.
-		m := regexp.MustCompile(`(?s)<a class="(btn cmptoggle[^"]*)" href="([^"]+)"[^>]*>\s*([A-Za-z]+)</a>`).
-			FindStringSubmatch(body)
-		if m == nil {
-			t.Fatal("no Compare birds toggle in the controls row")
-		}
-		// The control needs a label of its own, or it reads as one more
-		// Section step option -- which is what it looked like at first.
-		if !strings.Contains(body, `<span class="lbl">Compare birds</span>`) {
-			t.Error("the toggle has no control-set label, so it reads as part of the " +
-				"control before it")
-		}
-		if want := map[bool]string{true: "On", false: "Off"}[strings.Contains(m[1], " on")]; m[3] != want {
-			t.Errorf("the toggle reads %q but its class is %q; the label must state the mode",
-				m[3], m[1])
-		}
-		return m[1], html.UnescapeString(m[2])
-	}
-
-	// Off while browsing, and it turns the mode on with nothing picked.
-	class, href := find(mustGet(t, s, "/classic?units=metric"))
-	if strings.Contains(class, "on") {
-		t.Errorf("the toggle reads as on while browsing (class %q)", class)
-	}
-	q := mustQuery(t, href)
-	if v, present := q["species"]; !present || !slices.Equal(v, []string{""}) {
-		t.Errorf("the toggle goes to %q; it should enter pick mode with a bare species=", href)
-	}
-	if q.Get("units") != "metric" {
-		t.Errorf("the toggle dropped the display options: %q", href)
-	}
-	// Following it really does land in pick mode with an empty bar.
-	entered := mustGet(t, s, href)
-	if bar := pickBarOf(t, entered); !strings.Contains(bar, "No birds picked yet") {
-		t.Errorf("following the toggle did not enter pick mode; bar was %q", bar)
-	}
-
-	// On once picking, whether or not anything is picked, and it leaves by
-	// exactly the link Clear uses -- same behavior, so the same URL.
-	// units= matters: with no other parameter, Clear and a hardcoded "/classic?"
-	// are the same string, and the comparison below cannot tell a shared link
-	// from a coincidence.
-	for _, u := range []string{"/classic?species=&units=metric", "/classic?species=annhum&units=metric"} {
-		body := mustGet(t, s, u)
-		class, href = find(body)
-		if !strings.Contains(class, "on") {
-			t.Errorf("%s: the toggle reads as off while picking (class %q)", u, class)
-		}
-		if _, present := mustQuery(t, href)["species"]; present {
-			t.Errorf("%s: the toggle does not leave pick mode: %q", u, href)
-		}
-		clear := html.UnescapeString(mustMatch(t, body,
-			`<a class="btn pickclear" href="([^"]+)"`, "the Clear link"))
-		if href != clear {
-			t.Errorf("%s: the toggle leaves via %q but Clear uses %q; they should be the "+
-				"same link, not two that can drift", u, href, clear)
-		}
-	}
-}
-
-// TestPickLinksAnchorAtTheirTile asserts the fix for the jump that picking used
-// to cause on the index.
-//
-// Every control is a link, so picking reloads a 1.7 MB page with 841 inline
-// diagrams. The scroll script runs after that has painted, so the reader saw
-// the top of the list and was then moved — a long way, since picking happens
-// deep in the list. Navigating to the tile's own fragment makes the browser
-// scroll during load instead, and the script stands down when a hash is
-// present so the two do not fight.
-//
-// Verifies: product.togglesKeepPlace, product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
-func TestPickLinksAnchorAtTheirTile(t *testing.T) {
-	s := newTestServer(t)
-	body := mustGet(t, s, "/classic?species=")
-
-	ids := regexp.MustCompile(`<div class="tilewrap" id="([^"]+)"`).FindAllStringSubmatch(body, -1)
-	picks := pickControls(body)
-	if len(ids) == 0 || len(ids) != len(picks) {
-		t.Fatalf("%d tile anchors for %d pick controls", len(ids), len(picks))
-	}
-	for i, h := range picks {
-		want := "#" + ids[i][1]
-		if !strings.HasSuffix(h, want) {
-			t.Errorf("pick link %q does not end at its own tile %q; the browser cannot "+
-				"restore the reading position during load", h, want)
-		}
-	}
-
-	// The script must stand down when a hash is present, or it drags the
-	// reader away from the anchor the browser just scrolled to.
-	script := mustMatch(t, body, `(?s)(<script>.*</script>)`, "the page script")
-	if !strings.Contains(script, "window.location.hash") {
-		t.Error("the scroll script does not check for a hash, so it will override the " +
-			"browser's own fragment scroll and reintroduce the jump")
-	}
 }
 
 // TestEveryReportedMetricIsLabeled asserts product.labeledDetailDiagram's general rule: the diagram
@@ -2962,7 +1603,6 @@ func TestMassCubeIsRenderedAndExplained(t *testing.T) {
 	s := newTestServer(t)
 	for _, u := range []string{
 		"/species/greblu",
-		"/compare?species=greblu&species=annhum",
 	} {
 		body := mustGet(t, s, u)
 		class, x, _, side, ok := massCubeOf(t, body)
@@ -2986,143 +1626,18 @@ func TestMassCubeIsRenderedAndExplained(t *testing.T) {
 		}
 	}
 
-	// On index tiles too, since decisions.massCubeOnTiles -- but unlabeled. A tile carries no
+	// On home page tiles too, since decisions.massCubeOnTiles -- but unlabeled. A tile carries no
 	// labels at all and names the mass in its footer, so the cube appears
 	// with no text of its own.
-	_, index := get(t, s, "/classic")
+	_, index := get(t, s, "/?month=all&show=all")
 	tiles := tileArea(t, index)
 	cubes := strings.Count(tiles, `<g class="masscube`)
 	if n := strings.Count(tiles, `<a class="tile"`); cubes != n {
 		t.Errorf("%d mass cubes across %d tiles; every tile should carry one", cubes, n)
 	}
 	if strings.Contains(tiles, `class="dlabel`) {
-		t.Error("an index tile carries a diagram label; the tile has none, and the mass is " +
+		t.Error("a home page tile carries a diagram label; the tile has none, and the mass is " +
 			"named in its footer instead")
-	}
-}
-
-// sortControls returns the comparison view's Sort by options: label, href, on.
-func sortControls(t *testing.T, body string) []struct {
-	Label, Href string
-	On          bool
-} {
-	t.Helper()
-	block := regexp.MustCompile(`(?s)<div class="row cmpsort">.*?</div>`).FindString(body)
-	var out []struct {
-		Label, Href string
-		On          bool
-	}
-	for _, m := range regexp.MustCompile(
-		`<a class="(btn[^"]*)" href="([^"]+)">([^<]+)</a>`).FindAllStringSubmatch(block, -1) {
-		out = append(out, struct {
-			Label, Href string
-			On          bool
-		}{m[3], html.UnescapeString(m[2]), strings.Contains(m[1], " on")})
-	}
-	return out
-}
-
-// TestCompareSortReordersTheURL asserts the Sort by control of product.comparisonOneScale.
-//
-// The design decision it pins: sorting rewrites the species order in the URL
-// rather than adding a sort parameter, so the page still draws them in the
-// order given and a sorted comparison is an ordinary comparison URL. If a
-// `sort=` parameter ever appears instead, the panels and the URL can disagree
-// and this fails.
-//
-// Verifies: product.comparisonOneScale. Criterion: acceptance.comparisonSortRewritesUrl.
-func TestCompareSortReordersTheURL(t *testing.T) {
-	s := newTestServer(t)
-	// Deliberately in no metric's order, so no option starts out on.
-	// The murre must be in the set: it is the only fixture species for which
-	// the three metrics disagree, so without it every sort yields the same
-	// order and this test cannot tell one metric from another.
-	const start = "/compare?units=metric&species=greblu&species=annhum" +
-		"&species=amecro&species=thimur"
-	body := mustGet(t, s, start)
-
-	opts := sortControls(t, body)
-	if len(opts) != 5 {
-		t.Fatalf("%d sort options, want length, wingspan, mass, bill, and tail", len(opts))
-	}
-	ds := testDataset()
-	byID := map[string]*dataset.Species{}
-	for i := range ds.Species {
-		byID[ds.Species[i].ID] = &ds.Species[i]
-	}
-
-	for _, o := range opts {
-		m := map[string]view.Metric{
-			"Length": view.ByLength, "Wingspan": view.ByWingspan, "Mass": view.ByMass,
-			"Bill": view.ByBill, "Tail": view.ByTail,
-		}[o.Label]
-		if m == "" {
-			t.Errorf("unexpected sort option %q", o.Label)
-			continue
-		}
-		u := mustQuery(t, o.Href)
-		if u.Get("units") != "metric" {
-			t.Errorf("%s: the sort link dropped the display options: %q", o.Label, o.Href)
-		}
-		// No sort parameter: the order IS the species order (product.comparisonOneScale).
-		if u.Get("sort") != "" || u.Get("by") != "" {
-			t.Errorf("%s: the sort link carries an ordering parameter (%q); the order must "+
-				"live in the species list and nowhere else", o.Label, o.Href)
-		}
-		// The link names the same birds, ascending by that metric.
-		got := u["species"]
-		if len(got) != 4 {
-			t.Errorf("%s: the sort link names %d species, want 4", o.Label, len(got))
-			continue
-		}
-		for i := 1; i < len(got); i++ {
-			prev, cur := byID[got[i-1]], byID[got[i]]
-			if prev == nil || cur == nil {
-				t.Fatalf("%s: sort link names an unknown species: %v", o.Label, got)
-			}
-			if m.Value(cur) < m.Value(prev) {
-				t.Errorf("%s: %s (%.1f) is ordered before %s (%.1f); the sort is ascending",
-					o.Label, cur.Name(dataset.LocaleNA), m.Value(cur), prev.Name(dataset.LocaleNA), m.Value(prev))
-			}
-		}
-
-		// Following it puts the panels in that order, and lights that option.
-		after := mustGet(t, s, o.Href)
-		var drawn []string
-		for _, p := range drawnSpans(t, after) {
-			drawn = append(drawn, findSpeciesByName(t, p.Name).ID)
-		}
-		if !slices.Equal(drawn, got) {
-			t.Errorf("%s: the URL names %v but the page draws %v", o.Label, got, drawn)
-		}
-		for _, a := range sortControls(t, after) {
-			if a.Label == o.Label && !a.On {
-				t.Errorf("%s: after sorting by it, the option does not read as on", o.Label)
-			}
-		}
-	}
-
-	// Guard the guard: if every metric yields the same order, this test cannot
-	// distinguish them and a control that ignored its metric would pass.
-	if slices.Equal(mustQuery(t, opts[0].Href)["species"], mustQuery(t, opts[2].Href)["species"]) {
-		t.Fatal("length and mass sort this set identically, so the fixture cannot tell the " +
-			"three metrics apart; it needs a species that is heavy for its length")
-	}
-
-	// Nothing starts out on, since the fixture order is no metric's order --
-	// otherwise "reads as on after sorting" would pass without sorting.
-	for _, o := range opts {
-		if o.On {
-			t.Errorf("%s reads as on before any sort; the fixture order was meant to match "+
-				"no metric, so this test cannot tell sorting from doing nothing", o.Label)
-		}
-	}
-
-	// Below two birds there is nothing to sort.
-	for _, u := range []string{"/compare?species=annhum", "/compare?species="} {
-		if n := len(sortControls(t, mustGet(t, s, u))); n != 0 {
-			t.Errorf("%s offers %d sort options; there is nothing to sort", u, n)
-		}
 	}
 }
 
@@ -3164,43 +1679,6 @@ func TestNameLocaleTogglesNamesAndNothingElse(t *testing.T) {
 	}
 }
 
-// TestNameLocaleControlOffersBothAndMarksTheActive checks the control itself,
-// not just the effect. A toggle that renders and does nothing looks identical
-// to one that works until you follow it.
-//
-// Verifies: product.englishNameChoice. Criterion: acceptance.nameLocaleToggle.
-func TestNameLocaleControlOffersBothAndMarksTheActive(t *testing.T) {
-	s := newTestServer(t)
-	for _, c := range []struct{ query, onHref string }{
-		{"/classic", "names=na"},
-		{"/classic?names=world", "names=world"},
-	} {
-		_, body := get(t, s, c.query)
-		for _, want := range []string{`"names" "na"`, `"names" "world"`} {
-			_ = want // the template renders these through the query helper
-		}
-		if !strings.Contains(body, "names=na") || !strings.Contains(body, "names=world") {
-			t.Errorf("%s: the Names control does not offer both locales", c.query)
-		}
-		// The active one is marked. Located by finding the on-state button
-		// whose href carries this locale.
-		re := regexp.MustCompile(`<a class="btn on"[^>]*href="([^"]*)"`)
-		var onHrefs []string
-		for _, m := range re.FindAllStringSubmatch(body, -1) {
-			onHrefs = append(onHrefs, html.UnescapeString(m[1]))
-		}
-		found := false
-		for _, h := range onHrefs {
-			if strings.Contains(h, c.onHref) {
-				found = true
-			}
-		}
-		if !found {
-			t.Errorf("%s: no on-state control carries %q; on-states were %v", c.query, c.onHref, onHrefs)
-		}
-	}
-}
-
 // TestNameFallsBackToWorldWhenNoNorthAmericanName covers the five species with
 // no eBird/Clements concept: they must render a bird, not a blank (product.englishNameChoice).
 //
@@ -3217,183 +1695,21 @@ func TestNameFallsBackToWorldWhenNoNorthAmericanName(t *testing.T) {
 	}
 }
 
-// TestEmptyStateNamesTheFiltersThatEmptiedIt asserts the half of product.helpfulEmptyState that
-// says WHICH filter emptied the page, not merely that one did.
-//
-// The two empty states must stay distinct. "Nothing selected" is not a failed
-// match -- the reader turned everything off -- and saying "no birds match"
-// there blames the data for their click. acceptance.emptyStateGuides already pins that direction;
-// this pins the other.
-//
-// Verifies: product.helpfulEmptyState. Criterion: acceptance.nothingMatchedOffersAWayOut.
-func TestEmptyStateNamesTheFiltersThatEmptiedIt(t *testing.T) {
-	s := newTestServer(t)
-
-	// A selection that matches nothing: a real family, plus a metric window
-	// no bird falls in. The fixture has no way to empty a family selection on
-	// its own, which is why this needs the second filter to exist at all --
-	// see the note below.
-	_, body := get(t, s, "/classic?family=Ardeidae&family=Turdidae")
-	if strings.Contains(body, "No birds match") {
-		t.Fatal("a selection with species in it reported no matches")
-	}
-
-	// Nothing selected: the other message, and emphatically not this one.
-	_, none := get(t, s, "/classic?family=")
-	if !strings.Contains(none, "Select birds to display") {
-		t.Error("an emptied selection does not say how to get birds back")
-	}
-	if strings.Contains(none, "No birds match") {
-		t.Error("an emptied selection reports a failed match; nothing failed, the reader cleared it")
-	}
-
-	// The description itself, which is the new part. Built directly because
-	// the fixture cannot yet reach an empty intersection through the UI: one
-	// filter cannot contradict itself, and the region filter of product.regionAndMonthFilter does not
-	// exist. When it does, this should become a rendering test.
-	got := describeView(s.fams, options{HasSelection: true,
-		Families: map[string]bool{"Ardeidae": true, "Turdidae": true}})
-	fam := got[len(got)-1]
-	if fam.Label != "Family" {
-		t.Fatalf("describeView gave %+v, want Family last", got)
-	}
-	for _, want := range []string{"Ardeidae", "Turdidae"} {
-		if !strings.Contains(fam.Value, want) {
-			t.Errorf("the description %q does not name %q", fam.Value, want)
-		}
-	}
-
-	// Every family selected, and no family filter at all, both say All.
-	// Until 2026-10-19 neither was described; the owner asked for every
-	// setting to be named, defaults included (product.helpfulEmptyState).
-	everything := map[string]bool{}
-	for _, f := range s.fams {
-		everything[f.Name] = true
-	}
-	for _, o := range []options{{HasSelection: true, Families: everything}, {}} {
-		if d := describeView(s.fams, o); d[len(d)-1] != (activeFilter{"Family", "All"}) {
-			t.Errorf("every family is described as %+v; want Family All", d[len(d)-1])
-		}
-	}
-}
-
-// TestEveryControlIsDocumented asserts product.pageExplainsItself's rule: a control is documented
-// if and only if it exists.
-//
-// Written because the requirement used to ENUMERATE the controls it covered,
-// and the enumeration had gone stale twice over -- Compare birds and Names
-// were both live and both undocumented, while the requirement, the panel and
-// the controls each looked complete in isolation. A list cannot notice what it
-// omits, so this compares the two sets instead.
-//
-// Verifies: product.pageExplainsItself. Criterion: acceptance.everyControlDocumented.
-func TestEveryControlIsDocumented(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/classic")
-
-	// Locate before slicing. A missing marker makes strings.Index return -1,
-	// and body[-1:] panics before any assertion below can run -- so a broken
-	// selector would report a crash rather than "the selector is broken",
-	// which is the same confusion acceptance.familyListWraps's parser once produced.
-	// Every panel documents its own controls (product.pageExplainsItself), so both sets are
-	// gathered across the whole page rather than from one box.
-	if !strings.Contains(body, `class="ctrlhelp"`) {
-		t.Fatal("no panel carries a documentation block; the selector is broken, not the page")
-	}
-	var help string
-	for _, part := range strings.Split(body, `class="ctrlhelp"`)[1:] {
-		end := strings.Index(part, "</dl>")
-		if end < 0 {
-			t.Fatal("a documentation block is never closed; the selector is broken, not the page")
-		}
-		help += part[:end]
-	}
-	// An entry marked `ctrl note` explains something that is not a control --
-	// what a zone is, what pelagic means. Those are allowed to have no
-	// matching label, and are dropped before the sets are compared. Entries
-	// not so marked must correspond to a control, which is the half of this
-	// check that catches documentation for a control that was removed.
-	var docs []string
-	for _, part := range strings.Split(help, `<div class="ctrl`)[1:] {
-		if strings.HasPrefix(part, " note") {
-			continue
-		}
-		docs = append(docs, part)
-	}
-	help = strings.Join(docs, "")
-	documented := map[string]bool{}
-	for _, m := range regexp.MustCompile(`<dt>([^<]+)</dt>`).FindAllStringSubmatch(help, -1) {
-		documented[strings.TrimSpace(html.UnescapeString(m[1]))] = true
-	}
-
-	// Control labels live in the rows, which sit below each help block.
-	rows := body
-	labels := map[string]bool{}
-	for _, m := range regexp.MustCompile(`<span class="lbl">([^<]+)</span>`).
-		FindAllStringSubmatch(rows, -1) {
-		labels[strings.TrimSpace(html.UnescapeString(m[1]))] = true
-	}
-
-	// Both sets must be non-empty, or two broken selectors compare equal and
-	// this passes while checking nothing.
-	if len(documented) == 0 {
-		t.Fatal("no <dt> terms found; the documentation selector is broken, not the page")
-	}
-	if len(labels) == 0 {
-		t.Fatal("no control labels found; the control selector is broken, not the page")
-	}
-	if !labels["Scale"] {
-		t.Fatalf("the label set does not contain a control known to exist; it is %v", keysOf(labels))
-	}
-
-	for l := range labels {
-		if !documented[l] {
-			t.Errorf("the %q control is documented in no panel (product.pageExplainsItself)", l)
-		}
-	}
-	for d := range documented {
-		if !labels[d] {
-			t.Errorf("the documentation defines %q, which is not a control on the page", d)
-		}
-	}
-}
-
-// box returns one collapsible panel of the index by its id. The controls were
-// one panel and are now three (product.collapsibleControls), so a test that counts chips or order
-// headers has to say WHICH selector it means -- the family and region
-// selectors share markup and CSS deliberately, so a page-wide count sees both.
-func box(t *testing.T, body, id string) string {
+// box returns one setting on the home page's count line, by its label, so
+// a test that counts choices says WHICH setting it means.
+func box(t *testing.T, body, label string) string {
 	t.Helper()
-	open := `<details class="controls" id="` + id + `"`
+	open := `<details class="ctl" name="ctl" data-ctl="` + label + `"`
 	i := strings.Index(body, open)
 	if i < 0 {
-		t.Fatalf("no panel with id %q on the page", id)
+		t.Fatalf("no setting %q on the count line", label)
 	}
 	rest := body[i:]
 	j := strings.Index(rest, "</details>")
 	if j < 0 {
-		t.Fatalf("panel %q is never closed", id)
+		t.Fatalf("setting %q is never closed", label)
 	}
 	return rest[:j]
-}
-
-// grouping narrows a panel to one of its grouping blocks, by heading.
-//
-// Both selectors now render every chip twice, once per grouping (product.regionsGroupedTwoWays,
-// product.familiesByOrder), so a count taken over a whole panel counts each thing twice and an
-// assertion about "the groups" is really an assertion about two groupings at
-// once. Scoping is what keeps those counts meaningful.
-func grouping(t *testing.T, panel, name string) string {
-	t.Helper()
-	open := `<div class="ghdr">` + name + `<em>`
-	i := strings.Index(panel, open)
-	if i < 0 {
-		t.Fatalf("no grouping headed %q in this panel", name)
-	}
-	rest := panel[i+len(open):]
-	if k := strings.Index(rest, `<div class="ghdr">`); k >= 0 {
-		return rest[:k] // stop at the next grouping
-	}
-	return rest
 }
 
 // TestRegionFilter asserts product.regionAndMonthFilter and its composition with family (product.filtersCompose).
@@ -3403,7 +1719,7 @@ func TestRegionFilter(t *testing.T) {
 	s := newTestServer(t)
 
 	// One region shows what is reported there and excludes the rest.
-	_, ca := get(t, s, "/classic?region=CA")
+	_, ca := get(t, s, "/?month=all&show=all&region=CA")
 	// Unescaped: the fixture's names carry apostrophes, which the template
 	// writes as &#39; and a raw substring search then misses.
 	tiles := html.UnescapeString(tileArea(t, ca))
@@ -3418,21 +1734,21 @@ func TestRegionFilter(t *testing.T) {
 		}
 	}
 
-	// Absent means everywhere; explicitly empty means nowhere. The family
-	// filter draws the same distinction, and conflating them is the bug it
-	// had first.
-	_, all := get(t, s, "/classic")
-	_, none := get(t, s, "/classic?region=")
-	if strings.Count(tileArea(t, all), "tilewrap") == 0 {
+	// Absent means everywhere, and on the home page so does explicitly
+	// empty: no address can empty the page by filtering (product.nextView).
+	_, all := get(t, s, "/?month=all&show=all")
+	_, none := get(t, s, "/?month=all&show=all&region=")
+	n := strings.Count(tileArea(t, all), "tilewrap")
+	if n == 0 {
 		t.Fatal("no species with no region parameter")
 	}
-	if n := strings.Count(tileArea(t, none), "tilewrap"); n != 0 {
-		t.Errorf("an empty region= showed %d species; it must show none", n)
+	if m := strings.Count(tileArea(t, none), "tilewrap"); m != n {
+		t.Errorf("an empty region= showed %d species; it must show all %d", m, n)
 	}
 
 	// Composition: region and family narrow together, and an empty
 	// intersection names both filters rather than blaming one.
-	_, both := get(t, s, "/classic?region=CA&family=Corvidae")
+	_, both := get(t, s, "/?month=all&show=all&region=CA&family=Corvidae")
 	if n := strings.Count(tileArea(t, both), "tilewrap"); n != 0 {
 		t.Errorf("California plus Corvidae showed %d species; the crow is not in California", n)
 	}
@@ -3446,79 +1762,13 @@ func TestRegionFilter(t *testing.T) {
 	}
 
 	// A seabird appears under its ocean as well as the coast it is seen from.
-	_, sea := get(t, s, "/classic?region=NorthPacific")
+	_, sea := get(t, s, "/?month=all&show=all&region=NorthPacific")
 	if !strings.Contains(html.UnescapeString(tileArea(t, sea)), "Thick-billed Murre") {
 		t.Error("the Pacific shows no murre; a pelagic species has nowhere else to be")
 	}
-	_, ak := get(t, s, "/classic?region=AK")
+	_, ak := get(t, s, "/?month=all&show=all&region=AK")
 	if !strings.Contains(html.UnescapeString(tileArea(t, ak)), "Thick-billed Murre") {
 		t.Error("Alaska omits the murre, which is seen from shore there as well as at sea")
-	}
-}
-
-// TestRegionSelectorIsGroupedWithPelagicLast checks the control, not the
-// filtering: both groupings are offered, each groups the regions, and each
-// ends with the sea (product.regionAndMonthFilter, product.regionsGroupedTwoWays).
-//
-// The per-grouping split matters here. Before it, this test read the zone
-// toggles across the whole box and checked only the final one — which the
-// hand-drawn grouping satisfied on its own, leaving the derived grouping's
-// ordering unchecked.
-//
-// Verifies: product.regionAndMonthFilter, product.regionsGroupedTwoWays. Criterion: acceptance.regionFilterBehaves.
-func TestRegionSelectorIsGroupedWithPelagicLast(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/classic")
-	sel := box(t, body, "regions")
-
-	// Split the box into its grouping blocks, so each is checked on its own.
-	blocks := regexp.MustCompile(`<div class="ghdr">([^<]+)<em>([^<]*)</em>`).
-		FindAllStringSubmatchIndex(sel, -1)
-	if len(blocks) != 2 {
-		t.Fatalf("found %d grouping blocks, want the two of product.regionsGroupedTwoWays", len(blocks))
-	}
-	for i, b := range blocks {
-		name := html.UnescapeString(sel[b[2]:b[3]])
-		note := html.UnescapeString(sel[b[4]:b[5]])
-		end := len(sel)
-		if i+1 < len(blocks) {
-			end = blocks[i+1][0]
-		}
-		part := sel[b[0]:end]
-
-		if note == "" {
-			t.Errorf("grouping %q carries no note; a derived grouping and a "+
-				"hand-drawn one must not look alike (product.regionsGroupedTwoWays)", name)
-		}
-		var zones []string
-		for _, m := range regexp.MustCompile(`every region in ([^"]+)"`).
-			FindAllStringSubmatch(part, -1) {
-			zones = append(zones, html.UnescapeString(m[1]))
-		}
-		if len(zones) < 2 {
-			t.Fatalf("grouping %q has %d zone toggles; it is not grouped", name, len(zones))
-		}
-		if last := zones[len(zones)-1]; last != "Pelagic" {
-			t.Errorf("grouping %q ends with zone %q, want Pelagic — "+
-				"the sea is not a place anyone lives", name, last)
-		}
-		// Every region is reachable from every grouping, each being a
-		// partition: a region missing from one block is unreachable there.
-		for _, want := range []string{`>CA<em>California</em>`, `>PA<em>Pennsylvania</em>`} {
-			if !strings.Contains(part, want) {
-				t.Errorf("grouping %q is missing a chip matching %q", name, want)
-			}
-		}
-	}
-
-	// The two must actually be the two product.regionsGroupedTwoWays names, not the same one twice,
-	// and the hand-drawn one is rendered first: a reader arrives looking for
-	// their own state, not for a cluster analysis.
-	if !strings.Contains(sel, `<div class="ghdr">Common birds<em>`) ||
-		!strings.Contains(sel, `<div class="ghdr">Geographic<em>`) {
-		t.Error("the selector does not offer both a measured and a hand-drawn grouping")
-	}
-	if first := html.UnescapeString(sel[blocks[0][2]:blocks[0][3]]); first != "Geographic" {
-		t.Errorf("the first grouping rendered is %q, want Geographic", first)
 	}
 }
 
@@ -3528,8 +1778,8 @@ func TestRegionSelectorIsGroupedWithPelagicLast(t *testing.T) {
 //
 // Verifies: product.regionAndMonthFilter. Criterion: acceptance.regionUrlRoundTrips.
 func TestRegionURLsCarrySlugsNotGADMIDs(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/classic")
-	sel := box(t, body, "regions")
+	_, body := get(t, newTestServer(t), "/?month=all&show=all")
+	sel := box(t, body, "Region")
 
 	// No GADM id anywhere in a link. Checked against the real table rather
 	// than a pattern, so a new id shape cannot slip past.
@@ -3544,102 +1794,15 @@ func TestRegionURLsCarrySlugsNotGADMIDs(t *testing.T) {
 		}
 	}
 
-	// A coded region shows code then name; an uncoded one shows the name
-	// alone, with no empty <em> for the stylesheet to put a separator before.
-	if !strings.Contains(sel, `>CA<em>California</em>`) {
-		t.Error("California's chip does not show its postal code beside its name")
+	// A region is named, with its postal code as the tooltip where it has
+	// one; an uncoded one is named alone.
+	if !strings.Contains(sel, `title="CA">California</a>`) {
+		t.Error("California's choice does not carry its postal code")
 	}
 	for _, uncoded := range []string{"Johnston Atoll", "Gulf of Mexico", "North Pacific"} {
-		if strings.Contains(sel, `<em>`+uncoded+`</em>`) {
-			t.Errorf("%q renders inside <em>, which means an empty code precedes it "+
-				"and the stylesheet will open the chip with a stray separator", uncoded)
-		}
 		if !strings.Contains(sel, ">"+uncoded+"</a>") {
-			t.Errorf("%q does not render as a bare chip label", uncoded)
+			t.Errorf("%q does not render as a plain choice", uncoded)
 		}
-	}
-
-	// The ocean gloss survives, in the tooltip rather than the label.
-	if !strings.Contains(sel, `title="North Pacific, off the west coast"`) {
-		t.Error("the North Pacific chip lost the gloss saying which water it means")
-	}
-}
-
-// TestTraitAndFamilyPanels checks the two controls after decisions.habitatDietSpeciesLevel: diet and
-// habitat in their own box, assigned per species, and the taxonomic family
-// list in its own.
-//
-// They are separate boxes because they answer separate questions. The
-// family control sorts birds by what they are; diet and habitat sort them
-// by how they live, and the two were briefly crowded into one panel called
-// Species, which named neither well.
-//
-// Verifies: product.habitatAndDietFilters, product.familiesByOrder. Criterion: acceptance.habitatDietFilterPerSpecies.
-func TestTraitAndFamilyPanels(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/classic")
-
-	traits := box(t, body, "traits")
-	fams := box(t, body, "families")
-
-	blocks := func(panel string) []string {
-		var out []string
-		for _, m := range regexp.MustCompile(`<div class="ghdr">([^<]+)<em>([^<]*)</em>`).
-			FindAllStringSubmatch(panel, -1) {
-			out = append(out, html.UnescapeString(m[1]))
-			if strings.TrimSpace(m[2]) == "" {
-				t.Errorf("block %q carries no note", m[1])
-			}
-		}
-		return out
-	}
-	if got := blocks(traits); !slices.Equal(got, []string{"Diet", "Habitat"}) {
-		t.Errorf("the Diet and Habitat panel has blocks %v, want [Diet Habitat] — "+
-			"the order matches the panel's own title", got)
-	}
-	if got := blocks(fams); !slices.Equal(got, []string{"Taxonomic order"}) {
-		t.Errorf("the Families panel has blocks %v, want [Taxonomic order]", got)
-	}
-	if strings.Contains(body, "Birder groups") {
-		t.Error("the retired birder grouping is still rendered")
-	}
-	// The family chips belong to the family panel and the trait rows to the
-	// other; crossing over is how the two became one box before.
-	if strings.Contains(traits, `class="ofams"`) {
-		t.Error("family chips are in the Diet and Habitat panel")
-	}
-	if strings.Contains(fams, `class="tdesc"`) {
-		t.Error("trait rows are in the Families panel")
-	}
-
-	// Each trait option carries AVONET's definition and a count, which is
-	// the whole reason these are rows and not chips.
-	for _, want := range []string{"Marsh and lake", "Open sea", "Hunts in water", "Drinks nectar"} {
-		if !strings.Contains(traits, ">"+want+"</a>") {
-			t.Errorf("the trait controls do not offer %q", want)
-		}
-	}
-	rows := regexp.MustCompile(
-		`class="tcount">(\d+)</span>\s*<span class="tdesc"><b>([^<]+)</b>: ([^<]*)`).
-		FindAllStringSubmatch(traits, -1)
-	if len(rows) == 0 {
-		t.Fatal("no trait rows rendered at all")
-	}
-	if n := strings.Count(traits, `btn thdr`); n != len(rows) {
-		t.Errorf("%d trait toggles but %d carry a count and a description", n, len(rows))
-	}
-	for _, m := range rows {
-		if m[1] == "0" {
-			t.Error("an option with no species is offered; clicking it returns an empty page")
-		}
-		if strings.TrimSpace(m[2]) == "" {
-			t.Error("a trait option does not name the AVONET term its definition belongs to")
-		}
-		if strings.TrimSpace(m[3]) == "" {
-			t.Error("a trait option carries no definition")
-		}
-	}
-	if !strings.Contains(traits, `<b>Invertivore</b>: Species obtaining`) {
-		t.Error(`the "Eats insects" option does not lead its definition with Invertivore`)
 	}
 }
 
@@ -3654,7 +1817,7 @@ func TestTraitAndFamilyPanels(t *testing.T) {
 // Verifies: product.tileContents. Criterion: acceptance.familyGroupingComplete.
 func TestTileCarriesExactlyOneBadge(t *testing.T) {
 	s := newTestServer(t)
-	for _, path := range []string{"/classic", "/species/greblu", "/compare?species=greblu&species=annhum"} {
+	for _, path := range []string{"/?month=all&show=all", "/species/greblu"} {
 		code, body := get(t, s, path)
 		if code != http.StatusOK {
 			t.Fatalf("%s: HTTP %d", path, code)
@@ -3668,7 +1831,7 @@ func TestTileCarriesExactlyOneBadge(t *testing.T) {
 		// the detail and compare pages it is one per species panel.
 		var want int
 		switch path {
-		case "/classic":
+		case "/?month=all&show=all":
 			want = strings.Count(body, `<a class="tile" href=`)
 		case "/species/greblu":
 			want = 1
@@ -3679,96 +1842,6 @@ func TestTileCarriesExactlyOneBadge(t *testing.T) {
 			t.Errorf("%s: %d birds shown but %d badges; product.tileContents allows the family badge and "+
 				"no other, so a grouping has leaked onto the tile", path, want, badges)
 		}
-	}
-}
-
-// TestFiltersAreNamedOnTheCountLine asserts the half of product.helpfulEmptyState that applies
-// while the list still has birds in it: what is narrowing the view is stated
-// next to the count, not only once nothing matches.
-//
-// This is the rendering test acceptance.nothingMatchedOffersAWayOut recorded as missing. It was unreachable
-// when only the family filter existed -- one filter cannot contradict itself
-// -- and the region filter of product.regionAndMonthFilter made the empty intersection reachable.
-//
-// Verifies: product.helpfulEmptyState. Criterion: acceptance.countLineNamesEverySetting.
-func TestFiltersAreNamedOnTheCountLine(t *testing.T) {
-	s := newTestServer(t)
-
-	countLine := func(body string) string {
-		t.Helper()
-		return mustMatch(t, body, `<p class="count">(.*?)</p>`, "the species count line")
-	}
-
-	// Arrival: every setting at its default, named as such. Until
-	// 2026-10-19 nothing was named here; the owner asked for every setting,
-	// defaults included (TestCountLineNamesEverySetting has the full list).
-	if got := countLine(mustGet(t, s, "/classic")); !strings.Contains(got, "<b>Family</b> All") {
-		t.Errorf("the arrival page does not name its family filter as All: %q", got)
-	}
-
-	// One filter set, and birds still matching: named anyway.
-	full := mustGet(t, s, "/classic?family=Ardeidae")
-	line := countLine(full)
-	if !strings.Contains(line, "Ardeidae") {
-		t.Errorf("a narrowed list does not name its filter on the count line: %q", line)
-	}
-	if !strings.Contains(full, "Great Blue Heron") {
-		t.Fatal("the fixture no longer matches; this case is meant to have birds in it")
-	}
-
-	// Two filters whose intersection is empty: the count line still names
-	// both, and the empty message does not repeat them.
-	empty := mustGet(t, s, "/classic?family=Ardeidae&region=AK")
-	line = countLine(empty)
-	for _, want := range []string{"Ardeidae", "Alaska"} {
-		if !strings.Contains(html.UnescapeString(line), want) {
-			t.Errorf("the count line omits %q when the intersection is empty: %q", want, line)
-		}
-	}
-	if !strings.Contains(empty, "No birds match") {
-		t.Fatal("an empty intersection does not report a failed match")
-	}
-	if n, m := strings.Count(empty, `class="fsum"`), strings.Count(line, `class="fsum"`); n != m {
-		t.Errorf("the page carries %d setting chips and the count line %d — the empty state is "+
-			"repeating what the count line already said", n, m)
-	}
-}
-
-// TestClearTheFiltersClearsThem follows the empty state's link, which no test did: it is the
-// half of product.helpfulEmptyState that gives the dead end an exit. For a year it went nowhere.
-// First it changed nothing, then it set family=region, so a reader who clicked it landed on a page
-// with a nonsense family and the same empty list, and clicking again changed nothing.
-//
-// Verifies: product.helpfulEmptyState. Criterion: acceptance.nothingMatchedOffersAWayOut.
-func TestClearTheFiltersClearsThem(t *testing.T) {
-	s := newTestServer(t)
-	filters := []string{"family", "habitat", "niche", "region", "month"}
-	empty := mustGet(t, s, "/classic?family=Ardeidae&region=AK&niche=Invertivore&habitat=Forest&month=1&units=metric&by=mass")
-	if !strings.Contains(empty, "No birds match") {
-		t.Fatal("Ardeidae in Alaska is no longer an empty intersection; pick another")
-	}
-	m := regexp.MustCompile(`No birds match\. <a href="([^"]+)">`).FindStringSubmatch(empty)
-	if m == nil {
-		t.Fatal("the empty state has no link that clears the filters")
-	}
-	u, err := url.Parse(html.UnescapeString(m[1]))
-	if err != nil {
-		t.Fatal(err)
-	}
-	q := u.Query()
-	for _, f := range filters {
-		if _, ok := q[f]; ok {
-			t.Errorf("Clear the filters keeps %s=%q: %s", f, q[f], m[1])
-		}
-	}
-	for k, want := range map[string]string{"units": "metric", "by": "mass"} {
-		if q.Get(k) != want {
-			t.Errorf("Clear the filters dropped the display setting %s=%s, which is not a filter: %s", k, want, m[1])
-		}
-	}
-	after := mustGet(t, s, u.String())
-	if strings.Contains(after, "No birds match") || strings.Count(tileArea(t, after), "tilewrap") == 0 {
-		t.Errorf("following Clear the filters still shows no birds: %s", m[1])
 	}
 }
 
@@ -4052,144 +2125,6 @@ func TestAddedListsEveryUnpublishedAssignment(t *testing.T) {
 	}
 }
 
-// onlyLink pulls the Only href that follows a given group toggle, scoped to
-// one grouping so the same zone name in the other grouping is not matched.
-func onlyLink(t *testing.T, scope, afterLabel string) string {
-	t.Helper()
-	i := strings.Index(scope, ">"+afterLabel)
-	if i < 0 {
-		t.Fatalf("no group toggle labeled %q in this scope", afterLabel)
-	}
-	m := regexp.MustCompile(`<a class="btn only" href="([^"]+)"`).FindStringSubmatch(scope[i:])
-	if m == nil {
-		t.Fatalf("no Only link after %q", afterLabel)
-	}
-	return html.UnescapeString(m[1])
-}
-
-// Only narrows to one group in a click, and must not disturb the sections
-// beside it (product.onlyPerGroup).
-//
-// Watched fail: building OnlyURL from the current selection instead of from
-// the group makes the two starting selections disagree; pointing a trait's
-// Only at both trait parameters clears the habitat selection on a diet click.
-//
-// Verifies: product.onlyPerGroup. Criterion: acceptance.onlyNarrowsOneGroup.
-func TestOnlyNarrowsToOneGroup(t *testing.T) {
-	s := newTestServer(t)
-	_, body := get(t, s, "/classic")
-
-	// A region zone: its regions stay, every other region goes.
-	regions := box(t, body, "regions")
-	geo := grouping(t, regions, "Geographic")
-	zone := mustMatch(t, geo, `<a class="btn ohdr[^"]*" href="[^"]*"\s*\n?\s*title="[^"]*">([^<]+)</a>`,
-		"the first zone in the Geographic grouping")
-	href := onlyLink(t, geo, zone)
-
-	u, err := url.Parse(href)
-	if err != nil {
-		t.Fatalf("Only href %q does not parse: %v", href, err)
-	}
-	q := u.Query()
-	if _, ok := q["region"]; !ok {
-		t.Fatalf("Only for zone %q sets no region parameter: %q", zone, href)
-	}
-	// It must not reach into the other filters at all.
-	for _, p := range []string{"family", "habitat", "niche"} {
-		if _, ok := q[p]; ok {
-			t.Errorf("Only on a region set %q=%v; regions and %s are different sections",
-				p, q[p], p)
-		}
-	}
-
-	// Following it leaves exactly that zone's regions on, and nothing else.
-	_, after := get(t, s, href)
-	ar := box(t, after, "regions")
-	onChips := regexp.MustCompile(`<a class="chip rchip on"`).FindAllString(
-		grouping(t, ar, "Geographic"), -1)
-	zoneChips := regexp.MustCompile(`<a class="chip rchip[^"]*"`).FindAllString(
-		onlyZone(t, grouping(t, ar, "Geographic"), zone), -1)
-	if len(onChips) != len(zoneChips) {
-		t.Errorf("after Only on %q, %d regions are selected page-wide but the zone holds %d",
-			zone, len(onChips), len(zoneChips))
-	}
-
-	// A trait value: its own axis narrows, the other axis is untouched.
-	traits := box(t, body, "traits")
-	diet := grouping(t, traits, "Diet")
-	val := mustMatch(t, diet, `<a class="btn thdr[^"]*" href="[^"]*"\s*\n?\s*title="[^"]*">([^<]+)</a>`,
-		"the first diet value")
-	dh := onlyLink(t, diet, val)
-	du, err := url.Parse(dh)
-	if err != nil {
-		t.Fatalf("Only href %q does not parse: %v", dh, err)
-	}
-	if _, ok := du.Query()["habitat"]; ok {
-		t.Errorf("Only on a diet value set habitat=%v; diet and habitat are separate sections "+
-			"and narrowing one must leave the other whole", du.Query()["habitat"])
-	}
-
-	// Independence from the current selection: the same group yields the same
-	// Only target from a different starting state.
-	_, narrowed := get(t, s, "/classic?region=CA")
-	g2 := grouping(t, box(t, narrowed, "regions"), "Geographic")
-	if h2 := onlyLink(t, g2, zone); h2 != href {
-		t.Errorf("Only for %q differs by starting selection:\n  from all: %s\n  from CA:  %s",
-			zone, href, h2)
-	}
-}
-
-// onlyZone narrows a grouping to one zone's block.
-func onlyZone(t *testing.T, grouping, zone string) string {
-	t.Helper()
-	i := strings.Index(grouping, ">"+zone)
-	if i < 0 {
-		t.Fatalf("no zone %q", zone)
-	}
-	rest := grouping[i:]
-	if k := strings.Index(rest, `<div class="ogroup">`); k >= 0 {
-		return rest[:k]
-	}
-	return rest
-}
-
-// The unit buttons must name the units the page actually renders. They did
-// not: imperial was labeled "in / g" while every imperial mass on the page
-// was in ounces, so the control advertised a combination the site never
-// produced.
-//
-// Derived from the renderer, not from the button: format() is what decides
-// the suffix, so asking it is asking the thing the label is about. Reading
-// the expectation off the button would make this test agree with itself.
-//
-// Watched fail: restoring "in / g" reports that the imperial label says g
-// where the page renders oz.
-//
-// Verifies: product.sectionThresholdDefault. Criterion: acceptance.controlsMatchServer.
-func TestUnitButtonsNameTheUnitsRendered(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/classic")
-
-	for _, tc := range []struct {
-		metric3 bool
-		param   string
-	}{{false, "imperial"}, {true, "metric"}} {
-		// A small bird's mass: format() switches to pounds and kilograms
-		// further up, so the base unit the button names is the one a
-		// sparrow-sized mass renders in.
-		rendered := unitsFor(tc.metric3, 25).format(25, view.ByMass)
-		unit := strings.TrimLeft(rendered, "0123456789.,  ~")
-		unit = strings.TrimSpace(unit)
-
-		label := mustMatch(t, body,
-			`href="[^"]*units=`+tc.param+`[^"]*">([^<]+)</a>`,
-			"the "+tc.param+" units button")
-		if !strings.Contains(label, unit) {
-			t.Errorf("the %s button is labeled %q, but %s masses render as %q (unit %q)",
-				tc.param, label, tc.param, rendered, unit)
-		}
-	}
-}
-
 // realDataset loads the compiled dataset, or skips. Tests make no network
 // request and the dataset is not committed (tech.datasetNeverCommitted), so a check over the real
 // data is a check that runs when the data is there.
@@ -4370,26 +2305,25 @@ func TestNoSectionMixesMassUnits(t *testing.T) {
 	unit := regexp.MustCompile(`\b\d[\d.,]*\s*(oz|lb|kg|g)\b`)
 
 	for _, q := range []string{
-		"/classic?by=mass&scale=section", "/classic?by=mass&scale=global",
-		"/classic?by=length&scale=section", "/classic?by=length&scale=global",
-		"/classic?by=mass&scale=section&units=metric",
+		"/?month=all&show=all&by=mass", "/?month=all&show=all&by=length",
+		"/?month=all&show=all&by=mass&units=metric", "/?by=length",
 	} {
 		_, body := get(t, srv, q)
-		// Each section is a <section> block; check them one at a time, since
-		// two sections may legitimately differ from each other.
-		secs := regexp.MustCompile(`(?s)<section\b.*?</section>`).FindAllString(body, -1)
-		if len(secs) == 0 {
-			t.Fatalf("%s: no sections found; the test proves nothing", q)
+		// The home page compares every bird it draws, so all its tiles
+		// share one mass unit; read the tile footers only.
+		feet := regexp.MustCompile(`(?s)<div class="ft">.*?</div>`).FindAllString(body, -1)
+		if len(feet) == 0 {
+			t.Fatalf("%s: no tiles found; the test proves nothing", q)
 		}
-		for i, sec := range secs {
-			seen := map[string]bool{}
-			for _, m := range unit.FindAllStringSubmatch(sec, -1) {
+		seen := map[string]bool{}
+		for _, ft := range feet {
+			for _, m := range unit.FindAllStringSubmatch(ft, -1) {
 				seen[m[1]] = true
 			}
-			if (seen["oz"] && seen["lb"]) || (seen["g"] && seen["kg"]) {
-				t.Errorf("%s: section %d mixes mass units %v -- a reader has to "+
-					"convert to compare two birds in one section", q, i+1, keysOf(seen))
-			}
+		}
+		if (seen["oz"] && seen["lb"]) || (seen["g"] && seen["kg"]) {
+			t.Errorf("%s: the page mixes mass units %v -- a reader has to "+
+				"convert to compare two birds", q, keysOf(seen))
 		}
 	}
 }
@@ -4486,7 +2420,7 @@ func TestCitedAnchorsResolve(t *testing.T) {
 	// Every anchored citation anywhere on the site.
 	cite := regexp.MustCompile(`href="(/docs/[^"#]+)#([^"]+)"`)
 	checked := 0
-	for _, page := range []string{"/classic", "/species/greblu", "/species/amerob", "/added",
+	for _, page := range []string{"/?month=all&show=all", "/species/greblu", "/species/amerob", "/added",
 		"/docs/", "/docs/data", "/docs/using", "/excluded"} {
 		body := mustGet(t, s, page)
 		for _, m := range cite.FindAllStringSubmatch(body, -1) {
@@ -4542,8 +2476,8 @@ func TestTileShareFollowsTheRegionFilter(t *testing.T) {
 		return m[1]
 	}
 
-	all := oneIn("/classic", "American Robin")
-	ontario := oneIn("/classic?region=ON", "American Robin")
+	all := oneIn("/?month=all&show=all", "American Robin")
+	ontario := oneIn("/?month=all&show=all&region=ON", "American Robin")
 	if all == ontario {
 		t.Errorf("the robin's figure is %q both with all regions and in Ontario "+
 			"alone; the figure is not following the filter", all)
@@ -4577,7 +2511,7 @@ func TestTileShareFollowsTheRegionFilter(t *testing.T) {
 // Verifies: product.shareOfRecords. Criterion: acceptance.figureSaysWhatItCounts.
 func TestTheUnitSaysSpeciesAndNotBird(t *testing.T) {
 	s := newTestServer(t)
-	_, body := get(t, s, "/classic")
+	_, body := get(t, s, "/?month=all&show=all")
 	i := strings.Index(body, ">American Robin")
 	if i < 0 {
 		t.Fatal("the robin is not on the index")
@@ -4653,8 +2587,7 @@ func atoiComma(t *testing.T, s string) int {
 // Verifies: product.noPersonalAddress. Criterion: acceptance.noContactAddressPublished.
 func TestNoPersonalAddressIsPublished(t *testing.T) {
 	s := newTestServer(t)
-	pages := []string{"/classic", "/species/greblu", "/species/amerob", "/added",
-		"/compare?species=amerob&species=blujay", "/docs/"}
+	pages := []string{"/?month=all&show=all", "/species/greblu", "/species/amerob", "/added", "/docs/"}
 	guides := regexp.MustCompile(`href="(/docs/[^"#]+)"`).FindAllStringSubmatch(mustGet(t, s, "/docs/"), -1)
 	if len(guides) < 4 {
 		t.Fatalf("the docs index lists only %d guides; it is not listing the set", len(guides))
@@ -5046,7 +2979,7 @@ func TestShareStatesZeroRatherThanDashing(t *testing.T) {
 
 	// The fixture heron is in no region at all, so it has nothing in any
 	// selection and is the zero case on every view.
-	_, body := get(t, s, "/classic")
+	_, body := get(t, s, "/?month=all&show=all")
 	if strings.Contains(body, "&mdash;</span></div>") {
 		t.Error("a share cell still renders a bare em-dash; absence is stated as a number")
 	}
@@ -5072,7 +3005,7 @@ func TestShareStatesZeroRatherThanDashing(t *testing.T) {
 			seas = append(seas, "region="+rg.Slug())
 		}
 	}
-	_, body = get(t, s, "/classic?"+strings.Join(seas, "&"))
+	_, body = get(t, s, "/?month=all&show=all&"+strings.Join(seas, "&"))
 	if !regexp.MustCompile(`<b>[01] in [\d,]+</b>`).MatchString(body) {
 		t.Error("selecting the seas yields no figure; they have had a denominator since decisions.honestSeaDenominator")
 	}
@@ -5086,7 +3019,7 @@ func TestShareStatesZeroRatherThanDashing(t *testing.T) {
 // This is the check that would have caught the bug the owner reported. The
 // two numbers came from different tables with different denominators and
 // different membership rules, so `/species/yenalb2` could say "commonest in
-// Maine" while `/classic?region=NorthAtlantic` said something that looked like a
+// Maine" while `?region=NorthAtlantic` said something that looked like a
 // flat contradiction -- and nothing compared them, because each was tested
 // against its own source.
 //
@@ -5249,9 +3182,9 @@ func TestMissingTotalsDoNotClaimTheBirdIsAbsent(t *testing.T) {
 func TestInterfaceNeverSaysShare(t *testing.T) {
 	s := newTestServer(t)
 	pages := []string{
-		"/classic", "/classic?region=AK", "/classic?by=mass&scale=global",
+		"/?month=all&show=all", "/?month=all&show=all&region=AK", "/?month=all&show=all&by=mass",
 		"/species/greblu", "/species/amerob", "/species/thimur",
-		"/compare?species=amerob&species=greblu", "/added", "/docs/",
+		"/added", "/docs/",
 	}
 	for _, m := range regexp.MustCompile(`href="(/docs/[^"#]+)"`).
 		FindAllStringSubmatch(mustGet(t, s, "/docs/"), -1) {
@@ -5299,7 +3232,7 @@ func TestResponsesCompressWhenAsked(t *testing.T) {
 		return res, body
 	}
 
-	for _, path := range []string{"/classic", "/species/greblu", "/static/styles.css", "/docs/data"} {
+	for _, path := range []string{"/?month=all&show=all", "/species/greblu", "/static/styles.css", "/docs/data"} {
 		plainRes, plain := fetch(path, false)
 		gzRes, packed := fetch(path, true)
 
@@ -5377,7 +3310,7 @@ func TestResponsesCompressWhenAsked(t *testing.T) {
 	}
 
 	// A status that may carry no body must not carry a gzip header either.
-	plainRes, _ := fetch("/classic", false)
+	plainRes, _ := fetch("/?month=all&show=all", false)
 	if plainRes.Header.Get("Content-Encoding") != "" {
 		t.Error("an unasked-for response is labeled compressed")
 	}
@@ -5397,14 +3330,14 @@ func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 		t.Helper()
 		_, body := get(t, srv, query)
 		var out []string
-		for _, m := range regexp.MustCompile(`(?s)<h2>(.*?)</h2>`).FindAllStringSubmatch(body, -1) {
+		for _, m := range regexp.MustCompile(`(?s)<h3 class="tierhd"[^>]*>(.*?)</h3>`).FindAllStringSubmatch(body, -1) {
 			txt := regexp.MustCompile(`<[^>]+>`).ReplaceAllString(m[1], " ")
 			out = append(out, strings.Join(strings.Fields(html.UnescapeString(txt)), " "))
 		}
 		return out
 	}
 
-	got := heads("/classic?by=frequency")
+	got := heads("/?month=all&show=all&by=frequency")
 	if len(got) < 5 {
 		t.Fatalf("only %d sections; frequency spans 7.5 decades and should band into "+
 			"about nine: %v", len(got), got)
@@ -5451,7 +3384,7 @@ func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 	for i := range ds.Species {
 		sp := &ds.Species[i]
 		if sp.Exotic != "" {
-			continue // off the index (product.escapedBirdsListed), so in no tier
+			continue // off the home page (product.escapedBirdsListed), so in no tier
 		}
 		num, den := shareIn(sp, ds, options{})
 		if num == 0 || den == 0 {
@@ -5464,7 +3397,7 @@ func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 		}
 		want[fmt.Sprintf("1 in %s – 1 in %s", comma(lo), comma(lo*10-1))]++
 	}
-	counts := regexp.MustCompile(`(1 in [\d,]+ – 1 in [\d,]+) (\d+) species`)
+	counts := regexp.MustCompile(`(1 in [\d,]+ – 1 in [\d,]+) (\d+) birds?`)
 	var verified int
 	for _, h := range got {
 		m := counts.FindStringSubmatch(h)
@@ -5497,7 +3430,7 @@ func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 
 	// 100x halves the tier count, and the same control under a size metric
 	// still means percent.
-	if wide := heads("/classic?by=frequency&step=100"); len(wide) >= len(got) {
+	if wide := heads("/?month=all&show=all&by=frequency&step=100"); len(wide) >= len(got) {
 		t.Errorf("100x gave %d sections against 10x's %d; it should be coarser",
 			len(wide), len(got))
 	}
@@ -5506,7 +3439,7 @@ func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 	// under every filter. A data-anchored band would start at whichever bird
 	// is commonest in the selection, and "1 in 1,000 – 9,999" would denote
 	// one set nationally and another in Alaska.
-	ak := heads("/classic?by=frequency&region=AK")
+	ak := heads("/?month=all&show=all&by=frequency&region=AK")
 	national := map[string]bool{}
 	for _, h := range got {
 		if m := edge.FindStringSubmatch(h); m != nil {
@@ -5563,8 +3496,8 @@ func TestFrequencyTiersAreNotNamed(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
-	_, body := get(t, srv, "/classic?by=frequency")
-	heads := regexp.MustCompile(`(?s)<h2>(.*?)</h2>`).FindAllString(body, -1)
+	_, body := get(t, srv, "/?month=all&show=all&by=frequency")
+	heads := regexp.MustCompile(`(?s)<h3 class="tierhd"[^>]*>(.*?)</h3>`).FindAllString(body, -1)
 	if len(heads) == 0 {
 		t.Fatal("no section headers")
 	}
@@ -5574,48 +3507,6 @@ func TestFrequencyTiersAreNotNamed(t *testing.T) {
 			t.Errorf("a tier header says %q; product.shareOfRecords keeps this a number and not a rarity "+
 				"tag, and a named band is the threshold it refuses", word)
 		}
-	}
-}
-
-// TestFrequencyDefaultsToGlobalScale asserts decisions.frequencyGlobalScale: the scale default
-// depends on the ordering, and BOTH scale values stay selectable under it.
-//
-// The second half is the one that bites. The parser used to recognize only
-// the non-default value, with a comment warning that this silently disables
-// the toggle whenever the default moves -- which is what happened when
-// decisions.perSectionDefault moved it. A default that varies by metric is the same bug arriving
-// by a different road: read only Global, and "Per section" is a dead button
-// under Frequency.
-//
-// Verifies: product.scaleToggle, decisions.frequencyGlobalScale. Criterion: acceptance.frequencyTiers.
-func TestFrequencyDefaultsToGlobalScale(t *testing.T) {
-	for _, tc := range []struct {
-		query string
-		want  view.ScaleMode
-	}{
-		{"/classic", view.PerSection},
-		{"/classic?by=mass", view.PerSection},
-		{"/classic?by=frequency", view.Global},
-		// Both directions explicit, under both orderings.
-		{"/classic?by=frequency&scale=section", view.PerSection},
-		{"/classic?by=frequency&scale=global", view.Global},
-		{"/classic?by=length&scale=global", view.Global},
-		{"/classic?by=length&scale=section", view.PerSection},
-	} {
-		req := httptest.NewRequest(http.MethodGet, tc.query, nil)
-		if got := parseOptions(req).Scale; got != tc.want {
-			t.Errorf("%s: scale %q, want %q", tc.query, got, tc.want)
-		}
-	}
-
-	// And it reaches the page: under Frequency the control must show Global
-	// as the active one without the reader having asked.
-	_, body := get(t, newTestServer(t), "/classic?by=frequency")
-	global := regexp.MustCompile(`<a class="btn on"[^>]*scale=global`)
-	if !global.MatchString(body) {
-		section := regexp.MustCompile(`<a class="btn on"[^>]*scale=section`)
-		t.Errorf("the scale control does not show Global active under Frequency "+
-			"(Per section active: %v)", section.MatchString(body))
 	}
 }
 
@@ -5664,7 +3555,7 @@ func TestSharedNamesAreDisclosed(t *testing.T) {
 
 			// And the index tile carries the seam, with the other bird's
 			// common name in reach of a reader who never opens the page.
-			_, idx := get(t, srv, "/classic")
+			_, idx := get(t, srv, "/?month=all&show=all")
 			i := strings.Index(idx, id)
 			if i < 0 {
 				t.Errorf("%s is not on the index at all", id)
@@ -5718,106 +3609,6 @@ func TestSharedNamesAreDisclosed(t *testing.T) {
 	}
 }
 
-// TestOrderByStatesItsDirection asserts product.ascendingOrder's second half: the page says
-// which way each ordering runs, and says it for both groups at once.
-//
-// Frequency ascends a reciprocal — "1 in N" rises as the bird gets scarcer
-// — so it runs most-common-first while the three size metrics run
-// smallest-first. Three renames were proposed to dissolve that and all
-// three were declined (decisions.frequencyMetric): every frequency-polarity name points the
-// wrong way, every scarcity-polarity name overclaims, and the one word
-// right on both counts is one readers stumble over. What ships instead is
-// the direction, captioned under each group.
-//
-// Both captions are present on every view, whichever metric is selected. A
-// caption that changed with the selection would tell a reader what they had
-// already chosen; two standing captions tell them the controls behave
-// differently before they click, which is the thing worth knowing.
-//
-// Verifies: product.ascendingOrder, product.orderByFrequency. Criterion: acceptance.frequencyTiers.
-func TestOrderByStatesItsDirection(t *testing.T) {
-	s := newTestServer(t)
-	for _, query := range []string{"/classic", "/classic?by=length", "/classic?by=mass", "/classic?by=frequency"} {
-		_, body := get(t, s, query)
-		i := strings.Index(body, `class="lbl">Order by`)
-		if i < 0 {
-			t.Fatalf("%s: no Order by row; the selector is broken, not the page", query)
-		}
-		row := body[i:min(i+2000, len(body))]
-
-		groups := strings.Split(row, `class="dirbtns"`)
-		if len(groups) != 3 {
-			t.Errorf("%s: %d button groups, want 2 — the size metrics and Frequency",
-				query, len(groups)-1)
-			continue
-		}
-		// The five size metrics share one caption; Frequency has its own.
-		// Asserted by COUNTING buttons per group, so a metric silently
-		// moving between them fails rather than passing on the strings.
-		if n := strings.Count(groups[1][:strings.Index(groups[1], "</span>")], `class="btn`); n != 5 {
-			t.Errorf("%s: first group holds %d buttons, want 5", query, n)
-		}
-		if n := strings.Count(groups[2][:strings.Index(groups[2], "</span>")], `class="btn`); n != 1 {
-			t.Errorf("%s: second group holds %d buttons, want 1", query, n)
-		}
-
-		caps := regexp.MustCompile(`class="dirn">([^<]+)<`).FindAllStringSubmatch(row, -1)
-		if len(caps) != 2 {
-			t.Errorf("%s: %d direction captions, want 2", query, len(caps))
-			continue
-		}
-		if got := strings.TrimSpace(caps[0][1]); got != "smallest first" {
-			t.Errorf("%s: size metrics captioned %q", query, got)
-		}
-		if got := strings.TrimSpace(caps[1][1]); got != "most common first" {
-			t.Errorf("%s: Frequency captioned %q", query, got)
-		}
-	}
-}
-
-// TestOrderingRowAlignsOnTheBaseline pins the one declaration that keeps the
-// captioned groups from dragging their row out of line.
-//
-// The groups are two lines tall and everything else on that row is one, so
-// under the stylesheet's default `align-items: center` the row's height
-// follows the captions and ORDER BY sits level with the rules instead of
-// with the buttons. Baseline alignment puts the label, the three size
-// buttons, and the Frequency button on one line and lets the captions hang
-// below it.
-//
-// Asserted because it is invisible to every other check here: the markup is
-// identical either way, the contrast tests do not read layout, and nothing
-// renders pixels. A one-line CSS deletion would put it back and no test
-// would notice.
-//
-// Verifies: product.ascendingOrder. Criterion: acceptance.frequencyTiers.
-func TestOrderingRowAlignsOnTheBaseline(t *testing.T) {
-	b, err := web.Static.ReadFile("static/styles.css")
-	if err != nil {
-		t.Fatalf("reading the stylesheet: %v", err)
-	}
-	css := string(b)
-	if !regexp.MustCompile(`\.row\.ordering\s*\{[^}]*align-items:\s*baseline`).MatchString(css) {
-		t.Error("the ordering row does not align on the baseline; its two-line groups will " +
-			"drag ORDER BY down level with the rules")
-	}
-	// And the row has to carry the class, or the rule applies to nothing.
-	_, body := get(t, newTestServer(t), "/classic")
-	if !strings.Contains(body, `class="row ordering"`) {
-		t.Error("no row carries the ordering class, so the alignment rule matches nothing")
-	}
-	// The caption still hangs below its own group rather than floating in
-	// the row: it must be inside a .dirgroup, not a sibling of the buttons.
-	i := strings.Index(body, `class="dirgroup"`)
-	if i < 0 {
-		t.Fatal("no direction group on the page")
-	}
-	group := body[i:min(i+700, len(body))]
-	if strings.Index(group, `class="dirbtns"`) > strings.Index(group, `class="dirn"`) {
-		t.Error("the caption precedes its buttons; it should hang below them")
-	}
-}
-
 // TestTheDetailPageSaysEverythingTheTileSays asserts product.tileOpensDetail's superset rule
 // on the one field that broke it: the frequency figure.
 //
@@ -5858,9 +3649,9 @@ func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
 		min         int
 	}{
 		{"", "(all regions)", 1000},
-		{"?region=AK", "in Alaska", 300},
+		{"&region=AK", "in Alaska", 300},
 	} {
-		_, index := get(t, s, "/classic"+scope.query)
+		_, index := get(t, s, "/?month=all&show=all"+scope.query)
 		tiles := tile.FindAllStringSubmatch(index, -1)
 		// A parse that silently matched nothing would make every assertion
 		// below vacuous, which is the shape this project keeps paying for.
@@ -5887,7 +3678,7 @@ func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
 				t.Errorf("%s: tile carries no figure at all", id)
 				continue
 			}
-			_, page := get(t, s, "/species/"+id+scope.query)
+			_, page := get(t, s, "/species/"+id+strings.Replace(scope.query, "&", "?", 1))
 			body := norm(page)
 			for _, figure := range statements {
 				if !strings.Contains(body, figure) {
@@ -6055,7 +3846,7 @@ func TestResponsesCarryAValidator(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
-	paths := []string{"/classic", "/species/yelwar1", "/species/haiwoo", "/classic?region=AK",
+	paths := []string{"/?month=all&show=all", "/species/yelwar1", "/species/haiwoo", "/?month=all&show=all&region=AK",
 		"/static/styles.css"}
 
 	tags := map[string]string{}
@@ -6127,10 +3918,10 @@ func TestResponsesCarryAValidator(t *testing.T) {
 		t.Fatalf("newServer: %v", err)
 	}
 	w := httptest.NewRecorder()
-	s2.ServeHTTP(w, httptest.NewRequest("GET", "/classic", nil))
-	if w.Header().Get("ETag") == tags["/classic"] {
+	s2.ServeHTTP(w, httptest.NewRequest("GET", "/?month=all&show=all", nil))
+	if w.Header().Get("ETag") == tags["/?month=all&show=all"] {
 		t.Errorf("the index keeps ETag %s after the dataset changed; every reader "+
-			"with a cached copy would keep it", tags["/classic"])
+			"with a cached copy would keep it", tags["/?month=all&show=all"])
 	}
 }
 
@@ -6421,9 +4212,9 @@ func TestMonthsNarrowTheListAndTheFigureTogether(t *testing.T) {
 		_, body := get(t, s, path)
 		return strings.Count(body, `class="tilewrap"`)
 	}
-	all := count("/classic")
-	june := count("/classic?month=Jun")
-	jan := count("/classic?month=Jan")
+	all := count("/?month=all&show=all")
+	june := count("/?show=all&month=Jun")
+	jan := count("/?show=all&month=Jan")
 	if all < 1000 {
 		t.Fatalf("the unfiltered index shows %d tiles", all)
 	}
@@ -6441,12 +4232,12 @@ func TestMonthsNarrowTheListAndTheFigureTogether(t *testing.T) {
 	for i := 0; i < month.Count; i++ {
 		months = append(months, "month="+month.Abbrev[i])
 	}
-	if n := count("/classic?" + strings.Join(months, "&")); n != all {
+	if n := count("/?show=all&" + strings.Join(months, "&")); n != all {
 		t.Errorf("all twelve months show %d species and the whole year shows %d", n, all)
 	}
 
 	// The figure narrows with the list, and says which months it covers.
-	_, body := get(t, s, "/classic?region=NY&month=Jun&month=Jul&month=Aug")
+	_, body := get(t, s, "/?show=all&region=NY&month=Jun&month=Jul&month=Aug")
 	if !strings.Contains(body, "Jun-Aug") {
 		t.Error("a three-month selection does not say so on the tiles")
 	}
@@ -6482,7 +4273,7 @@ func newTestServerReal(t *testing.T) *server {
 // Verifies: product.regionAndMonthFilter, product.tileOpensDetail, decisions.monthPresence. Criterion: acceptance.monthsFilterAndAbstain.
 func TestAbstainedTilesSayWhy(t *testing.T) {
 	s := newTestServerReal(t)
-	const path = "/classic?region=HI&month=Jun"
+	const path = "/?show=all&region=HI&month=Jun"
 	_, body := get(t, s, path)
 
 	tileOf := func(id string) string {
@@ -6511,79 +4302,10 @@ func TestAbstainedTilesSayWhy(t *testing.T) {
 	}
 	// And the page says it too, because anything a tile shows the detail
 	// page must (product.tileOpensDetail).
-	_, page := get(t, s, "/species/miller"+strings.TrimPrefix(path, "/classic"))
+	_, page := get(t, s, "/species/miller"+strings.TrimPrefix(path, "/"))
 	if !strings.Contains(stripTags(page), marker) {
 		t.Error("Millerbird's detail page, opened under the same filter, does not say " +
 			"the month filter abstained")
-	}
-}
-
-// TestComparisonOffersAWayOutOfPickMode asserts the second exit from the
-// comparison view: one that returns to the index with pick mode off.
-//
-// The only way back used to be "back to picking birds", which keeps the
-// picks -- right for changing them, wrong for the common case of a reader
-// who has seen the comparison and wants the index again. They were left to
-// find Clear in a bar on a page they had not yet returned to.
-//
-// It must be the SAME exit as the bar's Clear and not a second one built
-// beside it: two links that both mean "leave pick mode" and are computed
-// separately will one day disagree about what else they keep.
-//
-// Watched fail: see acceptance.pickModeSurvivesNavigation.
-//
-// Verifies: product.pickFromIndex. Criterion: acceptance.pickModeSurvivesNavigation.
-func TestComparisonOffersAWayOutOfPickMode(t *testing.T) {
-	s := newTestServer(t)
-	const cmp = "/compare?species=annhum&species=amecro&region=CA&metric=mass"
-	body := mustGet(t, s, cmp)
-
-	back := html.UnescapeString(mustMatch(t, body,
-		`<a class="backlink" href="([^"]+)"`, "the back link"))
-	stop := html.UnescapeString(mustMatch(t, body,
-		`<a class="stoplink" href="([^"]+)"`, "the stop-comparing link"))
-	label := mustMatch(t, body, `class="stoplink"[^>]*>(?s)(.*?)</a>`, "its text")
-	if !strings.Contains(html.UnescapeString(label), "stop comparing") {
-		t.Errorf("the second exit reads %q", label)
-	}
-	// Below the back link, as asked, not above it or elsewhere on the page.
-	if strings.Index(body, `class="stoplink"`) < strings.Index(body, `class="backlink"`) {
-		t.Error("the stop link comes before the back link")
-	}
-
-	u, err := url.Parse(stop)
-	if err != nil {
-		t.Fatalf("stop link %q: %v", stop, err)
-	}
-	q := u.Query()
-	if _, picking := q["species"]; picking {
-		t.Errorf("stop link %q still carries species, so it lands in pick mode", stop)
-	}
-	// Everything else the comparison carried comes back with the reader.
-	for k, want := range map[string]string{"region": "CA", "metric": "mass"} {
-		if got := q.Get(k); got != want {
-			t.Errorf("stop link %q drops %s=%s; leaving pick mode must not reset the view",
-				stop, k, want)
-		}
-	}
-	if stop == back {
-		t.Error("both exits go to the same place, so one of them is not an exit")
-	}
-
-	// Following it lands on the index outside pick mode: no pick controls.
-	landed := mustGet(t, s, stop)
-	if strings.Contains(landed, `class="pick`) {
-		t.Errorf("following the stop link from %s lands in pick mode", cmp)
-	}
-
-	// And it is the bar's own Clear, so the two cannot drift apart.
-	bar := html.UnescapeString(mustMatch(t, mustGet(t, s,
-		"/classic?species=annhum&species=amecro&region=CA&metric=mass"),
-		`<a class="btn pickclear" href="([^"]+)"`, "the bar's Clear"))
-	if bar != stop {
-		t.Errorf("the bar's Clear goes to %q and the comparison's stop link to %q; two "+
-			"exits from one mode built separately will disagree about what they keep",
-			bar, stop)
 	}
 }
 
@@ -6616,8 +4338,8 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 	}
 
 	for _, c := range []struct{ path, id, want string }{
-		{"/classic?region=FL&month=Jan", "paibun", "Withheld by eBird in Florida, Jan"},
-		{"/classic?region=NY&month=Jun", "sheowl", "Withheld by eBird in New York, Jun"},
+		{"/?show=all&region=FL&month=Jan", "paibun", "Withheld by eBird in Florida, Jan"},
+		{"/?show=all&region=NY&month=Jun", "sheowl", "Withheld by eBird in New York, Jun"},
 	} {
 		shown, text := tile(c.path, c.id)
 		if !shown {
@@ -6632,7 +4354,7 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 
 	// Without a month filter the caveat names the whole window, and it wraps
 	// the year end rather than listing six months.
-	if _, text := tile("/classic?region=FL", "paibun"); !strings.Contains(text, "Withheld by eBird in Florida, Oct-Mar") {
+	if _, text := tile("/?month=all&show=all&region=FL", "paibun"); !strings.Contains(text, "Withheld by eBird in Florida, Oct-Mar") {
 		t.Errorf("Painted Bunting in Florida, all year, reads: %s", text)
 	}
 
@@ -6640,15 +4362,15 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 	// from February to May, but Wyoming's records run 302 a month inside the
 	// window against 269 outside: eBird published them, and saying otherwise
 	// would be false.
-	if _, text := tile("/classic?region=WY&month=Mar", "saggro"); strings.Contains(text, "Withheld by eBird") {
+	if _, text := tile("/?show=all&region=WY&month=Mar", "saggro"); strings.Contains(text, "Withheld by eBird") {
 		t.Errorf("Greater Sage-Grouse in Wyoming is marked withheld, but its records are in "+
 			"the export: %s", text)
 	}
 
 	// Controls: birds genuinely absent in a month stay hidden.
 	for _, c := range []struct{ path, id string }{
-		{"/classic?region=NY&month=Jan", "boboli"},
-		{"/classic?region=NY&month=Jun", "snobun"},
+		{"/?show=all&region=NY&month=Jan", "boboli"},
+		{"/?show=all&region=NY&month=Jun", "snobun"},
 	} {
 		if shown, _ := tile(c.path, c.id); shown {
 			t.Errorf("%s is shown under %s; it is not withheld there, just gone, and the month "+
@@ -6707,7 +4429,7 @@ func TestSameMeasurementsAreNoted(t *testing.T) {
 		t.Fatalf("BirdLife's Larus smithsonianus row draws %d species, want Vega and American Herring Gull", len(gulls))
 	}
 
-	_, idx := get(t, srv, "/classic")
+	_, idx := get(t, srv, "/?month=all&show=all")
 	want := 0
 	for _, group := range byRow {
 		if len(group) < 2 {
@@ -6760,7 +4482,7 @@ func TestSameMeasurementsNeedNoTable(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
-	_, idx := get(t, srv, "/classic")
+	_, idx := get(t, srv, "/?month=all&show=all")
 	for _, c := range []struct{ sp, other *dataset.Species }{{donor, borrower}, {borrower, donor}} {
 		name := html.EscapeString(c.other.Name(dataset.LocaleNA))
 		if !strings.Contains(tileOf(t, idx, c.sp.ID), "Same measurements as "+name) {
@@ -6837,21 +4559,21 @@ func TestExoticsAreOffTheIndexAndListed(t *testing.T) {
 		t.Fatalf("only %d flagged species in the dataset; the check has too little to assert", len(exotic))
 	}
 
-	_, idx := get(t, srv, "/classic")
+	_, idx := get(t, srv, "/?month=all&show=all")
 	if !strings.Contains(idx, `href="/excluded"`) {
-		t.Error("the index does not link to /excluded")
+		t.Error("the home page does not link to /excluded")
 	}
 	tiles := 0
 	for _, sp := range exotic {
 		if strings.Contains(idx, `id="`+tileAnchor(sp.ID)+`"`) {
 			tiles++
-			t.Errorf("%s is flagged exotic but has a tile on the index", sp.ScientificName)
+			t.Errorf("%s is flagged exotic but has a tile on the home page", sp.ScientificName)
 		}
 	}
 	// The count the page reports leaves them out too.
 	shown := len(ds.Species) - len(exotic)
-	if want := fmt.Sprintf("%d of %d species", shown, shown); !strings.Contains(stripTags(idx), want) {
-		t.Errorf("the index does not report %q; flagged birds are still being counted", want)
+	if want := fmt.Sprintf("All %d birds", shown); !strings.Contains(stripTags(idx), want) {
+		t.Errorf("the home page does not report %q; flagged birds are still being counted", want)
 	}
 	gone := 0
 	for fam, n := range famExotic {
@@ -6879,17 +4601,17 @@ func TestExoticsAreOffTheIndexAndListed(t *testing.T) {
 		}
 		code, page := get(t, srv, "/species/"+sp.ID)
 		if code != http.StatusOK {
-			t.Errorf("/species/%s answers %d; a bird off the index keeps its page", sp.ID, code)
+			t.Errorf("/species/%s answers %d; a bird off the home page keeps its page", sp.ID, code)
 			continue
 		}
-		if !strings.Contains(page, "Not on the index") || !strings.Contains(page, html.EscapeString(sp.Exotic)) ||
+		if !strings.Contains(page, "Not on the home page") || !strings.Contains(page, html.EscapeString(sp.Exotic)) ||
 			!strings.Contains(page, `href="/excluded"`) {
-			t.Errorf("/species/%s does not say it is off the index, why, and where the list is", sp.ID)
+			t.Errorf("/species/%s does not say it is off the home page, why, and where the list is", sp.ID)
 		}
 	}
 	// An ordinary bird says none of it.
-	if _, plain := get(t, srv, "/species/amerob"); strings.Contains(plain, "Not on the index") {
-		t.Error("American Robin's page says it is not on the index")
+	if _, plain := get(t, srv, "/species/amerob"); strings.Contains(plain, "Not on the home page") {
+		t.Error("American Robin's page says it is not on the home page")
 	}
 }
 
@@ -6916,7 +4638,7 @@ func TestReadersAreToldItIsAStickFigure(t *testing.T) {
 		return html.UnescapeString(page)
 	}
 	word := regexp.MustCompile(`(?i)\bdiagrams?\b`)
-	for _, path := range []string{"/classic", "/species/amerob", "/compare?species=amerob&species=blujay"} {
+	for _, path := range []string{"/?month=all&show=all", "/species/amerob"} {
 		text := visible(mustGet(t, s, path))
 		for _, m := range word.FindAllStringIndex(text, -1) {
 			lo, hi := max(0, m[0]-40), min(len(text), m[1]+40)
@@ -6924,7 +4646,7 @@ func TestReadersAreToldItIsAStickFigure(t *testing.T) {
 				path, strings.Join(strings.Fields(text[lo:hi]), " "))
 		}
 	}
-	if !strings.Contains(visible(mustGet(t, s, "/classic")), "stick figure") {
+	if !strings.Contains(visible(mustGet(t, s, "/?month=all&show=all")), "stick figure") {
 		t.Error("the index never calls the drawing a stick figure")
 	}
 	if !strings.Contains(visible(mustGet(t, s, "/docs/using")), "stick figure") {
@@ -6942,8 +4664,8 @@ func TestReadersAreToldItIsAStickFigure(t *testing.T) {
 // Verifies: tech.servesOnlyItsPages. Criterion: acceptance.staticServesAssetsOnly.
 func TestStaticServesAssetsOnly(t *testing.T) {
 	s := newTestServer(t)
-	for _, p := range []string{"/static/", "/static/index.html", "/static/detail.html",
-		"/static/compare.html", "/static/docs.html", "/static/undrawn.html"} {
+	for _, p := range []string{"/static/", "/static/next.html", "/static/detail.html",
+		"/static/shared.html", "/static/docs.html", "/static/undrawn.html"} {
 		if code, body := get(t, s, p); code != http.StatusNotFound {
 			t.Errorf("GET %s = %d, want 404; it serves %.40q", p, code, body)
 		}
@@ -6951,49 +4673,6 @@ func TestStaticServesAssetsOnly(t *testing.T) {
 	for _, p := range []string{"/static/styles.css", "/static/favicon.svg"} {
 		if code, _ := get(t, s, p); code != http.StatusOK {
 			t.Errorf("GET %s = %d, want 200; a page loads it", p, code)
-		}
-	}
-}
-
-// TestCountLineNamesEverySetting checks that the species-count line names
-// every setting, defaults included, one box each, in the order the controls
-// appear, each labeled as its control is; Comparing only while picking.
-//
-// Verifies: product.helpfulEmptyState. Criterion: acceptance.countLineNamesEverySetting.
-func TestCountLineNamesEverySetting(t *testing.T) {
-	s := newTestServer(t)
-	boxes := func(path string) []string {
-		t.Helper()
-		line := mustMatch(t, mustGet(t, s, path), `<p class="count">(.*?)</p>`, "the count line")
-		var out []string
-		for _, m := range regexp.MustCompile(`<span class="fsum"><b>([^<]+)</b> ([^<]*)</span>`).FindAllStringSubmatch(line, -1) {
-			out = append(out, m[1]+": "+html.UnescapeString(m[2]))
-		}
-		return out
-	}
-	defaults := []string{"Order by: Length", "Scale: Per section", "Units: in / oz", "Names: N. America",
-		"Section step: 15%", "Month: All", "Region: All", "Habitat: All", "Diet: All", "Family: All"}
-	if got := boxes("/classic"); !slices.Equal(got, defaults) {
-		t.Errorf("the arrival page names\n  %v\nwant every default\n  %v", got, defaults)
-	}
-	everything := "/classic?by=mass&scale=global&units=metric&names=world&step=20&species=amecro" +
-		"&month=Jun&region=CA&habitat=" + trait.Habitats[0].Value + "&niche=" + trait.Niches[0].Value +
-		"&family=Corvidae"
-	want := []string{"Order by: Mass", "Scale: Global", "Units: cm / g", "Names: World",
-		"Section step: 20%", "Comparing: 1 bird", "Month: Jun", "Region: California",
-		"Habitat: " + trait.Habitats[0].Label, "Diet: " + trait.Niches[0].Label, "Family: Corvidae"}
-	if got := boxes(everything); !slices.Equal(got, want) {
-		t.Errorf("the count line names\n  %v\nwant\n  %v", got, want)
-	}
-	// Frequency's own defaults: global scale, bands of one decade.
-	if got := boxes("/classic?by=frequency"); !slices.Contains(got, "Scale: Global") || !slices.Contains(got, "Section step: 10×") {
-		t.Errorf("under Frequency the count line names %v; want its defaults, Global and 10×", got)
-	}
-	// Each label is a control's own, so the line reads in the page's words.
-	page := mustGet(t, s, "/classic")
-	for _, label := range []string{"Order by", "Scale", "Units", "Names", "Section step", "Month", "Region", "Family"} {
-		if !strings.Contains(page, `<span class="lbl">`+label+`</span>`) {
-			t.Errorf("the count line's label %q is no control's label", label)
 		}
 	}
 }

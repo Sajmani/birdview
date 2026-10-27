@@ -18,34 +18,36 @@ import (
 	"html"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"regexp"
 	"strings"
 	"testing"
 )
 
-// countLine is the index's summary of every setting, as text. Every stable
-// parameter names itself there, so it is where a parameter that stopped being
-// read would show.
+// countLine is the home page's summary of its settings, as text: its title,
+// its count line's summaries, and its tier headings. Every stable parameter
+// shows there, so it is where a parameter that stopped being read would show.
 func countLine(t *testing.T, s *server, path string) string {
 	t.Helper()
-	m := regexp.MustCompile(`(?s)<p class="count">(.*?)</p>`).FindStringSubmatch(mustGet(t, s, path))
-	if m == nil {
+	body := mustGet(t, s, path)
+	parts := regexp.MustCompile(`(?s)<h2 class="settitle">.*?</h2>|<summary>.*?</summary>|<span class="shown">.*?</span>|<h3 class="tierhd".*?</h3>|<div class="pinned".*?</div>`).FindAllString(body, -1)
+	if len(parts) == 0 {
 		t.Fatalf("GET %s: no count line", path)
 	}
-	return html.UnescapeString(regexp.MustCompile(`<[^>]+>`).ReplaceAllString(m[1], " "))
+	return html.UnescapeString(regexp.MustCompile(`<[^>]+>`).ReplaceAllString(strings.Join(parts, " "), " "))
 }
 
 // TestStableUrlsKeepWorking asserts the public interface tech.stableUrls
 // names: every stable path answers, and every stable query parameter is still
 // read, with a value the pages' own links write. A parameter counts as read
-// when the index's count line changes because of it; the whole page would
-// change anyway, since every link on it carries the query.
+// when the home page's summary of its settings changes because of it; the
+// whole page would change anyway, since every link on it carries the query.
 //
 // Verifies: tech.stableUrls. Criterion: acceptance.stableUrlsKeepWorking.
 func TestStableUrlsKeepWorking(t *testing.T) {
 	s := newTestServer(t)
 	for _, p := range []string{
-		"/classic", "/species/amecro", "/compare?species=amecro&species=annhum",
+		"/", "/species/amecro",
 		"/docs", "/docs/using", "/docs/data", "/docs/pipeline", "/docs/building",
 		"/added", "/excluded",
 	} {
@@ -53,21 +55,17 @@ func TestStableUrlsKeepWorking(t *testing.T) {
 			t.Errorf("GET %s = %d, want 200; tech.stableUrls promises it", p, code)
 		}
 	}
-	w := httptest.NewRecorder()
-	s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/now?region=NY", nil))
-	if loc := w.Header().Get("Location"); w.Code != http.StatusSeeOther ||
-		!strings.HasPrefix(loc, "/classic?") || !strings.Contains(loc, "month=") || !strings.Contains(loc, "region=NY") {
-		t.Errorf("GET /now?region=NY = %d to %q, want a 303 to the index for this month in NY", w.Code, loc)
-	}
-
-	base := countLine(t, s, "/classic")
+	base0 := url.Values{"month": {"all"}, "show": {"all"}, "by": {"length"}}
+	base := countLine(t, s, string(nextURL(base0)))
 	for param, value := range map[string]string{
-		"by": "mass", "scale": "global", "step": "30", "units": "metric", "names": "world",
-		"species": "amecro", "family": "Corvidae", "region": "NY", "month": "Oct",
+		"by": "mass", "rev": "1", "step": "5", "units": "metric", "names": "world",
+		"pin": "amecro", "show": "pinned", "family": "Corvidae", "region": "NY", "month": "Oct",
 		"habitat": "Marine", "niche": "Frugivore",
 	} {
-		if got := countLine(t, s, "/classic?"+param+"="+value); got == base {
-			t.Errorf("?%s=%s leaves the index's settings as they were; the parameter is no longer read", param, value)
+		q := cloneValues(base0)
+		q.Set(param, value)
+		if got := countLine(t, s, string(nextURL(q))); got == base {
+			t.Errorf("?%s=%s leaves the home page's settings as they were; the parameter is no longer read", param, value)
 		}
 	}
 }

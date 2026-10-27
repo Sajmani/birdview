@@ -70,6 +70,7 @@ detail view — uses the full total length, so comparability is unaffected. See
 Subject: `diagram.scale.mode`
 Value: `per-section (default) | global; global is the default under Frequency, Bill and Tail`
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
 The user switches between a single scale across the entire filtered set, and a scale shared by all
 species within a section. **Per-section is the default, and is listed first.**
@@ -204,9 +205,9 @@ function that drew it. Supersedes the condition in [decisions.neckSplitUnmeasure
 Subject: `diagram.vocabulary.shared`
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
-Four surfaces draw the diagram: the **favicon**, the **index** (its tiles and its legend), the
-**detail view**, and the **comparison view**. A reader meets the same figure on all four, so the
-figure means the same thing on all four.
+Three surfaces draw the diagram: the **favicon**, the **home page**'s tiles, and the **detail
+view**. A reader meets the same figure on all three, so the figure means the same thing on all
+three.
 
 **Color is shared exactly.** Each part of the diagram — bill, head, neck, body, tail, wing
 crossbar, mass cube — has one color, and every surface uses that color for that part. A surface
@@ -217,7 +218,7 @@ be tuned per surface: the favicon drops the dashes and collapses neck, body, and
 stroke, and the detail view retunes the body's dash for its scale. Any such divergence carries its
 reason beside it.
 
-**The mechanism is most of the guarantee.** The index, detail, and comparison views share one
+**The mechanism is most of the guarantee.** The home page and the detail view share one
 `diagram` template and one stylesheet, so they cannot diverge. The favicon is the only exception: a
 standalone asset that restates the palette by hand. **That restatement is what has to be
 checked**, by [acceptance.faviconFromPalette](../../acceptance.md#faviconfrompalette).
@@ -236,7 +237,7 @@ Subject: `presentation.names.locale`
 Value: `na (default) | world`
 Goals: [goals.shareableViews](../../../goals/goals.md#shareableviews), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
-A toggle beside Units and Scale chooses between North American English names (eBird/Clements,
+A setting beside Units, **Names**, chooses between North American English names (eBird/Clements,
 the default) and world English names (AviList, following IOC). A species' id and URL are the same
 under both.
 
@@ -257,8 +258,8 @@ locale; a family label is a reading aid, not an identifier.
 
 ### The species id is the eBird code, and is locale-independent
 
-A species' URL is `/species/amerob`, and the comparison view names its birds the same way:
-`/compare?species=amerob&species=doveki`. The id is the **eBird species code** from
+A species' URL is `/species/amerob`, and the home page pins birds the same way:
+`/?pin=amerob&pin=doveki`. The id is the **eBird species code** from
 [namesFromAvilist](dataset.md#namesfromavilist).
 
 **This is what makes the locale toggle possible.** An id derived from the English name would move

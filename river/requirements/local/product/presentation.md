@@ -42,8 +42,9 @@ The metrics are **spelled out**, not abbreviated to `L`, `W`, and `M`: they fit 
 initials cost every new reader.
 
 The **cube** needs only a corner the drawing does not use, and no label, since the footer names the
-mass. Every tile in a section is drawn to one scale (scaleToggle), so the cubes compare down a
-section, a run of birds of similar length, which is where bulk against elongation shows.
+mass. Every tile on the home page is drawn to one scale ([nextView](#nextview)), so the cubes
+compare across the page; within a tier, a run of birds of similar size, they show bulk against
+elongation.
 
 Tiles wrap to fill the available display width.
 
@@ -66,10 +67,10 @@ Rationale: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition). One tal
 down a section. Eight of the 841 common names are long enough to wrap, and the longest family badge
 comes within a few pixels of the tile's inner width.
 
-In pick mode ([pickFromIndex](#pickfromindex)) each tile also carries a **pick control**, beside the
-tile's own link rather than inside it. In browsing mode it is absent.
+On the home page each tile also carries a **pin** ([nextView](#nextview)), beside the tile's own
+link rather than inside it.
 
-Rationale for centering: under global scale a small bird fills a fraction of the tile, and
+Rationale for centering: at one scale a small bird fills a fraction of the tile, and
 bottom-aligned it reads as a rendering fault; centered, the empty space reads as headroom.
 
 Family common names are **not** unique across families, so they are a reading aid beside the
@@ -101,6 +102,7 @@ a 12 g kinglet both round to 0.1 oz.
 **First load shows everything**
 
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
 The initial view has every family selected and shows all species, ordered by length.
 
@@ -113,6 +115,7 @@ for. Opening filtered or empty would hide it.
 
 Subject: `presentation.scroll`
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
 Changing any control preserves the scroll position **and the collapsed state of the Presentation
 and Controls panels**, as does returning from a detail view.
@@ -131,6 +134,7 @@ ordering, sectioning, and geometry stay in Go where they are property-tested (se
 
 Subject: `presentation.empty_state`
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
 With nothing selected, the display area reads *"Select birds to display in Controls above"*.
 
@@ -157,6 +161,7 @@ describe the same filters differently.
 
 Subject: `presentation.controls`
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
 The controls are **several collapsible panels**, each starting **closed** and each remembering its
 own state across navigations (togglesKeepPlace): **Controls** for the display toggles, **Regions**, **Diet
@@ -179,6 +184,7 @@ falls on the reader who wants a filter rather than on every reader.
 
 Subject: `presentation.filter_only`
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
 Beside each group selector in **Regions**, **Diet and Habitat**, and **Families** sits an
 **Only** control that selects that group and deselects everything else **within its own
@@ -202,8 +208,7 @@ Value: `mass unit fixed per comparison scope, smallest bird decides`
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Mass is written in **one unit across everything a page is comparing**. The scope is what the
-page claims to compare: on the index, a section, or the whole set, following the **scale**
-setting ([scaleToggle](diagram.md#scaletoggle)); on the comparison page, the birds named in the address; on a detail
+page claims to compare: on the home page, every bird it draws, which share one scale; on a detail
 page, the one bird, which compares nothing.
 
 **The smallest bird in the scope chooses the unit.** A scope holding one small bird is written
@@ -264,10 +269,10 @@ A region BirdView cannot supply a denominator for contributes to **neither** sid
 deriving both sides from that one condition keeps them from drifting apart. No region is in that
 state today.
 
-**On the index the scope is the regions and months currently selected**: a Gyrfalcon is 1 in
+**On the home page the scope is the regions and months currently selected**: a Gyrfalcon is 1 in
 3,631,056 species observations (all regions) and 1 in 82,946 in Alaska. Narrowing the months
 narrows both halves of the ratio ([regionAndMonthFilter](filtering.md#regionandmonthfilter)), so a
-month nobody was out in inflates nothing. The index therefore does not show where the bird peaks.
+month nobody was out in inflates nothing. The home page therefore does not show where the bird peaks.
 
 **Absence is a number, not a dash.** A bird with no records in the regions on screen reads
 **`0 in 1,225,176,035 species observations across every land region`**. The denominator says how
@@ -282,8 +287,8 @@ Shearwater has 39,143 records in the North Pacific). No selection reaches this t
 **On the detail page the scope is every region at once**, and the page also names the one
 where the species peaks, labeled **Top region**.
 
-**The peak and the index share are one calculation, not two that agree.** Both use the same
-per-region counts and totals, so selecting the named region on the index reproduces the detail
+**The peak and the home page's share are one calculation, not two that agree.** Both use the same
+per-region counts and totals, so selecting the named region on the home page reproduces the detail
 page's figure exactly, and the peak is always a region the bird is listed in
 ([decisions.honestSeaDenominator](../../decisions.md#honestseadenominator)).
 
@@ -449,6 +454,7 @@ disagreement is not transient: eBird filed 827,098 records under the shared name
 
 Subject: `presentation.help`
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
 Below the title, a **Presentation** panel carries two sections side by side, each half the page:
 **the diagram**, then **where the numbers come from**.
@@ -495,9 +501,8 @@ with a background or a border. Text that is cut off with an ellipsis, or that sc
 container, is not outside its box: a table too wide for a phone may scroll sideways inside itself,
 but the page may not.
 
-Rows laid out for a laptop stack on a phone instead of shrinking past reading: a group's header
-shares its line with its Only button and its members wrap below, and a category's definition goes
-under its toggle.
+Rows laid out for a laptop stack on a phone instead of shrinking past reading, and a setting's
+choices open on the screen, moved left as far as they need.
 
 Rationale: most people who reach birdview.site are on phones, and the first readers' first
 complaint was text running out of its panels and region rows running off the screen
@@ -513,7 +518,7 @@ Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shap
 
 Clicking a tile opens a detail view that is **a larger version of the same tile** — same header,
 same diagram, same main metrics, same layout — with the bird drawn **as large as the view allows,
-whatever scale the index is using**, plus:
+whatever scale the home page drew it at**, plus:
 
 - the measurement of **every individual diagram segment**: bill, head, neck, body, tail;
 - the **wing chord**, which the crossbar draws as its solid outer portions (measuredVersusModeled) and which would
@@ -534,7 +539,7 @@ Rationale: the tile is dense so it can be compared against dozens of others, whi
 to say where each number came from. The same layout, larger, lets the reader see a familiar thing
 with more exposed.
 
-The detail view does **not** inherit the index's scale: under the global default a kinglet is a few
+The detail view does **not** inherit the home page's scale: beside a swan a kinglet is a few
 pixels tall, and the view of one bird has nothing to compare it against.
 
 ## comparisonOneScale
@@ -544,6 +549,7 @@ pixels tall, and the view of one bird has nothing to compare it against.
 Subject: `presentation.compare_view`
 Value: `/compare?species=<id>&species=<id>…`
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
 A **comparison view** draws any number of chosen species together **on a single shared scale**, so
 they can be read directly against one another. It answers [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)'s question — *is a Merlin
@@ -588,6 +594,7 @@ metricProvenanceExplained is left out because a table per bird would bury the co
 Subject: `presentation.pick_mode`
 Value: `?species=<id>&species=<id>… — present, even empty, means picking`
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.shareableViews](../../../goals/goals.md#shareableviews)
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
 A reader assembles a comparison by **picking birds from the index**, where the diagrams and the
 family filter already are, rather than from a separate chooser that would duplicate both.
@@ -659,8 +666,8 @@ Subject: `docs.currency`
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 **Every CC BY source whose output appears on a page is credited on that page.** This is a license
-condition, not a courtesy: AviList, AVONET, and Fox are all CC BY 4.0. It covers `detail.html` and
-`compare.html`, whose names, families, and species codes all come from AviList.
+condition, not a courtesy: AviList, AVONET, and Fox are all CC BY 4.0. It covers `detail.html`,
+whose names, families, and species codes all come from AviList, as well as the home page.
 
 **User-facing documentation describes the project as it is, not as it was.** `README.md` and
 `docs/` are read before the code and trusted first. Two kinds of staleness are forbidden:
@@ -753,18 +760,18 @@ Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flex
 
 **The home page, `/`, draws one set of birds, at one scale, in tiers**
 (Sameer, 2026-10-26; [scalableInterface](../../../todo.md#scalableinterface)). It was built as a
-prototype at `/next` and replaced the index as the home page the same day. The index, with its
-sections and tiers, is now **the classic view** at `/classic`: unchanged, its links staying on it,
-and not linked from the home page except in its credits. A species page's **Back** goes back by the
-browser's history, so the home page returns as it was; species links carry only the units and
-names, which the species page draws with, and from a shared link Back goes to the home page in
-those. Elsewhere in these requirements, "the index" names
-the classic view.
+prototype at `/next` and replaced the index as the home page the same day; the index, kept for a
+day as the classic view at `/classic`, was removed on 2026-10-27
+([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)). A species page's **Back**
+goes back by the browser's history, so the home page returns as it was; species links carry only
+the units and names, which the species page draws with, and from a shared link Back goes to the
+home page in those. Its footer carries the full credits, which every other page links to.
 
 - **The header.** One line says what BirdView draws, its "stick figures" linking to the guide to
   reading a drawing, then "Click a bird for its numbers and sources"; what solid and dashed mean
-  is left to that guide and to each species page. Under it, **New here? Try** offers the classic view's things to try, its
-  comparisons made with pins: the birds around you now (this address with `#here-and-now`: the
+  is left to that guide and to each species page. Under it, **New here? Try** offers a few things
+  to try, each also in the guide's *Some things to try*, its comparisons made with pins: the birds
+  around you now (this address with `#here-and-now`: the
   reader's region found in the browser replaces the region, the month is set to Now, and every
   other setting is kept), small, medium, large, and huge birds (six pinned and shown
   alone, by length), all herons and ducks (every month), and more ideas.
@@ -777,8 +784,10 @@ the classic view.
   the first 100, and the count line says how many are ("First 100 of 1006 birds, plus 2 pins"). Pinning or unpinning leaves the page where
   it was. The pinned birds are listed under the find box in alphabetical order: a bird's name goes
   to its tile, and its pin unpins it. Unpinning returns the bird to the settings'
-  choice; nothing removes a bird the settings choose. A box above the set finds birds by name as
-  the search box does ([searchBox](filtering.md#searchbox)): as the reader types, it says how many
+  choice; nothing removes a bird the settings choose. A box above the set finds birds by name: a
+  bird matches when what is typed, ignoring case and punctuation, appears unbroken in one of its
+  English names, its species code, its scientific name, or the scientific name of its family or
+  order (not their English descriptions, which name other birds). As the reader types, it says how many
   birds match, and once there are 10 or fewer it lists them, each with its pin. Without
   JavaScript, Enter does the same. Pinning keeps the box's text, so the list stays open and
   several of its birds can be pinned and unpinned in turn, from the list or from their tiles;
@@ -791,13 +800,13 @@ the classic view.
   is open at a time, and a tap elsewhere closes it. A choice
   loads a new page, and the setting it was chosen in is open there, at the same place on the page,
   so several choices can be made in a row. Region
-  offers **Here**, which finds the reader's region in the browser as on the index
+  offers **Here**, which finds the reader's region in the browser
   ([hereSelectsLocalRegion](filtering.md#hereselectslocalregion)). Month's choices sit on one
   line: **All**, **Now**, which names no month, so the page shows whatever month it is loaded in,
   a rule, and the twelve months. On a phone too narrow for them, the line scrolls sideways. A **Reset**
   control, colored apart from the settings, returns to the landing set. Choosing one option selects only it; choosing more adds them; choosing every
   selected option again returns to all. Nothing selected means all.
-- **Tiers.** The ordered set breaks into tiers as the classic view's sections do
+- **Tiers.** The ordered set breaks into tiers
   ([sectionBreakRule](ordering.md#sectionbreakrule), [orderByFrequency](#orderbyfrequency)): a size tier spans one step of the scale from its
   smallest bird, a frequency tier a decade of "1 in N", and birds with no records a tier of their
   own; reversed, the tiers run the other way. A heading names each tier drawn, its range in the
@@ -834,9 +843,8 @@ the classic view.
   or most often recorded first, ↑ the reverse), months by three letters ("Oct (now)"), "all" for
   every region, "imperial" or "metric", "North Amer" or "world".
 - **Stateless.** Every view is its address. The home page with no month changes with the month, so it is
-  not stored or revalidated, as `/now` is not.
+  not stored or revalidated.
 
 Rationale: the first readers and the simulated ones found the index dense and its toggles
-backward, wanted search first, and could not read the comparison on a phone. A prototype beside
-the index lets the two be compared before any requirement of the index changes. See the proposal
+backward, wanted search first, and could not read the comparison on a phone. See the proposal
 recorded with [scalableInterface](../../../todo.md#scalableinterface).

@@ -246,8 +246,8 @@ no species needs encoding to be linked.
 **Assertions, the fallback:** the three species with no eBird code carry a scientific-name slug
 instead, and are reachable at it.
 
-**Assertions, the routes:** `/species/<code>` resolves, and the comparison view accepts codes in
-`species=` and renders those birds in that order.
+**Assertions, the routes:** `/species/<code>` resolves. Until 2026-10-27 the comparison view also
+accepted codes in `species=`; it went with the classic view.
 
 **Status: verified 2026-10-02 — passing, and watched failing** by mapping both lumped species
 onto their AviList taxon instead of dropping them, which collides *Vireo swainsoni* onto
@@ -277,8 +277,9 @@ string either way cannot pass.
 locales**. This is the property the whole change rests on, and the one an alpha code could not
 have had.
 
-**Assertions, the control:** the index offers both locales, marks the active one, and the links
-preserve the rest of the view state.
+**Assertions, the control:** the home page's Names setting offers both locales, marks the active
+one, and its links preserve the rest of the view state. Its check went with the classic view on
+2026-10-27; this is now decided through [app.nextViewDrawsOneSet](composed/internal/app/acceptance.md#nextviewdrawsoneset) (`TestNext*`).
 
 **Assertions, the fallback:** a species with no North American name renders its world name under
 either locale, rather than an empty header.
@@ -328,11 +329,10 @@ recorded, so it is not yet trusted. **Split 2026-10-25**, because River now hold
 
 ### billAndTailOrderings
 
-**The index sorts by bill and by tail, and says so**
+**The home page sorts by bill and by tail, and says so**
 
-**Verifies:** [product.oneSelectedMetric](local/product/ordering.md#oneselectedmetric), [product.ascendingOrder](local/product/ordering.md#ascendingorder), [product.scaleToggle](local/product/diagram.md#scaletoggle) · **Level:** code · **Method:** rendering test. The index sorts
-ascending by each, defaults to the Global scale under each, names it on the count line, and the
-comparison view offers both.
+**Verifies:** [product.oneSelectedMetric](local/product/ordering.md#oneselectedmetric), [product.ascendingOrder](local/product/ordering.md#ascendingorder) · **Level:** code · **Method:** rendering test. The home page sorts
+ascending by each and names it on the count line.
 **Run:** `go test ./cmd/birdview/ -run TestBillAndTailOrderings`
 **Status: verified 2026-10-19, passing, and watched failing.**
 
@@ -375,7 +375,7 @@ Watched failing: 2026-10-19, `TestHeadingDigits`, when only each tier's own ends
 
 **A tier's species count follows its range, in the count line's style**
 
-**Verifies:** [product.sectionHeadersStateRange](local/product/ordering.md#sectionheadersstaterange) · **Level:** code · **Method:** stylesheet test. The tier's *N species* sits right
+**Verifies:** [product.sectionHeadersStateRange](local/product/ordering.md#sectionheadersstaterange) · **Level:** code · **Method:** stylesheet test. The tier's *N birds* sits right
 after the range in the count line's style.
 **Run:** `go test ./cmd/birdview/ -run TestTierCountFollowsTheRange`
 **Status: verified 2026-10-19, passing, and watched failing.**
@@ -432,7 +432,9 @@ Watched failing: 2026-09-22, rounding each segment independently instead of bala
 factor differs between at least two sections in a representative dataset; in global mode one
 factor applies to every tile in the filtered set; **per-section is the default**, global is
 reachable by `?scale=global`, and per-section is listed first in the controls.
-**Status: verified 2026-09-22 — passing, and **watched failing**: scaling each bird to its own length was caught by the direct px/mm comparison. Worth noting that it was *not* caught by the first two assertions written for this criterion, because the wingspan constraint happened to preserve size ordering; comparing the scale factor itself is the only form that cannot pass by accident.**
+**Status: withdrawn 2026-10-27**, with [product.scaleToggle](local/product/diagram.md#scaletoggle) (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-09-22 — passing, and **watched failing**: scaling each bird to its own length was caught by the direct px/mm comparison. Worth noting that it was *not* caught by the first two assertions written for this criterion, because the wingspan constraint happened to preserve size ordering; comparing the scale factor itself is the only form that cannot pass by accident.**
 implementation satisfies "identical within a section" trivially when sections hold one bird.
 
 Watched failing: 2026-09-22, scaling each bird to its own length was caught by the direct px/mm comparison.
@@ -655,14 +657,13 @@ Watched failing: 2026-10-01, by restoring the initials.
 
 **The family filter selects and clears**
 
-**Verifies:** [product.familyFilter](local/product/filtering.md#familyfilter) · **Level:** code · **Method:** rendering test over `?family=`
+**Verifies:** [product.familyFilter](local/product/filtering.md#familyfilter) · **Level:** code · **Method:** rendering test over the home page's `?family=` and its Family setting
 **Assertions:** filtering to one family shows its species and excludes others; no filter shows
 all; every entry is labeled with its scientific name and its common name; **no entry carries a
 species count**, and a single count sits above the list instead; the selector is grouped by
 taxonomic order; groups appear in checklist sequence rather than
-alphabetically; each family sits inside its own order's group; each order is a working toggle that
-selects or clears **every** family in it, labeled with its common name; and **All** toggles the
-same way over the whole set, clearing the selection when untoggled.
+alphabetically; and each family sits inside its own order's group. Until 2026-10-27 each order was also a
+toggle for its families, and **All** one for the whole set; both went with the classic view.
 **Status: verified 2026-09-22 — passing, and watched failing** by alphabetizing the family list,
 and separately by making the order toggle add only its first family. **Counts moved above the
 list 2026-10-02** ([product.familyFilter](local/product/filtering.md#familyfilter)), watched failing by putting a count back on the
@@ -707,7 +708,7 @@ contains no `" in"` token, so an exclusion list misses it entirely.
 
 **Verifies:** [product.tileOpensDetail](local/product/presentation.md#tileopensdetail) · **Level:** code · **Method:** rendering test over the smallest fixture
 species, with and without an explicit `?scale=`
-**Assertion:** the diagram fills the detail view's height regardless of the index's scale mode.
+**Assertion:** the diagram fills the detail view's height whatever `scale=` the address carries.
 **Status: verified 2026-09-22 — passing, and watched failing** by making the detail view adopt the
 dataset-wide reference, which inset the hummingbird by 128 px.
 
@@ -725,7 +726,9 @@ the wingspan and the wing chord; the estimate marker is explained; both panels s
 
 Each explanation is asserted in its own scope. A whole-page search would let the controls panel
 satisfy a claim about the Presentation panel, and vice versa.
-**Status: verified 2026-09-27 — passing, and watched failing** by removing the scale explanation,
+**Status: withdrawn 2026-10-27**, with [product.pageExplainsItself](local/product/presentation.md#pageexplainsitself) (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-09-27 — passing, and watched failing** by removing the scale explanation,
 by removing the tail from the legend, by suppressing the legend diagram, and by swapping two
 sections.
 
@@ -768,7 +771,9 @@ selection
 **Assertions:** no species are displayed; the page says how to get them back; it does **not** say
 that nothing matched; the count reports zero; and All is no longer marked selected.
 **Run:** `go test ./cmd/birdview/ -run TestClearingEverythingShowsGuidance`
-**Status: verified 2026-09-22 — passing, and watched failing.** **Split 2026-10-25**, because River now holds that a criterion is met or not as a whole: its parts were met at different times, so each is its own criterion: `countLineNamesEverySetting`
+**Status: withdrawn 2026-10-27**, with [product.helpfulEmptyState](local/product/presentation.md#helpfulemptystate) (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-09-22 — passing, and watched failing.** **Split 2026-10-25**, because River now holds that a criterion is met or not as a whole: its parts were met at different times, so each is its own criterion: `countLineNamesEverySetting`
 and `nothingMatchedOffersAWayOut`.
 
 Watched failing: 2026-09-22, by treating an emptied selection as "no filter" (the previous behavior, which showed every bird).
@@ -787,7 +792,9 @@ page, on the count line, and not again in the empty state. **Changed twice on 20
 owner's request: from naming only filters that narrow something, to naming what the address
 carries, to naming everything.
 **Run:** `go test ./cmd/birdview/ -run 'TestCountLineNamesEverySetting|TestFiltersAreNamedOnTheCountLine'`
-**Status: verified 2026-10-03, passing, and watched failing; re-verified 2026-10-19.**
+**Status: withdrawn 2026-10-27**, with [product.helpfulEmptyState](local/product/presentation.md#helpfulemptystate) (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-10-03, passing, and watched failing; re-verified 2026-10-19.**
 `TestFiltersAreNamedOnTheCountLine` exercises an empty intersection end to end, reachable since the
 region filter.
 
@@ -804,7 +811,9 @@ Watched failing: 2026-10-19, by leaving months out when the address carries none
 and offers a link that clears them. The link drops month, region, habitat, diet, and family, and
 keeps order, scale, units, and names. Nothing selected is never described as a failed match.
 **Run:** `go test ./cmd/birdview/ -run 'TestClearTheFiltersClearsThem|TestEmptyStateNamesTheFiltersThatEmptiedIt'`
-**Status: verified 2026-10-21, passing, and watched failing.** The description was added 2026-10-02.
+**Status: withdrawn 2026-10-27**, with [product.helpfulEmptyState](local/product/presentation.md#helpfulemptystate) (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-10-21, passing, and watched failing.** The description was added 2026-10-02.
 No test had followed the link until 2026-10-21: it first changed nothing, then set `family=region`
 and kept every other filter, so the dead end had no exit.
 
@@ -822,7 +831,9 @@ detail page cannot consume the saved position; the detail view ships no script; 
 an `id` so `#controls` works as a fallback target; both panels carry ids so their collapsed state
 can be keyed on; every panel defaults to **closed** and carries a one-line description in its
 summary ([product.collapsibleControls](local/product/presentation.md#collapsiblecontrols)); and panel state is restored **before** the scroll.
-**Status: verified 2026-09-22, amended 2026-10-04 — passing, and watched failing** by
+**Status: withdrawn 2026-10-27**, with [product.togglesKeepPlace](local/product/presentation.md#toggleskeepplace) and [product.collapsibleControls](local/product/presentation.md#collapsiblecontrols) (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-09-22, amended 2026-10-04 — passing, and watched failing** by
 externalizing the script, by removing its path guard, by dropping a panel's id, and by reordering
 the restores so the scroll runs first. The default was *open* until [product.collapsibleControls](local/product/presentation.md#collapsiblecontrols) changed it; the
 amended check was watched failing by restoring `open` to the markup and by deleting a summary
@@ -843,7 +854,9 @@ a declared gap.
 panel, plus round-tripping each offered step through `parseOptions`
 **Assertions:** Global is listed before Per section; every offered section step (5, 10, 15, 20,
 30) is parsed as itself rather than falling back to the default.
-**Status: verified 2026-09-22 — passing, and watched failing** by reversing the scale pair and by
+**Status: withdrawn 2026-10-27**, with [product.scaleToggle](local/product/diagram.md#scaletoggle) and the Controls panel it read (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-09-22 — passing, and watched failing** by reversing the scale pair and by
 offering a step the server rejects.
 
 Watched failing: 2026-09-22, by reversing the scale pair and by offering a step the server rejects.
@@ -1090,7 +1103,7 @@ parsing, and selectors are split into tokens rather than substring-matched.
 **Verifies:** [tech.selfContainedServer](local/tech/delivery.md#selfcontainedserver) · **Level:** code · **Method:** assertions over the served asset and both pages
 
 **Assertions:** `/static/favicon.svg` is served with status 200; it **parses as XML** and its root
-element is `svg` with a `viewBox`; both the index and a detail page reference it; and
+element is `svg` with a `viewBox`; both the home page and a detail page reference it; and
 `/favicon.ico` returns 404 rather than the index page, which the catch-all route makes worth
 pinning.
 
@@ -1138,8 +1151,8 @@ and tidying them into agreement makes short necks render solid ([decisions.drawi
 
 **Assertions, rendering:** a species with a **measured** wingspan emits no dashed crossbar segment;
 one with a **modeled** wingspan emits exactly one, flanked by two solid segments and marked by two
-ticks; and the index and detail pages each carry text explaining what solid, dashed, and the tick
-mean.
+ticks; and the user guide (`/docs/using`) and the species page each carry text explaining what
+solid, dashed, and the tick mean.
 
 **Status: verified 2026-09-24 — passing, and watched failing** by: restoring the tail's dash;
 tidying the neck's pattern to match the body's; giving the head a fill back; placing the tick by
@@ -1242,14 +1255,15 @@ labels can be read at all.
 Left here as the worked example of why a branch that is dead *by the current numbers* is worth
 keeping, where one dead *by construction* is not — the distinction [decisions.inFlightNoLegs](decisions.md#inflightnolegs) turned on. Deleting it
 while it was unreachable would have meant rediscovering the need for it as a bug, the first time
-two birds were drawn to one scale.
+two birds were drawn to one scale. The comparison view went with the classic view on 2026-10-27
+([decisions.classicViewRemoved](decisions.md#classicviewremoved)).
 
 ### totalLengthLabeled
 
 **The detail diagram labels the whole bird's total length, under the tail**
 
 **Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) · **Level:** code · **Method:** geometry assertions over the whole fixture plus
-assertions on the rendered detail page, the help legend, and an index tile
+assertions on the rendered detail page and a home page tile
 
 **Assertions, placement:** the label is centered on the drawing axis (`text-anchor="middle"` at the
 bird's centerline, not the box's — they differ, because the bird is laid out left of the label
@@ -1273,7 +1287,7 @@ is the assertion that would otherwise be vacuous: for every unfolded bird the tw
 than hardcoding it, so it keeps working — and starts asserting the opposite — if the Ricklefs ask
 is ever granted and the value becomes measured.
 
-**Assertions, scope:** the detail view and the help legend carry the label; an **index tile carries
+**Assertions, scope:** the detail view carries the label; a **home page tile carries
 none**, like every other annotation of [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram).
 
 **Status: verified 2026-10-01** — re-verified after mass joined total length under the tail.
@@ -1322,7 +1336,9 @@ and the wrapper is what occupies it. A chip left as a direct child of `.ogroup` 
 grid item and lands in a new implicit row back at the page margin, which is the original bug
 reintroduced for one order.
 
-**Status: verified 2026-09-28 — passing, and watched failing** by reverting `.ogroup` to the
+**Status: withdrawn 2026-10-27**, with the classic view's Families panel, whose layout it checked (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-09-28 — passing, and watched failing** by reverting `.ogroup` to the
 wrapping flex row it was (the original bug); by collapsing it to one grid column; by removing
 `flex-wrap` from `.ofams`; by deleting the `.ofams` rule; by removing the wrapper from the markup;
 by leaving one chip outside it; and by moving the order header inside it.
@@ -1372,7 +1388,9 @@ rendered**, is **named on the page**, and appears in **no link the page builds**
 repairs itself on the next click. Asserted with a set mixing valid and invalid ids, because a set
 of one invalid id cannot tell "dropped it" from "refused the page".
 
-**Status: verified 2026-09-30 — passing, and watched failing** eleven ways: by laying each panel
+**Status: withdrawn 2026-10-27**, with [product.comparisonOneScale](local/product/presentation.md#comparisononescale) (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-09-30 — passing, and watched failing** eleven ways: by laying each panel
 out against its own length (every bird drew at 281.2px, filling its panel, and both scale
 assertions fired); by sharing a scale set by **half** the largest, which the proportionality check
 **passed** and only the largest-bird check caught, at 301.9px against 281.2px; by dropping the
@@ -1486,7 +1504,9 @@ and confirming the picks survive it.
 **names the dead one on the page**, and emits **no link containing it**. Asserted with a mixed set
 because an all-invalid set cannot distinguish dropping from refusing.
 
-**Status: verified 2026-10-01 — passing, and watched failing** ten ways: rendering the pick
+**Status: withdrawn 2026-10-27**, with [product.pickFromIndex](local/product/presentation.md#pickfromindex) (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-10-01 — passing, and watched failing** ten ways: rendering the pick
 control in browsing mode (5 controls on 5 tiles); implementing it by rewriting the tile's own
 href, which made a tile link to `/?species=` instead of a detail view; prepending instead of
 appending, so add-then-remove returned a different order; dropping `species` from the tile href,
@@ -1563,8 +1583,8 @@ what else they keep. Watched failing with a stop link that keeps the picks
 
 **Mass is drawn as the cube of water that weighs the same**
 
-**Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram), [product.pageExplainsItself](local/product/presentation.md#pageexplainsitself) · **Level:** code · **Method:** geometry assertions over every fixture
-species, plus assertions on the rendered detail and comparison pages
+**Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) · **Level:** code · **Method:** geometry assertions over every fixture
+species, plus assertions on the rendered detail page and home page tiles
 
 **Assertions, arithmetic:** the square's side is `10 × ∛(mass in grams) × px/mm`, to within a
 twentieth of a pixel, for every species. Derived from the definition of the gram — one gram of
@@ -1587,12 +1607,12 @@ lower**. Both are asserted; checking one leaves the other free to overrun.
 **Assertions, provenance:** solid when the mass is measured, dashed when it is not, as [product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled)
 requires of every other stroke.
 
-**Assertions, rendering:** the square reaches both the detail page and the comparison page, the
-diagram key appears **exactly once** on each however many birds are shown, and it **names the
-square**. An unexplained shape beside a bird reads as part of the bird, so the key naming it is
+**Assertions, rendering:** the square reaches the detail page, the diagram key appears **exactly
+once** on it, and it **names the square**. The comparison page was checked too until it went
+with the classic view on 2026-10-27. An unexplained shape beside a bird reads as part of the bird, so the key naming it is
 not documentation of the feature, it is the feature.
 
-**Assertions, the index tiles:** **every** tile carries a cube — counted against the number of
+**Assertions, the home page tiles:** **every** tile carries a cube — counted against the number of
 tiles, not merely found once — and **no tile carries a label of any kind**, the mass being named
 in the footer instead ([decisions.massCubeOnTiles](decisions.md#masscubeontiles)). This reverses what this criterion asserted
 when it was written, which was that tiles carry none; the reasoning is in [decisions.massCubeOnTiles](decisions.md#masscubeontiles).
@@ -1610,7 +1630,8 @@ bottom-left and the crossbar crosses the upper middle, so floating the cube to t
 tile, sliding it 120px right, tripling the projection depth, and scaling it by 1.6 all leave it
 technically clear while moving the margin a long way.
 
-**Assertions, the Presentation panel:** it explains the cube in prose, naming what it is: the
+**Assertions, the Presentation panel** (gone with the classic view on 2026-10-27, and with it
+[product.pageExplainsItself](local/product/presentation.md#pageexplainsitself))**:** it explains the cube in prose, naming what it is: the
 bird's mass drawn as water. The diagram key alone is not enough — the Presentation panel
 is where a reader learns to read the drawing ([product.pageExplainsItself](local/product/presentation.md#pageexplainsitself)), and the cube is the one mark that is not a
 length. (Until 2026-10-25 it also had to warn that a cube root flattens; that warning left the
@@ -1676,7 +1697,9 @@ by looking for stored state — there is none.
 
 **Assertions, scope:** no sort control below two birds, there being nothing to sort.
 
-**Status: verified 2026-10-01 — passing, and watched failing** by sorting descending; by sorting
+**Status: withdrawn 2026-10-27**, with [product.comparisonOneScale](local/product/presentation.md#comparisononescale) (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-10-01 — passing, and watched failing** by sorting descending; by sorting
 every option by length regardless of its metric; by adding a `sort=` parameter instead of
 reordering; by offering the control for a single bird; and by hardcoding the on-state true.
 
@@ -1852,7 +1875,9 @@ so breaking the selector panicked on `body[-1:]` before any assertion ran — re
 instead of "the selector is broken". That is the same confusion familyListWraps records, where a parser
 that depended on the structure under test reported its own failure rather than the defect.
 
-**Status: verified 2026-10-02 — passing, and watched failing** by the live defect it was written
+**Status: withdrawn 2026-10-27**, with [product.pageExplainsItself](local/product/presentation.md#pageexplainsitself) (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-10-02 — passing, and watched failing** by the live defect it was written
 for: **Names**, added with [product.englishNameChoice](local/product/diagram.md#englishnamechoice), was a control with no documentation, and
 this criterion is what caught it. **Re-verified after the panel split** ([product.collapsibleControls](local/product/presentation.md#collapsiblecontrols)),
 where it immediately caught the Family documentation left behind in the Controls box. Also watched failing by deleting the Units entry, by adding an
@@ -1871,13 +1896,13 @@ the two sets is the only form of this check that fails when someone adds a contr
 
 **The region filter selects, groups, and composes**
 
-**Verifies:** [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.filtersCompose](local/product/months.md#filterscompose) · **Level:** code · **Method:** rendering tests over `?region=`
+**Verifies:** [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.filtersCompose](local/product/months.md#filterscompose) · **Level:** code · **Method:** rendering tests over the home page's `?region=`
 
 **Assertions, filtering:** filtering to one region shows species reported there and excludes
-others; no parameter shows all; and an explicitly empty `region=` shows none, the same
-absent-versus-empty distinction the family filter draws.
+others; no parameter shows all; and an explicitly empty `region=` shows all too, the home page's
+rule. Until 2026-10-27 it showed none, as the classic view's family filter did.
 
-**Assertions, the selector:** the box offers **both groupings** of [product.regionsGroupedTwoWays](local/product/months.md#regionsgroupedtwoways),
+**Assertions, the selector, until the classic view went on 2026-10-27:** the box offers **both groupings** of [product.regionsGroupedTwoWays](local/product/months.md#regionsgroupedtwoways),
 each labeled and each carrying a note saying whether it is measured or drawn, with
 **Geographic first**; within each,
 regions are grouped into zones, **Pelagic is the last zone**, and every region is present, each
@@ -1943,7 +1968,9 @@ neighboring zone than to their own, by margins as small as 0.001; reassigning th
 does **not** converge but cycles, five regions moving every sweep. The mainland is a smooth
 gradient and any cut is a choice of where to slice ([decisions.regionsTwoWays](decisions.md#regionstwoways)).
 
-**Status: verified 2026-10-03 — passing, and watched failing** by filing Hawaii under Great
+**Status: withdrawn 2026-10-27**, with [product.regionsGroupedTwoWays](local/product/months.md#regionsgroupedtwoways) (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-10-03 — passing, and watched failing** by filing Hawaii under Great
 Lakes and Texas under New England (both caught on rank), and by filing Navassa under
 Mid-Atlantic and Alaska under Gulf Coast (both caught per region, Alaska at 0.446 against 0.465
 for regions at large). The earlier per-zone form of the check was watched **passing** under the
@@ -1956,7 +1983,7 @@ Watched failing: 2026-10-03, by filing Hawaii under Great Lakes and Texas under 
 **A region's URL is readable, unique, and round-trips**
 
 **Verifies:** [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter) · **Level:** code · **Method:** unit tests over the region table, plus a
-rendering test over the selector
+rendering test over the home page's Region setting
 
 **Assertions, the slug:** every region's slug is its postal code where it has one and its
 PascalCase name where it has none; slugs are **unique across all 74 regions**, and every slug is
@@ -1972,8 +1999,9 @@ with no standard abbreviation carry an **empty** code rather than a made-up one
 reintroduced quietly.
 
 **Assertions, rendering:** region links carry slugs and **no GADM id appears in any URL**; a
-chip with a code shows code and name, and a chip without one shows the name alone — not an
-empty code slot, which the stylesheet would precede with a stray separator.
+choice with a code is named with the code as its tooltip, and a choice without one is named
+alone. (The classic view's chips showed code and name, and a chip without a code had to show no
+empty code slot, which the stylesheet would precede with a stray separator.)
 
 **Status: verified 2026-10-03 — passing, and watched failing** by returning a stored slug
 instead of deriving it, so a renamed region kept its old URL; by emitting GADM ids in links
@@ -2172,9 +2200,10 @@ leaves the table looking correct. A second assertion counts the assignments that
 the dataset against the number the table defines, so a miss surfaces as a number rather than as
 nothing at all.
 
-**Assertions, the control:** the Species panel offers Habitat and Diet before the taxonomic
+**Assertions, the control:** the Species panel offered Habitat and Diet before the taxonomic
 family list, each option carrying its count and its definition, and the retired birder grouping
-is not rendered.
+was not rendered. That check went with the classic view on 2026-10-27; the home page's Habitat
+and Diet settings are decided through [app.nextViewDrawsOneSet](composed/internal/app/acceptance.md#nextviewdrawsoneset) (`TestNext*`).
 
 **Assertions, the additions page:** `/added` lists **every** assignment that is not published,
 counted against the dataset rather than eyeballed — a page that quietly lists a subset is worse
@@ -2214,13 +2243,13 @@ Watched failing: 2026-10-16, against the code as found, every template returned 
 
 ### robotsKeepsCrawlersToPages
 
-**`/robots.txt` opens every query-free page but the comparison, and closes every filtered view**
+**`/robots.txt` opens every query-free page, and closes every filtered view**
 
 **Verifies:** [tech.crawlersSkipFilteredViews](local/tech/delivery.md#crawlersskipfilteredviews), [tech.servesOnlyItsPages](local/tech/delivery.md#servesonlyitspages) · **Level:** code · **Method:** parse the served policy and judge
 every page the accessibility crawl discovers by RFC 9309's matching rules
 **Assertions:** `/robots.txt` answers 200 as `text/plain`; under `User-agent: *`, every discovered
-page without a query string is allowed except `/compare`, and every one with a query string is
-disallowed, as are `/now` and the boundary file; `/`, a species page, the guides, and the
+page without a query string is allowed, and every one with a query string is disallowed, as is
+the boundary file (`/compare` and `/now` had rules until 2026-10-27); `/`, a species page, the guides, and the
 stylesheet are allowed. The crawl must offer at least three of each kind, or the check fails
 rather than passing on nothing. An unknown field in the policy fails it too, so a typo cannot drop
 a rule. `TestRobotsMatcher` pins the matcher to RFC 9309's precedence: the longest match wins,
@@ -2239,11 +2268,12 @@ Watched failing: 2026-10-23, before the route existed, `GET /robots.txt` answere
 **Every stable path answers, and every stable parameter is still read**
 
 **Verifies:** [tech.stableUrls](local/tech/delivery.md#stableurls) · **Level:** code · **Method:** request each stable path; set each stable
-parameter to a value the pages write and compare the index's settings summary with the default's
-**Assertions:** `/`, a species page, a two-bird comparison, `/docs` and each of its four guides,
-`/added` and `/excluded` answer 200; `/now?region=NY` answers 303 to the index for this month in
-NY; and each of `by`, `scale`, `step`, `units`, `names`, `species`, `family`, `region`, `month`,
-`habitat` and `niche` changes the index's count line, which names every setting. The count line
+parameter to a value the pages write and compare the home page's settings summary with the default's
+**Assertions:** `/`, a species page, `/birds.json`, `/robots.txt`, `/docs` and each of its four
+guides, `/added` and `/excluded` answer 200; and each of `by`, `rev`, `step`, `units`, `names`,
+`pin`, `show`, `family`, `region`, `month`, `habitat` and `niche` changes the home page's title,
+count line, tier headings, or pinned list, which together name every setting. The comparison,
+`/now`, `scale` and `species` left this list on 2026-10-27 ([decisions.classicViewRemoved](decisions.md#classicviewremoved)). The count line
 is compared rather than the page, because every link on the page carries the query, so any
 parameter at all would change the page.
 **Does not cover:** that a URL shows the same birds it did, which moves with the data by design;
@@ -2313,13 +2343,15 @@ Watched failing: 2026-10-23, with the builder's `COPY --from=test` deleted, it r
 
 **Verifies:** [tech.smokeCheckAfterDeploy](local/tech/release.md#smokecheckafterdeploy) · **Level:** code · **Method:** run the checks over real HTTP against this server, a canonical-host redirect to it, and broken variants
 **Assertions:** against the server and a second one redirecting to it, all of at least eight
-checks pass; with `robots.txt` gone, the index uncompressed, an unknown species answered, or a
-guide gone, the check written for that breakage fails; and a host that serves the site instead of
+checks pass; with `robots.txt` gone, the home page uncompressed or cacheable, `/?month=all` not
+revalidated, an unknown species answered, or a guide gone, the check written for that breakage
+fails; and a host that serves the site instead of
 redirecting fails the redirect check.
 **Run:** `go test ./cmd/birdview/ -run TestSmokeChecksTheServer`
 **Status: verified 2026-10-23, passing, and watched failing** by the broken variants above, which
 the test keeps. Run against birdview.site the same day, with `www.birdview.site` and the Cloud Run
-address as redirecting hosts: nine checks, all passing.
+address as redirecting hosts: nine checks, all passing. On 2026-10-27 `/?month=all` replaced
+`/classic` in the revalidation check, and the `/now` check went ([decisions.classicViewRemoved](decisions.md#classicviewremoved)).
 
 Watched failing: 2026-10-23, by the broken variants above, which the test keeps.
 
@@ -2342,9 +2374,9 @@ Watched failing: 2026-10-23, by the broken variants above, which the test keeps.
 | [product.generatedBadgeColors](local/product/dataset.md#generatedbadgecolors) | legibleDistinctColors, badgeTextInheritsColor | |
 | [product.joinOnBinomial](local/product/dataset.md#joinonbinomial) | joinCoversEverySpecies | |
 | [product.unmatchedSpeciesReported](local/product/dataset.md#unmatchedspeciesreported) | unmatchedFailsBuild | |
-| [product.familyFilter](local/product/filtering.md#familyfilter) | familyFilterSelectsAndClears, familyListWraps | |
+| [product.familyFilter](local/product/filtering.md#familyfilter) | familyFilterSelectsAndClears | familyListWraps withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |
 | [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.filtersCompose](local/product/months.md#filterscompose) | regionFilterBehaves, regionUrlRoundTrips, belowBarCountsKept | |
-| [product.regionsGroupedTwoWays](local/product/months.md#regionsgroupedtwoways) | regionFilterBehaves, zonesAnswerToData | |
+| [product.regionsGroupedTwoWays](local/product/months.md#regionsgroupedtwoways) | — | withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |
 | [product.familiesByOrder](local/product/months.md#familiesbyorder) | familyGroupingComplete | |
 | [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters) | habitatDietFilterPerSpecies | |
 | [product.categoryProvenance](local/product/measurements.md#categoryprovenance) | categoryOriginShown | |
@@ -2352,17 +2384,17 @@ Watched failing: 2026-10-23, by the broken variants above, which the test keeps.
 | [product.sectionBreakRule](local/product/ordering.md#sectionbreakrule), [product.sectionThresholdDefault](local/product/ordering.md#sectionthresholddefault) | sectionBoundariesObeyRule | |
 | [product.sectionHeadersStateRange](local/product/ordering.md#sectionheadersstaterange) | sectionHeadersMatch | |
 | [product.diagramOnlyMode](local/product/presentation.md#diagramonlymode) | bothCommandsBuild | |
-| [product.tileContents](local/product/presentation.md#tilecontents) | tileCarriesHeaderAndMetrics, pickModeSurvivesNavigation, tileHeaderNeverWraps, familyGroupingComplete | |
+| [product.tileContents](local/product/presentation.md#tilecontents) | tileCarriesHeaderAndMetrics, tileHeaderNeverWraps, familyGroupingComplete | pickModeSurvivesNavigation withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |
 | [product.imperialByDefault](local/product/presentation.md#imperialbydefault) | unitToggleSwitches | |
-| [product.firstLoadShowsAll](local/product/presentation.md#firstloadshowsall) | familyFilterSelectsAndClears | |
+| [product.firstLoadShowsAll](local/product/presentation.md#firstloadshowsall) | — | withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |
 | [product.tileOpensDetail](local/product/presentation.md#tileopensdetail) | detailShowsProvenance, bothCommandsBuild, detailDrawsFullScale | |
-| [product.pageExplainsItself](local/product/presentation.md#pageexplainsitself) | pageExplainsControls, massDrawnAsWaterCube, everyControlDocumented | |
-| [product.collapsibleControls](local/product/presentation.md#collapsiblecontrols) | scrollScriptScoped | |
-| [product.helpfulEmptyState](local/product/presentation.md#helpfulemptystate) | emptyStateGuides | |
-| [product.togglesKeepPlace](local/product/presentation.md#toggleskeepplace) | scrollScriptScoped | partial — behavior unverifiable without a browser |
+| [product.pageExplainsItself](local/product/presentation.md#pageexplainsitself) | — | withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |
+| [product.collapsibleControls](local/product/presentation.md#collapsiblecontrols) | — | withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |
+| [product.helpfulEmptyState](local/product/presentation.md#helpfulemptystate) | — | withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |
+| [product.togglesKeepPlace](local/product/presentation.md#toggleskeepplace) | — | withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |
 | [product.segmentComposition](local/product/diagram.md#segmentcomposition) | diagramPartsInOrder, foldedNeckSameStroke, foldingFamiliesHaveNecks, diagramDistinguishesModeled | legsFromTarsusWithdrawn withdrawn ([decisions.inFlightNoLegs](decisions.md#inflightnolegs)) |
 | [product.segmentsSumToLength](local/product/diagram.md#segmentssumtolength) | segmentsSumExactly, foldedNeckSameStroke | |
-| [product.scaleToggle](local/product/diagram.md#scaletoggle) | sharedScale, controlsMatchServer | |
+| [product.scaleToggle](local/product/diagram.md#scaletoggle) | — | withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |
 | [product.crossbarAtVerticalScale](local/product/diagram.md#crossbaratverticalscale) | crossbarToScale | |
 | [product.proportionDifferentiates](local/product/diagram.md#proportiondifferentiates) | proportionsDifferentiate | |
 | [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily) | neckLengthSerialized, foldingFamiliesHaveNecks | |
@@ -2381,8 +2413,8 @@ Watched failing: 2026-10-23, by the broken variants above, which the test keeps.
 | [product.inaturalistLink](local/product/presentation.md#inaturalistlink) | inaturalistLinkConfidentOnly | |
 | [product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled) | diagramDistinguishesModeled | |
 | [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) | segmentLabelsDontCollide, totalLengthLabeled, massDrawnAsWaterCube | |
-| [product.comparisonOneScale](local/product/presentation.md#comparisononescale) | comparisonSharesScale, comparisonSortRewritesUrl | |
-| [product.pickFromIndex](local/product/presentation.md#pickfromindex) | pickModeSurvivesNavigation | |
+| [product.comparisonOneScale](local/product/presentation.md#comparisononescale) | — | withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |
+| [product.pickFromIndex](local/product/presentation.md#pickfromindex) | — | withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |
 | [tech.twoCommandsOneModule](local/tech/delivery.md#twocommandsonemodule), [tech.servesOnLocalhost](local/tech/delivery.md#servesonlocalhost) | bothCommandsBuild | |
 | [tech.selfContainedServer](local/tech/delivery.md#selfcontainedserver) | noServerNetworkRequest, ownRenderableFavicon | |
 | [tech.fetchRestrictedInputs](local/tech/delivery.md#fetchrestrictedinputs) | nothingRestrictedTracked, abaFileHashMatches | |
@@ -2404,7 +2436,7 @@ Honest gaps, rather than criteria that would not bite:
   interaction behaviors. They are testable, but only with a browser harness this project does not
   have, and a unit test asserting that a template contains a string verifies the template rather
   than the behavior. Covered by human review until a harness exists; promote them when one does.
-  familyFilterSelectsAndClears and familyListWraps do not close this gap: they check the selector's structure and layout, not
+  familyFilterSelectsAndClears does not close this gap: it checks the selector's structure, not
   what clicking a family does.
 - **[tech.localNowPublicLater](local/tech/posture.md#localnowpubliclater) (never commercial).** A standing posture with no code to check. It is enforced by the
   human gate and by `imports.md`, not by a test.
@@ -2437,7 +2469,9 @@ an empty page and looks like a data bug.
 what is selected, so the same Only link appears whatever else is on. Two different starting
 selections produce the same Only target for the same group.
 
-**Status: verified 2026-10-04 — passing, and watched failing** by building the target from the
+**Status: withdrawn 2026-10-27**, with [product.onlyPerGroup](local/product/presentation.md#onlypergroup) (the classic view was removed when the home page replaced it; [decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+
+Formerly: **verified 2026-10-04 — passing, and watched failing** by building the target from the
 current selection rather than from the group (the two starting selections then disagree), and by
 pointing a trait's Only at both trait parameters instead of its own (the habitat selection is
 then cleared by a diet click).
@@ -2449,21 +2483,19 @@ Watched failing: 2026-10-04, by building the target from the current selection r
 **Mass is written in one unit across a comparison**
 
 **Verifies:** [product.oneUnitInComparison](local/product/presentation.md#oneunitincomparison) · **Level:** code · **Method:** unit tests over
-`unitsFor`, plus rendering tests over the index and comparison pages
+`unitsFor`, plus rendering tests over the home page
 
 **Assertions, the rule:** the smallest mass in a scope chooses the unit, so a scope spanning the
 switch point is written in the smaller one throughout. A scope entirely above it keeps the large
 unit — the rule is "the smallest decides", not "always ounces". A scope with no recorded mass
 does not crash and does not pick the large unit on no evidence.
 
-**Assertions, the scopes:** on the index the scope follows the **scale** setting — per section
-under a per-section scale, the whole shown set under a global one — and a section's own
-`Min`–`Max` header is written in that section's unit, not a per-value one. On the comparison
-page the scope is the set named in the address: adding a small bird to a set of large ones
-rewrites the large ones.
+**Assertions, the scopes:** the home page draws every bird at one scale, so its scope is every
+bird it draws. Until 2026-10-27 the classic view's scope followed its Scale setting, and the
+comparison page's was the set named in its address; both went with the classic view.
 
-**Assertions, no mixing:** over the real dataset, no section and no comparison renders two
-different mass units at once. This is the assertion that would have caught the original defect,
+**Assertions, no mixing:** over the real dataset, the home page never renders two different
+mass units at once. This is the assertion that would have caught the original defect,
 which was found in a screenshot rather than by any check.
 
 **Status: verified 2026-10-04 — passing, and watched failing** by choosing the unit from the
@@ -2704,7 +2736,7 @@ now catches it is the check nobody had written.
 
 **Assertions:**
 
-1. For every species carrying a peak, **selecting that one region on the index reproduces the
+1. For every species carrying a peak, **selecting that one region on the home page reproduces the
    detail page's figure exactly.**
 2. The peak is always **a region the species is listed in**. The old figure could name one the
    reader would not find in the filter at all.
@@ -2818,6 +2850,9 @@ Watched failing: 2026-10-05, under every mutation in the table below, each shown
    stand on every view: a caption that followed the selection would report what the reader had
    just chosen, where two standing captions say the controls differ before they are clicked.
 
+Assertions 7 to 9 went with the classic view on 2026-10-27, with its Scale setting and its
+Order by row.
+
 **Assertion 2 is the one with teeth, and it was added after the first version passed a
 mutation it should have caught.** The header is written by `frequencyBand` and the banding done
 by `SectionsBy`, so a tier can be labeled `1 in 1,000 – 1 in 9,999` while holding whatever the
@@ -2858,7 +2893,7 @@ that varies by metric is the same bug by a different road.
 
 1. For **both** species a shared name covers, the detail page carries a *Recorded as* row
    naming the source binomial and the other species.
-2. The **index tile** carries the marker too, naming the other bird.
+2. The **home page tile** carries the marker too, naming the other bird.
 3. A species eBird **withholds** says so, and is **not** reported as a naming disagreement.
 4. An ordinary species carries none of it.
 
@@ -3039,7 +3074,7 @@ rendered tile cell and the tooltip beside it
 
 **Assertions:**
 
-1. The index tile's `1 in N` is followed, **in the same cell**, by the unit `species
+1. A home page tile's `1 in N` is followed, **in the same cell**, by the unit `species
    observations`.
 2. The tooltip that spells the figure out counts in the same noun, and no longer in `bird
    observations`.
@@ -3075,13 +3110,13 @@ region scopes
 
 **Assertions:**
 
-1. For a sample of species across the index, the figure printed on the tile appears verbatim
+1. For a sample of species across the home page, the figure printed on the tile appears verbatim
    on that species' detail page.
 2. It appears **under the scope the reader selected** — `(all regions)` unfiltered, `in
    Alaska` under `?region=AK` — not quietly swapped for another.
 3. The same bird's figure **differs** between the two scopes, or both assertions above could
    be satisfied by a pair of pages that ignore the filter entirely.
-4. The index parse is floored per scope — 1,000 tiles unfiltered, 300 in Alaska — so a regex
+4. The home page parse is floored per scope — 1,000 tiles unfiltered, 300 in Alaska — so a regex
    that silently matched nothing cannot make the rest vacuous.
 
 **The gap this closes.** [product.tileOpensDetail](local/product/presentation.md#tileopensdetail) described the detail view as a larger
@@ -3185,7 +3220,7 @@ responses, their headers, and their conditional round trip
    saves the thing it costs a header to offer.
 4. A page renders **byte-identically** three times running, which is the assumption the
    fingerprint rests on.
-5. Changing the dataset changes the index's `ETag`.
+5. Changing the dataset changes the home page's `ETag`.
 
 **Assertions 4 and 5 are the ones that matter**, because the ETag is computed from the build
 and the URL rather than from the body. That substitute is what makes the scheme affordable —
@@ -3488,7 +3523,7 @@ Watched failing: 2026-10-12, under every mutation in the table below, each shown
    wingspans is a column the reader code asks for, so a renamed or dropped column cannot leave
    the diagram describing a pipeline that no longer exists.
 5. **Linked** from `docs/data.md`, `docs/building.md` and `docs/using.md` as served, from the
-   source list at the foot of the index, and from the README.
+   home page's footer, and from the README.
 6. **One field per line, one mark per field.** Every box with fields lists one field per line,
    followed by exactly one of ★ · ✗ and an optional note in italics; the lines under a box's name
    are italic. A box with fields written as a plain label, which cannot carry italics, fails.
@@ -3584,7 +3619,7 @@ the code. The expected sheet is now written in the test.
 **Species drawn from the same measurements say so**
 
 **Verifies:** [product.borrowedMeasurementsSaySo](local/product/measurements.md#borrowedmeasurementssayso) · **Level:** code · **Method:** unit test over ingest
-output, and rendering tests over the index and the detail page
+output, and rendering tests over the home page and the detail page
 
 **Assertions:**
 
@@ -3680,22 +3715,23 @@ open record at all ([product.declaredExceptions](local/product/dataset.md#declar
 
 ### escapedBirdsListedAndServed
 
-**Escaped and kept birds are off the index, listed, and still served**
+**Escaped and kept birds are off the home page, listed, and still served**
 
 **Verifies:** [product.escapedBirdsListed](local/product/measurements.md#escapedbirdslisted), [product.statusIsPublished](local/product/dataset.md#statusispublished) · **Level:** code ·
-**Method:** unit test over ingest output, and rendering tests over the index, `/excluded` and
+**Method:** unit test over ingest output, and rendering tests over the home page, `/excluded` and
 the detail pages
 
 **Assertions:**
 
 1. **Flagged from the list.** Every species in `status.Exotic` is drawn and carries its reason as
    `exotic`; no other species carries one. A listed name that is not drawn fails the build.
-2. **Off the index.** No flagged species has a tile on the index, and none is offered or counted
-   by the family, habitat, diet, or region controls. A family whose every species is flagged is
+2. **Off the home page.** No flagged species has a tile on the home page, and none is offered or
+   counted by the family, habitat, diet, or region settings; the page reports *All N birds*
+   without them. A family whose every species is flagged is
    not offered.
 3. **Listed.** `/excluded` names every flagged species with its reason and links to its detail
-   page, and the index links to `/excluded`.
-4. **Still served.** Each flagged species' detail page answers 200, says it is not on the index
+   page, and the home page links to `/excluded`.
+4. **Still served.** Each flagged species' detail page answers 200, says it is not on the home page
    with its reason, and links to `/excluded`.
 
 **Status: verified 2026-10-14 — passing, and watched failing** under all of:
@@ -3720,15 +3756,14 @@ birds: the index shows 1,041 of 1,082, and Casuariidae and Ramphastidae leave th
 **Readers are told the drawing is a stick figure**
 
 **Verifies:** [product.segmentComposition](local/product/diagram.md#segmentcomposition), [decisions.stickFigure](decisions.md#stickfigure) · **Level:** code ·
-**Method:** rendering test over the visible text of the index, a detail page, the comparison page,
-and the using guide
+**Method:** rendering test over the visible text of the home page, a detail page, and the using
+guide
 
 **Assertions:**
 
-1. No visible text on the index, a detail page, or the comparison page says *diagram* or
-   *diagrams*, except the link to the data-pipeline diagram. Class names, template comments and
+1. No visible text on the home page or a detail page says *diagram* or *diagrams*, except the link to the data-pipeline diagram. Class names, template comments and
    scripts are not visible text and are not checked.
-2. The index and `docs/using.md` call the drawing a *stick figure*.
+2. The home page and `docs/using.md` call the drawing a *stick figure*.
 
 **The check found one the edit had missed:** the detail page's provenance for total length read
 *sum of the five diagram segments*, a model string written by the ingest rather than the

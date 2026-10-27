@@ -82,9 +82,8 @@ func datasetCounts(t *testing.T) (species, families int) {
 //
 // `pages` names the pages a source's output actually reaches; nil means all
 // of them. GBIF is the reason this field exists: region membership is derived
-// from its occurrence records and is shown on the index and the detail page,
-// but compare.html shows no regions, and demanding a credit there would be
-// asking for attribution for something the page does not use.
+// from its occurrence records and is shown on the home page and the detail
+// page, but a page that showed no regions would owe it no credit.
 //
 // This list is hand-maintained, which is its weakness: it cannot catch a
 // source nobody added to it. GBIF supplied served data from the day product.regionAndMonthFilter
@@ -99,19 +98,19 @@ var ccBySources = []struct {
 	{"AVONET", "AVONET", "mass, wing chord, and the measured segments", nil},
 	{"Fox et al.", "Fox", "empirical wingspans", nil},
 	{"GBIF", "GBIF", "which regions each bird is found in",
-		[]string{"index.html", "detail.html"}},
+		[]string{"next.html", "detail.html"}},
 }
 
 // TestEveryPageCreditsWhatItShows asserts the license half of product.selfDescriptionStaysTrue.
 //
 // Checked **per page**, because that is how attribution works and because
 // the gap it was written for was per-page: the index carried full credits
-// while detail.html and compare.html omitted AviList, on pages built out of
-// AviList names from the title down.
+// while the species and comparison pages omitted AviList, on pages built out
+// of AviList names from the title down.
 //
 // Verifies: product.selfDescriptionStaysTrue. Criterion: acceptance.creditsComplete.
 func TestEveryPageCreditsWhatItShows(t *testing.T) {
-	for _, page := range []string{"index.html", "detail.html", "compare.html"} {
+	for _, page := range []string{"next.html", "detail.html"} {
 		b, err := Static.ReadFile("static/" + page)
 		if err != nil {
 			t.Fatalf("reading the embedded %s: %v", page, err)

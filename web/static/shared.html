@@ -1,0 +1,188 @@
+{{- /*
+  Copyright 2026 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/ -}}
+{{/* The templates the home page and the species pages share: a bird's tile,
+     its pin, the diagram, and the diagram's key. */}}
+{{define "tile"}}
+{{/* The pin is a SIBLING of the tile link, not inside it: anchors cannot nest,
+     and the tile must keep opening the detail view (product.tileOpensDetail). */}}
+<div class="tilewrap" id="{{.Anchor}}">
+<a class="tile" href="{{.DetailURL}}">
+  <div class="hd">
+    <div class="nameline">
+      <span class="cn"><span class="cnname">{{.Name}}</span>{{with .S.SpeciesCode}}<span class="code">({{.}})</span>{{end}}</span>
+      <span class="sn">{{.S.ScientificName}}</span>
+    </div>
+    <span class="badge" style="background:{{.S.FamilyColor}};color:{{.S.FamilyText}}">{{.S.Family}}
+      <em>{{.S.FamilyCommon}}</em></span>
+  </div>
+  {{template "diagram" .}}
+  <div class="ft">
+    {{/* Named in full, not L/W/M: the initials cost every reader who has not
+         yet learned them, and the three fit a tile at full width (product.tileContents).
+
+         `whynot` supplies the tooltip. All three used to say "estimated" for
+         anything not measured, which was false for a near-match: that is a
+         real measurement with calipers, of a sibling taxon, and product.measuredVersusModeled draws
+         it SOLID for exactly that reason. The footer calling it an estimate
+         contradicted the stroke beside it, and named no reason a reader
+         could act on -- the Chihuahuan Meadowlark's mass is the Eastern
+         Meadowlark's, which is worth saying out loud. */}}
+    <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="{{whynot .S.TotalLength.Prov}}"{{end}}>Length {{.Length}}</span>
+    <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="{{whynot .S.Wingspan.Prov}}"{{end}}>Wingspan {{.Wing}}</span>
+    <span{{if ne .S.Mass.Prov.Kind "measured"}} class="est" title="{{whynot .S.Mass.Prov}}"{{end}}>Mass {{.MassStr}}</span>
+  </div>
+  {{/* How much of the species observations held by the regions currently
+       on screen (product.shareOfRecords). It answers the question the filtered page is
+       posing; "commonest in Yukon" answers one the reader did not ask and
+       stays on the detail page.
+
+       Its own line, not a fourth cell in the footer: the footer holds the
+       three measurements, product.tileContents keeps it to one line, and a fourth wrapped
+       it. Rendered on EVERY tile, because a line that appears on some tiles
+       and not others makes those tiles shorter and takes the whole flex row
+       out of step.
+
+       A cell either divides or explains (decisions.seaShareDiffers). The dividing form covers
+       absence too -- "0 in 1,225,176,035" rather than an em-dash, which left
+       a reader unable to tell a missing figure from a missing bird. The
+       explaining form is for having no denominator at all. */}}
+  <div class="share">{{with .Commonest}}{{if .Ratio}}<span title="{{.Title}}"><b>{{.Ratio}}</b>
+    species observations {{.Where}}</span>{{range .Seams}}<span class="seam"
+    title="{{.Title}}">{{.Text}}</span>{{end}}{{else}}<span class="nodata"
+    title="{{.Title}}">{{.Note}}</span>{{end}}{{else}}<span class="nodata"
+    title="no regions are selected">&mdash;</span>{{end}}{{range .SameAs}}<span class="seam"
+    title="{{.Title}}">{{.Text}}</span>{{end}}</div>
+</a>
+{{if .PinURL}}{{template "pin" .}}{{end}}
+</div>
+{{end}}
+
+{{/* A push pin in a box: pinning keeps a bird on the home page whatever the
+     settings (product.nextView). Filled when pinned. The find box's script
+     copies the icon from the page, so it is drawn once, here. */}}
+{{define "pin"}}<a class="pin{{if .Pinned}} on{{end}}" href="{{.PinURL}}" aria-pressed="{{if .Pinned}}true{{else}}false{{end}}"
+   title="{{if .Pinned}}Unpin{{else}}Pin{{end}} {{.Name}}" aria-label="{{if .Pinned}}Unpin{{else}}Pin{{end}} {{.Name}}">{{template "pinicon"}}</a>{{end}}
+{{define "pinicon"}}<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M10.2 1.5l4.3 4.3-1.4.5-2.3 2.3.6 3.6-1.3 1.3-2.9-2.9-4.1 4.1-.9-.9 4.1-4.1-2.9-2.9 1.3-1.3 3.6.6 2.3-2.3z"/></svg>{{end}}
+
+{{define "diagram"}}
+{{$g := .Geom}}{{$b := .Box}}
+<svg class="dia" viewBox="0 0 {{f1 $b.W}} {{f1 $b.H}}" preserveAspectRatio="xMidYMid meet" role="img"
+     aria-label="scaled outline of {{.Name}}">
+  {{/* .TopOffset, not a formula over $b.H: the box is taller than the drawing
+       area by the total-length strip, so recomputing the centering here put the
+       bird 12px low and disagreed with the labels, which use .TopOffset. */}}
+  <g transform="translate(0,{{f1 .TopOffset}})">
+    {{if $g.ChordTickX}}
+    {{/* Outer thirds are the MEASURED wing chord: carpal joint to primary tip,
+         so always solid. The inner span carries the whole model error, so it
+         alone is dashed when the wingspan is modeled. */}}
+    <line class="wing" x1="{{f1 (sub $g.CX $g.CrossbarHalfWidth)}}" y1="{{f1 $g.YShoulder}}"
+          x2="{{f1 (sub $g.CX $g.ChordTickX)}}" y2="{{f1 $g.YShoulder}}"/>
+    <line class="wing" x1="{{f1 (add $g.CX $g.ChordTickX)}}" y1="{{f1 $g.YShoulder}}"
+          x2="{{f1 (add $g.CX $g.CrossbarHalfWidth)}}" y2="{{f1 $g.YShoulder}}"/>
+    <line class="wing{{if .WingModeled}} est{{end}}" x1="{{f1 (sub $g.CX $g.ChordTickX)}}" y1="{{f1 $g.YShoulder}}"
+          x2="{{f1 (add $g.CX $g.ChordTickX)}}" y2="{{f1 $g.YShoulder}}"/>
+    <line class="chordtick" x1="{{f1 (sub $g.CX $g.ChordTickX)}}" y1="{{f1 (sub $g.YShoulder 4)}}"
+          x2="{{f1 (sub $g.CX $g.ChordTickX)}}" y2="{{f1 (add $g.YShoulder 4)}}"/>
+    <line class="chordtick" x1="{{f1 (add $g.CX $g.ChordTickX)}}" y1="{{f1 (sub $g.YShoulder 4)}}"
+          x2="{{f1 (add $g.CX $g.ChordTickX)}}" y2="{{f1 (add $g.YShoulder 4)}}"/>
+    {{else}}
+    <line class="wing{{if .WingModeled}} est{{end}}" x1="{{f1 (sub $g.CX $g.CrossbarHalfWidth)}}" y1="{{f1 $g.YShoulder}}"
+          x2="{{f1 (add $g.CX $g.CrossbarHalfWidth)}}" y2="{{f1 $g.YShoulder}}"/>
+    {{end}}
+    <line class="bill" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBillTip}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YCraniumTop}}"/>
+    <ellipse class="head" cx="{{f1 $g.CX}}" cy="{{f1 $g.YHeadCenter}}" rx="{{f1 $g.HeadRx}}" ry="{{f1 $g.HeadRy}}"/>
+    {{if $g.NeckFolded}}<path class="neck" d="M {{f1 $g.CX}} {{f1 $g.YNeckTop}} A {{f1 $g.NeckArcR}} {{f1 $g.NeckArcR}} 0 0 1 {{f1 $g.CX}} {{f1 $g.NeckMid}} A {{f1 $g.NeckArcR}} {{f1 $g.NeckArcR}} 0 0 0 {{f1 $g.CX}} {{f1 $g.YShoulder}}"/>
+    {{else}}<line class="neck" x1="{{f1 $g.CX}}" y1="{{f1 $g.YNeckTop}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YShoulder}}"/>
+    {{end}}    <line class="body" x1="{{f1 $g.CX}}" y1="{{f1 $g.YShoulder}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YBodyEnd}}"/>
+    <line class="junction" x1="{{f1 (sub $g.CX 4)}}" y1="{{f1 $g.YBodyEnd}}"
+          x2="{{f1 (add $g.CX 4)}}" y2="{{f1 $g.YBodyEnd}}"/>
+    <line class="tail" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBodyEnd}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YTailTip}}"/>
+  </g>
+  {{/* EVERYTHING BELOW IS TEXT OR SCAFFOLDING, and the order is load-bearing.
+       SVG paints in document order, so every line is emitted before every
+       label: a leader crossing the wing labels must pass BEHIND the words, not
+       through them. The wing labels used to sit inside the group above, which
+       put them before the leaders and let a leader strike through them.
+
+       These coordinates are the box's, not the group's, so the centering
+       offset is added explicitly -- view has already folded it into the segment
+       labels' own y values (product.labeledDetailDiagram). */}}
+  {{range .Labels}}
+  <line class="leader" x1="{{f1 (add $g.CX 6)}}" y1="{{f1 .AnchorY}}"
+        x2="{{f1 (sub $b.W 150)}}" y2="{{f1 .TextY}}"/>
+  {{end}}
+  {{if .WingspanLabel}}
+  {{/* Just off the right end of the bar and vertically on it, so it reads as
+       naming the whole crossbar rather than any part of it. */}}
+  <text class="dlabel span{{if .WingspanEst}} est{{end}}" text-anchor="start"
+        dominant-baseline="middle" x="{{f1 (add (add $g.CX $g.CrossbarHalfWidth) 8)}}"
+        y="{{f1 (add .TopOffset $g.YShoulder)}}">{{.WingspanLabel}}{{if .WingspanEst}} ~{{end}}</text>
+  {{end}}
+  {{if and .ChordLabel $g.ChordTickX}}
+  {{/* Centered over the LEFT outer segment. Both outer segments are the measured
+       chord, so either names it; the left keeps it clear of the wingspan label,
+       which sits off the right end of the bar. */}}
+  <text class="dlabel chord" text-anchor="middle" y="{{f1 (add .TopOffset (sub $g.YShoulder 7))}}"
+        x="{{f1 (sub $g.CX (div (add $g.ChordTickX $g.CrossbarHalfWidth) 2))}}">{{.ChordLabel}}</text>
+  {{end}}
+  {{range .Labels}}
+  <text class="dlabel{{if .Est}} est{{end}}" x="{{f1 (sub $b.W 144)}}" y="{{f1 .TextY}}"
+        dominant-baseline="middle">{{.Text}}{{if .Est}} ~{{end}}</text>
+  {{end}}
+  {{/* The whole bird, named under the foot of the figure and centered on the
+       drawing axis -- $g.CX, not the box center: the bird is laid out left of
+       the label gutter, so the two are 160px apart. No leader lines; there is
+       no part to point at. Mass sits here rather than in the stack beside the
+       drawing because it is not a length (product.labeledDetailDiagram). */}}
+  {{with .MassCube}}{{if .Side}}
+  {{/* The cube of water that weighs what the bird weighs, in oblique
+       projection (product.labeledDetailDiagram, decisions.massAsWaterCube). The FACE's base sits on the bottom of the
+       drawing area in every diagram, so the projection grows up and right
+       from a corner that never moves and two cubes can be compared by eye.
+       Top and right faces first, front face over them: nearest last. */}}
+  <g class="masscube{{if .Est}} est{{end}}">
+    <title>{{.Title}}</title>
+    <polygon class="mctop" points="{{f1 .X}},{{f1 .Y}}
+      {{f1 (add .X .Depth)}},{{f1 (sub .Y .Depth)}}
+      {{f1 (add (add .X .Side) .Depth)}},{{f1 (sub .Y .Depth)}}
+      {{f1 (add .X .Side)}},{{f1 .Y}}"/>
+    <polygon class="mcside" points="{{f1 (add .X .Side)}},{{f1 .Y}}
+      {{f1 (add (add .X .Side) .Depth)}},{{f1 (sub .Y .Depth)}}
+      {{f1 (add (add .X .Side) .Depth)}},{{f1 (sub (add .Y .Side) .Depth)}}
+      {{f1 (add .X .Side)}},{{f1 (add .Y .Side)}}"/>
+    <rect class="mcface" x="{{f1 .X}}" y="{{f1 .Y}}"
+          width="{{f1 .Side}}" height="{{f1 .Side}}"/>
+  </g>
+  {{if .Label}}
+  <text class="dlabel mass{{if .Est}} est{{end}}" text-anchor="middle"
+        x="{{f1 .LabelX}}" y="{{f1 .LabelY}}">{{.Label}}{{if .Est}} ~{{end}}</text>
+  {{end}}
+  {{end}}{{end}}
+  {{range .FootLabels}}
+  <text class="dlabel {{.Key}} foot{{if .Est}} est{{end}}" text-anchor="middle"
+        x="{{f1 $g.CX}}" y="{{f1 .Y}}">{{.Text}}{{if .Est}} ~{{end}}</text>
+  {{end}}
+</svg>
+{{end}}
+
+{{/* The diagram key, under the species page's drawing. */}}
+{{define "diagramkey"}}
+<p class="note diagramkey"><b>Solid</b> lines are measured; <b>dashed</b> lines are estimated,
+as is the hollow head. On the wing, the solid ends are the measured wing chord, and the
+<b>ticks</b> mark where it ends. The <b>cube</b> in the lower-left corner is the
+bird's mass drawn as water, at the same scale as the bird.</p>
+{{end}}

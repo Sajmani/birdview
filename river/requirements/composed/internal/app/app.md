@@ -13,7 +13,8 @@ where `## <id>` finds it and the first paragraph is the rule. Then the requireme
 wrote**, in full, each naming its sources in `Composed from:`. A source requirement not listed here
 belongs to another package or is not yet composed.
 
-**Status: composed by an agent; approved by Sameer on 2026-10-25.** Published at the commit that
+**Status: composed by an agent; approved by Sameer on 2026-10-25.** Recomposed by an agent on
+2026-10-27 to exclude the requirements [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved) withdrew. Published at the commit that
 records this approval, which identifies it; not tagged, since a tag is only an alias.
 
 ## Composition record
@@ -35,7 +36,6 @@ a lower tier may do.
 
 - [product.segmentComposition](../../../local/product/diagram.md#segmentcomposition) — Segment composition
 - [product.segmentsSumToLength](../../../local/product/diagram.md#segmentssumtolength) — Segments abut exactly and sum to total length
-- [product.scaleToggle](../../../local/product/diagram.md#scaletoggle) — Scale is a user toggle, defaulting to per-section
 - [product.crossbarAtVerticalScale](../../../local/product/diagram.md#crossbaratverticalscale) — The wing crossbar is drawn at the vertical scale
 - [product.proportionDifferentiates](../../../local/product/diagram.md#proportiondifferentiates) — Proportion differentiates species
 - [product.oneDiagramVocabulary](../../../local/product/diagram.md#onediagramvocabulary) — One diagram vocabulary, on every surface that draws one
@@ -65,16 +65,10 @@ a lower tier may do.
 - [product.familyFilter](../../../local/product/filtering.md#familyfilter) — Filter by family
 - [product.regionAndMonthFilter](../../../local/product/filtering.md#regionandmonthfilter) — Filter by region and month
 - [product.filtersCompose](../../../local/product/months.md#filterscompose) — Filters compose
-- [product.regionsGroupedTwoWays](../../../local/product/months.md#regionsgroupedtwoways) — Regions are grouped two ways
 - [product.familiesByOrder](../../../local/product/months.md#familiesbyorder) — Families are grouped by taxonomic order
 - [product.habitatAndDietFilters](../../../local/product/months.md#habitatanddietfilters) — Filter by habitat and by diet
-- [product.onlyPerGroup](../../../local/product/presentation.md#onlypergroup) — Every group offers "Only"
-- [product.firstLoadShowsAll](../../../local/product/presentation.md#firstloadshowsall) — First load shows everything
-- [product.helpfulEmptyState](../../../local/product/presentation.md#helpfulemptystate) — The empty state says what to do
 - [product.hereSelectsLocalRegion](../../../local/product/filtering.md#hereselectslocalregion) — Here selects the region the reader is in
-- [product.nowSelectsCurrentMonth](../../../local/product/filtering.md#nowselectscurrentmonth) — Now selects the current month
 - [product.locationStaysInBrowser](../../../local/product/filtering.md#locationstaysinbrowser) — The reader's location never leaves the browser
-- [product.searchBox](../../../local/product/filtering.md#searchbox) — A search box narrows the index as you type
 
 ### Ordering and sections
 
@@ -91,16 +85,11 @@ a lower tier may do.
 - [product.diagramOnlyMode](../../../local/product/presentation.md#diagramonlymode) — Diagram is the only presentation mode in v1
 - [product.tileContents](../../../local/product/presentation.md#tilecontents) — Tile contents
 - [product.tileOpensDetail](../../../local/product/presentation.md#tileopensdetail) — A tile opens a detail view
-- [product.comparisonOneScale](../../../local/product/presentation.md#comparisononescale) — A comparison view holds several birds to one scale
-- [product.pickFromIndex](../../../local/product/presentation.md#pickfromindex) — Birds are picked for comparison from the index, and the picks are the mode
 - [product.undrawnSpeciesAnswer](../../../local/product/presentation.md#undrawnspeciesanswer) — A species BirdView does not draw still answers for itself
-- [product.escapedBirdsListed](../../../local/product/measurements.md#escapedbirdslisted) — Escaped and kept birds are left off the index, and listed
-- [product.pageExplainsItself](../../../local/product/presentation.md#pageexplainsitself) — The page explains itself
+- [product.escapedBirdsListed](../../../local/product/measurements.md#escapedbirdslisted) — Escaped and kept birds are left off the home page, and listed
 - [product.fitsAPhone](../../../local/product/presentation.md#fitsaphone) — Every page fits a phone held upright
 - [product.nextView](../../../local/product/presentation.md#nextview) — The home page: one view of birds
 - [product.bandingCodes](../../../local/product/dataset.md#bandingcodes) — Each bird carries its four-letter banding code, where the Bird Banding Laboratory gives one
-- [product.collapsibleControls](../../../local/product/presentation.md#collapsiblecontrols) — The controls collapse
-- [product.togglesKeepPlace](../../../local/product/presentation.md#toggleskeepplace) — Toggling a control keeps your place
 - [product.inaturalistLink](../../../local/product/presentation.md#inaturalistlink) — The detail view links to the species on iNaturalist
 - [product.noPersonalAddress](../../../local/product/presentation.md#nopersonaladdress) — No personal address is published
 
@@ -122,6 +111,18 @@ a lower tier may do.
 - [product.perchedOrInFlight](../../../local/product/diagram.md#perchedorinflight) — Perched and in-flight selection. Excluded by [decisions.photographsWithdrawn](../../../decisions.md#photographswithdrawn)
 - [product.photoAttribution](../../../local/product/diagram.md#photoattribution) — Photograph attribution. Excluded by [decisions.photographsWithdrawn](../../../decisions.md#photographswithdrawn)
 - [product.photoCaching](../../../local/product/diagram.md#photocaching) — Local caching of photographs. Excluded by [decisions.photographsWithdrawn](../../../decisions.md#photographswithdrawn)
+- [product.comparisonOneScale](../../../local/product/presentation.md#comparisononescale) — A comparison view holds several birds to one scale. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
+- [product.pickFromIndex](../../../local/product/presentation.md#pickfromindex) — Birds are picked for comparison from the index, and the picks are the mode. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
+- [product.collapsibleControls](../../../local/product/presentation.md#collapsiblecontrols) — The controls collapse. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
+- [product.togglesKeepPlace](../../../local/product/presentation.md#toggleskeepplace) — Toggling a control keeps your place. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
+- [product.onlyPerGroup](../../../local/product/presentation.md#onlypergroup) — Every group offers "Only". Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
+- [product.helpfulEmptyState](../../../local/product/presentation.md#helpfulemptystate) — The empty state says what to do. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
+- [product.pageExplainsItself](../../../local/product/presentation.md#pageexplainsitself) — The page explains itself. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
+- [product.firstLoadShowsAll](../../../local/product/presentation.md#firstloadshowsall) — First load shows everything. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
+- [product.searchBox](../../../local/product/filtering.md#searchbox) — A search box narrows the index as you type. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
+- [product.scaleToggle](../../../local/product/diagram.md#scaletoggle) — Scale is a user toggle, defaulting to per-section. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
+- [product.nowSelectsCurrentMonth](../../../local/product/filtering.md#nowselectscurrentmonth) — Now selects the current month. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
+- [product.regionsGroupedTwoWays](../../../local/product/months.md#regionsgroupedtwoways) — Regions are grouped two ways. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
 
 ---
 

@@ -97,7 +97,7 @@ detail view says and the drawing does not.
 **That holds even where two tiles come out identical** (settled 2026-10-05). Of nine near-match
 species, three have their donor on screen beside them — Chihuahuan and Eastern Meadowlark, Cocos
 and Brown Booby, Siberian and American Pipit — and render the same length, wingspan, and mass. The
-index adds no marker: the detail page names the donor on every affected row (*"measured on
+home page adds no marker: the detail page names the donor on every affected row (*"measured on
 Sturnella magna, a different species this one was split from — no measurement exists for it"*),
 and a tile marker would add a mark to the six whose donor is not on screen.
 
@@ -191,13 +191,13 @@ mass (Sameer, 2026-10-25).
 **Mass is labeled under its cube, not in the stack under the tail.** On a small cube the label is
 wider than the face and is held clear of the left edge rather than centered past it.
 
-The **index tiles carry the cube too**, unlabeled ([tileContents](presentation.md#tilecontents),
+The **home page's tiles carry the cube too**, unlabeled ([tileContents](presentation.md#tilecontents),
 [decisions.massCubeOnTiles](../../decisions.md#masscubeontiles)), for what length and wingspan cannot show: **bulk against elongation**.
 Read against the bird's own length, it is about **27%** of the drawing height for alcids, dense
 divers, and **10–13%** for long-tailed light-bodied species like the Scissor-tailed Flycatcher and
 the magpie (measured after
 [decisions.trunkExponentCalibrated](../../decisions.md#trunkexponentcalibrated); the ratio is
-scale-invariant, so it holds under either mode of scaleToggle).
+scale-invariant, so it holds at any scale).
 
 **The cube compresses, so the number is required.** A Bushtit and a Common Raven differ in mass by
 **175×** and their cubes by 5.6×. The number carries the magnitude and the cube the sense of it.
@@ -344,13 +344,13 @@ drawings coincide is visible only by comparing two detail pages.
 
 ## escapedBirdsListed
 
-**Escaped and kept birds are left off the index, and listed**
+**Escaped and kept birds are left off the home page, and listed**
 
 Subject: `presentation.index.exotic`
-Value: `declared list; off the index, listed at /excluded, detail pages kept`
+Value: `declared list; off the home page, listed at /excluded, detail pages kept`
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata)
 
-**A bird whose records here are escapes is not drawn on the index.** Recurrence cannot tell a
+**A bird whose records here are escapes is not drawn on the home page.** Recurrence cannot tell a
 wild population from a supply of escapes ([declaredExceptions](dataset.md#declaredexceptions)), so
 parrots, waxbills, ornamental waterfowl, zoo birds, and a farmed Emu crowded out the birds a reader
 can expect to meet.
@@ -362,8 +362,8 @@ long-feral population, such as Indian Peafowl in Florida or Red Junglefowl on Ka
 qualify; nor does a wild vagrant, however rare.
 
 **Left off, not deleted.** Every listed bird keeps its detail page, which says it is not on the
-index and why. `/excluded` lists them all, each linked to that page, with its reason and its
-records; the index links to the list. A bird listed here appears in no family, habitat, diet or
+home page and why. `/excluded` lists them all, each linked to that page, with its reason and its
+records; the home page links to the list. A bird listed here appears in no family, habitat, diet or
 region control, and is not counted by them.
 
 Rationale: [goals.honestData](../../../goals/goals.md#honestdata) — removing a bird a reader may

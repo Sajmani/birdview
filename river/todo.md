@@ -50,10 +50,10 @@ key (option (a)); option (b) waits for a discussion of options and for
 
 Done 2026-10-26, option (b), by the owner's call and without the simulated comparison: the one-set
 view built at `/next` became the home page ([product.nextView](requirements/local/product/presentation.md#nextview)), with search-and-pin, one
-scale, a Show setting, and each setting on one count line; the index is the classic view at
-`/classic`. Deployed as `82821a6`. Left: region choice at county scale (search or a map, not
-chips) and the worldwide dataset; [homeSpeckScale](#homespeckscale) and
-[classicViewFate](#classicviewfate) follow from the redesign.
+scale, a Show setting, and each setting on one count line; the index stayed a day as the classic
+view at `/classic` and was removed 2026-10-27. Deployed as `82821a6`. Left: region choice at
+county scale (search or a map, not chips) and the worldwide dataset; [homeSpeckScale](#homespeckscale)
+follows from the redesign.
 
 ## homeSpeckScale
 
@@ -69,22 +69,6 @@ long and hard to read. Raised 2026-10-26, not yet answered. Options: keep one sc
 the comparison); shrink each tile's height to its bird so specks at least sit in small tiles; or
 scale per run of similar sizes and say so. Pinned only and the welcome line's size comparisons
 already avoid it by choosing similar birds.
-
-## classicViewFate
-
-**Keep, change, or retire the classic view at /classic**
-
-Status: open
-Owner: Sameer
-Gate: when the home page has had readers
-
-The index moved to `/classic` on 2026-10-26, unchanged, with its own links, `/now`, compare mode
-(`/compare`), and the guide's examples (`docs/using.md`'s Some things to try) pointing at it. It is
-not linked from the home page except in the credits. Decide whether it stays, and if it goes, what
-replaces compare mode and the guide's examples. Either way, the requirements still say "the index"
-in about 37 places; [product.nextView](requirements/local/product/presentation.md#nextview) says that now means the classic view, but a pass
-should name the classic view or the home page in each. `docs/using.md` also still describes the
-classic view's panels (Regions and months, Presentation) as the way in.
 
 ## simulatedUserTests
 
@@ -110,41 +94,8 @@ Built and first run 2026-10-25 ([usertests/](../usertests/README.md),
 `b3b2f93`. The old run found the missing search, the density, and the backwards month toggle, but
 saw the phone overflow only weakly; mean ease rose from 2.25 to 3.1. Left: run it before and after
 Presentation moves to the guide, and decide whether results stay in the repository. Since
-2026-10-26 the comparison to run is the new home page (`/`) against the classic view (`/classic`),
-which shipped first on the owner's call; the readers' tasks will need new instructions for pins and
-the Show setting.
-
-## togglesStartSelected
-
-**Tapping a month or region when all are selected removes it**
-
-Status: open
-Owner: Sameer
-Gate: needs the owner's call; the most-reported problem in the first simulated-user run
-
-All four simulated readers, on both revisions, tapped October or New York and lost it, because
-everything starts selected and a tap drops one ([product.regionAndMonthFilter](requirements/local/product/filtering.md#regionandmonthfilter)); three of the
-four built the address by hand instead. Karen's wording complaint
-([#1](https://github.com/google/birdview/issues/1)) was the same problem seen from the help text.
-One answer: when everything is selected, a tap on one item selects only it, as Only does, and
-later taps add and remove. That changes the requirement, and families too. The home page adopted
-this rule on 2026-10-26 ([product.nextView](requirements/local/product/presentation.md#nextview)); what is left is the classic view, if it stays
-([classicViewFate](#classicviewfate)).
-
-## compareNumbersUnreadable
-
-**The comparison's numbers cannot be read on a phone**
-
-Status: open
-Owner: unassigned
-Gate: before the testers are asked back
-
-Both phone readers, on both revisions, could not read the length, wingspan, and mass labels inside
-the comparison's drawings, and opened each bird's page instead
-([product.comparisonOneScale](requirements/local/product/presentation.md#comparisononescale)). Show the three numbers as text under each panel, or scale the
-labels with the drawing. The home page writes the three numbers as text under every drawing;
-what is left is `/compare`, which the classic view's compare mode reaches
-([classicViewFate](#classicviewfate)).
+2026-10-27 the classic view is gone, so the run is the home page (`/`) against `4f25193` and
+`b3b2f93`; the readers' tasks will need new instructions for pins and the Show setting.
 
 ## testersAskedBack
 
@@ -218,21 +169,6 @@ Gate: when convenient
 overestimate at large mass cost nothing because the heaviest bird in scope was 11 kg. Emu is now in
 scope at 34 kg and draws a 243 mm cranium. Check it against a measured emu skull, and if it is far
 off, fit or cap the coefficient.
-
-## wingspanSectionWidth
-
-**Per-section scale under Wingspan is not bounded in total length**
-
-Status: open
-Owner: Sameer
-Gate: when convenient
-
-Found 2026-10-19 while setting Bill and Tail's default scale
-([product.scaleToggle](requirements/local/product/diagram.md#scaletoggle)): with 15% sections, one
-wingspan section runs from the 146 mm Elf Owl to the 1,789 mm Emu, 12.3× in total length, because a
-flightless bird's short wings sort it among small owls. Length sections stay within 1.1× and mass
-within 3.1×. Either Wingspan should default to Global as Bill, Tail, and Frequency do, or flightless
-birds need handling in the wingspan sort
 
 ## sexSpecificDrawings
 

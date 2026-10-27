@@ -50,11 +50,11 @@ and would silently skip the tests of every later deploy.
 Subject: `release.smoke`
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 
-`birdview-smoke` checks a running deployment as a reader reaches it: the index is served gzipped,
-with a validator that revalidates; a species page and a guide answer; `robots.txt` serves its
-policy; an unknown species is not found; the boundary file is cached as immutable; `/now`
-redirects to the index; and each other address named redirects permanently to the canonical one.
-It fetches the index once and nothing else larger than a page, and it runs after every deploy.
+`birdview-smoke` checks a running deployment as a reader reaches it: the home page is served
+gzipped and never stored, and with a month named it carries a validator that revalidates; a
+species page and a guide answer; `robots.txt` serves its policy; an unknown species is not found;
+the boundary file is cached as immutable; and each other address named redirects permanently to
+the canonical one. It fetches nothing larger than a page, and it runs after every deploy.
 
 Rationale: the tests check the code, not the deployment; flags, domains, and the platform in front
 can each break a page the tests never see, as a missing `-addr` would have. Egress is what the

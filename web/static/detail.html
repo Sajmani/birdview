@@ -26,7 +26,7 @@
 {{/* Back is the browser's: arriving from a page of this site, it returns
      there as it was. From a shared link, or without the script, it goes to
      the home page in this page's units and names (product.nextView). */}}
-<p class="back">{{if .Bar.Picking}}<a class="backlink" href="{{call .Query}}">&larr; back to picking birds</a>{{else}}<a class="backlink" href="{{.Home}}" data-back>&larr; back</a>{{end}}</p>
+<p class="back"><a class="backlink" href="{{.Home}}" data-back>&larr; back</a></p>
 <script>
 (function () {
   var a = document.querySelector("a.backlink[data-back]");
@@ -53,17 +53,12 @@
   </div>
   {{template "diagram" .}}
 </div>
-{{/* product.escapedBirdsListed: a bird left off the index keeps this page, and says why. */}}
-{{with .S.Exotic}}<p class="seam">Not on the index. {{.}}
-  <a href="/excluded">Every bird left off the index</a>.</p>{{end}}
+{{/* product.escapedBirdsListed: a bird left off the home page keeps this page, and says why. */}}
+{{with .S.Exotic}}<p class="seam">Not on the home page. {{.}}
+  <a href="/excluded">Every bird left off the home page</a>.</p>{{end}}
 {{/* product.borrowedMeasurementsSaySo: a drawing that coincides with another species' because the
      measurements are the same row says so, with the reason in full. */}}
 {{range .SameAs}}<p class="seam">{{.Text}}. {{.Title}}</p>{{end}}
-
-{{/* Three states (product.pickFromIndex): start a comparison, add this bird to one, or drop
-     it from one. The link carries the whole set either way, so it is built in
-     Go rather than assembled here. */}}
-<p class="pickaction"><a class="btn{{if .Picked}} on{{end}}" href="{{.PickURL}}">{{.PickLabel}}</a></p>
 
 {{template "diagramkey"}}
 
@@ -112,7 +107,6 @@ license.</p>
 
 <p class="note">The neck/body split is a drawing convention, not a measurement.</p>
 {{with .FoldNote}}<p class="note">{{.}}</p>{{end}}
-{{template "pickbar" .Bar}}
 <footer>
   Traits: AVONET, Tobias et al. 2022,
   <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
@@ -121,7 +115,7 @@ license.</p>
   <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
   Regions: GBIF, eBird Observation Dataset, and iNaturalist,
   <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
-  <a href="{{call .Query}}">Full credits</a>.
+  <a href="/#credits">Full credits</a>.
 </footer>
 </body>
 </html>{{end}}

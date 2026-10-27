@@ -101,8 +101,8 @@ func discoverPages(t *testing.T, s *server) []webPage {
 	s.onRender = func(name string) { rendered = name }
 	defer func() { s.onRender = nil }()
 
-	queue := []string{"/classic", "/classic?species=", "/classic?species=amecro&species=annhum&family=Corvidae",
-		"/docs", "/added", "/excluded", "/compare?species=amecro&species=annhum", "/",
+	queue := []string{"/", "/?month=all&family=Corvidae&pin=annhum",
+		"/docs", "/added", "/excluded",
 		"/species/" + undrawnFixture()[0].ID, "/no-such-page", "/robots.txt"}
 	seen := map[string]bool{}
 	visits := map[string]int{}
@@ -146,7 +146,6 @@ func discoverPages(t *testing.T, s *server) []webPage {
 // noPages are the routes that serve no web page, and why. Each is probed to
 // confirm it, so an exemption cannot hide a page added there later.
 var noPages = map[string]string{
-	"/now":         "a redirect to the classic view for the current month",
 	"/boundaries/": "the region boundary file, JSON",
 	"/birds.json":  "the names the home page's find box searches, JSON",
 }
@@ -191,7 +190,18 @@ func TestEveryKindOfPageIsDiscovered(t *testing.T) {
 	if err != nil || len(names) == 0 {
 		t.Fatalf("listing templates: %v (%d found)", err, len(names))
 	}
+	pageTemplates := 0
 	for _, n := range names {
+		// A file that defines no page of its own name, such as shared.html,
+		// holds only parts of other pages, which are checked through them.
+		src, err := fs.ReadFile(assetFS, n)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(src), `{{define "`+filepath.Base(n)+`"}}`) {
+			continue
+		}
+		pageTemplates++
 		if !templates[filepath.Base(n)] {
 			t.Errorf("template %s rendered no discovered page; add a seed so its pages are checked",
 				filepath.Base(n))
@@ -202,7 +212,7 @@ func TestEveryKindOfPageIsDiscovered(t *testing.T) {
 			t.Errorf("no %s page discovered; tech.webPages names it, so the crawl has lost one", mt)
 		}
 	}
-	t.Logf("%d pages across %d routes and %d templates", len(pages), len(routes), len(names))
+	t.Logf("%d pages across %d routes and %d templates", len(pages), len(routes), pageTemplates)
 }
 
 var (

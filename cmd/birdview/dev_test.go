@@ -36,11 +36,11 @@ func TestEmbedIsTheDefault(t *testing.T) {
 	// And the embed actually carries the templates, so the default works.
 	b, err := assetFS.(interface {
 		ReadFile(string) ([]byte, error)
-	}).ReadFile("static/index.html")
+	}).ReadFile("static/next.html")
 	if err != nil {
-		t.Fatalf("the default asset source has no index.html: %v", err)
+		t.Fatalf("the default asset source has no next.html: %v", err)
 	}
 	if !strings.Contains(string(b), "AviList") {
-		t.Error("the embedded index.html does not credit AviList")
+		t.Error("the embedded next.html does not credit AviList")
 	}
 }

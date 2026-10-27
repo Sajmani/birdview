@@ -55,13 +55,12 @@ func Run(base string, redirectFrom []string, client *http.Client) []Result {
 	c.client = &cl
 
 	index := c.index()
-	c.classic()
+	c.revalidated()
 	c.page("a species page", firstMatch(speciesLink, index, "/species/amecro"), "text/html")
 	c.page("a guide", "/docs/using", "text/html")
 	c.robots()
 	c.unknownSpecies()
 	c.boundaryFile(firstMatch(boundaryLink, index, ""))
-	c.now()
 	for _, from := range redirectFrom {
 		c.redirect(from)
 	}
@@ -136,12 +135,14 @@ func (c *checker) index() string {
 	return string(body)
 }
 
-// classic fetches the classic view, which is a pure function of its address,
-// and checks that it is revalidated rather than stored.
-func (c *checker) classic() {
-	resp, _, err := c.get(http.MethodGet, "/classic", nil)
+// revalidated fetches the home page for every month, which is a pure
+// function of its address, and checks that it is revalidated rather than
+// stored.
+func (c *checker) revalidated() {
+	const path, name = "/?month=all", "the home page for every month"
+	resp, _, err := c.get(http.MethodGet, path, nil)
 	if err != nil {
-		c.record("the classic view", err)
+		c.record(name, err)
 		return
 	}
 	var problems []string
@@ -154,12 +155,12 @@ func (c *checker) classic() {
 	etag := resp.Header.Get("ETag")
 	if etag == "" {
 		problems = append(problems, "no ETag")
-	} else if again, _, err := c.get(http.MethodGet, "/classic", http.Header{"If-None-Match": {etag}}); err != nil {
+	} else if again, _, err := c.get(http.MethodGet, path, http.Header{"If-None-Match": {etag}}); err != nil {
 		problems = append(problems, "revalidating: "+err.Error())
 	} else if again.StatusCode != http.StatusNotModified {
 		problems = append(problems, fmt.Sprintf("revalidating with its ETag gave %d, want 304", again.StatusCode))
 	}
-	c.record("the classic view", joined(problems))
+	c.record(name, joined(problems))
 }
 
 func (c *checker) page(name, path, ctype string) {
@@ -210,16 +211,6 @@ func (c *checker) boundaryFile(path string) {
 		err = fmt.Errorf("HEAD %s: Cache-Control %q, want immutable", path, resp.Header.Get("Cache-Control"))
 	}
 	c.record("the boundary file", err)
-}
-
-func (c *checker) now() {
-	resp, _, err := c.get(http.MethodGet, "/now", nil)
-	if err == nil {
-		if loc := resp.Header.Get("Location"); resp.StatusCode != http.StatusSeeOther || !strings.HasPrefix(loc, "/classic?") {
-			err = fmt.Errorf("status %d to %q, want 303 to the classic view", resp.StatusCode, loc)
-		}
-	}
-	c.record("/now", err)
 }
 
 // redirect checks that from sends a reader to the same path and query on the

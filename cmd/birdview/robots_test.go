@@ -86,9 +86,8 @@ func parseRobots(t *testing.T, body string) []robotsRule {
 }
 
 // TestRobotsKeepsCrawlersToPages asserts that /robots.txt lets a crawler
-// fetch every page the site has without a query string, except the
-// comparison, and asks it to fetch nothing with one, nor /now or the boundary
-// file. The pages come from the same crawl the accessibility checks use, so a
+// fetch every page the site has without a query string, and asks it to fetch
+// nothing with one, nor the boundary file. The pages come from the same crawl the accessibility checks use, so a
 // page added later is judged without anyone listing it here.
 //
 // Verifies: tech.crawlersSkipFilteredViews, tech.servesOnlyItsPages. Criterion: acceptance.robotsKeepsCrawlersToPages.
@@ -112,12 +111,11 @@ func TestRobotsKeepsCrawlersToPages(t *testing.T) {
 		if p.url == "/robots.txt" {
 			continue
 		}
-		path, query, _ := strings.Cut(p.url, "?")
-		blocked := strings.HasPrefix(path, "/compare") || path == "/classic"
-		want := query == "" && !blocked
+		_, query, _ := strings.Cut(p.url, "?")
+		want := query == ""
 		if strings.Contains(p.url, "?") {
 			filtered++
-		} else if !blocked {
+		} else {
 			free++
 		}
 		if got := robotsAllowed(rules, p.url); got != want {
@@ -128,7 +126,7 @@ func TestRobotsKeepsCrawlersToPages(t *testing.T) {
 	if free < 3 || filtered < 3 {
 		t.Errorf("crawl found %d query-free and %d filtered pages; too few to judge the policy", free, filtered)
 	}
-	for _, p := range []string{"/now", "/now?region=ME", s.boundaryURL} {
+	for _, p := range []string{s.boundaryURL} {
 		if robotsAllowed(rules, p) {
 			t.Errorf("robots.txt allows %s, which is no page to index", p)
 		}
@@ -145,21 +143,21 @@ func TestRobotsKeepsCrawlersToPages(t *testing.T) {
 // actually apply rather than by whatever the matcher happens to do.
 func TestRobotsMatcher(t *testing.T) {
 	rules := []robotsRule{
-		{false, "/*?"}, {false, "/compare"}, {true, "/page"}, {false, "/*.php$"}, {false, "/fish"}, {true, "/fish.html"},
+		{false, "/*?"}, {false, "/hidden"}, {true, "/page"}, {false, "/*.php$"}, {false, "/fish"}, {true, "/fish.html"},
 	}
 	for path, want := range map[string]bool{
-		"/classic":                 true,
-		"/classic?family=Corvidae": false,
-		"/species/x?u=1":           false,
-		"/compare":                 false,
-		"/compareX":                false,
-		"/page":                    true,
-		"/index.php":               false,
-		"/index.php?x":             false, // "/*?" matches; "/*.php$" does not, since $ anchors the end
-		"/index.phpx":              true,
-		"/fish":                    false,
-		"/fish.html":               true, // longer Allow beats shorter Disallow
-		"/Fish":                    true, // paths are case-sensitive
+		"/birds":                 true,
+		"/birds?family=Corvidae": false,
+		"/species/x?u=1":         false,
+		"/hidden":                false,
+		"/hiddenX":               false,
+		"/page":                  true,
+		"/index.php":             false,
+		"/index.php?x":           false, // "/*?" matches; "/*.php$" does not, since $ anchors the end
+		"/index.phpx":            true,
+		"/fish":                  false,
+		"/fish.html":             true, // longer Allow beats shorter Disallow
+		"/Fish":                  true, // paths are case-sensitive
 	} {
 		if got := robotsAllowed(rules, path); got != want {
 			t.Errorf("robotsAllowed(%q) = %v, want %v", path, got, want)

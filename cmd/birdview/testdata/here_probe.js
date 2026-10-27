@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Drives Here and Now for TestHereInTheBrowser. Instructions come in the URL
+// Drives Here for TestHereInTheBrowser and TestHereAndNowLink. Instructions come in the URL
 // fragment, which the browser never sends, so the server sees exactly what a
 // reader's browser would send:
 //
@@ -46,8 +46,6 @@ window.addEventListener("load", function () {
   root.setAttribute("data-url", location.pathname + location.search);
   if (!params.has("probe")) return;
   var out = {};
-  var now = document.querySelector("a.now");
-  out.now = now ? now.getAttribute("href") : null;
   var here = document.querySelector("button.here");
   out.enabled = here ? !here.hasAttribute("aria-disabled") : false;
   window.BirdViewHere.ready.then(function () {

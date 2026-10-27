@@ -83,7 +83,7 @@ which every entry names its reason. Two classes qualify, and no others:
   episodes across 33 years — because ornamental birds are continuously replenished; recurrence
   is blind to origin. Escaped cage, aviary, and farm birds with no
   self-sustaining population anywhere BirdView covers are declared `exotic` and left off the
-  index ([escapedBirdsListed](measurements.md#escapedbirdslisted)); their status is still the derived one.
+  home page ([escapedBirdsListed](measurements.md#escapedbirdslisted)); their status is still the derived one.
 
 Rationale: a declared, visible exception can be argued with. The alternative is what
 [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence) rejected for the whole model: tuning a coefficient until the

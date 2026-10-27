@@ -229,14 +229,14 @@ func TestPipelineDiagramNamesEveryTaxonomyTable(t *testing.T) {
 }
 
 // TestPipelineDiagramIsLinked checks the diagram can be reached from where
-// each audience reads about the data, not only from the index: the guide
+// each audience reads about the data, not only from the home page: the guide
 // for readers, the guide for developers, the using guide's word on where
 // the numbers come from, the site's source list, and the README.
 //
 // Verifies: product.pipelineDiagram. Criterion: acceptance.pipelineDiagramServed.
 func TestPipelineDiagramIsLinked(t *testing.T) {
 	s := newTestServer(t)
-	for _, path := range []string{"/docs/data", "/docs/building", "/docs/using", "/classic"} {
+	for _, path := range []string{"/docs/data", "/docs/building", "/docs/using", "/"} {
 		if !strings.Contains(mustGet(t, s, path), `href="/docs/pipeline"`) {
 			t.Errorf("%s does not link to the pipeline diagram", path)
 		}

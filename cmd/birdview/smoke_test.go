@@ -85,8 +85,8 @@ func TestSmokeChecksTheServer(t *testing.T) {
 			}
 			return false
 		}},
-		{"classic view not revalidated", "the classic view", func(w http.ResponseWriter, r *http.Request) bool {
-			if r.URL.Path == "/classic" {
+		{"home page for every month not revalidated", "the home page for every month", func(w http.ResponseWriter, r *http.Request) bool {
+			if r.URL.Path == "/" && r.URL.Query().Get("month") == "all" {
 				r.Header.Del("If-None-Match")
 			}
 			return false

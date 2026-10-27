@@ -15,21 +15,21 @@
 package main
 
 import (
-	"net/http"
 	"sort"
 	"strings"
 
 	"birdview/internal/dataset"
 )
 
-// The search box (product.searchBox). The rule lives here: the server writes
-// each tile's searchable fields, normalized, into the page, and search.js only
-// checks that the typed text, normalized the same way, occurs in one of them.
-// TestSearchInTheBrowser holds the script to searchMatches.
+// The find box's matching rule (product.nextView). The rule lives here: the
+// server serves each bird's searchable fields, normalized, in /birds.json,
+// and next-find.js only checks that the typed text, normalized the same way,
+// occurs in one of them. TestNextFindInTheBrowser holds the script to
+// searchMatches.
 
 // normalizeSearch lowercases s and turns every run of characters other than
 // a-z and 0-9 into one space, so "Chuck-will's-widow" is "chuck will s widow"
-// and punctuation never decides a match. search.js does the same.
+// and punctuation never decides a match. next-find.js does the same.
 func normalizeSearch(s string) string {
 	var b strings.Builder
 	space := true
@@ -84,26 +84,6 @@ func searchTexts(ds *dataset.Dataset) map[string]string {
 	return out
 }
 
-// hiddenField is one setting the search form carries, so that Enter without
-// JavaScript keeps every other setting.
+// hiddenField is one setting a home page form carries, so that Enter
+// without JavaScript keeps every other setting.
 type hiddenField struct{ Name, Value string }
-
-// searchFormFields is every parameter of the current address except q, in
-// a stable order.
-func searchFormFields(r *http.Request) []hiddenField {
-	q := r.URL.Query()
-	keys := make([]string, 0, len(q))
-	for k := range q {
-		if k != "q" {
-			keys = append(keys, k)
-		}
-	}
-	sort.Strings(keys)
-	var out []hiddenField
-	for _, k := range keys {
-		for _, v := range q[k] {
-			out = append(out, hiddenField{k, v})
-		}
-	}
-	return out
-}

@@ -12,13 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/* Here and Now (product.hereSelectsLocalRegion, product.nowSelectsCurrentMonth).
+/* Here (product.hereSelectsLocalRegion).
  *
- * Now: point the button at the reader's own month. Without this script it
- * goes through /now, which uses the server's.
- *
- * Here: find the region the reader is in, here in the browser, and ask for
- * the page with that region selected -- the same request choosing it by hand
+ * Find the region the reader is in, here in the browser, and ask for the
+ * page with that region selected -- the same request choosing it by hand
  * would make. The position is never sent anywhere, and the boundary file is
  * fetched on every page load, pressed or not, so the server cannot even tell
  * that Here was used (product.locationStaysInBrowser).
@@ -28,15 +25,6 @@
  * two to the same answers. */
 (function () {
   "use strict";
-  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-  var now = document.querySelector("a.now[data-template]");
-  if (now) {
-    now.href = now.getAttribute("data-template")
-      .replace("__MONTH__", MONTHS[new Date().getMonth()]);
-  }
-
   var here = document.querySelector("button.here[data-template]");
   if (!here) return;
   var status = document.querySelector(".herestatus");
@@ -108,23 +96,18 @@
 
   function say(text) { status.textContent = text; }
 
-  // Arriving by a link ending in #here-and-now presses Here and Now
-  // together. On load, so a test can stand in for the browser's location
-  // first, and when the fragment changes to it, since the home page's link
-  // is its own address with the fragment added, which a browser follows
-  // without loading the page. The fragment is dropped either way, so a
-  // reload or the Back button does not ask again.
+  // Arriving by a link ending in #here-and-now presses Here, and the
+  // template sets the month to Now by naming none. On load, so a test can
+  // stand in for the browser's location first, and when the fragment changes
+  // to it, since the home page's link is its own address with the fragment
+  // added, which a browser follows without loading the page. The fragment is
+  // dropped either way, so a reload or the Back button does not ask again.
   var welcome = document.querySelector(".welcomestatus[data-template]");
   function asked() { return new URLSearchParams(location.hash.slice(1)).has("here-and-now"); }
   if (welcome) {
-    // The page names where a region is chosen by hand; the classic view's
-    // Regions and months panel unless it says otherwise. On the home page,
-    // which names its Region setting, a failure leaves the page as it was.
-    var home = welcome.hasAttribute("data-where");
-    var where = welcome.getAttribute("data-where") || "Regions and months";
-    var nowHint = home ? "" : " Press Now under Regions and months for this month.";
-    var shows = home ? "the page is unchanged" : "this shows every region and month";
-    var showsRegions = home ? "the page is unchanged" : "this shows every region";
+    // The page names where a region is chosen by hand, its Region setting;
+    // a failure leaves the page as it was.
+    var where = welcome.getAttribute("data-where") || "Region";
     var arrive = function () {
       var tell = function (text) {
         welcome.textContent = text;
@@ -135,18 +118,17 @@
         ready.then(function () {
           var slug = lookup(pos.coords.latitude, pos.coords.longitude);
           if (!slug) {
-            tell("You are outside every region BirdView covers, so " + showsRegions + "." + nowHint);
+            tell("You are outside every region BirdView covers, so the page is unchanged.");
             return;
           }
-          window.location.replace(welcome.getAttribute("data-template")
-            .replace("__REGION__", slug).replace("__MONTH__", MONTHS[new Date().getMonth()]));
+          window.location.replace(welcome.getAttribute("data-template").replace("__REGION__", slug));
         }, function () {
-          tell("The region boundaries did not load, so " + showsRegions + ".");
+          tell("The region boundaries did not load, so the page is unchanged.");
         });
       }, function (err) {
         tell(err.code === 1
-          ? "Permission to use your location was refused, so " + shows + ". Choose yours under " + where + "."
-          : "Your location could not be found, so " + shows + ". Choose yours under " + where + ".");
+          ? "Permission to use your location was refused, so the page is unchanged. Choose yours under " + where + "."
+          : "Your location could not be found, so the page is unchanged. Choose yours under " + where + ".");
       }, { timeout: 15000, maximumAge: 600000 });
     };
     if (asked()) window.addEventListener("load", arrive);

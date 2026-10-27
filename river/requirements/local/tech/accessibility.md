@@ -62,8 +62,8 @@ Binds: [wcag.WebPage](../../imported/w3.org/wcag/wcag.md#webpage)
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 **Every response the server sends as `text/html`, `image/svg+xml`, or `text/plain`, at any route,
-is a BirdView web page**, with everything drawn into it. Today that is the index, the species
-page in its drawn and undrawn forms, the comparison, the guides and their index, the added-values
+is a BirdView web page**, with everything drawn into it. Today that is the home page, the species
+page in its drawn and undrawn forms, the guides and their index, the added-values
 and excluded-birds pages, the pipeline diagram and the favicon opened at their own URLs, and the
 plain-text error responses.
 

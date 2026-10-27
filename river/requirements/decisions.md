@@ -1296,7 +1296,7 @@ diagram cannot drift from the renderer.
 
 Date: 2026-10-01
 Decided by: Sameer
-Status: amended by speciesUrlOutlivesSpecies
+Status: superseded by classicViewRemoved; amended earlier by speciesUrlOutlivesSpecies
 Affects: [product.pickFromIndex](local/product/presentation.md#pickfromindex), [product.comparisonOneScale](local/product/presentation.md#comparisononescale)
 Subject: `presentation.compare_view`, `presentation.pick_mode`
 Kind: Direct — a later decision reverses two conditions an earlier one set
@@ -3986,3 +3986,41 @@ What it costs: 198 of 1,082 species have no code, chiefly introduced birds and g
 Laboratory does not band with federal bands, and two species it lists only by subspecies (Brant
 and Cackling Goose). The page names a second list for such birds, but no longer serves it.
 
+---
+
+## classicViewRemoved
+
+**The classic view is removed, with everything only it needed**
+
+Date: 2026-10-27
+Decided by: Sameer
+Status: accepted
+Supersedes: compareUrlContract
+Affects: [product.nextView](local/product/presentation.md#nextview), [tech.stableUrls](local/tech/delivery.md#stableurls), and the twelve requirements withdrawn below
+
+### Decided
+
+The classic view at `/classic`, the comparison at `/compare`, `/now`, and pick mode are removed,
+now that the home page ([product.nextView](local/product/presentation.md#nextview)) has replaced
+them. They answer 404. The requirements only they satisfied are withdrawn:
+[product.comparisonOneScale](local/product/presentation.md#comparisononescale),
+[product.pickFromIndex](local/product/presentation.md#pickfromindex),
+[product.collapsibleControls](local/product/presentation.md#collapsiblecontrols),
+[product.togglesKeepPlace](local/product/presentation.md#toggleskeepplace),
+[product.onlyPerGroup](local/product/presentation.md#onlypergroup),
+[product.helpfulEmptyState](local/product/presentation.md#helpfulemptystate),
+[product.pageExplainsItself](local/product/presentation.md#pageexplainsitself),
+[product.firstLoadShowsAll](local/product/presentation.md#firstloadshowsall),
+[product.searchBox](local/product/filtering.md#searchbox),
+[product.scaleToggle](local/product/diagram.md#scaletoggle),
+[product.nowSelectsCurrentMonth](local/product/filtering.md#nowselectscurrentmonth), and
+[product.regionsGroupedTwoWays](local/product/months.md#regionsgroupedtwoways). Those the home
+page still satisfies stay, reworded to name it. The full credits move to the home page's footer.
+
+### Why
+
+The owner removed the classic view when the home page replaced it, closing
+[todo.classicViewFate](../todo-closed.md#classicviewfate); no further reason was given. The home
+page compares birds with pins, where the classic view used picks. Old `/compare` links stop
+working, which [compareUrlContract](#compareurlcontract) argued against while a comparison view
+existed.

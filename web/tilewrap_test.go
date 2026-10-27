@@ -81,7 +81,7 @@ var (
 //
 // Verifies: product.tileContents. Criterion: acceptance.tileHeaderNeverWraps.
 func TestBandingCodeIsOutsideTheTruncatingElement(t *testing.T) {
-	for _, name := range []string{"static/index.html", "static/detail.html", "static/compare.html"} {
+	for _, name := range []string{"static/shared.html", "static/detail.html"} {
 		b, err := Static.ReadFile(name)
 		if err != nil {
 			t.Fatalf("reading %s: %v", name, err)

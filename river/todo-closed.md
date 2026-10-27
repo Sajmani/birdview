@@ -543,3 +543,80 @@ Closed: 2026-10-04
 
 done 2026-10-04: eight rules removed, no template has emitted `class="sw …"` since
 [decisions.perSectionDefault](requirements/decisions.md#persectiondefault)
+
+## classicViewFate
+
+**Keep, change, or retire the classic view at /classic**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-10-27, retired by Sameer
+
+The index moved to `/classic` on 2026-10-26, unchanged, with its own links, `/now`, compare mode
+(`/compare`), and the guide's examples (`docs/using.md`'s Some things to try) pointing at it. It is
+not linked from the home page except in the credits. Decide whether it stays, and if it goes, what
+replaces compare mode and the guide's examples. Either way, the requirements still say "the index"
+in about 37 places; [product.nextView](requirements/local/product/presentation.md#nextview) says that now means the classic view, but a pass
+should name the classic view or the home page in each. `docs/using.md` also still describes the
+classic view's panels (Regions and months, Presentation) as the way in.
+
+Closed 2026-10-27: the owner removed the classic view, `/compare`, `/now`, and pick mode
+([decisions.classicViewRemoved](requirements/decisions.md#classicviewremoved)). The home page's pins replace compare mode, the guide's examples and panels now describe the
+home page, and the requirements that only the classic view satisfied are withdrawn; the rest name
+the home page.
+
+## togglesStartSelected
+
+**Tapping a month or region when all are selected removes it**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-10-27
+
+All four simulated readers, on both revisions, tapped October or New York and lost it, because
+everything starts selected and a tap drops one ([product.regionAndMonthFilter](requirements/local/product/filtering.md#regionandmonthfilter)); three of the
+four built the address by hand instead. Karen's wording complaint
+([#1](https://github.com/google/birdview/issues/1)) was the same problem seen from the help text.
+One answer: when everything is selected, a tap on one item selects only it, as Only does, and
+later taps add and remove. That changes the requirement, and families too. The home page adopted
+this rule on 2026-10-26 ([product.nextView](requirements/local/product/presentation.md#nextview)); what is left is the classic view, if it stays
+([classicViewFate](#classicviewfate)).
+
+Closed 2026-10-27: the classic view went ([decisions.classicViewRemoved](requirements/decisions.md#classicviewremoved)), so the home page's rule is the only one left.
+
+## compareNumbersUnreadable
+
+**The comparison's numbers cannot be read on a phone**
+
+Status: closed
+Owner: unassigned
+Closed: 2026-10-27
+
+Both phone readers, on both revisions, could not read the length, wingspan, and mass labels inside
+the comparison's drawings, and opened each bird's page instead
+([product.comparisonOneScale](requirements/local/product/presentation.md#comparisononescale)). Show the three numbers as text under each panel, or scale the
+labels with the drawing. The home page writes the three numbers as text under every drawing;
+what is left is `/compare`, which the classic view's compare mode reaches
+([classicViewFate](#classicviewfate)).
+
+Closed 2026-10-27: `/compare` went with the classic view ([decisions.classicViewRemoved](requirements/decisions.md#classicviewremoved)); the home page's comparisons, made
+with pins, write the three numbers as text under every drawing.
+
+## wingspanSectionWidth
+
+**Per-section scale under Wingspan is not bounded in total length**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-10-27
+
+Found 2026-10-19 while setting Bill and Tail's default scale
+([product.scaleToggle](requirements/local/product/diagram.md#scaletoggle)): with 15% sections, one
+wingspan section runs from the 146 mm Elf Owl to the 1,789 mm Emu, 12.3× in total length, because a
+flightless bird's short wings sort it among small owls. Length sections stay within 1.1× and mass
+within 3.1×. Either Wingspan should default to Global as Bill, Tail, and Frequency do, or flightless
+birds need handling in the wingspan sort.
+
+Closed 2026-10-27: per-section scale went with the classic view
+([decisions.classicViewRemoved](requirements/decisions.md#classicviewremoved)); the home page draws
+every bird to one scale, so no section's width decides a scale.

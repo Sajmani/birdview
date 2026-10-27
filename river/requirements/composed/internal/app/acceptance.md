@@ -133,7 +133,7 @@ does. Then, with a search in the box, a control, a tile, and Here must carry it,
 line's links, reset to defaults, and a guide must not. It gates where Chrome is installed.
 
 **Run:** `go test ./cmd/birdview/ -run 'TestSearchMatchesNamesCodesAndTaxa|TestSearchInTheBrowser'`
-**Status: verified 2026-10-25, passing.**
+**Status: withdrawn 2026-10-27**, with the requirement it covers; the classic view was removed when the home page replaced it ([decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)). Before that: verified 2026-10-25, passing.
 Watched failing: 2026-10-25, by not lowercasing what is typed in the script ("AMECRO" kept all six).
 Watched failing: 2026-10-25, by removing the script's click handler (the control, tile, and Here went without the search).
 Watched failing: 2026-10-25, by leaving the order's English name out of the searchable text (when the rule included it).
@@ -153,7 +153,7 @@ the box shows the search; the controls carry `q`, while the welcome line's links
 filters* do not; and a search that matches nothing says so.
 
 **Run:** `go test ./cmd/birdview/ -run TestSearchFromTheAddress`
-**Status: verified 2026-10-25, passing.**
+**Status: withdrawn 2026-10-27**, with the requirement it covers; the classic view was removed when the home page replaced it ([decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)). Before that: verified 2026-10-25, passing.
 Watched failing: 2026-10-25, by never hiding a tile the search does not match.
 
 ## boundariesResolveKnownPoints
@@ -210,7 +210,7 @@ The Months control folds into two lines — the label, All, Now, and the explana
 twelve months (`TestMonthsFoldIntoTwoLines`, watched failing against the one-line layout).
 
 **Run:** `go test ./cmd/birdview/ -run 'TestHereAndNow|TestMonthsFoldIntoTwoLines|TestWelcomeLine'`
-**Status: verified 2026-10-18, passing, and watched failing:** a template that added the reader's
+**Status: withdrawn 2026-10-27**: Now and `/now` went with the classic view ([decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)); the home page's Here and its welcome line are decided by nextViewDrawsOneSet and hereLookupAgreesInTheBrowser, and `TestWelcomeLine` now ties the home page's welcome line to the guide. Before that: verified 2026-10-18, passing, and watched failing: a template that added the reader's
 region to the old one instead of replacing it failed on every region; letting `/now` be
 revalidated failed on its `no-cache` and ETag.
 
@@ -220,13 +220,14 @@ revalidated failed on its `no-cache` and ETag.
 
 Covers: [product.hereSelectsLocalRegion](../../../local/product/filtering.md#hereselectslocalregion)
 
-**Method:** in headless Chrome with the location stubbed, press Here at each point of
-boundariesResolveKnownPoints and require the navigation the Go lookup predicts; with permission
-refused, location unavailable, and a point outside every region, require the matching message and
-no navigation. Now, pressed, goes to the reader's month without requesting `/now`. Arriving by a
-`#here-and-now` link goes to the page choosing the reader's region and month by hand gives; refused,
-it stays and says so in the welcome line (`TestHereAndNowLink`, watched failing on a link that set
-the wrong month and on a refusal message that did not say refused).
+**Method:** on the home page, in headless Chrome with the location stubbed, press Here at each
+point of boundariesResolveKnownPoints and require the navigation the Go lookup predicts; with
+permission refused, location unavailable, and a point outside every region, require the matching
+message and no navigation. Arriving by a `#here-and-now` link goes to the page choosing the
+reader's region by hand gives, with no month named; refused, it stays and says so in the welcome
+line (`TestHereAndNowLink`, watched failing on a link that set the wrong month and on a refusal
+message that did not say refused). Until 2026-10-27 this ran on the classic view, and also pressed
+Now.
 
 **Run:** `go test ./cmd/birdview/ -run TestHereInTheBrowser`
 **Status: verified 2026-10-18, passing, and watched failing:** a browser lookup that tried the sea
@@ -240,9 +241,9 @@ message. Needs Chrome, and skips without it.
 Covers: [product.locationStaysInBrowser](../../../local/product/filtering.md#locationstaysinbrowser)
 
 **Method:** in headless Chrome, record every request: the boundary file is requested when the
-index loads, before anything is pressed; pressing Here then makes exactly one request, identical
-to the one choosing that region's chip would make after Only, and no request carries a
-coordinate.
+home page loads, before anything is pressed; pressing Here then makes exactly one request,
+identical to the one choosing that region alone in the Region setting would make, and no request
+carries a coordinate.
 
 **Run:** `go test ./cmd/birdview/ -run TestHereInTheBrowser`
 **Status: verified 2026-10-18, passing, and watched failing:** adding the latitude to the URL a
@@ -256,8 +257,9 @@ case reads the server's request log and then stops the browser.
 
 Covers: [product.tierHistogram](../../../local/product/ordering.md#tierhistogram)
 
-**Method:** on the rendered index under several orderings and a filter, the histogram has exactly
-one bar per tier section, in order; each bar links to its tier's section; each bar's height is its
+**Method:** on the rendered home page, every bird shown, under several orderings and a filter, the
+histogram has exactly one bar per tier, in order, or none for a single tier; each bar links to its
+tier's heading; each bar's height is its
 tier's count as a percentage of the largest tier's, rounded; and each bar's label names the tier
 and ends with its count. Under the size orderings, a stretch with no birds is one empty bucket per
 whole 15% step it spans, between the bars on either side.
@@ -322,7 +324,7 @@ sends the typed count, and clicking into its box does not; without the script, F
 button. The chosen order links to its reverse and back, every other
 order links to itself unreversed, reversed mass runs largest first, and reversed frequency puts
 the most recorded duck last. Without a month the page is
-no-store with no validator; with one it carries an ETag. The classic view is at /classic. Every
+no-store with no validator; with one it carries an ETag. Every
 count-line setting is a `<details>` sharing one name, so the browser opens one at a time, and
 Reset links to /. The pinned list names each pinned bird in alphabetical order by displayed name, linking to its tile, with a pin
 that unpins it; no pin link jumps the page, and in headless Chrome a page loaded by a pin opens

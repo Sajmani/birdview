@@ -12,7 +12,6 @@ Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shap
 
 The user chooses whether the dataset is ordered by total length, wingspan, body mass, bill length,
 tail length, or how often the bird is recorded ([orderByFrequency](presentation.md#orderbyfrequency), [decisions.frequencyMetric](../../decisions.md#frequencymetric)).
-The comparison view offers the same size orderings for the birds it holds.
 
 **Bill and tail are absolute lengths, not proportions.** They are measured for every species; a
 ratio to total length would put modeled values under every ratio, since three of total length's
@@ -24,11 +23,11 @@ segments are modeled from mass.
 
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition)
 
-Species are sorted ascending by the selected metric, **and the page says which way that
-runs**: *smallest first* under length, wingspan, mass, bill, and tail, *most common first* under
-Frequency, captioned under each group of controls rather than one caption that follows the
-selection. The row aligns on the text baseline, so the heading and every button stay on one
-line and only the captions hang below.
+Species are sorted ascending by the selected metric unless the reader reverses it, **and the page says which way that
+runs**: *smallest first* under length, wingspan, mass, bill, and tail, *most often recorded
+first* under Frequency. On the home page each order's choice says so in its tooltip, the chosen
+order's summary carries an arrow, and choosing the chosen order again reverses it
+([nextView](presentation.md#nextview)).
 
 The direction is stated for every metric, not only the one that departs: Frequency ascends a
 reciprocal — *1 in N* rises as the bird gets scarcer — so a reader who has learned "smallest
@@ -50,8 +49,8 @@ Frequency is banded by decade instead
 bands would move whenever the region filter did.
 
 Rationale: bird size follows a power law, so fixed-width bins crowd small birds and isolate large
-ones. A ratio rule gives sections of comparable visual span at every scale, and, because a
-section is no more than N% wide, makes the per-section scale of scaleToggle honest.
+ones. A ratio rule gives sections of comparable visual span at every scale. On the home page the
+sections are its tiers ([nextView](presentation.md#nextview)).
 
 ## sectionThresholdDefault
 
@@ -61,13 +60,11 @@ Subject: `sectioning.step_percent`
 Value: `15`
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
-The section step N defaults to 15% and the reader can change it, among values from 5% to 30%.
+The section step N defaults to 15%. The address may set another, `step=` from 2 to 100; the home
+page offers no control for it.
 
-Every value the control offers must be one the server accepts, or the control silently falls back
-to the default.
-
-**Under Frequency the same control selects a band width in orders of magnitude**, `10×` or
-`100×` ([orderByFrequency](presentation.md#orderbyfrequency)). Percentages would misdescribe it: one decade is +900%.
+**Under Frequency the same parameter selects a band width in orders of magnitude**, `step=10` or
+`step=100` ([orderByFrequency](presentation.md#orderbyfrequency)). Percentages would misdescribe it: one decade is +900%.
 
 ## sectionHeadersStateRange
 
@@ -75,10 +72,10 @@ to the default.
 
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition)
 
-Each section shows its range in the currently selected metric and the number of species in it,
-under a heading that names the ordering as Order by does and the section's number: *Tail Tier 1*
-when ordering by Tail. The count follows the range directly, as *N species*, in the style of the
-*K of N species* line at the top of the index.
+Each tier shows its range in the currently selected metric and the number of birds in it, under
+a heading that names the ordering as Order by does and the tier's number: *Tail Tier 1* when
+ordering by Tail. The count follows the range directly, as *N birds*, in the style of the count
+line at the top of the home page.
 
 **The range is the tier's own birds**, smallest to largest; a tier of one bird states one value.
 Tiers do not abut, and the stretch between them can be wide. So every heading on a page carries
@@ -89,8 +86,8 @@ between the numbers.
 Rounding heading by heading made adjacent ranges read as overlapping ("0.2 in – 0.3 in", "0.3 in
 – 0.4 in"); running each range on to the next tier's start overstated it.
 
-Rationale: under per-section scaling (scaleToggle) the header is what tells the user that the scale has
-changed between one section and the next. Without it, per-section scaling is misleading.
+Rationale: the heading is what tells the reader where one tier ends and the next begins, and how
+far apart they are.
 
 ## tierHistogram
 
@@ -99,7 +96,7 @@ changed between one section and the next. Without it, per-section scaling is mis
 Subject: `sectioning.histogram`
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
-Under the species-count line, a histogram has one bar per tier, in tier order, each as tall as its
+Above the birds, a histogram has one bar per tier, in tier order, each as tall as its
 tier's species count against the largest tier's, and each linking to its tier. A bar's label names
 the tier as its heading does, its range, and its count: *Bill Tier 4: 0.35 in – 0.41 in, 72
 species*. It follows the current ordering and filters, so it is the shape of the view on screen.

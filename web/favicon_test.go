@@ -41,9 +41,9 @@ var (
 // is covered automatically; a list would quietly stop covering it.
 func diagramParts(t *testing.T) map[string]bool {
 	t.Helper()
-	b, err := Static.ReadFile("static/index.html")
+	b, err := Static.ReadFile("static/shared.html")
 	if err != nil {
-		t.Fatalf("reading the embedded index template: %v", err)
+		t.Fatalf("reading the embedded shared templates: %v", err)
 	}
 	m := reDiagTpl.FindStringSubmatch(string(b))
 	if m == nil {

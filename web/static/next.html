@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 */ -}}
-{{/* The /next prototype (product.nextView). Every control is a link or a
+{{/* The home page (product.nextView). Every control is a link or a
      form, and every popover is a <details>, so it works without JavaScript. */}}
 {{define "next.html"}}<!DOCTYPE html>
 <html lang="en">
@@ -30,10 +30,11 @@
   <p class="sub">BirdView draws birds as <a href="/docs/using">stick figures</a> to scale, so you
   can compare their sizes and shapes. Click a bird for its numbers and sources.{{with .Feedback}}
   Found something wrong? <a href="{{.}}">Report it</a>.{{end}}</p>
-  {{/* Things to try, as on the classic view, with its comparisons made
-       with pins: each pins six birds and shows only them, by length. The
-       first finds the reader's region in the browser (#here-and-now, in
-       here.js) and sets the month to Now, keeping every other setting. */}}
+  {{/* Things to try, each also in the guide's "Some things to try". The
+       comparisons are made with pins: each pins six birds and shows only
+       them, by length. The first finds the reader's region in the browser
+       (#here-and-now, in here.js) and sets the month to Now, keeping every
+       other setting. */}}
   <p class="welcome"><b>New here?</b> Try
     <a href="{{.HereNowURL}}">the birds around you now</a> &middot;
     compare some
@@ -156,11 +157,50 @@
 <p class="empty">No birds match. <a href="{{.ResetURL}}">Reset</a>.</p>
 {{end}}
 
-<footer>
-  <p><b>BirdView</b> is non-commercial. It is built on freely available sources, credited with
-  thanks on <a href="/classic">the classic view</a> and in <a href="/docs/data">how the data is made</a>.</p>
+<footer id="credits">
+  {{/* Not "built entirely from other people's work" any more. That was true
+       when every number came from a published source; BirdView now derives
+       work of its own -- the region table, the occurrence status, the
+       supplementary habitat and diet assignments, and every model behind a
+       drawn segment. Crediting the inputs is still the point of this list. */}}
+  <p><b>BirdView</b> is non-commercial. It is built on these freely available sources, with
+  thanks:</p>
+  <ul class="credits">
+    <li><b>Morphometric traits</b> &mdash; Tobias, J. A. et al. (2022).
+      <i>AVONET: morphological, ecological and geographical data for all birds.</i>
+      Ecology Letters 25:581&ndash;597.
+      <a href="https://doi.org/10.6084/m9.figshare.16586228">doi:10.6084/m9.figshare.16586228</a>,
+      licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</li>
+    <li><b>Wingspans</b> &mdash; Fox, M. R., Brunton, E. A. &amp; Shephard, J. M. (2026).
+      <i>Avian wingspan database.</i>
+      <a href="https://doi.org/10.6084/m9.figshare.32089083">doi:10.6084/m9.figshare.32089083</a>,
+      licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      Only empirical wingspans are used; the rest are modeled.</li>
+    <li><b>Region boundaries</b> &mdash; Made with
+      <a href="https://www.naturalearthdata.com/">Natural Earth</a>, in the public domain.
+      Used only by the Here button, in your browser.</li>
+    <li><b>Names, families, and species codes</b> &mdash; AviList Core Team (2026).
+      <i>AviList: The Global Avian Checklist, v2025b.</i>
+      <a href="https://doi.org/10.2173/avilist.v2025b">doi:10.2173/avilist.v2025b</a>,
+      licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      English names default to eBird/Clements usage; AviList&rsquo;s are an option.</li>
+    <li><b>Where each bird is found</b> &mdash; occurrence records from
+      <a href="https://www.gbif.org">GBIF</a>: the EOD &mdash; eBird Observation Dataset,
+      <a href="https://doi.org/10.15468/aomfnb">doi:10.15468/aomfnb</a>, and the iNaturalist
+      research-grade observations, both licensed
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      Only the derived list of regions per species is kept; no record, coordinate, date, or
+      observer reaches this site.</li>
+    <li><b>Which species are in scope</b> &mdash; BirdView's own, derived from the occurrence
+      records above, not from a checklist: a species is drawn when its records <b>recur</b> in
+      some region, in repeated episodes across years. Method and limits:
+      <a href="/docs/data#scope">how the data is made</a>. Escaped cage, aviary, and farm birds
+      also pass that rule; they are left off this page and
+      <a href="/excluded">listed with the reason for each</a>.</li>
+  </ul>
   <p class="caveat"><b>Every length here is modeled</b>, as are most wingspans. Click any bird to
-  see where each number comes from.</p>
+  see where each number comes from. <a href="/docs/pipeline">One diagram</a> shows how the sources
+  become the drawings.</p>
 </footer>
 <script>{{.FindScript}}</script>
 <script>{{.HereScript}}</script>

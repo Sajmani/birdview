@@ -7,15 +7,19 @@ life. Every setting is in the page address, so you can bookmark or share any vie
 
 ## The page
 
-Under the title, **New here? Try** offers a few views to start with, **more ideas** leads to
-[Some things to try](#some-things-to-try), and **reset to defaults** returns the page to how it was
-when you arrived.
+Under the title, **New here? Try** offers a few views to start with, and **more ideas** leads to
+[Some things to try](#some-things-to-try).
 
-Below the panels, a **search box** keeps the birds whose English or scientific name, code, family,
-or order contains what you type, as you type. The **count line** says how many species are shown
-and names every setting. Under it, a **histogram** has one bar per section, each linking to its section. Each
-section heading names the measurement and section, such as **Tail Tier 3**, its range, and its
-species count.
+The page opens on the birds recorded this month, most often recorded first, the first 100 of
+them. Every bird shown is drawn to one scale.
+
+Above the birds, a **find box** finds birds by English or scientific name, code, family, or order
+as you type, and lists them once there are 10 or fewer. **Pin** a bird, from that list or from its
+tile, to keep it on the page whatever the settings; the pinned birds are listed under the box.
+
+The **count line** says how many birds are drawn and names every setting. Click a setting to change
+it. Under it, a **histogram** has one bar per tier, each linking to its tier. Each tier heading
+names the order and the tier, such as **Tail Tier 3**, its range, and how many birds it holds.
 
 ---
 
@@ -45,81 +49,30 @@ of each number, and a link to the species on **iNaturalist** for photographs.
 
 ---
 
-## The controls
+## The settings
 
-### Order by
+- **Show:** the first 100 birds (type another number), **All** the birds the settings match, or
+  **Pinned only**. **Clear pins** unpins every bird; **Reset** returns every setting to its default
+  and keeps the pins.
+- **Order by:** **Frequency**, how often a bird is recorded, most often first (see
+  [below](#sorting-by-how-often-a-bird-is-recorded)), or **Length**, **Wingspan**, **Mass**,
+  **Bill**, or **Tail**, smallest first. Choose the order again to reverse it. A Northern Harrier
+  and a Cooper's Hawk sort close together by length and mass, and far apart by wingspan.
+- **Month:** **Now**, the default, is this month; **All** is every month. A bird with too few
+  records to tell is shown in every month, and says so.
+- **Region:** states, provinces, and stretches of open sea. A bird is listed in a region when at
+  least 1 in a million of the region's bird records are of it. **Here** chooses the region you are
+  in; your browser works it out, so your location never reaches the server. Here needs JavaScript.
+- **Family:** grouped by taxonomic order, in field-guide sequence.
+- **Habitat** and **Diet:** where a bird mostly lives and what it mostly eats, per species, from
+  **AVONET**. BirdView adds a few more and marks them as its own; [everything BirdView adds](/added)
+  is listed in one place.
+- **Units:** inches and ounces, or centimeters and grams.
+- **Names:** **North American** names, such as Dovekie and Rough-legged Hawk, or **World** names,
+  AviList's: Little Auk, Rough-legged Buzzard.
 
-**Length**, **Wingspan**, **Mass**, **Bill**, and **Tail** sort birds by that measurement, smallest
-first, in sections of similar size. **Frequency** sorts by how often a bird is recorded, most common
-first; see [below](#sorting-by-how-often-a-bird-is-recorded).
-
-Switching orderings shows how differently birds are built: a Northern Harrier and a Cooper's Hawk
-sort close together by length and mass, and far apart by wingspan.
-
-### Scale — per section or global
-
-- **Per section** scales each section to its largest bird, so every bird is big enough to read. Use
-  it to compare shape within a group. It is the default for Length, Wingspan, and Mass.
-- **Global** draws everything at one scale, so a kinglet is a speck beside a swan. Use it to compare
-  size across families. It is the default for Bill, Tail, and Frequency.
-
-### Section step
-
-How much larger a bird must be to start a new section: 5, 10, 15, 20, or 30 percent. Under Frequency
-the choices are 10× and 100×.
-
-### Units
-
-Inches and ounces, or centimeters and grams.
-
-### Names
-
-**N. America** uses North American names: Dovekie, Brant, Rough-legged Hawk. **World** uses
-AviList's: Little Auk, Brant Goose, Rough-legged Buzzard.
-
-## The filters
-
-**Regions and months**, **Diet and Habitat**, and **Families** narrow which birds are drawn. They
-combine, and everything is selected when you arrive:
-
-- Click a month, region, diet, or family to drop it.
-- Click a **group** heading, such as a zone or an order, to drop the group.
-- Click **Only** beside a group or category to keep just that, within its own panel.
-- Click **All** to clear the panel, or to select everything again.
-
-### Months
-
-**Now** selects the current month. A bird with too few records
-to tell is shown in every month, and says so.
-
-### Regions
-
-States, provinces, and stretches of open sea. A bird is listed in a region when at least 1 in a
-million of the region's bird records are of it.
-
-**Here** selects the region you are in. Your browser works out the region itself, so your location
-never reaches the server. Here needs JavaScript.
-
-The regions are **grouped two ways**: **Geographic**, by the map, and **Common birds**, by how much
-their species lists overlap.
-
-### Diet and Habitat
-
-What a bird mostly eats and where it mostly lives, per species, from **AVONET**. BirdView adds a few
-more and marks them as its own; [everything BirdView adds](/added) is listed in one place.
-
-### Families
-
-Grouped by taxonomic order, in field-guide sequence. Families in the same order share related
-colors.
-
----
-
-## Comparing a few birds side by side
-
-Turn on **Compare birds** in Controls and every tile gets a **+ Pick** button; a bar along the bottom
-collects your picks. Press **Compare** to draw them together at one scale. The comparison is a link
-you can keep or send.
+Choosing one option selects only it, choosing more adds them, and choosing a selected option again
+removes it. Nothing selected means all. The settings combine.
 
 ---
 
@@ -139,13 +92,14 @@ using the *1 in N* figure on every tile. The tiers are powers of ten: 1 in 10 to
 
 ## Some things to try
 
-- **[The birds around you now](/classic?by=frequency&scale=global#here-and-now).** The commonest birds
-  where you are this month, on one scale. Without sharing your location, try
-  [New York in October](/classic?by=frequency&scale=global&region=NY&month=Oct).
-- **Compare some [small birds](/compare?species=leasan&species=houspa&species=dowwoo&species=houfin&species=barswa&species=easpho),
-  [medium birds](/compare?species=blujay&species=amekes&species=calthr&species=moudov&species=belkin1&species=chwwid),
-  [large birds](/compare?species=turvul&species=gbbgul&species=greegr&species=cangoo&species=grecor&species=rosspo1),
-  [huge birds](/compare?species=calcon&species=amwpel&species=mutswa&species=magfri&species=baleag&species=bkfalb).**
+- **[The birds around you now](/#here-and-now).** The birds most often recorded where you are this
+  month. Without sharing your location, try
+  [New York in October](/?region=NY&month=Oct).
+- **Compare some [small birds](/?by=length&pin=leasan&pin=houspa&pin=dowwoo&pin=houfin&pin=barswa&pin=easpho&show=pinned),
+  [medium birds](/?by=length&pin=blujay&pin=amekes&pin=calthr&pin=moudov&pin=belkin1&pin=chwwid&show=pinned),
+  [large birds](/?by=length&pin=turvul&pin=gbbgul&pin=greegr&pin=cangoo&pin=grecor&pin=rosspo1&show=pinned),
+  [huge birds](/?by=length&pin=calcon&pin=amwpel&pin=mutswa&pin=magfri&pin=baleag&pin=bkfalb&show=pinned).**
+  Each pins six birds and shows only them, by length.
   - *Small:* Least Sandpiper, House Sparrow, Downy Woodpecker, House Finch, Barn Swallow, and
     Eastern Phoebe, all 141 to 158 mm long. The swallow is the lightest, 18 g, yet has the widest
     wings, 325 mm against 234 mm for the finch.
@@ -160,10 +114,10 @@ using the *1 in N* figure on every tile. The tiers are powers of ten: 1 in 10 to
   - *Huge:* California Condor, American White Pelican, Mute Swan, Magnificent Frigatebird, Bald
     Eagle, and Black-footed Albatross, all with wings over two meters. The albatross is the
     shortest, 709 mm, yet spans 2265 mm; the frigatebird weighs about a seventh of the swan.
-- **See all [herons and ducks](/classic?family=Ardeidae&family=Anatidae) together.** Similar lengths,
-  different builds: herons are nearly all neck and leg, ducks nearly all body.
-- **"Big" depends on the measure.** Sort by [length](/classic?by=length), then
-  [wingspan](/classic?by=wingspan), then [mass, scale Global](/classic?by=mass&scale=global).
+- **See all [herons and ducks](/?family=Ardeidae&family=Anatidae&month=all) together.** Similar
+  lengths, different builds: herons are nearly all neck and leg, ducks nearly all body.
+- **"Big" depends on the measure.** Order every bird by [length](/?by=length&month=all&show=all),
+  then [wingspan](/?by=wingspan&month=all&show=all), then [mass](/?by=mass&month=all&show=all).
 
 ---
 

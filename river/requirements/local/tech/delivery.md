@@ -38,7 +38,7 @@ that is neither a page nor something a page loads is `/robots.txt`
 ([crawlersSkipFilteredViews](#crawlersskipfilteredviews)).
 
 Rationale: a plain file server over that directory served every page's Go template source as an
-HTML page of its own, and `index.html`'s source at the bare `/static/`.
+HTML page of its own, and the home page's template source at the bare `/static/`.
 
 ## crawlersSkipFilteredViews
 
@@ -48,14 +48,12 @@ Subject: `server.robots`
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 The server answers `/robots.txt` with a policy that lets every crawler fetch each page that has no
-query string, except the comparison, and asks it to fetch nothing with a query string, nor `/now`
-or the region boundary file.
+query string, and asks it to fetch nothing with a query string, nor the region boundary file.
 
-Rationale: every control is a query parameter, so the index links to hundreds of variants of
+Rationale: every control is a query parameter, so the home page links to hundreds of variants of
 itself, each linking to hundreds more: an unbounded set of near-duplicate pages, each costing the
-egress a public deployment pays for. What is worth indexing has no query string: the index, about
-a thousand species pages, the guides, and the added and excluded lists. The comparison is
-nothing without the birds its query names. A `robots.txt` is a request that well-behaved crawlers
+egress a public deployment pays for. What is worth indexing has no query string: the home page,
+about a thousand species pages, the guides, and the added and excluded lists. A `robots.txt` is a request that well-behaved crawlers
 honor, not a limit; what bounds the cost of one that ignores it is the deployment's instance cap.
 
 ## stableUrls
@@ -65,11 +63,10 @@ honor, not a limit; what bounds the cost of one that ignores it is the deploymen
 Subject: `server.public_interface`
 Goals: [goals.shareableViews](../../../goals/goals.md#shareableviews), [goals.freedomToChange](../../../goals/goals.md#freedomtochange)
 
-BirdView's public interface is its URLs: the index `/`, a species page `/species/<eBird code>`, the
-comparison `/compare`, the current-month link `/now`, the guides `/docs` and `/docs/<guide>`, the
-lists `/added` and `/excluded`, and the query parameters the pages' own links write (`by`,
-`scale`, `step`, `units`, `names`, `species`, `family`, `region`, `month`, `habitat`, `niche`),
-with the values those links write. A URL of that form keeps working across releases. Everything
+BirdView's public interface is its URLs: the home page `/`, a species page `/species/<eBird code>`,
+the guides `/docs` and `/docs/<guide>`, the lists `/added` and `/excluded`, and the query
+parameters the pages' own links write (`by`, `rev`, `step`, `units`, `names`, `family`, `region`,
+`month`, `habitat`, `niche`, `pin`, `show`), with the values those links write. A URL of that form keeps working across releases. Everything
 else is internal and may change without notice: page markup, wording and styling, anything under
 `/static/` or `/boundaries/`, and the shape of `species.json`.
 
@@ -78,7 +75,9 @@ allows, and says what changed, as a species that leaves scope already does
 ([decisions.speciesUrlOutlivesSpecies](../../decisions.md#speciesurloutlivesspecies),
 [decisions.compareUrlContract](../../decisions.md#compareurlcontract)). Renaming a path,
 a parameter, or a value it accepts needs a decision, and the old form keeps answering, read as
-before or redirected.
+before or redirected. One decision removed URLs outright: the comparison `/compare`, the
+current-month link `/now`, and the `scale` and `species` parameters went with the classic view
+([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
 Rationale: every view is a URL ([goals.shareableViews](../../../goals/goals.md#shareableviews)), and
 once BirdView is public, people bookmark and send them; a link that breaks is a promise broken.

@@ -40,7 +40,6 @@ import (
 	"os"
 	pathpkg "path"
 	"regexp"
-	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -139,19 +138,18 @@ type server struct {
 	// onRender, when set, is told the name of every template rendered. Only
 	// the checks set it, to confirm they have seen every kind of page.
 	onRender func(template string)
-	// hereJS is web/static/here.js, inlined into every index page.
+	// hereJS is web/static/here.js, inlined into the home page.
 	hereJS template.JS
-	// searchJS is web/static/search.js, inlined likewise (product.searchBox).
-	searchJS template.JS
-	// nextFindJS is web/static/next-find.js, inlined into /next (product.nextView).
+	// nextFindJS is web/static/next-find.js, inlined into the home page (product.nextView).
 	nextFindJS template.JS
-	// search is each species' normalized search text, by id (product.searchBox).
+	// search is each species' normalized search text, by id, which the
+	// home page's find box matches against (product.nextView).
 	search map[string]string
 	// boundaryURL is where the region boundary file is served: its path
 	// carries the file's hash, so it can be cached for a year
 	// (tech.regionBoundaries, decisions.hereAndNowCaching).
 	boundaryURL string
-	// ds is what the index draws: every species except the exotics
+	// ds is what the home page draws: every species except the exotics
 	// (product.escapedBirdsListed). all is the whole dataset, for the detail pages and the lists
 	// that must name every bird.
 	ds   *dataset.Dataset
@@ -189,119 +187,6 @@ type familyOption struct {
 	Color, TextColor string
 	Order            string
 	OrderCommon      string
-}
-
-// orderGroup is one group of families inside a block of the selector --
-// historically an order, now either an order or a birder group (product.familiesByOrder).
-// Grouping by order in the checklist's taxonomic sequence matches how every
-// field guide is arranged, and it is what lets family colors repeat across
-// orders (product.familyFilter, product.generatedBadgeColors).
-type orderGroup struct {
-	Order    string       // the order's name
-	Common   string       // the order's English name; empty for a birder group
-	Selected bool         // every family in the group is filtered in
-	URL      template.URL // toggles the whole group
-	// OnlyURL selects this group's families and nothing else.
-	OnlyURL  template.URL
-	Families []familyRow
-}
-
-// familyGroupingBlock is one way of carving the families up, rendered as its
-// own labeled block (product.familiesByOrder). The same shape as the region selector's
-// groupingBlock, and it reuses that CSS.
-type familyGroupingBlock struct {
-	Name   string
-	Note   string
-	Groups []orderGroup
-}
-
-// groupKey names one group a family belongs to, and the group's subtitle.
-type groupKey struct{ Name, Common string }
-
-// groupFamilies gathers family rows into one block's groups.
-//
-// `keyOf` names **every** group a family belongs to: a birder group may hold
-// a family that another birder group also holds, since an owl is both a bird
-// of prey and a bird of the night (product.familiesByOrder, decisions.familyInTwoGroups). `order` fixes the sequence
-// groups are offered in; passing nil keeps the order families first appear
-// in, which for the taxonomic block is checklist sequence.
-//
-// A family the table does not know -- one AviList added that the birder table
-// has not been told about -- yields no groups and is gathered under the empty
-// name rather than dropped, so it stays reachable and acceptance.familyGroupingComplete reports it.
-func (s *server) groupFamilies(r *http.Request, selected map[string]bool, rows []familyRow,
-	order []string, keyOf func(familyOption) []groupKey) []orderGroup {
-
-	var out []orderGroup
-	at := map[string]int{}
-	ensure := func(name, common string) int {
-		if i, ok := at[name]; ok {
-			return i
-		}
-		out = append(out, orderGroup{Order: name, Common: common})
-		at[name] = len(out) - 1
-		return len(out) - 1
-	}
-	// Seed in the requested order, so an empty group still holds its place
-	// and the sequence does not depend on which families happen to exist.
-	for _, name := range order {
-		ensure(name, "")
-	}
-	for _, row := range rows {
-		keys := keyOf(row.familyOption)
-		if len(keys) == 0 {
-			keys = []groupKey{{}} // unknown family: visible under the empty name
-		}
-		for _, k := range keys {
-			i := ensure(k.Name, k.Common)
-			out[i].Families = append(out[i].Families, row)
-		}
-	}
-	// Drop groups no family landed in, which only happens for a seeded name
-	// the dataset has no families for.
-	kept := out[:0]
-	for _, g := range out {
-		if len(g.Families) > 0 {
-			kept = append(kept, g)
-		}
-	}
-	out = kept
-
-	// A group toggle selects its whole group, or clears it when the group is
-	// already fully selected. Deriving "selected" from the families rather
-	// than tracking it separately means the two can never disagree.
-	for i := range out {
-		g := &out[i]
-		g.Selected = true
-		for _, f := range g.Families {
-			if !selected[f.Name] {
-				g.Selected = false
-				break
-			}
-		}
-		next := map[string]bool{}
-		for k := range selected {
-			next[k] = true
-		}
-		for _, f := range g.Families {
-			if g.Selected {
-				delete(next, f.Name)
-			} else {
-				next[f.Name] = true
-			}
-		}
-		g.URL = s.familyURL(r, next)
-
-		// Only: exactly this group's families. Built from the group alone,
-		// not from the current selection, so it lands on the same page
-		// whatever was on before.
-		only := make(map[string]bool, len(g.Families))
-		for _, f := range g.Families {
-			only[f.Name] = true
-		}
-		g.OnlyURL = s.familyURL(r, only)
-	}
-	return out
 }
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -562,7 +447,7 @@ func compressed(h http.Handler) http.Handler {
 // staticFiles serves the files a page loads -- the stylesheet and the
 // favicon -- and nothing else from the same directory. The page templates live
 // beside them, and a plain file server would serve each one's source as an
-// HTML page, and index.html's for the bare directory (tech.servesOnlyItsPages).
+// HTML page, and a listing for the bare directory (tech.servesOnlyItsPages).
 func staticFiles(assets fs.FS) http.Handler {
 	files := http.FileServer(http.FS(assets))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -591,8 +476,8 @@ var assetFS fs.FS = web.Static
 // embed is what ships.
 func devAssets(dir string) error {
 	sub := os.DirFS(dir)
-	if _, err := fs.Stat(sub, "static/index.html"); err != nil {
-		return fmt.Errorf("-dev %s: no static/index.html below it: %w", dir, err)
+	if _, err := fs.Stat(sub, "static/next.html"); err != nil {
+		return fmt.Errorf("-dev %s: no static/next.html below it: %w", dir, err)
 	}
 	assetFS = sub
 	devDir = dir
@@ -610,18 +495,12 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	s := &server{mux: http.NewServeMux(), ds: ds, tmpl: tmpl, devDir: devDir,
 		byID: map[string]*dataset.Species{}, undrawnByID: map[string]*dataset.Undrawn{},
 		idOf: map[string]string{}}
-	// Inlined into the index rather than fetched, as the scroll script is
-	// (acceptance.scrollScriptScoped).
+	// Inlined into the home page rather than fetched, as its other scripts are.
 	js, err := fs.ReadFile(assetFS, "static/here.js")
 	if err != nil {
 		return nil, fmt.Errorf("reading here.js: %w", err)
 	}
 	s.hereJS = template.JS(js)
-	js, err = fs.ReadFile(assetFS, "static/search.js")
-	if err != nil {
-		return nil, fmt.Errorf("reading search.js: %w", err)
-	}
-	s.searchJS = template.JS(js)
 	js, err = fs.ReadFile(assetFS, "static/next-find.js")
 	if err != nil {
 		return nil, fmt.Errorf("reading next-find.js: %w", err)
@@ -648,7 +527,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		counts[sp.Family]++
 	}
 	s.sameAs = sharedRows(ds)
-	// The index view: the same dataset without the exotics, which keep
+	// What the home page draws: the same dataset without the exotics, which keep
 	// their pages through byID (product.escapedBirdsListed). A shallow copy, so the totals and
 	// the undrawn records are shared rather than duplicated.
 	s.all = ds
@@ -673,14 +552,14 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	}
 	// ds.Families is already in AviList's taxonomic sequence; preserve it
 	// rather than alphabetizing, which is the order every field guide uses.
-	onIndex := map[string]bool{}
+	drawn := map[string]bool{}
 	for i := range s.ds.Species {
-		onIndex[s.ds.Species[i].Family] = true
+		drawn[s.ds.Species[i].Family] = true
 	}
 	for _, f := range ds.Families {
-		// A family every one of whose birds is off the index is not
+		// A family every one of whose birds is off the home page is not
 		// offered: a control that selects nothing is noise (product.escapedBirdsListed).
-		if !onIndex[f.Name] {
+		if !drawn[f.Name] {
 			continue
 		}
 		s.fams = append(s.fams, familyOption{
@@ -700,13 +579,10 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		{"/added", http.HandlerFunc(s.added)},
 		{"/excluded", http.HandlerFunc(s.excluded)},
 		// Both the exact path and the subtree, so the bare name serves the
-		// index instead of a 301 to it.
+		// guides' index instead of a 301 to it.
 		{"/docs", http.HandlerFunc(s.document)},
 		{"/docs/", http.HandlerFunc(s.document)},
-		{"/compare", http.HandlerFunc(s.compare)},
 		{"/birds.json", http.HandlerFunc(s.nextBirds)},
-		{classicPath, http.HandlerFunc(s.index)},
-		{"/now", http.HandlerFunc(s.now)},
 		{"/boundaries/", http.HandlerFunc(s.boundaries)},
 		{"/robots.txt", http.HandlerFunc(robots)},
 		{"/species/", http.HandlerFunc(s.detail)},
@@ -739,16 +615,12 @@ type options struct {
 	// meaning "15 percent" in three views and "one decade" in a fourth is
 	// the kind of thing that reads fine and divides wrong.
 	Decades int
-	Scale   view.ScaleMode
-	// Families holds the explicitly named families. HasSelection distinguishes
-	// a fresh page, where nothing is named and everything is selected, from an
-	// explicitly emptied selection, where nothing is named and nothing is
-	// selected. The two look identical in the query string otherwise, and they
-	// mean opposite things.
+	// Families holds the explicitly named families. HasSelection says the
+	// address names the parameter at all; the home page reads an empty
+	// selection as all (nextOptions).
 	Families     map[string]bool
 	HasSelection bool
-	// Regions and HasRegions draw the same distinction for product.regionAndMonthFilter's filter:
-	// absent means everywhere, explicitly empty means nowhere.
+	// Regions and HasRegions draw the same distinction for product.regionAndMonthFilter's filter.
 	Regions    map[string]bool
 	HasRegions bool
 	// Months and HasMonths draw the same distinction over the twelve
@@ -756,7 +628,7 @@ type options struct {
 	Months    map[int]bool
 	HasMonths bool
 	// Habitats and Niches are product.habitatAndDietFilters's categorical filters, and draw the same
-	// absent-versus-empty distinction. A species matches when ANY of its
+	// distinction. A species matches when ANY of its
 	// assignments is selected: a bird of two habitats is in both, and
 	// requiring all of them would mean selecting two habitats returned only
 	// birds that use both, which is not what picking two places asks for.
@@ -770,27 +642,11 @@ type options struct {
 	// the default: this is an ABA-area dataset and Dovekie is what its reader
 	// calls that bird.
 	Locale dataset.Locale
-
-	// Picking is pick mode (product.pickFromIndex): the `species` parameter is present, even
-	// if it is empty. Picks are the ids named in it, deduplicated, in the
-	// order given -- that order is the reader's and no page reorders it.
-	Picking bool
-	Picks   []string
-
-	// Query is product.searchBox's search, as typed; empty when there is none.
-	Query string
 }
 
 func parseOptions(r *http.Request) options {
 	q := r.URL.Query()
-	// Per-section is the default (product.scaleToggle, decisions.perSectionDefault). Global makes the cross-family
-	// argument better and is one click away, but at global scale a median bird
-	// is a couple of pixels tall, and none of the diagram's vocabulary --
-	// dashed for modeled, the chord ticks, the labels -- is legible there. The
-	// default that teaches the reader to read a bird wins over the one that
-	// delivers the shock before they can.
 	o := options{Metric: view.ByLength, Step: view.DefaultStepPercent, Decades: 1,
-		Scale:  view.PerSection,
 		Locale: dataset.LocaleNA, Families: map[string]bool{}, Regions: map[string]bool{},
 		Months:   map[int]bool{},
 		Habitats: map[string]bool{}, Niches: map[string]bool{}}
@@ -806,34 +662,11 @@ func parseOptions(r *http.Request) options {
 	case view.ByFrequency:
 		o.Metric = view.ByFrequency
 	}
-	// Frequency defaults to global (decisions.frequencyGlobalScale). Per-section scaling rests on
-	// product.sectionBreakRule's guarantee that a section is at most N% wide, and a frequency
-	// tier has no such bound: it would draw the one 140 mm bird in the last
-	// tier at the height of a 1,201 mm swan six tiers up.
-	//
-	// Bill and Tail too: a section bounded in bill or tail length is not
-	// bounded in total length, and one runs 7.1x from a hummingbird to a
-	// pheasant (product.scaleToggle).
-	if o.Metric == view.ByFrequency || o.Metric == view.ByBill || o.Metric == view.ByTail {
-		o.Scale = view.Global
-	}
-	// BOTH values recognized, not just the non-default. The old comment here
-	// warned that reading only the non-default silently disables the toggle
-	// when the default moves -- which is what happened when decisions.perSectionDefault moved it.
-	// With a default that now varies by metric, reading only Global would
-	// leave "Per section" dead under Frequency, which is the same bug
-	// arriving by a different road.
-	switch view.ScaleMode(q.Get("scale")) {
-	case view.Global:
-		o.Scale = view.Global
-	case view.PerSection:
-		o.Scale = view.PerSection
-	}
 	// One `step` parameter, read differently by the two sectioning rules
-	// (decisions.frequencyMetric). Under Frequency the control offers band widths in orders of
-	// magnitude, so the value is 10 or 100 rather than a percentage -- and
-	// 10 is a legal percentage too, which is why the metric decides first
-	// instead of the range of the number.
+	// (decisions.frequencyMetric): under Frequency it is a band width in
+	// orders of magnitude, so the value is 10 or 100 rather than a
+	// percentage -- and 10 is a legal percentage too, which is why the metric
+	// decides first instead of the range of the number.
 	if o.Metric == view.ByFrequency {
 		if v := q.Get("step"); v == "100" {
 			o.Decades = 2
@@ -842,22 +675,10 @@ func parseOptions(r *http.Request) options {
 		o.Step = v
 	}
 	o.Metric3 = q.Get("units") == "metric"
-	// Recognize the non-default, as with scale above: writing this the other
-	// way round disables the toggle the moment the default moves.
+	// Recognize the non-default: writing this the other way round disables
+	// the setting the moment the default moves.
 	if dataset.Locale(q.Get("names")) == dataset.LocaleWorld {
 		o.Locale = dataset.LocaleWorld
-	}
-	// Pick mode is the presence of the parameter, not a value in it: a bare
-	// `species=` holds the mode open with nothing picked (product.pickFromIndex). Exactly the
-	// distinction drawn just below for `family`.
-	_, o.Picking = q["species"]
-	picked := map[string]bool{}
-	for _, id := range q["species"] {
-		if id == "" || picked[id] {
-			continue
-		}
-		picked[id] = true
-		o.Picks = append(o.Picks, id)
 	}
 	_, o.HasSelection = q["family"]
 	for _, f := range q["family"] {
@@ -894,7 +715,6 @@ func parseOptions(r *http.Request) options {
 			o.Months[i] = true
 		}
 	}
-	o.Query = strings.TrimSpace(q.Get("q"))
 	return o
 }
 
@@ -923,14 +743,9 @@ type tile struct {
 	// the wingspan is modeled (product.measuredVersusModeled).
 	WingModeled bool
 
-	// Search is the tile's normalized search text, and Hidden is set when
-	// the address's search does not match it (product.searchBox).
-	Search string
-	Hidden bool
-
-	// Labels and ChordLabel are empty on an index tile: the annotations of product.labeledDetailDiagram
-	// need room, so they appear only in the detail view and in the help legend,
-	// both of which build this struct through labeledTile.
+	// Labels and ChordLabel are empty on a home page tile: the annotations of product.labeledDetailDiagram
+	// need room, so they appear only in the detail view, which builds this
+	// struct through labeledTile.
 	Labels     []diagramLabel
 	TopOffset  float64
 	ChordLabel string
@@ -953,24 +768,15 @@ type tile struct {
 	MassCube massCube
 
 	// DetailURL is the tile's own link. Built in Go rather than in the
-	// template so it carries the reader's view state (product.pickFromIndex); empty on the
-	// legend tile, which is an illustration and links nowhere.
+	// template so it carries the units and names the species page draws with
+	// (product.nextView).
 	DetailURL template.URL
 
-	// PickURL is the pick control, a SIBLING of the tile link and never a
-	// replacement for it -- the tile opens the detail view in both modes, so
-	// product.tileOpensDetail holds without exception. Empty outside pick mode, which is what
-	// keeps the tile unchanged during ordinary browsing (product.tileContents).
-	PickURL template.URL
-	Picked  bool
-	// PinURL pins the bird on /next, or unpins it when Pinned
+	// PinURL pins the bird on the home page, or unpins it when Pinned
 	// (product.nextView). Empty everywhere else.
 	PinURL template.URL
 	Pinned bool
-	// Anchor is this tile's fragment id. Picking navigates to it, so the
-	// browser restores the reading position itself during load instead of the
-	// scroll script jumping there after the page has already painted -- which
-	// on a 1.7 MB index is a visible flash (product.togglesKeepPlace).
+	// Anchor is this tile's fragment id, which the pinned list links to.
 	Anchor string
 }
 
@@ -978,14 +784,12 @@ type tile struct {
 // and the element's id must agree, and they are written in different files.
 func tileAnchor(id string) string { return "s-" + id }
 
+// sectionView is one tier as the histogram reads it: its number, its range
+// as written, and how many birds it holds.
 type sectionView struct {
 	Index    int
 	Min, Max string
-	// Count is the section's birds that the search matches; Hidden is set
-	// when it matches none of them (product.searchBox).
-	Count  int
-	Hidden bool
-	Tiles  []tile
+	Count    int
 	// Note replaces the range where there is no range to state: the birds
 	// with no records in the regions selected have no ratio and so no tier
 	// (product.orderByFrequency).
@@ -1018,603 +822,17 @@ func frequencyBand(min, max float64, decades int) (lo, hi, note string) {
 	return "1 in " + comma(int64(start)), "1 in " + comma(int64(end)), ""
 }
 
-// familyRow is one filter chip, with the URL that toggles it already built:
-// a multi-valued query parameter is awkward to assemble in a template.
-type familyRow struct {
-	familyOption
-	Selected bool
-	URL      template.URL
-}
-
-type pageData struct {
-	// SearchScript is search.js; SearchFields carry every other setting
-	// through the search form; SearchEmpty is set when the search matches
-	// none of the birds the other filters keep (product.searchBox).
-	SearchScript template.JS
-	SearchFields []hiddenField
-	SearchEmpty  bool
-
-	// Feedback is the issue tracker URL, or empty. Empty publishes nothing
-	// (product.noPersonalAddress): a site may go up before its tracker exists, but must not
-	// invite a reader somewhere that does not.
-	Feedback string
-
-	Sections []sectionView
-	// FamilyGroupings is the family selector (product.familiesByOrder): families grouped by
-	// taxonomic order.
-	FamilyGroupings []familyGroupingBlock
-	// Traits are the categorical controls of product.habitatAndDietFilters: habitat and niche,
-	// assigned per species rather than per family, which is why they can be
-	// right where a family-level grouping could not (decisions.habitatDietSpeciesLevel).
-	Traits []traitBlock
-	// RegionGroupings is the region selector (product.regionAndMonthFilter): two groupings of the
-	// same regions (product.regionsGroupedTwoWays), each a labeled block of zones.
-	RegionGroupings []groupingBlock
-	AllRegions      bool
-	AllRegionsURL   template.URL
-	NoRegion        bool
-	// Months is the twelve-month filter beside the regions (product.regionAndMonthFilter).
-	Months       []monthChip
-	AllMonths    bool
-	AllMonthsURL template.URL
-	NoMonth      bool
-	// HereURL is the index with the region selection replaced by the
-	// placeholder hereSlot; the browser substitutes the reader's region
-	// (product.hereSelectsLocalRegion). BoundaryURL is the file it looks the
-	// region up in, loaded by every index page (product.locationStaysInBrowser).
-	HereURL     string
-	BoundaryURL string
-	// NowURL goes through /now, for a reader without JavaScript; NowTemplate
-	// is the index with the month replaced by nowSlot, which the script
-	// fills from the reader's clock (product.nowSelectsCurrentMonth).
-	NowURL      template.URL
-	NowTemplate string
-	HereScript  template.JS
-	// MetricLabel names the ordering in each section heading: "Tail Tier 1".
-	MetricLabel string
-	// Histogram is one bar per tier (product.tierHistogram).
-	Histogram []histBar
-	// HereNowTemplate is this page with both the region and the month
-	// replaced by placeholders, for arriving by a #here-and-now link.
-	HereNowTemplate string
-	// WelcomeNear and WelcomeHerons are the welcome line's things to try,
-	// carrying the picks while picking so following one keeps them
-	// (product.pickFromIndex).
-	WelcomeNear, WelcomeHerons template.URL
-	Opt                        options
-	Total                      int
-	Shown                      int
-	Query                      func(...string) template.URL
-	// AllSelected is true only when every family is explicitly filtered in --
-	// not when nothing is selected. Both states display the whole dataset, but
-	// they are different selections, and the control reflects the selection.
-	AllSelected bool
-	AllURL      template.URL
-	// NothingSelected drives the empty state, which has to say something
-	// different from "no matches": the user turned everything off.
-	NothingSelected bool
-
-	// Filters describes what is currently narrowing the list, for the empty
-	// state to name (product.helpfulEmptyState). Empty when nothing is narrowing it.
-	Filters []activeFilter
-	// ClearURL drops every filter, so the dead end has an exit.
-	ClearURL template.URL
-
-	// Legend is the labeled example diagram the help opens with (product.pageExplainsItself). Nil
-	// only if no suitable species exists, in which case the help degrades to
-	// prose rather than breaking.
-	Legend *tile
-
-	// Bar is the pick-mode furniture of product.pickFromIndex, shared with the detail view.
-	Bar pickBar
-	// CompareToggleURL enters pick mode with nothing picked, or leaves it.
-	// The entry point for a reader who wants to compare before they have a
-	// particular bird in mind; the detail view's control is the one for a
-	// reader who already does.
-	CompareToggleURL template.URL
-}
-
-// pickBar is everything the pick bar needs, built identically for the index
-// and the detail view so the two cannot drift apart (product.pickFromIndex).
-//
-// Picks are resolved against the WHOLE dataset rather than the filtered list,
-// so a bird the family filter is currently hiding is still named here. A
-// filter that appeared to discard picks would be worse than one that refused
-// to run.
-// activeFilter is one filter and what it is set to, in words.
-//
-// It exists so the empty state can say WHICH filter emptied the page rather
-// than that one did (product.helpfulEmptyState). The same description belongs in the collapsed
-// summary of a filter control, which is why it is built once here rather than
-// composed in the template: two places phrasing it separately is two places to
-// drift.
-type activeFilter struct {
-	Label string // "Family"
-	Value string // "Parulidae, Icteridae" or "3 of 90 selected"
-}
-
-// metricLabel is an ordering's name as its Order by button shows it, used on
-// the count line and in every section heading (product.sectionHeadersStateRange).
-func metricLabel(m view.Metric) string {
-	return map[view.Metric]string{view.ByLength: "Length", view.ByWingspan: "Wingspan",
-		view.ByMass: "Mass", view.ByBill: "Bill", view.ByTail: "Tail", view.ByFrequency: "Frequency"}[m]
-}
-
-// describeView names every setting on the count line, defaults included, one
-// box each, labeled as its control is and in the order the controls appear
-// (product.helpfulEmptyState). Comparing appears only while picking. A filter
-// the address does not carry selects everything, and says All.
-//
-// Verifies: product.helpfulEmptyState.
-func describeView(fams []familyOption, opt options) []activeFilter {
-	// Past a handful the names stop being readable and the count is the
-	// useful fact. The threshold is a presentation judgment, not a rule.
-	const nameLimit = 6
-	describe := func(picked []string, total int) string {
-		switch {
-		case len(picked) == 0:
-			return "None"
-		case len(picked) == total:
-			return "All"
-		case len(picked) > nameLimit:
-			return fmt.Sprintf("%d of %d selected", len(picked), total)
-		}
-		return strings.Join(picked, ", ")
-	}
-	var out []activeFilter
-	add := func(label, value string) { out = append(out, activeFilter{Label: label, Value: value}) }
-
-	// The Controls panel, top to bottom.
-	add("Order by", metricLabel(opt.Metric))
-	add("Scale", map[view.ScaleMode]string{view.PerSection: "Per section", view.Global: "Global"}[opt.Scale])
-	add("Units", map[bool]string{false: "in / oz", true: "cm / g"}[opt.Metric3])
-	add("Names", map[dataset.Locale]string{dataset.LocaleNA: "N. America", dataset.LocaleWorld: "World"}[opt.Locale])
-	if opt.Metric == view.ByFrequency {
-		add("Section step", map[int]string{1: "10×", 2: "100×"}[opt.Decades])
-	} else {
-		add("Section step", strconv.FormatFloat(opt.Step, 'f', -1, 64)+"%")
-	}
-	if opt.Picking {
-		switch n := len(opt.Picks); n {
-		case 0:
-			add("Comparing", "nothing picked yet")
-		case 1:
-			add("Comparing", "1 bird")
-		default:
-			add("Comparing", fmt.Sprintf("%d birds", n))
-		}
-	}
-
-	// The Regions and months panel: months, then regions.
-	if !opt.HasMonths {
-		add("Month", "All")
-	} else {
-		var picked []string
-		for i := 0; i < month.Count; i++ {
-			if opt.Months[i] {
-				picked = append(picked, month.Abbrev[i])
-			}
-		}
-		add("Month", describe(picked, month.Count))
-	}
-	if !opt.HasRegions {
-		add("Region", "All")
-	} else {
-		var picked []string
-		// Any grouping enumerates every region exactly once, being a
-		// partition; the geographic one is used because its order is the one
-		// a reader scans a list of place names in.
-		for _, z := range region.ZonesOf(region.ByGeography) {
-			for _, rg := range region.InZone(region.ByGeography, z) {
-				if opt.Regions[rg.ID] {
-					picked = append(picked, rg.Name)
-				}
-			}
-		}
-		add("Region", describe(picked, region.Len()))
-	}
-	// Habitat and diet (product.habitatAndDietFilters). Labels rather than
-	// AVONET's terms: the reader picked "Eats insects" and should be told
-	// "Eats insects", not "Invertivore".
-	cat := func(label string, terms []trait.Term, sel map[string]bool, present bool) {
-		if !present {
-			add(label, "All")
-			return
-		}
-		var picked []string
-		for _, t := range terms {
-			if sel[t.Value] {
-				picked = append(picked, t.Label)
-			}
-		}
-		add(label, describe(picked, len(terms)))
-	}
-	cat("Habitat", trait.Habitats, opt.Habitats, opt.HasHabitats)
-	cat("Diet", trait.Niches, opt.Niches, opt.HasNiches)
-	if !opt.HasSelection {
-		add("Family", "All")
-	} else {
-		var picked []string
-		for _, f := range fams {
-			if opt.Families[f.Name] {
-				picked = append(picked, f.Name)
-			}
-		}
-		add("Family", describe(picked, len(fams)))
-	}
-	return out
-}
-
-type pickBar struct {
-	Picking    bool
-	Picks      []pickChip
-	PicksMore  int
-	Missing    []string
-	CompareURL template.URL
-	ClearURL   template.URL
-}
-
-// pickChip is one bird in the pick bar, with the link that unpicks it.
-type pickChip struct {
-	Name      string
-	RemoveURL template.URL
-}
-
-// healPicks drops picks that no longer resolve and rewrites the request's own
-// query to the survivors, returning the dead ids so the page can name them.
-//
-// Called before anything is built from the request, which is the whole point:
-// every link the page goes on to build then omits the dead id, and the set
-// repairs itself on the reader's next click (product.pickFromIndex, decisions.compareUrlContract). Healing it later
-// produced a correct notice beside 970 links that still carried the dead id.
-func (s *server) healPicks(r *http.Request, opt *options) []string {
-	if !opt.Picking {
-		return nil
-	}
-	found, missing := s.resolvePicks(opt.Picks)
-	if len(missing) == 0 {
-		return nil
-	}
-	live := make([]string, 0, len(found))
-	for _, sp := range found {
-		live = append(live, sp.ID)
-	}
-	opt.Picks = live
-	q := r.URL.Query()
-	q.Del("species")
-	if len(live) == 0 {
-		q.Set("species", "")
-	}
-	for _, id := range live {
-		q.Add("species", id)
-	}
-	r.URL.RawQuery = q.Encode()
-	return missing
-}
-
-// buildPickBar assembles the bar, and returns the live picks so the caller can
-// mark its own tiles. opt.Picks must already have been healed.
-func (s *server) buildPickBar(r *http.Request, opt options, missing []string) (pickBar, []string) {
-	b := pickBar{Picking: opt.Picking, Missing: missing}
-	if !opt.Picking {
-		return b, nil
-	}
-	found, _ := s.resolvePicks(opt.Picks)
-	live := make([]string, 0, len(found))
-	for _, sp := range found {
-		live = append(live, sp.ID)
-	}
-	for i, sp := range found {
-		if i == pickBarNames {
-			b.PicksMore = len(found) - pickBarNames
-			break
-		}
-		b.Picks = append(b.Picks, pickChip{
-			Name: sp.Name(opt.Locale), RemoveURL: pickURL(r, toggled(live, sp.ID))})
-	}
-	b.CompareURL = compareURL(r, live)
-	b.ClearURL = queryFor(r, "species")()
-	return b, live
-}
-
-// pickBarNames caps how many picks the bar names before collapsing to a count.
-// There is no cap on the picks themselves (the owner's call), so the bar needs
-// one of its own: it is sticky, and an uncapped list of chips would eat the
-// viewport it is pinned to.
-const pickBarNames = 8
-
 // tileBox is the drawing area for one diagram. Roughly 2.6:1, because a
 // to-scale wingspan runs up to ~2.5x body length and product.crossbarAtVerticalScale draws it at the
 // vertical scale rather than shrinking it to fit.
 var tileBox = view.Box{W: 380, H: 148}
 
-// classicPath is where the index, the original view of every bird in
-// sections and tiers, is served now that the home page is the one set of
-// product.nextView (Sameer, 2026-10-26). It is not linked from the home
-// page; every link it builds stays on it.
-const classicPath = "/classic"
-
-func (s *server) index(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != classicPath {
-		http.NotFound(w, r)
-		return
-	}
-	opt := parseOptions(r)
-
-	// Heal the request before anything is built from it. A pick that no longer
-	// resolves is dropped here and reported in the bar, and the request's own
-	// query is rewritten to the surviving set -- so every link the page goes on
-	// to build, tile links and control links alike, omits the dead id and the
-	// set repairs itself on the reader's next click (product.pickFromIndex, decisions.compareUrlContract).
-	//
-	// Done here rather than where the bar is assembled because by then the
-	// links have already been built from the raw query, which is the bug this
-	// prevents: the notice appeared while 970 links still carried the dead id.
-	missingPicks := s.healPicks(r, &opt)
-
-	filtered, selected := s.filterSpecies(opt)
-	// Frequency is not a property of a bird, it is a ratio over the regions
-	// the reader has selected (product.shareOfRecords), so it is computed once here for the
-	// current selection rather than read off the species. Once per species,
-	// not once per comparison: the sort would otherwise walk every region
-	// 1,083 log 1,083 times.
-	var secs []view.Section
-	freq := map[*dataset.Species]float64{}
-	if opt.Metric == view.ByFrequency {
-		for _, sp := range filtered {
-			num, den := shareIn(sp, s.ds, opt)
-			if num == 0 || den == 0 {
-				// No ratio at all. +Inf sorts them last and keeps them in
-				// one final section rather than one section each (product.orderByFrequency).
-				freq[sp] = math.Inf(1)
-				continue
-			}
-			freq[sp] = float64(den) / float64(num)
-		}
-		secs = view.SectionsBy(filtered,
-			func(sp *dataset.Species) float64 { return freq[sp] },
-			func(min float64) float64 { return view.Decade(min, opt.Decades) })
-	} else {
-		secs = view.Sections(filtered, opt.Metric, opt.Step)
-	}
-	refs := view.Scales(secs, opt.Scale)
-
-	// The width reference must span the whole scale group too, or the crossbar
-	// would be clipped for wide-winged birds in a section whose longest bird is
-	// short -- a gull beside a rail.
-	spanRefs := make([]float64, len(secs))
-	var globalSpan float64
-	for i, sec := range secs {
-		for _, sp := range sec.Species {
-			if w := sp.Wingspan.Value; w > spanRefs[i] {
-				spanRefs[i] = w
-			}
-		}
-		if spanRefs[i] > globalSpan {
-			globalSpan = spanRefs[i]
-		}
-	}
-	if opt.Scale == view.Global {
-		for i := range spanRefs {
-			spanRefs[i] = globalSpan
-		}
-	}
-
-	page := pageData{Feedback: s.feedback, Opt: opt, Total: len(s.ds.Species), Shown: len(filtered),
-		Query:   queryFor(r),
-		Filters: describeView(s.fams, opt),
-		// Every filter, and nothing else: units, order, and names are how the
-		// reader wants birds shown, not which. The keys go in queryFor's drop
-		// list; its returned function takes key-value pairs, and passing these
-		// there once set family=region.
-		ClearURL: queryFor(r, filterKeys...)(),
-	}
-	if sp := s.legendSpecies(); sp != nil {
-		lt := labeledTile(sp, legendBox, unitsFor(opt.Metric3, sp.Mass.Value), opt.Locale)
-		page.Legend = &lt
-	}
-
-	// "All" toggles like an order does, over every family. Untoggling it clears
-	// the selection outright rather than leaving 91 redundant parameters behind.
-	page.AllSelected = len(s.fams) > 0
-	for _, f := range s.fams {
-		if !selected[f.Name] {
-			page.AllSelected = false
-			break
-		}
-	}
-	every := make(map[string]bool, len(s.fams))
-	for _, f := range s.fams {
-		every[f.Name] = true
-	}
-	if page.AllSelected {
-		page.AllURL = s.familyURL(r, nil)
-	} else {
-		page.AllURL = s.familyURL(r, every)
-	}
-	// Either filter emptied to nothing means nothing is selected: the reader
-	// turned something off, and no bird can satisfy an empty set (product.helpfulEmptyState).
-	page.NothingSelected = len(selected) == 0 || (opt.HasRegions && len(opt.Regions) == 0)
-
-	// The region selector, and its All control, mirroring the family one.
-	page.RegionGroupings = s.regionGroups(r, opt)
-	page.AllRegions = !opt.HasRegions || len(opt.Regions) == region.Len()
-	everyRegion := map[string]bool{}
-	for _, id := range append(region.LandIDs(), region.MarineIDs()...) {
-		everyRegion[id] = true
-	}
-	if page.AllRegions {
-		page.AllRegionsURL = s.regionURL(r, nil)
-	} else {
-		page.AllRegionsURL = s.regionURL(r, everyRegion)
-	}
-	page.NoRegion = opt.HasRegions && len(opt.Regions) == 0
-	page.Months = s.monthChips(r, opt)
-	page.AllMonths = !opt.HasMonths || len(opt.Months) == month.Count
-	page.NoMonth = opt.HasMonths && len(opt.Months) == 0
-	if page.AllMonths {
-		// All is a toggle, as it is for regions: pressed when everything is
-		// on, it clears everything. That is what makes one month two clicks
-		// away and a dedicated control unnecessary (decisions.monthPresence).
-		page.AllMonthsURL = s.monthURL(r, nil)
-	} else {
-		every := map[int]bool{}
-		for i := 0; i < month.Count; i++ {
-			every[i] = true
-		}
-		page.AllMonthsURL = s.monthURL(r, every)
-	}
-	page.HereURL = slotURL(r, "region", hereSlot)
-	page.BoundaryURL = s.boundaryURL
-	page.HereScript = s.hereJS
-	page.SearchScript = s.searchJS
-	page.SearchFields = searchFormFields(r)
-	page.MetricLabel = metricLabel(opt.Metric)
-	page.HereNowTemplate = slotsURL(r, "region", hereSlot, "month", nowSlot)
-	page.WelcomeNear = withPicks(r, classicPath+"?by=frequency&scale=global") + "#here-and-now"
-	page.WelcomeHerons = withPicks(r, classicPath+"?family=Ardeidae&family=Anatidae")
-	page.NowTemplate = slotURL(r, "month", nowSlot)
-	page.NowURL = template.URL("/now" + strings.TrimPrefix(slotURL(r, "month", ""), classicPath))
-
-	bar, live := s.buildPickBar(r, opt, missingPicks)
-	page.Bar = bar
-	// Leaving is exactly what Clear does, so it is the same URL rather than a
-	// second one that could drift from it.
-	page.CompareToggleURL = bar.ClearURL
-	if !opt.Picking {
-		page.CompareToggleURL = pickURL(r, nil)
-	}
-	pickedSet := map[string]bool{}
-	for _, id := range live {
-		pickedSet[id] = true
-	}
-	pickOf := func(string) template.URL { return "" }
-	if opt.Picking {
-		pickOf = func(id string) template.URL {
-			// Anchored at the tile it came from: the browser scrolls there as
-			// part of loading, rather than painting at the top and then being
-			// moved by the script.
-			return template.URL(string(pickURL(r, toggled(live, id))) + "#" + tileAnchor(id))
-		}
-	}
-	// One row per family, independent of grouping: a family's own toggle does
-	// the same thing whichever block it is clicked in. The rows are then
-	// grouped twice (product.familiesByOrder).
-	rows := make([]familyRow, 0, len(s.fams))
-	for _, f := range s.fams {
-		next := map[string]bool{}
-		for k := range selected {
-			next[k] = true
-		}
-		if next[f.Name] {
-			delete(next, f.Name)
-		} else {
-			next[f.Name] = true
-		}
-		rows = append(rows, familyRow{familyOption: f, Selected: selected[f.Name], URL: s.familyURL(r, next)})
-	}
-	page.Traits = []traitBlock{
-		s.traitControl(r, "Diet", "What the bird mostly eats, as AVONET classifies it. Drinks sap is BirdView's own.",
-			"niche", trait.Niches, opt.Niches, opt.HasNiches,
-			func(sp *dataset.Species) []dataset.Assignment { return sp.Niches }),
-		s.traitControl(r, "Habitat", "Where the bird mostly lives, as AVONET classifies it. BirdView adds a second habitat for a few birds.",
-			"habitat", trait.Habitats, opt.Habitats, opt.HasHabitats,
-			func(sp *dataset.Species) []dataset.Assignment { return sp.Habitats }),
-	}
-	page.FamilyGroupings = []familyGroupingBlock{
-		{Name: "Taxonomic order", Note: "AviList's taxonomy, in field-guide order.",
-			Groups: s.groupFamilies(r, selected, rows, nil,
-				func(f familyOption) []groupKey {
-					return []groupKey{{Name: f.Order, Common: f.OrderCommon}}
-				})},
-	}
-	// The unit scope follows the SCALE setting, because that is what the page
-	// is claiming to compare (product.oneUnitInComparison). Per section, each section shares a unit;
-	// globally, so does the whole set.
-	var globalUnits units
-	if opt.Scale == view.Global {
-		all := make([]float64, 0, len(filtered))
-		for _, sp := range filtered {
-			all = append(all, sp.Mass.Value)
-		}
-		globalUnits = unitsFor(opt.Metric3, all...)
-	}
-	// Each heading states its own birds, smallest to largest. Headings are
-	// formatted after the loop, all with one precision, so a gap between
-	// tiers shows as a gap between the numbers (product.sectionHeadersStateRange).
-	spans := make([]tierSpan, len(secs))
-	// The search hides tiles rather than dropping them, so sections and
-	// scales stay those of the other filters and nothing moves while the
-	// reader types (product.searchBox).
-	query := opt.Query
-	shown := 0
-	for i, sec := range secs {
-		u := globalUnits
-		if opt.Scale != view.Global {
-			ms := make([]float64, 0, len(sec.Species))
-			for _, sp := range sec.Species {
-				ms = append(ms, sp.Mass.Value)
-			}
-			u = unitsFor(opt.Metric3, ms...)
-		}
-		sv := sectionView{Index: i + 1}
-		spans[i] = tierSpan{sec.Min, sec.Max, u}
-		if opt.Metric == view.ByFrequency {
-			sv.Min, sv.Max, sv.Note = frequencyBand(sec.Min, sec.Max, opt.Decades)
-		}
-		for _, sp := range sec.Species {
-			g := view.Layout(sp, refs[i], spanRefs[i], tileBox)
-			sv.Tiles = append(sv.Tiles, tile{
-				S:    sp,
-				Name: sp.Name(opt.Locale), Geom: g, Box: tileBox,
-				// Set here rather than recomputed in the template: the template
-				// used to derive the centering from Box.H itself, which silently
-				// disagreed with this value the moment Box stopped being the
-				// drawing area (product.labeledDetailDiagram's bottom strip).
-				TopOffset: (tileBox.H - g.TotalHeight()) / 2,
-				DetailURL: detailLink(r, sp.ID),
-				PickURL:   pickOf(sp.ID),
-				Picked:    pickedSet[sp.ID],
-				Anchor:    tileAnchor(sp.ID),
-				// Unlabeled: the tile carries no labels and its footer names
-				// the mass already (product.tileContents, decisions.massCubeOnTiles).
-				MassCube:    newMassCube(sp, tileBox.H, g.PxPerMm, ""),
-				WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
-				Length:      u.format(sp.TotalLength.Value, view.ByLength),
-				Wing:        u.format(sp.Wingspan.Value, view.ByWingspan),
-				MassStr:     u.format(sp.Mass.Value, view.ByMass),
-				Commonest:   s.shareWithSeams(sp, opt),
-				SameAs:      s.sameMeasurements(sp, opt.Locale),
-				Search:      s.search[sp.ID],
-				Hidden:      !searchMatches(s.search[sp.ID], query),
-			})
-			if searchMatches(s.search[sp.ID], query) {
-				sv.Count++
-			}
-		}
-		sv.Hidden = sv.Count == 0
-		shown += sv.Count
-		page.Sections = append(page.Sections, sv)
-	}
-	page.Shown = shown
-	page.SearchEmpty = shown == 0 && len(secs) > 0
-	if opt.Metric != view.ByFrequency {
-		extra := headingDigits(spans, opt.Metric)
-		for i, sp := range spans {
-			page.Sections[i].Min = sp.u.formatDigits(sp.lo, opt.Metric, extra)
-			page.Sections[i].Max = sp.u.formatDigits(sp.hi, opt.Metric, extra)
-		}
-	}
-	page.Histogram = histogram(page.MetricLabel, page.Sections, secs, opt.Metric, opt.Step)
-	s.render(w, "index.html", page)
-}
-
-// filterSpecies applies every filter the address carries to the index's
+// filterSpecies applies every filter the address carries to the home page's
 // birds, and returns the ones every active filter admits, in dataset order,
-// with the families selected (product.filtersCompose). Shared by the index and
-// /next (product.nextView).
+// with the families selected (product.filtersCompose, product.nextView).
 func (s *server) filterSpecies(opt options) ([]*dataset.Species, map[string]bool) {
-	// A fresh page selects everything; an emptied selection selects nothing.
+	// No family named selects every family. The home page reads an emptied
+	// selection as none named (nextOptions).
 	selected := opt.Families
 	if !opt.HasSelection {
 		selected = make(map[string]bool, len(s.fams))
@@ -1717,9 +935,8 @@ type detailData struct {
 	// (product.borrowedMeasurementsSaySo).
 	SameAs []seam
 	Opt    options
-	Query  func(...string) template.URL
-	// Home is the home page with the address's settings: "back to all
-	// birds" when not picking.
+	// Home is the home page with the address's settings, where Back goes
+	// from a shared link or without JavaScript (product.nextView).
 	Home template.URL
 
 	// INatURL is empty when no confident iNaturalist match exists, and the
@@ -1743,17 +960,6 @@ type detailData struct {
 	WingspanEst   bool
 	FootLabels    []footLabel
 	MassCube      massCube
-
-	// Bar is the pick-mode furniture (product.pickFromIndex), shared with the index.
-	Bar pickBar
-	// PickURL toggles THIS bird in the comparison, and PickLabel says which of
-	// the three states the control is in: not picking, picking but this bird
-	// is not in the set, or picking and it already is. Offering "add" for a
-	// bird already picked would be a click that silently does nothing, since
-	// the comparison view deduplicates.
-	PickURL   template.URL
-	PickLabel string
-	Picked    bool
 }
 
 // diagramLabel is one annotation: where view put it, what it says, and whether
@@ -1784,13 +990,12 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	opt := parseOptions(r)
-	missingPicks := s.healPicks(r, &opt)
 	// Wider than the tile's 2.6:1 so the labels of product.labeledDetailDiagram have margin outside the
 	// wingtips. The extra width costs nothing: the scale is already limited by
 	// height for almost every bird, so the bird does not grow, the margin does.
 	box := view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}
 	// The detail view always draws the bird as large as the box allows, whatever
-	// scale the index is using. Under a global scale a small bird is a few
+	// scale the home page drew it at. Beside a swan a small bird is a few
 	// pixels tall by design, and carrying that into the one view devoted to
 	// that single bird would leave nothing to look at (product.tileOpensDetail).
 
@@ -1815,24 +1020,11 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	if sp.INatTaxonID > 0 {
 		inatURL = inat.TaxonURL(sp.INatTaxonID)
 	}
-	bar, live := s.buildPickBar(r, opt, missingPicks)
-	picked := slices.Contains(live, sp.ID)
-	// Three states, not two (product.pickFromIndex).
-	pickLabel := "Compare with another bird\u2026"
-	switch {
-	case picked:
-		pickLabel = "\u2713 Picked for comparison \u2014 remove"
-	case opt.Picking:
-		pickLabel = "Pick for comparison"
-	}
-
 	s.render(w, "detail.html", detailData{
 		S: sp, Name: lt.Name, Geom: lt.Geom, Box: lt.Box, Labels: lt.Labels, TopOffset: lt.TopOffset,
-		Bar: bar, Picked: picked, PickLabel: pickLabel,
-		PickURL:    pickURL(r, toggled(live, sp.ID)),
 		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
 		FootLabels: lt.FootLabels, MassCube: lt.MassCube,
-		Metrics: rows, Categories: s.categories(sp, opt), Opt: opt, Query: queryFor(r), Home: homeLink(r), INatURL: inatURL,
+		Metrics: rows, Categories: s.categories(sp, opt), Opt: opt, Home: homeLink(r), INatURL: inatURL,
 		SameAs:      s.sameMeasurements(sp, opt.Locale),
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 		FoldNote:    foldNote(sp, lt.Geom, one),
@@ -1861,7 +1053,6 @@ func foldNote(sp *dataset.Species, g view.Geometry, u units) string {
 // would be counts that were never measured.
 type undrawnData struct {
 	Feedback string
-	Query    func(...string) template.URL
 	Home     template.URL
 	Opt      options
 
@@ -1911,7 +1102,7 @@ func (s *server) undrawn(w http.ResponseWriter, r *http.Request, u *dataset.Undr
 		comma(int64(u.Episodes)), comma(int64(u.Years)), where, comma(u.Records))
 
 	d := undrawnData{
-		Feedback: s.feedback, Query: queryFor(r), Home: homeLink(r), Opt: opt,
+		Feedback: s.feedback, Home: homeLink(r), Opt: opt,
 		Name: name, AlsoCalled: other, U: u,
 	}
 	switch u.Status {
@@ -1946,249 +1137,10 @@ func prettyDate(iso string) string {
 	return t.Format("2 January 2006")
 }
 
-// comparePanel is one bird on the comparison page: the same annotated diagram
-// the detail view draws, plus the two links that make the panel navigable.
-//
-// tile is embedded so the shared "diagram" template, which reads .Geom, .Box,
-// .Labels and the rest off whatever it is handed, works here unchanged.
-type comparePanel struct {
-	tile
-	// DetailURL is where this panel's numbers are explained. product.comparisonOneScale trades the
-	// provenance table for this link, so it is not decoration -- it is the
-	// whole of what makes omitting the table honest.
-	DetailURL template.URL
-	// RemoveURL is the same comparison without this bird.
-	RemoveURL template.URL
-}
-
-// sortOption is one choice in the comparison view's Sort by control.
-//
-// On is a fact about the panels as they stand, not a stored mode: the sort
-// rewrites the species order in the URL, so there is nowhere for "sorted by
-// mass" to be remembered, and nothing to go stale when a bird is added.
-type sortOption struct {
-	Label string
-	URL   template.URL
-	On    bool
-}
-
-type compareData struct {
-	Panels []comparePanel
-	Opt    options
-	Query  func(...string) template.URL
-	// StopURL leaves pick mode: the index with the picks dropped and every
-	// other carried setting kept. The same URL as the pick bar's Clear, so
-	// the two exits cannot drift apart (product.pickFromIndex).
-	StopURL template.URL
-	// Sorts is empty below two birds, there being nothing to sort.
-	Sorts []sortOption
-	// Missing are picked ids that no longer resolve, named on the page so a
-	// rotted link says what it lost instead of silently shrinking (decisions.compareUrlContract).
-	Missing []string
-}
-
-// compare renders several birds to one shared scale (product.comparisonOneScale).
-func (s *server) compare(w http.ResponseWriter, r *http.Request) {
-	opt := parseOptions(r)
-	// Named order is the reader's and is preserved; a repeat is drawn once,
-	// both handled when the parameter is parsed.
-	//
-	// An id that no longer resolves is dropped and named rather than refused
-	// (decisions.compareUrlContract). This page used to 404, which was the honest option until
-	// drop-and-name existed; the case that decides it is not a typo but rot,
-	// since a comparison link is made to be kept and ids follow scientific
-	// names that get reassigned.
-	missing := s.healPicks(r, &opt)
-	chosen, _ := s.resolvePicks(opt.Picks)
-
-	// One scale for the whole set, taken from the largest bird in it, exactly
-	// as a section does (product.scaleToggle). Laying each panel out against its own length
-	// would fill every panel equally and compare nothing.
-	var refLength, refWingspan float64
-	masses := make([]float64, 0, len(chosen))
-	for _, sp := range chosen {
-		refLength = math.Max(refLength, sp.TotalLength.Value)
-		refWingspan = math.Max(refWingspan, sp.Wingspan.Value)
-		masses = append(masses, sp.Mass.Value)
-	}
-	// One unit for the whole set, for the same reason there is one scale
-	// (product.oneUnitInComparison). The set named in the address IS the scope here -- comparing a
-	// swan with a sparrow must not print "4.2 lb" beside "0.9 oz", which is
-	// two scales in the one place the page exists to put birds on one.
-	u := unitsFor(opt.Metric3, masses...)
-
-	box := view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}
-	panels := make([]comparePanel, 0, len(chosen))
-	for _, sp := range chosen {
-		panels = append(panels, comparePanel{
-			tile:      labeledTileAt(sp, box, u, refLength, refWingspan, opt.Locale),
-			DetailURL: detailLink(r, sp.ID),
-			RemoveURL: compareWithout(r, sp.ID),
-		})
-	}
-	// The species list goes back with the reader: the index is the picker, and
-	// "back" here means "add another bird" (decisions.compareUrlContract). Clear, on the index, is
-	// the one control that drops it.
-	s.render(w, "compare.html", compareData{Panels: panels, Opt: opt,
-		Sorts: sortOptions(r, chosen), Missing: missing, Query: queryFor(r),
-		StopURL: queryFor(r, "species")()})
-}
-
-// resolvePicks turns requested ids into species, separating the ones that no
-// longer exist (product.pickFromIndex).
-//
-// Missing ids are dropped and reported rather than refused, because the case
-// that matters is not a typo but rot: ids follow scientific names and this
-// checklist renames them -- the Sandhill Crane is antigone_canadensis and was
-// grus_canadensis. A comparison link is made to be kept, so it outlives some of
-// its own ids, and refusing the whole page would kill a five-bird comparison
-// over one reassigned genus. See decisions.compareUrlContract.
-func (s *server) resolvePicks(ids []string) (found []*dataset.Species, missing []string) {
-	for _, id := range ids {
-		if sp, ok := s.byID[id]; ok {
-			found = append(found, sp)
-		} else {
-			missing = append(missing, id)
-		}
-	}
-	return found, missing
-}
-
-// pickURL is the current page with the picks replaced. It keeps every other
-// parameter INCLUDING `family`, because picking a bird must not silently drop
-// the filter the reader is picking from (product.pickFromIndex).
-//
-// An empty set writes a bare `species=`, which holds pick mode open with
-// nothing picked rather than dropping the reader back into browsing mid-task.
-func pickURL(r *http.Request, ids []string) template.URL {
-	q := r.URL.Query()
-	q.Del("species")
-	if len(ids) == 0 {
-		q.Set("species", "")
-	}
-	for _, id := range ids {
-		q.Add("species", id)
-	}
-	return template.URL(classicPath + "?" + q.Encode())
-}
-
-// sortedIDs is the species reordered by one metric, ascending and stably, as
-// the index orders its sections (product.ascendingOrder).
-func sortedIDs(sp []*dataset.Species, m view.Metric) []string {
-	s := append([]*dataset.Species(nil), sp...)
-	sort.SliceStable(s, func(i, j int) bool { return m.Value(s[i]) < m.Value(s[j]) })
-	out := make([]string, len(s))
-	for i, x := range s {
-		out[i] = x.ID
-	}
-	return out
-}
-
-// sortOptions builds the Sort by control. Each link is an ordinary comparison
-// URL naming the same birds in a new order (product.comparisonOneScale), so a sorted comparison is
-// indistinguishable from one assembled by hand and there is no second place an
-// ordering can live.
-func sortOptions(r *http.Request, chosen []*dataset.Species) []sortOption {
-	if len(chosen) < 2 {
-		return nil
-	}
-	now := make([]string, len(chosen))
-	for i, sp := range chosen {
-		now[i] = sp.ID
-	}
-	var out []sortOption
-	for _, m := range []struct {
-		label  string
-		metric view.Metric
-	}{{"Length", view.ByLength}, {"Wingspan", view.ByWingspan}, {"Mass", view.ByMass},
-		{"Bill", view.ByBill}, {"Tail", view.ByTail}} {
-		ids := sortedIDs(chosen, m.metric)
-		out = append(out, sortOption{
-			Label: m.label, URL: compareURL(r, ids), On: slices.Equal(ids, now)})
-	}
-	return out
-}
-
-// compareURL sends the current picks to the comparison view. It keeps
-// `family`, unlike a tile link: it is one link per page, so the size bound
-// in detailLink does not apply, and the comparison's back links can only
-// return the reader to the filter if they were handed it (product.pickFromIndex).
-func compareURL(r *http.Request, ids []string) template.URL {
-	q := r.URL.Query()
-	q.Del("species")
-	for _, id := range ids {
-		q.Add("species", id)
-	}
-	return template.URL("/compare?" + q.Encode())
-}
-
-// toggled returns the picks with one id added or removed. Adding appends, so
-// the reader's order is the order they picked in.
-func toggled(picks []string, id string) []string {
-	out := make([]string, 0, len(picks)+1)
-	found := false
-	for _, p := range picks {
-		if p == id {
-			found = true
-			continue
-		}
-		out = append(out, p)
-	}
-	if !found {
-		out = append(out, id)
-	}
-	return out
-}
-
-// detailLink builds a link from any page into a species detail view, carrying
-// the view state the reader is in -- minus the one parameter too large to copy
-// 841 times (product.pickFromIndex).
-//
-// The picks ride along because the detail view cannot otherwise tell whether to
-// offer to pick that bird, nor build a link to the set plus it; `units` because
-// the page formats every value with it, and a link without it is why opening a
-// bird from a metric index used to land on an imperial page; `by`, `scale` and
-// `step` so the back link rebuilds the index the reader left.
-//
-// `family` is deliberately dropped. It is the only parameter with no bound on
-// its length: 90 families is about 1.7 KB, which repeated across 841 tile
-// hrefs would add roughly 1.4 MB to one page. The cost, accepted in product.pickFromIndex, is
-// that the in-page back link cannot restore the filter. The browser's own Back
-// button does, because it replays the previous URL.
-func detailLink(r *http.Request, id string) template.URL {
-	q := r.URL.Query()
-	q.Del("family")
-	if len(q) == 0 {
-		return template.URL("/species/" + id)
-	}
-	return template.URL("/species/" + id + "?" + q.Encode())
-}
-
-// homeLink is the home page with the request's settings, less any picks,
-// which belong to the classic view's comparison (product.nextView).
+// homeLink is the home page with the request's settings (product.nextView).
 func homeLink(r *http.Request) template.URL {
-	q := r.URL.Query()
-	q.Del("species")
-	return nextURL(q)
+	return nextURL(r.URL.Query())
 }
-
-// compareWithout is the same comparison minus one bird. Every other parameter
-// survives, including a repeat of some other species.
-func compareWithout(r *http.Request, id string) template.URL {
-	q := r.URL.Query()
-	kept := q["species"][:0:0]
-	for _, v := range q["species"] {
-		if v != id {
-			kept = append(kept, v)
-		}
-	}
-	q["species"] = kept
-	return template.URL("/compare?" + q.Encode())
-}
-
-// legendBox is the help diagram's drawing area: smaller than the detail view's
-// but the same shape, since it renders through the same template.
-var legendBox = view.Box{W: 900, H: 148 * 1.2}
 
 // labelGutter is the width reserved at the right of an annotated diagram: the
 // segment label column, plus room for the wingspan label that sits just beyond
@@ -2289,7 +1241,7 @@ const massCubeMargin = 8
 // newMassCube places the cube of water in the lower-left of a drawing area
 // drawH tall, at pxPerMm (product.labeledDetailDiagram, decisions.massAsWaterCube).
 //
-// label is empty on an index tile, which carries no labels at all and names
+// label is empty on a home page tile, which carries no labels at all and names
 // the mass in its footer instead (product.tileContents, decisions.massCubeOnTiles). Everything else about the
 // cube is identical there, including the face standing on the floor, so the
 // two surfaces cannot drift.
@@ -2321,45 +1273,10 @@ func footStrip(n int) float64 {
 	return footGap + float64(n-1)*footLine + footDescender
 }
 
-// legendPreferred are the species the help diagram would like to use, best
-// first. Each has a MODELED wingspan, so the dashed inner crossbar of product.measuredVersusModeled
-// appears in the legend rather than only in the prose beside it, and none is a
-// neck-folding family, so the neck reads as a plain stick.
-var legendPreferred = []string{"cyanocitta_cristata", "corvus_brachyrhynchos", "cardinalis_cardinalis"}
-
-// legendSpecies picks the bird the help draws. Preference first, then any
-// species with a modeled wingspan, then nothing -- the help degrades to prose
-// rather than breaking if the checklist ever drops all of them.
-func (s *server) legendSpecies() *dataset.Species {
-	for _, id := range legendPreferred {
-		if sp := s.byID[id]; sp != nil {
-			return sp
-		}
-	}
-	for i := range s.ds.Species {
-		if sp := &s.ds.Species[i]; sp.Wingspan.Prov.Kind == dataset.Modeled {
-			return sp
-		}
-	}
-	return nil
-}
-
 // labeledTile builds the annotated diagram for a bird drawn at its own scale:
-// the detail view and the help legend, each of which shows one bird with
-// nothing to measure it against (product.tileOpensDetail).
+// the detail view, which shows one bird with nothing to measure it against
+// (product.tileOpensDetail).
 func labeledTile(sp *dataset.Species, box view.Box, u units, loc dataset.Locale) tile {
-	return labeledTileAt(sp, box, u, sp.TotalLength.Value, sp.Wingspan.Value, loc)
-}
-
-// labeledTileAt is the same diagram laid out against an EXTERNAL reference, so
-// several birds can share one scale (product.comparisonOneScale).
-//
-// That reference is the whole of the difference between the two views: the
-// bird's own length makes a detail page fill its box, and the set maximum makes
-// a comparison mean something. Getting the argument wrong yields a page that
-// looks entirely correct and compares nothing, which is why acceptance.comparisonSharesScale asserts
-// drawn heights against the length ratio rather than asserting on the markup.
-func labeledTileAt(sp *dataset.Species, box view.Box, u units, refLength, refWingspan float64, loc dataset.Locale) tile {
 	// draw is the area the bird gets; the emitted box is that plus the strip the
 	// total length label sits in, so the label costs the bird nothing. Going the
 	// other way -- keeping the box and shrinking the bird into it -- would take
@@ -2387,7 +1304,7 @@ func labeledTileAt(sp *dataset.Species, box view.Box, u units, refLength, refWin
 	// The bird occupies everything left of the gutter; draw stays the full
 	// height, because the label column is positioned against the emitted box.
 	inner := view.Box{W: draw.W - labelGutter, H: draw.H}
-	g := view.Layout(sp, refLength, refWingspan, inner)
+	g := view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, inner)
 	top := (draw.H - g.TotalHeight()) / 2
 	segOf := map[string]dataset.Metric{
 		"bill": sp.Segments.Bill, "head": sp.Segments.Head, "neck": sp.Segments.Neck,
@@ -2470,35 +1387,6 @@ func (s *server) render(w http.ResponseWriter, name string, data any) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := tmpl.ExecuteTemplate(w, name, data); err != nil {
 		log.Printf("birdview: rendering %s: %v", name, err)
-	}
-}
-
-// filterKeys are the query parameters that narrow which species are shown
-// (product.helpfulEmptyState's link clears exactly these).
-var filterKeys = []string{"family", "habitat", "niche", "region", "month", "q"}
-
-// queryFor returns a helper that rewrites the current query string, so a
-// control can toggle one setting without discarding the others.
-//
-// drop names parameters the current page owns and the index does not
-// understand. Every link built here points at the index, and the index
-// preserves whatever it is handed -- so a stray parameter does not just look
-// untidy on one link, it attaches itself to every control the reader touches
-// afterwards. The comparison view drops its own species list for that reason.
-func queryFor(r *http.Request, drop ...string) func(...string) template.URL {
-	return func(kv ...string) template.URL {
-		q := r.URL.Query()
-		for _, k := range drop {
-			q.Del(k)
-		}
-		for i := 0; i+1 < len(kv); i += 2 {
-			if kv[i+1] == "" {
-				q.Del(kv[i])
-			} else {
-				q.Set(kv[i], kv[i+1])
-			}
-		}
-		return template.URL(classicPath + "?" + q.Encode())
 	}
 }
 
@@ -2679,137 +1567,10 @@ func (u units) formatDigits(v float64, as view.Metric, extra int) string {
 	return f(1, v/25.4, "in")
 }
 
-// familyURL rebuilds the current URL with exactly the given families selected.
-//
-// Two states get a short encoding. Everything selected is the default, so it
-// needs no family parameter at all; nothing selected is a single empty one.
-// Without that distinction the two would be indistinguishable in the query
-// string while meaning opposite things.
-
-// regionRow is one region chip, and zoneGroup one block of them. They mirror
-// familyRow and orderGroup exactly: zones play the part orders play, so the
-// two selectors share markup, CSS, and the wrap criterion (product.regionAndMonthFilter, acceptance.familyListWraps).
-type regionRow struct {
-	ID   string
-	Code string
-	Name string
-	// Title is the tooltip: the name, plus the gloss where a name needs one
-	// to say which stretch of ocean it means.
-	Title    string
-	Selected bool
-	URL      template.URL
-}
-
-type zoneGroup struct {
-	Zone     string
-	Selected bool
-	URL      template.URL
-	// OnlyURL selects this zone's regions and nothing else. The plain URL
-	// toggles the zone against whatever is already on, which is the right
-	// default and a slow way to get to one zone from everywhere -- the
-	// reader would have to clear all, then pick. Only is that in one click.
-	OnlyURL template.URL
-	Regions []regionRow
-}
-
-// groupingBlock is one way of carving the regions up, rendered as its own
-// labeled block of chips (product.regionsGroupedTwoWays). The Note is not decoration: it is where
-// the derived grouping and the hand-drawn one are told apart.
-type groupingBlock struct {
-	Name  string
-	Note  string
-	Zones []zoneGroup
-}
-
-// regionURL builds the link that results from toggling regions, using the
-// same absent / explicitly-empty distinction as familyURL: no parameter means
-// everywhere, `region=` means nowhere.
-func (s *server) regionURL(r *http.Request, want map[string]bool) template.URL {
-	q := r.URL.Query()
-	q.Del("region")
-	switch {
-	case len(want) == region.Len():
-		// default: no parameter
-	case len(want) == 0:
-		q.Set("region", "")
-	default:
-		// `want` is keyed by GADM id; the URL carries slugs (decisions.regionUrlIsPostalCode).
-		slugs := make([]string, 0, len(want))
-		for id := range want {
-			rg, ok := region.Get(id)
-			if !ok {
-				continue
-			}
-			slugs = append(slugs, rg.Slug())
-		}
-		sort.Strings(slugs)
-		for _, s := range slugs {
-			q.Add("region", s)
-		}
-	}
-	if len(q) == 0 {
-		return classicPath
-	}
-	return template.URL(classicPath + "?" + q.Encode())
-}
-
-// The placeholders the browser replaces in HereURL and NowTemplate. Both are
-// left alone by URL encoding, and no slug or month abbreviation contains them.
-const (
-	hereSlot = "__REGION__"
-	nowSlot  = "__MONTH__"
-)
-
-// slotURL is the current page with one parameter replaced by a single value.
-// Filled with a region slug or a month abbreviation it is exactly the URL
-// regionURL or monthURL builds for that one choice, because both sort what
-// they write and a single value sorts the same whatever it is: so pressing
-// Here asks for the same thing as choosing the region by hand
-// (product.locationStaysInBrowser). An empty value drops the parameter.
-func slotURL(r *http.Request, key, value string) string {
-	return slotsURL(r, key, value)
-}
-
-// slotsURL is slotURL for several parameters at once, given as key, value
-// pairs: the region and the month together, for a #here-and-now link.
-func slotsURL(r *http.Request, kv ...string) string {
-	q := r.URL.Query()
-	for i := 0; i+1 < len(kv); i += 2 {
-		q.Del(kv[i])
-		if kv[i+1] != "" {
-			q.Set(kv[i], kv[i+1])
-		}
-	}
-	if len(q) == 0 {
-		return classicPath
-	}
-	return classicPath + "?" + q.Encode()
-}
-
-// withPicks is a fixed index address carrying the request's picks, if it has
-// any, so a link to it does not leave pick mode: only Clear and reset to
-// defaults may (product.pickFromIndex). A bare species= holds the mode open
-// and is carried as it is.
-func withPicks(r *http.Request, target string) template.URL {
-	picks, picking := r.URL.Query()["species"]
-	if !picking {
-		return template.URL(target)
-	}
-	u, _ := url.Parse(target)
-	q := u.Query()
-	q["species"] = picks
-	return template.URL(u.Path + "?" + q.Encode())
-}
-
-// now sends a reader without JavaScript to the index for the server's
-// current month, every other setting kept (product.nowSelectsCurrentMonth).
-// It is the one response that reads the clock, which is why it is a redirect
-// that is never stored rather than a month written into the index
-// (decisions.hereAndNowCaching).
-func (s *server) now(w http.ResponseWriter, r *http.Request) {
-	m := month.Abbrev[time.Now().Month()-1]
-	http.Redirect(w, r, slotURL(r, "month", m), http.StatusSeeOther)
-}
+// hereSlot is the placeholder the browser replaces with the reader's region
+// in the Here button's and the welcome line's templates. URL encoding leaves
+// it alone once restored, and no region slug contains it.
+const hereSlot = "__REGION__"
 
 // boundaries serves the region boundary file at its hashed URL, and only
 // there. The URL changes whenever the file does, so it is cached for a year
@@ -2825,16 +1586,13 @@ func (s *server) boundaries(w http.ResponseWriter, r *http.Request) {
 }
 
 // robotsPolicy asks crawlers to skip every URL with a query string, which is
-// every filtered view of the index, and the routes that are no page to index.
+// every filtered view of the home page, and the route that is no page to index.
 // Everything else stays open, /static/ included, since a crawler renders a
 // page with its stylesheet. Wildcards are RFC 9309's.
 const robotsPolicy = `# BirdView: every control is a query parameter, so filtered views are endless.
 # Index the pages without one: the home page, each species, the guides.
 User-agent: *
 Disallow: /*?
-Disallow: /classic
-Disallow: /compare
-Disallow: /now
 Disallow: /boundaries/
 `
 
@@ -2844,180 +1602,11 @@ func robots(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, robotsPolicy)
 }
 
-// monthURL is regionURL for the twelve (product.regionAndMonthFilter). Same three cases: all of
-// them is the default and carries no parameter, none of them is an explicit
-// empty, and anything between is listed.
-func (s *server) monthURL(r *http.Request, want map[int]bool) template.URL {
-	q := r.URL.Query()
-	q.Del("month")
-	switch {
-	case len(want) == month.Count:
-		// default: no parameter
-	case len(want) == 0:
-		q.Set("month", "")
-	default:
-		// In calendar order, not the map's: a URL that reshuffled its own
-		// months between loads would make two identical selections look
-		// like two different pages.
-		for i := 0; i < month.Count; i++ {
-			if want[i] {
-				q.Add("month", month.Abbrev[i])
-			}
-		}
-	}
-	if len(q) == 0 {
-		return classicPath
-	}
-	return template.URL(classicPath + "?" + q.Encode())
-}
-
-// monthChip is one of the twelve in the control.
-type monthChip struct {
-	Abbrev   string
-	Name     string
-	Selected bool
-	URL      template.URL
-	Title    string
-}
-
-// monthChips builds the twelve toggles. No groups and no season names:
-// product.orderByFrequency forbids naming a band where the range can be stated, and a season
-// inverts between hemispheres and means nothing in the tropics, two of
-// which BirdView covers (decisions.monthPresence).
-func (s *server) monthChips(r *http.Request, opt options) []monthChip {
-	out := make([]monthChip, 0, month.Count)
-	for i := 0; i < month.Count; i++ {
-		on := !opt.HasMonths || opt.Months[i]
-		next := map[int]bool{}
-		for j := 0; j < month.Count; j++ {
-			if !opt.HasMonths || opt.Months[j] {
-				next[j] = true
-			}
-		}
-		if on {
-			delete(next, i)
-		} else {
-			next[i] = true
-		}
-		title := "Add " + month.Full[i]
-		if on {
-			title = "Remove " + month.Full[i]
-		}
-		out = append(out, monthChip{
-			Abbrev: month.Abbrev[i], Name: month.Full[i], Selected: on,
-			URL: s.monthURL(r, next), Title: title,
-		})
-	}
-	return out
-}
-
-// regionGroups builds the region selector: each grouping, its zones, their
-// regions, and the link each toggle produces. A region appears once per
-// grouping, so the same chip is rendered twice with two different URLs —
-// which is correct, since toggling it from either place does the same thing.
-func (s *server) regionGroups(r *http.Request, opt options) []groupingBlock {
-	sel := opt.Regions
-	if !opt.HasRegions {
-		sel = make(map[string]bool, region.Len())
-		for _, id := range append(region.LandIDs(), region.MarineIDs()...) {
-			sel[id] = true
-		}
-	}
-	var out []groupingBlock
-	for _, grouping := range region.Groupings {
-		block := groupingBlock{Name: grouping.Name, Note: grouping.Note}
-		out = append(out, block)
-	}
-	for bi, grouping := range region.Groupings {
-		for _, z := range grouping.Zones {
-			g := zoneGroup{Zone: z, Selected: true}
-			inZone := region.InZone(grouping.Name, z)
-			for _, rg := range inZone {
-				if !sel[rg.ID] {
-					g.Selected = false
-				}
-			}
-			// The group toggle clears its zone when the whole zone is on, and
-			// selects it otherwise -- an order header's behavior exactly.
-			next := map[string]bool{}
-			for k, v := range sel {
-				if v {
-					next[k] = true
-				}
-			}
-			for _, rg := range inZone {
-				if g.Selected {
-					delete(next, rg.ID)
-				} else {
-					next[rg.ID] = true
-				}
-			}
-			g.URL = s.regionURL(r, next)
-
-			// Only: exactly this zone's regions, whatever was on before.
-			// Built from inZone alone rather than from sel, so it does not
-			// depend on the current selection and one zone is reachable from
-			// any state of the page in a single click.
-			only := make(map[string]bool, len(inZone))
-			for _, rg := range inZone {
-				only[rg.ID] = true
-			}
-			g.OnlyURL = s.regionURL(r, only)
-
-			for _, rg := range inZone {
-				one := map[string]bool{}
-				for k, v := range sel {
-					if v {
-						one[k] = true
-					}
-				}
-				if sel[rg.ID] {
-					delete(one, rg.ID)
-				} else {
-					one[rg.ID] = true
-				}
-				title := rg.Name
-				if rg.Gloss != "" {
-					title += ", " + rg.Gloss
-				}
-				g.Regions = append(g.Regions, regionRow{
-					ID: rg.ID, Code: rg.Code, Name: rg.Name, Title: title,
-					Selected: sel[rg.ID], URL: s.regionURL(r, one),
-				})
-			}
-			out[bi].Zones = append(out[bi].Zones, g)
-		}
-	}
-	return out
-}
-
-func (s *server) familyURL(r *http.Request, fams map[string]bool) template.URL {
-	q := r.URL.Query()
-	q.Del("family")
-	switch {
-	case len(fams) == len(s.fams):
-		// default: no parameter
-	case len(fams) == 0:
-		q.Set("family", "")
-	default:
-		names := make([]string, 0, len(fams))
-		for f := range fams {
-			names = append(names, f)
-		}
-		sort.Strings(names)
-		for _, f := range names {
-			q.Add("family", f)
-		}
-	}
-	return template.URL(classicPath + "?" + q.Encode())
-}
-
 var funcs = template.FuncMap{
-	"f1":   func(v float64) string { return strconv.FormatFloat(v, 'f', 1, 64) },
-	"add":  func(a, b float64) float64 { return a + b },
-	"sub":  func(a, b float64) float64 { return a - b },
-	"div":  func(a, b float64) float64 { return a / b },
-	"list": func(v ...string) []string { return v },
+	"f1":  func(v float64) string { return strconv.FormatFloat(v, 'f', 1, 64) },
+	"add": func(a, b float64) float64 { return a + b },
+	"sub": func(a, b float64) float64 { return a - b },
+	"div": func(a, b float64) float64 { return a / b },
 	// whynot explains, in a tooltip, why a value is not this bird's own
 	// measurement. The three footer cells used to say "estimated" for
 	// anything not measured, which is false for a near-match and said so
@@ -3029,7 +1618,7 @@ var funcs = template.FuncMap{
 //
 // It names the donor for a near-match, because that is the fact a reader can
 // act on: two tiles showing an identical mass are not a coincidence when one
-// of them borrowed it from the other, and nothing else on the index says so.
+// of them borrowed it from the other, and nothing else on the home page says so.
 //
 // Verifies: product.provenancePerMetric, product.measuredVersusModeled.
 func whyNotMeasured(p dataset.Provenance) string {
@@ -3046,142 +1635,6 @@ func whyNotMeasured(p dataset.Provenance) string {
 		return "estimated"
 	}
 	return "estimated"
-}
-
-// traitRow is one option of a categorical control: its label, AVONET's
-// definition, how many species carry it, and the link that toggles it
-// (product.habitatAndDietFilters).
-type traitRow struct {
-	Value       string
-	Label       string
-	Description string
-	// Coined marks a category BirdView added where AVONET has none. The
-	// control says so: every other row leads with AVONET's term, and a
-	// term of ours must not borrow that authority (product.habitatAndDietFilters).
-	Coined   bool
-	Count    int
-	Selected bool
-	URL      template.URL
-	// OnlyURL selects this value alone within its axis. Habitat and diet are
-	// separate axes and separate parameters, so this never touches the other.
-	OnlyURL template.URL
-}
-
-// traitBlock is one categorical control -- habitat or niche.
-type traitBlock struct {
-	Name   string
-	Note   string
-	Param  string
-	All    bool
-	AllURL template.URL
-	Rows   []traitRow
-}
-
-// traitURL builds the link for a categorical filter, with the same
-// absent-versus-empty distinction every other filter uses: no parameter
-// means all, `habitat=` means none.
-func (s *server) traitURL(r *http.Request, param string, want map[string]bool, total int) template.URL {
-	q := r.URL.Query()
-	q.Del(param)
-	switch {
-	case len(want) == total:
-		// default: no parameter
-	case len(want) == 0:
-		q.Set(param, "")
-	default:
-		vals := make([]string, 0, len(want))
-		for v := range want {
-			vals = append(vals, v)
-		}
-		sort.Strings(vals)
-		for _, v := range vals {
-			q.Add(param, v)
-		}
-	}
-	if len(q) == 0 {
-		return classicPath
-	}
-	return template.URL(classicPath + "?" + q.Encode())
-}
-
-// traitControl builds one categorical block.
-//
-// **Counts are over the whole dataset, not the current view.** A count that
-// moved with the other filters would be telling the reader how many birds
-// they would still see, which the species count above the list already
-// says; what this answers is "how many birds are there of this kind", which
-// is a fact about the data and should not shift underfoot.
-func (s *server) traitControl(r *http.Request, name, note, param string,
-	terms []trait.Term, sel map[string]bool, active bool,
-	get func(*dataset.Species) []dataset.Assignment) traitBlock {
-
-	count := map[string]int{}
-	for i := range s.ds.Species {
-		seen := map[string]bool{}
-		for _, a := range get(&s.ds.Species[i]) {
-			if !seen[a.Value] {
-				seen[a.Value] = true
-				count[a.Value]++
-			}
-		}
-	}
-
-	on := func(v string) bool {
-		if !active {
-			return true // arrival: everything is selected
-		}
-		return sel[v]
-	}
-
-	// An option no bird carries is a dead control: it renders a row, offers
-	// a click, and returns an empty page. AVONET's vocabulary is worldwide
-	// and this dataset is one continent's worth, so Desert has no ABA-area
-	// species at all. Offer only what is there.
-	offered := terms[:0:0]
-	for _, t := range terms {
-		if count[t.Value] > 0 {
-			offered = append(offered, t)
-		}
-	}
-	terms = offered
-
-	cur := map[string]bool{}
-	for _, t := range terms {
-		if on(t.Value) {
-			cur[t.Value] = true
-		}
-	}
-
-	b := traitBlock{Name: name, Note: note, Param: param, All: len(cur) == len(terms)}
-	if b.All {
-		b.AllURL = s.traitURL(r, param, nil, len(terms))
-	} else {
-		every := map[string]bool{}
-		for _, t := range terms {
-			every[t.Value] = true
-		}
-		b.AllURL = s.traitURL(r, param, every, len(terms))
-	}
-	for _, t := range terms {
-		next := map[string]bool{}
-		for k := range cur {
-			next[k] = true
-		}
-		if next[t.Value] {
-			delete(next, t.Value)
-		} else {
-			next[t.Value] = true
-		}
-		b.Rows = append(b.Rows, traitRow{
-			Value: t.Value, Label: t.Label, Description: t.Description,
-			Count: count[t.Value], Selected: on(t.Value),
-			URL: s.traitURL(r, param, next, len(terms)),
-			// Only: this value alone within its axis. Habitat and diet carry
-			// separate parameters, so narrowing one leaves the other whole.
-			OnlyURL: s.traitURL(r, param, map[string]bool{t.Value: true}, len(terms)),
-		})
-	}
-	return b
 }
 
 // categoryRow is one line of the detail view's category table (product.categoryProvenance): what

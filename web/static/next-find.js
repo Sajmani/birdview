@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// /next's find box (product.nextView), inlined into the page.
+// The home page's find box (product.nextView), inlined into the page.
 //
 // As the reader types, it says how many birds match and lists them once
-// there are few enough, each with its pin. The rule is Go's, as in search.js: the names file carries each bird's
-// normalized search text, and this only checks that what is typed,
+// there are few enough, each with its pin. The rule is Go's: the names file
+// carries each bird's normalized search text, and this only checks that what is typed,
 // normalized as normalizeSearch does, occurs in it. The pins go to the
 // server's bird= toggle, which decides what pinning means, with the typed
 // text, so the list stays open for more pins until its × closes it. A pin

@@ -33,15 +33,14 @@ import (
 	"birdview/internal/view"
 )
 
-// The /next prototype (product.nextView): one set of birds, at one scale,
-// with no sections or tiers, beside the index until simulated readers have
-// compared the two.
+// The home page (product.nextView): one set of birds, at one scale, in tiers.
+// Built as a prototype at /next, which is why its names start with next.
 
-// nextClock is the clock /next reads for its default month. A variable so
+// nextClock is the clock the home page reads for its default month. A variable so
 // the checks can fix the month.
 var nextClock = time.Now
 
-// nextCap is how many birds /next draws by default, the top of the order,
+// nextCap is how many birds the home page draws by default, the top of the order,
 // before it offers to show the rest (product.nextView): a reader's first
 // screens, not the whole set (Sameer, 2026-10-26). The address can change it
 // (cap=50), or lift it (cap=none); the default is left out of addresses. Speed does not force it: measured
@@ -190,7 +189,7 @@ type nextData struct {
 	included map[string]bool
 }
 
-// nextURL is /next with q.
+// nextURL is the home page with q.
 func nextURL(q url.Values) template.URL {
 	if len(q) == 0 {
 		return "/"
@@ -347,9 +346,8 @@ func (s *server) nextToggleBird(r *http.Request) string {
 	return string(nextPin(q, id))
 }
 
-// nextTiers breaks the ordered birds into tiers: the classic view's
-// sections (view.SectionsBy), taken in ascending order and reversed with
-// the order. Within a tier the birds keep the order's tie-break.
+// nextTiers breaks the ordered birds into tiers (view.Sections and
+// view.SectionsBy), taken in ascending order and reversed with the order. Within a tier the birds keep the order's tie-break.
 func nextTiers(ordered []*dataset.Species, opt options, rev bool, share func(*dataset.Species) float64) []view.Section {
 	asc := append([]*dataset.Species(nil), ordered...)
 	if rev {
@@ -440,7 +438,7 @@ func nextPin(q url.Values, id string) template.URL {
 	return nextURL(q)
 }
 
-// nextPage builds /next for the address r carries.
+// nextPage builds the home page for the address r carries.
 func (s *server) nextPage(r *http.Request) nextData {
 	q := r.URL.Query()
 	opt := nextOptions(r)
@@ -506,7 +504,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 		return base[i].ScientificName < base[j].ScientificName
 	})
 
-	// Tiers, as the classic view breaks its sections (product.nextView):
+	// Tiers (product.nextView, product.sectionBreakRule):
 	// a size tier spans one step of the scale from its smallest bird, a
 	// frequency tier a decade of "1 in N", and the birds with no records are
 	// a tier of their own. Reversed, the tiers run the other way too.
@@ -661,8 +659,8 @@ func (s *server) nextPage(r *http.Request) nextData {
 		page.Tiers[tierOf[pk.sp]].Drawn = true
 	}
 	// One bar per tier, with an empty bar for each step of the scale no
-	// bird falls in, built in ascending order as the classic view's is and
-	// then turned to the order shown.
+	// bird falls in, built in ascending order and then turned to the order
+	// shown.
 	views := make([]sectionView, len(secs))
 	raw := slices.Clone(secs)
 	for i, t := range page.Tiers {
@@ -970,8 +968,8 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 	return out
 }
 
-// nextBirds serves the names /next's find box searches as the reader types
-// (product.nextView): for every bird of the index, its id, English name in
+// nextBirds serves the names the home page's find box searches as the reader types
+// (product.nextView): for every bird it draws, its id, English name in
 // the locale asked for, scientific name, and search text, as searchTexts
 // builds it. The matching stays the Go rule; the script only looks for the
 // typed text, normalized, in the text given here.
