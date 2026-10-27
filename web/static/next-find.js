@@ -86,6 +86,12 @@
       if (icon) a.appendChild(icon.content.cloneNode(true));
       li.appendChild(a);
       li.appendChild(document.createTextNode(" " + b[1] + " "));
+      if (b[4]) {
+        li.appendChild(el("span", "code", b[4]));
+        li.appendChild(document.createTextNode(" "));
+      }
+      li.appendChild(el("span", "code", "(" + b[0] + ")"));
+      li.appendChild(document.createTextNode(" "));
       li.appendChild(el("i", "", b[2]));
       ul.appendChild(li);
     });

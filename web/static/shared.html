@@ -22,7 +22,7 @@
 <a class="tile" href="{{.DetailURL}}">
   <div class="hd">
     <div class="nameline">
-      <span class="cn"><span class="cnname">{{.Name}}</span>{{with .S.SpeciesCode}}<span class="code">({{.}})</span>{{end}}</span>
+      <span class="cn"><span class="cnname">{{.Name}}</span>{{with .S.BandingCode}}<span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">{{.}}</span>{{end}}{{with .S.SpeciesCode}}<span class="code" title="eBird code">({{.}})</span>{{end}}</span>
       <span class="sn">{{.S.ScientificName}}</span>
     </div>
     <span class="badge" style="background:{{.S.FamilyColor}};color:{{.S.FamilyText}}">{{.S.Family}}

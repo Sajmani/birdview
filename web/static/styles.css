@@ -127,6 +127,8 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 .cnname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cn .code { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim);
   font-weight: 500; flex: none; }
+/* The find box's list writes the codes as the tiles do. */
+.finds li .code { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim); }
 /* Right-justified on the same line, and the first to give up room: it shrinks
    twenty times faster than the common name beside it. */
 .sn { font-size: 11.5px; font-style: italic; color: var(--dim); margin-left: auto;

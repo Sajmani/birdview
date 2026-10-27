@@ -157,8 +157,10 @@ joined by scientific name: where two rows share a scientific name, the row named
 with no scientific match, the one row with the species' North American English name; and a code
 two species would share goes to neither. A species the Laboratory does not list, as for most
 introduced birds and gamebirds it does not band with federal bands, has none. The code names the
-species whatever English names are shown. The find box finds a bird by its code, the species page
-shows it, and `/species/<code>` goes to the species page.
+species whatever English names are shown. Every tile, the species page, and the find box's list
+show it beside the name, with the eBird code in parentheses ("American Robin AMRO (amerob)"), and
+the find box finds a bird by either code. Addresses stay the eBird code, which every bird has,
+including any added from outside the Laboratory's area (Sameer, 2026-10-27).
 
 Rationale: birders know birds by these codes, and the owner asked for them (2026-10-27). The ABA's
 and IBP's lists were not usable ([decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba)); the Laboratory's is a U.S.

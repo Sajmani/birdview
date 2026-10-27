@@ -374,6 +374,7 @@ func TestNextFindInTheBrowser(t *testing.T) {
 			Found string   `json:"found"`
 			Close string   `json:"close"`
 			Items []string `json:"items"`
+			Texts []string `json:"texts"`
 		} `json:"typed"`
 		TilePin string `json:"tilePin"`
 	}
@@ -411,6 +412,13 @@ func TestNextFindInTheBrowser(t *testing.T) {
 		}
 		if !slices.Equal(r.Items, want) {
 			t.Errorf("typing %q: the script lists %v, the server %v", r.Q, r.Items, want)
+		}
+		var texts []string
+		for _, li := range regexp.MustCompile(`(?s)<li>(.*?)</li>`).FindAllStringSubmatch(finds, -1) {
+			texts = append(texts, strings.Join(strings.Fields(html.UnescapeString(regexp.MustCompile(`<[^>]+>`).ReplaceAllString(li[1], ""))), " "))
+		}
+		if !slices.Equal(r.Texts, texts) {
+			t.Errorf("typing %q: the script's list reads %q, the server's %q", r.Q, r.Texts, texts)
 		}
 		if len(want) > 0 {
 			lists++
@@ -1568,36 +1576,36 @@ func TestNextTiers(t *testing.T) {
 	}
 }
 
-// TestBandingCodesOnThePages checks where the banding codes show: the find
-// box finds a bird by its code, in any case, and lists it alone; the species
-// page shows the code beside the eBird code; and /species/<code>, in any
-// case, goes to the species' own page with the address's settings kept. A
-// code that is no species' is still a 404.
+// TestBandingCodesOnThePages checks where the banding codes show: beside
+// the name with the eBird code on every tile, on the species page, and in
+// the find box's list, which finds a bird by its code in any case. Addresses
+// stay the eBird code, which every bird has: /species/AMRO is no page.
 //
 // Verifies: product.bandingCodes. Criterion: app.bandingCodesShown.
 func TestBandingCodesOnThePages(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
+	codes := `<span class="cnname">American Robin</span><span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">AMRO</span><span class="code" title="eBird code">(amerob)</span>`
+	if !strings.Contains(mustGet(t, s, "/?pin=amerob"), codes) {
+		t.Error("American Robin's tile does not show AMRO and (amerob) beside its name")
+	}
+	if !strings.Contains(mustGet(t, s, "/species/amerob"), codes) {
+		t.Error("the species page does not show AMRO and (amerob) beside the name")
+	}
 	for _, q := range []string{"AMRO", "amro"} {
 		p := nextAt(s, "/?find="+q)
-		if len(p.Matches) != 1 || p.Matches[0].ID != "amerob" {
-			t.Errorf("find=%s lists %+v; want American Robin alone", q, p.Matches)
+		if len(p.Matches) != 1 || p.Matches[0].ID != "amerob" || p.Matches[0].Banding != "AMRO" {
+			t.Errorf("find=%s lists %+v; want American Robin alone, with AMRO", q, p.Matches)
 		}
 	}
-	body := mustGet(t, s, "/species/amerob")
-	if !strings.Contains(body, `<span class="code">(amerob)</span><span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">AMRO</span>`) {
-		t.Error("the species page does not show AMRO beside amerob")
+	if !strings.Contains(mustGet(t, s, "/?find=amro"), `American Robin <span class="code">AMRO</span> <span class="code">(amerob)</span> <i>Turdus migratorius</i>`) {
+		t.Error("the find list does not show AMRO and (amerob) beside the name")
 	}
-	for _, path := range []string{"/species/AMRO?units=metric", "/species/amro?units=metric"} {
+	for _, path := range []string{"/species/AMRO", "/species/amro"} {
 		w := httptest.NewRecorder()
 		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
-		if w.Code != http.StatusFound || w.Header().Get("Location") != "/species/amerob?units=metric" {
-			t.Errorf("GET %s = %d to %q, want 302 to /species/amerob?units=metric", path, w.Code, w.Header().Get("Location"))
+		if w.Code != http.StatusNotFound {
+			t.Errorf("GET %s = %d, want 404: addresses use the eBird code", path, w.Code)
 		}
-	}
-	w := httptest.NewRecorder()
-	s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/species/ZZZZ", nil))
-	if w.Code != http.StatusNotFound {
-		t.Errorf("GET /species/ZZZZ = %d, want 404", w.Code)
 	}
 }

@@ -3969,8 +3969,9 @@ Affects: [product.bandingCodes](local/product/dataset.md#bandingcodes)
 ### Decided
 
 Each species carries the four-letter alpha code from the USGS Bird Banding Laboratory's species
-list ([bbl](imports.md#bbl)), alongside the eBird code, which stays the species id. The code is
-shown on the species page, found by the find box, and accepted as `/species/<code>`.
+list ([bbl](imports.md#bbl)), alongside the eBird code, which stays the species id and the
+address. Both codes are shown beside the name on tiles, on the species page, and in the find box's
+list, and the find box finds a bird by either.
 
 ### Why
 

@@ -107,9 +107,9 @@ type nextItem struct {
 
 // nextMatch is one bird the find box found, with its pin.
 type nextMatch struct {
-	ID, Name, Scientific string
-	Pinned               bool
-	URL                  template.URL
+	ID, Name, Scientific, Banding string
+	Pinned                        bool
+	URL                           template.URL
 }
 
 type nextData struct {
@@ -731,7 +731,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 		if len(found) <= nextFindLimit {
 			for _, sp := range found {
 				page.Matches = append(page.Matches, nextMatch{ID: sp.ID, Name: sp.Name(opt.Locale),
-					Scientific: sp.ScientificName, Pinned: added[sp.ID],
+					Scientific: sp.ScientificName, Banding: sp.BandingCode, Pinned: added[sp.ID],
 					URL: template.URL(page.ToggleURL + "find=" + url.QueryEscape(page.Find) + "&bird=" + url.QueryEscape(sp.ID))})
 			}
 		}
@@ -978,10 +978,10 @@ func (s *server) nextBirds(w http.ResponseWriter, r *http.Request) {
 	if dataset.Locale(r.URL.Query().Get("names")) == dataset.LocaleWorld {
 		loc = dataset.LocaleWorld
 	}
-	out := make([][4]string, 0, len(s.ds.Species))
+	out := make([][5]string, 0, len(s.ds.Species))
 	for i := range s.ds.Species {
 		sp := &s.ds.Species[i]
-		out = append(out, [4]string{sp.ID, sp.Name(loc), sp.ScientificName, s.search[sp.ID]})
+		out = append(out, [5]string{sp.ID, sp.Name(loc), sp.ScientificName, s.search[sp.ID], sp.BandingCode})
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(out)

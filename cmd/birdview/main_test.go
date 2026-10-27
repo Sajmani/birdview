@@ -197,6 +197,16 @@ func testDataset() *dataset.Dataset {
 	// every mass square renders solid and the dashed branch of product.measuredVersusModeled is never
 	// drawn -- the same gap the crow's modeled wingspan fills for the crossbar,
 	// and it was found by breaking the code and watching the check not fail.
+	// Banding codes on two birds, so the find box's list is checked with and
+	// without one (product.bandingCodes).
+	for i := range sp {
+		switch sp[i].ID {
+		case "amecro":
+			sp[i].BandingCode = "AMCR"
+		case "annhum":
+			sp[i].BandingCode = "ANHU"
+		}
+	}
 	for i := range sp {
 		if sp[i].ID == "blasti" {
 			sp[i].Mass.Prov = dataset.Provenance{Kind: dataset.NearMatch,

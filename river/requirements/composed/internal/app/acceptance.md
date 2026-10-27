@@ -401,12 +401,13 @@ species. On a small list, the join takes the scientific name, picks the row name
 where two share one, falls back to the one row with the English name, and gives a code two
 species claim to neither.
 
-The find box finds American Robin alone by AMRO or amro; its species page shows AMRO beside amerob;
-`/species/AMRO` and `/species/amro` redirect to `/species/amerob` with the address's settings kept;
-`/species/ZZZZ` is a 404.
+American Robin's tile and species page show "AMRO (amerob)" beside its name; the find box finds it
+alone by AMRO or amro and lists it the same way; in headless Chrome the script's list reads as the
+server's, codes included; `/species/AMRO` is a 404, since addresses stay the eBird code.
 
 **Run:** `go test ./internal/bbl/ ./cmd/birdview-ingest/ ./cmd/birdview/ -run 'TestParse|TestBanding'`
 **Status: verified 2026-10-27, passing.**
-Watched failing: 2026-10-27, by leaving the code out of the search text ("find=AMRO lists []"), by redirecting only capitals, by a redirect dropping the settings, and by a species page without the code.
+Watched failing: 2026-10-27, by leaving the code out of the search text ("find=AMRO lists []"), and by a species page without the code.
+Watched failing: 2026-10-27, by the script's list without the banding code, by the names file without it, by a tile without it, and by the server's list without it.
 Watched failing: 2026-10-27, by keeping unidentified rows, by taking the last of two rows sharing a scientific name ("calgna got BACG"), by dropping the English-name fallback, and by letting two species keep one code.
 

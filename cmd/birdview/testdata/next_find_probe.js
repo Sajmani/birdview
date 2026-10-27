@@ -35,6 +35,10 @@ window.addEventListener("load", function () {
       document.querySelectorAll(".finds li a").forEach(function (a) {
         r.items.push(a.className + " " + a.getAttribute("href"));
       });
+      r.texts = [];
+      document.querySelectorAll(".finds li").forEach(function (li) {
+        r.texts.push(li.textContent.replace(/\s+/g, " ").trim());
+      });
       out.typed.push(r);
     });
     // A tile's pin, clicked with text in the box, carries the text.
