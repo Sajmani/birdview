@@ -156,6 +156,9 @@ type server struct {
 	all  *dataset.Dataset
 	tmpl *template.Template
 	byID map[string]*dataset.Species
+	// byBanding finds a species by its four-letter banding code, so that
+	// /species/AMRO reaches American Robin's page (product.bandingCodes).
+	byBanding map[string]string
 	// idOf maps an AviList scientific name to the served id, so a page can
 	// name another species without searching the slice (product.namesRecordsFiledUnder).
 	idOf map[string]string
@@ -494,7 +497,8 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	}
 	s := &server{mux: http.NewServeMux(), ds: ds, tmpl: tmpl, devDir: devDir,
 		byID: map[string]*dataset.Species{}, undrawnByID: map[string]*dataset.Undrawn{},
-		idOf: map[string]string{}}
+		byBanding: map[string]string{},
+		idOf:      map[string]string{}}
 	// Inlined into the home page rather than fetched, as its other scripts are.
 	js, err := fs.ReadFile(assetFS, "static/here.js")
 	if err != nil {
@@ -523,6 +527,9 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	for i := range ds.Species {
 		sp := &ds.Species[i]
 		s.byID[sp.ID] = sp
+		if sp.BandingCode != "" {
+			s.byBanding[sp.BandingCode] = sp.ID
+		}
 		s.idOf[sp.ScientificName] = sp.ID
 		counts[sp.Family]++
 	}
@@ -978,6 +985,16 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	wanted := strings.TrimPrefix(r.URL.Path, "/species/")
 	sp, ok := s.byID[wanted]
 	if !ok {
+		// A banding code, in any case, goes to the species' own address,
+		// which is its eBird code (product.bandingCodes).
+		if id, coded := s.byBanding[strings.ToUpper(wanted)]; coded {
+			target := "/species/" + id
+			if r.URL.RawQuery != "" {
+				target += "?" + r.URL.RawQuery
+			}
+			http.Redirect(w, r, target, http.StatusFound)
+			return
+		}
 		// A bird the derivation classified and left out of scope gets a page
 		// naming it and the measured reason, at 404 (product.undrawnSpeciesAnswer, decisions.speciesUrlOutlivesSpecies). Anything
 		// else gets the bare 404: this page is for a bird BirdView knows of

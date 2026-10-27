@@ -1567,3 +1567,37 @@ func TestNextTiers(t *testing.T) {
 		t.Error("the page draws no tier heading or histogram")
 	}
 }
+
+// TestBandingCodesOnThePages checks where the banding codes show: the find
+// box finds a bird by its code, in any case, and lists it alone; the species
+// page shows the code beside the eBird code; and /species/<code>, in any
+// case, goes to the species' own page with the address's settings kept. A
+// code that is no species' is still a 404.
+//
+// Verifies: product.bandingCodes. Criterion: app.bandingCodesShown.
+func TestBandingCodesOnThePages(t *testing.T) {
+	s := newTestServerReal(t)
+	fixNextClock(t, time.October)
+	for _, q := range []string{"AMRO", "amro"} {
+		p := nextAt(s, "/?find="+q)
+		if len(p.Matches) != 1 || p.Matches[0].ID != "amerob" {
+			t.Errorf("find=%s lists %+v; want American Robin alone", q, p.Matches)
+		}
+	}
+	body := mustGet(t, s, "/species/amerob")
+	if !strings.Contains(body, `<span class="code">(amerob)</span><span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">AMRO</span>`) {
+		t.Error("the species page does not show AMRO beside amerob")
+	}
+	for _, path := range []string{"/species/AMRO?units=metric", "/species/amro?units=metric"} {
+		w := httptest.NewRecorder()
+		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		if w.Code != http.StatusFound || w.Header().Get("Location") != "/species/amerob?units=metric" {
+			t.Errorf("GET %s = %d to %q, want 302 to /species/amerob?units=metric", path, w.Code, w.Header().Get("Location"))
+		}
+	}
+	w := httptest.NewRecorder()
+	s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/species/ZZZZ", nil))
+	if w.Code != http.StatusNotFound {
+		t.Errorf("GET /species/ZZZZ = %d, want 404", w.Code)
+	}
+}

@@ -531,9 +531,13 @@ and main metrics named above, but anything a tile ever gains. The *plus* above i
 [shareOfRecords](#shareofrecords)'s figure reached the tiles but not the detail page, a reader
 opening a bird found a different number for a different scope.
 
-**Where the tile's figure depends on the region selection, the detail page carries that
-selection and reports the same scope.** A figure that silently changes what it ranges over between
-pages is worse than one that is absent.
+**Where the tile's figure depends on the region and month selection, the detail page states its
+own scope.** Since 2026-10-27 species links carry only the units and names, so that Back returns
+to the home page as it was without its settings riding along (Sameer, 2026-10-27,
+[nextView](#nextview)): the detail page's share is for every region and month, and says so
+("all regions"), where the tile's is for the home page's settings. A figure that silently changes
+what it ranges over between pages is worse than one that is absent; one that names its scope is
+not silent.
 
 Rationale: the tile is dense so it can be compared against dozens of others, which leaves no room
 to say where each number came from. The same layout, larger, lets the reader see a familiar thing

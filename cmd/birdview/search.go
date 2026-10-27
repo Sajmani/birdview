@@ -73,7 +73,7 @@ func searchTexts(ds *dataset.Dataset) map[string]string {
 			names = append(names, n)
 		}
 		sort.Strings(names) // map order would make the page differ run to run
-		for _, f := range append(names, sp.SpeciesCode, sp.ScientificName, sp.Family, sp.Order) {
+		for _, f := range append(names, sp.SpeciesCode, sp.BandingCode, sp.ScientificName, sp.Family, sp.Order) {
 			if n := normalizeSearch(f); n != "" && !seen[n] {
 				seen[n] = true
 				fields = append(fields, n)
