@@ -1245,8 +1245,7 @@ func TestNextWelcomeLine(t *testing.T) {
 // something drop exactly that: Reset keeps only the pins, Clear pins drops
 // them and Pinned only, ×  drops the find box's text, and the birds around
 // you now replaces the region, sets the month to Now, and leaves Pinned only.
-// A tile's species page carries every parameter, so its way back returns to
-// the same page.
+// A tile's species page carries only the units and names.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextKeepsEveryParameter(t *testing.T) {
@@ -1358,19 +1357,11 @@ func TestNextKeepsEveryParameter(t *testing.T) {
 		if c := diff(nq); !slices.Equal(c, hereNow) {
 			t.Errorf("the birds around you now changes %v, want the region, the month, and leaving Pinned only", c)
 		}
-		// A species page and its way back.
+		// A species page carries only its units and names; Back returns by
+		// history (TestSpeciesBackUsesHistory).
 		tl := p.Tiles[0]
-		du, _ := url.Parse(string(tl.DetailURL))
-		if c := diff(du.Query()); len(c) != 0 {
-			t.Errorf("%s's species page loses %v", tl.S.ID, c)
-		}
-		back := regexp.MustCompile(`class="backlink" href="([^"]+)"`).FindStringSubmatch(mustGet(t, s, string(tl.DetailURL)))
-		if back == nil {
-			t.Fatal("the species page has no way back")
-		}
-		bu, _ := url.Parse(html.UnescapeString(back[1]))
-		if c := diff(bu.Query()); bu.Path != "/" || len(c) != 0 {
-			t.Errorf("back from %s's species page goes to %s, losing %v", tl.S.ID, back[1], c)
+		if want := "/species/" + tl.S.ID + "?names=world&units=metric"; string(tl.DetailURL) != want {
+			t.Errorf("%s's species page is %s, want %s", tl.S.ID, tl.DetailURL, want)
 		}
 	}
 	// The reported bug: a month from Pinned only stays Pinned only.
@@ -1404,6 +1395,66 @@ func TestNextShortValues(t *testing.T) {
 			if got[k] != v {
 				t.Errorf("%s: %s reads %q, want %q", target, k, got[k], v)
 			}
+		}
+	}
+}
+
+//go:embed testdata/detail_back_probe.js
+var detailBackProbe string
+
+// TestSpeciesBackUsesHistory checks Back on a species page in headless
+// Chrome: reached from the home page, it goes back by the browser's history,
+// so the home page returns as it was; opened from a shared link, it follows
+// its link to the home page in the species page's units and names. Species
+// links from the home page carry only those two settings.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestSpeciesBackUsesHistory(t *testing.T) {
+	s := newTestServer(t)
+	p := nextAt(s, "/?by=mass&month=all&units=metric&pin=amecro&region=FL&show=all")
+	if len(p.Tiles) == 0 || string(p.Tiles[0].DetailURL) != "/species/"+p.Tiles[0].S.ID+"?units=metric" {
+		t.Fatalf("the first tile links to %q; want its species page with only the units", p.Tiles[0].DetailURL)
+	}
+	chrome := findChrome()
+	if chrome == "" {
+		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); Back was not tested in a browser")
+	}
+	ts := httptest.NewServer(instrument(s, detailBackProbe, nil))
+	defer ts.Close()
+	for _, c := range []struct {
+		name, start string
+		back        int
+		followed    bool
+	}{
+		{"from the home page", "/?by=mass&month=all&units=metric", 1, false},
+		{"from a shared link", "/species/amecro?units=metric", 0, true},
+	} {
+		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+		out, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
+			"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
+			"--disable-component-update", "--disable-sync", "--disable-extensions",
+			"--user-data-dir="+t.TempDir(), "--virtual-time-budget=5000",
+			"--dump-dom", ts.URL+c.start).Output()
+		cancel()
+		if err != nil {
+			t.Fatalf("%s: chrome: %v", c.name, err)
+		}
+		m := dataAttr("data-probe").FindSubmatch(out)
+		if m == nil {
+			t.Fatalf("%s: no result from the probe", c.name)
+		}
+		var res struct {
+			Back     int    `json:"back"`
+			Followed bool   `json:"followed"`
+			Href     string `json:"href"`
+			Text     string `json:"text"`
+		}
+		if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
+			t.Fatalf("%s: reading the probe: %v", c.name, err)
+		}
+		if res.Back != c.back || res.Followed != c.followed || res.Href != "/?units=metric" || res.Text != "\u2190 back" {
+			t.Errorf("%s: Back (%q, to %s) went back %d times and followed its link %t; want %d and %t",
+				c.name, res.Text, res.Href, res.Back, res.Followed, c.back, c.followed)
 		}
 	}
 }

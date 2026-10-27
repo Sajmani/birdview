@@ -1162,10 +1162,11 @@ func TestScrollRestorationIsInlineAndSelfContained(t *testing.T) {
 	if !strings.Contains(body, `window.location.pathname !== "/classic"`) {
 		t.Error("script is not scoped to the index; a detail page would eat the saved scroll")
 	}
-	// The detail view ships no script at all.
+	// The detail view's one script is Back's, inline, and it touches no
+	// saved scroll position.
 	_, detail := get(t, s, "/species/greblu")
-	if strings.Contains(detail, "<script") {
-		t.Error("detail view carries a script; only the index needs one")
+	if strings.Count(detail, "<script") != 1 || strings.Contains(detail, "<script src") || strings.Contains(detail, "birdview.scroll") {
+		t.Error("detail view carries a script other than Back's, inline")
 	}
 	// And the controls remain addressable for anyone who prefers an anchor.
 	if !strings.Contains(body, `id="controls"`) {
@@ -2675,10 +2676,10 @@ func TestDetailPagePickStates(t *testing.T) {
 
 	// The back link names the mode it returns to.
 	for _, c := range []struct{ url, want string }{
-		{"/species/annhum", "back to all birds"},
+		{"/species/annhum", "\u2190 back"},
 		{"/species/annhum?species=amecro", "back to picking birds"},
 	} {
-		got := mustMatch(t, mustGet(t, s, c.url), `class="backlink"[^>]*>(?s)(.*?)</a>`, "the back link")
+		got := html.UnescapeString(mustMatch(t, mustGet(t, s, c.url), `class="backlink"[^>]*>(?s)(.*?)</a>`, "the back link"))
 		if !strings.Contains(strings.Join(strings.Fields(got), " "), c.want) {
 			t.Errorf("%s: back link reads %q, want %q", c.url, strings.TrimSpace(got), c.want)
 		}

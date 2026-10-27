@@ -755,8 +755,10 @@ Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flex
 (Sameer, 2026-10-26; [scalableInterface](../../../todo.md#scalableinterface)). It was built as a
 prototype at `/next` and replaced the index as the home page the same day. The index, with its
 sections and tiers, is now **the classic view** at `/classic`: unchanged, its links staying on it,
-and not linked from the home page except in its credits. A species page's "back to all birds"
-goes to the home page with the same settings. Elsewhere in these requirements, "the index" names
+and not linked from the home page except in its credits. A species page's **Back** goes back by the
+browser's history, so the home page returns as it was; species links carry only the units and
+names, which the species page draws with, and from a shared link Back goes to the home page in
+those. Elsewhere in these requirements, "the index" names
 the classic view.
 
 - **The header.** One line says what BirdView draws, its "stick figures" linking to the guide to
@@ -820,7 +822,7 @@ the classic view.
   kept: Show, the pins, and the find box's text included. Only these drop more, on purpose:
   Reset keeps only the pins; Clear pins also leaves Pinned only; the find list's × drops its text;
   the birds around you now replaces the region, sets the month to Now, and leaves Pinned only. A
-  tile's species page carries every parameter, so "back to all birds" returns to the same page.
+  tile's species page carries only the units and names; its Back returns by history.
 - **Short summaries.** Each setting's summary is brief: the order's name and an arrow (↓ largest
   or most often recorded first, ↑ the reverse), months by three letters ("Oct (now)"), "all" for
   every region, "imperial" or "metric", "North Amer" or "world".

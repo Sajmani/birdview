@@ -23,8 +23,24 @@
 <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body class="detail">
-<p class="back"><a class="backlink" href="{{if .Bar.Picking}}{{call .Query}}{{else}}{{.Home}}{{end}}">&larr;
-  {{if .Bar.Picking}}back to picking birds{{else}}back to all birds{{end}}</a></p>
+{{/* Back is the browser's: arriving from a page of this site, it returns
+     there as it was. From a shared link, or without the script, it goes to
+     the home page in this page's units and names (product.nextView). */}}
+<p class="back">{{if .Bar.Picking}}<a class="backlink" href="{{call .Query}}">&larr; back to picking birds</a>{{else}}<a class="backlink" href="{{.Home}}" data-back>&larr; back</a>{{end}}</p>
+<script>
+(function () {
+  var a = document.querySelector("a.backlink[data-back]");
+  if (!a) return;
+  a.addEventListener("click", function (e) {
+    var from = document.referrer;
+    try {
+      if (!from || new URL(from).origin !== location.origin || history.length < 2) return;
+    } catch (err) { return; }
+    e.preventDefault();
+    history.back();
+  });
+})();
+</script>
 
 <div class="tile big">
   <div class="hd">

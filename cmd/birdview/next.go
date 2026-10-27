@@ -342,17 +342,21 @@ func (s *server) nextToggleBird(r *http.Request) string {
 	return string(nextPin(q, id))
 }
 
-// nextDetailLink is a bird's species page with every parameter of the home
-// page, so its "back to all birds" returns to the same page. The classic
-// view drops the family from these links to keep its page small; the home
-// page draws a hundred tiles, not a thousand, and keeps it.
+// nextDetailLink is a bird's species page, carrying only what the page
+// draws itself with: the units and the names. Its Back returns by the
+// browser's history, so the home page comes back as it was without its
+// settings riding along (product.nextView).
 func nextDetailLink(q url.Values, id string) template.URL {
-	q = cloneValues(q)
-	q.Del("bird")
-	if len(q) == 0 {
+	keep := url.Values{}
+	for _, k := range []string{"names", "units"} {
+		if v := q.Get(k); v != "" {
+			keep.Set(k, v)
+		}
+	}
+	if len(keep) == 0 {
 		return template.URL("/species/" + id)
 	}
-	return template.URL("/species/" + id + "?" + q.Encode())
+	return template.URL("/species/" + id + "?" + keep.Encode())
 }
 
 // nextPin is the address with bird id pinned, or unpinned if it was. The
