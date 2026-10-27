@@ -18,8 +18,9 @@ migration finishes, these are deliberate local departures from `README.md`, not 
 | **Checks** | All in Go; see below the table | River's checker does not read composed packages yet, so BirdView checks its own |
 | **Stage adoption** | All four adopted: **Requirements**, **Implementation**, **Verification**, and **Release** since 2026-10-23 | Release was declared informal 2026-10-16 and adopted by Sameer on 2026-10-23, once birdview.site was public. Guardrails in [tech/release.md](requirements/local/tech/release.md); the deployment's probe, uptime check, alerting, and runbook live in the private `Sajmani/birdview-deploy` |
 
-**Composition.** **`app` composed** in River's normalized form: it links the 63 local requirements
-that apply to the web application unchanged, excludes the four withdrawn photograph requirements,
+**Composition.** **`app` composed** in River's normalized form: it links the 52 local requirements
+that apply to the web application unchanged, excludes sixteen withdrawn ones (the four photograph
+requirements, and twelve withdrawn with the classic view on 2026-10-27),
 and writes out WCAG's contrast criteria over every web page and the stylesheet's contract. Its
 criteria for the composed items are in `requirements/composed/internal/app/acceptance.md`; every other criterion still
 waits in `requirements/acceptance.md`. Not yet composed: `dataset` and `internal/repo`, which account

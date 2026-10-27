@@ -35,7 +35,7 @@ internal/dataset         the record and the provenance vocabulary
 internal/view            ordering, sectioning, scale, and diagram geometry; pure, no HTML
 internal/xlsx            the standard-library workbook reader behind the three source readers
 internal/smoke           the post-deploy checks; a package so the server's tests can run them
-web/static/              embedded templates, CSS, here.js, and the favicon
+web/static/              embedded templates (shared.html holds the tile and diagram), CSS, scripts, favicon
 data/                    the committed generated tables; region-boundaries.json is embedded
 docs/                    the guides, embedded and served at /docs
 .github/workflows/       CI: the standing checks on every push and pull request
@@ -53,28 +53,29 @@ So the server computes sections and geometry and renders HTML. Every control is 
 and every detail view is a URL, which also makes any view shareable. The cost is a page load per
 interaction, which is unnoticeable on localhost.
 
-**Three exceptions, all deliberate.** A page load per interaction means the browser lands at the
-top each time, discarding your place in a list of over a thousand birds. An inline script in
-`index.html` remembers, for the session, the scroll position and which panels are collapsed, and
-restores them on return. It holds no application logic.
+**Three exceptions, all deliberate**, all on the home page
+([product.nextView](requirements/local/product/presentation.md#nextview)). The first is `here.js`,
+behind Here in the Region setting and the welcome line's `#here-and-now`. It looks up the reader's
+region in the browser so their position never reaches the server
+([product.locationStaysInBrowser](requirements/local/product/filtering.md#locationstaysinbrowser)),
+and a test holds it to the Go lookup in `internal/boundary`.
 
-The second is `here.js`, behind the Here button. It looks up the reader's region in the browser so
-their position never reaches the server ([product.locationStaysInBrowser](requirements/local/product/filtering.md#locationstaysinbrowser)), and a test holds
-it to the Go lookup in `internal/boundary`.
+The second is `next-find.js`, which counts and lists the birds the find box matches as the reader
+types, each with its pin. It reads each bird's search text from `/birds.json`, which the server
+builds with the Go matcher's rule (`cmd/birdview/search.go`), and its links go to the server's
+`bird=` toggle, which decides what pinning means. A test holds it to the server's page for the same
+query.
 
-The third is `search.js`, the search box ([product.searchBox](requirements/local/product/filtering.md#searchbox)), which filters as the reader
-types. The server writes each tile's normalized words into `data-search` and applies `q` itself
-when it is in the address; the script only checks that the typed text occurs within one field, and a test holds
-it to the Go matcher in `cmd/birdview/search.go`. The home page carries `here.js` too, behind Here in its Region setting. The fourth and fifth are on the home page
-([product.nextView](requirements/local/product/presentation.md#nextview)). The placing script moves
-an opened setting's choices left only as far as keeps them on the screen, and closes them on a tap
-elsewhere. `next-find.js` counts and lists the birds the find box matches as the reader types, each with its
-pin. It
-reads each bird's search text from `/birds.json`, which the server builds, and its links go to
-the server's `bird=` toggle, which decides what pinning means. A test holds it to the
-server's page for the same query. The rule all five protect is that *logic* stays in Go, not that
-the client is inert; without JavaScript the page still works, minus these five (the searches then
-need Enter, and a phone shows a setting's choices under the whole count line).
+The third, inline in `next.html`, moves an opened setting's choices left only as far as keeps them
+on the screen, closes them on a tap elsewhere, and reopens the setting a choice was made in, at the
+same scroll position. The rule all three protect is that *logic* stays in Go, not that the client
+is inert; without JavaScript the page still works, minus these three (the find box then needs
+Enter, and a phone shows a setting's choices under the whole count line).
+
+The routes: the home page `/`, species pages `/species/<id>`, the guides `/docs/`, `/added`,
+`/excluded`, `/birds.json`, the boundary file under `/boundaries/`, `/robots.txt`, and `/static/`.
+The classic view, `/compare`, and `/now` were removed on 2026-10-27
+([decisions.classicViewRemoved](requirements/decisions.md#classicviewremoved)).
 
 This is what let [acceptance.familyFilterSelectsAndClears](requirements/acceptance.md#familyfilterselectsandclears) and [acceptance.unitToggleSwitches](requirements/acceptance.md#unittoggleswitches) be real checks rather than declared gaps.
 

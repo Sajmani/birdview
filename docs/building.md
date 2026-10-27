@@ -44,8 +44,8 @@ including the rejected ones and why.
 **BirdView links to iNaturalist and copies nothing from it**: no photograph is embedded, cached, or
 hotlinked, so no contributor's license is engaged.
 
-**Every CC BY source is credited on the page that uses it**, as its license asks; the index footer
-names each with its citation.
+**Every CC BY source is credited on the page that uses it**, as its license asks; the home page's footer
+names each with its citation, and every other page links to it.
 
 ---
 
@@ -345,8 +345,8 @@ that should redirect to it:
 go run ./cmd/birdview-smoke https://birdview.example https://www.birdview.example
 ```
 
-It prints one line per check and exits non-zero if any fails. It fetches the index once, gzipped,
-and nothing else larger than a page, so running it after every deploy costs little egress.
+It prints one line per check and exits non-zero if any fails. It fetches nothing larger than a
+page, so running it after every deploy costs little egress.
 
 ### Rolling back
 

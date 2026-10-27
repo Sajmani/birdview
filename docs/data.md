@@ -168,9 +168,9 @@ Palmyra, Wake, and Navassa (covered by BirdView). A species is in scope when, in
 region, its observations fall in repeated episodes across years. Nine are kept by hand because
 the open record cannot speak for them, each named with its reason.
 
-**41 of them are not on the index**, which shows 1041. Recurrence cannot tell a wild population
+**41 of them are not on the home page**, which shows 1041. Recurrence cannot tell a wild population
 from a steady supply of escapes, so parrots, waxbills, ornamental waterfowl, zoo birds, and a
-farmed Emu pass the rule too. They are on a declared list with reasons and left off the index and
+farmed Emu pass the rule too. They are on a declared list with reasons and left off the home page and
 its controls; [the list](/excluded) links to their pages, which stay up. Long-feral populations
 and wild vagrants are not on it.
 
@@ -222,7 +222,7 @@ cannot resolve and reports **zero** US and Canadian records for Cooper's Hawk.
 
 **Some species are correctly listed only at sea**: Townsend's Storm-Petrel, Bermuda Petrel,
 Trindade Petrel, Craveri's Murrelet, Guadalupe Murrelet, and Atlantic Yellow-nosed Albatross are
-seen beyond any land polygon. Six species on the index, among them Desertas Petrel and Little
+seen beyond any land polygon. Six species on the home page, among them Desertas Petrel and Little
 Curlew, reach the bar nowhere; their pages show no Regions row.
 
 **The ocean boxes are approximate**: disjoint coordinate rectangles, so a record falls in at most
@@ -273,7 +273,7 @@ must be reconstructed from observer, date, and rounded coordinates over a comple
 data (a partial slice makes almost every checklist look like one species), and doing that for
 every region would mean downloading all the records.
 
-**On the index the scope is the regions you have selected.** A Gyrfalcon is about 1 in 3.6 million
+**On the home page the scope is the regions you have selected.** A Gyrfalcon is about 1 in 3.6 million
 species observations across all regions and 1 in 82,000 in Alaska. Selecting a region where a bird
 is absent lowers its figure, because those records join only the denominator.
 
