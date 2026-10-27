@@ -408,3 +408,9 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 .tiles > .tierhd { flex: 0 0 100%; margin: 10px 0 0; font-size: 14px; font-weight: 600; }
 .tiles > .tierhd:first-child { margin-top: 0; }
 .tierhd .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
+/* The species page's Pin: a button with the pin and a word, filled when the
+   bird is pinned on the home page. */
+.pinaction { margin: 10px 0; }
+.pinbtn svg { fill: currentColor; }
+.pinbtn.on { background: var(--accent); border-color: var(--accent); color: #06283d; }
+

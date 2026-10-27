@@ -308,8 +308,11 @@ count, every link on the page changes only its own setting (Order by, also rev),
 Reset drops the find box's text, Reset keeps only the pins, Clear pins drops them (and Pinned
 only), × drops the text, the forms send every parameter but their own, Here replaces only the
 region, the birds around you now replaces the region and month (and leaves Pinned only), and a
-tile's species page carries only the units and names; in headless Chrome, Back on a species page
-reached from the home page goes back by history, and from a shared link follows its link to
+tile's species page carries only the units and names; in headless Chrome, a species page opened
+from the home page shows Pin or Unpin as the home page pins the bird, and its Pin goes back and
+leaves the bird, so that the home page, loaded again, requests its own address with bird= that
+bird; without the script Pin links to /?pin=<id>, and a bird left off the home page has none; Back
+on a species page reached from the home page goes back by history, and from a shared link follows its link to
 /?units=metric; choosing Nov from Pinned only stays
 Pinned only. The summaries read frequency ↓, length ↑, mass ↓ reversed, Oct (now), May or Jun,
 all, imperial or metric, and North Amer or world; the header links stick figures to the guide. The header ends with Click a bird and How to read a drawing and has no
@@ -372,6 +375,7 @@ Watched failing: 2026-10-26, by a filter dropping every show, by ignoring a coun
 Watched failing: 2026-10-26, by the count line saying "and 1 added" instead of "plus 1 pin".
 Watched failing: 2026-10-26, by ignoring cap, by a filter dropping it, by not redirecting cap=100, by Show all naming cap=all, and by the cap form sending cap twice.
 Watched failing: 2026-10-27, by tiers not reversed with the order, by undrawn tiers' bars linking on the page, by a heading per tile, and by taking the headings' precision in the order shown.
+Watched failing: 2026-10-27, by the home page not leaving its pins ("annhum's Pin: Pin, want Unpin"), by the home page ignoring the species page's ask, by Pin not leaving the bird, and by a Pin on a bird left off the home page (cutthr1).
 Watched failing: 2026-10-27, by Back without its script ("went back 0 times and followed its link true").
 Watched failing: 2026-10-27, by letting the tile's grid size to its name line (#4: "s-nobtyr wider by 9px, drawing off by 10px"); the browser check now also requires every tile within its box and its drawing centered.
 Watched failing: 2026-10-26, by placing the pin a fixed 60px above the tile's bottom ("28 of 100 pins are not level with the mass cube", 16px high), and by sharing a stretched tile's height among all its rows ("20 of 100", 4px).

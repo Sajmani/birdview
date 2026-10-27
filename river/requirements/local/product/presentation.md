@@ -766,7 +766,12 @@ Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flex
 (Sameer, 2026-10-26; [scalableInterface](../../../todo.md#scalableinterface)). It was built as a
 prototype at `/next` and replaced the index as the home page the same day; the index, kept for a
 day as the classic view at `/classic`, was removed on 2026-10-27
-([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)). A species page's **Back**
+([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)). A species page's **Pin** pins
+or unpins the bird on the home page the reader came from: the home page leaves its pins and its
+toggle address in the tab's session, so the species page shows Pin or Unpin, and pinning goes back
+and asks the home page to toggle the bird, which it does at the place the reader left (Sameer,
+2026-10-27, option (a)). Without the script, or from a shared link, Pin goes to the home page with
+that bird pinned; a bird left off the home page has no Pin. A species page's **Back**
 goes back by the browser's history, so the home page returns as it was; species links carry only
 the units and names, which the species page draws with, and from a shared link Back goes to the
 home page in those. Its footer carries the full credits, which every other page links to.

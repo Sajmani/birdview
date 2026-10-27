@@ -29,6 +29,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -1607,5 +1608,83 @@ func TestBandingCodesOnThePages(t *testing.T) {
 		if w.Code != http.StatusNotFound {
 			t.Errorf("GET %s = %d, want 404: addresses use the eBird code", path, w.Code)
 		}
+	}
+}
+
+//go:embed testdata/detail_pin_probe.js
+var detailPinProbe string
+
+// TestSpeciesPinAsksTheHomePage checks the species page's Pin in headless
+// Chrome: opened from the home page, it shows whether the bird is pinned
+// there, and clicking it goes back and leaves the bird for the home page,
+// which, loaded again, asks for its own address with that bird toggled.
+// Without the script it is a link to the home page with the bird pinned, and
+// a bird left off the home page has none.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestSpeciesPinAsksTheHomePage(t *testing.T) {
+	s := newTestServer(t)
+	body := mustGet(t, s, "/species/amecro")
+	if !strings.Contains(body, `<a class="btn pinbtn" href="/?pin=amecro" data-pin="amecro" aria-pressed="false">`) {
+		t.Error("the species page has no Pin linking to the home page with the bird pinned")
+	}
+	real := newTestServerReal(t)
+	exotic := ""
+	for i := range real.all.Species {
+		if real.all.Species[i].Exotic != "" {
+			exotic = real.all.Species[i].ID
+			break
+		}
+	}
+	if exotic == "" {
+		t.Fatal("the dataset has no bird left off the home page; the check needs one")
+	}
+	if strings.Contains(mustGet(t, real, "/species/"+exotic), `data-pin=`) {
+		t.Errorf("%s, left off the home page, has a Pin", exotic)
+	}
+	chrome := findChrome()
+	if chrome == "" {
+		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); the species page's Pin was not tested in a browser")
+	}
+	var mu sync.Mutex
+	var requests []string
+	ts := httptest.NewServer(instrument(s, detailPinProbe, func(uri string) {
+		mu.Lock()
+		requests = append(requests, uri)
+		mu.Unlock()
+	}))
+	defer ts.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
+		"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
+		"--disable-component-update", "--disable-sync", "--disable-extensions",
+		"--user-data-dir="+t.TempDir(), "--virtual-time-budget=8000",
+		"--dump-dom", ts.URL+"/?month=all&pin=annhum").Output()
+	if err != nil {
+		t.Fatalf("chrome: %v", err)
+	}
+	m := dataAttr("data-probe").FindSubmatch(out)
+	if m == nil {
+		t.Fatal("no result from the probe")
+	}
+	type frame struct {
+		Label, Pressed, Toggle string
+		Back                   int
+	}
+	var res struct{ SpeciesA, SpeciesB frame }
+	if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
+		t.Fatalf("reading the probe: %v", err)
+	}
+	if a := res.SpeciesA; a.Label != "Pin" || a.Pressed != "false" || a.Back != 1 || a.Toggle != "amecro" {
+		t.Errorf("amecro's Pin: %+v; want Pin, not pressed, going back once and leaving amecro to toggle", a)
+	}
+	if b := res.SpeciesB; b.Label != "Unpin" || b.Pressed != "true" {
+		t.Errorf("annhum's Pin: %+v; want Unpin, pressed, since the home page pins it", b)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	if !slices.Contains(requests, "/?month=all&pin=annhum&bird=amecro") {
+		t.Errorf("the home page, loaded again, did not ask to toggle amecro; requests %v", requests)
 	}
 }

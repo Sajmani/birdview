@@ -241,6 +241,40 @@
     if (e.key === "Escape") closeAll(null);
   });
   var KEY = "birdview.next.open";
+  // A species page's Pin asks this page to pin or unpin a bird
+  // (product.nextView): this page leaves its toggle address and its pins in
+  // the session for that page to read, and the species page, going back,
+  // leaves the bird to toggle. Returning, this page toggles it at the place
+  // the reader left. Checked as the page runs, and again when the browser
+  // restores it from its cache, which runs no script.
+  var finds = document.querySelector(".finds");
+  function pinAsked() {
+    var id, home;
+    try {
+      id = sessionStorage.getItem("birdview.toggle");
+      home = JSON.parse(sessionStorage.getItem("birdview.home") || "null");
+      if (id) sessionStorage.removeItem("birdview.toggle");
+    } catch (e) { return false; }
+    if (!id || !finds) return false;
+    try {
+      sessionStorage.setItem(KEY, JSON.stringify({ ctl: "", y: home ? home.y : window.scrollY }));
+    } catch (e) { /* the place is lost; the pin is not */ }
+    location.replace(finds.getAttribute("data-toggle") + "bird=" + encodeURIComponent(id));
+    return true;
+  }
+  function remember() {
+    if (!finds) return;
+    try {
+      sessionStorage.setItem("birdview.home", JSON.stringify({
+        toggle: finds.getAttribute("data-toggle"),
+        pins: (finds.getAttribute("data-pinned") || "").split(" ").filter(Boolean),
+        y: window.scrollY }));
+    } catch (e) { /* storage unavailable: the species page's Pin starts over */ }
+  }
+  if (pinAsked()) return;
+  remember();
+  window.addEventListener("pagehide", remember);
+  window.addEventListener("pageshow", function (e) { if (e.persisted) pinAsked(); });
   try {
     var saved = JSON.parse(sessionStorage.getItem(KEY) || "null");
     sessionStorage.removeItem(KEY);

@@ -53,6 +53,34 @@
   </div>
   {{template "diagram" .}}
 </div>
+{{/* Pin (product.nextView). The home page's pins are its address, which this
+     page does not carry, so the script reads them from what the home page
+     left in the session, and pinning goes back to the home page and asks it
+     to pin or unpin the bird there. Without the script, or arriving from a
+     shared link, it goes to the home page with this bird pinned. Birds left
+     off the home page cannot be pinned. */}}
+{{if not .S.Exotic}}<p class="pinaction"><a class="btn pinbtn" href="/?pin={{.S.ID}}" data-pin="{{.S.ID}}" aria-pressed="false">{{template "pinicon"}} <span class="pinlabel">Pin</span></a></p>
+<script>
+(function () {
+  var a = document.querySelector("a[data-pin]");
+  if (!a) return;
+  var id = a.getAttribute("data-pin"), home = null;
+  try { home = JSON.parse(sessionStorage.getItem("birdview.home") || "null"); } catch (e) {}
+  if (!home || !home.toggle) return;
+  var on = (home.pins || []).indexOf(id) >= 0;
+  a.classList.toggle("on", on);
+  a.setAttribute("aria-pressed", on ? "true" : "false");
+  a.querySelector(".pinlabel").textContent = on ? "Unpin" : "Pin";
+  a.addEventListener("click", function (e) {
+    e.preventDefault();
+    try { sessionStorage.setItem("birdview.toggle", id); } catch (err) { location.assign(a.href); return; }
+    var from = document.referrer, back = false;
+    try { back = !!from && new URL(from).origin === location.origin && history.length > 1; } catch (err) {}
+    if (back) history.back();
+    else location.assign(home.toggle + "bird=" + encodeURIComponent(id));
+  });
+})();
+</script>{{end}}
 {{/* product.escapedBirdsListed: a bird left off the home page keeps this page, and says why. */}}
 {{with .S.Exotic}}<p class="seam">Not on the home page. {{.}}
   <a href="/excluded">Every bird left off the home page</a>.</p>{{end}}
