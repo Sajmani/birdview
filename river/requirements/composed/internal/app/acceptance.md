@@ -364,6 +364,7 @@ Watched failing: 2026-10-26, by dropping the edge click's script, by sending on 
 Watched failing: 2026-10-26, by a filter dropping every show, by ignoring a count ("show=50: 100 drawn"), by the First form sending show twice, by All counting only the drawn birds ("under Pinned only, All offers 0 birds"), by one count-line row, and by an unmarked First.
 Watched failing: 2026-10-26, by the count line saying "and 1 added" instead of "plus 1 pin".
 Watched failing: 2026-10-26, by ignoring cap, by a filter dropping it, by not redirecting cap=100, by Show all naming cap=all, and by the cap form sending cap twice.
+Watched failing: 2026-10-27, by letting the tile's grid size to its name line (#4: "s-nobtyr wider by 9px, drawing off by 10px"); the browser check now also requires every tile within its box and its drawing centered.
 Watched failing: 2026-10-26, by placing the pin a fixed 60px above the tile's bottom ("28 of 100 pins are not level with the mass cube", 16px high), and by sharing a stretched tile's height among all its rows ("20 of 100", 4px).
 Watched failing: 2026-10-26, by dropping the gap after the last pin ("has 104 tiles and gaps, want 102 tiles and 3 gaps"), by dropping gaps before pins, by keeping pin order in the pinned list, and by sorting it by id instead of displayed name.
 Watched failing: 2026-10-26, by not reopening the setting ("with [] open"), by never forgetting it ("a plain reload opened [Month]"), and by dropping the rule and the one line.

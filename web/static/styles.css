@@ -600,7 +600,12 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 .pin:hover { border-color: var(--accent); color: var(--ink); }
 .pin.on, .pin.on:visited { background: var(--accent); border-color: var(--accent); color: #06283d; }
 .next .tilewrap { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(3, auto) 1fr; }
-.next .tilewrap > .tile { grid-area: 1 / 1 / 5 / 2; display: grid; grid-template-rows: subgrid; }
+.next .tilewrap > .tile { grid-area: 1 / 1 / 5 / 2; display: grid; grid-template-rows: subgrid;
+  grid-template-columns: minmax(0, 1fr); }
+/* A grid item is as wide as its content unless told otherwise, and the name
+   line never wraps: without this, a long name widened its tile and pushed the
+   drawing off center instead of truncating (#4). */
+.next .tilewrap > .tile > * { min-width: 0; }
 .next .tilewrap > .pin { grid-area: 2 / 1 / 3 / 2; justify-self: end; align-self: end;
   margin: 0 19px 16px 0; z-index: 1; }
 .finds li { display: flex; align-items: center; gap: 8px; }

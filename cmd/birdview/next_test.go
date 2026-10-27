@@ -1059,7 +1059,8 @@ var nextPinAlignProbe string
 
 // TestNextPinAlignsWithCube checks, in headless Chrome at a laptop's width
 // and a phone's, that every tile's pin stands level with its mass cube: the
-// foot of one within a pixel of the other's. The page is October's birds by
+// foot of one within a pixel of the other's; and that no tile is wider than
+// its box or draws its bird off center, as long names once made them (#4). The page is October's birds by
 // length, whose first tiles include ones with a note under the footer and
 // ones stretched to a taller neighbor in their row, the two cases that once
 // put the pin high.
@@ -1090,9 +1091,10 @@ func TestNextPinAlignsWithCube(t *testing.T) {
 			t.Fatalf("at %s: no result from the probe; it did not finish", size)
 		}
 		var res struct {
-			Tiles int      `json:"tiles"`
-			Notes int      `json:"notes"`
-			Off   []string `json:"off"`
+			Tiles      int      `json:"tiles"`
+			Notes      int      `json:"notes"`
+			Off        []string `json:"off"`
+			Uncentered []string `json:"uncentered"`
 		}
 		if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
 			t.Fatalf("reading the probe: %v", err)
@@ -1102,6 +1104,9 @@ func TestNextPinAlignsWithCube(t *testing.T) {
 		}
 		if len(res.Off) > 0 {
 			t.Errorf("at %s, %d of %d pins are not level with the mass cube: %v", size, len(res.Off), res.Tiles, res.Off)
+		}
+		if len(res.Uncentered) > 0 {
+			t.Errorf("at %s, %d of %d tiles are wider than their box or draw off center (#4): %v", size, len(res.Uncentered), res.Tiles, res.Uncentered)
 		}
 	}
 }
