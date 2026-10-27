@@ -538,6 +538,35 @@ license forbids redistribution, and the boundaries are sent to every reader's br
 
 ---
 
+## `bbl`
+
+| Field | Value |
+| --- | --- |
+| **Name** | `bbl` (`third_party/bbl/`) |
+| **Origin** | https://www.pwrc.usgs.gov/BBL/Bander_Portal/login/speclist.php — the USGS Bird Banding Laboratory's species list |
+| **Version** | as served on 2026-10-27 |
+| **Integrity** | [river/requirements/imported/usgs.gov/bbl/PROVENANCE.md](imported/usgs.gov/bbl/PROVENANCE.md) |
+| **Tier** | mandatory (copyright), though a public-domain source imposes nothing |
+| **Import style** | By reference, vendored: the page as served, read by `internal/bbl` in `cmd/birdview-ingest` |
+| **Scope** | The four-letter banding code of each species ([product.bandingCodes](local/product/dataset.md#bandingcodes)) |
+| **Adopted parts** | The alpha code, common name, and scientific name of each row that is one species; 884 of the 1,082 species join |
+| **Exclusions** | Band sizes, French names, status, and comments; rows that are not one species (unidentified pairs, hybrids, intergrades) |
+| **Owner** | U.S. Geological Survey, Eastern Ecological Science Center, Bird Banding Laboratory |
+| **Status** | **Adopted 2026-10-27.** Retrieved, hashed, and joined; credited as the USGS asks. |
+
+License, quoted from <https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits>,
+read 2026-10-27:
+
+> "USGS-authored or produced data and information are considered to be in the U.S. Public
+> Domain."
+
+The page asks for credit ("Credit: U.S. Geological Survey"). The codes are the Laboratory's own:
+the list is what banders must report with, and it differs in places from the IBP's codes, which
+were not used ([decisions.avilistReplacesAba](decisions.md#avilistreplacesaba)). The list leaves out birds not banded with federal
+bands; a second list for them is no longer served.
+
+---
+
 ## `birdlife-checklist`
 
 | Field | Value |

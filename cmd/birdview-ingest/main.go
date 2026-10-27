@@ -30,6 +30,7 @@ import (
 
 	"birdview/internal/avilist"
 	"birdview/internal/avonet"
+	"birdview/internal/bbl"
 	"birdview/internal/dataset"
 	"birdview/internal/inat"
 	"birdview/internal/morphology"
@@ -55,6 +56,7 @@ func main() {
 		avlPath  = flag.String("avilist", "third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx", "AviList checklist (extended release)")
 		inatPath = flag.String("inat", "data/inat-taxa.tsv", "iNaturalist taxon mapping (built by birdview-inatmap)")
 		regPath  = flag.String("regions", "data/region-presence.tsv", "per-region presence (built by birdview-regions)")
+		bblPath  = flag.String("bbl", "third_party/bbl/speclist.html", "USGS Bird Banding Laboratory species list (banding codes)")
 		outPath  = flag.String("out", "web/data/species.json", "output path (a build artifact)")
 	)
 	flag.Parse()
@@ -84,6 +86,14 @@ func main() {
 		log.Printf("birdview-ingest: WARNING: no region data (%v)", err)
 	} else {
 		fmt.Printf("  regions          : %d of %d species placed (product.regionAndMonthFilter)\n", placed, len(ds.Species))
+	}
+
+	coded, err := applyBanding(ds, *bblPath)
+	if err != nil {
+		// An enhancement like the iNaturalist links: loud, not fatal.
+		log.Printf("birdview-ingest: WARNING: no banding codes (%v)", err)
+	} else {
+		fmt.Printf("  banding codes    : %d of %d species (product.bandingCodes)\n", coded, len(ds.Species))
 	}
 
 	if err := os.MkdirAll(filepath.Dir(*outPath), 0o755); err != nil {
@@ -792,6 +802,66 @@ func applyINat(ds *dataset.Dataset, path string) (int, error) {
 			ds.Species[i].INatTaxonID = e.TaxonID
 			n++
 		}
+	}
+	return n, nil
+}
+
+// applyBanding gives each species the USGS Bird Banding Laboratory's
+// four-letter code (product.bandingCodes). The join is by scientific name;
+// where the Laboratory gives one name to two rows (a species and a form it
+// counts apart), the row whose English name is the species' North American
+// name wins, and failing that the species is left without a code rather than
+// given a guess. A species the Laboratory files under another scientific
+// name is joined by its North American English name, when exactly one row
+// has it.
+func applyBanding(ds *dataset.Dataset, path string) (int, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return 0, err
+	}
+	bySci := map[string][]bbl.Entry{}
+	byName := map[string][]bbl.Entry{}
+	for _, e := range bbl.Parse(string(b)) {
+		bySci[strings.ToLower(e.Scientific)] = append(bySci[strings.ToLower(e.Scientific)], e)
+		byName[strings.ToLower(e.Common)] = append(byName[strings.ToLower(e.Common)], e)
+	}
+	used := map[string]string{}
+	var n int
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		name := strings.ToLower(sp.Names[dataset.LocaleNA])
+		var code string
+		switch es := bySci[strings.ToLower(sp.ScientificName)]; {
+		case len(es) == 1:
+			code = es[0].Alpha
+		case len(es) > 1:
+			for _, e := range es {
+				if strings.ToLower(e.Common) == name {
+					code = e.Alpha
+				}
+			}
+		default:
+			if es := byName[name]; name != "" && len(es) == 1 {
+				code = es[0].Alpha
+			}
+		}
+		if code == "" {
+			continue
+		}
+		// One code, one species: a second claimant gets none.
+		if other, taken := used[code]; taken {
+			log.Printf("birdview-ingest: banding code %s claimed by %s and %s; neither keeps it", code, other, sp.ID)
+			for j := range ds.Species {
+				if ds.Species[j].ID == other {
+					ds.Species[j].BandingCode = ""
+					n--
+				}
+			}
+			continue
+		}
+		used[code] = sp.ID
+		sp.BandingCode = code
+		n++
 	}
 	return n, nil
 }

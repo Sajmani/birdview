@@ -384,3 +384,23 @@ Watched failing: 2026-10-26, by not lowercasing what is typed in the script ("AM
 Watched failing: 2026-10-26, by the script listing matches over the limit, and by its offering Add for a bird already shown.
 Watched failing: 2026-10-26, by the toggle not removing a bird the filters chose, and by ignoring exclude=.
 Watched failing: 2026-10-26, by the server listing 23 matches for "hawk".
+
+## bandingCodesShown
+
+**Birds carry the Bird Banding Laboratory's four-letter codes, and the site uses them**
+
+Covers: [product.bandingCodes](../../../local/product/dataset.md#bandingcodes)
+
+**Method:** the vendored list parses to over 1,100 one-species rows, each code once, with American
+Robin AMRO, Blue Jay BLJA, Western Grebe WEGR, and Bicknell's Thrush BITH, and without the
+unidentified Gray-cheeked/Bicknell's Thrush. The built dataset gives AMRO, BLJA, AMCR, NOCA, and
+BAEA to their birds, at least 850 species a code, and every code is four capital letters on one
+species. On a small list, the join takes the scientific name, picks the row named as the species
+where two share one, falls back to the one row with the English name, and gives a code two
+species claim to neither.
+
+**Run:** `go test ./internal/bbl/ ./cmd/birdview-ingest/ -run 'TestParse|TestBanding'`
+**Status: verified 2026-10-27, passing**, for the dataset; the find box, the species page, and
+`/species/<code>` are checked as they land.
+Watched failing: 2026-10-27, by keeping unidentified rows, by taking the last of two rows sharing a scientific name ("calgna got BACG"), by dropping the English-name fallback, and by letting two species keep one code.
+

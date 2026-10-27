@@ -38,6 +38,7 @@ const (
 	avlFile    = "../../third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx"
 	inatFile   = "../../data/inat-taxa.tsv"
 	regFile    = "../../data/region-presence.tsv"
+	bblFile    = "../../third_party/bbl/speclist.html"
 )
 
 // built caches the compiled dataset across tests: the AVONET workbook is 21 MB
@@ -64,6 +65,9 @@ func load(t *testing.T) *dataset.Dataset {
 	// nothing about the one that ships.
 	if _, err := applyRegions(ds, regFile); err != nil {
 		t.Fatalf("applyRegions: %v", err)
+	}
+	if _, err := applyBanding(ds, bblFile); err != nil {
+		t.Fatalf("applyBanding: %v", err)
 	}
 	built = ds
 	return ds
@@ -789,5 +793,92 @@ func TestExoticsAreFlaggedFromTheList(t *testing.T) {
 	out := []dataset.Species{{ScientificName: "Ara macao"}}
 	if err := flagExotic(out, map[string]string{"Ara macao": "x", "Nonesuch nonesuch": "y"}); err == nil {
 		t.Error("a listed species that is not drawn was accepted")
+	}
+}
+
+// TestBandingCodes checks the four-letter codes the ingest joins from the
+// USGS Bird Banding Laboratory's list: known birds carry the Laboratory's
+// code, every code is four capital letters and names one species, and most
+// of the dataset is covered (the birds left out are those the Laboratory
+// does not band with federal bands: introduced birds, most gamebirds).
+//
+// Verifies: product.bandingCodes. Criterion: app.bandingCodesShown.
+func TestBandingCodes(t *testing.T) {
+	ds := load(t)
+	by := map[string]*dataset.Species{}
+	seen := map[string]string{}
+	n := 0
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		by[sp.ID] = sp
+		if sp.BandingCode == "" {
+			continue
+		}
+		n++
+		if len(sp.BandingCode) != 4 || strings.ToUpper(sp.BandingCode) != sp.BandingCode {
+			t.Errorf("%s: banding code %q is not four capital letters", sp.ID, sp.BandingCode)
+		}
+		if other, dup := seen[sp.BandingCode]; dup {
+			t.Errorf("%s and %s share the banding code %s", other, sp.ID, sp.BandingCode)
+		}
+		seen[sp.BandingCode] = sp.ID
+	}
+	for id, code := range map[string]string{"amerob": "AMRO", "blujay": "BLJA", "amecro": "AMCR", "norcar": "NOCA", "baleag": "BAEA"} {
+		if sp := by[id]; sp == nil || sp.BandingCode != code {
+			t.Errorf("%s has banding code %q, want %s", id, sp.BandingCode, code)
+		}
+	}
+	if n < 850 {
+		t.Errorf("only %d of %d species have a banding code", n, len(ds.Species))
+	}
+}
+
+// TestBandingJoin checks the join's rules on a small list: by scientific
+// name; where two rows share one, the row named as the species is; with no
+// scientific match, by the North American English name when one row has it;
+// and a code two species claim goes to neither.
+//
+// Verifies: product.bandingCodes. Criterion: app.bandingCodesShown.
+func TestBandingJoin(t *testing.T) {
+	row := func(num, code, common, sci string) string {
+		return "<tr><td>" + num + "</td><td>" + code + "</td><td>" + common + "</td><td>2</td><td>x</td><td>" +
+			sci + "</td><td></td><td></td><td>1</td></tr>"
+	}
+	page := row("1", "AMRO", "American Robin", "Turdus migratorius") +
+		row("2", "CAGN", "California Gnatcatcher", "Polioptila californica") +
+		row("3", "BACG", "Baja Gnatcatcher", "Polioptila californica") +
+		row("4", "OLDN", "Renamed Bird", "Oldus genus") +
+		row("5", "TWIN", "Twin One", "Twinus one") +
+		row("6", "TWIN", "Twin Two", "Twinus two")
+	f := t.TempDir() + "/list.html"
+	if err := os.WriteFile(f, []byte(page), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	mk := func(id, na, sci string) dataset.Species {
+		return dataset.Species{ID: id, ScientificName: sci, Names: map[dataset.Locale]string{dataset.LocaleNA: na}}
+	}
+	ds := &dataset.Dataset{Species: []dataset.Species{
+		mk("amerob", "American Robin", "Turdus migratorius"),
+		mk("calgna", "California Gnatcatcher", "Polioptila californica"),
+		mk("renbir", "Renamed Bird", "Newus genus"),
+		mk("twin1", "Twin One", "Twinus one"),
+		mk("twin2", "Twin Two", "Twinus two"),
+	}}
+	n, err := applyBanding(ds, f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, sp := range ds.Species {
+		got[sp.ID] = sp.BandingCode
+	}
+	want := map[string]string{"amerob": "AMRO", "calgna": "CAGN", "renbir": "OLDN", "twin1": "", "twin2": ""}
+	for id, code := range want {
+		if got[id] != code {
+			t.Errorf("%s got %q, want %q", id, got[id], code)
+		}
+	}
+	if n != 3 {
+		t.Errorf("applyBanding counted %d, want 3", n)
 	}
 }

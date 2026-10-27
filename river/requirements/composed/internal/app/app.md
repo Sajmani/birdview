@@ -98,6 +98,7 @@ a lower tier may do.
 - [product.pageExplainsItself](../../../local/product/presentation.md#pageexplainsitself) — The page explains itself
 - [product.fitsAPhone](../../../local/product/presentation.md#fitsaphone) — Every page fits a phone held upright
 - [product.nextView](../../../local/product/presentation.md#nextview) — The home page: one view of birds
+- [product.bandingCodes](../../../local/product/dataset.md#bandingcodes) — Each bird carries its four-letter banding code, where the Bird Banding Laboratory gives one
 - [product.collapsibleControls](../../../local/product/presentation.md#collapsiblecontrols) — The controls collapse
 - [product.togglesKeepPlace](../../../local/product/presentation.md#toggleskeepplace) — Toggling a control keeps your place
 - [product.inaturalistLink](../../../local/product/presentation.md#inaturalistlink) — The detail view links to the species on iNaturalist

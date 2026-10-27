@@ -176,7 +176,13 @@ type Species struct {
 	// LIAU under the world locale (decisions.avilistReplacesAba).
 	//
 	// Not fixed-width despite the name: 4 to 8 characters in practice.
-	SpeciesCode    string `json:"speciesCode,omitempty"`
+	SpeciesCode string `json:"speciesCode,omitempty"`
+	// BandingCode is the four-letter alpha code the USGS Bird Banding
+	// Laboratory assigns, e.g. "AMRO" (product.bandingCodes): a public-domain
+	// U.S. Government list, joined by scientific name. It names the species,
+	// whatever English names are shown. Empty where the Laboratory lists no
+	// such species, as for most birds introduced from elsewhere.
+	BandingCode    string `json:"bandingCode,omitempty"`
 	ScientificName string `json:"scientificName"`
 	Family         string `json:"family"`
 	FamilyCommon   string `json:"familyCommon"`

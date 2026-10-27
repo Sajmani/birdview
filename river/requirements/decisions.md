@@ -1565,7 +1565,7 @@ apart in review or in a screenshot.
 
 Date: 2026-10-02
 Decided by: Sameer
-Status: amended by scopeFromRecurrence
+Status: amended by scopeFromRecurrence, bandingCodesFromBbl
 Affects: [product.namesFromAvilist](local/product/dataset.md#namesfromavilist), [product.englishNameChoice](local/product/diagram.md#englishnamechoice), [product.familiesByOrder](local/product/months.md#familiesbyorder)
 Subject: `dataset.names.source`
 Kind: Direct — a licensing constraint forces a source change, which then enables a feature
@@ -3953,3 +3953,36 @@ Keeping [tech.servesOnLocalhost](local/tech/delivery.md#servesonlocalhost)'s def
 approve: a default is what a local run gets without anyone choosing, and a server listening on
 every interface by default would expose a developer's machine to its network, so the deployment
 states its address instead, `-addr 0.0.0.0:8080`, because Cloud Run must reach it.
+
+---
+
+## bandingCodesFromBbl
+
+**Four-letter banding codes return, from the USGS Bird Banding Laboratory's public-domain list**
+
+Date: 2026-10-27
+Decided by: Sameer
+Status: accepted
+Amends: avilistReplacesAba
+Affects: [product.bandingCodes](local/product/dataset.md#bandingcodes)
+
+### Decided
+
+Each species carries the four-letter alpha code from the USGS Bird Banding Laboratory's species
+list ([bbl](imports.md#bbl)), alongside the eBird code, which stays the species id. The code is
+shown on the species page, found by the find box, and accepted as `/species/<code>`.
+
+### Why
+
+The owner asked for banding codes in search, on species pages, and in addresses. [avilistReplacesAba](#avilistreplacesaba)
+dropped the codes because both lists it knew were unusable: the ABA's is all rights reserved, and
+the IBP's publishes no license. The owner pointed to the Laboratory's list, which is a U.S.
+Government work; the USGS states that the data it authors is in the U.S. public domain, so it may
+be redistributed. Of the earlier objections, the locale one still holds in part: a code is derived
+from a North American English name, so under World names it no longer matches the name shown. It
+is kept as an identifier there rather than recomputed, which is what banders use it as.
+
+What it costs: 198 of 1,082 species have no code, chiefly introduced birds and gamebirds the
+Laboratory does not band with federal bands, and two species it lists only by subspecies (Brant
+and Cackling Goose). The page names a second list for such birds, but no longer serves it.
+

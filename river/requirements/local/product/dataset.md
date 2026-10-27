@@ -143,6 +143,27 @@ Both tables are recorded in the code with this requirement cited beside them, an
 **asserts the drop list** rather than discovering it: a species losing its name source quietly
 would change its URL under a reader ([englishNameChoice](diagram.md#englishnamechoice)).
 
+## bandingCodes
+
+**Each bird carries its four-letter banding code, where the Bird Banding Laboratory gives one**
+
+Subject: `dataset.names.bandingCode`
+Value: `USGS Bird Banding Laboratory species list, 2026-10-27`
+Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
+
+Each species carries the four-letter alpha code the USGS Bird Banding Laboratory assigns it
+(`AMRO` for American Robin), from the Laboratory's species list ([bbl](../../imports.md#bbl)),
+joined by scientific name: where two rows share a scientific name, the row named as the species;
+with no scientific match, the one row with the species' North American English name; and a code
+two species would share goes to neither. A species the Laboratory does not list, as for most
+introduced birds and gamebirds it does not band with federal bands, has none. The code names the
+species whatever English names are shown. The find box finds a bird by its code, the species page
+shows it, and `/species/<code>` goes to the species page.
+
+Rationale: birders know birds by these codes, and the owner asked for them (2026-10-27). The ABA's
+and IBP's lists were not usable ([decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba)); the Laboratory's is a U.S.
+Government work in the public domain ([decisions.bandingCodesFromBbl](../../decisions.md#bandingcodesfrombbl)).
+
 ## generatedBadgeColors
 
 **Family badge colors are generated**
