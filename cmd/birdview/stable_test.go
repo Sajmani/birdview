@@ -58,7 +58,7 @@ func TestStableUrlsKeepWorking(t *testing.T) {
 	base0 := url.Values{"month": {"all"}, "show": {"all"}, "by": {"length"}}
 	base := countLine(t, s, string(nextURL(base0)))
 	for param, value := range map[string]string{
-		"by": "mass", "rev": "1", "step": "5", "units": "metric", "names": "world",
+		"by": "mass", "rev": "1", "step": "50", "units": "metric", "names": "world",
 		"pin": "amecro", "show": "pinned", "family": "Corvidae", "region": "NY", "month": "Oct",
 		"habitat": "Marine", "niche": "Frugivore",
 	} {

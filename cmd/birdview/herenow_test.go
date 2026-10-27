@@ -634,13 +634,14 @@ func TestTierHistogram(t *testing.T) {
 				}
 			}
 			for k := 1; k < len(raw) && k < len(gaps); k++ {
-				want := int(math.Floor(math.Log(raw[k].Min/(raw[k-1].Min*1.15)) / math.Log(1.15)))
+				step := 1 + view.DefaultStepPercent/100
+				want := int(math.Floor(math.Log(raw[k].Min/(raw[k-1].Min*step)) / math.Log(step)))
 				if want < 0 {
 					want = 0
 				}
 				if gaps[k] != want {
 					t.Errorf("/?%s: %d empty buckets before tier %d, want %d for the stretch from %.1f to %.1f",
-						q, gaps[k], k+1, want, raw[k-1].Min*1.15, raw[k].Min)
+						q, gaps[k], k+1, want, raw[k-1].Min*step, raw[k].Min)
 				}
 			}
 		}

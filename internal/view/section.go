@@ -44,8 +44,9 @@ const (
 )
 
 // DefaultStepPercent is N in product.sectionThresholdDefault: a new section starts at the first bird more
-// than N% larger than the minimum of the previous section.
-const DefaultStepPercent = 15.0
+// than N% larger than the minimum of the previous section. 10, the owner's
+// choice on 2026-10-27 as the most intuitive step; it was 15.
+const DefaultStepPercent = 10.0
 
 // Value returns the species' value for this metric, in millimeters or grams.
 func (m Metric) Value(s *dataset.Species) float64 {

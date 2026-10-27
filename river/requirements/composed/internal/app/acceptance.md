@@ -303,7 +303,8 @@ drawn, Show, Clear pins, and Reset, then Order by through Names; it has no Show 
 `show=50`, `show=all`, and `show=pinned` do not. By length, reversed, and by mass with every bird shown, the tiers hold every
 matching bird, each drawn bird in order under its tier's heading, one heading per drawn tier;
 the histogram has a bar per tier linking to its heading, with show=all when the tier is not
-drawn; reversed tiers mirror the forward ones, headings included; frequency tiers read "1 in N". From an address setting every parameter, under Pinned only and under a
+drawn; reversed tiers mirror the forward ones, headings included; frequency tiers read "1 in N". Every length tier holds birds within 10% of its first, the next tier starting past that, and
+each drawn tier's heading has a back to top link to the header. From an address setting every parameter, under Pinned only and under a
 count, every link on the page changes only its own setting (Order by, also rev), none but × and
 Reset drops the find box's text, Reset keeps only the pins, Clear pins drops them (and Pinned
 only), × drops the text, the forms send every parameter but their own, Here replaces only the
@@ -374,6 +375,7 @@ Watched failing: 2026-10-26, by dropping the edge click's script, by sending on 
 Watched failing: 2026-10-26, by a filter dropping every show, by ignoring a count ("show=50: 100 drawn"), by the First form sending show twice, by All counting only the drawn birds ("under Pinned only, All offers 0 birds"), by one count-line row, and by an unmarked First.
 Watched failing: 2026-10-26, by the count line saying "and 1 added" instead of "plus 1 pin".
 Watched failing: 2026-10-26, by ignoring cap, by a filter dropping it, by not redirecting cap=100, by Show all naming cap=all, and by the cap form sending cap twice.
+Watched failing: 2026-10-27, by the old 15% step ("tier 1 holds rthhum at 79.8 mm, more than 10% past its first, 72.5 mm"), and by a header without the top anchor.
 Watched failing: 2026-10-27, by tiers not reversed with the order, by undrawn tiers' bars linking on the page, by a heading per tile, and by taking the headings' precision in the order shown.
 Watched failing: 2026-10-27, by the home page not leaving its pins ("annhum's Pin: Pin, want Unpin"), by the home page ignoring the species page's ask, by Pin not leaving the bird, and by a Pin on a bird left off the home page (cutthr1).
 Watched failing: 2026-10-27, by Back without its script ("went back 0 times and followed its link true").

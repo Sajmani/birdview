@@ -76,7 +76,7 @@ a lower tier may do.
 - [product.ascendingOrder](../../../local/product/ordering.md#ascendingorder) — Ascending order
 - [product.orderByFrequency](../../../local/product/presentation.md#orderbyfrequency) — Birds can be ordered by how often they are recorded
 - [product.sectionBreakRule](../../../local/product/ordering.md#sectionbreakrule) — Sections break at N% above the section minimum
-- [product.sectionThresholdDefault](../../../local/product/ordering.md#sectionthresholddefault) — N defaults to 15 and is adjustable
+- [product.sectionThresholdDefault](../../../local/product/ordering.md#sectionthresholddefault) — N defaults to 10 and is adjustable
 - [product.sectionHeadersStateRange](../../../local/product/ordering.md#sectionheadersstaterange) — Section headers state range and count
 - [product.tierHistogram](../../../local/product/ordering.md#tierhistogram) — A histogram shows how many species each tier holds
 

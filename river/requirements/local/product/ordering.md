@@ -54,13 +54,14 @@ sections are its tiers ([nextView](presentation.md#nextview)).
 
 ## sectionThresholdDefault
 
-**N defaults to 15 and is adjustable**
+**N defaults to 10 and is adjustable**
 
 Subject: `sectioning.step_percent`
-Value: `15`
+Value: `10`
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
-The section step N defaults to 15%. The address may set another, `step=` from 2 to 100; the home
+The section step N defaults to 10%: a tier holds the birds up to 10% larger than its smallest
+(Sameer, 2026-10-27, as the most intuitive step; it was 15%). The address may set another, `step=` from 2 to 100; the home
 page offers no control for it.
 
 **Under Frequency the same parameter selects a band width in orders of magnitude**, `step=10` or
@@ -101,7 +102,7 @@ tier's species count against the largest tier's, and each linking to its tier. A
 the tier as its heading does, its range, and its count: *Bill Tier 4: 0.35 in – 0.41 in, 72
 species*. It follows the current ordering and filters, so it is the shape of the view on screen.
 
-Every tier is the same 15% step, so the bars are a histogram of size on a log scale, and **a
+Every tier is the same 10% step, so the bars are a histogram of size on a log scale, and **a
 stretch with no birds shows as empty space**: one empty bucket for each whole step between where a
 tier's step ends and the next tier begins, so tiers far apart do not stand side by side as if they
 abutted. Frequency's bands are fixed decades and need none.

@@ -819,7 +819,7 @@ home page in those. Its footer carries the full credits, which every other page 
   ([sectionBreakRule](ordering.md#sectionbreakrule), [orderByFrequency](#orderbyfrequency)): a size tier spans one step of the scale from its
   smallest bird, a frequency tier a decade of "1 in N", and birds with no records a tier of their
   own; reversed, the tiers run the other way. A heading names each tier drawn, its range in the
-  page's units at one precision for all, and how many of the matching birds it holds. Above the
+  page's units at one precision for all, and how many of the matching birds it holds. Beside it, **back to top** returns to the page's header. Above the
   birds, a histogram has a bar per tier (and an empty one per step no bird falls in), each a link
   to its tier's heading, with every bird shown when that tier is not drawn.
 - **One scale.** Every bird shown is drawn to the scale of the longest. Its length, wingspan, and

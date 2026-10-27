@@ -1570,7 +1570,37 @@ func TestNextTiers(t *testing.T) {
 	if !strings.HasPrefix(f.Tiers[0].Min, "1 in ") || f.Tiers[0].Label != "Frequency" {
 		t.Errorf("the first frequency tier reads %+v", f.Tiers[0])
 	}
+	// Each length tier holds the birds up to 10% longer than its first, and
+	// the next tier starts past that (product.sectionThresholdDefault).
+	all := nextAt(s, "/?by=length&show=all")
+	var first, prevFirst float64
+	cur := -1
+	for _, it := range all.Items {
+		switch {
+		case it.Tier != nil:
+			cur, prevFirst, first = it.Tier.Index, first, 0
+		case it.Tile != nil:
+			v := it.Tile.S.TotalLength.Value
+			if first == 0 {
+				first = v
+				if prevFirst != 0 && v <= prevFirst*1.10 {
+					t.Errorf("tier %d starts at %.1f mm, within 10%% of tier %d's first, %.1f mm", cur, v, cur-1, prevFirst)
+				}
+			} else if v > first*1.10+1e-9 {
+				t.Errorf("tier %d holds %s at %.1f mm, more than 10%% past its first, %.1f mm", cur, it.Tile.S.ID, v, first)
+			}
+		}
+	}
 	body := mustGet(t, s, "/?by=length")
+	drawnTiers := 0
+	for _, tr := range nextAt(s, "/?by=length").Tiers {
+		if tr.Drawn {
+			drawnTiers++
+		}
+	}
+	if !strings.Contains(body, `<header id="top">`) || strings.Count(body, `<a class="totop" href="#top">back to top</a>`) != drawnTiers {
+		t.Errorf("want a back to top link, to the header, beside each of the %d drawn tiers", drawnTiers)
+	}
 	if !strings.Contains(body, `<h3 class="tierhd" id="tier-1"><span class="tier">Length Tier 1</span>`) ||
 		!strings.Contains(body, `<nav class="hist" aria-label="Birds in each tier">`) {
 		t.Error("the page draws no tier heading or histogram")
