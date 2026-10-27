@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"os/exec"
 	"regexp"
 	"slices"
@@ -127,7 +128,7 @@ func TestHereInTheBrowser(t *testing.T) {
 			cmd := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
 				"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
 				"--disable-component-update", "--disable-sync", "--disable-extensions",
-				"--user-data-dir="+t.TempDir(), "--virtual-time-budget=3000",
+				"--user-data-dir="+profileDir(t), "--virtual-time-budget=3000",
 				"--dump-dom", ts.URL+start+frag)
 			var dom string
 			if c.lands == pressedCA {
@@ -664,4 +665,25 @@ func TestTierHistogram(t *testing.T) {
 			}
 		}
 	}
+}
+
+// profileDir is a Chrome profile directory for a browser the test kills.
+// A killed browser's helper processes can go on writing the profile for a
+// moment, which fails t.TempDir's cleanup, so this one retries the removal
+// for a few seconds and gives up quietly.
+func profileDir(t *testing.T) string {
+	t.Helper()
+	dir, err := os.MkdirTemp("", "birdview-chrome-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		for range 50 {
+			if os.RemoveAll(dir) == nil {
+				return
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+	})
+	return dir
 }

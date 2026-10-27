@@ -110,6 +110,48 @@ has seen the home page that answers it. They were deliberately not contacted whi
 was in progress. Ask them to try birdview.site on a phone and a laptop, with the same questions as
 before, and record what they say under [scalableInterface](#scalableinterface).
 
+## uncodedBirds
+
+**198 drawn birds have no banding code**
+
+Status: open
+Owner: Sameer
+Gate: owner's call
+
+[decisions.bandingCodesFromBbl](requirements/decisions.md#bandingcodesfrombbl) takes four-letter
+codes from the USGS Bird Banding Lab list, joined by scientific name. 884 of 1,082 species get one;
+the other 198 show none on tiles, the species page, or search. Options: leave them
+blank, as now; or compute an unofficial code by the BBL's rules and mark it as computed, checking
+that no computed code collides with an official one. Asked 2026-10-27, not yet answered.
+
+## withdrawnWithClassic
+
+**Two behaviors went with the classic view; the owner may want them back**
+
+Status: open
+Owner: Sameer
+Gate: owner's call
+
+Removed 2026-10-27 under [decisions.classicViewRemoved](requirements/decisions.md#classicviewremoved):
+the Here-and-now link now uses the server's month rather than the reader's, and the "Common birds"
+region grouping ([decisions.regionsTwoWays](requirements/decisions.md#regionstwoways)) no longer
+appears anywhere. Restore either on request. `internal/view`'s `ScaleMode` and `Scales` are left
+over from the classic scale control and nothing calls them; delete them unless a scale choice
+returns under [homeSpeckScale](#homespeckscale).
+
+## cleanupLeftovers
+
+**Two criteria from the classic-view cleanup need a second look**
+
+Status: open
+Owner: unassigned
+Gate: opportunistic
+
+Found by the 2026-10-27 cleanup. The honestRevalidation criterion says every response carries an
+ETag, which is untrue for bare `/`; correct the wording or the server. Some Habitat and Diet
+criteria are now decided only through [app.nextViewDrawsOneSet](requirements/composed/internal/app/acceptance.md#nextviewdrawsoneset); check that each still has a test
+that fails when its behavior breaks.
+
 ## tightenProse
 
 **Tighten all prose and page text; less is more**
@@ -661,7 +703,8 @@ next gap without the client pacing any faster. The GBIF client's test has the sa
 flaked the same way on 2026-10-26: `TestTaxonIdentifiesItselfAndPaces` measured 53.8 ms against a
 60 ms interval in a full run, and passed three runs alone. Now that
 [tech.checksOnEveryChange](requirements/local/tech/release.md#checksoneverychange) fails CI on any failure, a flake here would read as a broken
-change. Measure the gap at the client's send instead, or widen the tolerance with that reason
+change. Measure the gap at the client's send instead, or widen the tolerance with that reason.
+By 2026-10-27 both flaked in most local full runs, though not yet in CI.
 
 ## attributionCriterionNamesAba
 
