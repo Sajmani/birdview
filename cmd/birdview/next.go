@@ -98,11 +98,12 @@ type nextPinned struct {
 	URL              template.URL
 }
 
-// nextItem is one entry in /next's grid: either a bird tile, or a gap row
-// saying how many unpinned birds were omitted there.
+// nextItem is one entry in the home page's grid: a bird tile, a gap row
+// saying how many unpinned birds were omitted there, or a tier's heading.
 type nextItem struct {
 	Tile   *tile
 	Hidden int
+	Tier   *nextTier
 }
 
 // nextMatch is one bird the find box found, with its pin.
@@ -120,6 +121,10 @@ type nextData struct {
 	Controls []nextControl
 	Tiles    []tile
 	Items    []nextItem
+	// Tiers are the tiers of the matching birds, in the order shown, and
+	// Histogram one bar per tier (product.nextView).
+	Tiers     []nextTier
+	Histogram []nextBar
 	// Show is which birds are drawn, the one setting show= carries: "first"
 	// (the first Cap of the order, and pins past them; show=<n>, 100 the
 	// default), "all" (show=all), or "pinned" (only the pinned birds,
@@ -342,6 +347,59 @@ func (s *server) nextToggleBird(r *http.Request) string {
 	return string(nextPin(q, id))
 }
 
+// nextTiers breaks the ordered birds into tiers: the classic view's
+// sections (view.SectionsBy), taken in ascending order and reversed with
+// the order. Within a tier the birds keep the order's tie-break.
+func nextTiers(ordered []*dataset.Species, opt options, rev bool, share func(*dataset.Species) float64) []view.Section {
+	asc := append([]*dataset.Species(nil), ordered...)
+	if rev {
+		slices.Reverse(asc)
+	}
+	var secs []view.Section
+	if opt.Metric == view.ByFrequency {
+		oneIn := func(sp *dataset.Species) float64 {
+			if f := share(sp); f > 0 {
+				return 1 / f
+			}
+			return math.Inf(1) // no records: one last tier
+		}
+		secs = view.SectionsBy(asc, oneIn, func(min float64) float64 { return view.Decade(min, opt.Decades) })
+	} else {
+		secs = view.Sections(asc, opt.Metric, opt.Step)
+	}
+	if rev {
+		slices.Reverse(secs)
+		for i := range secs {
+			secs[i].Species = slices.Clone(secs[i].Species)
+			slices.Reverse(secs[i].Species)
+		}
+	}
+	return secs
+}
+
+// nextTier is one tier's heading: its number in the order shown, the range
+// it covers in the page's units (or a note where there is none), how many
+// of the matching birds it holds, and whether any of them is drawn.
+type nextTier struct {
+	Index    int
+	Label    string
+	Min, Max string
+	Note     string
+	Count    int
+	Drawn    bool
+}
+
+// nextTierAnchor is a tier heading's id.
+func nextTierAnchor(i int) string { return "tier-" + strconv.Itoa(i) }
+
+// nextBar is one bar of the histogram: a tier, or an empty step of the
+// scale between two tiers, with where it links: the tier's heading, on this
+// page when it is drawn, or with every bird shown when it is not.
+type nextBar struct {
+	histBar
+	URL template.URL
+}
+
 // nextDetailLink is a bird's species page, carrying only what the page
 // draws itself with: the units and the names. Its Back returns by the
 // browser's history, so the home page comes back as it was without its
@@ -447,6 +505,20 @@ func (s *server) nextPage(r *http.Request) nextData {
 		}
 		return base[i].ScientificName < base[j].ScientificName
 	})
+
+	// Tiers, as the classic view breaks its sections (product.nextView):
+	// a size tier spans one step of the scale from its smallest bird, a
+	// frequency tier a decade of "1 in N", and the birds with no records are
+	// a tier of their own. Reversed, the tiers run the other way too.
+	secs := nextTiers(base, opt, rev, share)
+	base = base[:0]
+	tierOf := map[*dataset.Species]int{}
+	for i, sec := range secs {
+		for _, sp := range sec.Species {
+			base = append(base, sp)
+			tierOf[sp] = i
+		}
+	}
 
 	page := nextData{Feedback: s.feedback, Count: len(base), Total: len(s.ds.Species),
 		included: added, FindLimit: nextFindLimit,
@@ -560,10 +632,70 @@ func (s *server) nextPage(r *http.Request) nextData {
 		masses = append(masses, pk.sp.Mass.Value)
 	}
 	u := unitsFor(opt.Metric3, masses...)
+	// The tiers' headings, in the page's units, with one precision for
+	// all so that neighbors read apart (product.sectionHeadersStateRange).
+	metricLabel := map[view.Metric]string{view.ByFrequency: "Frequency", view.ByLength: "Length",
+		view.ByWingspan: "Wingspan", view.ByMass: "Mass", view.ByBill: "Bill", view.ByTail: "Tail"}[opt.Metric]
+	page.Tiers = make([]nextTier, len(secs))
+	spans := make([]tierSpan, len(secs))
+	for i, sec := range secs {
+		page.Tiers[i] = nextTier{Index: i + 1, Label: metricLabel, Count: len(sec.Species)}
+		if opt.Metric == view.ByFrequency {
+			page.Tiers[i].Min, page.Tiers[i].Max, page.Tiers[i].Note = frequencyBand(sec.Min, sec.Max, opt.Decades)
+		}
+		spans[i] = tierSpan{sec.Min, sec.Max, u}
+	}
+	if opt.Metric != view.ByFrequency {
+		// Neighbors are neighbors on the scale, whichever way it is shown.
+		asc := slices.Clone(spans)
+		if rev {
+			slices.Reverse(asc)
+		}
+		extra := headingDigits(asc, opt.Metric)
+		for i, sp := range spans {
+			page.Tiers[i].Min = sp.u.formatDigits(sp.lo, opt.Metric, extra)
+			page.Tiers[i].Max = sp.u.formatDigits(sp.hi, opt.Metric, extra)
+		}
+	}
+	for _, pk := range picks {
+		page.Tiers[tierOf[pk.sp]].Drawn = true
+	}
+	// One bar per tier, with an empty bar for each step of the scale no
+	// bird falls in, built in ascending order as the classic view's is and
+	// then turned to the order shown.
+	views := make([]sectionView, len(secs))
+	raw := slices.Clone(secs)
+	for i, t := range page.Tiers {
+		views[i] = sectionView{Index: t.Index, Min: t.Min, Max: t.Max, Note: t.Note, Count: t.Count}
+	}
+	if rev {
+		slices.Reverse(views)
+		slices.Reverse(raw)
+	}
+	bars := histogram(metricLabel, views, raw, opt.Metric, opt.Step)
+	if rev {
+		slices.Reverse(bars)
+	}
+	for _, b := range bars {
+		nb := nextBar{histBar: b}
+		if !b.Empty {
+			nb.URL = template.URL("#" + nextTierAnchor(b.Index))
+			if !page.Tiers[b.Index-1].Drawn {
+				nb.URL = page.ShowAllURL + nb.URL
+			}
+		}
+		page.Histogram = append(page.Histogram, nb)
+	}
+
 	page.Tiles = make([]tile, len(picks))
+	lastTier := -1
 	for i, pk := range picks {
 		if pk.before > 0 {
 			page.Items = append(page.Items, nextItem{Hidden: pk.before})
+		}
+		if t := tierOf[pk.sp]; t != lastTier {
+			lastTier = t
+			page.Items = append(page.Items, nextItem{Tier: &page.Tiers[t]})
 		}
 		sp := pk.sp
 		g := view.Layout(sp, refLen, refSpan, tileBox)

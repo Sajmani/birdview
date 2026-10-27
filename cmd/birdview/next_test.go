@@ -693,9 +693,16 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	if len(after.Tiles) != len(before.Tiles)+1 {
 		t.Errorf("after adding one bird, %d drawn (was %d)", len(after.Tiles), len(before.Tiles))
 	}
-	if n := len(after.Items); n != nextCap+2 || after.Items[n-2].Hidden != after.Hidden || after.Items[n-1].Tile == nil {
-		t.Errorf("pinning the last bird leaves items ending %+v, %+v; want a gap of %d then its tile",
-			after.Items[n-2], after.Items[n-1], after.Hidden)
+	// The items end with one gap holding every hidden bird, then (its own
+	// tier's heading, when it starts a tier, and) its tile.
+	n := len(after.Items)
+	gapAt := n - 2
+	if after.Items[gapAt].Tier != nil {
+		gapAt--
+	}
+	if after.Items[n-1].Tile == nil || after.Items[gapAt].Hidden != after.Hidden {
+		t.Errorf("pinning the last bird leaves items ending %+v; want a gap of %d then its tile",
+			after.Items[n-3:], after.Hidden)
 	}
 
 	// Two birds mid-order by length: gaps sit before the shorter, between the
@@ -1456,5 +1463,107 @@ func TestSpeciesBackUsesHistory(t *testing.T) {
 			t.Errorf("%s: Back (%q, to %s) went back %d times and followed its link %t; want %d and %t",
 				c.name, res.Text, res.Href, res.Back, res.Followed, c.back, c.followed)
 		}
+	}
+}
+
+// TestNextTiers checks the home page's tiers and histogram: the matching
+// birds break into tiers as the classic view's sections do, each bird
+// within its tier's range and the tiers in the order shown; a heading comes
+// before the first drawn bird of each tier drawn, and only those; the
+// histogram has a bar per tier, linking to its heading on the page when
+// drawn and with every bird shown when not; reversed, the tiers run the
+// other way; and frequency tiers are decades of "1 in N".
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextTiers(t *testing.T) {
+	s := newTestServerReal(t)
+	fixNextClock(t, time.October)
+	for _, c := range []struct {
+		target string
+		rev    bool
+	}{{"/?by=length", false}, {"/?by=length&rev=1", true}, {"/?by=mass&show=all", false}} {
+		p := nextAt(s, c.target)
+		if len(p.Tiers) < 5 {
+			t.Fatalf("%s: %d tiers", c.target, len(p.Tiers))
+		}
+		total := 0
+		for i, tr := range p.Tiers {
+			total += tr.Count
+			if tr.Index != i+1 || tr.Min == "" || tr.Max == "" {
+				t.Errorf("%s: tier %d reads %+v", c.target, i+1, tr)
+			}
+		}
+		if total != p.Count {
+			t.Errorf("%s: the tiers hold %d birds, the set %d", c.target, total, p.Count)
+		}
+		// Headings: one before the first drawn bird of each drawn tier, in
+		// order, and each tile's bird within the tier above it.
+		var heads []int
+		var cur *nextTier
+		var prev float64
+		for _, it := range p.Items {
+			switch {
+			case it.Tier != nil:
+				cur = it.Tier
+				heads = append(heads, it.Tier.Index)
+			case it.Tile != nil:
+				if cur == nil {
+					t.Fatalf("%s: a tile comes before any heading", c.target)
+				}
+				v := it.Tile.S.TotalLength.Value
+				if strings.Contains(c.target, "mass") {
+					v = it.Tile.S.Mass.Value
+				}
+				if prev != 0 && (v < prev) != c.rev && v != prev {
+					t.Errorf("%s: %s out of order", c.target, it.Tile.S.ID)
+				}
+				prev = v
+			}
+		}
+		drawn := 0
+		for _, tr := range p.Tiers {
+			if tr.Drawn {
+				drawn++
+			}
+		}
+		if len(heads) != drawn || !slices.IsSorted(heads) {
+			t.Errorf("%s: headings %v for %d drawn tiers", c.target, heads, drawn)
+		}
+		// The histogram: a bar per tier, empty steps between.
+		bars := 0
+		for _, b := range p.Histogram {
+			if b.Empty {
+				continue
+			}
+			bars++
+			want := "#tier-" + strconv.Itoa(b.Index)
+			if !p.Tiers[b.Index-1].Drawn {
+				want = string(p.ShowAllURL) + want
+			}
+			if string(b.URL) != want {
+				t.Errorf("%s: tier %d's bar links to %s, want %s", c.target, b.Index, b.URL, want)
+			}
+		}
+		if bars != len(p.Tiers) {
+			t.Errorf("%s: %d bars for %d tiers", c.target, bars, len(p.Tiers))
+		}
+		if strings.Contains(c.target, "show=all") && drawn != len(p.Tiers) {
+			t.Errorf("%s: %d of %d tiers drawn with every bird shown", c.target, drawn, len(p.Tiers))
+		}
+	}
+	// Reversed, the first tier is the largest birds.
+	up, down := nextAt(s, "/?by=length"), nextAt(s, "/?by=length&rev=1")
+	if up.Tiers[0].Min != down.Tiers[len(down.Tiers)-1].Min || up.Tiers[len(up.Tiers)-1].Max != down.Tiers[0].Max {
+		t.Errorf("reversed tiers do not mirror: first %+v, last %+v", down.Tiers[0], down.Tiers[len(down.Tiers)-1])
+	}
+	// Frequency: decades of "1 in N", most recorded first.
+	f := nextAt(s, "/")
+	if !strings.HasPrefix(f.Tiers[0].Min, "1 in ") || f.Tiers[0].Label != "Frequency" {
+		t.Errorf("the first frequency tier reads %+v", f.Tiers[0])
+	}
+	body := mustGet(t, s, "/?by=length")
+	if !strings.Contains(body, `<h3 class="tierhd" id="tier-1"><span class="tier">Length Tier 1</span>`) ||
+		!strings.Contains(body, `<nav class="hist" aria-label="Birds in each tier">`) {
+		t.Error("the page draws no tier heading or histogram")
 	}
 }

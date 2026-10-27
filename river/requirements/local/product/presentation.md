@@ -751,7 +751,7 @@ URL that always "works" hides the failure. See
 Subject: `presentation.next`
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
-**The home page, `/`, draws one set of birds, at one scale, with no sections or tiers**
+**The home page, `/`, draws one set of birds, at one scale, in tiers**
 (Sameer, 2026-10-26; [scalableInterface](../../../todo.md#scalableinterface)). It was built as a
 prototype at `/next` and replaced the index as the home page the same day. The index, with its
 sections and tiers, is now **the classic view** at `/classic`: unchanged, its links staying on it,
@@ -797,6 +797,13 @@ the classic view.
   a rule, and the twelve months. On a phone too narrow for them, the line scrolls sideways. A **Reset**
   control, colored apart from the settings, returns to the landing set. Choosing one option selects only it; choosing more adds them; choosing every
   selected option again returns to all. Nothing selected means all.
+- **Tiers.** The ordered set breaks into tiers as the classic view's sections do
+  ([sectionBreakRule](ordering.md#sectionbreakrule), [orderByFrequency](#orderbyfrequency)): a size tier spans one step of the scale from its
+  smallest bird, a frequency tier a decade of "1 in N", and birds with no records a tier of their
+  own; reversed, the tiers run the other way. A heading names each tier drawn, its range in the
+  page's units at one precision for all, and how many of the matching birds it holds. Above the
+  birds, a histogram has a bar per tier (and an empty one per step no bird falls in), each a link
+  to its tier's heading, with every bird shown when that tier is not drawn.
 - **One scale.** Every bird shown is drawn to the scale of the longest. Its length, wingspan, and
   mass are text under the drawing.
 - **Order.** By how often recorded (the default, most often first), or by length, wingspan,

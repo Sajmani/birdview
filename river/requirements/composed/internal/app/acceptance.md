@@ -298,7 +298,10 @@ setting but show and the find box, beside All with the count the settings match 
 (2), the chosen one marked, and its summary names the choice. The count line is two rows: what is
 drawn, Show, Clear pins, and Reset, then Order by through Names; it has no Show all of its own.
 `show=100`, `show=`, `show=0`, `show=-3`, and `show=zero` redirect to the address without show;
-`show=50`, `show=all`, and `show=pinned` do not. From an address setting every parameter, under Pinned only and under a
+`show=50`, `show=all`, and `show=pinned` do not. By length, reversed, and by mass with every bird shown, the tiers hold every
+matching bird, each drawn bird in order under its tier's heading, one heading per drawn tier;
+the histogram has a bar per tier linking to its heading, with show=all when the tier is not
+drawn; reversed tiers mirror the forward ones, headings included; frequency tiers read "1 in N". From an address setting every parameter, under Pinned only and under a
 count, every link on the page changes only its own setting (Order by, also rev), none but × and
 Reset drops the find box's text, Reset keeps only the pins, Clear pins drops them (and Pinned
 only), × drops the text, the forms send every parameter but their own, Here replaces only the
@@ -366,6 +369,7 @@ Watched failing: 2026-10-26, by dropping the edge click's script, by sending on 
 Watched failing: 2026-10-26, by a filter dropping every show, by ignoring a count ("show=50: 100 drawn"), by the First form sending show twice, by All counting only the drawn birds ("under Pinned only, All offers 0 birds"), by one count-line row, and by an unmarked First.
 Watched failing: 2026-10-26, by the count line saying "and 1 added" instead of "plus 1 pin".
 Watched failing: 2026-10-26, by ignoring cap, by a filter dropping it, by not redirecting cap=100, by Show all naming cap=all, and by the cap form sending cap twice.
+Watched failing: 2026-10-27, by tiers not reversed with the order, by undrawn tiers' bars linking on the page, by a heading per tile, and by taking the headings' precision in the order shown.
 Watched failing: 2026-10-27, by Back without its script ("went back 0 times and followed its link true").
 Watched failing: 2026-10-27, by letting the tile's grid size to its name line (#4: "s-nobtyr wider by 9px, drawing off by 10px"); the browser check now also requires every tile within its box and its drawing centered.
 Watched failing: 2026-10-26, by placing the pin a fixed 60px above the tile's bottom ("28 of 100 pins are not level with the mass cube", 16px high), and by sharing a stretched tile's height among all its rows ("20 of 100", 4px).

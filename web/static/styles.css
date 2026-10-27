@@ -617,5 +617,10 @@ h2 .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
 .pinned .pin { width: 24px; height: 24px; }
 /* Where unpinned birds are left out past the first 100: a full-width break in
    the tile grid saying how many are hidden there, with Show all. */
-.gap { flex: 0 0 100%; margin: 2px 0; padding: 6px 0; border-top: 1px dashed var(--line);
+.tiles > .gap { flex: 0 0 100%; margin: 2px 0; padding: 6px 0; border-top: 1px dashed var(--line);
   border-bottom: 1px dashed var(--line); color: var(--dim); font-size: 12.5px; }
+/* A tier's heading breaks the grid like a gap row, and reads as the classic
+   view's section headings do. */
+.tiles > .tierhd { flex: 0 0 100%; margin: 10px 0 0; font-size: 14px; font-weight: 600; }
+.tiles > .tierhd:first-child { margin-top: 0; }
+.tierhd .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
