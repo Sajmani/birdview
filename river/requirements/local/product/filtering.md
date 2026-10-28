@@ -94,8 +94,8 @@ from a different source than the occurrence records ([tech.regionBoundaries](../
 hundred meters of a border or coast, Here may pick the neighbor.
 
 **A link ending in `#here-and-now` presses Here on arrival, and sets the month to Now**: the
-browser asks for the reader's location and goes to the page with their region and no month named,
-which is the current month ([nextView](presentation.md#nextview)). The fragment is never sent to
+browser asks for the reader's location and goes to the page with their region and the month set
+to the browser's current month ([nextView](presentation.md#nextview)). The fragment is never sent to
 the server, so the link reveals nothing locationStaysInBrowser does not allow. If the region cannot
 be found the page stays where the link landed and says why, beside the link that was followed
 rather than inside the Region setting, which starts closed. Without JavaScript the link simply

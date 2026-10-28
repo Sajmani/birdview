@@ -56,6 +56,7 @@ func Run(base string, redirectFrom []string, client *http.Client) []Result {
 
 	index := c.index()
 	c.revalidated()
+	c.thisMonth()
 	c.page("a species page", firstMatch(speciesLink, index, "/species/amecro"), "text/html")
 	c.page("a guide", "/docs/using", "text/html")
 	c.robots()
@@ -108,8 +109,8 @@ func (c *checker) get(method, path string, header http.Header) (*http.Response, 
 }
 
 // index fetches the home page once, gzipped, checks how it was served, and
-// returns its body for the checks that follow links from it. With no month
-// named it answers from the clock, so it is never stored (product.nextView).
+// returns its body for the checks that follow links from it. revalidated
+// checks its caching.
 func (c *checker) index() string {
 	// The transport asks for gzip and decompresses, reporting it in
 	// Uncompressed; asking explicitly would turn that off.
@@ -128,18 +129,41 @@ func (c *checker) index() string {
 	if !strings.Contains(resp.Header.Get("Vary"), "Accept-Encoding") {
 		problems = append(problems, "no Vary: Accept-Encoding")
 	}
-	if resp.Header.Get("Cache-Control") != "no-store" {
-		problems = append(problems, fmt.Sprintf("Cache-Control %q, want no-store: with no month it answers from the clock", resp.Header.Get("Cache-Control")))
-	}
 	c.record("the home page", joined(problems))
 	return string(body)
 }
 
-// revalidated fetches the home page for every month, which is a pure
-// function of its address, and checks that it is revalidated rather than
-// stored.
+// thisMonth fetches month=now, Now without JavaScript, which redirects to
+// the server's month by its clock, and checks that the redirect names a
+// month and is never stored, or it would keep pointing at an old one
+// (product.nextView).
+func (c *checker) thisMonth() {
+	const path, name = "/?month=now", "the home page for this month"
+	resp, _, err := c.get(http.MethodGet, path, nil)
+	if err != nil {
+		c.record(name, err)
+		return
+	}
+	var problems []string
+	if resp.StatusCode != http.StatusSeeOther {
+		problems = append(problems, fmt.Sprintf("status %d, want 303 to the month", resp.StatusCode))
+	} else if loc := resp.Header.Get("Location"); !monthParam.MatchString(loc) {
+		problems = append(problems, fmt.Sprintf("redirects to %q, which names no month", loc))
+	}
+	if resp.Header.Get("Cache-Control") != "no-store" {
+		problems = append(problems, fmt.Sprintf("Cache-Control %q, want no-store: month=now redirects by the clock", resp.Header.Get("Cache-Control")))
+	}
+	c.record(name, joined(problems))
+}
+
+// monthParam is a month named by its three letters, as Now's redirect names it.
+var monthParam = regexp.MustCompile(`[?&]month=[A-Z][a-z]{2}(&|$)`)
+
+// revalidated fetches the home page, every month by default, which is a
+// pure function of its address, and checks that it is revalidated rather
+// than stored.
 func (c *checker) revalidated() {
-	const path, name = "/?month=all", "the home page for every month"
+	const path, name = "/", "the home page for every month"
 	resp, _, err := c.get(http.MethodGet, path, nil)
 	if err != nil {
 		c.record(name, err)

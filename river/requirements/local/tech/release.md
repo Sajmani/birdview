@@ -51,7 +51,7 @@ Subject: `release.smoke`
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 
 `birdview-smoke` checks a running deployment as a reader reaches it: the home page is served
-gzipped and never stored, and with a month named it carries a validator that revalidates; a
+gzipped and carries a validator that revalidates, and `month=now` redirects to a named month and is never stored; a
 species page and a guide answer; `robots.txt` serves its policy; an unknown species is not found;
 the boundary file is cached as immutable; and each other address named redirects permanently to
 the canonical one. It fetches nothing larger than a page, and it runs after every deploy.

@@ -33,8 +33,8 @@
   {{/* Things to try, each also in the guide's "Some things to try". The
        comparisons are made with pins: each pins six birds and shows only
        them, by length. The first finds the reader's region in the browser
-       (#here-and-now, in here.js) and sets the month to Now, keeping every
-       other setting. */}}
+       (#here-and-now, in here.js) and sets the month to the browser's
+       month, keeping every other setting. */}}
   <p class="welcome"><b>New here?</b> Try
     <a href="{{.HereNowURL}}">the birds around you now</a> &middot;
     compare some
@@ -74,7 +74,10 @@
 </div>
 <template id="pinicon">{{template "pinicon"}}</template>
 {{/* The pinned birds, in alphabetical order: the name goes to the bird's tile,
-     the pin unpins it (product.nextView). */}}
+     the pin unpins it (product.nextView). With two or more pinned, Compare
+     shows only them (show=pinned), the Show setting's Pinned only, which a
+     reader who has just pinned would not find there (#5); under Pinned only
+     it is the way back to the birds the settings match. */}}
 {{with .Pinned}}<div class="pinned" role="region" aria-label="Pinned birds">
   <span class="lbl">Pinned</span>
   <ul>
@@ -82,6 +85,7 @@
       <a class="pinname" href="#{{.Anchor}}" title="{{.Scientific}}">{{.Name}}</a></li>
     {{end}}
   </ul>
+  {{if $.PinnedOnly}}<a class="btn compare" href="{{$.ShowFirstURL}}" title="Back to the birds the settings match, with your pins">All birds</a>{{else if gt (len .) 1}}<a class="btn compare" href="{{$.ShowPinnedURL}}" title="Show only the birds you have pinned">Compare ({{len .}})</a>{{end}}
 </div>{{end}}
 
 <h2 class="settitle">{{.Title}}</h2>
@@ -111,7 +115,7 @@
     </div>
   </details>
   {{with .ClearPinsURL}}<a class="reset" href="{{.}}" title="Unpin every bird, keeping the settings">Clear pins</a>{{end}}
-  <a class="reset" href="{{.ResetURL}}" title="Every setting back to its default: this month's birds, most often recorded first. Pins are kept.">Reset</a>
+  <a class="reset" href="{{.ResetURL}}" title="Every setting back to its default: birds of every month, most often recorded first. Pins are kept.">Reset</a>
   </div>
   <div class="countrow">
   {{range .Controls}}
@@ -131,7 +135,7 @@
       <div class="popgroup{{if .OneLine}} oneline{{end}}">
         {{with .Name}}<span class="lbl">{{.}}</span>{{end}}
         {{range .Choices}}{{if .Sep}}<span class="sep" aria-hidden="true"></span>{{end}}{{if .Color}}<a class="chip{{if .On}} on{{end}}" href="{{.URL}}"
-          style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">{{.Label}}<em>{{.Title}}</em></a>{{else}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}>{{.Label}}</a>{{end}}
+          style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">{{.Label}}<em>{{.Title}}</em></a>{{else}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}{{if .Now}} data-now{{end}}>{{.Label}}</a>{{end}}
         {{end}}
       </div>
       {{end}}

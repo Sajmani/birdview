@@ -58,8 +58,8 @@ func tileIDs(p nextData) []string {
 }
 
 // TestNextLandingIsThisMonthByFrequency checks / with no filter: every
-// bird the month filter admits for the clock's month, or the months the
-// address names, or every bird with month=all, most often recorded first.
+// bird, of every month, or the months the address names, most often
+// recorded first.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextLandingIsThisMonthByFrequency(t *testing.T) {
@@ -72,7 +72,8 @@ func TestNextLandingIsThisMonthByFrequency(t *testing.T) {
 		target string
 		months []int
 	}{
-		{"/", []int{9}},
+		{"/", nil},
+		{"/?month=Oct", []int{9}},
 		{"/?month=May", []int{4}},
 		{"/?month=May&month=Jun", []int{4, 5}},
 		{"/?month=all", nil},
@@ -112,8 +113,11 @@ func TestNextLandingIsThisMonthByFrequency(t *testing.T) {
 			prev = f
 		}
 	}
-	if a, b := nextAt(s, "/").Count, nextAt(s, "/?month=all").Count; a >= b {
-		t.Errorf("/ shows %d birds and month=all %d; the month does not narrow", a, b)
+	if a, b := nextAt(s, "/?month=Oct").Count, nextAt(s, "/").Count; a >= b {
+		t.Errorf("month=Oct shows %d birds and / %d; the month does not narrow", a, b)
+	}
+	if a, b := nextAt(s, "/").Count, nextAt(s, "/?month=all").Count; a != b {
+		t.Errorf("/ shows %d birds and month=all %d; want every month by default", a, b)
 	}
 	for _, c := range nextAt(s, "/").Controls {
 		if c.Label == "Show" {
@@ -620,28 +624,37 @@ func TestNextOrderReverses(t *testing.T) {
 	}
 }
 
-// TestNextWithoutAMonthIsNotStored checks that / with no month, which
-// answers from the clock, is neither stored nor revalidated, and that with a
-// month it is cached as any page is.
+// TestNextWithoutAMonthIsNotStored checks that every home page, the default
+// for every month included, is cached as any page is, and that month=now,
+// Now without JavaScript, redirects to the clock's month with every other
+// setting kept, and is neither stored nor revalidated.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextWithoutAMonthIsNotStored(t *testing.T) {
 	s := newTestServer(t)
 	s.build = "test-build"
-	for target, store := range map[string]bool{
-		"/": false, "/?region=FL": false, "/?month=": false,
-		"/?month=Oct": true, "/?month=Oct&region=FL": true,
-	} {
+	fixNextClock(t, time.October)
+	for _, target := range []string{"/", "/?region=FL", "/?month=", "/?month=Oct", "/?month=Oct&region=FL"} {
 		w := httptest.NewRecorder()
 		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, target, nil))
 		if w.Code != http.StatusOK {
 			t.Errorf("GET %s = %d", target, w.Code)
 		}
-		cc, etag := w.Header().Get("Cache-Control"), w.Header().Get("ETag")
-		if store && (cc == "no-store" || etag == "") {
-			t.Errorf("%s: Cache-Control %q, ETag %q; a month makes it cacheable", target, cc, etag)
+		if cc, etag := w.Header().Get("Cache-Control"), w.Header().Get("ETag"); cc == "no-store" || etag == "" {
+			t.Errorf("%s: Cache-Control %q, ETag %q; want it cacheable", target, cc, etag)
 		}
-		if !store && (cc != "no-store" || etag != "") {
+	}
+	for target, want := range map[string]string{
+		"/?month=now":                      "/?month=Oct",
+		"/?by=mass&month=now&region=FL":    "/?by=mass&month=Oct&region=FL",
+		"/?month=May&month=now&pin=amecro": "/?month=Oct&pin=amecro",
+	} {
+		w := httptest.NewRecorder()
+		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, target, nil))
+		if w.Code != http.StatusSeeOther || w.Header().Get("Location") != want {
+			t.Errorf("GET %s = %d to %q; want 303 to %s", target, w.Code, w.Header().Get("Location"), want)
+		}
+		if cc, etag := w.Header().Get("Cache-Control"), w.Header().Get("ETag"); cc != "no-store" || etag != "" {
 			t.Errorf("%s: Cache-Control %q, ETag %q; want no-store and no validator", target, cc, etag)
 		}
 	}
@@ -794,8 +807,8 @@ func TestNextShowPinned(t *testing.T) {
 // setting's Now. Here's address, filled with a region, is the page with only
 // that region chosen and every other parameter kept, Pinned only included;
 // the page carries here.js and the boundary file to find the region with.
-// Now is the first month choice, chosen when no month is named, and links
-// to no month named.
+// Now is the second month choice, after All, which is chosen when no month
+// is named; Now links to month=now and is never itself chosen.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextHereAndNow(t *testing.T) {
@@ -841,17 +854,25 @@ func TestNextHereAndNow(t *testing.T) {
 	if want := append([]string{"All", "Now"}, month.Abbrev[:]...); !slices.Equal(labels, want) {
 		t.Errorf("the month choices are %v, want %v", labels, want)
 	}
-	if now := ch[1]; now.On || string(now.URL) != "/?by=mass&region=CA&show=pinned" {
-		t.Errorf("with May named, Now is %+v; want it off, linking to no month", now)
+	if now := ch[1]; now.On || !now.Now || string(now.URL) != "/?by=mass&month=now&region=CA&show=pinned" {
+		t.Errorf("with May named, Now is %+v; want it off and marked, linking to month=now", now)
 	}
-	if all := ch[0]; all.On || string(all.URL) != "/?by=mass&month=all&region=CA&show=pinned" {
-		t.Errorf("with May named, All is %+v; want it off, linking to month=all", all)
+	if all := ch[0]; all.On || string(all.URL) != "/?by=mass&region=CA&show=pinned" {
+		t.Errorf("with May named, All is %+v; want it off, linking to no month", all)
 	}
-	if ch := nextAt(s, "/").Controls[1].Groups[0].Choices; !ch[1].On || ch[0].On || ch[11].On {
-		t.Errorf("with no month named, All %t, Now %t, Oct %t; want only Now chosen", ch[0].On, ch[1].On, ch[11].On)
+	for _, target := range []string{"/", "/?month=all"} {
+		if ch := nextAt(s, target).Controls[1].Groups[0].Choices; !ch[0].On || ch[1].On || ch[11].On {
+			t.Errorf("%s: All %t, Now %t, Oct %t; want only All chosen", target, ch[0].On, ch[1].On, ch[11].On)
+		}
 	}
-	if ch := nextAt(s, "/?month=all").Controls[1].Groups[0].Choices; !ch[0].On || ch[1].On {
-		t.Errorf("with month=all, All %t and Now %t; want only All chosen", ch[0].On, ch[1].On)
+	// Now is a way to choose the current month, not a state: with October
+	// chosen, October is on and Now is not, and the summary is the month.
+	op := nextAt(s, "/?month=Oct")
+	if ch := op.Controls[1].Groups[0].Choices; ch[1].On || !ch[11].On || op.Controls[1].Value != "Oct" {
+		t.Errorf("with month=Oct: Now %t, Oct %t, summary %q; want only Oct, reading Oct", ch[1].On, ch[11].On, op.Controls[1].Value)
+	}
+	if _, body := get(t, s, "/"); strings.Count(body, " data-now>") != 1 || strings.Contains(body, "(now)") {
+		t.Error(`/ does not mark exactly one link data-now for here.js, or still says "(now)"`)
 	}
 }
 
@@ -1023,6 +1044,41 @@ func TestNextPinnedList(t *testing.T) {
 	}
 	if _, body := get(t, s, "/"); strings.Contains(body, `class="pinned"`) {
 		t.Error("with nothing pinned, the page still draws the pinned list")
+	}
+}
+
+// TestNextPinnedListCompares checks the pinned list's Compare (#5): with two
+// or more birds pinned it reads Compare (k) and goes to show=pinned, keeping
+// every other setting; with one pinned it is not there; and under Pinned
+// only it reads All birds and goes back to the address without show.
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNextPinnedListCompares(t *testing.T) {
+	s := newTestServer(t)
+	link := regexp.MustCompile(`<a class="btn compare" href="([^"]*)"[^>]*>([^<]*)</a>`)
+	for _, c := range []struct{ from, href, text string }{
+		{"/?by=mass&pin=amecro&pin=annhum&region=NY", "/?by=mass&pin=amecro&pin=annhum&region=NY&show=pinned", "Compare (2)"},
+		{"/?by=mass&pin=amecro&pin=annhum&region=NY&show=50", "/?by=mass&pin=amecro&pin=annhum&region=NY&show=pinned", "Compare (2)"},
+		{"/?by=mass&pin=amecro&pin=annhum&region=NY&show=pinned", "/?by=mass&pin=amecro&pin=annhum&region=NY", "All birds"},
+		{"/?pin=amecro", "", ""},
+		{"/", "", ""},
+	} {
+		_, body := get(t, s, c.from)
+		row := regexp.MustCompile(`(?s)<div class="pinned".*?</div>`).FindString(body)
+		m := link.FindStringSubmatch(row)
+		if c.text == "" {
+			if strings.Contains(body, `class="btn compare"`) {
+				t.Errorf("%s offers %v; want no Compare with fewer than two pinned", c.from, m)
+			}
+			continue
+		}
+		if m == nil {
+			t.Errorf("%s: the pinned list has no Compare link", c.from)
+			continue
+		}
+		if href := html.UnescapeString(m[1]); href != c.href || m[2] != c.text {
+			t.Errorf("%s: the pinned list's link reads %q and goes to %s; want %q to %s", c.from, m[2], href, c.text, c.href)
+		}
 	}
 }
 
@@ -1207,14 +1263,14 @@ func TestNextWelcomeLine(t *testing.T) {
 		t.Fatal("the home page has no New here? Try line")
 	}
 	if !strings.Contains(w[1], `<a href="/#here-and-now">the birds around you now</a>`) ||
-		!strings.Contains(w[1], `data-where="Region"`) || !strings.Contains(w[1], `data-template="/?region=__REGION__"`) ||
+		!strings.Contains(w[1], `data-where="Region"`) || !strings.Contains(w[1], `data-template="/?month=__MONTH__&amp;region=__REGION__"`) ||
 		!strings.Contains(w[1], `<a href="/docs/using#some-things-to-try">more ideas</a>`) {
 		t.Errorf("the welcome line lacks the birds around you now, its status, or more ideas:\n%s", w[1])
 	}
 	// From an address with settings changed, the link keeps them, and its
-	// template replaces the region and sets the month to Now.
+	// template replaces the region and sets the month to Now, the browser's.
 	if p := nextAt(s, "/?by=mass&month=May&region=FL&pin=amecro&show=pinned&find=crow"); string(p.HereNowURL) != "/?by=mass&find=crow&month=May&pin=amecro&region=FL&show=pinned#here-and-now" ||
-		p.HereNowTemplate != "/?by=mass&find=crow&pin=amecro&region=__REGION__" {
+		p.HereNowTemplate != "/?by=mass&find=crow&month=__MONTH__&pin=amecro&region=__REGION__" {
 		t.Errorf("from a changed address, the birds around you now is %s with template %s; want every setting kept, then the region replaced and the month Now",
 			p.HereNowURL, p.HereNowTemplate)
 	}
@@ -1402,7 +1458,8 @@ func TestNextShortValues(t *testing.T) {
 		return out
 	}
 	for target, want := range map[string]map[string]string{
-		"/": {"Order by": "frequency \u2193", "Month": "Oct (now)", "Region": "all", "Units": "imperial", "Names": "North Amer"},
+		"/":           {"Order by": "frequency \u2193", "Month": "all", "Region": "all", "Units": "imperial", "Names": "North Amer"},
+		"/?month=Oct": {"Month": "Oct"},
 		"/?by=length&month=May&month=Jun&units=metric&names=world": {"Order by": "length \u2191", "Month": "May or Jun", "Units": "metric", "Names": "world"},
 		"/?by=mass&rev=1": {"Order by": "mass \u2193"},
 	} {
@@ -1411,6 +1468,19 @@ func TestNextShortValues(t *testing.T) {
 			if got[k] != v {
 				t.Errorf("%s: %s reads %q, want %q", target, k, got[k], v)
 			}
+		}
+	}
+	// Units' choices carry the names its summary reads.
+	for _, c := range nextAt(s, "/").Controls {
+		if c.Label != "Units" {
+			continue
+		}
+		var labels []string
+		for _, ch := range c.Groups[0].Choices {
+			labels = append(labels, ch.Label)
+		}
+		if !slices.Equal(labels, []string{"Imperial", "Metric"}) {
+			t.Errorf("Units offers %v, want Imperial and Metric, as its summary reads", labels)
 		}
 	}
 }

@@ -3985,7 +3985,10 @@ is kept as an identifier there rather than recomputed, which is what banders use
 
 What it costs: 198 of 1,082 species have no code, chiefly introduced birds and gamebirds the
 Laboratory does not band with federal bands, and two species it lists only by subspecies (Brant
-and Cackling Goose). The page names a second list for such birds, but no longer serves it.
+and Cackling Goose). The page names a second list for such birds, but no longer serves it. They
+are left without one: BirdView presents facts, and a code computed by the Laboratory's rules would
+be a code no authority assigned. Every species already has its eBird code. Decided 2026-10-27 by
+Sameer, closing [uncodedBirds](../todo-closed.md#uncodedbirds).
 
 ---
 
@@ -4025,3 +4028,36 @@ The owner removed the classic view when the home page replaced it, closing
 page compares birds with pins, where the classic view used picks. Old `/compare` links stop
 working, which [compareUrlContract](#compareurlcontract) argued against while a comparison view
 existed.
+
+---
+
+## homeShowsEveryMonth
+
+**The home page shows every month by default, and Now chooses the reader's month by name**
+
+Date: 2026-10-27
+Decided by: Sameer
+Status: accepted
+Affects: [product.nextView](local/product/presentation.md#nextview), [tech.stableUrls](local/tech/delivery.md#stableurls), [tech.smokeCheckAfterDeploy](local/tech/release.md#smokecheckafterdeploy)
+
+### Decided
+
+The home page with no month named shows every month, and Reset, which keeps only the pins,
+returns to it. **Now** sets the month to the current one by name: `here.js` points its link at
+the browser's month (`month=Oct`), and without JavaScript the link's `month=now` is redirected by
+the server to its own month. "The birds around you now" sets the browser's month the same way.
+Now is never shown as chosen and the Month summary never says "(now)": once chosen, the month is
+simply that month. `month=all` still means every month. The Units setting's choices are named
+**Imperial** and **Metric**, as its summary reads.
+
+### Why
+
+The owner asked for all of it. The server's clock is UTC on Cloud Run, so a server-side Now
+showed next month for some hours at each month's end west of Greenwich; the reader's clock does
+not. A first version kept Now as a state (`month=now` with the reader's month in `now=`, a reload
+when they disagreed, and "Oct (now)" in the summary) so that a shared link kept meaning "this
+month"; the owner chose the simpler form the same evening, accepting that a shared link names the
+month it was made in. No page reads the clock now, so every home page carries an ETag and
+revalidates, and only the `month=now` redirect is unstored
+([decisions.hereAndNowCaching](#hereandnowcaching)). An address with no month, bookmarked before
+this, now shows every month rather than the month it is opened in.

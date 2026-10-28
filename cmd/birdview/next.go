@@ -65,6 +65,9 @@ type nextChoice struct {
 	// Color and TextColor draw the choice as the family's badge, with its
 	// description beside its name, as on the tiles.
 	Color, TextColor string
+	// Now marks Month's Now, whose month=now here.js replaces with the
+	// browser's month.
+	Now bool
 }
 
 // nextChoiceGroup is a labeled run of choices, such as the regions of one zone.
@@ -152,9 +155,9 @@ type nextData struct {
 	PinnedOnly bool
 	// HereNowURL is the welcome line's "the birds around you now": this
 	// address with #here-and-now, which here.js
-	// answers by going to HereNowTemplate with the reader's region filled
-	// in. The template replaces the region, sets the month to Now by naming
-	// none, and leaves Pinned only, since the birds around the reader are
+	// answers by going to HereNowTemplate with the reader's region and the
+	// browser's month filled in. The template replaces the region and the
+	// month and leaves Pinned only, since the birds around the reader are
 	// not pins; every other parameter is kept.
 	HereNowURL      template.URL
 	HereNowTemplate string
@@ -315,6 +318,14 @@ func (s *server) next(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	// Now links to month=now, which here.js rewrites to the browser's month.
+	// Without the script it lands here and goes to the server's month; the
+	// answer reads the clock, so it is never stored (revalidated).
+	if slices.Contains(q["month"], "now") {
+		q.Set("month", month.Abbrev[nextClock().Month()-1])
+		http.Redirect(w, r, string(nextURL(q)), http.StatusSeeOther)
+		return
+	}
 	s.render(w, "next.html", s.nextPage(r))
 }
 
@@ -442,14 +453,8 @@ func nextPin(q url.Values, id string) template.URL {
 func (s *server) nextPage(r *http.Request) nextData {
 	q := r.URL.Query()
 	opt := nextOptions(r)
-	// The birds of this month, the server's own, unless the address names
-	// months; month=all is every month.
-	nowMonth := int(nextClock().Month()) - 1
-	defaultMonth := len(nextValues(q, "month")) == 0
-	if defaultMonth {
-		opt.HasMonths = true
-		opt.Months = map[int]bool{nowMonth: true}
-	}
+	// Every month unless the address names some (month=now has already
+	// been redirected to a month by next).
 
 	// show=pinned draws only the pinned birds: a comparison of the reader's
 	// own picks. Otherwise the birds the settings match are drawn, the first
@@ -749,7 +754,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 	if pinnedOnly {
 		page.Title = "Birds you chose"
 	}
-	page.Controls = s.nextControls(q, opt, defaultMonth, nowMonth)
+	page.Controls = s.nextControls(q, opt)
 	for i := range page.Controls {
 		if page.Controls[i].Label == "Region" {
 			hq := cloneValues(q)
@@ -763,10 +768,12 @@ func (s *server) nextPage(r *http.Request) nextData {
 	hn.Del("bird")
 	page.HereNowURL = nextURL(hn) + "#here-and-now"
 	hn.Del("region")
-	hn.Del("month")
 	leavePinnedOnly(hn)
 	hn.Set("region", hereSlot)
-	page.HereNowTemplate = strings.Replace(string(nextURL(hn)), url.QueryEscape(hereSlot), hereSlot, 1)
+	hn.Set("month", nowSlot)
+	tmpl := string(nextURL(hn))
+	tmpl = strings.Replace(tmpl, url.QueryEscape(hereSlot), hereSlot, 1)
+	page.HereNowTemplate = strings.Replace(tmpl, url.QueryEscape(nowSlot), nowSlot, 1)
 	page.HereScript = s.hereJS
 	return page
 }
@@ -833,13 +840,12 @@ func (s *server) regionNames(sel map[string]bool) []string {
 }
 
 // nextControls builds the count line: one control per setting.
-func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowMonth int) []nextControl {
+func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	var out []nextControl
 	out = append(out, nextOrderControl(q, opt))
 
-	// Months. With none named, this month is chosen, and choosing another
-	// month selects only that one. "All" is month=all, so that it can be
-	// told apart from naming none.
+	// Months. With none named, every month is chosen; month=all, which
+	// older addresses carry, is every month too.
 	mc := nextControl{Label: "Month", Value: "all"}
 	mq := cloneValues(q)
 	mq.Del("month")
@@ -855,28 +861,22 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 		if on {
 			ms = append(ms, month.Abbrev[m])
 		}
-		base := mq
-		if defaultMonth {
-			base = q
-		}
-		mch = append(mch, nextChoice{Label: month.Abbrev[m], Title: month.Full[m], On: on && !defaultMonth,
-			URL: nextToggle(base, "month", month.Abbrev[m])})
+		mch = append(mch, nextChoice{Label: month.Abbrev[m], Title: month.Full[m], On: on,
+			URL: nextToggle(mq, "month", month.Abbrev[m])})
 	}
 	if len(ms) > 0 {
 		mc.Value = nextList(ms)
 	}
-	if defaultMonth {
-		mc.Value = month.Abbrev[nowMonth] + " (now)"
-	}
 	// All is a choice like the rest rather than the setting's All link, so
 	// every option sits on the one line.
 	allMonths := nextChoice{Label: "All", Title: "Every month", On: !opt.HasMonths,
-		URL: nextSet(q, "month", "all")}
-	// Now is no month named: this month, whichever it is when the page is
-	// loaded, so a shared address keeps meaning the current month.
+		URL: nextSet(q, "month", "")}
+	// Now selects only the current month. Its address names month=now, which
+	// here.js rewrites to the browser's month and the server, without the
+	// script, redirects to its own; the page itself never reads the clock.
 	mch[0].Sep = true
-	mch = append([]nextChoice{allMonths, {Label: "Now", Title: "This month, " + month.Full[nowMonth] + ", whenever the page is loaded",
-		On: defaultMonth, URL: nextSet(q, "month", "")}}, mch...)
+	mch = append([]nextChoice{allMonths, {Label: "Now", Title: "This month only",
+		URL: nextSet(q, "month", "now"), Now: true}}, mch...)
 	mc.Groups = []nextChoiceGroup{{Choices: mch, OneLine: true}}
 	out = append(out, mc)
 
@@ -950,8 +950,8 @@ func (s *server) nextControls(q url.Values, opt options, defaultMonth bool, nowM
 		uc.Value = "metric"
 	}
 	uc.Groups = []nextChoiceGroup{{Choices: []nextChoice{
-		{Label: "Inches and ounces", On: !opt.Metric3, URL: nextSet(q, "units", "")},
-		{Label: "Centimeters and grams", On: opt.Metric3, URL: nextSet(q, "units", "metric")},
+		{Label: "Imperial", Title: "Inches and ounces", On: !opt.Metric3, URL: nextSet(q, "units", "")},
+		{Label: "Metric", Title: "Centimeters and grams", On: opt.Metric3, URL: nextSet(q, "units", "metric")},
 	}}}
 	out = append(out, uc)
 

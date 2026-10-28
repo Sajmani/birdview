@@ -77,7 +77,10 @@ allows, and says what changed, as a species that leaves scope already does
 a parameter, or a value it accepts needs a decision, and the old form keeps answering, read as
 before or redirected. One decision removed URLs outright: the comparison `/compare`, the
 current-month link `/now`, and the `scale` and `species` parameters went with the classic view
-([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
+([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)). One changed what a URL
+shows: a home page address with no month showed the current month and now shows every month;
+Now chooses the current month by name
+([decisions.homeShowsEveryMonth](../../decisions.md#homeshowseverymonth)).
 
 Rationale: every view is a URL ([goals.shareableViews](../../../goals/goals.md#shareableviews)), and
 once BirdView is public, people bookmark and send them; a link that breaks is a promise broken.

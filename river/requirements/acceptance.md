@@ -2343,8 +2343,8 @@ Watched failing: 2026-10-23, with the builder's `COPY --from=test` deleted, it r
 
 **Verifies:** [tech.smokeCheckAfterDeploy](local/tech/release.md#smokecheckafterdeploy) · **Level:** code · **Method:** run the checks over real HTTP against this server, a canonical-host redirect to it, and broken variants
 **Assertions:** against the server and a second one redirecting to it, all of at least eight
-checks pass; with `robots.txt` gone, the home page uncompressed or cacheable, `/?month=all` not
-revalidated, an unknown species answered, or a guide gone, the check written for that breakage
+checks pass; with `robots.txt` gone, the home page uncompressed or not revalidated, `/?month=now`
+cacheable, an unknown species answered, or a guide gone, the check written for that breakage
 fails; and a host that serves the site instead of
 redirecting fails the redirect check.
 **Run:** `go test ./cmd/birdview/ -run TestSmokeChecksTheServer`
@@ -2352,6 +2352,10 @@ redirecting fails the redirect check.
 the test keeps. Run against birdview.site the same day, with `www.birdview.site` and the Cloud Run
 address as redirecting hosts: nine checks, all passing. On 2026-10-27 `/?month=all` replaced
 `/classic` in the revalidation check, and the `/now` check went ([decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+Later on 2026-10-27, with every month the default, the revalidation check moved to `/` and a new
+check holds `/?month=now` to a no-store redirect naming a month ([decisions.homeShowsEveryMonth](decisions.md#homeshowseverymonth));
+all passing, each new one failing under its broken variant. Not yet run against
+birdview.site, which still serves the old default.
 
 Watched failing: 2026-10-23, by the broken variants above, which the test keeps.
 

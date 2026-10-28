@@ -224,7 +224,7 @@ Covers: [product.hereSelectsLocalRegion](../../../local/product/filtering.md#her
 point of boundariesResolveKnownPoints and require the navigation the Go lookup predicts; with
 permission refused, location unavailable, and a point outside every region, require the matching
 message and no navigation. Arriving by a `#here-and-now` link goes to the page choosing the
-reader's region by hand gives, with no month named; refused, it stays and says so in the welcome
+reader's region by hand gives, with the month set to the browser's; refused, it stays and says so in the welcome
 line (`TestHereAndNowLink`, watched failing on a link that set the wrong month and on a refusal
 message that did not say refused). Until 2026-10-27 this ran on the classic view, and also pressed
 Now.
@@ -275,10 +275,10 @@ buckets were watched failing by removing them: "0 empty buckets before tier 2, w
 
 Covers: [product.nextView](../../../local/product/presentation.md#nextview)
 
-**Method:** over the real dataset, with the clock fixed to October. With no month, the page shows
-exactly the birds the month filter admits for October; with May, May and June, or `month=all`,
-those months' birds or every bird; each most often recorded first. October narrows the set from
-all. The count line has no Show setting and starts with Order by, set to frequency.
+**Method:** over the real dataset, with the clock fixed to October. With no month or `month=all`,
+the page shows every bird; with October, May, or May and June, exactly those months' birds; each
+most often recorded first. October narrows the set from all. `month=now` answers 303 to the same
+address with `month=Oct`, never stored. The count line has no Show setting and starts with Order by, set to frequency.
 Every bird on four pages is drawn at one pixels-per-millimeter, and the longest fits its tile.
 Ordering by mass runs smallest first; ordering by frequency runs most often recorded first.
 Family and region narrow together, and an emptied filter shows all, not nothing. Every drawn
@@ -292,7 +292,7 @@ matching nothing) shows the same count line and lists the same birds, with the s
 off, as the server's page for each. The Family setting draws every family in its badge's colors
 with its description. Choosing from all selects
 only that one, choosing again removes it, and changing a filter drops the find box and keeps how many are shown.
-The home page draws the first 100 of October's 1,006 and a link to all of them (`show=all`) in
+The home page draws the first 100 of its 1,041 and a link to all of them (`show=all`) in
 the same order, in the gap row at the end; the herons draw every heron with no link. `show=50`
 draws 50, says 50 in the box, and is kept by a filter but not Reset; `show=all` is kept by a
 filter too. The Show setting's First choice is a form reading First [box] that sends every other
@@ -315,41 +315,49 @@ leaves the bird, so that the home page, loaded again, requests its own address w
 bird; without the script Pin links to /?pin=<id>, and a bird left off the home page has none; Back
 on a species page reached from the home page goes back by history, and from a shared link follows its link to
 /?units=metric; choosing Nov from Pinned only stays
-Pinned only. The summaries read frequency ↓, length ↑, mass ↓ reversed, Oct (now), May or Jun,
-all, imperial or metric, and North Amer or world; the header links stick figures to the guide. The header ends with Click a bird and How to read a drawing and has no
+Pinned only. The summaries read frequency ↓, length ↑, mass ↓ reversed, all by default, Oct, May or Jun,
+all, imperial or metric, and North Amer or world, never "(now)", and Units offers Imperial and Metric; the header links stick figures to the guide. The header ends with Click a bird and How to read a drawing and has no
 key line; New here? Try's four comparisons each pin six real birds shown alone by length, herons
 and ducks draw only those families in every month, and the birds around you now is the address
-with #here-and-now, its template replacing the region and dropping the month (Now) and keeping
+with #here-and-now, its template replacing the region and setting the month to a slot for the
+browser's month, and keeping
 every other setting; in headless Chrome, from /?by=mass&month=May in California it lands on
-/?by=mass&region=CA and, refused, says the page is unchanged and to choose under Region. The
-same holds when the link is clicked on the page, which changes only the fragment. In headless Chrome, the script's × goes where the server's does, and a
+/?by=mass&month=<the browser's month>&region=CA and, refused, says the page is unchanged and to choose under Region. The
+same holds when the link is clicked on the page, which changes only the fragment. In headless
+Chrome, after here.js runs, Now links to the browser's month with every other setting kept
+(`TestNowIsTheBrowsersMonth`). In headless Chrome, the script's × goes where the server's does, and a
 tile's pin clicked with text in the box carries the text. In headless Chrome, clicking the First button or the First choice's edge
 sends the typed count, and clicking into its box does not; without the script, First is a submit
 button. The chosen order links to its reverse and back, every other
 order links to itself unreversed, reversed mass runs largest first, and reversed frequency puts
-the most recorded duck last. Without a month the page is
-no-store with no validator; with one it carries an ETag. Every
+the most recorded duck last. Every home page, with no month included, carries an ETag; the
+`month=now` redirect is no-store with no validator, and keeps every other setting. Every
 count-line setting is a `<details>` sharing one name, so the browser opens one at a time, and
 Reset links to /. The pinned list names each pinned bird in alphabetical order by displayed name, linking to its tile, with a pin
-that unpins it; no pin link jumps the page, and in headless Chrome a page loaded by a pin opens
+that unpins it; with two or more pinned it ends with Compare (k), going to `show=pinned` with every
+other setting kept, with one pinned it has none, and under Pinned only it ends with All birds, going to the address
+without show (`TestNextPinnedListCompares`); no pin link jumps the page, and in headless Chrome a page loaded by a pin opens
 scrolled where the pin was clicked. Reset keeps the pins, in order, and drops every setting; Clear pins,
 before it and only when something is pinned, drops the pins and keeps every setting. The phone-width and contrast checks reach the home page through the crawl, open
-every setting at once, and measure after the placing script has run. Pinning the October set's
+every setting at once, and measure after the placing script has run. Pinning the default set's
 least recorded bird, past the first 100, draws it after one gap row and none after it, and the count line says "plus 1 pin" ("plus 2 pins" for two); pinning two mid-order birds by length draws gap rows before, between, and after them summing to Hidden, each linking to Show all, and Show all draws no gaps. Pinned
 only links to `show=pinned` with the order kept and draws nothing; with two pinned it
 draws those two by mass, unpinning one leaves the other, and First brings the
-October birds back with both; `show=all` matches what the default does. Here, filled with FL, is
+default birds back with both; `show=all` matches what the default does. Here, filled with FL, is
 the page with only Florida chosen, every other setting kept, and the pinned-only
 view left, and the page carries the button, its status, and here.js. Month's choices are one
-line, All, Now, and the twelve months, with a rule only before January; Now is chosen with no
-month named and links to none, and All is chosen with `month=all`. In headless Chrome, choosing
+line, All, Now, and the twelve months, with a rule only before January; All is chosen with no
+month named or with `month=all` and links to no month; Now is never chosen, links to `month=now`,
+and is the one link marked `data-now` for here.js; with October named, October alone is chosen. In headless Chrome, choosing
 May in Month loads a page with Month open and nothing else, and loading it again after no choice
-opens nothing. In headless Chrome at 1280 and 390 px, every pin on October's birds by length
+opens nothing. In headless Chrome at 1280 and 390 px, every pin on the default birds by length
 stands within a pixel of its tile's mass cube, tiles with a note under the footer and tiles
 stretched to a taller neighbor included.
 
-**Run:** `go test ./cmd/birdview/ -run 'TestNext'` (the browser check gates where Chrome is installed)
-**Status: verified 2026-10-26, passing.**
+**Run:** `go test ./cmd/birdview/ -run 'TestNext|TestNowIsTheBrowsersMonth|TestHereAndNowLink'` (the browser checks gate where Chrome is installed)
+**Status: verified 2026-10-28, passing.**
+Watched failing: 2026-10-28, by a Compare that needs more than two pins ("/?by=mass&pin=amecro&pin=annhum&region=NY: the pinned list has no Compare link").
+Watched failing: 2026-10-27, by here.js leaving Now's link alone ("after here.js, Now links to /?by=mass&month=now&region=CA; want /?by=mass&month=Oct&region=CA"), by the server not redirecting month=now ("GET /?month=now = 200; want 303 to /?month=Oct"), and by here.js leaving the welcome template's month slot unfilled.
 Watched failing: 2026-10-26, by dropping the frequency default ("coshum (0.000207) follows a bird at 0.000015").
 Watched failing: 2026-10-26, by dropping the month default ("1041 birds, the month filter admits 1006"), and by leaving Order by off the count line.
 Watched failing: 2026-10-26, by scaling each bird to its own length.
@@ -412,7 +420,7 @@ alone by AMRO or amro and lists it the same way; in headless Chrome the script's
 server's, codes included; `/species/AMRO` is a 404, since addresses stay the eBird code.
 
 **Run:** `go test ./internal/bbl/ ./cmd/birdview-ingest/ ./cmd/birdview/ -run 'TestParse|TestBanding'`
-**Status: verified 2026-10-27, passing.**
+**Status: verified 2026-10-28, passing.**
 Watched failing: 2026-10-27, by leaving the code out of the search text ("find=AMRO lists []"), and by a species page without the code.
 Watched failing: 2026-10-27, by the script's list without the banding code, by the names file without it, by a tile without it, and by the server's list without it.
 Watched failing: 2026-10-27, by keeping unidentified rows, by taking the last of two rows sharing a scientific name ("calgna got BACG"), by dropping the English-name fallback, and by letting two species keep one code.

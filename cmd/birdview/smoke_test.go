@@ -79,14 +79,14 @@ func TestSmokeChecksTheServer(t *testing.T) {
 			}
 			return false
 		}},
-		{"home page cached", "the home page", func(w http.ResponseWriter, r *http.Request) bool {
-			if r.URL.Path == "/" {
+		{"home page for this month cached", "the home page for this month", func(w http.ResponseWriter, r *http.Request) bool {
+			if r.URL.Path == "/" && r.URL.Query().Get("month") == "now" {
 				r.URL.RawQuery = "month=Oct" // a named month is cacheable
 			}
 			return false
 		}},
 		{"home page for every month not revalidated", "the home page for every month", func(w http.ResponseWriter, r *http.Request) bool {
-			if r.URL.Path == "/" && r.URL.Query().Get("month") == "all" {
+			if r.URL.Path == "/" && r.URL.RawQuery == "" {
 				r.Header.Del("If-None-Match")
 			}
 			return false

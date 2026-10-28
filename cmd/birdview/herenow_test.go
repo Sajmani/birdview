@@ -39,6 +39,7 @@ import (
 	"birdview/docs"
 	"birdview/internal/boundary"
 	"birdview/internal/dataset"
+	"birdview/internal/month"
 	"birdview/internal/view"
 )
 
@@ -315,13 +316,15 @@ func TestHereAndNowLink(t *testing.T) {
 		return "#here-and-now&probe=1&geo=" + geo
 	}
 	// On the home page, the link chooses the region and sets the month to
-	// Now, which names no month, keeping every other setting.
+	// Now, the browser's month, keeping every other setting.
+	thisMonth := month.Abbrev[time.Now().Month()-1]
+	inCA := "/?by=mass&month=" + thisMonth + "&region=CA"
 	for _, c := range []struct{ name, start, geo, lands, says string }{
-		{"home in California", "/?by=mass&month=May", "38.5816,-121.4944", "/?by=mass&region=CA", ""},
+		{"home in California", "/?by=mass&month=May", "38.5816,-121.4944", inCA, ""},
 		{"home refused", "/", "denied", "/", "refused, so the page is unchanged. Choose yours under Region."},
 		// Clicked on the page, not arrived by: the link only adds the
 		// fragment, so the page must answer its change.
-		{"home clicked in California", "/?by=mass&month=May", "follow=1&geo=38.5816,-121.4944", "/?by=mass&region=CA", ""},
+		{"home clicked in California", "/?by=mass&month=May", "follow=1&geo=38.5816,-121.4944", inCA, ""},
 		{"home clicked refused", "/?region=FL", "follow=1&geo=denied", "/?region=FL", "refused, so the page is unchanged. Choose yours under Region."},
 	} {
 		t.Run(c.name, func(t *testing.T) {
@@ -399,6 +402,36 @@ func TestHereAndNowLink(t *testing.T) {
 				t.Errorf("the welcome line says %q, want it to say %q", probe.Welcome, c.says)
 			}
 		})
+	}
+}
+
+// TestNowIsTheBrowsersMonth loads the home page in headless Chrome and reads
+// Month's Now after here.js has run: it links to the browser's own month,
+// with every other setting kept, rather than to month=now, which only a
+// reader without the script follows (TestNextWithoutAMonthIsNotStored).
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestNowIsTheBrowsersMonth(t *testing.T) {
+	chrome := findChrome()
+	if chrome == "" {
+		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); Now was not tested in a browser")
+	}
+	ts := httptest.NewServer(newTestServer(t))
+	defer ts.Close()
+	out, err := exec.Command(chrome, "--headless", "--disable-gpu", "--no-first-run",
+		"--no-default-browser-check", "--disable-background-networking",
+		"--disable-component-update", "--disable-sync", "--disable-extensions",
+		"--user-data-dir="+t.TempDir(), "--virtual-time-budget=3000", "--dump-dom",
+		ts.URL+"/?by=mass&month=May&region=CA").Output()
+	if err != nil {
+		t.Fatalf("chrome: %v", err)
+	}
+	m := regexp.MustCompile(`<a [^>]*href="([^"]*)"[^>]*data-now[^>]*>Now</a>`).FindStringSubmatch(string(out))
+	if m == nil {
+		t.Fatal("the page has no Now link marked data-now")
+	}
+	if want := "/?by=mass&month=" + month.Abbrev[time.Now().Month()-1] + "&region=CA"; html.UnescapeString(m[1]) != want {
+		t.Errorf("after here.js, Now links to %s; want %s", html.UnescapeString(m[1]), want)
 	}
 }
 

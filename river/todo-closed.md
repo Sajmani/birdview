@@ -4,6 +4,43 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## uncodedBirds
+
+**198 drawn birds have no banding code**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-10-27, by the owner's call: they stay uncoded, recorded in [decisions.bandingCodesFromBbl](requirements/decisions.md#bandingcodesfrombbl)
+
+[decisions.bandingCodesFromBbl](requirements/decisions.md#bandingcodesfrombbl) takes four-letter
+codes from the USGS Bird Banding Lab list, joined by scientific name. 884 of 1,082 species get one;
+the other 198 show none on tiles, the species page, or search. Options: leave them
+blank, as now; or compute an unofficial code by the BBL's rules and mark it as computed, checking
+that no computed code collides with an official one. Asked 2026-10-27.
+
+**Closed 2026-10-27**, leaving them blank. Sameer: don't invent codes; BirdView presents facts, and
+every species already has its eBird code.
+
+## homeSpeckScale
+
+**At one scale, small birds draw as specks beside large ones**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-10-27, by the owner's call: one scale stays, in both the size and frequency orders
+
+The home page draws every bird to the longest shown. When a heron, goose, swan, crane, or vulture
+is among the first 100 (as in most months' default sets), the commonest songbirds are about 13 px
+long and hard to read. Raised 2026-10-26. Options: keep one scale (the point of
+the comparison); shrink each tile's height to its bird so specks at least sit in small tiles; or
+scale per run of similar sizes and say so. Pinned only and the welcome line's size comparisons
+already avoid it by choosing similar birds.
+
+**Closed 2026-10-27**, keeping one scale. Sameer: the Show setting's first-100 cap largely resolves
+it, because sorted by size the largest birds usually fall beyond the first 100. In the default
+order, by frequency, small birds beside large ones are the point: the reader should see the
+relative sizes.
+
 ## approveAppComposition
 
 **Approve the first composition, `app`, and decide whether to tag it**

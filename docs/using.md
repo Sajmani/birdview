@@ -10,12 +10,13 @@ life. Every setting is in the page address, so you can bookmark or share any vie
 Under the title, **New here? Try** offers a few views to start with, and **more ideas** leads to
 [Some things to try](#some-things-to-try).
 
-The page opens on the birds recorded this month, most often recorded first, the first 100 of
+The page opens on the birds of every month, most often recorded first, the first 100 of
 them. Every bird shown is drawn to one scale.
 
 Above the birds, a **find box** finds birds by English or scientific name, code, family, or order
 as you type, and lists them once there are 10 or fewer. **Pin** a bird, from that list or from its
 tile, to keep it on the page whatever the settings; the pinned birds are listed under the box.
+Pin two or more and **Compare** shows only them, side by side at one scale.
 
 The **count line** says how many birds are drawn and names every setting. Click a setting to change
 it. Under it, a **histogram** has one bar per tier, each linking to its tier. Each tier heading
@@ -58,8 +59,8 @@ of each number, and a link to the species on **iNaturalist** for photographs.
   [below](#sorting-by-how-often-a-bird-is-recorded)), or **Length**, **Wingspan**, **Mass**,
   **Bill**, or **Tail**, smallest first. Choose the order again to reverse it. A Northern Harrier
   and a Cooper's Hawk sort close together by length and mass, and far apart by wingspan.
-- **Month:** **Now**, the default, is this month; **All** is every month. A bird with too few
-  records to tell is shown in every month, and says so.
+- **Month:** **All**, the default, is every month; **Now** is this month, by your device's clock.
+  A bird with too few records to tell is shown in every month, and says so.
 - **Region:** states, provinces, and stretches of open sea. A bird is listed in a region when at
   least 1 in a million of the region's bird records are of it. **Here** chooses the region you are
   in; your browser works it out, so your location never reaches the server. Here needs JavaScript.
@@ -67,7 +68,7 @@ of each number, and a link to the species on **iNaturalist** for photographs.
 - **Habitat** and **Diet:** where a bird mostly lives and what it mostly eats, per species, from
   **AVONET**. BirdView adds a few more and marks them as its own; [everything BirdView adds](/added)
   is listed in one place.
-- **Units:** inches and ounces, or centimeters and grams.
+- **Units:** **Imperial**, inches and ounces, or **Metric**, centimeters and grams.
 - **Names:** **North American** names, such as Dovekie and Rough-legged Hawk, or **World** names,
   AviList's: Little Auk, Rough-legged Buzzard.
 

@@ -22,9 +22,22 @@
  *
  * The lookup mirrors internal/boundary's Lookup: land rings by the even-odd
  * rule, in file order, then the sea boxes. TestHereInTheBrowser holds the
- * two to the same answers. */
+ * two to the same answers.
+ *
+ * Month's Now links to month=now; this script points it at the browser's
+ * own month instead, and fills the same month into "the birds around you
+ * now". Without the script, the server redirects month=now to its month. */
 (function () {
   "use strict";
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var thisMonth = MONTHS[new Date().getMonth()];
+  document.querySelectorAll("a[data-now]").forEach(function (a) {
+    var u = new URL(a.href);
+    u.searchParams.set("month", thisMonth);
+    a.href = u.pathname + u.search;
+    a.title = "This month only: " + thisMonth;
+  });
+
   var here = document.querySelector("button.here[data-template]");
   if (!here) return;
   var status = document.querySelector(".herestatus");
@@ -97,7 +110,7 @@
   function say(text) { status.textContent = text; }
 
   // Arriving by a link ending in #here-and-now presses Here, and the
-  // template sets the month to Now by naming none. On load, so a test can
+  // template sets the month to Now, the browser's month. On load, so a test can
   // stand in for the browser's location first, and when the fragment changes
   // to it, since the home page's link is its own address with the fragment
   // added, which a browser follows without loading the page. The fragment is
@@ -121,7 +134,8 @@
             tell("You are outside every region BirdView covers, so the page is unchanged.");
             return;
           }
-          window.location.replace(welcome.getAttribute("data-template").replace("__REGION__", slug));
+          window.location.replace(welcome.getAttribute("data-template")
+            .replace("__REGION__", slug).replace("__MONTH__", thisMonth));
         }, function () {
           tell("The region boundaries did not load, so the page is unchanged.");
         });

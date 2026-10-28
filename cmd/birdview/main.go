@@ -40,6 +40,7 @@ import (
 	"os"
 	pathpkg "path"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -237,9 +238,9 @@ func (s *server) revalidated(h http.Handler) http.Handler {
 		// -dev mode has no fingerprint to trust, and /now answers from the
 		// clock: neither may be stored, and neither gets a validator that
 		// would let a stale answer be confirmed (decisions.hereAndNowCaching).
-		// The home page without a month answers from the clock as well (product.nextView).
+		// The home page's month=now redirects by the clock as well (product.nextView).
 		if s.build == "" || r.URL.Path == "/now" ||
-			(r.URL.Path == "/" && r.URL.Query().Get("month") == "") {
+			(r.URL.Path == "/" && slices.Contains(r.URL.Query()["month"], "now")) {
 			w.Header().Set("Cache-Control", "no-store")
 			h.ServeHTTP(w, r)
 			return
@@ -1571,6 +1572,10 @@ func (u units) formatDigits(v float64, as view.Metric, extra int) string {
 // in the Here button's and the welcome line's templates. URL encoding leaves
 // it alone once restored, and no region slug contains it.
 const hereSlot = "__REGION__"
+
+// nowSlot is the placeholder the browser replaces with its own month ("Oct")
+// in the welcome line's template, as the month= value.
+const nowSlot = "__MONTH__"
 
 // boundaries serves the region boundary file at its hashed URL, and only
 // there. The URL changes whenever the file does, so it is cached for a year

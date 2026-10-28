@@ -781,18 +781,21 @@ home page in those. Its footer carries the full credits, which every other page 
   is left to that guide and to each species page. Under it, **New here? Try** offers a few things
   to try, each also in the guide's *Some things to try*, its comparisons made with pins: the birds
   around you now (this address with `#here-and-now`: the
-  reader's region found in the browser replaces the region, the month is set to Now, and every
-  other setting is kept), small, medium, large, and huge birds (six pinned and shown
-  alone, by length), all herons and ducks (every month), and more ideas.
-- **The set.** With no filter, it is every bird recorded in the month, most often recorded first.
-  The month is the server's own unless the address names some; `month=all` is every month. Every
+  reader's region found in the browser replaces the region, the month is set to the browser's
+  current month, and every other setting is kept), small, medium, large, and huge birds (six
+  pinned and shown alone, by length), all herons and ducks, and more ideas.
+- **The set.** With no filter, it is every bird, most often recorded first: every month unless
+  the address names some (`month=all`, which older addresses carry, is every month too). Every
   filter (family, region, month, habitat, diet) narrows the set, and pinned birds join it.
 - **Pins.** Every drawn bird has a pin, a push pin in a box, filled when the bird is pinned, in
   the drawing's lower right corner, level with the mass cube opposite it on every tile. A
   pinned bird (`pin=<id>`) is drawn whatever the settings, wherever the order puts it, even past
   the first 100, and the count line says how many are ("First 100 of 1006 birds, plus 2 pins"). Pinning or unpinning leaves the page where
   it was. The pinned birds are listed under the find box in alphabetical order: a bird's name goes
-  to its tile, and its pin unpins it. Unpinning returns the bird to the settings'
+  to its tile, and its pin unpins it. With two or more pinned, the list ends with **Compare (k)**,
+  which shows only them (Show's Pinned only), and under Pinned only with **All birds**, which
+  leaves it ([#5](https://github.com/google/birdview/issues/5): a reader who had pinned two birds
+  could not find how to compare them). Unpinning returns the bird to the settings'
   choice; nothing removes a bird the settings choose. A box above the set finds birds by name: a
   bird matches when what is typed, ignoring case and punctuation, appears unbroken in one of its
   English names, its species code, its scientific name, or the scientific name of its family or
@@ -811,8 +814,10 @@ home page in those. Its footer carries the full credits, which every other page 
   so several choices can be made in a row. Region
   offers **Here**, which finds the reader's region in the browser
   ([hereSelectsLocalRegion](filtering.md#hereselectslocalregion)). Month's choices sit on one
-  line: **All**, **Now**, which names no month, so the page shows whatever month it is loaded in,
-  a rule, and the twelve months. On a phone too narrow for them, the line scrolls sideways. A **Reset**
+  line: **All** (the default), **Now**, which selects only the current month by name (the
+  browser's month; without JavaScript it goes to `month=now`, which the server redirects to its
+  own month), a rule, and the twelve
+  months. On a phone too narrow for them, the line scrolls sideways. A **Reset**
   control, colored apart from the settings, returns to the landing set. Choosing one option selects only it; choosing more adds them; choosing every
   selected option again returns to all. Nothing selected means all.
 - **Tiers.** The ordered set breaks into tiers
@@ -846,13 +851,14 @@ home page in those. Its footer carries the full credits, which every other page 
   setting (Order by, also its direction); a pin, the pins; Show, show. Every other parameter is
   kept: Show, the pins, and the find box's text included. Only these drop more, on purpose:
   Reset keeps only the pins; Clear pins also leaves Pinned only; the find list's × drops its text;
-  the birds around you now replaces the region, sets the month to Now, and leaves Pinned only. A
+  the birds around you now replaces the region and the month and leaves Pinned only. A
   tile's species page carries only the units and names; its Back returns by history.
 - **Short summaries.** Each setting's summary is brief: the order's name and an arrow (↓ largest
-  or most often recorded first, ↑ the reverse), months by three letters ("Oct (now)"), "all" for
-  every region, "imperial" or "metric", "North Amer" or "world".
-- **Stateless.** Every view is its address. The home page with no month changes with the month, so it is
-  not stored or revalidated.
+  or most often recorded first, ↑ the reverse), months by three letters ("Oct"), "all" for
+  every region, "imperial" or "metric", "North Amer" or "world". Units' choices carry the same
+  names, **Imperial** and **Metric**.
+- **Stateless.** Every view is its address, and no page reads the clock. Only `month=now`'s
+  redirect does, so it is not stored or revalidated.
 
 Rationale: the first readers and the simulated ones found the index dense and its toggles
 backward, wanted search first, and could not read the comparison on a phone. See the proposal

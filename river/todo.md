@@ -52,23 +52,8 @@ Done 2026-10-26, option (b), by the owner's call and without the simulated compa
 view built at `/next` became the home page ([product.nextView](requirements/local/product/presentation.md#nextview)), with search-and-pin, one
 scale, a Show setting, and each setting on one count line; the index stayed a day as the classic
 view at `/classic` and was removed 2026-10-27. Deployed as `82821a6`. Left: region choice at
-county scale (search or a map, not chips) and the worldwide dataset; [homeSpeckScale](#homespeckscale)
-follows from the redesign.
-
-## homeSpeckScale
-
-**At one scale, small birds draw as specks beside large ones**
-
-Status: open
-Owner: Sameer
-Gate: owner's call; before the testers are asked back
-
-The home page draws every bird to the longest shown. When a heron, goose, swan, crane, or vulture
-is among the first 100 (as in most months' default sets), the commonest songbirds are about 13 px
-long and hard to read. Raised 2026-10-26, not yet answered. Options: keep one scale (the point of
-the comparison); shrink each tile's height to its bird so specks at least sit in small tiles; or
-scale per run of similar sizes and say so. Pinned only and the welcome line's size comparisons
-already avoid it by choosing similar birds.
+county scale (search or a map, not chips) and the worldwide dataset;
+[homeSpeckScale](todo-closed.md#homespeckscale) followed from the redesign and is closed.
 
 ## simulatedUserTests
 
@@ -103,41 +88,28 @@ Presentation moves to the guide, and decide whether results stay in the reposito
 
 Status: open
 Owner: Sameer
-Gate: owner's call, once [homeSpeckScale](#homespeckscale) is settled
+Gate: owner's call; [homeSpeckScale](todo-closed.md#homespeckscale) is settled
 
 Ryan, Karen, and Joe gave the first feedback (2026-10-25), and Shai Mitra is also to be asked; none
 has seen the home page that answers it. They were deliberately not contacted while the redesign
 was in progress. Ask them to try birdview.site on a phone and a laptop, with the same questions as
 before, and record what they say under [scalableInterface](#scalableinterface).
 
-## uncodedBirds
-
-**198 drawn birds have no banding code**
-
-Status: open
-Owner: Sameer
-Gate: owner's call
-
-[decisions.bandingCodesFromBbl](requirements/decisions.md#bandingcodesfrombbl) takes four-letter
-codes from the USGS Bird Banding Lab list, joined by scientific name. 884 of 1,082 species get one;
-the other 198 show none on tiles, the species page, or search. Options: leave them
-blank, as now; or compute an unofficial code by the BBL's rules and mark it as computed, checking
-that no computed code collides with an official one. Asked 2026-10-27, not yet answered.
-
 ## withdrawnWithClassic
 
-**Two behaviors went with the classic view; the owner may want them back**
+**One behavior went with the classic view; the owner may want it back**
 
 Status: open
 Owner: Sameer
 Gate: owner's call
 
 Removed 2026-10-27 under [decisions.classicViewRemoved](requirements/decisions.md#classicviewremoved):
-the Here-and-now link now uses the server's month rather than the reader's, and the "Common birds"
-region grouping ([decisions.regionsTwoWays](requirements/decisions.md#regionstwoways)) no longer
-appears anywhere. Restore either on request. `internal/view`'s `ScaleMode` and `Scales` are left
-over from the classic scale control and nothing calls them; delete them unless a scale choice
-returns under [homeSpeckScale](#homespeckscale).
+the "Common birds" region grouping ([decisions.regionsTwoWays](requirements/decisions.md#regionstwoways))
+no longer appears anywhere. Restore it on request. The other, the Here-and-now link using the
+reader's month rather than the server's, was restored the same day under
+[decisions.homeShowsEveryMonth](requirements/decisions.md#homeshowseverymonth). `internal/view`'s `ScaleMode` and `Scales` are left
+over from the classic scale control and nothing calls them; delete them, since
+[homeSpeckScale](todo-closed.md#homespeckscale) closed without bringing back a scale choice.
 
 ## cleanupLeftovers
 
@@ -148,7 +120,8 @@ Owner: unassigned
 Gate: opportunistic
 
 Found by the 2026-10-27 cleanup. The honestRevalidation criterion says every response carries an
-ETag, which is untrue for bare `/`; correct the wording or the server. Some Habitat and Diet
+ETag, which is untrue for `/?month=now` (bare `/` has carried one since
+[decisions.homeShowsEveryMonth](requirements/decisions.md#homeshowseverymonth)); correct the wording. Some Habitat and Diet
 criteria are now decided only through [app.nextViewDrawsOneSet](requirements/composed/internal/app/acceptance.md#nextviewdrawsoneset); check that each still has a test
 that fails when its behavior breaks.
 
