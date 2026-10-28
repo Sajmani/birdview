@@ -48,6 +48,38 @@
           data-template="{{.HereNowTemplate}}"></span></p>
 </header>
 
+{{/* What is drawn, in words: "pinned birds", or the birds the settings
+     match, named by them (product.nextView). */}}
+<h2 class="settitle">{{.Title}}</h2>
+{{/* Which birds are drawn: one setting, show=, with three answers, always
+     in view, then Clear pins, there when something is pinned. Show first is
+     a form of its own, so Enter sends the count with every other setting,
+     with or without JavaScript; the server reads a blank or 100 as the
+     default (product.nextView). */}}
+<div class="showrow">
+  <form class="showfirst btn{{if eq .Show "first"}} on{{end}}" action="/" method="get">
+    {{range .ShowFields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
+    <button type="submit" title="Show the first this many birds">Show first</button>
+    <input class="cap" type="number" name="show" min="1" step="1" inputmode="numeric"
+      value="{{.Cap}}" aria-label="How many birds to show before the rest are hidden"
+      title="How many birds to show; click Show first or press Enter to apply">
+  </form>
+  <a class="btn{{if eq .Show "all"}} on{{end}}" href="{{.ShowAllURL}}" title="Every bird the settings match, with your pins">Show all ({{.Matching}})</a>
+  <a class="btn{{if eq .Show "pinned"}} on{{end}}" href="{{.ShowPinnedURL}}" title="Only the birds you have pinned">Show pinned ({{len .Pinned}})</a>
+  {{with .ClearPinsURL}}<a class="reset" href="{{.}}" title="Unpin every bird, keeping the settings">Clear pins</a>{{end}}
+</div>
+<template id="pinicon">{{template "pinicon"}}</template>
+{{/* The pinned birds, in alphabetical order: the name goes to the bird's tile,
+     the pin unpins it (product.nextView). */}}
+{{with .Pinned}}<div class="pinned" role="region" aria-label="Pinned birds">
+  <span class="lbl">Pinned</span>
+  <ul>
+    {{range .}}<li><a class="pin on" href="{{.URL}}" aria-pressed="true" title="Unpin {{.Name}}" aria-label="Unpin {{.Name}}">{{template "pinicon"}}</a>
+      <a class="pinname" href="#{{.Anchor}}" title="{{.Scientific}}">{{.Name}}</a></li>
+    {{end}}
+  </ul>
+</div>{{end}}
+
 {{/* The find box. With JavaScript, next-find.js counts the matches as the
      reader types and lists them once there are FindLimit or fewer; without
      it, Enter does the same on the server. Each listed bird links to
@@ -72,51 +104,10 @@
   {{end}}
   {{end}}
 </div>
-<template id="pinicon">{{template "pinicon"}}</template>
-{{/* The pinned birds, in alphabetical order: the name goes to the bird's tile,
-     the pin unpins it (product.nextView). With two or more pinned, Compare
-     shows only them (show=pinned), the Show setting's Pinned only, which a
-     reader who has just pinned would not find there (#5); under Pinned only
-     it is the way back to the birds the settings match. */}}
-{{with .Pinned}}<div class="pinned" role="region" aria-label="Pinned birds">
-  <span class="lbl">Pinned</span>
-  <ul>
-    {{range .}}<li><a class="pin on" href="{{.URL}}" aria-pressed="true" title="Unpin {{.Name}}" aria-label="Unpin {{.Name}}">{{template "pinicon"}}</a>
-      <a class="pinname" href="#{{.Anchor}}" title="{{.Scientific}}">{{.Name}}</a></li>
-    {{end}}
-  </ul>
-  {{if $.PinnedOnly}}<a class="btn compare" href="{{$.ShowFirstURL}}" title="Back to the birds the settings match, with your pins">All birds</a>{{else if gt (len .) 1}}<a class="btn compare" href="{{$.ShowPinnedURL}}" title="Show only the birds you have pinned">Compare ({{len .}})</a>{{end}}
-</div>{{end}}
 
-<h2 class="settitle">{{.Title}}</h2>
 <div class="count">
-  {{/* Two lines: what is drawn, with the Show setting, Clear pins, and
-       Reset; then the settings that choose and order the birds. */}}
-  <div class="countrow">
-  <span class="shown">{{if eq .Show "pinned"}}{{.Count}} pinned {{if eq .Count 1}}bird{{else}}birds{{end}}{{else if eq .Show "all"}}All {{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{else}}{{if .MoreURL}}First {{.First}} of {{end}}{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{with .AddedPast}}, plus {{.}} {{if eq . 1}}pin{{else}}pins{{end}}{{end}}{{end}}</span>
-  {{/* Which birds are drawn: one setting, show=, with three answers. The
-       first is a form of its own, so Enter sends the count with every
-       other setting, with or without JavaScript; the server reads a blank
-       or 100 as the default (product.nextView). */}}
-  <details class="ctl" name="ctl" data-ctl="Show">
-    <summary><b>Show</b> {{.ShowValue}}</summary>
-    <div class="pop">
-      <div class="popgroup">
-        <form class="showfirst btn{{if eq .Show "first"}} on{{end}}" action="/" method="get">
-          {{range .ShowFields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
-          <button type="submit" title="Show the first this many birds">First</button>
-          <input class="cap" type="number" name="show" min="1" step="1" inputmode="numeric"
-            value="{{.Cap}}" aria-label="How many birds to show before the rest are hidden"
-            title="How many birds to show; click First or press Enter to apply">
-        </form>
-        <a class="btn{{if eq .Show "all"}} on{{end}}" href="{{.ShowAllURL}}" title="Every bird the settings match, with your pins">All {{.Matching}}</a>
-        <a class="btn{{if eq .Show "pinned"}} on{{end}}" href="{{.ShowPinnedURL}}" title="Only the birds you have pinned">Pinned only ({{len .Pinned}})</a>
-      </div>
-    </div>
-  </details>
-  {{with .ClearPinsURL}}<a class="reset" href="{{.}}" title="Unpin every bird, keeping the settings">Clear pins</a>{{end}}
-  <a class="reset" href="{{.ResetURL}}" title="Every setting back to its default: birds of every month, most often recorded first. Pins are kept.">Reset</a>
-  </div>
+  {{/* The settings that choose and order the birds, each opening its
+       choices under itself, then Reset. */}}
   <div class="countrow">
   {{range .Controls}}
   {{/* One name for all, so opening one closes the others. */}}
@@ -142,6 +133,7 @@
     </div>
   </details>
   {{end}}
+  <a class="reset" href="{{.ResetURL}}" title="Every setting back to its default: birds of every month, most often recorded first. Pins are kept.">Reset</a>
   </div>
 </div>
 
@@ -149,6 +141,9 @@
      to its tier's heading, with every bird shown when that tier is not drawn
      (product.nextView). Heights are inline because they are data. */}}
 {{if gt (len .Histogram) 1}}<nav class="hist" aria-label="Birds in each tier">{{range .Histogram}}{{if .Empty}}<span class="gap"></span>{{else}}<a href="{{.URL}}" style="height:{{.Percent}}%" aria-label="{{.Label}}" title="{{.Label}}"></a>{{end}}{{end}}</nav>{{end}}
+{{/* What the histogram and the birds below it are: the order's
+     distribution over the birds drawn. */}}
+<p class="shownline"><span class="shown">{{.OrderLabel}} distribution of {{if eq .Show "pinned"}}{{.Count}} pinned {{if eq .Count 1}}bird{{else}}birds{{end}}{{else if eq .Show "all"}}all {{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{else}}{{if .MoreURL}}the first {{.First}} of {{end}}{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{with .AddedPast}}, plus {{.}} {{if eq . 1}}pin{{else}}pins{{end}}{{end}}{{end}}</span></p>
 {{if .Tiles}}
 <div class="tiles">
   {{range .Items}}{{if .Tile}}{{template "tile" .Tile}}{{else if .Tier}}<h3 class="tierhd" id="tier-{{.Tier.Index}}"><span class="tier">{{.Tier.Label}} Tier {{.Tier.Index}}</span>
@@ -301,10 +296,10 @@
       sessionStorage.setItem(KEY, JSON.stringify({ ctl: "", y: window.scrollY }));
     } catch (e) { /* as above */ }
   });
-  // The First choice is sent by clicking anywhere on it but its box, as
-  // the other choices are by clicking them; its First button does the same
-  // without the script.
-  line.querySelectorAll("form.showfirst").forEach(function (f) {
+  // Show first is sent by clicking anywhere on it but its box, as the other
+  // Show choices are by clicking them; its button does the same without
+  // the script.
+  document.querySelectorAll("form.showfirst").forEach(function (f) {
     f.addEventListener("click", function (e) {
       if (e.target === f && f.requestSubmit) f.requestSubmit();
     });

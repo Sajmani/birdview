@@ -18,6 +18,7 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
+	"fmt"
 	"html"
 	"html/template"
 	"math"
@@ -482,12 +483,12 @@ func TestNextShowAll(t *testing.T) {
 		t.Fatalf("/ has %d birds; the check needs more than %d", p.Count, nextCap)
 	}
 	if len(p.Tiles) != nextCap || string(p.MoreURL) != "/?show=all" || p.Hidden != p.Count-nextCap ||
-		p.Show != "first" || p.Cap != "100" || p.ShowValue != "first 100" {
-		t.Errorf("/ draws %d of %d, hides %d, show %q %q (%q), more link %q",
-			len(p.Tiles), p.Count, p.Hidden, p.Show, p.Cap, p.ShowValue, p.MoreURL)
+		p.Show != "first" || p.Cap != "100" {
+		t.Errorf("/ draws %d of %d, hides %d, show %q %q, more link %q",
+			len(p.Tiles), p.Count, p.Hidden, p.Show, p.Cap, p.MoreURL)
 	}
 	all := nextAt(s, string(p.MoreURL))
-	if len(all.Tiles) != p.Count || all.MoreURL != "" || all.Show != "all" || all.ShowValue != "all" {
+	if len(all.Tiles) != p.Count || all.MoreURL != "" || all.Show != "all" {
 		t.Errorf("%s draws %d of %d, show %q", p.MoreURL, len(all.Tiles), p.Count, all.Show)
 	}
 	for i := range p.Tiles {
@@ -511,48 +512,65 @@ func TestNextShowAll(t *testing.T) {
 		t.Errorf("show=50: Pinned only %s, All %s, Reset %s", c.ShowPinnedURL, c.ShowAllURL, c.ResetURL)
 	}
 
-	// The Show setting: First [box] in a form with the other settings, All
-	// N, Pinned only (k), the chosen one marked; and the two rows.
+	// The Show choices, in view under the heading: Show all (N), Show pinned
+	// (k), and Show first [box] in a form with the other settings, the
+	// chosen one marked.
 	_, body := get(t, s, "/?by=mass&show=50&find=jay&pin=amecro&pin=annhum")
-	form := regexp.MustCompile(`(?s)<form class="showfirst btn on" action="/" method="get">(.*?)</form>`).FindStringSubmatch(body)
+	row := regexp.MustCompile(`(?s)<div class="showrow">(.*?)\n</div>`).FindStringSubmatch(body)
+	if row == nil {
+		t.Fatal("the page has no Show row")
+	}
+	form := regexp.MustCompile(`(?s)<form class="showfirst btn on" action="/" method="get">(.*?)</form>`).FindStringSubmatch(row[1])
 	if form == nil {
-		t.Fatal("the Show setting has no First form, marked chosen")
+		t.Fatal("the Show row has no Show first form, marked chosen")
 	}
 	var sent []string
 	for _, m := range regexp.MustCompile(`<input type="hidden" name="([^"]+)" value="([^"]*)">`).FindAllStringSubmatch(form[1], -1) {
 		sent = append(sent, m[1]+"="+m[2])
 	}
 	if !slices.Equal(sent, []string{"by=mass", "find=jay", "pin=amecro", "pin=annhum"}) {
-		t.Errorf("the First form sends %v; want every parameter but show", sent)
+		t.Errorf("the Show first form sends %v; want every parameter but show", sent)
 	}
-	if !strings.Contains(form[1], ">First</button>\n          <input class=\"cap\" type=\"number\" name=\"show\"") || !strings.Contains(form[1], `value="50"`) {
-		t.Errorf("the First form does not read First [50]:\n%s", form[1])
+	if !strings.Contains(form[1], ">Show first</button>\n    <input class=\"cap\" type=\"number\" name=\"show\"") || !strings.Contains(form[1], `value="50"`) {
+		t.Errorf("the Show first form does not read Show first [50]:\n%s", form[1])
 	}
 	pp := nextAt(s, "/?by=mass&show=50&find=jay&pin=amecro&pin=annhum")
-	if !strings.Contains(body, ">All "+strconv.Itoa(pp.Matching)+"</a>") || !strings.Contains(body, ">Pinned only (2)</a>") {
-		t.Errorf("the Show setting does not offer All %d and Pinned only (2)", pp.Matching)
+	allBtn, pinBtn := ">Show all ("+strconv.Itoa(pp.Matching)+")</a>", ">Show pinned (2)</a>"
+	if f, i, j, k := strings.Index(row[1], "<form"), strings.Index(row[1], allBtn), strings.Index(row[1], pinBtn), strings.Index(row[1], ">Clear pins</a>"); f < 0 || i < f || j < i || k < j {
+		t.Errorf("the Show row does not read Show first, Show all (%d), Show pinned (2), Clear pins, in that order:\n%s", pp.Matching, row[1])
 	}
-	if !strings.Contains(body, "<summary><b>Show</b> first 50</summary>") {
-		t.Error("the Show setting's summary does not say first 50")
+	if strings.Contains(body, `data-ctl="Show"`) || strings.Contains(body, `class="btn compare"`) {
+		t.Error("Show is still a closed setting, or the pinned list still has its own Compare")
 	}
-	rows := regexp.MustCompile(`(?s)<div class="countrow">(.*?)\n  </div>`).FindAllStringSubmatch(body, -1)
-	if len(rows) != 2 {
-		t.Fatalf("the count line has %d rows, want 2", len(rows))
+	// The order of the page, top to bottom.
+	var at []int
+	marks := []string{"</header>", `<h2 class="settitle">`, `<div class="showrow">`, ">Clear pins</a>", `<div class="pinned"`,
+		`<form class="search"`, `<div class="count">`, `data-ctl="Order by"`, `data-ctl="Names"`, ">Reset</a>",
+		`<nav class="hist"`, `<span class="shown">Mass distribution of the first 50 of`, `<div class="tiles">`}
+	for _, m := range marks {
+		at = append(at, strings.Index(body, m))
 	}
-	first, second := rows[0][1], rows[1][1]
-	for _, want := range []string{`<span class="shown">First 50 of`, `data-ctl="Show"`, ">Clear pins</a>", ">Reset</a>"} {
-		if !strings.Contains(first, want) {
-			t.Errorf("the first row lacks %s", want)
+	for i := range marks {
+		if at[i] < 0 || i > 0 && at[i] < at[i-1] {
+			t.Fatalf("the page does not run in order: %q at %d, after %q at %d", marks[i], at[i], marks[max(i-1, 0)], at[max(i-1, 0)])
 		}
 	}
-	if strings.Contains(first, `data-ctl="Order by"`) || !strings.Contains(second, `data-ctl="Order by"`) || !strings.Contains(second, `data-ctl="Names"`) {
-		t.Error("Order by through Names are not on the second row alone")
+	if n := strings.Count(body, `<div class="countrow">`); n != 1 {
+		t.Errorf("the count line has %d rows, want 1", n)
 	}
 	if strings.Contains(body, ">Show all</a>\n") && strings.Index(body, ">Show all</a>") < strings.Index(body, `<div class="tiles">`) {
 		t.Error("the count line still has its own Show all; it is a Show choice now")
 	}
-	if p := nextAt(s, "/?show=all"); p.Show != "all" || !strings.Contains(mustGet(t, s, "/?show=all"), `<span class="shown">All `+strconv.Itoa(p.Count)+` birds</span>`) {
-		t.Error("show=all does not say All N birds")
+	// The sentence under the histogram leads with the chosen order.
+	for target, want := range map[string]string{
+		"/?show=all": "Frequency distribution of all %d birds",
+		"/?by=length&show=pinned&pin=amecro&pin=annhum": "Length distribution of %d pinned birds",
+		"/?by=tail&rev=1": "Tail length distribution of the first 100 of %d birds",
+	} {
+		p := nextAt(s, target)
+		if w := fmt.Sprintf(want, p.Count); !strings.Contains(mustGet(t, s, target), `<span class="shown">`+w+`</span>`) {
+			t.Errorf("%s does not say %q", target, w)
+		}
 	}
 
 	for from, to := range map[string]string{
@@ -786,7 +804,7 @@ func TestNextShowPinned(t *testing.T) {
 	if empty.Matching != start.Matching || empty.Matching < 500 {
 		t.Errorf("under Pinned only, All offers %d birds; the settings match %d", empty.Matching, start.Matching)
 	}
-	if !empty.PinnedOnly || len(empty.Tiles) != 0 || empty.Count != 0 || empty.Title != "Birds you chose" {
+	if !empty.PinnedOnly || len(empty.Tiles) != 0 || empty.Count != 0 || empty.Title != "Showing pinned birds" {
 		t.Errorf("pinned only: %d drawn of %d, title %q", len(empty.Tiles), empty.Count, empty.Title)
 	}
 	two := "/?by=mass&pin=amecro&pin=annhum&show=pinned"
@@ -989,9 +1007,9 @@ func TestNextResetKeepsPins(t *testing.T) {
 		t.Errorf("with nothing pinned: Clear pins %q, Reset %q; want no Clear pins and Reset to /", p.ClearPinsURL, p.ResetURL)
 	}
 	_, body := get(t, s, "/?pin=amecro")
-	clear, reset := strings.Index(body, ">Clear pins</a>"), strings.Index(body, ">Reset</a>")
-	if clear < 0 || reset < 0 || clear > reset {
-		t.Errorf("Clear pins at %d, Reset at %d; want Clear pins just before Reset", clear, reset)
+	clear, names, reset := strings.Index(body, ">Clear pins</a>"), strings.Index(body, `data-ctl="Names"`), strings.Index(body, ">Reset</a>")
+	if clear < 0 || reset < 0 || clear > names || reset < names {
+		t.Errorf("Clear pins at %d, Names at %d, Reset at %d; want Clear pins with Show, before the settings, and Reset after them", clear, names, reset)
 	}
 }
 
@@ -1047,38 +1065,24 @@ func TestNextPinnedList(t *testing.T) {
 	}
 }
 
-// TestNextPinnedListCompares checks the pinned list's Compare (#5): with two
-// or more birds pinned it reads Compare (k) and goes to show=pinned, keeping
-// every other setting; with one pinned it is not there; and under Pinned
-// only it reads All birds and goes back to the address without show.
+// TestNextHeading checks the heading above the Show choices: what is drawn,
+// in words, naming every chosen setting.
 //
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
-func TestNextPinnedListCompares(t *testing.T) {
+func TestNextHeading(t *testing.T) {
 	s := newTestServer(t)
-	link := regexp.MustCompile(`<a class="btn compare" href="([^"]*)"[^>]*>([^<]*)</a>`)
-	for _, c := range []struct{ from, href, text string }{
-		{"/?by=mass&pin=amecro&pin=annhum&region=NY", "/?by=mass&pin=amecro&pin=annhum&region=NY&show=pinned", "Compare (2)"},
-		{"/?by=mass&pin=amecro&pin=annhum&region=NY&show=50", "/?by=mass&pin=amecro&pin=annhum&region=NY&show=pinned", "Compare (2)"},
-		{"/?by=mass&pin=amecro&pin=annhum&region=NY&show=pinned", "/?by=mass&pin=amecro&pin=annhum&region=NY", "All birds"},
-		{"/?pin=amecro", "", ""},
-		{"/", "", ""},
+	for target, want := range map[string]string{
+		"/":                     "Showing birds in every month",
+		"/?show=pinned":         "Showing pinned birds",
+		"/?region=NY&month=Oct": "Showing birds in New York in October",
+		"/?family=Corvidae&habitat=Forest&niche=Granivore&niche=Frugivore&month=May&month=Jun": "Showing birds in May or June · Family: Corvidae · Habitat: Forest · Diet: Eats seeds or Eats fruit",
 	} {
-		_, body := get(t, s, c.from)
-		row := regexp.MustCompile(`(?s)<div class="pinned".*?</div>`).FindString(body)
-		m := link.FindStringSubmatch(row)
-		if c.text == "" {
-			if strings.Contains(body, `class="btn compare"`) {
-				t.Errorf("%s offers %v; want no Compare with fewer than two pinned", c.from, m)
-			}
-			continue
+		if got := nextAt(s, target).Title; got != want {
+			t.Errorf("%s: the heading reads %q, want %q", target, got, want)
 		}
-		if m == nil {
-			t.Errorf("%s: the pinned list has no Compare link", c.from)
-			continue
-		}
-		if href := html.UnescapeString(m[1]); href != c.href || m[2] != c.text {
-			t.Errorf("%s: the pinned list's link reads %q and goes to %s; want %q to %s", c.from, m[2], href, c.text, c.href)
-		}
+	}
+	if !strings.Contains(mustGet(t, s, "/?region=NY"), `<h2 class="settitle">Showing birds in New York in every month</h2>`) {
+		t.Error("the page does not draw the heading")
 	}
 }
 
@@ -1195,8 +1199,8 @@ var nextFirstProbe string
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextFirstCommitsOnClick(t *testing.T) {
 	s := newTestServer(t)
-	if body := mustGet(t, s, "/"); !strings.Contains(body, `<button type="submit" title="Show the first this many birds">First</button>`) {
-		t.Error("First is not a submit button")
+	if body := mustGet(t, s, "/"); !strings.Contains(body, `<button type="submit" title="Show the first this many birds">Show first</button>`) {
+		t.Error("Show first is not a submit button")
 	}
 	chrome := findChrome()
 	if chrome == "" {

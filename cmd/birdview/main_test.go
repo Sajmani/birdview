@@ -4582,7 +4582,7 @@ func TestExoticsAreOffTheIndexAndListed(t *testing.T) {
 	}
 	// The count the page reports leaves them out too.
 	shown := len(ds.Species) - len(exotic)
-	if want := fmt.Sprintf("All %d birds", shown); !strings.Contains(stripTags(idx), want) {
+	if want := fmt.Sprintf("distribution of all %d birds", shown); !strings.Contains(stripTags(idx), want) {
 		t.Errorf("the home page does not report %q; flagged birds are still being counted", want)
 	}
 	gone := 0

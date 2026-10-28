@@ -130,19 +130,20 @@ type nextData struct {
 	// Show is which birds are drawn, the one setting show= carries: "first"
 	// (the first Cap of the order, and pins past them; show=<n>, 100 the
 	// default), "all" (show=all), or "pinned" (only the pinned birds,
-	// show=pinned). ShowValue names it on the Show setting's summary,
-	// ShowFields are the address's other settings, which the First box's
-	// form sends with it, and ShowAllURL and ShowPinnedURL are the other
-	// two choices. Matching is how many birds the settings match, pins
-	// included, whatever is shown.
+	// show=pinned). ShowFields are the address's other settings, which the
+	// Show first box's form sends with it, and ShowAllURL and ShowPinnedURL
+	// are the other two choices. Matching is how many birds the settings
+	// match, pins included, whatever is shown.
 	Show          string
-	ShowValue     string
 	Cap           string
 	ShowFields    []hiddenField
 	ShowAllURL    template.URL
 	ShowPinnedURL template.URL
 	ShowFirstURL  template.URL
 	Matching      int
+	// OrderLabel names the chosen order ("Length", "Bill length"), which the
+	// sentence under the histogram leads with ("Length distribution of …").
+	OrderLabel string
 	// MoreURL shows every bird in the set (show=all); empty when all are
 	// shown. First
 	// is how many the filters chose that are drawn, Hidden how many are not,
@@ -548,7 +549,6 @@ func (s *server) nextPage(r *http.Request) nextData {
 	var picks []pick
 	after := 0
 	page.Show, page.Cap = mode, strconv.Itoa(capN)
-	page.ShowValue = map[string]string{"first": "first " + page.Cap, "all": "all", "pinned": "pinned only"}[mode]
 	for _, k := range sortedKeys(q) {
 		if k == "show" || k == "bird" {
 			continue
@@ -750,11 +750,12 @@ func (s *server) nextPage(r *http.Request) nextData {
 		}
 	}
 
-	page.Title = s.nextTitle(opt)
-	if pinnedOnly {
-		page.Title = "Birds you chose"
-	}
+	page.Title = s.nextTitle(opt, pinnedOnly)
 	page.Controls = s.nextControls(q, opt)
+	page.OrderLabel = nextOrderLabels[opt.Metric]
+	if opt.Metric == view.ByBill || opt.Metric == view.ByTail {
+		page.OrderLabel += " length" // "Bill length distribution", not "Bill distribution"
+	}
 	for i := range page.Controls {
 		if page.Controls[i].Label == "Region" {
 			hq := cloneValues(q)
@@ -787,10 +788,15 @@ func sortedKeys(q url.Values) []string {
 	return keys
 }
 
-// nextTitle says in words which birds these are.
-func (s *server) nextTitle(opt options) string {
+// nextTitle says in words which birds are drawn: "Showing pinned birds", or
+// "Showing birds in" the regions and months chosen, followed by any chosen
+// family, habitat, and diet, each under the label of its setting.
+func (s *server) nextTitle(opt options, pinnedOnly bool) string {
+	if pinnedOnly {
+		return "Showing pinned birds"
+	}
 	var b strings.Builder
-	b.WriteString("Birds")
+	b.WriteString("Showing birds")
 	if opt.HasRegions {
 		b.WriteString(" in " + nextList(s.regionNames(opt.Regions)))
 	}
@@ -804,6 +810,30 @@ func (s *server) nextTitle(opt options) string {
 		b.WriteString(" in " + nextList(ms))
 	} else {
 		b.WriteString(" in every month")
+	}
+	if opt.HasSelection {
+		var fs []string
+		for _, f := range s.fams {
+			if opt.Families[f.Name] {
+				fs = append(fs, f.Name)
+			}
+		}
+		b.WriteString(" · Family: " + nextList(fs))
+	}
+	terms := func(label string, ts []trait.Term, sel map[string]bool) {
+		var ls []string
+		for _, t := range ts {
+			if sel[t.Value] {
+				ls = append(ls, t.Label)
+			}
+		}
+		b.WriteString(" · " + label + ": " + nextList(ls))
+	}
+	if opt.HasHabitats {
+		terms("Habitat", trait.Habitats, opt.Habitats)
+	}
+	if opt.HasNiches {
+		terms("Diet", trait.Niches, opt.Niches)
 	}
 	return b.String()
 }
@@ -987,19 +1017,31 @@ func (s *server) nextBirds(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(out)
 }
 
+// nextOrders are the orders Order by offers, in its order, with their names.
+var nextOrders = []struct {
+	m     view.Metric
+	label string
+}{
+	{view.ByFrequency, "Frequency"}, {view.ByLength, "Length"}, {view.ByWingspan, "Wingspan"},
+	{view.ByMass, "Mass"}, {view.ByBill, "Bill"}, {view.ByTail, "Tail"},
+}
+
+// nextOrderLabels names each order, as Order by does.
+var nextOrderLabels = func() map[view.Metric]string {
+	out := map[view.Metric]string{}
+	for _, o := range nextOrders {
+		out[o.m] = o.label
+	}
+	return out
+}()
+
 // nextOrderControl is the Order by setting: frequency, the default, and the
 // five sizes.
 func nextOrderControl(q url.Values, opt options) nextControl {
 	oc := nextControl{Label: "Order by"}
 	rev := nextReversed(q)
 	var och []nextChoice
-	for _, m := range []struct {
-		m     view.Metric
-		label string
-	}{
-		{view.ByFrequency, "Frequency"}, {view.ByLength, "Length"}, {view.ByWingspan, "Wingspan"},
-		{view.ByMass, "Mass"}, {view.ByBill, "Bill"}, {view.ByTail, "Tail"},
-	} {
+	for _, m := range nextOrders {
 		v := string(m.m)
 		if m.m == view.ByFrequency {
 			v = ""

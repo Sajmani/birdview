@@ -12,17 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Drives TestNextFirstCommitsOnClick. It opens Show, types a count into the
-// First box, and clicks three places in turn: the box, the First button, and
+// Drives TestNextFirstCommitsOnClick. It types a count into the Show first
+// box, and clicks three places in turn: the box, the First button, and
 // the choice's own edge outside both. Each submission is recorded with the
 // count it would send and then cancelled, so the page stays. The result is
 // data-probe on the root.
 window.addEventListener("load", function () {
   setTimeout(function () {
     var out = { box: 0, button: 0, edge: 0, sent: [] };
-    var d = document.querySelector('details[data-ctl="Show"]');
-    d.open = true;
-    var f = d.querySelector("form.showfirst"), box = f.querySelector("input.cap");
+    var f = document.querySelector("form.showfirst"), box = f.querySelector("input.cap");
     var where = "";
     f.addEventListener("submit", function (e) {
       e.preventDefault();

@@ -783,18 +783,26 @@ home page in those. Its footer carries the full credits, which every other page 
   around you now (this address with `#here-and-now`: the
   reader's region found in the browser replaces the region, the month is set to the browser's
   current month, and every other setting is kept), small, medium, large, and huge birds (six
-  pinned and shown alone, by length), all herons and ducks, and more ideas.
+  pinned and shown alone, by length), all herons and ducks, and more ideas. A rule ends the
+  header.
+- **The order of the page** (Sameer, 2026-10-28). Under the header, top to bottom: a heading
+  saying what is drawn ("Showing pinned birds", or "Showing birds in" the regions and months
+  chosen, then any chosen family, habitat, and diet under their settings' labels); the **Show**
+  choices and **Clear pins**, on one line; the pinned birds; the find box; the other settings,
+  then **Reset**; the histogram; then a sentence naming the order and what is drawn ("Length
+  distribution of the first 100 of 1006 birds, plus 2 pins"); then the
+  birds. The steps a reader takes to compare birds, show pinned, see the pins, find more, come
+  first; the settings that narrow the set come after.
 - **The set.** With no filter, it is every bird, most often recorded first: every month unless
   the address names some (`month=all`, which older addresses carry, is every month too). Every
   filter (family, region, month, habitat, diet) narrows the set, and pinned birds join it.
 - **Pins.** Every drawn bird has a pin, a push pin in a box, filled when the bird is pinned, in
   the drawing's lower right corner, level with the mass cube opposite it on every tile. A
   pinned bird (`pin=<id>`) is drawn whatever the settings, wherever the order puts it, even past
-  the first 100, and the count line says how many are ("First 100 of 1006 birds, plus 2 pins"). Pinning or unpinning leaves the page where
-  it was. The pinned birds are listed under the find box in alphabetical order: a bird's name goes
-  to its tile, and its pin unpins it. With two or more pinned, the list ends with **Compare (k)**,
-  which shows only them (Show's Pinned only), and under Pinned only with **All birds**, which
-  leaves it ([#5](https://github.com/google/birdview/issues/5): a reader who had pinned two birds
+  the first 100, and the sentence above the birds says how many are ("… the first 100 of 1006 birds, plus 2 pins"). Pinning or unpinning leaves the page where
+  it was. The pinned birds are listed above the find box in alphabetical order: a bird's name goes
+  to its tile, and its pin unpins it. **Show pinned (k)**, always in view above them, compares
+  them ([#5](https://github.com/google/birdview/issues/5): a reader who had pinned two birds
   could not find how to compare them). Unpinning returns the bird to the settings'
   choice; nothing removes a bird the settings choose. A box above the set finds birds by name: a
   bird matches when what is typed, ignoring case and punctuation, appears unbroken in one of its
@@ -804,11 +812,12 @@ home page in those. Its footer carries the full credits, which every other page 
   JavaScript, Enter does the same. Pinning keeps the box's text, so the list stays open and
   several of its birds can be pinned and unpinned in turn, from the list or from their tiles;
   the list's **×** closes it, dropping the text.
-- **Filters are the count line.** The line under the box names each setting. Each is a control
-  that opens the choices for that one setting directly under itself, as a `<details>`, so it
-  works without JavaScript. **Clear pins**, there when something is pinned, unpins every bird and
-  keeps the settings; **Reset**, after it, returns every setting to its default and keeps the
-  pins. Family draws each family as its badge, with its description. Only one
+- **Filters are the count line.** The line under the find box names each setting, then ends with
+  **Reset**, which returns every setting to its default and keeps the pins. (**Clear pins**,
+  there when something is pinned, sits after the Show choices; it unpins every bird and keeps the
+  settings.) Each setting is a
+  control that opens the choices for that one setting directly under itself, as a `<details>`,
+  so it works without JavaScript. Family draws each family as its badge, with its description. Only one
   is open at a time, and a tap elsewhere closes it. A choice
   loads a new page, and the setting it was chosen in is open there, at the same place on the page,
   so several choices can be made in a row. Region
@@ -832,19 +841,21 @@ home page in those. Its footer carries the full credits, which every other page 
 - **Order.** By how often recorded (the default, most often first), or by length, wingspan,
   mass, bill, or tail (smallest first). Choosing the chosen order again reverses it (`rev=1`).
   Order by is the first setting on the count line.
-- **Show.** Which birds are drawn is one setting, **Show**, with three answers, and one parameter,
-  `show`: **First [100]** draws the first 100 of the order plus any pinned birds past them
-  (`show=<n>`; 100 is the default, which the address leaves out), and the 100 is a box: typing
-  another count and clicking First (anywhere on the choice but its box) or pressing Enter sets it,
-  with or without JavaScript, and a blank, 100, or
-  anything not a count returns to the default. **All N** draws every bird the settings match
-  (`show=all`), N counting them with the pins. **Pinned only (k)** draws only the pinned birds
-  (`show=pinned`), for a comparison of the reader's own picks. Wherever unpinned birds are left
+- **Show.** Which birds are drawn is one setting with three answers, always in view under the
+  heading, and one parameter, `show`: **Show first [100]** draws the first 100 of the order plus
+  any pinned birds past them (`show=<n>`; 100 is the default, which the address leaves out), and
+  the 100 is a box: typing another count and clicking Show first (anywhere on the choice but its
+  box) or pressing Enter sets it, with or without JavaScript, and a blank, 100, or anything not a
+  count returns to the default. **Show all (N)** draws every bird the settings match
+  (`show=all`), N counting them with the pins. **Show pinned (k)** draws only the pinned birds
+  (`show=pinned`), for a comparison of the reader's own picks. The chosen one is marked. Wherever unpinned birds are left
   out (after the first, between pinned birds past them, or after the last pinned bird), a gap row
   says how many are hidden there and links to `show=all`. Choosing a setting keeps Show as it is,
-  Pinned only included; Reset returns to the default. The count line is two rows: what is drawn
-  ("First 100 of 1006 birds, plus 2 pins", "All 1006 birds", "2 pinned birds") with Show, Clear
-  pins, and Reset; then Order by through Names. 100 is a reader's first
+  Pinned only included; Reset returns to the default. Under the histogram, a sentence names the
+  chosen order, as Order by does but with Bill and Tail as "Bill length" and "Tail length", and
+  what is drawn: "Length distribution of the first 100 of
+  1006 birds, plus 2 pins", "Frequency distribution of all 1006 birds", "Mass distribution of 2
+  pinned birds". 100 is a reader's first
   screens, not a limit of speed: all 1,041 birds paint in 0.73 s on a phone-class CPU over 5G
   (measured 2026-10-26 under Lighthouse's mobile throttling, 229 KiB).
 - **Every transition keeps what it does not change.** A setting's choice changes only that

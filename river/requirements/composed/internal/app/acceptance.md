@@ -295,10 +295,16 @@ only that one, choosing again removes it, and changing a filter drops the find b
 The home page draws the first 100 of its 1,041 and a link to all of them (`show=all`) in
 the same order, in the gap row at the end; the herons draw every heron with no link. `show=50`
 draws 50, says 50 in the box, and is kept by a filter but not Reset; `show=all` is kept by a
-filter too. The Show setting's First choice is a form reading First [box] that sends every other
-setting but show and the find box, beside All with the count the settings match and Pinned only
-(2), the chosen one marked, and its summary names the choice. The count line is two rows: what is
-drawn, Show, Clear pins, and Reset, then Order by through Names; it has no Show all of its own.
+filter too. Under the heading, the Show row reads Show first [box], a form that sends every other
+setting but show and the find box, then Show all with the count the settings match, Show pinned
+(2), and Clear pins, the chosen one marked; Show is no longer a closed setting. The page runs, top
+to bottom: the header, the heading, the Show row, the pinned list, the find box, one count row
+(Order by through Names, then Reset), the histogram, the sentence, and the birds. The sentence
+names the order and what is drawn: "Mass distribution of the first 50 of", "Frequency
+distribution of all N birds", "Length distribution of N pinned birds", "Tail length distribution of the
+first 100 of N birds" (`TestNextShowAll`). The heading reads "Showing pinned birds" under Pinned only, and
+otherwise "Showing birds in" the regions and months, then "· Family:", "· Habitat:", and "· Diet:"
+with what is chosen in each (`TestNextHeading`).
 `show=100`, `show=`, `show=0`, `show=-3`, and `show=zero` redirect to the address without show;
 `show=50`, `show=all`, and `show=pinned` do not. By length, reversed, and by mass with every bird shown, the tiers hold every
 matching bird, each drawn bird in order under its tier's heading, one heading per drawn tier;
@@ -326,17 +332,15 @@ every other setting; in headless Chrome, from /?by=mass&month=May in California 
 same holds when the link is clicked on the page, which changes only the fragment. In headless
 Chrome, after here.js runs, Now links to the browser's month with every other setting kept
 (`TestNowIsTheBrowsersMonth`). In headless Chrome, the script's × goes where the server's does, and a
-tile's pin clicked with text in the box carries the text. In headless Chrome, clicking the First button or the First choice's edge
-sends the typed count, and clicking into its box does not; without the script, First is a submit
+tile's pin clicked with text in the box carries the text. In headless Chrome, clicking the Show first button or the Show first choice's edge
+sends the typed count, and clicking into its box does not; without the script, Show first is a submit
 button. The chosen order links to its reverse and back, every other
 order links to itself unreversed, reversed mass runs largest first, and reversed frequency puts
 the most recorded duck last. Every home page, with no month included, carries an ETag; the
 `month=now` redirect is no-store with no validator, and keeps every other setting. Every
 count-line setting is a `<details>` sharing one name, so the browser opens one at a time, and
 Reset links to /. The pinned list names each pinned bird in alphabetical order by displayed name, linking to its tile, with a pin
-that unpins it; with two or more pinned it ends with Compare (k), going to `show=pinned` with every
-other setting kept, with one pinned it has none, and under Pinned only it ends with All birds, going to the address
-without show (`TestNextPinnedListCompares`); no pin link jumps the page, and in headless Chrome a page loaded by a pin opens
+that unpins it, and has no Compare of its own; no pin link jumps the page, and in headless Chrome a page loaded by a pin opens
 scrolled where the pin was clicked. Reset keeps the pins, in order, and drops every setting; Clear pins,
 before it and only when something is pinned, drops the pins and keeps every setting. The phone-width and contrast checks reach the home page through the crawl, open
 every setting at once, and measure after the placing script has run. Pinning the default set's
@@ -356,7 +360,8 @@ stretched to a taller neighbor included.
 
 **Run:** `go test ./cmd/birdview/ -run 'TestNext|TestNowIsTheBrowsersMonth|TestHereAndNowLink'` (the browser checks gate where Chrome is installed)
 **Status: verified 2026-10-28, passing.**
-Watched failing: 2026-10-28, by a Compare that needs more than two pins ("/?by=mass&pin=amecro&pin=annhum&region=NY: the pinned list has no Compare link").
+Watched failing: 2026-10-28, by Reset back before the settings ("the page does not run in order: \">Reset</a>\" … after \"data-ctl=\\\"Names\\\"\"") and by a sentence without the order's name ("\"<span class=\\\"shown\\\">Mass distribution of the first 50 of\" at -1").
+Watched failing: 2026-10-28, by the previous layout ("the page has no Show row"), by the count sentence above the histogram ("the page does not run in order: \"<span class=\\\"shown\\\">First 50 of\" … after \"<nav class=\\\"hist\\\"\""), and by a heading without the family ("… want \"Showing birds in May or June · Family: Corvidae · …\"").
 Watched failing: 2026-10-27, by here.js leaving Now's link alone ("after here.js, Now links to /?by=mass&month=now&region=CA; want /?by=mass&month=Oct&region=CA"), by the server not redirecting month=now ("GET /?month=now = 200; want 303 to /?month=Oct"), and by here.js leaving the welcome template's month slot unfilled.
 Watched failing: 2026-10-26, by dropping the frequency default ("coshum (0.000207) follows a bird at 0.000015").
 Watched failing: 2026-10-26, by dropping the month default ("1041 birds, the month filter admits 1006"), and by leaving Order by off the count line.
