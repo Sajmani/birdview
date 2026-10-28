@@ -340,7 +340,7 @@ func TestHereAndNowLink(t *testing.T) {
 			cmd := exec.Command(chrome, "--headless", "--disable-gpu", "--no-first-run",
 				"--no-default-browser-check", "--disable-background-networking",
 				"--disable-component-update", "--disable-sync", "--disable-extensions",
-				"--user-data-dir="+t.TempDir(), "--virtual-time-budget=3000", "--dump-dom",
+				"--user-data-dir="+profileDir(t), "--virtual-time-budget=3000", "--dump-dom",
 				ts.URL+c.start+frag(c.geo))
 			var dom string
 			if c.lands != c.start {
