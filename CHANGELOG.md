@@ -3,6 +3,61 @@
 Major changes to BirdView, newest first: features, data sources, and how the drawings are made.
 Small fixes are in the commit history. With no numbered releases yet, changes are grouped by period.
 
+## 2026-10-26 to 2026-10-28 — A new home page: find, pin, and compare
+
+### Added
+
+- A **find box** above the birds: type part of a name, code, or scientific name to count and list
+  matching birds.
+- **Pins**: pin any bird, from the find list, its tile, or its species page, to keep it on the page
+  whatever the settings. Pinned birds are listed under the find box; with two or more,
+  **Compare** shows only them, side by side at one scale
+  ([#5](https://github.com/google/birdview/issues/5)).
+- **New here? Try** compares small, medium, large, and huge birds with pins.
+- Tiers with headings and a histogram with a bar per tier, under every ordering.
+- Four-letter **banding codes** from the USGS Bird Banding Laboratory's public-domain list, beside
+  the eBird code on tiles, species pages, and the find list. Birds the Laboratory gives no code
+  show none; BirdView does not make codes up.
+
+### Changed
+
+- The home page draws one set of birds at one scale, the first 100 by default, with every setting
+  on one count line: Order by, Month, Region, Family, Habitat, Diet, Units, and Names, each
+  opening its choices beneath it. **Show** chooses the first n, all, or only the pinned birds.
+- The home page shows **every month** by default. **Now** chooses the current month by your
+  device's clock, as does *the birds around you now*.
+- Units' choices read **Imperial** and **Metric**.
+- A species page's Back returns by browser history, so the home page comes back as you left it.
+
+### Removed
+
+- The classic index, the comparison view (`/compare`), `/now`, and pick mode. Pins replace picks.
+
+## 2026-10-25 — Phones and search
+
+### Added
+
+- A search box that narrows the index as you type.
+
+### Changed
+
+- Every page fits a phone held upright.
+- Shorter page text: design reasoning moved out of the pages into the project's records.
+
+## 2026-10-22 to 2026-10-23 — BirdView is public at birdview.site
+
+### Added
+
+- [birdview.site](https://birdview.site), served from Google Cloud Run; `www` and the Cloud Run
+  address redirect to it.
+- `robots.txt`, asking crawlers to skip filtered views.
+- Every deploy is tested first and checked from outside after.
+
+### Changed
+
+- The addresses readers bookmark and share are now promised to keep working: the home page,
+  species pages, the guides, and the parameters the pages' own links write.
+
 ## 2026-10-20 — Documentation for first-time visitors
 
 ### Changed

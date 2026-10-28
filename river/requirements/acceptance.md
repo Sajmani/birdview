@@ -2354,8 +2354,9 @@ address as redirecting hosts: nine checks, all passing. On 2026-10-27 `/?month=a
 `/classic` in the revalidation check, and the `/now` check went ([decisions.classicViewRemoved](decisions.md#classicviewremoved)).
 Later on 2026-10-27, with every month the default, the revalidation check moved to `/` and a new
 check holds `/?month=now` to a no-store redirect naming a month ([decisions.homeShowsEveryMonth](decisions.md#homeshowseverymonth));
-all passing, each new one failing under its broken variant. Not yet run against
-birdview.site, which still serves the old default.
+all passing, each new one failing under its broken variant. Run against birdview.site on
+2026-10-28 after deploying `3b9f676` (revision `birdview-00016-g7q`), with the same two
+redirecting hosts: ten checks, all passing.
 
 Watched failing: 2026-10-23, by the broken variants above, which the test keeps.
 
