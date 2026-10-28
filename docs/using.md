@@ -14,12 +14,12 @@ The page opens on the birds of every month, most often recorded first, the first
 them. Every bird shown is drawn to one scale.
 
 Under the header, a heading says what is shown, such as *Showing birds in New York in October*.
-Under it, **Show first**, **Show all**, and **Show pinned** choose which birds are drawn, and
+Under it, **First**, **All**, and **Pinned** choose which birds are shown, and
 **Clear pins** unpins every bird.
 
 **Pin** a bird, from its tile or the **find box**, to keep it on the page whatever the settings;
 the pinned birds are listed above the box. To compare birds you choose, pin them and click
-**Show pinned**. The find box finds birds by English or scientific name, code, family, or order
+**Pinned**. The find box finds birds by English or scientific name, code, family, or order
 as you type, and lists them once there are 10 or fewer.
 
 Under the find box are the settings, then **Reset**. Click a setting to change it. Under them, a
@@ -58,8 +58,8 @@ of each number, and a link to the species on **iNaturalist** for photographs.
 
 ## The settings
 
-- **Show:** **Show first** 100 (type another number), **Show all** the birds the settings match,
-  or **Show pinned** for only your pins. **Clear pins** unpins every bird; **Reset**, after the
+- **Show:** **First** 100 (type another number), **All** the birds the settings match,
+  or **Pinned** for only your pins. **Clear pins** unpins every bird; **Reset**, after the
   settings, returns every setting to its default and keeps the pins.
 - **Order by:** **Frequency**, how often a bird is recorded, most often first (see
   [below](#sorting-by-how-often-a-bird-is-recorded)), or **Length**, **Wingspan**, **Mass**,

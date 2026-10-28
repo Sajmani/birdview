@@ -52,20 +52,21 @@
      match, named by them (product.nextView). */}}
 <h2 class="settitle">{{.Title}}</h2>
 {{/* Which birds are drawn: one setting, show=, with three answers, always
-     in view, then Clear pins, there when something is pinned. Show first is
-     a form of its own, so Enter sends the count with every other setting,
-     with or without JavaScript; the server reads a blank or 100 as the
-     default (product.nextView). */}}
+     in view and short enough to sit on one line on a phone (the heading
+     above says "Showing"), then Clear pins, there when something is pinned.
+     First is a form of its own, so Enter sends the count with every other
+     setting, with or without JavaScript; the server reads a blank or 100 as
+     the default (product.nextView). */}}
 <div class="showrow">
   <form class="showfirst btn{{if eq .Show "first"}} on{{end}}" action="/" method="get">
     {{range .ShowFields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
-    <button type="submit" title="Show the first this many birds">Show first</button>
+    <button type="submit" title="Show the first this many birds">First</button>
     <input class="cap" type="number" name="show" min="1" step="1" inputmode="numeric"
       value="{{.Cap}}" aria-label="How many birds to show before the rest are hidden"
-      title="How many birds to show; click Show first or press Enter to apply">
+      title="How many birds to show; click First or press Enter to apply">
   </form>
-  <a class="btn{{if eq .Show "all"}} on{{end}}" href="{{.ShowAllURL}}" title="Every bird the settings match, with your pins">Show all ({{.Matching}})</a>
-  <a class="btn{{if eq .Show "pinned"}} on{{end}}" href="{{.ShowPinnedURL}}" title="Only the birds you have pinned">Show pinned ({{len .Pinned}})</a>
+  <a class="btn{{if eq .Show "all"}} on{{end}}" href="{{.ShowAllURL}}" title="Show every bird the settings match, with your pins">All ({{.Matching}})</a>
+  <a class="btn{{if eq .Show "pinned"}} on{{end}}" href="{{.ShowPinnedURL}}" title="Show only the birds you have pinned">Pinned ({{len .Pinned}})</a>
   {{with .ClearPinsURL}}<a class="reset" href="{{.}}" title="Unpin every bird, keeping the settings">Clear pins</a>{{end}}
 </div>
 <template id="pinicon">{{template "pinicon"}}</template>
@@ -140,7 +141,7 @@
 {{/* One bar per tier, as tall as its count against the largest, each a link
      to its tier's heading, with every bird shown when that tier is not drawn
      (product.nextView). Heights are inline because they are data. */}}
-{{if gt (len .Histogram) 1}}<nav class="hist" aria-label="Birds in each tier">{{range .Histogram}}{{if .Empty}}<span class="gap"></span>{{else}}<a href="{{.URL}}" style="height:{{.Percent}}%" aria-label="{{.Label}}" title="{{.Label}}"></a>{{end}}{{end}}</nav>{{end}}
+{{if .Histogram}}<nav class="hist" aria-label="Birds in each tier">{{range .Histogram}}{{if .Empty}}<span class="gap"></span>{{else}}<a href="{{.URL}}" style="height:{{.Percent}}%" aria-label="{{.Label}}" title="{{.Label}}"></a>{{end}}{{end}}</nav>{{end}}
 {{/* What the histogram and the birds below it are: the order's
      distribution over the birds drawn. */}}
 <p class="shownline"><span class="shown">{{.OrderLabel}} distribution of {{if eq .Show "pinned"}}{{.Count}} pinned {{if eq .Count 1}}bird{{else}}birds{{end}}{{else if eq .Show "all"}}all {{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{else}}{{if .MoreURL}}the first {{.First}} of {{end}}{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{with .AddedPast}}, plus {{.}} {{if eq . 1}}pin{{else}}pins{{end}}{{end}}{{end}}</span></p>

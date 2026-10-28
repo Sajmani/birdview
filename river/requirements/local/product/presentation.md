@@ -792,7 +792,11 @@ home page in those. Its footer carries the full credits, which every other page 
   then **Reset**; the histogram; then a sentence naming the order and what is drawn ("Length
   distribution of the first 100 of 1006 birds, plus 2 pins"); then the
   birds. The steps a reader takes to compare birds, show pinned, see the pins, find more, come
-  first; the settings that narrow the set come after.
+  first; the settings that narrow the set come after. The Show choices are short (**First**,
+  **All**, **Pinned**, since the heading already says "Showing") so that with **Clear pins** they
+  fit one line at 360px; a find-list match reads as one line of text that wraps, and a tier
+  heading wraps only between its label, range, count, and back to top. The same layout serves
+  every width; only the page margin narrows on a phone.
 - **The set.** With no filter, it is every bird, most often recorded first: every month unless
   the address names some (`month=all`, which older addresses carry, is every month too). Every
   filter (family, region, month, habitat, diet) narrows the set, and pinned birds join it.
@@ -801,7 +805,7 @@ home page in those. Its footer carries the full credits, which every other page 
   pinned bird (`pin=<id>`) is drawn whatever the settings, wherever the order puts it, even past
   the first 100, and the sentence above the birds says how many are ("… the first 100 of 1006 birds, plus 2 pins"). Pinning or unpinning leaves the page where
   it was. The pinned birds are listed above the find box in alphabetical order: a bird's name goes
-  to its tile, and its pin unpins it. **Show pinned (k)**, always in view above them, compares
+  to its tile, and its pin unpins it. **Pinned (k)**, always in view above them, compares
   them ([#5](https://github.com/google/birdview/issues/5): a reader who had pinned two birds
   could not find how to compare them). Unpinning returns the bird to the settings'
   choice; nothing removes a bird the settings choose. A box above the set finds birds by name: a
@@ -842,12 +846,12 @@ home page in those. Its footer carries the full credits, which every other page 
   mass, bill, or tail (smallest first). Choosing the chosen order again reverses it (`rev=1`).
   Order by is the first setting on the count line.
 - **Show.** Which birds are drawn is one setting with three answers, always in view under the
-  heading, and one parameter, `show`: **Show first [100]** draws the first 100 of the order plus
+  heading, and one parameter, `show`: **First [100]** draws the first 100 of the order plus
   any pinned birds past them (`show=<n>`; 100 is the default, which the address leaves out), and
-  the 100 is a box: typing another count and clicking Show first (anywhere on the choice but its
+  the 100 is a box: typing another count and clicking First (anywhere on the choice but its
   box) or pressing Enter sets it, with or without JavaScript, and a blank, 100, or anything not a
-  count returns to the default. **Show all (N)** draws every bird the settings match
-  (`show=all`), N counting them with the pins. **Show pinned (k)** draws only the pinned birds
+  count returns to the default. **All (N)** draws every bird the settings match
+  (`show=all`), N counting them with the pins. **Pinned (k)** draws only the pinned birds
   (`show=pinned`), for a comparison of the reader's own picks. The chosen one is marked. Wherever unpinned birds are left
   out (after the first, between pinned birds past them, or after the last pinned bird), a gap row
   says how many are hidden there and links to `show=all`. Choosing a setting keeps Show as it is,

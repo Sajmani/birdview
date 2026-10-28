@@ -619,22 +619,23 @@ func TestTierCountFollowsTheRange(t *testing.T) {
 
 // TestTierHistogram checks the home page's histogram: one bar per
 // tier, in order, each as tall as its tier's count against the largest, each
-// labeled with its tier and linking to it, under every ordering.
+// labeled with its tier and linking to it, under every ordering, a single
+// tier included (#6: two pinned birds in one tier drew no histogram, under a
+// line calling it their distribution).
 //
 // Verifies: product.tierHistogram. Criterion: app.tierHistogramMatchesTiers.
 func TestTierHistogram(t *testing.T) {
 	s := newTestServer(t)
 	bar := regexp.MustCompile(`<a href="#tier-(\d+)" style="height:(\d+)%" aria-label="([^"]+)"`)
+	if bars := bar.FindAllStringSubmatch(mustGet(t, s, "/?show=pinned&pin=amecro"), -1); len(bars) != 1 || bars[0][2] != "100" {
+		t.Errorf("one pinned bird, one tier: the histogram has %d bars (%v); want one at 100%%", len(bars), bars)
+	}
 	for _, q := range []string{"by=length", "by=bill", "by=mass", "by=frequency", "by=length&family=Ardeidae"} {
 		body := mustGet(t, s, "/?month=all&show=all&"+q)
 		bars := bar.FindAllStringSubmatch(body, -1)
 		secs := regexp.MustCompile(`(?s)<h3 class="tierhd" id="tier-(\d+)">.*?<span class="n">(\d+) birds?</span>`).FindAllStringSubmatch(body, -1)
 		if len(secs) == 0 {
 			t.Fatalf("/?%s: no tier headings with ids", q)
-		}
-		// One tier needs no histogram, and the home page draws none.
-		if len(secs) == 1 && len(bars) == 0 {
-			continue
 		}
 		if len(bars) != len(secs) {
 			t.Fatalf("/?%s: %d bars for %d tiers", q, len(bars), len(secs))

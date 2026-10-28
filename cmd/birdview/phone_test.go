@@ -139,3 +139,80 @@ func TestPagesFitAPhone(t *testing.T) {
 		})
 	}
 }
+
+// showRowProbe reports, as data-contrast on the root, the width the page was
+// laid out at and the top of each choice on the Show row.
+const showRowProbe = `window.addEventListener("load", function () {
+  setTimeout(function () {
+    var tops = [];
+    document.querySelectorAll(".showrow > *").forEach(function (e) {
+      tops.push(Math.round(e.getBoundingClientRect().top));
+    });
+    document.documentElement.setAttribute("data-contrast",
+      JSON.stringify({ width: document.documentElement.clientWidth, tops: tops }));
+  }, 200);
+});`
+
+// TestShowRowFitsAPhone checks, in headless Chrome at phoneWidth, that the
+// Show row's four choices (First [box], All, Pinned, Clear pins) sit on one
+// line, as the owner asked (#6's screenshot had them on two).
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestShowRowFitsAPhone(t *testing.T) {
+	chrome := findChrome()
+	if chrome == "" {
+		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); the Show row was not measured")
+	}
+	inner := instrument(newTestServer(t), showRowProbe, nil)
+	const page = "/?show=pinned&pin=amecro&pin=annhum"
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/__phone" {
+			// A frame phoneWidth wide, as in TestPagesFitAPhone.
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			fmt.Fprintf(w, `<!doctype html><html><body style="margin:0">`+
+				`<iframe id="f" src="%s" style="border:0;width:%dpx;height:800px"></iframe>`+
+				`<script>setInterval(function () {`+
+				`var d = document.getElementById('f').contentDocument;`+
+				`var v = d && d.documentElement.getAttribute('data-contrast');`+
+				`if (v) document.documentElement.setAttribute('data-contrast', v);`+
+				`}, 100);</script></body></html>`, html.EscapeString(page), phoneWidth)
+			return
+		}
+		inner.ServeHTTP(w, r)
+	}))
+	defer ts.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
+		"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
+		"--disable-component-update", "--disable-sync", "--disable-extensions",
+		"--hide-scrollbars", "--user-data-dir="+t.TempDir(), "--window-size=800,900",
+		"--virtual-time-budget=5000", "--dump-dom", ts.URL+"/__phone").Output()
+	if err != nil {
+		t.Fatalf("chrome: %v", err)
+	}
+	m := dataContrast.FindSubmatch(out)
+	if m == nil {
+		t.Fatal("no result from the probe; it did not run")
+	}
+	var res struct {
+		Width int   `json:"width"`
+		Tops  []int `json:"tops"`
+	}
+	if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
+		t.Fatalf("reading the probe: %v", err)
+	}
+	if res.Width != phoneWidth {
+		t.Fatalf("the page was laid out %d pixels wide, not %d; the check would prove nothing", res.Width, phoneWidth)
+	}
+	if len(res.Tops) != 4 {
+		t.Fatalf("the Show row has %d choices, want 4 (First, All, Pinned, Clear pins)", len(res.Tops))
+	}
+	// Centered on one line, the choices' tops differ by a pixel or two; a
+	// second line starts a whole row (about 28px) lower.
+	for i, top := range res.Tops {
+		if top-res.Tops[0] > 8 || res.Tops[0]-top > 8 {
+			t.Errorf("at %dpx, Show choice %d starts at %dpx, the first at %dpx; want one line", phoneWidth, i+1, top, res.Tops[0])
+		}
+	}
+}

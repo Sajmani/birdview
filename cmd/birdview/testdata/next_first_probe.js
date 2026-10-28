@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Drives TestNextFirstCommitsOnClick. It types a count into the Show first
+// Drives TestNextFirstCommitsOnClick. It types a count into the First
 // box, and clicks three places in turn: the box, the First button, and
 // the choice's own edge outside both. Each submission is recorded with the
 // count it would send and then cancelled, so the page stays. The result is

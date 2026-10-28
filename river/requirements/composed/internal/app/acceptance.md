@@ -258,7 +258,8 @@ case reads the server's request log and then stops the browser.
 Covers: [product.tierHistogram](../../../local/product/ordering.md#tierhistogram)
 
 **Method:** on the rendered home page, every bird shown, under several orderings and a filter, the
-histogram has exactly one bar per tier, in order, or none for a single tier; each bar links to its
+histogram has exactly one bar per tier, in order, a single tier included (one pinned bird draws
+one bar at 100%; [#6](https://github.com/google/birdview/issues/6)); each bar links to its
 tier's heading; each bar's height is its
 tier's count as a percentage of the largest tier's, rounded; and each bar's label names the tier
 and ends with its count. Under the size orderings, a stretch with no birds is one empty bucket per
@@ -268,6 +269,9 @@ whole 15% step it spans, between the bars on either side.
 **Status: verified 2026-10-19, passing, and watched failing** before the histogram and the tier
 ids existed, and with bars sized by raw count instead of by share of the largest tier. The empty
 buckets were watched failing by removing them: "0 empty buckets before tier 2, want 4".
+Watched failing: 2026-10-28, by the page hiding the histogram for a single tier, as it did until
+[#6](https://github.com/google/birdview/issues/6) ("one pinned bird, one tier: the histogram has
+0 bars ([]); want one at 100%").
 
 ## nextViewDrawsOneSet
 
@@ -295,9 +299,9 @@ only that one, choosing again removes it, and changing a filter drops the find b
 The home page draws the first 100 of its 1,041 and a link to all of them (`show=all`) in
 the same order, in the gap row at the end; the herons draw every heron with no link. `show=50`
 draws 50, says 50 in the box, and is kept by a filter but not Reset; `show=all` is kept by a
-filter too. Under the heading, the Show row reads Show first [box], a form that sends every other
-setting but show and the find box, then Show all with the count the settings match, Show pinned
-(2), and Clear pins, the chosen one marked; Show is no longer a closed setting. The page runs, top
+filter too. Under the heading, the Show row reads First [box], a form that sends every other
+setting but show and the find box, then All with the count the settings match, Pinned
+(2), and Clear pins, the chosen one marked, all on one line at 360px (`TestShowRowFitsAPhone`); Show is no longer a closed setting. The page runs, top
 to bottom: the header, the heading, the Show row, the pinned list, the find box, one count row
 (Order by through Names, then Reset), the histogram, the sentence, and the birds. The sentence
 names the order and what is drawn: "Mass distribution of the first 50 of", "Frequency
@@ -332,8 +336,8 @@ every other setting; in headless Chrome, from /?by=mass&month=May in California 
 same holds when the link is clicked on the page, which changes only the fragment. In headless
 Chrome, after here.js runs, Now links to the browser's month with every other setting kept
 (`TestNowIsTheBrowsersMonth`). In headless Chrome, the script's × goes where the server's does, and a
-tile's pin clicked with text in the box carries the text. In headless Chrome, clicking the Show first button or the Show first choice's edge
-sends the typed count, and clicking into its box does not; without the script, Show first is a submit
+tile's pin clicked with text in the box carries the text. In headless Chrome, clicking the First button or the First choice's edge
+sends the typed count, and clicking into its box does not; without the script, First is a submit
 button. The chosen order links to its reverse and back, every other
 order links to itself unreversed, reversed mass runs largest first, and reversed frequency puts
 the most recorded duck last. Every home page, with no month included, carries an ETag; the
@@ -360,6 +364,7 @@ stretched to a taller neighbor included.
 
 **Run:** `go test ./cmd/birdview/ -run 'TestNext|TestNowIsTheBrowsersMonth|TestHereAndNowLink'` (the browser checks gate where Chrome is installed)
 **Status: verified 2026-10-28, passing.**
+Watched failing: 2026-10-28, by the longer labels (Show first, Show all, Show pinned) at 360px ("Show choice 4 starts at 275px, the first at 242px; want one line").
 Watched failing: 2026-10-28, by Reset back before the settings ("the page does not run in order: \">Reset</a>\" … after \"data-ctl=\\\"Names\\\"\"") and by a sentence without the order's name ("\"<span class=\\\"shown\\\">Mass distribution of the first 50 of\" at -1").
 Watched failing: 2026-10-28, by the previous layout ("the page has no Show row"), by the count sentence above the histogram ("the page does not run in order: \"<span class=\\\"shown\\\">First 50 of\" … after \"<nav class=\\\"hist\\\"\""), and by a heading without the family ("… want \"Showing birds in May or June · Family: Corvidae · …\"").
 Watched failing: 2026-10-27, by here.js leaving Now's link alone ("after here.js, Now links to /?by=mass&month=now&region=CA; want /?by=mass&month=Oct&region=CA"), by the server not redirecting month=now ("GET /?month=now = 200; want 303 to /?month=Oct"), and by here.js leaving the welcome template's month slot unfilled.

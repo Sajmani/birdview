@@ -512,8 +512,8 @@ func TestNextShowAll(t *testing.T) {
 		t.Errorf("show=50: Pinned only %s, All %s, Reset %s", c.ShowPinnedURL, c.ShowAllURL, c.ResetURL)
 	}
 
-	// The Show choices, in view under the heading: Show all (N), Show pinned
-	// (k), and Show first [box] in a form with the other settings, the
+	// The Show choices, in view under the heading: First [box], All (N),
+	// Pinned (k), and Clear pins; First is a form with the other settings, the
 	// chosen one marked.
 	_, body := get(t, s, "/?by=mass&show=50&find=jay&pin=amecro&pin=annhum")
 	row := regexp.MustCompile(`(?s)<div class="showrow">(.*?)\n</div>`).FindStringSubmatch(body)
@@ -522,22 +522,22 @@ func TestNextShowAll(t *testing.T) {
 	}
 	form := regexp.MustCompile(`(?s)<form class="showfirst btn on" action="/" method="get">(.*?)</form>`).FindStringSubmatch(row[1])
 	if form == nil {
-		t.Fatal("the Show row has no Show first form, marked chosen")
+		t.Fatal("the Show row has no First form, marked chosen")
 	}
 	var sent []string
 	for _, m := range regexp.MustCompile(`<input type="hidden" name="([^"]+)" value="([^"]*)">`).FindAllStringSubmatch(form[1], -1) {
 		sent = append(sent, m[1]+"="+m[2])
 	}
 	if !slices.Equal(sent, []string{"by=mass", "find=jay", "pin=amecro", "pin=annhum"}) {
-		t.Errorf("the Show first form sends %v; want every parameter but show", sent)
+		t.Errorf("the First form sends %v; want every parameter but show", sent)
 	}
-	if !strings.Contains(form[1], ">Show first</button>\n    <input class=\"cap\" type=\"number\" name=\"show\"") || !strings.Contains(form[1], `value="50"`) {
-		t.Errorf("the Show first form does not read Show first [50]:\n%s", form[1])
+	if !strings.Contains(form[1], ">First</button>\n    <input class=\"cap\" type=\"number\" name=\"show\"") || !strings.Contains(form[1], `value="50"`) {
+		t.Errorf("the First form does not read First [50]:\n%s", form[1])
 	}
 	pp := nextAt(s, "/?by=mass&show=50&find=jay&pin=amecro&pin=annhum")
-	allBtn, pinBtn := ">Show all ("+strconv.Itoa(pp.Matching)+")</a>", ">Show pinned (2)</a>"
+	allBtn, pinBtn := ">All ("+strconv.Itoa(pp.Matching)+")</a>", ">Pinned (2)</a>"
 	if f, i, j, k := strings.Index(row[1], "<form"), strings.Index(row[1], allBtn), strings.Index(row[1], pinBtn), strings.Index(row[1], ">Clear pins</a>"); f < 0 || i < f || j < i || k < j {
-		t.Errorf("the Show row does not read Show first, Show all (%d), Show pinned (2), Clear pins, in that order:\n%s", pp.Matching, row[1])
+		t.Errorf("the Show row does not read First, All (%d), Pinned (2), Clear pins, in that order:\n%s", pp.Matching, row[1])
 	}
 	if strings.Contains(body, `data-ctl="Show"`) || strings.Contains(body, `class="btn compare"`) {
 		t.Error("Show is still a closed setting, or the pinned list still has its own Compare")
@@ -1199,8 +1199,8 @@ var nextFirstProbe string
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextFirstCommitsOnClick(t *testing.T) {
 	s := newTestServer(t)
-	if body := mustGet(t, s, "/"); !strings.Contains(body, `<button type="submit" title="Show the first this many birds">Show first</button>`) {
-		t.Error("Show first is not a submit button")
+	if body := mustGet(t, s, "/"); !strings.Contains(body, `<button type="submit" title="Show the first this many birds">First</button>`) {
+		t.Error("First is not a submit button")
 	}
 	chrome := findChrome()
 	if chrome == "" {
