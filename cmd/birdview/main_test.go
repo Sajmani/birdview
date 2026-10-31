@@ -424,22 +424,26 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 		}
 	}
 
-	// The numbers come first (product.tileContents, decisions.tileNumbersFirst): the common
-	// name, then length, wingspan, and mass, then the share line, all above
-	// the drawing; the scientific name, the codes, and the family badge below
-	// it. The crow is the fixture's bird with a banding code.
+	// The numbers come first (product.tileContents, decisions.tileMeasurementLines): the common
+	// name and its codes, length, bill, and tail, wingspan and chord, and the
+	// share line, all above the drawing; the mass named beside the cube in it;
+	// and under it the short family badge, then the scientific name. The crow
+	// is the fixture's bird with a banding code.
 	crow := tileOf(t, body, "amecro")
 	order := []struct{ what, mark string }{
 		{"the common name", `<span class="cnname">American Crow</span>`},
-		{"the length", "Length "},
-		{"the wingspan", "Wingspan "},
-		{"the mass", "Mass "},
-		{"the share line", `<div class="share">`},
-		{"the drawing", `<svg class="dia"`},
-		{"the scientific name", "Corvus brachyrhynchos"},
 		{"the banding code", "AMCR"},
 		{"the eBird code", "(amecro)"},
+		{"the length", ">Length "},
+		{"the bill", ">Bill "},
+		{"the tail", ">Tail "},
+		{"the wingspan", ">Wingspan "},
+		{"the chord", ">Chord "},
+		{"the share line", `<div class="share">`},
+		{"the drawing", `<svg class="dia"`},
+		{"the mass, beside the cube", `<text class="tl"`},
 		{"the family badge", `class="badge"`},
+		{"the scientific name", "Corvus brachyrhynchos"},
 	}
 	last := -1
 	for i, o := range order {
@@ -449,10 +453,48 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 			continue
 		}
 		if at < last {
-			t.Errorf("on the crow's tile %s comes before %s; the numbers come first, the names under the drawing",
-				o.what, order[i-1].what)
+			t.Errorf("on the crow's tile %s comes before %s", o.what, order[i-1].what)
 		}
 		last = at
+	}
+	// The short badge: the family's scientific name, its common name only as
+	// the tooltip.
+	if m := regexp.MustCompile(`(?s)<span class="badge"[^>]*>(.*?)</span>`).FindStringSubmatch(crow); m == nil ||
+		strings.TrimSpace(m[1]) != "Corvidae" {
+		t.Errorf("the crow's badge reads %q; on a tile it is the family's scientific name alone", m)
+	}
+}
+
+// TestTileMassLabelSitsOnTheCube asserts the drawing's one label (product.tileContents): the
+// mass, right of the cube, its baseline on the cube's foot, on every tile.
+//
+// Verifies: product.tileContents. Criterion: acceptance.tileCarriesHeaderAndMetrics.
+func TestTileMassLabelSitsOnTheCube(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/?month=all&show=all")
+	face := regexp.MustCompile(`(?s)<rect class="mcface" x="([\d.]+)" y="([\d.]+)"\s*width="([\d.]+)" height="([\d.]+)"/>`)
+	label := regexp.MustCompile(`<text class="tl" text-anchor="start" x="([\d.]+)" y="([\d.]+)">Mass `)
+	f := func(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
+	n := 0
+	for _, id := range []string{"annhum", "amerob", "amecro", "greblu", "blasti"} {
+		seg := tileOf(t, body, id)
+		c, l := face.FindStringSubmatch(seg), label.FindStringSubmatch(seg)
+		if c == nil || l == nil {
+			t.Errorf("%s: cube %v, mass label %v; the tile needs both", id, c != nil, l != nil)
+			continue
+		}
+		n++
+		if foot, base := f(c[2])+f(c[4]), f(l[2]); math.Abs(foot-base) > 0.11 {
+			t.Errorf("%s: the mass label's baseline is at %.1f, the cube's foot at %.1f", id, base, foot)
+		}
+		if right, x := f(c[1])+f(c[3]), f(l[1]); x <= right {
+			t.Errorf("%s: the mass label starts at %.1f, inside the cube, which ends at %.1f", id, x, right)
+		}
+		if strings.Count(seg, "<text") != 1 {
+			t.Errorf("%s: the drawing carries %d labels; the mass is its only one", id, strings.Count(seg, "<text"))
+		}
+	}
+	if n == 0 {
+		t.Fatal("no tile measured")
 	}
 }
 
@@ -672,15 +714,26 @@ func tileArea(t *testing.T, body string) string {
 	return body[i:]
 }
 
-// footer returns the contents of the first tile's metric footer.
+// footer returns the first tile's measurements: its two lines of lengths
+// and its mass label, beside the cube (product.tileContents).
 func footer(t *testing.T, body string) string {
 	t.Helper()
-	i := strings.Index(body, `<div class="ft">`)
+	i := strings.Index(body, `<div class="tilewrap"`)
 	if i < 0 {
-		t.Fatal("no tile footer in the page")
+		t.Fatal("no tile in the page")
 	}
-	rest := body[i:]
-	return rest[:strings.Index(rest, "</div>")]
+	tile := body[i:]
+	if j := strings.Index(tile[1:], `<div class="tilewrap"`); j > 0 {
+		tile = tile[:j+1]
+	}
+	var out []string
+	for _, m := range regexp.MustCompile(`(?s)<div class="ft">.*?</div>|<text class="tl"[^>]*>.*?</text>`).FindAllString(tile, -1) {
+		out = append(out, m)
+	}
+	if len(out) != 3 {
+		t.Fatalf("the first tile has %d of its two measurement lines and its mass label", len(out))
+	}
+	return strings.Join(out, "\n")
 }
 
 // TestUnitToggle asserts product.imperialByDefault where the user actually reads the numbers.
@@ -703,8 +756,9 @@ func TestUnitToggle(t *testing.T) {
 		t.Helper()
 		_, body := get(t, s, path)
 		f := footer(t, body)
-		if n := countAny(f, wantLen); n != 2 {
-			t.Errorf("%s: footer %q has %d of the two length values in %v", path, f, n, wantLen)
+		// Length, bill, tail, wingspan, and the chord where it is known.
+		if n := countAny(f, wantLen); n < 4 || n != strings.Count(f, "<span") {
+			t.Errorf("%s: footer %q has %d length values in %v for %d measurements", path, f, n, wantLen, strings.Count(f, "<span"))
 		}
 		if n := countAny(f, wantMass); n != 1 {
 			t.Errorf("%s: footer %q has %d of the one mass value in %v", path, f, n, wantMass)

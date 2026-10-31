@@ -4070,7 +4070,7 @@ this, now shows every month rather than the month it is opened in.
 
 Date: 2026-10-30
 Decided by: Sameer
-Status: accepted
+Status: amended by tileMeasurementLines
 Affects: [product.tileContents](local/product/presentation.md#tilecontents), [product.nextView](local/product/presentation.md#nextview), [product.inaturalistLink](local/product/presentation.md#inaturalistlink), [product.bandingCodes](local/product/dataset.md#bandingcodes)
 
 ### Decided
@@ -4093,3 +4093,34 @@ BirdView naming iNaturalist in words, so the link is the word. The pin leaves th
 right corner, where it stood level with the mass cube; the cube is unchanged. The reader's other
 suggestions (a month hint, a type face for small text, pinned birds first, the cube's meaning) are
 open as [todo.homePageReaderFeedback](../todo.md#homepagereaderfeedback).
+
+---
+
+## tileMeasurementLines
+
+**A tile's measurements are two lines of text, the mass is named beside its cube, and the badge is short**
+
+Date: 2026-10-31
+Decided by: Sameer
+Status: accepted
+Amends: tileNumbersFirst
+Affects: [product.tileContents](local/product/presentation.md#tilecontents), [product.inaturalistLink](local/product/presentation.md#inaturalistlink), [product.bandingCodes](local/product/dataset.md#bandingcodes)
+
+### Decided
+
+A tile's header is the common name with its banding and eBird codes, then **length, bill, and
+tail**, then **wingspan and wing chord**, then the share line, and a rule. The drawing carries one
+label: the mass, right of the cube, its baseline on the cube's foot, in the measurement lines' type.
+Under the second rule, the **short family badge** (the family's scientific name, its common name
+as the tooltip) comes before the scientific name, and the **iNat** link sits at that line's right
+end, in the tile's lower-right corner, within the band under the rule. The pin stays in the top-right
+corner. The species page and the Family setting keep the full badge.
+
+### Why
+
+The owner drew it, 2026-10-31, after trying measurements as labels on the drawing, which crowded
+around small birds. With the codes back on the name line and the badge short, nothing on the
+bottom line truncates on any of the 1,041 tiles at laptop width or at 360px, where the full badge
+cut the scientific name on half of them; the iNat link costs one tile at 360px about 8px of its
+scientific name (Cactus Wren). The mass label is the one label on a tile because the mass has no
+part of the bird to sit beside, and the cube is its picture.

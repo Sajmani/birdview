@@ -16,44 +16,49 @@
 {{/* The templates the home page and the species pages share: a bird's tile,
      its pin, the diagram, and the diagram's key. */}}
 {{define "tile"}}
-{{/* The numbers first (product.tileContents, decisions.tileNumbersFirst): the
-     name, the three measurements, and the share line above the drawing; the
-     scientific name, the codes, and the family under it; and last the notes,
-     the only part some tiles have and others lack, so that a tile with notes
-     grows below its drawing and the drawings in a row stay level.
+{{/* The numbers first (product.tileContents, decisions.tileMeasurementLines): the name and its
+     codes, two lines of measurements, and the share line above the drawing;
+     the mass named beside its cube in it; the short family badge and the
+     scientific name under it; and last the notes, the only part some tiles
+     have and others lack, so that a tile with notes grows below its drawing
+     and the drawings in a row stay level.
 
-     The iNat link and the pin are SIBLINGS of the tile link, not inside it:
+     The pin and the iNat link are SIBLINGS of the tile link, not inside it:
      anchors cannot nest, and the tile must keep opening the detail view
-     (product.tileOpensDetail). They sit in the tile's top-right corner, over
-     the end of the name line, which keeps room for them. */}}
+     (product.tileOpensDetail). The pin is in the top-right corner, the iNat link in the
+     lower-right, each over the end of a line that keeps room for it. */}}
 <div class="tilewrap" id="{{.Anchor}}">
 <a class="tile" href="{{.DetailURL}}">
   <div class="hd">
     <div class="nameline">
-      <span class="cn"><span class="cnname">{{.Name}}</span></span>
+      <span class="cn"><span class="cnname">{{.Name}}</span>{{with .S.BandingCode}}<span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">{{.}}</span>{{end}}{{with .S.SpeciesCode}}<span class="code" title="eBird code">({{.}})</span>{{end}}</span>
+    </div>
+    {{/* Named in full, not L/W/M: the initials cost every reader who has not
+         yet learned them (product.tileContents). Length, bill, and tail, then the wing.
+
+         `whynot` supplies the tooltip. All of them used to say "estimated" for
+         anything not measured, which was false for a near-match: that is a
+         real measurement with calipers, of a sibling taxon, and product.measuredVersusModeled draws
+         it SOLID for exactly that reason. The tile calling it an estimate
+         contradicted the stroke beside it, and named no reason a reader
+         could act on -- the Chihuahuan Meadowlark's mass is the Eastern
+         Meadowlark's, which is worth saying out loud. */}}
+    <div class="ft">
+      <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="{{whynot .S.TotalLength.Prov}}"{{end}}>Length {{.Length}}</span>
+      <span{{if ne .S.Segments.Bill.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Bill.Prov}}"{{end}}>Bill {{.BillStr}}</span>
+      <span{{if ne .S.Segments.Tail.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Tail.Prov}}"{{end}}>Tail {{.TailStr}}</span>
     </div>
     <div class="ft">
-      {{/* Named in full, not L/W/M: the initials cost every reader who has not
-           yet learned them, and the three fit a tile at full width (product.tileContents).
-
-           `whynot` supplies the tooltip. All three used to say "estimated" for
-           anything not measured, which was false for a near-match: that is a
-           real measurement with calipers, of a sibling taxon, and product.measuredVersusModeled draws
-           it SOLID for exactly that reason. The tile calling it an estimate
-           contradicted the stroke beside it, and named no reason a reader
-           could act on -- the Chihuahuan Meadowlark's mass is the Eastern
-           Meadowlark's, which is worth saying out loud. */}}
-      <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="{{whynot .S.TotalLength.Prov}}"{{end}}>Length {{.Length}}</span>
       <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="{{whynot .S.Wingspan.Prov}}"{{end}}>Wingspan {{.Wing}}</span>
-      <span{{if ne .S.Mass.Prov.Kind "measured"}} class="est" title="{{whynot .S.Mass.Prov}}"{{end}}>Mass {{.MassStr}}</span>
+      {{with .ChordStr}}<span{{if ne $.S.WingChord.Prov.Kind "measured"}} class="est" title="{{whynot $.S.WingChord.Prov}}"{{end}}>Chord {{.}}</span>{{end}}
     </div>
     {{/* How much of the species observations held by the regions currently
          on screen (product.shareOfRecords). It answers the question the filtered page is
          posing; "commonest in Yukon" answers one the reader did not ask and
          stays on the detail page.
 
-         Its own line, not a fourth cell beside the measurements: product.tileContents keeps
-         that line to one, and a fourth wrapped it. Rendered on EVERY tile,
+         Its own line, not a cell beside the measurements: product.tileContents keeps
+         each line to one, and a fourth cell once wrapped. Rendered on EVERY tile,
          because a line that appears on some tiles and not others shifts
          their drawings and takes the whole flex row out of step.
 
@@ -69,10 +74,12 @@
   {{template "diagram" .}}
   <div class="lo">
     <div class="idline">
-      <span class="sn">{{.S.ScientificName}}</span>{{with .S.BandingCode}}<span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">{{.}}</span>{{end}}{{with .S.SpeciesCode}}<span class="code" title="eBird code">({{.}})</span>{{end}}
+      {{/* The short badge, the family's scientific name alone, so the
+           scientific name keeps its room; the full badge is on the species
+           page and in the Family setting (product.tileContents). */}}
+      <span class="badge" style="background:{{.S.FamilyColor}};color:{{.S.FamilyText}}" title="{{.S.FamilyCommon}}">{{.S.Family}}</span>
+      <span class="sn">{{.S.ScientificName}}</span>
     </div>
-    <span class="badge" style="background:{{.S.FamilyColor}};color:{{.S.FamilyText}}">{{.S.Family}}
-      <em>{{.S.FamilyCommon}}</em></span>
   </div>
   {{if or (and .Commonest .Commonest.Seams) .SameAs}}<div class="notes">{{with .Commonest}}{{range .Seams}}<span class="seam"
     title="{{.Title}}">{{.Text}}</span>{{end}}{{end}}{{range .SameAs}}<span class="seam"
@@ -185,6 +192,9 @@
         x="{{f1 .LabelX}}" y="{{f1 .LabelY}}">{{.Label}}{{if .Est}} ~{{end}}</text>
   {{end}}
   {{end}}{{end}}
+  {{/* A home page tile's one label, its mass, beside the cube (product.tileContents). */}}
+  {{range .TileLabels}}<text class="tl" text-anchor="{{.Anchor}}" x="{{f1 .X}}" y="{{f1 .Y}}">{{.Text}}{{if .Est}}<tspan class="estmark" dx="2">~</tspan>{{end}}</text>
+  {{end}}
   {{range .FootLabels}}
   <text class="dlabel {{.Key}} foot{{if .Est}} est{{end}}" text-anchor="middle"
         x="{{f1 $g.CX}}" y="{{f1 .Y}}">{{.Text}}{{if .Est}} ~{{end}}</text>

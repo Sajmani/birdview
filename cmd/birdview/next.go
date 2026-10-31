@@ -713,10 +713,22 @@ func (s *server) nextPage(r *http.Request) nextData {
 			Length:      u.format(sp.TotalLength.Value, view.ByLength),
 			Wing:        u.format(sp.Wingspan.Value, view.ByWingspan),
 			MassStr:     u.format(sp.Mass.Value, view.ByMass),
+			BillStr:     u.format(sp.Segments.Bill.Value, view.ByLength),
+			TailStr:     u.format(sp.Segments.Tail.Value, view.ByLength),
 			Commonest:   s.shareWithSeams(sp, opt),
 			SameAs:      s.sameMeasurements(sp, opt.Locale),
 		}
 		t.PinURL, t.Pinned = nextPin(q, sp.ID), added[sp.ID]
+		// The chord is left out where it is unknown; the mass is the
+		// drawing's one label, right of the cube, its baseline on the cube's
+		// foot (product.tileContents, decisions.tileMeasurementLines).
+		if sp.WingChord.Value > 0 {
+			t.ChordStr = u.format(sp.WingChord.Value, view.ByLength)
+		}
+		if c := t.MassCube; c.Side > 0 {
+			t.TileLabels = []tileLabel{{Text: "Mass " + t.MassStr, Est: sp.Mass.Prov.Kind != dataset.Measured,
+				X: c.X + c.Side + c.Depth + 6, Y: c.Y + c.Side, Anchor: "start"}}
+		}
 		if sp.INatTaxonID > 0 {
 			t.INatURL = inat.TaxonURL(sp.INatTaxonID)
 		}
@@ -1095,4 +1107,13 @@ func nextArrow(m view.Metric, rev bool) string {
 		return "\u2193"
 	}
 	return "\u2191"
+}
+
+// tileLabel names a measurement inside a home page tile's drawing: the mass,
+// beside its cube (product.tileContents).
+type tileLabel struct {
+	Text   string
+	Est    bool
+	X, Y   float64 // baseline position, in the box's coordinates; the mass label's sits on the cube's foot
+	Anchor string  // start, middle, or end
 }

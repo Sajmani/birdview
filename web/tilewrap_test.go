@@ -58,8 +58,6 @@ func TestTileHeaderCannotWrap(t *testing.T) {
 			"the banding code would shrink or truncate; it is the one part a reader cannot reconstruct"},
 		{".idline", "flex-wrap: nowrap",
 			"the line under a tile's rule could wrap its codes onto a second row"},
-		{".idline .code", "flex: none",
-			"a code under the rule would shrink or truncate while the scientific name kept its width"},
 		{".ft", "flex-wrap: nowrap",
 			"the measurements could wrap to a second line and push the drawing down"},
 		{".badge", "white-space: nowrap",
@@ -77,17 +75,14 @@ func TestTileHeaderCannotWrap(t *testing.T) {
 
 var (
 	reNameline = regexp.MustCompile(`(?s)<div class="nameline">(.*?)</div>`)
-	reIdline   = regexp.MustCompile(`(?s)<div class="idline">(.*?)</div>`)
 	reCnname   = regexp.MustCompile(`(?s)<span class="cnname">(.*?)</span>`)
-	reSn       = regexp.MustCompile(`(?s)<span class="sn">(.*?)</span>`)
 )
 
 // TestBandingCodeIsOutsideTheTruncatingElement is the half no stylesheet check
 // can see. The names truncate with an ellipsis, so a code nested inside one
 // would be the first thing eaten -- and the markup looks correct until a name
-// is long enough to prove otherwise. The species page keeps the codes beside
-// the common name; a tile carries them under its rule, after the scientific
-// name (product.tileContents, decisions.tileNumbersFirst).
+// is long enough to prove otherwise. The species page and the tile both
+// carry the codes beside the common name (product.tileContents).
 //
 // Verifies: product.tileContents. Criterion: acceptance.tileHeaderNeverWraps.
 func TestBandingCodeIsOutsideTheTruncatingElement(t *testing.T) {
@@ -96,7 +91,7 @@ func TestBandingCodeIsOutsideTheTruncatingElement(t *testing.T) {
 		line, name *regexp.Regexp
 	}{
 		{"static/detail.html", ".nameline", reNameline, reCnname},
-		{"static/shared.html", ".idline", reIdline, reSn},
+		{"static/shared.html", ".nameline", reNameline, reCnname},
 	} {
 		b, err := Static.ReadFile(c.file)
 		if err != nil {
@@ -120,5 +115,22 @@ func TestBandingCodeIsOutsideTheTruncatingElement(t *testing.T) {
 				t.Errorf("%s: its %s line emits no code at all", c.file, c.what)
 			}
 		}
+	}
+}
+
+// TestMassLabelSetLikeTheMeasurements asserts that the mass label beside a
+// tile's cube is in the measurement lines' type and size (product.tileContents,
+// decisions.tileMeasurementLines): the same font declaration, word for word.
+//
+// Verifies: product.tileContents. Criterion: acceptance.tileCarriesHeaderAndMetrics.
+func TestMassLabelSetLikeTheMeasurements(t *testing.T) {
+	font := regexp.MustCompile(`font:\s*([^;]+);`)
+	ft, tl := font.FindStringSubmatch(rule(t, ".ft")), font.FindStringSubmatch(rule(t, ".tl"))
+	if ft == nil || tl == nil {
+		t.Fatalf("a font declaration is missing: .ft %v, .tl %v", ft, tl)
+	}
+	// .ft also sets a line height, which an SVG label has no use for.
+	if strings.Replace(ft[1], "/1 ", " ", 1) != tl[1] {
+		t.Errorf("the mass label is set in %q and the measurements in %q; they should match", tl[1], ft[1])
 	}
 }

@@ -109,7 +109,8 @@ Feedback from a reader of the home page ([product.nextView](requirements/local/p
 2. **Tile layout:** move length, wingspan, and mass up beside or below the name, above the stick
    figure, since they are what the page is for; move the banding codes and Latin name below the
    line. Set the measurements in a face designed for small text ("old eyes"). **Layout done
-   2026-10-30** ([decisions.tileNumbersFirst](requirements/decisions.md#tilenumbersfirst)). Left:
+   2026-10-30, revised 2026-10-31** ([decisions.tileNumbersFirst](requirements/decisions.md#tilenumbersfirst),
+   [decisions.tileMeasurementLines](requirements/decisions.md#tilemeasurementlines)). Left:
    the type face, the system sans-serif at 12–13 px in full-contrast ink, or a bundled legibility
    face such as Atkinson Hyperlegible, which needs an `imports.md` entry first.
 3. **Pins:** keep the pinned bird at the top of the results as a reference, whatever the Show
@@ -127,7 +128,7 @@ Feedback from a reader of the home page ([product.nextView](requirements/local/p
    [inatterms](requirements/imported/inaturalist.org/inatterms/inatterms.md) adopted iNaturalist on
    the finding that BirdView names it in words rather than reproducing a logo. Use a word or a
    glyph of BirdView's own, unless iNaturalist grants permission in writing. **Done 2026-10-30**,
-   as the word **iNat** beside the pin.
+   as the word **iNat**, in the tile's lower-right corner since 2026-10-31.
 
 The reader also asked what "1 in 6,322 species observations" in New York means, so the line does
 not explain itself ([product.shareOfRecords](requirements/local/product/presentation.md#shareofrecords)).

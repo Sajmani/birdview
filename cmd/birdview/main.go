@@ -732,6 +732,11 @@ type tile struct {
 	Length  string
 	Wing    string
 	MassStr string
+	// BillStr, TailStr, and ChordStr complete the tile's measurement lines
+	// (product.tileContents); ChordStr is empty when the chord is unknown.
+	BillStr  string
+	TailStr  string
+	ChordStr string
 	// Commonest is the share line: where the bird is the biggest part of
 	// what gets recorded, and how big a part (product.shareOfRecords). Nil when unknown.
 	Commonest *shareCell
@@ -782,6 +787,9 @@ type tile struct {
 	// INatURL is the species' iNaturalist taxon page, or empty when no
 	// confident match exists and the tile shows no link (product.inaturalistLink).
 	INatURL string
+	// TileLabels is a home page tile's one drawing label, its mass beside the
+	// cube (product.tileContents).
+	TileLabels []tileLabel
 }
 
 // tileAnchor is the fragment id of one tile. Declared once because the href
@@ -964,6 +972,9 @@ type detailData struct {
 	WingspanEst   bool
 	FootLabels    []footLabel
 	MassCube      massCube
+	// TileLabels is empty on a species page, which labels its diagram its
+	// own way; the shared diagram template reads it.
+	TileLabels []tileLabel
 }
 
 // diagramLabel is one annotation: where view put it, what it says, and whether

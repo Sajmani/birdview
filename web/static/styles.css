@@ -134,14 +134,20 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 .sn { font-size: 11.5px; font-style: italic; color: var(--dim); margin-left: auto;
   text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   flex: 0 20 auto; min-width: 0; }
-/* A tile's line under its rule (product.tileContents, decisions.tileNumbersFirst): the
-   scientific name, left, then the codes, which never give way while the name
-   truncates before them. */
+/* A tile's line under its rule (product.tileContents, decisions.tileMeasurementLines): the
+   short family badge, then the scientific name, which gives way first. */
 .idline { display: flex; align-items: baseline; gap: 6px; flex-wrap: nowrap; }
-.idline .sn { margin-left: 0; text-align: left; flex: 0 1 auto; }
-.idline .code { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim);
-  font-weight: 500; flex: none; }
+.idline .sn { margin-left: 0; text-align: left; flex: 0 20 auto; }
 .lo { border-top: 1px solid var(--line); padding-top: 7px; }
+/* The short family badge leads the line and gives way after the scientific
+   name. A rule closes the header above the drawing (product.tileContents). */
+.idline .badge { margin: 0; flex: 0 1 auto; min-width: 0; }
+.next .tile .hd { border-bottom: 1px solid var(--line); padding-bottom: 7px; }
+
+/* The mass label beside a tile's cube, in the measurement lines' font, word for word
+   (product.tileContents); an SVG label needs no line height. */
+.tl { font: 10.5px ui-monospace, SFMono-Regular, Menlo, monospace; fill: var(--dim); }
+.tl .estmark { fill: var(--accent); }
 /* The notes come last, so only the part under the drawing grows. */
 .notes { min-width: 0; }
 
@@ -378,13 +384,13 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
   border: 1px solid var(--line); border-radius: 4px; color: var(--ink); text-decoration: none; }
 .finds .findclose:hover { border-color: var(--accent); }
 /* The pin: a push pin in a box, filled when the bird is pinned. On a tile it
-   sits in the top-right corner, with the iNat link just left of it, both on
-   the name line (product.tileContents, decisions.tileNumbersFirst). The tile's four parts
+   sits in the top-right corner, on the name line (product.tileContents). The tile's four parts
    (header, drawing, the names under the rule, notes) are rows of the
    wrapper's grid, shared through subgrid, so a tile stretched to its row's
    tallest neighbor fills its box, giving the extra height to the notes' row,
-   which is last. The two links sit at the start of the header's row, 11px in
-   from the top and right: the tile's 1px border and 10px padding. */
+   which is last. The pin sits at the start of the header's row, 11px in from
+   the top and right: the tile's 1px border and 10px padding. The iNat link
+   sits at the end of the third row, under the rule. */
 .pin, .pin:visited { display: inline-flex; align-items: center; justify-content: center;
   width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 6px;
   background: var(--bg); color: var(--dim); vertical-align: middle; }
@@ -398,18 +404,22 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
    line never wraps: without this, a long name widened its tile and pushed the
    drawing off center instead of truncating (#4). */
 .next .tilewrap > .tile > * { min-width: 0; }
-.next .tilewrap > .pin, .next .tilewrap > .inat { grid-area: 1 / 1 / 2 / 2; justify-self: end;
+.next .tilewrap > .pin { grid-area: 1 / 1 / 2 / 2; justify-self: end;
   align-self: start; margin: 11px 11px 0 0; z-index: 1; }
 /* The iNat link: the word, never iNaturalist's logo, which its terms reserve
-   (product.inaturalistLink). As tall as the pin, 6px left of it. */
-.next .tilewrap > .inat { margin-right: 45px; }
-.inat, .inat:visited { display: inline-flex; align-items: center; height: 28px; padding: 0 7px;
-  box-sizing: border-box; border: 1px solid var(--line); border-radius: 6px; background: var(--bg);
-  color: var(--ink); font-size: 11.5px; font-weight: 600; text-decoration: none; }
+   (product.inaturalistLink). In the lower-right corner, at the end of the line under the rule,
+   its foot on that line's and 20px tall, so it stays within the band under
+   the rule and the tile does not grow for it. The line keeps room for it. */
+.next .tilewrap > .inat { grid-area: 3 / 1 / 4 / 2; justify-self: end; align-self: end;
+  margin: 0 11px 0 0; z-index: 1; }
+.next .tile .idline { padding-right: 46px; }
+.inat, .inat:visited { display: inline-flex; align-items: center; height: 20px; padding: 0 6px;
+  box-sizing: border-box; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);
+  color: var(--ink); font-size: 11px; font-weight: 600; text-decoration: none; }
 .inat:hover { border-color: var(--accent); }
-/* The name line keeps room for the two links and is as tall as they are, so
-   the name truncates short of them and the measurements start below them. */
-.next .tile .nameline { min-height: 28px; align-items: center; padding-right: 84px; }
+/* The name line keeps room for the pin and is as tall as it, so the name
+   truncates short of it and the measurements start below it. */
+.next .tile .nameline { min-height: 28px; align-items: center; padding-right: 38px; }
 .finds li { display: block; }
 .finds li .pin { vertical-align: middle; margin-right: 8px; }
 /* The pinned birds, under the find box: one line that wraps. */

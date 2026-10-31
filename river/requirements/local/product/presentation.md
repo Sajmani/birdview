@@ -23,18 +23,23 @@ Subject: `presentation.tile`
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Each species is one **tile**, laid out top to bottom, **the numbers first**
-([decisions.tileNumbersFirst](../../decisions.md#tilenumbersfirst)):
+([decisions.tileNumbersFirst](../../decisions.md#tilenumbersfirst),
+[decisions.tileMeasurementLines](../../decisions.md#tilemeasurementlines)):
 
-1. a header of three lines: the **common name**, with the **iNaturalist link** and the **pin** in
-   the tile's top-right corner ([inaturalistLink](#inaturalistlink), [nextView](#nextview)); the
-   main metrics — **length, wingspan, mass** — named in full and in the selected unit system; and
-   the share line ([shareOfRecords](#shareofrecords));
+1. a header of four lines, then a rule: the **common name followed by its banding code and its
+   eBird species code in parentheses**, with the **pin** in the tile's top-right corner
+   ([nextView](#nextview)); **length, bill, and tail**; **wingspan and wing chord**, the chord left
+   out where it is unknown; and the share line ([shareOfRecords](#shareofrecords)). The
+   measurements are named in full and in the selected unit system;
 2. the diagram, **vertically centered** in its area, carrying the **mass cube** in its lower-left
-   corner ([decisions.massCubeOnTiles](../../decisions.md#masscubeontiles)) and **no labels of any kind**;
-3. below a rule, the **scientific name followed by the banding code and the eBird species code in
-   parentheses**; then the **family badge**, showing the family's scientific name and its common
-   name together; and last, any notes on the measurements or the count
-   ([borrowedMeasurementsSaySo](measurements.md#borrowedmeasurementssayso)).
+   corner ([decisions.massCubeOnTiles](../../decisions.md#masscubeontiles)) with the **mass** named beside it, and no other label;
+3. below a rule, the **short family badge**, the family's scientific name alone, then the
+   **scientific name**, with the **iNaturalist link** at the line's right end, in the tile's
+   lower-right corner ([inaturalistLink](#inaturalistlink)); and last, any notes on the
+   measurements or the count ([borrowedMeasurementsSaySo](measurements.md#borrowedmeasurementssayso)).
+
+The short badge carries the family's common name as its tooltip; the full badge, with both names,
+is on the species page and in the Family setting.
 
 **The family badge is the only badge, and the count is the rule.** Other groupings — the birder
 groups and the taxonomic order of [familiesByOrder](months.md#familiesbyorder), and any later one
@@ -46,23 +51,24 @@ because a list invites one more entry.
 The metrics are **spelled out**, not abbreviated to `L`, `W`, and `M`: they fit at full width, and
 initials cost every new reader.
 
-The **cube** needs only a corner the drawing does not use, and no label, since the header names the
-mass. Every tile on the home page is drawn to one scale ([nextView](#nextview)), so the cubes
+The **cube** needs only a corner the drawing does not use. Its label, "Mass" and the value, is the
+drawing's only text: it sits right of the cube, its baseline on the cube's foot, in the type and
+size of the measurement lines. Every tile on the home page is drawn to one scale ([nextView](#nextview)), so the cubes
 compare across the page; within a tier, a run of birds of similar size, they show bulk against
 elongation.
 
 Tiles wrap to fill the available display width.
 
 **Every tile is the same height above its drawing, and nothing inside one may wrap to make it
-taller.** Each line of the header, the line under the rule, and the family badge is one line, and
-the diagram has a fixed aspect. Only the notes, last, may add lines, so a tile that has them
+taller.** Each line of the header and the line under the rule is one line, and the diagram has a
+fixed aspect. Only the notes, last, may add lines, so a tile that has them
 grows below its drawing and every drawing in a row stays level. Where text does not fit, it
 **truncates on its one line**, giving way in order of what a reader can reconstruct:
 
 | | gives way |
 | --- | --- |
 | scientific name | first, and most readily |
-| family common name, in the badge | next; the family's scientific name leads and survives |
+| family name, in the badge | next |
 | common name | last |
 | **banding code, eBird species code, iNaturalist link, pin** | **never** |
 
@@ -75,8 +81,9 @@ comes within a few pixels of the tile's inner width.
 
 The iNaturalist link and the pin sit **beside the tile's own link rather than inside it**, since
 links cannot nest and the tile opens the detail view ([tileOpensDetail](#tileopensdetail)). The
-pin is on the right, in the corner, and the iNaturalist link just left of it; the common name
-truncates short of both.
+pin is in the top-right corner and the common name truncates short of it; the iNaturalist link is
+in the lower-right corner, its foot on the line's and its top below the rule, so the tile is no
+taller for it, and the scientific name truncates short of it.
 
 Rationale for centering: at one scale a small bird fills a fraction of the tile, and
 bottom-aligned it reads as a rendering fault; centered, the empty space reads as headroom.
@@ -737,8 +744,9 @@ Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 The detail view and every home page tile carry a link to the species' iNaturalist taxon page, so a
 reader who has just learned how big a bird is can go and see one. On the detail view the link names
-the species and iNaturalist in a sentence. On a tile it reads **iNat**, and its accessible name is the
-bird's name and "on iNaturalist" ([decisions.tileNumbersFirst](../../decisions.md#tilenumbersfirst)).
+the species and iNaturalist in a sentence. On a tile it reads **iNat**, in the tile's lower-right
+corner, and its accessible name is the bird's name and "on iNaturalist"
+([decisions.tileNumbersFirst](../../decisions.md#tilenumbersfirst), [decisions.tileMeasurementLines](../../decisions.md#tilemeasurementlines)).
 
 **Words, never iNaturalist's logo.** iNaturalist's terms name its bird logo as a trademark and
 grant "no right or license to reproduce" it; the adoption of iNaturalist rests on BirdView naming

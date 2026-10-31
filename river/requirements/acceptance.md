@@ -644,18 +644,21 @@ Watched failing: 2026-10-22, `TestDockerStagesCopyWhatTheyBuild`): against the `
 
 **Verifies:** [product.tileContents](local/product/presentation.md#tilecontents) · **Level:** code · **Method:** rendering test
 **Assertions:** every tile shows the common name, the eBird code in parentheses, the scientific
-name, a family badge naming both the scientific and common family name, an SVG diagram, and the
-three main metrics **named in full** — `Length`, `Wingspan`, `Mass`, not `L`, `W`, `M`
-([decisions.massCubeOnTiles](decisions.md#masscubeontiles)). On the crow's tile they run in
-order: the common name, length, wingspan, mass, and the share line, then the drawing, then the
-scientific name, the banding code, the eBird code, and the family badge
-([decisions.tileNumbersFirst](decisions.md#tilenumbersfirst)).
+name, a family badge, an SVG diagram, and the main metrics **named in full** — `Length`,
+`Wingspan`, `Mass`, not `L`, `W`, `M` ([decisions.massCubeOnTiles](decisions.md#masscubeontiles)). On the crow's tile they run in
+order: the common name, the banding code, the eBird code, length, bill, tail, wingspan, chord, and
+the share line, then the drawing with the mass label in it, then the family badge and the
+scientific name; the badge reads the family's scientific name alone
+([decisions.tileMeasurementLines](decisions.md#tilemeasurementlines)). On every fixture tile the mass label's baseline is on the cube's foot, it
+starts right of the cube, and it is the drawing's only text; and the stylesheet sets `.tl` in
+`.ft`'s font.
 **Status: verified 2026-10-01 — passing, and watched failing** by restoring the initials.
 Spelling them out also makes the assertion worth something: `"M "` matched almost any sentence on
 the page, so the old check passed whether the tile carried a mass or not.
 
 Watched failing: 2026-10-01, by restoring the initials.
 Watched failing: 2026-10-30, against the tiles as they stood, names first and measurements last ("on the crow's tile the drawing comes before the share line").
+Watched failing: 2026-10-31, by the full badge on a tile ("the crow's badge reads … Corvidae <em>Corvidae family</em>"), by the mass label 2 units above the cube's foot ("baseline is at 138.0, the cube's foot at 140.0"), by a second label in the drawing ("carries 2 labels"), and by the mass label at 11px against the measurements' 10.5px.
 
 ### familyFilterSelectsAndClears
 
@@ -694,12 +697,14 @@ The check reads the control's own state and the orders' states instead.
 
 **Verifies:** [product.imperialByDefault](local/product/presentation.md#imperialbydefault) · **Level:** code · **Method:** rendering test over the tile footer, plus a
 unit test pinning the conversions
-**Assertions:** the tile footer carries two length values and one mass value in the selected
-system's units, and differs between the two systems; mass converts as `1 oz = 28.349523125 g`.
+**Assertions:** the tile's two measurement lines carry every length on them, at least four, and
+its mass label one mass value, in the selected system's units, and they differ between the two
+systems ([decisions.tileMeasurementLines](decisions.md#tilemeasurementlines)); mass converts as `1 oz = 28.349523125 g`.
 **Status: verified 2026-09-22 — passing, and watched failing** on both a hardcoded-inches footer
 and a kilograms-under-imperial conversion.
 
 Watched failing: 2026-09-22, on both a hardcoded-inches footer and a kilograms-under-imperial conversion.
+Watched failing: 2026-10-31, by a bill hardcoded to inches on the tile, under metric.
 
 The first version of this criterion asserted only that a centimeter value appeared *somewhere* on
 the page, and passed for weeks while every tile was hardcoded to inches: the section headers alone
@@ -1827,18 +1832,16 @@ common name sits in its own `.cnname` element carrying `white-space: nowrap` wit
 banding code at the end of `.cn`, which is the one part that must survive.
 
 **Assertions, the code never truncates:** `.cn .code` declares `flex: none`, so it keeps its
-width while everything beside it gives way. On a tile the codes sit under the rule after the
-scientific name ([decisions.tileNumbersFirst](decisions.md#tilenumbersfirst)): `.idline` declares
-`flex-wrap: nowrap` and `.idline .code` `flex: none`, and the measurements' line `.ft` declares
-`flex-wrap: nowrap`, since it now sits above the drawing.
+width while everything beside it gives way. The line under a tile's rule, `.idline`, and the
+measurement lines, `.ft`, declare `flex-wrap: nowrap`, since a wrapped measurement line would push
+the drawing down.
 
 **Assertions, the badge cannot wrap:** `.badge` declares `white-space: nowrap` with
 `text-overflow: ellipsis` and a `max-width`, a bare `nowrap` being worse than wrapping — it would
 overflow the tile instead.
 
-**Assertions, markup:** the species page's name line contains a `.cnname` and a tile's line
-under the rule a `.sn`, and on each the codes are siblings of the truncating name rather than
-inside it. A code nested in the truncating element is
+**Assertions, markup:** the species page's name line and the tile's each contain a `.cnname`,
+and the codes are siblings of it rather than inside it ([decisions.tileMeasurementLines](decisions.md#tilemeasurementlines)). A code nested in the truncating element is
 the defect this criterion exists to prevent, and it looks identical until a name is long enough.
 
 **Status: verified 2026-10-02 — passing, and watched failing** by removing `flex-wrap: nowrap`
@@ -1847,7 +1850,8 @@ dropping `flex: none` from `.code`; by moving the code inside `.cnname` in the t
 the markup assertion catches what no stylesheet check can see; and by reverting `.badge` to its
 wrapping form.
 
-Watched failing: 2026-10-30, by dropping `flex-wrap: nowrap` from `.idline` and from `.ft`, by dropping `flex: none` from `.idline .code`, and by moving the banding code inside the tile's `.sn`.
+Watched failing: 2026-10-30, by dropping `flex-wrap: nowrap` from `.idline` and from `.ft`.
+Watched failing: 2026-10-31, by moving the banding code inside the tile's `.cnname` ("a code is inside the truncating name on its .nameline line").
 Watched failing: 2026-10-02, by removing `flex-wrap: nowrap` from `.nameline`, which is the shipped bug; by dropping `white-space: nowrap` from `.cnname`; by dropping `flex: none` from `.code`; by moving the code inside `.cnname` in the template, where the markup assertion catches what no stylesheet check can see; and by reverting `.badge` to its wrapping form.
 
 **Why this is structural and not visual.** Whether text *actually* wraps depends on font metrics

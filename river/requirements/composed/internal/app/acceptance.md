@@ -360,12 +360,15 @@ and is the one link marked `data-now` for here.js; with October named, October a
 May in Month loads a page with Month open and nothing else, and loading it again after no choice
 opens nothing. In headless Chrome at 1280 px and in a 360 px frame, on the birds by length with
 the two longest names pinned, every pin stands in its tile's top-right corner, within the tile's
-11px of border and padding of the top and right edges; the common name ends short of the links;
-and every drawing starts within a pixel of the others in its row, tiles with notes and tiles
-stretched to a taller neighbor included ([decisions.tileNumbersFirst](../../../decisions.md#tilenumbersfirst)).
+11px of border and padding of the top and right edges, and the common name ends short of it;
+every iNat link stands in the lower-right corner, its foot within a pixel of the bottom line's and
+its top below the rule, and the scientific name ends short of it; and every drawing starts within
+a pixel of the others in its row, tiles with notes and tiles stretched to a taller neighbor
+included ([decisions.tileNumbersFirst](../../../decisions.md#tilenumbersfirst), [decisions.tileMeasurementLines](../../../decisions.md#tilemeasurementlines)).
 
 **Run:** `go test ./cmd/birdview/ -run 'TestNext|TestNowIsTheBrowsersMonth|TestHereAndNowLink'` (the browser checks gate where Chrome is installed)
 **Status: verified 2026-10-28, passing.**
+Watched failing: 2026-10-31, by iNat back in the top row ("iNat's foot -260px off the bottom line's"), by iNat at the pin's 28px ("iNat's foot 1px off the bottom line's"), and by no room kept for it on the bottom line, with the scientific name set at 16px ("s-arcwar2 scientific name runs 16px under iNat").
 Watched failing: 2026-10-30, by the pin back in the drawing's lower right corner ("s-calhum pin 25px from the top, 19px from the right"), by the notes above the drawing ("s-sedwre1 drawing 21px below s-anpswi's"), and by a name line keeping no room for the links, with the name set at 17px ("s-migwar name runs 53px under the links"; at 13px every name in the dataset ends short of them at 360px).
 Watched failing: 2026-10-28, by the longer labels (Show first, Show all, Show pinned) at 360px ("Show choice 4 starts at 275px, the first at 242px; want one line").
 Watched failing: 2026-10-28, by Reset back before the settings ("the page does not run in order: \">Reset</a>\" … after \"data-ctl=\\\"Names\\\"\"") and by a sentence without the order's name ("\"<span class=\\\"shown\\\">Mass distribution of the first 50 of\" at -1").
@@ -426,7 +429,7 @@ named the bird's name and "on iNaturalist", and placed after the tile's own link
 than inside it; the stilt, which has no confident match, carries no link to iNaturalist; and the
 page carries no image, so the link cannot be iNaturalist's logo
 ([decisions.tileNumbersFirst](../../../decisions.md#tilenumbersfirst)). In headless Chrome, at
-least nine in ten measured tiles carry the link, level with the pin and just left of it
+least nine in ten measured tiles carry the link, in the lower-right corner
 (`TestNextTileCornerAndRows`, under [nextViewDrawsOneSet](#nextviewdrawsoneset)).
 
 **Run:** `go test ./cmd/birdview/ -run 'TestTileLinksToINaturalist|TestNextTileCornerAndRows'`
@@ -447,14 +450,13 @@ species. On a small list, the join takes the scientific name, picks the row name
 where two share one, falls back to the one row with the English name, and gives a code two
 species claim to neither.
 
-American Robin's species page shows "AMRO (amerob)" beside its name, and its tile after its
-scientific name, under the drawing ([decisions.tileNumbersFirst](../../../decisions.md#tilenumbersfirst)); the find box finds it
+American Robin's tile and species page show "AMRO (amerob)" beside its name; the find box finds it
 alone by AMRO or amro and lists it the same way; in headless Chrome the script's list reads as the
 server's, codes included; `/species/AMRO` is a 404, since addresses stay the eBird code.
 
 **Run:** `go test ./internal/bbl/ ./cmd/birdview-ingest/ ./cmd/birdview/ -run 'TestParse|TestBanding'`
 **Status: verified 2026-10-28, passing.**
-Watched failing: 2026-10-30, by the tile's codes back beside the common name ("American Robin's tile does not show AMRO and (amerob) after Turdus migratorius").
+Watched failing: 2026-10-31, by the tile's codes moved off the name line ("American Robin's tile does not show AMRO and (amerob) beside its name").
 Watched failing: 2026-10-27, by leaving the code out of the search text ("find=AMRO lists []"), and by a species page without the code.
 Watched failing: 2026-10-27, by the script's list without the banding code, by the names file without it, by a tile without it, and by the server's list without it.
 Watched failing: 2026-10-27, by keeping unidentified rows, by taking the last of two rows sharing a scientific name ("calgna got BACG"), by dropping the English-name fallback, and by letting two species keep one code.

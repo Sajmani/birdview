@@ -1135,8 +1135,9 @@ var nextTileProbe string
 
 // TestNextTileCornerAndRows checks, in headless Chrome at a laptop's width
 // and a phone's, that every tile's pin stands in its top-right corner with
-// the iNat link just left of it and the common name truncating short of
-// both (product.tileContents, decisions.tileNumbersFirst); that no tile is
+// the common name truncating short of it, and its iNat link in the
+// lower-right corner, foot on the bottom line's, top below the rule, the
+// scientific name short of it (product.tileContents, decisions.tileMeasurementLines); that no tile is
 // wider than its box or draws its bird off center, as long names once made
 // them (#4); and that the drawings in a row start level, though some tiles
 // carry notes the others lack. The page is October's birds by length, whose
@@ -1215,7 +1216,7 @@ func TestNextTileCornerAndRows(t *testing.T) {
 			t.Fatalf("at %s: no row holds two tiles, so drawings were never compared across a row", size)
 		}
 		if len(res.Corner) > 0 {
-			t.Errorf("at %s, %d problems in the tiles' top-right corners: %v", size, len(res.Corner), res.Corner)
+			t.Errorf("at %s, %d problems in the tiles' corners: %v", size, len(res.Corner), res.Corner)
 		}
 		if len(res.Uncentered) > 0 {
 			t.Errorf("at %s, %d of %d tiles are wider than their box or draw off center (#4): %v", size, len(res.Uncentered), res.Tiles, res.Uncentered)
@@ -1720,22 +1721,20 @@ func TestNextTiers(t *testing.T) {
 	}
 }
 
-// TestBandingCodesOnThePages checks where the banding codes show: with the
-// eBird code after the scientific name on every tile, beside the name on the
-// species page and in the find box's list, which finds a bird by its code in any case. Addresses
+// TestBandingCodesOnThePages checks where the banding codes show: beside
+// the name with the eBird code on every tile, on the species page, and in
+// the find box's list, which finds a bird by its code in any case. Addresses
 // stay the eBird code, which every bird has: /species/AMRO is no page.
 //
 // Verifies: product.bandingCodes. Criterion: app.bandingCodesShown.
 func TestBandingCodesOnThePages(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	// On a tile the codes follow the scientific name, under the drawing
-	// (product.tileContents, decisions.tileNumbersFirst); the species page keeps them beside the name.
-	tail := `<span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">AMRO</span><span class="code" title="eBird code">(amerob)</span>`
-	if !strings.Contains(mustGet(t, s, "/?pin=amerob"), `<span class="sn">Turdus migratorius</span>`+tail) {
-		t.Error("American Robin's tile does not show AMRO and (amerob) after Turdus migratorius")
+	codes := `<span class="cnname">American Robin</span><span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">AMRO</span><span class="code" title="eBird code">(amerob)</span>`
+	if !strings.Contains(mustGet(t, s, "/?pin=amerob"), codes) {
+		t.Error("American Robin's tile does not show AMRO and (amerob) beside its name")
 	}
-	if !strings.Contains(mustGet(t, s, "/species/amerob"), `<span class="cnname">American Robin</span>`+tail) {
+	if !strings.Contains(mustGet(t, s, "/species/amerob"), codes) {
 		t.Error("the species page does not show AMRO and (amerob) beside the name")
 	}
 	for _, q := range []string{"AMRO", "amro"} {
