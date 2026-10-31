@@ -358,12 +358,15 @@ line, All, Now, and the twelve months, with a rule only before January; All is c
 month named or with `month=all` and links to no month; Now is never chosen, links to `month=now`,
 and is the one link marked `data-now` for here.js; with October named, October alone is chosen. In headless Chrome, choosing
 May in Month loads a page with Month open and nothing else, and loading it again after no choice
-opens nothing. In headless Chrome at 1280 and 390 px, every pin on the default birds by length
-stands within a pixel of its tile's mass cube, tiles with a note under the footer and tiles
-stretched to a taller neighbor included.
+opens nothing. In headless Chrome at 1280 px and in a 360 px frame, on the birds by length with
+the two longest names pinned, every pin stands in its tile's top-right corner, within the tile's
+11px of border and padding of the top and right edges; the common name ends short of the links;
+and every drawing starts within a pixel of the others in its row, tiles with notes and tiles
+stretched to a taller neighbor included ([decisions.tileNumbersFirst](../../../decisions.md#tilenumbersfirst)).
 
 **Run:** `go test ./cmd/birdview/ -run 'TestNext|TestNowIsTheBrowsersMonth|TestHereAndNowLink'` (the browser checks gate where Chrome is installed)
 **Status: verified 2026-10-28, passing.**
+Watched failing: 2026-10-30, by the pin back in the drawing's lower right corner ("s-calhum pin 25px from the top, 19px from the right"), by the notes above the drawing ("s-sedwre1 drawing 21px below s-anpswi's"), and by a name line keeping no room for the links, with the name set at 17px ("s-migwar name runs 53px under the links"; at 13px every name in the dataset ends short of them at 360px).
 Watched failing: 2026-10-28, by the longer labels (Show first, Show all, Show pinned) at 360px ("Show choice 4 starts at 275px, the first at 242px; want one line").
 Watched failing: 2026-10-28, by Reset back before the settings ("the page does not run in order: \">Reset</a>\" … after \"data-ctl=\\\"Names\\\"\"") and by a sentence without the order's name ("\"<span class=\\\"shown\\\">Mass distribution of the first 50 of\" at -1").
 Watched failing: 2026-10-28, by the previous layout ("the page has no Show row"), by the count sentence above the histogram ("the page does not run in order: \"<span class=\\\"shown\\\">First 50 of\" … after \"<nav class=\\\"hist\\\"\""), and by a heading without the family ("… want \"Showing birds in May or June · Family: Corvidae · …\"").
@@ -411,6 +414,25 @@ Watched failing: 2026-10-26, by the script listing matches over the limit, and b
 Watched failing: 2026-10-26, by the toggle not removing a bird the filters chose, and by ignoring exclude=.
 Watched failing: 2026-10-26, by the server listing 23 matches for "hawk".
 
+## tileLinksToInaturalist
+
+**Every tile with a confident match links to iNaturalist, in words**
+
+Covers: [product.inaturalistLink](../../../local/product/presentation.md#inaturalistlink), [product.tileContents](../../../local/product/presentation.md#tilecontents)
+
+**Method:** on the home page with every bird shown, the heron's and the robin's tiles each carry a
+link reading **iNat** whose href is exactly `https://www.inaturalist.org/taxa/<id>` for that bird,
+named the bird's name and "on iNaturalist", and placed after the tile's own link closes rather
+than inside it; the stilt, which has no confident match, carries no link to iNaturalist; and the
+page carries no image, so the link cannot be iNaturalist's logo
+([decisions.tileNumbersFirst](../../../decisions.md#tilenumbersfirst)). In headless Chrome, at
+least nine in ten measured tiles carry the link, level with the pin and just left of it
+(`TestNextTileCornerAndRows`, under [nextViewDrawsOneSet](#nextviewdrawsoneset)).
+
+**Run:** `go test ./cmd/birdview/ -run 'TestTileLinksToINaturalist|TestNextTileCornerAndRows'`
+**Status: verified 2026-10-30, passing.**
+Watched failing: 2026-10-30, against the tiles as they stood ("greblu's tile has no iNat link"), by dropping the guard on a missing match ("the stilt has no confident iNaturalist match, and its tile still links there"), and by moving the link inside the tile ("greblu's iNat link is inside the tile's own link").
+
 ## bandingCodesShown
 
 **Birds carry the Bird Banding Laboratory's four-letter codes, and the site uses them**
@@ -425,12 +447,14 @@ species. On a small list, the join takes the scientific name, picks the row name
 where two share one, falls back to the one row with the English name, and gives a code two
 species claim to neither.
 
-American Robin's tile and species page show "AMRO (amerob)" beside its name; the find box finds it
+American Robin's species page shows "AMRO (amerob)" beside its name, and its tile after its
+scientific name, under the drawing ([decisions.tileNumbersFirst](../../../decisions.md#tilenumbersfirst)); the find box finds it
 alone by AMRO or amro and lists it the same way; in headless Chrome the script's list reads as the
 server's, codes included; `/species/AMRO` is a 404, since addresses stay the eBird code.
 
 **Run:** `go test ./internal/bbl/ ./cmd/birdview-ingest/ ./cmd/birdview/ -run 'TestParse|TestBanding'`
 **Status: verified 2026-10-28, passing.**
+Watched failing: 2026-10-30, by the tile's codes back beside the common name ("American Robin's tile does not show AMRO and (amerob) after Turdus migratorius").
 Watched failing: 2026-10-27, by leaving the code out of the search text ("find=AMRO lists []"), and by a species page without the code.
 Watched failing: 2026-10-27, by the script's list without the banding code, by the names file without it, by a tile without it, and by the server's list without it.
 Watched failing: 2026-10-27, by keeping unidentified rows, by taking the last of two rows sharing a scientific name ("calgna got BACG"), by dropping the English-name fallback, and by letting two species keep one code.

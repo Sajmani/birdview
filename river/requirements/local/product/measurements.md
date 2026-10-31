@@ -136,7 +136,7 @@ means adding it to the diagram. It is a rule rather than a list because a list l
 In the detail view, each of the five segments is named and measured **beside the part it
 describes**, joined to it by a leader line. The **wing chord** is labeled on the crossbar rather
 than in the stack, since it is a horizontal length. The **total length** and the **mass** are
-labeled as well (below). An estimated value carries the same `~` the tile footer uses. The
+labeled as well (below). An estimated value carries the same `~` the tile uses. The
 provenance table below the diagram is unchanged and still explains each number's source or model.
 
 The `~` must be in the **markup**, not CSS generated content: `::after` generates no box on an SVG

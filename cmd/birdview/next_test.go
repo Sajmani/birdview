@@ -1130,34 +1130,59 @@ func TestNextPinKeepsPlace(t *testing.T) {
 	}
 }
 
-//go:embed testdata/next_pin_align_probe.js
-var nextPinAlignProbe string
+//go:embed testdata/next_tile_probe.js
+var nextTileProbe string
 
-// TestNextPinAlignsWithCube checks, in headless Chrome at a laptop's width
-// and a phone's, that every tile's pin stands level with its mass cube: the
-// foot of one within a pixel of the other's; and that no tile is wider than
-// its box or draws its bird off center, as long names once made them (#4). The page is October's birds by
-// length, whose first tiles include ones with a note under the footer and
-// ones stretched to a taller neighbor in their row, the two cases that once
-// put the pin high.
+// TestNextTileCornerAndRows checks, in headless Chrome at a laptop's width
+// and a phone's, that every tile's pin stands in its top-right corner with
+// the iNat link just left of it and the common name truncating short of
+// both (product.tileContents, decisions.tileNumbersFirst); that no tile is
+// wider than its box or draws its bird off center, as long names once made
+// them (#4); and that the drawings in a row start level, though some tiles
+// carry notes the others lack. The page is October's birds by length, whose
+// first tiles include ones with notes and ones stretched to a taller
+// neighbor in their row, with the two longest names pinned.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
-func TestNextPinAlignsWithCube(t *testing.T) {
+// Verifies: product.nextView, product.tileContents. Criteria: app.nextViewDrawsOneSet, app.tileLinksToInaturalist.
+func TestNextTileCornerAndRows(t *testing.T) {
 	chrome := findChrome()
 	if chrome == "" {
-		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); pin alignment was not tested in a browser")
+		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); the tiles' corners and rows were not measured in a browser")
 	}
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	ts := httptest.NewServer(instrument(s, nextPinAlignProbe, nil))
+	// The two longest names are pinned onto the page, so a name that could
+	// run under the links is measured at the narrowest phone. Chrome will not
+	// open a window that narrow, so the phone's page is framed phoneWidth
+	// wide, as in TestPagesFitAPhone.
+	const page = "/?by=length&pin=migwar&pin=gnlthr"
+	inner := instrument(s, nextTileProbe, nil)
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/__phone" {
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			fmt.Fprintf(w, `<!doctype html><html><body style="margin:0">`+
+				`<iframe id="f" src="%s" style="border:0;width:%dpx;height:800px"></iframe>`+
+				`<script>setInterval(function () {`+
+				`var d = document.getElementById('f').contentDocument;`+
+				`var v = d && d.documentElement.getAttribute('data-probe');`+
+				`if (v) document.documentElement.setAttribute('data-probe', v);`+
+				`}, 100);</script></body></html>`, html.EscapeString(page), phoneWidth)
+			return
+		}
+		inner.ServeHTTP(w, r)
+	}))
 	defer ts.Close()
-	for _, size := range []string{"1280,800", "390,844"} {
+	for _, size := range []string{"laptop", "phone"} {
+		url := ts.URL + page
+		if size == "phone" {
+			url = ts.URL + "/__phone"
+		}
 		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 		out, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
 			"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
 			"--disable-component-update", "--disable-sync", "--disable-extensions",
-			"--user-data-dir="+t.TempDir(), "--window-size="+size, "--virtual-time-budget=8000",
-			"--dump-dom", ts.URL+"/?by=length").Output()
+			"--user-data-dir="+t.TempDir(), "--window-size=1280,800", "--virtual-time-budget=8000",
+			"--dump-dom", url).Output()
 		cancel()
 		if err != nil {
 			t.Fatalf("chrome at %s: %v", size, err)
@@ -1169,20 +1194,34 @@ func TestNextPinAlignsWithCube(t *testing.T) {
 		var res struct {
 			Tiles      int      `json:"tiles"`
 			Notes      int      `json:"notes"`
-			Off        []string `json:"off"`
+			INats      int      `json:"inats"`
+			Rows       int      `json:"rows"`
+			Long       int      `json:"long"`
+			Corner     []string `json:"corner"`
 			Uncentered []string `json:"uncentered"`
+			Ragged     []string `json:"ragged"`
 		}
 		if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
 			t.Fatalf("reading the probe: %v", err)
 		}
-		if res.Tiles < 50 || res.Notes == 0 {
-			t.Fatalf("at %s: %d tiles measured, %d with a note; the check needs both", size, res.Tiles, res.Notes)
+		if res.Tiles < 50 || res.Notes == 0 || res.INats < res.Tiles*9/10 {
+			t.Fatalf("at %s: %d tiles measured, %d with notes, %d with an iNat link; the check needs all three",
+				size, res.Tiles, res.Notes, res.INats)
 		}
-		if len(res.Off) > 0 {
-			t.Errorf("at %s, %d of %d pins are not level with the mass cube: %v", size, len(res.Off), res.Tiles, res.Off)
+		if res.Long != 2 {
+			t.Fatalf("at %s: %d of the 2 long-named birds pinned for the check were measured", size, res.Long)
+		}
+		if size == "laptop" && res.Rows == 0 {
+			t.Fatalf("at %s: no row holds two tiles, so drawings were never compared across a row", size)
+		}
+		if len(res.Corner) > 0 {
+			t.Errorf("at %s, %d problems in the tiles' top-right corners: %v", size, len(res.Corner), res.Corner)
 		}
 		if len(res.Uncentered) > 0 {
 			t.Errorf("at %s, %d of %d tiles are wider than their box or draw off center (#4): %v", size, len(res.Uncentered), res.Tiles, res.Uncentered)
+		}
+		if len(res.Ragged) > 0 {
+			t.Errorf("at %s, %d drawings are not level with their row: %v", size, len(res.Ragged), res.Ragged)
 		}
 	}
 }
@@ -1681,20 +1720,22 @@ func TestNextTiers(t *testing.T) {
 	}
 }
 
-// TestBandingCodesOnThePages checks where the banding codes show: beside
-// the name with the eBird code on every tile, on the species page, and in
-// the find box's list, which finds a bird by its code in any case. Addresses
+// TestBandingCodesOnThePages checks where the banding codes show: with the
+// eBird code after the scientific name on every tile, beside the name on the
+// species page and in the find box's list, which finds a bird by its code in any case. Addresses
 // stay the eBird code, which every bird has: /species/AMRO is no page.
 //
 // Verifies: product.bandingCodes. Criterion: app.bandingCodesShown.
 func TestBandingCodesOnThePages(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	codes := `<span class="cnname">American Robin</span><span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">AMRO</span><span class="code" title="eBird code">(amerob)</span>`
-	if !strings.Contains(mustGet(t, s, "/?pin=amerob"), codes) {
-		t.Error("American Robin's tile does not show AMRO and (amerob) beside its name")
+	// On a tile the codes follow the scientific name, under the drawing
+	// (product.tileContents, decisions.tileNumbersFirst); the species page keeps them beside the name.
+	tail := `<span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">AMRO</span><span class="code" title="eBird code">(amerob)</span>`
+	if !strings.Contains(mustGet(t, s, "/?pin=amerob"), `<span class="sn">Turdus migratorius</span>`+tail) {
+		t.Error("American Robin's tile does not show AMRO and (amerob) after Turdus migratorius")
 	}
-	if !strings.Contains(mustGet(t, s, "/species/amerob"), codes) {
+	if !strings.Contains(mustGet(t, s, "/species/amerob"), `<span class="cnname">American Robin</span>`+tail) {
 		t.Error("the species page does not show AMRO and (amerob) beside the name")
 	}
 	for _, q := range []string{"AMRO", "amro"} {

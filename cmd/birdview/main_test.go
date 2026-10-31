@@ -424,15 +424,35 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 		}
 	}
 
-	// The common and scientific names share one header line (product.tileContents), so no
-	// block-level element may close between them.
-	i := strings.Index(body, "American Robin")
-	j := strings.Index(body, "Turdus migratorius")
-	if i < 0 || j < 0 || j < i {
-		t.Fatal("names not found in the expected order")
+	// The numbers come first (product.tileContents, decisions.tileNumbersFirst): the common
+	// name, then length, wingspan, and mass, then the share line, all above
+	// the drawing; the scientific name, the codes, and the family badge below
+	// it. The crow is the fixture's bird with a banding code.
+	crow := tileOf(t, body, "amecro")
+	order := []struct{ what, mark string }{
+		{"the common name", `<span class="cnname">American Crow</span>`},
+		{"the length", "Length "},
+		{"the wingspan", "Wingspan "},
+		{"the mass", "Mass "},
+		{"the share line", `<div class="share">`},
+		{"the drawing", `<svg class="dia"`},
+		{"the scientific name", "Corvus brachyrhynchos"},
+		{"the banding code", "AMCR"},
+		{"the eBird code", "(amecro)"},
+		{"the family badge", `class="badge"`},
 	}
-	if strings.Contains(body[i:j], "</div>") {
-		t.Error("scientific name is not on the same header line as the common name")
+	last := -1
+	for i, o := range order {
+		at := strings.Index(crow, o.mark)
+		if at < 0 {
+			t.Errorf("the crow's tile has no %s (%q)", o.what, o.mark)
+			continue
+		}
+		if at < last {
+			t.Errorf("on the crow's tile %s comes before %s; the numbers come first, the names under the drawing",
+				o.what, order[i-1].what)
+		}
+		last = at
 	}
 }
 
@@ -1015,6 +1035,51 @@ func TestINatLinkOnlyForAConfidentMatch(t *testing.T) {
 	// because the page failed to render.
 	if !strings.Contains(unmatched, "Black-necked Stilt") {
 		t.Fatal("the unmatched species page did not render")
+	}
+}
+
+// TestTileLinksToINaturalist asserts product.inaturalistLink on the home page: every tile
+// whose species has a confident match carries an "iNat" link to exactly its
+// taxon page, beside the tile's own link rather than inside it, and named
+// for the bird and iNaturalist; the stilt, unmatched, carries none. The link
+// is the word: iNaturalist's terms reserve its logo (decisions.tileNumbersFirst).
+//
+// Verifies: product.inaturalistLink, product.tileContents. Criterion: app.tileLinksToInaturalist.
+func TestTileLinksToINaturalist(t *testing.T) {
+	_, body := get(t, newTestServer(t), "/?month=all&show=all")
+	link := regexp.MustCompile(`<a class="inat" href="([^"]*)"[^>]*aria-label="([^"]*)"[^>]*>([^<]*)</a>`)
+	for id, want := range map[string]string{
+		"greblu": "https://www.inaturalist.org/taxa/4956",
+		"amerob": "https://www.inaturalist.org/taxa/12727",
+	} {
+		seg := tileOf(t, body, id)
+		m := link.FindStringSubmatch(seg)
+		if m == nil {
+			t.Errorf("%s's tile has no iNat link", id)
+			continue
+		}
+		if m[1] != want {
+			t.Errorf("%s's iNat link goes to %q, want %q", id, m[1], want)
+		}
+		if !strings.HasSuffix(m[2], " on iNaturalist") || !strings.Contains(seg, ">"+strings.TrimSuffix(m[2], " on iNaturalist")+"<") {
+			t.Errorf("%s's iNat link is named %q; want the bird's name and \"on iNaturalist\"", id, m[2])
+		}
+		if m[3] != "iNat" {
+			t.Errorf("%s's iNat link reads %q, want the word iNat", id, m[3])
+		}
+		// Beside the tile's link, not in it: anchors cannot nest. The tile
+		// holds no other anchor, so its first </a> is its own.
+		open := strings.Index(seg, `<a class="tile"`)
+		if open < 0 || strings.Index(seg, `class="inat"`) < open+strings.Index(seg[open:], "</a>") {
+			t.Errorf("%s's iNat link is inside the tile's own link", id)
+		}
+	}
+	stilt := tileOf(t, body, "blasti")
+	if strings.Contains(stilt, "inaturalist.org") || strings.Contains(stilt, `class="inat"`) {
+		t.Error("the stilt has no confident iNaturalist match, and its tile still links there")
+	}
+	if strings.Contains(strings.ToLower(body), "<img") {
+		t.Error("the home page carries an image; the iNat link is the word, never iNaturalist's logo")
 	}
 }
 
@@ -3571,16 +3636,9 @@ func TestSharedNamesAreDisclosed(t *testing.T) {
 				t.Errorf("%s is not on the index at all", id)
 				continue
 			}
-			// The share cell sits after the tile's inline SVG, which runs to
-			// thousands of characters, so seek to the cell rather than
-			// guessing a window.
-			rest := idx[i:]
-			c := strings.Index(rest, `class="share"`)
-			if c < 0 {
-				t.Errorf("no share cell after %s on the index", id)
-				continue
-			}
-			cell := rest[c:min(c+600, len(rest))]
+			// The marker is one of the tile's notes, which come last, under
+			// the drawing (product.tileContents).
+			cell := tileNotes(tileOf(t, idx, id))
 			if !strings.Contains(cell, `class="seam"`) {
 				t.Errorf("the index tile for %s (%s) carries no shared-count marker", id, sci)
 			}
@@ -3676,10 +3734,11 @@ func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
 			}
 			id := m[1]
 			// Each span in the cell is its own statement -- the figure, then
-			// any caveats -- and the detail page may set them apart, so
+			// any caveats, which sit in the tile's notes under the drawing
+			// (product.tileContents) -- and the detail page may set them apart, so
 			// each is looked for on its own rather than as one run of text.
 			var statements []string
-			for _, sm := range span.FindAllStringSubmatch(m[2], -1) {
+			for _, sm := range span.FindAllStringSubmatch(m[2]+tileNotes(tileOf(t, index, id)), -1) {
 				if st := norm(sm[1]); st != "" {
 					statements = append(statements, st)
 				}
@@ -4393,6 +4452,15 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 	if !strings.Contains(stripTags(page), "withheld by eBird in Florida, Oct-Mar") {
 		t.Error("Painted Bunting's page does not list Florida's withheld months")
 	}
+}
+
+// tileNotes returns the notes a tile carries last, under its drawing --
+// borrowed measurements, a shared count -- or "" when it has none.
+func tileNotes(tile string) string {
+	if m := regexp.MustCompile(`(?s)<div class="notes">(.*?)</div>`).FindStringSubmatch(tile); m != nil {
+		return m[1]
+	}
+	return ""
 }
 
 // tileOf returns one tile's own markup on a rendered index, from its wrapper

@@ -56,6 +56,12 @@ func TestTileHeaderCannotWrap(t *testing.T) {
 			"the name would be clipped mid-glyph with no sign it was cut"},
 		{".cn .code", "flex: none",
 			"the banding code would shrink or truncate; it is the one part a reader cannot reconstruct"},
+		{".idline", "flex-wrap: nowrap",
+			"the line under a tile's rule could wrap its codes onto a second row"},
+		{".idline .code", "flex: none",
+			"a code under the rule would shrink or truncate while the scientific name kept its width"},
+		{".ft", "flex-wrap: nowrap",
+			"the measurements could wrap to a second line and push the drawing down"},
 		{".badge", "white-space: nowrap",
 			"the family badge could wrap, which makes the tile taller just as surely"},
 		{".badge", "text-overflow: ellipsis",
@@ -71,37 +77,47 @@ func TestTileHeaderCannotWrap(t *testing.T) {
 
 var (
 	reNameline = regexp.MustCompile(`(?s)<div class="nameline">(.*?)</div>`)
+	reIdline   = regexp.MustCompile(`(?s)<div class="idline">(.*?)</div>`)
 	reCnname   = regexp.MustCompile(`(?s)<span class="cnname">(.*?)</span>`)
+	reSn       = regexp.MustCompile(`(?s)<span class="sn">(.*?)</span>`)
 )
 
 // TestBandingCodeIsOutsideTheTruncatingElement is the half no stylesheet check
-// can see. `.cnname` truncates with an ellipsis, so a banding code nested
-// inside it would be the first thing eaten -- and the markup looks correct
-// until a name is long enough to prove otherwise.
+// can see. The names truncate with an ellipsis, so a code nested inside one
+// would be the first thing eaten -- and the markup looks correct until a name
+// is long enough to prove otherwise. The species page keeps the codes beside
+// the common name; a tile carries them under its rule, after the scientific
+// name (product.tileContents, decisions.tileNumbersFirst).
 //
 // Verifies: product.tileContents. Criterion: acceptance.tileHeaderNeverWraps.
 func TestBandingCodeIsOutsideTheTruncatingElement(t *testing.T) {
-	for _, name := range []string{"static/shared.html", "static/detail.html"} {
-		b, err := Static.ReadFile(name)
+	for _, c := range []struct {
+		file, what string
+		line, name *regexp.Regexp
+	}{
+		{"static/detail.html", ".nameline", reNameline, reCnname},
+		{"static/shared.html", ".idline", reIdline, reSn},
+	} {
+		b, err := Static.ReadFile(c.file)
 		if err != nil {
-			t.Fatalf("reading %s: %v", name, err)
+			t.Fatalf("reading %s: %v", c.file, err)
 		}
-		heads := reNameline.FindAllStringSubmatch(string(b), -1)
-		if len(heads) == 0 {
-			t.Errorf("%s has no .nameline header; the check cannot bite", name)
+		lines := c.line.FindAllStringSubmatch(string(b), -1)
+		if len(lines) == 0 {
+			t.Errorf("%s has no %s line; the check cannot bite", c.file, c.what)
 			continue
 		}
-		for _, h := range heads {
-			inner := reCnname.FindStringSubmatch(h[1])
+		for _, h := range lines {
+			inner := c.name.FindStringSubmatch(h[1])
 			if inner == nil {
-				t.Errorf("%s: header has no .cnname, so the common name has nothing to truncate in", name)
+				t.Errorf("%s: its %s line has no truncating name element", c.file, c.what)
 				continue
 			}
-			if strings.Contains(inner[1], `class="code"`) {
-				t.Errorf("%s: the banding code is inside .cnname, so the ellipsis eats it first", name)
+			if strings.Contains(inner[1], `class="code`) {
+				t.Errorf("%s: a code is inside the truncating name on its %s line, so the ellipsis eats it first", c.file, c.what)
 			}
-			if !strings.Contains(h[1], `class="code"`) {
-				t.Errorf("%s: header emits no banding code at all", name)
+			if !strings.Contains(h[1], `class="code`) {
+				t.Errorf("%s: its %s line emits no code at all", c.file, c.what)
 			}
 		}
 	}

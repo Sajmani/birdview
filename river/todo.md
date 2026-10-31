@@ -95,6 +95,43 @@ has seen the home page that answers it. They were deliberately not contacted whi
 was in progress. Ask them to try birdview.site on a phone and a laptop, with the same questions as
 before, and record what they say under [scalableInterface](#scalableinterface).
 
+## homePageReaderFeedback
+
+**A reader's suggestions for the home page, 2026-10-30**
+
+Status: open
+Owner: Sameer
+Gate: owner's call on each; requirement first
+
+Feedback from a reader of the home page ([product.nextView](requirements/local/product/presentation.md#nextview)), relayed by the owner:
+
+1. **Month:** say that several months can be chosen ("click as many as you want").
+2. **Tile layout:** move length, wingspan, and mass up beside or below the name, above the stick
+   figure, since they are what the page is for; move the banding codes and Latin name below the
+   line. Set the measurements in a face designed for small text ("old eyes"). **Layout done
+   2026-10-30** ([decisions.tileNumbersFirst](requirements/decisions.md#tilenumbersfirst)). Left:
+   the type face, the system sans-serif at 12–13 px in full-contrast ink, or a bundled legibility
+   face such as Atkinson Hyperlegible, which needs an `imports.md` entry first.
+3. **Pins:** keep the pinned bird at the top of the results as a reference, whatever the Show
+   setting.
+4. **Mass cube:** at first it looked like a button for a 3-D view, and among similar birds (gulls)
+   the cubes were all about the same size, so their meaning did not come through. Show the hover
+   text sooner, or draw a vessel of water (a fish tank, a water-cooler bottle) so the volume reads
+   as water ([decisions.massAsWaterCube](requirements/decisions.md#massaswatercube); compare
+   [massAsLine](#massasline)).
+5. **iNaturalist link on every tile** (the owner's addition), not only on the detail view
+   ([product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink)). The
+   tile is one link to the detail view, so this one must be a sibling, like the pin. **Not with
+   iNaturalist's logo:** its Terms of Use name "the iNaturalist Bird Logo Design" as a trademark
+   and grant "no right or license to reproduce" it, and
+   [inatterms](requirements/imported/inaturalist.org/inatterms/inatterms.md) adopted iNaturalist on
+   the finding that BirdView names it in words rather than reproducing a logo. Use a word or a
+   glyph of BirdView's own, unless iNaturalist grants permission in writing. **Done 2026-10-30**,
+   as the word **iNat** beside the pin.
+
+The reader also asked what "1 in 6,322 species observations" in New York means, so the line does
+not explain itself ([product.shareOfRecords](requirements/local/product/presentation.md#shareofrecords)).
+
 ## withdrawnWithClassic
 
 **One behavior went with the classic view; the owner may want it back**

@@ -134,6 +134,16 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 .sn { font-size: 11.5px; font-style: italic; color: var(--dim); margin-left: auto;
   text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   flex: 0 20 auto; min-width: 0; }
+/* A tile's line under its rule (product.tileContents, decisions.tileNumbersFirst): the
+   scientific name, left, then the codes, which never give way while the name
+   truncates before them. */
+.idline { display: flex; align-items: baseline; gap: 6px; flex-wrap: nowrap; }
+.idline .sn { margin-left: 0; text-align: left; flex: 0 1 auto; }
+.idline .code { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim);
+  font-weight: 500; flex: none; }
+.lo { border-top: 1px solid var(--line); padding-top: 7px; }
+/* The notes come last, so only the part under the drawing grows. */
+.notes { min-width: 0; }
 
 .badge { display: inline-block; font-size: 10.5px; font-weight: 600;
   border-radius: 4px; padding: 1px 6px; margin-top: 4px;
@@ -141,18 +151,14 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
   vertical-align: bottom; }
 .badge em { font-style: normal; font-weight: 400; }
 .badge em::before { content: "\00b7"; margin: 0 4px; }
-.ft { display: flex; gap: 14px; font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-  color: var(--dim); border-top: 1px solid var(--line); padding-top: 7px; margin-top: 4px; }
+.ft { display: flex; flex-wrap: nowrap; gap: 14px; font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--dim); margin-top: 4px; white-space: nowrap; }
 .ft .est::after { content: "~"; color: var(--accent); margin-left: 2px; }
-/* The share: where the bird is the biggest part of what a region records
-   (product.shareOfRecords). Right of the family badge, dim, and in the footer's monospace so
-   the digits line up down a column of tiles. It is not a measurement of the
-   bird, and should not read like one. */
-/* The share line (product.shareOfRecords): where the bird is the biggest part of what a
-   region records. Below the three measurements, because it is not one -- it
-   is a fact about how often the bird is reported. Monospace to match the
-   footer, truncated rather than wrapped, since a wrapped tile is a taller
-   tile and one tall tile leaves its whole row ragged. */
+/* The share line (product.shareOfRecords): how much of what the regions in view record is
+   this bird. Below the three measurements, because it is not one -- it is a
+   fact about how often the bird is reported. Monospace to match them,
+   truncated rather than wrapped, since it sits above the drawing and a
+   second line would push that tile's drawing out of step with its row. */
 .share { font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim);
   margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .share b { font-weight: 600; color: var(--ink); }
@@ -296,15 +302,14 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 .dlabel { fill: var(--ink); font-size: 11px; }
 .dlabel.chord, .dlabel.span { fill: #4ade80; }
 
-/* A caveat on the figure above it: a count that covers two species, because
-   a source does not separate them (product.namesRecordsFiledUnder), or a bird the month filter
-   declined to judge (decisions.monthPresence). Marked on the tile, not only on the detail
+/* A caveat on a tile's figures: a count that covers two species, because
+   a source does not separate them (product.namesRecordsFiledUnder), a bird the month filter
+   declined to judge (decisions.monthPresence), or measurements borrowed from another bird. Marked on the tile, not only on the detail
    page: the index is where the misreading happens. Amber on the tile's own
-   surface, checked against the 7:1 floor like every other text color.
+   surface, checked against the 7:1 floor like every other text color. On a
+   tile they are its notes, last (product.tileContents).
 
-   5px above, the same gap the figure keeps from the measurements: .share
-   sets line-height 1, so without it the caveat sits flush against the
-   figure and reads as a run-on of it. */
+   5px above, so a caveat does not sit flush against the line before it. */
 .seam { display: block; margin-top: 5px; color: #f0b429; font-size: 10.5px; font-style: italic; }
 
 /* A phone held upright (product.fitsAPhone). Nothing may reach past the edge of
@@ -373,15 +378,13 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
   border: 1px solid var(--line); border-radius: 4px; color: var(--ink); text-decoration: none; }
 .finds .findclose:hover { border-color: var(--accent); }
 /* The pin: a push pin in a box, filled when the bird is pinned. On a tile it
-   sits in the drawing's lower right corner, opposite the mass cube, its foot
-   level with the cube's. The tile's four parts (header, drawing, footer,
-   share line) are rows of the wrapper's grid, shared through subgrid, and
-   the pin sits at the end of the drawing's row: the footer and share line
-   vary in height (a note, a borrowed measurement), so an offset from the
-   tile's bottom put the pin 16px high on such tiles. 16px up is the
-   drawing's 8px margin plus the cube's 8px above the drawing's foot; 19px
-   in, as the cube is from the left. A tile stretched to its row's tallest
-   neighbor gives the extra height to the share line's row, which is last. */
+   sits in the top-right corner, with the iNat link just left of it, both on
+   the name line (product.tileContents, decisions.tileNumbersFirst). The tile's four parts
+   (header, drawing, the names under the rule, notes) are rows of the
+   wrapper's grid, shared through subgrid, so a tile stretched to its row's
+   tallest neighbor fills its box, giving the extra height to the notes' row,
+   which is last. The two links sit at the start of the header's row, 11px in
+   from the top and right: the tile's 1px border and 10px padding. */
 .pin, .pin:visited { display: inline-flex; align-items: center; justify-content: center;
   width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 6px;
   background: var(--bg); color: var(--dim); vertical-align: middle; }
@@ -395,8 +398,18 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
    line never wraps: without this, a long name widened its tile and pushed the
    drawing off center instead of truncating (#4). */
 .next .tilewrap > .tile > * { min-width: 0; }
-.next .tilewrap > .pin { grid-area: 2 / 1 / 3 / 2; justify-self: end; align-self: end;
-  margin: 0 19px 16px 0; z-index: 1; }
+.next .tilewrap > .pin, .next .tilewrap > .inat { grid-area: 1 / 1 / 2 / 2; justify-self: end;
+  align-self: start; margin: 11px 11px 0 0; z-index: 1; }
+/* The iNat link: the word, never iNaturalist's logo, which its terms reserve
+   (product.inaturalistLink). As tall as the pin, 6px left of it. */
+.next .tilewrap > .inat { margin-right: 45px; }
+.inat, .inat:visited { display: inline-flex; align-items: center; height: 28px; padding: 0 7px;
+  box-sizing: border-box; border: 1px solid var(--line); border-radius: 6px; background: var(--bg);
+  color: var(--ink); font-size: 11.5px; font-weight: 600; text-decoration: none; }
+.inat:hover { border-color: var(--accent); }
+/* The name line keeps room for the two links and is as tall as they are, so
+   the name truncates short of them and the measurements start below them. */
+.next .tile .nameline { min-height: 28px; align-items: center; padding-right: 84px; }
 .finds li { display: block; }
 .finds li .pin { vertical-align: middle; margin-right: 8px; }
 /* The pinned birds, under the find box: one line that wraps. */

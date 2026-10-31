@@ -3,6 +3,18 @@
 Major changes to BirdView, newest first: features, data sources, and how the drawings are made.
 Small fixes are in the commit history. With no numbered releases yet, changes are grouped by period.
 
+## 2026-10-30 — Tiles put the numbers first
+
+### Changed
+
+- Each tile leads with the bird's name, its length, wingspan, and mass, and its *1 in N* share,
+  above the drawing; the scientific name, codes, and family move below it. The pin moves to the
+  tile's top-right corner.
+
+### Added
+
+- An **iNat** link on every tile, beside the pin, to the species on iNaturalist.
+
 ## 2026-10-26 to 2026-10-28 — A new home page: find, pin, and compare
 
 ### Added

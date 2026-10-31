@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"birdview/internal/dataset"
+	"birdview/internal/inat"
 	"birdview/internal/month"
 	"birdview/internal/region"
 	"birdview/internal/trait"
@@ -716,6 +717,9 @@ func (s *server) nextPage(r *http.Request) nextData {
 			SameAs:      s.sameMeasurements(sp, opt.Locale),
 		}
 		t.PinURL, t.Pinned = nextPin(q, sp.ID), added[sp.ID]
+		if sp.INatTaxonID > 0 {
+			t.INatURL = inat.TaxonURL(sp.INatTaxonID)
+		}
 		page.Tiles[i] = t
 		page.Items = append(page.Items, nextItem{Tile: &page.Tiles[i]})
 	}

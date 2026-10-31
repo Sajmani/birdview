@@ -32,9 +32,11 @@ holds.
 
 ## Reading a tile
 
-Each tile has the bird's names and family, a stick figure to scale, a cube for its mass, its length,
-wingspan, and mass, and how many of the species observations in the selected regions are of this
-bird, as *1 in N*.
+Each tile starts with the bird's name, its length, wingspan, and mass, and how many of the species
+observations in the selected regions are of this bird, as *1 in N*. Then comes a stick figure to
+scale, with a cube for its mass, and under it the scientific name, the banding and eBird codes, and
+the family. **iNat**, top right, opens the species on iNaturalist; the pin beside it keeps the bird
+on the page.
 
 The figure is a **top-down view of a bird in flight**, head up. Solid lines are measured; dashed
 lines are estimated.

@@ -16,56 +16,69 @@
 {{/* The templates the home page and the species pages share: a bird's tile,
      its pin, the diagram, and the diagram's key. */}}
 {{define "tile"}}
-{{/* The pin is a SIBLING of the tile link, not inside it: anchors cannot nest,
-     and the tile must keep opening the detail view (product.tileOpensDetail). */}}
+{{/* The numbers first (product.tileContents, decisions.tileNumbersFirst): the
+     name, the three measurements, and the share line above the drawing; the
+     scientific name, the codes, and the family under it; and last the notes,
+     the only part some tiles have and others lack, so that a tile with notes
+     grows below its drawing and the drawings in a row stay level.
+
+     The iNat link and the pin are SIBLINGS of the tile link, not inside it:
+     anchors cannot nest, and the tile must keep opening the detail view
+     (product.tileOpensDetail). They sit in the tile's top-right corner, over
+     the end of the name line, which keeps room for them. */}}
 <div class="tilewrap" id="{{.Anchor}}">
 <a class="tile" href="{{.DetailURL}}">
   <div class="hd">
     <div class="nameline">
-      <span class="cn"><span class="cnname">{{.Name}}</span>{{with .S.BandingCode}}<span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">{{.}}</span>{{end}}{{with .S.SpeciesCode}}<span class="code" title="eBird code">({{.}})</span>{{end}}</span>
-      <span class="sn">{{.S.ScientificName}}</span>
+      <span class="cn"><span class="cnname">{{.Name}}</span></span>
+    </div>
+    <div class="ft">
+      {{/* Named in full, not L/W/M: the initials cost every reader who has not
+           yet learned them, and the three fit a tile at full width (product.tileContents).
+
+           `whynot` supplies the tooltip. All three used to say "estimated" for
+           anything not measured, which was false for a near-match: that is a
+           real measurement with calipers, of a sibling taxon, and product.measuredVersusModeled draws
+           it SOLID for exactly that reason. The tile calling it an estimate
+           contradicted the stroke beside it, and named no reason a reader
+           could act on -- the Chihuahuan Meadowlark's mass is the Eastern
+           Meadowlark's, which is worth saying out loud. */}}
+      <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="{{whynot .S.TotalLength.Prov}}"{{end}}>Length {{.Length}}</span>
+      <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="{{whynot .S.Wingspan.Prov}}"{{end}}>Wingspan {{.Wing}}</span>
+      <span{{if ne .S.Mass.Prov.Kind "measured"}} class="est" title="{{whynot .S.Mass.Prov}}"{{end}}>Mass {{.MassStr}}</span>
+    </div>
+    {{/* How much of the species observations held by the regions currently
+         on screen (product.shareOfRecords). It answers the question the filtered page is
+         posing; "commonest in Yukon" answers one the reader did not ask and
+         stays on the detail page.
+
+         Its own line, not a fourth cell beside the measurements: product.tileContents keeps
+         that line to one, and a fourth wrapped it. Rendered on EVERY tile,
+         because a line that appears on some tiles and not others shifts
+         their drawings and takes the whole flex row out of step.
+
+         A cell either divides or explains (decisions.seaShareDiffers). The dividing form covers
+         absence too -- "0 in 1,225,176,035" rather than an em-dash, which left
+         a reader unable to tell a missing figure from a missing bird. The
+         explaining form is for having no denominator at all. */}}
+    <div class="share">{{with .Commonest}}{{if .Ratio}}<span title="{{.Title}}"><b>{{.Ratio}}</b>
+      species observations {{.Where}}</span>{{else}}<span class="nodata"
+      title="{{.Title}}">{{.Note}}</span>{{end}}{{else}}<span class="nodata"
+      title="no regions are selected">&mdash;</span>{{end}}</div>
+  </div>
+  {{template "diagram" .}}
+  <div class="lo">
+    <div class="idline">
+      <span class="sn">{{.S.ScientificName}}</span>{{with .S.BandingCode}}<span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">{{.}}</span>{{end}}{{with .S.SpeciesCode}}<span class="code" title="eBird code">({{.}})</span>{{end}}
     </div>
     <span class="badge" style="background:{{.S.FamilyColor}};color:{{.S.FamilyText}}">{{.S.Family}}
       <em>{{.S.FamilyCommon}}</em></span>
   </div>
-  {{template "diagram" .}}
-  <div class="ft">
-    {{/* Named in full, not L/W/M: the initials cost every reader who has not
-         yet learned them, and the three fit a tile at full width (product.tileContents).
-
-         `whynot` supplies the tooltip. All three used to say "estimated" for
-         anything not measured, which was false for a near-match: that is a
-         real measurement with calipers, of a sibling taxon, and product.measuredVersusModeled draws
-         it SOLID for exactly that reason. The footer calling it an estimate
-         contradicted the stroke beside it, and named no reason a reader
-         could act on -- the Chihuahuan Meadowlark's mass is the Eastern
-         Meadowlark's, which is worth saying out loud. */}}
-    <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="{{whynot .S.TotalLength.Prov}}"{{end}}>Length {{.Length}}</span>
-    <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="{{whynot .S.Wingspan.Prov}}"{{end}}>Wingspan {{.Wing}}</span>
-    <span{{if ne .S.Mass.Prov.Kind "measured"}} class="est" title="{{whynot .S.Mass.Prov}}"{{end}}>Mass {{.MassStr}}</span>
-  </div>
-  {{/* How much of the species observations held by the regions currently
-       on screen (product.shareOfRecords). It answers the question the filtered page is
-       posing; "commonest in Yukon" answers one the reader did not ask and
-       stays on the detail page.
-
-       Its own line, not a fourth cell in the footer: the footer holds the
-       three measurements, product.tileContents keeps it to one line, and a fourth wrapped
-       it. Rendered on EVERY tile, because a line that appears on some tiles
-       and not others makes those tiles shorter and takes the whole flex row
-       out of step.
-
-       A cell either divides or explains (decisions.seaShareDiffers). The dividing form covers
-       absence too -- "0 in 1,225,176,035" rather than an em-dash, which left
-       a reader unable to tell a missing figure from a missing bird. The
-       explaining form is for having no denominator at all. */}}
-  <div class="share">{{with .Commonest}}{{if .Ratio}}<span title="{{.Title}}"><b>{{.Ratio}}</b>
-    species observations {{.Where}}</span>{{range .Seams}}<span class="seam"
-    title="{{.Title}}">{{.Text}}</span>{{end}}{{else}}<span class="nodata"
-    title="{{.Title}}">{{.Note}}</span>{{end}}{{else}}<span class="nodata"
-    title="no regions are selected">&mdash;</span>{{end}}{{range .SameAs}}<span class="seam"
-    title="{{.Title}}">{{.Text}}</span>{{end}}</div>
+  {{if or (and .Commonest .Commonest.Seams) .SameAs}}<div class="notes">{{with .Commonest}}{{range .Seams}}<span class="seam"
+    title="{{.Title}}">{{.Text}}</span>{{end}}{{end}}{{range .SameAs}}<span class="seam"
+    title="{{.Title}}">{{.Text}}</span>{{end}}</div>{{end}}
 </a>
+{{with .INatURL}}<a class="inat" href="{{.}}" rel="noopener noreferrer" title="{{$.Name}} on iNaturalist" aria-label="{{$.Name}} on iNaturalist">iNat</a>{{end}}
 {{if .PinURL}}{{template "pin" .}}{{end}}
 </div>
 {{end}}

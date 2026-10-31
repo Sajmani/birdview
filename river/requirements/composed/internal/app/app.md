@@ -90,7 +90,7 @@ a lower tier may do.
 - [product.fitsAPhone](../../../local/product/presentation.md#fitsaphone) — Every page fits a phone held upright
 - [product.nextView](../../../local/product/presentation.md#nextview) — The home page: one view of birds
 - [product.bandingCodes](../../../local/product/dataset.md#bandingcodes) — Each bird carries its four-letter banding code, where the Bird Banding Laboratory gives one
-- [product.inaturalistLink](../../../local/product/presentation.md#inaturalistlink) — The detail view links to the species on iNaturalist
+- [product.inaturalistLink](../../../local/product/presentation.md#inaturalistlink) — The detail view and every tile link to the species on iNaturalist
 - [product.noPersonalAddress](../../../local/product/presentation.md#nopersonaladdress) — No personal address is published
 
 ### Serving

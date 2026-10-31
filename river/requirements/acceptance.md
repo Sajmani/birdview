@@ -643,15 +643,19 @@ Watched failing: 2026-10-22, `TestDockerStagesCopyWhatTheyBuild`): against the `
 **The tile carries the header, diagram, and main metrics**
 
 **Verifies:** [product.tileContents](local/product/presentation.md#tilecontents) · **Level:** code · **Method:** rendering test
-**Assertions:** every tile shows the common name with its banding code in parentheses, the
-scientific name, a family badge naming both the scientific and common family name, an SVG diagram,
-and the three main metrics **named in full** — `Length`, `Wingspan`, `Mass`, not `L`, `W`, `M`
-([decisions.massCubeOnTiles](decisions.md#masscubeontiles)).
+**Assertions:** every tile shows the common name, the eBird code in parentheses, the scientific
+name, a family badge naming both the scientific and common family name, an SVG diagram, and the
+three main metrics **named in full** — `Length`, `Wingspan`, `Mass`, not `L`, `W`, `M`
+([decisions.massCubeOnTiles](decisions.md#masscubeontiles)). On the crow's tile they run in
+order: the common name, length, wingspan, mass, and the share line, then the drawing, then the
+scientific name, the banding code, the eBird code, and the family badge
+([decisions.tileNumbersFirst](decisions.md#tilenumbersfirst)).
 **Status: verified 2026-10-01 — passing, and watched failing** by restoring the initials.
 Spelling them out also makes the assertion worth something: `"M "` matched almost any sentence on
 the page, so the old check passed whether the tile carried a mass or not.
 
 Watched failing: 2026-10-01, by restoring the initials.
+Watched failing: 2026-10-30, against the tiles as they stood, names first and measurements last ("on the crow's tile the drawing comes before the share line").
 
 ### familyFilterSelectsAndClears
 
@@ -1823,14 +1827,18 @@ common name sits in its own `.cnname` element carrying `white-space: nowrap` wit
 banding code at the end of `.cn`, which is the one part that must survive.
 
 **Assertions, the code never truncates:** `.cn .code` declares `flex: none`, so it keeps its
-width while everything beside it gives way.
+width while everything beside it gives way. On a tile the codes sit under the rule after the
+scientific name ([decisions.tileNumbersFirst](decisions.md#tilenumbersfirst)): `.idline` declares
+`flex-wrap: nowrap` and `.idline .code` `flex: none`, and the measurements' line `.ft` declares
+`flex-wrap: nowrap`, since it now sits above the drawing.
 
 **Assertions, the badge cannot wrap:** `.badge` declares `white-space: nowrap` with
 `text-overflow: ellipsis` and a `max-width`, a bare `nowrap` being worse than wrapping — it would
 overflow the tile instead.
 
-**Assertions, markup:** every tile header contains exactly one `.cnname`, and the banding code
-when present is a sibling of it rather than inside it. A code nested in the truncating element is
+**Assertions, markup:** the species page's name line contains a `.cnname` and a tile's line
+under the rule a `.sn`, and on each the codes are siblings of the truncating name rather than
+inside it. A code nested in the truncating element is
 the defect this criterion exists to prevent, and it looks identical until a name is long enough.
 
 **Status: verified 2026-10-02 — passing, and watched failing** by removing `flex-wrap: nowrap`
@@ -1839,6 +1847,7 @@ dropping `flex: none` from `.code`; by moving the code inside `.cnname` in the t
 the markup assertion catches what no stylesheet check can see; and by reverting `.badge` to its
 wrapping form.
 
+Watched failing: 2026-10-30, by dropping `flex-wrap: nowrap` from `.idline` and from `.ft`, by dropping `flex: none` from `.idline .code`, and by moving the banding code inside the tile's `.sn`.
 Watched failing: 2026-10-02, by removing `flex-wrap: nowrap` from `.nameline`, which is the shipped bug; by dropping `white-space: nowrap` from `.cnname`; by dropping `flex: none` from `.code`; by moving the code inside `.cnname` in the template, where the markup assertion catches what no stylesheet check can see; and by reverting `.badge` to its wrapping form.
 
 **Why this is structural and not visual.** Whether text *actually* wraps depends on font metrics

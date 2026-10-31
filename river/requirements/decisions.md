@@ -4061,3 +4061,35 @@ month it was made in. No page reads the clock now, so every home page carries an
 revalidates, and only the `month=now` redirect is unstored
 ([decisions.hereAndNowCaching](#hereandnowcaching)). An address with no month, bookmarked before
 this, now shows every month rather than the month it is opened in.
+
+---
+
+## tileNumbersFirst
+
+**A tile puts its numbers first and links to iNaturalist, in words**
+
+Date: 2026-10-30
+Decided by: Sameer
+Status: accepted
+Affects: [product.tileContents](local/product/presentation.md#tilecontents), [product.nextView](local/product/presentation.md#nextview), [product.inaturalistLink](local/product/presentation.md#inaturalistlink), [product.bandingCodes](local/product/dataset.md#bandingcodes)
+
+### Decided
+
+A tile's header is three lines: the common name, with an **iNat** link and the pin in the top-right
+corner; length, wingspan, and mass; and the share line. Then the drawing. Below a rule come the
+scientific name with the banding and eBird codes, the family badge, and last any notes on the
+measurements or the count, so a tile that has notes grows below its drawing and the drawings in a
+row stay level. The link reads "iNat" rather than showing iNaturalist's logo.
+
+### Why
+
+A reader of the home page asked, 2026-10-30, for length, wingspan, and mass beside the name, since
+comparing sizes is what the page is for, with the codes and Latin name below; the owner chose that
+layout, with the share line as the header's third line, the pin in the top-right corner, and an
+iNaturalist link on every tile. The owner first proposed iNaturalist's logo for the link. Its
+Terms of Use name "the iNaturalist Bird Logo Design" as a trademark and grant "no right or license
+to reproduce" it, and [inatterms](imported/inaturalist.org/inatterms/inatterms.md) rests on
+BirdView naming iNaturalist in words, so the link is the word. The pin leaves the drawing's lower
+right corner, where it stood level with the mass cube; the cube is unchanged. The reader's other
+suggestions (a month hint, a type face for small text, pinned birds first, the cube's meaning) are
+open as [todo.homePageReaderFeedback](../todo.md#homepagereaderfeedback).

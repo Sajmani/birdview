@@ -158,8 +158,9 @@ with no scientific match, the one row with the species' North American English n
 two species would share goes to neither. A species the Laboratory does not list, as for most
 introduced birds and gamebirds it does not band with federal bands, has none. The code names the
 species whatever English names are shown. Every tile, the species page, and the find box's list
-show it beside the name, with the eBird code in parentheses ("American Robin AMRO (amerob)"), and
-the find box finds a bird by either code. Addresses stay the eBird code, which every bird has,
+show it with the eBird code in parentheses: beside the name on the species page and in the list
+("American Robin AMRO (amerob)"), and after the scientific name, under the drawing, on a tile
+([tileContents](presentation.md#tilecontents)); the find box finds a bird by either code. Addresses stay the eBird code, which every bird has,
 including any added from outside the Laboratory's area (Sameer, 2026-10-27).
 
 Rationale: birders know birds by these codes, and the owner asked for them (2026-10-27). The ABA's

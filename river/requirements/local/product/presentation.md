@@ -22,14 +22,19 @@ and shape comparable; photographs were always the enrichment.
 Subject: `presentation.tile`
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
-Each species is one **tile**, laid out top to bottom:
+Each species is one **tile**, laid out top to bottom, **the numbers first**
+([decisions.tileNumbersFirst](../../decisions.md#tilenumbersfirst)):
 
-1. a header whose first line carries the **common name followed by its eBird species code in
-   parentheses**, with the **scientific name right-justified on the same line**; and below it the
-   **family badge**, showing the family's scientific name and its common name together;
+1. a header of three lines: the **common name**, with the **iNaturalist link** and the **pin** in
+   the tile's top-right corner ([inaturalistLink](#inaturalistlink), [nextView](#nextview)); the
+   main metrics — **length, wingspan, mass** — named in full and in the selected unit system; and
+   the share line ([shareOfRecords](#shareofrecords));
 2. the diagram, **vertically centered** in its area, carrying the **mass cube** in its lower-left
    corner ([decisions.massCubeOnTiles](../../decisions.md#masscubeontiles)) and **no labels of any kind**;
-3. the main metrics — **length, wingspan, mass** — named in full and in the selected unit system.
+3. below a rule, the **scientific name followed by the banding code and the eBird species code in
+   parentheses**; then the **family badge**, showing the family's scientific name and its common
+   name together; and last, any notes on the measurements or the count
+   ([borrowedMeasurementsSaySo](measurements.md#borrowedmeasurementssayso)).
 
 **The family badge is the only badge, and the count is the rule.** Other groupings — the birder
 groups and the taxonomic order of [familiesByOrder](months.md#familiesbyorder), and any later one
@@ -41,24 +46,25 @@ because a list invites one more entry.
 The metrics are **spelled out**, not abbreviated to `L`, `W`, and `M`: they fit at full width, and
 initials cost every new reader.
 
-The **cube** needs only a corner the drawing does not use, and no label, since the footer names the
+The **cube** needs only a corner the drawing does not use, and no label, since the header names the
 mass. Every tile on the home page is drawn to one scale ([nextView](#nextview)), so the cubes
 compare across the page; within a tier, a run of birds of similar size, they show bulk against
 elongation.
 
 Tiles wrap to fill the available display width.
 
-**Every tile is the same height, and nothing inside one may wrap to make it taller.** The header,
-the family badge, and the footer are one line each and the diagram has a fixed aspect. Where text
-does not fit, it **truncates on that one line**, giving way in order of what a reader can
-reconstruct:
+**Every tile is the same height above its drawing, and nothing inside one may wrap to make it
+taller.** Each line of the header, the line under the rule, and the family badge is one line, and
+the diagram has a fixed aspect. Only the notes, last, may add lines, so a tile that has them
+grows below its drawing and every drawing in a row stays level. Where text does not fit, it
+**truncates on its one line**, giving way in order of what a reader can reconstruct:
 
 | | gives way |
 | --- | --- |
 | scientific name | first, and most readily |
 | family common name, in the badge | next; the family's scientific name leads and survives |
 | common name | last |
-| **eBird species code** | **never** |
+| **banding code, eBird species code, iNaturalist link, pin** | **never** |
 
 The species code is 4 to 8 characters, **not the fixed six its name suggests**, and cannot be
 guessed from a truncation, so it never truncates. Nothing laying it out may assume a width.
@@ -67,8 +73,10 @@ Rationale: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition). One tal
 down a section. Eight of the 841 common names are long enough to wrap, and the longest family badge
 comes within a few pixels of the tile's inner width.
 
-On the home page each tile also carries a **pin** ([nextView](#nextview)), beside the tile's own
-link rather than inside it.
+The iNaturalist link and the pin sit **beside the tile's own link rather than inside it**, since
+links cannot nest and the tile opens the detail view ([tileOpensDetail](#tileopensdetail)). The
+pin is on the right, in the corner, and the iNaturalist link just left of it; the common name
+truncates short of both.
 
 Rationale for centering: at one scale a small bird fills a fraction of the tile, and
 bottom-aligned it reads as a rendering fault; centered, the empty space reads as headroom.
@@ -91,7 +99,7 @@ One toggle switches the whole interface between:
 | imperial (default) | inches | ounces, pounds above 16 oz |
 | metric | centimeters | grams, kilograms above 1 kg |
 
-**Every** displayed number honors it — tile footers, section headers, and the detail view alike.
+**Every** displayed number honors it — tile measurements, section headers, and the detail view alike.
 
 Rationale: the audience is predominantly US; the toggle serves Canadian users and anyone who thinks
 in centimeters. Ounces below one are shown to two decimals, because otherwise a 3 g hummingbird and
@@ -722,13 +730,19 @@ does not publish their mail.
 
 ## inaturalistLink
 
-**The detail view links to the species on iNaturalist**
+**The detail view and every tile link to the species on iNaturalist**
 
 Subject: `presentation.detail_view.external_link`
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
-The detail view carries a link to the species' iNaturalist taxon page, so a reader who has just
-learned how big a bird is can go and see one.
+The detail view and every home page tile carry a link to the species' iNaturalist taxon page, so a
+reader who has just learned how big a bird is can go and see one. On the detail view the link names
+the species and iNaturalist in a sentence. On a tile it reads **iNat**, and its accessible name is the
+bird's name and "on iNaturalist" ([decisions.tileNumbersFirst](../../decisions.md#tilenumbersfirst)).
+
+**Words, never iNaturalist's logo.** iNaturalist's terms name its bird logo as a trademark and
+grant "no right or license to reproduce" it; the adoption of iNaturalist rests on BirdView naming
+it in plain words ([inatterms](../../imported/inaturalist.org/inatterms/inatterms.md)).
 
 The link is shown **only where the match is confident**, which requires **both** names to agree:
 
@@ -801,7 +815,7 @@ home page in those. Its footer carries the full credits, which every other page 
   the address names some (`month=all`, which older addresses carry, is every month too). Every
   filter (family, region, month, habitat, diet) narrows the set, and pinned birds join it.
 - **Pins.** Every drawn bird has a pin, a push pin in a box, filled when the bird is pinned, in
-  the drawing's lower right corner, level with the mass cube opposite it on every tile. A
+  the tile's top-right corner, on the common name's line ([tileContents](#tilecontents)). A
   pinned bird (`pin=<id>`) is drawn whatever the settings, wherever the order puts it, even past
   the first 100, and the sentence above the birds says how many are ("… the first 100 of 1006 birds, plus 2 pins"). Pinning or unpinning leaves the page where
   it was. The pinned birds are listed above the find box in alphabetical order: a bird's name goes

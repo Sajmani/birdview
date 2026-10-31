@@ -779,6 +779,9 @@ type tile struct {
 	Pinned bool
 	// Anchor is this tile's fragment id, which the pinned list links to.
 	Anchor string
+	// INatURL is the species' iNaturalist taxon page, or empty when no
+	// confident match exists and the tile shows no link (product.inaturalistLink).
+	INatURL string
 }
 
 // tileAnchor is the fragment id of one tile. Declared once because the href
