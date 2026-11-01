@@ -42,17 +42,8 @@
 })();
 </script>
 
-<div class="tile big">
-  <div class="hd">
-    <div class="nameline">
-      <span class="cn"><span class="cnname">{{.Name}}</span>{{with .S.BandingCode}}<span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">{{.}}</span>{{end}}{{with .S.SpeciesCode}}<span class="code" title="eBird code">({{.}})</span>{{end}}</span>
-      <span class="sn">{{.S.ScientificName}}</span>
-    </div>
-    <span class="badge" style="background:{{.S.FamilyColor}};color:{{.S.FamilyText}}">{{.S.Family}}
-      <em>{{.S.FamilyCommon}}</em></span>
-  </div>
-  {{template "diagram" .}}
-</div>
+{{/* The home page's tile, larger (product.tileOpensDetail). */}}
+{{template "tile" .Tile}}
 {{/* Pin (product.nextView). The home page's pins are its address, which this
      page does not carry, so the script reads them from what the home page
      left in the session, and pinning goes back to the home page and asks it

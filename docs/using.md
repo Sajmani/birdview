@@ -54,8 +54,10 @@ lines are estimated.
 
 Legs are not drawn. **A `~` after a number means it is estimated**, as most lengths are.
 
-**Click any bird** for its own page: the same figure, larger, with every part measured and the source
-of each number, and a link to the species on **eBird** for photographs, sounds, and a range map.
+**Click any bird** for its own page: the same tile, larger, naming every part and its measurement,
+with the source of each number below it, and a link to the species on **eBird** for photographs,
+sounds, and a range map. A measurement's name is colored like its part where it can be: **Bill**
+amber, **Wingspan** and **Chord** green, **Mass** blue.
 
 ---
 

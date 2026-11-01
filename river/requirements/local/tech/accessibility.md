@@ -53,6 +53,31 @@ all text, with no lower floor for secondary text; see
 
 ---
 
+## textSizeFloor
+
+**No text renders below 13px, and running text is 15px, 16px on a phone**
+
+Subject: `text.size.floor`
+Value: `13px floor; body 15px, 16px at 600px wide or less`
+Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
+
+Every piece of visible text on every web page ([webPages](#webpages)) **renders at 13 CSS pixels
+or more**, at a laptop's width and at a phone's 360px. Rendered, not declared: text inside an SVG
+is scaled with the drawing, so its size is its font size times the drawing's scale on screen, and a
+label declared at 11px in a drawing shown at a third of its width is a 3.5px label. Running text,
+the page's own font size, is **15px**, and **16px** at a width of 600px or less, where a phone
+also zooms into any form field set smaller.
+
+Codes, badges, tags, notes, and labels are held to the same 13px; there is no smaller size for
+secondary text ([decisions.textSizeFloor](../../decisions.md#textsizefloor)).
+
+Rationale: the first readers found the page dense and the type small ("old eyes"), and on a phone
+the species page's diagram labels rendered at 3.5px. WCAG sets no minimum size, so the number is
+BirdView's own: 13px is the smallest size common platform guidance allows for secondary text, and
+16px is the size at which a phone browser stops zooming on focus.
+
+---
+
 ## webPages
 
 **What counts as a BirdView web page**

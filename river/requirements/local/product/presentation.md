@@ -30,7 +30,9 @@ Each species is one **tile**, laid out top to bottom, **the numbers first**
    eBird species code in parentheses**, with the **pin** in the tile's top-right corner
    ([nextView](#nextview)); **length, bill, and tail**; **wingspan and wing chord**, the chord left
    out where it is unknown; and the share line ([shareOfRecords](#shareofrecords)). The
-   measurements are named in full and in the selected unit system;
+   measurements are named in full and in the selected unit system, in a proportional face with
+   figures of even width so that numbers align down a column. On the detail view the first line
+   also carries head, neck, and body ([labeledDetailDiagram](measurements.md#labeleddetaildiagram)), and wraps where it must;
 2. the diagram, **vertically centered** in its area, carrying the **mass cube** in its lower-left
    corner ([decisions.massCubeOnTiles](../../decisions.md#masscubeontiles)) with the **mass** named beside it, and no other label;
 3. below a rule, the **short family badge**, the family's scientific name alone, then the
@@ -531,11 +533,12 @@ is 375 to 430.
 Subject: `presentation.detail_view`
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
-Clicking a tile opens a detail view that is **a larger version of the same tile** — same header,
-same diagram, same main metrics, same layout — with the bird drawn **as large as the view allows,
-whatever scale the home page drew it at**, plus:
+Clicking a tile opens a detail view that is **a larger version of the same tile** — the same
+template, header, diagram, metrics, and layout ([decisions.textSizeFloor](../../decisions.md#textsizefloor)) — with the bird drawn **as large as
+the view allows, whatever scale the home page drew it at**, plus:
 
-- the measurement of **every individual diagram segment**: bill, head, neck, body, tail;
+- the measurement of **every individual diagram segment**, on the tile's measurement lines: bill,
+  head, neck, body, tail ([labeledDetailDiagram](measurements.md#labeleddetaildiagram));
 - the **wing chord**, which the crossbar draws as its solid outer portions (measuredVersusModeled) and which would
   otherwise be the one length visible in the drawing with no row explaining it;
 - the **provenance of every metric shown**, main metrics and segments alike (metricProvenanceExplained).

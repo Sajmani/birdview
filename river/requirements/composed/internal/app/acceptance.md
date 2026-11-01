@@ -362,12 +362,14 @@ opens nothing. In headless Chrome at 1280 px and in a 360 px frame, on the birds
 the two longest names pinned, every pin stands in its tile's top-right corner, within the tile's
 11px of border and padding of the top and right edges, and the common name ends short of it;
 every eBird link stands in the lower-right corner, its foot within a pixel of the bottom line's and
-its top below the rule, and the scientific name ends short of it; and every drawing starts within
+its top below the rule, and the scientific name ends short of it; every mass label's baseline is
+within a pixel of its cube's foot; and every drawing starts within
 a pixel of the others in its row, tiles with notes and tiles stretched to a taller neighbor
 included ([decisions.tileNumbersFirst](../../../decisions.md#tilenumbersfirst), [decisions.tileMeasurementLines](../../../decisions.md#tilemeasurementlines)).
 
 **Run:** `go test ./cmd/birdview/ -run 'TestNext|TestNowIsTheBrowsersMonth|TestHereAndNowLink'` (the browser checks gate where Chrome is installed)
 **Status: verified 2026-10-28, passing.**
+Watched failing: 2026-11-01, by the mass label without its baseline trim ("mass labels' baselines are not on the cube's foot: [s-calhum -3px …]"); the probe first measured the label's box rather than its baseline and passed regardless, so it now measures a zero-height mark on the baseline.
 Watched failing: 2026-10-31, by iNat back in the top row ("iNat's foot -260px off the bottom line's"), by iNat at the pin's 28px ("iNat's foot 1px off the bottom line's"), and by no room kept for it on the bottom line, with the scientific name set at 16px ("s-arcwar2 scientific name runs 16px under iNat").
 Watched failing: 2026-10-30, by the pin back in the drawing's lower right corner ("s-calhum pin 25px from the top, 19px from the right"), by the notes above the drawing ("s-sedwre1 drawing 21px below s-anpswi's"), and by a name line keeping no room for the links, with the name set at 17px ("s-migwar name runs 53px under the links"; at 13px every name in the dataset ends short of them at 360px).
 Watched failing: 2026-10-28, by the longer labels (Show first, Show all, Show pinned) at 360px ("Show choice 4 starts at 275px, the first at 242px; want one line").
@@ -472,6 +474,23 @@ species has is a 404.
 **Run:** `go test ./cmd/birdview/ -run TestEveryCodeReachesItsSpecies`
 **Status: verified 2026-11-01, passing.**
 Watched failing: 2026-11-01, against the server before aliases ("GET /species/grbher3?units=metric = 404", "GET /?pin=grbher3 = 200", "find=grbher3 lists []"), and with bird= taking two redirects ("301 to \"/?bird=greblu\"").
+
+## textMeetsSizeFloor
+
+**No text renders below 13px, and running text is 15px, 16px on a phone**
+
+Covers: [tech.textSizeFloor](../../../local/tech/accessibility.md#textsizefloor)
+
+**Method:** two HTML pages of every kind, found by the crawl of [everyPageIsFound](#everypageisfound),
+render in headless Chrome at 1280px and framed at 360px with every `<details>` open; every visible
+run of text is measured at its drawn size, its font size times the scale of any SVG it sits in,
+and the page's own font size is read. It fails on any run under 13px and on running text under
+15px, or 16px in the frame. SVG documents served on their own, the pipeline diagram, are drawn
+images rather than pages of text and are outside it.
+
+**Run:** `go test ./cmd/birdview/ -run TestRenderedTextSize` (gates where Chrome is installed)
+**Status: verified 2026-11-01, passing.**
+Watched failing: 2026-11-01, against the stylesheet as it stood: all 20 page renders, among them the species page's diagram labels at 3.5px in the frame ("3.5px below 13px at 360px wide: \"Wingspan  15.4 in\""), the measurement lines at 10.5px, and running text at 14px.
 
 ## bandingCodesShown
 

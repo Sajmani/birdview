@@ -124,43 +124,38 @@ span model is wrong, so the model's error falls on the inner segment. See
 
 ## labeledDetailDiagram
 
-**The detail diagram is labeled with each segment and its measurement**
+**The detail tile names each segment and its measurement, keyed to the drawing by color**
 
 Subject: `presentation.detail_view.diagram_labels`
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.honestData](../../../goals/goals.md#honestdata)
 
-**Every metric the detail view reports appears in the drawing.** The provenance table may explain
+**Every metric the detail view reports appears on its tile.** The provenance table may explain
 more about a number but may not be the only place it appears, so adding a metric to the table
-means adding it to the diagram. It is a rule rather than a list because a list let mass go undrawn.
+means adding it to the tile. It is a rule rather than a list because a list let mass go undrawn.
 
-In the detail view, each of the five segments is named and measured **beside the part it
-describes**, joined to it by a leader line. The **wing chord** is labeled on the crossbar rather
-than in the stack, since it is a horizontal length. The **total length** and the **mass** are
-labeled as well (below). An estimated value carries the same `~` the tile uses. The
-provenance table below the diagram is unchanged and still explains each number's source or model.
+The detail view's tile is the home page's tile, larger ([tileOpensDetail](presentation.md#tileopensdetail)), and its measurement lines
+carry every segment: **length, bill, head, neck, body, and tail**, then **wingspan and wing
+chord**. An estimated value carries the same `~` as everywhere else. The drawing itself carries
+one label, the mass beside its cube, as on the home page ([decisions.textSizeFloor](../../decisions.md#textsizefloor)).
 
-The `~` must be in the **markup**, not CSS generated content: `::after` generates no box on an SVG
-`<text>`, so the rule is silently inert; the labels first shipped that way, marking nothing. See
-[acceptance.segmentLabelsDontCollide](../../acceptance.md#segmentlabelsdontcollide).
+**A measurement's name is set in its part's color** where that color is a text color the contrast
+floor allows ([tech.textContrastFloor](../tech/accessibility.md#textcontrastfloor)): **Bill** in the bill's amber, **Wingspan** and **Chord** in
+the crossbar's green, and **Mass** in the cube's blue. The name says which part it measures, so
+color is never the only cue; the other parts are gray, darker than any text the floor allows, and
+their names are set as plain text.
 
-Labels never overlap one another. Where two segments are too close for their labels to sit at both
-midpoints, the text moves and the leader line stretches; the leader ties a label to its segment.
+Labels in the drawing, with leader lines to each part, were the design until 2026-11-01. Drawn in
+an SVG scaled to the page, they rendered at 8px on a laptop and 3.5px on a phone, below
+[tech.textSizeFloor](../tech/accessibility.md#textsizefloor), and a label column wide enough to read would leave a phone's drawing no
+room.
 
-**Text draws over lines.** Every line in the diagram is emitted before every label, so a leader
-that crosses a label passes behind the words.
+Rationale: reading a table means mapping rows onto the drawing in your head; a measurement named
+on the tile, in its part's color, maps itself. One tile on both pages is one design to keep
+readable.
 
-Rationale: reading the table means mapping rows onto the drawing in your head. The detail view has
-room to label the drawing; the tile stays dense for comparison.
+### Total length and mass
 
-The **wing chord** label is centered over the **left** outer segment, clear of the wingspan. The
-**wingspan** label sits just beyond the right wingtip on the crossbar's line, so it names the whole
-bar. The detail diagram is therefore wider than the tile's proportions, with the right reserved for
-labels; a wide-winged bird is drawn slightly smaller rather than under its own annotations.
-
-### The whole-bird labels: total length and mass
-
-**Total length and mass are labeled horizontally, centered on the axis, below the tail tip**, with
-no leader line, since they name the whole bird rather than a part.
+**Total length is the tile's Length.** It states the bird's length, not the drawing's height (below).
 
 **Where the figure is shorter than the total length, the page says why.** A bird that flies with
 its neck folded has the neck drawn as an S ([decisions.foldedNeckAsS](../../decisions.md#foldedneckass)), so the figure spans less
@@ -188,10 +183,9 @@ can be compared, and that a cube root flattens (a cube twice as wide is a bird e
 heavy), is design reasoning, recorded here and not on the page; the number under the cube gives the
 mass (Sameer, 2026-10-25).
 
-**Mass is labeled under its cube, not in the stack under the tail.** On a small cube the label is
-wider than the face and is held clear of the left edge rather than centered past it.
+**Mass is labeled beside its cube**, its baseline on the cube's foot, on both pages.
 
-The **home page's tiles carry the cube too**, unlabeled ([tileContents](presentation.md#tilecontents),
+The **home page's tiles carry the cube too** ([tileContents](presentation.md#tilecontents),
 [decisions.massCubeOnTiles](../../decisions.md#masscubeontiles)), for what length and wingspan cannot show: **bulk against elongation**.
 Read against the bird's own length, it is about **27%** of the drawing height for alcids, dense
 divers, and **10–13%** for long-tailed light-bodied species like the Scissor-tailed Flycatcher and
@@ -208,18 +202,11 @@ a second, arbitrary scale — is refused.
 Mass is **measured for 831 of 841 species**, so it is usually the only unmarked number on the
 figure and the only solid-stroked whole-bird mark.
 
-Total length is labeled because it is the number BirdView exists to give intuition about
-([goals.sizeIntuition](../../../goals/goals.md#sizeintuition)). A **bottom strip is added** for it; without one, a bird whose height binds
-has its tail tip on the bottom edge and the label is clipped. The strip **extends the box downward
-rather than shrinking the bird into it**: width is fixed by the page column, but height is not, so
-the bird keeps the size [tileOpensDetail](presentation.md#tileopensdetail) requires instead of
-losing 8.5% of it to a one-line label.
-
 **Total length states the bird's length, not the drawing's height.** For the folded-neck families
 of [decisions.foldedNeckAsS](../../decisions.md#foldedneckass) these differ: the neck's S spans 2/π
-of its length, so the figure is 6–9% shorter than the labeled number across the 14 species
-affected. The neck label already follows this rule ([decisions.foldedNeckAsS](../../decisions.md#foldedneckass)); a label taken from
-the drawn extent would name a quantity no source states.
+of its length, so the figure is 6–9% shorter than the Length across the 14 species affected. The
+neck measurement follows the same rule ([decisions.foldedNeckAsS](../../decisions.md#foldedneckass)); a number taken from the drawn extent
+would name a quantity no source states.
 
 ## metricProvenanceExplained
 

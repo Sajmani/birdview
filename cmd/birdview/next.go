@@ -723,34 +723,10 @@ func (s *server) nextPage(r *http.Request) nextData {
 			page.Items = append(page.Items, nextItem{Tier: &page.Tiers[t]})
 		}
 		sp := pk.sp
-		g := view.Layout(sp, refLen, refSpan, tileBox)
-		t := tile{
-			S: sp, Name: sp.Name(opt.Locale), Geom: g, Box: tileBox,
-			TopOffset:   (tileBox.H - g.TotalHeight()) / 2,
-			DetailURL:   nextDetailLink(q, sp.ID),
-			Anchor:      tileAnchor(sp.ID),
-			MassCube:    newMassCube(sp, tileBox.H, g.PxPerMm, ""),
-			WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
-			Length:      u.format(sp.TotalLength.Value, view.ByLength),
-			Wing:        u.format(sp.Wingspan.Value, view.ByWingspan),
-			MassStr:     u.format(sp.Mass.Value, view.ByMass),
-			BillStr:     u.format(sp.Segments.Bill.Value, view.ByLength),
-			TailStr:     u.format(sp.Segments.Tail.Value, view.ByLength),
-			Commonest:   s.shareWithSeams(sp, opt),
-			SameAs:      s.sameMeasurements(sp, opt.Locale),
-		}
+		t := newTile(sp, view.Layout(sp, refLen, refSpan, tileBox), tileBox, u, opt.Locale)
+		t.DetailURL, t.Anchor = nextDetailLink(q, sp.ID), tileAnchor(sp.ID)
+		t.Commonest, t.SameAs = s.shareWithSeams(sp, opt), s.sameMeasurements(sp, opt.Locale)
 		t.PinURL, t.Pinned = nextPin(q, sp.ID), added[sp.ID]
-		// The chord is left out where it is unknown; the mass is the
-		// drawing's one label, right of the cube, its baseline on the cube's
-		// foot (product.tileContents, decisions.tileMeasurementLines).
-		if sp.WingChord.Value > 0 {
-			t.ChordStr = u.format(sp.WingChord.Value, view.ByLength)
-		}
-		if c := t.MassCube; c.Side > 0 {
-			t.TileLabels = []tileLabel{{Text: "Mass " + t.MassStr, Est: sp.Mass.Prov.Kind != dataset.Measured,
-				X: c.X + c.Side + c.Depth + 6, Y: c.Y + c.Side, Anchor: "start"}}
-		}
-		t.EBirdURL = ebirdURL(sp)
 		page.Tiles[i] = t
 		page.Items = append(page.Items, nextItem{Tile: &page.Tiles[i]})
 	}
@@ -1126,13 +1102,4 @@ func nextArrow(m view.Metric, rev bool) string {
 		return "\u2193"
 	}
 	return "\u2191"
-}
-
-// tileLabel names a measurement inside a home page tile's drawing: the mass,
-// beside its cube (product.tileContents).
-type tileLabel struct {
-	Text   string
-	Est    bool
-	X, Y   float64 // baseline position, in the box's coordinates; the mass label's sits on the cube's foot
-	Anchor string  // start, middle, or end
 }

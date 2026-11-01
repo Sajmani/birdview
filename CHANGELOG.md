@@ -3,6 +3,17 @@
 Major changes to BirdView, newest first: features, data sources, and how the drawings are made.
 Small fixes are in the commit history. With no numbered releases yet, changes are grouped by period.
 
+## 2026-11-01 — Larger type, and one tile on both pages
+
+### Changed
+
+- No text is smaller than 13px, and running text is 15px, 16px on a phone. The species page's
+  diagram labels had rendered at 3.5px on a phone.
+- The species page shows the home page's tile, larger, naming every part and its measurement, in
+  place of a diagram labeled with leader lines. Bill, Wingspan, Chord, and Mass are named in their
+  parts' colors.
+- Measurements are set in a proportional face with even-width figures instead of monospace.
+
 ## 2026-11-01 — eBird links
 
 ### Changed

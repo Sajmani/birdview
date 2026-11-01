@@ -413,7 +413,7 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 		// The three main metrics, named in full rather than as L/W/M (product.tileContents).
 		// Spelled out they are also worth asserting: "M " matched almost
 		// anything on the page.
-		"Length ", "Wingspan ", "Mass ",
+		"Length ", ">Wingspan</span> ", ">Mass</span> ",
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("tile is missing %q", want)
@@ -431,13 +431,13 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 		{"the banding code", "AMCR"},
 		{"the eBird code", "(amecro)"},
 		{"the length", ">Length "},
-		{"the bill", ">Bill "},
+		{"the bill", ">Bill</span> "},
 		{"the tail", ">Tail "},
-		{"the wingspan", ">Wingspan "},
-		{"the chord", ">Chord "},
+		{"the wingspan", ">Wingspan</span> "},
+		{"the chord", ">Chord</span> "},
 		{"the share line", `<div class="share">`},
 		{"the drawing", `<svg class="dia"`},
-		{"the mass, beside the cube", `<text class="tl"`},
+		{"the mass, beside the cube", `<span class="ml`},
 		{"the family badge", `class="badge"`},
 		{"the scientific name", "Corvus brachyrhynchos"},
 	}
@@ -461,14 +461,15 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 	}
 }
 
-// TestTileMassLabelSitsOnTheCube asserts the drawing's one label (product.tileContents): the
-// mass, right of the cube, its baseline on the cube's foot, on every tile.
+// TestTileMassLabelSitsOnTheCube asserts the drawing's one label (product.tileContents): on
+// every tile, the mass, set as page text placed in percent of the drawing, starts right of the
+// cube and stands on the cube's foot, and the drawing holds no text of its own.
 //
 // Verifies: product.tileContents. Criterion: acceptance.tileCarriesHeaderAndMetrics.
 func TestTileMassLabelSitsOnTheCube(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/?month=all&show=all")
 	face := regexp.MustCompile(`(?s)<rect class="mcface" x="([\d.]+)" y="([\d.]+)"\s*width="([\d.]+)" height="([\d.]+)"/>`)
-	label := regexp.MustCompile(`<text class="tl" text-anchor="start" x="([\d.]+)" y="([\d.]+)">Mass `)
+	label := regexp.MustCompile(`<span class="ml(?: est)?"\s*style="left:([\d.]+)%;bottom:([\d.]+)%"><span class="k k-mass">Mass</span> `)
 	f := func(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 	n := 0
 	for _, id := range []string{"annhum", "amerob", "amecro", "greblu", "blasti"} {
@@ -479,14 +480,16 @@ func TestTileMassLabelSitsOnTheCube(t *testing.T) {
 			continue
 		}
 		n++
-		if foot, base := f(c[2])+f(c[4]), f(l[2]); math.Abs(foot-base) > 0.11 {
+		w, h := tileBox.W, tileBox.H
+		// Percentages are written to a tenth, so a tenth of a percent is the tolerance.
+		if foot, base := f(c[2])+f(c[4]), h-f(l[2])*h/100; math.Abs(foot-base) > h/1000+0.01 {
 			t.Errorf("%s: the mass label's baseline is at %.1f, the cube's foot at %.1f", id, base, foot)
 		}
-		if right, x := f(c[1])+f(c[3]), f(l[1]); x <= right {
+		if right, x := f(c[1])+f(c[3]), f(l[1])*w/100; x <= right {
 			t.Errorf("%s: the mass label starts at %.1f, inside the cube, which ends at %.1f", id, x, right)
 		}
-		if strings.Count(seg, "<text") != 1 {
-			t.Errorf("%s: the drawing carries %d labels; the mass is its only one", id, strings.Count(seg, "<text"))
+		if svg := mustMatch(t, seg, `(?s)(<svg class="dia".*?</svg>)`, "the drawing"); strings.Contains(svg, "<text") {
+			t.Errorf("%s: the drawing carries text; the mass is its one label, beside it as page text", id)
 		}
 	}
 	if n == 0 {
@@ -723,7 +726,7 @@ func footer(t *testing.T, body string) string {
 		tile = tile[:j+1]
 	}
 	var out []string
-	for _, m := range regexp.MustCompile(`(?s)<div class="ft">.*?</div>|<text class="tl"[^>]*>.*?</text>`).FindAllString(tile, -1) {
+	for _, m := range regexp.MustCompile(`(?s)<div class="ft">.*?</div>|<span class="ml[^>]*>.*?</span>.*?</span>`).FindAllString(tile, -1) {
 		out = append(out, m)
 	}
 	if len(out) != 3 {
@@ -752,9 +755,11 @@ func TestUnitToggle(t *testing.T) {
 		t.Helper()
 		_, body := get(t, s, path)
 		f := footer(t, body)
-		// Length, bill, tail, wingspan, and the chord where it is known.
-		if n := countAny(f, wantLen); n < 4 || n != strings.Count(f, "<span") {
-			t.Errorf("%s: footer %q has %d length values in %v for %d measurements", path, f, n, wantLen, strings.Count(f, "<span"))
+		// Length, bill, tail, wingspan, and the chord where it is known: every
+		// number on the tile, less the mass, carries a length unit of the system.
+		values := len(regexp.MustCompile(`\d ?[a-z]+</span>`).FindAllString(f, -1))
+		if n := countAny(f, wantLen); n < 4 || n != values-1 {
+			t.Errorf("%s: footer %q has %d length values in %v for %d measurements", path, f, n, wantLen, values-1)
 		}
 		if n := countAny(f, wantMass); n != 1 {
 			t.Errorf("%s: footer %q has %d of the one mass value in %v", path, f, n, wantMass)
@@ -1284,155 +1289,102 @@ func TestBothPagesExplainTheStrokeCode(t *testing.T) {
 	}
 }
 
-// TestDetailDiagramIsLabeled asserts product.labeledDetailDiagram on the rendered page: five labels,
-// each naming its segment and carrying the value the provenance table gives for
-// it.
+// metricsOf returns the species page's measurements table rows, label to value.
+func metricsOf(t *testing.T, body string) map[string]string {
+	t.Helper()
+	i := strings.Index(body, `<table class="prov metrics">`)
+	if i < 0 {
+		t.Fatal("no measurements table on the species page")
+	}
+	table := body[i:]
+	table = table[:strings.Index(table, "</table>")]
+	out := map[string]string{}
+	for _, m := range regexp.MustCompile(`<th>([^<]+)</th>\s*<td class="v">([^<]+)</td>\s*<td class="k"><span class="tag t-([a-z-]+)">`).FindAllStringSubmatch(table, -1) {
+		out[m[1]] = m[2] + "|" + m[3]
+	}
+	return out
+}
+
+// TestDetailTileNamesEverySegment asserts product.labeledDetailDiagram on the rendered page: the
+// species page draws the home page's tile, larger, and its measurement lines and mass label
+// carry every metric the measurements table reports, with the table's value and a ~ exactly
+// where the table says the value is not measured. The names of the bill, the crossbar, and
+// the mass take their parts' colors, and the drawing itself holds no text and no leader lines.
 //
-// The values are read out of the table rather than recomputed here, so the two
-// cannot drift apart. A label that disagreed with the table would be the worst
-// outcome of this feature -- two numbers for one segment on one page.
+// Written against the table rather than a list of metric names, so it maintains itself: mass
+// was once reported in the table and absent from the drawing for weeks.
 //
-// Verifies: product.labeledDetailDiagram. Criterion: acceptance.segmentLabelsDontCollide.
-func TestDetailDiagramIsLabeled(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/species/greblu?units=metric")
-
-	// Matches a segment label, dashed or not, but deliberately NOT the chord:
-	// that one is checked separately below, and folding it in here would let a
-	// missing segment hide behind it.
-	labels := regexp.MustCompile(`<text class="dlabel(?: est)?"[^>]*>([^<]+)</text>`).FindAllStringSubmatch(body, -1)
-	if len(labels) != 5 {
-		t.Fatalf("detail diagram carries %d segment labels, want one per segment", len(labels))
-	}
-	got, marked := map[string]string{}, map[string]bool{}
-	for _, m := range labels {
-		f := strings.Fields(m[1])
-		seg := strings.ToLower(f[0])
-		val := strings.Join(f[1:], " ")
-		// The estimated marker is emitted in the markup, so strip it before
-		// comparing with the table -- and remember that it was there.
-		if marked[seg] = strings.HasSuffix(val, " ~"); marked[seg] {
-			val = strings.TrimSuffix(val, " ~")
+// Verifies: product.labeledDetailDiagram, product.tileOpensDetail. Criterion: acceptance.segmentLabelsDontCollide.
+func TestDetailTileNamesEverySegment(t *testing.T) {
+	for _, units := range []string{"metric", "imperial"} {
+		body := mustGet(t, newTestServer(t), "/species/greblu?units="+units)
+		rows := metricsOf(t, body)
+		if len(rows) < 9 {
+			t.Fatalf("%s: only %d rows in the measurements table; the fixture cannot show that every metric is named", units, len(rows))
 		}
-		got[seg] = val
-	}
-	for _, seg := range []string{"bill", "head", "neck", "body", "tail"} {
-		val, ok := got[seg]
-		if !ok {
-			t.Errorf("no label for the %s", seg)
-			continue
+		if n := strings.Count(body, `class="tile big"`); n != 1 {
+			t.Fatalf("%s: %d large tiles on the species page, want the one", units, n)
 		}
-		name := strings.ToUpper(seg[:1]) + seg[1:]
-		row := mustMatch(t, body,
-			`<th>`+name+`</th>\s*<td class="v">([^<]+)</td>`, "the "+seg+" row")
-		if val != row {
-			t.Errorf("%s: diagram says %q, provenance table says %q", seg, val, row)
+		// What the tile says, name to value and whether it is marked estimated.
+		said := map[string]string{}
+		for _, m := range regexp.MustCompile(`(?s)<span( class="est"[^>]*)?>(?:<span class="k [^"]*">)?([A-Za-z]+)(?:</span>)? ([^<]+)</span>`).FindAllStringSubmatch(body, -1) {
+			said[m[2]] = strings.TrimSpace(m[3]) + "|" + strconv.FormatBool(m[1] != "")
 		}
-		// The marker must track the provenance the table states for that same
-		// row, not a constant: asserted on the emitted text, because the class
-		// attribute was present and correct while nothing was drawn.
-		kind := mustMatch(t, body,
-			`<th>`+name+`</th>\s*<td class="v">[^<]+</td>\s*<td class="k"><span class="tag t-([a-z-]+)">`,
-			"the "+seg+" provenance kind")
-		if want := kind == "modeled"; marked[seg] != want {
-			t.Errorf("%s: label %q carries the ~ marker = %v, but the table calls it %q",
-				seg, got[seg], marked[seg], kind)
+		if m := regexp.MustCompile(`<span class="ml( est)?"[^>]*><span class="k k-mass">Mass</span> ([^<]+)</span>`).FindStringSubmatch(body); m != nil {
+			said["Mass"] = m[2] + "|" + strconv.FormatBool(m[1] != "")
+		}
+		names := map[string]string{"Total length": "Length", "Wing chord": "Chord"}
+		for label, row := range rows {
+			val, kind, _ := strings.Cut(row, "|")
+			name := label
+			if n, ok := names[label]; ok {
+				name = n
+			}
+			want := val + "|" + strconv.FormatBool(kind != "measured")
+			if got, ok := said[name]; !ok {
+				t.Errorf("%s: the table reports %s but the tile does not name it", units, label)
+			} else if got != want {
+				t.Errorf("%s: %s: the tile says %q, the table %q (value|estimated)", units, name, got, want)
+			}
 		}
 	}
-
-	// The wing chord is labeled on the crossbar, and like every other label its
-	// value is read out of the provenance table so the two cannot drift.
-	chord := mustMatch(t, body, `<text class="dlabel chord"[^>]*>([^<]+)</text>`, "the wing chord label")
-	if !strings.HasPrefix(chord, "Wing chord ") {
-		t.Errorf("chord label is %q; it should name what it measures", chord)
+	body := mustGet(t, newTestServer(t), "/species/greblu")
+	for _, k := range []string{`<span class="k k-bill">Bill</span>`, `<span class="k k-wing">Wingspan</span>`,
+		`<span class="k k-wing">Chord</span>`, `<span class="k k-mass">Mass</span>`} {
+		if !strings.Contains(body, k) {
+			t.Errorf("the species page's tile does not key %s to its part's color", k)
+		}
 	}
-	if got, want := strings.TrimSpace(strings.TrimPrefix(chord, "Wing chord")),
-		mustMatch(t, body, `<th>Wing chord</th>\s*<td class="v">([^<]+)</td>`, "the wing chord row"); got != want {
-		t.Errorf("wing chord: diagram says %q, provenance table says %q", got, want)
+	// The full badge, with the family's common name, which the home page's tile leaves to its
+	// tooltip (product.tileContents).
+	if m := regexp.MustCompile(`(?s)<span class="badge"[^>]*>(.*?)</span>`).FindStringSubmatch(body); m == nil ||
+		!strings.Contains(m[1], "<em>Ardeidae family</em>") {
+		t.Errorf("the species page's badge is %q; it carries the family's common name", m)
 	}
-
-	// Leaders tie each label to its segment.
-	if n := strings.Count(body, `class="leader"`); n != 5 {
-		t.Errorf("%d leader lines, want 5", n)
-	}
-	// A tile has none: the index is dense on purpose.
-	_, index := get(t, newTestServer(t), "/?month=all&show=all")
-	if strings.Contains(tileArea(t, index), `class="dlabel`) {
-		t.Error("index tiles carry diagram labels; those belong to the detail view and the legend")
+	svg := mustMatch(t, body, `(?s)(<svg class="dia".*?</svg>)`, "the drawing")
+	if strings.Contains(svg, "<text") || strings.Contains(body, `class="leader"`) {
+		t.Error("the drawing carries labels or leader lines; its measurements are on the tile")
 	}
 }
 
-// TestWingLabelsClearTheColumn asserts the geometry the wing labels depend on:
-// the wingspan label sits just beyond the wingtip, so the bird must be laid out
-// narrow enough that it never reaches the segment label column.
+// TestDetailTileStatesTotalLength asserts that the species page's Length is the bird's total
+// length from the table, never the drawing's height (product.labeledDetailDiagram).
 //
-// Checked across every species rather than one, because the binding case is the
-// widest-winged bird and which species that is changes with the data. Before
-// the gutter existed a Black-footed Albatross's crossbar reached x=988 in a
-// 988-wide box while the column began at 838, so the bar crossed every label on
-// that side.
+// The Great Blue Heron is not an arbitrary fixture. Ardeidae folds its neck
+// (decisions.foldedNeckAsS), so its drawn height is 6-9% short of its total length -- which is
+// what makes the assertion bite. For an unfolded bird the two agree.
 //
-// Verifies: product.labeledDetailDiagram. Criterion: acceptance.segmentLabelsDontCollide.
-func TestWingLabelsClearTheColumn(t *testing.T) {
-	// Wider than any label this renders; if the estimate is ever wrong it is
-	// wrong in the safe direction.
-	const spanLabelWidth = 150
-
-	full := view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}
-	inner := view.Box{W: full.W - labelGutter, H: full.H}
-	columnX := full.W - 150
-
-	ds := testDataset()
-	var worst float64 = 1e9
-	var worstName string
-	for i := range ds.Species {
-		sp := &ds.Species[i]
-		g := view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, inner)
-		end := g.CX + g.CrossbarHalfWidth + 8 + spanLabelWidth
-		if gap := columnX - end; gap < worst {
-			worst, worstName = gap, sp.Name(dataset.LocaleNA)
-		}
+// Verifies: product.labeledDetailDiagram. Criterion: acceptance.totalLengthLabeled.
+func TestDetailTileStatesTotalLength(t *testing.T) {
+	body := mustGet(t, newTestServer(t), "/species/greblu?units=metric")
+	row, _, _ := strings.Cut(metricsOf(t, body)["Total length"], "|")
+	if got := mustMatch(t, body, `>Length ([^<]+)</span>`, "the tile's Length"); got != row {
+		t.Errorf("the tile's Length is %q, the table's total length %q", got, row)
 	}
-	if worst < 0 {
-		t.Errorf("%s: the wingspan label would reach the segment column by %.1f px; "+
-			"widen labelGutter", worstName, -worst)
-	}
-
-	// And the gutter must not be so wide that it is doing nothing: the widest
-	// bird should still use most of the space it has.
-	if labelGutter >= full.W/2 {
-		t.Errorf("labelGutter is %d of a %.0f box; the bird has less room than its labels",
-			labelGutter, full.W)
-	}
-}
-
-// TestDiagramTextPaintsOverLines asserts the paint order of the annotated
-// diagram: every line is emitted before every label, so a leader that crosses a
-// label passes behind the words.
-//
-// SVG has no z-index; document order IS paint order. The wing labels used to
-// sit inside the centering group, which put them ahead of the leaders and let
-// the neck's leader strike through "Wing chord" and "Wingspan".
-//
-// Verifies: product.labeledDetailDiagram. Criterion: acceptance.segmentLabelsDontCollide.
-func TestDiagramTextPaintsOverLines(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/species/greblu")
-	svg := mustMatch(t, body, `(?s)(<svg class="dia".*?</svg>)`, "the detail diagram")
-
-	lastLine := strings.LastIndex(svg, "<line")
-	firstText := strings.Index(svg, "<text")
-	if lastLine < 0 || firstText < 0 {
-		t.Fatalf("diagram has %d lines and %d texts; expected both", lastLine, firstText)
-	}
-	if lastLine > firstText {
-		t.Errorf("a <line> is emitted after the first <text> (line at %d, text at %d); "+
-			"SVG paints in document order, so that line is drawn over the label",
-			lastLine, firstText)
-	}
-
-	// And the labels really do exist to be covered, or the check above is
-	// satisfied by a diagram with no text at all.
-	if n := strings.Count(svg, "<text"); n < 7 {
-		t.Errorf("only %d labels in the diagram; expected five segments plus chord and wingspan", n)
+	sp := findSpecies(t, "greblu")
+	if g := view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, tileBox); !g.NeckFolded {
+		t.Fatal("the fixture no longer folds its neck, so this test can no longer " +
+			"distinguish the bird's length from the drawing's height; pick another Ardeidae")
 	}
 }
 
@@ -1443,121 +1395,6 @@ func keysOf(m map[string]bool) []string {
 	}
 	sort.Strings(out)
 	return out
-}
-
-// TestDetailDiagramLabelsTotalLength asserts product.labeledDetailDiagram's total length label: the one
-// annotation that names the whole bird rather than a part of it.
-//
-// The Great Blue Heron is not an arbitrary fixture. Ardeidae folds its neck
-// (decisions.foldedNeckAsS), so its drawn height is 6-9% short of its total length -- which is
-// what makes the value assertion below bite. For every unfolded bird the two
-// agree exactly, so a version of this test built on any other species would
-// pass just as happily against a label derived from the drawing.
-//
-// Verifies: product.labeledDetailDiagram. Criterion: acceptance.totalLengthLabeled.
-func TestDetailDiagramLabelsTotalLength(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/species/greblu?units=metric")
-
-	el := mustMatch(t, body, `(<text class="dlabel total[^"]*"[^>]*>[^<]+</text>)`,
-		"the total length label")
-
-	// Horizontal: SVG text rotates only via a transform, so its absence is the
-	// assertion. Stated explicitly because "horizontal" is otherwise invisible.
-	if strings.Contains(el, "transform") || strings.Contains(el, "rotate") {
-		t.Errorf("the total length label is rotated; product.labeledDetailDiagram requires it horizontal: %s", el)
-	}
-	if !strings.Contains(el, `text-anchor="middle"`) {
-		t.Errorf("the total length label is not centered: %s", el)
-	}
-
-	// Centered on the BIRD's axis, not the box's. The two differ by half the
-	// label gutter, so a label centered on the box sits well to the right of the
-	// bird it names.
-	lt := labeledTile(findSpecies(t, "greblu"), view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{metric: true}, dataset.LocaleNA)
-	if x := attrF(t, el, "x"); math.Abs(x-lt.Geom.CX) > 0.05 {
-		t.Errorf("total length label at x=%.1f; the bird's axis is %.1f (box center is %.1f)",
-			x, lt.Geom.CX, lt.Box.W/2)
-	}
-	// Below the tail tip, not above it.
-	tail := lt.TopOffset + lt.Geom.YTailTip
-	if y := attrF(t, el, "y"); y <= tail {
-		t.Errorf("total length label at y=%.1f, tail tip at %.1f; it belongs below the tail", y, tail)
-	}
-
-	// It states the bird's length, read from the provenance table -- never the
-	// drawn height, which for this folded-neck bird is a different number.
-	text := mustMatch(t, el, `>([^<]+)</text>`, "the label text")
-	val := strings.TrimSpace(strings.TrimPrefix(text, "Total length"))
-	marked := strings.HasSuffix(val, " ~")
-	val = strings.TrimSuffix(val, " ~")
-	row := mustMatch(t, body, `<th>Total length</th>\s*<td class="v">([^<]+)</td>`,
-		"the total length row")
-	if val != row {
-		t.Errorf("total length: diagram says %q, provenance table says %q", val, row)
-	}
-	// Guard the guard: if the fixture ever stops folding its neck, the check
-	// above goes vacuous and should say so rather than quietly weaken.
-	if !lt.Geom.NeckFolded {
-		t.Fatal("the fixture no longer folds its neck, so this test can no longer " +
-			"distinguish the bird's length from the drawing's height; pick another Ardeidae")
-	}
-
-	// The marker tracks the provenance the table states, not a constant.
-	kind := mustMatch(t, body,
-		`<th>Total length</th>\s*<td class="v">[^<]+</td>\s*<td class="k"><span class="tag t-([a-z-]+)">`,
-		"the total length provenance kind")
-	if want := kind == "modeled"; marked != want {
-		t.Errorf("total length label carries the ~ marker = %v, but the table calls it %q",
-			marked, kind)
-	}
-
-	// No leader: there is no part to point at.
-	if n := strings.Count(body, `class="leader"`); n != 5 {
-		t.Errorf("%d leader lines; the total length label should not add one", n)
-	}
-
-	// A home page tile does not.
-	_, index := get(t, newTestServer(t), "/?month=all&show=all")
-	if strings.Contains(tileArea(t, index), `class="dlabel`) {
-		t.Error("home page tiles carry diagram labels; those belong to the detail view")
-	}
-}
-
-// TestTotalLengthLabelStaysInTheBox asserts the room half of acceptance.totalLengthLabeled across every
-// species, because the binding case is whichever bird is tallest relative to its
-// wingspan and that changes with the data.
-//
-// Without the reserved strip this fails for essentially the whole dataset: the
-// detail view scales each bird to fill the drawing area, so the tail tip lands
-// on its bottom edge and the label is drawn outside the viewBox.
-//
-// Verifies: product.labeledDetailDiagram. Criterion: acceptance.totalLengthLabeled.
-func TestTotalLengthLabelStaysInTheBox(t *testing.T) {
-	// The 11px text's descender. The baseline may sit this far above the edge
-	// and no closer.
-	const descender = 3
-
-	ds := testDataset()
-	for i := range ds.Species {
-		sp := &ds.Species[i]
-		lt := labeledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{metric: true}, dataset.LocaleNA)
-		if len(lt.FootLabels) == 0 {
-			t.Fatalf("%s: no whole-bird labels at all", sp.Name(dataset.LocaleNA))
-		}
-		// Two things hang below the drawing and the strip must clear whichever
-		// reaches lower: the stack under the tail, and the mass label under
-		// the cube. Checking only one leaves the other free to overrun.
-		last := lt.FootLabels[len(lt.FootLabels)-1]
-		for _, c := range []struct {
-			what string
-			y    float64
-		}{{last.Text, last.Y}, {lt.MassCube.Label, lt.MassCube.LabelY}} {
-			if c.y+descender > lt.Box.H {
-				t.Errorf("%s: %q baseline at %.1f (+%d descender) overruns the %.1f box",
-					sp.Name(dataset.LocaleNA), c.what, c.y, descender, lt.Box.H)
-			}
-		}
-	}
 }
 
 // findSpecies returns a fixture species by id, so a test can rebuild the same
@@ -1598,52 +1435,6 @@ func mustGet(t *testing.T, s *server, path string) string {
 	return body
 }
 
-// TestEveryReportedMetricIsLabeled asserts product.labeledDetailDiagram's general rule: the diagram
-// carries every metric the detail view reports, not a chosen subset.
-//
-// Written against the provenance table rather than a list of metric names, so
-// it maintains itself. Mass was reported in the table and absent from the
-// drawing for weeks without anything noticing, because every check named the
-// metrics it expected and mass was not among them. Adding a row to the table
-// now fails this until the drawing carries it too.
-//
-// Verifies: product.labeledDetailDiagram. Criterion: acceptance.segmentLabelsDontCollide.
-func TestEveryReportedMetricIsLabeled(t *testing.T) {
-	for _, units := range []string{"metric", "imperial"} {
-		body := mustGet(t, newTestServer(t), "/species/greblu?units="+units)
-
-		// Scoped to the measurements table. The detail page now carries a
-		// second provenance table for categories (product.categoryProvenance), whose rows are
-		// not metrics and are not drawn in the diagram.
-		metrics := body[strings.Index(body, `<table class="prov metrics">`):]
-		metrics = metrics[:strings.Index(metrics, "</table>")]
-		rows := regexp.MustCompile(
-			`<th>([^<]+)</th>\s*<td class="v">([^<]+)</td>`).FindAllStringSubmatch(metrics, -1)
-		if len(rows) < 9 {
-			t.Fatalf("%s: only %d rows in the provenance table; the fixture cannot show that "+
-				"EVERY reported metric is labeled", units, len(rows))
-		}
-
-		// Every label the diagram draws, whitespace-normalized and stripped of
-		// the estimated marker, which the table does not carry.
-		drawn := map[string]bool{}
-		for _, m := range regexp.MustCompile(
-			`<text class="dlabel[^"]*"[^>]*>([^<]+)</text>`).FindAllStringSubmatch(body, -1) {
-			s := strings.Join(strings.Fields(html.UnescapeString(m[1])), " ")
-			drawn[strings.TrimSuffix(s, " ~")] = true
-		}
-
-		for _, r := range rows {
-			want := strings.Join(strings.Fields(
-				html.UnescapeString(r[1])+" "+html.UnescapeString(r[2])), " ")
-			if !drawn[want] {
-				t.Errorf("%s: the table reports %q but the diagram does not label it; "+
-					"product.labeledDetailDiagram requires every reported metric to appear in the drawing", units, want)
-			}
-		}
-	}
-}
-
 // massCubeOf returns the mass square's attributes from a rendered diagram.
 func massCubeOf(t *testing.T, body string) (class string, x, y, side float64, ok bool) {
 	t.Helper()
@@ -1676,7 +1467,7 @@ func TestMassCubeIsWaterToScale(t *testing.T) {
 
 	for i := range ds.Species {
 		sp := &ds.Species[i]
-		lt := labeledTile(sp, view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}, units{}, dataset.LocaleNA)
+		lt := newTile(sp, view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, tileBox), tileBox, units{}, dataset.LocaleNA)
 
 		// One gram of water is one cubic centimeter, so the cube of water
 		// weighing massG grams has side cbrt(massG) cm = 10*cbrt(massG) mm.
@@ -1691,9 +1482,7 @@ func TestMassCubeIsWaterToScale(t *testing.T) {
 		// cube form: the projection grows up and right from it, so two cubes
 		// can be compared by eye. A base that moved with the bird would
 		// destroy that without changing a single size.
-		drawH := lt.Box.H - math.Max(footStrip(len(lt.FootLabels)),
-			massLabelGap+footDescender)
-		if base, want := lt.MassCube.Y+lt.MassCube.Side, drawH-massCubeMargin; math.Abs(base-want) > 0.01 {
+		if base, want := lt.MassCube.Y+lt.MassCube.Side, lt.Box.H-massCubeMargin; math.Abs(base-want) > 0.01 {
 			t.Errorf("%s: the cube's face stands at y=%.2f, want %.2f in every diagram",
 				sp.Name(dataset.LocaleNA), base, want)
 		}
@@ -1713,11 +1502,19 @@ func TestMassCubeIsWaterToScale(t *testing.T) {
 		if lt.MassCube.Depth <= 0 {
 			t.Errorf("%s: the cube has no depth, so it is a square", sp.Name(dataset.LocaleNA))
 		}
-		// Its label must be centered under the face without being clipped --
-		// a Scissor-tailed Flycatcher's 29px cube once rendered "ass 1.4 oz".
-		if left := lt.MassCube.LabelX - float64(len(lt.MassCube.Label))*massLabelCharWidth/2; left < -0.01 {
-			t.Errorf("%s: the mass label %q starts at x=%.1f and is clipped",
-				sp.Name(dataset.LocaleNA), lt.MassCube.Label, left)
+		// Its label starts right of the cube and stands on the cube's foot,
+		// placed in percent of the drawing so it follows the cube at any width
+		// (product.tileContents).
+		if l := lt.MassLabel; l == nil {
+			t.Errorf("%s: the cube has no mass label", sp.Name(dataset.LocaleNA))
+		} else {
+			c := lt.MassCube
+			if left := l.Left * lt.Box.W / 100; left <= c.X+c.Side+c.Depth {
+				t.Errorf("%s: the mass label starts at x=%.1f, inside the cube", sp.Name(dataset.LocaleNA), left)
+			}
+			if foot := lt.Box.H - l.Bottom*lt.Box.H/100; math.Abs(foot-(c.Y+c.Side)) > 0.01 {
+				t.Errorf("%s: the mass label stands at y=%.2f, the cube's foot at %.2f", sp.Name(dataset.LocaleNA), foot, c.Y+c.Side)
+			}
 		}
 		// Measured mass draws solid, near-match dashed (product.measuredVersusModeled).
 		if want := sp.Mass.Prov.Kind != dataset.Measured; lt.MassCube.Est != want {
@@ -1761,18 +1558,21 @@ func TestMassCubeIsRenderedAndExplained(t *testing.T) {
 		}
 	}
 
-	// On home page tiles too, since decisions.massCubeOnTiles -- but unlabeled. A tile carries no
-	// labels at all and names the mass in its footer, so the cube appears
-	// with no text of its own.
+	// On home page tiles too, since decisions.massCubeOnTiles, each with its mass named beside it
+	// and no text inside the drawing.
 	_, index := get(t, s, "/?month=all&show=all")
 	tiles := tileArea(t, index)
 	cubes := strings.Count(tiles, `<g class="masscube`)
-	if n := strings.Count(tiles, `<a class="tile"`); cubes != n {
-		t.Errorf("%d mass cubes across %d tiles; every tile should carry one", cubes, n)
+	n := strings.Count(tiles, `<a class="tile"`)
+	if cubes != n || strings.Count(tiles, `<span class="ml`) != n {
+		t.Errorf("%d mass cubes and %d mass labels across %d tiles; every tile should carry one of each",
+			cubes, strings.Count(tiles, `<span class="ml`), n)
 	}
-	if strings.Contains(tiles, `class="dlabel`) {
-		t.Error("a home page tile carries a diagram label; the tile has none, and the mass is " +
-			"named in its footer instead")
+	for _, svg := range diagrams(t, tiles) {
+		if strings.Contains(svg, "<text") {
+			t.Error("a home page tile's drawing carries text; its one label is the mass, beside it as page text")
+			break
+		}
 	}
 }
 
@@ -2334,7 +2134,7 @@ func TestTileCubeNeverReachesTheCrossbar(t *testing.T) {
 			for i, sec := range secs {
 				for _, sp := range sec.Species {
 					g := view.Layout(sp, refs[i], spanRefs[i], tileBox)
-					c := newMassCube(sp, tileBox.H, g.PxPerMm, "")
+					c := newMassCube(sp, tileBox.H, g.PxPerMm)
 					if c.Side <= 0 {
 						continue // no mass, no cube
 					}

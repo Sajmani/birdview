@@ -81,8 +81,8 @@ var (
 // TestBandingCodeIsOutsideTheTruncatingElement is the half no stylesheet check
 // can see. The names truncate with an ellipsis, so a code nested inside one
 // would be the first thing eaten -- and the markup looks correct until a name
-// is long enough to prove otherwise. The species page and the tile both
-// carry the codes beside the common name (product.tileContents).
+// is long enough to prove otherwise. The tile, which both pages draw, carries
+// the codes beside the common name (product.tileContents, product.tileOpensDetail).
 //
 // Verifies: product.tileContents. Criterion: acceptance.tileHeaderNeverWraps.
 func TestBandingCodeIsOutsideTheTruncatingElement(t *testing.T) {
@@ -90,8 +90,7 @@ func TestBandingCodeIsOutsideTheTruncatingElement(t *testing.T) {
 		file, what string
 		line, name *regexp.Regexp
 	}{
-		{"static/detail.html", ".nameline", reNameline, reCnname},
-		{"static/shared.html", ".nameline", reNameline, reCnname},
+		{"static/shared.html", ".nameline", reNameline, reCnname}, // the tile, on both pages
 	} {
 		b, err := Static.ReadFile(c.file)
 		if err != nil {
@@ -119,18 +118,21 @@ func TestBandingCodeIsOutsideTheTruncatingElement(t *testing.T) {
 }
 
 // TestMassLabelSetLikeTheMeasurements asserts that the mass label beside a
-// tile's cube is in the measurement lines' type and size (product.tileContents,
+// tile's cube, page text laid over the drawing, is in the measurement lines' type and size (product.tileContents,
 // decisions.tileMeasurementLines): the same font declaration, word for word.
 //
 // Verifies: product.tileContents. Criterion: acceptance.tileCarriesHeaderAndMetrics.
 func TestMassLabelSetLikeTheMeasurements(t *testing.T) {
 	font := regexp.MustCompile(`font:\s*([^;]+);`)
-	ft, tl := font.FindStringSubmatch(rule(t, ".ft")), font.FindStringSubmatch(rule(t, ".tl"))
-	if ft == nil || tl == nil {
-		t.Fatalf("a font declaration is missing: .ft %v, .tl %v", ft, tl)
+	ft, ml := font.FindStringSubmatch(rule(t, ".ft")), font.FindStringSubmatch(rule(t, ".ml"))
+	if ft == nil || ml == nil {
+		t.Fatalf("a font declaration is missing: .ft %v, .ml %v", ft, ml)
 	}
-	// .ft also sets a line height, which an SVG label has no use for.
-	if strings.Replace(ft[1], "/1 ", " ", 1) != tl[1] {
-		t.Errorf("the mass label is set in %q and the measurements in %q; they should match", tl[1], ft[1])
+	// .ft also sets a line height, which the label, trimmed to its baseline, has no use for.
+	if regexp.MustCompile(`/[0-9.]+ `).ReplaceAllString(ft[1], " ") != ml[1] {
+		t.Errorf("the mass label is set in %q and the measurements in %q; they should match", ml[1], ft[1])
+	}
+	if !strings.Contains(rule(t, ".ml"), "tabular-nums") {
+		t.Error("the mass label's figures are not of even width, as the measurements' are")
 	}
 }

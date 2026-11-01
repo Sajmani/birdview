@@ -27,8 +27,8 @@
      anchors cannot nest, and the tile must keep opening the detail view
      (product.tileOpensDetail). The pin is in the top-right corner, the eBird link in the
      lower-right, each over the end of a line that keeps room for it. */}}
-<div class="tilewrap" id="{{.Anchor}}">
-<a class="tile" href="{{.DetailURL}}">
+<div class="tilewrap{{if .Big}} big{{end}}"{{with .Anchor}} id="{{.}}"{{end}}>
+{{if .DetailURL}}<a class="tile" href="{{.DetailURL}}">{{else}}<div class="tile{{if .Big}} big{{end}}">{{end}}
   <div class="hd">
     <div class="nameline">
       <span class="cn"><span class="cnname">{{.Name}}</span>{{with .S.BandingCode}}<span class="code banding" title="Banding code, from the USGS Bird Banding Laboratory">{{.}}</span>{{end}}{{with .S.SpeciesCode}}<span class="code" title="eBird code">({{.}})</span>{{end}}</span>
@@ -44,13 +44,18 @@
          could act on -- the Chihuahuan Meadowlark's mass is the Eastern
          Meadowlark's, which is worth saying out loud. */}}
     <div class="ft">
+      {{/* A name takes its part's color where the contrast floor allows: the bill's, the
+           crossbar's (product.labeledDetailDiagram). The species page's tile adds head, neck, and body. */}}
       <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="{{whynot .S.TotalLength.Prov}}"{{end}}>Length {{.Length}}</span>
-      <span{{if ne .S.Segments.Bill.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Bill.Prov}}"{{end}}>Bill {{.BillStr}}</span>
-      <span{{if ne .S.Segments.Tail.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Tail.Prov}}"{{end}}>Tail {{.TailStr}}</span>
+      <span{{if ne .S.Segments.Bill.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Bill.Prov}}"{{end}}><span class="k k-bill">Bill</span> {{.BillStr}}</span>
+      {{if .Big}}<span{{if ne .S.Segments.Head.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Head.Prov}}"{{end}}>Head {{.HeadStr}}</span>
+      <span{{if ne .S.Segments.Neck.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Neck.Prov}}"{{end}}>Neck {{.NeckStr}}</span>
+      <span{{if ne .S.Segments.Body.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Body.Prov}}"{{end}}>Body {{.BodyStr}}</span>
+      {{end}}<span{{if ne .S.Segments.Tail.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Tail.Prov}}"{{end}}>Tail {{.TailStr}}</span>
     </div>
     <div class="ft">
-      <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="{{whynot .S.Wingspan.Prov}}"{{end}}>Wingspan {{.Wing}}</span>
-      {{with .ChordStr}}<span{{if ne $.S.WingChord.Prov.Kind "measured"}} class="est" title="{{whynot $.S.WingChord.Prov}}"{{end}}>Chord {{.}}</span>{{end}}
+      <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="{{whynot .S.Wingspan.Prov}}"{{end}}><span class="k k-wing">Wingspan</span> {{.Wing}}</span>
+      {{with .ChordStr}}<span{{if ne $.S.WingChord.Prov.Kind "measured"}} class="est" title="{{whynot $.S.WingChord.Prov}}"{{end}}><span class="k k-wing">Chord</span> {{.}}</span>{{end}}
     </div>
     {{/* How much of the species observations held by the regions currently
          on screen (product.shareOfRecords). It answers the question the filtered page is
@@ -71,20 +76,24 @@
       title="{{.Title}}">{{.Note}}</span>{{end}}{{else}}<span class="nodata"
       title="no regions are selected">&mdash;</span>{{end}}</div>
   </div>
-  {{template "diagram" .}}
+  {{/* The drawing, and its one label: the mass beside its cube, set as page text over the
+       drawing so it keeps the measurement lines' size at any width (tech.textSizeFloor). */}}
+  <div class="dwrap">{{template "diagram" .}}{{with .MassLabel}}<span class="ml{{if .Est}} est{{end}}"
+    style="left:{{f1 .Left}}%;bottom:{{f1 .Bottom}}%"><span class="k k-mass">Mass</span> {{.Value}}</span>{{end}}</div>
   <div class="lo">
     <div class="idline">
       {{/* The short badge, the family's scientific name alone, so the
-           scientific name keeps its room; the full badge is on the species
-           page and in the Family setting (product.tileContents). */}}
-      <span class="badge" style="background:{{.S.FamilyColor}};color:{{.S.FamilyText}}" title="{{.S.FamilyCommon}}">{{.S.Family}}</span>
+           scientific name keeps its room; the species page's tile and the
+           Family setting carry the full badge (product.tileContents). */}}
+      <span class="badge" style="background:{{.S.FamilyColor}};color:{{.S.FamilyText}}" title="{{.S.FamilyCommon}}">{{.S.Family}}{{if .Big}}
+        <em>{{.S.FamilyCommon}}</em>{{end}}</span>
       <span class="sn">{{.S.ScientificName}}</span>
     </div>
   </div>
   {{if or (and .Commonest .Commonest.Seams) .SameAs}}<div class="notes">{{with .Commonest}}{{range .Seams}}<span class="seam"
     title="{{.Title}}">{{.Text}}</span>{{end}}{{end}}{{range .SameAs}}<span class="seam"
     title="{{.Title}}">{{.Text}}</span>{{end}}</div>{{end}}
-</a>
+{{if .DetailURL}}</a>{{else}}</div>{{end}}
 {{with .EBirdURL}}<a class="ebird" href="{{.}}" rel="noopener noreferrer" title="{{$.Name}} on eBird" aria-label="{{$.Name}} on eBird">eBird</a>{{end}}
 {{if .PinURL}}{{template "pin" .}}{{end}}
 </div>
@@ -132,42 +141,6 @@
           x2="{{f1 (add $g.CX 4)}}" y2="{{f1 $g.YBodyEnd}}"/>
     <line class="tail" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBodyEnd}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YTailTip}}"/>
   </g>
-  {{/* EVERYTHING BELOW IS TEXT OR SCAFFOLDING, and the order is load-bearing.
-       SVG paints in document order, so every line is emitted before every
-       label: a leader crossing the wing labels must pass BEHIND the words, not
-       through them. The wing labels used to sit inside the group above, which
-       put them before the leaders and let a leader strike through them.
-
-       These coordinates are the box's, not the group's, so the centering
-       offset is added explicitly -- view has already folded it into the segment
-       labels' own y values (product.labeledDetailDiagram). */}}
-  {{range .Labels}}
-  <line class="leader" x1="{{f1 (add $g.CX 6)}}" y1="{{f1 .AnchorY}}"
-        x2="{{f1 (sub $b.W 150)}}" y2="{{f1 .TextY}}"/>
-  {{end}}
-  {{if .WingspanLabel}}
-  {{/* Just off the right end of the bar and vertically on it, so it reads as
-       naming the whole crossbar rather than any part of it. */}}
-  <text class="dlabel span{{if .WingspanEst}} est{{end}}" text-anchor="start"
-        dominant-baseline="middle" x="{{f1 (add (add $g.CX $g.CrossbarHalfWidth) 8)}}"
-        y="{{f1 (add .TopOffset $g.YShoulder)}}">{{.WingspanLabel}}{{if .WingspanEst}} ~{{end}}</text>
-  {{end}}
-  {{if and .ChordLabel $g.ChordTickX}}
-  {{/* Centered over the LEFT outer segment. Both outer segments are the measured
-       chord, so either names it; the left keeps it clear of the wingspan label,
-       which sits off the right end of the bar. */}}
-  <text class="dlabel chord" text-anchor="middle" y="{{f1 (add .TopOffset (sub $g.YShoulder 7))}}"
-        x="{{f1 (sub $g.CX (div (add $g.ChordTickX $g.CrossbarHalfWidth) 2))}}">{{.ChordLabel}}</text>
-  {{end}}
-  {{range .Labels}}
-  <text class="dlabel{{if .Est}} est{{end}}" x="{{f1 (sub $b.W 144)}}" y="{{f1 .TextY}}"
-        dominant-baseline="middle">{{.Text}}{{if .Est}} ~{{end}}</text>
-  {{end}}
-  {{/* The whole bird, named under the foot of the figure and centered on the
-       drawing axis -- $g.CX, not the box center: the bird is laid out left of
-       the label gutter, so the two are 160px apart. No leader lines; there is
-       no part to point at. Mass sits here rather than in the stack beside the
-       drawing because it is not a length (product.labeledDetailDiagram). */}}
   {{with .MassCube}}{{if .Side}}
   {{/* The cube of water that weighs what the bird weighs, in oblique
        projection (product.labeledDetailDiagram, decisions.massAsWaterCube). The FACE's base sits on the bottom of the
@@ -187,18 +160,7 @@
     <rect class="mcface" x="{{f1 .X}}" y="{{f1 .Y}}"
           width="{{f1 .Side}}" height="{{f1 .Side}}"/>
   </g>
-  {{if .Label}}
-  <text class="dlabel mass{{if .Est}} est{{end}}" text-anchor="middle"
-        x="{{f1 .LabelX}}" y="{{f1 .LabelY}}">{{.Label}}{{if .Est}} ~{{end}}</text>
-  {{end}}
   {{end}}{{end}}
-  {{/* A home page tile's one label, its mass, beside the cube (product.tileContents). */}}
-  {{range .TileLabels}}<text class="tl" text-anchor="{{.Anchor}}" x="{{f1 .X}}" y="{{f1 .Y}}">{{.Text}}{{if .Est}}<tspan class="estmark" dx="2">~</tspan>{{end}}</text>
-  {{end}}
-  {{range .FootLabels}}
-  <text class="dlabel {{.Key}} foot{{if .Est}} est{{end}}" text-anchor="middle"
-        x="{{f1 $g.CX}}" y="{{f1 .Y}}">{{.Text}}{{if .Est}} ~{{end}}</text>
-  {{end}}
 </svg>
 {{end}}
 

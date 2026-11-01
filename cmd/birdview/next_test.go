@@ -1198,6 +1198,8 @@ func TestNextTileCornerAndRows(t *testing.T) {
 			EBirds     int      `json:"ebirds"`
 			Rows       int      `json:"rows"`
 			Long       int      `json:"long"`
+			Mass       int      `json:"mass"`
+			OffFoot    []string `json:"offfoot"`
 			Corner     []string `json:"corner"`
 			Uncentered []string `json:"uncentered"`
 			Ragged     []string `json:"ragged"`
@@ -1214,6 +1216,12 @@ func TestNextTileCornerAndRows(t *testing.T) {
 		}
 		if size == "laptop" && res.Rows == 0 {
 			t.Fatalf("at %s: no row holds two tiles, so drawings were never compared across a row", size)
+		}
+		if res.Mass < res.Tiles*9/10 {
+			t.Errorf("at %s: %d of %d tiles have a mass label to measure", size, res.Mass, res.Tiles)
+		}
+		if len(res.OffFoot) > 0 {
+			t.Errorf("at %s, %d mass labels' baselines are not on the cube's foot: %v", size, len(res.OffFoot), res.OffFoot)
 		}
 		if len(res.Corner) > 0 {
 			t.Errorf("at %s, %d problems in the tiles' corners: %v", size, len(res.Corner), res.Corner)

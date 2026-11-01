@@ -22,7 +22,7 @@
 // measured and every one more than a pixel off as data-probe on the root.
 window.addEventListener("load", function () {
   setTimeout(function () {
-    var out = { tiles: 0, notes: 0, ebirds: 0, rows: 0, long: 0, corner: [], uncentered: [], ragged: [] };
+    var out = { tiles: 0, notes: 0, ebirds: 0, rows: 0, long: 0, mass: 0, offfoot: [], corner: [], uncentered: [], ragged: [] };
     var rows = {};
     document.querySelectorAll(".tilewrap").forEach(function (t) {
       var pin = t.querySelector(":scope > a.pin");
@@ -51,6 +51,19 @@ window.addEventListener("load", function () {
         if (Math.abs(n.bottom - line.bottom) > 1) out.corner.push(t.id + " eBird's foot " + Math.round(n.bottom - line.bottom) + "px off the bottom line's");
         if (n.top < rule.top) out.corner.push(t.id + " eBird reaches " + Math.round(rule.top - n.top) + "px above the rule");
         if (sn.right > n.left + 0.5) out.corner.push(t.id + " scientific name runs " + Math.round(sn.right - n.left) + "px under eBird");
+      }
+      // The mass label's baseline stands on the cube's foot (product.tileContents). A
+      // zero-height inline box sits on the baseline, so its bottom is where
+      // the baseline is, whatever the label's own box does.
+      var ml = tile.querySelector(".ml"), face = tile.querySelector("svg .mcface");
+      if (ml && face) {
+        out.mass++;
+        var mark = document.createElement("span");
+        mark.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline";
+        ml.appendChild(mark);
+        var d = mark.getBoundingClientRect().bottom - face.getBoundingClientRect().bottom;
+        ml.removeChild(mark);
+        if (Math.abs(d) > 1) out.offfoot.push(t.id + " " + Math.round(d * 10) / 10 + "px");
       }
       // A long name truncates; it must not widen the tile and push the
       // drawing off center (#4).

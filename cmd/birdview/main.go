@@ -776,25 +776,8 @@ type tile struct {
 	// the wingspan is modeled (product.measuredVersusModeled).
 	WingModeled bool
 
-	// Labels and ChordLabel are empty on a home page tile: the annotations of product.labeledDetailDiagram
-	// need room, so they appear only in the detail view, which builds this
-	// struct through labeledTile.
-	Labels     []diagramLabel
-	TopOffset  float64
-	ChordLabel string
-	// WingspanLabel sits at the right wingtip, mirroring the chord label at the
-	// left, so the crossbar names the whole span as well as its measured part.
-	WingspanLabel string
-	WingspanEst   bool
-	// FootLabels name the whole bird rather than any part of it, stacked on
-	// the drawing axis below the tail tip (product.labeledDetailDiagram): its total length and its
-	// mass. A slice rather than named fields because product.labeledDetailDiagram requires every
-	// metric the detail view reports to appear in the drawing, so the next
-	// whole-bird metric should be one more entry and not a new layout.
-	//
-	// Total length is the bird's reported length, never the drawn height: a
-	// folded neck makes those differ by 6-9%.
-	FootLabels []footLabel
+	// TopOffset centers the bird vertically in its box (product.tileContents).
+	TopOffset float64
 
 	// MassCube is the bird's mass drawn as water: one face of the cube of
 	// water that weighs the same (product.labeledDetailDiagram, decisions.massAsWaterCube). Side zero means none.
@@ -814,9 +797,13 @@ type tile struct {
 	// EBirdURL is the species' eBird page, or empty when it has no eBird
 	// code and the tile shows no link (product.ebirdLink).
 	EBirdURL string
-	// TileLabels is a home page tile's one drawing label, its mass beside the
-	// cube (product.tileContents).
-	TileLabels []tileLabel
+	// MassLabel is the drawing's one label, the mass beside its cube
+	// (product.tileContents); nil when there is no cube.
+	MassLabel *massLabel
+	// Big is the species page's tile: the same tile, larger, whose first
+	// measurement line also carries head, neck, and body (product.tileOpensDetail, product.labeledDetailDiagram).
+	Big                       bool
+	HeadStr, NeckStr, BodyStr string
 }
 
 // ebirdURL is the species' page on eBird, by the eBird code it carries from
@@ -826,6 +813,52 @@ func ebirdURL(sp *dataset.Species) string {
 		return ""
 	}
 	return "https://ebird.org/species/" + url.PathEscape(sp.SpeciesCode)
+}
+
+// massLabel is the mass named beside its cube (product.tileContents). It is page text laid over
+// the drawing, not SVG text, so it keeps the measurement lines' size at any
+// width (tech.textSizeFloor); Left and Bottom place it, in percent of the drawing's width and
+// height, so it follows the cube as the drawing scales.
+type massLabel struct {
+	Value        string
+	Est          bool
+	Left, Bottom float64
+}
+
+// newTile builds the tile both pages draw (product.tileContents, product.tileOpensDetail) for a bird
+// laid out as g in box: its measurements in the units u, the cube and its
+// label, and the eBird link. The home page adds its links and the share; the
+// species page makes it Big.
+func newTile(sp *dataset.Species, g view.Geometry, box view.Box, u units, loc dataset.Locale) tile {
+	t := tile{
+		S: sp, Name: sp.Name(loc), Geom: g, Box: box,
+		TopOffset:   (box.H - g.TotalHeight()) / 2,
+		MassCube:    newMassCube(sp, box.H, g.PxPerMm),
+		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
+		Length:      u.format(sp.TotalLength.Value, view.ByLength),
+		Wing:        u.format(sp.Wingspan.Value, view.ByWingspan),
+		MassStr:     u.format(sp.Mass.Value, view.ByMass),
+		BillStr:     u.format(sp.Segments.Bill.Value, view.ByLength),
+		TailStr:     u.format(sp.Segments.Tail.Value, view.ByLength),
+		HeadStr:     u.format(sp.Segments.Head.Value, view.ByLength),
+		NeckStr:     u.format(sp.Segments.Neck.Value, view.ByLength),
+		BodyStr:     u.format(sp.Segments.Body.Value, view.ByLength),
+		EBirdURL:    ebirdURL(sp),
+	}
+	// The chord is left out where it is unknown (product.tileContents).
+	if sp.WingChord.Value > 0 {
+		t.ChordStr = u.format(sp.WingChord.Value, view.ByLength)
+	}
+	// Right of the cube, its baseline on the cube's foot (decisions.tileMeasurementLines).
+	if c := t.MassCube; c.Side > 0 {
+		t.MassLabel = &massLabel{
+			Value:  t.MassStr,
+			Est:    sp.Mass.Prov.Kind != dataset.Measured,
+			Left:   100 * (c.X + c.Side + c.Depth + 6) / box.W,
+			Bottom: 100 * (box.H - (c.Y + c.Side)) / box.H,
+		}
+	}
+	return t
 }
 
 // tileAnchor is the fragment id of one tile. Declared once because the href
@@ -973,8 +1006,6 @@ type detailData struct {
 	S *dataset.Species
 	// Name is the species' English name in the reader's locale (product.englishNameChoice).
 	Name    string
-	Geom    view.Geometry
-	Box     view.Box
 	Metrics []metricRow
 	// Categories is every group the bird is sorted into, with who decided
 	// each (product.categoryProvenance).
@@ -991,34 +1022,12 @@ type detailData struct {
 	// then renders nothing at all rather than a placeholder (product.ebirdLink).
 	EBirdURL string
 
-	// WingModeled drives the crossbar split: the inner span is dashed only when
-	// the wingspan is modeled (product.measuredVersusModeled).
-	WingModeled bool
-
-	// FoldNote explains why a folded-neck bird's figure is shorter than the total length labeled
-	// beneath it, with its own numbers; empty for a bird drawn at full extent
-	// (product.labeledDetailDiagram).
+	// FoldNote explains why a folded-neck bird's figure is shorter than its total length, with
+	// its own numbers; empty for a bird drawn at full extent (product.labeledDetailDiagram).
 	FoldNote string
 
-	// Labels annotate the detail diagram (product.labeledDetailDiagram); empty on a tile.
-	Labels        []diagramLabel
-	TopOffset     float64
-	ChordLabel    string
-	WingspanLabel string
-	WingspanEst   bool
-	FootLabels    []footLabel
-	MassCube      massCube
-	// TileLabels is empty on a species page, which labels its diagram its
-	// own way; the shared diagram template reads it.
-	TileLabels []tileLabel
-}
-
-// diagramLabel is one annotation: where view put it, what it says, and whether
-// the value it reports is estimated.
-type diagramLabel struct {
-	view.Label
-	Text string
-	Est  bool
+	// Tile is the species page's tile: the home page's, larger (product.tileOpensDetail).
+	Tile tile
 }
 
 type metricRow struct {
@@ -1051,14 +1060,11 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	opt := parseOptions(r)
-	// Wider than the tile's 2.6:1 so the labels of product.labeledDetailDiagram have margin outside the
-	// wingtips. The extra width costs nothing: the scale is already limited by
-	// height for almost every bird, so the bird does not grow, the margin does.
-	box := view.Box{W: tileBox.W * 2.6, H: tileBox.H * 1.9}
-	// The detail view always draws the bird as large as the box allows, whatever
-	// scale the home page drew it at. Beside a swan a small bird is a few
-	// pixels tall by design, and carrying that into the one view devoted to
-	// that single bird would leave nothing to look at (product.tileOpensDetail).
+	// The home page's tile, larger (product.tileOpensDetail): the same box, drawn to the bird's
+	// own scale, so the bird is as large as the view allows whatever scale
+	// the home page drew it at. Beside a swan a small bird is a few pixels
+	// tall by design, and carrying that into the one view devoted to it would
+	// leave nothing to look at. The page's CSS sets the tile's width.
 
 	// A detail page compares nothing, so the bird is its own scope and the
 	// unit is whichever suits it.
@@ -1074,16 +1080,15 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		row("Body", sp.Segments.Body, view.ByLength, one),
 		row("Tail", sp.Segments.Tail, view.ByLength, one),
 	}
-	lt := labeledTile(sp, box, one, opt.Locale)
+	t := newTile(sp, view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, tileBox), tileBox, one, opt.Locale)
+	t.Big = true
+	t.Commonest = s.shareWithSeams(sp, opt)
 
 	s.render(w, "detail.html", detailData{
-		S: sp, Name: lt.Name, Geom: lt.Geom, Box: lt.Box, Labels: lt.Labels, TopOffset: lt.TopOffset,
-		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
-		FootLabels: lt.FootLabels, MassCube: lt.MassCube,
-		Metrics: rows, Categories: s.categories(sp, opt), Opt: opt, Home: homeLink(r), EBirdURL: ebirdURL(sp),
-		SameAs:      s.sameMeasurements(sp, opt.Locale),
-		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
-		FoldNote:    foldNote(sp, lt.Geom, one),
+		S: sp, Name: t.Name, Tile: t,
+		Metrics: rows, Categories: s.categories(sp, opt), Opt: opt, Home: homeLink(r), EBirdURL: t.EBirdURL,
+		SameAs:   s.sameMeasurements(sp, opt.Locale),
+		FoldNote: foldNote(sp, t.Geom, one),
 	})
 }
 
@@ -1198,43 +1203,6 @@ func homeLink(r *http.Request) template.URL {
 	return nextURL(r.URL.Query())
 }
 
-// labelGutter is the width reserved at the right of an annotated diagram: the
-// segment label column, plus room for the wingspan label that sits just beyond
-// the wingtip.
-//
-// The bird is laid out in the remaining width, so a wide-winged bird is drawn
-// slightly smaller rather than running under its own labels. Before this, a
-// Black-footed Albatross's wingtip reached x=988 in a 988-wide box while the
-// label column started at 838, so the crossbar crossed every label on that
-// side.
-// 320 rather than the 290 that merely fits: at 290 the widest-winged species
-// clear the column by 2px, which is not clearance, it is luck.
-const labelGutter = 320
-
-// The strip reserved at the bottom of an annotated diagram for the whole-bird
-// labels (product.labeledDetailDiagram), the vertical counterpart of labelGutter.
-//
-// Without it they are clipped rather than merely cramped: the detail view
-// scales the bird to fill the box, so any bird whose height binds has its tail
-// tip exactly on the bottom edge and nothing at all below it.
-//
-// footGap is where the first baseline sits below the tail tip and footLine is
-// the spacing between them; footDescender keeps the glyphs of the last line
-// inside the viewBox, not merely its baseline.
-const (
-	footGap       = 15
-	footLine      = 13
-	footDescender = 9
-)
-
-// footLabel is one whole-bird annotation under the tail.
-type footLabel struct {
-	Key  string // total, mass -- also the CSS hook
-	Text string
-	Y    float64
-	Est  bool
-}
-
 // massCube is the cube of water that weighs what the bird weighs, drawn in the
 // lower-left in oblique projection (product.labeledDetailDiagram, decisions.massAsWaterCube).
 //
@@ -1244,12 +1212,8 @@ type footLabel struct {
 // corner that never moves, so only the cube's size differs between birds.
 type massCube struct {
 	X, Y, Side, Depth float64
-	// The mass label sits centered under the face rather than in the stack
-	// under the tail, so the number is beside the shape it describes.
-	Label          string
-	LabelX, LabelY float64
-	Est            bool // mass not measured -- dashed, per product.measuredVersusModeled
-	Title          string
+	Est               bool // mass not measured -- dashed, per product.measuredVersusModeled
+	Title             string
 }
 
 // massCubeDepth is the oblique projection's depth, as a fraction of the side,
@@ -1261,22 +1225,6 @@ type massCube struct {
 // unit tests cannot see that margin because the fixture holds five birds and
 // no grebe. The looser value is the one that survives a data change.
 const massCubeDepth = 0.4
-
-// massLabelGap is how far the mass label's baseline sits below the face.
-//
-// Wider than the footGap the stack under the tail uses, and deliberately: the
-// tail is a hairline and the cube is a solid block, so the same gap that looks
-// airy under one looks cramped under the other.
-const massLabelGap = 18
-
-// massLabelCharWidth approximates one character of the 11px label, used only
-// to stop a small cube's centered label running off the left edge of the
-// drawing -- a Scissor-tailed Flycatcher's cube is 29px wide and its label
-// about 70px, which rendered as "ass 1.4 oz".
-//
-// Deliberately generous: overestimating only nudges the label right, while
-// underestimating clips it again.
-const massLabelCharWidth = 6.2
 
 // massCubeSide is the side of that cube, in millimeters, for a mass in grams.
 //
@@ -1295,13 +1243,9 @@ func massCubeSide(massG float64) float64 {
 const massCubeMargin = 8
 
 // newMassCube places the cube of water in the lower-left of a drawing area
-// drawH tall, at pxPerMm (product.labeledDetailDiagram, decisions.massAsWaterCube).
-//
-// label is empty on a home page tile, which carries no labels at all and names
-// the mass in its footer instead (product.tileContents, decisions.massCubeOnTiles). Everything else about the
-// cube is identical there, including the face standing on the floor, so the
-// two surfaces cannot drift.
-func newMassCube(sp *dataset.Species, drawH, pxPerMm float64, label string) massCube {
+// drawH tall, at pxPerMm (product.labeledDetailDiagram, decisions.massAsWaterCube), its face standing on the floor so
+// two cubes share an origin. Its label is the tile's (massLabel).
+func newMassCube(sp *dataset.Species, drawH, pxPerMm float64) massCube {
 	side := massCubeSide(sp.Mass.Value) * pxPerMm
 	if side <= 0 {
 		return massCube{}
@@ -1312,90 +1256,7 @@ func newMassCube(sp *dataset.Species, drawH, pxPerMm float64, label string) mass
 		Est:   sp.Mass.Prov.Kind != dataset.Measured,
 		Title: "Mass as water: a cube of water weighing the same, to scale",
 	}
-	if label != "" {
-		c.Label = label
-		// Centered under the face, but never far enough left to be clipped.
-		c.LabelX = math.Max(massCubeMargin+side/2, float64(len(label))*massLabelCharWidth/2)
-		c.LabelY = base + massLabelGap
-	}
 	return c
-}
-
-// footStrip is the height n stacked whole-bird labels need.
-func footStrip(n int) float64 {
-	if n == 0 {
-		return 0
-	}
-	return footGap + float64(n-1)*footLine + footDescender
-}
-
-// labeledTile builds the annotated diagram for a bird drawn at its own scale:
-// the detail view, which shows one bird with nothing to measure it against
-// (product.tileOpensDetail).
-func labeledTile(sp *dataset.Species, box view.Box, u units, loc dataset.Locale) tile {
-	// draw is the area the bird gets; the emitted box is that plus the strip the
-	// total length label sits in, so the label costs the bird nothing. Going the
-	// other way -- keeping the box and shrinking the bird into it -- would take
-	// 8.5% of the detail view's height and contradict product.tileOpensDetail, which requires the
-	// bird drawn as large as the view allows. Width has no such freedom, which
-	// is why labelGutter does shrink the bird and this does not.
-	// Every metric the detail view reports has to appear in the drawing
-	// (product.labeledDetailDiagram). The two that name the whole bird rather than a part of it go
-	// under the tail; mass is here and not in the stack because it is not a
-	// length and has no part to point at.
-	//
-	// The reported total length, never g.TotalHeight(): for a folded neck the
-	// drawing is shorter than the bird (decisions.foldedNeckAsS), and the label names the bird.
-	foot := []footLabel{{
-		Key:  "total",
-		Text: "Total length  " + u.format(sp.TotalLength.Value, view.ByLength),
-		Est:  sp.TotalLength.Prov.Kind != dataset.Measured,
-	}}
-
-	draw := box
-	// The strip has to clear whichever reaches lower: the stack under the tail
-	// or the mass label under the cube.
-	box.H += math.Max(footStrip(len(foot)), massLabelGap+footDescender)
-
-	// The bird occupies everything left of the gutter; draw stays the full
-	// height, because the label column is positioned against the emitted box.
-	inner := view.Box{W: draw.W - labelGutter, H: draw.H}
-	g := view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, inner)
-	top := (draw.H - g.TotalHeight()) / 2
-	segOf := map[string]dataset.Metric{
-		"bill": sp.Segments.Bill, "head": sp.Segments.Head, "neck": sp.Segments.Neck,
-		"body": sp.Segments.Body, "tail": sp.Segments.Tail,
-	}
-	t := tile{S: sp, Name: sp.Name(loc), Geom: g, Box: box, TopOffset: top,
-		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled}
-	// draw, not box: the segment label column belongs in the drawing area, and
-	// must not spill into the strip the total length label owns.
-	for _, l := range g.DetailLabels(draw, top) {
-		m := segOf[l.Key]
-		t.Labels = append(t.Labels, diagramLabel{
-			Label: l,
-			Text:  strings.ToUpper(l.Key[:1]) + l.Key[1:] + "  " + u.format(m.Value, view.ByLength),
-			Est:   m.Prov.Kind == dataset.Modeled,
-		})
-	}
-	if sp.WingChord.Value > 0 {
-		t.ChordLabel = "Wing chord  " + u.format(sp.WingChord.Value, view.ByLength)
-	}
-	t.WingspanLabel = "Wingspan  " + u.format(sp.Wingspan.Value, view.ByWingspan)
-	t.WingspanEst = sp.Wingspan.Prov.Kind == dataset.Modeled
-	for i := range foot {
-		foot[i].Y = top + g.YTailTip + footGap + float64(i)*footLine
-	}
-	t.FootLabels = foot
-
-	// Lower-left of the DRAWING area, not the emitted box: the box is taller by
-	// the foot strip and wider by the label gutter, and the square belongs
-	// inside the bird's own area. Measured over the whole dataset before this
-	// was built -- the crossbar reaches into that corner for 0 of 841 species,
-	// the tightest clearance being 50px on Western Grebe.
-	t.MassCube = newMassCube(sp, draw.H, g.PxPerMm,
-		"Mass  "+u.format(sp.Mass.Value, view.ByMass))
-	return t
 }
 
 // row turns a metric into a display line, stating its provenance in plain

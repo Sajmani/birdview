@@ -1065,6 +1065,12 @@ control, whose hand-written pairs nothing read. Watched failing since: selected-
 `#2a7fa8` is reported at 2.42:1 against its own `--accent` background. That change was first
 caught by [app.renderedTextContrast](composed/internal/app/acceptance.md#renderedtextcontrast), with this check passing.
 
+**Since 2026-11-01 no SVG text is styled** ([decisions.textSizeFloor](decisions.md#textsizefloor)): the drawing's one label is page text,
+held to the floor as `color`. The SVG text check stays and reports that it found nothing to check;
+a `fill` on a text rule added later is held to the floor again. Its old guard, failing when it
+checked nothing, now cannot tell a broken parser from an absent subject, so the parser is shown
+working by the text tokens it finds instead.
+
 **Assertions, SVG text:** every `fill` a rule declares **on a text element** clears the same 7:1
 against both surfaces. Which rules those are is derived rather than listed: a class token that any
 rule gives a font property to is a text token, and any rule naming one is styling text. So
@@ -1206,117 +1212,40 @@ Watched failing: 2026-10-22, before the note existed (`TestFoldedFigureExplained
 
 ### segmentLabelsDontCollide
 
-**Every segment is labeled on the detail diagram, and no two labels collide**
+**Every metric the species page reports is named on its tile, keyed to its part by color**
 
-**Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) · **Level:** code · **Method:** unit tests over the label layout plus
-assertions on the rendered detail page
+**Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram), [product.tileOpensDetail](local/product/presentation.md#tileopensdetail) · **Level:** code · **Method:** assertions on the rendered species page
 
-**Assertions, layout:** all five segments get a label; each label's anchor is the midpoint of its
-own segment; labels stay in the order the segments do; no two are closer than the line height; and
-the last one stays inside the box.
+**Assertions:** the species page draws one large tile, the home page's template; its measurement
+lines and mass label name **every row of the measurements table**, total length as Length and
+wing chord as Chord, with the table's value and a `~` exactly where the table's kind is not
+`measured`, in both unit systems. Written against the table rather than a list of metric names, so
+it maintains itself. Bill, Wingspan, Chord, and Mass are keyed to their parts' colors; the drawing
+holds no text and no leader line; and the badge carries the family's common name
+([decisions.textSizeFloor](decisions.md#textsizefloor)). Until 2026-11-01 this criterion held the labels inside the drawing to
+a layout, a paint order, and a column; those assertions went with the labels.
 
-**Assertions, paint order:** in the rendered diagram every line element is emitted before every
-text element, since SVG has no z-index and document order is paint order. The check also requires
-the labels to exist, so it cannot be satisfied by a diagram with no text to cover.
-
-**Assertions, geometry:** across every species, the wingspan label placed beyond the wingtip clears
-the segment label column, and the reserved gutter is not so wide that the labels have more room
-than the bird. Checked over the whole fixture rather than one bird, because the binding case is the
-widest-winged species and which one that is changes with the data.
-
-**Assertions, rendering:** the detail page emits five segment labels plus **wing chord** and
-**wingspan** labels on the crossbar, each naming what it measures and carrying the same value the provenance table gives
-for it — read out of the table rather than recomputed, so the two cannot drift apart. The segment
-count is matched on the segment labels alone, so a missing segment cannot hide behind the chord. A
-tile carries none.
-
-**Assertions, completeness:** **every row of the provenance table is labeled in the diagram**,
-with the same value, in both unit systems. Written against the table rather than a list of metric
-names, so it maintains itself: adding a row without labeling it fails. Watched failing by
-removing the mass label — which is the state this check was written to catch — and by labeling
-mass with the wingspan's value.
-
-**Assertions, the estimated marker:** a diagram label whose value is modeled carries the `~` **in
-the emitted markup**, and one whose value is measured does not. Asserted on the text content, not
-on the class attribute: the class is what the inert CSS rule keyed off, so a check that accepted it
-would re-certify the original bug.
-
-**Status: verified 2026-09-28 — passing, and watched failing** by anchoring every label at the same
-y, by removing the minimum-gap pass, by dropping a segment from the list, by removing the reserved
-gutter and by inflating it, by moving the wing labels back inside the centering group — which
-reproduces the bug where the neck's leader struck through "Wing chord" and "Wingspan" — and, for
-the marker, by reverting the `~` to the `.dlabel.est::after` rule it came from and by marking every
-label estimated regardless of provenance.
-
+**Run:** `go test ./cmd/birdview/ -run TestDetailTileNamesEverySegment`
+**Status: verified 2026-11-01, passing.**
 Watched failing: 2026-09-28, by removing the mass label — which is the state this check was written to catch — and by labeling mass with the wingspan's value.
 Watched failing: 2026-09-28, by anchoring every label at the same y, by removing the minimum-gap pass, by dropping a segment from the list, by removing the reserved gutter and by inflating it, by moving the wing labels back inside the centering group — which reproduces the bug where the neck's leader struck through "Wing chord" and "Wingspan" — and, for the marker, by reverting the `~` to the `.dlabel.est::after` rule it came from and by marking every label estimated regardless of provenance.
-
-**The marker assertion was added because the criterion claimed it and never checked it.** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) has
-required the `~` since these labels were introduced in `a826b96`, which implemented it as
-`.dlabel.est::after` — CSS generated content on an SVG `<text>`, which no browser renders. It was
-found by screenshotting the same detail page twice, once with the rule and once without, and
-getting byte-identical PNGs. So from `a826b96` until this criterion was extended, every modeled
-value on the diagram was drawn exactly like a measured one, which is the one thing
-[decisions.noOpenLengthAndWingspan](decisions.md#noopenlengthandwingspan) exists to prevent. The lesson is the one this file keeps relearning: the obvious
-check would have asserted on `class="dlabel est"`, which was present, correct, and meaningless.
-
-**The collision resolver fires on the comparison view, and until then fired nowhere.** It was
-recorded here as dead on real data — 0 of 841 species needed it — because the detail view draws
-every bird to fill its box, so no two segments are closer than the line height. That note
-predicted "a larger font, a shorter box or a new segment would all wake it". What actually woke it
-was [product.comparisonOneScale](local/product/presentation.md#comparisononescale), which is none of the three: at a scale set by a larger bird, a
-small one's five segments collapse into a few pixels and the resolver is the only reason its
-labels can be read at all.
-
-Left here as the worked example of why a branch that is dead *by the current numbers* is worth
-keeping, where one dead *by construction* is not — the distinction [decisions.inFlightNoLegs](decisions.md#inflightnolegs) turned on. Deleting it
-while it was unreachable would have meant rediscovering the need for it as a bug, the first time
-two birds were drawn to one scale. The comparison view went with the classic view on 2026-10-27
-([decisions.classicViewRemoved](decisions.md#classicviewremoved)).
+Watched failing: 2026-11-01, against the labeled diagram ("the table reports Mass but the tile does not name it", and Head and Neck likewise), and by the short badge on the species page ("carries the family's common name").
 
 ### totalLengthLabeled
 
-**The detail diagram labels the whole bird's total length, under the tail**
+**The species page states the whole bird's total length, not the drawing's height**
 
-**Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) · **Level:** code · **Method:** geometry assertions over the whole fixture plus
-assertions on the rendered detail page and a home page tile
+**Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) · **Level:** code · **Method:** assertions on the rendered species page
 
-**Assertions, placement:** the label is centered on the drawing axis (`text-anchor="middle"` at the
-bird's centerline, not the box's — they differ, because the bird is laid out left of the label
-gutter) and sits **below the tail tip**. It is horizontal: no `transform`/`rotate` on the element.
-It has **no leader line**, so the leader count stays at one per segment.
+**Assertions:** the species page's tile gives Length as the **total length from the measurements
+table**, read out of the rendered table. The fixture is a **folded-neck species** (Ardeidae), whose
+drawn height is 6–9% short of its total length, so a Length taken from the drawing would differ;
+the test stops if the fixture ever stops folding its neck. Until 2026-11-01 the total length was a
+label under the tail, held to a placement and a room in the box; those assertions went with the
+label ([decisions.textSizeFloor](decisions.md#textsizefloor)).
 
-**Assertions, room:** across **every species in the fixture**, the label's baseline plus its
-descender stays inside the box. The binding case is a bird whose height fills the box — most of
-them, since the detail view scales the bird to fit — so this would fail for the entire dataset if
-the bottom strip were not reserved, and it is checked over all 841 rather than one bird because the
-worst case is whichever species is tallest relative to its wingspan.
-
-**Assertions, value:** the label states the **total length from the provenance table**, read out of
-the rendered table rather than recomputed. The fixture includes a **folded-neck species**
-(Ardeidae), where the drawn height is 6–9% short of the total length — so an implementation that
-labeled the drawn extent instead of the datum produces a visibly different number and fails. This
-is the assertion that would otherwise be vacuous: for every unfolded bird the two agree exactly.
-
-**Assertions, provenance:** total length is modeled for all 841 species today
-([decisions.ricklefsProhibited](decisions.md#ricklefsprohibited)), so the label carries the `~`. The check reads the provenance rather
-than hardcoding it, so it keeps working — and starts asserting the opposite — if the Ricklefs ask
-is ever granted and the value becomes measured.
-
-**Assertions, scope:** the detail view carries the label; a **home page tile carries
-none**, like every other annotation of [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram).
-
-**Status: verified 2026-10-01** — re-verified after mass joined total length under the tail.
-The box-fit check now asserts the **last** label in the stack, since the strip must clear the
-whole stack and not just its first line; watched failing by sizing the strip for one line, which
-overran by 4px on every species. Originally **verified 2026-09-28 — passing, and watched
-failing** by removing the label from the
-template; by centering it on the box center, which put it at x=494 against the bird's axis at x=334,
-exactly half the gutter adrift; by placing it above the tail tip (y=254.3 against a tail tip at
-269.3); by removing the reserved strip, which overran the box for **all five fixture species**, the
-worst by 15 px; by labeling `TotalHeight()/PxPerMm` instead of the reported length, which the Great
-Blue Heron caught at 78.7 cm against a table reading 86.0 cm; and by dropping the `~`.
-
+**Run:** `go test ./cmd/birdview/ -run TestDetailTileStatesTotalLength`
+**Status: verified 2026-11-01, passing.**
 Watched failing: 2026-10-01, by sizing the strip for one line, which overran by 4px on every species.
 Watched failing: 2026-09-28, by removing the label from the template.
 Watched failing: 2026-09-28, by centering it on the box center, which put it at x=494 against the bird's axis at x=334, exactly half the gutter adrift.
@@ -1324,13 +1253,6 @@ Watched failing: 2026-09-28, by placing it above the tail tip (y=254.3 against a
 Watched failing: 2026-09-28, by removing the reserved strip, which overran the box for all five fixture species, the worst by 15 px.
 Watched failing: 2026-09-28, by labeling `TotalHeight()/PxPerMm` instead of the reported length, which the Great Blue Heron caught at 78.7 cm against a table reading 86.0 cm.
 Watched failing: 2026-09-28, by dropping the `~`.
-
-**The folded-neck fixture was itself verified to be load-bearing, not decoration.** With the
-`TotalHeight()` bug still in place, the species was swapped to the American Robin and the value
-assertion **passed** — the drawn extent and the total length agree exactly for every unfolded bird,
-so the check would have been vacuous on any of the other four fixtures. The test therefore carries
-a guard that fails loudly if the fixture ever stops folding its neck, and that guard was watched
-firing during this exercise.
 
 ### familyListWraps
 
@@ -1613,12 +1535,9 @@ diagram** — that fixed corner is the whole point of the cube form, since it gi
 common origin and lets two cubes be compared directly; a base that drifted with the bird would
 cost that without changing any number. The projection has **non-zero depth**, or it is the square
 this replaced. It stays inside the drawing area above and never reaches the bird's axis to the
-right. Its label is centered under the face but **held clear of the left edge**: a Scissor-tailed
-Flycatcher's 29 px cube renders a ~70 px label, which read "ass 1.4 oz" before it was clamped.
-
-**Assertions, the strip below:** two things now hang under the drawing — the stack under the tail
-and the mass label under the cube — and the reserved strip must clear **whichever reaches
-lower**. Both are asserted; checking one leaves the other free to overrun.
+right. Its label, page text over the drawing since 2026-11-01, starts right of the cube and stands
+on its foot, placed in percent of the drawing ([decisions.textSizeFloor](decisions.md#textsizefloor)); before, it hung under the
+face and was held clear of the left edge, and a strip under the drawing was reserved for it.
 
 **Assertions, provenance:** solid when the mass is measured, dashed when it is not, as [product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled)
 requires of every other stroke.

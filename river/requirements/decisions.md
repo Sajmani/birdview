@@ -4258,3 +4258,34 @@ answering, redirected. Cornell's codes for a narrower concept count as aliases o
 contains it, as `eamwre1`, Eastern Marsh Wren, finds Marsh Wren; that sends a reader to the bird
 BirdView draws for it, not to a different one.
 
+---
+
+## textSizeFloor
+
+**A 13px floor for all text, 15px running text, and one tile on both pages**
+
+Date: 2026-11-01
+Decided by: Sameer
+Status: accepted
+Affects: [tech.textSizeFloor](local/tech/accessibility.md#textsizefloor), [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram), [product.tileOpensDetail](local/product/presentation.md#tileopensdetail), [product.tileContents](local/product/presentation.md#tilecontents)
+
+### Decided
+
+No text renders below 13px at a laptop's width or a phone's 360px, measured as rendered, so SVG
+text counts at its scaled size; running text is 15px, 16px at 600px wide or less. The species page
+shows the home page's tile, larger, with every segment on its measurement lines, instead of a
+diagram labeled with leader lines; a measurement's name takes its part's color where the contrast
+floor allows (bill, wing, cube). Measurements are set in a proportional face with even-width
+figures instead of monospace.
+
+### Why
+
+The owner found text too small, especially on phones, and the species page's labels tiny. Measured
+before the change: about 80% of text styles were under 13px on both pages; the home tile's lines at
+10.5px; the species page's diagram labels at 8.2px on a laptop and 3.5px at 360px, because they
+scale with an SVG about 990 units wide. Labels inside a drawing cannot hold a floor on a phone, so
+the owner chose to retire the leader lines, which he liked, for names keyed by color, and to use one
+tile on both pages now that the home tile carries what the species tile did. A labeled diagram at
+wide widths only, with leaders, remains possible later. Monospace was what made the measurement
+lines too wide to enlarge.
+

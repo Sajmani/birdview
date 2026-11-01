@@ -605,7 +605,10 @@ func TestTierCountFollowsTheRange(t *testing.T) {
 		t.Errorf("the tier count is pushed to the far edge: %s", rule)
 	}
 	count := mustMatch(t, string(css), `(?m)^\.sub, \.count, footer \{([^}]*)\}`, "the count line's rule")
-	for _, decl := range []string{"color: var(--dim)", "font-size: 12.5px"} {
+	// The size is read off the count line rather than named, so raising the
+	// type (tech.textSizeFloor) cannot leave this pinned to an old number.
+	size := mustMatch(t, count, `(font-size: [0-9.]+px)`, "the count line's size")
+	for _, decl := range []string{"color: var(--dim)", size} {
 		if !strings.Contains(count, decl) || !strings.Contains(rule, decl) {
 			t.Errorf("the tier count and the count line differ on %q: %q vs %q", decl, rule, count)
 		}

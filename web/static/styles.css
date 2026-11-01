@@ -21,10 +21,13 @@
 * { box-sizing: border-box; }
 body {
   margin: 0; padding: 24px; background: var(--bg); color: var(--ink);
-  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
+/* No text below 13px, and running text 15px, 16px on a phone (tech.textSizeFloor). Secondary
+   text -- codes, badges, tags, notes -- is 13px, not smaller; hierarchy comes
+   from weight and color. */
 h1 { font-size: 22px; margin: 0 0 4px; }
-.sub, .count, footer { color: var(--dim); font-size: 12.5px; }
+.sub, .count, footer { color: var(--dim); font-size: 13px; }
 footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 12px; max-width: 80ch; }
 /* Every link is colored here, not per-component. A link with no rule inherits
    the browser default -- #0000EE unvisited, #551A8B visited -- which against
@@ -39,11 +42,11 @@ footer a:visited { color: var(--accent-visited); }
 .credits b { color: var(--ink); font-weight: 600; }
 .caveat { margin-top: 10px; }
 
-.lbl { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .05em;
+.lbl { color: var(--dim); font-size: 13px; text-transform: uppercase; letter-spacing: .05em;
   margin: 0 4px 0 14px; }
 .btn, .chip { display: inline-flex; align-items: center; gap: 5px; text-decoration: none;
   background: #0b1220; border: 1px solid var(--line);
-  border-radius: 6px; padding: 3px 6px; font-size: 12.5px; }
+  border-radius: 6px; padding: 3px 6px; font-size: 13px; }
 /* Family chips get their background and text color inline, generated together
    so the pair clears 7:1. These defaults only reach chips without one, like
    a chip with no family. */
@@ -53,16 +56,16 @@ footer a:visited { color: var(--accent-visited); }
    until the script enables it: dotted, and
    with the text at full contrast, because the floor holds for inactive
    controls too (product.hereSelectsLocalRegion). */
-.here { font: inherit; font-size: 12.5px; cursor: pointer; }
+.here { font: inherit; font-size: 13px; cursor: pointer; }
 .here[aria-disabled="true"] { border-style: dotted; background: transparent; cursor: not-allowed; }
-.herestatus { color: var(--ink); font-size: 12px; }
-.welcome { margin: 6px 0 0; font-size: 13px; }
+.herestatus { color: var(--ink); font-size: 13px; }
+.welcome { margin: 6px 0 0; font-size: 15px; }
 .welcomestatus { display: block; margin-top: 4px; color: var(--ink); }
 .welcomestatus:empty { display: none; }
 .herestatus:empty { display: none; }
 .chip.on { font-weight: 600; outline: 2px solid var(--accent); outline-offset: 1px; }
 .chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-.hint { color: var(--dim); font-size: 11px; font-style: italic; }
+.hint { color: var(--dim); font-size: 13px; font-style: italic; }
 
 .btn b { font-weight: 600; margin-left: 6px; opacity: .8; }
 /* Sub-text inside a colored chip inherits the chip's own text color. A fixed
@@ -70,15 +73,15 @@ footer a:visited { color: var(--accent-visited); }
    it made the common name invisible on Anatidae, Columbidae, and a dozen others.
    Hierarchy comes from weight and size, not from dimming, so every character
    keeps the 7:1 ratio the background was chosen for (tech.badgeContrast). */
-.chip:visited em, .chip em { font-style: normal; color: inherit; font-weight: 400; font-size: 11.5px; }
-.chip b { color: inherit; font-weight: 700; font-size: 11.5px; }
+.chip:visited em, .chip em { font-style: normal; color: inherit; font-weight: 400; font-size: 13px; }
+.chip b { color: inherit; font-weight: 700; font-size: 13px; }
 .chip em::before { content: "\00b7"; margin: 0 5px; }
 .chip b::before { content: ""; margin-left: 7px; }
 .count { margin: 4px 0 0; }
 /* [hidden] must beat every display rule. */
 [hidden] { display: none !important; }
 .search { margin: 8px 0 0; }
-.search input { width: min(420px, 100%); box-sizing: border-box; font: inherit; font-size: 14px;
+.search input { width: min(420px, 100%); box-sizing: border-box; font: inherit; font-size: 16px;
   color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
   padding: 7px 10px; }
 .search input::placeholder { color: var(--dim); opacity: 1; }
@@ -90,7 +93,7 @@ footer a:visited { color: var(--accent-visited); }
 
 .pickaction { margin: 10px 0 0; }
 
-h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; gap: 10px;
+h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; gap: 10px;
   border-bottom: 1px solid var(--line); padding-bottom: 6px; }
 .tier { background: var(--panel); border: 1px solid var(--line); border-radius: 5px;
   padding: 2px 8px; color: var(--accent); }
@@ -108,7 +111,11 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
   border-radius: 8px; padding: 10px; text-decoration: none; color: inherit; display: block; }
 .tile:visited { color: inherit; }
 .tile:hover { border-color: var(--accent); }
-.tile.big { width: min(760px, 100%); }
+.tile.big, .tilewrap.big { width: min(760px, 100%); }
+/* The species page's tile names every segment and carries the full badge, so
+   its first measurement line and its line under the rule may wrap
+   (product.tileContents); no neighboring tile depends on its height. */
+.tile.big .ft, .tile.big .idline { flex-wrap: wrap; row-gap: 4px; }
 /* The header is ONE line (product.tileContents), and stays one line at any name length.
 
    It did not. "Greater Necklaced Laughingthrush (GNLA)" wrapped its banding
@@ -122,16 +129,16 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
    The banding code never does. It is six fixed characters, and it is the one
    part a reader cannot reconstruct from a truncation. */
 .nameline { display: flex; align-items: baseline; gap: 10px; flex-wrap: nowrap; }
-.cn { font-size: 13px; font-weight: 700; display: flex; align-items: baseline;
+.cn { font-size: 15px; font-weight: 700; display: flex; align-items: baseline;
   gap: 5px; min-width: 0; flex: 0 1 auto; }
 .cnname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cn .code { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim);
+.cn .code { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim);
   font-weight: 500; flex: none; }
 /* The find box's list writes the codes as the tiles do. */
-.finds li .code { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim); }
+.finds li .code { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim); }
 /* Right-justified on the same line, and the first to give up room: it shrinks
    twenty times faster than the common name beside it. */
-.sn { font-size: 11.5px; font-style: italic; color: var(--dim); margin-left: auto;
+.sn { font-size: 13px; font-style: italic; color: var(--dim); margin-left: auto;
   text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   flex: 0 20 auto; min-width: 0; }
 /* A tile's line under its rule (product.tileContents, decisions.tileMeasurementLines): the
@@ -142,38 +149,56 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 /* The short family badge leads the line and gives way after the scientific
    name. A rule closes the header above the drawing (product.tileContents). */
 .idline .badge { margin: 0; flex: 0 1 auto; min-width: 0; }
-.next .tile .hd { border-bottom: 1px solid var(--line); padding-bottom: 7px; }
+.tile .hd { border-bottom: 1px solid var(--line); padding-bottom: 7px; }
 
-/* The mass label beside a tile's cube, in the measurement lines' font, word for word
-   (product.tileContents); an SVG label needs no line height. */
-.tl { font: 10.5px ui-monospace, SFMono-Regular, Menlo, monospace; fill: var(--dim); }
-.tl .estmark { fill: var(--accent); }
+/* The drawing and its one label, the mass beside its cube (product.tileContents). The label
+   is page text laid over the drawing, placed in percent of it so it follows the
+   cube as the drawing scales, and set in the measurement lines' font so it keeps
+   their size at any width, which SVG text did not (tech.textSizeFloor). Its box is trimmed
+   to the alphabetic baseline, so bottom: puts the baseline on the cube's foot. */
+.dwrap { position: relative; margin: 8px 0; }
+.ml { position: absolute; white-space: nowrap; text-box: trim-end cap alphabetic;
+  font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; font-variant-numeric: tabular-nums;
+  color: var(--dim); }
+.ml.est::after { content: "~"; color: var(--accent); margin-left: 2px; }
+/* A measurement's name in its part's hue (product.labeledDetailDiagram), lightened where the
+   stroke color itself falls short of the 7:1 floor on a panel: the bill's
+   #f59e0b is 6.8:1, its tint 8.8:1; the cube's #38bdf8 6.8:1, its tint 8.8:1. */
+.k-bill { color: #fbbf24; }
+.k-wing { color: #4ade80; }
+.k-mass { color: #7dd3fc; }
 /* The notes come last, so only the part under the drawing grows. */
 .notes { min-width: 0; }
 
-.badge { display: inline-block; font-size: 10.5px; font-weight: 600;
+.badge { display: inline-block; font-size: 13px; font-weight: 600;
   border-radius: 4px; padding: 1px 6px; margin-top: 4px;
   max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   vertical-align: bottom; }
 .badge em { font-style: normal; font-weight: 400; }
 .badge em::before { content: "\00b7"; margin: 0 4px; }
-.ft { display: flex; flex-wrap: nowrap; gap: 14px; font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-  color: var(--dim); margin-top: 4px; white-space: nowrap; }
+/* The measurement lines: a proportional face with figures of even width, so
+   numbers line up down a column and the lines fit a phone at 13px, which
+   monospace did not (product.tileContents, decisions.textSizeFloor). */
+.ft { display: flex; flex-wrap: nowrap; gap: 12px; font: 13px/1.25 system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-variant-numeric: tabular-nums; color: var(--dim); margin-top: 4px; white-space: nowrap; }
 .ft .est::after { content: "~"; color: var(--accent); margin-left: 2px; }
 /* The share line (product.shareOfRecords): how much of what the regions in view record is
    this bird. Below the three measurements, because it is not one -- it is a
-   fact about how often the bird is reported. Monospace to match them,
+   fact about how often the bird is reported. Set like them,
    truncated rather than wrapped, since it sits above the drawing and a
    second line would push that tile's drawing out of step with its row. */
-.share { font: 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim);
+.share { font: 13px/1.25 system-ui, -apple-system, "Segoe UI", sans-serif; font-variant-numeric: tabular-nums; color: var(--dim);
   margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .share b { font-weight: 600; color: var(--ink); }
 .share .nodata { opacity: .6; }
 
-.dia { display: block; width: 100%; height: auto; margin: 8px 0; }
+.dia { display: block; width: 100%; height: auto; }
+/* Strokes keep their width whatever the drawing's scale, so the species page's
+   larger tile is not drawn in heavier lines than the home page's. */
+.dia line, .dia path, .dia ellipse, .dia polygon, .dia rect { vector-effect: non-scaling-stroke; }
 .tile.big .nameline { gap: 16px; }
-.tile.big .cn { font-size: 17px; }
-.tile.big .sn { font-size: 13.5px; }
+.tile.big .cn { font-size: 20px; }
+.tile.big .sn { font-size: 15px; }
 .bill { stroke: #f59e0b; stroke-width: 2; }
 .head { fill: #475569; stroke: #cbd5e1; stroke-width: 1.2; }
 .neck { stroke: #cbd5e1; stroke-width: 2; fill: none; }
@@ -188,11 +213,8 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
    with the mark whose entire point is that it IS a length to scale (product.crossbarAtVerticalScale).
    This color is dE 86 from the cube and 92 from the amber bill.
 
-   #0ea5e9 was also 6.44:1 on the page and 5.28:1 on a panel, and this color
-   is used as TEXT: the chord and wingspan labels below take their fill from
-   the same vocabulary. That shipped under a 7:1 floor (tech.textContrastFloor) because the
-   contrast check matched `color:` and SVG text has no `color`. See
-   TestSVGTextContrast. */
+   It is also TEXT: the names Wingspan and Chord take it (.k-wing), and at 8.4:1
+   on a panel it clears the 7:1 floor (tech.textContrastFloor). #0ea5e9 would not have. */
 .wing { stroke: #4ade80; stroke-width: 2.5; stroke-linecap: round; }
 
 .back a, .back a:visited { color: var(--accent); text-decoration: none; }
@@ -200,9 +222,9 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 .prov th { text-align: left; padding: 7px 14px 7px 0; font-weight: 600; white-space: nowrap;
   border-top: 1px solid var(--line); vertical-align: top; }
 .prov td { padding: 7px 14px 7px 0; border-top: 1px solid var(--line); vertical-align: top; }
-.prov .v { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; }
-.prov .d { color: var(--dim); font-size: 12.5px; }
-.tag { font-size: 10.5px; border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+.prov .v { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; }
+.prov .d { color: var(--dim); font-size: 13px; }
+.tag { font-size: 13px; border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
 .t-measured { background: #86efac; color: #000; }
 .t-near-match { background: #fde047; color: #000; }
 .t-modeled { background: #cbd5e1; color: #000; }
@@ -216,17 +238,17 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
    drops the rule that would otherwise read as a new fact. */
 .cats .cont th, .cats .cont td { border-top: none; padding-top: 0; }
 .cats .v { white-space: normal; max-width: 52ch; }
-.note { color: var(--dim); font-size: 12.5px; max-width: 70ch; margin-top: 18px; }
+.note { color: var(--dim); font-size: 13px; max-width: 70ch; margin-top: 18px; }
 /* A served document (product.categoryProvenance), rendered from Markdown. Narrow measure because
    it is prose, not a control panel. */
-.doc { max-width: 90ch; color: var(--ink); font-size: 13.5px; line-height: 1.65; }
+.doc { max-width: 90ch; color: var(--ink); line-height: 1.65; }
 .doc h1, .doc h2, .doc h3 { color: var(--ink); margin: 26px 0 8px; line-height: 1.3; }
-.doc h1 { font-size: 20px; }
-.doc h2 { font-size: 16px; border-bottom: 1px solid var(--line); padding-bottom: 5px; }
-.doc h3 { font-size: 14px; }
+.doc h1 { font-size: 22px; }
+.doc h2 { font-size: 18px; border-bottom: 1px solid var(--line); padding-bottom: 5px; }
+.doc h3 { font-size: 16px; }
 .doc p, .doc li { color: var(--dim); }
 .doc strong, .doc b { color: var(--ink); font-weight: 600; }
-.doc code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink);
+.doc code { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink);
   background: var(--panel); border-radius: 4px; padding: 1px 5px; }
 .doc pre { background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
   padding: 12px; overflow-x: auto; }
@@ -234,7 +256,7 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 /* A diagram is drawn wider than the page; shrink it to fit, and it links to
    itself full size. */
 .doc img { max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; }
-.doc table { border-collapse: collapse; margin: 12px 0; font-size: 12.5px; }
+.doc table { border-collapse: collapse; margin: 12px 0; font-size: 13px; }
 .doc th, .doc td { border: 1px solid var(--line); padding: 6px 10px; text-align: left;
   vertical-align: top; color: var(--dim); }
 .doc th { color: var(--ink); font-weight: 600; }
@@ -258,7 +280,7 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 .badge.st-vagrant { border-color: #f0b429; }
 .badge.st-historical { border-color: #94a3b8; }
 .badge.st-absent { border-color: #64748b; }
-.tile.undrawn .verdict { margin: 12px 0 0; font-size: 14.5px; }
+.tile.undrawn .verdict { margin: 12px 0 0; font-size: 16px; }
 .tile.undrawn .verdict b { color: #f8fafc; }
 .evidence { max-width: 70ch; margin: 0 0 10px; }
 
@@ -292,10 +314,6 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 .chordtick          { stroke: #4ade80; stroke-width: 1.5; opacity: .85; }
 .diagramkey { margin-top: 16px; max-width: 80ch; }
 
-/* Detail-diagram labels (product.labeledDetailDiagram). The leader is faint because it is scaffolding;
-   the text is what carries meaning. An estimated value repeats the ~ the tile
-   footer uses, so the same mark means the same thing everywhere. */
-.leader { stroke: var(--line); stroke-width: 1; }
 /* Mass as water (product.labeledDetailDiagram). Tinted rather than outlined only: it is a volume, not
    a length, and a bare outline in a figure made of lines reads as one more
    measurement. Dashed when the mass is not measured, like every other
@@ -305,8 +323,6 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 .mctop  { fill: #38bdf866; }
 .mcside { fill: #38bdf81f; }
 .masscube.est polygon, .masscube.est rect { stroke-dasharray: 4 3; }
-.dlabel { fill: var(--ink); font-size: 11px; }
-.dlabel.chord, .dlabel.span { fill: #4ade80; }
 
 /* A caveat on a tile's figures: a count that covers two species, because
    a source does not separate them (product.namesRecordsFiledUnder), a bird the month filter
@@ -316,13 +332,13 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
    tile they are its notes, last (product.tileContents).
 
    5px above, so a caveat does not sit flush against the line before it. */
-.seam { display: block; margin-top: 5px; color: #f0b429; font-size: 10.5px; font-style: italic; }
+.seam { display: block; margin-top: 5px; color: #f0b429; font-size: 13px; font-style: italic; }
 
 /* A phone held upright (product.fitsAPhone). Nothing may reach past the edge of
    the window or out of the box it sits in, down to 360px. A table too wide to
    fit scrolls inside itself rather than taking the page with it. */
 @media (max-width: 600px) {
-  body { padding: 16px 12px; }
+  body { padding: 16px 12px; font-size: 16px; }
   .tilewrap { max-width: 100%; }
   code { overflow-wrap: anywhere; }
   .prov, .doc table { display: block; max-width: 100%; overflow-x: auto; }
@@ -331,15 +347,15 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 /* The home page (product.nextView). Each setting on the count line is
    a <details>; its choices open beneath it, over the birds, so the page does
    not move when one is opened. */
-.key { color: var(--dim); font-size: 12.5px; margin: 6px 0 0; }
+.key { color: var(--dim); font-size: 13px; margin: 6px 0 0; }
 .key b { color: var(--ink); font-weight: 600; }
 .next > header { border-bottom: 1px solid var(--line); padding-bottom: 10px; }
-.settitle { font-size: 16px; font-weight: 600; margin: 12px 0 6px; border-bottom: 0; padding-bottom: 0; }
+.settitle { font-size: 18px; font-weight: 600; margin: 12px 0 6px; border-bottom: 0; padding-bottom: 0; }
 .showrow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .next .count { position: relative; margin-top: 10px; }
 .next .countrow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .next .countrow + .countrow { margin-top: 6px; }
-.shownline { color: var(--dim); font-size: 12.5px; margin: 4px 0 8px; }
+.shownline { color: var(--dim); font-size: 13px; margin: 4px 0 8px; }
 /* The First choice in Show: a button holding the count's box. */
 .showfirst { margin: 0; cursor: pointer; }
 .showfirst button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
@@ -373,7 +389,7 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 .popgroup .sep { align-self: stretch; width: 1px; background: var(--dim); margin: 2px 4px; }
 /* Reset looks like a setting, set apart by its color. */
 .reset, .reset:visited { background: #3f1d1d; border: 1px solid #8b3a3a; border-radius: 4px;
-  padding: 1px 7px; color: var(--ink); text-decoration: none; font-weight: 600; font-size: 12.5px; }
+  padding: 1px 7px; color: var(--ink); text-decoration: none; font-weight: 600; font-size: 13px; }
 .showrow .reset { padding: 3px 6px; border-radius: 6px; }
 .reset:hover { border-color: #f87171; }
 .finds ul { list-style: none; padding: 0; margin: 8px 0; }
@@ -397,29 +413,29 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 .pin svg { fill: currentColor; }
 .pin:hover { border-color: var(--accent); color: var(--ink); }
 .pin.on, .pin.on:visited { background: var(--accent); border-color: var(--accent); color: #06283d; }
-.next .tilewrap { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(3, auto) 1fr; }
-.next .tilewrap > .tile { grid-area: 1 / 1 / 5 / 2; display: grid; grid-template-rows: subgrid;
+.tilewrap { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(3, auto) 1fr; }
+.tilewrap > .tile { grid-area: 1 / 1 / 5 / 2; display: grid; grid-template-rows: subgrid;
   grid-template-columns: minmax(0, 1fr); }
 /* A grid item is as wide as its content unless told otherwise, and the name
    line never wraps: without this, a long name widened its tile and pushed the
    drawing off center instead of truncating (#4). */
-.next .tilewrap > .tile > * { min-width: 0; }
-.next .tilewrap > .pin { grid-area: 1 / 1 / 2 / 2; justify-self: end;
+.tilewrap > .tile > * { min-width: 0; }
+.tilewrap > .pin { grid-area: 1 / 1 / 2 / 2; justify-self: end;
   align-self: start; margin: 11px 11px 0 0; z-index: 1; }
 /* The eBird link: the word, never a logo (product.ebirdLink). In the lower-right corner, at
-   the end of the line under the rule, its foot on that line's and 20px tall,
+   the end of the line under the rule, its foot on that line's and 22px tall,
    so it stays within the band under the rule and the tile does not grow for
    it. The line keeps room for it. */
-.next .tilewrap > .ebird { grid-area: 3 / 1 / 4 / 2; justify-self: end; align-self: end;
+.tilewrap > .ebird { grid-area: 3 / 1 / 4 / 2; justify-self: end; align-self: end;
   margin: 0 11px 0 0; z-index: 1; }
-.next .tile .idline { padding-right: 52px; }
-.ebird, .ebird:visited { display: inline-flex; align-items: center; height: 20px; padding: 0 6px;
+.tile .idline { padding-right: 52px; }
+.ebird, .ebird:visited { display: inline-flex; align-items: center; height: 22px; padding: 0 6px;
   box-sizing: border-box; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);
-  color: var(--ink); font-size: 11px; font-weight: 600; text-decoration: none; }
+  color: var(--ink); font-size: 13px; font-weight: 600; text-decoration: none; }
 .ebird:hover { border-color: var(--accent); }
 /* The name line keeps room for the pin and is as tall as it, so the name
    truncates short of it and the measurements start below it. */
-.next .tile .nameline { min-height: 28px; align-items: center; padding-right: 38px; }
+.tile .nameline { min-height: 28px; align-items: center; padding-right: 38px; }
 .finds li { display: block; }
 .finds li .pin { vertical-align: middle; margin-right: 8px; }
 /* The pinned birds, under the find box: one line that wraps. */
@@ -431,16 +447,16 @@ h2 { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; ga
 /* Where unpinned birds are left out past the first 100: a full-width break in
    the tile grid saying how many are hidden there, with Show all. */
 .tiles > .gap { flex: 0 0 100%; margin: 2px 0; padding: 6px 0; border-top: 1px dashed var(--line);
-  border-bottom: 1px dashed var(--line); color: var(--dim); font-size: 12.5px; }
+  border-bottom: 1px dashed var(--line); color: var(--dim); font-size: 13px; }
 /* A tier's heading breaks the grid like a gap row. */
 /* A tier heading's parts (label, range, count, back to top) each stay whole;
    on a narrow screen the heading wraps between them, never inside one. */
-.tiles > .tierhd { flex: 0 0 100%; margin: 10px 0 0; font-size: 14px; font-weight: 600;
+.tiles > .tierhd { flex: 0 0 100%; margin: 10px 0 0; font-size: 15px; font-weight: 600;
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; white-space: nowrap; }
 .tiles > .tierhd:first-child { margin-top: 0; }
 .tierhd .tier { font-size: 13px; }
-.tierhd .n { color: var(--dim); font-weight: 400; font-size: 12.5px; }
-.tierhd .totop { font-weight: 400; font-size: 12.5px; }
+.tierhd .n { color: var(--dim); font-weight: 400; font-size: 13px; }
+.tierhd .totop { font-weight: 400; font-size: 13px; }
 /* The species page's Pin: a button with the pin and a word, filled when the
    bird is pinned on the home page. */
 .pinaction { margin: 10px 0; }

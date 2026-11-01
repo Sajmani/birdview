@@ -40,7 +40,7 @@ a lower tier may do.
 - [product.proportionDifferentiates](../../../local/product/diagram.md#proportiondifferentiates) — Proportion differentiates species
 - [product.oneDiagramVocabulary](../../../local/product/diagram.md#onediagramvocabulary) — One diagram vocabulary, on every surface that draws one
 - [product.measuredVersusModeled](../../../local/product/measurements.md#measuredversusmodeled) — The diagram shows which lengths are measured and which are modeled
-- [product.labeledDetailDiagram](../../../local/product/measurements.md#labeleddetaildiagram) — The detail diagram is labeled with each segment and its measurement
+- [product.labeledDetailDiagram](../../../local/product/measurements.md#labeleddetaildiagram) — The detail tile names each segment and its measurement, keyed to the drawing by color
 
 ### What the reader is told about the numbers
 
@@ -88,6 +88,7 @@ a lower tier may do.
 - [product.undrawnSpeciesAnswer](../../../local/product/presentation.md#undrawnspeciesanswer) — A species BirdView does not draw still answers for itself
 - [product.escapedBirdsListed](../../../local/product/measurements.md#escapedbirdslisted) — Escaped and kept birds are left off the home page, and listed
 - [product.fitsAPhone](../../../local/product/presentation.md#fitsaphone) — Every page fits a phone held upright
+- [tech.textSizeFloor](../../../local/tech/accessibility.md#textsizefloor) — No text renders below 13px, and running text is 15px, 16px on a phone
 - [product.nextView](../../../local/product/presentation.md#nextview) — The home page: one view of birds
 - [product.bandingCodes](../../../local/product/dataset.md#bandingcodes) — Each bird carries its four-letter banding code, where the Bird Banding Laboratory gives one
 - [product.ebirdLink](../../../local/product/presentation.md#ebirdlink) — The detail view and every tile link to the species on eBird
