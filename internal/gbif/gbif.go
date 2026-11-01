@@ -261,10 +261,6 @@ var genitive = []string{"iorum", "orum", "arum", "iae", "ae", "ii", "i"}
 // gendered are the adjectival endings that change when a species moves genus,
 // because an epithet agrees in grammatical gender with its genus: Oressochen
 // jubatus and Neochen jubata are one goose.
-//
-// The same list, for the same reason, is in internal/inat. They are kept apart
-// because the rules around them differ -- that one has no genitive step, and
-// pairs every match with an agreeing common name instead.
 var gendered = []string{"rum", "um", "us", "is", "ra", "er", "a", "e"}
 
 // fold reduces an epithet to a form comparable across a change of genus or of

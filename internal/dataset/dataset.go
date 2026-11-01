@@ -239,11 +239,6 @@ type Species struct {
 	// the ratio, so a share resting on nine records can say so.
 	Commonest *Commonest `json:"commonest,omitempty"`
 
-	// INatTaxonID links the detail view to iNaturalist (product.inaturalistLink). Zero means no
-	// confident match, and then no link is shown at all -- not a search URL,
-	// not a guess (decisions.inaturalistLinkAdopted).
-	INatTaxonID int `json:"inatTaxonId,omitempty"`
-
 	// The three main metrics shown on every tile (product.tileContents).
 	TotalLength Metric `json:"totalLength"`
 	Wingspan    Metric `json:"wingspan"`

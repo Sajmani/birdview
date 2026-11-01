@@ -13,7 +13,6 @@ cmd/birdview-ingest      compiles sources and data/ tables into web/data/species
 cmd/birdview             serves it on localhost, rendering HTML server-side
 cmd/birdview-status      generator: data/status.tsv, BirdView's own occurrence status (the scope)
 cmd/birdview-regions     generator: data/region-presence.tsv, per-region and per-month presence
-cmd/birdview-inatmap     generator: data/inat-taxa.tsv, one iNaturalist taxon ID per species
 cmd/birdview-gbifmap     generator: data/gbif-taxa.tsv, the GBIF -> AviList name bridge
 cmd/birdview-boundaries  generator: data/region-boundaries.json, from Natural Earth
 cmd/birdview-names       generator: data/source-names.tsv; only a test reads it
@@ -28,7 +27,6 @@ internal/month           the twelve months and the rule for presence in one
 internal/boundary        the region boundary file and the reference lookup over it
 internal/trait           the habitat and diet vocabularies, and BirdView's additions
 internal/gbif            the GBIF -> AviList name bridge, and the paced API client
-internal/inat            the iNaturalist taxon lookup, and the links built from it
 internal/morphology      the segment models, and the rounding that keeps them summing
 internal/palette         generated order and family colors under the contrast rule
 internal/dataset         the record and the provenance vocabulary
@@ -90,12 +88,12 @@ AVONET ──────────────────► resolve each sp
                              (own row, then renamed row, then a near-match)   │
 Fox wingspans ───────────► empirical value, else the fitted order-level ──────┤
                              regression                                       ├─► species.json ─► server
-data/inat-taxa.tsv ──────► iNaturalist link ──────────────────────────────────┤
 data/region-presence.tsv ► regions, months, share of records ─────────────────┘
 ```
 
-The generators that write those `data/` tables query GBIF (eBird and iNaturalist records) and
-iNaturalist over the network; the ingest itself reads only files in the repository.
+The generators that write those `data/` tables query GBIF (eBird and iNaturalist records) over
+the network; the ingest itself reads only files in the repository. The species link goes to eBird
+by the eBird code AviList supplies, so it needs no table ([product.ebirdLink](requirements/local/product/presentation.md#ebirdlink)).
 
 Resolution order (`resolve` in `cmd/birdview-ingest`) is the substance of [decisions.abaSpeciesWithoutAvonet](requirements/decisions.md#abaspecieswithoutavonet): prefer any row that is genuinely *this* taxon —
 whatever name or sheet it is filed under — over borrowing a relative's measurements. In order: a
@@ -127,17 +125,15 @@ the same group, so one scale still serves the whole section.
 
 ## The network generators, and why they are not in the ingest
 
-`birdview-inatmap`, `birdview-gbifmap`, `birdview-regions`, `birdview-status`, and
-`birdview-names` all ask somebody else's server about BirdView's species, and all write a committed
-table rather than running at build time
-([tech.pacedInaturalistMapping](requirements/local/tech/process.md#pacedinaturalistmapping)). The reasons are the same in each case: tests make no network request, a build that needs
+`birdview-gbifmap`, `birdview-regions`, `birdview-status`, and `birdview-names` all ask somebody
+else's server about BirdView's species, and all write a committed table rather than running at
+build time. The reasons are the same in each case: tests make no network request, a build that needs
 the network fails on a plane, and a quarter of an hour of someone else's server time does not
 belong in a `go build`. The tables go stale; a stale row fails visibly and the refresh is one
 command. `birdview-boundaries` makes one hash-checked download of Natural Earth.
 
-The two mapping tools differ in what a miss means. iNaturalist supplies a *link*, so a miss costs a link and
-nothing else, and `inat.Table` simply omits the species. GBIF supplies a *name correspondence*,
-where the set of things that did not resolve is the interesting output — so `gbif.Table` carries
+GBIF supplies a *name correspondence*, where the set of things that did not resolve is the
+interesting output — so `gbif.Table` carries
 every species GBIF reported, with a tier saying how it resolved or why it did not.
 
 `gbif.Resolve` tries three tiers and refuses ambiguity at each: the accepted name, then the

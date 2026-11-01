@@ -4150,3 +4150,30 @@ rested on a committed table of taxon IDs resolved against iNaturalist's API unde
 confidence rule, while every species shows its eBird code beside its name already. eBird's terms
 are not vendored; a link copies nothing, and checking them is open as
 [todo.ebirdTermsUnread](../todo.md#ebirdtermsunread).
+
+---
+
+## inaturalistSourcesRetired
+
+**The iNaturalist mapping is deleted, and iNaturalist's API rules and site terms are retired**
+
+Date: 2026-11-01
+Decided by: Sameer
+Status: accepted
+Affects: [tech.pacedInaturalistMapping](local/tech/process.md#pacedinaturalistmapping), [tech.identifiedClient](local/tech/delivery.md#identifiedclient)
+
+### Decided
+
+With the species link on eBird ([ebirdLinkReplacesInaturalist](#ebirdlinkreplacesinaturalist)), nothing used the iNaturalist
+mapping, so it is deleted: `cmd/birdview-inatmap`, `internal/inat`, `data/inat-taxa.tsv`, the
+ingest's join and its `-inat` flag, and the dataset's `inatTaxonId`.
+[tech.pacedInaturalistMapping](local/tech/process.md#pacedinaturalistmapping) is withdrawn. The `inat-api` and `inat-terms` sources are
+retired: BirdView neither calls iNaturalist's API nor links to its site, which was their whole
+scope. Their vendored copies and transcriptions stay as the record, as `aba`'s provenance did,
+because earlier decisions link to them. iNaturalist's observation counts still arrive through
+GBIF, under `gbif`.
+
+### Why
+
+The owner asked for the cleanup once the link moved to eBird.
+

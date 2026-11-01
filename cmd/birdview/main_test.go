@@ -214,17 +214,6 @@ func testDataset() *dataset.Dataset {
 		}
 	}
 
-	// iNaturalist taxon IDs (product.inaturalistLink). The stilt is deliberately left unmatched so
-	// both branches of the detail view are exercised: a species iNaturalist has
-	// not confidently matched must show no link at all.
-	inat := map[string]int{
-		"annhum": 5305, "amerob": 12727,
-		"amecro": 8021, "greblu": 4956,
-	}
-	for i := range sp {
-		sp[i].INatTaxonID = inat[sp[i].ID]
-	}
-
 	var fams []dataset.Family
 	seenFam := map[string]bool{}
 	for i := range sp {

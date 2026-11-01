@@ -12,7 +12,7 @@ the box lives.
 
 Square boxes are data: a published source, a table in code, or a file a command writes. Rounded
 boxes are things that run: a command, or a numbered step inside `birdview-ingest`. The steps are
-not files; the ingest runs all nine in memory and writes only `species.json`. Dotted arrows are
+not files; the ingest runs all eight in memory and writes only `species.json`. Dotted arrows are
 facts copied into code rather than data read by a program. The diagram's corner repeats this
 legend.
 
@@ -101,14 +101,6 @@ flowchart LR
     species ·
     region ·
     date window ·`"]
-    TAXA["`iNaturalist taxa API
-    *live*
-    ─────────────
-    id ✗ *linked to until 2026-11-01*
-    name · *exact match*
-    rank · *species only*
-    preferred_common_name · *must agree*
-    names · *English names, for the same check*`"]
     BACK["`GBIF backbone API
     *live*
     ─────────────
@@ -154,15 +146,14 @@ flowchart LR
   end
 
   PREV["`web/data/species.json, the previous build
-  *the file birdview-ingest writes, read back by three generators*
+  *the file birdview-ingest writes, read back by two generators*
   ─────────────
   id ·
   scientificName · *the species to look up*
-  names · *the North American name, checked against iNaturalist's*`"]
+  names · *the North American name, for birdview-names*`"]
 
   STATUSCMD(["birdview-status"])
   REGIONSCMD(["birdview-regions"])
-  INATCMD(["birdview-inatmap"])
   NAMESCMD(["birdview-names"])
   GBIFCMD(["birdview-gbifmap"])
 
@@ -187,11 +178,6 @@ flowchart LR
     region:jan|…|dec ★ *counts by month*
     ~ · *under the bar: counted, not listed*
     !flags ★ *months eBird withholds*`"]
-    INAT["`inat-taxa.tsv
-    ─────────────
-    scientific name · *join key*
-    taxon id ✗ *linked to until 2026-11-01*
-    common name as iNaturalist returned it ✗ *for the audit trail*`"]
     SN["`source-names.tsv
     *read only by the name-agreement check*
     ─────────────
@@ -208,7 +194,7 @@ flowchart LR
     tier ✗`"]
   end
 
-  subgraph INGEST["birdview-ingest: nine steps, in memory; only species.json is written"]
+  subgraph INGEST["birdview-ingest: eight steps, in memory; only species.json is written"]
     direction TB
     S1(["Step 1: scope
     keep established or rare;
@@ -238,9 +224,7 @@ flowchart LR
     species out of scope keep
     their status and evidence,
     named from AviList"])
-    S8(["Step 8: links
-    attach the iNaturalist taxon id"])
-    S9(["Step 9: regions
+    S8(["Step 8: regions
     attach counts, months, withheld flags;
     regions under the bar counted apart;
     peak share gives the top region"])
@@ -273,7 +257,6 @@ flowchart LR
   belowCounts · *the same*
   belowMonths · *the same*
   commonest ★
-  inatTaxonId ✗
   families ★ *names, orders, colors*
   regionTotals · *the denominator*
   regionMonthlyTotals · *the denominator, by month*
@@ -307,7 +290,6 @@ flowchart LR
   present at 1 per million; every count kept"| REGIONS
 
   SENS -.->|"restated as facts"| TSENS
-  TAXA --> INATCMD -->|"exact name and common name agree"| INAT
   OCC --> NAMESCMD -->|"records per source under each AviList name"| SN
   OCC -->|"species in eBird's US and Canada records"| GBIFCMD
   BACK --> GBIFCMD
@@ -315,13 +297,11 @@ flowchart LR
   GBIFCMD --> GT
 
   PREV -->|"the species to look up"| REGIONSCMD
-  PREV -->|"the species to look up"| INATCMD
   PREV -->|"the species to look up"| NAMESCMD
-  NAMES -->|"retry under the pre-AviList name"| INATCMD
 
   STATUS --> S1
   DECL --> S1
-  S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> JSON
+  S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> JSON
   STATUS -->|"species left out of scope"| S7
   AVL --> S2
   AVL --> S7
@@ -332,8 +312,7 @@ flowchart LR
   TRAIT --> S5
   FOX --> S6
   AVO --> S6
-  INAT --> S8
-  REGIONS --> S9
+  REGIONS --> S8
 
   JSON --> SERVER
   NAMES -->|"Recorded as, read directly"| SERVER
@@ -371,12 +350,11 @@ hybrid matches no species. `birdview-regions` applies these rules through `taxon
 `birdview-status` applies the same tables in its own code and drops hybrids, which have no status.
 Where a name table applies to a species, its page says so under *Recorded as*.
 
-**The ingest joins everything into one file, in nine steps.** It keeps the in-scope species
+**The ingest joins everything into one file, in eight steps.** It keeps the in-scope species
 (step 1), names them and their families from AviList (2), measures them from AVONET (3), models
 the segments no source measures (4), assigns habitat and diet (5), takes wingspan from Fox where it
 was measured and estimates it where it was not (6), records the species it does not draw and why
-(7), and attaches the iNaturalist taxon id (8), which no page has used since the link went to eBird,
-and the region counts (9). Every metric carries its
+(7), and attaches the region counts (8). Every metric carries its
 provenance (*measured*, *near-match*, or *modeled*), and the page shows which. See
 [what is measured and what is modeled](data.md).
 

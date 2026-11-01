@@ -29,7 +29,7 @@ Everything the build needs is in the repository.
 | [AVONET](https://doi.org/10.6084/m9.figshare.16586228.v7) (Tobias et al. 2022) | CC BY 4.0 | the workbook, in [`third_party/avonet/`](../third_party/avonet) | bill, wing, tail, mass, habitat, diet |
 | [Fox et al. 2026 wingspan database](https://doi.org/10.6084/m9.figshare.32089083) | CC BY 4.0 | the workbook, in [`third_party/foxwingspan/`](../third_party/foxwingspan) | measured wingspans |
 | [GBIF](https://www.gbif.org): the [eBird Observation Dataset](https://doi.org/10.15468/aomfnb) and iNaturalist research-grade observations | CC BY 4.0 | only tables BirdView derives, under `data/`; never a record | where each bird recurs, the regions, how common it is |
-| [iNaturalist](https://www.inaturalist.org) | taxon IDs are facts; the terms are © iNaturalist | one taxon ID per species in `data/inat-taxa.tsv`, and the terms in [`third_party/inatterms/`](../third_party/inatterms) and [`third_party/inatapi/`](../third_party/inatapi) | the link from a species page to its photographs |
+| [iNaturalist](https://www.inaturalist.org) terms, retired | © iNaturalist | the terms, in [`third_party/inatterms/`](../third_party/inatterms) and [`third_party/inatapi/`](../third_party/inatapi) | nothing since 2026-11-01; kept as the record of an earlier link |
 | [Natural Earth](https://www.naturalearthdata.com/) 1:10m states and provinces | public domain | the derived `data/region-boundaries.json`; the source is fetched by hash only to regenerate it | the Here button |
 | [WCAG 2.2](https://www.w3.org/TR/2024/REC-WCAG22-20241212/) | W3C Document License | the Recommendation, in [`third_party/wcag/`](../third_party/wcag) | the accessibility rules BirdView meets, quoted |
 
@@ -80,7 +80,6 @@ restart after changing a Go file (for example, adding a field a template uses).
 | | `-avilist` | `third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx` |
 | | `-avonet` | `third_party/avonet/AVONET Supplementary dataset 1.xlsx` |
 | | `-wingspan` | `third_party/foxwingspan/wingspan_fox2026_AppendixS1.xlsx` |
-| | `-inat` | `data/inat-taxa.tsv` |
 | | `-regions` | `data/region-presence.tsv` |
 | | `-out` | `web/data/species.json` |
 | `birdview` | `-addr` | `localhost:8080` |
@@ -95,27 +94,21 @@ The defaults are relative paths, so run both commands from the repository root.
 
 ## The generators
 
-Five commands build committed tables under `data/`. None runs as part of the ingest: together they
+Four commands build committed tables under `data/`. None runs as part of the ingest: together they
 make thousands of requests to other people's servers, tests make no network requests, and the
 build must work offline. Run a generator by hand when its source changes, review the diff, and
 commit it. [How BirdView's data is built](pipeline.md) diagrams them and the ingest they feed.
 
 | Command | Writes | Cost |
 | --- | --- | --- |
-| `birdview-inatmap` | `data/inat-taxa.tsv`: one iNaturalist taxon ID per species | ~20 min, 1 request/second |
 | `birdview-gbifmap` | `data/gbif-taxa.tsv`: GBIF backbone name → AviList name | ~5 min, ~2,800 requests |
 | `birdview-regions` | `data/region-presence.tsv`: which regions each species occurs in | one facet query per region, resumable |
 | `birdview-status` | `data/status.tsv`: BirdView's own occurrence status per species | two passes, resumable |
 | `birdview-boundaries` | `data/region-boundaries.json`: region outlines for the Here button, from Natural Earth | one ~15 MB download, hash-checked |
 
-`birdview-inatmap`, `birdview-names`, and `birdview-regions` read the built dataset, so run the
-ingest first.
+`birdview-names` and `birdview-regions` read the built dataset, so run the ingest first.
 
-iNaturalist's API terms ask for one request per second; do not shorten the interval. The GBIF rate
-is BirdView's own, and the client slows further whenever GBIF answers 429.
-
-`birdview-inatmap` leaves out a species that does not resolve confidently. Since the link went to
-eBird (2026-11-01), no page uses its table.
+The GBIF rate is BirdView's own, and the client slows further whenever GBIF answers 429.
 
 `birdview-status` caches raw fetches under `/tmp` and skips what it already has, so an interrupted
 run resumes. It refuses to write a partial table, because a species whose dates never arrived would
@@ -162,7 +155,6 @@ Chrome installed, so every test can run there. A skipped test fails the run.
 ```
 cmd/birdview-ingest/     builds species.json from the sources and the data/ tables
 cmd/birdview/            the server; embeds web/ and docs/ and serves them
-cmd/birdview-inatmap/    generator: iNaturalist taxon IDs
 cmd/birdview-gbifmap/    generator: GBIF backbone -> AviList name bridge
 cmd/birdview-regions/    generator: per-region presence
 cmd/birdview-status/     generator: BirdView's own occurrence status
@@ -179,7 +171,6 @@ internal/region/         the regions, their two groupings, and their IDs
 internal/boundary/       the region boundary file and the reference lookup over it
 internal/month/          the twelve months and the rule for presence in one
 internal/gbif/           the paced GBIF client and the name bridge
-internal/inat/           the iNaturalist taxon lookup
 internal/status/         recurrence: episodes, and the status they imply
 internal/view/           ordering, sectioning, diagram geometry; pure, no HTML
 internal/dataset/        the serialized types and the provenance kinds

@@ -198,8 +198,9 @@ Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 Any HTTP client this project uses to fetch a source sends a descriptive `User-Agent` naming the
 application and a contact. Go's default `Go-http-client/1.1` is not acceptable.
 
-Rationale: Wikimedia's User-Agent policy returns HTTP 403 for generic agents, and iNaturalist's
-API guidance asks the same. Both matter if [product.speciesPhotographs](../product/diagram.md#speciesphotographs) returns.
+Rationale: GBIF's API asks for it, Wikimedia's User-Agent policy returns HTTP 403 for generic
+agents, and iNaturalist's API guidance asked the same while BirdView called it. Wikimedia's matters
+if [product.speciesPhotographs](../product/diagram.md#speciesphotographs) returns.
 
 ## goVersionFollowsDeps
 

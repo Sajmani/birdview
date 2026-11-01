@@ -7,11 +7,10 @@ a conflict mechanically; anything it cannot resolve escalates to a person and is
 
 | Tier | Sources | Why |
 | --- | --- | --- |
-| **Governing** | `inat-api` | The operator can throttle or block a client that ignores it; BirdView may not locally override it |
-| **Mandatory** | `avonet`, `fox-wingspan`, `bohmer-neck`, `avilist`, `gbif`, `wiley`, `wcag`, `inat-terms`, `ebird-sensitive`, `natural-earth` | Copyright licenses and platform terms. A local requirement may tighten one, never loosen it |
+| **Mandatory** | `avonet`, `fox-wingspan`, `bohmer-neck`, `avilist`, `gbif`, `wiley`, `wcag`, `ebird-sensitive`, `natural-earth` | Copyright licenses and platform terms. A local requirement may tighten one, never loosen it |
 | **Local** | `product`, `tech` | BirdView's own requirements |
 
-Retired and rejected sources (`aba`, `ricklefs`, `birdlife-checklist`) bind nothing and have no
+Retired and rejected sources (`aba`, `inat-api`, `inat-terms`, `ricklefs`, `birdlife-checklist`) bind nothing and have no
 tier.
 
 **No order between `product` and `tech` has been decided.** No conflict between them has yet

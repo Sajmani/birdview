@@ -19,13 +19,11 @@ import (
 	"math"
 	"net/url"
 	"os"
-	"sort"
 	"strings"
 	"testing"
 
 	"birdview/internal/avonet"
 	"birdview/internal/dataset"
-	"birdview/internal/inat"
 	"birdview/internal/region"
 	"birdview/internal/status"
 	"birdview/internal/taxonomy"
@@ -36,7 +34,6 @@ const (
 	avoFile    = "../../third_party/avonet/AVONET Supplementary dataset 1.xlsx"
 	foxFile    = "../../third_party/foxwingspan/wingspan_fox2026_AppendixS1.xlsx"
 	avlFile    = "../../third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx"
-	inatFile   = "../../data/inat-taxa.tsv"
 	regFile    = "../../data/region-presence.tsv"
 	bblFile    = "../../third_party/bbl/speclist.html"
 )
@@ -492,79 +489,6 @@ func TestHeadIsNotAConstant(t *testing.T) {
 	if heaviest.ScientificName != biggestHead.ScientificName {
 		t.Errorf("heaviest bird is %s but the largest head belongs to %s",
 			heaviest.ScientificName, biggestHead.ScientificName)
-	}
-}
-
-// TestINatTableMatchesTheDataset guards the committed mapping against drift.
-//
-// The table is generated rarely and by hand, so it is exactly the kind of
-// artifact that rots quietly: a species renamed by a taxonomic revision leaves a
-// row behind that matches nothing, and the link simply stops appearing with
-// nobody told. This makes that loud.
-//
-// It does NOT require full coverage. A species iNaturalist has not confidently
-// matched is supposed to be absent (product.inaturalistLink) -- usually a recent split it has not
-// followed yet -- so absence is correct and only a *stale* row is a fault.
-//
-// Verifies: product.inaturalistLink, tech.pacedInaturalistMapping. Criterion: acceptance.inaturalistLinkConfidentOnly.
-func TestINatTableMatchesTheDataset(t *testing.T) {
-	f, err := os.Open(inatFile)
-	if err != nil {
-		t.Skipf("skipping: %s is absent; run cmd/birdview-inatmap", inatFile)
-	}
-	defer f.Close()
-	table, err := inat.Load(f)
-	if err != nil {
-		t.Fatalf("the committed mapping does not parse: %v", err)
-	}
-
-	ds := load(t)
-	known := map[string]string{}
-	for i := range ds.Species {
-		known[ds.Species[i].ScientificName] = ds.Species[i].Name(dataset.LocaleNA)
-	}
-
-	var stale []string
-	for sci := range table {
-		if _, ok := known[sci]; !ok {
-			stale = append(stale, sci)
-		}
-	}
-	if len(stale) > 0 {
-		sort.Strings(stale)
-		t.Errorf("%d rows name species not in the dataset, so their links are dead: %v",
-			len(stale), stale)
-	}
-
-	// Every ID positive, and no two species pointing at the same taxon -- which
-	// would mean the matcher accepted the same bird twice under different names.
-	seen := map[int]string{}
-	for sci, e := range table {
-		if e.TaxonID <= 0 {
-			t.Errorf("%s has taxon id %d", sci, e.TaxonID)
-		}
-		if prev, dup := seen[e.TaxonID]; dup {
-			t.Errorf("taxon %d is claimed by both %s and %s", e.TaxonID, prev, sci)
-		}
-		seen[e.TaxonID] = sci
-	}
-
-	// Coverage is REQUIRED to be total (product.inaturalistLink, decisions.fullInaturalistCoverage). Every one of the 30 that
-	// once failed turned out to be a formatting or synonym artifact, not a real
-	// disagreement, so an unresolved species now means something is wrong --
-	// a taxonomic change, a normalizer regression, or a stale table -- rather
-	// than a bird iNaturalist does not have.
-	var missing []string
-	for i := range ds.Species {
-		if _, ok := table[ds.Species[i].ScientificName]; !ok {
-			missing = append(missing, ds.Species[i].ScientificName)
-		}
-	}
-	if len(missing) > 0 {
-		sort.Strings(missing)
-		t.Errorf("%d of %d species have no iNaturalist link; coverage must be total. "+
-			"Re-run cmd/birdview-inatmap, and if any still fail, diagnose why before "+
-			"accepting the gap: %v", len(missing), len(ds.Species), missing)
 	}
 }
 

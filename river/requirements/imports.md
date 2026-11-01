@@ -77,12 +77,21 @@ and the checklist landing page carries no license statement at all.
 | **Version** | Page's own revision line: "Revised on February 27, 2025 06:23 PM by kueda" |
 | **Integrity** | [river/requirements/imported/inaturalist.org/inatapi/PROVENANCE.md](imported/inaturalist.org/inatapi/PROVENANCE.md) |
 | **Tier** | governing (the operator can throttle or block a client that ignores it) |
-| **Import style** | By reference, vendored — **copied from the maintainer's `birdsync` repository and verified byte-for-byte against the SHA-256 recorded there** |
-| **Scope** | Every request `cmd/birdview-inatmap` makes to `api.inaturalist.org` |
-| **Adopted parts** | all eight, in [inatapi.md](imported/inaturalist.org/inatapi/inatapi.md) |
-| **Exclusions** | Bulk access routes — observation exports, the weekly GBIF dataset — which serve consumers of observation data. BirdView reads one integer per species from the taxonomy. |
+| **Import style** | **Retired 2026-11-01.** Still vendored, hash-verified, and transcribed, as the record; nothing calls the API. |
+| **Scope** | *(formerly)* every request `cmd/birdview-inatmap` made to `api.inaturalist.org` |
+| **Adopted parts** | None. |
+| **Exclusions** | Everything. |
 | **Owner** | iNaturalist |
-| **Status** | **Adopted 2026-09-23.** Vendored and hash-verified; transcribed against BirdView's much narrower use. |
+| **Status** | **Retired 2026-11-01**; adopted 2026-09-23. See below the table. |
+
+**Status.** **Retired 2026-11-01**, when the species link went to eBird by the eBird code
+([decisions.ebirdLinkReplacesInaturalist](decisions.md#ebirdlinkreplacesinaturalist)). `cmd/birdview-inatmap`, `internal/inat`, and
+`data/inat-taxa.tsv` are deleted, so BirdView sends no request to `api.inaturalist.org`. The
+copy and transcription stay because the decisions that adopted them link to them, as the ABA
+entry above explains. iNaturalist's observations still reach BirdView through GBIF, under
+[`gbif`](#gbif), not through this API.
+
+What follows describes the adoption as it stood.
 
 Two of the eight are implemented ([`inatapi.RequestRate`](imported/inaturalist.org/inatapi/inatapi.md#requestrate) pacing as [tech.pacedInaturalistMapping](local/tech/process.md#pacedinaturalistmapping), [`inatapi.UserAgent`](imported/inaturalist.org/inatapi/inatapi.md#useragent) as the pre-existing
 [tech.identifiedClient](local/tech/delivery.md#identifiedclient)); two are not applicable because BirdView never pages; four are satisfied by construction
@@ -103,12 +112,19 @@ HTTP 403 and a JavaScript challenge. The API itself serves an identified client 
 | **Version** | Retrieved 2026-08-09 from a browser; hashes in [PROVENANCE.md](imported/inaturalist.org/inatterms/PROVENANCE.md) |
 | **Integrity** | [river/requirements/imported/inaturalist.org/inatterms/PROVENANCE.md](imported/inaturalist.org/inatterms/PROVENANCE.md) |
 | **Tier** | mandatory (copyright and platform terms) |
-| **Import style** | By reference, vendored — **copied from `birdsync` and hash-verified**, as above |
-| **Scope** | BirdView's use of the platform: unauthenticated reads, and outbound links to taxon pages |
-| **Adopted parts** | all six, in [inatterms.md](imported/inaturalist.org/inatterms/inatterms.md) |
-| **Exclusions** | Conduct rules unreachable by a client that posts nothing: harassment, sockpuppets, explicit content, commercial AI training |
+| **Import style** | **Retired 2026-11-01.** Still vendored, hash-verified, and transcribed, as the record. |
+| **Scope** | *(formerly)* BirdView's use of the platform: unauthenticated reads, and outbound links to taxon pages |
+| **Adopted parts** | None. |
+| **Exclusions** | Everything. |
 | **Owner** | iNaturalist |
-| **Status** | **Adopted 2026-09-23.** Vendored so that one negative finding is checkable rather than remembered. |
+| **Status** | **Retired 2026-11-01**; adopted 2026-09-23. See below the table. |
+
+**Status.** **Retired 2026-11-01**, with [`inat-api`](#inat-api): BirdView neither reads the
+platform nor links to it ([decisions.ebirdLinkReplacesInaturalist](decisions.md#ebirdlinkreplacesinaturalist)), which was the whole of its scope.
+iNaturalist's research-grade observations still reach BirdView as counts through GBIF, governed
+by [`gbif`](#gbif). BirdView still copies nothing from iNaturalist.
+
+What follows describes the adoption as it stood.
 
 BirdView is subject to very little of this, and the entry exists to say which little. **The
 adoption rests on a negative: nothing in either document restricts reusing a taxon identifier or
@@ -659,7 +675,6 @@ Every source BirdView reads is worldwide:
 | **AviList** | worldwide — 11,131 species, 252 families |
 | **AVONET** | worldwide — 10,661 species, 41 orders |
 | **Fox wingspan** | worldwide — 10,618 species; gaps are flightless birds and Galliformes, not regions |
-| **iNaturalist taxon IDs** | worldwide taxonomy; BirdView stores one id per in-scope species |
 | **eBird and iNaturalist occurrence, via GBIF** | worldwide, at **very uneven density**: the US and Canada alone hold 1,238,404,492 eBird records ([decisions.regionJoinNormalizes](decisions.md#regionjoinnormalizes)) |
 
 What makes BirdView North American is entirely its own:

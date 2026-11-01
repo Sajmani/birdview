@@ -18,6 +18,7 @@ normative so agents reading the instruction file are pointed at it.
 **The iNaturalist mapping is built by a separate, paced tool**
 
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen), [goals.rapidIteration](../../../goals/goals.md#rapiditeration)
+Status: **Withdrawn 2026-11-01**, with the mapping it governed ([decisions.inaturalistSourcesRetired](../../decisions.md#inaturalistsourcesretired)).
 
 Resolving species to iNaturalist taxon IDs happens in `cmd/birdview-inatmap`, never in
 `birdview-ingest` and never while serving. The tool waits at least one second between requests

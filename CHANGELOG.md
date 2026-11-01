@@ -10,6 +10,12 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 - The link on every tile and species page goes to the species on **eBird**, by the eBird code
   beside its name, instead of iNaturalist. The tile's button reads **eBird**.
 
+### Removed
+
+- The iNaturalist taxon table and the tool that built it from iNaturalist's API: the eBird link
+  needs no lookup. iNaturalist's observations still count toward where each bird is found, through
+  GBIF.
+
 ## 2026-10-30 to 2026-10-31 — Tiles put the numbers first
 
 ### Changed

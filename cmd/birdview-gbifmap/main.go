@@ -15,9 +15,8 @@
 // Command birdview-gbifmap builds the committed table that maps GBIF backbone
 // scientific names onto AviList's.
 //
-// It is deliberately NOT part of birdview-ingest, for the reason tech.pacedInaturalistMapping gives
-// for cmd/birdview-inatmap: a full run is about 2,800 requests to someone
-// else's server, tests make no network request, and a build that needs the
+// It is deliberately NOT part of birdview-ingest: a full run is about 2,800
+// requests to someone else's server, tests make no network request, and a build that needs the
 // network is a build that fails on a plane. Run this when the bridge needs
 // refreshing, read the report, commit the table.
 //

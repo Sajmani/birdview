@@ -372,19 +372,10 @@ link can be followed and checked. `grep -n '^### ' alignment.md` lists the crite
 - Verifies requirements:
   - [`product.inaturalistLink`](requirements/local/product/presentation.md#inaturalistlink)
   - [`tech.pacedInaturalistMapping`](requirements/local/tech/process.md#pacedinaturalistmapping)
-- Guardrails:
-  - [`TestINatLinkOnlyForAConfidentMatch`](../cmd/birdview/main_test.go#L1422)
-  - [`TestNoINaturalistImagesAreEmbedded`](../cmd/birdview/main_test.go#L1459)
-  - [`TestINatTableMatchesTheDataset`](../cmd/birdview-ingest/main_test.go#L506)
-  - [`TestAcceptRequiresBothNames`](../internal/inat/inat_test.go#L36)
-  - [`TestAcceptUsesEveryEnglishName`](../internal/inat/inat_test.go#L84)
-  - [`TestTableRoundTripsAndRejectsJunk`](../internal/inat/inat_test.go#L102)
-  - [`TestTaxonURL`](../internal/inat/inat_test.go#L150)
-  - [`TestLookupHonorsTheSourceRequirements`](../internal/inat/inat_test.go#L184)
-  - [`TestLookupRejectsAWrongBird`](../internal/inat/inat_test.go#L222)
-  - [`TestLookupReportsTransportErrorsSeparately`](../internal/inat/inat_test.go#L254)
-- Blocks: blocks once met
-- State: met since 2026-09-27 (currently blocking)
+- Guardrails: none since 2026-11-01. The criterion was withdrawn with both requirements
+  ([decisions.ebirdLinkReplacesInaturalist](requirements/decisions.md#ebirdlinkreplacesinaturalist)), and its tests were deleted with the code they guarded.
+- Blocks: no longer
+- State: withdrawn 2026-11-01; met from 2026-09-27
 
 ### [`acceptance.foldingFamiliesHaveNecks`](requirements/acceptance.md#foldingfamilieshavenecks)
 

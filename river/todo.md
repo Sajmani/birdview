@@ -329,10 +329,6 @@ Gate: before composition
 
 Classified 2026-10-16, each of the 81 read individually. **Composed — wholly an imported obligation,
 restated:**
-[tech.pacedInaturalistMapping](requirements/local/tech/process.md#pacedinaturalistmapping)
-([`inatapi.RequestRate`](requirements/imported/inaturalist.org/inatapi/inatapi.md#requestrate)),
-[tech.identifiedClient](requirements/local/tech/delivery.md#identifiedclient)
-([`inatapi.UserAgent`](requirements/imported/inaturalist.org/inatapi/inatapi.md#useragent)),
 [tech.badgeContrast](requirements/local/tech/accessibility.md#badgecontrast), and
 [tech.textContrastFloor](requirements/local/tech/accessibility.md#textcontrastfloor) (WCAG 2.2 SC
 1.4.6 and 1.4.11). These belong in a composed package citing the source, not in `tech`. **Mixed — a
@@ -341,10 +337,8 @@ local requirement with an imported obligation inside it, to split:**
 redistribute* is the licenses'; *fetch at build time* is BirdView's mechanism),
 [product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue)
 (*credit every CC BY source* is a license condition; docs currency is local),
-[tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater) (*never
-commercial* follows the non-commercial licenses), and
-[product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink) (*reproduce
-no photograph* is [`inatterms.ContributorKeepsRights`](requirements/imported/inaturalist.org/inatterms/inatterms.md#contributorkeepsrights)). **The other 73 are local intent**, including
+and [tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater) (*never
+commercial* follows the non-commercial licenses). **The other 73 are local intent**, including
 those that name a source — choosing AviList for names is BirdView's decision, made with licenses in
 mind, not an obligation AviList imposes. Two findings on the way: the WCAG manifest entry still says
 other text is held to 4.5:1, which
@@ -354,7 +348,10 @@ code reading either. **Progress 2026-10-16:** WCAG is now vendored and transcrib
 stale manifest entry is fixed, and the two contrast requirements serve as the guarantee half of
 [app.stylesheetContract](requirements/composed/internal/app/app.md#stylesheetcontract), with their WCAG obligation
 composed separately as [app.pagesMeetTextContrast](requirements/composed/internal/app/app.md#pagesmeettextcontrast).
-The four mixed requirements are still to split
+The three mixed requirements are still to split. **2026-11-01:** three of the original list
+went with iNaturalist ([decisions.inaturalistSourcesRetired](requirements/decisions.md#inaturalistsourcesretired)): [tech.pacedInaturalistMapping](requirements/local/tech/process.md#pacedinaturalistmapping) and
+[product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink) are withdrawn, and [tech.identifiedClient](requirements/local/tech/delivery.md#identifiedclient) no longer restates an
+imported source
 
 ## presenceOverSelection
 
@@ -717,7 +714,7 @@ README was silent or assumed something BirdView did not have:
 
 ## inatPacingFlake
 
-**The iNaturalist pacing test can fail under load**
+**The GBIF client's pacing test can fail under load, as the iNaturalist one did**
 
 Status: open
 Owner: unassigned
@@ -731,7 +728,8 @@ flaked the same way on 2026-10-26: `TestTaxonIdentifiesItselfAndPaces` measured 
 60 ms interval in a full run, and passed three runs alone. Now that
 [tech.checksOnEveryChange](requirements/local/tech/release.md#checksoneverychange) fails CI on any failure, a flake here would read as a broken
 change. Measure the gap at the client's send instead, or widen the tolerance with that reason.
-By 2026-10-27 both flaked in most local full runs, though not yet in CI.
+By 2026-10-27 both flaked in most local full runs, though not yet in CI. The iNaturalist test was
+deleted 2026-11-01 with the client it tested ([decisions.inaturalistSourcesRetired](requirements/decisions.md#inaturalistsourcesretired)); the GBIF one remains.
 
 ## attributionCriterionNamesAba
 

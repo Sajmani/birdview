@@ -976,7 +976,7 @@ other line in that test.
 **Status: withdrawn 2026-11-01** with [product.inaturalistLink](local/product/presentation.md#inaturalistlink)
 ([decisions.ebirdLinkReplacesInaturalist](decisions.md#ebirdlinkreplacesinaturalist)). Its rendering assertions moved to
 [app.ebirdLinkOnTilesAndPages](composed/internal/app/acceptance.md#ebirdlinkontilesandpages); the matching, coverage, table, and courtesy assertions
-still run, over code nothing on a page uses any more.
+were deleted with the code they guarded ([decisions.inaturalistSourcesRetired](decisions.md#inaturalistsourcesretired)).
 mapping table, plus assertions on the rendered detail page; the resolver is exercised against an
 `httptest` server, never the live API
 

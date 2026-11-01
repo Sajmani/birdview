@@ -215,7 +215,7 @@ func TestFoldCrossesGenusAndCaseButNotSpecies(t *testing.T) {
 	apart := [][2]string{
 		{"alba", "albus"},        // Ardea alba and Corvus albus are not one bird
 		{"minuta", "minutilla"},  // Calidris minuta and Calidris minutilla
-		{"villosus", "borealis"}, // the near miss internal/inat was built around
+		{"villosus", "borealis"}, // the near miss the old iNaturalist matcher was built around
 		{"aestiva", "petechia"},  // the two halves of the Yellow Warbler split
 		{"nivosus", "montanus"},  // two plovers that moved genus together
 	}
