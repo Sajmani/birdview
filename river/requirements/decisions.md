@@ -4177,3 +4177,46 @@ GBIF, under `gbif`.
 
 The owner asked for the cleanup once the link moved to eBird.
 
+---
+
+## ebirdCodesComplete
+
+**Every species has an eBird code; where it has two, the simpler one is used**
+
+Date: 2026-11-01
+Decided by: Sameer
+Status: accepted
+Affects: [product.ebirdLink](local/product/presentation.md#ebirdlink), [product.namesFromAvilist](local/product/dataset.md#namesfromavilist)
+
+### Decided
+
+`taxonomy.EBirdCodes` gives an eBird code to the three species AviList gives none — Ruddy Duck
+`rudduc`, White-necked Petrel `whnpet`, American Barn Owl `brnowl` — and replaces AviList's code
+for the two species whose second code is simpler: Fork-tailed Swift `fotswi` (AviList `fotswi1`)
+and Bronzed Cowbird `brocow` (AviList `brocow1`). A species has two codes where AviList v2025b
+and Cornell's BirdNET taxonomy, which follows AviList and carries eBird's current codes, give
+different codes for the same scientific name. The owner's rule picks between them: no digits
+before digits, then shorter. It leaves AviList's code for the other six it was applied to: Marsh
+Wren `marwre` (not `eamwre1`), Tufted Flycatcher `tuffly` (not `tuffly1`), Nutting's Flycatcher
+`nutfly` (not `nutfly1`), Warbling Vireo `warvir` (not `eawvir1`), Siberian Stonechat `y00427`
+(not `sibsto1`, the longer), and Willet `willet1` (not `willet2`, a tie). Page addresses do not
+change.
+
+### Why
+
+The owner asked that no species be without an eBird code, gave Ruddy Duck's, and set the rule.
+Wikidata (CC0) confirmed `rudduc` and `whnpet`; the BirdNET taxonomy confirmed all five. eBird's
+own pages could not be checked: they answer automated requests with a proof-of-work challenge,
+which BirdView does not try to get past.
+
+**Wikidata's other codes were not counted as second codes.** It holds two for Guadalupe Murrelet
+(`xanmur`, `xanmur1`) and a different one from AviList's for 18 species; where those 18 were
+checked against BirdNET, it sided with AviList for 15, and Wikidata's codes there are eBird's
+codes for an earlier or broader concept: `yelwar` is Yellow Warbler where AviList's species is
+Mangrove Warbler, `hergul` the Herring Gull before European Herring Gull was split. Taking them
+would send readers to the wrong bird.
+
+Each species the table changes keeps its earlier page address, so links to it still work; its
+code beside the name and its eBird link use the table's code. The three AviList draws more
+narrowly than eBird link to eBird's broader species.
+

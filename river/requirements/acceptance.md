@@ -216,10 +216,12 @@ bird rather than a blank; family scientific and English names are non-empty; and
 name equals its scientific name** — the tell of a silent fallback, which an earlier design
 shipped for every one of its species.
 
-**Assertions, the code:** exactly **three** species carry no eBird code, and they are **named,
-not counted** — *Oxyura jamaicensis*, *Pterodroma cervicalis*, *Tyto furcata*, each a taxon
-AviList recognizes and Clements has no 1:1 counterpart for. A fourth appearing means the join
-moved, which a percentage threshold would have absorbed in silence.
+**Assertions, the code:** every species carries an eBird code. AviList gives none to exactly
+**three**, and they are **named, not counted** — *Oxyura jamaicensis*, *Pterodroma cervicalis*,
+*Tyto furcata*, each a taxon AviList recognizes and Clements has no 1:1 counterpart for — and
+`taxonomy.EBirdCodes` declares theirs as AviList's gaps and no other species' as one
+([decisions.ebirdCodesComplete](decisions.md#ebirdcodescomplete)). A fourth gap appearing means the join moved, and shows as a
+species with no code at all, which a percentage threshold would have absorbed in silence.
 
 **Status: verified 2026-10-02 — passing, and watched failing** by blanking the world name, which
 leaves the fallback with nothing to fall back to; and by adding a fourth species to the uncoded
@@ -228,6 +230,7 @@ Previously verified 2026-09-22 against the ABA checklist; rewritten for
 [decisions.avilistReplacesAba](decisions.md#avilistreplacesaba).
 
 Watched failing: 2026-10-02, by blanking the world name, which leaves the fallback with nothing to fall back to; and by adding a fourth species to the uncoded set, which the named list catches where a percentage threshold would have absorbed it.
+Watched failing: 2026-11-01, by dropping American Barn Owl's declared code ("1 species have no eBird code, and no declared one: [Tyto furcata]").
 
 ### stableSpeciesId
 

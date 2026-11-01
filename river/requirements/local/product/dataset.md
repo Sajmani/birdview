@@ -127,7 +127,8 @@ Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen), [goals.
 
 English common names in **both locales** ([englishNameChoice](diagram.md#englishnamechoice)), the **eBird species code**, family
 scientific and English names, the order, and the family **sequence** all come from
-[AviList](../../imports.md#avilist). Scientific names come from the scope list, and are the join key.
+[AviList](../../imports.md#avilist), except the few eBird codes [ebirdLink](presentation.md#ebirdlink) declares. Scientific names come from the
+scope list, and are the join key.
 
 Rationale: **licensing.** The ABA checklist supplied all of this but is all rights reserved, so
 it blocked public deployment ([decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba)). AviList is CC BY 4.0 and carries

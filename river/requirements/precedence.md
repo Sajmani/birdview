@@ -7,7 +7,7 @@ a conflict mechanically; anything it cannot resolve escalates to a person and is
 
 | Tier | Sources | Why |
 | --- | --- | --- |
-| **Mandatory** | `avonet`, `fox-wingspan`, `bohmer-neck`, `avilist`, `gbif`, `wiley`, `wcag`, `ebird-sensitive`, `natural-earth` | Copyright licenses and platform terms. A local requirement may tighten one, never loosen it |
+| **Mandatory** | `avonet`, `fox-wingspan`, `bohmer-neck`, `avilist`, `gbif`, `wiley`, `wcag`, `ebird-sensitive`, `birdnet-taxonomy`, `wikidata`, `natural-earth` | Copyright licenses and platform terms. A local requirement may tighten one, never loosen it |
 | **Local** | `product`, `tech` | BirdView's own requirements |
 
 Retired and rejected sources (`aba`, `inat-api`, `inat-terms`, `ricklefs`, `birdlife-checklist`) bind nothing and have no

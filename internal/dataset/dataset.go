@@ -176,6 +176,8 @@ type Species struct {
 	// LIAU under the world locale (decisions.avilistReplacesAba).
 	//
 	// Not fixed-width despite the name: 4 to 8 characters in practice.
+	// AviList's, except where taxonomy.EBirdCodes declares another
+	// (product.ebirdLink); every species has one, and the eBird link uses it.
 	SpeciesCode string `json:"speciesCode,omitempty"`
 	// BandingCode is the four-letter alpha code the USGS Bird Banding
 	// Laboratory assigns, e.g. "AMRO" (product.bandingCodes): a public-domain

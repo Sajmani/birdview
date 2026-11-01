@@ -391,7 +391,7 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 				dataset.LocaleNA:    avr.NameNA,
 				dataset.LocaleWorld: avr.NameWorld,
 			},
-			SpeciesCode:    avr.Code,
+			SpeciesCode:    ebirdCode(sci, avr.Code),
 			ScientificName: sci,
 			Family:         avr.Family,
 			FamilyCommon:   famCommon[avr.Family],
@@ -640,6 +640,16 @@ func rejected(rows map[string]status.Row, avl avilist.Table,
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].ScientificName < out[j].ScientificName })
 	return out, nil
+}
+
+// ebirdCode is the eBird code a species shows and links with: AviList's,
+// unless taxonomy.EBirdCodes declares another (product.ebirdLink). The species' id, its page
+// address, is not derived from this, so a declared code moves no URL.
+func ebirdCode(sci, avilist string) string {
+	if c, ok := taxonomy.EBirdCodes[sci]; ok {
+		return c.Code
+	}
+	return avilist
 }
 
 func id(sci string) string {

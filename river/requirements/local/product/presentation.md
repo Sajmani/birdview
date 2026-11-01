@@ -791,9 +791,19 @@ is can go and see one. On the detail view the link names the species and eBird i
 tile it reads **eBird**, in the tile's lower-right corner, and its accessible name is the bird's
 name and "on eBird" ([decisions.ebirdLinkReplacesInaturalist](../../decisions.md#ebirdlinkreplacesinaturalist)).
 
-The code is the one each species already carries from AviList ([namesFromAvilist](dataset.md#namesfromavilist)), so the link needs no
-lookup or matching of its own. A species with **no eBird code** — AviList recognizes a few species
-eBird does not — shows **no link at all**, not a search URL or a guess.
+**Every species has a code and a link.** The code is the one each species carries from AviList
+([namesFromAvilist](dataset.md#namesfromavilist)), except where a declared table, `taxonomy.EBirdCodes`, says otherwise
+([decisions.ebirdCodesComplete](../../decisions.md#ebirdcodescomplete)):
+
+- **AviList gives no code** for a species whose concept it draws more narrowly than eBird does;
+  the table gives eBird's code for the bird, as Ruddy Duck is `rudduc`.
+- **A species has two codes** when AviList's and the one Cornell's current taxonomy gives for the
+  same species differ. The table takes the **simpler**: a code without digits over one with them,
+  then the shorter; on a tie, AviList's stands.
+
+The code shown beside the name is the one the link uses. A species' page address does not change
+with it: it stays AviList's code, or the scientific-name slug where AviList has none
+([tech.stableUrls](../tech/delivery.md#stableurls)).
 
 **Words, never eBird's logo**, and BirdView **links and never copies**: no photograph, sound, or
 map is embedded, hotlinked, cached, or reproduced; the reader arrives on eBird, where each carries

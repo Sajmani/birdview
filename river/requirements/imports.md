@@ -625,6 +625,43 @@ process anything from BirdLife's DataZone**, as for Wiley ([decisions.ricklefsPr
 
 ---
 
+## `birdnet-taxonomy`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | <https://birdnet.cornell.edu/taxonomy/> — code at <https://github.com/birdnet-team/birdnet-taxonomy> |
+| **Version** | `v0.5-Nov2026`, downloaded 2026-11-01 |
+| **Integrity** | **Not vendored, so no hash here.** Five codes taken from it are in `taxonomy.EBirdCodes`, each named there. |
+| **Tier** | mandatory (copyright license) |
+| **Import style** | **Consulted, not ingested.** The file was read once to compare eBird codes; no file from it is in the repository. |
+| **Scope** | Evidence for the eBird codes of [decisions.ebirdCodesComplete](decisions.md#ebirdcodescomplete) |
+| **Adopted parts** | Five eBird species codes, which are identifiers, not expression |
+| **Exclusions** | Everything else: names, descriptions, images, and every other identifier |
+| **Owner** | Cornell K. Lisa Yang Center for Conservation Bioacoustics (BirdNET) |
+| **Status** | **Consulted 2026-11-01.** Taxonomy data CC BY-SA 4.0, code MIT, per its README. |
+
+Cornell's own taxonomy for BirdNET: AviList's species, with eBird's current codes. It agreed with
+AviList's code for all but eight of BirdView's species and supplied the three AviList lacks.
+
+---
+
+## `wikidata`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | <https://query.wikidata.org/> — property P3444, eBird taxon ID |
+| **Version** | Queried 2026-11-01 |
+| **Integrity** | **Not vendored.** Nothing from it is stored; it corroborated two codes. |
+| **Tier** | mandatory (license, CC0) |
+| **Import style** | **Consulted, not ingested.** |
+| **Scope** | Corroboration for [decisions.ebirdCodesComplete](decisions.md#ebirdcodescomplete) |
+| **Adopted parts** | None stored |
+| **Exclusions** | Everything; its eBird codes are often an earlier concept's (see the decision) |
+| **Owner** | Wikimedia Foundation and contributors |
+| **Status** | **Consulted 2026-11-01.** CC0. |
+
+---
+
 ## `ebird-sensitive`
 
 | Field | Value |

@@ -8,7 +8,9 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 ### Changed
 
 - The link on every tile and species page goes to the species on **eBird**, by the eBird code
-  beside its name, instead of iNaturalist. The tile's button reads **eBird**.
+  beside its name, instead of iNaturalist. The tile's button reads **eBird**. Every species has a
+  code now: Ruddy Duck, White-necked Petrel, and American Barn Owl, which AviList gives none, link
+  to eBird too.
 
 ### Removed
 

@@ -474,3 +474,26 @@ var DomesticForms = map[string]string{
 	"Columba livia":    "iNaturalist files feral Rock Pigeons under Columba livia domestica",
 	"Cairina moschata": "iNaturalist files domestic Muscovy Ducks under Cairina moschata domestica",
 }
+
+// EBirdCodes gives the eBird species code where AviList's will not do
+// (product.ebirdLink, decisions.ebirdCodesComplete): the species AviList gives no code, because it draws
+// them more narrowly than eBird, and the species with a second code that is
+// simpler -- no digits before digits, then shorter. Keyed by scientific name;
+// each code is confirmed in Cornell's BirdNET taxonomy, which follows AviList
+// and carries eBird's current codes.
+//
+// Only the code a species shows and links with comes from here. Its page
+// address stays AviList's code, or the scientific-name slug where AviList has
+// none, so no link to BirdView breaks (tech.stableUrls).
+var EBirdCodes = map[string]EBirdCode{
+	"Oxyura jamaicensis":    {"rudduc", "AviList gives none; eBird's Ruddy Duck"},
+	"Pterodroma cervicalis": {"whnpet", "AviList gives none; eBird's White-necked Petrel"},
+	"Tyto furcata":          {"brnowl", "AviList gives none; eBird's American Barn Owl"},
+	"Apus pacificus":        {"fotswi", "simpler than AviList's fotswi1"},
+	"Molothrus aeneus":      {"brocow", "simpler than AviList's brocow1"},
+}
+
+// EBirdCode is one entry in EBirdCodes: the code, and why AviList's was not used.
+type EBirdCode struct {
+	Code, Why string
+}

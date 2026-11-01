@@ -164,20 +164,26 @@ func TestSpeciesCodesArePresent(t *testing.T) {
 			missing = append(missing, s.ScientificName)
 		}
 	}
-	// Exactly three species have no eBird code, and they are named rather
-	// than counted: each is a taxon AviList recognizes and Clements has no
-	// 1:1 counterpart for, so Clements publishes no code. A fourth appearing
-	// means the join moved, not that the world changed.
-	want := map[string]bool{
+	// None is left without a code (product.ebirdLink). AviList gives none to exactly three, and
+	// they are named rather than counted: each is a taxon AviList recognizes
+	// and Clements has no 1:1 counterpart for, so taxonomy.EBirdCodes supplies
+	// eBird's code. A fourth appearing means the join moved, not that the
+	// world changed, and it shows here as a species with no code at all.
+	if len(missing) > 0 {
+		t.Errorf("%d species have no eBird code, and no declared one: %v", len(missing), missing)
+	}
+	gaps := map[string]bool{
 		"Oxyura jamaicensis": true, "Pterodroma cervicalis": true, "Tyto furcata": true,
 	}
-	for _, m := range missing {
-		if !want[m] {
-			t.Errorf("%s has no eBird species code and is not one of the three known gaps", m)
+	for sci, c := range taxonomy.EBirdCodes {
+		if strings.HasPrefix(c.Why, "AviList gives none") != gaps[sci] {
+			t.Errorf("taxonomy.EBirdCodes says of %s %q; AviList's gaps are exactly %v", sci, c.Why, gaps)
 		}
 	}
-	if len(missing) != len(want) {
-		t.Errorf("%d species have no eBird code, want %d: %v", len(missing), len(want), missing)
+	for sci := range gaps {
+		if _, ok := taxonomy.EBirdCodes[sci]; !ok {
+			t.Errorf("%s has no AviList code and no declared one", sci)
+		}
 	}
 }
 
@@ -804,5 +810,54 @@ func TestBandingJoin(t *testing.T) {
 	}
 	if n != 3 {
 		t.Errorf("applyBanding counted %d, want 3", n)
+	}
+}
+
+// TestEverySpeciesHasAnEBirdCode asserts product.ebirdLink's "every species has a code": no
+// drawn species is left without one, the codes taxonomy.EBirdCodes declares are the ones the
+// dataset carries, and none of them moves a species' page address (tech.stableUrls).
+//
+// Verifies: product.ebirdLink. Criterion: app.everySpeciesHasAnEBirdCode.
+func TestEverySpeciesHasAnEBirdCode(t *testing.T) {
+	ds := load(t)
+	bySci := map[string]*dataset.Species{}
+	var missing []string
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		bySci[sp.ScientificName] = sp
+		if sp.SpeciesCode == "" {
+			missing = append(missing, sp.ScientificName)
+		}
+	}
+	if len(missing) > 0 {
+		t.Errorf("%d species have no eBird code, so no eBird link: %v", len(missing), missing)
+	}
+	for _, c := range []struct{ sci, code, id string }{
+		{"Oxyura jamaicensis", "rudduc", "oxyura_jamaicensis"},
+		{"Pterodroma cervicalis", "whnpet", "pterodroma_cervicalis"},
+		{"Tyto furcata", "brnowl", "tyto_furcata"},
+		{"Apus pacificus", "fotswi", "fotswi1"},
+		{"Molothrus aeneus", "brocow", "brocow1"},
+		{"Anas platyrhynchos", "mallar3", "mallar3"}, // AviList's code stands where no table entry is
+	} {
+		sp, ok := bySci[c.sci]
+		if !ok {
+			t.Errorf("%s is not in the dataset", c.sci)
+			continue
+		}
+		if sp.SpeciesCode != c.code {
+			t.Errorf("%s carries eBird code %q, want %q", c.sci, sp.SpeciesCode, c.code)
+		}
+		if sp.ID != c.id {
+			t.Errorf("%s's page address moved to /species/%s; it stays /species/%s", c.sci, sp.ID, c.id)
+		}
+	}
+	seen := map[string]string{}
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		if prev, dup := seen[sp.SpeciesCode]; dup && sp.SpeciesCode != "" {
+			t.Errorf("eBird code %q is on both %s and %s", sp.SpeciesCode, prev, sp.ScientificName)
+		}
+		seen[sp.SpeciesCode] = sp.ScientificName
 	}
 }
