@@ -445,12 +445,15 @@ Covers: [product.ebirdLink](../../../local/product/presentation.md#ebirdlink)
 **Method:** over the built dataset, every species carries an eBird code and no two share one;
 Ruddy Duck, White-necked Petrel, and American Barn Owl carry `rudduc`, `whnpet`, and `brnowl`,
 which AviList lacks; Fork-tailed Swift and Bronzed Cowbird carry `fotswi` and `brocow`, the
-simpler of their two codes, and Siberian Stonechat `sibsto1`, by the owner's call; Mallard keeps AviList's `mallar3`; and each of those keeps its earlier
+simpler of their two codes, and Siberian Stonechat `sibsto1`, with fewer digits than AviList's `y00427`; every code the
+table puts in place of AviList's is the one `taxonomy.SimplerEBirdCode` picks, which takes fewer digits, then the shorter,
+then AviList's; Mallard keeps AviList's `mallar3`; and each of those keeps its earlier
 page address ([decisions.ebirdCodesComplete](../../../decisions.md#ebirdcodescomplete)).
 
-**Run:** `go test ./cmd/birdview-ingest/ -run TestEverySpeciesHasAnEBirdCode`
+**Run:** `go test ./cmd/birdview-ingest/ ./internal/taxonomy/ -run 'TestEverySpeciesHasAnEBirdCode|TestEBirdCodesFollowTheRule'`
 **Status: verified 2026-11-01, passing.**
 Watched failing: 2026-11-01, against AviList's codes alone ("3 species have no eBird code", "Apus pacificus carries eBird code \"fotswi1\", want \"fotswi\""), and by deriving the page address from the declared code ("Oxyura jamaicensis's page address moved to /species/rudduc").
+Watched failing: 2026-11-01, by the first rule, any digits against none ("the rule picks \"y00427\"").
 Watched failing: 2026-11-01, by dropping Siberian Stonechat's entry ("Saxicola maurus carries eBird code \"y00427\", want \"sibsto1\"").
 
 ## bandingCodesShown

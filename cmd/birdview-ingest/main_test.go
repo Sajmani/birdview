@@ -176,8 +176,8 @@ func TestSpeciesCodesArePresent(t *testing.T) {
 		"Oxyura jamaicensis": true, "Pterodroma cervicalis": true, "Tyto furcata": true,
 	}
 	for sci, c := range taxonomy.EBirdCodes {
-		if strings.HasPrefix(c.Why, "AviList gives none") != gaps[sci] {
-			t.Errorf("taxonomy.EBirdCodes says of %s %q; AviList's gaps are exactly %v", sci, c.Why, gaps)
+		if (c.AviList == "") != gaps[sci] {
+			t.Errorf("taxonomy.EBirdCodes declares %s as replacing AviList's %q; AviList's gaps are exactly %v", sci, c.AviList, gaps)
 		}
 	}
 	for sci := range gaps {

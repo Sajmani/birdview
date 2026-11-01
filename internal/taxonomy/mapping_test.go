@@ -120,3 +120,30 @@ func TestBinomialReducesRankWithoutInventingSpecies(t *testing.T) {
 		}
 	}
 }
+
+// TestEBirdCodesFollowTheRule asserts that every code taxonomy.EBirdCodes puts in place of
+// AviList's is the one SimplerEBirdCode picks, so the table cannot drift from the
+// rule product.ebirdLink states, and pins the rule on the cases that set it.
+//
+// Verifies: product.ebirdLink. Criterion: app.everySpeciesHasAnEBirdCode.
+func TestEBirdCodesFollowTheRule(t *testing.T) {
+	for sci, c := range EBirdCodes {
+		if c.AviList == "" {
+			continue
+		}
+		if got := SimplerEBirdCode(c.AviList, c.Code); got != c.Code {
+			t.Errorf("%s: the table takes %q over AviList's %q, but the rule picks %q", sci, c.Code, c.AviList, got)
+		}
+	}
+	for _, c := range []struct{ avilist, other, want string }{
+		{"fotswi1", "fotswi", "fotswi"},   // fewer digits
+		{"y00427", "sibsto1", "sibsto1"},  // fewer digits, though longer
+		{"marwre", "eamwre1", "marwre"},   // AviList's has fewer
+		{"willet1", "willet2", "willet1"}, // a tie on both keeps AviList's
+		{"abcd1", "abcdef1", "abcd1"},     // same digits: the shorter
+	} {
+		if got := SimplerEBirdCode(c.avilist, c.other); got != c.want {
+			t.Errorf("SimplerEBirdCode(%q, %q) = %q, want %q", c.avilist, c.other, got, c.want)
+		}
+	}
+}

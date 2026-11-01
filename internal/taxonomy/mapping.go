@@ -477,24 +477,50 @@ var DomesticForms = map[string]string{
 
 // EBirdCodes gives the eBird species code where AviList's will not do
 // (product.ebirdLink, decisions.ebirdCodesComplete): the species AviList gives no code, because it draws
-// them more narrowly than eBird, and the species with a second code that is
-// simpler -- no digits before digits, then shorter. Keyed by scientific name;
-// each code is confirmed in Cornell's BirdNET taxonomy, which follows AviList
-// and carries eBird's current codes.
+// them more narrowly than eBird, and the species with a second code that
+// SimplerEBirdCode prefers. Keyed by scientific name; each code is confirmed
+// in Cornell's BirdNET taxonomy, which follows AviList and carries eBird's
+// current codes.
 //
 // Only the code a species shows and links with comes from here. Its page
 // address stays AviList's code, or the scientific-name slug where AviList has
 // none, so no link to BirdView breaks (tech.stableUrls).
 var EBirdCodes = map[string]EBirdCode{
-	"Oxyura jamaicensis":    {"rudduc", "AviList gives none; eBird's Ruddy Duck"},
-	"Pterodroma cervicalis": {"whnpet", "AviList gives none; eBird's White-necked Petrel"},
-	"Tyto furcata":          {"brnowl", "AviList gives none; eBird's American Barn Owl"},
-	"Apus pacificus":        {"fotswi", "simpler than AviList's fotswi1"},
-	"Molothrus aeneus":      {"brocow", "simpler than AviList's brocow1"},
-	"Saxicola maurus":       {"sibsto1", "the owner's call over AviList's placeholder-like y00427"},
+	"Oxyura jamaicensis":    {Code: "rudduc", Why: "AviList gives none; eBird's Ruddy Duck"},
+	"Pterodroma cervicalis": {Code: "whnpet", Why: "AviList gives none; eBird's White-necked Petrel"},
+	"Tyto furcata":          {Code: "brnowl", Why: "AviList gives none; eBird's American Barn Owl"},
+	"Apus pacificus":        {Code: "fotswi", AviList: "fotswi1", Why: "fewer digits"},
+	"Molothrus aeneus":      {Code: "brocow", AviList: "brocow1", Why: "fewer digits"},
+	"Saxicola maurus":       {Code: "sibsto1", AviList: "y00427", Why: "fewer digits"},
 }
 
-// EBirdCode is one entry in EBirdCodes: the code, and why AviList's was not used.
+// EBirdCode is one entry in EBirdCodes: the code, the AviList code it
+// replaces (empty where AviList gives none), and why.
 type EBirdCode struct {
-	Code, Why string
+	Code, AviList, Why string
+}
+
+// SimplerEBirdCode picks between two eBird codes for one species, the rule a
+// reader can remember: the one with fewer digits; if they tie, the shorter;
+// if that ties too, a, which callers pass as AviList's.
+func SimplerEBirdCode(a, b string) string {
+	digits := func(s string) int {
+		n := 0
+		for _, r := range s {
+			if r >= '0' && r <= '9' {
+				n++
+			}
+		}
+		return n
+	}
+	if da, db := digits(a), digits(b); da != db {
+		if db < da {
+			return b
+		}
+		return a
+	}
+	if len(b) < len(a) {
+		return b
+	}
+	return a
 }

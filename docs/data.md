@@ -147,9 +147,9 @@ BirdView has no photographs, so every tile and species page links to the species
 `ebird.org/species/` and the eBird code shown beside the bird's name. The code comes from AviList
 with the names, so the link needs no lookup of its own. Six species take theirs from a short
 table instead: three AviList gives no code, because it splits them more finely than eBird (Ruddy
-Duck, White-necked Petrel, American Barn Owl, which link to eBird's broader species), two whose
-second code is simpler (Fork-tailed Swift `fotswi`, Bronzed Cowbird `brocow`), and Siberian
-Stonechat `sibsto1`, whose AviList code reads as a placeholder. See
+Duck, White-necked Petrel, American Barn Owl, which link to eBird's broader species), and three whose
+second code is simpler (Fork-tailed Swift `fotswi`, Bronzed Cowbird `brocow`, Siberian Stonechat
+`sibsto1`). Simpler means fewer digits; if that ties, shorter. See
 [the decision record](../river/requirements/decisions.md#ebirdcodescomplete).
 
 BirdView **links and never copies**: no photograph, sound, or map is embedded, hotlinked, or
