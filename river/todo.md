@@ -128,10 +128,26 @@ Feedback from a reader of the home page ([product.nextView](requirements/local/p
    [inatterms](requirements/imported/inaturalist.org/inatterms/inatterms.md) adopted iNaturalist on
    the finding that BirdView names it in words rather than reproducing a logo. Use a word or a
    glyph of BirdView's own, unless iNaturalist grants permission in writing. **Done 2026-10-30**,
-   as the word **iNat**, in the tile's lower-right corner since 2026-10-31.
+   as the word **iNat**, in the tile's lower-right corner since 2026-10-31. Replaced 2026-11-01 by
+   an **eBird** link ([decisions.ebirdLinkReplacesInaturalist](requirements/decisions.md#ebirdlinkreplacesinaturalist)).
 
 The reader also asked what "1 in 6,322 species observations" in New York means, so the line does
 not explain itself ([product.shareOfRecords](requirements/local/product/presentation.md#shareofrecords)).
+
+## ebirdTermsUnread
+
+**eBird's terms of use are not vendored, and the eBird link was adopted without reading them**
+
+Status: open
+Owner: Sameer
+Gate: before any use of eBird beyond a plain link
+
+[product.ebirdLink](requirements/local/product/presentation.md#ebirdlink) links to eBird species pages and copies nothing, which
+needs no license. But iNaturalist's adoption read and transcribed its terms
+([inatterms](requirements/imported/inaturalist.org/inatterms/inatterms.md)), and eBird's never
+were. Vendor eBird's terms of use under `third_party/`, transcribe what binds a site that links to
+it, and record the finding as `inatterms` did. Until then, anything more than a link (a logo, an
+embedded map or photograph, a lookup against eBird's API) waits.
 
 ## withdrawnWithClassic
 

@@ -1135,7 +1135,7 @@ var nextTileProbe string
 
 // TestNextTileCornerAndRows checks, in headless Chrome at a laptop's width
 // and a phone's, that every tile's pin stands in its top-right corner with
-// the common name truncating short of it, and its iNat link in the
+// the common name truncating short of it, and its eBird link in the
 // lower-right corner, foot on the bottom line's, top below the rule, the
 // scientific name short of it (product.tileContents, decisions.tileMeasurementLines); that no tile is
 // wider than its box or draws its bird off center, as long names once made
@@ -1144,7 +1144,7 @@ var nextTileProbe string
 // first tiles include ones with notes and ones stretched to a taller
 // neighbor in their row, with the two longest names pinned.
 //
-// Verifies: product.nextView, product.tileContents. Criteria: app.nextViewDrawsOneSet, app.tileLinksToInaturalist.
+// Verifies: product.nextView, product.tileContents. Criteria: app.nextViewDrawsOneSet, app.ebirdLinkOnTilesAndPages.
 func TestNextTileCornerAndRows(t *testing.T) {
 	chrome := findChrome()
 	if chrome == "" {
@@ -1195,7 +1195,7 @@ func TestNextTileCornerAndRows(t *testing.T) {
 		var res struct {
 			Tiles      int      `json:"tiles"`
 			Notes      int      `json:"notes"`
-			INats      int      `json:"inats"`
+			EBirds     int      `json:"ebirds"`
 			Rows       int      `json:"rows"`
 			Long       int      `json:"long"`
 			Corner     []string `json:"corner"`
@@ -1205,9 +1205,9 @@ func TestNextTileCornerAndRows(t *testing.T) {
 		if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
 			t.Fatalf("reading the probe: %v", err)
 		}
-		if res.Tiles < 50 || res.Notes == 0 || res.INats < res.Tiles*9/10 {
-			t.Fatalf("at %s: %d tiles measured, %d with notes, %d with an iNat link; the check needs all three",
-				size, res.Tiles, res.Notes, res.INats)
+		if res.Tiles < 50 || res.Notes == 0 || res.EBirds < res.Tiles*9/10 {
+			t.Fatalf("at %s: %d tiles measured, %d with notes, %d with an eBird link; the check needs all three",
+				size, res.Tiles, res.Notes, res.EBirds)
 		}
 		if res.Long != 2 {
 			t.Fatalf("at %s: %d of the 2 long-named birds pinned for the check were measured", size, res.Long)

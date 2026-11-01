@@ -973,6 +973,10 @@ other line in that test.
 **The iNaturalist link appears only for a confident match**
 
 **Verifies:** [product.inaturalistLink](local/product/presentation.md#inaturalistlink), [tech.pacedInaturalistMapping](local/tech/process.md#pacedinaturalistmapping) · **Level:** code · **Method:** unit tests over the matcher and the
+**Status: withdrawn 2026-11-01** with [product.inaturalistLink](local/product/presentation.md#inaturalistlink)
+([decisions.ebirdLinkReplacesInaturalist](decisions.md#ebirdlinkreplacesinaturalist)). Its rendering assertions moved to
+[app.ebirdLinkOnTilesAndPages](composed/internal/app/acceptance.md#ebirdlinkontilesandpages); the matching, coverage, table, and courtesy assertions
+still run, over code nothing on a page uses any more.
 mapping table, plus assertions on the rendered detail page; the resolver is exercised against an
 `httptest` server, never the live API
 
@@ -2428,7 +2432,7 @@ Watched failing: 2026-10-23, by the broken variants above, which the test keeps.
 | [product.tileMarksModeled](local/product/measurements.md#tilemarksmodeled) | tileMarksNonMeasured | |
 | [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) | provenanceWellFormed | |
 | [product.metricProvenanceExplained](local/product/measurements.md#metricprovenanceexplained) | detailShowsProvenance | |
-| [product.inaturalistLink](local/product/presentation.md#inaturalistlink) | inaturalistLinkConfidentOnly | |
+| [product.inaturalistLink](local/product/presentation.md#inaturalistlink) | | inaturalistLinkConfidentOnly withdrawn ([decisions.ebirdLinkReplacesInaturalist](decisions.md#ebirdlinkreplacesinaturalist)) |
 | [product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled) | diagramDistinguishesModeled | |
 | [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) | segmentLabelsDontCollide, totalLengthLabeled, massDrawnAsWaterCube | |
 | [product.comparisonOneScale](local/product/presentation.md#comparisononescale) | — | withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |

@@ -810,7 +810,7 @@ a stick is not misleading.
 
 Date: 2026-09-23
 Decided by: Sameer
-Status: amended by fullInaturalistCoverage
+Status: superseded by ebirdLinkReplacesInaturalist
 Affects: [product.inaturalistLink](local/product/presentation.md#inaturalistlink), [tech.pacedInaturalistMapping](local/tech/process.md#pacedinaturalistmapping)
 Subject: `presentation.detail_view.external_link`
 Kind: Source adoption, with three sub-decisions
@@ -1160,7 +1160,7 @@ which a reader can only ask once but must be able to answer.
 
 Date: 2026-09-27
 Decided by: Sameer
-Status: accepted
+Status: superseded by ebirdLinkReplacesInaturalist
 Amends: inaturalistLinkAdopted
 Affects: [product.inaturalistLink](local/product/presentation.md#inaturalistlink)
 Subject: `presentation.detail_view.external_link`
@@ -4124,3 +4124,29 @@ bottom line truncates on any of the 1,041 tiles at laptop width or at 360px, whe
 cut the scientific name on half of them; the iNat link costs one tile at 360px about 8px of its
 scientific name (Cactus Wren). The mass label is the one label on a tile because the mass has no
 part of the bird to sit beside, and the cube is its picture.
+
+---
+
+## ebirdLinkReplacesInaturalist
+
+**Tiles and species pages link to eBird by the species' eBird code, not to iNaturalist**
+
+Date: 2026-11-01
+Decided by: Sameer
+Status: accepted
+Supersedes: inaturalistLinkAdopted, fullInaturalistCoverage
+Affects: [product.ebirdLink](local/product/presentation.md#ebirdlink), [product.inaturalistLink](local/product/presentation.md#inaturalistlink), [product.tileContents](local/product/presentation.md#tilecontents)
+
+### Decided
+
+The link on every tile and species page goes to `https://ebird.org/species/<code>`, using the
+eBird species code each species already carries from AviList, and reads **eBird** on a tile.
+[product.inaturalistLink](local/product/presentation.md#inaturalistlink) is withdrawn. A species with no eBird code shows no link.
+
+### Why
+
+The owner asked for it; no further reason was given. It needs no mapping: the iNaturalist link
+rested on a committed table of taxon IDs resolved against iNaturalist's API under a two-name
+confidence rule, while every species shows its eBird code beside its name already. eBird's terms
+are not vendored; a link copies nothing, and checking them is open as
+[todo.ebirdTermsUnread](../todo.md#ebirdtermsunread).

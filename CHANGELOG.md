@@ -3,6 +3,13 @@
 Major changes to BirdView, newest first: features, data sources, and how the drawings are made.
 Small fixes are in the commit history. With no numbered releases yet, changes are grouped by period.
 
+## 2026-11-01 — eBird links
+
+### Changed
+
+- The link on every tile and species page goes to the species on **eBird**, by the eBird code
+  beside its name, instead of iNaturalist. The tile's button reads **eBird**.
+
 ## 2026-10-30 to 2026-10-31 — Tiles put the numbers first
 
 ### Changed

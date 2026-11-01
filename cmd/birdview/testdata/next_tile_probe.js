@@ -15,14 +15,14 @@
 
 // Drives TestNextTileCornerAndRows. For every tile on the page, it measures
 // whether the pin sits in the tile's top-right corner with the common name
-// short of it, and the iNat link in the lower-right corner with the
+// short of it, and the eBird link in the lower-right corner with the
 // scientific name short of it; whether
 // the tile is wider than its box or its drawing off center; and, row by row,
 // whether every drawing starts at the same height. It records the tiles
 // measured and every one more than a pixel off as data-probe on the root.
 window.addEventListener("load", function () {
   setTimeout(function () {
-    var out = { tiles: 0, notes: 0, inats: 0, rows: 0, long: 0, corner: [], uncentered: [], ragged: [] };
+    var out = { tiles: 0, notes: 0, ebirds: 0, rows: 0, long: 0, corner: [], uncentered: [], ragged: [] };
     var rows = {};
     document.querySelectorAll(".tilewrap").forEach(function (t) {
       var pin = t.querySelector(":scope > a.pin");
@@ -39,18 +39,18 @@ window.addEventListener("load", function () {
       var top = Math.round(p.top - r.top), right = Math.round(r.right - p.right);
       if (top < 0 || top > 12 || right < 0 || right > 12) out.corner.push(t.id + " pin " + top + "px from the top, " + right + "px from the right");
       if (name.right > p.left + 0.5) out.corner.push(t.id + " name runs " + Math.round(name.right - p.left) + "px under the pin");
-      // The iNat link: in the lower-right corner, its foot on the bottom
+      // The eBird link: in the lower-right corner, its foot on the bottom
       // line's and its top below the rule, with the scientific name short of it.
-      var inat = t.querySelector(":scope > a.inat");
-      if (inat) {
-        out.inats++;
-        var n = inat.getBoundingClientRect(), line = tile.querySelector(".idline").getBoundingClientRect();
+      var eb = t.querySelector(":scope > a.ebird");
+      if (eb) {
+        out.ebirds++;
+        var n = eb.getBoundingClientRect(), line = tile.querySelector(".idline").getBoundingClientRect();
         var rule = tile.querySelector(".lo").getBoundingClientRect(), sn = tile.querySelector(".sn").getBoundingClientRect();
         var ir = Math.round(r.right - n.right);
-        if (ir < 0 || ir > 12) out.corner.push(t.id + " iNat " + ir + "px from the right");
-        if (Math.abs(n.bottom - line.bottom) > 1) out.corner.push(t.id + " iNat's foot " + Math.round(n.bottom - line.bottom) + "px off the bottom line's");
-        if (n.top < rule.top) out.corner.push(t.id + " iNat reaches " + Math.round(rule.top - n.top) + "px above the rule");
-        if (sn.right > n.left + 0.5) out.corner.push(t.id + " scientific name runs " + Math.round(sn.right - n.left) + "px under iNat");
+        if (ir < 0 || ir > 12) out.corner.push(t.id + " eBird " + ir + "px from the right");
+        if (Math.abs(n.bottom - line.bottom) > 1) out.corner.push(t.id + " eBird's foot " + Math.round(n.bottom - line.bottom) + "px off the bottom line's");
+        if (n.top < rule.top) out.corner.push(t.id + " eBird reaches " + Math.round(rule.top - n.top) + "px above the rule");
+        if (sn.right > n.left + 0.5) out.corner.push(t.id + " scientific name runs " + Math.round(sn.right - n.left) + "px under eBird");
       }
       // A long name truncates; it must not widen the tile and push the
       // drawing off center (#4).

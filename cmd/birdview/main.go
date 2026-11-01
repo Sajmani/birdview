@@ -62,7 +62,6 @@ import (
 	"birdview/data"
 	"birdview/docs"
 	"birdview/internal/dataset"
-	"birdview/internal/inat"
 	"birdview/internal/month"
 	"birdview/internal/region"
 	"birdview/internal/status"
@@ -784,12 +783,21 @@ type tile struct {
 	Pinned bool
 	// Anchor is this tile's fragment id, which the pinned list links to.
 	Anchor string
-	// INatURL is the species' iNaturalist taxon page, or empty when no
-	// confident match exists and the tile shows no link (product.inaturalistLink).
-	INatURL string
+	// EBirdURL is the species' eBird page, or empty when it has no eBird
+	// code and the tile shows no link (product.ebirdLink).
+	EBirdURL string
 	// TileLabels is a home page tile's one drawing label, its mass beside the
 	// cube (product.tileContents).
 	TileLabels []tileLabel
+}
+
+// ebirdURL is the species' page on eBird, by the eBird code it carries from
+// AviList, or "" for a species with none (product.ebirdLink).
+func ebirdURL(sp *dataset.Species) string {
+	if sp.SpeciesCode == "" {
+		return ""
+	}
+	return "https://ebird.org/species/" + url.PathEscape(sp.SpeciesCode)
 }
 
 // tileAnchor is the fragment id of one tile. Declared once because the href
@@ -951,9 +959,9 @@ type detailData struct {
 	// from a shared link or without JavaScript (product.nextView).
 	Home template.URL
 
-	// INatURL is empty when no confident iNaturalist match exists, and the
-	// template then renders nothing at all rather than a placeholder (product.inaturalistLink).
-	INatURL string
+	// EBirdURL is empty when the species has no eBird code, and the template
+	// then renders nothing at all rather than a placeholder (product.ebirdLink).
+	EBirdURL string
 
 	// WingModeled drives the crossbar split: the inner span is dashed only when
 	// the wingspan is modeled (product.measuredVersusModeled).
@@ -1030,16 +1038,11 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	}
 	lt := labeledTile(sp, box, one, opt.Locale)
 
-	// Only a confident match gets a link; zero means none was found (product.inaturalistLink).
-	var inatURL string
-	if sp.INatTaxonID > 0 {
-		inatURL = inat.TaxonURL(sp.INatTaxonID)
-	}
 	s.render(w, "detail.html", detailData{
 		S: sp, Name: lt.Name, Geom: lt.Geom, Box: lt.Box, Labels: lt.Labels, TopOffset: lt.TopOffset,
 		ChordLabel: lt.ChordLabel, WingspanLabel: lt.WingspanLabel, WingspanEst: lt.WingspanEst,
 		FootLabels: lt.FootLabels, MassCube: lt.MassCube,
-		Metrics: rows, Categories: s.categories(sp, opt), Opt: opt, Home: homeLink(r), INatURL: inatURL,
+		Metrics: rows, Categories: s.categories(sp, opt), Opt: opt, Home: homeLink(r), EBirdURL: ebirdURL(sp),
 		SameAs:      s.sameMeasurements(sp, opt.Locale),
 		WingModeled: sp.Wingspan.Prov.Kind == dataset.Modeled,
 		FoldNote:    foldNote(sp, lt.Geom, one),

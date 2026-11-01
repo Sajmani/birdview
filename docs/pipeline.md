@@ -52,7 +52,7 @@ flowchart LR
     Scientific_name ★ *also the join key*
     English_name_Clements_v2025 ★ *North American name*
     English_name_AviList ★ *world name*
-    Species_code_Cornell_Lab ★ *also the page address*
+    Species_code_Cornell_Lab ★ *also the page address and the eBird link*
     Family ★
     Family_English_name ★
     Order ★`"]
@@ -104,7 +104,7 @@ flowchart LR
     TAXA["`iNaturalist taxa API
     *live*
     ─────────────
-    id ★ *link to iNaturalist*
+    id ✗ *linked to until 2026-11-01*
     name · *exact match*
     rank · *species only*
     preferred_common_name · *must agree*
@@ -190,7 +190,7 @@ flowchart LR
     INAT["`inat-taxa.tsv
     ─────────────
     scientific name · *join key*
-    taxon id ★ *link to iNaturalist*
+    taxon id ✗ *linked to until 2026-11-01*
     common name as iNaturalist returned it ✗ *for the audit trail*`"]
     SN["`source-names.tsv
     *read only by the name-agreement check*
@@ -273,7 +273,7 @@ flowchart LR
   belowCounts · *the same*
   belowMonths · *the same*
   commonest ★
-  inatTaxonId ★
+  inatTaxonId ✗
   families ★ *names, orders, colors*
   regionTotals · *the denominator*
   regionMonthlyTotals · *the denominator, by month*
@@ -375,7 +375,8 @@ Where a name table applies to a species, its page says so under *Recorded as*.
 (step 1), names them and their families from AviList (2), measures them from AVONET (3), models
 the segments no source measures (4), assigns habitat and diet (5), takes wingspan from Fox where it
 was measured and estimates it where it was not (6), records the species it does not draw and why
-(7), and attaches the iNaturalist link (8) and the region counts (9). Every metric carries its
+(7), and attaches the iNaturalist taxon id (8), which no page has used since the link went to eBird,
+and the region counts (9). Every metric carries its
 provenance (*measured*, *near-match*, or *modeled*), and the page shows which. See
 [what is measured and what is modeled](data.md).
 

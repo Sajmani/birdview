@@ -1055,107 +1055,80 @@ func boolToInt(b bool) int {
 	return 0
 }
 
-// TestINatLinkOnlyForAConfidentMatch asserts product.inaturalistLink on the rendered page: a
-// species with a mapping gets a link to exactly its taxon page, and one without
-// gets nothing -- no placeholder, no search URL, no "not found" row.
+// TestEbirdLinks asserts product.ebirdLink on both pages that carry it. Every tile whose
+// species has an eBird code carries an "eBird" link to exactly
+// https://ebird.org/species/<code>, beside the tile's own link rather than
+// inside it, named for the bird and eBird, and the species page links there
+// in a sentence. A species with no code -- the stilt, with its code removed
+// here -- gets no link on either page, and nothing links to iNaturalist's
+// taxon pages any more (decisions.ebirdLinkReplacesInaturalist). Neither page carries an image: the link
+// is the word, and BirdView copies nothing.
 //
-// The absence is the half worth testing. A search link would never 404, which is
-// exactly what makes it the wrong answer: it always looks like it worked. An
-// absent link is legible.
-//
-// Verifies: product.inaturalistLink. Criterion: acceptance.inaturalistLinkConfidentOnly.
-func TestINatLinkOnlyForAConfidentMatch(t *testing.T) {
-	s := newTestServer(t)
-
-	_, matched := get(t, s, "/species/greblu")
-	href := mustMatch(t, matched, `<a href="(https://www\.inaturalist\.org/taxa/[0-9]+)"`, "the iNaturalist link")
-	if href != "https://www.inaturalist.org/taxa/4956" {
-		t.Errorf("link points at %q, want the heron's taxon page", href)
+// Verifies: product.ebirdLink, product.tileContents. Criterion: app.ebirdLinkOnTilesAndPages.
+func TestEbirdLinks(t *testing.T) {
+	ds := testDataset()
+	for i := range ds.Species {
+		if ds.Species[i].ID == "blasti" {
+			ds.Species[i].SpeciesCode = ""
+		}
 	}
-	if !strings.Contains(matched, "Great Blue Heron on\niNaturalist") &&
-		!strings.Contains(matched, "Great Blue Heron on iNaturalist") {
-		t.Error("the link does not name the species and the destination")
+	s, err := newServer(ds)
+	if err != nil {
+		t.Fatalf("newServer: %v", err)
 	}
-
-	// The unmatched species must show no iNaturalist reference of any kind.
-	_, unmatched := get(t, s, "/species/blasti")
-	if strings.Contains(unmatched, "inaturalist.org") {
-		t.Error("a species with no confident match still mentions iNaturalist; it should show nothing")
-	}
-	if strings.Contains(strings.ToLower(unmatched), "not found on inaturalist") {
-		t.Error("a species with no confident match shows a placeholder; it should show nothing")
-	}
-	// And it is otherwise a normal page, so the check above is not passing
-	// because the page failed to render.
-	if !strings.Contains(unmatched, "Black-necked Stilt") {
-		t.Fatal("the unmatched species page did not render")
-	}
-}
-
-// TestTileLinksToINaturalist asserts product.inaturalistLink on the home page: every tile
-// whose species has a confident match carries an "iNat" link to exactly its
-// taxon page, beside the tile's own link rather than inside it, and named
-// for the bird and iNaturalist; the stilt, unmatched, carries none. The link
-// is the word: iNaturalist's terms reserve its logo (decisions.tileNumbersFirst).
-//
-// Verifies: product.inaturalistLink, product.tileContents. Criterion: app.tileLinksToInaturalist.
-func TestTileLinksToINaturalist(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/?month=all&show=all")
-	link := regexp.MustCompile(`<a class="inat" href="([^"]*)"[^>]*aria-label="([^"]*)"[^>]*>([^<]*)</a>`)
-	for id, want := range map[string]string{
-		"greblu": "https://www.inaturalist.org/taxa/4956",
-		"amerob": "https://www.inaturalist.org/taxa/12727",
-	} {
+	_, body := get(t, s, "/?month=all&show=all")
+	link := regexp.MustCompile(`<a class="ebird" href="([^"]*)"[^>]*aria-label="([^"]*)"[^>]*>([^<]*)</a>`)
+	for id, name := range map[string]string{"greblu": "Great Blue Heron", "amerob": "American Robin"} {
 		seg := tileOf(t, body, id)
 		m := link.FindStringSubmatch(seg)
 		if m == nil {
-			t.Errorf("%s's tile has no iNat link", id)
+			t.Errorf("%s's tile has no eBird link", id)
 			continue
 		}
-		if m[1] != want {
-			t.Errorf("%s's iNat link goes to %q, want %q", id, m[1], want)
+		if want := "https://ebird.org/species/" + id; m[1] != want {
+			t.Errorf("%s's eBird link goes to %q, want %q", id, m[1], want)
 		}
-		if !strings.HasSuffix(m[2], " on iNaturalist") || !strings.Contains(seg, ">"+strings.TrimSuffix(m[2], " on iNaturalist")+"<") {
-			t.Errorf("%s's iNat link is named %q; want the bird's name and \"on iNaturalist\"", id, m[2])
+		if m[2] != name+" on eBird" {
+			t.Errorf("%s's eBird link is named %q, want %q", id, m[2], name+" on eBird")
 		}
-		if m[3] != "iNat" {
-			t.Errorf("%s's iNat link reads %q, want the word iNat", id, m[3])
+		if m[3] != "eBird" {
+			t.Errorf("%s's eBird link reads %q, want the word eBird", id, m[3])
 		}
 		// Beside the tile's link, not in it: anchors cannot nest. The tile
 		// holds no other anchor, so its first </a> is its own.
 		open := strings.Index(seg, `<a class="tile"`)
-		if open < 0 || strings.Index(seg, `class="inat"`) < open+strings.Index(seg[open:], "</a>") {
-			t.Errorf("%s's iNat link is inside the tile's own link", id)
+		if open < 0 || strings.Index(seg, `class="ebird"`) < open+strings.Index(seg[open:], "</a>") {
+			t.Errorf("%s's eBird link is inside the tile's own link", id)
+		}
+
+		_, page := get(t, s, "/species/"+id)
+		if !strings.Contains(page, `<a href="https://ebird.org/species/`+id+`"`) {
+			t.Errorf("/species/%s does not link to its eBird page", id)
+		}
+		if !strings.Contains(strings.Join(strings.Fields(stripTags(page)), " "), name+" on eBird") {
+			t.Errorf("/species/%s's link does not name the bird and eBird", id)
+		}
+		if strings.Contains(strings.ToLower(page), "<img") {
+			t.Errorf("/species/%s carries an image; BirdView links and copies nothing", id)
 		}
 	}
 	stilt := tileOf(t, body, "blasti")
-	if strings.Contains(stilt, "inaturalist.org") || strings.Contains(stilt, `class="inat"`) {
-		t.Error("the stilt has no confident iNaturalist match, and its tile still links there")
+	_, stiltPage := get(t, s, "/species/blasti")
+	if !strings.Contains(stiltPage, "Black-necked Stilt") {
+		t.Fatal("the stilt's page did not render")
+	}
+	for where, h := range map[string]string{"tile": stilt, "page": stiltPage} {
+		if strings.Contains(h, "ebird.org/species") {
+			t.Errorf("the stilt has no eBird code, and its %s still links to eBird", where)
+		}
+	}
+	for _, page := range []string{body, stiltPage} {
+		if strings.Contains(page, "inaturalist.org/taxa") {
+			t.Error("a page still links to an iNaturalist taxon page")
+		}
 	}
 	if strings.Contains(strings.ToLower(body), "<img") {
-		t.Error("the home page carries an image; the iNat link is the word, never iNaturalist's logo")
-	}
-}
-
-// TestNoINaturalistImagesAreEmbedded states the intent behind BirdView linking
-// rather than copying (product.inaturalistLink, inatterms.ContributorKeepsRights). acceptance.noServerNetworkRequest's subresource scan already
-// forbids the mechanism for tech.selfContainedServer reasons; this says why it also matters here.
-//
-// Photographs on iNaturalist are contributors' work under their own licenses,
-// frequently CC BY-NC. Linking engages none of them. Embedding would engage all
-// of them, per photograph.
-//
-// Verifies: product.inaturalistLink. Criterion: acceptance.inaturalistLinkConfidentOnly.
-func TestNoINaturalistImagesAreEmbedded(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/species/greblu")
-	for _, bad := range []string{
-		`src="https://static.inaturalist.org`,
-		`src="https://inaturalist-open-data`,
-		`<img`,
-	} {
-		if strings.Contains(body, bad) {
-			t.Errorf("detail page contains %q; BirdView links to iNaturalist and copies nothing from it", bad)
-		}
+		t.Error("the home page carries an image; the eBird link is the word, never a logo")
 	}
 }
 

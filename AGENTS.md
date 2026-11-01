@@ -56,8 +56,8 @@ it running as a foreground or tracked background task; that holds the turn open.
   are committed on purpose.
 - **Third-party files live under `third_party/<name>/`** with their own license, no Apache header;
   provenance in `river/requirements/imported/<origin>/<name>/PROVENANCE.md`.
-- **Link to iNaturalist; copy nothing from it**, least of all photographs
-  (product.inaturalistLink).
+- **Link to eBird; copy nothing from it or from iNaturalist**, least of all photographs
+  (product.ebirdLink).
 - **Never present a modeled value as a measurement** (product.tileMarksModeled).
 
 ## Conventions

@@ -127,10 +127,11 @@
   </tbody>
 </table>
 
-{{if .INatURL}}
-<p class="seealso">See <a href="{{.INatURL}}" rel="noopener noreferrer">{{.Name}} on
-iNaturalist</a> for photographs, range, and observations; each photograph there has its own
-license.</p>
+{{/* product.ebirdLink: by the species' eBird code; nothing for a species without one. */}}
+{{if .EBirdURL}}
+<p class="seealso">See <a href="{{.EBirdURL}}" rel="noopener noreferrer">{{.Name}} on
+eBird</a> for photographs, sounds, a range map, and sightings; each photograph and recording there
+is credited to its maker.</p>
 {{end}}
 
 <p class="note">The neck/body split is a drawing convention, not a measurement.</p>

@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"birdview/internal/dataset"
-	"birdview/internal/inat"
 	"birdview/internal/month"
 	"birdview/internal/region"
 	"birdview/internal/trait"
@@ -729,9 +728,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 			t.TileLabels = []tileLabel{{Text: "Mass " + t.MassStr, Est: sp.Mass.Prov.Kind != dataset.Measured,
 				X: c.X + c.Side + c.Depth + 6, Y: c.Y + c.Side, Anchor: "start"}}
 		}
-		if sp.INatTaxonID > 0 {
-			t.INatURL = inat.TaxonURL(sp.INatTaxonID)
-		}
+		t.EBirdURL = ebirdURL(sp)
 		page.Tiles[i] = t
 		page.Items = append(page.Items, nextItem{Tile: &page.Tiles[i]})
 	}

@@ -361,7 +361,7 @@ May in Month loads a page with Month open and nothing else, and loading it again
 opens nothing. In headless Chrome at 1280 px and in a 360 px frame, on the birds by length with
 the two longest names pinned, every pin stands in its tile's top-right corner, within the tile's
 11px of border and padding of the top and right edges, and the common name ends short of it;
-every iNat link stands in the lower-right corner, its foot within a pixel of the bottom line's and
+every eBird link stands in the lower-right corner, its foot within a pixel of the bottom line's and
 its top below the rule, and the scientific name ends short of it; and every drawing starts within
 a pixel of the others in its row, tiles with notes and tiles stretched to a taller neighbor
 included ([decisions.tileNumbersFirst](../../../decisions.md#tilenumbersfirst), [decisions.tileMeasurementLines](../../../decisions.md#tilemeasurementlines)).
@@ -417,24 +417,24 @@ Watched failing: 2026-10-26, by the script listing matches over the limit, and b
 Watched failing: 2026-10-26, by the toggle not removing a bird the filters chose, and by ignoring exclude=.
 Watched failing: 2026-10-26, by the server listing 23 matches for "hawk".
 
-## tileLinksToInaturalist
+## ebirdLinkOnTilesAndPages
 
-**Every tile with a confident match links to iNaturalist, in words**
+**Every tile and species page with an eBird code links to the species on eBird, in words**
 
-Covers: [product.inaturalistLink](../../../local/product/presentation.md#inaturalistlink), [product.tileContents](../../../local/product/presentation.md#tilecontents)
+Covers: [product.ebirdLink](../../../local/product/presentation.md#ebirdlink), [product.tileContents](../../../local/product/presentation.md#tilecontents)
 
 **Method:** on the home page with every bird shown, the heron's and the robin's tiles each carry a
-link reading **iNat** whose href is exactly `https://www.inaturalist.org/taxa/<id>` for that bird,
-named the bird's name and "on iNaturalist", and placed after the tile's own link closes rather
-than inside it; the stilt, which has no confident match, carries no link to iNaturalist; and the
-page carries no image, so the link cannot be iNaturalist's logo
-([decisions.tileNumbersFirst](../../../decisions.md#tilenumbersfirst)). In headless Chrome, at
-least nine in ten measured tiles carry the link, in the lower-right corner
+link reading **eBird** whose href is exactly `https://ebird.org/species/<code>`, named the bird's
+name and "on eBird", and placed after the tile's own link closes rather than inside it; their
+species pages link to the same address in a sentence naming the bird and eBird. With the stilt's
+code removed, neither its tile nor its page links to eBird. No page links to an iNaturalist taxon
+page, and neither page carries an image ([decisions.ebirdLinkReplacesInaturalist](../../../decisions.md#ebirdlinkreplacesinaturalist)). In headless
+Chrome, at least nine in ten measured tiles carry the link, in the lower-right corner
 (`TestNextTileCornerAndRows`, under [nextViewDrawsOneSet](#nextviewdrawsoneset)).
 
-**Run:** `go test ./cmd/birdview/ -run 'TestTileLinksToINaturalist|TestNextTileCornerAndRows'`
-**Status: verified 2026-10-30, passing.**
-Watched failing: 2026-10-30, against the tiles as they stood ("greblu's tile has no iNat link"), by dropping the guard on a missing match ("the stilt has no confident iNaturalist match, and its tile still links there"), and by moving the link inside the tile ("greblu's iNat link is inside the tile's own link").
+**Run:** `go test ./cmd/birdview/ -run 'TestEbirdLinks|TestNextTileCornerAndRows'`
+**Status: verified 2026-11-01, passing.**
+Watched failing: 2026-11-01, against the iNaturalist links as they stood ("greblu's tile has no eBird link", "a page still links to an iNaturalist taxon page").
 
 ## bandingCodesShown
 

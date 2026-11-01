@@ -23,9 +23,9 @@
      have and others lack, so that a tile with notes grows below its drawing
      and the drawings in a row stay level.
 
-     The pin and the iNat link are SIBLINGS of the tile link, not inside it:
+     The pin and the eBird link are SIBLINGS of the tile link, not inside it:
      anchors cannot nest, and the tile must keep opening the detail view
-     (product.tileOpensDetail). The pin is in the top-right corner, the iNat link in the
+     (product.tileOpensDetail). The pin is in the top-right corner, the eBird link in the
      lower-right, each over the end of a line that keeps room for it. */}}
 <div class="tilewrap" id="{{.Anchor}}">
 <a class="tile" href="{{.DetailURL}}">
@@ -85,7 +85,7 @@
     title="{{.Title}}">{{.Text}}</span>{{end}}{{end}}{{range .SameAs}}<span class="seam"
     title="{{.Title}}">{{.Text}}</span>{{end}}</div>{{end}}
 </a>
-{{with .INatURL}}<a class="inat" href="{{.}}" rel="noopener noreferrer" title="{{$.Name}} on iNaturalist" aria-label="{{$.Name}} on iNaturalist">iNat</a>{{end}}
+{{with .EBirdURL}}<a class="ebird" href="{{.}}" rel="noopener noreferrer" title="{{$.Name}} on eBird" aria-label="{{$.Name}} on eBird">eBird</a>{{end}}
 {{if .PinURL}}{{template "pin" .}}{{end}}
 </div>
 {{end}}

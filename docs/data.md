@@ -141,22 +141,17 @@ gives their widths.
 
 ---
 
-## The iNaturalist link
+## The eBird link
 
-BirdView has no photographs, so the detail page links to the species on iNaturalist — only when
-iNaturalist's scientific name matches exactly *and* its common name agrees after normalizing
-punctuation and case. A taxonomic revision on either side then removes the link rather than
-misdirecting it. Failing species get no link, not a search URL, which never 404s and so always
-looks as if it worked.
+BirdView has no photographs, so every tile and species page links to the species on eBird, at
+`ebird.org/species/` and the eBird code shown beside the bird's name. The code comes from AviList
+with the names, so the link needs no lookup of its own; the few species AviList recognizes and
+eBird does not have no code and get no link, not a search URL. See
+[the decision record](../river/requirements/decisions.md#ebirdlinkreplacesinaturalist).
 
-On a 55-species sample including the near-match splits, all 55 matched on scientific name and 54
-on common name (the miss was a hyphen); Wikimedia Commons failed three of six hard cases because it
-lags recent splits. See
-[the decision record](../river/requirements/decisions.md#inaturalistlinkadopted).
-
-BirdView **links and never copies**: no photograph is embedded, hotlinked, or cached. Images on
-iNaturalist carry their own licenses, often CC BY-NC, which covers contributors' work, not the
-taxonomy we take an identifier from.
+BirdView **links and never copies**: no photograph, sound, or map is embedded, hotlinked, or
+cached. Until 2026-11-01 the link went to iNaturalist, through a table of taxon IDs matched by
+scientific and common name ([the earlier record](../river/requirements/decisions.md#inaturalistlinkadopted)).
 
 ## Scope
 

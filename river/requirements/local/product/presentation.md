@@ -34,8 +34,8 @@ Each species is one **tile**, laid out top to bottom, **the numbers first**
 2. the diagram, **vertically centered** in its area, carrying the **mass cube** in its lower-left
    corner ([decisions.massCubeOnTiles](../../decisions.md#masscubeontiles)) with the **mass** named beside it, and no other label;
 3. below a rule, the **short family badge**, the family's scientific name alone, then the
-   **scientific name**, with the **iNaturalist link** at the line's right end, in the tile's
-   lower-right corner ([inaturalistLink](#inaturalistlink)); and last, any notes on the
+   **scientific name**, with the **eBird link** at the line's right end, in the tile's
+   lower-right corner ([ebirdLink](#ebirdlink)); and last, any notes on the
    measurements or the count ([borrowedMeasurementsSaySo](measurements.md#borrowedmeasurementssayso)).
 
 The short badge carries the family's common name as its tooltip; the full badge, with both names,
@@ -70,7 +70,7 @@ grows below its drawing and every drawing in a row stays level. Where text does 
 | scientific name | first, and most readily |
 | family name, in the badge | next |
 | common name | last |
-| **banding code, eBird species code, iNaturalist link, pin** | **never** |
+| **banding code, eBird species code, eBird link, pin** | **never** |
 
 The species code is 4 to 8 characters, **not the fixed six its name suggests**, and cannot be
 guessed from a truncation, so it never truncates. Nothing laying it out may assume a width.
@@ -79,9 +79,9 @@ Rationale: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition). One tal
 down a section. Eight of the 841 common names are long enough to wrap, and the longest family badge
 comes within a few pixels of the tile's inner width.
 
-The iNaturalist link and the pin sit **beside the tile's own link rather than inside it**, since
+The eBird link and the pin sit **beside the tile's own link rather than inside it**, since
 links cannot nest and the tile opens the detail view ([tileOpensDetail](#tileopensdetail)). The
-pin is in the top-right corner and the common name truncates short of it; the iNaturalist link is
+pin is in the top-right corner and the common name truncates short of it; the eBird link is
 in the lower-right corner, its foot on the line's and its top below the rule, so the tile is no
 taller for it, and the scientific name truncates short of it.
 
@@ -741,6 +741,7 @@ does not publish their mail.
 
 Subject: `presentation.detail_view.external_link`
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
+Status: **Withdrawn 2026-11-01**, replaced by [ebirdLink](#ebirdlink) ([decisions.ebirdLinkReplacesInaturalist](../../decisions.md#ebirdlinkreplacesinaturalist)).
 
 The detail view and every home page tile carry a link to the species' iNaturalist taxon page, so a
 reader who has just learned how big a bird is can go and see one. On the detail view the link names
@@ -776,6 +777,30 @@ Rationale: BirdView will never have photographs, and a reader surprised by a siz
 bird. A link to the *wrong* bird is worse than none, and an absent link is legible where a search
 URL that always "works" hides the failure. See
 [decisions.inaturalistLinkAdopted](../../decisions.md#inaturalistlinkadopted).
+
+## ebirdLink
+
+**The detail view and every tile link to the species on eBird**
+
+Subject: `presentation.detail_view.external_link`
+Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
+
+The detail view and every home page tile carry a link to the species' page on eBird,
+`https://ebird.org/species/<eBird species code>`, so a reader who has just learned how big a bird
+is can go and see one. On the detail view the link names the species and eBird in a sentence. On a
+tile it reads **eBird**, in the tile's lower-right corner, and its accessible name is the bird's
+name and "on eBird" ([decisions.ebirdLinkReplacesInaturalist](../../decisions.md#ebirdlinkreplacesinaturalist)).
+
+The code is the one each species already carries from AviList ([namesFromAvilist](dataset.md#namesfromavilist)), so the link needs no
+lookup or matching of its own. A species with **no eBird code** — AviList recognizes a few species
+eBird does not — shows **no link at all**, not a search URL or a guess.
+
+**Words, never eBird's logo**, and BirdView **links and never copies**: no photograph, sound, or
+map is embedded, hotlinked, cached, or reproduced; the reader arrives on eBird, where each carries
+its own credit. [tech.selfContainedServer](../tech/delivery.md#selfcontainedserver) forbids the embedding independently.
+
+Rationale: BirdView will never have photographs, and a reader surprised by a size wants to see the
+bird. eBird files the bird under the same code BirdView shows beside its name.
 
 ## nextView
 

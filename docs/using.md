@@ -36,7 +36,7 @@ Each tile starts with the bird's name and its banding and eBird codes; its lengt
 its wingspan and wing chord; and how many of the species observations in the selected regions are
 of this bird, as *1 in N*. Then comes a stick figure to scale, with a cube for its mass and the mass
 beside it, and under it the family and the scientific name. The pin, top right, keeps the bird on
-the page; **iNat**, bottom right, opens the species on iNaturalist.
+the page; **eBird**, bottom right, opens the species on eBird.
 
 The figure is a **top-down view of a bird in flight**, head up. Solid lines are measured; dashed
 lines are estimated.
@@ -54,7 +54,7 @@ lines are estimated.
 Legs are not drawn. **A `~` after a number means it is estimated**, as most lengths are.
 
 **Click any bird** for its own page: the same figure, larger, with every part measured and the source
-of each number, and a link to the species on **iNaturalist** for photographs.
+of each number, and a link to the species on **eBird** for photographs, sounds, and a range map.
 
 ---
 

@@ -41,8 +41,8 @@ openly licensed; they and the WCAG text are kept so every quotation of them in
 [source register](../river/requirements/imports.md) records every source considered,
 including the rejected ones and why.
 
-**BirdView links to iNaturalist and copies nothing from it**: no photograph is embedded, cached, or
-hotlinked, so no contributor's license is engaged.
+**BirdView links to eBird and copies nothing from it or from iNaturalist**: no photograph is
+embedded, cached, or hotlinked, so no contributor's license is engaged.
 
 **Every CC BY source is credited on the page that uses it**, as its license asks; the home page's footer
 names each with its citation, and every other page links to it.
@@ -114,8 +114,8 @@ ingest first.
 iNaturalist's API terms ask for one request per second; do not shorten the interval. The GBIF rate
 is BirdView's own, and the client slows further whenever GBIF answers 429.
 
-`birdview-inatmap` leaves out a species that does not resolve confidently; its page then shows no
-iNaturalist link.
+`birdview-inatmap` leaves out a species that does not resolve confidently. Since the link went to
+eBird (2026-11-01), no page uses its table.
 
 `birdview-status` caches raw fetches under `/tmp` and skips what it already has, so an interrupted
 run resumes. It refuses to write a partial table, because a species whose dates never arrived would
