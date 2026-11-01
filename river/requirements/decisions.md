@@ -4193,13 +4193,15 @@ Affects: [product.ebirdLink](local/product/presentation.md#ebirdlink), [product.
 `taxonomy.EBirdCodes` gives an eBird code to the three species AviList gives none — Ruddy Duck
 `rudduc`, White-necked Petrel `whnpet`, American Barn Owl `brnowl` — and replaces AviList's code
 for the two species whose second code is simpler: Fork-tailed Swift `fotswi` (AviList `fotswi1`)
-and Bronzed Cowbird `brocow` (AviList `brocow1`). A species has two codes where AviList v2025b
+and Bronzed Cowbird `brocow` (AviList `brocow1`), and, by the owner's call over the rule, gives
+Siberian Stonechat `sibsto1`, Cornell's current code, for AviList's `y00427`. A species has two codes where AviList v2025b
 and Cornell's BirdNET taxonomy, which follows AviList and carries eBird's current codes, give
 different codes for the same scientific name. The owner's rule picks between them: no digits
-before digits, then shorter. It leaves AviList's code for the other six it was applied to: Marsh
-Wren `marwre` (not `eamwre1`), Tufted Flycatcher `tuffly` (not `tuffly1`), Nutting's Flycatcher
-`nutfly` (not `nutfly1`), Warbling Vireo `warvir` (not `eawvir1`), Siberian Stonechat `y00427`
-(not `sibsto1`, the longer), and Willet `willet1` (not `willet2`, a tie). Page addresses do not
+before digits, then shorter. It leaves AviList's code for five others: Marsh Wren `marwre` (not
+`eamwre1`), Tufted Flycatcher `tuffly` (not `tuffly1`), Nutting's Flycatcher `nutfly` (not
+`nutfly1`), Warbling Vireo `warvir` (not `eawvir1`), and Willet `willet1` (not `willet2`, a tie).
+The rule would have kept Siberian Stonechat's `y00427`, the shorter; the owner chose `sibsto1`,
+since `y00427` reads as a placeholder. Page addresses do not
 change.
 
 ### Why

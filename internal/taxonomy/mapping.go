@@ -491,6 +491,7 @@ var EBirdCodes = map[string]EBirdCode{
 	"Tyto furcata":          {"brnowl", "AviList gives none; eBird's American Barn Owl"},
 	"Apus pacificus":        {"fotswi", "simpler than AviList's fotswi1"},
 	"Molothrus aeneus":      {"brocow", "simpler than AviList's brocow1"},
+	"Saxicola maurus":       {"sibsto1", "the owner's call over AviList's placeholder-like y00427"},
 }
 
 // EBirdCode is one entry in EBirdCodes: the code, and why AviList's was not used.

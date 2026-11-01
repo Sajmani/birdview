@@ -799,7 +799,8 @@ name and "on eBird" ([decisions.ebirdLinkReplacesInaturalist](../../decisions.md
   the table gives eBird's code for the bird, as Ruddy Duck is `rudduc`.
 - **A species has two codes** when AviList's and the one Cornell's current taxonomy gives for the
   same species differ. The table takes the **simpler**: a code without digits over one with them,
-  then the shorter; on a tie, AviList's stands.
+  then the shorter; on a tie, AviList's stands. The owner may override the rule for a species,
+  as for Siberian Stonechat.
 
 The code shown beside the name is the one the link uses. A species' page address does not change
 with it: it stays AviList's code, or the scientific-name slug where AviList has none

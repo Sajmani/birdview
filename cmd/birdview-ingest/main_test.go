@@ -838,6 +838,7 @@ func TestEverySpeciesHasAnEBirdCode(t *testing.T) {
 		{"Tyto furcata", "brnowl", "tyto_furcata"},
 		{"Apus pacificus", "fotswi", "fotswi1"},
 		{"Molothrus aeneus", "brocow", "brocow1"},
+		{"Saxicola maurus", "sibsto1", "y00427"},
 		{"Anas platyrhynchos", "mallar3", "mallar3"}, // AviList's code stands where no table entry is
 	} {
 		sp, ok := bySci[c.sci]
