@@ -4185,7 +4185,7 @@ The owner asked for the cleanup once the link moved to eBird.
 
 Date: 2026-11-01
 Decided by: Sameer
-Status: accepted
+Status: amended by ebirdCodeAliases
 Affects: [product.ebirdLink](local/product/presentation.md#ebirdlink), [product.namesFromAvilist](local/product/dataset.md#namesfromavilist)
 
 ### Decided
@@ -4223,4 +4223,38 @@ would send readers to the wrong bird.
 Each species the table changes keeps its earlier page address, so links to it still work; its
 code beside the name and its eBird link use the table's code. The three AviList draws more
 narrowly than eBird link to eBird's broader species.
+
+---
+
+## ebirdCodeAliases
+
+**A species answers to every code it has; its simplest is its page address**
+
+Date: 2026-11-01
+Decided by: Sameer
+Status: accepted
+Amends: ebirdCodesComplete
+Affects: [product.ebirdLink](local/product/presentation.md#ebirdlink), [tech.stableUrls](local/tech/delivery.md#stableurls)
+
+### Decided
+
+A species' codes are AviList's and any `taxonomy.EBirdCodes` records from Cornell's current
+taxonomy. The simplest, by `taxonomy.SimplerEBirdCode` (fewer digits, then shorter, then
+AviList's), is its id: the code beside its name, the eBird link, and its page address. Every
+other code is an alias: the find box matches it, and `/species/<alias>` and `pin=<alias>`
+redirect to the id. The table now records all of Cornell's codes that differ from AviList's,
+eleven species, and the rule chooses, rather than the table recording only the codes it chose.
+The address a species had before is always among its aliases, so no BirdView link breaks: six
+species change address (Ruddy Duck `/species/oxyura_jamaicensis` to `/species/rudduc`, and
+likewise White-necked Petrel, American Barn Owl, Fork-tailed Swift, Bronzed Cowbird, and Siberian
+Stonechat), and the old one redirects. An alias two species would share stops the build.
+
+### Why
+
+The owner asked: the codes are unambiguous, so each should work, while the page shows one. It
+also ends the mismatch [ebirdCodesComplete](#ebirdcodescomplete) left, where Ruddy Duck showed `rudduc` and lived at
+`/species/oxyura_jamaicensis`. [tech.stableUrls](local/tech/delivery.md#stableurls) allows the change: the old form keeps
+answering, redirected. Cornell's codes for a narrower concept count as aliases of the species that
+contains it, as `eamwre1`, Eastern Marsh Wren, finds Marsh Wren; that sends a reader to the bird
+BirdView draws for it, not to a different one.
 

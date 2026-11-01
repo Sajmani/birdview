@@ -29,6 +29,7 @@
 package taxonomy
 
 import (
+	"slices"
 	"sort"
 	"strings"
 )
@@ -475,29 +476,53 @@ var DomesticForms = map[string]string{
 	"Cairina moschata": "iNaturalist files domestic Muscovy Ducks under Cairina moschata domestica",
 }
 
-// EBirdCodes gives the eBird species code where AviList's will not do
-// (product.ebirdLink, decisions.ebirdCodesComplete): the species AviList gives no code, because it draws
-// them more narrowly than eBird, and the species with a second code that
-// SimplerEBirdCode prefers. Keyed by scientific name; each code is confirmed
-// in Cornell's BirdNET taxonomy, which follows AviList and carries eBird's
-// current codes.
-//
-// Only the code a species shows and links with comes from here. Its page
-// address stays AviList's code, or the scientific-name slug where AviList has
-// none, so no link to BirdView breaks (tech.stableUrls).
-var EBirdCodes = map[string]EBirdCode{
-	"Oxyura jamaicensis":    {Code: "rudduc", Why: "AviList gives none; eBird's Ruddy Duck"},
-	"Pterodroma cervicalis": {Code: "whnpet", Why: "AviList gives none; eBird's White-necked Petrel"},
-	"Tyto furcata":          {Code: "brnowl", Why: "AviList gives none; eBird's American Barn Owl"},
-	"Apus pacificus":        {Code: "fotswi", AviList: "fotswi1", Why: "fewer digits"},
-	"Molothrus aeneus":      {Code: "brocow", AviList: "brocow1", Why: "fewer digits"},
-	"Saxicola maurus":       {Code: "sibsto1", AviList: "y00427", Why: "fewer digits"},
+// EBirdCodes records, by scientific name, the eBird codes Cornell's current
+// taxonomy gives a species where they differ from AviList's (product.ebirdLink, decisions.ebirdCodeAliases):
+// for the three species AviList gives none, because it draws them more narrowly
+// than eBird, the only code; for the rest, a second one. Each was read from
+// Cornell's BirdNET taxonomy, which follows AviList and carries eBird's current
+// codes. SpeciesCodes chooses among a species' codes; this table only records
+// them.
+var EBirdCodes = map[string][]string{
+	"Oxyura jamaicensis":      {"rudduc"},  // AviList gives none
+	"Pterodroma cervicalis":   {"whnpet"},  // AviList gives none
+	"Tyto furcata":            {"brnowl"},  // AviList gives none
+	"Apus pacificus":          {"fotswi"},  // AviList fotswi1
+	"Molothrus aeneus":        {"brocow"},  // AviList brocow1
+	"Saxicola maurus":         {"sibsto1"}, // AviList y00427
+	"Cistothorus palustris":   {"eamwre1"}, // AviList marwre; Eastern Marsh Wren, split in Cornell's
+	"Mitrephanes phaeocercus": {"tuffly1"}, // AviList tuffly
+	"Myiarchus nuttingi":      {"nutfly1"}, // AviList nutfly
+	"Vireo gilvus":            {"eawvir1"}, // AviList warvir; Eastern Warbling Vireo, split in Cornell's
+	"Tringa semipalmata":      {"willet2"}, // AviList willet1
 }
 
-// EBirdCode is one entry in EBirdCodes: the code, the AviList code it
-// replaces (empty where AviList gives none), and why.
-type EBirdCode struct {
-	Code, AviList, Why string
+// SpeciesCodes returns a species' own eBird code, the simplest of AviList's
+// and those EBirdCodes records (SimplerEBirdCode), and its other codes, which
+// are aliases (product.ebirdLink). AviList's code comes first, so it wins a tie.
+func SpeciesCodes(sci, avilist string) (own string, others []string) {
+	var all []string
+	if avilist != "" {
+		all = append(all, avilist)
+	}
+	for _, c := range EBirdCodes[sci] {
+		if c != "" && !slices.Contains(all, c) {
+			all = append(all, c)
+		}
+	}
+	for _, c := range all {
+		if own == "" {
+			own = c
+		} else {
+			own = SimplerEBirdCode(own, c)
+		}
+	}
+	for _, c := range all {
+		if c != own {
+			others = append(others, c)
+		}
+	}
+	return own, others
 }
 
 // SimplerEBirdCode picks between two eBird codes for one species, the rule a

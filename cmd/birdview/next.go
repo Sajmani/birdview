@@ -306,6 +306,12 @@ func (s *server) next(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	q := r.URL.Query()
+	// A bird pinned by another of its codes is addressed by its own
+	// (product.ebirdLink), so the page and its links name each bird one way.
+	if changed := s.canonicalPins(q); changed && !q.Has("bird") {
+		http.Redirect(w, r, string(nextURL(q)), http.StatusMovedPermanently)
+		return
+	}
 	if q.Has("bird") {
 		http.Redirect(w, r, s.nextToggleBird(r), http.StatusSeeOther)
 		return
@@ -330,6 +336,18 @@ func (s *server) next(w http.ResponseWriter, r *http.Request) {
 	s.render(w, "next.html", s.nextPage(r))
 }
 
+// canonicalPins rewrites, in place, any pin= value that is one of a species'
+// other codes to its id, and reports whether it rewrote one.
+func (s *server) canonicalPins(q url.Values) bool {
+	changed := false
+	for i, v := range q["pin"] {
+		if id, ok := s.aliasOf[v]; ok {
+			q["pin"][i], changed = id, true
+		}
+	}
+	return changed
+}
+
 // nextShowOf reads show: "pinned", "all", or "first" with the count to draw
 // before the gap rows. ok is false when show is absent or reads as the
 // default, the first nextCap, so the address can leave it out.
@@ -349,7 +367,11 @@ func nextShowOf(q url.Values) (mode string, n int, ok bool) {
 // script links here, so the rule stays in Go.
 func (s *server) nextToggleBird(r *http.Request) string {
 	q := r.URL.Query()
+	s.canonicalPins(q)
 	id := q.Get("bird")
+	if own, ok := s.aliasOf[id]; ok {
+		id = own // another of its codes (product.ebirdLink)
+	}
 	q.Del("bird")
 	if _, ok := s.byID[id]; !ok {
 		q.Del("find")

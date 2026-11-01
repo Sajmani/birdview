@@ -241,6 +241,13 @@ func testDataset() *dataset.Dataset {
 		"USA.5_1": 1000000, "USA.38_1": 200000, "USA.39_1": 480000,
 		"CAN.9_1": 1817968, "USA.2_1": 6055121, "SEA.PAC": 1596171,
 	}
+	// A second code for the heron, as Cornell's taxonomy gives some species
+	// one AviList does not (product.ebirdLink, decisions.ebirdCodeAliases).
+	for i := range sp {
+		if sp[i].ID == "greblu" {
+			sp[i].CodeAliases = []string{"grbher3"}
+		}
+	}
 	return &dataset.Dataset{Families: fams, Species: sp, RegionTotals: totals,
 		Undrawn: undrawnFixture()}
 }
@@ -263,7 +270,7 @@ func undrawnFixture() []dataset.Undrawn {
 			dataset.LocaleNA: na, dataset.LocaleWorld: worldName(na)}
 	}
 	return []dataset.Undrawn{{
-		ID: "paspig", Names: names("Passenger Pigeon"),
+		ID: "paspig", CodeAliases: []string{"ectopistes_migratorius"}, Names: names("Passenger Pigeon"),
 		ScientificName: "Ectopistes migratorius", Status: "historical",
 		Region: "CAN.9_1", Episodes: 89, Years: 52, Records: 145,
 		LastSeen: "1902-05-18",
@@ -1042,6 +1049,43 @@ func boolToInt(b bool) int {
 		return 1
 	}
 	return 0
+}
+
+// TestEveryCodeReachesItsSpecies asserts the half of product.ebirdLink about a species' other
+// codes: /species/<alias> redirects to the species' own address, query
+// kept, for a drawn bird and an undrawn one alike; pin= and bird= take an
+// alias and land on the own code; the find box finds a bird by an alias; and a
+// code no species has is still a plain 404.
+//
+// Verifies: product.ebirdLink, tech.stableUrls. Criterion: app.everyCodeReachesItsSpecies.
+func TestEveryCodeReachesItsSpecies(t *testing.T) {
+	s := newTestServer(t)
+	for alias, want := range map[string]string{
+		"/species/grbher3?units=metric":   "/species/greblu?units=metric",
+		"/species/ectopistes_migratorius": "/species/paspig",
+	} {
+		rec := httptest.NewRecorder()
+		s.ServeHTTP(rec, httptest.NewRequest("GET", alias, nil))
+		if rec.Code != http.StatusMovedPermanently || rec.Header().Get("Location") != want {
+			t.Errorf("GET %s = %d to %q; want 301 to %q", alias, rec.Code, rec.Header().Get("Location"), want)
+		}
+	}
+	if code, _ := get(t, s, "/species/nosuchbird1"); code != http.StatusNotFound {
+		t.Errorf("an unknown code answers %d, want 404", code)
+	}
+	for addr, want := range map[string]string{
+		"/?pin=grbher3":  "pin=greblu",
+		"/?bird=grbher3": "pin=greblu",
+	} {
+		rec := httptest.NewRecorder()
+		s.ServeHTTP(rec, httptest.NewRequest("GET", addr, nil))
+		if loc := rec.Header().Get("Location"); rec.Code/100 != 3 || !strings.Contains(loc, want) || strings.Contains(loc, "grbher3") {
+			t.Errorf("GET %s = %d to %q; want a redirect pinning by the own code (%s)", addr, rec.Code, loc, want)
+		}
+	}
+	if p := nextAt(s, "/?find=grbher3"); len(p.Matches) != 1 || p.Matches[0].ID != "greblu" {
+		t.Errorf("find=grbher3 lists %+v; want the heron alone", p.Matches)
+	}
 }
 
 // TestEbirdLinks asserts product.ebirdLink on both pages that carry it. Every tile whose

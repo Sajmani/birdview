@@ -438,23 +438,40 @@ Watched failing: 2026-11-01, against the iNaturalist links as they stood ("grebl
 
 ## everySpeciesHasAnEBirdCode
 
-**Every species has an eBird code, and a declared code moves no page**
+**Every species has an eBird code, its simplest, and answers to the rest**
 
 Covers: [product.ebirdLink](../../../local/product/presentation.md#ebirdlink)
 
-**Method:** over the built dataset, every species carries an eBird code and no two share one;
-Ruddy Duck, White-necked Petrel, and American Barn Owl carry `rudduc`, `whnpet`, and `brnowl`,
-which AviList lacks; Fork-tailed Swift and Bronzed Cowbird carry `fotswi` and `brocow`, the
-simpler of their two codes, and Siberian Stonechat `sibsto1`, with fewer digits than AviList's `y00427`; every code the
-table puts in place of AviList's is the one `taxonomy.SimplerEBirdCode` picks, which takes fewer digits, then the shorter,
-then AviList's; Mallard keeps AviList's `mallar3`; and each of those keeps its earlier
-page address ([decisions.ebirdCodesComplete](../../../decisions.md#ebirdcodescomplete)).
+**Method:** over the built dataset, every species carries an eBird code, which is also its id.
+Ruddy Duck, White-necked Petrel, and American Barn Owl, which AviList gives none, have `rudduc`,
+`whnpet`, and `brnowl`, with their former scientific-name addresses as aliases. Fork-tailed Swift
+`fotswi`, Bronzed Cowbird `brocow`, and Siberian Stonechat `sibsto1` take the simpler of two codes
+and keep AviList's as an alias; Marsh Wren `marwre` and Willet `willet1` keep AviList's and take
+Cornell's as an alias; Mallard keeps `mallar3` with none. No code, id or alias, answers for two
+species, drawn or not. `taxonomy.SimplerEBirdCode` takes fewer digits, then the shorter, then
+AviList's, and `taxonomy.SpeciesCodes` applies it ([decisions.ebirdCodeAliases](../../../decisions.md#ebirdcodealiases)).
 
-**Run:** `go test ./cmd/birdview-ingest/ ./internal/taxonomy/ -run 'TestEverySpeciesHasAnEBirdCode|TestEBirdCodesFollowTheRule'`
+**Run:** `go test ./cmd/birdview-ingest/ ./internal/taxonomy/ -run 'TestEverySpeciesHasAnEBirdCode|TestSpeciesCodes'`
 **Status: verified 2026-11-01, passing.**
-Watched failing: 2026-11-01, against AviList's codes alone ("3 species have no eBird code", "Apus pacificus carries eBird code \"fotswi1\", want \"fotswi\""), and by deriving the page address from the declared code ("Oxyura jamaicensis's page address moved to /species/rudduc").
+Watched failing: 2026-11-01, against AviList's codes alone ("3 species have no eBird code", "Apus pacificus carries eBird code \"fotswi1\", want \"fotswi\"").
 Watched failing: 2026-11-01, by the first rule, any digits against none ("the rule picks \"y00427\"").
-Watched failing: 2026-11-01, by dropping Siberian Stonechat's entry ("Saxicola maurus carries eBird code \"y00427\", want \"sibsto1\"").
+Watched failing: 2026-11-01, by ids that stay AviList's code or the slug ("Oxyura jamaicensis has code \"oxyura_jamaicensis\" and id \"oxyura_jamaicensis\", want both \"rudduc\"", "answers also to [], want [oxyura_jamaicensis]"); this also found that a species with no code at all would have shown its slug as its eBird code, now fixed.
+
+## everyCodeReachesItsSpecies
+
+**Every code a species has reaches it**
+
+Covers: [product.ebirdLink](../../../local/product/presentation.md#ebirdlink), [tech.stableUrls](../../../local/tech/delivery.md#stableurls)
+
+**Method:** with a second code on the fixture heron and a former address on Passenger Pigeon,
+`/species/<alias>` answers 301 to the species' own address, query kept, for a drawn bird and an
+undrawn one; `pin=<alias>` and `bird=<alias>` redirect to an address pinning the own code, which
+the alias no longer appears in; the find box lists the heron alone for its alias; and a code no
+species has is a 404.
+
+**Run:** `go test ./cmd/birdview/ -run TestEveryCodeReachesItsSpecies`
+**Status: verified 2026-11-01, passing.**
+Watched failing: 2026-11-01, against the server before aliases ("GET /species/grbher3?units=metric = 404", "GET /?pin=grbher3 = 200", "find=grbher3 lists []"), and with bird= taking two redirects ("301 to \"/?bird=greblu\"").
 
 ## bandingCodesShown
 

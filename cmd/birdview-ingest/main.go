@@ -377,13 +377,9 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 		}
 
 		// The eBird code is the id, so a URL is /species/amerob rather than a
-		// genus nobody can spell. Where AviList publishes no code the
-		// scientific-name slug stands in, which keeps every species reachable
-		// and keeps the id stable (product.englishNameChoice, acceptance.stableSpeciesId).
-		sid := avr.Code
-		if sid == "" {
-			sid = id(sci)
-		}
+		// genus nobody can spell: the simplest of the species' codes, with the
+		// rest as aliases that redirect to it (product.ebirdLink, product.englishNameChoice, acceptance.stableSpeciesId).
+		sid, code, aliases := codes(sci, avr.Code)
 
 		rec := dataset.Species{
 			ID: sid,
@@ -391,7 +387,8 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 				dataset.LocaleNA:    avr.NameNA,
 				dataset.LocaleWorld: avr.NameWorld,
 			},
-			SpeciesCode:    ebirdCode(sci, avr.Code),
+			SpeciesCode:    code,
+			CodeAliases:    aliases,
 			ScientificName: sci,
 			Family:         avr.Family,
 			FamilyCommon:   famCommon[avr.Family],
@@ -593,9 +590,22 @@ func flagExotic(out []dataset.Species, exotic map[string]string) error {
 func rejected(rows map[string]status.Row, avl avilist.Table,
 	drawn []dataset.Species) ([]dataset.Undrawn, error) {
 
+	// Every code a species answers to, its id and its aliases, names it
+	// alone (product.ebirdLink), drawn or not.
 	taken := make(map[string]string, len(drawn))
+	claim := func(code, sci string) error {
+		if other, clash := taken[code]; clash && other != sci {
+			return fmt.Errorf("code %q belongs to both %s and %s; one URL cannot mean two birds", code, other, sci)
+		}
+		taken[code] = sci
+		return nil
+	}
 	for _, sp := range drawn {
-		taken[sp.ID] = sp.ScientificName
+		for _, c := range append([]string{sp.ID}, sp.CodeAliases...) {
+			if err := claim(c, sp.ScientificName); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	out := make([]dataset.Undrawn, 0, len(rows))
@@ -604,19 +614,16 @@ func rejected(rows map[string]status.Row, avl avilist.Table,
 		if !ok {
 			continue
 		}
-		uid := avr.Code
-		if uid == "" {
-			uid = id(sci)
+		uid, _, aliases := codes(sci, avr.Code)
+		for _, c := range append([]string{uid}, aliases...) {
+			if err := claim(c, sci); err != nil {
+				return nil, err
+			}
 		}
-		if other, clash := taken[uid]; clash {
-			return nil, fmt.Errorf(
-				"id %q belongs to both %s (drawn) and %s (not drawn); "+
-					"one URL cannot mean two birds", uid, other, sci)
-		}
-		taken[uid] = sci
 
 		u := dataset.Undrawn{
-			ID: uid,
+			ID:          uid,
+			CodeAliases: aliases,
 			Names: map[dataset.Locale]string{
 				dataset.LocaleNA:    avr.NameNA,
 				dataset.LocaleWorld: avr.NameWorld,
@@ -642,14 +649,21 @@ func rejected(rows map[string]status.Row, avl avilist.Table,
 	return out, nil
 }
 
-// ebirdCode is the eBird code a species shows and links with: AviList's,
-// unless taxonomy.EBirdCodes declares another (product.ebirdLink). The species' id, its page
-// address, is not derived from this, so a declared code moves no URL.
-func ebirdCode(sci, avilist string) string {
-	if c, ok := taxonomy.EBirdCodes[sci]; ok {
-		return c.Code
+// codes is a species' id, eBird code, and aliases (product.ebirdLink): the code is the
+// simplest of its eBird codes, AviList's and any taxonomy.EBirdCodes records,
+// and is also the id; the aliases are the rest. Where AviList gives no code,
+// the scientific-name slug was the species' address, so it stays an alias;
+// with no code at all, the slug is the id and the code is empty, so no eBird
+// link is made from it.
+func codes(sci, avilist string) (sid, code string, aliases []string) {
+	own, others := taxonomy.SpeciesCodes(sci, avilist)
+	if own == "" {
+		return id(sci), "", nil
 	}
-	return avilist
+	if avilist == "" {
+		others = append(others, id(sci))
+	}
+	return own, own, others
 }
 
 func id(sci string) string {

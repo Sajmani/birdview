@@ -15,6 +15,7 @@
 package taxonomy
 
 import (
+	"slices"
 	"strings"
 	"testing"
 )
@@ -121,20 +122,12 @@ func TestBinomialReducesRankWithoutInventingSpecies(t *testing.T) {
 	}
 }
 
-// TestEBirdCodesFollowTheRule asserts that every code taxonomy.EBirdCodes puts in place of
-// AviList's is the one SimplerEBirdCode picks, so the table cannot drift from the
-// rule product.ebirdLink states, and pins the rule on the cases that set it.
+// TestSpeciesCodesChooseBySimplerRule pins the rule product.ebirdLink states and how SpeciesCodes
+// applies it: the species' own code is the one with fewer digits, then the
+// shorter, then AviList's, and every other code it has is an alias.
 //
 // Verifies: product.ebirdLink. Criterion: app.everySpeciesHasAnEBirdCode.
-func TestEBirdCodesFollowTheRule(t *testing.T) {
-	for sci, c := range EBirdCodes {
-		if c.AviList == "" {
-			continue
-		}
-		if got := SimplerEBirdCode(c.AviList, c.Code); got != c.Code {
-			t.Errorf("%s: the table takes %q over AviList's %q, but the rule picks %q", sci, c.Code, c.AviList, got)
-		}
-	}
+func TestSpeciesCodesChooseBySimplerRule(t *testing.T) {
 	for _, c := range []struct{ avilist, other, want string }{
 		{"fotswi1", "fotswi", "fotswi"},   // fewer digits
 		{"y00427", "sibsto1", "sibsto1"},  // fewer digits, though longer
@@ -144,6 +137,22 @@ func TestEBirdCodesFollowTheRule(t *testing.T) {
 	} {
 		if got := SimplerEBirdCode(c.avilist, c.other); got != c.want {
 			t.Errorf("SimplerEBirdCode(%q, %q) = %q, want %q", c.avilist, c.other, got, c.want)
+		}
+	}
+	for _, c := range []struct {
+		sci, avilist, own string
+		others            []string
+	}{
+		{"Apus pacificus", "fotswi1", "fotswi", []string{"fotswi1"}},
+		{"Saxicola maurus", "y00427", "sibsto1", []string{"y00427"}},
+		{"Cistothorus palustris", "marwre", "marwre", []string{"eamwre1"}},
+		{"Tringa semipalmata", "willet1", "willet1", []string{"willet2"}},
+		{"Oxyura jamaicensis", "", "rudduc", nil},
+		{"Turdus migratorius", "amerob", "amerob", nil},
+	} {
+		own, others := SpeciesCodes(c.sci, c.avilist)
+		if own != c.own || !slices.Equal(others, c.others) {
+			t.Errorf("SpeciesCodes(%s, %q) = %q, %q; want %q, %q", c.sci, c.avilist, own, others, c.own, c.others)
 		}
 	}
 }

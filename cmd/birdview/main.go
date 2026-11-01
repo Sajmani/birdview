@@ -166,7 +166,10 @@ type server struct {
 	// Consulted only after byID misses, so a URL that stopped working can say
 	// why instead of 404ing into silence (product.undrawnSpeciesAnswer).
 	undrawnByID map[string]*dataset.Undrawn
-	fams        []familyOption
+	// aliasOf maps a species' other codes, and the address it had before, to
+	// its id, drawn or not (product.ebirdLink, decisions.ebirdCodeAliases).
+	aliasOf map[string]string
+	fams    []familyOption
 	// devDir is empty for a real binary. When set, render re-parses the
 	// templates on every request so an edit shows on reload.
 	devDir string
@@ -493,7 +496,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 		return nil, fmt.Errorf("parsing templates: %w", err)
 	}
 	s := &server{mux: http.NewServeMux(), ds: ds, tmpl: tmpl, devDir: devDir,
-		byID: map[string]*dataset.Species{}, undrawnByID: map[string]*dataset.Undrawn{},
+		byID: map[string]*dataset.Species{}, undrawnByID: map[string]*dataset.Undrawn{}, aliasOf: map[string]string{},
 		idOf: map[string]string{}}
 	// Inlined into the home page rather than fetched, as its other scripts are.
 	js, err := fs.ReadFile(assetFS, "static/here.js")
@@ -549,6 +552,31 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 				"one URL cannot mean two birds (product.undrawnSpeciesAnswer)", u.ID)
 		}
 		s.undrawnByID[u.ID] = u
+	}
+	// Aliases, checked last so none can shadow an id. The ingest refuses a
+	// code two species share; a dataset with one was not built by it.
+	alias := func(a, id string) error {
+		_, drawn := s.byID[a]
+		_, undrawn := s.undrawnByID[a]
+		if prev, dup := s.aliasOf[a]; drawn || undrawn || (dup && prev != id) {
+			return fmt.Errorf("code %q answers for more than one species (product.ebirdLink)", a)
+		}
+		s.aliasOf[a] = id
+		return nil
+	}
+	for i := range ds.Species {
+		for _, a := range ds.Species[i].CodeAliases {
+			if err := alias(a, ds.Species[i].ID); err != nil {
+				return nil, err
+			}
+		}
+	}
+	for i := range ds.Undrawn {
+		for _, a := range ds.Undrawn[i].CodeAliases {
+			if err := alias(a, ds.Undrawn[i].ID); err != nil {
+				return nil, err
+			}
+		}
 	}
 	// ds.Families is already in AviList's taxonomic sequence; preserve it
 	// rather than alphabetizing, which is the order every field guide uses.
@@ -1007,6 +1035,16 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		// and chose not to draw, and it would be a fabrication for a typo.
 		if u, known := s.undrawnByID[wanted]; known {
 			s.undrawn(w, r, u)
+			return
+		}
+		// Another of the species' codes: the page lives at its own
+		// (product.ebirdLink, tech.stableUrls).
+		if id, known := s.aliasOf[wanted]; known {
+			to := "/species/" + id
+			if r.URL.RawQuery != "" {
+				to += "?" + r.URL.RawQuery
+			}
+			http.Redirect(w, r, to, http.StatusMovedPermanently)
 			return
 		}
 		http.NotFound(w, r)

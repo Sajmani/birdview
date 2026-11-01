@@ -123,7 +123,8 @@ flowchart LR
     NearMatchSheets · *the sheet a near-match borrows from*
     OwnRowSheets · *the sheet a species' own row comes from*
     NotInAviList · *dropped at step 2*
-    EBirdCodes ★ *the eBird code where AviList's will not do*
+    EBirdCodes ★ *Cornell's eBird codes where they differ from AviList's*
+    SpeciesCodes ★ *the simplest code is the id; the rest find it*
     OrderCommonNames ★ *order names*`"]
     TSENS["`taxonomy.EBirdSensitive
     ─────────────
@@ -238,6 +239,7 @@ flowchart LR
   names ★
   scientificName ★
   speciesCode ★
+  codeAliases · *find the species; their pages redirect*
   family ★
   familyCommon ★
   familyColor ★
@@ -306,7 +308,7 @@ flowchart LR
   STATUS -->|"species left out of scope"| S7
   AVL --> S2
   AVL --> S7
-  NAMES -->|"eBird codes AviList lacks or makes longer"| S2
+  NAMES -->|"each species' simplest eBird code, and its aliases"| S2
   NAMES --> S3
   AVO --> S3
   AVO --> S4

@@ -63,7 +63,8 @@ honor, not a limit; what bounds the cost of one that ignores it is the deploymen
 Subject: `server.public_interface`
 Goals: [goals.shareableViews](../../../goals/goals.md#shareableviews), [goals.freedomToChange](../../../goals/goals.md#freedomtochange)
 
-BirdView's public interface is its URLs: the home page `/`, a species page `/species/<eBird code>`,
+BirdView's public interface is its URLs: the home page `/`, a species page `/species/<eBird code>`
+(any of a species' codes, the others redirecting to its own; [product.ebirdLink](../product/presentation.md#ebirdlink)),
 the guides `/docs` and `/docs/<guide>`, the lists `/added` and `/excluded`, and the query
 parameters the pages' own links write (`by`, `rev`, `step`, `units`, `names`, `family`, `region`,
 `month`, `habitat`, `niche`, `pin`, `show`), with the values those links write. A URL of that form keeps working across releases. Everything

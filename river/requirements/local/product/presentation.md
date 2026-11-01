@@ -791,20 +791,22 @@ is can go and see one. On the detail view the link names the species and eBird i
 tile it reads **eBird**, in the tile's lower-right corner, and its accessible name is the bird's
 name and "on eBird" ([decisions.ebirdLinkReplacesInaturalist](../../decisions.md#ebirdlinkreplacesinaturalist)).
 
-**Every species has a code and a link.** The code is the one each species carries from AviList
-([namesFromAvilist](dataset.md#namesfromavilist)), except where a declared table, `taxonomy.EBirdCodes`, says otherwise
-([decisions.ebirdCodesComplete](../../decisions.md#ebirdcodescomplete)):
+**Every species has a code and a link.** A species' codes are the one it carries from AviList
+([namesFromAvilist](dataset.md#namesfromavilist)) and any other a declared table, `taxonomy.EBirdCodes`, records for it from Cornell's
+current taxonomy ([decisions.ebirdCodesComplete](../../decisions.md#ebirdcodescomplete), [decisions.ebirdCodeAliases](../../decisions.md#ebirdcodealiases)). AviList gives none to
+a few species it draws more narrowly than eBird, and the table gives eBird's, as Ruddy Duck is
+`rudduc`.
 
-- **AviList gives no code** for a species whose concept it draws more narrowly than eBird does;
-  the table gives eBird's code for the bird, as Ruddy Duck is `rudduc`.
-- **A species has two codes** when AviList's and the one Cornell's current taxonomy gives for the
-  same species differ. The table takes the **simpler**: **the one with fewer digits; if that
-  ties, the shorter; if that ties too, AviList's.** `fotswi` beats `fotswi1`, and `sibsto1`
-  beats `y00427`.
+**One code is the species' own: the simplest**, by a rule meant to be remembered: **the one with
+fewer digits; if that ties, the shorter; if that ties too, AviList's.** `fotswi` beats `fotswi1`,
+and `sibsto1` beats `y00427`. It is the code shown beside the name, the one the eBird link uses,
+and the species' page address, `/species/<code>`.
 
-The code shown beside the name is the one the link uses. A species' page address does not change
-with it: it stays AviList's code, or the scientific-name slug where AviList has none
-([tech.stableUrls](../tech/delivery.md#stableurls)).
+**Every other code works too.** The find box finds a species by any of its codes, and
+`/species/<other code>` and `pin=<other code>` redirect to the species' own code, as does the
+scientific-name address a species had while AviList gave it no code
+([tech.stableUrls](../tech/delivery.md#stableurls)). A code must name one species: a build where
+two species, drawn or not, would answer to the same code stops.
 
 **Words, never eBird's logo**, and BirdView **links and never copies**: no photograph, sound, or
 map is embedded, hotlinked, cached, or reproduced; the reader arrives on eBird, where each carries

@@ -11,6 +11,8 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
   beside its name, instead of iNaturalist. The tile's button reads **eBird**. Every species has a
   code now: Ruddy Duck, White-necked Petrel, and American Barn Owl, which AviList gives none, link
   to eBird too.
+- Where a bird has two eBird codes, the simpler (fewer digits, then shorter) is shown, linked, and
+  its page address; the other still finds it, and its old address redirects.
 
 ### Removed
 

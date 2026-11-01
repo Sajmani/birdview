@@ -176,9 +176,13 @@ type Species struct {
 	// LIAU under the world locale (decisions.avilistReplacesAba).
 	//
 	// Not fixed-width despite the name: 4 to 8 characters in practice.
-	// AviList's, except where taxonomy.EBirdCodes declares another
-	// (product.ebirdLink); every species has one, and the eBird link uses it.
+	// The simplest of the species' codes (product.ebirdLink); every species has one, and
+	// it is also the ID and the eBird link's.
 	SpeciesCode string `json:"speciesCode,omitempty"`
+	// CodeAliases are the species' other codes, and the address it had while
+	// AviList gave it no code: each finds it, and /species/<alias> redirects to
+	// the ID (product.ebirdLink, decisions.ebirdCodeAliases).
+	CodeAliases []string `json:"codeAliases,omitempty"`
 	// BandingCode is the four-letter alpha code the USGS Bird Banding
 	// Laboratory assigns, e.g. "AMRO" (product.bandingCodes): a public-domain
 	// U.S. Government list, joined by scientific name. It names the species,
@@ -306,6 +310,7 @@ type Undrawn struct {
 	// ID and Names are resolved exactly as a Species' are, so a URL that
 	// worked before the species left scope still reaches this record.
 	ID             string            `json:"id"`
+	CodeAliases    []string          `json:"codeAliases,omitempty"`
 	Names          map[Locale]string `json:"names"`
 	ScientificName string            `json:"scientificName"`
 

@@ -19,6 +19,7 @@ import (
 	"math"
 	"net/url"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 
@@ -172,17 +173,18 @@ func TestSpeciesCodesArePresent(t *testing.T) {
 	if len(missing) > 0 {
 		t.Errorf("%d species have no eBird code, and no declared one: %v", len(missing), missing)
 	}
-	gaps := map[string]bool{
-		"Oxyura jamaicensis": true, "Pterodroma cervicalis": true, "Tyto furcata": true,
+	gaps := map[string]string{
+		"Oxyura jamaicensis": "rudduc", "Pterodroma cervicalis": "whnpet", "Tyto furcata": "brnowl",
 	}
-	for sci, c := range taxonomy.EBirdCodes {
-		if (c.AviList == "") != gaps[sci] {
-			t.Errorf("taxonomy.EBirdCodes declares %s as replacing AviList's %q; AviList's gaps are exactly %v", sci, c.AviList, gaps)
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		want, gap := gaps[sp.ScientificName]
+		if !gap {
+			continue
 		}
-	}
-	for sci := range gaps {
-		if _, ok := taxonomy.EBirdCodes[sci]; !ok {
-			t.Errorf("%s has no AviList code and no declared one", sci)
+		if sp.SpeciesCode != want || !slices.Contains(sp.CodeAliases, strings.ToLower(strings.ReplaceAll(sp.ScientificName, " ", "_"))) {
+			t.Errorf("%s: code %q, aliases %v; AviList gives it none, so it takes %q from taxonomy.EBirdCodes and keeps its old address as an alias",
+				sp.ScientificName, sp.SpeciesCode, sp.CodeAliases, want)
 		}
 	}
 }
@@ -814,8 +816,8 @@ func TestBandingJoin(t *testing.T) {
 }
 
 // TestEverySpeciesHasAnEBirdCode asserts product.ebirdLink's "every species has a code": no
-// drawn species is left without one, the codes taxonomy.EBirdCodes declares are the ones the
-// dataset carries, and none of them moves a species' page address (tech.stableUrls).
+// drawn species is left without one, each species' own code is the simplest of its codes and
+// its id, and the rest, with any address it had before, are aliases no other species claims.
 //
 // Verifies: product.ebirdLink. Criterion: app.everySpeciesHasAnEBirdCode.
 func TestEverySpeciesHasAnEBirdCode(t *testing.T) {
@@ -832,25 +834,50 @@ func TestEverySpeciesHasAnEBirdCode(t *testing.T) {
 	if len(missing) > 0 {
 		t.Errorf("%d species have no eBird code, so no eBird link: %v", len(missing), missing)
 	}
-	for _, c := range []struct{ sci, code, id string }{
-		{"Oxyura jamaicensis", "rudduc", "oxyura_jamaicensis"},
-		{"Pterodroma cervicalis", "whnpet", "pterodroma_cervicalis"},
-		{"Tyto furcata", "brnowl", "tyto_furcata"},
-		{"Apus pacificus", "fotswi", "fotswi1"},
-		{"Molothrus aeneus", "brocow", "brocow1"},
-		{"Saxicola maurus", "sibsto1", "y00427"},
-		{"Anas platyrhynchos", "mallar3", "mallar3"}, // AviList's code stands where no table entry is
+	// The species' own code is the simplest, and its id; every other code,
+	// and the address it had before, is an alias (decisions.ebirdCodeAliases).
+	for _, c := range []struct {
+		sci, code string
+		aliases   []string
+	}{
+		{"Oxyura jamaicensis", "rudduc", []string{"oxyura_jamaicensis"}},
+		{"Pterodroma cervicalis", "whnpet", []string{"pterodroma_cervicalis"}},
+		{"Tyto furcata", "brnowl", []string{"tyto_furcata"}},
+		{"Apus pacificus", "fotswi", []string{"fotswi1"}},
+		{"Molothrus aeneus", "brocow", []string{"brocow1"}},
+		{"Saxicola maurus", "sibsto1", []string{"y00427"}},
+		{"Cistothorus palustris", "marwre", []string{"eamwre1"}},
+		{"Tringa semipalmata", "willet1", []string{"willet2"}},
+		{"Anas platyrhynchos", "mallar3", nil},
 	} {
 		sp, ok := bySci[c.sci]
 		if !ok {
 			t.Errorf("%s is not in the dataset", c.sci)
 			continue
 		}
-		if sp.SpeciesCode != c.code {
-			t.Errorf("%s carries eBird code %q, want %q", c.sci, sp.SpeciesCode, c.code)
+		if sp.SpeciesCode != c.code || sp.ID != c.code {
+			t.Errorf("%s has code %q and id %q, want both %q", c.sci, sp.SpeciesCode, sp.ID, c.code)
 		}
-		if sp.ID != c.id {
-			t.Errorf("%s's page address moved to /species/%s; it stays /species/%s", c.sci, sp.ID, c.id)
+		if !slices.Equal(sp.CodeAliases, c.aliases) {
+			t.Errorf("%s answers also to %v, want %v", c.sci, sp.CodeAliases, c.aliases)
+		}
+	}
+	// Every code names one species, drawn or not.
+	owner := map[string]string{}
+	claim := func(code, sci string) {
+		if prev, dup := owner[code]; dup && prev != sci {
+			t.Errorf("code %q answers for both %s and %s", code, prev, sci)
+		}
+		owner[code] = sci
+	}
+	for i := range ds.Species {
+		for _, c := range append([]string{ds.Species[i].ID}, ds.Species[i].CodeAliases...) {
+			claim(c, ds.Species[i].ScientificName)
+		}
+	}
+	for i := range ds.Undrawn {
+		for _, c := range append([]string{ds.Undrawn[i].ID}, ds.Undrawn[i].CodeAliases...) {
+			claim(c, ds.Undrawn[i].ScientificName)
 		}
 	}
 	seen := map[string]string{}
