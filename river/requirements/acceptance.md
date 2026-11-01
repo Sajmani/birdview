@@ -3163,6 +3163,7 @@ index and the detail page came to disagree about where a bird is commonest
 **Status: verified 2026-10-07 — passing, and watched failing** under all of:
 
 Watched failing: 2026-10-07, under every mutation in the table below, each shown with what went red.
+Watched failing: 2026-11-01, when ids moved the sample onto Ferruginous Pygmy-Owl, whose tile note ("Withheld by eBird in Arizona, all year") the page carries in lower case as a row continuing "Recorded as"; the comparison now ignores case, and still fails on a real difference in wording (the page without its comma).
 
 | Mutation | What went red |
 | --- | --- |

@@ -3810,7 +3810,11 @@ func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
 			_, page := get(t, s, "/species/"+id+strings.Replace(scope.query, "&", "?", 1))
 			body := norm(page)
 			for _, figure := range statements {
-				if !strings.Contains(body, figure) {
+				// Case aside: a tile's note starts a sentence ("Withheld by
+				// eBird in Arizona"), and the page's row continues its label
+				// ("Recorded as withheld by eBird in Arizona"). The words are
+				// the same; capitalization is not information.
+				if !strings.Contains(strings.ToLower(body), strings.ToLower(figure)) {
 					t.Errorf("%s%s: the tile says %q and the detail page does not. "+
 						"product.tileOpensDetail makes the detail view a superset of the tile: a reader "+
 						"who opens a bird to learn more must not find less",
