@@ -53,7 +53,8 @@ lines are estimated.
 | **Wing crossbar** | the wingspan, at the same scale as the bird. The orchid ends are the measured wing chord, ending at the ticks. The emerald middle, **Inner** on the tile, is the wingspan less the two chords; it is dashed when the wingspan is estimated, and its number always carries a `~`, since it is worked out rather than measured |
 | **Cube** | a cube of water that weighs the same as the bird, at the same scale |
 
-Legs are not drawn. **A `~` after a number means it is estimated**, as most lengths are.
+Legs are not drawn. **A `~` after a number means it is estimated**, as most lengths are. Hover
+over any number to see where it came from: the dataset that measured it, or how it was estimated.
 
 **Click any bird** for its own page: the same tile, larger, naming every part and its measurement,
 with the source of each number below it, and a link to the species on **eBird** for photographs,

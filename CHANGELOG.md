@@ -23,6 +23,8 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 - Tiles name the crossbar's emerald middle **Inner**: the wingspan less the two wing chords, marked
   `~` because it is worked out rather than measured. **Wingspan**, which names the whole bar, is no
   longer emerald. The icon shows the orchid chords too.
+- Every number on a tile names its source when you hover over it, measured ones included. Only
+  estimates had a tooltip before, and the mass had none.
 
 ## 2026-11-01 — eBird links
 

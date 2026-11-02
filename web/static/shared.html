@@ -36,7 +36,8 @@
     {{/* Named in full, not L/W/M: the initials cost every reader who has not
          yet learned them (product.tileContents). Length, bill, and tail, then the wing.
 
-         `whynot` supplies the tooltip. All of them used to say "estimated" for
+         `prov` supplies every value's tooltip, measured ones included: where it came from
+         (product.provenancePerMetric). All of them used to say "estimated" for
          anything not measured, which was false for a near-match: that is a
          real measurement with calipers, of a sibling taxon, and product.measuredVersusModeled draws
          it SOLID for exactly that reason. The tile calling it an estimate
@@ -46,17 +47,17 @@
     <div class="ft">
       {{/* A measured part's name takes its part's color (product.labeledDetailDiagram, product.oneDiagramVocabulary). The
            species page's tile adds head, neck, and body, which are modeled and gray. */}}
-      <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="{{whynot .S.TotalLength.Prov}}"{{end}}>Length {{.Length}}</span>
-      <span{{if ne .S.Segments.Bill.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Bill.Prov}}"{{end}}><span class="k k-bill">Bill</span> {{.BillStr}}</span>
-      {{if .Big}}<span{{if ne .S.Segments.Head.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Head.Prov}}"{{end}}>Head {{.HeadStr}}</span>
-      <span{{if ne .S.Segments.Neck.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Neck.Prov}}"{{end}}>Neck {{.NeckStr}}</span>
-      <span{{if ne .S.Segments.Body.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Body.Prov}}"{{end}}>Body {{.BodyStr}}</span>
-      {{end}}<span{{if ne .S.Segments.Tail.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Tail.Prov}}"{{end}}><span class="k k-tail">Tail</span> {{.TailStr}}</span>
+      <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.TotalLength.Prov .S.ScientificName}}">Length {{.Length}}</span>
+      <span{{if ne .S.Segments.Bill.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.Segments.Bill.Prov .S.ScientificName}}"><span class="k k-bill">Bill</span> {{.BillStr}}</span>
+      {{if .Big}}<span{{if ne .S.Segments.Head.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.Segments.Head.Prov .S.ScientificName}}">Head {{.HeadStr}}</span>
+      <span{{if ne .S.Segments.Neck.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.Segments.Neck.Prov .S.ScientificName}}">Neck {{.NeckStr}}</span>
+      <span{{if ne .S.Segments.Body.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.Segments.Body.Prov .S.ScientificName}}">Body {{.BodyStr}}</span>
+      {{end}}<span{{if ne .S.Segments.Tail.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.Segments.Tail.Prov .S.ScientificName}}"><span class="k k-tail">Tail</span> {{.TailStr}}</span>
     </div>
     <div class="ft">
-      <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="{{whynot .S.Wingspan.Prov}}"{{end}}>Wingspan {{.Wing}}</span>
+      <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.Wingspan.Prov .S.ScientificName}}">Wingspan {{.Wing}}</span>
       {{with .InnerStr}}<span class="est" title="{{$.InnerWhy}}"><span class="k k-wing">Inner</span> {{.}}</span>
-      {{end}}{{with .ChordStr}}<span{{if ne $.S.WingChord.Prov.Kind "measured"}} class="est" title="{{whynot $.S.WingChord.Prov}}"{{end}}><span class="k k-chord">Chord</span> {{.}}</span>{{end}}
+      {{end}}{{with .ChordStr}}<span{{if ne $.S.WingChord.Prov.Kind "measured"}} class="est"{{end}} title="{{prov $.S.WingChord.Prov $.S.ScientificName}}"><span class="k k-chord">Chord</span> {{.}}</span>{{end}}
     </div>
     {{/* How much of the species observations held by the regions currently
          on screen (product.shareOfRecords). It answers the question the filtered page is
@@ -79,7 +80,7 @@
   </div>
   {{/* The drawing, and its one label: the mass beside its cube, set as page text over the
        drawing so it keeps the measurement lines' size at any width (tech.textSizeFloor). */}}
-  <div class="dwrap">{{template "diagram" .}}{{with .MassLabel}}<span class="ml{{if .Est}} est{{end}}"
+  <div class="dwrap">{{template "diagram" .}}{{with .MassLabel}}<span class="ml{{if .Est}} est{{end}}" title="{{.Title}}"
     style="left:{{f1 .Left}}%;bottom:{{f1 .Bottom}}%"><span class="k k-mass">Mass</span> {{.Value}}</span>{{end}}</div>
   <div class="lo">
     <div class="idline">

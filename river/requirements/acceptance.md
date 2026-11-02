@@ -1233,6 +1233,21 @@ Watched failing: 2026-09-28, by anchoring every label at the same y, by removing
 Watched failing: 2026-11-01, against the labeled diagram ("the table reports Mass but the tile does not name it", and Head and Neck likewise), and by the short badge on the species page ("carries the family's common name").
 Watched failing: 2026-11-01, before the tile named the inner span ("the table reports Inner span but the tile does not name it", "does not key <span class=\"k k-wing\">Inner span</span>") and while Wingspan was still emerald ("keys Wingspan to a color").
 
+### tileValuesNameTheirSource
+
+**Every value on a tile says where it came from in its tooltip, measured ones included**
+
+**Verifies:** [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) · **Level:** code · **Method:** assertions on the rendered species page and on the tooltip function
+
+**Assertions:** on the species page's tile, Length, Bill, Head, Neck, Body, Tail, Wingspan, Chord,
+and Mass each carry a tooltip, and a measured one begins `measured, from` and its source; a
+measurement filed under another name adds `filed as` and that name, and one filed under the
+species' own name does not repeat it; a near-match names its donor and its source.
+
+**Run:** `go test ./cmd/birdview/ -run TestTileValuesNameTheirSource`
+**Status: verified 2026-11-01, passing.**
+Watched failing: 2026-11-01, before measured values had tooltips ("Bill (measured) has no tooltip saying where it came from", and Tail, Chord, and Mass likewise; "a measurement filed under an older name has the tooltip \"estimated\""; "a near-match's tooltip is \"measured, but on Sturnella magna — not this species\"; it names the donor and the source").
+
 ### innerSpanDerived
 
 **The inner span is the wingspan less two chords, and never passes for a measurement**
@@ -2389,7 +2404,7 @@ Watched failing: 2026-10-23, by the broken variants above, which the test keeps.
 | [product.borrowedMeasurementsSaySo](local/product/measurements.md#borrowedmeasurementssayso) | sharedMeasurementsDisclosed | |
 | [product.escapedBirdsListed](local/product/measurements.md#escapedbirdslisted) | escapedBirdsListedAndServed | |
 | [product.tileMarksModeled](local/product/measurements.md#tilemarksmodeled) | tileMarksNonMeasured | |
-| [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) | provenanceWellFormed | |
+| [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) | provenanceWellFormed, tileValuesNameTheirSource | |
 | [product.metricProvenanceExplained](local/product/measurements.md#metricprovenanceexplained) | detailShowsProvenance | |
 | [product.inaturalistLink](local/product/presentation.md#inaturalistlink) | | inaturalistLinkConfidentOnly withdrawn ([decisions.ebirdLinkReplacesInaturalist](decisions.md#ebirdlinkreplacesinaturalist)) |
 | [product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled) | diagramDistinguishesModeled | |

@@ -470,7 +470,7 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 func TestTileMassLabelSitsOnTheCube(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/?month=all&show=all")
 	face := regexp.MustCompile(`(?s)<rect class="mcface" x="([\d.]+)" y="([\d.]+)"\s*width="([\d.]+)" height="([\d.]+)"/>`)
-	label := regexp.MustCompile(`<span class="ml(?: est)?"\s*style="left:([\d.]+)%;bottom:([\d.]+)%"><span class="k k-mass">Mass</span> `)
+	label := regexp.MustCompile(`<span class="ml(?: est)?"(?: title="[^"]*")?\s*style="left:([\d.]+)%;bottom:([\d.]+)%"><span class="k k-mass">Mass</span> `)
 	f := func(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 	n := 0
 	for _, id := range []string{"annhum", "amerob", "amecro", "greblu", "blasti"} {
@@ -1330,7 +1330,7 @@ func TestDetailTileNamesEverySegment(t *testing.T) {
 		}
 		// What the tile says, name to value and whether it is marked estimated.
 		said := map[string]string{}
-		for _, m := range regexp.MustCompile(`(?s)<span( class="est"[^>]*)?>(?:<span class="k [^"]*">)?([A-Za-z]+)(?:</span>)? ([^<]+)</span>`).FindAllStringSubmatch(body, -1) {
+		for _, m := range regexp.MustCompile(`(?s)<span( class="est")?(?: title="[^"]*")?>(?:<span class="k [^"]*">)?([A-Za-z]+)(?:</span>)? ([^<]+)</span>`).FindAllStringSubmatch(body, -1) {
 			said[m[2]] = strings.TrimSpace(m[3]) + "|" + strconv.FormatBool(m[1] != "")
 		}
 		if m := regexp.MustCompile(`<span class="ml( est)?"[^>]*><span class="k k-mass">Mass</span> ([^<]+)</span>`).FindStringSubmatch(body); m != nil {
@@ -2281,13 +2281,13 @@ func TestNoSectionMixesMassUnits(t *testing.T) {
 // length, wingspan, and mass, and the only thing on the index distinguishing
 // them was one tilde labeled with the wrong reason.
 //
-// Watched fail: returning "estimated" from whyNotMeasured for NearMatch
+// Watched fail: returning "estimated" from provenanceTip for NearMatch
 // reports the donor missing.
 //
 // Verifies: product.provenancePerMetric, product.measuredVersusModeled. Criterion: acceptance.unitToggleSwitches.
 func TestNearMatchTooltipNamesTheDonor(t *testing.T) {
 	near := dataset.Provenance{Kind: dataset.NearMatch, SourceTaxon: "Sturnella magna"}
-	got := whyNotMeasured(near)
+	got := provenanceTip(near, "Sturnella neglecta")
 	if !strings.Contains(got, "Sturnella magna") {
 		t.Errorf("near-match tooltip = %q, want it to name the donor: two tiles showing "+
 			"an identical mass are not a coincidence when one borrowed it", got)
@@ -2298,11 +2298,11 @@ func TestNearMatchTooltipNamesTheDonor(t *testing.T) {
 	}
 	// A modeled value is still an estimate, and still says so.
 	mod := dataset.Provenance{Kind: dataset.Modeled, Model: "cranium modeled as 7.5 x mass^(1/3)"}
-	if m := whyNotMeasured(mod); !strings.HasPrefix(m, "estimated") {
+	if m := provenanceTip(mod, ""); !strings.HasPrefix(m, "estimated") {
 		t.Errorf("modeled tooltip = %q, want it to lead with estimated", m)
 	}
 	// A near-match with no donor recorded must not claim one.
-	if m := whyNotMeasured(dataset.Provenance{Kind: dataset.NearMatch}); strings.Contains(m, "Sturnella") {
+	if m := provenanceTip(dataset.Provenance{Kind: dataset.NearMatch}, ""); strings.Contains(m, "Sturnella") {
 		t.Errorf("a near-match with no source taxon invented one: %q", m)
 	}
 }
@@ -4689,5 +4689,51 @@ func TestInnerSpanIsDerived(t *testing.T) {
 	g := view.Layout(&whole, whole.TotalLength.Value, whole.Wingspan.Value, tileBox)
 	if tl := newTile(&whole, g, tileBox, one, ""); tl.InnerStr != "" {
 		t.Errorf("chords meeting at the axis: the tile still names an Inner of %s", tl.InnerStr)
+	}
+}
+
+// TestTileValuesNameTheirSource asserts that every value on a tile says where it came from in its
+// tooltip, measured ones included: a measured value names its dataset, a near-match its donor,
+// and a modeled one its model. Until 2026-11-01 only values that were not measured had one, so a
+// reader could learn where an estimate came from and not where a measurement did.
+//
+// Verifies: product.provenancePerMetric. Criterion: acceptance.tileValuesNameTheirSource.
+func TestTileValuesNameTheirSource(t *testing.T) {
+	sp := findSpecies(t, "greblu")
+	body := mustGet(t, newTestServer(t), "/species/greblu?units=metric")
+	tile := mustMatch(t, body, `(?s)(<div class="tile big">.*?<div class="lo">)`, "the species page's tile")
+	said := map[string]string{}
+	for _, m := range regexp.MustCompile(`<span(?: class="(?:ml )?est")?(?: class="ml")?(?: title="([^"]*)")?[^>]*>(?:<span class="k [^"]*">)?([A-Z][a-z]+)(?:</span>)? [^<]+</span>`).FindAllStringSubmatch(tile, -1) {
+		said[m[2]] = html.UnescapeString(m[1])
+	}
+	for name, m := range map[string]dataset.Metric{
+		"Length": sp.TotalLength, "Bill": sp.Segments.Bill, "Head": sp.Segments.Head, "Neck": sp.Segments.Neck,
+		"Body": sp.Segments.Body, "Tail": sp.Segments.Tail, "Wingspan": sp.Wingspan, "Chord": sp.WingChord, "Mass": sp.Mass,
+	} {
+		title, ok := said[name]
+		switch {
+		case !ok:
+			t.Errorf("the tile names no %s", name)
+		case title == "":
+			t.Errorf("%s (%s) has no tooltip saying where it came from", name, m.Prov.Kind)
+		case m.Prov.Kind == dataset.Measured && !strings.HasPrefix(title, "measured, from "+m.Prov.Source):
+			t.Errorf("%s is measured, and its tooltip is %q; it names its source, %q", name, title, m.Prov.Source)
+		}
+	}
+	if !slices.ContainsFunc([]dataset.Metric{sp.TotalLength, sp.Segments.Bill, sp.Segments.Tail, sp.Wingspan, sp.WingChord, sp.Mass},
+		func(m dataset.Metric) bool { return m.Prov.Kind == dataset.Measured }) {
+		t.Fatal("the fixture has no measured value, so this test cannot see a measured tooltip; pick another bird")
+	}
+	// A measurement filed under another name says so, so the claim can be checked (product.provenancePerMetric).
+	filed := dataset.Provenance{Kind: dataset.Measured, Source: "AVONET v7, sheet AVONET1_BirdLife", SourceTaxon: "Charadrius nivosus"}
+	if got := provenanceTip(filed, "Anarhynchus nivosus"); got != "measured, from AVONET v7, sheet AVONET1_BirdLife, filed as Charadrius nivosus" {
+		t.Errorf("a measurement filed under an older name has the tooltip %q", got)
+	}
+	if got := provenanceTip(filed, "Charadrius nivosus"); strings.Contains(got, "filed as") {
+		t.Errorf("a measurement filed under the species' own name has the tooltip %q; it repeats the name", got)
+	}
+	near := dataset.Provenance{Kind: dataset.NearMatch, Source: "AVONET v7", SourceTaxon: "Sturnella magna"}
+	if got := provenanceTip(near, "Sturnella neglecta"); !strings.Contains(got, "Sturnella magna") || !strings.Contains(got, "AVONET v7") {
+		t.Errorf("a near-match's tooltip is %q; it names the donor and the source", got)
 	}
 }

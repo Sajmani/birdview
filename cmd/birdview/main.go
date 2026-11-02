@@ -824,7 +824,7 @@ func ebirdURL(sp *dataset.Species) string {
 // width (tech.textSizeFloor); Left and Bottom place it, in percent of the drawing's width and
 // height, so it follows the cube as the drawing scales.
 type massLabel struct {
-	Value        string
+	Value, Title string
 	Est          bool
 	Left, Bottom float64
 }
@@ -860,6 +860,7 @@ func newTile(sp *dataset.Species, g view.Geometry, box view.Box, u units, loc da
 	if c := t.MassCube; c.Side > 0 {
 		t.MassLabel = &massLabel{
 			Value:  t.MassStr,
+			Title:  provenanceTip(sp.Mass.Prov, sp.ScientificName),
 			Est:    sp.Mass.Prov.Kind != dataset.Measured,
 			Left:   100 * (c.X + c.Side + c.Depth + 6) / box.W,
 			Bottom: 100 * (box.H - (c.Y + c.Side)) / box.H,
@@ -884,7 +885,7 @@ func innerSpan(sp *dataset.Species) (float64, bool) {
 func innerSpanWhy(sp *dataset.Species) string {
 	from := func(m dataset.Metric) string {
 		if m.Prov.Kind == dataset.Modeled {
-			return ", " + whyNotMeasured(m.Prov)
+			return ", " + provenanceTip(m.Prov, sp.ScientificName)
 		}
 		src := m.Prov.Source
 		if src == "" {
@@ -1572,27 +1573,37 @@ var funcs = template.FuncMap{
 	"add": func(a, b float64) float64 { return a + b },
 	"sub": func(a, b float64) float64 { return a - b },
 	"div": func(a, b float64) float64 { return a / b },
-	// whynot explains, in a tooltip, why a value is not this bird's own
-	// measurement. The three footer cells used to say "estimated" for
-	// anything not measured, which is false for a near-match and said so
-	// right beside a stroke product.measuredVersusModeled draws SOLID because it IS a measurement.
-	"whynot": whyNotMeasured,
+	// prov says, in a tooltip, where a value came from (product.provenancePerMetric).
+	"prov": provenanceTip,
 }
 
-// whyNotMeasured turns a provenance into a short tooltip.
+// provenanceTip turns a provenance into a short tooltip, for every value a tile shows.
 //
-// It names the donor for a near-match, because that is the fact a reader can
-// act on: two tiles showing an identical mass are not a coincidence when one
-// of them borrowed it from the other, and nothing else on the home page says so.
+// A measured value names its dataset, and the name it is filed under where that differs from own,
+// the species' scientific name, so the
+// claim can be checked. A near-match names its donor, because that is the fact a reader can act
+// on: two tiles showing an identical mass are not a coincidence when one of them borrowed it from
+// the other. It does not say "estimated", which the footer cells once said for anything not
+// measured, beside a stroke product.measuredVersusModeled draws SOLID because it IS a measurement.
 //
 // Verifies: product.provenancePerMetric, product.measuredVersusModeled.
-func whyNotMeasured(p dataset.Provenance) string {
+func provenanceTip(p dataset.Provenance, own string) string {
+	from := ""
+	if p.Source != "" {
+		from = ", from " + p.Source
+	}
 	switch p.Kind {
+	case dataset.Measured:
+		tip := "measured" + from
+		if p.SourceTaxon != "" && p.SourceTaxon != own {
+			tip += ", filed as " + p.SourceTaxon
+		}
+		return tip
 	case dataset.NearMatch:
 		if p.SourceTaxon != "" {
-			return "measured, but on " + p.SourceTaxon + " \u2014 not this species"
+			return "measured, but on " + p.SourceTaxon + " \u2014 not this species" + from
 		}
-		return "measured on a related species, not this one"
+		return "measured on a related species, not this one" + from
 	case dataset.Modeled:
 		if p.Model != "" {
 			return "estimated: " + p.Model

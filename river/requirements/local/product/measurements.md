@@ -79,6 +79,12 @@ The three kinds:
 - **`modeled`** — computed rather than measured. `model` names the computation, and where the
   model's accuracy has been measured it states that too.
 
+**Every value a tile shows says where it came from in its tooltip**, measured values included: a
+measured value names its source, and the name it is filed under where that is not the species'
+own; a near-match names its donor and its source; a modeled value names its model. A reader can
+then learn where a measurement came from as easily as an estimate, without opening the species
+page.
+
 Rationale: one record covers what [decisions.noOpenLengthAndWingspan](../../decisions.md#noopenlengthandwingspan) solved for lengths and
 [decisions.abaSpeciesWithoutAvonet](../../decisions.md#abaspecieswithoutavonet) for split taxa, so each later gap is a labeling problem rather
 than a redesign.
