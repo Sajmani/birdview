@@ -27,6 +27,9 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
   estimates had a tooltip before, and the mass had none.
 - **Tiny birds** joins the things to try: six birds around 10 cm long, from Winter Wren to Bushtit.
 - The line of things to try begins **Try**, without "New here?".
+- The line under the histogram says it counts all the birds, then how many are shown: *Length
+  distribution of all 1041 birds, showing the first 100*. It said *of the first 100 of 1041
+  birds*, though the histogram has always counted them all.
 - **Grassland hunters** joins them too: the birds of grassland that hunt animals, from Burrowing
   Owl to Golden Eagle.
 

@@ -25,8 +25,10 @@ as you type, and lists them once there are 10 or fewer. Where a bird has more th
 any of them finds it; the simplest is the one shown.
 
 Under the find box are the settings, then **Reset**. Click a setting to change it. Under them, a
-**histogram** has one bar per tier, each linking to its tier, and a line names the order and how
-many birds are drawn, such as *Length distribution of the first 100 of 1041 birds*. Each tier
+**histogram** has one bar per tier, each linking to its tier, and a line names the order, how
+many birds the histogram counts, and how many are drawn, such as *Length distribution of all 1041
+birds, showing the first 100*. The histogram counts every bird the settings match, even those not
+drawn, so you can jump to any tier; under **Pinned** it counts only the pinned birds. Each tier
 heading names the order and the tier, such as **Tail Tier 3**, its range, and how many birds it
 holds.
 

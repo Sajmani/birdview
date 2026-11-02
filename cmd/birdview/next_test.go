@@ -546,7 +546,7 @@ func TestNextShowAll(t *testing.T) {
 	var at []int
 	marks := []string{"</header>", `<h2 class="settitle">`, `<div class="showrow">`, ">Clear pins</a>", `<div class="pinned"`,
 		`<form class="search"`, `<div class="count">`, `data-ctl="Order by"`, `data-ctl="Names"`, ">Reset</a>",
-		`<nav class="hist"`, `<span class="shown">Mass distribution of the first 50 of`, `<div class="tiles">`}
+		`<nav class="hist"`, `<span class="shown">Mass distribution of all `, `<div class="tiles">`}
 	for _, m := range marks {
 		at = append(at, strings.Index(body, m))
 	}
@@ -561,15 +561,30 @@ func TestNextShowAll(t *testing.T) {
 	if strings.Contains(body, ">Show all</a>\n") && strings.Index(body, ">Show all</a>") < strings.Index(body, `<div class="tiles">`) {
 		t.Error("the count line still has its own Show all; it is a Show choice now")
 	}
-	// The sentence under the histogram leads with the chosen order.
+	// The sentence under the histogram leads with the chosen order, and says what the histogram
+	// counts, which is every bird the settings match whatever is drawn, and then what is drawn
+	// (Sameer, 2026-11-02).
 	for target, want := range map[string]string{
 		"/?show=all": "Frequency distribution of all %d birds",
 		"/?by=length&show=pinned&pin=amecro&pin=annhum": "Length distribution of %d pinned birds",
-		"/?by=tail&rev=1": "Tail length distribution of the first 100 of %d birds",
+		"/?by=tail&rev=1":                    "Tail length distribution of all %d birds, showing the first 100",
+		"/?by=length&pin=annhum&pin=grbher3": "Length distribution of all %d birds, showing the first 100, plus 1 pin",
 	} {
 		p := nextAt(s, target)
 		if w := fmt.Sprintf(want, p.Count); !strings.Contains(mustGet(t, s, target), `<span class="shown">`+w+`</span>`) {
 			t.Errorf("%s does not say %q", target, w)
+		}
+	}
+
+	if p := nextAt(s, "/?by=tail&rev=1"); len(p.Tiles) >= p.Count {
+		t.Errorf("the tails draw %d of %d birds; the fixture cannot show the histogram counting birds not drawn", len(p.Tiles), p.Count)
+	} else {
+		n := 0
+		for _, tr := range p.Tiers {
+			n += tr.Count
+		}
+		if n != p.Count {
+			t.Errorf("the histogram's tiers count %d birds, and the sentence says all %d", n, p.Count)
 		}
 	}
 
@@ -724,10 +739,10 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	if after.AddedPast != 1 || after.First != nextCap || after.Hidden != before.Hidden-1 {
 		t.Errorf("after adding: first %d, added past it %d, hidden %d (was %d)", after.First, after.AddedPast, after.Hidden, before.Hidden)
 	}
-	if _, body := get(t, s, follow(t, s, string(m[0].URL))); !strings.Contains(body, " of "+strconv.Itoa(after.Count)+" birds, plus 1 pin</span>") {
-		t.Errorf("the count line does not say \"plus 1 pin\" after %d birds", after.Count)
+	if _, body := get(t, s, follow(t, s, string(m[0].URL))); !strings.Contains(body, "all "+strconv.Itoa(after.Count)+" birds, showing the first "+strconv.Itoa(nextCap)+", plus 1 pin</span>") {
+		t.Errorf("the count line does not say \"plus 1 pin\" after all %d birds and the first %d", after.Count, nextCap)
 	}
-	if _, body := get(t, s, "/?show=2&month=all&pin="+last.ID+"&pin="+all.Tiles[len(all.Tiles)-2].S.ID); !strings.Contains(body, " birds, plus 2 pins</span>") {
+	if _, body := get(t, s, "/?show=2&month=all&pin="+last.ID+"&pin="+all.Tiles[len(all.Tiles)-2].S.ID); !strings.Contains(body, " birds, showing the first 2, plus 2 pins</span>") {
 		t.Error("with two pins past the cap, the count line does not say \"plus 2 pins\"")
 	}
 	if len(after.Tiles) != len(before.Tiles)+1 {

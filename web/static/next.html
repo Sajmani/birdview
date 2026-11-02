@@ -144,9 +144,10 @@
      to its tier's heading, with every bird shown when that tier is not drawn
      (product.nextView). Heights are inline because they are data. */}}
 {{if .Histogram}}<nav class="hist" aria-label="Birds in each tier">{{range .Histogram}}{{if .Empty}}<span class="gap"></span>{{else}}<a href="{{.URL}}" style="height:{{.Percent}}%" aria-label="{{.Label}}" title="{{.Label}}"></a>{{end}}{{end}}</nav>{{end}}
-{{/* What the histogram and the birds below it are: the order's
-     distribution over the birds drawn. */}}
-<p class="shownline"><span class="shown">{{.OrderLabel}} distribution of {{if eq .Show "pinned"}}{{.Count}} pinned {{if eq .Count 1}}bird{{else}}birds{{end}}{{else if eq .Show "all"}}all {{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{else}}{{if .MoreURL}}the first {{.First}} of {{end}}{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{with .AddedPast}}, plus {{.}} {{if eq . 1}}pin{{else}}pins{{end}}{{end}}{{end}}</span></p>
+{{/* What the histogram counts, then what is drawn below it. The histogram counts every bird the
+     settings match, whatever is drawn, so that any tier can be reached from it; under Pinned only it
+     counts the pinned birds (product.nextView). */}}
+<p class="shownline"><span class="shown">{{.OrderLabel}} distribution of {{if eq .Show "pinned"}}{{.Count}} pinned {{if eq .Count 1}}bird{{else}}birds{{end}}{{else}}{{if ne .Count 1}}all {{end}}{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{if and (ne .Show "all") .MoreURL}}, showing the first {{.First}}{{with .AddedPast}}, plus {{.}} {{if eq . 1}}pin{{else}}pins{{end}}{{end}}{{end}}{{end}}</span></p>
 {{if .Tiles}}
 <div class="tiles">
   {{range .Items}}{{if .Tile}}{{template "tile" .Tile}}{{else if .Group}}<h3 class="tierhd pinhd" id="pinned-birds"><span class="tier">Pinned</span>

@@ -304,9 +304,10 @@ setting but show and the find box, then All with the count the settings match, P
 (2), and Clear pins, the chosen one marked, all on one line at 360px (`TestShowRowFitsAPhone`); Show is no longer a closed setting. The page runs, top
 to bottom: the header, the heading, the Show row, the pinned list, the find box, one count row
 (Order by through Names, then Reset), the histogram, the sentence, and the birds. The sentence
-names the order and what is drawn: "Mass distribution of the first 50 of", "Frequency
-distribution of all N birds", "Length distribution of N pinned birds", "Tail length distribution of the
-first 100 of N birds" (`TestNextShowAll`). The heading reads "Showing pinned birds" under Pinned only, and
+names the order, what the histogram counts, and what is drawn: "Mass distribution of all", "Frequency
+distribution of all N birds", "Length distribution of N pinned birds", "Tail length distribution of
+all N birds, showing the first 100", and with a pin past the first, ", plus 1 pin"; and the
+histogram's tiers count all N birds while the first 100 are drawn (`TestNextShowAll`). The heading reads "Showing pinned birds" under Pinned only, and
 otherwise "Showing birds in" the regions and months, then "· Family:", "· Habitat:", and "· Diet:"
 with what is chosen in each (`TestNextHeading`).
 `show=100`, `show=`, `show=0`, `show=-3`, and `show=zero` redirect to the address without show;
@@ -375,6 +376,7 @@ Watched failing: 2026-10-31, by iNat back in the top row ("iNat's foot -260px of
 Watched failing: 2026-10-30, by the pin back in the drawing's lower right corner ("s-calhum pin 25px from the top, 19px from the right"), by the notes above the drawing ("s-sedwre1 drawing 21px below s-anpswi's"), and by a name line keeping no room for the links, with the name set at 17px ("s-migwar name runs 53px under the links"; at 13px every name in the dataset ends short of them at 360px).
 Watched failing: 2026-10-28, by the longer labels (Show first, Show all, Show pinned) at 360px ("Show choice 4 starts at 275px, the first at 242px; want one line").
 Watched failing: 2026-10-28, by Reset back before the settings ("the page does not run in order: \">Reset</a>\" … after \"data-ctl=\\\"Names\\\"\"") and by a sentence without the order's name ("\"<span class=\\\"shown\\\">Mass distribution of the first 50 of\" at -1").
+Watched failing: 2026-11-02, by the sentence that said "of the first 100 of" while the histogram counted every bird ("the page does not run in order: \"<span class=\\\"shown\\\">Mass distribution of all \" at -1"), and by a wrong pin in the fixture's address, which drew no pin past the first ("does not say \"Length distribution of all 1041 birds, showing the first 100, plus 1 pin\"").
 Watched failing: 2026-10-28, by the previous layout ("the page has no Show row"), by the count sentence above the histogram ("the page does not run in order: \"<span class=\\\"shown\\\">First 50 of\" … after \"<nav class=\\\"hist\\\"\""), and by a heading without the family ("… want \"Showing birds in May or June · Family: Corvidae · …\"").
 Watched failing: 2026-10-27, by here.js leaving Now's link alone ("after here.js, Now links to /?by=mass&month=now&region=CA; want /?by=mass&month=Oct&region=CA"), by the server not redirecting month=now ("GET /?month=now = 200; want 303 to /?month=Oct"), and by here.js leaving the welcome template's month slot unfilled.
 Watched failing: 2026-10-26, by dropping the frequency default ("coshum (0.000207) follows a bird at 0.000015").

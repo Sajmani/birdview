@@ -853,8 +853,9 @@ home page in those. Its footer carries the full credits, which every other page 
   saying what is drawn ("Showing pinned birds", or "Showing birds in" the regions and months
   chosen, then any chosen family, habitat, and diet under their settings' labels); the **Show**
   choices and **Clear pins**, on one line; the pinned birds; the find box; the other settings,
-  then **Reset**; the histogram; then a sentence naming the order and what is drawn ("Length
-  distribution of the first 100 of 1006 birds, plus 2 pins"); then the
+  then **Reset**; the histogram; then a sentence naming the order, what the histogram counts,
+  and what is drawn ("Length distribution of all 1006 birds, showing the first 100, plus 2
+  pins"); then the
   birds. The steps a reader takes to compare birds, show pinned, see the pins, find more, come
   first; the settings that narrow the set come after. The Show choices are short (**First**,
   **All**, **Pinned**, since the heading already says "Showing") so that with **Clear pins** they
@@ -923,10 +924,12 @@ home page in those. Its footer carries the full credits, which every other page 
   (`show=pinned`), for a comparison of the reader's own picks. The chosen one is marked. Wherever unpinned birds are left
   out (after the first, between pinned birds past them, or after the last pinned bird), a gap row
   says how many are hidden there and links to `show=all`. Choosing a setting keeps Show as it is,
-  Pinned only included; Reset returns to the default. Under the histogram, a sentence names the
-  chosen order, as Order by does but with Bill and Tail as "Bill length" and "Tail length", and
-  what is drawn: "Length distribution of the first 100 of
-  1006 birds, plus 2 pins", "Frequency distribution of all 1006 birds", "Mass distribution of 2
+  Pinned only included; Reset returns to the default. **The histogram counts every bird the
+  settings match, whatever is drawn**, so any tier can be reached from it; under Pinned only it
+  counts the pinned birds (Sameer, 2026-11-02). Under the histogram, a sentence names the
+  chosen order, as Order by does but with Bill and Tail as "Bill length" and "Tail length", what
+  the histogram counts, and what is drawn: "Length distribution of all 1006 birds, showing the
+  first 100, plus 2 pins", "Frequency distribution of all 1006 birds", "Mass distribution of 2
   pinned birds". 100 is a reader's first
   screens, not a limit of speed: all 1,041 birds paint in 0.73 s on a phone-class CPU over 5G
   (measured 2026-10-26 under Lighthouse's mobile throttling, 229 KiB).
