@@ -1292,7 +1292,8 @@ func TestNextFirstCommitsOnClick(t *testing.T) {
 // BirdView draws, with Click a bird and How to read a drawing, and no key
 // line ("Drawn to scale", "Solid is measured"); then New here? Try, whose
 // five comparisons each pin six real birds and show only them, by length,
-// whose herons and ducks draw only those two families in every month, and
+// whose grassland hunters draw only grassland birds that hunt animals, whose
+// herons and ducks draw only those two families in every month, and
 // whose birds around you now is /#here-and-now with its status naming the
 // Region setting.
 //
@@ -1355,7 +1356,23 @@ func TestNextWelcomeLine(t *testing.T) {
 			if !strings.Contains(href, "month=all") {
 				t.Errorf("herons and ducks is %s; want every month", href)
 			}
+		case text == "grassland hunters":
+			p := nextAt(s, href)
+			if len(p.Tiles) < 10 {
+				t.Errorf("the grassland hunters draw %d birds", len(p.Tiles))
+			}
+			has := func(as []dataset.Assignment, v string) bool {
+				return slices.ContainsFunc(as, func(a dataset.Assignment) bool { return a.Value == v })
+			}
+			for _, tl := range p.Tiles {
+				if !has(tl.S.Habitats, "Grassland") || !has(tl.S.Niches, "Vertivore") {
+					t.Errorf("the grassland hunters draw %s, of habitats %v and niches %v", tl.S.ID, tl.S.Habitats, tl.S.Niches)
+				}
+			}
 		}
+	}
+	if !strings.Contains(w[1], ">grassland hunters</a>") {
+		t.Error("the welcome line does not offer the grassland hunters")
 	}
 	if sizes != 5 {
 		t.Errorf("the welcome line compares %d sizes of birds, want 5 (tiny, small, medium, large, huge)", sizes)

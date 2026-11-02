@@ -133,6 +133,10 @@ using the *1 in N* figure on every tile. The tiers are powers of ten: 1 in 10 to
   - *Huge:* California Condor, American White Pelican, Mute Swan, Magnificent Frigatebird, Bald
     Eagle, and Black-footed Albatross, all with wings over two meters. The albatross is the
     shortest, 709 mm, yet spans 2265 mm; the frigatebird weighs about a seventh of the swan.
+- **See the [grassland hunters](/?habitat=Grassland&niche=Vertivore).** Habitat set to Grassland
+  and Diet to Hunts animals: fourteen hawks, falcons, owls, and an eagle. The Golden Eagle weighs
+  about 28 times as much as the Burrowing Owl, 4.25 kg against 151 g, and spans 2056 mm against
+  600 mm.
 - **See all [herons and ducks](/?family=Ardeidae&family=Anatidae&month=all) together.** Similar
   lengths, different builds: herons are nearly all neck and leg, ducks nearly all body.
 - **"Big" depends on the measure.** Order every bird by [length](/?by=length&month=all&show=all),
