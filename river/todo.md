@@ -136,20 +136,6 @@ Feedback from a reader of the home page ([product.nextView](requirements/local/p
 The reader also asked what "1 in 6,322 species observations" in New York means, so the line does
 not explain itself ([product.shareOfRecords](requirements/local/product/presentation.md#shareofrecords)).
 
-## chordNamedOnBar
-
-**The species page no longer says "Wing chord" on the bar**
-
-Status: open
-Owner: Sameer
-Gate: owner's call
-
-The 2026-11-01 reader run ([summary](../usertests/results/2026-11-01/summary.md)) found that the
-leader labels' one advantage was a "Wing chord" label on the crossbar's outer segment; on the tile,
-readers find the chord only from the note and the ticks, and on a bird whose wingspan is measured
-the whole bar is solid. Options: draw the chord's outer segments in a second green, or mark them
-with the Chord color's tint, so the name on the tile and the part match by color as Bill does.
-
 ## massUnitConsistent
 
 **A bird's mass changes unit between pages**

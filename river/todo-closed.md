@@ -4,6 +4,20 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## chordNamedOnBar
+
+**The species page no longer says "Wing chord" on the bar**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-11-01, by the owner's call: the chord is drawn orchid and named Chord in orchid on the tile ([decisions.partColorsByMeasurement](requirements/decisions.md#partcolorsbymeasurement), [decisions.innerSpanDerived](requirements/decisions.md#innerspanderived))
+
+The 2026-11-01 reader run ([summary](../usertests/results/2026-11-01/summary.md)) found that the
+leader labels' one advantage was a "Wing chord" label on the crossbar's outer segment; on the tile,
+readers find the chord only from the note and the ticks, and on a bird whose wingspan is measured
+the whole bar is solid. Options: draw the chord's outer segments in a second green, or mark them
+with the Chord color's tint, so the name on the tile and the part match by color as Bill does.
+
 ## pinnedSideBySide
 
 **Pinned birds stack in one column, one per tier**
