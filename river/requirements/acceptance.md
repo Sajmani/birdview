@@ -1220,7 +1220,8 @@ Watched failing: 2026-10-22, before the note existed (`TestFoldedFigureExplained
 lines and mass label name **every row of the measurements table**, total length as Length and
 wing chord as Chord, with the table's value and a `~` exactly where the table's kind is not
 `measured`, in both unit systems. Written against the table rather than a list of metric names, so
-it maintains itself. Bill, Wingspan, Chord, and Mass are keyed to their parts' colors; the drawing
+it maintains itself. Bill, Inner, Chord, Tail, and Mass are keyed to their parts' colors and
+Wingspan is not ([decisions.innerSpanDerived](decisions.md#innerspanderived)); the drawing
 holds no text and no leader line; and the badge carries the family's common name
 ([decisions.textSizeFloor](decisions.md#textsizefloor)). Until 2026-11-01 this criterion held the labels inside the drawing to
 a layout, a paint order, and a column; those assertions went with the labels.
@@ -1230,6 +1231,23 @@ a layout, a paint order, and a column; those assertions went with the labels.
 Watched failing: 2026-09-28, by removing the mass label — which is the state this check was written to catch — and by labeling mass with the wingspan's value.
 Watched failing: 2026-09-28, by anchoring every label at the same y, by removing the minimum-gap pass, by dropping a segment from the list, by removing the reserved gutter and by inflating it, by moving the wing labels back inside the centering group — which reproduces the bug where the neck's leader struck through "Wing chord" and "Wingspan" — and, for the marker, by reverting the `~` to the `.dlabel.est::after` rule it came from and by marking every label estimated regardless of provenance.
 Watched failing: 2026-11-01, against the labeled diagram ("the table reports Mass but the tile does not name it", and Head and Neck likewise), and by the short badge on the species page ("carries the family's common name").
+Watched failing: 2026-11-01, before the tile named the inner span ("the table reports Inner span but the tile does not name it", "does not key <span class=\"k k-wing\">Inner span</span>") and while Wingspan was still emerald ("keys Wingspan to a color").
+
+### innerSpanDerived
+
+**The inner span is the wingspan less two chords, and never passes for a measurement**
+
+**Verifies:** [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram), [product.tileContents](local/product/presentation.md#tilecontents) · **Level:** code · **Method:** assertions on the rendered pages and on a tile built for a bird whose chords meet
+
+**Assertions:** the species page's tile names an Inner, keyed emerald, whose value is the
+wingspan less two chords in the page's unit, marked `~`, with a tooltip saying it is derived from
+the wingspan and the chord; the measurements table has an Inner span row of kind `derived`; the
+home page's tiles carry it the same way; and a bird whose chord is half its wingspan gets no inner
+span, as its bar is drawn whole.
+
+**Run:** `go test ./cmd/birdview/ -run TestInnerSpanIsDerived`
+**Status: verified 2026-11-01, passing.**
+Watched failing: 2026-11-01, with the tile's field present and never set ("the species page's tile has no Inner span marked estimated"), and with the tile still saying Inner span ("has no Inner marked estimated").
 
 ### totalLengthLabeled
 
@@ -2375,7 +2393,7 @@ Watched failing: 2026-10-23, by the broken variants above, which the test keeps.
 | [product.metricProvenanceExplained](local/product/measurements.md#metricprovenanceexplained) | detailShowsProvenance | |
 | [product.inaturalistLink](local/product/presentation.md#inaturalistlink) | | inaturalistLinkConfidentOnly withdrawn ([decisions.ebirdLinkReplacesInaturalist](decisions.md#ebirdlinkreplacesinaturalist)) |
 | [product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled) | diagramDistinguishesModeled | |
-| [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) | segmentLabelsDontCollide, totalLengthLabeled, massDrawnAsWaterCube | |
+| [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) | segmentLabelsDontCollide, totalLengthLabeled, massDrawnAsWaterCube, innerSpanDerived | |
 | [product.comparisonOneScale](local/product/presentation.md#comparisononescale) | — | withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |
 | [product.pickFromIndex](local/product/presentation.md#pickfromindex) | — | withdrawn ([decisions.classicViewRemoved](decisions.md#classicviewremoved)) |
 | [tech.twoCommandsOneModule](local/tech/delivery.md#twocommandsonemodule), [tech.servesOnLocalhost](local/tech/delivery.md#servesonlocalhost) | bothCommandsBuild | |

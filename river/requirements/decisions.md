@@ -4380,3 +4380,34 @@ the deepest that holds apart from the emerald for tritanopes; the head and neck 
 to `#94a3b8`, so the white tail is not mistaken for them, which their strokes allow since their
 names are plain text and a stroke needs only 3:1.
 
+---
+
+## innerSpanDerived
+
+**The crossbar's inner segment is named Inner, derived, and Wingspan is plain text**
+
+Date: 2026-11-01
+Decided by: Sameer
+Status: accepted
+Affects: [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram), [product.tileContents](local/product/presentation.md#tilecontents)
+
+### Decided
+
+The wing line reads Wingspan, Inner, Chord. Wingspan names the whole bar and is plain text;
+Inner, the emerald segment between the chord ticks, is the wingspan less two chords, marked
+`~` and described as derived in its tooltip and in the measurements table, naming both sources;
+Chord stays orchid. The measurements table names the row Inner span. The inner span is left out
+where twice the chord reaches the wingspan. The favicon draws the crossbar the same way, orchid
+chords either side of an emerald inner span.
+
+### Why
+
+The owner noticed that Wingspan was emerald while only the bar's inner segment is. No anatomical
+term names that segment: it spans both arm-wings and the body between them, the chord being the
+hand-wing. "Chord-to-chord" and "interchord span" were considered and are long or coined; the owner
+chose Inner span, then Inner on the tile, because "Inner span" overflowed a 360px phone by up to
+19px in imperial units, the text being at its size floor and the header fixed at four lines. It is derived rather than measured because its two inputs come from different
+datasets, specimens, and axes (Fox's spread-wing wingspan, AVONET's closed-wing chord), and
+subtracting them doubles the chord's error and magnifies the wingspan's: for the Great Blue Heron
+1,826 mm − 2 × 467 mm = 892 mm, where a 3% error in the wingspan is a 6% error in the result.
+

@@ -54,8 +54,9 @@
       {{end}}<span{{if ne .S.Segments.Tail.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Tail.Prov}}"{{end}}><span class="k k-tail">Tail</span> {{.TailStr}}</span>
     </div>
     <div class="ft">
-      <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="{{whynot .S.Wingspan.Prov}}"{{end}}><span class="k k-wing">Wingspan</span> {{.Wing}}</span>
-      {{with .ChordStr}}<span{{if ne $.S.WingChord.Prov.Kind "measured"}} class="est" title="{{whynot $.S.WingChord.Prov}}"{{end}}><span class="k k-chord">Chord</span> {{.}}</span>{{end}}
+      <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="{{whynot .S.Wingspan.Prov}}"{{end}}>Wingspan {{.Wing}}</span>
+      {{with .InnerStr}}<span class="est" title="{{$.InnerWhy}}"><span class="k k-wing">Inner</span> {{.}}</span>
+      {{end}}{{with .ChordStr}}<span{{if ne $.S.WingChord.Prov.Kind "measured"}} class="est" title="{{whynot $.S.WingChord.Prov}}"{{end}}><span class="k k-chord">Chord</span> {{.}}</span>{{end}}
     </div>
     {{/* How much of the species observations held by the regions currently
          on screen (product.shareOfRecords). It answers the question the filtered page is

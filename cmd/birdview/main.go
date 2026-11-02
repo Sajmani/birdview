@@ -764,6 +764,10 @@ type tile struct {
 	BillStr  string
 	TailStr  string
 	ChordStr string
+	// InnerStr is the crossbar between the chord ticks, the wingspan less two
+	// chords, and InnerWhy its tooltip; empty where the chords meet
+	// (product.labeledDetailDiagram, decisions.innerSpanDerived).
+	InnerStr, InnerWhy string
 	// Commonest is the share line: where the bird is the biggest part of
 	// what gets recorded, and how big a part (product.shareOfRecords). Nil when unknown.
 	Commonest *shareCell
@@ -849,6 +853,9 @@ func newTile(sp *dataset.Species, g view.Geometry, box view.Box, u units, loc da
 	if sp.WingChord.Value > 0 {
 		t.ChordStr = u.format(sp.WingChord.Value, view.ByLength)
 	}
+	if mm, ok := innerSpan(sp); ok {
+		t.InnerStr, t.InnerWhy = u.format(mm, view.ByLength), innerSpanWhy(sp)
+	}
 	// Right of the cube, its baseline on the cube's foot (decisions.tileMeasurementLines).
 	if c := t.MassCube; c.Side > 0 {
 		t.MassLabel = &massLabel{
@@ -859,6 +866,36 @@ func newTile(sp *dataset.Species, g view.Geometry, box view.Box, u units, loc da
 		}
 	}
 	return t
+}
+
+// innerSpan is the crossbar between the chord ticks, the wingspan less two chords, in mm; false
+// where twice the chord reaches the wingspan, the same rule by which view.Layout draws the bar
+// whole (product.labeledDetailDiagram, decisions.innerSpanDerived).
+func innerSpan(sp *dataset.Species) (float64, bool) {
+	c := sp.WingChord.Value
+	if c <= 0 || 2*c >= sp.Wingspan.Value {
+		return 0, false
+	}
+	return sp.Wingspan.Value - 2*c, true
+}
+
+// innerSpanWhy says how the inner span is derived and from what, for its tooltip and its row in
+// the measurements table: it is never a measurement (product.labeledDetailDiagram).
+func innerSpanWhy(sp *dataset.Species) string {
+	from := func(m dataset.Metric) string {
+		if m.Prov.Kind == dataset.Modeled {
+			return ", " + whyNotMeasured(m.Prov)
+		}
+		src := m.Prov.Source
+		if src == "" {
+			src = "a published source"
+		}
+		if m.Prov.Kind == dataset.NearMatch && m.Prov.SourceTaxon != "" {
+			src += ", measured on " + m.Prov.SourceTaxon
+		}
+		return ", from " + src
+	}
+	return "derived: the wingspan" + from(sp.Wingspan) + "; less two wing chords" + from(sp.WingChord)
 }
 
 // tileAnchor is the fragment id of one tile. Declared once because the href
@@ -1073,13 +1110,20 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		row("Total length", sp.TotalLength, view.ByLength, one),
 		row("Wingspan", sp.Wingspan, view.ByWingspan, one),
 		row("Wing chord", sp.WingChord, view.ByLength, one),
+	}
+	if mm, ok := innerSpan(sp); ok {
+		// The tile calls it Inner; the table has room to say what (decisions.innerSpanDerived).
+		rows = append(rows, metricRow{Label: "Inner span", Value: one.format(mm, view.ByLength),
+			Kind: "derived", Detail: innerSpanWhy(sp) + "."})
+	}
+	rows = append(rows, []metricRow{
 		row("Mass", sp.Mass, view.ByMass, one),
 		row("Bill", sp.Segments.Bill, view.ByLength, one),
 		row("Head", sp.Segments.Head, view.ByLength, one),
 		row("Neck", sp.Segments.Neck, view.ByLength, one),
 		row("Body", sp.Segments.Body, view.ByLength, one),
 		row("Tail", sp.Segments.Tail, view.ByLength, one),
-	}
+	}...)
 	t := newTile(sp, view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, tileBox), tileBox, one, opt.Locale)
 	t.Big = true
 	t.Commonest = s.shareWithSeams(sp, opt)

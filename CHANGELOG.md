@@ -10,7 +10,7 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 - No text is smaller than 13px, and running text is 15px, 16px on a phone. The species page's
   diagram labels had rendered at 3.5px on a phone.
 - The species page shows the home page's tile, larger, naming every part and its measurement, in
-  place of a diagram labeled with leader lines. Bill, Wingspan, Chord, and Mass are named in their
+  place of a diagram labeled with leader lines. Bill, Tail, Inner, Chord, and Mass are named in their
   parts' colors.
 - Measurements are set in a proportional face with even-width figures instead of monospace.
 - The tail and the wing chord have colors of their own: amber bill, white tail, emerald wing with
@@ -20,6 +20,9 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 ### Added
 
 - Pinned birds lead the list as a **Pinned** group, side by side, and stay in their tiers below.
+- Tiles name the crossbar's emerald middle **Inner**: the wingspan less the two wing chords, marked
+  `~` because it is worked out rather than measured. **Wingspan**, which names the whole bar, is no
+  longer emerald. The icon shows the orchid chords too.
 
 ## 2026-11-01 — eBird links
 

@@ -134,12 +134,21 @@ more about a number but may not be the only place it appears, so adding a metric
 means adding it to the tile. It is a rule rather than a list because a list let mass go undrawn.
 
 The detail view's tile is the home page's tile, larger ([tileOpensDetail](presentation.md#tileopensdetail)), and its measurement lines
-carry every segment: **length, bill, head, neck, body, and tail**, then **wingspan and wing
-chord**. An estimated value carries the same `~` as everywhere else. The drawing itself carries
+carry every segment: **length, bill, head, neck, body, and tail**, then **wingspan, inner span, and
+wing chord**, named Wingspan, Inner, and Chord. An estimated value carries the same `~` as everywhere else. The drawing itself carries
 one label, the mass beside its cube, as on the home page ([decisions.textSizeFloor](../../decisions.md#textsizefloor)).
 
 **A measurement's name is set in its part's color** ([oneDiagramVocabulary](diagram.md#onediagramvocabulary)): **Bill** amber, **Tail**
-white, **Wingspan** emerald, **Chord** orchid, and **Mass** blue. The name says
+white, **Inner** emerald, **Chord** orchid, and **Mass** blue. **Wingspan** names the whole
+bar, not one colored part, so it is plain text, like Length.
+
+**The inner span is the crossbar between the chord ticks**, the wingspan less two wing chords
+([decisions.innerSpanDerived](../../decisions.md#innerspanderived)). It is **derived, never shown as a measurement**: it subtracts measurements from two
+sources taken on different specimens and different axes, a spread wing tip to tip against a closed
+wing wrist to tip, so the number measures nothing anyone measured, and subtraction enlarges their
+uncertainty. The tile names it **Inner**, short enough that the wing line fits a phone; its tooltip and its
+row in the measurements table, named Inner span, say how it is derived and from what. It carries the `~`, and it is left out where twice the chord reaches the wingspan, where the
+drawing does not split the bar. The name says
 which part it measures, so color is never the only cue. Head, neck, and body are modeled and drawn
 gray, and their names are plain text.
 

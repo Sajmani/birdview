@@ -28,8 +28,8 @@ Each species is one **tile**, laid out top to bottom, **the numbers first**
 
 1. a header of four lines, then a rule: the **common name followed by its banding code and its
    eBird species code in parentheses**, with the **pin** in the tile's top-right corner
-   ([nextView](#nextview)); **length, bill, and tail**; **wingspan and wing chord**, the chord left
-   out where it is unknown; and the share line ([shareOfRecords](#shareofrecords)). The
+   ([nextView](#nextview)); **length, bill, and tail**; **wingspan, inner, and chord**, the chord left
+   out where it is unknown and the inner span where the chords meet; and the share line ([shareOfRecords](#shareofrecords)). The
    measurements are named in full and in the selected unit system, in a proportional face with
    figures of even width so that numbers align down a column. On the detail view the first line
    also carries head, neck, and body ([labeledDetailDiagram](measurements.md#labeleddetaildiagram)), and wraps where it must;

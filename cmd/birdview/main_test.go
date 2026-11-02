@@ -413,7 +413,7 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 		// The three main metrics, named in full rather than as L/W/M (product.tileContents).
 		// Spelled out they are also worth asserting: "M " matched almost
 		// anything on the page.
-		"Length ", ">Wingspan</span> ", ">Mass</span> ",
+		"Length ", ">Wingspan ", ">Mass</span> ",
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("tile is missing %q", want)
@@ -421,7 +421,7 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 	}
 
 	// The numbers come first (product.tileContents, decisions.tileMeasurementLines): the common
-	// name and its codes, length, bill, and tail, wingspan and chord, and the
+	// name and its codes, length, bill, and tail, wingspan, inner span, and chord, and the
 	// share line, all above the drawing; the mass named beside the cube in it;
 	// and under it the short family badge, then the scientific name. The crow
 	// is the fixture's bird with a banding code.
@@ -433,7 +433,8 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 		{"the length", ">Length "},
 		{"the bill", ">Bill</span> "},
 		{"the tail", ">Tail</span> "},
-		{"the wingspan", ">Wingspan</span> "},
+		{"the wingspan", ">Wingspan "},
+		{"the inner span", ">Inner</span> "},
 		{"the chord", ">Chord</span> "},
 		{"the share line", `<div class="share">`},
 		{"the drawing", `<svg class="dia"`},
@@ -1335,7 +1336,7 @@ func TestDetailTileNamesEverySegment(t *testing.T) {
 		if m := regexp.MustCompile(`<span class="ml( est)?"[^>]*><span class="k k-mass">Mass</span> ([^<]+)</span>`).FindStringSubmatch(body); m != nil {
 			said["Mass"] = m[2] + "|" + strconv.FormatBool(m[1] != "")
 		}
-		names := map[string]string{"Total length": "Length", "Wing chord": "Chord"}
+		names := map[string]string{"Total length": "Length", "Wing chord": "Chord", "Inner span": "Inner"}
 		for label, row := range rows {
 			val, kind, _ := strings.Cut(row, "|")
 			name := label
@@ -1351,11 +1352,15 @@ func TestDetailTileNamesEverySegment(t *testing.T) {
 		}
 	}
 	body := mustGet(t, newTestServer(t), "/species/greblu")
-	for _, k := range []string{`<span class="k k-bill">Bill</span>`, `<span class="k k-wing">Wingspan</span>`,
+	for _, k := range []string{`<span class="k k-bill">Bill</span>`, `<span class="k k-wing">Inner</span>`,
 		`<span class="k k-chord">Chord</span>`, `<span class="k k-tail">Tail</span>`, `<span class="k k-mass">Mass</span>`} {
 		if !strings.Contains(body, k) {
 			t.Errorf("the species page's tile does not key %s to its part's color", k)
 		}
+	}
+	// Wingspan names the whole bar, not one colored part (decisions.innerSpanDerived).
+	if strings.Contains(body, `">Wingspan</span>`) {
+		t.Error("the species page's tile keys Wingspan to a color; it names the whole bar and is plain text")
 	}
 	// The full badge, with the family's common name, which the home page's tile leaves to its
 	// tooltip (product.tileContents).
@@ -4643,5 +4648,46 @@ func TestFoldedFigureExplained(t *testing.T) {
 	_, crow := get(t, s, "/species/amecro")
 	if strings.Contains(crow, "drawn as an S") {
 		t.Error("a straight-necked bird's page explains a fold it does not have")
+	}
+}
+
+// TestInnerSpanIsDerived asserts the crossbar's inner segment as product.labeledDetailDiagram
+// states it: named Inner on the tile and Inner span in the table, the wingspan less two chords, always marked estimated with a
+// tooltip saying it is derived and from what, and left out where twice the chord reaches the
+// wingspan, where the drawing does not split the bar.
+//
+// Verifies: product.labeledDetailDiagram, product.tileContents. Criterion: acceptance.innerSpanDerived.
+func TestInnerSpanIsDerived(t *testing.T) {
+	sp := findSpecies(t, "greblu")
+	if sp.WingChord.Value <= 0 || 2*sp.WingChord.Value >= sp.Wingspan.Value {
+		t.Fatal("the fixture's chords no longer split its wingspan; pick another bird")
+	}
+	inner := regexp.MustCompile(`<span class="est" title="([^"]*)"><span class="k k-wing">Inner</span> ([^<]+)</span>`)
+	body := mustGet(t, newTestServer(t), "/species/greblu?units=metric")
+	m := inner.FindStringSubmatch(body)
+	if m == nil {
+		t.Fatal("the species page's tile has no Inner marked estimated")
+	}
+	one := unitsFor(true, sp.Mass.Value)
+	if want := one.format(sp.Wingspan.Value-2*sp.WingChord.Value, view.ByLength); m[2] != want {
+		t.Errorf("the Inner reads %q, want the wingspan less two chords, %q", m[2], want)
+	}
+	title := html.UnescapeString(m[1])
+	if !strings.HasPrefix(title, "derived") || !strings.Contains(title, "wingspan") || !strings.Contains(title, "chord") {
+		t.Errorf("the Inner's tooltip is %q; it says the value is derived, from the wingspan and the chord", title)
+	}
+	if row, ok := metricsOf(t, body)["Inner span"]; !ok || !strings.HasSuffix(row, "|derived") {
+		t.Errorf("the measurements table's Inner span row is %q, want one marked derived", row)
+	}
+	if home := mustGet(t, newTestServer(t), "/?units=metric"); !inner.MatchString(home) {
+		t.Error("the home page's tiles carry no Inner marked estimated")
+	}
+
+	// Where the chords meet, the bar is drawn whole and there is no inner span to name.
+	whole := *sp
+	whole.WingChord.Value = whole.Wingspan.Value / 2
+	g := view.Layout(&whole, whole.TotalLength.Value, whole.Wingspan.Value, tileBox)
+	if tl := newTile(&whole, g, tileBox, one, ""); tl.InnerStr != "" {
+		t.Errorf("chords meeting at the axis: the tile still names an Inner of %s", tl.InnerStr)
 	}
 }

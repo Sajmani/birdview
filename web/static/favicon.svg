@@ -17,15 +17,15 @@
      aria-label="BirdView: a bird diagram seen from above">
   <!--
     The same figure the app draws: a bird from above, in flight (product.segmentComposition),
-    reduced to the three parts that survive 16px. Wing crossbar, body and
-    head, plus a bill nub for the palette's amber. The tail is solid rather
+    reduced to the three parts that survive 16px. Wing crossbar, split into its chords and inner
+    span (decisions.innerSpanDerived), body and head, plus a bill nub for the palette's amber. The tail is solid rather
     than dashed, because a 5/3 dash pattern is invisible at this size.
 
     Colors are the diagram's own, and must stay that way (product.oneDiagramVocabulary): the icon
     may use no color that paints no part of the diagram. acceptance.faviconFromPalette checks this
     against the stylesheet, so a change there without a change here is caught.
 
-    On #0f172a: wing #34d399 at 9.3:1, head and body #94a3b8 at 6.96:1, tail #ffffff at 17.85:1,
+    On #0f172a: wing #34d399 at 9.3:1, chord #ffc7f7 at 12.6:1, head and body #94a3b8 at 6.96:1, tail #ffffff at 17.85:1,
     bill #fbbf24 at 10.7:1 (decisions.partColorsByMeasurement).
 
     The crossbar was #5ccbfa until 2026-10-02, which is the interface accent
@@ -49,8 +49,11 @@
   -->
   <rect width="32" height="32" rx="7" fill="#0f172a"/>
   <g fill="none" stroke-linecap="round">
-    <!-- Wings first, so the body crosses in front of them, as in the app. -->
-    <path d="M2.5 14.5 H29.5" stroke="#34d399" stroke-width="3"/>
+    <!-- Wings first, so the body crosses in front of them, as in the app: an orchid chord at
+         each end and the emerald inner span between, butt-ended so it covers their inner caps. -->
+    <path d="M2.5 14.5 H9" stroke="#ffc7f7" stroke-width="3"/>
+    <path d="M23 14.5 H29.5" stroke="#ffc7f7" stroke-width="3"/>
+    <path d="M9 14.5 H23" stroke="#34d399" stroke-width="3" stroke-linecap="butt"/>
     <path d="M16 3.5 V7" stroke="#fbbf24" stroke-width="2"/>
     <circle cx="16" cy="10" r="3.1" fill="#94a3b8" stroke="none"/>
     <path d="M16 12.5 V23" stroke="#94a3b8" stroke-width="4" stroke-linecap="butt"/>
