@@ -14,3 +14,10 @@ site's default units (inches, ounces) with metric in brackets.
 
 Also record, per task, whether the reader found it on the site or guessed, and how many pages it
 took.
+
+Added 2026-11-01, for the species page tasks of that run:
+
+| Task | Expected | Correct when |
+| --- | --- | --- |
+| T7 | Great Blue Heron: bill 5.7 in (14.5 cm), tail 6.5 in | Both within 0.1 in |
+| T8 | The solid outer ends of the green crossbar, from the bend of the wing to the tip, ending at the ticks; 18.4 in | The part, and the length within 0.1 in |

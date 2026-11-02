@@ -110,9 +110,11 @@ Feedback from a reader of the home page ([product.nextView](requirements/local/p
    figure, since they are what the page is for; move the banding codes and Latin name below the
    line. Set the measurements in a face designed for small text ("old eyes"). **Layout done
    2026-10-30, revised 2026-10-31** ([decisions.tileNumbersFirst](requirements/decisions.md#tilenumbersfirst),
-   [decisions.tileMeasurementLines](requirements/decisions.md#tilemeasurementlines)). Left:
-   the type face, the system sans-serif at 12–13 px in full-contrast ink, or a bundled legibility
-   face such as Atkinson Hyperlegible, which needs an `imports.md` entry first.
+   [decisions.tileMeasurementLines](requirements/decisions.md#tilemeasurementlines)). **Type
+   enlarged 2026-11-01**: nothing below 13px, measurements in the system sans-serif with even-width
+   figures ([decisions.textSizeFloor](requirements/decisions.md#textsizefloor)). Left: whether a bundled legibility face such as Atkinson
+   Hyperlegible is worth an `imports.md` entry, and whether the measurements, still the dim gray,
+   should be full-contrast ink.
 3. **Pins:** keep the pinned bird at the top of the results as a reference, whatever the Show
    setting.
 4. **Mass cube:** at first it looked like a button for a 3-D view, and among similar birds (gulls)
@@ -133,6 +135,58 @@ Feedback from a reader of the home page ([product.nextView](requirements/local/p
 
 The reader also asked what "1 in 6,322 species observations" in New York means, so the line does
 not explain itself ([product.shareOfRecords](requirements/local/product/presentation.md#shareofrecords)).
+
+## chordNamedOnBar
+
+**The species page no longer says "Wing chord" on the bar**
+
+Status: open
+Owner: Sameer
+Gate: owner's call
+
+The 2026-11-01 reader run ([summary](../usertests/results/2026-11-01/summary.md)) found that the
+leader labels' one advantage was a "Wing chord" label on the crossbar's outer segment; on the tile,
+readers find the chord only from the note and the ticks, and on a bird whose wingspan is measured
+the whole bar is solid. Options: draw the chord's outer segments in a second green, or mark them
+with the Chord color's tint, so the name on the tile and the part match by color as Bill does.
+
+## pinnedSideBySide
+
+**Pinned birds stack in one column, one per tier**
+
+Status: open
+Owner: Sameer
+Gate: owner's call
+
+All four readers of the 2026-11-01 run who compared pinned birds found them in a single column,
+each under its own tier heading, and called "side by side" scrolling. For a handful of pinned
+birds, tier headings carry nothing; a row in one tier, or no tiers under Pinned only, would let the
+reader look across ([product.nextView](requirements/local/product/presentation.md#nextview)).
+
+## massUnitConsistent
+
+**A bird's mass changes unit between pages**
+
+Status: open
+Owner: unassigned
+Gate: opportunistic
+
+The unit follows the birds on screen, so the Mallard is 29.8 oz on the home page and 1.9 lb when
+pinned or on its own page. Four of eight readers on 2026-11-01 tripped on it. Decide whether one
+bird should read the same everywhere ([product.imperialByDefault](requirements/local/product/presentation.md#imperialbydefault)).
+
+## harnessOpensSettings
+
+**The simulated readers cannot open the home page's settings**
+
+Status: open
+Owner: unassigned
+Gate: before the next reader run
+
+`usertests/tools/page --open` knows only the classic view's panel names and `shot` cannot click, so
+no reader on 2026-11-01 could open Month, Region, Units, or Names, and each reported the settings
+broken. Teach `page` to open a `<details>` setting by its name, and say so in `prompt.md`, which
+also still tells readers the find box sends `q=` rather than `find=`.
 
 ## ebirdTermsUnread
 
