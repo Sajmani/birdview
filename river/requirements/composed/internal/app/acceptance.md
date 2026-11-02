@@ -327,7 +327,8 @@ on a species page reached from the home page goes back by history, and from a sh
 /?units=metric; choosing Nov from Pinned only stays
 Pinned only. The summaries read frequency ↓, length ↑, mass ↓ reversed, all by default, Oct, May or Jun,
 all, imperial or metric, and North Amer or world, never "(now)", and Units offers Imperial and Metric; the header links stick figures to the guide. The header ends with Click a bird and How to read a drawing and has no
-key line; New here? Try's four comparisons each pin six real birds shown alone by length, herons
+key line; its Try line has no "New here?" before it, its five comparisons each pin six real birds shown alone by length, the
+grassland hunters draw only grassland birds that hunt animals, herons
 and ducks draw only those families in every month, and the birds around you now is the address
 with #here-and-now, its template replacing the region and setting the month to a slot for the
 browser's month, and keeping

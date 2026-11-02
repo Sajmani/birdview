@@ -26,6 +26,7 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 - Every number on a tile names its source when you hover over it, measured ones included. Only
   estimates had a tooltip before, and the mass had none.
 - **Tiny birds** joins the things to try: six birds around 10 cm long, from Winter Wren to Bushtit.
+- The line of things to try begins **Try**, without "New here?".
 - **Grassland hunters** joins them too: the birds of grassland that hunt animals, from Burrowing
   Owl to Golden Eagle.
 

@@ -841,7 +841,7 @@ home page in those. Its footer carries the full credits, which every other page 
 
 - **The header.** One line says what BirdView draws, its "stick figures" linking to the guide to
   reading a drawing, then "Click a bird for its numbers and sources"; what solid and dashed mean
-  is left to that guide and to each species page. Under it, **New here? Try** offers a few things
+  is left to that guide and to each species page. Under it, **Try** offers a few things
   to try, each also in the guide's *Some things to try*, its comparisons made with pins: the birds
   around you now (this address with `#here-and-now`: the
   reader's region found in the browser replaces the region, the month is set to the browser's

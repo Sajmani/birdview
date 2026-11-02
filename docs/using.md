@@ -7,7 +7,7 @@ life. Every setting is in the page address, so you can bookmark or share any vie
 
 ## The page
 
-Under the title, **New here? Try** offers a few views to start with, and **more ideas** leads to
+Under the title, **Try** offers a few views to start with, and **more ideas** leads to
 [Some things to try](#some-things-to-try).
 
 The page opens on the birds of every month, most often recorded first, the first 100 of

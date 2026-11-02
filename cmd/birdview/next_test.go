@@ -1290,7 +1290,7 @@ func TestNextFirstCommitsOnClick(t *testing.T) {
 
 // TestNextWelcomeLine checks the home page's header: one line saying what
 // BirdView draws, with Click a bird and How to read a drawing, and no key
-// line ("Drawn to scale", "Solid is measured"); then New here? Try, whose
+// line ("Drawn to scale", "Solid is measured"); then Try, with no "New here?", whose
 // five comparisons each pin six real birds and show only them, by length,
 // whose grassland hunters draw only grassland birds that hunt animals, whose
 // herons and ducks draw only those two families in every month, and
@@ -1312,9 +1312,12 @@ func TestNextWelcomeLine(t *testing.T) {
 			t.Errorf("the home page still says %q", gone)
 		}
 	}
-	w := regexp.MustCompile(`(?s)<p class="welcome"><b>New here\?</b> Try(.*?)</p>`).FindStringSubmatch(body)
+	w := regexp.MustCompile(`(?s)<p class="welcome">Try(.*?)</p>`).FindStringSubmatch(body)
 	if w == nil {
-		t.Fatal("the home page has no New here? Try line")
+		t.Fatal("the home page has no welcome line beginning Try")
+	}
+	if strings.Contains(body, "New here") {
+		t.Error(`the welcome line still begins "New here?"; Try is enough`)
 	}
 	if !strings.Contains(w[1], `<a href="/#here-and-now">the birds around you now</a>`) ||
 		!strings.Contains(w[1], `data-where="Region"`) || !strings.Contains(w[1], `data-template="/?month=__MONTH__&amp;region=__REGION__"`) ||
