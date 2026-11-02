@@ -4,6 +4,19 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## pinnedSideBySide
+
+**Pinned birds stack in one column, one per tier**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-11-01, by the Pinned group, which under Pinned only is the whole page ([decisions.pinnedGroupLeads](requirements/decisions.md#pinnedgroupleads))
+
+All four readers of the 2026-11-01 run who compared pinned birds found them in a single column,
+each under its own tier heading, and called "side by side" scrolling. For a handful of pinned
+birds, tier headings carry nothing; a row in one tier, or no tiers under Pinned only, would let the
+reader look across ([product.nextView](requirements/local/product/presentation.md#nextview)).
+
 ## uncodedBirds
 
 **198 drawn birds have no banding code**

@@ -147,7 +147,9 @@
 <p class="shownline"><span class="shown">{{.OrderLabel}} distribution of {{if eq .Show "pinned"}}{{.Count}} pinned {{if eq .Count 1}}bird{{else}}birds{{end}}{{else if eq .Show "all"}}all {{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{else}}{{if .MoreURL}}the first {{.First}} of {{end}}{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}{{with .AddedPast}}, plus {{.}} {{if eq . 1}}pin{{else}}pins{{end}}{{end}}{{end}}</span></p>
 {{if .Tiles}}
 <div class="tiles">
-  {{range .Items}}{{if .Tile}}{{template "tile" .Tile}}{{else if .Tier}}<h3 class="tierhd" id="tier-{{.Tier.Index}}"><span class="tier">{{.Tier.Label}} Tier {{.Tier.Index}}</span>
+  {{range .Items}}{{if .Tile}}{{template "tile" .Tile}}{{else if .Group}}<h3 class="tierhd pinhd" id="pinned-birds"><span class="tier">Pinned</span>
+    <span class="n">{{.Group}} {{if eq .Group 1}}bird{{else}}birds{{end}}</span>
+    <a class="totop" href="#top">back to top</a></h3>{{else if .Tier}}<h3 class="tierhd" id="tier-{{.Tier.Index}}"><span class="tier">{{.Tier.Label}} Tier {{.Tier.Index}}</span>
     {{with .Tier}}{{if .Note}}{{.Note}}{{else if eq .Min .Max}}{{.Min}}{{else if .Max}}{{.Min}} &ndash; {{.Max}}{{else}}{{.Min}} and beyond{{end}}
     <span class="n">{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}</span>{{end}}
     <a class="totop" href="#top">back to top</a></h3>{{else}}<p class="gap">{{.Hidden}} {{if eq .Hidden 1}}bird{{else}}birds{{end}} hidden — <a href="{{$.MoreURL}}">Show all</a></p>{{end}}{{end}}

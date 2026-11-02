@@ -492,6 +492,22 @@ images rather than pages of text and are outside it.
 **Status: verified 2026-11-01, passing.**
 Watched failing: 2026-11-01, against the stylesheet as it stood: all 20 page renders, among them the species page's diagram labels at 3.5px in the frame ("3.5px below 13px at 360px wide: \"Wingspan  15.4 in\""), the measurement lines at 10.5px, and running text at 14px.
 
+## pinnedGroupLeads
+
+**Pinned birds lead the home page as a group, and stay in their tiers**
+
+Covers: [product.nextView](../../../local/product/presentation.md#nextview)
+
+**Method:** with the hummingbird and the heron pinned, by length, a heading naming its 2 birds
+comes before the first tier, then their two tiles, shortest first, with anchors `p-<id>`; both
+are still drawn in their tiers below; the pinned list links to `#p-<id>`; the histogram is the
+same as with nothing pinned; with nothing pinned there is no group; and under Pinned only,
+reversed, the page is the group alone, heron first ([decisions.pinnedGroupLeads](../../../decisions.md#pinnedgroupleads)).
+
+**Run:** `go test ./cmd/birdview/ -run 'TestPinnedGroupLeadsThePage|TestNextPinnedList'`
+**Status: verified 2026-11-01, passing.**
+Watched failing: 2026-11-01, against the page before the group ("the Pinned group heading is at -1").
+
 ## bandingCodesShown
 
 **Birds carry the Bird Banding Laboratory's four-letter codes, and the site uses them**

@@ -4320,3 +4320,31 @@ reads as three families rather than six colors. The bill's earlier `#f59e0b` and
 were 6.8:1 on the panel, which is why the names first took lighter tints; every color now clears
 the floor on its own. The cube stays a blue, so it still reads as water.
 
+---
+
+## pinnedGroupLeads
+
+**Pinned birds lead the home page as a group, and stay in their tiers**
+
+Date: 2026-11-01
+Decided by: Sameer
+Status: accepted
+Affects: [product.nextView](local/product/presentation.md#nextview)
+
+### Decided
+
+Where the first tier begins, a Pinned group shows every pinned bird, sorted by the page's order
+and not tiered; the tiers follow below, with the pinned birds still in them. Under Pinned only the
+group is the page, so pinned birds sit side by side. A bird in the group has its own anchor, and
+the pinned list links there. No group appears when nothing is pinned, and the histogram stays the
+tiers'.
+
+### Why
+
+A reader asked on 2026-10-30 that pinned birds stay at the top for reference
+([todo.homePageReaderFeedback](../todo.md#homepagereaderfeedback)); the home page had kept each pinned bird only where the order put it.
+The owner, reconsidering, chose a group over moving the birds, so the tiers still show where each
+pinned bird falls. The 2026-11-01 reader run found pinned birds under Pinned only stacked one per tier
+in a single column, which readers called scrolling rather than comparing
+([todo.pinnedSideBySide](../todo-closed.md#pinnedsidebyside)); the group lays them out in a row.
+

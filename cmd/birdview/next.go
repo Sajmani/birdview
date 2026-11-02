@@ -106,6 +106,8 @@ type nextItem struct {
 	Tile   *tile
 	Hidden int
 	Tier   *nextTier
+	// Group is the Pinned group's heading: how many birds it holds (product.nextView).
+	Group int
 }
 
 // nextMatch is one bird the find box found, with its pin.
@@ -122,7 +124,10 @@ type nextData struct {
 	Total    int
 	Controls []nextControl
 	Tiles    []tile
-	Items    []nextItem
+	// GroupTiles are the Pinned group's: the pinned birds again, in the
+	// page's order, at the head of the page (product.nextView).
+	GroupTiles []tile
+	Items      []nextItem
 	// Tiers are the tiers of the matching birds, in the order shown, and
 	// Histogram one bar per tier (product.nextView).
 	Tiers     []nextTier
@@ -633,7 +638,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 	for _, id := range keep["pin"] {
 		sp := s.byID[id]
 		page.Pinned = append(page.Pinned, nextPinned{Name: sp.Name(opt.Locale), Scientific: sp.ScientificName,
-			Anchor: tileAnchor(id), URL: nextPin(q, id)})
+			Anchor: pinnedAnchor(id), URL: nextPin(q, id)})
 	}
 	sort.Slice(page.Pinned, func(i, j int) bool {
 		li, lj := strings.ToLower(page.Pinned[i].Name), strings.ToLower(page.Pinned[j].Name)
@@ -712,9 +717,36 @@ func (s *server) nextPage(r *http.Request) nextData {
 		page.Histogram = append(page.Histogram, nb)
 	}
 
+	// The Pinned group leads the page: every pinned bird, in the page's
+	// order and untiered, before the first tier; under Pinned only it is the
+	// page (product.nextView, decisions.pinnedGroupLeads). Its tiles have their own anchors, so a bird
+	// drawn twice is still addressed once in each place.
+	newPageTile := func(sp *dataset.Species, anchor string) tile {
+		t := newTile(sp, view.Layout(sp, refLen, refSpan, tileBox), tileBox, u, opt.Locale)
+		t.DetailURL, t.Anchor = nextDetailLink(q, sp.ID), anchor
+		t.Commonest, t.SameAs = s.shareWithSeams(sp, opt), s.sameMeasurements(sp, opt.Locale)
+		t.PinURL, t.Pinned = nextPin(q, sp.ID), added[sp.ID]
+		return t
+	}
+	for _, pk := range picks {
+		if added[pk.sp.ID] {
+			page.GroupTiles = append(page.GroupTiles, newPageTile(pk.sp, pinnedAnchor(pk.sp.ID)))
+		}
+	}
+	if len(page.GroupTiles) > 0 {
+		page.Items = append(page.Items, nextItem{Group: len(page.GroupTiles)})
+		for i := range page.GroupTiles {
+			page.Items = append(page.Items, nextItem{Tile: &page.GroupTiles[i]})
+		}
+	}
+
 	page.Tiles = make([]tile, len(picks))
 	lastTier := -1
 	for i, pk := range picks {
+		page.Tiles[i] = newPageTile(pk.sp, tileAnchor(pk.sp.ID))
+		if pinnedOnly {
+			continue // the group is the page
+		}
 		if pk.before > 0 {
 			page.Items = append(page.Items, nextItem{Hidden: pk.before})
 		}
@@ -722,15 +754,9 @@ func (s *server) nextPage(r *http.Request) nextData {
 			lastTier = t
 			page.Items = append(page.Items, nextItem{Tier: &page.Tiers[t]})
 		}
-		sp := pk.sp
-		t := newTile(sp, view.Layout(sp, refLen, refSpan, tileBox), tileBox, u, opt.Locale)
-		t.DetailURL, t.Anchor = nextDetailLink(q, sp.ID), tileAnchor(sp.ID)
-		t.Commonest, t.SameAs = s.shareWithSeams(sp, opt), s.sameMeasurements(sp, opt.Locale)
-		t.PinURL, t.Pinned = nextPin(q, sp.ID), added[sp.ID]
-		page.Tiles[i] = t
 		page.Items = append(page.Items, nextItem{Tile: &page.Tiles[i]})
 	}
-	if after > 0 {
+	if after > 0 && !pinnedOnly {
 		page.Items = append(page.Items, nextItem{Hidden: after})
 	}
 
@@ -1027,6 +1053,10 @@ func (s *server) nextBirds(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(out)
 }
+
+// pinnedAnchor is the fragment id of a pinned bird's tile in the Pinned group, apart from
+// its tile in the tiers, which keeps tileAnchor (product.nextView).
+func pinnedAnchor(id string) string { return "p-" + id }
 
 // nextOrders are the orders Order by offers, in its order, with their names.
 var nextOrders = []struct {

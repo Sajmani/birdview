@@ -18,8 +18,9 @@ Under it, **First**, **All**, and **Pinned** choose which birds are shown, and
 **Clear pins** unpins every bird.
 
 **Pin** a bird, from its tile or the **find box**, to keep it on the page whatever the settings;
-the pinned birds are listed above the box. To compare birds you choose, pin them and click
-**Pinned**. The find box finds birds by English or scientific name, code, family, or order
+the pinned birds are listed above the box, and they also lead the list of birds, side by side, as a
+**Pinned** group before the first tier, while staying in their tiers. To compare only the birds you
+choose, pin them and click **Pinned**. The find box finds birds by English or scientific name, code, family, or order
 as you type, and lists them once there are 10 or fewer. Where a bird has more than one eBird code,
 any of them finds it; the simplest is the one shown.
 

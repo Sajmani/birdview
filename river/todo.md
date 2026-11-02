@@ -116,7 +116,7 @@ Feedback from a reader of the home page ([product.nextView](requirements/local/p
    Hyperlegible is worth an `imports.md` entry, and whether the measurements, still the dim gray,
    should be full-contrast ink.
 3. **Pins:** keep the pinned bird at the top of the results as a reference, whatever the Show
-   setting.
+   setting. **Done 2026-11-01** as the Pinned group ([decisions.pinnedGroupLeads](requirements/decisions.md#pinnedgroupleads)).
 4. **Mass cube:** at first it looked like a button for a 3-D view, and among similar birds (gulls)
    the cubes were all about the same size, so their meaning did not come through. Show the hover
    text sooner, or draw a vessel of water (a fish tank, a water-cooler bottle) so the volume reads
@@ -149,19 +149,6 @@ leader labels' one advantage was a "Wing chord" label on the crossbar's outer se
 readers find the chord only from the note and the ticks, and on a bird whose wingspan is measured
 the whole bar is solid. Options: draw the chord's outer segments in a second green, or mark them
 with the Chord color's tint, so the name on the tile and the part match by color as Bill does.
-
-## pinnedSideBySide
-
-**Pinned birds stack in one column, one per tier**
-
-Status: open
-Owner: Sameer
-Gate: owner's call
-
-All four readers of the 2026-11-01 run who compared pinned birds found them in a single column,
-each under its own tier heading, and called "side by side" scrolling. For a handful of pinned
-birds, tier headings carry nothing; a row in one tier, or no tiers under Pinned only, would let the
-reader look across ([product.nextView](requirements/local/product/presentation.md#nextview)).
 
 ## massUnitConsistent
 

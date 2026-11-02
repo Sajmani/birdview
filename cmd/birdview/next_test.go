@@ -1026,8 +1026,9 @@ func TestNextPinnedList(t *testing.T) {
 	for _, e := range p.Pinned {
 		names = append(names, e.Anchor)
 	}
-	if !slices.Equal(names, []string{"s-amecro", "s-annhum"}) {
-		t.Fatalf("the pinned list links to %v, want s-amecro then s-annhum (alphabetical, not pin or mass order)", names)
+	// Into the Pinned group, where each pinned bird has its own tile (decisions.pinnedGroupLeads).
+	if !slices.Equal(names, []string{"p-amecro", "p-annhum"}) {
+		t.Fatalf("the pinned list links to %v, want p-amecro then p-annhum (alphabetical, not pin or mass order)", names)
 	}
 	if string(p.Pinned[0].URL) != "/?by=mass&month=all&pin=annhum&pin=nosuchbird" {
 		t.Errorf("the first entry's pin goes to %s, want the page without that pin", p.Pinned[0].URL)
@@ -1035,7 +1036,7 @@ func TestNextPinnedList(t *testing.T) {
 	// Under IOC names, thimur ("Murre Thick-billed") precedes amerob ("Robin
 	// American"), though amerob precedes thimur by id, pin order, and mass.
 	wp := nextAt(s, "/?by=mass&month=all&names=world&pin=amerob&pin=thimur")
-	if len(wp.Pinned) != 2 || wp.Pinned[0].Anchor != "s-thimur" || wp.Pinned[1].Anchor != "s-amerob" {
+	if len(wp.Pinned) != 2 || wp.Pinned[0].Anchor != "p-thimur" || wp.Pinned[1].Anchor != "p-amerob" {
 		t.Errorf("under IOC names, the pinned list is %+v, want thimur before amerob", wp.Pinned)
 	}
 	unpinned := 0
@@ -1054,8 +1055,8 @@ func TestNextPinnedList(t *testing.T) {
 	if !strings.Contains(body, `<div class="pinned" role="region" aria-label="Pinned birds">`) {
 		t.Error("with a bird pinned, the page draws no pinned list")
 	}
-	if !strings.Contains(body, `<a class="pinname" href="#s-amecro"`) || !strings.Contains(body, `id="s-amecro"`) {
-		t.Error("the pinned list's name does not link to the bird's tile")
+	if !strings.Contains(body, `<a class="pinname" href="#p-amecro"`) || !strings.Contains(body, `id="p-amecro"`) {
+		t.Error("the pinned list's name does not link to the bird's tile in the Pinned group")
 	}
 	if p := nextAt(s, "/"); len(p.Pinned) != 0 {
 		t.Errorf("with nothing pinned, the list has %d entries", len(p.Pinned))
@@ -1838,5 +1839,58 @@ func TestSpeciesPinAsksTheHomePage(t *testing.T) {
 	defer mu.Unlock()
 	if !slices.Contains(requests, "/?month=all&pin=annhum&bird=amecro") {
 		t.Errorf("the home page, loaded again, did not ask to toggle amecro; requests %v", requests)
+	}
+}
+
+// TestPinnedGroupLeadsThePage asserts product.nextView's Pinned group: with birds pinned, a
+// group heading naming how many comes before the first tier, then the pinned birds' tiles in the
+// page's order, each with its own anchor; the tiers follow with the pinned birds still in them;
+// the pinned list links into the group; the histogram is unchanged; with nothing pinned there is
+// no group; and under Pinned only the group is the whole page, reversed with the order.
+//
+// Verifies: product.nextView. Criterion: app.pinnedGroupLeads.
+func TestPinnedGroupLeadsThePage(t *testing.T) {
+	s := newTestServer(t)
+	body := mustGet(t, s, "/?month=all&by=length&pin=greblu&pin=annhum")
+	group := strings.Index(body, `id="pinned-birds"`)
+	tier := strings.Index(body, `id="tier-1"`)
+	if group < 0 || tier < 0 || group > tier {
+		t.Fatalf("the Pinned group heading is at %d and the first tier at %d; the group leads", group, tier)
+	}
+	if !regexp.MustCompile(`(?s)id="pinned-birds"[^>]*>.*?Pinned.*?2 birds`).MatchString(body[group:tier]) {
+		t.Errorf("the group heading does not name its 2 birds: %q", body[group:min(group+300, tier)])
+	}
+	// In the group, in the page's order: the hummingbird is shorter than the heron.
+	a, b := strings.Index(body[group:tier], `id="p-annhum"`), strings.Index(body[group:tier], `id="p-greblu"`)
+	if a < 0 || b < 0 || a > b {
+		t.Errorf("the group holds annhum at %d and greblu at %d; want both, shortest first", a, b)
+	}
+	if strings.Count(body[group:tier], `class="tilewrap`) != 2 {
+		t.Errorf("the group holds %d tiles, want the 2 pinned", strings.Count(body[group:tier], `class="tilewrap`))
+	}
+	// Still in their tiers below.
+	for _, id := range []string{"annhum", "greblu"} {
+		if !strings.Contains(body[tier:], `id="s-`+id+`"`) {
+			t.Errorf("%s is pinned but has left its tier", id)
+		}
+		if !strings.Contains(body, `class="pinname" href="#p-`+id+`"`) {
+			t.Errorf("the pinned list does not link %s to its tile in the group", id)
+		}
+	}
+	// The histogram is the tiers', pinned or not.
+	bars := regexp.MustCompile(`(?s)<nav class="hist".*?</nav>`)
+	if bars.FindString(body) != bars.FindString(mustGet(t, s, "/?month=all&by=length")) {
+		t.Error("pinning changed the histogram; it counts the tiers only")
+	}
+	if strings.Contains(mustGet(t, s, "/?month=all&by=length"), `id="pinned-birds"`) {
+		t.Error("with nothing pinned, the page still has a Pinned group")
+	}
+	// Pinned only: the group is the page, and reverses with the order.
+	only := mustGet(t, s, "/?month=all&by=length&rev=1&pin=greblu&pin=annhum&show=pinned")
+	if !strings.Contains(only, `id="pinned-birds"`) || strings.Contains(only, `class="tierhd" id="tier-`) {
+		t.Error("under Pinned only the page should be the Pinned group, with no tiers")
+	}
+	if a, b := strings.Index(only, `id="p-annhum"`), strings.Index(only, `id="p-greblu"`); a < 0 || b < 0 || b > a {
+		t.Errorf("reversed, the group holds greblu at %d and annhum at %d; want the heron first", b, a)
 	}
 }

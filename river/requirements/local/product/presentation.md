@@ -866,9 +866,13 @@ home page in those. Its footer carries the full credits, which every other page 
 - **Pins.** Every drawn bird has a pin, a push pin in a box, filled when the bird is pinned, in
   the tile's top-right corner, on the common name's line ([tileContents](#tilecontents)). A
   pinned bird (`pin=<id>`) is drawn whatever the settings, wherever the order puts it, even past
-  the first 100, and the sentence above the birds says how many are ("… the first 100 of 1006 birds, plus 2 pins"). Pinning or unpinning leaves the page where
-  it was. The pinned birds are listed above the find box in alphabetical order: a bird's name goes
-  to its tile, and its pin unpins it. **Pinned (k)**, always in view above them, compares
+  the first 100, and the sentence above the birds says how many are ("… the first 100 of 1006 birds, plus 2 pins"). **The pinned birds
+  also lead the page, as a Pinned group** where the first tier would begin: a heading naming how
+  many, then their tiles in the page's order, untiered, side by side; the tiers follow, the pinned
+  birds still in them ([decisions.pinnedGroupLeads](../../decisions.md#pinnedgroupleads)). With nothing pinned there is no group, and under
+  **Pinned (k)** the group is the whole page. The histogram counts the tiers only. Pinning or
+  unpinning leaves the page where it was. The pinned birds are listed above the find box in
+  alphabetical order: a bird's name goes to its tile in the group, and its pin unpins it. **Pinned (k)**, always in view above them, compares
   them ([#5](https://github.com/google/birdview/issues/5): a reader who had pinned two birds
   could not find how to compare them). Unpinning returns the bird to the settings'
   choice; nothing removes a bird the settings choose. A box above the set finds birds by name: a
