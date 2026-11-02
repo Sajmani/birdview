@@ -110,11 +110,15 @@ using the *1 in N* figure on every tile. The tiers are powers of ten: 1 in 10 to
 - **[The birds around you now](/#here-and-now).** The birds most often recorded where you are this
   month. Without sharing your location, try
   [New York in October](/?region=NY&month=Oct).
-- **Compare some [small birds](/?by=length&pin=leasan&pin=houspa&pin=dowwoo&pin=houfin&pin=barswa&pin=easpho&show=pinned),
+- **Compare some [tiny birds](/?by=length&pin=winwre3&pin=lucwar&pin=ruckin&pin=bubhum&pin=lesgol&pin=bushti&show=pinned),
+  [small birds](/?by=length&pin=leasan&pin=houspa&pin=dowwoo&pin=houfin&pin=barswa&pin=easpho&show=pinned),
   [medium birds](/?by=length&pin=blujay&pin=amekes&pin=calthr&pin=moudov&pin=belkin1&pin=chwwid&show=pinned),
   [large birds](/?by=length&pin=turvul&pin=gbbgul&pin=greegr&pin=cangoo&pin=grecor&pin=rosspo1&show=pinned),
   [huge birds](/?by=length&pin=calcon&pin=amwpel&pin=mutswa&pin=magfri&pin=baleag&pin=bkfalb&show=pinned).**
   Each pins six birds and shows only them, by length.
+  - *Tiny:* Winter Wren, Lucy's Warbler, Ruby-crowned Kinglet, Buff-bellied Hummingbird, Lesser
+    Goldfinch, and Bushtit, all about 93 to 104 mm long. The hummingbird is the lightest, 4 g,
+    against 9 g for the wren and the goldfinch, and its bill, 24 mm, is three times the Bushtit's.
   - *Small:* Least Sandpiper, House Sparrow, Downy Woodpecker, House Finch, Barn Swallow, and
     Eastern Phoebe, all 141 to 158 mm long. The swallow is the lightest, 18 g, yet has the widest
     wings, 325 mm against 234 mm for the finch.

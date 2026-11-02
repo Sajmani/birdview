@@ -1291,7 +1291,7 @@ func TestNextFirstCommitsOnClick(t *testing.T) {
 // TestNextWelcomeLine checks the home page's header: one line saying what
 // BirdView draws, with Click a bird and How to read a drawing, and no key
 // line ("Drawn to scale", "Solid is measured"); then New here? Try, whose
-// four comparisons each pin six real birds and show only them, by length,
+// five comparisons each pin six real birds and show only them, by length,
 // whose herons and ducks draw only those two families in every month, and
 // whose birds around you now is /#here-and-now with its status naming the
 // Region setting.
@@ -1357,8 +1357,8 @@ func TestNextWelcomeLine(t *testing.T) {
 			}
 		}
 	}
-	if sizes != 4 {
-		t.Errorf("the welcome line compares %d sizes of birds, want 4 (small, medium, large, huge)", sizes)
+	if sizes != 5 {
+		t.Errorf("the welcome line compares %d sizes of birds, want 5 (tiny, small, medium, large, huge)", sizes)
 	}
 }
 
