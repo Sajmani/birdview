@@ -138,11 +138,10 @@ carry every segment: **length, bill, head, neck, body, and tail**, then **wingsp
 chord**. An estimated value carries the same `~` as everywhere else. The drawing itself carries
 one label, the mass beside its cube, as on the home page ([decisions.textSizeFloor](../../decisions.md#textsizefloor)).
 
-**A measurement's name is set in its part's color** where that color is a text color the contrast
-floor allows ([tech.textContrastFloor](../tech/accessibility.md#textcontrastfloor)): **Bill** in the bill's amber, **Wingspan** and **Chord** in
-the crossbar's green, and **Mass** in the cube's blue. The name says which part it measures, so
-color is never the only cue; the other parts are gray, darker than any text the floor allows, and
-their names are set as plain text.
+**A measurement's name is set in its part's color** ([oneDiagramVocabulary](diagram.md#onediagramvocabulary)): **Bill** amber, **Tail**
+pale yellow, **Wingspan** emerald, **Chord** pale green, and **Mass** periwinkle. The name says
+which part it measures, so color is never the only cue. Head, neck, and body are modeled and drawn
+gray, and their names are plain text.
 
 Labels in the drawing, with leader lines to each part, were the design until 2026-11-01. Drawn in
 an SVG scaled to the page, they rendered at 8px on a laptop and 3.5px on a phone, below

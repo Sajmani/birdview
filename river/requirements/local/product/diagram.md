@@ -210,8 +210,18 @@ view**. A reader meets the same figure on all three, so the figure means the sam
 three.
 
 **Color is shared exactly.** Each part of the diagram — bill, head, neck, body, tail, wing
-crossbar, mass cube — has one color, and every surface uses that color for that part. A surface
+crossbar, wing chord, mass cube — has one color, and every surface uses that color for that part. A surface
 may not pick its own shade of a part, however good its local reason.
+
+**The colors group the measurements by kind** ([decisions.partColorsByMeasurement](../../decisions.md#partcolorsbymeasurement)): warm for the measured ends
+of the body's axis, **bill** amber `#fbbf24` and **tail** pale yellow `#fef08a`; green for the
+wing, the **crossbar** emerald `#34d399` and the **chord**, its measured outer segments, pale green
+`#bbf7d0`; periwinkle `#a5b4fc` for the **mass cube**; and gray for the modeled head, neck, and
+body. **Every part color is also a text color**, clearing 7:1 on the page and the panel
+([tech.textContrastFloor](../tech/accessibility.md#textcontrastfloor)), so a measurement's name can be set in its part's color; and **every two
+parts differ by a ΔE00 of at least 10**, grays included, under normal vision and under simulated
+protanopia, deuteranopia, and tritanopia, so no reader sees two parts as one. Color is never the
+only cue: each name says what it measures, and stroke style carries provenance.
 
 **Size-dependent geometry is not shared.** Stroke weight, dash pattern, and which parts appear may
 be tuned per surface: the favicon drops the dashes and collapses neck, body, and tail into one

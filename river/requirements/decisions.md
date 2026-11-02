@@ -4289,3 +4289,34 @@ tile on both pages now that the home tile carries what the species tile did. A l
 wide widths only, with leaders, remains possible later. Monospace was what made the measurement
 lines too wide to enlarge.
 
+---
+
+## partColorsByMeasurement
+
+**The diagram's colors group its measured parts by kind, and hold apart for color-blind readers**
+
+Date: 2026-11-01
+Decided by: Sameer
+Status: accepted
+Affects: [product.oneDiagramVocabulary](local/product/diagram.md#onediagramvocabulary), [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram)
+
+### Decided
+
+Bill amber `#fbbf24` and tail pale yellow `#fef08a`, the measured ends of the axis; crossbar emerald
+`#34d399` and chord pale green `#bbf7d0`, the wing; mass cube periwinkle `#a5b4fc`; head, neck, and
+body gray. The chord, the crossbar's measured outer segments, is drawn in its own color. Each color
+serves as its part's stroke and its name's text, so each clears 7:1, and every two parts, grays
+included, differ by ΔE00 ≥ 10 under normal vision and simulated protanopia, deuteranopia, and
+tritanopia, checked by a test.
+
+### Why
+
+The owner asked to color the chord and tail too, without rainbow birds, distinct enough, and within
+accessibility constraints. Three schemes were measured. Keeping the cube sky blue boxed the rest in:
+with a rose tail, deuteranopes saw the wingspan and tail as one (ΔE 3.8), and today's green wing and
+blue cube were only 7.4 apart for tritanopes. Grouping by kind, warm for the axis, green for the wing,
+cool for mass, gray for the modeled parts, kept every pair at 10.3 or more for every simulation, and
+reads as three families rather than six colors. The bill's earlier `#f59e0b` and cube's `#38bdf8`
+were 6.8:1 on the panel, which is why the names first took lighter tints; every color now clears
+the floor on its own. The cube stays a blue, so it still reads as water.
+

@@ -432,7 +432,7 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 		{"the eBird code", "(amecro)"},
 		{"the length", ">Length "},
 		{"the bill", ">Bill</span> "},
-		{"the tail", ">Tail "},
+		{"the tail", ">Tail</span> "},
 		{"the wingspan", ">Wingspan</span> "},
 		{"the chord", ">Chord</span> "},
 		{"the share line", `<div class="share">`},
@@ -1232,7 +1232,9 @@ func TestFaviconIsServedLocally(t *testing.T) {
 // Verifies: product.measuredVersusModeled. Criterion: acceptance.diagramDistinguishesModeled.
 func TestCrossbarSplitsAtTheChord(t *testing.T) {
 	s := newTestServer(t)
-	wing := regexp.MustCompile(`<line class="(wing(?: est)?)"`)
+	// The outer segments are the chord, drawn in its own color (product.oneDiagramVocabulary); they
+	// are solid, as the measured chord is.
+	wing := regexp.MustCompile(`<line class="((?:wing|chord)(?: est)?)"`)
 
 	cases := []struct {
 		id, name    string
@@ -1350,7 +1352,7 @@ func TestDetailTileNamesEverySegment(t *testing.T) {
 	}
 	body := mustGet(t, newTestServer(t), "/species/greblu")
 	for _, k := range []string{`<span class="k k-bill">Bill</span>`, `<span class="k k-wing">Wingspan</span>`,
-		`<span class="k k-wing">Chord</span>`, `<span class="k k-mass">Mass</span>`} {
+		`<span class="k k-chord">Chord</span>`, `<span class="k k-tail">Tail</span>`, `<span class="k k-mass">Mass</span>`} {
 		if !strings.Contains(body, k) {
 			t.Errorf("the species page's tile does not key %s to its part's color", k)
 		}

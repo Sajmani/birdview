@@ -44,18 +44,18 @@
          could act on -- the Chihuahuan Meadowlark's mass is the Eastern
          Meadowlark's, which is worth saying out loud. */}}
     <div class="ft">
-      {{/* A name takes its part's color where the contrast floor allows: the bill's, the
-           crossbar's (product.labeledDetailDiagram). The species page's tile adds head, neck, and body. */}}
+      {{/* A measured part's name takes its part's color (product.labeledDetailDiagram, product.oneDiagramVocabulary). The
+           species page's tile adds head, neck, and body, which are modeled and gray. */}}
       <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est" title="{{whynot .S.TotalLength.Prov}}"{{end}}>Length {{.Length}}</span>
       <span{{if ne .S.Segments.Bill.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Bill.Prov}}"{{end}}><span class="k k-bill">Bill</span> {{.BillStr}}</span>
       {{if .Big}}<span{{if ne .S.Segments.Head.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Head.Prov}}"{{end}}>Head {{.HeadStr}}</span>
       <span{{if ne .S.Segments.Neck.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Neck.Prov}}"{{end}}>Neck {{.NeckStr}}</span>
       <span{{if ne .S.Segments.Body.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Body.Prov}}"{{end}}>Body {{.BodyStr}}</span>
-      {{end}}<span{{if ne .S.Segments.Tail.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Tail.Prov}}"{{end}}>Tail {{.TailStr}}</span>
+      {{end}}<span{{if ne .S.Segments.Tail.Prov.Kind "measured"}} class="est" title="{{whynot .S.Segments.Tail.Prov}}"{{end}}><span class="k k-tail">Tail</span> {{.TailStr}}</span>
     </div>
     <div class="ft">
       <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est" title="{{whynot .S.Wingspan.Prov}}"{{end}}><span class="k k-wing">Wingspan</span> {{.Wing}}</span>
-      {{with .ChordStr}}<span{{if ne $.S.WingChord.Prov.Kind "measured"}} class="est" title="{{whynot $.S.WingChord.Prov}}"{{end}}><span class="k k-wing">Chord</span> {{.}}</span>{{end}}
+      {{with .ChordStr}}<span{{if ne $.S.WingChord.Prov.Kind "measured"}} class="est" title="{{whynot $.S.WingChord.Prov}}"{{end}}><span class="k k-chord">Chord</span> {{.}}</span>{{end}}
     </div>
     {{/* How much of the species observations held by the regions currently
          on screen (product.shareOfRecords). It answers the question the filtered page is
@@ -118,9 +118,9 @@
     {{/* Outer thirds are the MEASURED wing chord: carpal joint to primary tip,
          so always solid. The inner span carries the whole model error, so it
          alone is dashed when the wingspan is modeled. */}}
-    <line class="wing" x1="{{f1 (sub $g.CX $g.CrossbarHalfWidth)}}" y1="{{f1 $g.YShoulder}}"
+    <line class="chord" x1="{{f1 (sub $g.CX $g.CrossbarHalfWidth)}}" y1="{{f1 $g.YShoulder}}"
           x2="{{f1 (sub $g.CX $g.ChordTickX)}}" y2="{{f1 $g.YShoulder}}"/>
-    <line class="wing" x1="{{f1 (add $g.CX $g.ChordTickX)}}" y1="{{f1 $g.YShoulder}}"
+    <line class="chord" x1="{{f1 (add $g.CX $g.ChordTickX)}}" y1="{{f1 $g.YShoulder}}"
           x2="{{f1 (add $g.CX $g.CrossbarHalfWidth)}}" y2="{{f1 $g.YShoulder}}"/>
     <line class="wing{{if .WingModeled}} est{{end}}" x1="{{f1 (sub $g.CX $g.ChordTickX)}}" y1="{{f1 $g.YShoulder}}"
           x2="{{f1 (add $g.CX $g.ChordTickX)}}" y2="{{f1 $g.YShoulder}}"/>
@@ -167,7 +167,7 @@
 {{/* The diagram key, under the species page's drawing. */}}
 {{define "diagramkey"}}
 <p class="note diagramkey"><b>Solid</b> lines are measured; <b>dashed</b> lines are estimated,
-as is the hollow head. On the wing, the solid ends are the measured wing chord, and the
+as is the hollow head. On the wing, the paler solid ends are the measured wing chord, and the
 <b>ticks</b> mark where it ends. The <b>cube</b> in the lower-left corner is the
 bird's mass drawn as water, at the same scale as the bird.</p>
 {{end}}

@@ -1745,6 +1745,25 @@ diagram's palette" and implemented it as a search for three hardcoded literals �
 would have passed through any change to the app's colors whatever. That is why the drift it was
 written to prevent went unnoticed until someone looked.
 
+
+### partColorsHoldApart
+
+**The diagram's part colors are text colors, name their parts on the tile, and stay apart for color-blind readers**
+
+**Verifies:** [product.oneDiagramVocabulary](local/product/diagram.md#onediagramvocabulary), [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) · **Level:** code · **Method:** a check over the stylesheet
+
+**Assertions:** each measured part's stroke (bill, tail, crossbar, chord, cube) clears 7:1 on the
+page and the panel; each name on the tile (`.k-bill`, `.k-tail`, `.k-wing`, `.k-chord`, `.k-mass`)
+is set in exactly its part's stroke color; and every two parts, with the gray head, neck, and body,
+differ by a CIEDE2000 ΔE of at least 10 under normal vision and under protanopia, deuteranopia, and
+tritanopia simulated with Machado, Oliveira, and Fernandes's 2009 matrices at full severity
+([decisions.partColorsByMeasurement](decisions.md#partcolorsbymeasurement)). The ΔE formula is pinned on a color against itself and black against
+white.
+
+**Run:** `go test ./web/ -run 'TestPartColorsHoldApart|TestDeltaE2000'`
+**Status: verified 2026-11-01, passing.**
+Watched failing: 2026-11-01, against the palette as it stood ("bill #f59e0b is 6.81:1 on the panel", "tail #94a3b8 is 5.71:1 on the panel", no `.k-tail`), and with the rose tail of the scheme the decision rejected ("deuteranopia: tail and crossbar are ΔE00 3.8 apart").
+
 ### tileHeaderNeverWraps
 
 **Nothing in a tile header can wrap to a second line**
@@ -2344,7 +2363,7 @@ Watched failing: 2026-10-23, by the broken variants above, which the test keeps.
 | [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily) | neckLengthSerialized, foldingFamiliesHaveNecks | |
 | [product.craniumFromMass](local/product/diagram.md#craniumfrommass) | craniumVaries | |
 | [product.trunkFromMass](local/product/diagram.md#trunkfrommass) | trunkScalesLikeSkeletons | |
-| [product.oneDiagramVocabulary](local/product/diagram.md#onediagramvocabulary) | faviconFromPalette | |
+| [product.oneDiagramVocabulary](local/product/diagram.md#onediagramvocabulary) | faviconFromPalette, partColorsHoldApart | |
 | [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources) (composite) | totalIsSumOfSegments | |
 | [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources) (wingspan model) | wingspanModelReconstructsFox | |
 | [product.speciesPhotographs](local/product/diagram.md#speciesphotographs) – [product.photoCaching](local/product/diagram.md#photocaching) | — | withdrawn |
