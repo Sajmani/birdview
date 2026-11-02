@@ -163,10 +163,10 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .ml.est::after { content: "~"; color: var(--accent); margin-left: 2px; }
 /* A measurement's name in exactly its part's color (product.labeledDetailDiagram). */
 .k-bill { color: #fbbf24; }
-.k-tail { color: #fef08a; }
+.k-tail { color: #ffffff; }
 .k-wing { color: #34d399; }
-.k-chord { color: #bbf7d0; }
-.k-mass { color: #a5b4fc; }
+.k-chord { color: #ffc7f7; }
+.k-mass { color: #8db4fc; }
 /* The notes come last, so only the part under the drawing grows. */
 .notes { min-width: 0; }
 
@@ -199,16 +199,16 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .tile.big .nameline { gap: 16px; }
 .tile.big .cn { font-size: 20px; }
 .tile.big .sn { font-size: 15px; }
-/* The parts' colors group the measurements by kind (product.oneDiagramVocabulary, decisions.partColorsByMeasurement): warm
-   for the measured ends of the axis, green for the wing, periwinkle for mass,
-   gray for the modeled head, neck, and body. Each is also its name's text
-   color, so each clears 7:1, and every two parts differ by a ΔE00 of 10 or more
-   for normal and color-blind vision (TestPartColorsHoldApart). */
+/* The parts' colors (product.oneDiagramVocabulary, decisions.partColorsRevised): amber bill, white tail, emerald
+   wing with an orchid chord, blue cube, gray for the modeled head, neck, and
+   body. Each measured part's color is also its name's text color, so each
+   clears 7:1, and every two parts differ by a ΔE00 of 10 or more for normal
+   and color-blind vision (TestPartColorsHoldApart). */
 .bill { stroke: #fbbf24; stroke-width: 2; }
-.head { fill: #475569; stroke: #cbd5e1; stroke-width: 1.2; }
-.neck { stroke: #cbd5e1; stroke-width: 2; fill: none; }
+.head { fill: #475569; stroke: #94a3b8; stroke-width: 1.2; }
+.neck { stroke: #94a3b8; stroke-width: 2; fill: none; }
 .body { stroke: #64748b; stroke-width: 5; stroke-linecap: butt; }
-.tail { stroke: #fef08a; stroke-width: 2; stroke-dasharray: 5 3; }
+.tail { stroke: #ffffff; stroke-width: 2; stroke-dasharray: 5 3; }
 .junction { stroke: #cbd5e1; stroke-width: 1.5; }
 /* The crossbar is GREEN, not blue, and both halves of that matter.
 
@@ -222,8 +222,8 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
    It is also TEXT: the name Wingspan takes it (.k-wing), and it clears the 7:1
    floor (tech.textContrastFloor). #0ea5e9 would not have. */
 .wing { stroke: #34d399; stroke-width: 2.5; stroke-linecap: round; }
-/* The chord: the crossbar's measured outer segments, in the wing's lighter green. */
-.chord { stroke: #bbf7d0; stroke-width: 2.5; stroke-linecap: round; }
+/* The chord: the crossbar's measured outer segments, orchid, ending at the ticks. */
+.chord { stroke: #ffc7f7; stroke-width: 2.5; stroke-linecap: round; }
 
 .back a, .back a:visited { color: var(--accent); text-decoration: none; }
 .prov { border-collapse: collapse; margin-top: 8px; max-width: 100ch; }
@@ -319,17 +319,17 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .dia .body     { stroke-width: 2.5; stroke-dasharray: 6 3; stroke-linecap: round; }
 .dia .tail     { stroke-dasharray: none; }
 .dia .wing.est { stroke-dasharray: 6 3; }
-.chordtick          { stroke: #bbf7d0; stroke-width: 1.5; opacity: .85; }
+.chordtick          { stroke: #ffc7f7; stroke-width: 1.5; opacity: .85; }
 .diagramkey { margin-top: 16px; max-width: 80ch; }
 
 /* Mass as water (product.labeledDetailDiagram). Tinted rather than outlined only: it is a volume, not
    a length, and a bare outline in a figure made of lines reads as one more
    measurement. Dashed when the mass is not measured, like every other
    estimated stroke. */
-.masscube polygon, .masscube rect { stroke: #a5b4fc; stroke-width: 1; }
-.mcface { fill: #a5b4fc3d; }
-.mctop  { fill: #a5b4fc66; }
-.mcside { fill: #a5b4fc1f; }
+.masscube polygon, .masscube rect { stroke: #8db4fc; stroke-width: 1; }
+.mcface { fill: #8db4fc3d; }
+.mctop  { fill: #8db4fc66; }
+.mcside { fill: #8db4fc1f; }
 .masscube.est polygon, .masscube.est rect { stroke-dasharray: 4 3; }
 
 /* A caveat on a tile's figures: a count that covers two species, because

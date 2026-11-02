@@ -139,7 +139,7 @@ chord**. An estimated value carries the same `~` as everywhere else. The drawing
 one label, the mass beside its cube, as on the home page ([decisions.textSizeFloor](../../decisions.md#textsizefloor)).
 
 **A measurement's name is set in its part's color** ([oneDiagramVocabulary](diagram.md#onediagramvocabulary)): **Bill** amber, **Tail**
-pale yellow, **Wingspan** emerald, **Chord** pale green, and **Mass** periwinkle. The name says
+white, **Wingspan** emerald, **Chord** orchid, and **Mass** blue. The name says
 which part it measures, so color is never the only cue. Head, neck, and body are modeled and drawn
 gray, and their names are plain text.
 

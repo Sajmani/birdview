@@ -4297,7 +4297,7 @@ lines too wide to enlarge.
 
 Date: 2026-11-01
 Decided by: Sameer
-Status: accepted
+Status: amended by partColorsRevised
 Affects: [product.oneDiagramVocabulary](local/product/diagram.md#onediagramvocabulary), [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram)
 
 ### Decided
@@ -4347,4 +4347,36 @@ The owner, reconsidering, chose a group over moving the birds, so the tiers stil
 pinned bird falls. The 2026-11-01 reader run found pinned birds under Pinned only stacked one per tier
 in a single column, which readers called scrolling rather than comparing
 ([todo.pinnedSideBySide](../todo-closed.md#pinnedsidebyside)); the group lays them out in a row.
+
+---
+
+## partColorsRevised
+
+**A white tail, a blue cube, and an orchid chord**
+
+Date: 2026-11-01
+Decided by: Sameer
+Status: accepted
+Amends: partColorsByMeasurement
+Affects: [product.oneDiagramVocabulary](local/product/diagram.md#onediagramvocabulary), [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram)
+
+### Decided
+
+Bill amber `#fbbf24`, tail white `#ffffff`, crossbar emerald `#34d399`, chord orchid `#ffc7f7`,
+mass cube blue `#8db4fc`, head and neck gray `#94a3b8`, body gray `#64748b`; every stroke thin,
+the chord's extent marked by its ticks. The rule of [partColorsByMeasurement](#partcolorsbymeasurement) stands: each measured part's
+color clears 7:1 as its name's text, and every two parts differ by ΔE00 ≥ 10 under normal and
+simulated protan, deutan, and tritan vision.
+
+### Why
+
+The owner found a pale-yellow tail too close to the amber bill, wanted the cube blue again, and
+found the chord's pale green too close to the wing. Heavier strokes for the measured parts were
+tried in a preview and rejected. Within the rule, every distinct chord color is pale, and each
+resembles another part for red-green color-blind readers: greens and limes turn the bill's yellow,
+cyan and orchid the tail's white. The owner chose orchid, which passes at 10.1, against keeping
+the chord the wing's emerald, which would have left the closest pair at 11.5. The cube's blue is
+the deepest that holds apart from the emerald for tritanopes; the head and neck went a step darker,
+to `#94a3b8`, so the white tail is not mistaken for them, which their strokes allow since their
+names are plain text and a stroke needs only 3:1.
 

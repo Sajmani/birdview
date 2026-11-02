@@ -50,7 +50,7 @@ lines are estimated.
 | **Neck** | estimated per family, dashed. Herons and pelicans fly with the neck folded, so theirs is an **S** |
 | **Body** | estimated from mass, dashed |
 | **Tail** | measured, so solid |
-| **Wing crossbar** | the wingspan, at the same scale as the bird. The paler green ends are the measured wing chord, ending at the ticks; the middle is dashed when the wingspan is estimated |
+| **Wing crossbar** | the wingspan, at the same scale as the bird. The orchid ends are the measured wing chord, ending at the ticks; the middle is dashed when the wingspan is estimated |
 | **Cube** | a cube of water that weighs the same as the bird, at the same scale |
 
 Legs are not drawn. **A `~` after a number means it is estimated**, as most lengths are.
@@ -58,8 +58,8 @@ Legs are not drawn. **A `~` after a number means it is estimated**, as most leng
 **Click any bird** for its own page: the same tile, larger, naming every part and its measurement,
 with the source of each number below it, and a link to the species on **eBird** for photographs,
 sounds, and a range map. A measured part's name is colored like the part: **Bill** amber, **Tail**
-pale yellow, **Wingspan** emerald, **Chord** pale green, **Mass** periwinkle. The modeled head, neck,
-and body are gray.
+white, **Wingspan** emerald, **Chord** orchid, **Mass** blue. The modeled head, neck, and body are
+gray.
 
 ---
 

@@ -13,9 +13,9 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
   place of a diagram labeled with leader lines. Bill, Wingspan, Chord, and Mass are named in their
   parts' colors.
 - Measurements are set in a proportional face with even-width figures instead of monospace.
-- The tail and the wing chord have colors of their own: the bill and tail warm, the wing's span and
-  chord two greens, the mass periwinkle, the modeled parts gray, and every two parts distinct for
-  color-blind readers too.
+- The tail and the wing chord have colors of their own: amber bill, white tail, emerald wing with
+  an orchid chord, blue mass cube, and gray modeled parts, every two distinct for color-blind
+  readers too.
 
 ### Added
 

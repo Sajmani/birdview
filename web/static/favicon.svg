@@ -25,7 +25,7 @@
     may use no color that paints no part of the diagram. acceptance.faviconFromPalette checks this
     against the stylesheet, so a change there without a change here is caught.
 
-    On #0f172a: wing #34d399 at 9.3:1, head and body #cbd5e1 at 12.02:1,
+    On #0f172a: wing #34d399 at 9.3:1, head and body #94a3b8 at 6.96:1, tail #ffffff at 17.85:1,
     bill #fbbf24 at 10.7:1 (decisions.partColorsByMeasurement).
 
     The crossbar was #5ccbfa until 2026-10-02, which is the interface accent
@@ -37,8 +37,8 @@
 
     Two parts are drawn in a color that is not their own, which product.oneDiagramVocabulary allows
     at this size and which is why acceptance.faviconFromPalette does not check per-part mapping. The
-    body uses the head's #cbd5e1 because its own #64748b is 3.75:1 and
-    unreadable at 16px, and neck and tail collapse into the same stroke.
+    body uses the head's #94a3b8 because its own #64748b is 3.75:1 and
+    unreadable at 16px, and the neck collapses into that stroke.
 
     Opaque background rather than transparent, so the icon reads the same
     against light and dark browser chrome.
@@ -52,8 +52,8 @@
     <!-- Wings first, so the body crosses in front of them, as in the app. -->
     <path d="M2.5 14.5 H29.5" stroke="#34d399" stroke-width="3"/>
     <path d="M16 3.5 V7" stroke="#fbbf24" stroke-width="2"/>
-    <circle cx="16" cy="10" r="3.1" fill="#cbd5e1" stroke="none"/>
-    <path d="M16 12.5 V23" stroke="#cbd5e1" stroke-width="4" stroke-linecap="butt"/>
-    <path d="M16 23 V28.5" stroke="#cbd5e1" stroke-width="1.8"/>
+    <circle cx="16" cy="10" r="3.1" fill="#94a3b8" stroke="none"/>
+    <path d="M16 12.5 V23" stroke="#94a3b8" stroke-width="4" stroke-linecap="butt"/>
+    <path d="M16 23 V28.5" stroke="#ffffff" stroke-width="1.8"/>
   </g>
 </svg>
