@@ -4,6 +4,25 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## gbifLicenseTerms
+
+**GBIF's terms: cite the data, and decide what CC BY-NC means for BirdView**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-11-03, by the owner's call that BirdView is non-commercial and by citing both datasets ([decisions.gbifTermsMet](requirements/decisions.md#gbiftermsmet))
+
+[imports.gbif-terms](requirements/imports.md#gbif-terms) found two requirements BirdView does not meet:
+
+1. **Citation** ([gbifterms.CiteApiDataByDerivedDataset](requirements/imported/gbif.org/gbifterms/gbifterms.md#citeapidatabyderiveddataset)). Data read from the search API carries no
+   DOI; BirdView should acknowledge each publisher by its dataset DOI (eBird 10.15468/aomfnb,
+   iNaturalist 10.15468/ab3s5x) where it credits sources, or register a derived dataset for one DOI.
+   Downloads replace this with their own DOIs ([gbifterms.CiteDownloadDoi](requirements/imported/gbif.org/gbifterms/gbifterms.md#citedownloaddoi)).
+2. **Non-commercial** ([gbifterms.PublisherLicencesPrevail](requirements/imported/gbif.org/gbifterms/gbifterms.md#publisherlicencesprevail)). iNaturalist's research-grade
+   observations are CC BY-NC 4.0, and BirdView counts them where eBird withholds a species. Whether
+   BirdView's use is non-commercial, and what follows if it is not (dropping iNaturalist counts, or
+   keeping them out of anything served), is a decision for `decisions.md`.
+
 ## gbifPacingTestFlaky
 
 **The GBIF pacing test fails on a loaded machine**

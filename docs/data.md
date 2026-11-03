@@ -202,7 +202,8 @@ under a license BirdView can serve, so the list is computed from occurrence reco
 outlying islands — plus five ocean boxes of BirdView's own.
 
 **A species is listed in a region when it reaches 1 record per million of that region's bird
-records**, from GBIF under CC BY 4.0. The bar decides only the listing: records under it still
+records**, from GBIF: eBird's under CC BY 4.0, and iNaturalist's research-grade observations under
+CC BY-NC 4.0. The bar decides only the listing: records under it still
 count in *1 in N*. Emu is listed nowhere, yet its 38 records, 19 in Texas, are on its tile.
 
 **The bar is relative** because eBird's volume doubled in five years, so an absolute bar would

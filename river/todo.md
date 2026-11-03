@@ -1057,23 +1057,3 @@ and island names redirecting, was done 2026-11-03. Left, in order:
 6. Seas: adopt [imports.marine-regions](requirements/imports.md#marine-regions), assign the download's offshore grid cells to its
    areas while building the data, replace the five sea boxes, and redirect their names. Asking VLIZ
    about serving its boundaries gates only Here at sea, the one use that sends them to readers.
-
-## gbifLicenseTerms
-
-**GBIF's terms: cite the data, and decide what CC BY-NC means for BirdView**
-
-Status: open
-Owner: Sameer
-Gate: before the first GBIF download is adopted
-
-[imports.gbif-terms](requirements/imports.md#gbif-terms) found two requirements BirdView does not meet:
-
-1. **Citation** ([gbifterms.CiteApiDataByDerivedDataset](requirements/imported/gbif.org/gbifterms/gbifterms.md#citeapidatabyderiveddataset)). Data read from the search API carries no
-   DOI; BirdView should acknowledge each publisher by its dataset DOI (eBird 10.15468/aomfnb,
-   iNaturalist 10.15468/ab3s5x) where it credits sources, or register a derived dataset for one DOI.
-   Downloads replace this with their own DOIs ([gbifterms.CiteDownloadDoi](requirements/imported/gbif.org/gbifterms/gbifterms.md#citedownloaddoi)).
-2. **Non-commercial** ([gbifterms.PublisherLicencesPrevail](requirements/imported/gbif.org/gbifterms/gbifterms.md#publisherlicencesprevail)). iNaturalist's research-grade
-   observations are CC BY-NC 4.0, and BirdView counts them where eBird withholds a species. Whether
-   BirdView's use is non-commercial, and what follows if it is not (dropping iNaturalist counts, or
-   keeping them out of anything served), is a decision for `decisions.md`.
-

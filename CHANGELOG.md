@@ -10,6 +10,8 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 - A region in an address is now the code its records are filed under: `?region=USA.33_1` for New
   York rather than `?region=NY`. Old addresses still work and go to the new ones. This makes room
   for counties, which have no postal codes. The sea regions keep their names for now.
+- The credits cite GBIF's two datasets in full, by DOI, and give iNaturalist's research-grade
+  observations their actual license, CC BY-NC 4.0; every page had said CC BY 4.0 for both.
 
 - The mass cube and its name are sky blue again, a shade light enough to read as text. For
   color-blind readers it can look like the wing or the chord, but it stands apart from the figure

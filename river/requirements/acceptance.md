@@ -886,7 +886,10 @@ buttons reversed. It now reads only the controls panel.
 license — **AVONET, Fox, and AviList by name and DOI**; the ABA checklist is credited for the
 species list and *only* that; the footer discloses that lengths are modeled; the detail view
 carries credit too, being a shareable URL of its own; and **no page claims a permission the
-project does not hold**.
+project does not hold**. **The two GBIF datasets** are cited in the home page's credits by
+publisher, title, DOI as a URL, and "accessed via GBIF.org", and the home page, the species page,
+and the page for an undrawn bird each give iNaturalist's license as CC BY-NC 4.0, never as CC BY
+4.0 with eBird's ([decisions.gbifTermsMet](decisions.md#gbiftermsmet)).
 **Status: verified 2026-09-22 — passing, and watched failing** by stripping the license links and
 by reinstating a "used by permission" claim. **AviList added 2026-10-02**
 ([decisions.avilistReplacesAba](decisions.md#avilistreplacesaba)) and watched failing by deleting its credit while leaving its names
@@ -895,6 +898,7 @@ of the attribution, so an unasserted credit is a license breach waiting to happe
 
 Watched failing: 2026-09-22, by stripping the license links and by reinstating a "used by permission" claim.
 Watched failing: 2026-10-02, by deleting its credit while leaving its names on every tile — which is the shape the obligation actually has: CC BY permits the use *because* of the attribution, so an unasserted credit is a license breach waiting to happen.
+Watched failing: 2026-11-03, against the footers as they stood (`TestGBIFDatasetsCitedWithTheirLicenses`: "the full credits do not cite \"https://doi.org/10.15468/ab3s5x\"", "the footer does not give iNaturalist's license, CC BY-NC 4.0" on all three pages, "the footer licenses iNaturalist's records CC BY 4.0").
 
 The second half exists because the first version of this footer said the ABA checklist was "used by
 permission". It is not — that request has not been sent. Claiming a right you have not been granted

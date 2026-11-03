@@ -54,12 +54,12 @@ the page footer and the data guide. Several downloads are each cited, or listed 
 > as an easy way of obtaining a DOI for citing the data."
 > — Citation guidelines, GBIF data accessed using third-party tools
 
-**For BirdView: applies today, and is not yet met.** BirdView's region presence, recurrence, and
-counts come from the occurrence search API, so no DOI covers them. The requirement is to
-acknowledge each publisher (the eBird Observation Dataset and iNaturalist research-grade
-observations, by their dataset DOIs); a derived dataset, which needs a GBIF account and a list of
-contributing datasets with counts, is GBIF's recommendation for a single DOI. Moving to downloads
-replaces this with [CiteDownloadDoi](#citedownloaddoi) for whatever the downloads cover.
+**For BirdView: applies today, and met by citing the publishers** ([decisions.gbifTermsMet](../../../decisions.md#gbiftermsmet)).
+BirdView's region presence, recurrence, and counts come from the occurrence search API, so no DOI
+covers them. The home page's credits cite both datasets by publisher, title, DOI as a URL, and
+"accessed via GBIF.org", with the dates retrieved ([product.selfDescriptionStaysTrue](../../../local/product/presentation.md#selfdescriptionstaystrue)). A derived
+dataset, GBIF's recommendation for a single DOI, is not registered. Moving to downloads replaces
+this with [CiteDownloadDoi](#citedownloaddoi) for whatever the downloads cover.
 
 ## PublisherLicencesPrevail
 
@@ -75,9 +75,9 @@ replaces this with [CiteDownloadDoi](#citedownloaddoi) for whatever the download
 CC BY 4.0. iNaturalist's research-grade observations are **CC BY-NC 4.0** (both from the datasets'
 GBIF records, `api.gbif.org/v1/dataset/{key}`, read 2026-11-03). BirdView already counts
 iNaturalist records where eBird withholds a species ([decisions.countEbirdFirst](../../../decisions.md#countebirdfirst)), so the
-non-commercial term reaches it now, not only with downloads. **Whether BirdView's use is
-non-commercial in the license's sense is open** and is the owner's to decide in `decisions.md`
-([todo.gbifLicenseTerms](../../../../todo.md#gbiflicenseterms)).
+non-commercial term reaches it now, not only with downloads. **BirdView is non-commercial**
+([tech.localNowPublicLater](../../../local/tech/posture.md#localnowpubliclater), confirmed in [decisions.gbifTermsMet](../../../decisions.md#gbiftermsmet)), so it may count them, and every page
+showing their output names each dataset's own license.
 
 ## RetainOwnershipIdentifier
 

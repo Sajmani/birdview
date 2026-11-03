@@ -200,9 +200,8 @@ accepted* — is exactly what should attract scrutiny rather than escape it.
 | **Status** | **Adopted 2026-10-02** for the name bridge. License verified from the API's own dataset records; coverage measured and recorded below; no criteria in `acceptance.md` yet. |
 
 **Terms.** GBIF's data user agreement and citation guidelines are vendored and transcribed as
-[`gbif-terms`](#gbif-terms). Two of their requirements are not yet met: data read from the search
-API should be cited, by its publishers or a derived dataset's DOI, and iNaturalist's records are
-CC BY-NC 4.0, which reaches BirdView's counts ([todo.gbifLicenseTerms](../todo.md#gbiflicenseterms)).
+[`gbif-terms`](#gbif-terms). Both datasets are cited by publisher and DOI, and iNaturalist's records, CC BY-NC
+4.0, are counted because BirdView is non-commercial ([decisions.gbifTermsMet](decisions.md#gbiftermsmet)).
 
 **Proposed 2026-11-03: GADM codes and names.** `/geocode/gadm/{code}/subdivisions` returns the
 GADM 4.1 codes, names, and types of a region's subdivisions, as GBIF attaches them to records; it
@@ -722,12 +721,13 @@ confirm*, as for every licensing judgment.
 | **Adopted parts** | Provisions 1, 2, 3, 4, 6, and 7 of the data user agreement; the citation guidelines for occurrence downloads, multiple downloads, and data from the search API |
 | **Exclusions** | Provisions 5 and 8 to 10; citing single occurrences, species pages, media, and non-data content |
 | **Owner** | GBIF Secretariat |
-| **Status** | **Adopted 2026-11-03.** Two requirements open: [gbifterms.CiteApiDataByDerivedDataset](imported/gbif.org/gbifterms/gbifterms.md#citeapidatabyderiveddataset) and the non-commercial term under [gbifterms.PublisherLicencesPrevail](imported/gbif.org/gbifterms/gbifterms.md#publisherlicencesprevail) |
+| **Status** | **Adopted 2026-11-03**, and met the same day ([decisions.gbifTermsMet](decisions.md#gbiftermsmet)) |
 
 **Why it matters now.** The terms make the datasets' licenses prevail over GBIF's own, and the two
 datasets BirdView counts differ: eBird's is CC BY 4.0, iNaturalist's CC BY-NC 4.0. They also ask
 that data with no DOI, which is all BirdView reads from the search API, be cited by its publishers
-or a derived dataset. Neither was recorded before the owner asked for these terms to be vendored.
+or a derived dataset. Neither was recorded before the owner asked for these terms to be vendored,
+and every footer had credited iNaturalist's records under CC BY 4.0.
 
 ---
 

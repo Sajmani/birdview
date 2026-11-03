@@ -969,6 +969,43 @@ func TestAttributionIsComplete(t *testing.T) {
 
 func s2(t *testing.T) *server { t.Helper(); return newTestServer(t) }
 
+// TestGBIFDatasetsCitedWithTheirLicenses checks the two occurrence datasets are cited as GBIF's
+// terms ask (gbifterms.CiteApiDataByDerivedDataset, gbifterms.PublisherLicencesPrevail): the full
+// credits cite each by its publisher, title, DOI as a URL, and "accessed via GBIF.org", and every
+// page that shows their output gives each its own license, iNaturalist's being CC BY-NC 4.0, not
+// the CC BY 4.0 the footers once claimed for both.
+//
+// Verifies: product.selfDescriptionStaysTrue, gbifterms.PublisherLicencesPrevail. Criterion: acceptance.attributionComplete.
+func TestGBIFDatasetsCitedWithTheirLicenses(t *testing.T) {
+	s := newTestServer(t)
+	_, home := get(t, s, "/?month=all&show=all")
+	credits := strings.Join(strings.Fields(html.UnescapeString(home[strings.Index(home, "<footer"):])), " ")
+	for _, want := range []string{
+		"EOD – eBird Observation Dataset", "Cornell Lab of Ornithology", "https://doi.org/10.15468/aomfnb",
+		"iNaturalist Research-grade Observations", "iNaturalist contributors", "https://doi.org/10.15468/ab3s5x",
+		"accessed via GBIF.org",
+	} {
+		if !strings.Contains(credits, want) {
+			t.Errorf("the full credits do not cite %q", want)
+		}
+	}
+	for _, page := range []string{"/?month=all&show=all", "/species/greblu", "/species/" + undrawnFixture()[0].ID} {
+		_, body := get(t, s, page)
+		f := html.UnescapeString(body[strings.Index(body, "<footer"):])
+		inat := strings.Index(f, "iNaturalist")
+		if inat < 0 {
+			t.Errorf("%s: the footer does not credit iNaturalist", page)
+			continue
+		}
+		if !strings.Contains(f, "creativecommons.org/licenses/by-nc/4.0") || !strings.Contains(f, "CC BY-NC 4.0") {
+			t.Errorf("%s: the footer does not give iNaturalist's license, CC BY-NC 4.0", page)
+		}
+		if regexp.MustCompile(`iNaturalist[^.]*both[^.]*CC BY 4\.0`).MatchString(regexp.MustCompile(`<[^>]*>`).ReplaceAllString(f, "")) {
+			t.Errorf("%s: the footer licenses iNaturalist's records CC BY 4.0", page)
+		}
+	}
+}
+
 // TestNoUnearnedPermissionClaim guards against the page asserting a permission
 // the project does not hold.
 //

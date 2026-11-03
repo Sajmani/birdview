@@ -22,4 +22,7 @@ licensing gate: [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecu
 names, so nothing all-rights-reserved is read at build time or served.
 
 Rationale: Macaulay Library permits embedding for non-commercial use only, and iNaturalist's
-default CC BY-NC corpus is usable on the same basis. Taking revenue would breach both.
+default CC BY-NC corpus is usable on the same basis. Taking revenue would breach both. **The
+iNaturalist research-grade observations BirdView counts through GBIF are CC BY-NC 4.0**, which
+GBIF's terms make prevail over its own ([gbifterms.PublisherLicencesPrevail](../../imported/gbif.org/gbifterms/gbifterms.md#publisherlicencesprevail)); BirdView may count them
+because it is non-commercial ([decisions.gbifTermsMet](../../decisions.md#gbiftermsmet)).

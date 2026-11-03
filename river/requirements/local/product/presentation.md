@@ -691,6 +691,13 @@ Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCi
 condition, not a courtesy: AviList, AVONET, and Fox are all CC BY 4.0. It covers `detail.html`,
 whose names, families, and species codes all come from AviList, as well as the home page.
 
+**Each GBIF dataset is credited with its own license, and cited in full in the credits**
+([gbifterms.CiteApiDataByDerivedDataset](../../imported/gbif.org/gbifterms/gbifterms.md#citeapidatabyderiveddataset), [decisions.gbifTermsMet](../../decisions.md#gbiftermsmet)): the eBird Observation Dataset
+under CC BY 4.0 and iNaturalist's research-grade observations under CC BY-NC 4.0, wherever their
+output appears; and in the home page's credits, each by its publisher, title, DOI as a URL, and
+"accessed via GBIF.org", as GBIF's citation guidelines lay out. A GBIF download, once used, is cited
+by its own DOI ([gbifterms.CiteDownloadDoi](../../imported/gbif.org/gbifterms/gbifterms.md#citedownloaddoi)).
+
 **User-facing documentation describes the project as it is, not as it was.** `README.md` and
 `docs/` are read before the code and trusted first. Two kinds of staleness are forbidden:
 

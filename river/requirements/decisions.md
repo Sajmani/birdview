@@ -4513,3 +4513,32 @@ message.
   GADM's; at county scale Here needs boundaries keyed to GADM codes, and sea boundaries keyed to
   Marine Regions ids, which is open ([todo.countyRegions](../todo.md#countyregions)).
 
+---
+
+## gbifTermsMet
+
+**BirdView counts iNaturalist's CC BY-NC records as a non-commercial site, and cites both GBIF datasets**
+
+Date: 2026-11-03
+Decided by: Sameer
+Status: accepted
+Affects: [tech.localNowPublicLater](local/tech/posture.md#localnowpubliclater), [product.selfDescriptionStaysTrue](local/product/presentation.md#selfdescriptionstaystrue), [gbifterms.PublisherLicencesPrevail](imported/gbif.org/gbifterms/gbifterms.md#publisherlicencesprevail), [gbifterms.CiteApiDataByDerivedDataset](imported/gbif.org/gbifterms/gbifterms.md#citeapidatabyderiveddataset)
+
+### Decided
+
+BirdView is non-commercial, as [tech.localNowPublicLater](local/tech/posture.md#localnowpubliclater) already states, so it counts iNaturalist's
+research-grade observations under their CC BY-NC 4.0 license. Each page that shows output from
+GBIF's two datasets gives each its own license, and the home page's credits cite both as GBIF's
+citation guidelines lay out: publisher, title, DOI as a URL, and accessed via GBIF.org, with the
+dates the data was retrieved. No derived dataset is registered; the publisher citations meet the
+guideline, and downloads, once used, bring their own DOIs.
+
+### Why
+
+Vendoring GBIF's terms ([imports.gbif-terms](imports.md#gbif-terms)) found that the datasets' licenses prevail over GBIF's, and
+that iNaturalist's is CC BY-NC 4.0, while every footer had credited both datasets under CC BY 4.0.
+The owner confirmed the use is non-commercial, which the posture requirement had said since
+2026-10-22 without connecting it to these counts. The guidelines ask that data read from the
+search API, which carries no DOI, be credited to each publisher or covered by a derived dataset;
+crediting the publishers is the direct form, and needs no account or registration.
+
