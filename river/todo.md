@@ -1038,17 +1038,27 @@ Mexican bird and Morelet's Seedeater is the one native to Texas
 
 Status: open
 Owner: Sameer
-Gate: step 2, a GBIF download, needs the owner's GBIF account
+Gate: the owner's answers to step 3's four questions
 
 [decisions.regionCodesFromData](requirements/decisions.md#regioncodesfromdata) names regions by GADM code on land and Marine Regions id at sea, and
 redirects every value BirdView wrote before. Step 1, land regions by GADM code with postal codes
 and island names redirecting, was done 2026-11-03. Left, in order:
 
-2. **A GBIF download** in place of per-region queries, which county scale would multiply about
+2. *Done 2026-11-03:* both downloads recorded in `data/gbif-downloads.tsv` (New York counties,
+   10.15468/dl.ttkwue; uncoded cells, 10.15468/dl.4jngjn). The uncoded cells turned out to be mostly
+   inland and near-shore water, not open sea: lakes, rivers, and bays GADM leaves out, with Lake
+   Saint-Louis at Montreal the busiest cell. Step 6 has to separate inland, coastal, and open water.
+   Original plan: **a GBIF download** in place of per-region queries, which county scale would multiply about
    fortyfold and which is kinder to GBIF: species by county by month for New York, and species by
    grid cell by month for records with no GADM code, offshore. Needs a GBIF account and SQL download
    access; each download has a DOI to cite, which changes [imports.gbif](requirements/imports.md#gbif) and the credits.
-3. A New York spike on that data: records per county, file size, and a minimum record count for
+3. *Done 2026-11-03 (eBird only):* 63 units, 112 k to 4.9 M eBird records each; at today's rule a
+   county lists 235 to 410 species, 9% of listings on fewer than 5 records; 50 species reach a county
+   list but not the state's, cage birds and vagrants; NYC's five counties together list 428 of the
+   state's 450, so in dense counties the share ordering matters more than the set; ~40 MB of
+   presence for the US by county. Open: a minimum record count, whether county lists must also be
+   on the state list or recur, what a county view is for, and how to store and ship county presence.
+   Original plan: a New York spike on that data: records per county, file size, and a minimum record count for
    small counties, where one record per million is less than one record.
 4. A county picker prototype (drill-down, search, Here to a county) on the New York data, sized so
    no link lists many county codes.
