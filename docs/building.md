@@ -114,6 +114,13 @@ The GBIF rate is BirdView's own, and the client slows further whenever GBIF answ
 run resumes. It refuses to write a partial table, because a species whose dates never arrived would
 be classified as a vagrant on no evidence.
 
+`birdview-gbifdownload` requests a GBIF SQL download from a query committed under
+`data/gbif-queries/`, waits for it, writes it under `fetched/gbif/` (never committed), and records
+its key, DOI, license, and hash in `data/gbif-downloads.tsv`, the DOI being what the credits cite.
+It needs a GBIF account, read from `GBIF_USER` and `GBIF_PASSWORD`; given `-key`, it fetches and
+records a download already requested from GBIF's website, with no credentials. `-validate` only asks
+GBIF whether it would accept the query. Nothing reads its downloads yet ([county regions](../river/todo.md#countyregions)).
+
 A sixth command, `birdview-names`, writes `data/source-names.tsv`: how many records eBird and
 iNaturalist each hold under each species' name, used to find names the two disagree about. Only a
 test reads it.
@@ -159,6 +166,7 @@ cmd/birdview-gbifmap/    generator: GBIF backbone -> AviList name bridge
 cmd/birdview-regions/    generator: per-region presence
 cmd/birdview-status/     generator: BirdView's own occurrence status
 cmd/birdview-boundaries/ generator: region boundaries for the Here button
+cmd/birdview-gbifdownload/ requests, fetches, and records GBIF SQL downloads
 cmd/birdview-names/      measures how eBird and iNaturalist name each species
 cmd/birdview-smoke/      checks a running deployment from outside, after each deploy
 internal/avilist/        the AviList workbook reader: names, families, codes, sequence

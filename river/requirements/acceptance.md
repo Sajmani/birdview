@@ -1975,6 +1975,23 @@ Hawaii break, which is why it was replaced.
 
 Watched failing: 2026-10-03, by filing Hawaii under Great Lakes and Texas under New England (both caught on rank), and by filing Navassa under Mid-Atlantic and Alaska under Gulf Coast (both caught per region, Alaska at 0.446 against 0.465 for regions at large).
 
+### gbifDownloadsRecorded
+
+**A GBIF download is fetched and recorded only under the query it was requested from**
+
+**Verifies:** [tech.gbifDownloadsRecorded](local/tech/process.md#gbifdownloadsrecorded), [gbifterms.CiteDownloadDoi](imported/gbif.org/gbifterms/gbifterms.md#citedownloaddoi) · **Level:** code · **Method:** the download client against a fake GBIF
+
+**Assertions:** a query is validated without credentials and GBIF's formatting of it returned; a
+rejected query fails validation; submitting sends the credentials and returns the key; waiting polls
+until the download succeeds; fetching returns the file and its SHA-256; the record carries the key,
+DOI, creation date, license, query file, and hash, and never the password; and a download is not
+recorded if it has not succeeded or was requested with SQL other than the committed query, in either
+its committed form or GBIF's formatting of it.
+
+**Run:** `go test ./internal/gbif/ -run TestDownloadSubmitsWaitsAndRecords`
+**Status: verified 2026-11-03, passing.**
+Watched failing: 2026-11-03, with the query check disabled ("a download was recorded under a query it was not requested from"), and before Validate returned GBIF's formatting.
+
 ### regionUrlRoundTrips
 
 **A region's URL is the data's code, unique, round-trips, and old values redirect**

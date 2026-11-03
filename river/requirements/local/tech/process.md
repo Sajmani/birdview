@@ -44,6 +44,24 @@ and status *before* code that reads it is written.
 Rationale: after designing around three datasets, this project found that two could not legally
 be redistributed and the third lacked the fields it was chosen for.
 
+## gbifDownloadsRecorded
+
+**Every GBIF download is requested from a committed query and recorded before it is read**
+
+Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
+
+A GBIF download BirdView reads is requested from a SQL query committed under `data/gbif-queries/`,
+and **its key, DOI, creation date, query file, and the SHA-256 of the file fetched are recorded in
+`data/gbif-downloads.tsv`** before any code reads it. The download itself is kept under `fetched/`,
+out of the repository: it is GBIF's, large, and reproducible from its key. `cmd/birdview-gbifdownload`
+validates a query, submits it, waits for it, fetches it, and writes the record; a download requested
+from GBIF's website is fetched and recorded by its key the same way. GBIF credentials are read from
+the environment, never from a file in the repository, and never printed.
+
+Rationale: GBIF's terms require citing each download by its DOI ([gbifterms.CiteDownloadDoi](../../imported/gbif.org/gbifterms/gbifterms.md#citedownloaddoi)), so
+the DOI has to be kept where the credits can find it; and a count derived from a download can only
+be checked against the query and the file it came from.
+
 ---
 
 Project bindings are in [bindings.md](../../../bindings.md).

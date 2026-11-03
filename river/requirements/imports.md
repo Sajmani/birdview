@@ -203,6 +203,12 @@ accepted* — is exactly what should attract scrutiny rather than escape it.
 [`gbif-terms`](#gbif-terms). Both datasets are cited by publisher and DOI, and iNaturalist's records, CC BY-NC
 4.0, are counted because BirdView is non-commercial ([decisions.gbifTermsMet](decisions.md#gbiftermsmet)).
 
+**Proposed 2026-11-03: SQL downloads.** `POST /occurrence/download/request` with format
+`SQL_TSV_ZIP`, from the queries in `data/gbif-queries/`, recorded in `data/gbif-downloads.tsv` with
+their DOIs ([tech.gbifDownloadsRecorded](local/tech/process.md#gbifdownloadsrecorded)); a GBIF account is required, and the feature is marked
+experimental. Taxon columns are read through `occurrence.gbif_classification`, the GBIF backbone,
+since SQL downloads default to the Catalogue of Life.
+
 **Proposed 2026-11-03: GADM codes and names.** `/geocode/gadm/{code}/subdivisions` returns the
 GADM 4.1 codes, names, and types of a region's subdivisions, as GBIF attaches them to records; it
 would name land regions in URLs and list a state's counties
