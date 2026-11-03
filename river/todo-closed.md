@@ -4,6 +4,31 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## plainMeasurementDefinitions
+
+**A reader asks what each measurement means, in everyday words, and to see a found bird at once**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-11-03. Definitions lead every tooltip, table row, and the guide
+([product.everydayDefinitions](requirements/local/product/measurements.md#everydaydefinitions)); found birds link to their species pages (option A, the owner's
+choice). Option B, drawing the found birds' tiles at the top without a pin, was left for the picker
+redesign ([todo.countyRegions](todo.md#countyregions), step 4).
+
+Feedback from a reader (Tina), relayed by the owner on 2026-11-03:
+
+1. **Definitions.** "Inner" and "Chord" were unfamiliar, the hover text was not clear, and the
+   definitions under the stick-figure link "seemed to focus more on how the measurements were
+   calculated rather than what they actually represent". Suggested: everyday language, such as
+   wingspan as "the distance from the tip of one wing to the tip of the other when both wings are
+   fully outstretched". Since 2026-11-03 each tooltip names where a value came from
+   ([product.provenancePerMetric](requirements/local/product/measurements.md#provenancepermetric)), which says nothing about what it measures; and `docs/using.md`'s
+   parts table describes how each part is drawn and sourced.
+2. **Search.** "I wish that when you searched for a bird, its information box would automatically
+   appear at the top without needing to pin it first", for looking up one bird's wingspan quickly.
+   Today a match lists the bird with a pin, and only pinning draws its tile
+   ([product.nextView](requirements/local/product/presentation.md#nextview)).
+
 ## gbifLicenseTerms
 
 **GBIF's terms: cite the data, and decide what CC BY-NC means for BirdView**

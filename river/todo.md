@@ -95,28 +95,6 @@ has seen the home page that answers it. They were deliberately not contacted whi
 was in progress. Ask them to try birdview.site on a phone and a laptop, with the same questions as
 before, and record what they say under [scalableInterface](#scalableinterface).
 
-## plainMeasurementDefinitions
-
-**A reader asks what each measurement means, in everyday words, and to see a found bird at once**
-
-Status: open
-Owner: Sameer
-Gate: owner's call on the approach; requirement first
-
-Feedback from a reader (Tina), relayed by the owner on 2026-11-03:
-
-1. **Definitions.** "Inner" and "Chord" were unfamiliar, the hover text was not clear, and the
-   definitions under the stick-figure link "seemed to focus more on how the measurements were
-   calculated rather than what they actually represent". Suggested: everyday language, such as
-   wingspan as "the distance from the tip of one wing to the tip of the other when both wings are
-   fully outstretched". Since 2026-11-03 each tooltip names where a value came from
-   ([product.provenancePerMetric](requirements/local/product/measurements.md#provenancepermetric)), which says nothing about what it measures; and `docs/using.md`'s
-   parts table describes how each part is drawn and sourced.
-2. **Search.** "I wish that when you searched for a bird, its information box would automatically
-   appear at the top without needing to pin it first", for looking up one bird's wingspan quickly.
-   Today a match lists the bird with a pin, and only pinning draws its tile
-   ([product.nextView](requirements/local/product/presentation.md#nextview)).
-
 ## homePageReaderFeedback
 
 **A reader's suggestions for the home page, 2026-10-30**

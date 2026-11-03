@@ -857,13 +857,13 @@ func newTile(sp *dataset.Species, g view.Geometry, box view.Box, u units, loc da
 		t.ChordStr = u.format(sp.WingChord.Value, view.ByLength)
 	}
 	if mm, ok := innerSpan(sp); ok {
-		t.InnerStr, t.InnerWhy = u.format(mm, view.ByLength), innerSpanWhy(sp)
+		t.InnerStr, t.InnerWhy = u.format(mm, view.ByLength), defined("Inner", innerSpanWhy(sp))
 	}
 	// Right of the cube, its baseline on the cube's foot (decisions.tileMeasurementLines).
 	if c := t.MassCube; c.Side > 0 {
 		t.MassLabel = &massLabel{
 			Value:  t.MassStr,
-			Title:  provenanceTip(sp.Mass.Prov, sp.ScientificName),
+			Title:  defined("Mass", provenanceTip(sp.Mass.Prov, sp.ScientificName)),
 			Est:    sp.Mass.Prov.Kind != dataset.Measured,
 			Left:   100 * (c.X + c.Side + c.Depth + 6) / box.W,
 			Bottom: 100 * (box.H - (c.Y + c.Side)) / box.H,
@@ -1118,7 +1118,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	if mm, ok := innerSpan(sp); ok {
 		// The tile calls it Inner; the table has room to say what (decisions.innerSpanDerived).
 		rows = append(rows, metricRow{Label: "Inner span", Value: one.format(mm, view.ByLength),
-			Kind: "derived", Detail: innerSpanWhy(sp) + "."})
+			Kind: "derived", Detail: innerSpanWhy(sp)})
 	}
 	rows = append(rows, []metricRow{
 		row("Mass", sp.Mass, view.ByMass, one),
@@ -1128,6 +1128,19 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		row("Body", sp.Segments.Body, view.ByLength, one),
 		row("Tail", sp.Segments.Tail, view.ByLength, one),
 	}...)
+	// Each row says what it measures before where it came from (product.everydayDefinitions).
+	for i := range rows {
+		name := rows[i].Label
+		switch name {
+		case "Total length":
+			name = "Length"
+		case "Wing chord":
+			name = "Chord"
+		case "Inner span":
+			name = "Inner"
+		}
+		rows[i].Detail = defined(name, rows[i].Detail)
+	}
 	t := newTile(sp, view.Layout(sp, sp.TotalLength.Value, sp.Wingspan.Value, tileBox), tileBox, one, opt.Locale)
 	t.Big = true
 	t.Commonest = s.shareWithSeams(sp, opt)
@@ -1576,8 +1589,44 @@ var funcs = template.FuncMap{
 	"add": func(a, b float64) float64 { return a + b },
 	"sub": func(a, b float64) float64 { return a - b },
 	"div": func(a, b float64) float64 { return a / b },
-	// prov says, in a tooltip, where a value came from (product.provenancePerMetric).
-	"prov": provenanceTip,
+	// tip is a measurement's tooltip: what it measures, then where the value came from
+	// (product.everydayDefinitions, product.provenancePerMetric).
+	"tip": func(name string, p dataset.Provenance, own string) string {
+		return defined(name, provenanceTip(p, own))
+	},
+}
+
+// definitions says, in everyday words, what each measurement a tile names represents
+// (product.everydayDefinitions). The requirement's table is the source; TestTooltipsSayWhatEachMeasures reads it and
+// holds these to it word for word.
+var definitions = map[string]string{
+	"Length":   "From the tip of the bill to the tip of the tail.",
+	"Bill":     "From the tip of the bill to where it meets the skull.",
+	"Tail":     "From where the tail leaves the body to the tip of its longest feather.",
+	"Wingspan": "From the tip of one wing to the tip of the other, across the body, with both wings fully extended.",
+	"Chord":    "One folded wing, from the bend of the wing to its tip.",
+	"Inner":    "The middle of the wingspan, between the bends of the two wings: the body and the inner wings.",
+	"Mass":     "How much the bird weighs; the cube is the water that weighs the same.",
+	"Head":     "The parts of the length between the bill and the tail.",
+	"Neck":     "The parts of the length between the bill and the tail.",
+	"Body":     "The parts of the length between the bill and the tail.",
+}
+
+// defined puts a measurement's definition before what is said about its value, as one or more
+// sentences: "One folded wing, from the bend of the wing to its tip. Measured, from AVONET v7."
+func defined(name, about string) string {
+	about = strings.TrimSpace(about)
+	if about == "" {
+		return definitions[name]
+	}
+	about = strings.ToUpper(about[:1]) + about[1:]
+	if !strings.HasSuffix(about, ".") {
+		about += "."
+	}
+	if d := definitions[name]; d != "" {
+		return d + " " + about
+	}
+	return about
 }
 
 // provenanceTip turns a provenance into a short tooltip, for every value a tile shows.

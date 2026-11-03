@@ -888,7 +888,9 @@ home page in those. Its footer carries the full credits, which every other page 
   bird matches when what is typed, ignoring case and punctuation, appears unbroken in one of its
   English names, its species code, its scientific name, or the scientific name of its family or
   order (not their English descriptions, which name other birds). As the reader types, it says how many
-  birds match, and once there are 10 or fewer it lists them, each with its pin. Without
+  birds match, and once there are 10 or fewer it lists them, each with its pin and **its name
+  linking to its species page**, so one bird's measurements are a tap away without pinning it
+  (Sameer, 2026-11-03, on a reader's request: [todo.plainMeasurementDefinitions](../../../todo-closed.md#plainmeasurementdefinitions)). Without
   JavaScript, Enter does the same. Pinning keeps the box's text, so the list stays open and
   several of its birds can be pinned and unpinned in turn, from the list or from their tiles;
   the list's **×** closes it, dropping the text.

@@ -10,6 +10,10 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 - A region in an address is now the code its records are filed under: `?region=USA.33_1` for New
   York rather than `?region=NY`. Old addresses still work and go to the new ones. This makes room
   for counties, which have no postal codes. The sea regions keep their names for now.
+- Every number's tooltip, and its row on a bird's own page, now begins by saying what it measures in
+  everyday words, such as "One folded wing, from the bend of the wing to its tip" for Chord. The
+  guide lists them all. Wingspan follows the definition in Fox and colleagues' paper.
+- A bird found by name links to its own page, so one bird's measurements no longer need a pin.
 - The credits cite GBIF's two datasets in full, by DOI, and give iNaturalist's research-grade
   observations their actual license, CC BY-NC 4.0; every page had said CC BY 4.0 for both.
 

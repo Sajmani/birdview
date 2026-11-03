@@ -413,8 +413,10 @@ func TestNextFindInTheBrowser(t *testing.T) {
 		var want []string
 		finds := body[strings.Index(body, `<div class="finds"`):]
 		finds = finds[:strings.Index(finds, "</div>")]
-		for _, l := range regexp.MustCompile(`<li><a class="(pin(?: on)?)" href="([^"]*)"`).FindAllStringSubmatch(finds, -1) {
-			want = append(want, l[1]+" "+html.UnescapeString(l[2]))
+		for _, li := range regexp.MustCompile(`(?s)<li>(.*?)</li>`).FindAllStringSubmatch(finds, -1) {
+			for _, l := range regexp.MustCompile(`<a class="([^"]*)" href="([^"]*)"`).FindAllStringSubmatch(li[1], -1) {
+				want = append(want, l[1]+" "+html.UnescapeString(l[2]))
+			}
 		}
 		if !slices.Equal(r.Items, want) {
 			t.Errorf("typing %q: the script lists %v, the server %v", r.Q, r.Items, want)
@@ -1787,7 +1789,7 @@ func TestBandingCodesOnThePages(t *testing.T) {
 			t.Errorf("find=%s lists %+v; want American Robin alone, with AMRO", q, p.Matches)
 		}
 	}
-	if !strings.Contains(mustGet(t, s, "/?find=amro"), `American Robin <span class="code">AMRO</span> <span class="code">(amerob)</span> <i>Turdus migratorius</i>`) {
+	if !strings.Contains(mustGet(t, s, "/?find=amro"), `American Robin</a> <span class="code">AMRO</span> <span class="code">(amerob)</span> <i>Turdus migratorius</i>`) {
 		t.Error("the find list does not show AMRO and (amerob) beside the name")
 	}
 	for _, path := range []string{"/species/AMRO", "/species/amro"} {

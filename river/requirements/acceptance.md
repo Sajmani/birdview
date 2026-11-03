@@ -1975,6 +1975,22 @@ Hawaii break, which is why it was replaced.
 
 Watched failing: 2026-10-03, by filing Hawaii under Great Lakes and Texas under New England (both caught on rank), and by filing Navassa under Mid-Atlantic and Alaska under Gulf Coast (both caught per region, Alaska at 0.446 against 0.465 for regions at large).
 
+### everydayDefinitionsShown
+
+**Every measurement says what it is before where it came from, in the requirement's own words**
+
+**Verifies:** [product.everydayDefinitions](local/product/measurements.md#everydaydefinitions) · **Level:** code · **Method:** assertions on the rendered species page and the guide, against the requirement's table
+
+**Assertions:** the definitions are read from [product.everydayDefinitions](local/product/measurements.md#everydaydefinitions)'s table itself, so a page cannot drift
+from it; on the species page's tile, the tooltip of Length, Bill, Head, Neck, Body, Tail, Wingspan,
+Inner, Chord, and Mass each begins with its definition and goes on to say where the value came
+from; each row of the measurements table begins with its definition; and the guide carries every
+definition word for word.
+
+**Run:** `go test ./cmd/birdview/ -run TestTooltipsSayWhatEachMeasures`
+**Status: verified 2026-11-03, passing.**
+Watched failing: 2026-11-03, against tooltips that named only the source ("Chord's tooltip is \"measured, from AVONET v7, sheet AVONET2_eBird\"; it begins with its definition"), the table likewise, and a guide without the definitions ("the guide does not define Wingspan as …").
+
 ### gbifDownloadsRecorded
 
 **A GBIF download is fetched and recorded only under the query it was requested from**
@@ -2432,6 +2448,7 @@ Watched failing: 2026-10-23, by the broken variants above, which the test keeps.
 | [product.escapedBirdsListed](local/product/measurements.md#escapedbirdslisted) | escapedBirdsListedAndServed | |
 | [product.tileMarksModeled](local/product/measurements.md#tilemarksmodeled) | tileMarksNonMeasured | |
 | [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) | provenanceWellFormed, tileValuesNameTheirSource | |
+| [product.everydayDefinitions](local/product/measurements.md#everydaydefinitions) | everydayDefinitionsShown | |
 | [product.metricProvenanceExplained](local/product/measurements.md#metricprovenanceexplained) | detailShowsProvenance | |
 | [product.inaturalistLink](local/product/presentation.md#inaturalistlink) | | inaturalistLinkConfidentOnly withdrawn ([decisions.ebirdLinkReplacesInaturalist](decisions.md#ebirdlinkreplacesinaturalist)) |
 | [product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled) | diagramDistinguishesModeled | |

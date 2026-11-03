@@ -115,6 +115,9 @@ type nextMatch struct {
 	ID, Name, Scientific, Banding string
 	Pinned                        bool
 	URL                           template.URL
+	// DetailURL is the bird's species page, so one bird's measurements need no pin
+	// (product.nextView).
+	DetailURL template.URL
 }
 
 type nextData struct {
@@ -181,13 +184,16 @@ type nextData struct {
 	// list open on the text. CloseURL closes the list: this address without
 	// find. PinnedIDs are the pinned birds, space-separated, and BirdsURL the
 	// names the script searches.
-	ToggleURL  string
-	CloseURL   template.URL
-	PinnedIDs  string
-	BirdsURL   string
-	FindLimit  int
-	FindScript template.JS
-	HereScript template.JS
+	ToggleURL string
+	CloseURL  template.URL
+	PinnedIDs string
+	BirdsURL  string
+	// DetailSuffix is what follows /species/<id> in a species page's address from here: the
+	// units and names, or nothing. The find script builds the list's links with it.
+	DetailSuffix string
+	FindLimit    int
+	FindScript   template.JS
+	HereScript   template.JS
 	// ResetURL returns every setting to its default and keeps the pins;
 	// ClearPinsURL drops the pins and keeps every setting, empty when
 	// nothing is pinned.
@@ -577,6 +583,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 		page.ToggleURL = "/?" + tq.Encode() + "&"
 	}
 	page.CloseURL = nextURL(tq)
+	page.DetailSuffix = strings.TrimPrefix(string(nextDetailLink(q, "")), "/species/")
 	page.BirdsURL = "/birds.json"
 	if opt.Locale == dataset.LocaleWorld {
 		page.BirdsURL += "?names=" + string(dataset.LocaleWorld)
@@ -789,7 +796,8 @@ func (s *server) nextPage(r *http.Request) nextData {
 			for _, sp := range found {
 				page.Matches = append(page.Matches, nextMatch{ID: sp.ID, Name: sp.Name(opt.Locale),
 					Scientific: sp.ScientificName, Banding: sp.BandingCode, Pinned: added[sp.ID],
-					URL: template.URL(page.ToggleURL + "find=" + url.QueryEscape(page.Find) + "&bird=" + url.QueryEscape(sp.ID))})
+					URL:       template.URL(page.ToggleURL + "find=" + url.QueryEscape(page.Find) + "&bird=" + url.QueryEscape(sp.ID)),
+					DetailURL: nextDetailLink(q, sp.ID)})
 			}
 		}
 	}

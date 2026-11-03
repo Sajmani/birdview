@@ -34,6 +34,7 @@ import (
 	"strings"
 	"testing"
 
+	"birdview/docs"
 	"birdview/internal/dataset"
 	"birdview/internal/month"
 	"birdview/internal/region"
@@ -755,7 +756,9 @@ func TestUnitToggle(t *testing.T) {
 	check := func(path string, wantLen, wantMass []string) {
 		t.Helper()
 		_, body := get(t, s, path)
-		f := footer(t, body)
+		// The tooltips are not what the reader reads, and their definitions say "in" and "the
+		// tip"; count only the numbers shown.
+		f := regexp.MustCompile(`\stitle="[^"]*"`).ReplaceAllString(footer(t, body), "")
 		// Length, bill, tail, wingspan, and the chord where it is known: every
 		// number on the tile, less the mass, carries a length unit of the system.
 		values := len(regexp.MustCompile(`\d ?[a-z]+</span>`).FindAllString(f, -1))
@@ -4724,7 +4727,7 @@ func TestInnerSpanIsDerived(t *testing.T) {
 		t.Errorf("the Inner reads %q, want the wingspan less two chords, %q", m[2], want)
 	}
 	title := html.UnescapeString(m[1])
-	if !strings.HasPrefix(title, "derived") || !strings.Contains(title, "wingspan") || !strings.Contains(title, "chord") {
+	if !strings.Contains(title, "Derived: ") || !strings.Contains(title, "wingspan") || !strings.Contains(title, "chord") {
 		t.Errorf("the Inner's tooltip is %q; it says the value is derived, from the wingspan and the chord", title)
 	}
 	if row, ok := metricsOf(t, body)["Inner span"]; !ok || !strings.HasSuffix(row, "|derived") {
@@ -4767,7 +4770,7 @@ func TestTileValuesNameTheirSource(t *testing.T) {
 			t.Errorf("the tile names no %s", name)
 		case title == "":
 			t.Errorf("%s (%s) has no tooltip saying where it came from", name, m.Prov.Kind)
-		case m.Prov.Kind == dataset.Measured && !strings.HasPrefix(title, "measured, from "+m.Prov.Source):
+		case m.Prov.Kind == dataset.Measured && !strings.Contains(title, "Measured, from "+m.Prov.Source):
 			t.Errorf("%s is measured, and its tooltip is %q; it names its source, %q", name, title, m.Prov.Source)
 		}
 	}
@@ -4786,5 +4789,93 @@ func TestTileValuesNameTheirSource(t *testing.T) {
 	near := dataset.Provenance{Kind: dataset.NearMatch, Source: "AVONET v7", SourceTaxon: "Sturnella magna"}
 	if got := provenanceTip(near, "Sturnella neglecta"); !strings.Contains(got, "Sturnella magna") || !strings.Contains(got, "AVONET v7") {
 		t.Errorf("a near-match's tooltip is %q; it names the donor and the source", got)
+	}
+}
+
+// definitionsFromRequirement reads product.everydayDefinitions's table, so the pages are checked against
+// the requirement's own words rather than a copy of them.
+func definitionsFromRequirement(t *testing.T) map[string]string {
+	t.Helper()
+	b, err := os.ReadFile(filepath.Join("..", "..", "river", "requirements", "local", "product", "measurements.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	sec := string(b)[strings.Index(string(b), "## everydayDefinitions"):]
+	sec = sec[:strings.Index(sec[3:], "\n## ")+3]
+	defs := map[string]string{}
+	for _, m := range regexp.MustCompile(`(?m)^\| ([A-Z][A-Za-z, ]+) \| ([^|]+\.) \|`).FindAllStringSubmatch(sec, -1) {
+		for _, name := range strings.Split(m[1], ", ") {
+			defs[name] = strings.TrimSpace(m[2])
+		}
+	}
+	if len(defs) < 10 {
+		t.Fatalf("read %d definitions from product.everydayDefinitions; the table has moved or changed shape", len(defs))
+	}
+	return defs
+}
+
+// TestTooltipsSayWhatEachMeasures asserts product.everydayDefinitions: every measurement's tooltip on the
+// species page's tile begins with its plain definition and then says where the value came from;
+// each row of the measurements table begins with it too; and the guide lists every one.
+//
+// Verifies: product.everydayDefinitions. Criterion: acceptance.everydayDefinitionsShown.
+func TestTooltipsSayWhatEachMeasures(t *testing.T) {
+	defs := definitionsFromRequirement(t)
+	body := mustGet(t, newTestServer(t), "/species/greblu?units=metric")
+	tile := mustMatch(t, body, `(?s)(<div class="tile big">.*?<div class="lo">)`, "the species page's tile")
+	titles := map[string]string{}
+	for _, m := range regexp.MustCompile(`<span(?: class="(?:ml )?(?:est|ml)")? title="([^"]*)"[^>]*>(?:<span class="k [^"]*">)?([A-Z][a-z]+)(?:</span>)? [^<]+</span>`).FindAllStringSubmatch(tile, -1) {
+		titles[m[2]] = html.UnescapeString(m[1])
+	}
+	for _, name := range []string{"Length", "Bill", "Head", "Neck", "Body", "Tail", "Wingspan", "Inner", "Chord", "Mass"} {
+		title, ok := titles[name]
+		switch {
+		case !ok:
+			t.Errorf("the tile names no %s with a tooltip", name)
+		case !strings.HasPrefix(title, defs[name]+" "):
+			t.Errorf("%s's tooltip is %q; it begins with its definition, %q", name, title, defs[name])
+		case len(title) <= len(defs[name])+1:
+			t.Errorf("%s's tooltip is only its definition; where the value came from follows it", name)
+		}
+	}
+	label := map[string]string{"Total length": "Length", "Wing chord": "Chord", "Inner span": "Inner"}
+	table := body[strings.Index(body, `<table class="prov metrics">`):]
+	table = table[:strings.Index(table, "</table>")]
+	rows := regexp.MustCompile(`(?s)<th>([^<]+)</th>.*?<td class="d">([^<]*)</td>`).FindAllStringSubmatch(table, -1)
+	if len(rows) < 9 {
+		t.Fatalf("read %d rows of the measurements table", len(rows))
+	}
+	for _, r := range rows {
+		name := r[1]
+		if n, ok := label[name]; ok {
+			name = n
+		}
+		if d := html.UnescapeString(r[2]); !strings.HasPrefix(d, defs[name]+" ") {
+			t.Errorf("the table's %s row reads %q; it begins with the definition, %q", r[1], d, defs[name])
+		}
+	}
+	guide, err := docs.Files.ReadFile("using.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	flat := strings.Join(strings.Fields(string(guide)), " ")
+	for name, d := range defs {
+		if !strings.Contains(flat, d) {
+			t.Errorf("the guide does not define %s as %q", name, d)
+		}
+	}
+}
+
+// TestFoundBirdLinksToItsPage asserts the find list's names link to their species pages, keeping
+// the units and names the home page draws with, so one bird's measurements need no pin
+// (product.nextView).
+//
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestFoundBirdLinksToItsPage(t *testing.T) {
+	body := mustGet(t, newTestServer(t), "/?find=crow&units=metric&names=world&month=all")
+	finds := body[strings.Index(body, `<div class="finds"`):]
+	finds = finds[:strings.Index(finds, "</div>")]
+	if !strings.Contains(finds, `<a class="sp" href="/species/amecro?names=world&amp;units=metric">Crow American</a>`) {
+		t.Errorf("the find list does not link American Crow (in the fixture's world names, Crow American) to its species page:\n%s", finds)
 	}
 }

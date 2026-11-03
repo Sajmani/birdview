@@ -8,6 +8,7 @@ Vendored copy of the avian wingspan database, BirdView's only source of measured
 | File | Origin | SHA-256 |
 | --- | --- | --- |
 | `//third_party/foxwingspan/wingspan_fox2026_AppendixS1.xlsx` | https://doi.org/10.6084/m9.figshare.32089083 (v1) | `6b55747a5761c08356d92c7a0b524b4e586c28a25316b0a6c1de3738db1d8eda` |
+| `//third_party/foxwingspan/fox2026-preprint.pdf` | https://doi.org/10.64898/2026.04.27.720532 (v1) | `093cda99a4383559a87a211168eaf4cf21ee261cdc8c92d9941f38c10ba1b3d5` |
 
 - **Size:** 4,879,919 bytes · **MD5:** `4970a3506c98859c3aeb7e98e5f5ce35`, which **matches the
   `computed_md5` figshare publishes for the file** — so the download is confirmed intact against
@@ -20,6 +21,13 @@ Vendored copy of the avian wingspan database, BirdView's only source of measured
 - **Citation:** Fox, M. R., Brunton, E. A., Shephard, J. M. (2026). Estimating avian wingspan from
   wing length: an order-level regression approach. *bioRxiv*. Dataset: "Avian wingspan database:
   empirical and predicted wingspan for 10,618 flighted bird species", published 2026-04-24.
+
+**The preprint** (`fox2026-preprint.pdf`, 472,383 bytes) was saved from bioRxiv by the maintainer
+on 2026-11-03, since bioRxiv answers automated requests with HTTP 429. Its own footer reads "made
+available under a CC-BY 4.0 International license", so it is committed. It is kept for one
+sentence, the definition [product.everydayDefinitions](../../../local/product/measurements.md#everydaydefinitions) quotes, on page 2, lines 27 to 28: "Wingspan, the
+tip-to-tip distance of fully extended wings". The dataset's own metadata does not define wingspan;
+it says only that BirdWingData's B-measures were excluded "as they omit the inter-wing body segment".
 
 The file lives at the repository root under the same location exception as the AVONET workbook —
 it is a build input, not a rules document. See

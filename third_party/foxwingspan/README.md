@@ -6,13 +6,13 @@ International license, whose full text is in [LICENSE](LICENSE).
 
 | | |
 | --- | --- |
-| **File** | `wingspan_fox2026_AppendixS1.xlsx` |
+| **Files** | `wingspan_fox2026_AppendixS1.xlsx`, and the paper describing it, `fox2026-preprint.pdf` |
 | **Origin** | <https://doi.org/10.6084/m9.figshare.32089083> |
 | **Version** | v1, published 2026-04-24 |
 | **Owner** | Fox, Brunton & Shephard |
 | **License** | CC BY 4.0 |
 | **Modifications** | None. The file is exactly as published, and its hash is checked on every run of the spec checks. |
-| **Used for** | Empirical wingspans. Only rows marked as measured are read; the predicted columns are not. |
+| **Used for** | Empirical wingspans. Only rows marked as measured are read; the predicted columns are not. The paper is read by no code; it is kept for its definition of wingspan, which BirdView's quotes. |
 
 **Cite as** directed at the DOI above.
 

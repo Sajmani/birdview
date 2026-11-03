@@ -418,6 +418,8 @@ Watched failing: 2026-10-26, by anchoring each popover to its own setting with n
 Watched failing: 2026-10-26, by never marking a pin pinned, by a pin that never unpins, by dropping the families' colors, and by the script drawing every pin unpinned.
 Watched failing: 2026-10-26, by dropping the shared name ("0 of 9 count-line settings share the name ctl").
 Watched failing: 2026-10-26, by not lowercasing what is typed in the script ("AMECRO": the script says "", the server "1 bird matches.").
+Added 2026-11-03: each bird the find list names links to its species page, keeping the units and names (`TestFoundBirdLinksToItsPage`), and the script's list links each name the same way as the server's (`TestNextFindInTheBrowser`, now comparing every link in a list item, not only the pin).
+Watched failing: 2026-11-03, before the names were links ("the find list does not link American Crow … to its species page").
 Watched failing: 2026-10-26, by the script listing matches over the limit, and by its offering Add for a bird already shown.
 Watched failing: 2026-10-26, by the toggle not removing a bird the filters chose, and by ignoring exclude=.
 Watched failing: 2026-10-26, by the server listing 23 matches for "hawk".

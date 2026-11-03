@@ -89,6 +89,35 @@ Rationale: one record covers what [decisions.noOpenLengthAndWingspan](../../deci
 [decisions.abaSpeciesWithoutAvonet](../../decisions.md#abaspecieswithoutavonet) for split taxa, so each later gap is a labeling problem rather
 than a redesign.
 
+## everydayDefinitions
+
+**Every measurement says what it is, in everyday words, before where it came from**
+
+Subject: `measurement.definition`
+Goals: [goals.honestData](../../../goals/goals.md#honestdata)
+
+Each measurement BirdView names has **one plain sentence saying what it measures**, written for a
+reader who knows no anatomy, and **consistent with its source's own definition**. It leads the
+measurement's tooltip on a tile, before where the value came from
+([provenancePerMetric](#provenancepermetric)); it leads the measurement's row in the species page's table; and the guide
+lists them all. A reader asked for exactly this: "Inner" and "Chord" were unfamiliar, and the
+explanations described how values were calculated "rather than what they actually represent"
+([todo.plainMeasurementDefinitions](../../../todo-closed.md#plainmeasurementdefinitions)).
+
+| Name | Definition | The source's own |
+| --- | --- | --- |
+| Length | From the tip of the bill to the tip of the tail. | the sum of the drawn segments ([decisions.noOpenLengthAndWingspan](../../decisions.md#noopenlengthandwingspan)) |
+| Bill | From the tip of the bill to where it meets the skull. | AVONET: "Length from the tip of the beak to the base of the skull" |
+| Tail | From where the tail leaves the body to the tip of its longest feather. | AVONET: "Distance between the tip of the longest rectrix and the point at which the two central rectrices protrude from the skin" |
+| Wingspan | From the tip of one wing to the tip of the other, across the body, with both wings fully extended. | Fox et al.: "Wingspan, the tip-to-tip distance of fully extended wings"; the body between the wings included |
+| Chord | One folded wing, from the bend of the wing to its tip. | AVONET: "Length from the carpal joint to the tip of the longest primary on the unflattened wing" |
+| Inner | The middle of the wingspan, between the bends of the two wings: the body and the inner wings. | derived, the wingspan less two chords ([labeledDetailDiagram](#labeleddetaildiagram)) |
+| Mass | How much the bird weighs; the cube is the water that weighs the same. | AVONET body mass |
+| Head, Neck, Body | The parts of the length between the bill and the tail. | modeled ([diagram.segmentComposition](diagram.md#segmentcomposition)) |
+
+The definitions say what a value represents, not how it was obtained; the provenance that follows
+says that, and an estimate keeps its `~`.
+
 ## measuredVersusModeled
 
 **The diagram shows which lengths are measured and which are modeled**

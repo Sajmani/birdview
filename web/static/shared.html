@@ -47,17 +47,17 @@
     <div class="ft">
       {{/* A measured part's name takes its part's color (product.labeledDetailDiagram, product.oneDiagramVocabulary). The
            species page's tile adds head, neck, and body, which are modeled and gray. */}}
-      <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.TotalLength.Prov .S.ScientificName}}">Length {{.Length}}</span>
-      <span{{if ne .S.Segments.Bill.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.Segments.Bill.Prov .S.ScientificName}}"><span class="k k-bill">Bill</span> {{.BillStr}}</span>
-      {{if .Big}}<span{{if ne .S.Segments.Head.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.Segments.Head.Prov .S.ScientificName}}">Head {{.HeadStr}}</span>
-      <span{{if ne .S.Segments.Neck.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.Segments.Neck.Prov .S.ScientificName}}">Neck {{.NeckStr}}</span>
-      <span{{if ne .S.Segments.Body.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.Segments.Body.Prov .S.ScientificName}}">Body {{.BodyStr}}</span>
-      {{end}}<span{{if ne .S.Segments.Tail.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.Segments.Tail.Prov .S.ScientificName}}"><span class="k k-tail">Tail</span> {{.TailStr}}</span>
+      <span{{if ne .S.TotalLength.Prov.Kind "measured"}} class="est"{{end}} title="{{tip "Length" .S.TotalLength.Prov .S.ScientificName}}">Length {{.Length}}</span>
+      <span{{if ne .S.Segments.Bill.Prov.Kind "measured"}} class="est"{{end}} title="{{tip "Bill" .S.Segments.Bill.Prov .S.ScientificName}}"><span class="k k-bill">Bill</span> {{.BillStr}}</span>
+      {{if .Big}}<span{{if ne .S.Segments.Head.Prov.Kind "measured"}} class="est"{{end}} title="{{tip "Head" .S.Segments.Head.Prov .S.ScientificName}}">Head {{.HeadStr}}</span>
+      <span{{if ne .S.Segments.Neck.Prov.Kind "measured"}} class="est"{{end}} title="{{tip "Neck" .S.Segments.Neck.Prov .S.ScientificName}}">Neck {{.NeckStr}}</span>
+      <span{{if ne .S.Segments.Body.Prov.Kind "measured"}} class="est"{{end}} title="{{tip "Body" .S.Segments.Body.Prov .S.ScientificName}}">Body {{.BodyStr}}</span>
+      {{end}}<span{{if ne .S.Segments.Tail.Prov.Kind "measured"}} class="est"{{end}} title="{{tip "Tail" .S.Segments.Tail.Prov .S.ScientificName}}"><span class="k k-tail">Tail</span> {{.TailStr}}</span>
     </div>
     <div class="ft">
-      <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est"{{end}} title="{{prov .S.Wingspan.Prov .S.ScientificName}}">Wingspan {{.Wing}}</span>
+      <span{{if ne .S.Wingspan.Prov.Kind "measured"}} class="est"{{end}} title="{{tip "Wingspan" .S.Wingspan.Prov .S.ScientificName}}">Wingspan {{.Wing}}</span>
       {{with .InnerStr}}<span class="est" title="{{$.InnerWhy}}"><span class="k k-wing">Inner</span> {{.}}</span>
-      {{end}}{{with .ChordStr}}<span{{if ne $.S.WingChord.Prov.Kind "measured"}} class="est"{{end}} title="{{prov $.S.WingChord.Prov $.S.ScientificName}}"><span class="k k-chord">Chord</span> {{.}}</span>{{end}}
+      {{end}}{{with .ChordStr}}<span{{if ne $.S.WingChord.Prov.Kind "measured"}} class="est"{{end}} title="{{tip "Chord" $.S.WingChord.Prov $.S.ScientificName}}"><span class="k k-chord">Chord</span> {{.}}</span>{{end}}
     </div>
     {{/* How much of the species observations held by the regions currently
          on screen (product.shareOfRecords). It answers the question the filtered page is

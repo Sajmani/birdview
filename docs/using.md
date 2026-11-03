@@ -42,6 +42,23 @@ of this bird, as *1 in N*. Then comes a stick figure to scale, with a cube for i
 beside it, and under it the family and the scientific name. The pin, top right, keeps the bird on
 the page; **eBird**, bottom right, opens the species on eBird.
 
+### What the numbers mean
+
+Hover over a number to see what it measures and where it came from.
+
+- **Length:** From the tip of the bill to the tip of the tail.
+- **Bill:** From the tip of the bill to where it meets the skull.
+- **Tail:** From where the tail leaves the body to the tip of its longest feather.
+- **Wingspan:** From the tip of one wing to the tip of the other, across the body, with both wings fully extended.
+- **Chord:** One folded wing, from the bend of the wing to its tip.
+- **Inner:** The middle of the wingspan, between the bends of the two wings: the body and the inner wings.
+  It is worked out as the wingspan less two chords, so it always carries a `~`.
+- **Mass:** How much the bird weighs; the cube is the water that weighs the same.
+- **Head, neck, and body**, on a bird's own page: The parts of the length between the bill and the tail.
+  They are estimated, not measured.
+
+### The figure
+
 The figure is a **top-down view of a bird in flight**, head up. Solid lines are measured; dashed
 lines are estimated.
 

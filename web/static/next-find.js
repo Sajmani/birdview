@@ -29,6 +29,7 @@
   var limit = parseInt(out.getAttribute("data-limit"), 10) || 8;
   var toggle = out.getAttribute("data-toggle");
   var close = out.getAttribute("data-close");
+  var detail = out.getAttribute("data-detail") || "";
   // Form-encoded, as Go's url.QueryEscape writes it.
   function enc(s) { return new URLSearchParams({ v: s }).toString().slice(2); }
   var pinned = {};
@@ -85,7 +86,12 @@
       a.setAttribute("aria-label", a.title);
       if (icon) a.appendChild(icon.content.cloneNode(true));
       li.appendChild(a);
-      li.appendChild(document.createTextNode(" " + b[1] + " "));
+      li.appendChild(document.createTextNode(" "));
+      // The name opens the bird's species page, as on the server's list.
+      var sp = el("a", "sp", b[1]);
+      sp.href = "/species/" + b[0] + detail;
+      li.appendChild(sp);
+      li.appendChild(document.createTextNode(" "));
       if (b[4]) {
         li.appendChild(el("span", "code", b[4]));
         li.appendChild(document.createTextNode(" "));
