@@ -1975,6 +1975,23 @@ Hawaii break, which is why it was replaced.
 
 Watched failing: 2026-10-03, by filing Hawaii under Great Lakes and Texas under New England (both caught on rank), and by filing Navassa under Mid-Atlantic and Alaska under Gulf Coast (both caught per region, Alaska at 0.446 against 0.465 for regions at large).
 
+### countyListingApplied
+
+**A county lists only what its state lists, with at least 5 records there**
+
+**Verifies:** [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [decisions.countyListingRule](decisions.md#countylistingrule) · **Level:** code · **Method:** the county table's builder over rows shaped like the download
+
+**Assertions:** a species its state lists, with at least 5 records in a county and one per million
+of that county's records, is listed there; one with 4 records, one its state does not list, and one
+under one per million of a busy county are written under the bar, so they still count; a name
+BirdView does not draw counts in the county's total and nowhere else; the twelve months sum to the
+total; the download's zipped table is read by its header; and a state's eBird withholding covers its
+counties.
+
+**Run:** `go test ./cmd/birdview-regions/ -run TestCounty && go test ./internal/taxonomy/`
+**Status: verified 2026-11-03, passing.**
+Watched failing: 2026-11-03, with the state-list condition removed ("Nymphicus hollandicus in USA.33.24_1: listed true … want listed false"), and before a state's withholding covered its counties ("a state's entry must cover its own counties").
+
 ### everydayDefinitionsShown
 
 **Every measurement says what it is before where it came from, in the requirement's own words**

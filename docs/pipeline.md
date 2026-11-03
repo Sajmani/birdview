@@ -82,7 +82,7 @@ flowchart LR
     wingspan_reported_min_all ★ *range*
     wingspan_reported_max_all ★ *range*`"]
     OCC["`GBIF occurrence search
-    *live API, CC BY 4.0*
+    *live API; eBird CC BY 4.0, iNaturalist CC BY-NC 4.0*
     *eBird EOD and iNaturalist research-grade*
     ─────────────
     taxonKey · *birds only*
@@ -101,6 +101,14 @@ flowchart LR
     species ·
     region ·
     date window ·`"]
+    DL["`GBIF SQL download
+    *recorded in data/gbif-downloads.tsv, kept in fetched/*
+    ─────────────
+    datasetkey · *which source*
+    level2gid · *the county*
+    month ·
+    v_scientificname · *the name as published*
+    n · *records*`"]
     BACK["`GBIF backbone API
     *live*
     ─────────────
@@ -187,6 +195,14 @@ flowchart LR
     scientific name ·
     ebird ·
     inaturalist ·`"]
+    COUNTIES["`county-presence/USA.33_1.tsv
+    *read by nothing yet; one table per state, as region-presence.tsv*
+    ─────────────
+    county id ✗ *on total rows*
+    every bird record there, by month ✗
+    scientific name ✗
+    county:jan|…|dec ✗ *counts by month*
+    ~ ✗ *under the bar*`"]
     GT["`gbif-taxa.tsv
     *read by nothing yet*
     ─────────────
@@ -291,6 +307,10 @@ flowchart LR
   TSENS -->|"confirm withheld months"| REGIONSCMD
   REGIONSCMD -->|"count eBird, iNaturalist only in confirmed gaps;
   present at 1 per million; every count kept"| REGIONS
+  DL -->|"-counties: one state's counties"| REGIONSCMD
+  REGIONS -->|"the state's list"| REGIONSCMD
+  REGIONSCMD -->|"listed if the state lists it,
+  at 1 per million and 5 records"| COUNTIES
 
   SENS -.->|"restated as facts"| TSENS
   OCC --> NAMESCMD -->|"records per source under each AviList name"| SN

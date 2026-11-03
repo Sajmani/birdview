@@ -576,6 +576,22 @@ func (c *Client) RegionName(ctx context.Context, datasetKey, gadmGid string) (st
 	return body.Results[0].Gadm.Level1.Name, nil
 }
 
+// Subdivision is one GADM unit inside another, as GBIF's GADM endpoint lists it.
+type Subdivision struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// Subdivisions lists the GADM units one level below gadmGid -- a state's counties -- with the
+// names GBIF attaches to records filed under them (decisions.regionCodesFromData).
+func (c *Client) Subdivisions(ctx context.Context, gadmGid string) ([]Subdivision, error) {
+	var out []Subdivision
+	if err := c.get(ctx, "/geocode/gadm/"+url.PathEscape(gadmGid)+"/subdivisions", &out); err != nil {
+		return nil, fmt.Errorf("listing the subdivisions of %s: %w", gadmGid, err)
+	}
+	return out, nil
+}
+
 type speciesResponse struct {
 	Key           int    `json:"key"`
 	CanonicalName string `json:"canonicalName"`

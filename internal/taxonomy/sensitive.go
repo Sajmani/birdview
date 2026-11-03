@@ -25,8 +25,9 @@ import (
 type Withholding struct {
 	// Species is the AviList name BirdView draws.
 	Species string
-	// Region is a GADM id, a country prefix ("USA", "CAN") meaning every
-	// region of that country, or empty meaning everywhere.
+	// Region is a GADM id, covering that region and its subdivisions; a
+	// country prefix ("USA", "CAN") meaning every region of that country; or
+	// empty meaning everywhere.
 	Region string
 	// Where is the region as eBird's list names it, kept so an entry can be
 	// checked against the page it came from.
@@ -45,6 +46,12 @@ func (w Withholding) Covers(gid string) bool {
 		return true
 	case !strings.Contains(w.Region, "."):
 		return strings.HasPrefix(gid, w.Region+".")
+	}
+	// A state's entry covers its counties, whose GADM codes extend the
+	// state's: USA.33_1 is New York, USA.33.24_1 one of its counties
+	// (decisions.countyListingRule).
+	if i := strings.LastIndex(w.Region, "_"); i > 0 {
+		return strings.HasPrefix(gid, w.Region[:i]+".")
 	}
 	return false
 }

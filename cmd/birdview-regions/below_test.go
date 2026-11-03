@@ -38,7 +38,7 @@ func TestBelowBarCellsRoundTrip(t *testing.T) {
 		map[string]string{"USA.44_1": "Texas", "USA.5_1": "California"},
 		map[string]int64{"USA.44_1": 120, "USA.5_1": 120},
 		map[string][12]int64{"USA.44_1": {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10},
-			"USA.5_1": {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10}})
+			"USA.5_1": {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10}}, "")
 	if err != nil {
 		t.Fatal(err)
 	}

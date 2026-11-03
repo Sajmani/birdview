@@ -120,6 +120,11 @@ func TestWindowsCoverWholeMonthsOnly(t *testing.T) {
 	if !ny.Covers("USA.33_1") || ny.Covers("USA.3_1") {
 		t.Error("a GADM entry must cover exactly that region")
 	}
+	// And a state's entry covers its counties, whose codes extend its own
+	// (decisions.countyListingRule): eBird withholds the bird in all of New York.
+	if !ny.Covers("USA.33.24_1") || ny.Covers("USA.3.24_1") || ny.Covers("USA.330.1_1") {
+		t.Error("a state's entry must cover its own counties and no other state's")
+	}
 	// The motivating entries are present, so a regenerated table that lost
 	// them fails here rather than on a live page.
 	for _, c := range []struct{ sp, gid string }{
