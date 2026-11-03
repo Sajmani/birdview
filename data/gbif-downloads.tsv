@@ -1,0 +1,5 @@
+# GBIF downloads BirdView reads, each requested from a committed query (tech.gbifDownloadsRecorded).
+# Written by cmd/birdview-gbifdownload. Cite each by its DOI (gbifterms.CiteDownloadDoi).
+#
+# key	doi	created	license	records	query	sha256
+0025636-261023074918325	10.15468/dl.ttkwue	2026-11-03	http://creativecommons.org/licenses/by-nc/4.0/legalcode	191349	data/gbif-queries/ny-counties.sql	04752a45a2d953a312dfbb11889e58a9eed5bef56fdebd9af5def9614f55fec9
