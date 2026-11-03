@@ -4542,3 +4542,38 @@ The owner confirmed the use is non-commercial, which the posture requirement had
 search API, which carries no DOI, be credited to each publisher or covered by a derived dataset;
 crediting the publishers is the direct form, and needs no account or registration.
 
+---
+
+## countyListingRule
+
+**A county lists a bird its state lists, with at least 5 records there, and is stored for the server only**
+
+Date: 2026-11-03
+Decided by: Sameer
+Status: accepted
+Affects: [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter)
+
+### Decided
+
+1. **Listing.** A species is listed in a US county when its state lists it, and its records in the
+   county reach one per million of the county's bird observations and at least 5, counted over all
+   years as a state's are, eBird first and iNaturalist only where eBird withholds it.
+2. **What a county is for.** Choosing counties narrows the set and orders it by those counties' share
+   of records, as choosing states does.
+3. **Storage.** County presence is kept as per-state tables that the server reads and never sends to
+   the browser. New York's, about 0.8 MB, is committed as an ordinary table for the prototype; how the
+   US's, about 40 MB, is kept in the repository is settled before scaling past New York.
+
+### Why
+
+The New York spike ([notes: The New York county spike](../notes.md#the-new-york-county-spike)) found one per million below one record in every
+county, 9% of listings resting on fewer than 5 records, and 50 species reaching a county list
+without being on the state's: cage birds such as Cockatiel and vagrants such as Brewer's Blackbird.
+The state's list, at about 62 records for New York, screens those out; the floor then drops a bird
+regular in the state but recorded in a county once or twice. All years, because 94% of New York's
+eBird records are from 2010 or later, so the window is in practice eBird's own era, and because the
+state rule counts the same way. The owner considered and set aside a recent window and a count of
+distinct years, both needing the year in the download ([todo.countyFloorRevisit](../todo.md#countyfloorrevisit)). In dense counties
+the set barely narrows (New York City's five list 428 of the state's 450), so the county's share
+ordering is where the choice shows.
+

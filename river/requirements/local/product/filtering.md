@@ -43,6 +43,14 @@ filter works. A species is listed in a region when it reaches 1 record per milli
 bird observations, counted from eBird — or from iNaturalist only where eBird is confirmed to
 withhold it there — and its records below the bar still count in its figure.
 
+**A US county is a region too, listed under a stricter rule** ([decisions.countyListingRule](../../decisions.md#countylistingrule)): a
+species is listed in a county when its state lists it, and its records in the county reach both one
+per million of the county's bird observations and **at least 5 records**, over all years, counted
+as for a state. A county narrows the set and orders it by the county's own share of records, as a
+state does. One record per million is less than one record in every New York county, so the bar
+alone would list a bird on a single sighting; the state's list keeps out the cage birds and one-off
+vagrants a county's small total would let in.
+
 It follows the same rule as families: nothing selected means every region. The data is GBIF's, which serves eBird and iNaturalist under CC BY 4.0 with GADM regions as a
 queryable field ([decisions.regionFilterReinstated](../../decisions.md#regionfilterreinstated)).
 

@@ -1038,7 +1038,7 @@ Mexican bird and Morelet's Seedeater is the one native to Texas
 
 Status: open
 Owner: Sameer
-Gate: the owner's answers to step 3's four questions
+Gate: step 4, the New York county prototype
 
 [decisions.regionCodesFromData](requirements/decisions.md#regioncodesfromdata) names regions by GADM code on land and Marine Regions id at sea, and
 redirects every value BirdView wrote before. Step 1, land regions by GADM code with postal codes
@@ -1057,7 +1057,9 @@ and island names redirecting, was done 2026-11-03. Left, in order:
    list but not the state's, cage birds and vagrants; NYC's five counties together list 428 of the
    state's 450, so in dense counties the share ordering matters more than the set; ~40 MB of
    presence for the US by county. Details in [notes: The New York county spike](notes.md#the-new-york-county-spike).
-   **Open, for the owner, before step 4:**
+   **Answered 2026-11-03** ([decisions.countyListingRule](requirements/decisions.md#countylistingrule)): a floor of 5 records over all years
+   with the state list required, counties narrowing and ordering like states, and per-state tables
+   for the server; alternatives to the floor parked in [countyFloorRevisit](#countyfloorrevisit). The questions as asked:
    - *Minimum record count:* a fixed floor (5 or 10 records) or one per year, since records
      accumulate over decades.
    - *Vagrants:* whether a county listing also requires the bird to be on its state's list, or to
@@ -1077,3 +1079,27 @@ and island names redirecting, was done 2026-11-03. Left, in order:
 6. Seas: adopt [imports.marine-regions](requirements/imports.md#marine-regions), assign the download's offshore grid cells to its
    areas while building the data, replace the five sea boxes, and redirect their names. Asking VLIZ
    about serving its boundaries gates only Here at sea, the one use that sends them to readers.
+
+## countyFloorRevisit
+
+**Revisit the county floor if county lists grow with eBird**
+
+Status: parked
+Owner: Sameer
+Gate: when a regenerated county table lists noticeably more species than the one before it, or
+before counties outside the US and Canada
+
+[decisions.countyListingRule](requirements/decisions.md#countylistingrule) lists a bird in a county at 5 records over all years. A fixed count gets
+easier to reach as eBird grows (New York added 6.6 M records in 2025 alone), though the requirement
+that the state also list the bird bounds what can get through. Alternatives the owner considered,
+each needing the year in the GBIF download (a `"year"` column in `data/gbif-queries/ny-counties.sql`):
+
+1. **A recent window:** count only the last 10 years, so old records age out and the floor means
+   the same thing each year.
+2. **Distinct years:** require records in at least N different years, as
+   [product.scopeIsRecurringAvifauna](requirements/local/product/dataset.md#scopeisrecurringavifauna) does for scope, which separates a resident from a bird that visited once and
+   drew a crowd.
+3. **A relative floor:** a share of the county's records larger than one per million, so it scales
+   with effort as the state bar does; the spike's table in
+   [notes: The New York county spike](notes.md#the-new-york-county-spike) gives the counts it would trade against.
+
