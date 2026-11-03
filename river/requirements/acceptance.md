@@ -1790,12 +1790,14 @@ page and the panel; each name on the tile (`.k-bill`, `.k-tail`, `.k-wing`, `.k-
 is set in exactly its part's stroke color; and every two parts, with the gray head, neck, and body,
 differ by a CIEDE2000 ΔE of at least 10 under normal vision and under protanopia, deuteranopia, and
 tritanopia simulated with Machado, Oliveira, and Fernandes's 2009 matrices at full severity
-([decisions.partColorsByMeasurement](decisions.md#partcolorsbymeasurement)). The ΔE formula is pinned on a color against itself and black against
+([decisions.partColorsByMeasurement](decisions.md#partcolorsbymeasurement)), except that the mass cube is held apart only under normal vision
+([decisions.massCubeSkyBlue](decisions.md#masscubeskyblue)). The ΔE formula is pinned on a color against itself and black against
 white.
 
 **Run:** `go test ./web/ -run 'TestPartColorsHoldApart|TestDeltaE2000'`
-**Status: verified 2026-11-01, passing.**
+**Status: verified 2026-11-03, passing.**
 Watched failing: 2026-11-01, against the palette as it stood ("bill #f59e0b is 6.81:1 on the panel", "tail #94a3b8 is 5.71:1 on the panel", no `.k-tail`), and with the rose tail of the scheme the decision rejected ("deuteranopia: tail and crossbar are ΔE00 3.8 apart").
+Watched failing: 2026-11-03, with the sky-blue cube and no exemption ("protanopia: chord and mass cube are ΔE00 2.4 apart", "tritanopia: crossbar and mass cube are ΔE00 6.8 apart"), and with the exemption and the original `#38bdf8` stroke, which the exemption does not excuse ("mass cube #38bdf8 is 6.83:1 on the panel", "its name is colored … #7dd3fc, its stroke #38bdf8").
 
 ### tileHeaderNeverWraps
 

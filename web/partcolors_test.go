@@ -24,19 +24,22 @@ import (
 
 // part is one part of the diagram: the rule that strokes it, and the rule
 // that colors its name on the tile, if it has one (product.oneDiagramVocabulary,
-// product.labeledDetailDiagram).
+// product.labeledDetailDiagram). Apart marks a part drawn away from the figure, with its name
+// beside it, which need hold apart from the others only under normal vision
+// (decisions.massCubeSkyBlue).
 type part struct {
 	name, stroke, key string
+	apart             bool
 }
 
 var parts = []part{
-	{"bill", ".bill", ".k-bill"},
-	{"tail", ".tail", ".k-tail"},
-	{"crossbar", ".wing", ".k-wing"},
-	{"chord", ".chord", ".k-chord"},
-	{"mass cube", ".masscube polygon, .masscube rect", ".k-mass"},
-	{"head and neck", ".neck", ""},
-	{"body", ".body", ""},
+	{"bill", ".bill", ".k-bill", false},
+	{"tail", ".tail", ".k-tail", false},
+	{"crossbar", ".wing", ".k-wing", false},
+	{"chord", ".chord", ".k-chord", false},
+	{"mass cube", ".masscube polygon, .masscube rect", ".k-mass", true},
+	{"head and neck", ".neck", "", false},
+	{"body", ".body", "", false},
 }
 
 var reStroke = regexp.MustCompile(`(?:^|[;\s])stroke:\s*(#[0-9a-fA-F]{6})`)
@@ -46,13 +49,16 @@ var reTextColor = regexp.MustCompile(`(?:^|[;\s])color:\s*(#[0-9a-fA-F]{6})`)
 // colored part's stroke clears 7:1 on the page and the panel, so its name can be set in it;
 // each name on the tile is set in exactly its part's color; and every two parts, grays
 // included, differ by a ΔE00 of at least 10 under normal vision and under simulated
-// protanopia, deuteranopia, and tritanopia (Machado, Oliveira, and Fernandes 2009, severity 1).
+// protanopia, deuteranopia, and tritanopia (Machado, Oliveira, and Fernandes 2009, severity 1),
+// except that the mass cube, drawn apart from the figure with its name beside it, is held apart
+// only under normal vision (decisions.massCubeSkyBlue).
 //
 // Verifies: product.oneDiagramVocabulary, product.labeledDetailDiagram. Criterion: acceptance.partColorsHoldApart.
 func TestPartColorsHoldApart(t *testing.T) {
 	type col struct {
-		name string
-		rgb  [3]uint8
+		name  string
+		rgb   [3]uint8
+		apart bool
 	}
 	var cols []col
 	page, panel := mustVar(t, "--bg"), mustVar(t, "--panel")
@@ -63,7 +69,7 @@ func TestPartColorsHoldApart(t *testing.T) {
 			continue
 		}
 		r, g, b := hexRGB(t, m[1])
-		cols = append(cols, col{p.name, [3]uint8{r, g, b}})
+		cols = append(cols, col{p.name, [3]uint8{r, g, b}, p.apart})
 		if p.key == "" {
 			continue
 		}
@@ -83,6 +89,9 @@ func TestPartColorsHoldApart(t *testing.T) {
 	for _, sim := range []string{"normal", "protanopia", "deuteranopia", "tritanopia"} {
 		for i := range cols {
 			for j := i + 1; j < len(cols); j++ {
+				if sim != "normal" && (cols[i].apart || cols[j].apart) {
+					continue
+				}
 				if d := deltaE2000(simulate(cols[i].rgb, sim), simulate(cols[j].rgb, sim)); d < 10 {
 					t.Errorf("%s: %s and %s are ΔE00 %.1f apart; at least 10 keeps them distinct", sim, cols[i].name, cols[j].name, d)
 				}

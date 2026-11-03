@@ -4356,7 +4356,7 @@ in a single column, which readers called scrolling rather than comparing
 
 Date: 2026-11-01
 Decided by: Sameer
-Status: accepted
+Status: amended by massCubeSkyBlue
 Amends: partColorsByMeasurement
 Affects: [product.oneDiagramVocabulary](local/product/diagram.md#onediagramvocabulary), [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram)
 
@@ -4411,3 +4411,34 @@ datasets, specimens, and axes (Fox's spread-wing wingspan, AVONET's closed-wing 
 subtracting them doubles the chord's error and magnifies the wingspan's: for the Great Blue Heron
 1,826 mm − 2 × 467 mm = 892 mm, where a 3% error in the wingspan is a 6% error in the result.
 
+---
+
+## massCubeSkyBlue
+
+**The mass cube is sky blue again, held apart from the figure by place rather than color**
+
+Date: 2026-11-03
+Decided by: Sameer
+Status: accepted
+Amends: partColorsRevised
+Affects: [product.oneDiagramVocabulary](local/product/diagram.md#onediagramvocabulary)
+
+### Decided
+
+The mass cube's stroke, its tint, and its name are sky blue `#7dd3fc`. The cube still clears 7:1
+and its name is still set in its stroke's color, and it still differs from every part by a ΔE00 of
+at least 10 under normal vision; it alone is exempt from that distance under simulated color
+blindness. Every other pair keeps the rule of [partColorsByMeasurement](#partcolorsbymeasurement).
+
+### Why
+
+The owner asked for the cube's original blue back. That blue, `#38bdf8`, is 6.83:1 on the panel,
+under the text floor, and was named in a lighter tint than its stroke; `#7dd3fc`, the tint its name
+used, clears 7:1 for both. Neither holds apart from the figure for color-blind readers: under
+tritanopia `#7dd3fc` is ΔE00 6.8 from the emerald crossbar, and under protanopia 2.4 from the orchid
+chord, because every sky blue sits near the emerald for tritanopes. The owner accepted that: the
+cube is drawn apart from the stick figure, as a solid rather than a line, and its Mass label sits
+beside it, so a reader who cannot tell its color from the wing's still cannot mistake it for the
+wing. WCAG 1.4.1 asks only that color not be the only cue, which place, shape, and label satisfy;
+the ΔE rule is BirdView's own, stricter one, and it still holds among the figure's parts, which
+touch one another and are told apart by color.

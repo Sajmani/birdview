@@ -166,7 +166,7 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .k-tail { color: #ffffff; }
 .k-wing { color: #34d399; }
 .k-chord { color: #ffc7f7; }
-.k-mass { color: #8db4fc; }
+.k-mass { color: #7dd3fc; }
 /* The notes come last, so only the part under the drawing grows. */
 .notes { min-width: 0; }
 
@@ -326,10 +326,10 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
    a length, and a bare outline in a figure made of lines reads as one more
    measurement. Dashed when the mass is not measured, like every other
    estimated stroke. */
-.masscube polygon, .masscube rect { stroke: #8db4fc; stroke-width: 1; }
-.mcface { fill: #8db4fc3d; }
-.mctop  { fill: #8db4fc66; }
-.mcside { fill: #8db4fc1f; }
+.masscube polygon, .masscube rect { stroke: #7dd3fc; stroke-width: 1; }
+.mcface { fill: #7dd3fc3d; }
+.mctop  { fill: #7dd3fc66; }
+.mcside { fill: #7dd3fc1f; }
 .masscube.est polygon, .masscube.est rect { stroke-dasharray: 4 3; }
 
 /* A caveat on a tile's figures: a count that covers two species, because

@@ -3,6 +3,14 @@
 Major changes to BirdView, newest first: features, data sources, and how the drawings are made.
 Small fixes are in the commit history. With no numbered releases yet, changes are grouped by period.
 
+## 2026-11-03 — A sky-blue cube
+
+### Changed
+
+- The mass cube and its name are sky blue again, a shade light enough to read as text. For
+  color-blind readers it can look like the wing or the chord, but it stands apart from the figure
+  with its name beside it.
+
 ## 2026-11-01 — Larger type, and one tile on both pages
 
 ### Changed

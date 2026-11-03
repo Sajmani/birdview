@@ -213,13 +213,16 @@ three.
 crossbar, wing chord, mass cube — has one color, and every surface uses that color for that part. A surface
 may not pick its own shade of a part, however good its local reason.
 
-**The colors** ([decisions.partColorsRevised](../../decisions.md#partcolorsrevised)): **bill** amber `#fbbf24`, **tail** white `#ffffff`, **crossbar**
+**The colors** ([decisions.partColorsRevised](../../decisions.md#partcolorsrevised), [decisions.massCubeSkyBlue](../../decisions.md#masscubeskyblue)): **bill** amber `#fbbf24`, **tail** white `#ffffff`, **crossbar**
 emerald `#34d399`, **chord**, the crossbar's measured outer segments, orchid `#ffc7f7`, ending at
-the ticks, **mass cube** blue `#8db4fc`, and gray for the modeled head and neck `#94a3b8` and body
+the ticks, **mass cube** sky blue `#7dd3fc`, and gray for the modeled head and neck `#94a3b8` and body
 `#64748b`. All strokes are thin. **Every part color is also a text color**, clearing 7:1 on the page and the panel
 ([tech.textContrastFloor](../tech/accessibility.md#textcontrastfloor)), so a measurement's name can be set in its part's color; and **every two
 parts differ by a ΔE00 of at least 10**, grays included, under normal vision and under simulated
-protanopia, deuteranopia, and tritanopia, so no reader sees two parts as one. Color is never the
+protanopia, deuteranopia, and tritanopia, so no reader sees two parts as one. **The mass cube is
+held apart only under normal vision**: it is drawn apart from the figure, as a shape no other part
+has, with its name beside it, so a color-blind reader who sees it in the wing's or the chord's color
+still cannot take it for either. Color is never the
 only cue: each name says what it measures, and stroke style carries provenance.
 
 **Size-dependent geometry is not shared.** Stroke weight, dash pattern, and which parts appear may
