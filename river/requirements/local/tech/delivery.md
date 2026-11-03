@@ -76,7 +76,9 @@ allows, and says what changed, as a species that leaves scope already does
 ([decisions.speciesUrlOutlivesSpecies](../../decisions.md#speciesurloutlivesspecies),
 [decisions.compareUrlContract](../../decisions.md#compareurlcontract)). Renaming a path,
 a parameter, or a value it accepts needs a decision, and the old form keeps answering, read as
-before or redirected. One decision removed URLs outright: the comparison `/compare`, the
+before or redirected. A region value that BirdView replaced, or that its source retired, redirects
+to the codes that replace it **without a message**, the page's heading naming the regions shown
+([decisions.regionCodesFromData](../../decisions.md#regioncodesfromdata)). One decision removed URLs outright: the comparison `/compare`, the
 current-month link `/now`, and the `scale` and `species` parameters went with the classic view
 ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)). One changed what a URL
 shows: a home page address with no month showed the current month and now shows every month;

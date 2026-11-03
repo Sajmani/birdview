@@ -199,6 +199,11 @@ accepted* — is exactly what should attract scrutiny rather than escape it.
 | **Owner** | GBIF Secretariat |
 | **Status** | **Adopted 2026-10-02** for the name bridge. License verified from the API's own dataset records; coverage measured and recorded below; no criteria in `acceptance.md` yet. |
 
+**Proposed 2026-11-03: GADM codes and names.** `/geocode/gadm/{code}/subdivisions` returns the
+GADM 4.1 codes, names, and types of a region's subdivisions, as GBIF attaches them to records; it
+would name land regions in URLs and list a state's counties
+([decisions.regionCodesFromData](decisions.md#regioncodesfromdata)).
+
 License: **CC BY 4.0** on both datasets, read from `GET /v1/dataset/{key}` rather than from a web
 page, because `www.gbif.org` answers an agent with a Cloudflare challenge. The committed table
 names both DOIs in its header, which is where the attribution lives while nothing from it is
@@ -696,6 +701,43 @@ neither: eBird's own data-use article classes "eBird.org products (web pages…)
 citation, and what BirdView takes from it is a set of facts — this species, this region, these
 dates — restated in its own structure and cited here. No text from the page is copied. *Owner to
 confirm*, as for every licensing judgment.
+
+---
+
+## `marine-regions`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | <https://www.marineregions.org>, the Marine Regions gazetteer of the Flanders Marine Institute (VLIZ); REST API at `https://www.marineregions.org/rest/` |
+| **Version** | Not yet retrieved for import. Gazetteer queried 2026-11-03 for research only |
+| **Integrity** | None yet |
+| **Tier** | mandatory (copyright license) |
+| **Import style** | To be decided: gazetteer ids and names by reference; any boundaries pinned by hash, as Natural Earth's are |
+| **Scope** | Sea regions and their codes ([decisions.regionCodesFromData](decisions.md#regioncodesfromdata)): IHO sea areas divided by EEZ, and the "High Seas of" parts |
+| **Adopted parts** | None yet. Proposed: the gazetteer's IHO Sea Area records (for example MRGID 4288, Gulf of Mexico), its EEZ-and-IHO intersections (25281, United States part of the Gulf of Mexico) and high-seas parts (26559, High Seas of the Gulf of Mexico), with each record's `status` and `accepted` id for retirement |
+| **Exclusions** | Maritime boundaries for any legal or navigational purpose, which its terms exclude |
+| **Owner** | Flanders Marine Institute (VLIZ) |
+| **Status** | **Proposed 2026-11-03, not adopted.** License read; boundaries not retrieved; whether GBIF's polygon search accepts these areas unmeasured |
+
+License, quoted from <https://www.marineregions.org/disclaimer.php>, read 2026-11-03:
+
+> "Marine Regions’ products have been licensed under CC-BY since Maritime Boundaries version 11
+> (2019). Please contact us for other uses of the Licensed Material beyond license terms. We kindly
+> request our users not to make our products available for download elsewhere and to always refer
+> to marineregions.org for the most up-to-date products and services."
+
+> "Marine Regions is not meant to be used for legal, economical (in the sense of exploration of
+> natural resources) or navigational purposes. It is developed solely for scientific, educational
+> and research purposes."
+
+**Why this source.** GBIF uses it at sea: GBIF's geocoder derives a record's country from Marine
+Regions' union of land and EEZ, and its reverse geocoder labels points with Marine Regions' IHO sea
+areas (`gbif/geocode`, `database/import.sh`). No occurrence field carries the sea area, so BirdView
+would assign offshore records itself.
+
+**Open before adoption.** The request not to offer its products for download elsewhere sits
+alongside CC BY, which permits it; sending sea boundaries to readers' browsers for Here may warrant
+asking VLIZ. Credit is required.
 
 ---
 

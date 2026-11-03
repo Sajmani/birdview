@@ -111,7 +111,7 @@ using the *1 in N* figure on every tile. The tiers are powers of ten: 1 in 10 to
 
 - **[The birds around you now](/#here-and-now).** The birds most often recorded where you are this
   month. Without sharing your location, try
-  [New York in October](/?region=NY&month=Oct).
+  [New York in October](/?region=USA.33_1&month=Oct).
 - **Compare some [tiny birds](/?by=length&pin=winwre3&pin=lucwar&pin=ruckin&pin=bubhum&pin=lesgol&pin=bushti&show=pinned),
   [small birds](/?by=length&pin=leasan&pin=houspa&pin=dowwoo&pin=houfin&pin=barswa&pin=easpho&show=pinned),
   [medium birds](/?by=length&pin=blujay&pin=amekes&pin=calthr&pin=moudov&pin=belkin1&pin=chwwid&show=pinned),

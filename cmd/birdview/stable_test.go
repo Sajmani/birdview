@@ -59,7 +59,7 @@ func TestStableUrlsKeepWorking(t *testing.T) {
 	base := countLine(t, s, string(nextURL(base0)))
 	for param, value := range map[string]string{
 		"by": "mass", "rev": "1", "step": "50", "units": "metric", "names": "world",
-		"pin": "amecro", "show": "pinned", "family": "Corvidae", "region": "NY", "month": "Oct",
+		"pin": "amecro", "show": "pinned", "family": "Corvidae", "region": "USA.33_1", "month": "Oct",
 		"habitat": "Marine", "niche": "Frugivore",
 	} {
 		q := cloneValues(base0)

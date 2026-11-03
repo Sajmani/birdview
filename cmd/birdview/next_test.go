@@ -201,15 +201,15 @@ func TestNextFiltersCombineAndEmptyIsAll(t *testing.T) {
 	if len(herons.Tiles) < 5 {
 		t.Fatalf("family=Ardeidae shows %d birds, want every heron", len(herons.Tiles))
 	}
-	fl := nextAt(s, "/?family=Ardeidae&region=FL")
-	me := nextAt(s, "/?family=Ardeidae&region=ME")
+	fl := nextAt(s, "/?family=Ardeidae&region=USA.10_1")
+	me := nextAt(s, "/?family=Ardeidae&region=USA.20_1")
 	if len(fl.Tiles) == 0 || len(me.Tiles) >= len(herons.Tiles) {
 		t.Errorf("herons: %d everywhere, %d in Florida, %d in Maine; region does not narrow",
 			len(herons.Tiles), len(fl.Tiles), len(me.Tiles))
 	}
 	for _, tl := range fl.Tiles {
 		if tl.S.Family != "Ardeidae" {
-			t.Errorf("family=Ardeidae&region=FL shows %s, of %s", tl.S.ID, tl.S.Family)
+			t.Errorf("family=Ardeidae&region=USA.10_1 shows %s, of %s", tl.S.ID, tl.S.Family)
 		}
 	}
 	if got, want := len(nextAt(s, "/?family=").Tiles), len(nextAt(s, "/").Tiles); got != want {
@@ -449,13 +449,13 @@ func TestNextFindInTheBrowser(t *testing.T) {
 func TestNextToggle(t *testing.T) {
 	q := func(s string) url.Values { v, _ := url.ParseQuery(s); return v }
 	for _, c := range []struct{ from, v, want string }{
-		{"", "FL", "/?region=FL"},
-		{"region=FL", "ME", "/?region=FL&region=ME"},
-		{"region=FL&region=ME", "FL", "/?region=ME"},
-		{"region=ME", "ME", "/"},
-		{"region=", "ME", "/?region=ME"},
-		{"region=FL&find=hawk&show=50&by=mass", "FL", "/?by=mass&find=hawk&show=50"},
-		{"pin=blujay&show=pinned", "FL", "/?pin=blujay&region=FL&show=pinned"},
+		{"", "USA.10_1", "/?region=USA.10_1"},
+		{"region=USA.10_1", "USA.20_1", "/?region=USA.10_1&region=USA.20_1"},
+		{"region=USA.10_1&region=USA.20_1", "USA.10_1", "/?region=USA.20_1"},
+		{"region=USA.20_1", "USA.20_1", "/"},
+		{"region=", "USA.20_1", "/?region=USA.20_1"},
+		{"region=USA.10_1&find=hawk&show=50&by=mass", "USA.10_1", "/?by=mass&find=hawk&show=50"},
+		{"pin=blujay&show=pinned", "USA.10_1", "/?pin=blujay&region=USA.10_1&show=pinned"},
 	} {
 		if got := string(nextToggle(q(c.from), "region", c.v)); got != c.want {
 			t.Errorf("toggling %s from %q = %s, want %s", c.v, c.from, got, c.want)
@@ -505,7 +505,7 @@ func TestNextShowAll(t *testing.T) {
 		t.Errorf("show=50: %d drawn, first %d, hidden %d of %d, box %q, more %s",
 			len(c.Tiles), c.First, c.Hidden, c.Count, c.Cap, c.MoreURL)
 	}
-	if got := string(nextToggle(url.Values{"show": {"all"}, "by": {"mass"}}, "region", "FL")); got != "/?by=mass&region=FL&show=all" {
+	if got := string(nextToggle(url.Values{"show": {"all"}, "by": {"mass"}}, "region", "USA.10_1")); got != "/?by=mass&region=USA.10_1&show=all" {
 		t.Errorf("a filter from show=all goes to %s; how many are shown is kept", got)
 	}
 	if string(c.ShowPinnedURL) != "/?by=mass&show=pinned" || string(c.ShowAllURL) != "/?by=mass&show=all" || string(c.ResetURL) != "/" {
@@ -667,7 +667,7 @@ func TestNextWithoutAMonthIsNotStored(t *testing.T) {
 	s := newTestServer(t)
 	s.build = "test-build"
 	fixNextClock(t, time.October)
-	for _, target := range []string{"/", "/?region=FL", "/?month=", "/?month=Oct", "/?month=Oct&region=FL"} {
+	for _, target := range []string{"/", "/?region=USA.10_1", "/?month=", "/?month=Oct", "/?month=Oct&region=USA.10_1"} {
 		w := httptest.NewRecorder()
 		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, target, nil))
 		if w.Code != http.StatusOK {
@@ -678,9 +678,9 @@ func TestNextWithoutAMonthIsNotStored(t *testing.T) {
 		}
 	}
 	for target, want := range map[string]string{
-		"/?month=now":                      "/?month=Oct",
-		"/?by=mass&month=now&region=FL":    "/?by=mass&month=Oct&region=FL",
-		"/?month=May&month=now&pin=amecro": "/?month=Oct&pin=amecro",
+		"/?month=now":                         "/?month=Oct",
+		"/?by=mass&month=now&region=USA.10_1": "/?by=mass&month=Oct&region=USA.10_1",
+		"/?month=May&month=now&pin=amecro":    "/?month=Oct&pin=amecro",
 	} {
 		w := httptest.NewRecorder()
 		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, target, nil))
@@ -700,7 +700,7 @@ func TestNextWithoutAMonthIsNotStored(t *testing.T) {
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextControlsOpenOneAtATime(t *testing.T) {
 	s := newTestServer(t)
-	_, body := get(t, s, "/?region=FL")
+	_, body := get(t, s, "/?region=USA.10_1")
 	n := strings.Count(body, `<details class="ctl"`)
 	named := len(regexp.MustCompile(`<details class="ctl" name="ctl"[ >]`).FindAllString(body, -1))
 	if n < 8 || named != n {
@@ -847,7 +847,7 @@ func TestNextShowPinned(t *testing.T) {
 func TestNextHereAndNow(t *testing.T) {
 	s := newTestServer(t)
 	fixNextClock(t, time.October)
-	p := nextAt(s, "/?by=mass&region=CA&show=pinned&month=May")
+	p := nextAt(s, "/?by=mass&region=USA.5_1&show=pinned&month=May")
 	var region, mon *nextControl
 	for i := range p.Controls {
 		switch p.Controls[i].Label {
@@ -860,8 +860,8 @@ func TestNextHereAndNow(t *testing.T) {
 	if region == nil || mon == nil {
 		t.Fatal("no Region or Month setting")
 	}
-	if got := strings.Replace(region.HereURL, hereSlot, "FL", 1); got != "/?by=mass&month=May&region=FL&show=pinned" {
-		t.Errorf("Here, filled with FL, is %s", got)
+	if got := strings.Replace(region.HereURL, hereSlot, "USA.10_1", 1); got != "/?by=mass&month=May&region=USA.10_1&show=pinned" {
+		t.Errorf("Here, filled with Florida, is %s", got)
 	}
 	if region.Boundaries != s.boundaryURL {
 		t.Errorf("Here looks regions up in %q, want %q", region.Boundaries, s.boundaryURL)
@@ -887,10 +887,10 @@ func TestNextHereAndNow(t *testing.T) {
 	if want := append([]string{"All", "Now"}, month.Abbrev[:]...); !slices.Equal(labels, want) {
 		t.Errorf("the month choices are %v, want %v", labels, want)
 	}
-	if now := ch[1]; now.On || !now.Now || string(now.URL) != "/?by=mass&month=now&region=CA&show=pinned" {
+	if now := ch[1]; now.On || !now.Now || string(now.URL) != "/?by=mass&month=now&region=USA.5_1&show=pinned" {
 		t.Errorf("with May named, Now is %+v; want it off and marked, linking to month=now", now)
 	}
-	if all := ch[0]; all.On || string(all.URL) != "/?by=mass&region=CA&show=pinned" {
+	if all := ch[0]; all.On || string(all.URL) != "/?by=mass&region=USA.5_1&show=pinned" {
 		t.Errorf("with May named, All is %+v; want it off, linking to no month", all)
 	}
 	for _, target := range []string{"/", "/?month=all"} {
@@ -1011,11 +1011,11 @@ func TestNextFamilyBadges(t *testing.T) {
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestNextResetKeepsPins(t *testing.T) {
 	s := newTestServer(t)
-	p := nextAt(s, "/?by=mass&region=FL&month=May&pin=annhum&pin=amecro&show=pinned&rev=1")
+	p := nextAt(s, "/?by=mass&region=USA.10_1&month=May&pin=annhum&pin=amecro&show=pinned&rev=1")
 	if string(p.ResetURL) != "/?pin=annhum&pin=amecro" {
 		t.Errorf("Reset links to %s, want the defaults with both pins, in order", p.ResetURL)
 	}
-	if string(p.ClearPinsURL) != "/?by=mass&month=May&region=FL&rev=1" {
+	if string(p.ClearPinsURL) != "/?by=mass&month=May&region=USA.10_1&rev=1" {
 		t.Errorf("Clear pins links to %s, want every setting kept and no pins", p.ClearPinsURL)
 	}
 	if p := nextAt(s, "/?by=mass"); p.ClearPinsURL != "" || string(p.ResetURL) != "/" {
@@ -1088,16 +1088,16 @@ func TestNextPinnedList(t *testing.T) {
 func TestNextHeading(t *testing.T) {
 	s := newTestServer(t)
 	for target, want := range map[string]string{
-		"/":                     "Showing birds in every month",
-		"/?show=pinned":         "Showing pinned birds",
-		"/?region=NY&month=Oct": "Showing birds in New York in October",
+		"/":                           "Showing birds in every month",
+		"/?show=pinned":               "Showing pinned birds",
+		"/?region=USA.33_1&month=Oct": "Showing birds in New York in October",
 		"/?family=Corvidae&habitat=Forest&niche=Granivore&niche=Frugivore&month=May&month=Jun": "Showing birds in May or June · Family: Corvidae · Habitat: Forest · Diet: Eats seeds or Eats fruit",
 	} {
 		if got := nextAt(s, target).Title; got != want {
 			t.Errorf("%s: the heading reads %q, want %q", target, got, want)
 		}
 	}
-	if !strings.Contains(mustGet(t, s, "/?region=NY"), `<h2 class="settitle">Showing birds in New York in every month</h2>`) {
+	if !strings.Contains(mustGet(t, s, "/?region=USA.33_1"), `<h2 class="settitle">Showing birds in New York in every month</h2>`) {
 		t.Error("the page does not draw the heading")
 	}
 }
@@ -1341,7 +1341,7 @@ func TestNextWelcomeLine(t *testing.T) {
 	}
 	// From an address with settings changed, the link keeps them, and its
 	// template replaces the region and sets the month to Now, the browser's.
-	if p := nextAt(s, "/?by=mass&month=May&region=FL&pin=amecro&show=pinned&find=crow"); string(p.HereNowURL) != "/?by=mass&find=crow&month=May&pin=amecro&region=FL&show=pinned#here-and-now" ||
+	if p := nextAt(s, "/?by=mass&month=May&region=USA.10_1&pin=amecro&show=pinned&find=crow"); string(p.HereNowURL) != "/?by=mass&find=crow&month=May&pin=amecro&region=USA.10_1&show=pinned#here-and-now" ||
 		p.HereNowTemplate != "/?by=mass&find=crow&month=__MONTH__&pin=amecro&region=__REGION__" {
 		t.Errorf("from a changed address, the birds around you now is %s with template %s; want every setting kept, then the region replaced and the month Now",
 			p.HereNowURL, p.HereNowTemplate)
@@ -1411,7 +1411,7 @@ func TestNextWelcomeLine(t *testing.T) {
 func TestNextKeepsEveryParameter(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	const every = "/?by=mass&family=Corvidae&find=crow&habitat=Forest&month=May&names=world&niche=Omnivore&pin=amecro&pin=blujay&region=NY&rev=1&units=metric"
+	const every = "/?by=mass&family=Corvidae&find=crow&habitat=Forest&month=May&names=world&niche=Omnivore&pin=amecro&pin=blujay&region=USA.33_1&rev=1&units=metric"
 	// From Pinned only and from a count, so that no broken link can pass
 	// for one that changes the same keys on purpose.
 	for _, c := range []struct {
@@ -1585,7 +1585,7 @@ var detailBackProbe string
 // Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestSpeciesBackUsesHistory(t *testing.T) {
 	s := newTestServer(t)
-	p := nextAt(s, "/?by=mass&month=all&units=metric&pin=amecro&region=FL&show=all")
+	p := nextAt(s, "/?by=mass&month=all&units=metric&pin=amecro&region=USA.10_1&show=all")
 	if len(p.Tiles) == 0 || string(p.Tiles[0].DetailURL) != "/species/"+p.Tiles[0].S.ID+"?units=metric" {
 		t.Fatalf("the first tile links to %q; want its species page with only the units", p.Tiles[0].DetailURL)
 	}

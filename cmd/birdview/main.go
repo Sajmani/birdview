@@ -728,10 +728,13 @@ func parseOptions(r *http.Request) options {
 	}
 	_, o.HasRegions = q["region"]
 	for _, g := range q["region"] {
-		// A URL carries slugs ("CA", "GulfOfMexico"); everything downstream
-		// works in GADM ids, so translate here and nowhere else (decisions.regionUrlIsPostalCode).
-		// An unknown slug is dropped rather than guessed at.
+		// A URL carries a land region's GADM code or a sea box's name; everything
+		// downstream works in region ids, so translate here and nowhere else
+		// (decisions.regionCodesFromData). A retired value still reads, though the
+		// home page redirects it first. An unknown value is dropped rather than guessed at.
 		if rg, ok := region.BySlug(g); ok {
+			o.Regions[rg.ID] = true
+		} else if rg, ok := region.Retired(g); ok {
 			o.Regions[rg.ID] = true
 		}
 	}

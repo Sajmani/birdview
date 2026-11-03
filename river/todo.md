@@ -1031,3 +1031,29 @@ and Cinnamon-rumped Seedeater (131, mostly California and Arizona) off `status.E
 records may be wild vagrants. Each needs a judgment: add it to the list with a reason, or leave it.
 The seedeater may also be a naming question, since AviList's *Sporophila torqueola* is the west
 Mexican bird and Morelet's Seedeater is the one native to Texas
+
+## countyRegions
+
+**Regions down to counties, coded as the data codes them**
+
+Status: open
+Owner: Sameer
+Gate: step 2, a GBIF download, needs the owner's GBIF account
+
+[decisions.regionCodesFromData](requirements/decisions.md#regioncodesfromdata) names regions by GADM code on land and Marine Regions id at sea, and
+redirects every value BirdView wrote before. Step 1, land regions by GADM code with postal codes
+and island names redirecting, was done 2026-11-03. Left, in order:
+
+2. **A GBIF download** in place of per-region queries, which county scale would multiply about
+   fortyfold and which is kinder to GBIF: species by county by month for New York, and species by
+   grid cell by month for records with no GADM code, offshore. Needs a GBIF account and SQL download
+   access; each download has a DOI to cite, which changes [imports.gbif](requirements/imports.md#gbif) and the credits.
+3. A New York spike on that data: records per county, file size, and a minimum record count for
+   small counties, where one record per million is less than one record.
+4. A county picker prototype (drill-down, search, Here to a county) on the New York data, sized so
+   no link lists many county codes.
+5. Boundaries keyed to GADM codes for Here at county scale, since
+   [tech.regionBoundaries](requirements/local/tech/delivery.md#regionboundaries) uses Natural Earth.
+6. Seas: adopt [imports.marine-regions](requirements/imports.md#marine-regions), assign the download's offshore grid cells to its
+   areas while building the data, replace the five sea boxes, and redirect their names. Asking VLIZ
+   about serving its boundaries gates only Here at sea, the one use that sends them to readers.

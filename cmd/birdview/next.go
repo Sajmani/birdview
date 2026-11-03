@@ -313,7 +313,10 @@ func (s *server) next(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	// A bird pinned by another of its codes is addressed by its own
 	// (product.ebirdLink), so the page and its links name each bird one way.
-	if changed := s.canonicalPins(q); changed && !q.Has("bird") {
+	// A region named by a value BirdView no longer writes is addressed by its
+	// current code (decisions.regionCodesFromData, tech.stableUrls).
+	pins := s.canonicalPins(q)
+	if regions := canonicalRegions(q); (pins || regions) && !q.Has("bird") {
 		http.Redirect(w, r, string(nextURL(q)), http.StatusMovedPermanently)
 		return
 	}
@@ -348,6 +351,18 @@ func (s *server) canonicalPins(q url.Values) bool {
 	for i, v := range q["pin"] {
 		if id, ok := s.aliasOf[v]; ok {
 			q["pin"][i], changed = id, true
+		}
+	}
+	return changed
+}
+
+// canonicalRegions rewrites, in place, any region= value BirdView no longer writes to the region's
+// current one, and reports whether it rewrote one.
+func canonicalRegions(q url.Values) bool {
+	changed := false
+	for i, v := range q["region"] {
+		if r, ok := region.Retired(v); ok {
+			q["region"][i], changed = r.Slug(), true
 		}
 	}
 	return changed

@@ -1661,7 +1661,7 @@ func TestRegionFilter(t *testing.T) {
 	s := newTestServer(t)
 
 	// One region shows what is reported there and excludes the rest.
-	_, ca := get(t, s, "/?month=all&show=all&region=CA")
+	_, ca := get(t, s, "/?month=all&show=all&region=USA.5_1")
 	// Unescaped: the fixture's names carry apostrophes, which the template
 	// writes as &#39; and a raw substring search then misses.
 	tiles := html.UnescapeString(tileArea(t, ca))
@@ -1690,7 +1690,7 @@ func TestRegionFilter(t *testing.T) {
 
 	// Composition: region and family narrow together, and an empty
 	// intersection names both filters rather than blaming one.
-	_, both := get(t, s, "/?month=all&show=all&region=CA&family=Corvidae")
+	_, both := get(t, s, "/?month=all&show=all&region=USA.5_1&family=Corvidae")
 	if n := strings.Count(tileArea(t, both), "tilewrap"); n != 0 {
 		t.Errorf("California plus Corvidae showed %d species; the crow is not in California", n)
 	}
@@ -1708,31 +1708,29 @@ func TestRegionFilter(t *testing.T) {
 	if !strings.Contains(html.UnescapeString(tileArea(t, sea)), "Thick-billed Murre") {
 		t.Error("the Pacific shows no murre; a pelagic species has nowhere else to be")
 	}
-	_, ak := get(t, s, "/?month=all&show=all&region=AK")
+	_, ak := get(t, s, "/?month=all&show=all&region=USA.2_1")
 	if !strings.Contains(html.UnescapeString(tileArea(t, ak)), "Thick-billed Murre") {
 		t.Error("Alaska omits the murre, which is seen from shore there as well as at sea")
 	}
 }
 
-// TestRegionURLsCarrySlugsNotGADMIDs checks what the reader actually gets:
-// links built from postal codes and names, with the internal key nowhere in
-// sight (decisions.regionUrlIsPostalCode).
+// TestRegionURLsCarryDataCodes checks what the reader actually gets: land regions linked by
+// their GADM codes, sea boxes by name, and every older value redirected to the current one
+// (decisions.regionCodesFromData).
 //
-// Verifies: product.regionAndMonthFilter. Criterion: acceptance.regionUrlRoundTrips.
-func TestRegionURLsCarrySlugsNotGADMIDs(t *testing.T) {
-	_, body := get(t, newTestServer(t), "/?month=all&show=all")
-	sel := box(t, body, "Region")
-
-	// No GADM id anywhere in a link. Checked against the real table rather
-	// than a pattern, so a new id shape cannot slip past.
-	for _, id := range append(region.LandIDs(), region.MarineIDs()...) {
-		if strings.Contains(sel, "region="+id) {
-			t.Errorf("the GADM id %q appears in a URL; it is a database key", id)
+// Verifies: product.regionAndMonthFilter, tech.stableUrls. Criterion: acceptance.regionUrlRoundTrips.
+func TestRegionURLsCarryDataCodes(t *testing.T) {
+	s := newTestServer(t)
+	_, body := get(t, s, "/?month=all&show=all")
+	sel := html.UnescapeString(box(t, body, "Region"))
+	for _, want := range []string{"region=USA.5_1", "region=CAN.2_1", "region=UMI.4_1", "region=GulfOfMexico"} {
+		if !strings.Contains(sel, want) {
+			t.Errorf("no link carries %q", want)
 		}
 	}
-	for _, want := range []string{"region=CA", "region=GulfOfMexico", "region=JohnstonAtoll"} {
-		if !strings.Contains(html.UnescapeString(sel), want) {
-			t.Errorf("no link carries %q", want)
+	for _, old := range []string{"region=CA&", "region=CA\"", "region=JohnstonAtoll", "region=BC"} {
+		if strings.Contains(sel, old) {
+			t.Errorf("a link still carries the retired %q", old)
 		}
 	}
 
@@ -1745,6 +1743,22 @@ func TestRegionURLsCarrySlugsNotGADMIDs(t *testing.T) {
 		if !strings.Contains(sel, ">"+uncoded+"</a>") {
 			t.Errorf("%q does not render as a plain choice", uncoded)
 		}
+	}
+
+	// Old values redirect permanently to the current ones, everything else kept.
+	for from, to := range map[string]string{
+		"/?region=CA&by=mass":                        "/?by=mass&region=USA.5_1",
+		"/?region=JohnstonAtoll&region=GulfOfMexico": "/?region=UMI.4_1&region=GulfOfMexico",
+		"/?month=May&region=NY&region=USA.10_1":      "/?month=May&region=USA.33_1&region=USA.10_1",
+	} {
+		w := httptest.NewRecorder()
+		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, from, nil))
+		if w.Code != http.StatusMovedPermanently || w.Header().Get("Location") != to {
+			t.Errorf("GET %s = %d to %q, want 301 to %s", from, w.Code, w.Header().Get("Location"), to)
+		}
+	}
+	if code, _ := get(t, s, "/?region=USA.5_1&region=GulfOfMexico"); code != http.StatusOK {
+		t.Errorf("current values answer %d, want 200", code)
 	}
 }
 
@@ -2419,7 +2433,7 @@ func TestTileShareFollowsTheRegionFilter(t *testing.T) {
 	}
 
 	all := oneIn("/?month=all&show=all", "American Robin")
-	ontario := oneIn("/?month=all&show=all&region=ON", "American Robin")
+	ontario := oneIn("/?month=all&show=all&region=CAN.9_1", "American Robin")
 	if all == ontario {
 		t.Errorf("the robin's figure is %q both with all regions and in Ontario "+
 			"alone; the figure is not following the filter", all)
@@ -3124,7 +3138,7 @@ func TestMissingTotalsDoNotClaimTheBirdIsAbsent(t *testing.T) {
 func TestInterfaceNeverSaysShare(t *testing.T) {
 	s := newTestServer(t)
 	pages := []string{
-		"/?month=all&show=all", "/?month=all&show=all&region=AK", "/?month=all&show=all&by=mass",
+		"/?month=all&show=all", "/?month=all&show=all&region=USA.2_1", "/?month=all&show=all&by=mass",
 		"/species/greblu", "/species/amerob", "/species/thimur",
 		"/added", "/docs/",
 	}
@@ -3381,7 +3395,7 @@ func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 	// under every filter. A data-anchored band would start at whichever bird
 	// is commonest in the selection, and "1 in 1,000 – 9,999" would denote
 	// one set nationally and another in Alaska.
-	ak := heads("/?month=all&show=all&by=frequency&region=AK")
+	ak := heads("/?month=all&show=all&by=frequency&region=USA.2_1")
 	national := map[string]bool{}
 	for _, h := range got {
 		if m := edge.FindStringSubmatch(h); m != nil {
@@ -3584,7 +3598,7 @@ func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
 		min         int
 	}{
 		{"", "(all regions)", 1000},
-		{"&region=AK", "in Alaska", 300},
+		{"&region=USA.2_1", "in Alaska", 300},
 	} {
 		_, index := get(t, s, "/?month=all&show=all"+scope.query)
 		tiles := tile.FindAllStringSubmatch(index, -1)
@@ -3647,7 +3661,7 @@ func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
 	}
 	// The two scopes must actually differ, or both halves above could be
 	// satisfied by a page ignoring the filter entirely.
-	if seen[""] == seen["?region=AK"] {
+	if seen[""] == seen["?region=USA.2_1"] {
 		t.Errorf("the same bird reads %q unfiltered and in Alaska; the figure "+
 			"is not following the region selection on either page", seen[""])
 	}
@@ -3786,7 +3800,7 @@ func TestResponsesCarryAValidator(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
-	paths := []string{"/?month=all&show=all", "/species/yelwar1", "/species/haiwoo", "/?month=all&show=all&region=AK",
+	paths := []string{"/?month=all&show=all", "/species/yelwar1", "/species/haiwoo", "/?month=all&show=all&region=USA.2_1",
 		"/static/styles.css"}
 
 	tags := map[string]string{}
@@ -4177,7 +4191,7 @@ func TestMonthsNarrowTheListAndTheFigureTogether(t *testing.T) {
 	}
 
 	// The figure narrows with the list, and says which months it covers.
-	_, body := get(t, s, "/?show=all&region=NY&month=Jun&month=Jul&month=Aug")
+	_, body := get(t, s, "/?show=all&region=USA.33_1&month=Jun&month=Jul&month=Aug")
 	if !strings.Contains(body, "Jun-Aug") {
 		t.Error("a three-month selection does not say so on the tiles")
 	}
@@ -4213,7 +4227,7 @@ func newTestServerReal(t *testing.T) *server {
 // Verifies: product.regionAndMonthFilter, product.tileOpensDetail, decisions.monthPresence. Criterion: acceptance.monthsFilterAndAbstain.
 func TestAbstainedTilesSayWhy(t *testing.T) {
 	s := newTestServerReal(t)
-	const path = "/?show=all&region=HI&month=Jun"
+	const path = "/?show=all&region=USA.12_1&month=Jun"
 	_, body := get(t, s, path)
 
 	tileOf := func(id string) string {
@@ -4278,8 +4292,8 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 	}
 
 	for _, c := range []struct{ path, id, want string }{
-		{"/?show=all&region=FL&month=Jan", "paibun", "Withheld by eBird in Florida, Jan"},
-		{"/?show=all&region=NY&month=Jun", "sheowl", "Withheld by eBird in New York, Jun"},
+		{"/?show=all&region=USA.10_1&month=Jan", "paibun", "Withheld by eBird in Florida, Jan"},
+		{"/?show=all&region=USA.33_1&month=Jun", "sheowl", "Withheld by eBird in New York, Jun"},
 	} {
 		shown, text := tile(c.path, c.id)
 		if !shown {
@@ -4294,7 +4308,7 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 
 	// Without a month filter the caveat names the whole window, and it wraps
 	// the year end rather than listing six months.
-	if _, text := tile("/?month=all&show=all&region=FL", "paibun"); !strings.Contains(text, "Withheld by eBird in Florida, Oct-Mar") {
+	if _, text := tile("/?month=all&show=all&region=USA.10_1", "paibun"); !strings.Contains(text, "Withheld by eBird in Florida, Oct-Mar") {
 		t.Errorf("Painted Bunting in Florida, all year, reads: %s", text)
 	}
 
@@ -4302,15 +4316,15 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 	// from February to May, but Wyoming's records run 302 a month inside the
 	// window against 269 outside: eBird published them, and saying otherwise
 	// would be false.
-	if _, text := tile("/?show=all&region=WY&month=Mar", "saggro"); strings.Contains(text, "Withheld by eBird") {
+	if _, text := tile("/?show=all&region=USA.51_1&month=Mar", "saggro"); strings.Contains(text, "Withheld by eBird") {
 		t.Errorf("Greater Sage-Grouse in Wyoming is marked withheld, but its records are in "+
 			"the export: %s", text)
 	}
 
 	// Controls: birds genuinely absent in a month stay hidden.
 	for _, c := range []struct{ path, id string }{
-		{"/?show=all&region=NY&month=Jan", "boboli"},
-		{"/?show=all&region=NY&month=Jun", "snobun"},
+		{"/?show=all&region=USA.33_1&month=Jan", "boboli"},
+		{"/?show=all&region=USA.33_1&month=Jun", "snobun"},
 	} {
 		if shown, _ := tile(c.path, c.id); shown {
 			t.Errorf("%s is shown under %s; it is not withheld there, just gone, and the month "+
@@ -4319,7 +4333,7 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 	}
 
 	// And the detail page says it, opened under the same filter (product.tileOpensDetail).
-	_, page := get(t, s, "/species/paibun?region=FL&month=Jan")
+	_, page := get(t, s, "/species/paibun?region=USA.10_1&month=Jan")
 	if !strings.Contains(stripTags(page), "withheld by eBird in Florida, Oct-Mar") {
 		t.Error("Painted Bunting's page does not list Florida's withheld months")
 	}

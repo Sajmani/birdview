@@ -1758,7 +1758,7 @@ test instead of going unnoticed.
 
 Date: 2026-10-03
 Decided by: Sameer
-Status: accepted
+Status: amended by regionCodesFromData
 Affects: [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter)
 Subject: `presentation.region_filter.url`
 Kind: Direct — the URL carried an internal database key, and the obvious fix would have required inventing identifiers the project has no authority to mint
@@ -4442,3 +4442,74 @@ beside it, so a reader who cannot tell its color from the wing's still cannot mi
 wing. WCAG 1.4.1 asks only that color not be the only cue, which place, shape, and label satisfy;
 the ΔE rule is BirdView's own, stricter one, and it still holds among the figure's parts, which
 touch one another and are told apart by color.
+
+---
+
+## regionCodesFromData
+
+**A region's URL is the code its data is filed under: GADM's for land, Marine Regions' for sea**
+
+Date: 2026-11-03
+Decided by: Sameer
+Status: accepted
+Amends: regionUrlIsPostalCode
+Affects: [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [tech.stableUrls](local/tech/delivery.md#stableurls), [tech.regionBoundaries](local/tech/delivery.md#regionboundaries)
+
+### Decided
+
+**Land.** A land region's URL value is its GADM code as GBIF attaches it to records, at any level:
+`?region=USA.33_1` for New York, `?region=USA.33.24_1` for Kings County. GBIF geocodes with GADM
+4.1 and patches a few codes on import (`gbif/geocode`, `database/import.sh`, read 2026-11-03), so
+the codes are GADM 4.1's as GBIF serves them, read from GBIF's GADM endpoint
+(`/v1/geocode/gadm/{code}/subdivisions`), never from GADM's own files, whose license forbids
+redistribution ([imports.natural-earth](imports.md#natural-earth)).
+
+**Sea.** GADM covers land only, and no occurrence field names a sea, so a sea region's URL value
+is the Marine Regions gazetteer id of its area, prefixed: `?region=MRGID:25281` for the United
+States part of the Gulf of Mexico. The units are Marine Regions' IHO sea areas divided by
+exclusive economic zone, with a "High Seas of" piece for each sea area beyond any zone, so the
+Gulf of Mexico (`MRGID:4288`) holds its national parts and its high seas as a state holds its
+counties. Marine Regions is proposed, not yet adopted ([imports.marine-regions](imports.md#marine-regions));
+this decision takes effect for seas when it is.
+
+**Old and retired values redirect, silently.** Every value BirdView has written keeps working by a
+permanent redirect to the current code: postal codes (`NY` to `USA.33_1`), sea names
+(`GulfOfMexico` to the units that replace the box), and any code its source retires (to the codes
+that replace it: GADM's successor codes; Marine Regions' accepted id). The page says nothing about
+the redirect; the heading names the regions it shows. A retired value that maps to several codes
+redirects to all of them.
+
+### Why
+
+The owner chose to scale BirdView down to counties and out to the world, and to align its URLs with
+the data rather than maintain a naming layer over it. A slug of state code and county name was
+drafted and mapped over all 3,148 US county-level units (the `gadm-county-urls` review, 2026-11-03):
+it collided nowhere, but put GADM's misspellings and truncations (`Lake Hurron`, `Prince of
+Wales-Outer Ketchi`) into URLs, or needed a table of corrections, and would need a naming rule per
+country worldwide. GADM's codes are persistent from version 3.6, retired when an area splits
+rather than reused (gadm.org metadata, quoted in [regionUrlIsPostalCode](#regionurlispostalcode)), hierarchical, so a
+county's code shows its state's, and are what GBIF files records under. Readability is the cost,
+accepted: regions are chosen from the page, not typed.
+
+Marine Regions is the scheme GBIF itself uses at sea: its geocoder decides a record's country from
+Marine Regions' land-and-EEZ union and labels points with Marine Regions' IHO sea areas
+(`/v1/geocode/reverse` at 25.95 N 89.13 W returns `mrgid/4288`, Gulf of Mexico). Dividing sea areas
+by EEZ matches how eBird files offshore records, under the nearest state out to the zone's edge and
+as "High Seas" beyond, and how GBIF assigns them a country. The prefix keeps a sea code from being
+read as a land one: every GADM code begins with three capital letters and a dot or the end.
+
+Redirecting rather than accepting the old values alongside keeps one URL per view, and exercises
+the retirement path that GADM and Marine Regions will need. [tech.stableUrls](local/tech/delivery.md#stableurls) asked a changed
+URL to say what changed; for a renamed region the heading already does, and the owner chose no
+message.
+
+### What it costs
+
+- Every region URL BirdView has written, and every link on its pages, changes form. Old links work
+  through the redirect.
+- The five sea boxes have no exact successors; each redirects to the units that cover it, which
+  are larger or smaller than the box.
+- [tech.regionBoundaries](local/tech/delivery.md#regionboundaries) draws Here's boundaries from Natural Earth, whose borders are not
+  GADM's; at county scale Here needs boundaries keyed to GADM codes, and sea boundaries keyed to
+  Marine Regions ids, which is open ([todo.countyRegions](../todo.md#countyregions)).
+

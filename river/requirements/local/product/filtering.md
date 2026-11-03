@@ -65,16 +65,23 @@ handful of records is nothing against a continental billion, and 22 per million 
 sits with Washington and Oregon, not with Nova Scotia. Zones are presentation only: which birds a
 region holds is decided per region, never per zone.
 
-**A region appears in a URL as its postal abbreviation, or as its name** — `?region=CA`,
-`?region=GulfOfMexico` ([decisions.regionUrlIsPostalCode](../../decisions.md#regionurlispostalcode)). Where a standard abbreviation exists it
-is used, and where none does the name is used in PascalCase. **No code is invented**: the obvious
-ones are taken (Midway cannot be `MI`, Palmyra cannot be `PA`), and an invented code would sit
-beside 64 official ones with nothing marking it as a guess. A region with no standard code shows
-**no code**, only its name.
+**A region appears in a URL as the code its records are filed under**
+([decisions.regionCodesFromData](../../decisions.md#regioncodesfromdata)): a land region as its **GADM code**, as GBIF attaches it,
+at any level — `?region=USA.33_1` for New York, `?region=USA.33.24_1` for Kings County — and a sea
+region as its **Marine Regions id**, prefixed — `?region=MRGID:25281` for the United States part of
+the Gulf of Mexico. **No code is invented**: every code is the data's own, and the same code keys
+the presence table, queries GBIF, and names the region in the URL.
 
-The GADM id stays the internal key — it keys the presence table and is what GBIF is queried
-with — but does not belong in a URL. The slug is **derived** from the code or the name rather
-than stored, so a renamed region cannot keep a URL that no longer describes it.
+**Sea regions are IHO sea areas divided by exclusive economic zone**, with a "High Seas of" piece
+for each sea area beyond any zone, as Marine Regions publishes them. A sea area holds its parts as
+a state holds its counties. GADM covers land only and no occurrence record names a sea, so
+BirdView assigns offshore records to these areas itself.
+
+**A value BirdView no longer writes redirects to the codes that replace it**, permanently and
+without a message: a postal code or sea name from before 2026-11 (`NY` to `USA.33_1`), and a code
+its source retires (to GADM's successors, or to Marine Regions' accepted id). A value that maps to
+several codes redirects to all of them. The page's heading names the regions shown, so the reader
+sees what the link now means.
 
 ## hereSelectsLocalRegion
 

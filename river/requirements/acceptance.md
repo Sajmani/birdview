@@ -1973,37 +1973,41 @@ Watched failing: 2026-10-03, by filing Hawaii under Great Lakes and Texas under 
 
 ### regionUrlRoundTrips
 
-**A region's URL is readable, unique, and round-trips**
+**A region's URL is the data's code, unique, round-trips, and old values redirect**
 
-**Verifies:** [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter) · **Level:** code · **Method:** unit tests over the region table, plus a
-rendering test over the home page's Region setting
+**Verifies:** [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [tech.stableUrls](local/tech/delivery.md#stableurls) · **Level:** code · **Method:** unit tests over the region table, plus a
+rendering and redirect test over the home page
 
-**Assertions, the slug:** every region's slug is its postal code where it has one and its
-PascalCase name where it has none; slugs are **unique across all 74 regions**, and every slug is
-URL-safe without escaping. Uniqueness is the load-bearing one — two regions sharing a slug makes
-one of them unreachable, and the collision would be silent.
+**Assertions, the URL value:** a land region's is its GADM code (`USA.5_1`, `CAN.2_1`, `UMI.4_1`)
+and a sea box's its PascalCase name (`GulfOfMexico`), and no internal `SEA.*` id resolves in a URL
+([decisions.regionCodesFromData](decisions.md#regioncodesfromdata)); values are **unique across all 74 regions** and URL-safe
+without escaping. Uniqueness is the load-bearing one — two regions sharing a value makes one of
+them unreachable, and the collision would be silent.
 
-**Assertions, round-trip:** resolving a region's own slug returns that same region, for every
-region. A slug that renders but does not resolve is a dead link on every chip.
+**Assertions, round-trip:** resolving a region's own value returns that same region, for every
+region. A value that renders but does not resolve is a dead link on every choice.
 
-**Assertions, no invented codes:** every non-empty code is two characters, and the ten regions
+**Assertions, retired values:** every postal code and every island name BirdView wrote before
+2026-11-03 resolves as retired to its region, none is also a current value, and the sea names are
+not retired; on the home page `/?region=CA&by=mass` redirects permanently to
+`/?by=mass&region=USA.5_1`, several retired values in one address are all rewritten, and current
+values answer 200.
+
+**Assertions, no invented codes:** every non-empty postal code is two characters, and the ten regions
 with no standard abbreviation carry an **empty** code rather than a made-up one
-([decisions.regionUrlIsPostalCode](decisions.md#regionurlispostalcode)). This is the assertion that stops the rejected proposal being
-reintroduced quietly.
+([decisions.regionUrlIsPostalCode](decisions.md#regionurlispostalcode)). The codes now only label choices, but the rule still holds.
 
-**Assertions, rendering:** region links carry slugs and **no GADM id appears in any URL**; a
-choice with a code is named with the code as its tooltip, and a choice without one is named
-alone. (The classic view's chips showed code and name, and a chip without a code had to show no
-empty code slot, which the stylesheet would precede with a stray separator.)
+**Assertions, rendering:** region links carry GADM codes for land and names for the sea boxes,
+and no retired value; a choice with a postal code is named with the code as its tooltip, and a
+choice without one is named alone.
 
-**Status: verified 2026-10-03 — passing, and watched failing** by returning a stored slug
-instead of deriving it, so a renamed region kept its old URL; by emitting GADM ids in links
-again; by giving Palmyra the code `PM`, which the no-invented-code assertion rejects; and by
-rendering the empty code, which puts a leading separator on ten chips.
+**Run:** `go test ./internal/region/ ./cmd/birdview/ -run 'TestSlugsAreUniqueAndResolve|TestSlugIsDataCode|TestRetiredValuesResolve|TestRegionURLsCarryDataCodes'`
+**Status: verified 2026-11-03, passing.**
 
 Watched failing: 2026-10-03, by returning a stored slug instead of deriving it, so a renamed region kept its old URL; by emitting GADM ids in links again; by giving Palmyra the code `PM`, which the no-invented-code assertion rejects; and by rendering the empty code, which puts a leading separator on ten chips.
+Watched failing: 2026-11-03, against postal-code URLs ("USA.5_1 (California) has the URL value \"CA\", want \"USA.5_1\"") and with no retired lookup ("the retired value \"CA\" resolves to (false), want USA.5_1", 64 postal codes not resolving), and with the home page's redirect disabled ("GET /?region=CA&by=mass = 200 to \"\", want 301 to /?by=mass&region=USA.5_1").
 
-Giving two regions the same slug does not reach an assertion: the index is built once at
+Giving two regions the same value does not reach an assertion: the index is built once at
 startup and **panics** there, naming both regions. That is deliberate — a collision makes a
 region silently unreachable, so it should stop the binary rather than wait for a test run — and
 it is recorded here because "watched failing" meant watching a panic, not a red assertion.

@@ -23,13 +23,13 @@ var KnownPoints = []struct {
 	Lat, Lon float64
 	Want     string
 }{
-	{"Sacramento", 38.5816, -121.4944, "CA"},
-	{"Toronto", 43.6532, -79.3832, "ON"},
-	{"Honolulu", 21.3069, -157.8583, "HI"},
-	{"Anchorage", 61.2181, -149.9003, "AK"},
-	{"the White House", 38.8977, -77.0365, "DC"},
-	{"Tampa", 27.9506, -82.4572, "FL"},
-	{"Sand Island, Midway", 28.2085, -177.3780, "MidwayAtoll"},
+	{"Sacramento", 38.5816, -121.4944, "USA.5_1"},
+	{"Toronto", 43.6532, -79.3832, "CAN.9_1"},
+	{"Honolulu", 21.3069, -157.8583, "USA.12_1"},
+	{"Anchorage", 61.2181, -149.9003, "USA.2_1"},
+	{"the White House", 38.8977, -77.0365, "USA.9_1"},
+	{"Tampa", 27.9506, -82.4572, "USA.10_1"},
+	{"Sand Island, Midway", 28.2085, -177.3780, "UMI.6_1"},
 	{"the Gulf off Louisiana", 28.0, -90.0, "GulfOfMexico"},
 	{"the open North Atlantic", 40.0, -60.0, "NorthAtlantic"},
 	{"Mexico City", 19.4326, -99.1332, ""},

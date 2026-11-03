@@ -239,7 +239,7 @@ func TestPelagicIsTheLastZone(t *testing.T) {
 }
 
 // TestSlugsAreUniqueAndResolve is the invariant every region link rests on.
-// Two regions sharing a slug makes one unreachable from every chip, and the
+// Two regions sharing a URL value makes one unreachable from every choice, and the
 // collision is silent: the page still renders, the wrong birds appear.
 //
 // Verifies: product.regionAndMonthFilter. Criterion: acceptance.regionUrlRoundTrips.
@@ -249,82 +249,96 @@ func TestSlugsAreUniqueAndResolve(t *testing.T) {
 		r, _ := Get(id)
 		slug := r.Slug()
 		if slug == "" {
-			t.Errorf("%s has an empty slug", id)
+			t.Errorf("%s has an empty URL value", id)
 			continue
 		}
 		if other, dup := seen[slug]; dup {
-			t.Errorf("%s and %s share the slug %q", other, id, slug)
+			t.Errorf("%s and %s share the URL value %q", other, id, slug)
 		}
 		seen[slug] = id
 
-		// URL-safe without escaping: a slug that needs encoding is a slug
-		// that will be mis-typed and mis-copied.
+		// URL-safe without escaping: a value that needs encoding is one that
+		// will be mis-typed and mis-copied.
 		if url.QueryEscape(slug) != slug {
-			t.Errorf("%s has the slug %q, which does not survive a URL unescaped", id, slug)
-		}
-		if !regexp.MustCompile(`^[A-Za-z]+$`).MatchString(slug) {
-			t.Errorf("%s has the slug %q; want letters only", id, slug)
+			t.Errorf("%s has the URL value %q, which does not survive a URL unescaped", id, slug)
 		}
 
 		// Round-trip: what is rendered must resolve, and to the same region.
 		back, ok := BySlug(slug)
 		if !ok {
-			t.Errorf("%s renders the slug %q, which resolves to nothing", id, slug)
+			t.Errorf("%s renders the URL value %q, which resolves to nothing", id, slug)
 			continue
 		}
 		if back.ID != id {
-			t.Errorf("slug %q round-trips to %s, not %s", slug, back.ID, id)
+			t.Errorf("URL value %q round-trips to %s, not %s", slug, back.ID, id)
 		}
 	}
 	if len(seen) != Len() {
-		t.Errorf("%d distinct slugs for %d regions", len(seen), Len())
+		t.Errorf("%d distinct URL values for %d regions", len(seen), Len())
 	}
 }
 
-// TestSlugIsCodeOrPascalName pins the rule itself, so the two halves cannot
-// drift into one another: a postal code where there is one, the name in
-// PascalCase where there is not (decisions.regionUrlIsPostalCode).
+// TestSlugIsDataCode pins the rule (decisions.regionCodesFromData): a land region's URL value
+// is its GADM code, the code its records are filed under; a sea box, which no source codes yet,
+// keeps its name in PascalCase until Marine Regions replaces it.
 //
 // Verifies: product.regionAndMonthFilter. Criterion: acceptance.regionUrlRoundTrips.
-func TestSlugIsCodeOrPascalName(t *testing.T) {
+func TestSlugIsDataCode(t *testing.T) {
 	for _, tc := range []struct{ id, want string }{
-		{"USA.5_1", "CA"},            // a state uses its postal code
-		{"CAN.2_1", "BC"},            // so does a province
-		{"UMI.4_1", "JohnstonAtoll"}, // an island has none, so the name
-		{"SEA.GULF", "GulfOfMexico"}, // and the small word is capitalized too
-		{"SEA.PAC", "NorthPacific"},  // the gloss stays out of the slug
+		{"USA.5_1", "USA.5_1"},       // a state is its GADM code
+		{"CAN.2_1", "CAN.2_1"},       // so is a province
+		{"UMI.4_1", "UMI.4_1"},       // and an island
+		{"SEA.GULF", "GulfOfMexico"}, // a sea box keeps its name
+		{"SEA.PAC", "NorthPacific"},  // without the gloss
 	} {
 		r, ok := Get(tc.id)
 		if !ok {
 			t.Fatalf("%s is not a region", tc.id)
 		}
 		if got := r.Slug(); got != tc.want {
-			t.Errorf("%s (%s) slugs to %q, want %q", tc.id, r.Name, got, tc.want)
+			t.Errorf("%s (%s) has the URL value %q, want %q", tc.id, r.Name, got, tc.want)
 		}
 	}
-
-	// Derived, not stored: a region renamed in the table must take a new
-	// slug rather than keeping one that no longer describes it.
-	renamed := Region{Name: "Palmyra Atoll"}
-	if got := renamed.Slug(); got != "PalmyraAtoll" {
-		t.Errorf("an uncoded region slugs to %q, want PalmyraAtoll", got)
-	}
-	renamed.Name = "Palmyra"
-	if got := renamed.Slug(); got != "Palmyra" {
-		t.Errorf("renaming did not change the slug; it is stored, not derived (got %q)", got)
+	for _, id := range MarineIDs() {
+		if _, ok := BySlug(id); ok {
+			t.Errorf("the internal sea id %q resolves in a URL; it is BirdView's key, not a code any source assigns", id)
+		}
 	}
 }
 
-// TestGADMIDsAreNotSlugs guards the thing decisions.regionUrlIsPostalCode removed. The GADM id stays
-// the internal key, so it is still in the table and still easy to reach for;
-// what must never happen is it reaching a URL again.
+// TestRetiredValuesResolve keeps every region URL BirdView wrote before decisions.regionCodesFromData
+// working: each postal code and each island name resolves, as retired, to its region, and no
+// retired value is also a current one, which would make the redirect ambiguous.
 //
-// Verifies: product.regionAndMonthFilter. Criterion: acceptance.regionUrlRoundTrips.
-func TestGADMIDsAreNotSlugs(t *testing.T) {
-	for _, id := range append(LandIDs(), MarineIDs()...) {
-		if _, ok := BySlug(id); ok {
-			t.Errorf("the GADM id %q resolves as a slug; ids are keys, not URLs", id)
+// Verifies: tech.stableUrls, product.regionAndMonthFilter. Criterion: acceptance.regionUrlRoundTrips.
+func TestRetiredValuesResolve(t *testing.T) {
+	for old, id := range map[string]string{
+		"CA": "USA.5_1", "NY": "USA.33_1", "BC": "CAN.2_1", "ON": "CAN.9_1", "DC": "USA.9_1",
+		"JohnstonAtoll": "UMI.4_1", "WakeIsland": "UMI.9_1",
+	} {
+		r, ok := Retired(old)
+		if !ok || r.ID != id {
+			t.Errorf("the retired value %q resolves to %v (%v), want %s", old, r.ID, ok, id)
 		}
+		if _, current := BySlug(old); current {
+			t.Errorf("%q is both retired and current", old)
+		}
+	}
+	n := 0
+	for _, id := range LandIDs() {
+		r, _ := Get(id)
+		if r.Code != "" {
+			if back, ok := Retired(r.Code); !ok || back.ID != id {
+				t.Errorf("%s's postal code %q does not resolve as retired", id, r.Code)
+			}
+			n++
+		}
+	}
+	if n < 60 {
+		t.Errorf("only %d land regions have postal codes; the check cannot see the old URLs", n)
+	}
+	if _, ok := Retired("GulfOfMexico"); ok {
+		t.Error("GulfOfMexico resolves as retired, but the sea boxes keep their names until Marine Regions replaces them")
 	}
 }
 

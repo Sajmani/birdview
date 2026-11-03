@@ -70,11 +70,12 @@ const (
 type Region struct {
 	// ID is GADM's own id for a land region ("USA.5_1"), or a SEA.* id for a
 	// marine one. It keys the presence table and is the gadmGid sent to
-	// GBIF. It is **not** what appears in a URL: it is a database key, and
-	// Slug is the reader's handle (decisions.regionUrlIsPostalCode).
+	// GBIF. For a land region it is also what appears in a URL; a sea box's
+	// SEA.* id is BirdView's own and never does (decisions.regionCodesFromData).
 	ID string
 	// Code is the standard postal abbreviation, or **empty** where no
-	// standard exists. It is deliberately left empty for the islands and the
+	// standard exists. It labels the region's choice and is what URLs carried
+	// before decisions.regionCodesFromData, which now redirect. It is deliberately left empty for the islands and the
 	// oceans: the obvious abbreviations are taken -- Midway cannot be MI,
 	// Navassa cannot be NV, Palmyra cannot be PA, Wake cannot be WA -- and a
 	// code invented to dodge a collision would sit beside 64 official ones
@@ -85,7 +86,7 @@ type Region struct {
 	Name string
 	// Gloss clarifies a name that needs it -- which stretch of ocean a box
 	// covers, in practice. It is shown in the chip's tooltip and never
-	// enters the slug.
+	// enters a URL.
 	Gloss string
 	Kind  Kind
 	// zones maps a grouping to this region's zone within it. Unexported so
@@ -98,19 +99,30 @@ type Region struct {
 // not one this package offers.
 func (r Region) Zone(grouping string) string { return r.zones[grouping] }
 
-// Slug is how this region appears in a URL: its postal abbreviation where it
-// has one, otherwise its name in PascalCase -- "CA", "GulfOfMexico".
-//
-// **Derived, never stored.** A stored slug can outlive the name it was made
-// from, leaving a URL that describes a region BirdView no longer has; deriving
-// it means renaming a region renames its URL, which is the honest behavior
-// even though it breaks the old link.
+// Slug is how this region appears in a URL: the code its records are filed under
+// (decisions.regionCodesFromData). A land region's is its GADM code, "USA.5_1"; a sea box, which no
+// source codes until Marine Regions replaces it, keeps its name in PascalCase, "GulfOfMexico".
 func (r Region) Slug() string {
+	if r.Kind == Land {
+		return r.ID
+	}
+	return pascal(r.Name)
+}
+
+// retiredSlug is the URL value a land region had before decisions.regionCodesFromData: its postal
+// abbreviation, or its name in PascalCase where it has none (decisions.regionUrlIsPostalCode). Kept
+// so those URLs redirect rather than break (tech.stableUrls).
+func (r Region) retiredSlug() string {
 	if r.Code != "" {
 		return r.Code
 	}
+	return pascal(r.Name)
+}
+
+// pascal writes a name in PascalCase: "Gulf of Mexico" is "GulfOfMexico".
+func pascal(name string) string {
 	var b strings.Builder
-	for _, word := range strings.Fields(r.Name) {
+	for _, word := range strings.Fields(name) {
 		for i, ch := range word {
 			if i == 0 {
 				b.WriteString(strings.ToUpper(string(ch)))
@@ -382,6 +394,18 @@ func init() {
 		}
 		bySlug[r.Slug()] = r
 	}
+	// And by the values BirdView wrote before, which redirect. A retired
+	// value that is also current would make the redirect ambiguous.
+	for _, r := range all {
+		if r.Kind != Land {
+			continue
+		}
+		old := r.retiredSlug()
+		if cur, dup := bySlug[old]; dup {
+			panic(fmt.Sprintf("region: the retired value %q of %s is %s's current one", old, r.ID, cur.ID))
+		}
+		retired[old] = r
+	}
 }
 
 // BySlug resolves a URL token to a region. The lookup is built once from the
@@ -393,6 +417,15 @@ func BySlug(slug string) (Region, bool) {
 }
 
 var bySlug = map[string]Region{}
+
+// Retired resolves a URL value BirdView no longer writes to the region it named, so the page
+// can redirect it to the current one (decisions.regionCodesFromData).
+func Retired(v string) (Region, bool) {
+	r, ok := retired[v]
+	return r, ok
+}
+
+var retired = map[string]Region{}
 
 // ZonesOf lists a grouping's zones in offer order, or nil if no such grouping
 // exists.

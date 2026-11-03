@@ -89,7 +89,7 @@ func TestHereInTheBrowser(t *testing.T) {
 	s := newTestServer(t)
 	// A named month, so the page does not depend on the clock.
 	const start = "/?by=mass&month=May"
-	pressedCA := string(nextToggle(url.Values{"by": {"mass"}, "month": {"May"}}, "region", "CA"))
+	pressedCA := string(nextToggle(url.Values{"by": {"mass"}, "month": {"May"}}, "region", "USA.5_1"))
 
 	var points [][2]float64
 	for _, p := range boundary.KnownPoints {
@@ -318,14 +318,14 @@ func TestHereAndNowLink(t *testing.T) {
 	// On the home page, the link chooses the region and sets the month to
 	// Now, the browser's month, keeping every other setting.
 	thisMonth := month.Abbrev[time.Now().Month()-1]
-	inCA := "/?by=mass&month=" + thisMonth + "&region=CA"
+	inCA := "/?by=mass&month=" + thisMonth + "&region=USA.5_1"
 	for _, c := range []struct{ name, start, geo, lands, says string }{
 		{"home in California", "/?by=mass&month=May", "38.5816,-121.4944", inCA, ""},
 		{"home refused", "/", "denied", "/", "refused, so the page is unchanged. Choose yours under Region."},
 		// Clicked on the page, not arrived by: the link only adds the
 		// fragment, so the page must answer its change.
 		{"home clicked in California", "/?by=mass&month=May", "follow=1&geo=38.5816,-121.4944", inCA, ""},
-		{"home clicked refused", "/?region=FL", "follow=1&geo=denied", "/?region=FL", "refused, so the page is unchanged. Choose yours under Region."},
+		{"home clicked refused", "/?region=USA.10_1", "follow=1&geo=denied", "/?region=USA.10_1", "refused, so the page is unchanged. Choose yours under Region."},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			t.Parallel()
@@ -422,7 +422,7 @@ func TestNowIsTheBrowsersMonth(t *testing.T) {
 		"--no-default-browser-check", "--disable-background-networking",
 		"--disable-component-update", "--disable-sync", "--disable-extensions",
 		"--user-data-dir="+t.TempDir(), "--virtual-time-budget=3000", "--dump-dom",
-		ts.URL+"/?by=mass&month=May&region=CA").Output()
+		ts.URL+"/?by=mass&month=May&region=USA.5_1").Output()
 	if err != nil {
 		t.Fatalf("chrome: %v", err)
 	}
@@ -430,7 +430,7 @@ func TestNowIsTheBrowsersMonth(t *testing.T) {
 	if m == nil {
 		t.Fatal("the page has no Now link marked data-now")
 	}
-	if want := "/?by=mass&month=" + month.Abbrev[time.Now().Month()-1] + "&region=CA"; html.UnescapeString(m[1]) != want {
+	if want := "/?by=mass&month=" + month.Abbrev[time.Now().Month()-1] + "&region=USA.5_1"; html.UnescapeString(m[1]) != want {
 		t.Errorf("after here.js, Now links to %s; want %s", html.UnescapeString(m[1]), want)
 	}
 }
