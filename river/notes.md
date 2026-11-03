@@ -257,3 +257,48 @@ still outstanding.
 late, the length column changes from wholly `modeled` to half `measured`, which will move diagrams
 and re-sort sections. Builders should treat the provenance model ([product.provenancePerMetric](requirements/local/product/measurements.md#provenancepermetric)) as the thing that stays
 fixed and the mix of kinds as the thing that moves.
+
+## The New York county spike
+
+*Run 2026-11-03 for [todo.countyRegions](todo.md#countyregions), step 3. Not a decision.* GBIF download
+`0025636-261023074918325` (DOI 10.15468/dl.ttkwue), bird records in New York by dataset, GADM
+county, month, and verbatim name, from `data/gbif-queries/ny-counties.sql`. Method: eBird only,
+today's rule (listed at one record per million of the area's eBird bird records, the
+`birdview-regions` bar), names matched case-insensitively to the 1,082 drawn species in
+`data/region-presence.tsv`, with a minimum record count *k* applied on top. iNaturalist (437,237
+records, 0.7%) was left out; the pipeline counts it only where eBird withholds a sensitive species.
+The script was a one-off and is not kept; the counts below are reproducible from the download.
+
+**Coverage.** 63 units, every record coded: 62 counties and GADM's Lake Ontario unit. eBird holds
+60.8 M records in the download against 62.5 M in the state table built in October, 2.6% fewer, not
+yet explained (perhaps the download's `occurrencestatus = 'PRESENT'` filter, or how the two count).
+Counties run from 112,043 eBird records (Lewis) to 4.9 M (Tompkins), so one per million is under 5
+records everywhere. Lake Ontario holds 810,546, and its sixth-commonest bird is American Robin
+(15,840): GADM's lake unit evidently takes in some shoreline.
+
+| Floor *k* | Median species per county | Fewest | Most |
+| --- | --- | --- | --- |
+| 1 (today's rule) | 292 | 235 | 410 |
+| 3 | 277 | 209 | 410 |
+| 5 | 268 | 201 | 410 |
+| 10 | 253 | 186 | 397 |
+| 20 | 238 | 170 | 385 |
+| 50 | 214 | 139 | 363 |
+
+At today's rule there are 18,703 county listings, 1,734 (9%) on fewer than 5 records. A floor mostly
+trims small counties: Lewis falls from 243 to 209 at *k* = 5; Suffolk does not change.
+
+**The county bar admits what the state bar excludes.** With *k* = 5, 50 species reach some county's
+list but not New York's: Cockatiel (4 counties), African Collared-Dove (4), Bar-headed Goose (3),
+Taiga Bean-Goose (3), Egyptian Goose (2), and Brewer's Blackbird (3), a genuine vagrant. The state
+bar is about 62 records; a county's can be under one. [decisions.escapedBirdsOffIndex](requirements/decisions.md#escapedbirdsoffindex)
+removes the cage birds by species wherever they are; the vagrants would remain.
+
+**New York City.** The five boroughs together list 428 species at *k* = 1, 410 at 5, and 392 at 10,
+against the state's 450. Choosing them barely narrows the set: in a county this heavily birded, the
+county changes the order by share of records (*1 in N*) far more than which birds appear.
+
+**Size.** New York's county presence, as `region-presence.tsv` cells (species, county, twelve
+monthly counts), is about 0.8 MB, 16,969 to 18,703 pairs by floor. Scaled by county count to the US,
+about 40 MB, against today's 1.5 MB table, which the server embeds.
+

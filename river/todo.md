@@ -1056,8 +1056,18 @@ and island names redirecting, was done 2026-11-03. Left, in order:
    county lists 235 to 410 species, 9% of listings on fewer than 5 records; 50 species reach a county
    list but not the state's, cage birds and vagrants; NYC's five counties together list 428 of the
    state's 450, so in dense counties the share ordering matters more than the set; ~40 MB of
-   presence for the US by county. Open: a minimum record count, whether county lists must also be
-   on the state list or recur, what a county view is for, and how to store and ship county presence.
+   presence for the US by county. Details in [notes: The New York county spike](notes.md#the-new-york-county-spike).
+   **Open, for the owner, before step 4:**
+   - *Minimum record count:* a fixed floor (5 or 10 records) or one per year, since records
+     accumulate over decades.
+   - *Vagrants:* whether a county listing also requires the bird to be on its state's list, or to
+     recur as [product.scopeIsRecurringAvifauna](requirements/local/product/dataset.md#scopeisrecurringavifauna) requires, rather than only to reach a count.
+   - *What a county view is for:* narrowing the set, or chiefly ordering it by local share; it
+     shapes the picker more than the bar does.
+   - *Storage and delivery:* about 40 MB for the US, which the server cannot embed as it does
+     today: per-state files loaded on demand, or a compact binary table.
+   - *Loose ends:* the download's eBird total is 2.6% under October's state table, unexplained; and
+     GADM's Lake Ontario unit takes in shoreline (American Robin is its sixth-commonest bird).
    Original plan: a New York spike on that data: records per county, file size, and a minimum record count for
    small counties, where one record per million is less than one record.
 4. A county picker prototype (drill-down, search, Here to a county) on the New York data, sized so
