@@ -1031,18 +1031,3 @@ and Cinnamon-rumped Seedeater (131, mostly California and Arizona) off `status.E
 records may be wild vagrants. Each needs a judgment: add it to the list with a reason, or leave it.
 The seedeater may also be a naming question, since AviList's *Sporophila torqueola* is the west
 Mexican bird and Morelet's Seedeater is the one native to Texas
-
-## gbifPacingTestFlaky
-
-**The GBIF pacing test fails on a loaded machine**
-
-Status: open
-Owner: unassigned
-Gate: before it blocks another deploy
-
-`TestTaxonIdentifiesItselfAndPaces` (`internal/gbif`) times the gaps between requests as the fake
-server receives them, against the client's 60 ms interval less 5 ms. On 2026-11-01 Cloud Build saw
-two arrive 54.6 ms apart and failed the image build, though it passes locally and nothing near it
-had changed. Observing at the server is deliberate, since a client that sets the interval and never
-waits must fail, but arrival times include scheduling the client does not control. Assert on the
-average gap, or widen the tolerance with a reason ([tech.identifiedClient](requirements/local/tech/delivery.md#identifiedclient)).

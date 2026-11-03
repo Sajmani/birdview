@@ -4,6 +4,21 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## gbifPacingTestFlaky
+
+**The GBIF pacing test fails on a loaded machine**
+
+Status: closed
+Owner: unassigned
+Closed: 2026-11-03, by asserting the span from first arrival to last, with half an interval of slack, in place of each gap; it passed 15 runs beside the full suite, and still fails when the client does not wait
+
+`TestTaxonIdentifiesItselfAndPaces` (`internal/gbif`) times the gaps between requests as the fake
+server receives them, against the client's 60 ms interval less 5 ms. On 2026-11-01 Cloud Build saw
+two arrive 54.6 ms apart and failed the image build, though it passes locally and nothing near it
+had changed. Observing at the server is deliberate, since a client that sets the interval and never
+waits must fail, but arrival times include scheduling the client does not control. Assert on the
+average gap, or widen the tolerance with a reason ([tech.identifiedClient](requirements/local/tech/delivery.md#identifiedclient)).
+
 ## chordNamedOnBar
 
 **The species page no longer says "Wing chord" on the bar**

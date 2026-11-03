@@ -561,7 +561,7 @@ const (
 //
 // Watched fail: deleting the req.Header.Set("User-Agent", ...) line in get
 // leaves Go's default Go-http-client/1.1 and the first two assertions redden;
-// making pace() return immediately reddens the third.
+// making pace() return immediately reddens the third, as does pacing each worker alone.
 //
 // Verifies: tech.identifiedClient.
 func TestTaxonIdentifiesItselfAndPaces(t *testing.T) {
@@ -596,14 +596,16 @@ func TestTaxonIdentifiesItselfAndPaces(t *testing.T) {
 	}
 	sorted := append([]time.Time(nil), (*times)...)
 	sort.Slice(sorted, func(i, j int) bool { return sorted[i].Before(sorted[j]) })
-	// A small tolerance: neither Sleep nor a round trip is exact, and a gap of
-	// 59.8 ms is scheduler jitter rather than a client hammering the service.
-	const jitter = 5 * time.Millisecond
-	for i := 1; i < len(sorted); i++ {
-		if gap := sorted[i].Sub(sorted[i-1]); gap < interval-jitter {
-			t.Errorf("requests %d and %d were %v apart, closer than the %v interval",
-				i-1, i, gap, interval)
-		}
+	// The span from first arrival to last, not each gap: the client paces when it sends, and the
+	// server sees arrivals, which scheduling can bunch. One request delayed by a busy machine
+	// shortens the gap after it by as much as it lengthened the one before (Cloud Build saw 54.6 ms
+	// against 60 on 2026-11-01), but it cannot shorten the span by more than that delay, so the
+	// span keeps half an interval of slack. A client that does not wait, or paces each worker
+	// alone, spans a fraction of it.
+	want := time.Duration(len(sorted)-1)*interval - interval/2
+	if span := sorted[len(sorted)-1].Sub(sorted[0]); span < want {
+		t.Errorf("%d requests arrived over %v, less than %v at one per %v; the client is not pacing",
+			len(sorted), span, want, interval)
 	}
 }
 
