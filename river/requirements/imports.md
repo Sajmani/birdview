@@ -199,6 +199,11 @@ accepted* — is exactly what should attract scrutiny rather than escape it.
 | **Owner** | GBIF Secretariat |
 | **Status** | **Adopted 2026-10-02** for the name bridge. License verified from the API's own dataset records; coverage measured and recorded below; no criteria in `acceptance.md` yet. |
 
+**Terms.** GBIF's data user agreement and citation guidelines are vendored and transcribed as
+[`gbif-terms`](#gbif-terms). Two of their requirements are not yet met: data read from the search
+API should be cited, by its publishers or a derived dataset's DOI, and iNaturalist's records are
+CC BY-NC 4.0, which reaches BirdView's counts ([todo.gbifLicenseTerms](../todo.md#gbiflicenseterms)).
+
 **Proposed 2026-11-03: GADM codes and names.** `/geocode/gadm/{code}/subdivisions` returns the
 GADM 4.1 codes, names, and types of a region's subdivisions, as GBIF attaches them to records; it
 would name land regions in URLs and list a state's counties
@@ -701,6 +706,28 @@ neither: eBird's own data-use article classes "eBird.org products (web pages…)
 citation, and what BirdView takes from it is a set of facts — this species, this region, these
 dates — restated in its own structure and cited here. No text from the page is copied. *Owner to
 confirm*, as for every licensing judgment.
+
+---
+
+## `gbif-terms`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | <https://www.gbif.org/terms/data-user> and <https://www.gbif.org/citation-guidelines> |
+| **Version** | Retrieved 2026-11-03 from a browser; the agreement "last updated: 15 September 2026"; hashes in [PROVENANCE.md](imported/gbif.org/gbifterms/PROVENANCE.md) |
+| **Integrity** | [river/requirements/imported/gbif.org/gbifterms/PROVENANCE.md](imported/gbif.org/gbifterms/PROVENANCE.md) |
+| **Tier** | mandatory (platform terms) |
+| **Import style** | Vendored for the record (`third_party/gbifterms/`, inert, hash-verified) and transcribed ([gbifterms.md](imported/gbif.org/gbifterms/gbifterms.md)) |
+| **Scope** | BirdView's use of data obtained through GBIF: occurrence counts from the search API today, SQL downloads as proposed |
+| **Adopted parts** | Provisions 1, 2, 3, 4, 6, and 7 of the data user agreement; the citation guidelines for occurrence downloads, multiple downloads, and data from the search API |
+| **Exclusions** | Provisions 5 and 8 to 10; citing single occurrences, species pages, media, and non-data content |
+| **Owner** | GBIF Secretariat |
+| **Status** | **Adopted 2026-11-03.** Two requirements open: [gbifterms.CiteApiDataByDerivedDataset](imported/gbif.org/gbifterms/gbifterms.md#citeapidatabyderiveddataset) and the non-commercial term under [gbifterms.PublisherLicencesPrevail](imported/gbif.org/gbifterms/gbifterms.md#publisherlicencesprevail) |
+
+**Why it matters now.** The terms make the datasets' licenses prevail over GBIF's own, and the two
+datasets BirdView counts differ: eBird's is CC BY 4.0, iNaturalist's CC BY-NC 4.0. They also ask
+that data with no DOI, which is all BirdView reads from the search API, be cited by its publishers
+or a derived dataset. Neither was recorded before the owner asked for these terms to be vendored.
 
 ---
 
