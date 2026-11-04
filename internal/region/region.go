@@ -485,6 +485,31 @@ func AddCounty(id, name, parent string) error {
 	return nil
 }
 
+// CountyParent reads a county's state from its GADM code, which extends the state's by one level:
+// USA.33.24_1 is in USA.33_1. It reports false for any code that is not a county's, so it works
+// whether or not the county is registered.
+func CountyParent(id string) (string, bool) {
+	if strings.Count(id, ".") != 2 {
+		return "", false
+	}
+	i := strings.LastIndex(id, ".")
+	j := strings.LastIndex(id, "_")
+	if j < i {
+		return "", false
+	}
+	return id[:i] + id[j:], true
+}
+
+// RemoveCounties unregisters every county, so no county's code resolves.
+func RemoveCounties() {
+	for id, r := range all {
+		if r.Kind == County {
+			delete(all, id)
+			delete(bySlug, r.Slug())
+		}
+	}
+}
+
 // CountiesOf lists a land region's counties, by name.
 func CountiesOf(parent string) []Region {
 	var out []Region

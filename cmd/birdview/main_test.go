@@ -4916,6 +4916,7 @@ func countyDataset() *dataset.Dataset {
 //
 // Verifies: product.regionAndMonthFilter. Criterion: acceptance.countyListingApplied.
 func TestCountyIsARegion(t *testing.T) {
+	countiesOn(t)
 	s, err := newServer(countyDataset())
 	if err != nil {
 		t.Fatal(err)
@@ -4960,6 +4961,7 @@ func TestCountyIsARegion(t *testing.T) {
 //
 // Verifies: product.nextView, product.regionAndMonthFilter. Criterion: acceptance.countyListingApplied.
 func TestCountySettingDrillsDown(t *testing.T) {
+	countiesOn(t)
 	ds := countyDataset()
 	ds.Counties = append(ds.Counties, dataset.County{ID: "USA.5.37_1", Name: "San Diego", State: "USA.5_1"})
 	ds.RegionTotals["USA.5.37_1"] = 300000
@@ -5014,5 +5016,48 @@ func TestCountySettingDrillsDown(t *testing.T) {
 	}
 	if string(c.AllURL) != "/?region=USA.5_1" || c.Value != "Los Angeles" {
 		t.Errorf("with Los Angeles chosen, County reads %q with All at %q; want Los Angeles, and All back to California", c.Value, c.AllURL)
+	}
+}
+
+// countiesOn serves counties for one test, as the server's -counties flag does.
+func countiesOn(t *testing.T) {
+	t.Helper()
+	old := countiesEnabled
+	countiesEnabled = true
+	t.Cleanup(func() { countiesEnabled = old })
+}
+
+// TestCountiesOffByDefault asserts decisions.countiesBehindFlag: without -counties the server serves no county, though
+// the dataset carries them. A county's code resolves to nothing, there is no County setting, and
+// every figure is what it was without county data, so no county is counted alongside its state.
+//
+// Verifies: product.regionAndMonthFilter. Criterion: acceptance.countyListingApplied.
+func TestCountiesOffByDefault(t *testing.T) {
+	if countiesEnabled {
+		t.Fatal("counties are served by default; they are behind -counties until every supported region has them")
+	}
+	s, err := newServer(countyDataset())
+	if err != nil {
+		t.Fatal(err)
+	}
+	plain, err := newServer(testDataset())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p := nextAt(s, "/?show=all&month=all&region=USA.5.19_1"); len(p.Tiles) != len(nextAt(plain, "/?show=all&month=all").Tiles) {
+		t.Errorf("a county's address narrows the birds to %d without -counties; it should resolve to nothing", len(p.Tiles))
+	}
+	for _, c := range nextAt(s, "/?region=USA.5_1").Controls {
+		if c.Label == "County" {
+			t.Error("a County setting appears without -counties")
+		}
+	}
+	for _, path := range []string{"/?show=all&month=all", "/?show=all&month=all&region=USA.5_1"} {
+		_, a := get(t, s, path)
+		_, b := get(t, plain, path)
+		re := regexp.MustCompile(`<b>1 in ([\d,]+)</b>`)
+		if x, y := re.FindStringSubmatch(tileOf(t, a, "annhum")), re.FindStringSubmatch(tileOf(t, b, "annhum")); x == nil || y == nil || x[1] != y[1] {
+			t.Errorf("%s: the hummingbird reads %v with county data and %v without; without -counties they must agree", path, x, y)
+		}
 	}
 }

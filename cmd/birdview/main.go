@@ -87,6 +87,7 @@ func main() {
 	// The deployment's one public host, e.g. birdview.site; requests for any
 	// other host are redirected to it (tech.oneCanonicalHost). A flag, not a
 	// constant, because the host belongs to whoever deploys, not to the code.
+	flag.BoolVar(&countiesEnabled, "counties", false, "serve the dataset's counties as regions; off until every supported region has them (decisions.countiesBehindFlag)")
 	canonical := flag.String("canonical", "", "the one host to answer at; other hosts are redirected to it over HTTPS. Unset serves every host")
 	flag.Parse()
 
@@ -490,6 +491,53 @@ func devAssets(dir string) error {
 // devDir is non-empty in dev mode, and is what makes render re-parse.
 var devDir string
 
+// stripCounties takes the dataset's counties out of it: from every species' regions, from the
+// regions' totals.
+func stripCounties(ds *dataset.Dataset) {
+	if len(ds.Counties) == 0 {
+		return
+	}
+	county := map[string]bool{}
+	for _, c := range ds.Counties {
+		county[c.ID] = true
+		delete(ds.RegionTotals, c.ID)
+		delete(ds.RegionMonthlyTotals, c.ID)
+	}
+	keep := func(ids []string, counts []int64, months [][12]int64) ([]string, []int64, [][12]int64) {
+		var i2 []string
+		var c2 []int64
+		var m2 [][12]int64
+		for i, id := range ids {
+			if county[id] {
+				continue
+			}
+			i2 = append(i2, id)
+			if i < len(counts) {
+				c2 = append(c2, counts[i])
+			}
+			if i < len(months) {
+				m2 = append(m2, months[i])
+			}
+		}
+		return i2, c2, m2
+	}
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		sp.Regions, sp.RegionCounts, sp.RegionMonths = keep(sp.Regions, sp.RegionCounts, sp.RegionMonths)
+		sp.BelowRegions, sp.BelowCounts, sp.BelowMonths = keep(sp.BelowRegions, sp.BelowCounts, sp.BelowMonths)
+		for id := range sp.RegionWithheld {
+			if county[id] {
+				delete(sp.RegionWithheld, id)
+			}
+		}
+	}
+	ds.Counties = nil
+}
+
+// countiesEnabled serves the dataset's counties, set by -counties. Off by default until every
+// supported region has counties (decisions.countiesBehindFlag).
+var countiesEnabled bool
+
 func newServer(ds *dataset.Dataset) (*server, error) {
 	tmpl, err := template.New("").Funcs(funcs).ParseFS(assetFS, "static/*.html")
 	if err != nil {
@@ -498,11 +546,18 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	s := &server{mux: http.NewServeMux(), ds: ds, tmpl: tmpl, devDir: devDir,
 		byID: map[string]*dataset.Species{}, undrawnByID: map[string]*dataset.Undrawn{}, aliasOf: map[string]string{},
 		idOf: map[string]string{}}
-	// The dataset's counties become regions, by their GADM codes (decisions.countyListingRule).
-	for _, c := range ds.Counties {
-		if err := region.AddCounty(c.ID, c.Name, c.State); err != nil {
-			return nil, err
+	// The dataset's counties become regions, by their GADM codes (decisions.countyListingRule), when -counties says
+	// so; otherwise they are taken out of the dataset, so none is counted alongside its state
+	// (decisions.countiesBehindFlag).
+	if countiesEnabled {
+		for _, c := range ds.Counties {
+			if err := region.AddCounty(c.ID, c.Name, c.State); err != nil {
+				return nil, err
+			}
 		}
+	} else {
+		region.RemoveCounties()
+		stripCounties(ds)
 	}
 	// Inlined into the home page rather than fetched, as its other scripts are.
 	js, err := fs.ReadFile(assetFS, "static/here.js")
@@ -2023,8 +2078,8 @@ func shareIn(sp *dataset.Species, ds *dataset.Dataset, opt options) (num, den in
 		}
 		// A county's records are its state's too, so it counts only when chosen, and not when its
 		// state is chosen with it (decisions.countyListingRule).
-		if rg, ok := region.Get(id); ok && rg.Kind == region.County {
-			return !all && opt.Regions[id] && !opt.Regions[rg.Parent]
+		if parent, ok := region.CountyParent(id); ok {
+			return !all && opt.Regions[id] && !opt.Regions[parent]
 		}
 		return all || opt.Regions[id]
 	}

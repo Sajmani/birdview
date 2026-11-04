@@ -1995,12 +1995,16 @@ only its own birds, named with its state's code, giving each bird the county's o
 counted twice, in every region or beside its own state (`TestCountyIsARegion`). The County setting
 appears only for one state with counties or counties of one state, a county chosen from the state
 replaces it, more counties add, and removing the last or All returns to the state
-(`TestCountySettingDrillsDown`).
+(`TestCountySettingDrillsDown`). Without `-counties`, the default, a county's code resolves to
+nothing, there is no County setting, and every figure equals the one without county data
+(`TestCountiesOffByDefault`); and a county is recognized by its code whether or not it is
+registered (`TestCountyParentFromCode`).
 
-**Run:** `go test ./cmd/birdview-regions/ -run TestCounty && go test ./internal/taxonomy/ && go test ./cmd/birdview-ingest/ -run TestCountiesJoinedAsRegions && go test ./cmd/birdview/ -run 'TestCountyIsARegion|TestCountySettingDrillsDown'`
+**Run:** `go test ./cmd/birdview-regions/ -run TestCounty && go test ./internal/taxonomy/ && go test ./cmd/birdview-ingest/ -run TestCountiesJoinedAsRegions && go test ./cmd/birdview/ -run 'TestCountyIsARegion|TestCountySettingDrillsDown|TestCountiesOffByDefault' && go test ./internal/region/ -run TestCountyParentFromCode`
 **Status: verified 2026-11-03, passing.**
 Watched failing: 2026-11-03, with the state-list condition removed ("Nymphicus hollandicus in USA.33.24_1: listed true … want listed false"), and before a state's withholding covered its counties ("a state's entry must cover its own counties").
 Watched failing: 2026-11-03, before the server knew counties ("Los Angeles draws [amerob amecro annhum thimur blasti greblu]", "the heading reads \"Showing birds in every month\"") and while "every region" summed a county with its state ("1 in 1,461 with the county and 1 in 2,275 without"); and before the County setting existed ("choosing California, which has counties, shows no County setting").
+Watched failing: 2026-11-03, before the flag removed counties ("a county's address narrows the birds to 1 without -counties", "a County setting appears without -counties"), and with counties recognized only when registered ("Acanthis flammea in January: divided by 89554017, want 86259547").
 
 ### everydayDefinitionsShown
 

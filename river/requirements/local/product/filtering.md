@@ -51,7 +51,8 @@ state does. One record per million is less than one record in every New York cou
 alone would list a bird on a single sighting; the state's list keeps out the cage birds and one-off
 vagrants a county's small total would let in. **The region a bird is "commonest in" stays a state,
 province, or sea**: a county is inside a state, and naming one of thousands would rarely tell a
-reader where the bird is common.
+reader where the bird is common. **Counties are served only when the server runs with `-counties`**,
+until every US state and Canadian province has them ([decisions.countiesBehindFlag](../../decisions.md#countiesbehindflag)).
 
 It follows the same rule as families: nothing selected means every region. The data is GBIF's, which serves eBird and iNaturalist under CC BY 4.0 with GADM regions as a
 queryable field ([decisions.regionFilterReinstated](../../decisions.md#regionfilterreinstated)).

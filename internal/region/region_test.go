@@ -373,3 +373,16 @@ func TestPresenceReadsWithheldFlags(t *testing.T) {
 		}
 	}
 }
+
+// TestCountyParentFromCode asserts a county's state is read from its code alone, so a county is
+// recognized whether or not it is registered (decisions.countyListingRule).
+//
+// Verifies: product.regionAndMonthFilter. Criterion: acceptance.countyListingApplied.
+func TestCountyParentFromCode(t *testing.T) {
+	for id, want := range map[string]string{"USA.33.24_1": "USA.33_1", "CAN.9.12_1": "CAN.9_1", "USA.33_1": "", "SEA.GULF": "", "GulfOfMexico": ""} {
+		got, ok := CountyParent(id)
+		if got != want || ok != (want != "") {
+			t.Errorf("CountyParent(%q) = %q, %v; want %q", id, got, ok, want)
+		}
+	}
+}

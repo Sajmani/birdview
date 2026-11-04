@@ -97,10 +97,6 @@ not colored, and the modeled head, neck, and body are gray.
 - **Region:** states, provinces, and stretches of open sea. A bird is listed in a region when at
   least 1 in a million of the region's bird records are of it. **Here** chooses the region you are
   in; your browser works it out, so your location never reaches the server. Here needs JavaScript.
-- **County:** for New York, so far. Choose New York under **Region** and a **County** setting
-  appears; choosing a county, or several, shows only their birds, ordered by how often each is
-  recorded there. A county lists a bird only if New York lists it and it has at least 5 records in
-  the county. **All** returns to the whole state.
 - **Family:** grouped by taxonomic order, in field-guide sequence.
 - **Habitat** and **Diet:** where a bird mostly lives and what it mostly eats, per species, from
   **AVONET**. BirdView adds a few more and marks them as its own; [everything BirdView adds](/added)

@@ -4577,3 +4577,31 @@ distinct years, both needing the year in the download ([todo.countyFloorRevisit]
 the set barely narrows (New York City's five list 428 of the state's 450), so the county's share
 ordering is where the choice shows.
 
+---
+
+## countiesBehindFlag
+
+**Counties are served only with -counties, until every supported region has them**
+
+Date: 2026-11-03
+Decided by: Sameer
+Status: accepted
+Affects: [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.nextView](local/product/presentation.md#nextview)
+
+### Decided
+
+County support ships to birdview.site all at once, when every supported region has counties: the
+US states by county and Canada's provinces and territories by census division (GADM's level 2 for
+both). Until then the server serves counties only when started with `-counties`, which the deploy
+does not pass. Without it, the server removes the dataset's counties at load, from the species'
+regions and the regions' totals, so no county is listed, chosen, or counted. In-flight work is
+committed and pushed to origin as usual, so it is not held on one machine.
+
+### Why
+
+The owner wants no partial county feature live, New York's alone being a prototype, and wants the
+work pushed rather than kept local. A flag lets `main` stay deployable with county work merged; a
+branch would have done the same at the cost of merging later. The flag removes counties rather than
+only hiding the setting, because a county left in the data would be counted with its state in every
+figure over all regions.
+

@@ -1038,7 +1038,8 @@ Mexican bird and Morelet's Seedeater is the one native to Texas
 
 Status: open
 Owner: Sameer
-Gate: step 4, the New York county prototype
+Gate: ships to birdview.site, with -counties turned on, only when every US state and Canadian
+province and territory has counties ([decisions.countiesBehindFlag](requirements/decisions.md#countiesbehindflag)); work in progress is pushed
 
 [decisions.regionCodesFromData](requirements/decisions.md#regioncodesfromdata) names regions by GADM code on land and Marine Regions id at sea, and
 redirects every value BirdView wrote before. Step 1, land regions by GADM code with postal codes
@@ -1076,7 +1077,9 @@ and island names redirecting, was done 2026-11-03. Left, in order:
    by `birdview-regions -counties`), joined by the ingest and served as regions; a **County**
    setting follows Region when New York or its counties are chosen. Left: searching counties by name,
    since the setting lists 63 alphabetically; Here to a county, which needs step 5; how the setting
-   scales to Texas's 254; and the remaining states' downloads and tables.
+   scales to Texas's 254; and the remaining states' downloads and tables, and Canada's census
+   divisions (the owner's call, 2026-11-03). Served only with `-counties` until then
+   ([decisions.countiesBehindFlag](requirements/decisions.md#countiesbehindflag)).
    Original plan: a county picker prototype (drill-down, search, Here to a county) on the New York data, sized so
    no link lists many county codes.
 5. Boundaries keyed to GADM codes for Here at county scale, since
