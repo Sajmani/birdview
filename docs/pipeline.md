@@ -196,13 +196,14 @@ flowchart LR
     ebird ·
     inaturalist ·`"]
     COUNTIES["`county-presence/USA.33_1.tsv
-    *read by nothing yet; one table per state, as region-presence.tsv*
+    *one table per state, as region-presence.tsv*
     ─────────────
-    county id ✗ *on total rows*
-    every bird record there, by month ✗
-    scientific name ✗
-    county:jan|…|dec ✗ *counts by month*
-    ~ ✗ *under the bar*`"]
+    #region · *county id and name*
+    county id · *on total rows*
+    every bird record there, by month · *the denominator*
+    scientific name · *join key*
+    county:jan|…|dec ★ *counts by month*
+    ~ · *under the bar*`"]
     GT["`gbif-taxa.tsv
     *read by nothing yet*
     ─────────────
@@ -268,6 +269,7 @@ flowchart LR
   mass ★ *with its provenance*
   habitats ★ *each with its origin*
   niches ★ *each with its origin*
+  counties · *a county's name and state*
   regions · *the region filter*
   regionCounts ★ *the 1 in N*
   regionMonths · *the month filter*
@@ -337,6 +339,7 @@ flowchart LR
   FOX --> S6
   AVO --> S6
   REGIONS --> S8
+  COUNTIES -->|"after the peak share"| S8
 
   JSON --> SERVER
   NAMES -->|"Recorded as, read directly"| SERVER

@@ -498,6 +498,12 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	s := &server{mux: http.NewServeMux(), ds: ds, tmpl: tmpl, devDir: devDir,
 		byID: map[string]*dataset.Species{}, undrawnByID: map[string]*dataset.Undrawn{}, aliasOf: map[string]string{},
 		idOf: map[string]string{}}
+	// The dataset's counties become regions, by their GADM codes (decisions.countyListingRule).
+	for _, c := range ds.Counties {
+		if err := region.AddCounty(c.ID, c.Name, c.State); err != nil {
+			return nil, err
+		}
+	}
 	// Inlined into the home page rather than fetched, as its other scripts are.
 	js, err := fs.ReadFile(assetFS, "static/here.js")
 	if err != nil {
@@ -2015,6 +2021,11 @@ func shareIn(sp *dataset.Species, ds *dataset.Dataset, opt options) (num, den in
 		if _, ok := totals[id]; !ok {
 			return false
 		}
+		// A county's records are its state's too, so it counts only when chosen, and not when its
+		// state is chosen with it (decisions.countyListingRule).
+		if rg, ok := region.Get(id); ok && rg.Kind == region.County {
+			return !all && opt.Regions[id] && !opt.Regions[rg.Parent]
+		}
 		return all || opt.Regions[id]
 	}
 	// Every month unless the reader said otherwise. Both halves of the
@@ -2109,7 +2120,7 @@ func shareOf(sp *dataset.Species, ds *dataset.Dataset, opt options) *shareCell {
 	if !all && len(opt.Regions) == 1 {
 		for id := range opt.Regions {
 			if rg, ok := region.Get(id); ok {
-				where, scope = "in "+rg.Name, rg.Name
+				where, scope = "in "+rg.Label(), rg.Label()
 			}
 		}
 	} else if all {

@@ -372,6 +372,11 @@ type Dataset struct {
 	// are one species (product.shareOfRecords).
 	RegionTotals map[string]int64 `json:"regionTotals,omitempty"`
 
+	// Counties are the county regions the dataset carries presence for, each named as GBIF names
+	// it and placed in its state (product.regionAndMonthFilter, decisions.countyListingRule). Their records are in
+	// RegionTotals and in each species' Regions like any region's.
+	Counties []County `json:"counties,omitempty"`
+
 	// RegionMonthlyTotals is the same denominator split twelve ways,
 	// January first, for a figure scoped to months (product.regionAndMonthFilter, decisions.monthPresence). The
 	// twelve sum to RegionTotals exactly -- every record carries a month,
@@ -390,4 +395,11 @@ type Dataset struct {
 	// (product.undrawnSpeciesAnswer). Not species: nothing here is drawn, filtered, counted or
 	// compared.
 	Undrawn []Undrawn `json:"undrawn,omitempty"`
+}
+
+// County is one county region: its GADM code, its name, and its state's GADM code.
+type County struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	State string `json:"state"`
 }

@@ -1988,9 +1988,16 @@ BirdView does not draw counts in the county's total and nowhere else; the twelve
 total; the download's zipped table is read by its header; and a state's eBird withholding covers its
 counties.
 
-**Run:** `go test ./cmd/birdview-regions/ -run TestCounty && go test ./internal/taxonomy/`
+Joined and served: the ingest carries a county table's listed and under-the-bar cells, its totals,
+and each county's name and state into the dataset without moving the peak share off a state
+(`TestCountiesJoinedAsRegions`); and on the home page a county is a region by its GADM code, listing
+only its own birds, named with its state's code, giving each bird the county's own share, and never
+counted twice, in every region or beside its own state (`TestCountyIsARegion`).
+
+**Run:** `go test ./cmd/birdview-regions/ -run TestCounty && go test ./internal/taxonomy/ && go test ./cmd/birdview-ingest/ -run TestCountiesJoinedAsRegions && go test ./cmd/birdview/ -run TestCountyIsARegion`
 **Status: verified 2026-11-03, passing.**
 Watched failing: 2026-11-03, with the state-list condition removed ("Nymphicus hollandicus in USA.33.24_1: listed true … want listed false"), and before a state's withholding covered its counties ("a state's entry must cover its own counties").
+Watched failing: 2026-11-03, before the server knew counties ("Los Angeles draws [amerob amecro annhum thimur blasti greblu]", "the heading reads \"Showing birds in every month\"") and while "every region" summed a county with its state ("1 in 1,461 with the county and 1 in 2,275 without").
 
 ### everydayDefinitionsShown
 

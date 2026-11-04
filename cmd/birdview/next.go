@@ -923,6 +923,12 @@ func (s *server) regionNames(sel map[string]bool) []string {
 				if sel[rg.ID] {
 					out = append(out, rg.Name)
 				}
+				// A chosen county follows its state, named with the state's code.
+				for _, c := range region.CountiesOf(rg.ID) {
+					if sel[c.ID] {
+						out = append(out, c.Label())
+					}
+				}
 			}
 		}
 	}

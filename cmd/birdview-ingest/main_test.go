@@ -19,6 +19,7 @@ import (
 	"math"
 	"net/url"
 	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -36,6 +37,7 @@ const (
 	foxFile    = "../../third_party/foxwingspan/wingspan_fox2026_AppendixS1.xlsx"
 	avlFile    = "../../third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx"
 	regFile    = "../../data/region-presence.tsv"
+	countyDir  = "../../data/county-presence"
 	bblFile    = "../../third_party/bbl/speclist.html"
 )
 
@@ -63,6 +65,9 @@ func load(t *testing.T) *dataset.Dataset {
 	// nothing about the one that ships.
 	if _, err := applyRegions(ds, regFile); err != nil {
 		t.Fatalf("applyRegions: %v", err)
+	}
+	if _, err := applyCounties(ds, countyDir); err != nil {
+		t.Fatalf("applyCounties: %v", err)
 	}
 	if _, err := applyBanding(ds, bblFile); err != nil {
 		t.Fatalf("applyBanding: %v", err)
@@ -887,5 +892,54 @@ func TestEverySpeciesHasAnEBirdCode(t *testing.T) {
 			t.Errorf("eBird code %q is on both %s and %s", sp.SpeciesCode, prev, sp.ScientificName)
 		}
 		seen[sp.SpeciesCode] = sp.ScientificName
+	}
+}
+
+// TestCountiesJoinedAsRegions asserts the ingest carries a county table into the dataset
+// (decisions.countyListingRule): a listed county joins the species' regions with its counts and months, one
+// under the bar joins the Below fields, the county's totals join the regions', each county is named
+// and placed in its state, and the peak share still names a state.
+//
+// Verifies: product.regionAndMonthFilter. Criterion: acceptance.countyListingApplied.
+func TestCountiesJoinedAsRegions(t *testing.T) {
+	dir := t.TempDir()
+	table := "#region\tUSA.33.24_1\tKings\n#region\tUSA.33.32_1\tNew York\n" +
+		"total\tUSA.33.24_1\t100|100|100|100|100|100|100|100|100|100|100|100\n" +
+		"total\tUSA.33.32_1\t50|50|50|50|50|50|50|50|50|50|50|50\n" +
+		"Turdus migratorius\tUSA.33.24_1:5|5|5|5|5|5|5|5|5|5|5|5,USA.33.32_1~:1|0|0|0|0|0|0|0|0|0|0|1\n"
+	if err := os.WriteFile(filepath.Join(dir, "USA.33_1.tsv"), []byte(table), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	peak := &dataset.Commonest{Region: "USA.33_1", Records: 900, RegionRecords: 60000}
+	ds := &dataset.Dataset{
+		RegionTotals: map[string]int64{"USA.33_1": 60000},
+		Species: []dataset.Species{{ScientificName: "Turdus migratorius",
+			Regions: []string{"USA.33_1"}, RegionCounts: []int64{900},
+			RegionMonths: [][12]int64{{75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75}}, Commonest: peak}},
+	}
+	n, err := applyCounties(ds, dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := ds.Species[0]
+	if n != 2 || len(ds.Counties) != 2 {
+		t.Fatalf("joined %d counties, carried %+v", n, ds.Counties)
+	}
+	for _, c := range ds.Counties {
+		if c.State != "USA.33_1" || (c.ID == "USA.33.24_1" && c.Name != "Kings") {
+			t.Errorf("carried the county %+v", c)
+		}
+	}
+	if len(s.Regions) != 2 || s.Regions[1] != "USA.33.24_1" || s.RegionCounts[1] != 60 || s.RegionMonths[1][0] != 5 {
+		t.Errorf("regions %v counts %v; want Kings added with 60", s.Regions, s.RegionCounts)
+	}
+	if len(s.BelowRegions) != 1 || s.BelowRegions[0] != "USA.33.32_1" || s.BelowCounts[0] != 2 {
+		t.Errorf("below regions %v counts %v; want New York County with 2", s.BelowRegions, s.BelowCounts)
+	}
+	if ds.RegionTotals["USA.33.24_1"] != 1200 || ds.RegionMonthlyTotals["USA.33.32_1"][0] != 50 {
+		t.Errorf("county totals %v, monthly %v", ds.RegionTotals, ds.RegionMonthlyTotals)
+	}
+	if s.Commonest != peak {
+		t.Errorf("the peak share moved to %+v; it names a state, whose counties are inside it", s.Commonest)
 	}
 }

@@ -54,6 +54,10 @@ const (
 	// Marine is BirdView's own approximation, defined by a coordinate box.
 	// Boundaries are ours and are stated to be approximate.
 	Marine Kind = "marine"
+	// County is a GADM level-2 unit inside a land region, registered from the dataset rather than
+	// declared here (decisions.countyListingRule). It sits in no zone, and "every region" does not
+	// include it, since its state already counts its records.
+	County Kind = "county"
 )
 
 // The two groupings. Names are exported because the server and its tests name
@@ -89,6 +93,8 @@ type Region struct {
 	// enters a URL.
 	Gloss string
 	Kind  Kind
+	// Parent is a county's state, by id; empty for every other region.
+	Parent string
 	// zones maps a grouping to this region's zone within it. Unexported so
 	// that every region is built by this package and the partition invariant
 	// has somewhere to hold.
@@ -103,7 +109,7 @@ func (r Region) Zone(grouping string) string { return r.zones[grouping] }
 // (decisions.regionCodesFromData). A land region's is its GADM code, "USA.5_1"; a sea box, which no
 // source codes until Marine Regions replaces it, keeps its name in PascalCase, "GulfOfMexico".
 func (r Region) Slug() string {
-	if r.Kind == Land {
+	if r.Kind == Land || r.Kind == County {
 		return r.ID
 	}
 	return pascal(r.Name)
@@ -445,7 +451,62 @@ func Get(id string) (Region, bool) {
 }
 
 // Len is how many regions exist.
-func Len() int { return len(all) }
+// Len is how many regions "every region" means: the land and sea regions, not the counties
+// inside them.
+func Len() int {
+	n := 0
+	for _, r := range all {
+		if r.Kind != County {
+			n++
+		}
+	}
+	return n
+}
+
+// AddCounty registers a county region from the dataset, under its state. Registering one twice
+// with the same name and state is a no-op, so several servers in one process can load the same data.
+func AddCounty(id, name, parent string) error {
+	p, ok := all[parent]
+	if !ok || p.Kind != Land {
+		return fmt.Errorf("region: county %s (%s) names %q, which is not a land region", id, name, parent)
+	}
+	if r, ok := all[id]; ok {
+		if r.Kind == County && r.Name == name && r.Parent == parent {
+			return nil
+		}
+		return fmt.Errorf("region: county %s collides with region %s (%s)", id, r.ID, r.Name)
+	}
+	if _, dup := bySlug[id]; dup {
+		return fmt.Errorf("region: county %s collides with a URL value already in use", id)
+	}
+	r := Region{ID: id, Name: name, Kind: County, Parent: parent}
+	all[id] = r
+	bySlug[r.Slug()] = r
+	return nil
+}
+
+// CountiesOf lists a land region's counties, by name.
+func CountiesOf(parent string) []Region {
+	var out []Region
+	for _, r := range all {
+		if r.Kind == County && r.Parent == parent {
+			out = append(out, r)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	return out
+}
+
+// Label is how a page names the region: a county with its state's postal code, since county names
+// repeat from state to state ("Kings, NY"); every other region by its name.
+func (r Region) Label() string {
+	if r.Kind == County {
+		if p, ok := all[r.Parent]; ok && p.Code != "" {
+			return r.Name + ", " + p.Code
+		}
+	}
+	return r.Name
+}
 
 // InZone lists the regions of one zone within one grouping, by name.
 func InZone(grouping, zone string) []Region {

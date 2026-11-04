@@ -2836,7 +2836,9 @@ func TestAbsentSpeciesCarryNoEvidence(t *testing.T) {
 // Every region, land and sea (decisions.honestSeaDenominator). A sea's denominator is now every
 // bird record on open water inside its box, measured the same way a land
 // region's is, so the ranking spans both -- and 45 species peak at sea,
-// including the albatross whose "commonest in Maine" started all this.
+// including the albatross whose "commonest in Maine" started all this. Not counties, which the
+// ranking leaves out (decisions.countyListingRule): a county is inside a state, and naming one of thousands
+// would rarely tell a reader where the bird is common.
 //
 // Verifies: product.shareOfRecords, decisions.seaShareDiffers, decisions.honestSeaDenominator. Criterion: acceptance.commonestIsLargestShare.
 func TestCommonestIsTheLargestShare(t *testing.T) {
@@ -2855,6 +2857,9 @@ func TestCommonestIsTheLargestShare(t *testing.T) {
 			total, ok := ds.RegionTotals[id]
 			if !ok || total == 0 || j >= len(sp.RegionCounts) {
 				continue // no denominator, so not in the ranking
+			}
+			if strings.Count(id, ".") > 1 {
+				continue // a county: inside a state, and out of the ranking
 			}
 			if got := float64(sp.RegionCounts[j]) / float64(total); got > claimed {
 				t.Errorf("%s: page says commonest in %s (1 in %d), but %s is 1 in %d",
@@ -4173,6 +4178,9 @@ func TestAllTwelveMonthsIsTheWholeYear(t *testing.T) {
 		denSum += den
 		var want int64
 		for id := range ds.RegionTotals {
+			if strings.Count(id, ".") > 1 {
+				continue // a county, whose records its state already holds (decisions.countyListingRule)
+			}
 			want += ds.RegionMonthlyTotals[id][m]
 		}
 		if den != want {
@@ -4512,12 +4520,17 @@ func TestRecordsBelowTheBarCount(t *testing.T) {
 		if sp.ScientificName == "Dromaius novaehollandiae" {
 			emu = sp
 		}
+		// Every record once: a county's are its state's too (decisions.countyListingRule).
 		var want int64
-		for _, n := range sp.RegionCounts {
-			want += n
+		for i, n := range sp.RegionCounts {
+			if strings.Count(sp.Regions[i], ".") <= 1 {
+				want += n
+			}
 		}
-		for _, n := range sp.BelowCounts {
-			want += n
+		for i, n := range sp.BelowCounts {
+			if strings.Count(sp.BelowRegions[i], ".") <= 1 {
+				want += n
+			}
 		}
 		below += len(sp.BelowRegions)
 		if num, _ := shareIn(sp, ds, options{}); num != want {
@@ -4877,5 +4890,65 @@ func TestFoundBirdLinksToItsPage(t *testing.T) {
 	finds = finds[:strings.Index(finds, "</div>")]
 	if !strings.Contains(finds, `<a class="sp" href="/species/amecro?names=world&amp;units=metric">Crow American</a>`) {
 		t.Errorf("the find list does not link American Crow (in the fixture's world names, Crow American) to its species page:\n%s", finds)
+	}
+}
+
+// countyDataset is the test dataset with one California county, Los Angeles, which holds the
+// hummingbird and not the stilt (decisions.countyListingRule).
+func countyDataset() *dataset.Dataset {
+	ds := testDataset()
+	const la = "USA.5.19_1"
+	ds.Counties = []dataset.County{{ID: la, Name: "Los Angeles", State: "USA.5_1"}}
+	ds.RegionTotals[la] = 400000
+	for i := range ds.Species {
+		if ds.Species[i].ID == "annhum" {
+			ds.Species[i].Regions = append(ds.Species[i].Regions, la)
+			ds.Species[i].RegionCounts = append(ds.Species[i].RegionCounts, 3000)
+		}
+	}
+	return ds
+}
+
+// TestCountyIsARegion asserts a county works as a region by its GADM code (product.regionAndMonthFilter,
+// decisions.countyListingRule): it lists only the birds listed there, names itself with its state's
+// code, gives each bird its own share of the county's records, and is never counted twice, neither
+// in "every region" nor alongside its own state.
+//
+// Verifies: product.regionAndMonthFilter. Criterion: acceptance.countyListingApplied.
+func TestCountyIsARegion(t *testing.T) {
+	s, err := newServer(countyDataset())
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := nextAt(s, "/?show=all&month=all&region=USA.5.19_1")
+	if !hasTile(p, "annhum") || hasTile(p, "blasti") {
+		t.Errorf("Los Angeles draws %v; want the hummingbird and not the stilt, which is only statewide", tileIDs(p))
+	}
+	if !strings.Contains(p.Title, "Los Angeles, CA") {
+		t.Errorf("the heading reads %q; a county is named with its state's code", p.Title)
+	}
+	share := func(path string) string {
+		_, body := get(t, s, path)
+		seg := tileOf(t, body, "annhum")
+		m := regexp.MustCompile(`<b>1 in ([\d,]+)</b>`).FindStringSubmatch(seg)
+		if m == nil {
+			t.Fatalf("%s: no share on the hummingbird's tile", path)
+		}
+		return m[1]
+	}
+	if got := share("/?show=all&month=all&region=USA.5.19_1"); got != "133" {
+		t.Errorf("the hummingbird in Los Angeles is 1 in %s; want 1 in 133, 3,000 of 400,000", got)
+	}
+	plain, err := newServer(testDataset())
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, body := get(t, plain, "/?show=all&month=all")
+	want := regexp.MustCompile(`<b>1 in ([\d,]+)</b>`).FindStringSubmatch(tileOf(t, body, "annhum"))[1]
+	if got := share("/?show=all&month=all"); got != want {
+		t.Errorf("across every region the hummingbird is 1 in %s with the county and 1 in %s without; a county must not count twice", got, want)
+	}
+	if got, alone := share("/?show=all&month=all&region=USA.5_1&region=USA.5.19_1"), share("/?show=all&month=all&region=USA.5_1"); got != alone {
+		t.Errorf("California with Los Angeles gives 1 in %s, California alone 1 in %s; the county is inside its state", got, alone)
 	}
 }
