@@ -911,6 +911,13 @@ home page in those. Its footer carries the full credits, which every other page 
   months. On a phone too narrow for them, the line scrolls sideways. A **Reset**
   control, colored apart from the settings, returns to the landing set. Choosing one option selects only it; choosing more adds them; choosing every
   selected option again returns to all. Nothing selected means all.
+- **County follows Region when one state with counties is chosen** ([filtering.regionAndMonthFilter](filtering.md#regionandmonthfilter),
+  [decisions.countyListingRule](../../decisions.md#countylistingrule)). When the regions chosen are one state BirdView has counties for, or
+  counties of that one state, a **County** setting follows Region and lists that state's counties
+  by name. Choosing a county from the state replaces the state with it, since the state already
+  holds every county's birds; choosing more adds them; removing the last returns to the state, as
+  does County's **All**. With no state chosen, or several, there is no County setting; a county is
+  still reachable by its address.
 - **Tiers.** The ordered set breaks into tiers
   ([sectionBreakRule](ordering.md#sectionbreakrule), [orderByFrequency](#orderbyfrequency)): a size tier spans one step of the scale from its
   smallest bird, a frequency tier a decade of "1 in N", and birds with no records a tier of their

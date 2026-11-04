@@ -935,6 +935,74 @@ func (s *server) regionNames(sel map[string]bool) []string {
 	return out
 }
 
+// countyControl is the County setting (product.nextView, decisions.countyListingRule): present when the regions chosen are one
+// state with counties, or counties of one state. From the state, a county replaces it; among
+// counties, a choice toggles; removing the last, or All, returns to the state.
+func countyControl(q url.Values, opt options) (nextControl, bool) {
+	if !opt.HasRegions || len(opt.Regions) == 0 {
+		return nextControl{}, false
+	}
+	state := ""
+	chosen := map[string]bool{}
+	for id := range opt.Regions {
+		rg, ok := region.Get(id)
+		if !ok {
+			return nextControl{}, false
+		}
+		switch {
+		case rg.Kind == region.County && (state == "" || state == rg.Parent):
+			state = rg.Parent
+			chosen[id] = true
+		case rg.Kind == region.Land && len(opt.Regions) == 1:
+			state = id
+		default:
+			return nextControl{}, false
+		}
+	}
+	counties := region.CountiesOf(state)
+	if len(counties) == 0 {
+		return nextControl{}, false
+	}
+	// The chosen counties in the order the address names them, so a choice adds at the end.
+	var current []string
+	for _, v := range nextValues(q, "region") {
+		if rg, ok := region.BySlug(v); ok && chosen[rg.ID] {
+			current = append(current, rg.Slug())
+		}
+	}
+	st, _ := region.Get(state)
+	c := nextControl{Label: "County", Value: "all"}
+	var names []string
+	grp := nextChoiceGroup{Name: "Counties in " + st.Name}
+	for _, rg := range counties {
+		on := chosen[rg.ID]
+		if on {
+			names = append(names, rg.Name)
+		}
+		var next []string
+		for _, v := range current {
+			if v != rg.Slug() {
+				next = append(next, v)
+			}
+		}
+		if !on {
+			next = append(next, rg.Slug())
+		}
+		if len(next) == 0 {
+			next = []string{st.Slug()}
+		}
+		nq := cloneValues(q)
+		nq["region"] = next
+		grp.Choices = append(grp.Choices, nextChoice{Label: rg.Name, Title: rg.Label(), On: on, URL: nextURL(nq)})
+	}
+	c.Groups = []nextChoiceGroup{grp}
+	if len(names) > 0 {
+		c.Value = nextList(names)
+		c.AllURL = nextSet(q, "region", st.Slug())
+	}
+	return c, true
+}
+
 // nextControls builds the count line: one control per setting.
 func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	var out []nextControl
@@ -991,6 +1059,9 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 		rc.Groups = append(rc.Groups, grp)
 	}
 	out = append(out, rc)
+	if cc, ok := countyControl(q, opt); ok {
+		out = append(out, cc)
+	}
 
 	fc := nextControl{Label: "Family", Value: "all"}
 	var fnames []string

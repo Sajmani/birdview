@@ -1992,12 +1992,15 @@ Joined and served: the ingest carries a county table's listed and under-the-bar 
 and each county's name and state into the dataset without moving the peak share off a state
 (`TestCountiesJoinedAsRegions`); and on the home page a county is a region by its GADM code, listing
 only its own birds, named with its state's code, giving each bird the county's own share, and never
-counted twice, in every region or beside its own state (`TestCountyIsARegion`).
+counted twice, in every region or beside its own state (`TestCountyIsARegion`). The County setting
+appears only for one state with counties or counties of one state, a county chosen from the state
+replaces it, more counties add, and removing the last or All returns to the state
+(`TestCountySettingDrillsDown`).
 
-**Run:** `go test ./cmd/birdview-regions/ -run TestCounty && go test ./internal/taxonomy/ && go test ./cmd/birdview-ingest/ -run TestCountiesJoinedAsRegions && go test ./cmd/birdview/ -run TestCountyIsARegion`
+**Run:** `go test ./cmd/birdview-regions/ -run TestCounty && go test ./internal/taxonomy/ && go test ./cmd/birdview-ingest/ -run TestCountiesJoinedAsRegions && go test ./cmd/birdview/ -run 'TestCountyIsARegion|TestCountySettingDrillsDown'`
 **Status: verified 2026-11-03, passing.**
 Watched failing: 2026-11-03, with the state-list condition removed ("Nymphicus hollandicus in USA.33.24_1: listed true … want listed false"), and before a state's withholding covered its counties ("a state's entry must cover its own counties").
-Watched failing: 2026-11-03, before the server knew counties ("Los Angeles draws [amerob amecro annhum thimur blasti greblu]", "the heading reads \"Showing birds in every month\"") and while "every region" summed a county with its state ("1 in 1,461 with the county and 1 in 2,275 without").
+Watched failing: 2026-11-03, before the server knew counties ("Los Angeles draws [amerob amecro annhum thimur blasti greblu]", "the heading reads \"Showing birds in every month\"") and while "every region" summed a county with its state ("1 in 1,461 with the county and 1 in 2,275 without"); and before the County setting existed ("choosing California, which has counties, shows no County setting").
 
 ### everydayDefinitionsShown
 

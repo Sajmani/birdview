@@ -4952,3 +4952,67 @@ func TestCountyIsARegion(t *testing.T) {
 		t.Errorf("California with Los Angeles gives 1 in %s, California alone 1 in %s; the county is inside its state", got, alone)
 	}
 }
+
+// TestCountySettingDrillsDown asserts the County setting (product.nextView): it follows Region only when
+// the regions chosen are one state with counties or counties of that state; choosing a county from
+// the state replaces the state; choosing more adds them; removing the last, or All, returns to the
+// state.
+//
+// Verifies: product.nextView, product.regionAndMonthFilter. Criterion: acceptance.countyListingApplied.
+func TestCountySettingDrillsDown(t *testing.T) {
+	ds := countyDataset()
+	ds.Counties = append(ds.Counties, dataset.County{ID: "USA.5.37_1", Name: "San Diego", State: "USA.5_1"})
+	ds.RegionTotals["USA.5.37_1"] = 300000
+	s, err := newServer(ds)
+	if err != nil {
+		t.Fatal(err)
+	}
+	county := func(target string) *nextControl {
+		p := nextAt(s, target)
+		for i := range p.Controls {
+			if p.Controls[i].Label == "County" {
+				return &p.Controls[i]
+			}
+		}
+		return nil
+	}
+	choice := func(c *nextControl, name string) nextChoice {
+		for _, g := range c.Groups {
+			for _, ch := range g.Choices {
+				if ch.Label == name {
+					return ch
+				}
+			}
+		}
+		t.Fatalf("County offers no %s", name)
+		return nextChoice{}
+	}
+	for _, target := range []string{"/", "/?region=USA.5_1&region=USA.38_1", "/?region=USA.38_1"} {
+		if c := county(target); c != nil {
+			t.Errorf("%s has a County setting; only one state with counties, or its counties, has one", target)
+		}
+	}
+	c := county("/?region=USA.5_1")
+	if c == nil {
+		t.Fatal("choosing California, which has counties, shows no County setting")
+	}
+	if la := choice(c, "Los Angeles"); la.On || string(la.URL) != "/?region=USA.5.19_1" {
+		t.Errorf("from California, Los Angeles goes to %s (on %v); want the county in place of the state", la.URL, la.On)
+	}
+	if c.AllURL != "" || c.Value != "all" {
+		t.Errorf("from the state, County reads %q with All at %q; want all, already", c.Value, c.AllURL)
+	}
+	c = county("/?region=USA.5.19_1")
+	if c == nil {
+		t.Fatal("a chosen county shows no County setting")
+	}
+	if la := choice(c, "Los Angeles"); !la.On || string(la.URL) != "/?region=USA.5_1" {
+		t.Errorf("with Los Angeles chosen, choosing it again goes to %s (on %v); want back to California", la.URL, la.On)
+	}
+	if sd := choice(c, "San Diego"); sd.On || string(sd.URL) != "/?region=USA.5.19_1&region=USA.5.37_1" {
+		t.Errorf("with Los Angeles chosen, San Diego goes to %s; want both counties", sd.URL)
+	}
+	if string(c.AllURL) != "/?region=USA.5_1" || c.Value != "Los Angeles" {
+		t.Errorf("with Los Angeles chosen, County reads %q with All at %q; want Los Angeles, and All back to California", c.Value, c.AllURL)
+	}
+}

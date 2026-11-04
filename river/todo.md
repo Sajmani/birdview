@@ -1072,7 +1072,12 @@ and island names redirecting, was done 2026-11-03. Left, in order:
      GADM's Lake Ontario unit takes in shoreline (American Robin is its sixth-commonest bird).
    Original plan: a New York spike on that data: records per county, file size, and a minimum record count for
    small counties, where one record per million is less than one record.
-4. A county picker prototype (drill-down, search, Here to a county) on the New York data, sized so
+4. *Prototype done 2026-11-03:* New York's county table (`data/county-presence/USA.33_1.tsv`, built
+   by `birdview-regions -counties`), joined by the ingest and served as regions; a **County**
+   setting follows Region when New York or its counties are chosen. Left: searching counties by name,
+   since the setting lists 63 alphabetically; Here to a county, which needs step 5; how the setting
+   scales to Texas's 254; and the remaining states' downloads and tables.
+   Original plan: a county picker prototype (drill-down, search, Here to a county) on the New York data, sized so
    no link lists many county codes.
 5. Boundaries keyed to GADM codes for Here at county scale, since
    [tech.regionBoundaries](requirements/local/tech/delivery.md#regionboundaries) uses Natural Earth.

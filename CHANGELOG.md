@@ -3,6 +3,15 @@
 Major changes to BirdView, newest first: features, data sources, and how the drawings are made.
 Small fixes are in the commit history. With no numbered releases yet, changes are grouped by period.
 
+## 2026-11-03 — New York's counties
+
+### Added
+
+- **County**, for New York: choose New York under Region and pick one or more of its 62 counties,
+  or Lake Ontario. Each county lists the birds New York lists that have at least 5 records there,
+  ordered by how often they are recorded in that county. A county's address is its GADM code, such
+  as `?region=USA.33.24_1` for Kings County (Brooklyn).
+
 ## 2026-11-03 — A sky-blue cube, and regions by their data codes
 
 ### Changed
