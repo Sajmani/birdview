@@ -343,6 +343,13 @@ episode-derived number would be a floor for most of the dataset.
 sums over the regions in view, and sums compose, so any selection is one pass over the per-region
 counts.
 
+**A place is never followed by its months after a bare comma**, since a county is named with its
+state's code and "Queens, NY, Nov" reads as three places: a figure or caveat scoped to months names
+them in parentheses after the place, *1 in 31 species observations in Queens, NY (Nov)*, *Withheld
+by eBird in Florida (Oct–Mar)*. **A list whose items contain commas separates them with
+semicolons**, *Bronx, NY; Kings, NY; New York, NY; or 2 more*; a list of states keeps its commas (Sameer,
+2026-11-04).
+
 ## undrawnSpeciesAnswer
 
 **A species BirdView does not draw still answers for itself**

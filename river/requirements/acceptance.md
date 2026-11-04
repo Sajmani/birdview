@@ -1998,12 +1998,15 @@ replaces it, more counties add, and removing the last or All returns to the stat
 (`TestCountySettingDrillsDown`). Without `-counties`, the default, a county's code resolves to
 nothing, there is no County setting, and every figure equals the one without county data
 (`TestCountiesOffByDefault`); and a county is recognized by its code whether or not it is
-registered (`TestCountyParentFromCode`).
+registered (`TestCountyParentFromCode`). A county's months follow it in parentheses on the share
+line, and a list of counties is separated by semicolons while a list of states keeps its commas
+(`TestPlaceAndMonthsAreNotJoinedByAComma`).
 
-**Run:** `go test ./cmd/birdview-regions/ -run TestCounty && go test ./internal/taxonomy/ && go test ./cmd/birdview-ingest/ -run TestCountiesJoinedAsRegions && go test ./cmd/birdview/ -run 'TestCountyIsARegion|TestCountySettingDrillsDown|TestCountiesOffByDefault' && go test ./internal/region/ -run TestCountyParentFromCode`
+**Run:** `go test ./cmd/birdview-regions/ -run TestCounty && go test ./internal/taxonomy/ && go test ./cmd/birdview-ingest/ -run TestCountiesJoinedAsRegions && go test ./cmd/birdview/ -run 'TestCountyIsARegion|TestCountySettingDrillsDown|TestCountiesOffByDefault|TestPlaceAndMonthsAreNotJoinedByAComma' && go test ./internal/region/ -run TestCountyParentFromCode`
 **Status: verified 2026-11-03, passing.**
 Watched failing: 2026-11-03, with the state-list condition removed ("Nymphicus hollandicus in USA.33.24_1: listed true … want listed false"), and before a state's withholding covered its counties ("a state's entry must cover its own counties").
 Watched failing: 2026-11-03, before the server knew counties ("Los Angeles draws [amerob amecro annhum thimur blasti greblu]", "the heading reads \"Showing birds in every month\"") and while "every region" summed a county with its state ("1 in 1,461 with the county and 1 in 2,275 without"); and before the County setting existed ("choosing California, which has counties, shows no County setting").
+Watched failing: 2026-11-04, with a county's months after a comma ("the hummingbird's share line does not read \"in Los Angeles, CA (Jun)\"") and a list of counties joined by commas ("five counties list as \"Bronx, NY, Kings, NY, New York, NY, or 2 more\"").
 Watched failing: 2026-11-03, before the flag removed counties ("a county's address narrows the birds to 1 without -counties", "a County setting appears without -counties"), and with counties recognized only when registered ("Acanthis flammea in January: divided by 89554017, want 86259547").
 
 ### everydayDefinitionsShown
@@ -3470,8 +3473,8 @@ dataset
 4. The table's withheld flags round-trip, and malformed flags are refused rather than read as
    "nothing withheld".
 5. Under `?region=FL&month=Jan` Painted Bunting is **shown** and its tile says *Withheld by eBird
-   in Florida, Jan*; under `?region=NY&month=Jun` the same holds for Short-eared Owl. Without a
-   month filter the Florida caveat reads *Oct-Mar*, wrapping the year end.
+   in Florida (Jan)*; under `?region=NY&month=Jun` the same holds for Short-eared Owl. Without a
+   month filter the Florida caveat reads *(Oct-Mar)*, wrapping the year end.
 6. Greater Sage-Grouse in Wyoming in March carries **no** caveat: its records are in the export.
 7. **Controls:** Bobolink in New York in January and Snow Bunting in New York in June stay
    hidden. They are not withheld, just gone.

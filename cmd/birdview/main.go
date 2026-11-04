@@ -1891,14 +1891,14 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 		for id := range sp.RegionWithheld {
 			name := id
 			if rg, ok := region.Get(id); ok {
-				name = rg.Name
+				name = rg.Label()
 			}
 			ws = append(ws, where{name, maskScope(sp.WithheldIn(id))})
 		}
 		sort.Slice(ws, func(i, j int) bool { return ws[i].name < ws[j].name })
 		value := fmt.Sprintf("withheld by eBird in %d regions", len(ws))
 		if len(ws) == 1 {
-			value = "withheld by eBird in " + ws[0].name + ", " + ws[0].months
+			value = "withheld by eBird in " + ws[0].name + " (" + ws[0].months + ")"
 		}
 		parts := make([]string, len(ws))
 		for i, w := range ws {
@@ -2189,7 +2189,9 @@ func shareOf(sp *dataset.Species, ds *dataset.Dataset, opt options) *shareCell {
 		if all {
 			where = "(all regions, " + ms + ")"
 		} else {
-			where += ", " + ms
+			// In parentheses, not after a comma: a county's name already ends in its state's
+			// code, and "Queens, NY, Nov" reads as three places (product.shareOfRecords).
+			where += " (" + ms + ")"
 		}
 		scope += " in " + ms
 	}
@@ -2413,7 +2415,7 @@ func (s *server) withheldIn(sp *dataset.Species, opt options) map[string][12]boo
 // records eBird kept back (decisions.ebirdSilenceNotAbsence).
 //
 // One region is named with its months, because that is the case a reader
-// can act on: "Withheld by eBird in Florida, Oct-Mar". Several are counted,
+// can act on: "Withheld by eBird in Florida (Oct-Mar)". Several are counted,
 // because thirty-eight state names do not fit on a tile, and the detail page
 // lists them.
 func (s *server) withheldSeam(sp *dataset.Species, opt options) (text, title string, yes bool) {
@@ -2429,11 +2431,11 @@ func (s *server) withheldSeam(sp *dataset.Species, opt options) (text, title str
 		for id, months := range w {
 			name := id
 			if rg, ok := region.Get(id); ok {
-				name = rg.Name
+				name = rg.Label()
 			}
 			text = "Withheld by eBird in " + name
 			if sc := maskScope(months); sc != "" {
-				text += ", " + sc
+				text += " (" + sc + ")"
 			}
 		}
 		return text, title, true

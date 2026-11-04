@@ -4340,8 +4340,8 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 	}
 
 	for _, c := range []struct{ path, id, want string }{
-		{"/?show=all&region=USA.10_1&month=Jan", "paibun", "Withheld by eBird in Florida, Jan"},
-		{"/?show=all&region=USA.33_1&month=Jun", "sheowl", "Withheld by eBird in New York, Jun"},
+		{"/?show=all&region=USA.10_1&month=Jan", "paibun", "Withheld by eBird in Florida (Jan)"},
+		{"/?show=all&region=USA.33_1&month=Jun", "sheowl", "Withheld by eBird in New York (Jun)"},
 	} {
 		shown, text := tile(c.path, c.id)
 		if !shown {
@@ -4356,7 +4356,7 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 
 	// Without a month filter the caveat names the whole window, and it wraps
 	// the year end rather than listing six months.
-	if _, text := tile("/?month=all&show=all&region=USA.10_1", "paibun"); !strings.Contains(text, "Withheld by eBird in Florida, Oct-Mar") {
+	if _, text := tile("/?month=all&show=all&region=USA.10_1", "paibun"); !strings.Contains(text, "Withheld by eBird in Florida (Oct-Mar)") {
 		t.Errorf("Painted Bunting in Florida, all year, reads: %s", text)
 	}
 
@@ -4382,7 +4382,7 @@ func TestWithheldMonthsAreNotJudged(t *testing.T) {
 
 	// And the detail page says it, opened under the same filter (product.tileOpensDetail).
 	_, page := get(t, s, "/species/paibun?region=USA.10_1&month=Jan")
-	if !strings.Contains(stripTags(page), "withheld by eBird in Florida, Oct-Mar") {
+	if !strings.Contains(stripTags(page), "withheld by eBird in Florida (Oct-Mar)") {
 		t.Error("Painted Bunting's page does not list Florida's withheld months")
 	}
 }
@@ -5059,5 +5059,41 @@ func TestCountiesOffByDefault(t *testing.T) {
 		if x, y := re.FindStringSubmatch(tileOf(t, a, "annhum")), re.FindStringSubmatch(tileOf(t, b, "annhum")); x == nil || y == nil || x[1] != y[1] {
 			t.Errorf("%s: the hummingbird reads %v with county data and %v without; without -counties they must agree", path, x, y)
 		}
+	}
+}
+
+// TestPlaceAndMonthsAreNotJoinedByAComma asserts product.shareOfRecords's punctuation: a county, named
+// with its state's code, takes its months in parentheses, not after another comma, and a list of
+// counties is separated by semicolons while a list of states keeps its commas.
+//
+// Verifies: product.shareOfRecords, product.nextView. Criterion: acceptance.countyListingApplied.
+func TestPlaceAndMonthsAreNotJoinedByAComma(t *testing.T) {
+	countiesOn(t)
+	ds := countyDataset()
+	// June figures for the county, so a June share has something to divide by.
+	ds.RegionMonthlyTotals = map[string][12]int64{"USA.5.19_1": {5: 40000}}
+	for i := range ds.Species {
+		if ds.Species[i].ID == "annhum" {
+			ds.Species[i].RegionMonths = make([][12]int64, len(ds.Species[i].Regions))
+			ds.Species[i].RegionMonths[len(ds.Species[i].Regions)-1][5] = 300
+		}
+	}
+	s, err := newServer(ds)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, body := get(t, s, "/?pin=annhum&show=pinned&region=USA.5.19_1&month=Jun")
+	tile := html.UnescapeString(stripTags(body))
+	if !strings.Contains(tile, "in Los Angeles, CA (Jun)") || strings.Contains(tile, "CA, Jun") {
+		t.Error("the hummingbird's share line does not read \"in Los Angeles, CA (Jun)\"; the month goes in parentheses after the county")
+	}
+	if got := nextList([]string{"Bronx, NY", "Kings, NY", "New York, NY", "Queens, NY", "Richmond, NY"}); got != "Bronx, NY; Kings, NY; New York, NY; or 2 more" {
+		t.Errorf("five counties list as %q; items with commas are separated by semicolons", got)
+	}
+	if got := nextList([]string{"Bronx, NY", "Kings, NY"}); got != "Bronx, NY or Kings, NY" {
+		t.Errorf("two counties list as %q", got)
+	}
+	if got := nextList([]string{"California", "Oregon", "Washington"}); got != "California, Oregon, or Washington" {
+		t.Errorf("three states list as %q; a list without commas in its items keeps them", got)
 	}
 }

@@ -901,6 +901,14 @@ func (s *server) nextTitle(opt options, pinnedOnly bool) string {
 // nextList joins names with commas and "or", or counts them when there are
 // too many to read.
 func nextList(names []string) string {
+	// Semicolons between items that hold commas themselves, as counties do ("Kings, NY"), so the
+	// list's own separators stay visible (product.shareOfRecords).
+	sep := ", "
+	for _, n := range names {
+		if strings.Contains(n, ",") {
+			sep = "; "
+		}
+	}
 	switch n := len(names); {
 	case n == 0:
 		return ""
@@ -909,9 +917,9 @@ func nextList(names []string) string {
 	case n == 2:
 		return names[0] + " or " + names[1]
 	case n <= 4:
-		return strings.Join(names[:n-1], ", ") + ", or " + names[n-1]
+		return strings.Join(names[:n-1], sep) + sep + "or " + names[n-1]
 	default:
-		return strings.Join(names[:3], ", ") + ", or " + strconv.Itoa(n-3) + " more"
+		return strings.Join(names[:3], sep) + sep + "or " + strconv.Itoa(n-3) + " more"
 	}
 }
 

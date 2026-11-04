@@ -7,6 +7,9 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 
 ### Changed
 
+- A figure or note limited to some months names them in parentheses after the place: *1 in 31
+  species observations in New York (Nov)*, *Withheld by eBird in Florida (Oct–Mar)*.
+
 - A region in an address is now the code its records are filed under: `?region=USA.33_1` for New
   York rather than `?region=NY`. Old addresses still work and go to the new ones. This makes room
   for counties, which have no postal codes. The sea regions keep their names for now.

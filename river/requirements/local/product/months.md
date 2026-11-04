@@ -34,7 +34,7 @@ says why. This affects a quarter of the species-region cells and **0.0345% of th
 **A month eBird withholds is not judged either.** Where eBird's Sensitive Species list keeps a
 species out of its records in a region and season, and the records confirm it
 ([decisions.ebirdSilenceNotAbsence](../../decisions.md#ebirdsilencenotabsence)), those months are missing by policy: the species is shown, and
-the tile says *Withheld by eBird in Florida, Oct–Mar*. Judging them hid Painted Bunting from
+the tile says *Withheld by eBird in Florida (Oct–Mar)*. Judging them hid Painted Bunting from
 Florida in January, the heart of its season there.
 
 **All twelve months selected must reproduce the annual figures exactly.** Every record carries
