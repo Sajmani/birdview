@@ -302,3 +302,43 @@ county changes the order by share of records (*1 in N*) far more than which bird
 monthly counts), is about 0.8 MB, 16,969 to 18,703 pairs by floor. Scaled by county count to the US,
 about 40 MB, against today's 1.5 MB table, which the server embeds.
 
+## The habitat audit, pass 1
+
+*Run 2026-11-07 for [todo.traitAudit](todo.md#traitaudit). Not a decision.* Over the 1,041 birds on the index in
+`web/data/species.json`.
+
+**The data.** Every bird has exactly one AVONET habitat; BirdView adds others for nine. AVONET's
+Metadata sheet defines each category ("Coastal (= intertidal zones within immediate vicinity of
+beaches, estuaries, brackish to salty marshes, including mudflats, lagoons…)"; "Wetland (= wide range
+of freshwater aquatic habitats…)") but not how the primary one was chosen; the paper that may say is
+in a Wiley journal, which BirdView does not read. Checked against the workbook itself (both the
+BirdLife and eBird sheets): the values below are AVONET's, not an ingest error.
+
+**Breeding habitat for migrants** (AVONET `Migration` = 3 for each): Black-bellied Plover,
+Semipalmated, Purple, and Rock Sandpiper, Little and Red-necked Stint, Great Knot: Grassland; Western
+Sandpiper: Shrubland; Least, White-rumped Sandpiper, Dunlin, Semipalmated Plover: Wetland; Black,
+Surf, White-winged, and Stejneger's Scoter, Long-tailed Duck: Wetland; Brant, Snow Goose: Grassland;
+all five loons and Horned, Red-necked, Western, and Clark's Grebe: Wetland.
+
+**Range-wide, not North American:** Black Skimmer Riverine; Great Cormorant Wetland. **Against
+AVONET's own definitions:** Clapper Rail and Atlantic Black Rail Wetland, though salt marsh is
+Coastal; Laughing Gull and Royal, Sandwich, Common, and Least Tern Marine only.
+
+**The occurrence data does not measure habitat.** Records with no GADM code (download
+`0025653-261023074918325`) were tried as time on water: beaches are land, so shorebirds barely
+register, and some Caribbean and Central American land lies outside GADM (Bananaquit read 91% "on
+water").
+
+**Proposed BirdView additions, for the owner's review** (about 60):
+
+| Group | Add Coastal | Add Marine | Other |
+| --- | --- | --- | --- |
+| Shorebirds | Least, Semipalmated, Western, White-rumped Sandpiper; Dunlin; Black-bellied, Semipalmated Plover; Short-billed Dowitcher; Marbled, Bar-tailed Godwit; Hudsonian Whimbrel; Long-billed Curlew; Greater Yellowlegs | Red-necked Phalarope | Purple, Rock Sandpiper, Wandering Tattler: Coastal and Rock; Killdeer: Grassland and Human Modified |
+| Waterfowl | Common, Barrow's Goldeneye; Bufflehead; Greater Scaup; Red-breasted Merganser; American Black Duck; Brant | the four scoters; Long-tailed Duck | Snow Goose: Wetland and Human Modified; Harlequin Duck: Riverine |
+| Loons, grebes | Western, Clark's Grebe | all five loons; Horned, Red-necked Grebe | |
+| Gulls, terns | Laughing, Bonaparte's, Black-headed, Western Gull; Royal, Sandwich, Common, Least, Forster's, Caspian Tern; Black Skimmer | | |
+| Herons, rails, cormorants | Great, Snowy Egret; Little Blue Heron; Black-crowned Night Heron; Clapper, Black Rail; Great Cormorant | | |
+
+Each would carry a reason, as the current nine do (for example, Least Sandpiper: "migrates and
+winters on mudflats and salt marsh").
+

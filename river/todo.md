@@ -1111,3 +1111,40 @@ each needing the year in the GBIF download (a `"year"` column in `data/gbif-quer
    with effort as the state bar does; the spike's table in
    [notes: The New York county spike](notes.md#the-new-york-county-spike) gives the counts it would trade against.
 
+## traitAudit
+
+**Audit every bird's habitat and diet, so the filters say what a birder expects**
+
+Status: open
+Owner: Sameer
+Gate: before the Habitat and Diet filters are relied on further, and again before worldwide species
+
+Habitat and Diet come from AVONET, one primary value per species, with BirdView's additions for
+nine birds ([product.habitatAndDietFilters](requirements/local/product/months.md#habitatanddietfilters)). A reader found Least Sandpiper under Marsh and lake and
+missing, with the other peeps, from Shore and estuary. The owner's judgment: without intuitively
+correct values these filters are not only useless but misleading. Findings so far, for habitat, in
+[notes: The habitat audit, pass 1](notes.md#the-habitat-audit-pass-1):
+
+1. AVONET's single habitat is in practice the breeding habitat for migrants: Black-bellied Plover,
+   Semipalmated and Purple Sandpiper are Grassland (tundra), the scoters and every loon and grebe
+   Wetland. AVONET's own `Migration` column is 3 for all of them, a useful hint but not a rule:
+   residents can span several habitats and diets too.
+2. It is range-wide, not North American (Black Skimmer Riverine), and sometimes contradicts its own
+   definitions (Clapper Rail Wetland, though AVONET puts salt marsh under Coastal).
+3. The occurrence data cannot settle it: records with no GADM code do not measure time on water.
+
+Left:
+
+- **Habitat:** review the ~60 water-bird additions proposed in the notes, then the other families
+  (the full table of every bird's habitat was published as a review artifact on 2026-11-07).
+- **Diet:** the same audit for `Trophic.Niche`, which has the same one-value limit (a bird that eats
+  insects in summer and seeds in winter has one niche); `mixedDiet` covers only AVONET's own
+  Omnivore-level disagreements.
+- **The rule:** `trait.Supplementary`'s comment ("Kept deliberately short") conflicts with the
+  requirement's "as many as apply"; settle it in a decision before adding dozens.
+- **The label:** whether the filters should say they choose a bird's main habitat or diet.
+- **Sources:** no openly licensed per-species, multi-habitat source is known; IUCN's habitats come
+  through BirdLife, whose terms BirdView cannot accept. Additions are BirdView's own, reviewed by the
+  owner (and perhaps Dennis and Bobbi).
+- **Worldwide species:** repeat the audit for every species added.
+
