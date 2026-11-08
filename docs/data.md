@@ -368,7 +368,7 @@ Both come from **AVONET**, with its definitions quoted in the control. AVONET re
 primary habitat and one primary diet per species, so a bird that uses two is filed under one, and
 for a migrant the habitat is in practice where it breeds: Black-bellied Plover is Grassland.
 
-**The habitat filter arranges AVONET's eleven habitats in five groups**: Coast and sea (Coastal,
+**The habitat filter arranges AVONET's eleven habitats in five groups**: Shore and sea (Coastal,
 Marine), Fresh water (Wetland, Riverine), Woods (Forest, Woodland), Open country (Grassland,
 Shrubland, Desert, Rock), and Towns and farms (Human Modified). A group's name is a shortcut that
 chooses all its habitats; each can also be chosen alone, and a bird is shown when any of its

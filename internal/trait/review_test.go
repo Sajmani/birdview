@@ -84,7 +84,7 @@ func TestHabitatGroupsPartitionAVONET(t *testing.T) {
 			t.Errorf("AVONET's %s is in no group", h.Value)
 		}
 	}
-	want := "Coast and sea=Coastal,Marine|Fresh water=Wetland,Riverine|Woods=Forest,Woodland|Open country=Grassland,Shrubland,Desert,Rock|Towns and farms=Human Modified"
+	want := "Shore and sea=Coastal,Marine|Fresh water=Wetland,Riverine|Woods=Forest,Woodland|Open country=Grassland,Shrubland,Desert,Rock|Towns and farms=Human Modified"
 	if strings.Join(got, "|") != want {
 		t.Errorf("groups are %v, want %s", got, want)
 	}

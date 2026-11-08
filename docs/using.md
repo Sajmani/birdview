@@ -105,7 +105,7 @@ Every setting that can be all starts its choices with **All**, marked when it is
   bird you know, a Herring Gull or a Red-tailed Hawk, shows how big the others are. Pinned birds
   stay on the page whatever it is set to.
 - **Family:** grouped by taxonomic order, in field-guide sequence.
-- **Habitat:** AVONET's habitats, a group to a line: **Coast and sea**, **Fresh water**, **Woods**,
+- **Habitat:** AVONET's habitats, a group to a line: **Shore and sea**, **Fresh water**, **Woods**,
   **Open country**, and towns and farmland. The group's name chooses all its habitats, or clears
   them when all are chosen, and each habitat can be chosen alone. A bird is shown when any of its
   habitats is chosen.

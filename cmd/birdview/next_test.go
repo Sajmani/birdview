@@ -2048,7 +2048,7 @@ func TestHabitatGroupsFilter(t *testing.T) {
 		lines = append(lines, strings.Join(ls, " "))
 	}
 	want := []string{
-		"Coast and sea | Shore and estuary Coastal and open sea",
+		"Shore and sea | Shore and estuary Coastal and open sea",
 		"Fresh water | Marsh and lake River and stream",
 		"Woods | Forest Woodland",
 		"Open country | Grassland Shrubland Desert Rock and scree",
@@ -2074,7 +2074,7 @@ func TestHabitatGroupsFilter(t *testing.T) {
 	} {
 		sc, coastal, _ := coast(c.url)
 		if sc.On != c.on || string(sc.URL) != c.shortcut {
-			t.Errorf("at %s, Coast and sea is on %v going to %s; want on %v going to %s", c.url, sc.On, sc.URL, c.on, c.shortcut)
+			t.Errorf("at %s, Shore and sea is on %v going to %s; want on %v going to %s", c.url, sc.On, sc.URL, c.on, c.shortcut)
 		}
 		if string(coastal.URL) != c.single {
 			t.Errorf("at %s, Shore and estuary goes to %s, want %s", c.url, coastal.URL, c.single)
@@ -2096,14 +2096,14 @@ func TestHabitatGroupsFilter(t *testing.T) {
 			in = in || a.Value == "Coastal" || a.Value == "Marine"
 		}
 		if got[tl.S.ID] != in {
-			t.Errorf("Coast and sea: %s drawn %v, has %v", tl.S.ID, got[tl.S.ID], tl.S.Habitats)
+			t.Errorf("Shore and sea: %s drawn %v, has %v", tl.S.ID, got[tl.S.ID], tl.S.Habitats)
 		}
 	}
 	if !hasTile(p, "greblu") {
-		t.Error("Coast and sea omits the heron, whose BirdView habitat is Coastal")
+		t.Error("Shore and sea omits the heron, whose BirdView habitat is Coastal")
 	}
 	for url, heading := range map[string]string{
-		"/?month=all&habitat=Coastal&habitat=Marine&habitat=Forest": "Habitat: Coast and sea or Forest",
+		"/?month=all&habitat=Coastal&habitat=Marine&habitat=Forest": "Habitat: Shore and sea or Forest",
 		"/?month=all&habitat=Marine":                                "Habitat: Coastal and open sea",
 	} {
 		if p := nextAt(s, url); !strings.Contains(p.Title, heading) {

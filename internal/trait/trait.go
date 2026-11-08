@@ -91,7 +91,7 @@ type HabitatGroup struct {
 // HabitatGroups are the habitat filter's lines, in the order it offers them. Together they hold
 // every one of AVONET's habitats exactly once.
 var HabitatGroups = []HabitatGroup{
-	{Label: "Coast and sea", Terms: []string{"Coastal", "Marine"}},
+	{Label: "Shore and sea", Terms: []string{"Coastal", "Marine"}},
 	{Label: "Fresh water", Terms: []string{"Wetland", "Riverine"}},
 	{Label: "Woods", Terms: []string{"Forest", "Woodland"}},
 	{Label: "Open country", Terms: []string{"Grassland", "Shrubland", "Desert", "Rock"}},
