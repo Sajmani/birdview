@@ -14,8 +14,8 @@ Acrocephalus dumetorum	Blyth's Reed Warbler	Wetland	pending
 Acrocephalus familiaris	Millerbird	Shrubland	pending			
 Actitis hypoleucos	Common Sandpiper	Wetland	pending			
 Actitis macularius	Spotted Sandpiper	Wetland	pending			
-Aechmophorus clarkii	Clark's Grebe	Wetland	proposed			Coastal: winters on bays and inshore sea
-Aechmophorus occidentalis	Western Grebe	Wetland	proposed			Coastal: winters on bays and inshore sea
+Aechmophorus clarkii	Clark's Grebe	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on bays and inshore sea
+Aechmophorus occidentalis	Western Grebe	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on bays and inshore sea
 Aegolius acadicus	Northern Saw-whet Owl	Forest	pending			
 Aegolius funereus	Boreal Owl	Forest	pending			
 Aerodramus bartschi	Mariana Swiftlet	Forest	pending			
@@ -72,7 +72,7 @@ Anas diazi	Mexican Duck	Wetland	pending
 Anas fulvigula	Mottled Duck	Wetland	pending			
 Anas laysanensis	Laysan Duck	Wetland	pending			
 Anas platyrhynchos	Mallard	Wetland	reviewed	Sameer	2026-10-03	Human Modified: town ponds and park lakes throughout the range
-Anas rubripes	American Black Duck	Wetland	proposed			Coastal: salt marsh is a main habitat
+Anas rubripes	American Black Duck	Wetland	reviewed	Sameer	2026-11-07	Coastal: salt marsh is a main habitat
 Anas wyvilliana	Hawaiian Duck	Riverine	pending			
 Anas zonorhyncha	Eastern Spot-billed Duck	Wetland	pending			
 Anhinga anhinga	Anhinga	Wetland	pending			
@@ -82,7 +82,7 @@ Anous stolidus	Brown Noddy	Marine	pending
 Anser albifrons	Greater White-fronted Goose	Grassland	pending			
 Anser anser	Graylag Goose	Wetland	pending			
 Anser brachyrhynchus	Pink-footed Goose	Grassland	pending			
-Anser caerulescens	Snow Goose	Grassland	proposed			Wetland: winters on marshes | Human Modified: feeds in farm fields
+Anser caerulescens	Snow Goose	Grassland	reviewed	Sameer	2026-11-07	Wetland: winters on marshes | Human Modified: feeds in farm fields
 Anser canagicus	Emperor Goose	Coastal	pending			
 Anser cygnoides	Swan Goose	Wetland	pending			
 Anser erythropus	Lesser White-fronted Goose	Grassland	pending			
@@ -120,7 +120,7 @@ Aratinga nenday	Nanday Parakeet	Forest	pending
 Aratinga weddellii	Dusky-headed Parakeet	Forest	pending			
 Archilochus alexandri	Black-chinned Hummingbird	Forest	pending			
 Archilochus colubris	Ruby-throated Hummingbird	Woodland	pending			
-Ardea alba	Great Egret	Wetland	proposed			Coastal: salt marsh and tidal flats as much as fresh water
+Ardea alba	Great Egret	Wetland	reviewed	Sameer	2026-11-07	Coastal: salt marsh and tidal flats as much as fresh water
 Ardea cinerea	Gray Heron	Wetland	pending			
 Ardea herodias	Great Blue Heron	Wetland	reviewed	Sameer	2026-10-03	Coastal: forages on tidal flats and estuaries as readily as on fresh water
 Ardea ibis	Western Cattle-Egret	Human Modified	pending			
@@ -148,7 +148,7 @@ Aythya americana	Redhead	Wetland	pending
 Aythya collaris	Ring-necked Duck	Wetland	pending			
 Aythya ferina	Common Pochard	Wetland	pending			
 Aythya fuligula	Tufted Duck	Wetland	pending			
-Aythya marila	Greater Scaup	Wetland	proposed			Coastal: winters on coastal bays
+Aythya marila	Greater Scaup	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on coastal bays
 Aythya nyroca	Ferruginous Duck	Wetland	pending			
 Aythya valisineria	Canvasback	Wetland	pending			
 Baeolophus atricristatus	Black-crested Titmouse	Woodland	pending			
@@ -169,7 +169,7 @@ Botaurus exilis	Least Bittern	Wetland	pending
 Botaurus lentiginosus	American Bittern	Wetland	pending			
 Brachyramphus brevirostris	Kittlitz's Murrelet	Marine	pending			
 Brachyramphus marmoratus	Marbled Murrelet	Marine	pending			
-Branta bernicla	Brant	Grassland	proposed			Coastal: winters on eelgrass bays
+Branta bernicla	Brant	Grassland	reviewed	Sameer	2026-11-07	Coastal: winters on eelgrass bays
 Branta canadensis	Canada Goose	Grassland	reviewed	Sameer	2026-10-03	Human Modified: parks, playing fields, and golf courses are now its commonest North American habitat
 Branta hutchinsii	Cackling Goose	Grassland	pending			
 Branta leucopsis	Barnacle Goose	Grassland	pending			
@@ -178,9 +178,9 @@ Brotogeris chiriri	Yellow-chevroned Parakeet	Forest	pending
 Brotogeris versicolurus	White-winged Parakeet	Forest	pending			
 Bubo scandiacus	Snowy Owl	Grassland	pending			
 Bubo virginianus	Great Horned Owl	Forest	pending			
-Bucephala albeola	Bufflehead	Wetland	proposed			Coastal: winters on bays and estuaries
-Bucephala clangula	Common Goldeneye	Wetland	proposed			Coastal: winters on bays and harbors
-Bucephala islandica	Barrow's Goldeneye	Wetland	proposed			Coastal: winters on bays and harbors
+Bucephala albeola	Bufflehead	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on bays and estuaries
+Bucephala clangula	Common Goldeneye	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on bays and harbors
+Bucephala islandica	Barrow's Goldeneye	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on bays and harbors
 Bulweria bulwerii	Bulwer's Petrel	Marine	pending			
 Buteo albonotatus	Zone-tailed Hawk	Forest	pending			
 Buteo brachyurus	Short-tailed Hawk	Forest	pending			
@@ -207,21 +207,21 @@ Calcarius ornatus	Chestnut-collared Longspur	Grassland	pending
 Calcarius pictus	Smith's Longspur	Grassland	pending			
 Calidris acuminata	Sharp-tailed Sandpiper	Wetland	pending			
 Calidris alba	Sanderling	Coastal	pending			
-Calidris alpina	Dunlin	Wetland	proposed			Coastal: winters on beaches and mudflats
+Calidris alpina	Dunlin	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on beaches and mudflats
 Calidris bairdii	Baird's Sandpiper	Grassland	pending			
 Calidris canutus	Red Knot	Coastal	pending			
 Calidris falcinellus	Broad-billed Sandpiper	Wetland	pending			
 Calidris ferruginea	Curlew Sandpiper	Coastal	pending			
-Calidris fuscicollis	White-rumped Sandpiper	Wetland	proposed			Coastal: migrates along coasts
+Calidris fuscicollis	White-rumped Sandpiper	Wetland	reviewed	Sameer	2026-11-07	Coastal: migrates along coasts
 Calidris himantopus	Stilt Sandpiper	Wetland	pending			
-Calidris maritima	Purple Sandpiper	Grassland	proposed			Coastal: winters on rocky shores
-Calidris mauri	Western Sandpiper	Shrubland	proposed			Coastal: migrates and winters on Pacific and Gulf mudflats
+Calidris maritima	Purple Sandpiper	Grassland	reviewed	Sameer	2026-11-07	Coastal: winters on rocky shores
+Calidris mauri	Western Sandpiper	Shrubland	reviewed	Sameer	2026-11-07	Coastal: migrates and winters on Pacific and Gulf mudflats
 Calidris melanotos	Pectoral Sandpiper	Wetland	pending			
 Calidris minuta	Little Stint	Grassland	pending			
-Calidris minutilla	Least Sandpiper	Wetland	proposed			Coastal: migrates and winters on mudflats and salt marsh
-Calidris ptilocnemis	Rock Sandpiper	Grassland	proposed			Coastal: winters on rocky Pacific shores
+Calidris minutilla	Least Sandpiper	Wetland	reviewed	Sameer	2026-11-07	Coastal: migrates and winters on mudflats and salt marsh
+Calidris ptilocnemis	Rock Sandpiper	Grassland	reviewed	Sameer	2026-11-07	Coastal: winters on rocky Pacific shores
 Calidris pugnax	Ruff	Wetland	pending			
-Calidris pusilla	Semipalmated Sandpiper	Grassland	proposed			Coastal: migrates in great numbers through beaches and mudflats
+Calidris pusilla	Semipalmated Sandpiper	Grassland	reviewed	Sameer	2026-11-07	Coastal: migrates in great numbers through beaches and mudflats
 Calidris ruficollis	Red-necked Stint	Grassland	pending			
 Calidris subminuta	Long-toed Stint	Wetland	pending			
 Calidris subruficollis	Buff-breasted Sandpiper	Grassland	pending			
@@ -269,8 +269,8 @@ Chaetura vauxi	Vaux's Swift	Forest	pending
 Chamaea fasciata	Wrentit	Shrubland	pending			
 Charadrius hiaticula	Common Ringed Plover	Coastal	pending			
 Charadrius melodus	Piping Plover	Coastal	pending			
-Charadrius semipalmatus	Semipalmated Plover	Wetland	proposed			Coastal: migrates through beaches and mudflats
-Charadrius vociferus	Killdeer	Wetland	proposed			Grassland: nests and feeds in open fields | Human Modified: lawns, farm fields, and gravel lots
+Charadrius semipalmatus	Semipalmated Plover	Wetland	reviewed	Sameer	2026-11-07	Coastal: migrates through beaches and mudflats
+Charadrius vociferus	Killdeer	Wetland	reviewed	Sameer	2026-11-07	Grassland: nests and feeds in open fields | Human Modified: lawns, farm fields, and gravel lots | Coastal: forages on beaches, mudflats, and shores as well as fields
 Chasiempis ibidis	Oahu Elepaio	Forest	pending			
 Chasiempis sandwichensis	Hawaii Elepaio	Forest	pending			
 Chasiempis sclateri	Kauai Elepaio	Forest	pending			
@@ -290,15 +290,15 @@ Chondrohierax uncinatus	Hook-billed Kite	Forest	pending
 Chordeiles acutipennis	Lesser Nighthawk	Shrubland	pending			
 Chordeiles gundlachii	Antillean Nighthawk	Shrubland	pending			
 Chordeiles minor	Common Nighthawk	Grassland	pending			
-Chroicocephalus philadelphia	Bonaparte's Gull	Wetland	proposed			Coastal: winters on bays and inlets
-Chroicocephalus ridibundus	Black-headed Gull	Wetland	proposed			Coastal: winters on bays and inlets
+Chroicocephalus philadelphia	Bonaparte's Gull	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on bays and inlets
+Chroicocephalus ridibundus	Black-headed Gull	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on bays and inlets
 Chrysolophus amherstiae	Lady Amherst's Pheasant	Forest	pending			
 Chrysolophus pictus	Golden Pheasant	Forest	pending			
 Cinclus mexicanus	American Dipper	Riverine	pending			
 Circus hudsonius	Northern Harrier	Grassland	pending			
 Cistothorus palustris	Marsh Wren	Wetland	pending			
 Cistothorus stellaris	Sedge Wren	Grassland	pending			
-Clangula hyemalis	Long-tailed Duck	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
+Clangula hyemalis	Long-tailed Duck	Wetland	reviewed	Sameer	2026-11-07	Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
 Coccothraustes coccothraustes	Hawfinch	Forest	pending			
 Coccyzus americanus	Yellow-billed Cuckoo	Forest	pending			
 Coccyzus erythropthalmus	Black-billed Cuckoo	Forest	pending			
@@ -373,10 +373,10 @@ Dryobates pubescens	Downy Woodpecker	Woodland	pending
 Dryobates scalaris	Ladder-backed Woodpecker	Shrubland	pending			
 Dryocopus pileatus	Pileated Woodpecker	Forest	pending			
 Dumetella carolinensis	Gray Catbird	Shrubland	pending			
-Egretta caerulea	Little Blue Heron	Wetland	proposed			Coastal: salt marsh and tidal flats as much as fresh water
+Egretta caerulea	Little Blue Heron	Wetland	reviewed	Sameer	2026-11-07	Coastal: salt marsh and tidal flats as much as fresh water
 Egretta garzetta	Little Egret	Wetland	pending			
 Egretta rufescens	Reddish Egret	Coastal	pending			
-Egretta thula	Snowy Egret	Wetland	proposed			Coastal: salt marsh and tidal flats as much as fresh water
+Egretta thula	Snowy Egret	Wetland	reviewed	Sameer	2026-11-07	Coastal: salt marsh and tidal flats as much as fresh water
 Egretta tricolor	Tricolored Heron	Coastal	pending			
 Elanoides forficatus	Swallow-tailed Kite	Forest	pending			
 Elanus leucurus	White-tailed Kite	Human Modified	pending			
@@ -443,11 +443,11 @@ Gallinago stenura	Pin-tailed Snipe	Wetland	pending
 Gallinula galeata	Common Gallinule	Wetland	pending			
 Gallus gallus	Red Junglefowl	Forest	pending			
 Garrulax canorus	Chinese Hwamei	Shrubland	pending			
-Gavia adamsii	Yellow-billed Loon	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
-Gavia arctica	Arctic Loon	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
-Gavia immer	Common Loon	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
-Gavia pacifica	Pacific Loon	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
-Gavia stellata	Red-throated Loon	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
+Gavia adamsii	Yellow-billed Loon	Wetland	reviewed	Sameer	2026-11-07	Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
+Gavia arctica	Arctic Loon	Wetland	reviewed	Sameer	2026-11-07	Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
+Gavia immer	Common Loon	Wetland	reviewed	Sameer	2026-11-07	Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
+Gavia pacifica	Pacific Loon	Wetland	reviewed	Sameer	2026-11-07	Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
+Gavia stellata	Red-throated Loon	Wetland	reviewed	Sameer	2026-11-07	Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
 Gelochelidon nilotica	Gull-billed Tern	Coastal	pending			
 Geococcyx californianus	Greater Roadrunner	Shrubland	pending			
 Geopelia cuneata	Diamond Dove	Grassland	pending			
@@ -487,7 +487,7 @@ Himantopus mexicanus	Black-necked Stilt	Wetland	pending
 Himatione sanguinea	Apapane	Forest	pending			
 Hirundapus caudacutus	White-throated Needletail	Woodland	pending			
 Hirundo rustica	Barn Swallow	Human Modified	pending			
-Histrionicus histrionicus	Harlequin Duck	Marine	proposed			Riverine: breeds on fast rivers | Coastal: winters along rocky shores and jetties
+Histrionicus histrionicus	Harlequin Duck	Marine	reviewed	Sameer	2026-11-07	Riverine: breeds on fast rivers | Coastal: winters along rocky shores and jetties
 Horornis diphone	Japanese Bush Warbler	Shrubland	pending			
 Hydrobates castro	Band-rumped Storm-Petrel	Marine	pending			
 Hydrobates furcatus	Fork-tailed Storm-Petrel	Marine	pending			
@@ -499,7 +499,7 @@ Hydrobates socorroensis	Townsend's Storm-Petrel	Marine	pending
 Hydrobates tethys	Wedge-rumped Storm-Petrel	Marine	pending			
 Hydrobates tristrami	Tristram's Storm-Petrel	Marine	pending			
 Hydrocoloeus minutus	Little Gull	Coastal	pending			
-Hydroprogne caspia	Caspian Tern	Wetland	proposed			Coastal: bays and estuaries as much as fresh water
+Hydroprogne caspia	Caspian Tern	Wetland	reviewed	Sameer	2026-11-07	Coastal: bays and estuaries as much as fresh water
 Hylocichla mustelina	Wood Thrush	Forest	pending			
 Icteria virens	Yellow-breasted Chat	Forest	pending			
 Icterus bullockiorum	Bullock's Oriole	Forest	pending			
@@ -545,12 +545,12 @@ Larus hyperboreus	Glaucous Gull	Coastal	pending
 Larus livens	Yellow-footed Gull	Marine	pending			
 Larus marinus	Great Black-backed Gull	Coastal	pending			
 Larus michahellis	Yellow-legged Gull	Coastal	pending			
-Larus occidentalis	Western Gull	Marine	proposed			Coastal: beaches and harbors
+Larus occidentalis	Western Gull	Marine	reviewed	Sameer	2026-11-07	Coastal: beaches and harbors
 Larus schistisagus	Slaty-backed Gull	Coastal	pending			
 Larus smithsonianus	American Herring Gull	Coastal	reviewed	Sameer	2026-10-03	Human Modified: feeds routinely at landfill, docks, and town rooftops
 Larus vegae	Vega Gull	Coastal	pending			
 Larvivora sibilans	Rufous-tailed Robin	Forest	pending			
-Laterallus jamaicensis	Black Rail	Wetland	proposed			Coastal: Atlantic birds live in salt marsh
+Laterallus jamaicensis	Black Rail	Wetland	reviewed	Sameer	2026-11-07	Coastal: Atlantic birds live in salt marsh
 Legatus leucophaius	Piratic Flycatcher	Forest	pending			
 Leiothlypis celata	Orange-crowned Warbler	Shrubland	pending			
 Leiothlypis crissalis	Colima Warbler	Forest	pending			
@@ -564,17 +564,17 @@ Leuconotopicus albolarvatus	White-headed Woodpecker	Forest	pending
 Leuconotopicus arizonae	Arizona Woodpecker	Forest	pending			
 Leuconotopicus borealis	Red-cockaded Woodpecker	Forest	pending			
 Leuconotopicus villosus	Hairy Woodpecker	Forest	pending			
-Leucophaeus atricilla	Laughing Gull	Marine	proposed			Coastal: beaches, bays, and harbors
+Leucophaeus atricilla	Laughing Gull	Marine	reviewed	Sameer	2026-11-07	Coastal: beaches, bays, and harbors
 Leucophaeus pipixcan	Franklin's Gull	Coastal	pending			
 Leucosticte atrata	Black Rosy-Finch	Grassland	pending			
 Leucosticte australis	Brown-capped Rosy-Finch	Grassland	pending			
 Leucosticte tephrocotis	Gray-crowned Rosy-Finch	Grassland	pending			
-Limnodromus griseus	Short-billed Dowitcher	Wetland	proposed			Coastal: migrates and winters on coastal mudflats
+Limnodromus griseus	Short-billed Dowitcher	Wetland	reviewed	Sameer	2026-11-07	Coastal: migrates and winters on coastal mudflats
 Limnodromus scolopaceus	Long-billed Dowitcher	Wetland	pending			
 Limnothlypis swainsonii	Swainson's Warbler	Shrubland	pending			
-Limosa fedoa	Marbled Godwit	Wetland	proposed			Coastal: winters on coastal mudflats
+Limosa fedoa	Marbled Godwit	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on coastal mudflats
 Limosa haemastica	Hudsonian Godwit	Wetland	pending			
-Limosa lapponica	Bar-tailed Godwit	Wetland	proposed			Coastal: migrates through coastal mudflats
+Limosa lapponica	Bar-tailed Godwit	Wetland	reviewed	Sameer	2026-11-07	Coastal: migrates through coastal mudflats
 Limosa limosa	Black-tailed Godwit	Wetland	pending			
 Locustella lanceolata	Lanceolated Warbler	Grassland	pending			
 Lonchura atricapilla	Chestnut Munia	Wetland	pending			
@@ -610,10 +610,10 @@ Melanerpes erythrocephalus	Red-headed Woodpecker	Forest	pending
 Melanerpes formicivorus	Acorn Woodpecker	Woodland	pending			
 Melanerpes lewis	Lewis's Woodpecker	Woodland	pending			
 Melanerpes uropygialis	Gila Woodpecker	Shrubland	pending			
-Melanitta americana	Black Scoter	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
-Melanitta deglandi	White-winged Scoter	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
-Melanitta perspicillata	Surf Scoter	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
-Melanitta stejnegeri	Stejneger's Scoter	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
+Melanitta americana	Black Scoter	Wetland	reviewed	Sameer	2026-11-07	Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
+Melanitta deglandi	White-winged Scoter	Wetland	reviewed	Sameer	2026-11-07	Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
+Melanitta perspicillata	Surf Scoter	Wetland	reviewed	Sameer	2026-11-07	Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
+Melanitta stejnegeri	Stejneger's Scoter	Wetland	reviewed	Sameer	2026-11-07	Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
 Melanospiza bicolor	Black-faced Grassquit	Shrubland	pending			
 Melanotis caerulescens	Blue Mockingbird	Forest	pending			
 Meleagris gallopavo	Wild Turkey	Forest	pending			
@@ -626,7 +626,7 @@ Melozone crissalis	California Towhee	Shrubland	pending
 Melozone fusca	Canyon Towhee	Shrubland	pending			
 Mergellus albellus	Smew	Wetland	pending			
 Mergus merganser	Common Merganser	Riverine	pending			
-Mergus serrator	Red-breasted Merganser	Wetland	proposed			Coastal: winters on bays and inshore sea
+Mergus serrator	Red-breasted Merganser	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on bays and inshore sea
 Micrathene whitneyi	Elf Owl	Shrubland	pending			
 Mimus gilvus	Tropical Mockingbird	Shrubland	pending			
 Mimus gundlachii	Bahama Mockingbird	Shrubland	pending			
@@ -666,14 +666,14 @@ Netta peposaca	Rosy-billed Pochard	Wetland	pending
 Netta rufina	Red-crested Pochard	Wetland	pending			
 Nomonyx dominicus	Masked Duck	Wetland	pending			
 Nucifraga columbiana	Clark's Nutcracker	Forest	pending			
-Numenius americanus	Long-billed Curlew	Grassland	proposed			Coastal: winters on coastal mudflats
-Numenius hudsonicus	Hudsonian Whimbrel	Grassland	proposed			Coastal: migrates and winters on coasts and salt marsh
+Numenius americanus	Long-billed Curlew	Grassland	reviewed	Sameer	2026-11-07	Coastal: winters on coastal mudflats
+Numenius hudsonicus	Hudsonian Whimbrel	Grassland	reviewed	Sameer	2026-11-07	Coastal: migrates and winters on coasts and salt marsh
 Numenius madagascariensis	Far Eastern Curlew	Wetland	pending			
 Numenius minutus	Little Curlew	Grassland	pending			
 Numenius tahitiensis	Bristle-thighed Curlew	Grassland	pending			
 Numida meleagris	Helmeted Guineafowl	Woodland	pending			
 Nyctanassa violacea	Yellow-crowned Night Heron	Coastal	pending			
-Nycticorax nycticorax	Black-crowned Night Heron	Wetland	proposed			Coastal: salt marsh and harbors
+Nycticorax nycticorax	Black-crowned Night Heron	Wetland	reviewed	Sameer	2026-11-07	Coastal: salt marsh and harbors
 Nyctidromus albicollis	Common Pauraque	Woodland	pending			
 Nymphicus hollandicus	Cockatiel	Grassland	pending			
 Oceanites oceanicus	Wilson's Storm-Petrel	Marine	pending			
@@ -735,10 +735,10 @@ Phaethon aethereus	Red-billed Tropicbird	Marine	pending
 Phaethon lepturus	White-tailed Tropicbird	Marine	pending			
 Phaethon rubricauda	Red-tailed Tropicbird	Marine	pending			
 Phainopepla nitens	Phainopepla	Shrubland	pending			
-Phalacrocorax carbo	Great Cormorant	Wetland	proposed			Coastal: North American birds are coastal
+Phalacrocorax carbo	Great Cormorant	Wetland	reviewed	Sameer	2026-11-07	Coastal: North American birds are coastal
 Phalaenoptilus nuttallii	Common Poorwill	Shrubland	pending			
 Phalaropus fulicarius	Red Phalarope	Marine	pending			
-Phalaropus lobatus	Red-necked Phalarope	Wetland	proposed			Marine: migrates at sea
+Phalaropus lobatus	Red-necked Phalarope	Wetland	reviewed	Sameer	2026-11-07	Marine: migrates at sea
 Phalaropus tricolor	Wilson's Phalarope	Wetland	pending			
 Phasianus colchicus	Ring-necked Pheasant	Human Modified	pending			
 Phasianus versicolor	Green Pheasant	Human Modified	pending			
@@ -785,9 +785,9 @@ Ploceus melanocephalus	Black-headed Weaver	Wetland	pending
 Pluvialis apricaria	European Golden-Plover	Grassland	pending			
 Pluvialis dominica	American Golden-Plover	Grassland	pending			
 Pluvialis fulva	Pacific Golden-Plover	Grassland	pending			
-Pluvialis squatarola	Black-bellied Plover	Grassland	proposed			Coastal: migrates and winters on beaches and mudflats
-Podiceps auritus	Horned Grebe	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
-Podiceps grisegena	Red-necked Grebe	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
+Pluvialis squatarola	Black-bellied Plover	Grassland	reviewed	Sameer	2026-11-07	Coastal: migrates and winters on beaches and mudflats
+Podiceps auritus	Horned Grebe	Wetland	reviewed	Sameer	2026-11-07	Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
+Podiceps grisegena	Red-necked Grebe	Wetland	reviewed	Sameer	2026-11-07	Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
 Podiceps nigricollis	Eared Grebe	Wetland	pending			
 Podilymbus podiceps	Pied-billed Grebe	Wetland	pending			
 Poecile atricapillus	Black-capped Chickadee	Forest	pending			
@@ -851,7 +851,7 @@ Quiscalus major	Boat-tailed Grackle	Wetland	pending
 Quiscalus mexicanus	Great-tailed Grackle	Human Modified	pending			
 Quiscalus quiscula	Common Grackle	Wetland	pending			
 Radjah radjah	Radjah Shelduck	Coastal	pending			
-Rallus crepitans	Clapper Rail	Wetland	proposed			Coastal: lives in salt marsh
+Rallus crepitans	Clapper Rail	Wetland	reviewed	Sameer	2026-11-07	Coastal: lives in salt marsh
 Rallus elegans	King Rail	Wetland	pending			
 Rallus limicola	Virginia Rail	Wetland	pending			
 Rallus obsoletus	Ridgway's Rail	Coastal	pending			
@@ -868,7 +868,7 @@ Rissa brevirostris	Red-legged Kittiwake	Marine	pending
 Rissa tridactyla	Black-legged Kittiwake	Marine	pending			
 Rostrhamus sociabilis	Snail Kite	Wetland	pending			
 Rupornis magnirostris	Roadside Hawk	Forest	pending			
-Rynchops niger	Black Skimmer	Riverine	proposed			Coastal: North American skimmers are coastal
+Rynchops niger	Black Skimmer	Riverine	reviewed	Sameer	2026-11-07	Coastal: North American skimmers are coastal
 Salpinctes obsoletus	Rock Wren	Rock	pending			
 Saucerottia beryllina	Berylline Hummingbird	Forest	pending			
 Saxicola maurus	Siberian Stonechat	Shrubland	pending			
@@ -918,7 +918,7 @@ Sitta carolinensis	White-breasted Nuthatch	Forest	pending
 Sitta pusilla	Brown-headed Nuthatch	Forest	pending			
 Sitta pygmaea	Pygmy Nuthatch	Forest	pending			
 Somateria fischeri	Spectacled Eider	Coastal	pending			
-Somateria mollissima	Common Eider	Marine	proposed			Coastal: winters in the surf along rocky shores and jetties
+Somateria mollissima	Common Eider	Marine	reviewed	Sameer	2026-11-07	Coastal: winters in the surf along rocky shores and jetties
 Somateria spectabilis	King Eider	Marine	pending			
 Spatula clypeata	Northern Shoveler	Wetland	pending			
 Spatula cyanoptera	Cinnamon Teal	Wetland	pending			
@@ -952,11 +952,11 @@ Stercorarius parasiticus	Parasitic Jaeger	Marine	pending
 Stercorarius pomarinus	Pomarine Jaeger	Marine	pending			
 Stercorarius skua	Great Skua	Marine	pending			
 Sterna dougallii	Roseate Tern	Marine	pending			
-Sterna forsteri	Forster's Tern	Wetland	proposed			Coastal: salt marsh and bays as much as fresh water
-Sterna hirundo	Common Tern	Marine	proposed			Coastal: beaches and estuaries
+Sterna forsteri	Forster's Tern	Wetland	reviewed	Sameer	2026-11-07	Coastal: salt marsh and bays as much as fresh water
+Sterna hirundo	Common Tern	Marine	reviewed	Sameer	2026-11-07	Coastal: beaches and estuaries
 Sterna paradisaea	Arctic Tern	Coastal	pending			
 Sternula albifrons	Little Tern	Coastal	pending			
-Sternula antillarum	Least Tern	Marine	proposed			Coastal: nests on beaches
+Sternula antillarum	Least Tern	Marine	reviewed	Sameer	2026-11-07	Coastal: nests on beaches
 Streptopelia decaocto	Eurasian Collared-Dove	Human Modified	pending			
 Streptopelia orientalis	Oriental Turtle-Dove	Woodland	pending			
 Streptopelia roseogrisea	African Collared-Dove	Shrubland	pending			
@@ -993,8 +993,8 @@ Telespiza ultima	Nihoa Finch	Coastal	pending
 Tetraogallus himalayensis	Himalayan Snowcock	Grassland	pending			
 Thalassarche chlororhynchos	Atlantic Yellow-nosed Albatross		pending			
 Thalasseus elegans	Elegant Tern	Coastal	pending			
-Thalasseus maximus	Royal Tern	Marine	proposed			Coastal: beaches and estuaries
-Thalasseus sandvicensis	Sandwich Tern	Marine	proposed			Coastal: beaches and estuaries
+Thalasseus maximus	Royal Tern	Marine	reviewed	Sameer	2026-11-07	Coastal: beaches and estuaries
+Thalasseus sandvicensis	Sandwich Tern	Marine	reviewed	Sameer	2026-11-07	Coastal: beaches and estuaries
 Thectocercus acuticaudatus	Blue-crowned Parakeet	Shrubland	pending			
 Thraupis episcopus	Blue-gray Tanager	Forest	pending			
 Threskiornis aethiopicus	African Sacred Ibis	Wetland	pending			
@@ -1013,8 +1013,8 @@ Toxostoma rufum	Brown Thrasher	Shrubland	pending
 Tringa brevipes	Gray-tailed Tattler	Wetland	pending			
 Tringa flavipes	Lesser Yellowlegs	Wetland	pending			
 Tringa glareola	Wood Sandpiper	Wetland	pending			
-Tringa incana	Wandering Tattler	Wetland	proposed			Coastal: winters on rocky Pacific shores
-Tringa melanoleuca	Greater Yellowlegs	Wetland	proposed			Coastal: common on salt marsh and mudflats
+Tringa incana	Wandering Tattler	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on rocky Pacific shores
+Tringa melanoleuca	Greater Yellowlegs	Wetland	reviewed	Sameer	2026-11-07	Coastal: common on salt marsh and mudflats
 Tringa nebularia	Common Greenshank	Wetland	pending			
 Tringa ochropus	Green Sandpiper	Wetland	pending			
 Tringa semipalmata	Willet	Coastal	pending			

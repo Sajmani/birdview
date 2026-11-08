@@ -1137,8 +1137,9 @@ Left:
 
 - **Habitat:** reviewed species by species in `data/habitat-review.tsv`, which the build holds
   complete ([decisions.habitatReviewedPerSpecies](requirements/decisions.md#habitatreviewedperspecies)): 9 reviewed (the former `trait.Supplementary`
-  entries), 59 proposed (pass 1's water birds, awaiting the owner), 1,014 pending. Next: the owner's
-  review of the 59, then the other families.
+  entries) and 60 more (pass 1's water birds, approved by the owner on 2026-11-07, with Shore and
+  estuary added to Killdeer), so 69 reviewed and 1,013 pending. Next: the other families, landbirds
+  mostly; raptors, swallows, and blackbirds first.
 - **Diet:** the same audit for `Trophic.Niche`, which has the same one-value limit (a bird that eats
   insects in summer and seeds in winter has one niche); `mixedDiet` covers only AVONET's own
   Omnivore-level disagreements.

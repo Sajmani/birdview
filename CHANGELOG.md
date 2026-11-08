@@ -18,6 +18,9 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
   water, Woods, Open country, and Towns and farms. A group's name chooses all its habitats at once,
   and each can still be chosen alone. The welcome line's grassland hunters are now the open-country
   hunters.
+- **Habitats for 60 water birds**, reviewed one by one: shorebirds, herons, rails, gulls, and terns
+  now count as birds of the shore, and sea ducks, loons, and grebes as birds of the shore and sea as
+  well, where AVONET files many of them under the habitat they breed in.
 - Every setting that can be all always offers **All**, marked when chosen, so the choices no longer
   shift. How common no longer shows All twice.
 
