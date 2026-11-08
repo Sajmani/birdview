@@ -1148,3 +1148,29 @@ Left:
   owner (and perhaps Dennis and Bobbi).
 - **Worldwide species:** repeat the audit for every species added.
 
+## anchorBirds
+
+**An anchor bird, chosen by the reader, to measure other birds against**
+
+Status: parked
+Owner: Sameer
+Gate: after [traitAudit](#traitaudit), and once a group such as "all shorebirds" can be chosen in one step
+
+From issue #8 and a conversation with Dennis Hrehowsik, who with Bobbi Manian teaches gull
+identification by comparison with an anchor, a first-year American Herring Gull ("The Brooklyn Gull
+Guide", *The Clapper Rail*, Spring 2025, pp. 8–11): "anchor bird means suggesting an easily
+identifiable species as a bench mark for size comparison. Like how bb plover is the anchor or middle
+sized shore bird." Explored 2026-11-07 (the review artifacts `pin-twins-spec.md`,
+`cross-family-twins-10.md`):
+
+- **Twins**, birds within 10% in length, wingspan, bill, and tail, are mostly a bird's relatives,
+  or across families trivia in which a birder knows one bird of the pair. Dropped.
+- **Grouping larger, same, smaller** than an anchor adds little to the tiers.
+- **[product.howCommonFilter](requirements/local/product/filtering.md#howcommonfilter)**, built from this, does most of the work: familiar birds sorted by size line
+  up across families.
+
+Left for an anchor: a pin-like control with a ship's-anchor icon marking one bird, and every tile
+stating its length and wingspan as a share of the anchor's. Two things stand in the way. Habitat
+cannot yet choose the shorebirds ([traitAudit](#traitaudit): Black-bellied Plover is Grassland). And Family offers
+shorebirds only family by family, under Charadriiformes ("Shorebirds, Gulls, and Auks").
+

@@ -97,6 +97,11 @@ not colored, and the modeled head, neck, and body are gray.
 - **Region:** states, provinces, and stretches of open sea. A bird is listed in a region when at
   least 1 in a million of the region's bird records are of it. **Here** chooses the region you are
   in; your browser works it out, so your location never reaches the server. Here needs JavaScript.
+- **How common:** only the birds that are at least 1 in 100, 1 in 1,000, or 1 in 10,000 of the
+  species observations in the regions and months you chose. Combined with an order such as
+  **Length** or **Wingspan**, it lines up the familiar birds of a place and season by size, so a
+  bird you know, a Herring Gull or a Red-tailed Hawk, shows how big the others are. Pinned birds
+  stay on the page whatever it is set to.
 - **Family:** grouped by taxonomic order, in field-guide sequence.
 - **Habitat** and **Diet:** where a bird mostly lives and what it mostly eats, per species, from
   **AVONET**. BirdView adds a few more and marks them as its own; [everything BirdView adds](/added)

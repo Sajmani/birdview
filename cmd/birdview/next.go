@@ -895,6 +895,9 @@ func (s *server) nextTitle(opt options, pinnedOnly bool) string {
 	if opt.HasNiches {
 		terms("Diet", trait.Niches, opt.Niches)
 	}
+	if opt.Common > 0 {
+		b.WriteString(" · At least 1 in " + comma(int64(opt.Common)))
+	}
 	return b.String()
 }
 
@@ -1070,6 +1073,24 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	if cc, ok := countyControl(q, opt); ok {
 		out = append(out, cc)
 	}
+	// How common: a threshold on the share each tile states, in the same steps as the frequency
+	// tiers (product.howCommonFilter).
+	hc := nextControl{Label: "How common", Value: "all"}
+	hcAll := nextChoice{Label: "All", Title: "Every bird the other settings choose", On: opt.Common == 0, URL: nextSet(q, "common", "")}
+	hcs := []nextChoice{hcAll}
+	for _, n := range []int{100, 1000, 10000} {
+		v := strconv.Itoa(n)
+		on := opt.Common == n
+		if on {
+			hc.Value = "1 in " + comma(int64(n))
+			hc.AllURL = nextSet(q, "common", "")
+		}
+		hcs = append(hcs, nextChoice{Label: "1 in " + comma(int64(n)),
+			Title: "Birds at least 1 in " + comma(int64(n)) + " of the observations in the regions and months chosen",
+			On:    on, URL: nextSet(q, "common", v)})
+	}
+	hc.Groups = []nextChoiceGroup{{Choices: hcs, OneLine: true}}
+	out = append(out, hc)
 
 	fc := nextControl{Label: "Family", Value: "all"}
 	var fnames []string

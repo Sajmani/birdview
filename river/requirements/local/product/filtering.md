@@ -94,6 +94,31 @@ its source retires (to GADM's successors, or to Marine Regions' accepted id). A 
 several codes redirects to all of them. The page's heading names the regions shown, so the reader
 sees what the link now means.
 
+## howCommonFilter
+
+**Filter by how common a bird is where and when the reader is looking**
+
+Subject: `presentation.common_filter`
+Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
+
+A **How common** setting keeps only the birds that are **at least 1 in 100, 1 in 1,000, or 1 in
+10,000 of the species observations in the regions and months chosen**, the share each tile states
+([presentation.shareOfRecords](presentation.md#shareofrecords)); **All**, the default, keeps every bird. It composes with every other filter and
+with every order, so the familiar birds of a place and season can be sorted by length or wingspan,
+and a familiar bird lines up with the familiar birds of other families its size. Pinned birds stay
+drawn whatever it is set to, so an unusual bird can be compared with the familiar ones.
+
+It is a threshold on the share, not a count of birds, so it means the same in a county as across
+the continent, in the steps the frequency tiers use ([orderByFrequency](presentation.md#orderbyfrequency)). The address carries it as
+`common=100`, `common=1000`, or `common=10000`; any other value is ignored. The page's heading names
+it ("· At least 1 in 1,000"), and the setting follows Region (and County, where shown) on the count
+line.
+
+Rationale: sorting by frequency already shows the commonest birds first, but only in that order;
+sorted by length, "the first 100" is the 100 smallest. Choosing the set by how familiar its birds
+are, and ordering it by size, is what lets a reader calibrate an unfamiliar bird against familiar
+ones, as birders do with an anchor bird (Sameer, 2026-11-07).
+
 ## hereSelectsLocalRegion
 
 **Here selects the region the reader is in**

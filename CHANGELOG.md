@@ -3,6 +3,15 @@
 Major changes to BirdView, newest first: features, data sources, and how the drawings are made.
 Small fixes are in the commit history. With no numbered releases yet, changes are grouped by period.
 
+## 2026-11-07 — How common
+
+### Added
+
+- **How common** keeps only the birds that are at least 1 in 100, 1 in 1,000, or 1 in 10,000 of the
+  observations in the regions and months chosen. Sorted by length or wingspan, the familiar birds of
+  a place and season line up by size across families: in Brooklyn in November, Ring-billed Gull
+  shares a wingspan tier with Red-tailed Hawk and Common Raven.
+
 ## 2026-11-03 — A sky-blue cube, and regions by their data codes
 
 ### Changed

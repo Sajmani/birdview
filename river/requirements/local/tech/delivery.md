@@ -67,7 +67,7 @@ BirdView's public interface is its URLs: the home page `/`, a species page `/spe
 (any of a species' codes, the others redirecting to its own; [product.ebirdLink](../product/presentation.md#ebirdlink)),
 the guides `/docs` and `/docs/<guide>`, the lists `/added` and `/excluded`, and the query
 parameters the pages' own links write (`by`, `rev`, `step`, `units`, `names`, `family`, `region`,
-`month`, `habitat`, `niche`, `pin`, `show`), with the values those links write. A URL of that form keeps working across releases. Everything
+`month`, `habitat`, `niche`, `common`, `pin`, `show`), with the values those links write. A URL of that form keeps working across releases. Everything
 else is internal and may change without notice: page markup, wording and styling, anything under
 `/static/` or `/boundaries/`, and the shape of `species.json`.
 

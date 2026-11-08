@@ -1413,7 +1413,7 @@ func TestNextWelcomeLine(t *testing.T) {
 func TestNextKeepsEveryParameter(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	const every = "/?by=mass&family=Corvidae&find=crow&habitat=Forest&month=May&names=world&niche=Omnivore&pin=amecro&pin=blujay&region=USA.33_1&rev=1&units=metric"
+	const every = "/?by=mass&common=10000&family=Corvidae&find=crow&habitat=Forest&month=May&names=world&niche=Omnivore&pin=amecro&pin=blujay&region=USA.33_1&rev=1&units=metric"
 	// From Pinned only and from a count, so that no broken link can pass
 	// for one that changes the same keys on purpose.
 	for _, c := range []struct {
@@ -1448,7 +1448,7 @@ func TestNextKeepsEveryParameter(t *testing.T) {
 			return changed
 		}
 		special := map[string][]string{
-			string(p.ResetURL):     {"by", "family", "find", "habitat", "month", "names", "niche", "region", "rev", "show", "units"},
+			string(p.ResetURL):     {"by", "common", "family", "find", "habitat", "month", "names", "niche", "region", "rev", "show", "units"},
 			string(p.ClearPinsURL): clearPins,
 			string(p.CloseURL):     {"find"},
 		}
@@ -1929,5 +1929,81 @@ func TestPinnedGroupLeadsThePage(t *testing.T) {
 	}
 	if a, b := strings.Index(only, `id="p-annhum"`), strings.Index(only, `id="p-greblu"`); a < 0 || b < 0 || b > a {
 		t.Errorf("reversed, the group holds greblu at %d and annhum at %d; want the heron first", b, a)
+	}
+}
+
+// TestHowCommonFilters asserts product.howCommonFilter: at each threshold the page draws exactly the
+// birds whose share of the observations in view meets it, a pinned bird is drawn whatever the
+// setting, the setting offers All and the three thresholds with the chosen one marked, the heading
+// names it, and a value it does not offer is ignored.
+//
+// Verifies: product.howCommonFilter. Criterion: app.nextViewDrawsOneSet.
+func TestHowCommonFilters(t *testing.T) {
+	s := newTestServer(t)
+	all := nextAt(s, "/?show=all&month=all")
+	share := map[string][2]int64{}
+	for _, tl := range all.Tiles {
+		n, d := shareIn(tl.S, s.ds, options{})
+		share[tl.S.ID] = [2]int64{n, d}
+	}
+	kept := func(id string, n int64) bool {
+		v := share[id]
+		return v[1] > 0 && v[0]*n >= v[1]
+	}
+	narrowed := false
+	for _, n := range []int64{100, 1000, 10000} {
+		p := nextAt(s, fmt.Sprintf("/?show=all&month=all&common=%d", n))
+		got := map[string]bool{}
+		for _, tl := range p.Tiles {
+			got[tl.S.ID] = true
+		}
+		for id := range share {
+			if got[id] != kept(id, n) {
+				v := share[id]
+				t.Errorf("common=%d: %s drawn %v at %d in %d", n, id, got[id], v[0], v[1])
+			}
+		}
+		if len(p.Tiles) < len(all.Tiles) && len(p.Tiles) > 0 {
+			narrowed = true
+		}
+		if !strings.Contains(p.Title, "· At least 1 in "+comma(n)) {
+			t.Errorf("common=%d: the heading reads %q", n, p.Title)
+		}
+	}
+	if !narrowed {
+		t.Fatal("no threshold narrowed the fixture to some but not all of its birds; the check proves little")
+	}
+	// A pinned bird the threshold leaves out is still drawn.
+	var rare string
+	for id := range share {
+		if !kept(id, 100) {
+			rare = id
+		}
+	}
+	if p := nextAt(s, "/?show=all&month=all&common=100&pin="+rare); !hasTile(p, rare) {
+		t.Errorf("%s, pinned, is not drawn under common=100; pins stay whatever the setting", rare)
+	}
+	c := nextAt(s, "/?common=1000")
+	var hc *nextControl
+	for i := range c.Controls {
+		if c.Controls[i].Label == "How common" {
+			hc = &c.Controls[i]
+		}
+	}
+	if hc == nil {
+		t.Fatal("no How common setting")
+	}
+	var labels []string
+	for _, ch := range hc.Groups[0].Choices {
+		labels = append(labels, ch.Label)
+		if ch.On != (ch.Label == "1 in 1,000") {
+			t.Errorf("with common=1000, %s is on %v", ch.Label, ch.On)
+		}
+	}
+	if strings.Join(labels, "|") != "All|1 in 100|1 in 1,000|1 in 10,000" || hc.Value != "1 in 1,000" {
+		t.Errorf("How common offers %v, reading %q", labels, hc.Value)
+	}
+	if p := nextAt(s, "/?show=all&month=all&common=5"); len(p.Tiles) != len(all.Tiles) || strings.Contains(p.Title, "At least") {
+		t.Errorf("common=5, a value not offered, draws %d of %d birds, heading %q; it is ignored", len(p.Tiles), len(all.Tiles), p.Title)
 	}
 }

@@ -725,7 +725,10 @@ type options struct {
 	HasHabitats bool
 	Niches      map[string]bool
 	HasNiches   bool
-	Metric3     bool // imperial when false
+	// Common keeps only birds at least 1 in Common of the observations in the regions and months in
+	// view; zero keeps every bird (product.howCommonFilter).
+	Common  int
+	Metric3 bool // imperial when false
 
 	// Locale selects which English name is served (product.englishNameChoice). North American is
 	// the default: this is an ABA-area dataset and Dovekie is what its reader
@@ -764,6 +767,14 @@ func parseOptions(r *http.Request) options {
 		o.Step = v
 	}
 	o.Metric3 = q.Get("units") == "metric"
+	switch q.Get("common") {
+	case "100":
+		o.Common = 100
+	case "1000":
+		o.Common = 1000
+	case "10000":
+		o.Common = 10000
+	}
 	// Recognize the non-default: writing this the other way round disables
 	// the setting the moment the default moves.
 	if dataset.Locale(q.Get("names")) == dataset.LocaleWorld {
@@ -1092,12 +1103,21 @@ func (s *server) filterSpecies(opt options) ([]*dataset.Species, map[string]bool
 		}
 		return false
 	}
+	// How common: at least 1 in Common of the observations in the regions and months in view, the
+	// share each tile states (product.howCommonFilter).
+	common := func(sp *dataset.Species) bool {
+		if opt.Common == 0 {
+			return true
+		}
+		num, den := shareIn(sp, s.ds, opt)
+		return den > 0 && num*int64(opt.Common) >= den
+	}
 	var filtered []*dataset.Species
 	for i := range s.ds.Species {
 		sp := &s.ds.Species[i]
 		if selected[sp.Family] && inRegion(sp) && inMonth(sp) &&
 			anyAssigned(sp.Habitats, opt.Habitats, opt.HasHabitats) &&
-			anyAssigned(sp.Niches, opt.Niches, opt.HasNiches) {
+			anyAssigned(sp.Niches, opt.Niches, opt.HasNiches) && common(sp) {
 			filtered = append(filtered, sp)
 		}
 	}
