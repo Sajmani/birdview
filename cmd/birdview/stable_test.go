@@ -60,7 +60,7 @@ func TestStableUrlsKeepWorking(t *testing.T) {
 	for param, value := range map[string]string{
 		"by": "mass", "rev": "1", "step": "50", "units": "metric", "names": "world",
 		"pin": "amecro", "show": "pinned", "family": "Corvidae", "region": "USA.33_1", "month": "Oct",
-		"habitat": "Marine", "niche": "Frugivore", "common": "1000",
+		"habitat": "Marine", "niche": "Frugivore", "freq": "1000",
 	} {
 		q := cloneValues(base0)
 		q.Set(param, value)

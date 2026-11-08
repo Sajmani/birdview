@@ -1167,7 +1167,7 @@ sized shore bird." Explored 2026-11-07 (the review artifacts `pin-twins-spec.md`
 - **Twins**, birds within 10% in length, wingspan, bill, and tail, are mostly a bird's relatives,
   or across families trivia in which a birder knows one bird of the pair. Dropped.
 - **Grouping larger, same, smaller** than an anchor adds little to the tiers.
-- **[product.howCommonFilter](requirements/local/product/filtering.md#howcommonfilter)**, built from this, does most of the work: familiar birds sorted by size line
+- **[product.reportingFrequencyFilter](requirements/local/product/filtering.md#reportingfrequencyfilter)**, built from this, does most of the work: familiar birds sorted by size line
   up across families.
 
 Left for an anchor: a pin-like control with a ship's-anchor icon marking one bird, and every tile

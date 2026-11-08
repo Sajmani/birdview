@@ -67,7 +67,7 @@ BirdView's public interface is its URLs: the home page `/`, a species page `/spe
 (any of a species' codes, the others redirecting to its own; [product.ebirdLink](../product/presentation.md#ebirdlink)),
 the guides `/docs` and `/docs/<guide>`, the lists `/added` and `/excluded`, and the query
 parameters the pages' own links write (`by`, `rev`, `step`, `units`, `names`, `family`, `region`,
-`month`, `habitat`, `niche`, `common`, `pin`, `show`), with the values those links write. A URL of that form keeps working across releases. Everything
+`month`, `habitat`, `niche`, `freq`, `pin`, `show`), with the values those links write. A URL of that form keeps working across releases. Everything
 else is internal and may change without notice: page markup, wording and styling, anything under
 `/static/` or `/boundaries/`, and the shape of `species.json`.
 
@@ -78,7 +78,8 @@ allows, and says what changed, as a species that leaves scope already does
 a parameter, or a value it accepts needs a decision, and the old form keeps answering, read as
 before or redirected. A region value that BirdView replaced, or that its source retired, redirects
 to the codes that replace it **without a message**, the page's heading naming the regions shown
-([decisions.regionCodesFromData](../../decisions.md#regioncodesfromdata)). One decision removed URLs outright: the comparison `/compare`, the
+([decisions.regionCodesFromData](../../decisions.md#regioncodesfromdata)). `common`, the reporting frequency's name until 2026-11-08, redirects to
+`freq` ([decisions.reportingFrequencyParam](../../decisions.md#reportingfrequencyparam)). One decision removed URLs outright: the comparison `/compare`, the
 current-month link `/now`, and the `scale` and `species` parameters went with the classic view
 ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)). One changed what a URL
 shows: a home page address with no month showed the current month and now shows every month;

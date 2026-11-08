@@ -94,14 +94,14 @@ its source retires (to GADM's successors, or to Marine Regions' accepted id). A 
 several codes redirects to all of them. The page's heading names the regions shown, so the reader
 sees what the link now means.
 
-## howCommonFilter
+## reportingFrequencyFilter
 
-**Filter by how common a bird is where and when the reader is looking**
+**Filter by how often a bird is reported where and when the reader is looking**
 
 Subject: `presentation.common_filter`
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
-A **How common** setting keeps only the birds that are **at least 1 in 100, 1 in 1,000, or 1 in
+A **Reporting frequency** setting keeps only the birds that are **at least 1 in 100, 1 in 1,000, or 1 in
 10,000 of the species observations in the regions and months chosen**, the share each tile states
 ([presentation.shareOfRecords](presentation.md#shareofrecords)); **All**, the default, keeps every bird. It composes with every other filter and
 with every order, so the familiar birds of a place and season can be sorted by length or wingspan,
@@ -110,7 +110,9 @@ drawn whatever it is set to, so an unusual bird can be compared with the familia
 
 It is a threshold on the share, not a count of birds, so it means the same in a county as across
 the continent, in the steps the frequency tiers use ([orderByFrequency](presentation.md#orderbyfrequency)). The address carries it as
-`common=100`, `common=1000`, or `common=10000`; any other value is ignored. The page's heading names
+`freq=100`, `freq=1000`, or `freq=10000`; any other value is ignored. The setting is named for what
+it measures, reports, not birds present or individuals counted
+([decisions.reportingFrequencyParam](../../decisions.md#reportingfrequencyparam)). The page's heading names
 it ("· At least 1 in 1,000"), and the setting follows Region (and County, where shown) on the count
 line.
 

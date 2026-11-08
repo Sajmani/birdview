@@ -330,7 +330,7 @@ func (s *server) next(w http.ResponseWriter, r *http.Request) {
 	// current code (decisions.regionCodesFromData, tech.stableUrls).
 	pins := s.canonicalPins(q)
 	regions := canonicalRegions(q)
-	if (pins || regions) && !q.Has("bird") {
+	if (pins || regions || canonicalFreq(q)) && !q.Has("bird") {
 		http.Redirect(w, r, string(nextURL(q)), http.StatusMovedPermanently)
 		return
 	}
@@ -368,6 +368,20 @@ func (s *server) canonicalPins(q url.Values) bool {
 		}
 	}
 	return changed
+}
+
+// canonicalFreq rewrites, in place, common=, the reporting frequency's name until 2026-11-08, to
+// freq=, unless freq= is already given, and reports whether it rewrote it
+// (decisions.reportingFrequencyParam).
+func canonicalFreq(q url.Values) bool {
+	if !q.Has("common") {
+		return false
+	}
+	if !q.Has("freq") {
+		q["freq"] = q["common"]
+	}
+	q.Del("common")
+	return true
 }
 
 // canonicalRegions rewrites, in place, any region= value BirdView no longer writes to the region's
@@ -1080,10 +1094,10 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	if cc, ok := countyControl(q, opt); ok {
 		out = append(out, cc)
 	}
-	// How common: a threshold on the share each tile states, in the same steps as the frequency
-	// tiers (product.howCommonFilter).
-	hc := nextControl{Label: "How common", Value: "all"}
-	hcAll := nextChoice{Label: "All", Title: "Every bird the other settings choose", On: opt.Common == 0, URL: nextSet(q, "common", "")}
+	// Reporting frequency: a threshold on the share each tile states, in the same steps as the
+	// frequency tiers (product.reportingFrequencyFilter).
+	hc := nextControl{Label: "Reporting frequency", Value: "all"}
+	hcAll := nextChoice{Label: "All", Title: "Every bird the other settings choose", On: opt.Common == 0, URL: nextSet(q, "freq", "")}
 	hcs := []nextChoice{hcAll}
 	for _, n := range []int{100, 1000, 10000} {
 		v := strconv.Itoa(n)
@@ -1093,7 +1107,7 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 		}
 		hcs = append(hcs, nextChoice{Label: "1 in " + comma(int64(n)),
 			Title: "Birds at least 1 in " + comma(int64(n)) + " of the observations in the regions and months chosen",
-			On:    on, URL: nextSet(q, "common", v)})
+			On:    on, URL: nextSet(q, "freq", v)})
 	}
 	hc.Groups = []nextChoiceGroup{{Choices: hcs, OneLine: true}}
 	out = append(out, hc)

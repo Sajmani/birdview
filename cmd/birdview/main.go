@@ -726,7 +726,7 @@ type options struct {
 	Niches      map[string]bool
 	HasNiches   bool
 	// Common keeps only birds at least 1 in Common of the observations in the regions and months in
-	// view; zero keeps every bird (product.howCommonFilter).
+	// view; zero keeps every bird (product.reportingFrequencyFilter).
 	Common  int
 	Metric3 bool // imperial when false
 
@@ -767,7 +767,7 @@ func parseOptions(r *http.Request) options {
 		o.Step = v
 	}
 	o.Metric3 = q.Get("units") == "metric"
-	switch q.Get("common") {
+	switch q.Get("freq") {
 	case "100":
 		o.Common = 100
 	case "1000":
@@ -1103,8 +1103,8 @@ func (s *server) filterSpecies(opt options) ([]*dataset.Species, map[string]bool
 		}
 		return false
 	}
-	// How common: at least 1 in Common of the observations in the regions and months in view, the
-	// share each tile states (product.howCommonFilter).
+	// Reporting frequency: at least 1 in Common of the observations in the regions and months in view, the
+	// share each tile states (product.reportingFrequencyFilter).
 	common := func(sp *dataset.Species) bool {
 		if opt.Common == 0 {
 			return true

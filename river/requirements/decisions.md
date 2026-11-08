@@ -4698,3 +4698,27 @@ groups are rearranged, needs no redirect, and keeps the filter's values the data
 codes are ([regionCodesFromData](#regioncodesfromdata)); the shortcut keeps the coarse choice a birder wants one click
 away, and the habitats themselves remain choosable.
 
+---
+
+## reportingFrequencyParam
+
+**How common becomes Reporting frequency, and `common=` becomes `freq=`**
+
+Date: 2026-11-08
+Decided by: Sameer
+Status: accepted
+Affects: [product.reportingFrequencyFilter](local/product/filtering.md#reportingfrequencyfilter), [tech.stableUrls](local/tech/delivery.md#stableurls)
+
+### Decided
+
+The setting is named **Reporting frequency** and its parameter `freq`, with the same values (`100`,
+`1000`, `10000`). An address with `common=`, which birdview.site served from 2026-11-07, redirects
+permanently to the same address with `freq=`; where both are given, `freq` wins.
+
+### Why
+
+The filter measures the share of reports, not how many birds are present or how many individuals
+were counted. "How common" reads as a claim about the birds; "Reporting frequency" says what was
+measured. The parameter follows the label so the address reads the same way, and the redirect keeps
+the one day's links working, as [tech.stableUrls](local/tech/delivery.md#stableurls) requires of a renamed parameter.
+

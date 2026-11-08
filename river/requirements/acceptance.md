@@ -2004,7 +2004,7 @@ Watched failing: 2026-11-07, as shortcuts: with the group's choice always adding
 
 **Verifies:** [product.nextView](local/product/presentation.md#nextview) · **Level:** code · **Method:** the home page rendered with every such setting all, and with every one narrowed
 
-**Assertions:** Month, Region, County, How common, Family, Habitat, and Diet each offer exactly one
+**Assertions:** Month, Region, County, Reporting frequency, Family, Habitat, and Diet each offer exactly one
 All, as their first choice, at an address where each is all (Region aside, set to a state so County
 shows) and at one where each is narrowed; All is marked exactly when its setting is all.
 

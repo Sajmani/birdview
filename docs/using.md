@@ -99,7 +99,7 @@ Every setting that can be all starts its choices with **All**, marked when it is
 - **Region:** states, provinces, and stretches of open sea. A bird is listed in a region when at
   least 1 in a million of the region's bird records are of it. **Here** chooses the region you are
   in; your browser works it out, so your location never reaches the server. Here needs JavaScript.
-- **How common:** only the birds that are at least 1 in 100, 1 in 1,000, or 1 in 10,000 of the
+- **Reporting frequency:** only the birds that are at least 1 in 100, 1 in 1,000, or 1 in 10,000 of the
   species observations in the regions and months you chose. Combined with an order such as
   **Length** or **Wingspan**, it lines up the familiar birds of a place and season by size, so a
   bird you know, a Herring Gull or a Red-tailed Hawk, shows how big the others are. Pinned birds

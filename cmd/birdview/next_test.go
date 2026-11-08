@@ -1415,7 +1415,7 @@ func TestNextWelcomeLine(t *testing.T) {
 func TestNextKeepsEveryParameter(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	const every = "/?by=mass&common=10000&family=Corvidae&find=crow&habitat=Forest&month=May&names=world&niche=Omnivore&pin=amecro&pin=blujay&region=USA.33_1&rev=1&units=metric"
+	const every = "/?by=mass&freq=10000&family=Corvidae&find=crow&habitat=Forest&month=May&names=world&niche=Omnivore&pin=amecro&pin=blujay&region=USA.33_1&rev=1&units=metric"
 	// From Pinned only and from a count, so that no broken link can pass
 	// for one that changes the same keys on purpose.
 	for _, c := range []struct {
@@ -1450,7 +1450,7 @@ func TestNextKeepsEveryParameter(t *testing.T) {
 			return changed
 		}
 		special := map[string][]string{
-			string(p.ResetURL):     {"by", "common", "family", "find", "habitat", "month", "names", "niche", "region", "rev", "show", "units"},
+			string(p.ResetURL):     {"by", "family", "find", "freq", "habitat", "month", "names", "niche", "region", "rev", "show", "units"},
 			string(p.ClearPinsURL): clearPins,
 			string(p.CloseURL):     {"find"},
 		}
@@ -1934,13 +1934,13 @@ func TestPinnedGroupLeadsThePage(t *testing.T) {
 	}
 }
 
-// TestHowCommonFilters asserts product.howCommonFilter: at each threshold the page draws exactly the
+// TestReportingFrequencyFilters asserts product.reportingFrequencyFilter: at each threshold the page draws exactly the
 // birds whose share of the observations in view meets it, a pinned bird is drawn whatever the
 // setting, the setting offers All and the three thresholds with the chosen one marked, the heading
 // names it, and a value it does not offer is ignored.
 //
-// Verifies: product.howCommonFilter. Criterion: app.nextViewDrawsOneSet.
-func TestHowCommonFilters(t *testing.T) {
+// Verifies: product.reportingFrequencyFilter. Criterion: app.nextViewDrawsOneSet.
+func TestReportingFrequencyFilters(t *testing.T) {
 	s := newTestServer(t)
 	all := nextAt(s, "/?show=all&month=all")
 	share := map[string][2]int64{}
@@ -1954,7 +1954,7 @@ func TestHowCommonFilters(t *testing.T) {
 	}
 	narrowed := false
 	for _, n := range []int64{100, 1000, 10000} {
-		p := nextAt(s, fmt.Sprintf("/?show=all&month=all&common=%d", n))
+		p := nextAt(s, fmt.Sprintf("/?show=all&month=all&freq=%d", n))
 		got := map[string]bool{}
 		for _, tl := range p.Tiles {
 			got[tl.S.ID] = true
@@ -1962,14 +1962,14 @@ func TestHowCommonFilters(t *testing.T) {
 		for id := range share {
 			if got[id] != kept(id, n) {
 				v := share[id]
-				t.Errorf("common=%d: %s drawn %v at %d in %d", n, id, got[id], v[0], v[1])
+				t.Errorf("freq=%d: %s drawn %v at %d in %d", n, id, got[id], v[0], v[1])
 			}
 		}
 		if len(p.Tiles) < len(all.Tiles) && len(p.Tiles) > 0 {
 			narrowed = true
 		}
 		if !strings.Contains(p.Title, "· At least 1 in "+comma(n)) {
-			t.Errorf("common=%d: the heading reads %q", n, p.Title)
+			t.Errorf("freq=%d: the heading reads %q", n, p.Title)
 		}
 	}
 	if !narrowed {
@@ -1982,31 +1982,42 @@ func TestHowCommonFilters(t *testing.T) {
 			rare = id
 		}
 	}
-	if p := nextAt(s, "/?show=all&month=all&common=100&pin="+rare); !hasTile(p, rare) {
-		t.Errorf("%s, pinned, is not drawn under common=100; pins stay whatever the setting", rare)
+	if p := nextAt(s, "/?show=all&month=all&freq=100&pin="+rare); !hasTile(p, rare) {
+		t.Errorf("%s, pinned, is not drawn under freq=100; pins stay whatever the setting", rare)
 	}
-	c := nextAt(s, "/?common=1000")
+	c := nextAt(s, "/?freq=1000")
 	var hc *nextControl
 	for i := range c.Controls {
-		if c.Controls[i].Label == "How common" {
+		if c.Controls[i].Label == "Reporting frequency" {
 			hc = &c.Controls[i]
 		}
 	}
 	if hc == nil {
-		t.Fatal("no How common setting")
+		t.Fatal("no Reporting frequency setting")
 	}
 	var labels []string
 	for _, ch := range hc.Groups[0].Choices {
 		labels = append(labels, ch.Label)
 		if ch.On != (ch.Label == "1 in 1,000") {
-			t.Errorf("with common=1000, %s is on %v", ch.Label, ch.On)
+			t.Errorf("with freq=1000, %s is on %v", ch.Label, ch.On)
 		}
 	}
 	if strings.Join(labels, "|") != "All|1 in 100|1 in 1,000|1 in 10,000" || hc.Value != "1 in 1,000" {
-		t.Errorf("How common offers %v, reading %q", labels, hc.Value)
+		t.Errorf("Reporting frequency offers %v, reading %q", labels, hc.Value)
 	}
-	if p := nextAt(s, "/?show=all&month=all&common=5"); len(p.Tiles) != len(all.Tiles) || strings.Contains(p.Title, "At least") {
-		t.Errorf("common=5, a value not offered, draws %d of %d birds, heading %q; it is ignored", len(p.Tiles), len(all.Tiles), p.Title)
+	if p := nextAt(s, "/?show=all&month=all&freq=5"); len(p.Tiles) != len(all.Tiles) || strings.Contains(p.Title, "At least") {
+		t.Errorf("freq=5, a value not offered, draws %d of %d birds, heading %q; it is ignored", len(p.Tiles), len(all.Tiles), p.Title)
+	}
+	// common= was the parameter's name until 2026-11-08 (decisions.reportingFrequencyParam).
+	for from, to := range map[string]string{
+		"/?common=1000&by=mass":             "/?by=mass&freq=1000",
+		"/?common=100&freq=10000&month=May": "/?freq=10000&month=May",
+	} {
+		w := httptest.NewRecorder()
+		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, from, nil))
+		if w.Code != http.StatusMovedPermanently || w.Header().Get("Location") != to {
+			t.Errorf("GET %s = %d to %q, want 301 to %s", from, w.Code, w.Header().Get("Location"), to)
+		}
 	}
 }
 
@@ -2132,15 +2143,15 @@ func TestAllAlwaysOffered(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	settings := []string{"Month", "Region", "County", "How common", "Family", "Habitat", "Diet"}
+	settings := []string{"Month", "Region", "County", "Reporting frequency", "Family", "Habitat", "Diet"}
 	all := "/?region=USA.5_1"
-	narrow := "/?region=USA.5.19_1&month=May&common=1000&family=Corvidae&habitat=Forest&niche=Granivore"
+	narrow := "/?region=USA.5.19_1&month=May&freq=1000&family=Corvidae&habitat=Forest&niche=Granivore"
 	allRe := regexp.MustCompile(`<a class="btn( on)?" href="[^"]*"[^>]*>All</a>`)
 	for _, c := range []struct {
 		url    string
 		marked map[string]bool
 	}{
-		{all, map[string]bool{"Month": true, "Region": false, "County": true, "How common": true, "Family": true, "Habitat": true, "Diet": true}},
+		{all, map[string]bool{"Month": true, "Region": false, "County": true, "Reporting frequency": true, "Family": true, "Habitat": true, "Diet": true}},
 		{narrow, map[string]bool{}},
 	} {
 		_, body := get(t, s, c.url)
