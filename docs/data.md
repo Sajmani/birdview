@@ -365,7 +365,14 @@ resident, the bias that keeps record counts out of the scope rule; see [Scope](#
 ## Habitat and diet
 
 Both come from **AVONET**, with its definitions quoted in the control. AVONET records **one**
-primary habitat and one primary diet per species, so a bird that uses two is filed under one.
+primary habitat and one primary diet per species, so a bird that uses two is filed under one, and
+for a migrant the habitat is in practice where it breeds: Black-bellied Plover is Grassland.
+
+**The habitat filter offers five groups** of AVONET's eleven habitats: Coast and sea (Coastal,
+Marine), Fresh water (Wetland, Riverine), Woods (Forest, Woodland), Open country (Grassland,
+Shrubland, Desert, Rock), and Towns and farms (Human Modified). A bird stands in a group when any
+of its habitats does. A bird's page names its exact habitats. **BirdView reviews every bird's
+habitats, species by species**, for where a North American birder sees it; the review is under way.
 
 BirdView adds values where that hides something, and **marks every addition**: `birdview` where
 BirdView decided it, `derived` where it follows from AVONET's own data by a stated rule. All are

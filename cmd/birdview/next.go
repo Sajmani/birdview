@@ -322,7 +322,8 @@ func (s *server) next(w http.ResponseWriter, r *http.Request) {
 	// A region named by a value BirdView no longer writes is addressed by its
 	// current code (decisions.regionCodesFromData, tech.stableUrls).
 	pins := s.canonicalPins(q)
-	if regions := canonicalRegions(q); (pins || regions) && !q.Has("bird") {
+	regions := canonicalRegions(q)
+	if habitats := canonicalHabitats(q); (pins || regions || habitats) && !q.Has("bird") {
 		http.Redirect(w, r, string(nextURL(q)), http.StatusMovedPermanently)
 		return
 	}
@@ -358,6 +359,29 @@ func (s *server) canonicalPins(q url.Values) bool {
 		if id, ok := s.aliasOf[v]; ok {
 			q["pin"][i], changed = id, true
 		}
+	}
+	return changed
+}
+
+// canonicalHabitats rewrites, in place, any habitat= value naming one of AVONET's habitats to its
+// group, once per group, and reports whether it rewrote one (decisions.habitatGroups).
+func canonicalHabitats(q url.Values) bool {
+	changed := false
+	var out []string
+	seen := map[string]bool{}
+	for _, v := range q["habitat"] {
+		if g := trait.GroupOf(v); g != "" {
+			v, changed = g, true
+		}
+		if !seen[v] {
+			seen[v] = true
+			out = append(out, v)
+		} else {
+			changed = true
+		}
+	}
+	if changed {
+		q["habitat"] = out
 	}
 	return changed
 }
@@ -890,7 +914,7 @@ func (s *server) nextTitle(opt options, pinnedOnly bool) string {
 		b.WriteString(" · " + label + ": " + nextList(ls))
 	}
 	if opt.HasHabitats {
-		terms("Habitat", trait.Habitats, opt.Habitats)
+		terms("Habitat", trait.HabitatGroupTerms(), opt.Habitats)
 	}
 	if opt.HasNiches {
 		terms("Diet", trait.Niches, opt.Niches)
@@ -1138,7 +1162,7 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 		return c
 	}
 	out = append(out,
-		traitCtl("Habitat", "habitat", trait.Habitats, opt.Habitats, opt.HasHabitats),
+		traitCtl("Habitat", "habitat", trait.HabitatGroupTerms(), opt.Habitats, opt.HasHabitats),
 		traitCtl("Diet", "niche", trait.Niches, opt.Niches, opt.HasNiches))
 
 	uc := nextControl{Label: "Units", Value: "imperial"}

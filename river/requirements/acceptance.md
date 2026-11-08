@@ -1975,6 +1975,22 @@ Hawaii break, which is why it was replaced.
 
 Watched failing: 2026-10-03, by filing Hawaii under Great Lakes and Texas under New England (both caught on rank), and by filing Navassa under Mid-Atlantic and Alaska under Gulf Coast (both caught per region, Alaska at 0.446 against 0.465 for regions at large).
 
+### habitatGroupsFilter
+
+**Habitat filters by five groups of AVONET's habitats, and old addresses redirect**
+
+**Verifies:** [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters), [decisions.habitatGroups](decisions.md#habitatgroups), [tech.stableUrls](local/tech/delivery.md#stableurls) · **Level:** code · **Method:** the groups checked against AVONET's vocabulary, and the home page rendered and requested
+
+**Assertions:** the five groups hold each of AVONET's eleven habitats exactly once, with the
+values, labels, and order the requirement gives; each group draws exactly the birds with any habitat
+in it, AVONET's or BirdView's (the heron, Coastal by BirdView's addition, is in Coast and sea); the
+setting offers the five; and an address naming AVONET's habitats redirects permanently to their
+groups, once each.
+
+**Run:** `go test ./internal/trait/ -run TestHabitatGroupsPartitionAVONET && go test ./cmd/birdview/ -run TestHabitatGroupsFilter`
+**Status: verified 2026-11-07, passing.**
+Watched failing: 2026-11-07, with the filter matching AVONET's values instead of their groups (eight failures, among them "Coast and sea omits the heron"), and before the groups existed.
+
 ### habitatReviewComplete
 
 **Every drawn species has a habitat review, current with AVONET, and only reviewed additions count**

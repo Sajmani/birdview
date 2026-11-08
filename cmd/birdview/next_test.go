@@ -36,6 +36,7 @@ import (
 
 	"birdview/internal/dataset"
 	"birdview/internal/month"
+	"birdview/internal/trait"
 )
 
 // fixNextClock sets /next's clock to a day in m for the rest of the test.
@@ -1093,7 +1094,7 @@ func TestNextHeading(t *testing.T) {
 		"/":                           "Showing birds in every month",
 		"/?show=pinned":               "Showing pinned birds",
 		"/?region=USA.33_1&month=Oct": "Showing birds in New York in October",
-		"/?family=Corvidae&habitat=Forest&niche=Granivore&niche=Frugivore&month=May&month=Jun": "Showing birds in May or June · Family: Corvidae · Habitat: Forest · Diet: Eats seeds or Eats fruit",
+		"/?family=Corvidae&habitat=woods&niche=Granivore&niche=Frugivore&month=May&month=Jun": "Showing birds in May or June · Family: Corvidae · Habitat: Woods · Diet: Eats seeds or Eats fruit",
 	} {
 		if got := nextAt(s, target).Title; got != want {
 			t.Errorf("%s: the heading reads %q, want %q", target, got, want)
@@ -1309,7 +1310,7 @@ func TestNextFirstCommitsOnClick(t *testing.T) {
 // BirdView draws, with Click a bird and How to read a drawing, and no key
 // line ("Drawn to scale", "Solid is measured"); then Try, with no "New here?", whose
 // five comparisons each pin six real birds and show only them, by length,
-// whose grassland hunters draw only grassland birds that hunt animals, whose
+// whose open-country hunters draw only open-country birds that hunt animals, whose
 // herons and ducks draw only those two families in every month, and
 // whose birds around you now is /#here-and-now with its status naming the
 // Region setting.
@@ -1376,23 +1377,24 @@ func TestNextWelcomeLine(t *testing.T) {
 			if !strings.Contains(href, "month=all") {
 				t.Errorf("herons and ducks is %s; want every month", href)
 			}
-		case text == "grassland hunters":
+		case text == "open-country hunters":
 			p := nextAt(s, href)
 			if len(p.Tiles) < 10 {
-				t.Errorf("the grassland hunters draw %d birds", len(p.Tiles))
+				t.Errorf("the open-country hunters draw %d birds", len(p.Tiles))
 			}
 			has := func(as []dataset.Assignment, v string) bool {
 				return slices.ContainsFunc(as, func(a dataset.Assignment) bool { return a.Value == v })
 			}
 			for _, tl := range p.Tiles {
-				if !has(tl.S.Habitats, "Grassland") || !has(tl.S.Niches, "Vertivore") {
-					t.Errorf("the grassland hunters draw %s, of habitats %v and niches %v", tl.S.ID, tl.S.Habitats, tl.S.Niches)
+				open := slices.ContainsFunc(tl.S.Habitats, func(a dataset.Assignment) bool { return trait.GroupOf(a.Value) == "open" })
+				if !open || !has(tl.S.Niches, "Vertivore") {
+					t.Errorf("the open-country hunters draw %s, of habitats %v and niches %v", tl.S.ID, tl.S.Habitats, tl.S.Niches)
 				}
 			}
 		}
 	}
-	if !strings.Contains(w[1], ">grassland hunters</a>") {
-		t.Error("the welcome line does not offer the grassland hunters")
+	if !strings.Contains(w[1], ">open-country hunters</a>") {
+		t.Error("the welcome line does not offer the open-country hunters")
 	}
 	if sizes != 5 {
 		t.Errorf("the welcome line compares %d sizes of birds, want 5 (tiny, small, medium, large, huge)", sizes)
@@ -1413,7 +1415,7 @@ func TestNextWelcomeLine(t *testing.T) {
 func TestNextKeepsEveryParameter(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	const every = "/?by=mass&common=10000&family=Corvidae&find=crow&habitat=Forest&month=May&names=world&niche=Omnivore&pin=amecro&pin=blujay&region=USA.33_1&rev=1&units=metric"
+	const every = "/?by=mass&common=10000&family=Corvidae&find=crow&habitat=woods&month=May&names=world&niche=Omnivore&pin=amecro&pin=blujay&region=USA.33_1&rev=1&units=metric"
 	// From Pinned only and from a count, so that no broken link can pass
 	// for one that changes the same keys on purpose.
 	for _, c := range []struct {
@@ -2005,5 +2007,56 @@ func TestHowCommonFilters(t *testing.T) {
 	}
 	if p := nextAt(s, "/?show=all&month=all&common=5"); len(p.Tiles) != len(all.Tiles) || strings.Contains(p.Title, "At least") {
 		t.Errorf("common=5, a value not offered, draws %d of %d birds, heading %q; it is ignored", len(p.Tiles), len(all.Tiles), p.Title)
+	}
+}
+
+// TestHabitatGroupsFilter asserts the habitat filter by groups (decisions.habitatGroups): a group draws exactly the
+// birds with any habitat in it, AVONET's or BirdView's; the setting offers the five groups; and an
+// address naming AVONET's habitats redirects to their groups, once each.
+//
+// Verifies: product.habitatAndDietFilters, tech.stableUrls. Criterion: acceptance.habitatGroupsFilter.
+func TestHabitatGroupsFilter(t *testing.T) {
+	s := newTestServer(t)
+	all := nextAt(s, "/?show=all&month=all")
+	for _, g := range trait.HabitatGroups {
+		p := nextAt(s, "/?show=all&month=all&habitat="+g.Value)
+		got := map[string]bool{}
+		for _, tl := range p.Tiles {
+			got[tl.S.ID] = true
+		}
+		for _, tl := range all.Tiles {
+			in := false
+			for _, a := range tl.S.Habitats {
+				in = in || trait.GroupOf(a.Value) == g.Value
+			}
+			if got[tl.S.ID] != in {
+				t.Errorf("habitat=%s: %s drawn %v, has %v", g.Value, tl.S.ID, got[tl.S.ID], tl.S.Habitats)
+			}
+		}
+	}
+	if p := nextAt(s, "/?show=all&month=all&habitat=coast"); !hasTile(p, "greblu") {
+		t.Error("Coast and sea omits the heron, whose BirdView habitat is Coastal")
+	}
+	var labels []string
+	for _, c := range nextAt(s, "/").Controls {
+		if c.Label == "Habitat" {
+			for _, ch := range c.Groups[0].Choices {
+				labels = append(labels, ch.Label)
+			}
+		}
+	}
+	if strings.Join(labels, "|") != "Coast and sea|Fresh water|Woods|Open country|Towns and farms" {
+		t.Errorf("Habitat offers %v", labels)
+	}
+	for from, to := range map[string]string{
+		"/?habitat=Marine&by=mass":                    "/?by=mass&habitat=coast",
+		"/?habitat=Forest&habitat=Woodland":           "/?habitat=woods",
+		"/?habitat=Coastal&habitat=Wetland&month=May": "/?habitat=coast&habitat=freshwater&month=May",
+	} {
+		w := httptest.NewRecorder()
+		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, from, nil))
+		if w.Code != http.StatusMovedPermanently || w.Header().Get("Location") != to {
+			t.Errorf("GET %s = %d to %q, want 301 to %s", from, w.Code, w.Header().Get("Location"), to)
+		}
 	}
 }

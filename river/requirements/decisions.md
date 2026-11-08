@@ -4638,3 +4638,34 @@ build holds complete is that process, since a new species, or a changed AVONET v
 naming it. `trait.Supplementary` said it was "kept deliberately short", which the requirement's "as
 many as apply" already overruled; a review of every species settles it.
 
+---
+
+## habitatGroups
+
+**The habitat filter offers five groups of AVONET's habitats**
+
+Date: 2026-11-07
+Decided by: Sameer
+Status: accepted
+Affects: [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters), [tech.stableUrls](local/tech/delivery.md#stableurls), [product.nextView](local/product/presentation.md#nextview)
+
+### Decided
+
+Habitat offers Coast and sea (Coastal, Marine), Fresh water (Wetland, Riverine), Woods (Forest,
+Woodland), Open country (Grassland, Shrubland, Desert, Rock), and Towns and farms (Human Modified),
+as `habitat=coast`, `freshwater`, `woods`, `open`, and `towns`. A bird is in a group when any of its
+habitats is. AVONET's eleven remain the data: the habitat review adds AVONET terms, and the species
+page names them. Old addresses naming an AVONET habitat redirect to its group. The welcome line's
+grassland hunters become the open-country hunters.
+
+### Why
+
+The filter is for "which birds am I likely to see here", and eleven categories are finer than a
+birder's question and than AVONET's one-value data can support. AVONET's Coastal means on shore and
+its Marine in the water near it, a distinction a Long-tailed Duck off a Brooklyn beach does not
+respect; Rock is both a mountaintop and a jetty, so Purple Sandpiper's rocks are coastal. Grouping
+removes those boundaries from the filter, makes each species' review a question of five rather
+than eleven, and invents no category, each group being a union of AVONET's own terms. The owner
+chose this over letting the place stand in for habitat, which remains an idea for later
+([todo.placeAsHabitat](../todo.md#placeashabitat)).
+

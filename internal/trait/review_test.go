@@ -59,3 +59,36 @@ func TestHabitatReviewParsesAndApplies(t *testing.T) {
 		}
 	}
 }
+
+// TestHabitatGroupsPartitionAVONET asserts decisions.habitatGroups: the five groups hold every one of AVONET's
+// habitats exactly once, in the order and with the values and labels the requirement gives.
+//
+// Verifies: product.habitatAndDietFilters. Criterion: acceptance.habitatGroupsFilter.
+func TestHabitatGroupsPartitionAVONET(t *testing.T) {
+	var got []string
+	seen := map[string]string{}
+	for _, g := range HabitatGroups {
+		got = append(got, g.Value+"="+g.Label)
+		for _, term := range g.Terms {
+			if other, dup := seen[term]; dup {
+				t.Errorf("%s is in both %s and %s", term, other, g.Value)
+			}
+			seen[term] = g.Value
+			if GroupOf(term) != g.Value {
+				t.Errorf("GroupOf(%q) = %q, want %q", term, GroupOf(term), g.Value)
+			}
+		}
+	}
+	for _, h := range Habitats {
+		if seen[h.Value] == "" {
+			t.Errorf("AVONET's %s is in no group", h.Value)
+		}
+	}
+	want := "coast=Coast and sea|freshwater=Fresh water|woods=Woods|open=Open country|towns=Towns and farms"
+	if strings.Join(got, "|") != want {
+		t.Errorf("groups are %v, want %s", got, want)
+	}
+	if seen["Rock"] != "open" || seen["Marine"] != "coast" {
+		t.Errorf("Rock is in %q and Marine in %q", seen["Rock"], seen["Marine"])
+	}
+}

@@ -132,6 +132,25 @@ Both are multi-select and compose with region and family ([filtersCompose](#filt
 options shows birds in **either**, because picking two places asks for the birds of both places
 and not for the birds that use both.
 
+**Habitat offers five groups of AVONET's habitats, not its eleven**
+([decisions.habitatGroups](../../decisions.md#habitatgroups)), each an exact union of AVONET's terms, so nothing is invented:
+
+| Group | `habitat=` | AVONET's habitats |
+| --- | --- | --- |
+| Coast and sea | `coast` | Coastal, Marine |
+| Fresh water | `freshwater` | Wetland, Riverine |
+| Woods | `woods` | Forest, Woodland |
+| Open country | `open` | Grassland, Shrubland, Desert, Rock |
+| Towns and farms | `towns` | Human Modified |
+
+A bird is in a group when any of its habitats, AVONET's or BirdView's, is. The filter answers
+"which birds am I likely to see here", and a birder stands in a place, not a category: a Long-tailed
+Duck five feet off a beach is AVONET's Marine, the Purple Sandpiper on the jetty behind it is
+Grassland in AVONET and coastal in fact, and a salt marsh is Coastal by AVONET's own definition. The
+species page still names AVONET's exact habitat and BirdView's additions with their reasons. An
+address naming one of AVONET's habitats, as the filter wrote before 2026-11-07, redirects to its
+group.
+
 **The classification is AVONET's, taken verbatim, and the definitions are quoted.** The values
 are AVONET's own strings, and the value in the URL — `?niche=Invertivore`; the control shows a
 plain-English label for each — "Eats insects" for `Invertivore` — with AVONET's own definition as

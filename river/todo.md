@@ -1174,3 +1174,19 @@ stating its length and wingspan as a share of the anchor's. Two things stand in 
 cannot yet choose the shorebirds ([traitAudit](#traitaudit): Black-bellied Plover is Grassland). And Family offers
 shorebirds only family by family, under Charadriiformes ("Shorebirds, Gulls, and Auks").
 
+## placeAsHabitat
+
+**Let the place stand in for habitat: birds recorded near here, this month**
+
+Status: parked
+Owner: Sameer
+Gate: after counties ship ([countyRegions](#countyregions))
+
+Proposed 2026-11-07 as the longer-term answer to "which birds am I likely to see here", which
+eBird's hotspots answer by place rather than by habitat (though Plumb Beach is beach, salt marsh,
+and bay at once). GBIF records carry coordinates, so a SQL download grouped by small grid cells (a
+kilometer or two) and month would give the birds recorded near a point, and a beach cell and a park
+cell would differ with no habitat classification at all. Open: cell size; the minimum record count,
+as for counties ([decisions.countyListingRule](requirements/decisions.md#countylistingrule)); keeping Here private, since the reader's location stays in
+the browser ([product.locationStaysInBrowser](requirements/local/product/filtering.md#locationstaysinbrowser)); and the data's size.
+

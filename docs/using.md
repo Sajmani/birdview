@@ -103,9 +103,11 @@ not colored, and the modeled head, neck, and body are gray.
   bird you know, a Herring Gull or a Red-tailed Hawk, shows how big the others are. Pinned birds
   stay on the page whatever it is set to.
 - **Family:** grouped by taxonomic order, in field-guide sequence.
-- **Habitat** and **Diet:** where a bird mostly lives and what it mostly eats, per species, from
-  **AVONET**. BirdView adds a few more and marks them as its own; [everything BirdView adds](/added)
-  is listed in one place.
+- **Habitat:** **Coast and sea**, **Fresh water**, **Woods**, **Open country**, or **Towns and
+  farms**, each a group of AVONET's habitats; a bird is in a group when any of its habitats is.
+- **Diet:** what a bird mostly eats, per species, from **AVONET**.
+- For both, BirdView adds values where AVONET's single one hides where a birder sees the bird, and
+  marks them as its own; [everything BirdView adds](/added) is listed in one place.
 - **Units:** **Imperial**, inches and ounces, or **Metric**, centimeters and grams.
 - **Names:** **North American** names, such as Dovekie and Rough-legged Hawk, or **World** names,
   AviList's: Little Auk, Rough-legged Buzzard.
@@ -157,10 +159,10 @@ using the *1 in N* figure on every tile. The tiers are powers of ten: 1 in 10 to
   - *Huge:* California Condor, American White Pelican, Mute Swan, Magnificent Frigatebird, Bald
     Eagle, and Black-footed Albatross, all with wings over two meters. The albatross is the
     shortest, 709 mm, yet spans 2265 mm; the frigatebird weighs about a seventh of the swan.
-- **See the [grassland hunters](/?habitat=Grassland&niche=Vertivore).** Habitat set to Grassland
-  and Diet to Hunts animals: fourteen hawks, falcons, owls, and an eagle. The Golden Eagle weighs
-  about 28 times as much as the Burrowing Owl, 4.25 kg against 151 g, and spans 2056 mm against
-  600 mm.
+- **See the [open-country hunters](/?habitat=open&niche=Vertivore).** Habitat set to Open country
+  and Diet to Hunts animals: seventeen hawks, falcons, owls, an eagle, and Northern Shrike, a
+  songbird that hunts like a hawk. The Golden Eagle weighs 67 times as much as the shrike, 4.25 kg
+  against 63 g, and spans 2056 mm against 327 mm.
 - **See all [herons and ducks](/?family=Ardeidae&family=Anatidae&month=all) together.** Similar
   lengths, different builds: herons are nearly all neck and leg, ducks nearly all body.
 - **"Big" depends on the measure.** Order every bird by [length](/?by=length&month=all&show=all),

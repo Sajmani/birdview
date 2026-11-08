@@ -3,7 +3,7 @@
 Major changes to BirdView, newest first: features, data sources, and how the drawings are made.
 Small fixes are in the commit history. With no numbered releases yet, changes are grouped by period.
 
-## 2026-11-07 — How common
+## 2026-11-07 — How common, and habitats in groups
 
 ### Added
 
@@ -11,6 +11,12 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
   observations in the regions and months chosen. Sorted by length or wingspan, the familiar birds of
   a place and season line up by size across families: in Brooklyn in November, Ring-billed Gull
   shares a wingspan tier with Red-tailed Hawk and Common Raven.
+
+### Changed
+
+- **Habitat** offers five groups: Coast and sea, Fresh water, Woods, Open country, and Towns and
+  farms, each a group of AVONET's eleven habitats. Old addresses still work. The welcome line's
+  grassland hunters are now the open-country hunters.
 
 ## 2026-11-03 — A sky-blue cube, and regions by their data codes
 

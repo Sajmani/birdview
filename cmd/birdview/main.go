@@ -788,6 +788,11 @@ func parseOptions(r *http.Request) options {
 	}
 	_, o.HasHabitats = q["habitat"]
 	for _, v := range q["habitat"] {
+		// A group's value, or one of AVONET's habitats from an older address, read as its group
+		// (decisions.habitatGroups); the home page redirects the latter first.
+		if g := trait.GroupOf(v); g != "" {
+			v = g
+		}
 		if v != "" {
 			o.Habitats[v] = true
 		}
@@ -1112,11 +1117,24 @@ func (s *server) filterSpecies(opt options) ([]*dataset.Species, map[string]bool
 		num, den := shareIn(sp, s.ds, opt)
 		return den > 0 && num*int64(opt.Common) >= den
 	}
+	// Habitat chooses groups of AVONET's habitats; a bird is in a group when any of its habitats,
+	// AVONET's or BirdView's, is (decisions.habitatGroups).
+	inHabitat := func(sp *dataset.Species) bool {
+		if !opt.HasHabitats {
+			return true
+		}
+		for _, a := range sp.Habitats {
+			if opt.Habitats[trait.GroupOf(a.Value)] {
+				return true
+			}
+		}
+		return false
+	}
 	var filtered []*dataset.Species
 	for i := range s.ds.Species {
 		sp := &s.ds.Species[i]
 		if selected[sp.Family] && inRegion(sp) && inMonth(sp) &&
-			anyAssigned(sp.Habitats, opt.Habitats, opt.HasHabitats) &&
+			inHabitat(sp) &&
 			anyAssigned(sp.Niches, opt.Niches, opt.HasNiches) && common(sp) {
 			filtered = append(filtered, sp)
 		}
