@@ -132,24 +132,30 @@ Both are multi-select and compose with region and family ([filtersCompose](#filt
 options shows birds in **either**, because picking two places asks for the birds of both places
 and not for the birds that use both.
 
-**Habitat offers five groups of AVONET's habitats, not its eleven**
-([decisions.habitatGroups](../../decisions.md#habitatgroups)), each an exact union of AVONET's terms, so nothing is invented:
+**Habitat's choices are arranged in five groups of AVONET's habitats, one group to a line, each
+line led by a choice that takes the whole group** ([decisions.habitatGroupShortcuts](../../decisions.md#habitatgroupshortcuts)). Each group is an
+exact union of AVONET's terms, so nothing is invented:
 
-| Group | `habitat=` | AVONET's habitats |
-| --- | --- | --- |
-| Coast and sea | `coast` | Coastal, Marine |
-| Fresh water | `freshwater` | Wetland, Riverine |
-| Woods | `woods` | Forest, Woodland |
-| Open country | `open` | Grassland, Shrubland, Desert, Rock |
-| Towns and farms | `towns` | Human Modified |
+| Group | AVONET's habitats |
+| --- | --- |
+| Coast and sea | Coastal, Marine |
+| Fresh water | Wetland, Riverine |
+| Woods | Forest, Woodland |
+| Open country | Grassland, Shrubland, Desert, Rock |
+| Towns and farms | Human Modified |
 
-A bird is in a group when any of its habitats, AVONET's or BirdView's, is. The filter answers
-"which birds am I likely to see here", and a birder stands in a place, not a category: a Long-tailed
-Duck five feet off a beach is AVONET's Marine, the Purple Sandpiper on the jetty behind it is
-Grassland in AVONET and coastal in fact, and a salt marsh is Coastal by AVONET's own definition. The
-species page still names AVONET's exact habitat and BirdView's additions with their reasons. An
-address naming one of AVONET's habitats, as the filter wrote before 2026-11-07, redirects to its
-group.
+**A group is a shortcut, not a value.** The address carries only AVONET's habitats
+(`habitat=Coastal&habitat=Marine`), and the filter matches them as before. A group's choice is
+marked when every habitat in it is chosen; choosing it adds those not yet chosen, and choosing it
+again removes them all. Each habitat on its line can still be chosen alone. Towns and farms holds
+one habitat, so its line is that habitat alone. The page's heading names
+a fully chosen group by its label, and any other chosen habitat by its own.
+
+The groups answer "which birds am I likely to see here", and a birder stands in a place, not a
+category: a Long-tailed Duck five feet off a beach is AVONET's Marine, the Purple Sandpiper on the
+jetty behind it is Grassland in AVONET and coastal in fact, and a salt marsh is Coastal by AVONET's
+own definition. The species page still names AVONET's exact habitat and BirdView's additions with
+their reasons.
 
 **The classification is AVONET's, taken verbatim, and the definitions are quoted.** The values
 are AVONET's own strings, and the value in the URL — `?niche=Invertivore`; the control shows a

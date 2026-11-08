@@ -860,7 +860,7 @@ home page in those. Its footer carries the full credits, which every other page 
   around you now (this address with `#here-and-now`: the
   reader's region found in the browser replaces the region, the month is set to the browser's
   current month, and every other setting is kept), tiny, small, medium, large, and huge birds (six
-  pinned and shown alone, by length), the open-country hunters (Habitat Open country and Diet Hunts
+  pinned and shown alone, by length), the open-country hunters (Habitat's Open country and Diet Hunts
   animals), all herons and ducks, and more ideas. A rule ends the
   header.
 - **The order of the page** (Sameer, 2026-10-28). Under the header, top to bottom: a heading

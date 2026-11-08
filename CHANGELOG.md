@@ -14,9 +14,10 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 
 ### Changed
 
-- **Habitat** offers five groups: Coast and sea, Fresh water, Woods, Open country, and Towns and
-  farms, each a group of AVONET's eleven habitats. Old addresses still work. The welcome line's
-  grassland hunters are now the open-country hunters.
+- **Habitat** arranges AVONET's eleven habitats in five groups, a line each: Coast and sea, Fresh
+  water, Woods, Open country, and Towns and farms. A group's name chooses all its habitats at once,
+  and each can still be chosen alone. The welcome line's grassland hunters are now the open-country
+  hunters.
 
 ## 2026-11-03 — A sky-blue cube, and regions by their data codes
 

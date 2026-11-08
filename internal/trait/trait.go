@@ -31,6 +31,7 @@
 package trait
 
 import (
+	"slices"
 	"strings"
 
 	"birdview/internal/dataset"
@@ -80,47 +81,31 @@ var Habitats = []Term{
 	{Value: "Marine", Label: "Coastal and open sea", Description: "Pelagic, on sea near coasts, including species in the intertidal zone on beaches, and those pelagic species nesting near the sea on cliffs, islets and islands."},
 }
 
-// HabitatGroup is one choice of the habitat filter: a union of AVONET's habitats
-// (decisions.habitatGroups).
+// HabitatGroup is a shortcut in the habitat filter: one choice that selects or clears several of
+// AVONET's habitats at once, each still chosen on its own (decisions.habitatGroupShortcuts).
 type HabitatGroup struct {
-	Value, Label string
-	Terms        []string
+	Label string
+	Terms []string
 }
 
-// HabitatGroups are the habitat filter's choices, in the order it offers them. Each is a union of
-// AVONET's habitats, and together they hold every one exactly once.
+// HabitatGroups are the habitat filter's lines, in the order it offers them. Together they hold
+// every one of AVONET's habitats exactly once.
 var HabitatGroups = []HabitatGroup{
-	{Value: "coast", Label: "Coast and sea", Terms: []string{"Coastal", "Marine"}},
-	{Value: "freshwater", Label: "Fresh water", Terms: []string{"Wetland", "Riverine"}},
-	{Value: "woods", Label: "Woods", Terms: []string{"Forest", "Woodland"}},
-	{Value: "open", Label: "Open country", Terms: []string{"Grassland", "Shrubland", "Desert", "Rock"}},
-	{Value: "towns", Label: "Towns and farms", Terms: []string{"Human Modified"}},
+	{Label: "Coast and sea", Terms: []string{"Coastal", "Marine"}},
+	{Label: "Fresh water", Terms: []string{"Wetland", "Riverine"}},
+	{Label: "Woods", Terms: []string{"Forest", "Woodland"}},
+	{Label: "Open country", Terms: []string{"Grassland", "Shrubland", "Desert", "Rock"}},
+	{Label: "Towns and farms", Terms: []string{"Human Modified"}},
 }
 
 // GroupOf names the group an AVONET habitat belongs to, or "" for a value no group holds.
 func GroupOf(habitat string) string {
 	for _, g := range HabitatGroups {
-		for _, t := range g.Terms {
-			if t == habitat {
-				return g.Value
-			}
+		if slices.Contains(g.Terms, habitat) {
+			return g.Label
 		}
 	}
 	return ""
-}
-
-// HabitatGroupTerms gives the groups as the filter's terms: each described by the AVONET habitats
-// it holds, in their plain labels.
-func HabitatGroupTerms() []Term {
-	var out []Term
-	for _, g := range HabitatGroups {
-		var ls []string
-		for _, t := range g.Terms {
-			ls = append(ls, LabelOf(Habitats, t))
-		}
-		out = append(out, Term{Value: g.Value, Label: g.Label, Description: "AVONET's " + strings.Join(ls, ", ") + "."})
-	}
-	return out
 }
 
 // Niches in the order the control offers them: plant food, then animal food,
@@ -315,4 +300,15 @@ func LabelOf(terms []Term, value string) string {
 		}
 	}
 	return value
+}
+
+// DescriptionOf returns the publisher's definition of a value, or "" if the vocabulary does not
+// know it.
+func DescriptionOf(terms []Term, value string) string {
+	for _, t := range terms {
+		if t.Value == value {
+			return t.Description
+		}
+	}
+	return ""
 }

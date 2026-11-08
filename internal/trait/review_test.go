@@ -60,22 +60,22 @@ func TestHabitatReviewParsesAndApplies(t *testing.T) {
 	}
 }
 
-// TestHabitatGroupsPartitionAVONET asserts decisions.habitatGroups: the five groups hold every one of AVONET's
-// habitats exactly once, in the order and with the values and labels the requirement gives.
+// TestHabitatGroupsPartitionAVONET asserts decisions.habitatGroupShortcuts: the five groups hold every one of
+// AVONET's habitats exactly once, in the order and with the labels the requirement gives.
 //
 // Verifies: product.habitatAndDietFilters. Criterion: acceptance.habitatGroupsFilter.
 func TestHabitatGroupsPartitionAVONET(t *testing.T) {
 	var got []string
 	seen := map[string]string{}
 	for _, g := range HabitatGroups {
-		got = append(got, g.Value+"="+g.Label)
+		got = append(got, g.Label+"="+strings.Join(g.Terms, ","))
 		for _, term := range g.Terms {
 			if other, dup := seen[term]; dup {
-				t.Errorf("%s is in both %s and %s", term, other, g.Value)
+				t.Errorf("%s is in both %s and %s", term, other, g.Label)
 			}
-			seen[term] = g.Value
-			if GroupOf(term) != g.Value {
-				t.Errorf("GroupOf(%q) = %q, want %q", term, GroupOf(term), g.Value)
+			seen[term] = g.Label
+			if GroupOf(term) != g.Label {
+				t.Errorf("GroupOf(%q) = %q, want %q", term, GroupOf(term), g.Label)
 			}
 		}
 	}
@@ -84,11 +84,8 @@ func TestHabitatGroupsPartitionAVONET(t *testing.T) {
 			t.Errorf("AVONET's %s is in no group", h.Value)
 		}
 	}
-	want := "coast=Coast and sea|freshwater=Fresh water|woods=Woods|open=Open country|towns=Towns and farms"
+	want := "Coast and sea=Coastal,Marine|Fresh water=Wetland,Riverine|Woods=Forest,Woodland|Open country=Grassland,Shrubland,Desert,Rock|Towns and farms=Human Modified"
 	if strings.Join(got, "|") != want {
 		t.Errorf("groups are %v, want %s", got, want)
-	}
-	if seen["Rock"] != "open" || seen["Marine"] != "coast" {
-		t.Errorf("Rock is in %q and Marine in %q", seen["Rock"], seen["Marine"])
 	}
 }

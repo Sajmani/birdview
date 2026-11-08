@@ -323,7 +323,7 @@ func (s *server) next(w http.ResponseWriter, r *http.Request) {
 	// current code (decisions.regionCodesFromData, tech.stableUrls).
 	pins := s.canonicalPins(q)
 	regions := canonicalRegions(q)
-	if habitats := canonicalHabitats(q); (pins || regions || habitats) && !q.Has("bird") {
+	if (pins || regions) && !q.Has("bird") {
 		http.Redirect(w, r, string(nextURL(q)), http.StatusMovedPermanently)
 		return
 	}
@@ -359,29 +359,6 @@ func (s *server) canonicalPins(q url.Values) bool {
 		if id, ok := s.aliasOf[v]; ok {
 			q["pin"][i], changed = id, true
 		}
-	}
-	return changed
-}
-
-// canonicalHabitats rewrites, in place, any habitat= value naming one of AVONET's habitats to its
-// group, once per group, and reports whether it rewrote one (decisions.habitatGroups).
-func canonicalHabitats(q url.Values) bool {
-	changed := false
-	var out []string
-	seen := map[string]bool{}
-	for _, v := range q["habitat"] {
-		if g := trait.GroupOf(v); g != "" {
-			v, changed = g, true
-		}
-		if !seen[v] {
-			seen[v] = true
-			out = append(out, v)
-		} else {
-			changed = true
-		}
-	}
-	if changed {
-		q["habitat"] = out
 	}
 	return changed
 }
@@ -914,7 +891,7 @@ func (s *server) nextTitle(opt options, pinnedOnly bool) string {
 		b.WriteString(" · " + label + ": " + nextList(ls))
 	}
 	if opt.HasHabitats {
-		terms("Habitat", trait.HabitatGroupTerms(), opt.Habitats)
+		b.WriteString(" · Habitat: " + nextList(habitatNames(opt.Habitats)))
 	}
 	if opt.HasNiches {
 		terms("Diet", trait.Niches, opt.Niches)
@@ -1161,9 +1138,7 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 		c.Groups = []nextChoiceGroup{{Choices: ch}}
 		return c
 	}
-	out = append(out,
-		traitCtl("Habitat", "habitat", trait.HabitatGroupTerms(), opt.Habitats, opt.HasHabitats),
-		traitCtl("Diet", "niche", trait.Niches, opt.Niches, opt.HasNiches))
+	out = append(out, habitatCtl(q, opt), traitCtl("Diet", "niche", trait.Niches, opt.Niches, opt.HasNiches))
 
 	uc := nextControl{Label: "Units", Value: "imperial"}
 	if opt.Metric3 {
@@ -1185,6 +1160,77 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 		{Label: "World", Title: "As the IOC and AviList have them", On: world, URL: nextSet(q, "names", string(dataset.LocaleWorld))},
 	}}}
 	out = append(out, nc)
+	return out
+}
+
+// habitatCtl is the Habitat setting: a line per group of AVONET's habitats, the group's shortcut
+// first and then each of its habitats, chosen on its own (decisions.habitatGroupShortcuts). A group
+// of one habitat needs no shortcut.
+func habitatCtl(q url.Values, opt options) nextControl {
+	c := nextControl{Label: "Habitat", Value: "all"}
+	for _, g := range trait.HabitatGroups {
+		all := opt.HasHabitats
+		var ls []string
+		for _, t := range g.Terms {
+			all = all && opt.Habitats[t]
+			ls = append(ls, trait.LabelOf(trait.Habitats, t))
+		}
+		var ch []nextChoice
+		short := len(g.Terms) > 1
+		if short {
+			ch = append(ch, nextChoice{Label: g.Label, Title: "All of " + nextList(ls), On: all,
+				URL: habitatGroupToggle(q, g.Terms, all)})
+		}
+		for i, t := range g.Terms {
+			ch = append(ch, nextChoice{Label: ls[i], Title: trait.DescriptionOf(trait.Habitats, t),
+				On: opt.HasHabitats && opt.Habitats[t], URL: nextToggle(q, "habitat", t), Sep: short && i == 0})
+		}
+		c.Groups = append(c.Groups, nextChoiceGroup{Choices: ch, OneLine: true})
+	}
+	if opt.HasHabitats {
+		c.Value = nextList(habitatNames(opt.Habitats))
+		c.AllURL = nextSet(q, "habitat", "")
+	}
+	return c
+}
+
+// habitatGroupToggle is the address with a group's habitats all removed when all are selected,
+// and otherwise all added; from all, that selects only the group's.
+func habitatGroupToggle(q url.Values, terms []string, all bool) template.URL {
+	q = cloneValues(q)
+	var next []string
+	for _, v := range nextValues(q, "habitat") {
+		if !slices.Contains(terms, v) {
+			next = append(next, v)
+		}
+	}
+	if !all {
+		next = append(next, terms...)
+	}
+	q.Del("habitat")
+	for _, v := range next {
+		q.Add("habitat", v)
+	}
+	return nextURL(q)
+}
+
+// habitatNames names the selected habitats: a group by its name when all its habitats are
+// selected, and otherwise each selected habitat by its label.
+func habitatNames(sel map[string]bool) []string {
+	var out []string
+	for _, g := range trait.HabitatGroups {
+		var on []string
+		for _, t := range g.Terms {
+			if sel[t] {
+				on = append(on, trait.LabelOf(trait.Habitats, t))
+			}
+		}
+		if len(on) == len(g.Terms) && len(on) > 1 {
+			out = append(out, g.Label)
+		} else {
+			out = append(out, on...)
+		}
+	}
 	return out
 }
 

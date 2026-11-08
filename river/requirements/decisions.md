@@ -4646,7 +4646,7 @@ many as apply" already overruled; a review of every species settles it.
 
 Date: 2026-11-07
 Decided by: Sameer
-Status: accepted
+Status: amended by habitatGroupShortcuts
 Affects: [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters), [tech.stableUrls](local/tech/delivery.md#stableurls), [product.nextView](local/product/presentation.md#nextview)
 
 ### Decided
@@ -4668,4 +4668,33 @@ removes those boundaries from the filter, makes each species' review a question 
 than eleven, and invents no category, each group being a union of AVONET's own terms. The owner
 chose this over letting the place stand in for habitat, which remains an idea for later
 ([todo.placeAsHabitat](../todo.md#placeashabitat)).
+
+---
+
+## habitatGroupShortcuts
+
+**Habitat groups are shortcuts over AVONET's habitats, not values of their own**
+
+Date: 2026-11-07
+Decided by: Sameer
+Status: accepted
+Amends: habitatGroups
+Affects: [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters), [tech.stableUrls](local/tech/delivery.md#stableurls)
+
+### Decided
+
+The five groups of [habitatGroups](#habitatgroups) stay, as the arrangement of Habitat's choices: one
+group to a line, led by a choice that takes the whole group, then each of its habitats, which can
+be chosen alone. The address carries AVONET's habitats only; the group values (`coast`, `woods`, …)
+and the redirect to them are withdrawn, never having been deployed. A group's choice is marked when
+all its habitats are chosen; choosing it adds the missing ones, and choosing it again removes them.
+A group of one habitat (Towns and farms) gets no group choice, which would only repeat it.
+
+### Why
+
+The owner proposed groups as aliases for AVONET's habitats, then the earlier interface's pattern of
+a group toggle beside its members. Carried in AVONET's terms, an address never breaks when the
+groups are rearranged, needs no redirect, and keeps the filter's values the data's own, as region
+codes are ([regionCodesFromData](#regioncodesfromdata)); the shortcut keeps the coarse choice a birder wants one click
+away, and the habitats themselves remain choosable.
 

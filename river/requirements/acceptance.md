@@ -1977,19 +1977,24 @@ Watched failing: 2026-10-03, by filing Hawaii under Great Lakes and Texas under 
 
 ### habitatGroupsFilter
 
-**Habitat filters by five groups of AVONET's habitats, and old addresses redirect**
+**Habitat's groups are shortcuts over AVONET's habitats, a line each**
 
-**Verifies:** [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters), [decisions.habitatGroups](decisions.md#habitatgroups), [tech.stableUrls](local/tech/delivery.md#stableurls) · **Level:** code · **Method:** the groups checked against AVONET's vocabulary, and the home page rendered and requested
+**Verifies:** [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters), [decisions.habitatGroupShortcuts](decisions.md#habitatgroupshortcuts), [tech.stableUrls](local/tech/delivery.md#stableurls) · **Level:** code · **Method:** the groups checked against AVONET's vocabulary, and the home page rendered and requested
 
-**Assertions:** the five groups hold each of AVONET's eleven habitats exactly once, with the
-values, labels, and order the requirement gives; each group draws exactly the birds with any habitat
-in it, AVONET's or BirdView's (the heron, Coastal by BirdView's addition, is in Coast and sea); the
-setting offers the five; and an address naming AVONET's habitats redirects permanently to their
-groups, once each.
+**Assertions:** the five groups hold each of AVONET's eleven habitats exactly once, with the labels
+and order the requirement gives; the setting offers one line per group, unwrapped, the group's
+choice then a rule then its habitats, and Towns and farms as its one habitat alone; the group's
+choice is marked only when all its habitats are, adds the missing ones (to any others chosen, or
+alone from all), and removes them all when all are chosen; each habitat still toggles alone;
+choosing Coast and sea draws exactly the birds with Coastal or Marine, AVONET's or BirdView's (the
+heron, Coastal by BirdView's addition, among them); the heading and the setting's value name a fully
+chosen group by its label and other habitats by theirs; and an address naming AVONET's habitats is
+served, not redirected.
 
 **Run:** `go test ./internal/trait/ -run TestHabitatGroupsPartitionAVONET && go test ./cmd/birdview/ -run TestHabitatGroupsFilter`
 **Status: verified 2026-11-07, passing.**
 Watched failing: 2026-11-07, with the filter matching AVONET's values instead of their groups (eight failures, among them "Coast and sea omits the heron"), and before the groups existed.
+Watched failing: 2026-11-07, as shortcuts: with the group's choice always adding its habitats ("at /?habitat=Coastal&habitat=Marine, Coast and sea is on true going to /?habitat=Coastal&habitat=Marine; want on true going to /") and with the heading never naming a group ("headed … Shore and estuary, Coastal and open sea, or Forest", want "Habitat: Coast and sea or Forest").
 
 ### habitatReviewComplete
 

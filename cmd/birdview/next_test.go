@@ -1094,7 +1094,7 @@ func TestNextHeading(t *testing.T) {
 		"/":                           "Showing birds in every month",
 		"/?show=pinned":               "Showing pinned birds",
 		"/?region=USA.33_1&month=Oct": "Showing birds in New York in October",
-		"/?family=Corvidae&habitat=woods&niche=Granivore&niche=Frugivore&month=May&month=Jun": "Showing birds in May or June · Family: Corvidae · Habitat: Woods · Diet: Eats seeds or Eats fruit",
+		"/?family=Corvidae&habitat=Forest&habitat=Woodland&niche=Granivore&niche=Frugivore&month=May&month=Jun": "Showing birds in May or June · Family: Corvidae · Habitat: Woods · Diet: Eats seeds or Eats fruit",
 	} {
 		if got := nextAt(s, target).Title; got != want {
 			t.Errorf("%s: the heading reads %q, want %q", target, got, want)
@@ -1386,7 +1386,7 @@ func TestNextWelcomeLine(t *testing.T) {
 				return slices.ContainsFunc(as, func(a dataset.Assignment) bool { return a.Value == v })
 			}
 			for _, tl := range p.Tiles {
-				open := slices.ContainsFunc(tl.S.Habitats, func(a dataset.Assignment) bool { return trait.GroupOf(a.Value) == "open" })
+				open := slices.ContainsFunc(tl.S.Habitats, func(a dataset.Assignment) bool { return trait.GroupOf(a.Value) == "Open country" })
 				if !open || !has(tl.S.Niches, "Vertivore") {
 					t.Errorf("the open-country hunters draw %s, of habitats %v and niches %v", tl.S.ID, tl.S.Habitats, tl.S.Niches)
 				}
@@ -1415,7 +1415,7 @@ func TestNextWelcomeLine(t *testing.T) {
 func TestNextKeepsEveryParameter(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
-	const every = "/?by=mass&common=10000&family=Corvidae&find=crow&habitat=woods&month=May&names=world&niche=Omnivore&pin=amecro&pin=blujay&region=USA.33_1&rev=1&units=metric"
+	const every = "/?by=mass&common=10000&family=Corvidae&find=crow&habitat=Forest&month=May&names=world&niche=Omnivore&pin=amecro&pin=blujay&region=USA.33_1&rev=1&units=metric"
 	// From Pinned only and from a count, so that no broken link can pass
 	// for one that changes the same keys on purpose.
 	for _, c := range []struct {
@@ -2010,53 +2010,111 @@ func TestHowCommonFilters(t *testing.T) {
 	}
 }
 
-// TestHabitatGroupsFilter asserts the habitat filter by groups (decisions.habitatGroups): a group draws exactly the
-// birds with any habitat in it, AVONET's or BirdView's; the setting offers the five groups; and an
-// address naming AVONET's habitats redirects to their groups, once each.
+// TestHabitatGroupsFilter asserts the habitat groups as shortcuts (decisions.habitatGroupShortcuts):
+// the setting offers a line per group, its shortcut and then its habitats; the shortcut selects the
+// group's habitats, adding to any others, or clears them all when all are on; each habitat still
+// toggles on its own; addresses name AVONET's habitats and are never redirected; and the heading
+// names a fully chosen group.
 //
 // Verifies: product.habitatAndDietFilters, tech.stableUrls. Criterion: acceptance.habitatGroupsFilter.
 func TestHabitatGroupsFilter(t *testing.T) {
 	s := newTestServer(t)
-	all := nextAt(s, "/?show=all&month=all")
-	for _, g := range trait.HabitatGroups {
-		p := nextAt(s, "/?show=all&month=all&habitat="+g.Value)
-		got := map[string]bool{}
-		for _, tl := range p.Tiles {
-			got[tl.S.ID] = true
+	ctl := func(url string) nextControl {
+		t.Helper()
+		for _, c := range nextAt(s, url).Controls {
+			if c.Label == "Habitat" {
+				return c
+			}
 		}
-		for _, tl := range all.Tiles {
-			in := false
-			for _, a := range tl.S.Habitats {
-				in = in || trait.GroupOf(a.Value) == g.Value
+		t.Fatalf("%s has no Habitat setting", url)
+		return nextControl{}
+	}
+	var lines []string
+	for _, g := range ctl("/").Groups {
+		var ls []string
+		for _, ch := range g.Choices {
+			l := ch.Label
+			if ch.Sep {
+				l = "| " + l
 			}
-			if got[tl.S.ID] != in {
-				t.Errorf("habitat=%s: %s drawn %v, has %v", g.Value, tl.S.ID, got[tl.S.ID], tl.S.Habitats)
-			}
+			ls = append(ls, l)
+		}
+		if !g.OneLine {
+			t.Errorf("line %v wraps", ls)
+		}
+		lines = append(lines, strings.Join(ls, " "))
+	}
+	want := []string{
+		"Coast and sea | Shore and estuary Coastal and open sea",
+		"Fresh water | Marsh and lake River and stream",
+		"Woods | Forest Woodland",
+		"Open country | Grassland Shrubland Desert Rock and scree",
+		"Towns and farmland",
+	}
+	if strings.Join(lines, "\n") != strings.Join(want, "\n") {
+		t.Errorf("Habitat offers\n%s\nwant\n%s", strings.Join(lines, "\n"), strings.Join(want, "\n"))
+	}
+	coast := func(url string) (shortcut, coastal, marine nextChoice) {
+		t.Helper()
+		ch := ctl(url).Groups[0].Choices
+		return ch[0], ch[1], ch[2]
+	}
+	for _, c := range []struct {
+		url              string
+		on               bool
+		shortcut, single string
+	}{
+		{"/", false, "/?habitat=Coastal&habitat=Marine", "/?habitat=Coastal"},
+		{"/?habitat=Forest&habitat=Coastal", false, "/?habitat=Forest&habitat=Coastal&habitat=Marine", "/?habitat=Forest"},
+		{"/?habitat=Marine&habitat=Coastal&habitat=Forest", true, "/?habitat=Forest", "/?habitat=Marine&habitat=Forest"},
+		{"/?habitat=Coastal&habitat=Marine", true, "/", "/?habitat=Marine"},
+	} {
+		sc, coastal, _ := coast(c.url)
+		if sc.On != c.on || string(sc.URL) != c.shortcut {
+			t.Errorf("at %s, Coast and sea is on %v going to %s; want on %v going to %s", c.url, sc.On, sc.URL, c.on, c.shortcut)
+		}
+		if string(coastal.URL) != c.single {
+			t.Errorf("at %s, Shore and estuary goes to %s, want %s", c.url, coastal.URL, c.single)
 		}
 	}
-	if p := nextAt(s, "/?show=all&month=all&habitat=coast"); !hasTile(p, "greblu") {
+	if _, coastal, marine := coast("/?habitat=Coastal"); !coastal.On || marine.On {
+		t.Errorf("with habitat=Coastal, Shore and estuary is on %v and Coastal and open sea %v", coastal.On, marine.On)
+	}
+
+	all := nextAt(s, "/?show=all&month=all")
+	p := nextAt(s, "/?show=all&month=all&habitat=Coastal&habitat=Marine")
+	got := map[string]bool{}
+	for _, tl := range p.Tiles {
+		got[tl.S.ID] = true
+	}
+	for _, tl := range all.Tiles {
+		in := false
+		for _, a := range tl.S.Habitats {
+			in = in || a.Value == "Coastal" || a.Value == "Marine"
+		}
+		if got[tl.S.ID] != in {
+			t.Errorf("Coast and sea: %s drawn %v, has %v", tl.S.ID, got[tl.S.ID], tl.S.Habitats)
+		}
+	}
+	if !hasTile(p, "greblu") {
 		t.Error("Coast and sea omits the heron, whose BirdView habitat is Coastal")
 	}
-	var labels []string
-	for _, c := range nextAt(s, "/").Controls {
-		if c.Label == "Habitat" {
-			for _, ch := range c.Groups[0].Choices {
-				labels = append(labels, ch.Label)
-			}
+	for url, heading := range map[string]string{
+		"/?month=all&habitat=Coastal&habitat=Marine&habitat=Forest": "Habitat: Coast and sea or Forest",
+		"/?month=all&habitat=Marine":                                "Habitat: Coastal and open sea",
+	} {
+		if p := nextAt(s, url); !strings.Contains(p.Title, heading) {
+			t.Errorf("%s is headed %q, want %q in it", url, p.Title, heading)
+		}
+		if v := ctl(url).Value; !strings.Contains(heading, v) {
+			t.Errorf("%s's Habitat reads %q, want it in %q", url, v, heading)
 		}
 	}
-	if strings.Join(labels, "|") != "Coast and sea|Fresh water|Woods|Open country|Towns and farms" {
-		t.Errorf("Habitat offers %v", labels)
-	}
-	for from, to := range map[string]string{
-		"/?habitat=Marine&by=mass":                    "/?by=mass&habitat=coast",
-		"/?habitat=Forest&habitat=Woodland":           "/?habitat=woods",
-		"/?habitat=Coastal&habitat=Wetland&month=May": "/?habitat=coast&habitat=freshwater&month=May",
-	} {
+	for _, url := range []string{"/?habitat=Marine&by=mass", "/?habitat=Forest&habitat=Woodland"} {
 		w := httptest.NewRecorder()
-		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, from, nil))
-		if w.Code != http.StatusMovedPermanently || w.Header().Get("Location") != to {
-			t.Errorf("GET %s = %d to %q, want 301 to %s", from, w.Code, w.Header().Get("Location"), to)
+		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, url, nil))
+		if w.Code != http.StatusOK {
+			t.Errorf("GET %s = %d to %q, want 200: AVONET's habitats are the address", url, w.Code, w.Header().Get("Location"))
 		}
 	}
 }
