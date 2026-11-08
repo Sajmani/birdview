@@ -85,6 +85,8 @@ not colored, and the modeled head, neck, and body are gray.
 
 ## The settings
 
+Every setting that can be all starts its choices with **All**, marked when it is chosen.
+
 - **Show:** **First** 100 (type another number), **All** the birds the settings match,
   or **Pinned** for only your pins. **Clear pins** unpins every bird; **Reset**, after the
   settings, returns every setting to its default and keeps the pins.

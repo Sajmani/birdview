@@ -18,6 +18,8 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
   water, Woods, Open country, and Towns and farms. A group's name chooses all its habitats at once,
   and each can still be chosen alone. The welcome line's grassland hunters are now the open-country
   hunters.
+- Every setting that can be all always offers **All**, marked when chosen, so the choices no longer
+  shift. How common no longer shows All twice.
 
 ## 2026-11-03 — A sky-blue cube, and regions by their data codes
 

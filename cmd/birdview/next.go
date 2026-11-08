@@ -77,6 +77,8 @@ type nextChoiceGroup struct {
 	// OneLine keeps the choices on one line, scrolling sideways where the
 	// screen is too narrow for them, as the twelve months are.
 	OneLine bool
+	// Lead is the choice that heads the group, set off by a rule: a habitat group's shortcut.
+	Lead *nextChoice
 }
 
 // nextControl is one setting on the count line: its name, what it is set to,
@@ -86,8 +88,13 @@ type nextControl struct {
 	Value  string
 	Note   string
 	Groups []nextChoiceGroup
-	// AllURL returns this setting to all; empty when it already is.
+	// AllURL returns this setting to all; empty for a setting that cannot be all or that offers
+	// All among its choices. AllOn marks it when the setting is all.
 	AllURL template.URL
+	AllOn  bool
+	// Leads draws each group's Lead in a column, so the rule after it and the choices start
+	// at the same place on every line; Habitat only.
+	Leads bool
 	// HereURL is this address with the region a placeholder for here.js to
 	// fill, and Boundaries the file it looks the region up in; Region only.
 	HereURL, Boundaries string
@@ -1008,9 +1015,9 @@ func countyControl(q url.Values, opt options) (nextControl, bool) {
 		grp.Choices = append(grp.Choices, nextChoice{Label: rg.Name, Title: rg.Label(), On: on, URL: nextURL(nq)})
 	}
 	c.Groups = []nextChoiceGroup{grp}
+	c.AllURL, c.AllOn = nextSet(q, "region", st.Slug()), len(names) == 0
 	if len(names) > 0 {
 		c.Value = nextList(names)
-		c.AllURL = nextSet(q, "region", st.Slug())
 	}
 	return c, true
 }
@@ -1056,10 +1063,9 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	mc.Groups = []nextChoiceGroup{{Choices: mch, OneLine: true}}
 	out = append(out, mc)
 
-	rc := nextControl{Label: "Region", Value: "all"}
+	rc := nextControl{Label: "Region", Value: "all", AllURL: nextSet(q, "region", ""), AllOn: !opt.HasRegions}
 	if opt.HasRegions {
 		rc.Value = nextList(s.regionNames(opt.Regions))
-		rc.AllURL = nextSet(q, "region", "")
 	}
 	g := region.Groupings[0]
 	for _, z := range g.Zones {
@@ -1084,7 +1090,6 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 		on := opt.Common == n
 		if on {
 			hc.Value = "1 in " + comma(int64(n))
-			hc.AllURL = nextSet(q, "common", "")
 		}
 		hcs = append(hcs, nextChoice{Label: "1 in " + comma(int64(n)),
 			Title: "Birds at least 1 in " + comma(int64(n)) + " of the observations in the regions and months chosen",
@@ -1113,9 +1118,9 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 		last.Choices = append(last.Choices, nextChoice{Label: f.Name, Title: f.Common, On: on,
 			URL: nextToggle(q, "family", f.Name), Color: f.Color, TextColor: f.TextColor})
 	}
+	fc.AllURL, fc.AllOn = nextSet(q, "family", ""), !opt.HasSelection
 	if opt.HasSelection {
 		fc.Value = nextList(fnames)
-		fc.AllURL = nextSet(q, "family", "")
 	}
 	out = append(out, fc)
 
@@ -1131,9 +1136,9 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 			ch = append(ch, nextChoice{Label: t.Label, Title: t.Description, On: on,
 				URL: nextToggle(q, param, t.Value)})
 		}
+		c.AllURL, c.AllOn = nextSet(q, param, ""), !has
 		if has {
 			c.Value = nextList(names)
-			c.AllURL = nextSet(q, param, "")
 		}
 		c.Groups = []nextChoiceGroup{{Choices: ch}}
 		return c
@@ -1165,9 +1170,9 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 
 // habitatCtl is the Habitat setting: a line per group of AVONET's habitats, the group's shortcut
 // first and then each of its habitats, chosen on its own (decisions.habitatGroupShortcuts). A group
-// of one habitat needs no shortcut.
+// of one habitat needs no shortcut, so the habitat itself leads its line.
 func habitatCtl(q url.Values, opt options) nextControl {
-	c := nextControl{Label: "Habitat", Value: "all"}
+	c := nextControl{Label: "Habitat", Value: "all", Leads: true, AllURL: nextSet(q, "habitat", ""), AllOn: !opt.HasHabitats}
 	for _, g := range trait.HabitatGroups {
 		all := opt.HasHabitats
 		var ls []string
@@ -1176,20 +1181,19 @@ func habitatCtl(q url.Values, opt options) nextControl {
 			ls = append(ls, trait.LabelOf(trait.Habitats, t))
 		}
 		var ch []nextChoice
-		short := len(g.Terms) > 1
-		if short {
-			ch = append(ch, nextChoice{Label: g.Label, Title: "All of " + nextList(ls), On: all,
-				URL: habitatGroupToggle(q, g.Terms, all)})
-		}
 		for i, t := range g.Terms {
 			ch = append(ch, nextChoice{Label: ls[i], Title: trait.DescriptionOf(trait.Habitats, t),
-				On: opt.HasHabitats && opt.Habitats[t], URL: nextToggle(q, "habitat", t), Sep: short && i == 0})
+				On: opt.HasHabitats && opt.Habitats[t], URL: nextToggle(q, "habitat", t)})
 		}
-		c.Groups = append(c.Groups, nextChoiceGroup{Choices: ch, OneLine: true})
+		grp := nextChoiceGroup{Lead: &nextChoice{Label: g.Label, Title: "All of " + nextList(ls), On: all,
+			URL: habitatGroupToggle(q, g.Terms, all)}, Choices: ch}
+		if len(ch) == 1 {
+			grp = nextChoiceGroup{Lead: &ch[0]}
+		}
+		c.Groups = append(c.Groups, grp)
 	}
 	if opt.HasHabitats {
 		c.Value = nextList(habitatNames(opt.Habitats))
-		c.AllURL = nextSet(q, "habitat", "")
 	}
 	return c
 }

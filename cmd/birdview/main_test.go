@@ -5001,8 +5001,8 @@ func TestCountySettingDrillsDown(t *testing.T) {
 	if la := choice(c, "Los Angeles"); la.On || string(la.URL) != "/?region=USA.5.19_1" {
 		t.Errorf("from California, Los Angeles goes to %s (on %v); want the county in place of the state", la.URL, la.On)
 	}
-	if c.AllURL != "" || c.Value != "all" {
-		t.Errorf("from the state, County reads %q with All at %q; want all, already", c.Value, c.AllURL)
+	if !c.AllOn || string(c.AllURL) != "/?region=USA.5_1" || c.Value != "all" {
+		t.Errorf("from the state, County reads %q with All at %q (marked %v); want all, marked", c.Value, c.AllURL, c.AllOn)
 	}
 	c = county("/?region=USA.5.19_1")
 	if c == nil {
@@ -5014,7 +5014,7 @@ func TestCountySettingDrillsDown(t *testing.T) {
 	if sd := choice(c, "San Diego"); sd.On || string(sd.URL) != "/?region=USA.5.19_1&region=USA.5.37_1" {
 		t.Errorf("with Los Angeles chosen, San Diego goes to %s; want both counties", sd.URL)
 	}
-	if string(c.AllURL) != "/?region=USA.5_1" || c.Value != "Los Angeles" {
+	if c.AllOn || string(c.AllURL) != "/?region=USA.5_1" || c.Value != "Los Angeles" {
 		t.Errorf("with Los Angeles chosen, County reads %q with All at %q; want Los Angeles, and All back to California", c.Value, c.AllURL)
 	}
 }

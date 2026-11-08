@@ -119,21 +119,25 @@
     <summary><b>{{.Label}}</b> {{.Value}}</summary>
     <div class="pop">
       {{with .Note}}<p class="hint">{{.}}</p>{{end}}
-      {{if or .AllURL .HereURL}}<p>{{with .AllURL}}<a class="btn" href="{{.}}">All</a>{{end}}
+      {{if or .AllURL .HereURL}}<p>{{if .AllURL}}<a class="btn{{if .AllOn}} on{{end}}" href="{{.AllURL}}">All</a>{{end}}
         {{if .HereURL}}{{/* here.js finds the reader's region in the browser and
              asks for this address with it, as choosing it by hand would
              (product.hereSelectsLocalRegion, product.locationStaysInBrowser). */}}<button type="button" class="btn here" aria-disabled="true"
           data-template="{{.HereURL}}" data-boundaries="{{.Boundaries}}"
           title="Here needs JavaScript and permission to use your location">Here</button>
         <span class="herestatus" role="status" aria-live="polite"></span>{{end}}</p>{{end}}
-      {{range .Groups}}
+      {{if .Leads}}<div class="leads">
+      {{range .Groups}}{{with .Lead}}{{template "choice" .}}{{end}}
+        <div class="popgroup">{{range .Choices}}{{template "choice" .}}
+        {{end}}</div>
+      {{end}}</div>
+      {{else}}{{range .Groups}}
       <div class="popgroup{{if .OneLine}} oneline{{end}}">
         {{with .Name}}<span class="lbl">{{.}}</span>{{end}}
-        {{range .Choices}}{{if .Sep}}<span class="sep" aria-hidden="true"></span>{{end}}{{if .Color}}<a class="chip{{if .On}} on{{end}}" href="{{.URL}}"
-          style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">{{.Label}}<em>{{.Title}}</em></a>{{else}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}{{if .Now}} data-now{{end}}>{{.Label}}</a>{{end}}
+        {{range .Choices}}{{if .Sep}}<span class="sep" aria-hidden="true"></span>{{end}}{{template "choice" .}}
         {{end}}
       </div>
-      {{end}}
+      {{end}}{{end}}
     </div>
   </details>
   {{end}}
@@ -338,3 +342,7 @@
 </script>
 </body>
 </html>{{end}}
+
+{{/* One choice in a setting's popover: a family as its badge, anything else as a button. */}}
+{{define "choice"}}{{if .Color}}<a class="chip{{if .On}} on{{end}}" href="{{.URL}}"
+  style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">{{.Label}}<em>{{.Title}}</em></a>{{else}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}{{if .Now}} data-now{{end}}>{{.Label}}</a>{{end}}{{end}}

@@ -2030,17 +2030,20 @@ func TestHabitatGroupsFilter(t *testing.T) {
 		return nextControl{}
 	}
 	var lines []string
+	if !ctl("/").Leads {
+		t.Error("Habitat does not set its group names in a column")
+	}
 	for _, g := range ctl("/").Groups {
 		var ls []string
-		for _, ch := range g.Choices {
-			l := ch.Label
-			if ch.Sep {
-				l = "| " + l
-			}
-			ls = append(ls, l)
+		if g.Lead == nil {
+			t.Fatalf("a Habitat line has no lead: %v", g.Choices)
 		}
-		if !g.OneLine {
-			t.Errorf("line %v wraps", ls)
+		ls = append(ls, g.Lead.Label)
+		if len(g.Choices) > 0 {
+			ls = append(ls, "|")
+		}
+		for _, ch := range g.Choices {
+			ls = append(ls, ch.Label)
 		}
 		lines = append(lines, strings.Join(ls, " "))
 	}
@@ -2056,8 +2059,8 @@ func TestHabitatGroupsFilter(t *testing.T) {
 	}
 	coast := func(url string) (shortcut, coastal, marine nextChoice) {
 		t.Helper()
-		ch := ctl(url).Groups[0].Choices
-		return ch[0], ch[1], ch[2]
+		g := ctl(url).Groups[0]
+		return *g.Lead, g.Choices[0], g.Choices[1]
 	}
 	for _, c := range []struct {
 		url              string
@@ -2115,6 +2118,51 @@ func TestHabitatGroupsFilter(t *testing.T) {
 		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, url, nil))
 		if w.Code != http.StatusOK {
 			t.Errorf("GET %s = %d to %q, want 200: AVONET's habitats are the address", url, w.Code, w.Header().Get("Location"))
+		}
+	}
+}
+
+// TestAllAlwaysOffered asserts that every setting that can be all offers All exactly once, first,
+// whether or not the setting is all, and marks it only when it is, so the choices do not move.
+//
+// Verifies: product.nextView. Criterion: acceptance.allAlwaysOffered.
+func TestAllAlwaysOffered(t *testing.T) {
+	countiesOn(t)
+	s, err := newServer(countyDataset())
+	if err != nil {
+		t.Fatal(err)
+	}
+	settings := []string{"Month", "Region", "County", "How common", "Family", "Habitat", "Diet"}
+	all := "/?region=USA.5_1"
+	narrow := "/?region=USA.5.19_1&month=May&common=1000&family=Corvidae&habitat=Forest&niche=Granivore"
+	allRe := regexp.MustCompile(`<a class="btn( on)?" href="[^"]*"[^>]*>All</a>`)
+	for _, c := range []struct {
+		url    string
+		marked map[string]bool
+	}{
+		{all, map[string]bool{"Month": true, "Region": false, "County": true, "How common": true, "Family": true, "Habitat": true, "Diet": true}},
+		{narrow, map[string]bool{}},
+	} {
+		_, body := get(t, s, c.url)
+		for _, name := range settings {
+			i := strings.Index(body, `data-ctl="`+name+`"`)
+			if i < 0 {
+				t.Errorf("%s has no %s setting", c.url, name)
+				continue
+			}
+			pop := body[i:]
+			pop = pop[:strings.Index(pop, "</details>")]
+			found := allRe.FindAllStringSubmatchIndex(pop, -1)
+			if len(found) != 1 {
+				t.Errorf("at %s, %s offers All %d times, want once", c.url, name, len(found))
+				continue
+			}
+			if first := strings.Index(pop, `<a class="`); first != found[0][0] {
+				t.Errorf("at %s, %s's All is not its first choice", c.url, name)
+			}
+			if marked := found[0][2] >= 0; marked != c.marked[name] {
+				t.Errorf("at %s, %s's All is marked %v, want %v", c.url, name, marked, c.marked[name])
+			}
 		}
 	}
 }

@@ -395,6 +395,13 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .popgroup.oneline .btn { padding-left: 7px; padding-right: 7px; }
 .popgroup.oneline > * { flex: none; }
 .popgroup .sep { align-self: stretch; width: 1px; background: var(--dim); margin: 2px 4px; }
+/* Habitat: the group names in a column, then one rule, then each group's habitats, wrapping under
+   themselves. */
+.leads { display: grid; grid-template-columns: max-content 1fr; gap: 0 8px; align-items: start; margin-bottom: 8px; }
+.leads > .btn { justify-self: start; margin-bottom: 8px; }
+.leads > .popgroup { border-left: 1px solid var(--dim); padding-left: 8px; align-self: stretch;
+  align-items: flex-start; align-content: flex-start; margin-bottom: 0; padding-bottom: 8px; }
+.leads > .popgroup:empty { border-left-color: transparent; }
 /* Reset looks like a setting, set apart by its color. */
 .reset, .reset:visited { background: #3f1d1d; border: 1px solid #8b3a3a; border-radius: 4px;
   padding: 1px 7px; color: var(--ink); text-decoration: none; font-weight: 600; font-size: 13px; }

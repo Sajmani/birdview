@@ -148,7 +148,9 @@ exact union of AVONET's terms, so nothing is invented:
 (`habitat=Coastal&habitat=Marine`), and the filter matches them as before. A group's choice is
 marked when every habitat in it is chosen; choosing it adds those not yet chosen, and choosing it
 again removes them all. Each habitat on its line can still be chosen alone. Towns and farms holds
-one habitat, so its line is that habitat alone. The page's heading names
+one habitat, so its line is that habitat alone. The group names form a column and the rule after
+them one vertical line, so every group's habitats start at the same place; a line too long for the
+screen wraps under its own habitats, not under the group name (Sameer, 2026-11-07). The page's heading names
 a fully chosen group by its label, and any other chosen habitat by its own.
 
 The groups answer "which birds am I likely to see here", and a birder stands in a place, not a

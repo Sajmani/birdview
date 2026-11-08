@@ -917,7 +917,9 @@ home page in those. Its footer carries the full credits, which every other page 
   own month), a rule, and the twelve
   months. On a phone too narrow for them, the line scrolls sideways. A **Reset**
   control, colored apart from the settings, returns to the landing set. Choosing one option selects only it; choosing more adds them; choosing every
-  selected option again returns to all. Nothing selected means all.
+  selected option again returns to all. Nothing selected means all. **Every setting that can be all
+  offers All as its first choice, always, marked when it is chosen**, so the choices stay where they
+  are when the reader moves between all and a narrower choice (Sameer, 2026-11-07).
 - **County follows Region when one state with counties is chosen** ([filtering.regionAndMonthFilter](filtering.md#regionandmonthfilter),
   [decisions.countyListingRule](../../decisions.md#countylistingrule)). When the regions chosen are one state BirdView has counties for, or
   counties of that one state, a **County** setting follows Region and lists that state's counties

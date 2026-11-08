@@ -1982,8 +1982,9 @@ Watched failing: 2026-10-03, by filing Hawaii under Great Lakes and Texas under 
 **Verifies:** [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters), [decisions.habitatGroupShortcuts](decisions.md#habitatgroupshortcuts), [tech.stableUrls](local/tech/delivery.md#stableurls) · **Level:** code · **Method:** the groups checked against AVONET's vocabulary, and the home page rendered and requested
 
 **Assertions:** the five groups hold each of AVONET's eleven habitats exactly once, with the labels
-and order the requirement gives; the setting offers one line per group, unwrapped, the group's
-choice then a rule then its habitats, and Towns and farms as its one habitat alone; the group's
+and order the requirement gives; the setting offers one line per group, the group's choice
+leading it in a column of leads (so the rule after them and the habitats start at one place, and a
+long line wraps under its habitats) and Towns and farms led by its one habitat alone; the group's
 choice is marked only when all its habitats are, adds the missing ones (to any others chosen, or
 alone from all), and removes them all when all are chosen; each habitat still toggles alone;
 choosing Coast and sea draws exactly the birds with Coastal or Marine, AVONET's or BirdView's (the
@@ -1994,7 +1995,22 @@ served, not redirected.
 **Run:** `go test ./internal/trait/ -run TestHabitatGroupsPartitionAVONET && go test ./cmd/birdview/ -run TestHabitatGroupsFilter`
 **Status: verified 2026-11-07, passing.**
 Watched failing: 2026-11-07, with the filter matching AVONET's values instead of their groups (eight failures, among them "Coast and sea omits the heron"), and before the groups existed.
+Watched failing: 2026-11-07, with the leads in a column: against the one-line layout, "a Habitat line has no lead". The alignment itself was checked by screenshot at 900, 560, and 400 pixels wide.
 Watched failing: 2026-11-07, as shortcuts: with the group's choice always adding its habitats ("at /?habitat=Coastal&habitat=Marine, Coast and sea is on true going to /?habitat=Coastal&habitat=Marine; want on true going to /") and with the heading never naming a group ("headed … Shore and estuary, Coastal and open sea, or Forest", want "Habitat: Coast and sea or Forest").
+
+### allAlwaysOffered
+
+**Every setting that can be all offers All once, first, and marks it when chosen**
+
+**Verifies:** [product.nextView](local/product/presentation.md#nextview) · **Level:** code · **Method:** the home page rendered with every such setting all, and with every one narrowed
+
+**Assertions:** Month, Region, County, How common, Family, Habitat, and Diet each offer exactly one
+All, as their first choice, at an address where each is all (Region aside, set to a state so County
+shows) and at one where each is narrowed; All is marked exactly when its setting is all.
+
+**Run:** `go test ./cmd/birdview/ -run TestAllAlwaysOffered`
+**Status: verified 2026-11-07, passing.**
+Watched failing: 2026-11-07, with All hidden when its setting is all and How common's All link restored: "County offers All 0 times, want once" for County, Family, Habitat, and Diet, and "How common offers All 2 times, want once".
 
 ### habitatReviewComplete
 
