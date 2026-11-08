@@ -298,7 +298,7 @@ Cinclus mexicanus	American Dipper	Riverine	pending
 Circus hudsonius	Northern Harrier	Grassland	pending			
 Cistothorus palustris	Marsh Wren	Wetland	pending			
 Cistothorus stellaris	Sedge Wren	Grassland	pending			
-Clangula hyemalis	Long-tailed Duck	Wetland	proposed			Marine: winters on the ocean
+Clangula hyemalis	Long-tailed Duck	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
 Coccothraustes coccothraustes	Hawfinch	Forest	pending			
 Coccyzus americanus	Yellow-billed Cuckoo	Forest	pending			
 Coccyzus erythropthalmus	Black-billed Cuckoo	Forest	pending			
@@ -443,11 +443,11 @@ Gallinago stenura	Pin-tailed Snipe	Wetland	pending
 Gallinula galeata	Common Gallinule	Wetland	pending			
 Gallus gallus	Red Junglefowl	Forest	pending			
 Garrulax canorus	Chinese Hwamei	Shrubland	pending			
-Gavia adamsii	Yellow-billed Loon	Wetland	proposed			Marine: winters on the ocean
-Gavia arctica	Arctic Loon	Wetland	proposed			Marine: winters on the ocean
-Gavia immer	Common Loon	Wetland	proposed			Marine: winters on the ocean
-Gavia pacifica	Pacific Loon	Wetland	proposed			Marine: winters on the ocean
-Gavia stellata	Red-throated Loon	Wetland	proposed			Marine: winters on the ocean
+Gavia adamsii	Yellow-billed Loon	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
+Gavia arctica	Arctic Loon	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
+Gavia immer	Common Loon	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
+Gavia pacifica	Pacific Loon	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
+Gavia stellata	Red-throated Loon	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
 Gelochelidon nilotica	Gull-billed Tern	Coastal	pending			
 Geococcyx californianus	Greater Roadrunner	Shrubland	pending			
 Geopelia cuneata	Diamond Dove	Grassland	pending			
@@ -487,7 +487,7 @@ Himantopus mexicanus	Black-necked Stilt	Wetland	pending
 Himatione sanguinea	Apapane	Forest	pending			
 Hirundapus caudacutus	White-throated Needletail	Woodland	pending			
 Hirundo rustica	Barn Swallow	Human Modified	pending			
-Histrionicus histrionicus	Harlequin Duck	Marine	proposed			Riverine: breeds on fast rivers
+Histrionicus histrionicus	Harlequin Duck	Marine	proposed			Riverine: breeds on fast rivers | Coastal: winters along rocky shores and jetties
 Horornis diphone	Japanese Bush Warbler	Shrubland	pending			
 Hydrobates castro	Band-rumped Storm-Petrel	Marine	pending			
 Hydrobates furcatus	Fork-tailed Storm-Petrel	Marine	pending			
@@ -610,10 +610,10 @@ Melanerpes erythrocephalus	Red-headed Woodpecker	Forest	pending
 Melanerpes formicivorus	Acorn Woodpecker	Woodland	pending			
 Melanerpes lewis	Lewis's Woodpecker	Woodland	pending			
 Melanerpes uropygialis	Gila Woodpecker	Shrubland	pending			
-Melanitta americana	Black Scoter	Wetland	proposed			Marine: winters on the ocean
-Melanitta deglandi	White-winged Scoter	Wetland	proposed			Marine: winters on the ocean
-Melanitta perspicillata	Surf Scoter	Wetland	proposed			Marine: winters on the ocean
-Melanitta stejnegeri	Stejneger's Scoter	Wetland	proposed			Marine: winters on the ocean
+Melanitta americana	Black Scoter	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
+Melanitta deglandi	White-winged Scoter	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
+Melanitta perspicillata	Surf Scoter	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
+Melanitta stejnegeri	Stejneger's Scoter	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays, inlets, and just off beaches
 Melanospiza bicolor	Black-faced Grassquit	Shrubland	pending			
 Melanotis caerulescens	Blue Mockingbird	Forest	pending			
 Meleagris gallopavo	Wild Turkey	Forest	pending			
@@ -786,8 +786,8 @@ Pluvialis apricaria	European Golden-Plover	Grassland	pending
 Pluvialis dominica	American Golden-Plover	Grassland	pending			
 Pluvialis fulva	Pacific Golden-Plover	Grassland	pending			
 Pluvialis squatarola	Black-bellied Plover	Grassland	proposed			Coastal: migrates and winters on beaches and mudflats
-Podiceps auritus	Horned Grebe	Wetland	proposed			Marine: winters on the ocean
-Podiceps grisegena	Red-necked Grebe	Wetland	proposed			Marine: winters on the ocean
+Podiceps auritus	Horned Grebe	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
+Podiceps grisegena	Red-necked Grebe	Wetland	proposed			Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
 Podiceps nigricollis	Eared Grebe	Wetland	pending			
 Podilymbus podiceps	Pied-billed Grebe	Wetland	pending			
 Poecile atricapillus	Black-capped Chickadee	Forest	pending			
@@ -918,7 +918,7 @@ Sitta carolinensis	White-breasted Nuthatch	Forest	pending
 Sitta pusilla	Brown-headed Nuthatch	Forest	pending			
 Sitta pygmaea	Pygmy Nuthatch	Forest	pending			
 Somateria fischeri	Spectacled Eider	Coastal	pending			
-Somateria mollissima	Common Eider	Marine	pending			
+Somateria mollissima	Common Eider	Marine	proposed			Coastal: winters in the surf along rocky shores and jetties
 Somateria spectabilis	King Eider	Marine	pending			
 Spatula clypeata	Northern Shoveler	Wetland	pending			
 Spatula cyanoptera	Cinnamon Teal	Wetland	pending			
