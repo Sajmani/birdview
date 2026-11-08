@@ -77,7 +77,7 @@ var Habitats = []Term{
 	{Value: "Wetland", Label: "Marsh and lake", Description: "Wide range of freshwater aquatic habitats including lakes, marshes, swamps and reedbeds."},
 	{Value: "Riverine", Label: "River and stream", Description: "Associated with rivers and streams at all elevations."},
 	{Value: "Coastal", Label: "Shore and estuary", Description: "Intertidal zones within immediate vicinity of beaches, estuaries, brackish to salty marshes, including mudflats, lagoons, alkaline wetlands, coastal dunes and harbours."},
-	{Value: "Marine", Label: "Open sea", Description: "Pelagic, on sea near coasts, including species in the intertidal zone on beaches, and those pelagic species nesting near the sea on cliffs, islets and islands."},
+	{Value: "Marine", Label: "Coastal and open sea", Description: "Pelagic, on sea near coasts, including species in the intertidal zone on beaches, and those pelagic species nesting near the sea on cliffs, islets and islands."},
 }
 
 // Niches in the order the control offers them: plant food, then animal food,
