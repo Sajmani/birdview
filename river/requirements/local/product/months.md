@@ -176,7 +176,7 @@ never merged into the published value ([categoryProvenance](measurements.md#cate
 
 **Every bird's habitats are reviewed, species by species, for where a North American birder sees
 it** ([decisions.habitatReviewedPerSpecies](../../decisions.md#habitatreviewedperspecies)). AVONET's one value is in practice where a migrant breeds:
-Black-bellied Plover is Grassland, the peeps miss Shore and estuary, the loons miss Coastal and open sea. So
+Black-bellied Plover is Grassland, the peeps miss Shore and estuary, the loons miss Open sea. So
 `data/habitat-review.tsv` holds a row for **every species BirdView draws**: AVONET's habitat as it
 stood when reviewed, the habitats BirdView adds with a reason for each, and the review's status,
 reviewer, and date. Only a reviewed row's additions reach the page; a pending or proposed row

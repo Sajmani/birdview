@@ -2048,7 +2048,7 @@ func TestHabitatGroupsFilter(t *testing.T) {
 		lines = append(lines, strings.Join(ls, " "))
 	}
 	want := []string{
-		"Shore and sea | Shore and estuary Coastal and open sea",
+		"Shore and sea | Shore and estuary Open sea",
 		"Fresh water | Marsh and lake River and stream",
 		"Woods | Forest Woodland",
 		"Open country | Grassland Shrubland Desert Rock and scree",
@@ -2081,7 +2081,7 @@ func TestHabitatGroupsFilter(t *testing.T) {
 		}
 	}
 	if _, coastal, marine := coast("/?habitat=Coastal"); !coastal.On || marine.On {
-		t.Errorf("with habitat=Coastal, Shore and estuary is on %v and Coastal and open sea %v", coastal.On, marine.On)
+		t.Errorf("with habitat=Coastal, Shore and estuary is on %v and Open sea %v", coastal.On, marine.On)
 	}
 
 	all := nextAt(s, "/?show=all&month=all")
@@ -2104,7 +2104,7 @@ func TestHabitatGroupsFilter(t *testing.T) {
 	}
 	for url, heading := range map[string]string{
 		"/?month=all&habitat=Coastal&habitat=Marine&habitat=Forest": "Habitat: Shore and sea or Forest",
-		"/?month=all&habitat=Marine":                                "Habitat: Coastal and open sea",
+		"/?month=all&habitat=Marine":                                "Habitat: Open sea",
 	} {
 		if p := nextAt(s, url); !strings.Contains(p.Title, heading) {
 			t.Errorf("%s is headed %q, want %q in it", url, p.Title, heading)
