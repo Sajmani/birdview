@@ -1,0 +1,1089 @@
+# Habitat review: one row per species BirdView draws (decisions.habitatReviewedPerSpecies).
+# AVONET's habitat is as it stood when the row was reviewed; the build fails if it changes.
+# status is pending (not yet reviewed), proposed (additions drafted, awaiting the owner), or
+# reviewed (approved; only these reach the page). Additions are "Habitat: reason", separated by " | ",
+# each a value from AVONET's habitat vocabulary, as trait.Habitats spells it.
+#
+# scientific name	name	AVONET habitat	status	reviewer	date	additions
+Acanthis flammea	Redpoll	Forest	pending			
+Accipiter nisus	Eurasian Sparrowhawk	Forest	pending			
+Accipiter striatus	Sharp-shinned Hawk	Forest	pending			
+Acridotheres cristatellus	Crested Myna	Grassland	pending			
+Acridotheres tristis	Common Myna	Human Modified	pending			
+Acrocephalus dumetorum	Blyth's Reed Warbler	Wetland	pending			
+Acrocephalus familiaris	Millerbird	Shrubland	pending			
+Actitis hypoleucos	Common Sandpiper	Wetland	pending			
+Actitis macularius	Spotted Sandpiper	Wetland	pending			
+Aechmophorus clarkii	Clark's Grebe	Wetland	proposed			Coastal: winters on bays and inshore sea
+Aechmophorus occidentalis	Western Grebe	Wetland	proposed			Coastal: winters on bays and inshore sea
+Aegolius acadicus	Northern Saw-whet Owl	Forest	pending			
+Aegolius funereus	Boreal Owl	Forest	pending			
+Aerodramus bartschi	Mariana Swiftlet	Forest	pending			
+Aeronautes saxatalis	White-throated Swift	Rock	pending			
+Aethia cristatella	Crested Auklet	Marine	pending			
+Aethia psittacula	Parakeet Auklet	Marine	pending			
+Aethia pusilla	Least Auklet	Marine	pending			
+Aethia pygmaea	Whiskered Auklet	Marine	pending			
+Agapornis fischeri	Fischer's Lovebird	Woodland	pending			
+Agapornis personatus	Yellow-collared Lovebird	Shrubland	pending			
+Agapornis roseicollis	Rosy-faced Lovebird	Shrubland	pending			
+Agelaius phoeniceus	Red-winged Blackbird	Wetland	pending			
+Agelaius tricolor	Tricolored Blackbird	Wetland	pending			
+Aimophila ruficeps	Rufous-crowned Sparrow	Shrubland	pending			
+Aix galericulata	Mandarin Duck	Forest	pending			
+Aix sponsa	Wood Duck	Wetland	pending			
+Alauda arvensis	Eurasian Skylark	Grassland	pending			
+Alca torda	Razorbill	Marine	pending			
+Alectoris chukar	Chukar	Shrubland	pending			
+Alectoris rufa	Red-legged Partridge	Shrubland	pending			
+Alle alle	Dovekie	Marine	pending			
+Alopochen aegyptiaca	Egyptian Goose	Wetland	pending			
+Amadina fasciata	Cut-throat	Grassland	pending			
+Amandava amandava	Red Avadavat	Shrubland	pending			
+Amandava subflava	Zebra Waxbill	Grassland	pending			
+Amazilia yucatanensis	Buff-bellied Hummingbird	Woodland	pending			
+Amazona aestiva	Turquoise-fronted Amazon	Shrubland	pending			
+Amazona albifrons	White-fronted Amazon	Woodland	pending			
+Amazona amazonica	Orange-winged Amazon	Forest	pending			
+Amazona auropalliata	Yellow-naped Amazon	Woodland	pending			
+Amazona autumnalis	Red-lored Amazon	Forest	pending			
+Amazona farinosa	Mealy Amazon	Forest	pending			
+Amazona finschi	Lilac-crowned Amazon	Woodland	pending			
+Amazona ochrocephala	Yellow-crowned Amazon	Forest	pending			
+Amazona oratrix	Yellow-headed Amazon	Forest	pending			
+Amazona ventralis	Hispaniolan Amazon	Forest	pending			
+Amazona viridigenalis	Red-crowned Amazon	Forest	pending			
+Amazona xantholora	Yellow-lored Amazon	Woodland	pending			
+Ammodramus savannarum	Grasshopper Sparrow	Grassland	pending			
+Ammospiza caudacuta	Saltmarsh Sparrow	Wetland	pending			
+Ammospiza leconteii	LeConte's Sparrow	Grassland	pending			
+Ammospiza maritima	Seaside Sparrow	Wetland	pending			
+Ammospiza nelsoni	Nelson's Sparrow	Wetland	pending			
+Amphispiza bilineata	Black-throated Sparrow	Shrubland	pending			
+Amphispizopsis quinquestriata	Five-striped Sparrow	Shrubland	pending			
+Anarhynchus mongolus	Siberian Sand-Plover	Wetland	pending			
+Anarhynchus montanus	Mountain Plover	Grassland	pending			
+Anarhynchus nivosus	Snowy Plover	Coastal	pending			
+Anarhynchus wilsonia	Wilson's Plover	Coastal	pending			
+Anas acuta	Northern Pintail	Wetland	pending			
+Anas bahamensis	White-cheeked Pintail	Wetland	pending			
+Anas crecca	Green-winged Teal	Wetland	pending			
+Anas diazi	Mexican Duck	Wetland	pending			
+Anas fulvigula	Mottled Duck	Wetland	pending			
+Anas laysanensis	Laysan Duck	Wetland	pending			
+Anas platyrhynchos	Mallard	Wetland	reviewed	Sameer	2026-10-03	Human Modified: town ponds and park lakes throughout the range
+Anas rubripes	American Black Duck	Wetland	proposed			Coastal: salt marsh is a main habitat
+Anas wyvilliana	Hawaiian Duck	Riverine	pending			
+Anas zonorhyncha	Eastern Spot-billed Duck	Wetland	pending			
+Anhinga anhinga	Anhinga	Wetland	pending			
+Anous ceruleus	Blue-gray Noddy	Marine	pending			
+Anous minutus	Black Noddy	Marine	pending			
+Anous stolidus	Brown Noddy	Marine	pending			
+Anser albifrons	Greater White-fronted Goose	Grassland	pending			
+Anser anser	Graylag Goose	Wetland	pending			
+Anser brachyrhynchus	Pink-footed Goose	Grassland	pending			
+Anser caerulescens	Snow Goose	Grassland	proposed			Wetland: winters on marshes | Human Modified: feeds in farm fields
+Anser canagicus	Emperor Goose	Coastal	pending			
+Anser cygnoides	Swan Goose	Wetland	pending			
+Anser erythropus	Lesser White-fronted Goose	Grassland	pending			
+Anser fabalis	Taiga Bean-Goose	Wetland	pending			
+Anser indicus	Bar-headed Goose	Wetland	pending			
+Anser rossii	Ross's Goose	Wetland	pending			
+Anser serrirostris	Tundra Bean-Goose	Grassland	pending			
+Anthracothorax prevostii	Green-breasted Mango	Shrubland	pending			
+Anthus cervinus	Red-throated Pipit	Grassland	pending			
+Anthus gustavi	Pechora Pipit	Shrubland	pending			
+Anthus hodgsoni	Olive-backed Pipit	Grassland	pending			
+Anthus japonicus	Siberian Pipit	Grassland	pending			
+Anthus rubescens	American Pipit	Grassland	pending			
+Anthus spragueii	Sprague's Pipit	Grassland	pending			
+Anthus trivialis	Tree Pipit	Woodland	pending			
+Antigone canadensis	Sandhill Crane	Wetland	pending			
+Antrostomus arizonae	Mexican Whip-poor-will	Forest	pending			
+Antrostomus carolinensis	Chuck-will's-widow	Woodland	pending			
+Antrostomus ridgwayi	Buff-collared Nightjar	Rock	pending			
+Antrostomus vociferus	Eastern Whip-poor-will	Forest	pending			
+Aphelocoma californica	California Scrub-Jay	Shrubland	pending			
+Aphelocoma coerulescens	Florida Scrub-Jay	Shrubland	pending			
+Aphelocoma insularis	Island Scrub-Jay	Shrubland	pending			
+Aphelocoma wollweberi	Mexican Jay	Forest	pending			
+Aphelocoma woodhouseii	Woodhouse's Scrub-Jay	Shrubland	pending			
+Apus apus	Common Swift	Human Modified	pending			
+Apus pacificus	Fork-tailed Swift	Woodland	pending			
+Aquila chrysaetos	Golden Eagle	Grassland	pending			
+Ara ararauna	Blue-and-yellow Macaw	Forest	pending			
+Ara macao	Scarlet Macaw	Forest	pending			
+Ara militaris	Military Macaw	Forest	pending			
+Ara severus	Chestnut-fronted Macaw	Forest	pending			
+Aramus guarauna	Limpkin	Wetland	pending			
+Aratinga nenday	Nanday Parakeet	Forest	pending			
+Aratinga weddellii	Dusky-headed Parakeet	Forest	pending			
+Archilochus alexandri	Black-chinned Hummingbird	Forest	pending			
+Archilochus colubris	Ruby-throated Hummingbird	Woodland	pending			
+Ardea alba	Great Egret	Wetland	proposed			Coastal: salt marsh and tidal flats as much as fresh water
+Ardea cinerea	Gray Heron	Wetland	pending			
+Ardea herodias	Great Blue Heron	Wetland	reviewed	Sameer	2026-10-03	Coastal: forages on tidal flats and estuaries as readily as on fresh water
+Ardea ibis	Western Cattle-Egret	Human Modified	pending			
+Ardenna bulleri	Buller's Shearwater	Marine	pending			
+Ardenna carneipes	Flesh-footed Shearwater	Marine	pending			
+Ardenna creatopus	Pink-footed Shearwater	Marine	pending			
+Ardenna gravis	Great Shearwater	Marine	pending			
+Ardenna grisea	Sooty Shearwater	Marine	pending			
+Ardenna pacifica	Wedge-tailed Shearwater	Marine	pending			
+Ardenna tenuirostris	Short-tailed Shearwater	Marine	pending			
+Ardeola bacchus	Chinese Pond-Heron	Wetland	pending			
+Arenaria interpres	Ruddy Turnstone	Coastal	pending			
+Arenaria melanocephala	Black Turnstone	Coastal	pending			
+Arremonops rufivirgatus	Olive Sparrow	Woodland	pending			
+Artemisiospiza belli	Bell's Sparrow	Shrubland	pending			
+Artemisiospiza nevadensis	Sagebrush Sparrow	Shrubland	pending			
+Asio flammeus	Short-eared Owl	Grassland	pending			
+Asio otus	Long-eared Owl	Forest	pending			
+Astur atricapillus	American Goshawk	Forest	pending			
+Astur cooperii	Cooper's Hawk	Woodland	pending			
+Athene cunicularia	Burrowing Owl	Grassland	pending			
+Auriparus flaviceps	Verdin	Shrubland	pending			
+Aythya affinis	Lesser Scaup	Wetland	pending			
+Aythya americana	Redhead	Wetland	pending			
+Aythya collaris	Ring-necked Duck	Wetland	pending			
+Aythya ferina	Common Pochard	Wetland	pending			
+Aythya fuligula	Tufted Duck	Wetland	pending			
+Aythya marila	Greater Scaup	Wetland	proposed			Coastal: winters on coastal bays
+Aythya nyroca	Ferruginous Duck	Wetland	pending			
+Aythya valisineria	Canvasback	Wetland	pending			
+Baeolophus atricristatus	Black-crested Titmouse	Woodland	pending			
+Baeolophus bicolor	Tufted Titmouse	Forest	pending			
+Baeolophus inornatus	Oak Titmouse	Shrubland	pending			
+Baeolophus ridgwayi	Juniper Titmouse	Woodland	pending			
+Baeolophus wollweberi	Bridled Titmouse	Forest	pending			
+Balearica regulorum	Gray Crowned-Crane	Wetland	pending			
+Bartramia longicauda	Upland Sandpiper	Grassland	pending			
+Basileuterus culicivorus	Golden-crowned Warbler	Forest	pending			
+Basileuterus lachrymosus	Fan-tailed Warbler	Woodland	pending			
+Basileuterus rufifrons	Rufous-capped Warbler	Shrubland	pending			
+Basilinna leucotis	White-eared Hummingbird	Forest	pending			
+Bombycilla cedrorum	Cedar Waxwing	Woodland	pending			
+Bombycilla garrulus	Bohemian Waxwing	Forest	pending			
+Bonasa umbellus	Ruffed Grouse	Shrubland	pending			
+Botaurus exilis	Least Bittern	Wetland	pending			
+Botaurus lentiginosus	American Bittern	Wetland	pending			
+Brachyramphus brevirostris	Kittlitz's Murrelet	Marine	pending			
+Brachyramphus marmoratus	Marbled Murrelet	Marine	pending			
+Branta bernicla	Brant	Grassland	proposed			Coastal: winters on eelgrass bays
+Branta canadensis	Canada Goose	Grassland	reviewed	Sameer	2026-10-03	Human Modified: parks, playing fields, and golf courses are now its commonest North American habitat
+Branta hutchinsii	Cackling Goose	Grassland	pending			
+Branta leucopsis	Barnacle Goose	Grassland	pending			
+Branta sandvicensis	Hawaiian Goose	Shrubland	pending			
+Brotogeris chiriri	Yellow-chevroned Parakeet	Forest	pending			
+Brotogeris versicolurus	White-winged Parakeet	Forest	pending			
+Bubo scandiacus	Snowy Owl	Grassland	pending			
+Bubo virginianus	Great Horned Owl	Forest	pending			
+Bucephala albeola	Bufflehead	Wetland	proposed			Coastal: winters on bays and estuaries
+Bucephala clangula	Common Goldeneye	Wetland	proposed			Coastal: winters on bays and harbors
+Bucephala islandica	Barrow's Goldeneye	Wetland	proposed			Coastal: winters on bays and harbors
+Bulweria bulwerii	Bulwer's Petrel	Marine	pending			
+Buteo albonotatus	Zone-tailed Hawk	Forest	pending			
+Buteo brachyurus	Short-tailed Hawk	Forest	pending			
+Buteo jamaicensis	Red-tailed Hawk	Woodland	pending			
+Buteo lagopus	Rough-legged Hawk	Grassland	pending			
+Buteo lineatus	Red-shouldered Hawk	Woodland	pending			
+Buteo plagiatus	Gray Hawk	Forest	pending			
+Buteo platypterus	Broad-winged Hawk	Forest	pending			
+Buteo regalis	Ferruginous Hawk	Grassland	pending			
+Buteo solitarius	Hawaiian Hawk	Forest	pending			
+Buteo swainsoni	Swainson's Hawk	Grassland	pending			
+Buteogallus anthracinus	Common Black Hawk	Woodland	pending			
+Buteogallus urubitinga	Great Black Hawk	Woodland	pending			
+Butorides virescens	Green Heron	Wetland	pending			
+Cacatua alba	White Cockatoo	Forest	pending			
+Cacatua galerita	Sulphur-crested Cockatoo	Forest	pending			
+Cacatua goffiniana	Tanimbar Corella	Forest	pending			
+Cacatua moluccensis	Salmon-crested Cockatoo	Forest	pending			
+Cacatua sanguinea	Little Corella	Woodland	pending			
+Cairina moschata	Muscovy Duck	Wetland	pending			
+Calamospiza melanocorys	Lark Bunting	Grassland	pending			
+Calcarius lapponicus	Lapland Longspur	Grassland	pending			
+Calcarius ornatus	Chestnut-collared Longspur	Grassland	pending			
+Calcarius pictus	Smith's Longspur	Grassland	pending			
+Calidris acuminata	Sharp-tailed Sandpiper	Wetland	pending			
+Calidris alba	Sanderling	Coastal	pending			
+Calidris alpina	Dunlin	Wetland	proposed			Coastal: winters on beaches and mudflats
+Calidris bairdii	Baird's Sandpiper	Grassland	pending			
+Calidris canutus	Red Knot	Coastal	pending			
+Calidris falcinellus	Broad-billed Sandpiper	Wetland	pending			
+Calidris ferruginea	Curlew Sandpiper	Coastal	pending			
+Calidris fuscicollis	White-rumped Sandpiper	Wetland	proposed			Coastal: migrates along coasts
+Calidris himantopus	Stilt Sandpiper	Wetland	pending			
+Calidris maritima	Purple Sandpiper	Grassland	proposed			Coastal: winters on rocky shores | Rock: winters on rock jetties and breakwaters
+Calidris mauri	Western Sandpiper	Shrubland	proposed			Coastal: migrates and winters on Pacific and Gulf mudflats
+Calidris melanotos	Pectoral Sandpiper	Wetland	pending			
+Calidris minuta	Little Stint	Grassland	pending			
+Calidris minutilla	Least Sandpiper	Wetland	proposed			Coastal: migrates and winters on mudflats and salt marsh
+Calidris ptilocnemis	Rock Sandpiper	Grassland	proposed			Coastal: winters on rocky Pacific shores | Rock: winters on rocky Pacific shores
+Calidris pugnax	Ruff	Wetland	pending			
+Calidris pusilla	Semipalmated Sandpiper	Grassland	proposed			Coastal: migrates in great numbers through beaches and mudflats
+Calidris ruficollis	Red-necked Stint	Grassland	pending			
+Calidris subminuta	Long-toed Stint	Wetland	pending			
+Calidris subruficollis	Buff-breasted Sandpiper	Grassland	pending			
+Calidris temminckii	Temminck's Stint	Grassland	pending			
+Calidris tenuirostris	Great Knot	Grassland	pending			
+Calidris virgata	Surfbird	Coastal	pending			
+Calliope calliope	Siberian Rubythroat	Shrubland	pending			
+Callipepla californica	California Quail	Shrubland	pending			
+Callipepla gambelii	Gambel's Quail	Shrubland	pending			
+Callipepla squamata	Scaled Quail	Shrubland	pending			
+Callonetta leucophrys	Ringed Teal	Wetland	pending			
+Calonectris borealis	Cory's Shearwater	Marine	pending			
+Calonectris diomedea	Scopoli's Shearwater	Marine	pending			
+Calothorax lucifer	Lucifer Hummingbird	Shrubland	pending			
+Calypte anna	Anna's Hummingbird	Woodland	pending			
+Calypte costae	Costa's Hummingbird	Shrubland	pending			
+Camptostoma imberbe	Northern Beardless-Tyrannulet	Forest	pending			
+Campylorhynchus brunneicapillus	Cactus Wren	Shrubland	pending			
+Canachites canadensis	Spruce Grouse	Forest	pending			
+Caracara plancus	Crested Caracara	Shrubland	pending			
+Cardellina canadensis	Canada Warbler	Forest	pending			
+Cardellina pusilla	Wilson's Warbler	Forest	pending			
+Cardellina rubrifrons	Red-faced Warbler	Forest	pending			
+Cardinalis cardinalis	Northern Cardinal	Shrubland	pending			
+Cardinalis sinuatus	Pyrrhuloxia	Shrubland	pending			
+Carduelis carduelis	European Goldfinch	Woodland	pending			
+Carpodacus erythrinus	Common Rosefinch	Shrubland	pending			
+Cathartes aura	Turkey Vulture	Human Modified	pending			
+Catharus bicknelli	Bicknell's Thrush	Forest	pending			
+Catharus fuscescens	Veery	Forest	pending			
+Catharus guttatus	Hermit Thrush	Forest	pending			
+Catharus minimus	Gray-cheeked Thrush	Forest	pending			
+Catharus ustulatus	Swainson's Thrush	Forest	pending			
+Catherpes mexicanus	Canyon Wren	Rock	pending			
+Centrocercus minimus	Gunnison Sage-Grouse	Shrubland	pending			
+Centrocercus urophasianus	Greater Sage-Grouse	Shrubland	pending			
+Centronyx bairdii	Baird's Sparrow	Grassland	pending			
+Centronyx henslowii	Henslow's Sparrow	Grassland	pending			
+Cepphus columba	Pigeon Guillemot	Marine	pending			
+Cepphus grylle	Black Guillemot	Marine	pending			
+Cerorhinca monocerata	Rhinoceros Auklet	Marine	pending			
+Certhia americana	Brown Creeper	Forest	pending			
+Chaetura pelagica	Chimney Swift	Human Modified	pending			
+Chaetura vauxi	Vaux's Swift	Forest	pending			
+Chamaea fasciata	Wrentit	Shrubland	pending			
+Charadrius hiaticula	Common Ringed Plover	Coastal	pending			
+Charadrius melodus	Piping Plover	Coastal	pending			
+Charadrius semipalmatus	Semipalmated Plover	Wetland	proposed			Coastal: migrates through beaches and mudflats
+Charadrius vociferus	Killdeer	Wetland	proposed			Grassland: nests and feeds in open fields | Human Modified: lawns, farm fields, and gravel lots
+Chasiempis ibidis	Oahu Elepaio	Forest	pending			
+Chasiempis sandwichensis	Hawaii Elepaio	Forest	pending			
+Chasiempis sclateri	Kauai Elepaio	Forest	pending			
+Chlidonias hybrida	Whiskered Tern	Wetland	pending			
+Chlidonias leucopterus	White-winged Tern	Wetland	pending			
+Chlidonias niger	Black Tern	Wetland	pending			
+Chloebia gouldiae	Gouldian Finch	Woodland	pending			
+Chloris chloris	European Greenfinch	Woodland	pending			
+Chloris sinica	Oriental Greenfinch	Shrubland	pending			
+Chloroceryle amazona	Amazon Kingfisher	Riverine	pending			
+Chloroceryle americana	Green Kingfisher	Riverine	pending			
+Chlorodrepanis flava	Oahu Amakihi	Forest	pending			
+Chlorodrepanis stejnegeri	Kauai Amakihi	Forest	pending			
+Chlorodrepanis virens	Hawaii Amakihi	Forest	pending			
+Chondestes grammacus	Lark Sparrow	Shrubland	pending			
+Chondrohierax uncinatus	Hook-billed Kite	Forest	pending			
+Chordeiles acutipennis	Lesser Nighthawk	Shrubland	pending			
+Chordeiles gundlachii	Antillean Nighthawk	Shrubland	pending			
+Chordeiles minor	Common Nighthawk	Grassland	pending			
+Chroicocephalus philadelphia	Bonaparte's Gull	Wetland	proposed			Coastal: winters on bays and inlets
+Chroicocephalus ridibundus	Black-headed Gull	Wetland	proposed			Coastal: winters on bays and inlets
+Chrysolophus amherstiae	Lady Amherst's Pheasant	Forest	pending			
+Chrysolophus pictus	Golden Pheasant	Forest	pending			
+Cinclus mexicanus	American Dipper	Riverine	pending			
+Circus hudsonius	Northern Harrier	Grassland	pending			
+Cistothorus palustris	Marsh Wren	Wetland	pending			
+Cistothorus stellaris	Sedge Wren	Grassland	pending			
+Clangula hyemalis	Long-tailed Duck	Wetland	proposed			Marine: winters on the ocean
+Coccothraustes coccothraustes	Hawfinch	Forest	pending			
+Coccyzus americanus	Yellow-billed Cuckoo	Forest	pending			
+Coccyzus erythropthalmus	Black-billed Cuckoo	Forest	pending			
+Coccyzus minor	Mangrove Cuckoo	Woodland	pending			
+Coereba flaveola	Bananaquit	Shrubland	pending			
+Colaptes auratus	Northern Flicker	Shrubland	pending			
+Colaptes chrysoides	Gilded Flicker	Shrubland	pending			
+Colibri thalassinus	Mexican Violetear	Forest	pending			
+Colinus virginianus	Northern Bobwhite	Human Modified	pending			
+Columba livia	Rock Pigeon	Human Modified	reviewed	Sameer	2026-10-03	Rock: a cliff-nester by ancestry, still using cliffs and quarries away from towns
+Columbina inca	Inca Dove	Human Modified	pending			
+Columbina passerina	Common Ground Dove	Shrubland	pending			
+Columbina talpacoti	Ruddy Ground Dove	Human Modified	pending			
+Contopus caribaeus	Cuban Pewee	Forest	pending			
+Contopus cooperi	Olive-sided Flycatcher	Forest	pending			
+Contopus pertinax	Greater Pewee	Forest	pending			
+Contopus sordidulus	Western Wood-Pewee	Forest	pending			
+Contopus virens	Eastern Wood-Pewee	Forest	pending			
+Copsychus malabaricus	White-rumped Shama	Forest	pending			
+Coragyps atratus	Black Vulture	Human Modified	pending			
+Corthylio calendula	Ruby-crowned Kinglet	Forest	pending			
+Corvus albus	Pied Crow	Shrubland	pending			
+Corvus brachyrhynchos	American Crow	Human Modified	pending			
+Corvus corax	Common Raven	Forest	pending			
+Corvus cryptoleucus	Chihuahuan Raven	Grassland	pending			
+Corvus imparatus	Tamaulipas Crow	Shrubland	pending			
+Corvus ossifragus	Fish Crow	Coastal	pending			
+Corvus splendens	House Crow	Human Modified	pending			
+Coscoroba coscoroba	Coscoroba Swan	Wetland	pending			
+Coturnicops noveboracensis	Yellow Rail	Wetland	pending			
+Coturnix coturnix	Common Quail	Human Modified	pending			
+Coturnix japonica	Japanese Quail	Grassland	pending			
+Creagrus furcatus	Swallow-tailed Gull	Marine	pending			
+Crex crex	Corn Crake	Grassland	pending			
+Crithagra mozambica	Yellow-fronted Canary	Shrubland	pending			
+Crotophaga ani	Smooth-billed Ani	Human Modified	pending			
+Crotophaga sulcirostris	Groove-billed Ani	Human Modified	pending			
+Cuculus canorus	Common Cuckoo	Forest	pending			
+Cuculus optatus	Oriental Cuckoo	Forest	pending			
+Cyanerpes cyaneus	Red-legged Honeycreeper	Forest	pending			
+Cyanocitta cristata	Blue Jay	Woodland	pending			
+Cyanocitta stelleri	Steller's Jay	Forest	pending			
+Cyanocompsa parellina	Blue Bunting	Woodland	pending			
+Cyanocorax colliei	Black-throated Magpie-Jay	Woodland	pending			
+Cyanocorax formosus	White-throated Magpie-Jay	Woodland	pending			
+Cyanocorax morio	Brown Jay	Forest	pending			
+Cyanocorax yncas	Green Jay	Forest	pending			
+Cyanoliseus patagonus	Burrowing Parakeet	Shrubland	pending			
+Cygnus atratus	Black Swan	Wetland	pending			
+Cygnus buccinator	Trumpeter Swan	Wetland	pending			
+Cygnus columbianus	Tundra Swan	Wetland	pending			
+Cygnus cygnus	Whooper Swan	Wetland	pending			
+Cygnus melancoryphus	Black-necked Swan	Wetland	pending			
+Cygnus olor	Mute Swan	Wetland	pending			
+Cynanthus latirostris	Broad-billed Hummingbird	Woodland	pending			
+Cypseloides niger	Black Swift	Forest	pending			
+Cyrtonyx montezumae	Montezuma Quail	Forest	pending			
+Delichon lagopodum	Siberian House-Martin	Human Modified	pending			
+Dendragapus fuliginosus	Sooty Grouse	Forest	pending			
+Dendragapus obscurus	Dusky Grouse	Forest	pending			
+Dendrocopos major	Great Spotted Woodpecker	Woodland	pending			
+Dendrocygna arborea	West Indian Whistling-Duck	Forest	pending			
+Dendrocygna autumnalis	Black-bellied Whistling-Duck	Wetland	pending			
+Dendrocygna bicolor	Fulvous Whistling-Duck	Wetland	pending			
+Dendrocygna eytoni	Plumed Whistling-Duck	Grassland	pending			
+Dendrocygna viduata	White-faced Whistling-Duck	Wetland	pending			
+Dolichonyx oryzivorus	Bobolink	Grassland	pending			
+Drepanis coccinea	Iiwi	Forest	pending			
+Dromaius novaehollandiae	Emu	Grassland	pending			
+Dryobates nuttallii	Nuttall's Woodpecker	Woodland	pending			
+Dryobates pubescens	Downy Woodpecker	Woodland	pending			
+Dryobates scalaris	Ladder-backed Woodpecker	Shrubland	pending			
+Dryocopus pileatus	Pileated Woodpecker	Forest	pending			
+Dumetella carolinensis	Gray Catbird	Shrubland	pending			
+Egretta caerulea	Little Blue Heron	Wetland	proposed			Coastal: salt marsh and tidal flats as much as fresh water
+Egretta garzetta	Little Egret	Wetland	pending			
+Egretta rufescens	Reddish Egret	Coastal	pending			
+Egretta thula	Snowy Egret	Wetland	proposed			Coastal: salt marsh and tidal flats as much as fresh water
+Egretta tricolor	Tricolored Heron	Coastal	pending			
+Elanoides forficatus	Swallow-tailed Kite	Forest	pending			
+Elanus leucurus	White-tailed Kite	Human Modified	pending			
+Emberiza aureola	Yellow-breasted Bunting	Shrubland	pending			
+Emberiza leucocephalos	Pine Bunting	Forest	pending			
+Emberiza pallasi	Pallas's Bunting	Shrubland	pending			
+Emberiza pusilla	Little Bunting	Forest	pending			
+Emberiza rustica	Rustic Bunting	Forest	pending			
+Emberiza schoeniclus	Reed Bunting	Wetland	pending			
+Emberiza variabilis	Gray Bunting	Shrubland	pending			
+Empidonax alnorum	Alder Flycatcher	Shrubland	pending			
+Empidonax difficilis	Western Flycatcher	Forest	pending			
+Empidonax flaviventris	Yellow-bellied Flycatcher	Forest	pending			
+Empidonax fulvifrons	Buff-breasted Flycatcher	Forest	pending			
+Empidonax hammondii	Hammond's Flycatcher	Forest	pending			
+Empidonax minimus	Least Flycatcher	Forest	pending			
+Empidonax oberholseri	Dusky Flycatcher	Forest	pending			
+Empidonax traillii	Willow Flycatcher	Shrubland	pending			
+Empidonax virescens	Acadian Flycatcher	Forest	pending			
+Empidonax wrightii	Gray Flycatcher	Shrubland	pending			
+Empidonomus varius	Variegated Flycatcher	Woodland	pending			
+Eremophila alpestris	Horned Lark	Grassland	pending			
+Estrilda astrild	Common Waxbill	Grassland	pending			
+Estrilda melpoda	Orange-cheeked Waxbill	Grassland	pending			
+Estrilda troglodytes	Black-rumped Waxbill	Shrubland	pending			
+Eudocimus albus	White Ibis	Wetland	pending			
+Eudocimus ruber	Scarlet Ibis	Wetland	pending			
+Eudromias morinellus	Eurasian Dotterel	Grassland	pending			
+Eugenes fulgens	Rivoli's Hummingbird	Forest	pending			
+Euodice cantans	African Silverbill	Grassland	pending			
+Euodice malabarica	Indian Silverbill	Grassland	pending			
+Euphagus carolinus	Rusty Blackbird	Forest	pending			
+Euphagus cyanocephalus	Brewer's Blackbird	Human Modified	pending			
+Euplectes afer	Yellow-crowned Bishop	Wetland	pending			
+Euplectes franciscanus	Northern Red Bishop	Grassland	pending			
+Eupsittula aurea	Peach-fronted Parakeet	Grassland	pending			
+Eupsittula canicularis	Orange-fronted Parakeet	Woodland	pending			
+Euptilotis neoxenus	Eared Quetzal	Forest	pending			
+Falco columbarius	Merlin	Woodland	pending			
+Falco femoralis	Aplomado Falcon	Grassland	pending			
+Falco mexicanus	Prairie Falcon	Grassland	pending			
+Falco peregrinus	Peregrine Falcon	Grassland	reviewed	Sameer	2026-10-03	Human Modified: city buildings and bridges are a primary nest site
+Falco rusticolus	Gyrfalcon	Grassland	pending			
+Falco sparverius	American Kestrel	Grassland	pending			
+Falco subbuteo	Eurasian Hobby	Woodland	pending			
+Falco tinnunculus	Eurasian Kestrel	Shrubland	pending			
+Ficedula albicilla	Taiga Flycatcher	Woodland	pending			
+Francolinus francolinus	Black Francolin	Shrubland	pending			
+Fratercula arctica	Atlantic Puffin	Marine	pending			
+Fratercula cirrhata	Tufted Puffin	Marine	pending			
+Fratercula corniculata	Horned Puffin	Marine	pending			
+Fregata ariel	Lesser Frigatebird	Marine	pending			
+Fregata magnificens	Magnificent Frigatebird	Marine	pending			
+Fregata minor	Great Frigatebird	Marine	pending			
+Fringilla coelebs	Common Chaffinch	Forest	pending			
+Fringilla montifringilla	Brambling	Forest	pending			
+Fulica alai	Hawaiian Coot	Wetland	pending			
+Fulica americana	American Coot	Wetland	pending			
+Fulmarus glacialis	Northern Fulmar	Marine	pending			
+Gallinago delicata	Wilson's Snipe	Wetland	pending			
+Gallinago gallinago	Common Snipe	Wetland	pending			
+Gallinago solitaria	Solitary Snipe	Wetland	pending			
+Gallinago stenura	Pin-tailed Snipe	Wetland	pending			
+Gallinula galeata	Common Gallinule	Wetland	pending			
+Gallus gallus	Red Junglefowl	Forest	pending			
+Garrulax canorus	Chinese Hwamei	Shrubland	pending			
+Gavia adamsii	Yellow-billed Loon	Wetland	proposed			Marine: winters on the ocean
+Gavia arctica	Arctic Loon	Wetland	proposed			Marine: winters on the ocean
+Gavia immer	Common Loon	Wetland	proposed			Marine: winters on the ocean
+Gavia pacifica	Pacific Loon	Wetland	proposed			Marine: winters on the ocean
+Gavia stellata	Red-throated Loon	Wetland	proposed			Marine: winters on the ocean
+Gelochelidon nilotica	Gull-billed Tern	Coastal	pending			
+Geococcyx californianus	Greater Roadrunner	Shrubland	pending			
+Geopelia cuneata	Diamond Dove	Grassland	pending			
+Geopelia striata	Zebra Dove	Woodland	pending			
+Geothlypis formosa	Kentucky Warbler	Forest	pending			
+Geothlypis philadelphia	Mourning Warbler	Forest	pending			
+Geothlypis poliocephala	Gray-crowned Yellowthroat	Shrubland	pending			
+Geothlypis tolmiei	MacGillivray's Warbler	Forest	pending			
+Geothlypis trichas	Common Yellowthroat	Wetland	pending			
+Geotrygon chrysia	Key West Quail-Dove	Woodland	pending			
+Geotrygon montana	Ruddy Quail-Dove	Forest	pending			
+Geranoaetus albicaudatus	White-tailed Hawk	Grassland	pending			
+Glaucestrilda caerulescens	Lavender Waxbill	Shrubland	pending			
+Glaucidium brasilianum	Ferruginous Pygmy-Owl	Shrubland	pending			
+Glaucidium gnoma	Northern Pygmy-Owl	Forest	pending			
+Gracula religiosa	Common Hill Myna	Forest	pending			
+Grus americana	Whooping Crane	Wetland	pending			
+Grus grus	Common Crane	Wetland	pending			
+Gygis candida	Blue-billed White-Tern	Marine	pending			
+Gymnogyps californianus	California Condor	Shrubland	pending			
+Gymnorhinus cyanocephalus	Pinyon Jay	Forest	pending			
+Haematopus bachmani	Black Oystercatcher	Coastal	pending			
+Haematopus ostralegus	Eurasian Oystercatcher	Coastal	pending			
+Haematopus palliatus	American Oystercatcher	Coastal	pending			
+Haemorhous cassinii	Cassin's Finch	Forest	pending			
+Haemorhous mexicanus	House Finch	Shrubland	pending			
+Haemorhous purpureus	Purple Finch	Forest	pending			
+Haliaeetus albicilla	White-tailed Eagle	Rock	pending			
+Haliaeetus leucocephalus	Bald Eagle	Wetland	pending			
+Haliaeetus pelagicus	Steller's Sea-Eagle	Wetland	pending			
+Heliomaster constantii	Plain-capped Starthroat	Woodland	pending			
+Helmitheros vermivorum	Worm-eating Warbler	Forest	pending			
+Helopsaltes ochotensis	Middendorff's Grasshopper Warbler	Shrubland	pending			
+Hemignathus wilsoni	Akiapolaau	Forest	pending			
+Hesperiphona vespertina	Evening Grosbeak	Forest	pending			
+Himantopus mexicanus	Black-necked Stilt	Wetland	pending			
+Himatione sanguinea	Apapane	Forest	pending			
+Hirundapus caudacutus	White-throated Needletail	Woodland	pending			
+Hirundo rustica	Barn Swallow	Human Modified	pending			
+Histrionicus histrionicus	Harlequin Duck	Marine	proposed			Riverine: breeds on fast rivers
+Horornis diphone	Japanese Bush Warbler	Shrubland	pending			
+Hydrobates castro	Band-rumped Storm-Petrel	Marine	pending			
+Hydrobates furcatus	Fork-tailed Storm-Petrel	Marine	pending			
+Hydrobates homochroa	Ashy Storm-Petrel	Marine	pending			
+Hydrobates leucorhous	Leach's Storm-Petrel	Marine	pending			
+Hydrobates melania	Black Storm-Petrel	Marine	pending			
+Hydrobates microsoma	Least Storm-Petrel	Marine	pending			
+Hydrobates socorroensis	Townsend's Storm-Petrel	Marine	pending			
+Hydrobates tethys	Wedge-rumped Storm-Petrel	Marine	pending			
+Hydrobates tristrami	Tristram's Storm-Petrel	Marine	pending			
+Hydrocoloeus minutus	Little Gull	Coastal	pending			
+Hydroprogne caspia	Caspian Tern	Wetland	proposed			Coastal: bays and estuaries as much as fresh water
+Hylocichla mustelina	Wood Thrush	Forest	pending			
+Icteria virens	Yellow-breasted Chat	Forest	pending			
+Icterus bullockiorum	Bullock's Oriole	Forest	pending			
+Icterus cucullatus	Hooded Oriole	Woodland	pending			
+Icterus galbula	Baltimore Oriole	Forest	pending			
+Icterus graduacauda	Audubon's Oriole	Forest	pending			
+Icterus gularis	Altamira Oriole	Woodland	pending			
+Icterus icterus	Venezuelan Troupial	Forest	pending			
+Icterus parisorum	Scott's Oriole	Shrubland	pending			
+Icterus pectoralis	Spot-breasted Oriole	Woodland	pending			
+Icterus pustulatus	Streak-backed Oriole	Woodland	pending			
+Icterus spurius	Orchard Oriole	Forest	pending			
+Icterus wagleri	Black-vented Oriole	Forest	pending			
+Ictinia mississippiensis	Mississippi Kite	Woodland	pending			
+Ixoreus naevius	Varied Thrush	Forest	pending			
+Jabiru mycteria	Jabiru	Grassland	pending			
+Jacana spinosa	Northern Jacana	Wetland	pending			
+Junco hyemalis	Dark-eyed Junco	Forest	pending			
+Junco phaeonotus	Yellow-eyed Junco	Forest	pending			
+Jynx torquilla	Eurasian Wryneck	Woodland	pending			
+Lagonosticta senegala	Red-billed Firefinch	Woodland	pending			
+Lagopus lagopus	Willow Ptarmigan	Grassland	pending			
+Lagopus leucura	White-tailed Ptarmigan	Grassland	pending			
+Lagopus muta	Rock Ptarmigan	Grassland	pending			
+Lampornis clemenciae	Blue-throated Mountain-gem	Forest	pending			
+Lamprotornis caudatus	Long-tailed Glossy Starling	Woodland	pending			
+Lanius borealis	Northern Shrike	Shrubland	pending			
+Lanius collurio	Red-backed Shrike	Woodland	pending			
+Lanius cristatus	Brown Shrike	Shrubland	pending			
+Lanius ludovicianus	Loggerhead Shrike	Shrubland	pending			
+Larus argentatus	European Herring Gull	Coastal	pending			
+Larus brachyrhynchus	Short-billed Gull	Coastal	pending			
+Larus californicus	California Gull	Coastal	pending			
+Larus canus	Common Gull	Coastal	pending			
+Larus crassirostris	Black-tailed Gull	Coastal	pending			
+Larus delawarensis	Ring-billed Gull	Coastal	pending			
+Larus dominicanus	Kelp Gull	Marine	pending			
+Larus fuscus	Lesser Black-backed Gull	Coastal	pending			
+Larus glaucescens	Glaucous-winged Gull	Coastal	pending			
+Larus glaucoides	Iceland Gull	Coastal	pending			
+Larus heermanni	Heermann's Gull	Coastal	pending			
+Larus hyperboreus	Glaucous Gull	Coastal	pending			
+Larus livens	Yellow-footed Gull	Marine	pending			
+Larus marinus	Great Black-backed Gull	Coastal	pending			
+Larus michahellis	Yellow-legged Gull	Coastal	pending			
+Larus occidentalis	Western Gull	Marine	proposed			Coastal: beaches and harbors
+Larus schistisagus	Slaty-backed Gull	Coastal	pending			
+Larus smithsonianus	American Herring Gull	Coastal	reviewed	Sameer	2026-10-03	Human Modified: feeds routinely at landfill, docks, and town rooftops
+Larus vegae	Vega Gull	Coastal	pending			
+Larvivora sibilans	Rufous-tailed Robin	Forest	pending			
+Laterallus jamaicensis	Black Rail	Wetland	proposed			Coastal: Atlantic birds live in salt marsh
+Legatus leucophaius	Piratic Flycatcher	Forest	pending			
+Leiothlypis celata	Orange-crowned Warbler	Shrubland	pending			
+Leiothlypis crissalis	Colima Warbler	Forest	pending			
+Leiothlypis luciae	Lucy's Warbler	Forest	pending			
+Leiothlypis peregrina	Tennessee Warbler	Forest	pending			
+Leiothlypis ruficapilla	Nashville Warbler	Forest	pending			
+Leiothlypis virginiae	Virginia's Warbler	Shrubland	pending			
+Leiothrix lutea	Red-billed Leiothrix	Shrubland	pending			
+Leptotila verreauxi	White-tipped Dove	Shrubland	pending			
+Leuconotopicus albolarvatus	White-headed Woodpecker	Forest	pending			
+Leuconotopicus arizonae	Arizona Woodpecker	Forest	pending			
+Leuconotopicus borealis	Red-cockaded Woodpecker	Forest	pending			
+Leuconotopicus villosus	Hairy Woodpecker	Forest	pending			
+Leucophaeus atricilla	Laughing Gull	Marine	proposed			Coastal: beaches, bays, and harbors
+Leucophaeus pipixcan	Franklin's Gull	Coastal	pending			
+Leucosticte atrata	Black Rosy-Finch	Grassland	pending			
+Leucosticte australis	Brown-capped Rosy-Finch	Grassland	pending			
+Leucosticte tephrocotis	Gray-crowned Rosy-Finch	Grassland	pending			
+Limnodromus griseus	Short-billed Dowitcher	Wetland	proposed			Coastal: migrates and winters on coastal mudflats
+Limnodromus scolopaceus	Long-billed Dowitcher	Wetland	pending			
+Limnothlypis swainsonii	Swainson's Warbler	Shrubland	pending			
+Limosa fedoa	Marbled Godwit	Wetland	proposed			Coastal: winters on coastal mudflats
+Limosa haemastica	Hudsonian Godwit	Wetland	pending			
+Limosa lapponica	Bar-tailed Godwit	Wetland	proposed			Coastal: migrates through coastal mudflats
+Limosa limosa	Black-tailed Godwit	Wetland	pending			
+Locustella lanceolata	Lanceolated Warbler	Grassland	pending			
+Lonchura atricapilla	Chestnut Munia	Wetland	pending			
+Lonchura malacca	Tricolored Munia	Wetland	pending			
+Lonchura punctulata	Scaly-breasted Munia	Grassland	pending			
+Lophodytes cucullatus	Hooded Merganser	Wetland	pending			
+Lophura leucomelanos	Kalij Pheasant	Forest	pending			
+Lophura nycthemera	Silver Pheasant	Forest	pending			
+Loxia curvirostra	Red Crossbill	Forest	pending			
+Loxia leucoptera	White-winged Crossbill	Forest	pending			
+Loxia sinesciuris	Cassia Crossbill	Forest	pending			
+Loxioides bailleui	Palila	Woodland	pending			
+Loxops caeruleirostris	Akekee	Forest	pending			
+Loxops coccineus	Hawaii Akepa	Forest	pending			
+Loxops mana	Hawaii Creeper	Forest	pending			
+Luscinia svecica	Bluethroat	Grassland	pending			
+Lymnocryptes minimus	Jack Snipe	Wetland	pending			
+Magumma parva	Anianiau	Forest	pending			
+Mareca americana	American Wigeon	Wetland	pending			
+Mareca falcata	Falcated Duck	Wetland	pending			
+Mareca penelope	Eurasian Wigeon	Wetland	pending			
+Mareca sibilatrix	Chiloe Wigeon	Wetland	pending			
+Mareca strepera	Gadwall	Wetland	pending			
+Megaceryle alcyon	Belted Kingfisher	Riverine	pending			
+Megaceryle torquata	Ringed Kingfisher	Riverine	pending			
+Megascops asio	Eastern Screech-Owl	Woodland	pending			
+Megascops kennicottii	Western Screech-Owl	Forest	pending			
+Megascops trichopsis	Whiskered Screech-Owl	Forest	pending			
+Melamprosops phaeosoma	Poo-uli	Forest	pending			
+Melanerpes aurifrons	Golden-fronted Woodpecker	Shrubland	pending			
+Melanerpes carolinus	Red-bellied Woodpecker	Woodland	pending			
+Melanerpes erythrocephalus	Red-headed Woodpecker	Forest	pending			
+Melanerpes formicivorus	Acorn Woodpecker	Woodland	pending			
+Melanerpes lewis	Lewis's Woodpecker	Woodland	pending			
+Melanerpes uropygialis	Gila Woodpecker	Shrubland	pending			
+Melanitta americana	Black Scoter	Wetland	proposed			Marine: winters on the ocean
+Melanitta deglandi	White-winged Scoter	Wetland	proposed			Marine: winters on the ocean
+Melanitta perspicillata	Surf Scoter	Wetland	proposed			Marine: winters on the ocean
+Melanitta stejnegeri	Stejneger's Scoter	Wetland	proposed			Marine: winters on the ocean
+Melanospiza bicolor	Black-faced Grassquit	Shrubland	pending			
+Melanotis caerulescens	Blue Mockingbird	Forest	pending			
+Meleagris gallopavo	Wild Turkey	Forest	pending			
+Melopsittacus undulatus	Budgerigar	Woodland	pending			
+Melospiza georgiana	Swamp Sparrow	Wetland	pending			
+Melospiza lincolnii	Lincoln's Sparrow	Wetland	pending			
+Melospiza melodia	Song Sparrow	Shrubland	pending			
+Melozone aberti	Abert's Towhee	Shrubland	pending			
+Melozone crissalis	California Towhee	Shrubland	pending			
+Melozone fusca	Canyon Towhee	Shrubland	pending			
+Mergellus albellus	Smew	Wetland	pending			
+Mergus merganser	Common Merganser	Riverine	pending			
+Mergus serrator	Red-breasted Merganser	Wetland	proposed			Coastal: winters on bays and inshore sea
+Micrathene whitneyi	Elf Owl	Shrubland	pending			
+Mimus gilvus	Tropical Mockingbird	Shrubland	pending			
+Mimus gundlachii	Bahama Mockingbird	Shrubland	pending			
+Mimus polyglottos	Northern Mockingbird	Shrubland	pending			
+Mitrephanes phaeocercus	Tufted Flycatcher	Forest	pending			
+Mniotilta varia	Black-and-white Warbler	Forest	pending			
+Molothrus aeneus	Bronzed Cowbird	Forest	pending			
+Molothrus ater	Brown-headed Cowbird	Forest	pending			
+Molothrus bonariensis	Shiny Cowbird	Woodland	pending			
+Morus bassanus	Northern Gannet	Marine	pending			
+Motacilla alba	White Wagtail	Human Modified	pending			
+Motacilla cinerea	Gray Wagtail	Riverine	pending			
+Motacilla citreola	Citrine Wagtail	Wetland	pending			
+Motacilla tschutschensis	Eastern Yellow Wagtail	Grassland	pending			
+Muscicapa dauurica	Asian Brown Flycatcher	Woodland	pending			
+Muscicapa griseisticta	Gray-streaked Flycatcher	Shrubland	pending			
+Muscicapa sibirica	Dark-sided Flycatcher	Forest	pending			
+Myadestes obscurus	Omao	Forest	pending			
+Myadestes palmeri	Puaiohi	Forest	pending			
+Myadestes townsendi	Townsend's Solitaire	Forest	pending			
+Mycteria americana	Wood Stork	Wetland	pending			
+Myiarchus cinerascens	Ash-throated Flycatcher	Shrubland	pending			
+Myiarchus crinitus	Great Crested Flycatcher	Woodland	pending			
+Myiarchus nuttingi	Nutting's Flycatcher	Woodland	pending			
+Myiarchus sagrae	La Sagra's Flycatcher	Forest	pending			
+Myiarchus tuberculifer	Dusky-capped Flycatcher	Forest	pending			
+Myiarchus tyrannulus	Brown-crested Flycatcher	Woodland	pending			
+Myioborus miniatus	Slate-throated Redstart	Forest	pending			
+Myioborus pictus	Painted Redstart	Forest	pending			
+Myiodynastes luteiventris	Sulphur-bellied Flycatcher	Woodland	pending			
+Myiopsitta monachus	Monk Parakeet	Human Modified	pending			
+Myiozetetes similis	Social Flycatcher	Shrubland	pending			
+Nannopterum auritum	Double-crested Cormorant	Marine	reviewed	Sameer	2026-10-03	Wetland: abundant on inland lakes and rivers, though AVONET codes its primary habitat as marine
+Nannopterum brasilianum	Neotropic Cormorant	Wetland	pending			
+Nesophlox evelynae	Bahama Woodstar	Human Modified	pending			
+Netta peposaca	Rosy-billed Pochard	Wetland	pending			
+Netta rufina	Red-crested Pochard	Wetland	pending			
+Nomonyx dominicus	Masked Duck	Wetland	pending			
+Nucifraga columbiana	Clark's Nutcracker	Forest	pending			
+Numenius americanus	Long-billed Curlew	Grassland	proposed			Coastal: winters on coastal mudflats
+Numenius hudsonicus	Hudsonian Whimbrel	Grassland	proposed			Coastal: migrates and winters on coasts and salt marsh
+Numenius madagascariensis	Far Eastern Curlew	Wetland	pending			
+Numenius minutus	Little Curlew	Grassland	pending			
+Numenius tahitiensis	Bristle-thighed Curlew	Grassland	pending			
+Numida meleagris	Helmeted Guineafowl	Woodland	pending			
+Nyctanassa violacea	Yellow-crowned Night Heron	Coastal	pending			
+Nycticorax nycticorax	Black-crowned Night Heron	Wetland	proposed			Coastal: salt marsh and harbors
+Nyctidromus albicollis	Common Pauraque	Woodland	pending			
+Nymphicus hollandicus	Cockatiel	Grassland	pending			
+Oceanites oceanicus	Wilson's Storm-Petrel	Marine	pending			
+Oenanthe oenanthe	Northern Wheatear	Grassland	pending			
+Onychoprion aleuticus	Aleutian Tern	Coastal	pending			
+Onychoprion anaethetus	Bridled Tern	Marine	pending			
+Onychoprion fuscatus	Sooty Tern	Marine	pending			
+Onychoprion lunatus	Gray-backed Tern	Marine	pending			
+Oporornis agilis	Connecticut Warbler	Forest	pending			
+Oreomystis bairdi	Akikiki	Forest	pending			
+Oreortyx pictus	Mountain Quail	Shrubland	pending			
+Oreoscoptes montanus	Sage Thrasher	Shrubland	pending			
+Oreothlypis superciliosa	Crescent-chested Warbler	Forest	pending			
+Ortalis vetula	Plain Chachalaca	Shrubland	pending			
+Ortygornis pondicerianus	Gray Francolin	Grassland	pending			
+Oxyura jamaicensis	Ruddy Duck	Wetland	pending			
+Pachyramphus aglaiae	Rose-throated Becard	Forest	pending			
+Padda oryzivora	Java Sparrow	Human Modified	pending			
+Pagophila eburnea	Ivory Gull	Marine	pending			
+Palmeria dolei	Akohekohe	Forest	pending			
+Pandion haliaetus	Osprey	Marine	reviewed	Sameer	2026-10-03	Coastal: fishes estuaries and sheltered salt water as well as fresh | Human Modified: nests routinely on poles, pylons, and purpose-built platforms
+Parabuteo unicinctus	Harris's Hawk	Shrubland	pending			
+Parkesia motacilla	Louisiana Waterthrush	Forest	pending			
+Parkesia noveboracensis	Northern Waterthrush	Shrubland	pending			
+Paroaria capitata	Yellow-billed Cardinal	Shrubland	pending			
+Paroaria coronata	Red-crested Cardinal	Shrubland	pending			
+Paroreomyza montana	Maui Alauahio	Forest	pending			
+Parus major	Great Tit	Woodland	pending			
+Passer domesticus	House Sparrow	Human Modified	pending			
+Passer montanus	Eurasian Tree Sparrow	Woodland	pending			
+Passerculus sandwichensis	Savannah Sparrow	Grassland	pending			
+Passerella iliaca	Fox Sparrow	Forest	pending			
+Passerina amoena	Lazuli Bunting	Shrubland	pending			
+Passerina caerulea	Blue Grosbeak	Forest	pending			
+Passerina ciris	Painted Bunting	Shrubland	pending			
+Passerina cyanea	Indigo Bunting	Shrubland	pending			
+Passerina leclancherii	Orange-breasted Bunting	Woodland	pending			
+Passerina versicolor	Varied Bunting	Shrubland	pending			
+Patagioenas fasciata	Band-tailed Pigeon	Forest	pending			
+Patagioenas flavirostris	Red-billed Pigeon	Woodland	pending			
+Patagioenas leucocephala	White-crowned Pigeon	Woodland	pending			
+Pavo cristatus	Indian Peafowl	Forest	pending			
+Pavo muticus	Green Peafowl	Woodland	pending			
+Pelagodroma marina	White-faced Storm-Petrel	Marine	pending			
+Pelecanus erythrorhynchos	American White Pelican	Wetland	reviewed	Sameer	2026-10-03	Coastal: winters on sheltered coasts and estuaries, though AVONET codes its primary habitat as inland wetland
+Pelecanus occidentalis	Brown Pelican	Marine	pending			
+Pelecanus onocrotalus	Great White Pelican	Wetland	pending			
+Pelecanus rufescens	Pink-backed Pelican	Wetland	pending			
+Perdix perdix	Gray Partridge	Grassland	pending			
+Perisoreus canadensis	Canada Jay	Forest	pending			
+Petrochelidon fulva	Cave Swallow	Grassland	pending			
+Petrochelidon pyrrhonota	Cliff Swallow	Grassland	pending			
+Peucaea aestivalis	Bachman's Sparrow	Forest	pending			
+Peucaea botterii	Botteri's Sparrow	Grassland	pending			
+Peucaea carpalis	Rufous-winged Sparrow	Shrubland	pending			
+Peucaea cassinii	Cassin's Sparrow	Grassland	pending			
+Peucedramus taeniatus	Olive Warbler	Forest	pending			
+Phaethon aethereus	Red-billed Tropicbird	Marine	pending			
+Phaethon lepturus	White-tailed Tropicbird	Marine	pending			
+Phaethon rubricauda	Red-tailed Tropicbird	Marine	pending			
+Phainopepla nitens	Phainopepla	Shrubland	pending			
+Phalacrocorax carbo	Great Cormorant	Wetland	proposed			Coastal: North American birds are coastal
+Phalaenoptilus nuttallii	Common Poorwill	Shrubland	pending			
+Phalaropus fulicarius	Red Phalarope	Marine	pending			
+Phalaropus lobatus	Red-necked Phalarope	Wetland	proposed			Marine: migrates at sea
+Phalaropus tricolor	Wilson's Phalarope	Wetland	pending			
+Phasianus colchicus	Ring-necked Pheasant	Human Modified	pending			
+Phasianus versicolor	Green Pheasant	Human Modified	pending			
+Pheucticus chrysopeplus	Yellow Grosbeak	Forest	pending			
+Pheucticus ludovicianus	Rose-breasted Grosbeak	Forest	pending			
+Pheucticus melanocephalus	Black-headed Grosbeak	Forest	pending			
+Phoebastria albatrus	Short-tailed Albatross	Marine	pending			
+Phoebastria immutabilis	Laysan Albatross	Marine	pending			
+Phoebastria nigripes	Black-footed Albatross	Marine	pending			
+Phoeniconaias minor	Lesser Flamingo	Wetland	pending			
+Phoenicopterus chilensis	Chilean Flamingo	Wetland	pending			
+Phoenicopterus roseus	Greater Flamingo	Wetland	pending			
+Phoenicopterus ruber	American Flamingo	Coastal	pending			
+Phonipara canora	Cuban Grassquit	Shrubland	pending			
+Phylloscopus borealis	Arctic Warbler	Forest	pending			
+Phylloscopus collybita	Common Chiffchaff	Forest	pending			
+Phylloscopus examinandus	Kamchatka Leaf Warbler	Forest	pending			
+Phylloscopus fuscatus	Dusky Warbler	Wetland	pending			
+Phylloscopus sibilatrix	Wood Warbler	Forest	pending			
+Phylloscopus trochilus	Willow Warbler	Forest	pending			
+Pica hudsonia	Black-billed Magpie	Grassland	pending			
+Pica nuttallii	Yellow-billed Magpie	Shrubland	pending			
+Picoides arcticus	Black-backed Woodpecker	Forest	pending			
+Picoides dorsalis	American Three-toed Woodpecker	Forest	pending			
+Pinicola enucleator	Pine Grosbeak	Forest	pending			
+Pionus maximiliani	Scaly-headed Parrot	Forest	pending			
+Pionus senilis	White-crowned Parrot	Forest	pending			
+Pipilo chlorurus	Green-tailed Towhee	Shrubland	pending			
+Pipilo erythrophthalmus	Eastern Towhee	Forest	pending			
+Pipilo maculatus	Spotted Towhee	Forest	pending			
+Piranga bidentata	Flame-colored Tanager	Forest	pending			
+Piranga flava	Hepatic Tanager	Forest	pending			
+Piranga ludoviciana	Western Tanager	Forest	pending			
+Piranga olivacea	Scarlet Tanager	Forest	pending			
+Piranga rubra	Summer Tanager	Forest	pending			
+Pitangus sulphuratus	Great Kiskadee	Human Modified	pending			
+Platalea ajaja	Roseate Spoonbill	Wetland	pending			
+Plectrophenax hyperboreus	McKay's Bunting	Grassland	pending			
+Plectrophenax nivalis	Snow Bunting	Grassland	pending			
+Plegadis chihi	White-faced Ibis	Wetland	pending			
+Plegadis falcinellus	Glossy Ibis	Wetland	pending			
+Ploceus cucullatus	Village Weaver	Woodland	pending			
+Ploceus melanocephalus	Black-headed Weaver	Wetland	pending			
+Pluvialis apricaria	European Golden-Plover	Grassland	pending			
+Pluvialis dominica	American Golden-Plover	Grassland	pending			
+Pluvialis fulva	Pacific Golden-Plover	Grassland	pending			
+Pluvialis squatarola	Black-bellied Plover	Grassland	proposed			Coastal: migrates and winters on beaches and mudflats
+Podiceps auritus	Horned Grebe	Wetland	proposed			Marine: winters on the ocean
+Podiceps grisegena	Red-necked Grebe	Wetland	proposed			Marine: winters on the ocean
+Podiceps nigricollis	Eared Grebe	Wetland	pending			
+Podilymbus podiceps	Pied-billed Grebe	Wetland	pending			
+Poecile atricapillus	Black-capped Chickadee	Forest	pending			
+Poecile carolinensis	Carolina Chickadee	Forest	pending			
+Poecile cinctus	Gray-headed Chickadee	Forest	pending			
+Poecile gambeli	Mountain Chickadee	Forest	pending			
+Poecile hudsonicus	Boreal Chickadee	Forest	pending			
+Poecile rufescens	Chestnut-backed Chickadee	Forest	pending			
+Poecile sclateri	Mexican Chickadee	Forest	pending			
+Polioptila caerulea	Blue-gray Gnatcatcher	Woodland	pending			
+Polioptila californica	California Gnatcatcher	Shrubland	pending			
+Polioptila melanura	Black-tailed Gnatcatcher	Shrubland	pending			
+Polioptila nigriceps	Black-capped Gnatcatcher	Shrubland	pending			
+Polysticta stelleri	Steller's Eider	Marine	pending			
+Pooecetes gramineus	Vesper Sparrow	Grassland	pending			
+Porphyrio martinica	Purple Gallinule	Wetland	pending			
+Porzana carolina	Sora	Wetland	pending			
+Progne subis	Purple Martin	Forest	pending			
+Protonotaria citrea	Prothonotary Warbler	Forest	pending			
+Prunella montanella	Siberian Accentor	Forest	pending			
+Psaltriparus minimus	Bushtit	Woodland	pending			
+Pseudonestor xanthophrys	Maui Parrotbill	Forest	pending			
+Psiloscops flammeolus	Flammulated Owl	Forest	pending			
+Psittacara erythrogenys	Red-masked Parakeet	Woodland	pending			
+Psittacara finschi	Crimson-fronted Parakeet	Forest	pending			
+Psittacara holochlorus	Green Parakeet	Forest	pending			
+Psittacara leucophthalmus	White-eyed Parakeet	Forest	pending			
+Psittacara mitratus	Mitred Parakeet	Forest	pending			
+Psittacara wagleri	Scarlet-fronted Parakeet	Forest	pending			
+Psittacula cyanocephala	Plum-headed Parakeet	Forest	pending			
+Psittacula krameri	Rose-ringed Parakeet	Forest	pending			
+Psittacus erithacus	Gray Parrot	Forest	pending			
+Pternistis erckelii	Erckel's Spurfowl	Shrubland	pending			
+Pterocles exustus	Chestnut-bellied Sandgrouse	Grassland	pending			
+Pterodroma arminjoniana	Trindade Petrel	Marine	pending			
+Pterodroma cahow	Bermuda Petrel	Marine	pending			
+Pterodroma cervicalis	White-necked Petrel	Marine	pending			
+Pterodroma cookii	Cook's Petrel	Marine	pending			
+Pterodroma deserta	Desertas Petrel	Marine	pending			
+Pterodroma externa	Juan Fernandez Petrel	Marine	pending			
+Pterodroma hasitata	Black-capped Petrel	Marine	pending			
+Pterodroma hypoleuca	Bonin Petrel	Marine	pending			
+Pterodroma inexpectata	Mottled Petrel	Marine	pending			
+Pterodroma neglecta	Kermadec Petrel	Marine	pending			
+Pterodroma nigripennis	Black-winged Petrel	Marine	pending			
+Pterodroma sandwichensis	Hawaiian Petrel	Marine	pending			
+Pterodroma ultima	Murphy's Petrel	Marine	pending			
+Pterorhinus pectoralis	Greater Necklaced Laughingthrush	Forest	pending			
+Ptychoramphus aleuticus	Cassin's Auklet	Marine	pending			
+Puffinus lherminieri	Sargasso Shearwater	Marine	pending			
+Puffinus nativitatis	Christmas Shearwater	Marine	pending			
+Puffinus newelli	Newell's Shearwater	Marine	pending			
+Puffinus opisthomelas	Black-vented Shearwater	Marine	pending			
+Puffinus puffinus	Manx Shearwater	Marine	pending			
+Pycnonotus cafer	Red-vented Bulbul	Shrubland	pending			
+Pycnonotus jocosus	Red-whiskered Bulbul	Shrubland	pending			
+Pyrocephalus rubinus	Vermilion Flycatcher	Woodland	pending			
+Pyrrhula pyrrhula	Eurasian Bullfinch	Forest	pending			
+Pyrrhura molinae	Green-cheeked Parakeet	Woodland	pending			
+Quiscalus major	Boat-tailed Grackle	Wetland	pending			
+Quiscalus mexicanus	Great-tailed Grackle	Human Modified	pending			
+Quiscalus quiscula	Common Grackle	Wetland	pending			
+Radjah radjah	Radjah Shelduck	Coastal	pending			
+Rallus crepitans	Clapper Rail	Wetland	proposed			Coastal: lives in salt marsh
+Rallus elegans	King Rail	Wetland	pending			
+Rallus limicola	Virginia Rail	Wetland	pending			
+Rallus obsoletus	Ridgway's Rail	Coastal	pending			
+Ramosomyia violiceps	Violet-crowned Hummingbird	Shrubland	pending			
+Ramphastos sulfuratus	Keel-billed Toucan	Forest	pending			
+Ramphocelus carbo	Silver-beaked Tanager	Human Modified	pending			
+Recurvirostra americana	American Avocet	Wetland	pending			
+Regulus satrapa	Golden-crowned Kinglet	Forest	pending			
+Rhodostethia rosea	Ross's Gull	Coastal	pending			
+Rhynchophanes mccownii	Thick-billed Longspur	Grassland	pending			
+Ridgwayia pinicola	Aztec Thrush	Forest	pending			
+Riparia riparia	Bank Swallow	Riverine	pending			
+Rissa brevirostris	Red-legged Kittiwake	Marine	pending			
+Rissa tridactyla	Black-legged Kittiwake	Marine	pending			
+Rostrhamus sociabilis	Snail Kite	Wetland	pending			
+Rupornis magnirostris	Roadside Hawk	Forest	pending			
+Rynchops niger	Black Skimmer	Riverine	proposed			Coastal: North American skimmers are coastal
+Salpinctes obsoletus	Rock Wren	Rock	pending			
+Saucerottia beryllina	Berylline Hummingbird	Forest	pending			
+Saxicola maurus	Siberian Stonechat	Shrubland	pending			
+Sayornis nigricans	Black Phoebe	Rock	pending			
+Sayornis phoebe	Eastern Phoebe	Forest	pending			
+Sayornis saya	Say's Phoebe	Forest	pending			
+Scolopax minor	American Woodcock	Forest	pending			
+Seiurus aurocapilla	Ovenbird	Forest	pending			
+Selasphorus calliope	Calliope Hummingbird	Shrubland	pending			
+Selasphorus platycercus	Broad-tailed Hummingbird	Forest	pending			
+Selasphorus rufus	Rufous Hummingbird	Forest	pending			
+Selasphorus sasin	Allen's Hummingbird	Shrubland	pending			
+Serinus canaria	Island Canary	Woodland	pending			
+Setophaga aestiva	Northern Yellow Warbler	Shrubland	pending			
+Setophaga americana	Northern Parula	Forest	pending			
+Setophaga caerulescens	Black-throated Blue Warbler	Forest	pending			
+Setophaga castanea	Bay-breasted Warbler	Forest	pending			
+Setophaga cerulea	Cerulean Warbler	Forest	pending			
+Setophaga chrysoparia	Golden-cheeked Warbler	Forest	pending			
+Setophaga citrina	Hooded Warbler	Forest	pending			
+Setophaga coronata	Yellow-rumped Warbler	Forest	pending			
+Setophaga discolor	Prairie Warbler	Shrubland	pending			
+Setophaga dominica	Yellow-throated Warbler	Forest	pending			
+Setophaga fusca	Blackburnian Warbler	Forest	pending			
+Setophaga graciae	Grace's Warbler	Forest	pending			
+Setophaga kirtlandii	Kirtland's Warbler	Forest	pending			
+Setophaga magnolia	Magnolia Warbler	Forest	pending			
+Setophaga nigrescens	Black-throated Gray Warbler	Forest	pending			
+Setophaga occidentalis	Hermit Warbler	Forest	pending			
+Setophaga palmarum	Palm Warbler	Forest	pending			
+Setophaga pensylvanica	Chestnut-sided Warbler	Forest	pending			
+Setophaga petechia	Mangrove Yellow Warbler	Shrubland	pending			
+Setophaga pinus	Pine Warbler	Forest	pending			
+Setophaga pitiayumi	Tropical Parula	Forest	pending			
+Setophaga ruticilla	American Redstart	Forest	pending			
+Setophaga striata	Blackpoll Warbler	Forest	pending			
+Setophaga tigrina	Cape May Warbler	Forest	pending			
+Setophaga townsendi	Townsend's Warbler	Forest	pending			
+Setophaga virens	Black-throated Green Warbler	Forest	pending			
+Sialia currucoides	Mountain Bluebird	Grassland	pending			
+Sialia mexicana	Western Bluebird	Woodland	pending			
+Sialia sialis	Eastern Bluebird	Woodland	pending			
+Sibirionetta formosa	Baikal Teal	Wetland	pending			
+Sicalis flaveola	Saffron Finch	Shrubland	pending			
+Sitta canadensis	Red-breasted Nuthatch	Forest	pending			
+Sitta carolinensis	White-breasted Nuthatch	Forest	pending			
+Sitta pusilla	Brown-headed Nuthatch	Forest	pending			
+Sitta pygmaea	Pygmy Nuthatch	Forest	pending			
+Somateria fischeri	Spectacled Eider	Coastal	pending			
+Somateria mollissima	Common Eider	Marine	pending			
+Somateria spectabilis	King Eider	Marine	pending			
+Spatula clypeata	Northern Shoveler	Wetland	pending			
+Spatula cyanoptera	Cinnamon Teal	Wetland	pending			
+Spatula discors	Blue-winged Teal	Wetland	pending			
+Spatula querquedula	Garganey	Wetland	pending			
+Spermestes cucullata	Bronze Mannikin	Woodland	pending			
+Sphyrapicus nuchalis	Red-naped Sapsucker	Woodland	pending			
+Sphyrapicus ruber	Red-breasted Sapsucker	Woodland	pending			
+Sphyrapicus thyroideus	Williamson's Sapsucker	Forest	pending			
+Sphyrapicus varius	Yellow-bellied Sapsucker	Woodland	pending			
+Spilopelia chinensis	Spotted Dove	Woodland	pending			
+Spindalis zena	Western Spindalis	Forest	pending			
+Spinus lawrencei	Lawrence's Goldfinch	Forest	pending			
+Spinus pinus	Pine Siskin	Forest	pending			
+Spinus psaltria	Lesser Goldfinch	Shrubland	pending			
+Spinus spinus	Eurasian Siskin	Forest	pending			
+Spinus tristis	American Goldfinch	Forest	pending			
+Spiza americana	Dickcissel	Grassland	pending			
+Spizella atrogularis	Black-chinned Sparrow	Shrubland	pending			
+Spizella breweri	Brewer's Sparrow	Shrubland	pending			
+Spizella pallida	Clay-colored Sparrow	Shrubland	pending			
+Spizella passerina	Chipping Sparrow	Forest	pending			
+Spizella pusilla	Field Sparrow	Grassland	pending			
+Spizelloides arborea	American Tree Sparrow	Shrubland	pending			
+Sporophila morelleti	Morelet's Seedeater	Human Modified	pending			
+Sporophila torqueola	Cinnamon-rumped Seedeater	Human Modified	pending			
+Stelgidopteryx serripennis	Northern Rough-winged Swallow	Shrubland	pending			
+Stercorarius longicaudus	Long-tailed Jaeger	Marine	pending			
+Stercorarius maccormicki	South Polar Skua	Marine	pending			
+Stercorarius parasiticus	Parasitic Jaeger	Marine	pending			
+Stercorarius pomarinus	Pomarine Jaeger	Marine	pending			
+Stercorarius skua	Great Skua	Marine	pending			
+Sterna dougallii	Roseate Tern	Marine	pending			
+Sterna forsteri	Forster's Tern	Wetland	proposed			Coastal: salt marsh and bays as much as fresh water
+Sterna hirundo	Common Tern	Marine	proposed			Coastal: beaches and estuaries
+Sterna paradisaea	Arctic Tern	Coastal	pending			
+Sternula albifrons	Little Tern	Coastal	pending			
+Sternula antillarum	Least Tern	Marine	proposed			Coastal: nests on beaches
+Streptopelia decaocto	Eurasian Collared-Dove	Human Modified	pending			
+Streptopelia orientalis	Oriental Turtle-Dove	Woodland	pending			
+Streptopelia roseogrisea	African Collared-Dove	Shrubland	pending			
+Strix nebulosa	Great Gray Owl	Forest	pending			
+Strix occidentalis	Spotted Owl	Forest	pending			
+Strix varia	Barred Owl	Forest	pending			
+Sturnella lilianae	Chihuahuan Meadowlark	Grassland	pending			
+Sturnella magna	Eastern Meadowlark	Grassland	pending			
+Sturnella neglecta	Western Meadowlark	Grassland	pending			
+Sturnus vulgaris	European Starling	Human Modified	pending			
+Sula brewsteri	Cocos Booby	Marine	pending			
+Sula dactylatra	Masked Booby	Marine	pending			
+Sula granti	Nazca Booby	Marine	pending			
+Sula leucogaster	Brown Booby	Marine	pending			
+Sula nebouxii	Blue-footed Booby	Marine	pending			
+Sula sula	Red-footed Booby	Marine	pending			
+Surnia ulula	Northern Hawk Owl	Grassland	pending			
+Synthliboramphus antiquus	Ancient Murrelet	Marine	pending			
+Synthliboramphus craveri	Craveri's Murrelet	Marine	pending			
+Synthliboramphus hypoleucus	Guadalupe Murrelet	Marine	pending			
+Synthliboramphus scrippsi	Scripps's Murrelet	Marine	pending			
+Tachornis phoenicobia	Antillean Palm Swift	Grassland	pending			
+Tachybaptus dominicus	Least Grebe	Wetland	pending			
+Tachycineta bicolor	Tree Swallow	Wetland	pending			
+Tachycineta cyaneoviridis	Bahama Swallow	Woodland	pending			
+Tachycineta thalassina	Violet-green Swallow	Forest	pending			
+Tadorna cana	South African Shelduck	Wetland	pending			
+Tadorna ferruginea	Ruddy Shelduck	Wetland	pending			
+Tadorna tadorna	Common Shelduck	Coastal	pending			
+Taeniopygia guttata	Zebra Finch	Grassland	pending			
+Tarsiger cyanurus	Red-flanked Bluetail	Forest	pending			
+Telespiza cantans	Laysan Finch	Grassland	pending			
+Telespiza ultima	Nihoa Finch	Coastal	pending			
+Tetraogallus himalayensis	Himalayan Snowcock	Grassland	pending			
+Thalassarche chlororhynchos	Atlantic Yellow-nosed Albatross		pending			
+Thalasseus elegans	Elegant Tern	Coastal	pending			
+Thalasseus maximus	Royal Tern	Marine	proposed			Coastal: beaches and estuaries
+Thalasseus sandvicensis	Sandwich Tern	Marine	proposed			Coastal: beaches and estuaries
+Thectocercus acuticaudatus	Blue-crowned Parakeet	Shrubland	pending			
+Thraupis episcopus	Blue-gray Tanager	Forest	pending			
+Threskiornis aethiopicus	African Sacred Ibis	Wetland	pending			
+Thryomanes bewickii	Bewick's Wren	Shrubland	pending			
+Thryophilus sinaloa	Sinaloa Wren	Woodland	pending			
+Thryothorus ludovicianus	Carolina Wren	Woodland	pending			
+Tiaris olivaceus	Yellow-faced Grassquit	Human Modified	pending			
+Tigrisoma mexicanum	Bare-throated Tiger-Heron	Wetland	pending			
+Toxostoma bendirei	Bendire's Thrasher	Shrubland	pending			
+Toxostoma crissale	Crissal Thrasher	Shrubland	pending			
+Toxostoma curvirostre	Curve-billed Thrasher	Shrubland	pending			
+Toxostoma lecontei	LeConte's Thrasher	Shrubland	pending			
+Toxostoma longirostre	Long-billed Thrasher	Shrubland	pending			
+Toxostoma redivivum	California Thrasher	Shrubland	pending			
+Toxostoma rufum	Brown Thrasher	Shrubland	pending			
+Tringa brevipes	Gray-tailed Tattler	Wetland	pending			
+Tringa flavipes	Lesser Yellowlegs	Wetland	pending			
+Tringa glareola	Wood Sandpiper	Wetland	pending			
+Tringa incana	Wandering Tattler	Wetland	proposed			Coastal: winters on rocky Pacific shores | Rock: forages on wave-washed rocks
+Tringa melanoleuca	Greater Yellowlegs	Wetland	proposed			Coastal: common on salt marsh and mudflats
+Tringa nebularia	Common Greenshank	Wetland	pending			
+Tringa ochropus	Green Sandpiper	Wetland	pending			
+Tringa semipalmata	Willet	Coastal	pending			
+Tringa solitaria	Solitary Sandpiper	Wetland	pending			
+Tringa stagnatilis	Marsh Sandpiper	Wetland	pending			
+Troglodytes aedon	Northern House Wren	Shrubland	pending			
+Troglodytes hiemalis	Winter Wren	Forest	pending			
+Troglodytes pacificus	Pacific Wren	Forest	pending			
+Trogon ambiguus	Coppery-tailed Trogon	Woodland	pending			
+Trogon elegans	Elegant Trogon	Woodland	pending			
+Turdus assimilis	White-throated Thrush	Forest	pending			
+Turdus eunomus	Dusky Thrush	Forest	pending			
+Turdus grayi	Clay-colored Thrush	Forest	pending			
+Turdus iliacus	Redwing	Forest	pending			
+Turdus migratorius	American Robin	Forest	pending			
+Turdus naumanni	Naumann's Thrush	Forest	pending			
+Turdus obscurus	Eyebrowed Thrush	Forest	pending			
+Turdus philomelos	Song Thrush	Forest	pending			
+Turdus pilaris	Fieldfare	Forest	pending			
+Turdus plumbeus	Western Red-legged Thrush	Woodland	pending			
+Turdus rufopalliatus	Rufous-backed Robin	Shrubland	pending			
+Tympanuchus cupido	Greater Prairie-Chicken	Grassland	pending			
+Tympanuchus pallidicinctus	Lesser Prairie-Chicken	Grassland	pending			
+Tympanuchus phasianellus	Sharp-tailed Grouse	Grassland	pending			
+Tyrannus caudifasciatus	Loggerhead Kingbird	Forest	pending			
+Tyrannus couchii	Couch's Kingbird	Forest	pending			
+Tyrannus crassirostris	Thick-billed Kingbird	Forest	pending			
+Tyrannus dominicensis	Gray Kingbird	Forest	pending			
+Tyrannus forficatus	Scissor-tailed Flycatcher	Human Modified	pending			
+Tyrannus melancholicus	Tropical Kingbird	Human Modified	pending			
+Tyrannus savana	Fork-tailed Flycatcher	Grassland	pending			
+Tyrannus tyrannus	Eastern Kingbird	Woodland	pending			
+Tyrannus verticalis	Western Kingbird	Shrubland	pending			
+Tyrannus vociferans	Cassin's Kingbird	Forest	pending			
+Tyto furcata	American Barn Owl	Human Modified	pending			
+Uraeginthus bengalus	Red-cheeked Cordonbleu	Shrubland	pending			
+Uria aalge	Common Murre	Marine	pending			
+Uria lomvia	Thick-billed Murre	Marine	pending			
+Urile pelagicus	Pelagic Cormorant	Marine	pending			
+Urile penicillatus	Brandt's Cormorant	Marine	pending			
+Urile urile	Red-faced Cormorant	Marine	pending			
+Vanellus vanellus	Northern Lapwing	Wetland	pending			
+Vermivora chrysoptera	Golden-winged Warbler	Shrubland	pending			
+Vermivora cyanoptera	Blue-winged Warbler	Shrubland	pending			
+Vidua macroura	Pin-tailed Whydah	Shrubland	pending			
+Vireo altiloquus	Black-whiskered Vireo	Woodland	pending			
+Vireo atricapilla	Black-capped Vireo	Shrubland	pending			
+Vireo bellii	Bell's Vireo	Shrubland	pending			
+Vireo cassinii	Cassin's Vireo	Forest	pending			
+Vireo crassirostris	Thick-billed Vireo	Woodland	pending			
+Vireo flavifrons	Yellow-throated Vireo	Forest	pending			
+Vireo flavoviridis	Yellow-green Vireo	Woodland	pending			
+Vireo gilvus	Warbling Vireo	Forest	pending			
+Vireo griseus	White-eyed Vireo	Shrubland	pending			
+Vireo huttoni	Hutton's Vireo	Forest	pending			
+Vireo olivaceus	Red-eyed Vireo	Forest	pending			
+Vireo philadelphicus	Philadelphia Vireo	Woodland	pending			
+Vireo plumbeus	Plumbeous Vireo	Forest	pending			
+Vireo solitarius	Blue-headed Vireo	Forest	pending			
+Vireo vicinior	Gray Vireo	Forest	pending			
+Xanthocephalus xanthocephalus	Yellow-headed Blackbird	Wetland	pending			
+Xema sabini	Sabine's Gull	Marine	pending			
+Xenus cinereus	Terek Sandpiper	Grassland	pending			
+Zenaida asiatica	White-winged Dove	Shrubland	pending			
+Zenaida aurita	Zenaida Dove	Forest	pending			
+Zenaida macroura	Mourning Dove	Human Modified	pending			
+Zonotrichia albicollis	White-throated Sparrow	Woodland	pending			
+Zonotrichia atricapilla	Golden-crowned Sparrow	Shrubland	pending			
+Zonotrichia leucophrys	White-crowned Sparrow	Shrubland	pending			
+Zonotrichia querula	Harris's Sparrow	Shrubland	pending			
+Zosterops japonicus	Warbling White-eye	Forest	pending			
+Zosterops simplex	Swinhoe's White-eye	Forest	pending			

@@ -4605,3 +4605,36 @@ branch would have done the same at the cost of merging later. The flag removes c
 only hiding the setting, because a county left in the data would be counted with its state in every
 figure over all regions.
 
+---
+
+## habitatReviewedPerSpecies
+
+**Habitats are reviewed species by species, in a table the build holds complete**
+
+Date: 2026-11-07
+Decided by: Sameer
+Status: accepted
+Affects: [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters)
+
+### Decided
+
+Every species BirdView draws gets a reviewed set of habitats: AVONET's primary value, which stays
+as published, and the habitats BirdView adds for where a North American birder sees the bird, each
+with a reason. The review lives in `data/habitat-review.tsv`, one row per species, with a status
+(`pending`, `proposed`, `reviewed`), reviewer, and date; only reviewed rows change the page. The
+build fails when the table and the dataset disagree: a drawn species with no row, a row for a
+species no longer drawn, or AVONET's habitat changed since the row was reviewed. BirdView's habitat
+additions move from `trait.Supplementary` into the table; diet stays there until it is reviewed the
+same way. Reviews proceed family by family: BirdView drafts, the owner approves.
+
+### Why
+
+The habitat filter is the key to "the common birds I'll see in my county this month on the shore",
+and AVONET's single value cannot answer it: for migrants it is the breeding habitat
+([notes: The habitat audit, pass 1](../notes.md#the-habitat-audit-pass-1)). No openly licensed per-species, multi-habitat source is
+known, so the correction is BirdView's own, as additions already were. The owner asked for a
+process that says when the data needs review again, such as when species are added; a table the
+build holds complete is that process, since a new species, or a changed AVONET value, fails a test
+naming it. `trait.Supplementary` said it was "kept deliberately short", which the requirement's "as
+many as apply" already overruled; a review of every species settles it.
+

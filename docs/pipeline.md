@@ -150,7 +150,7 @@ flowchart LR
     status.Exotic ★ *escapes off the index, with a reason each*`"]
     TRAIT["`internal/trait
     ─────────────
-    Supplementary ★ *habitats and diets BirdView adds*
+    Supplementary ★ *diets BirdView adds*
     plantFoodOf ★ *the plant half of a mixed diet*
     plantFoodOfSpecies ★ *the same, per species*`"]
   end
@@ -195,6 +195,13 @@ flowchart LR
     scientific name ·
     ebird ·
     inaturalist ·`"]
+    HREV["`habitat-review.tsv
+    *one row per drawn species; the build fails when it falls behind*
+    ─────────────
+    scientific name · *join key*
+    AVONET habitat · *as reviewed; checked against AVONET*
+    status · *pending, proposed, or reviewed*
+    additions ★ *reviewed rows only: habitat and reason*`"]
     COUNTIES["`county-presence/USA.33_1.tsv
     *one table per state, as region-presence.tsv*
     ─────────────
@@ -339,6 +346,7 @@ flowchart LR
   FOX --> S6
   AVO --> S6
   REGIONS --> S8
+  HREV -->|"reviewed additions"| S5
   COUNTIES -->|"after the peak share"| S8
 
   JSON --> SERVER

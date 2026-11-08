@@ -1975,6 +1975,22 @@ Hawaii break, which is why it was replaced.
 
 Watched failing: 2026-10-03, by filing Hawaii under Great Lakes and Texas under New England (both caught on rank), and by filing Navassa under Mid-Atlantic and Alaska under Gulf Coast (both caught per region, Alaska at 0.446 against 0.465 for regions at large).
 
+### habitatReviewComplete
+
+**Every drawn species has a habitat review, current with AVONET, and only reviewed additions count**
+
+**Verifies:** [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters), [decisions.habitatReviewedPerSpecies](decisions.md#habitatreviewedperspecies) · **Level:** code · **Method:** the review table parsed, then held against the built dataset
+
+**Assertions:** every species BirdView draws has a row in `data/habitat-review.tsv` and no row names
+a species it does not draw; each row's AVONET habitat is AVONET's today; a reviewed row's additions
+reach the species as BirdView's, with their reasons, and a proposed or pending row's do not; and a
+row with an unknown status, a reviewed row without reviewer or date, an addition outside AVONET's
+vocabulary, or one without a reason is refused.
+
+**Run:** `go test ./internal/trait/ -run TestHabitatReviewParsesAndApplies && go test ./cmd/birdview-ingest/ -run TestEveryDrawnBirdHasAHabitatReview`
+**Status: verified 2026-11-07, passing.**
+Watched failing: 2026-11-07, with Least Sandpiper's row removed ("Calidris minutilla is drawn and has no row in data/habitat-review.tsv") and American Robin's AVONET habitat edited ("AVONET's habitat is \"Forest\", but the review was of \"Desert\"; review the row again"), and before the parser existed.
+
 ### countyListingApplied
 
 **A county lists only what its state lists, with at least 5 records there**

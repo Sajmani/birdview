@@ -146,6 +146,16 @@ Cormorant is marine and Neotropic Cormorant is not.
 further habitats and diets as apply** — there is no limit of one — and tags each **`birdview`**,
 never merged into the published value ([categoryProvenance](measurements.md#categoryprovenance)).
 
+**Every bird's habitats are reviewed, species by species, for where a North American birder sees
+it** ([decisions.habitatReviewedPerSpecies](../../decisions.md#habitatreviewedperspecies)). AVONET's one value is in practice where a migrant breeds:
+Black-bellied Plover is Grassland, the peeps miss Shore and estuary, the loons miss Open sea. So
+`data/habitat-review.tsv` holds a row for **every species BirdView draws**: AVONET's habitat as it
+stood when reviewed, the habitats BirdView adds with a reason for each, and the review's status,
+reviewer, and date. Only a reviewed row's additions reach the page; a pending or proposed row
+leaves AVONET's value alone. **The build fails when a drawn species has no row, when a row names a
+species BirdView no longer draws, or when AVONET's value has changed since the review**, so adding
+species or updating AVONET brings the review back to the reviewer rather than leaving it stale.
+
 **BirdView may also add a term to the vocabulary, under a narrower rule: only where AVONET has
 none that fits at all.** Not "none that fits well" — a bird that eats berries is a `Frugivore`
 even if the word is clumsy. The case this exists for is **sap**: AVONET's ten niches have no

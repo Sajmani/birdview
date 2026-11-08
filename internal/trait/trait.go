@@ -109,38 +109,12 @@ type extra struct {
 	Why     string
 }
 
-// Supplementary is where BirdView disagrees with, or rather adds to, AVONET
-// — keyed by scientific name.
-//
-// **Kept deliberately short.** AVONET's primary value is right about the
-// bird's main haunt in almost every case, and a long list here would be this
-// project quietly substituting its own classification for a published one,
-// which is the habit decisions.familiesTwoWays was written to break. An entry earns its place
-// only when AVONET's single value hides something a reader filtering by
-// habitat would certainly expect to find.
+// Supplementary is the niches BirdView adds to AVONET's, keyed by scientific name. Habitats moved
+// to data/habitat-review.tsv, where every species is reviewed (decisions.habitatReviewedPerSpecies); niches stay
+// here until they are reviewed the same way (todo.traitAudit).
 //
 // Every entry is rendered as BirdView, never merged into AVONET's (product.categoryProvenance).
 var Supplementary = map[string][]extra{
-	// AVONET codes these by where they nest or mainly feed, but each is a
-	// bird a reader filtering for the other habitat would expect to see.
-	"Pelecanus erythrorhynchos": {{Habitat: "Coastal", Why: "winters on sheltered coasts and estuaries, though AVONET codes its primary habitat as inland wetland"}},
-	"Nannopterum auritum":       {{Habitat: "Wetland", Why: "abundant on inland lakes and rivers, though AVONET codes its primary habitat as marine"}},
-	"Ardea herodias":            {{Habitat: "Coastal", Why: "forages on tidal flats and estuaries as readily as on fresh water"}},
-	"Pandion haliaetus": {
-		{Habitat: "Coastal", Why: "fishes estuaries and sheltered salt water as well as fresh"},
-		{Habitat: "Human Modified", Why: "nests routinely on poles, pylons, and purpose-built platforms"},
-	},
-	"Larus smithsonianus": {{Habitat: "Human Modified", Why: "feeds routinely at landfill, docks, and town rooftops"}},
-
-	// Birds whose everyday haunt is not the one AVONET records. Chimney
-	// Swift and Barn Swallow were on this list too and came off it: AVONET
-	// already codes both Human Modified, and an addition that restates the
-	// published value adds nothing.
-	"Branta canadensis":  {{Habitat: "Human Modified", Why: "parks, playing fields, and golf courses are now its commonest North American habitat"}},
-	"Anas platyrhynchos": {{Habitat: "Human Modified", Why: "town ponds and park lakes throughout the range"}},
-	"Columba livia":      {{Habitat: "Rock", Why: "a cliff-nester by ancestry, still using cliffs and quarries away from towns"}},
-	"Falco peregrinus":   {{Habitat: "Human Modified", Why: "city buildings and bridges are a primary nest site"}},
-
 	// The sapsuckers. AVONET files them under Invertivore or Omnivore,
 	// which is true and misses the point: Sphyrapicus drills wells and
 	// lives off sap, and the genus is named for it.
@@ -241,16 +215,19 @@ func BirdView(value, why string) dataset.Assignment {
 	return dataset.Assignment{Value: value, Origin: dataset.BirdView, Why: why, Doc: "data#habitat-and-diet"}
 }
 
-// HabitatsFor returns every habitat assigned to a species: AVONET's primary
-// value first, then anything BirdView adds.
-func HabitatsFor(scientificName, avonetHabitat string) []dataset.Assignment {
+// HabitatsFor returns every habitat assigned to a species: AVONET's primary value first, then the
+// habitats a reviewed row of the habitat review adds (decisions.habitatReviewedPerSpecies). A pending or proposed
+// row adds nothing.
+func HabitatsFor(scientificName, avonetHabitat string, review map[string]Review) []dataset.Assignment {
 	var out []dataset.Assignment
 	if avonetHabitat != "" {
 		out = append(out, Published(avonetHabitat))
 	}
-	for _, e := range Supplementary[scientificName] {
-		if e.Habitat != "" && e.Habitat != avonetHabitat {
-			out = append(out, BirdView(e.Habitat, e.Why))
+	if r, ok := review[scientificName]; ok && r.Status == "reviewed" {
+		for _, a := range r.Additions {
+			if a.Habitat != avonetHabitat {
+				out = append(out, BirdView(a.Habitat, a.Why))
+			}
 		}
 	}
 	return out

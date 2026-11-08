@@ -114,6 +114,10 @@ The GBIF rate is BirdView's own, and the client slows further whenever GBIF answ
 run resumes. It refuses to write a partial table, because a species whose dates never arrived would
 be classified as a vagrant on no evidence.
 
+`data/habitat-review.tsv` is edited by hand: one row per species BirdView draws, holding the
+habitats BirdView adds to AVONET's and the review's status. When species are added, or AVONET is
+updated, the ingest's tests fail and name the rows to add or review again.
+
 `birdview-gbifdownload` requests a GBIF SQL download from a query committed under
 `data/gbif-queries/`, waits for it, writes it under `fetched/gbif/` (never committed), and records
 its key, DOI, license, and hash in `data/gbif-downloads.tsv`, the DOI being what the credits cite.

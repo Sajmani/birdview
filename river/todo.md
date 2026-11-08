@@ -1135,13 +1135,13 @@ correct values these filters are not only useless but misleading. Findings so fa
 
 Left:
 
-- **Habitat:** review the ~60 water-bird additions proposed in the notes, then the other families
-  (the full table of every bird's habitat was published as a review artifact on 2026-11-07).
+- **Habitat:** reviewed species by species in `data/habitat-review.tsv`, which the build holds
+  complete ([decisions.habitatReviewedPerSpecies](requirements/decisions.md#habitatreviewedperspecies)): 9 reviewed (the former `trait.Supplementary`
+  entries), 59 proposed (pass 1's water birds, awaiting the owner), 1,014 pending. Next: the owner's
+  review of the 59, then the other families.
 - **Diet:** the same audit for `Trophic.Niche`, which has the same one-value limit (a bird that eats
   insects in summer and seeds in winter has one niche); `mixedDiet` covers only AVONET's own
   Omnivore-level disagreements.
-- **The rule:** `trait.Supplementary`'s comment ("Kept deliberately short") conflicts with the
-  requirement's "as many as apply"; settle it in a decision before adding dozens.
 - **The label:** whether the filters should say they choose a bird's main habitat or diet.
 - **Sources:** no openly licensed per-species, multi-habitat source is known; IUCN's habitats come
   through BirdLife, whose terms BirdView cannot accept. Additions are BirdView's own, reviewed by the

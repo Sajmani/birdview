@@ -29,16 +29,18 @@ import (
 	"birdview/internal/region"
 	"birdview/internal/status"
 	"birdview/internal/taxonomy"
+	"birdview/internal/trait"
 )
 
 const (
-	statusFile = "../../data/status.tsv"
-	avoFile    = "../../third_party/avonet/AVONET Supplementary dataset 1.xlsx"
-	foxFile    = "../../third_party/foxwingspan/wingspan_fox2026_AppendixS1.xlsx"
-	avlFile    = "../../third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx"
-	regFile    = "../../data/region-presence.tsv"
-	countyDir  = "../../data/county-presence"
-	bblFile    = "../../third_party/bbl/speclist.html"
+	statusFile        = "../../data/status.tsv"
+	avoFile           = "../../third_party/avonet/AVONET Supplementary dataset 1.xlsx"
+	foxFile           = "../../third_party/foxwingspan/wingspan_fox2026_AppendixS1.xlsx"
+	avlFile           = "../../third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx"
+	regFile           = "../../data/region-presence.tsv"
+	countyDir         = "../../data/county-presence"
+	habitatReviewFile = "../../data/habitat-review.tsv"
+	bblFile           = "../../third_party/bbl/speclist.html"
 )
 
 // built caches the compiled dataset across tests: the AVONET workbook is 21 MB
@@ -54,6 +56,9 @@ func load(t *testing.T) *dataset.Dataset {
 	// (decisions.scopeFromRecurrence), so this no longer skips on a clean checkout. That is the
 	// point of the change: the build depends on nothing it may not
 	// redistribute.
+	if err := loadHabitatReview(habitatReviewFile); err != nil {
+		t.Fatalf("loadHabitatReview: %v", err)
+	}
 	ds, _, err := build(statusFile, avoFile, foxFile, avlFile)
 	if err != nil {
 		t.Fatalf("build: %v", err)
@@ -941,5 +946,61 @@ func TestCountiesJoinedAsRegions(t *testing.T) {
 	}
 	if s.Commonest != peak {
 		t.Errorf("the peak share moved to %+v; it names a state, whose counties are inside it", s.Commonest)
+	}
+}
+
+// TestEveryDrawnBirdHasAHabitatReview holds data/habitat-review.tsv complete against the dataset
+// (decisions.habitatReviewedPerSpecies): every species BirdView draws has a row, no row names a species it does not
+// draw, each row's AVONET habitat is AVONET's today, and exactly the reviewed rows' additions reach
+// the dataset. A new species, or an AVONET update, fails here, naming what to review.
+//
+// Verifies: product.habitatAndDietFilters. Criterion: acceptance.habitatReviewComplete.
+func TestEveryDrawnBirdHasAHabitatReview(t *testing.T) {
+	ds := load(t)
+	f, err := os.Open(habitatReviewFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	rev, err := trait.ParseHabitatReview(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	drawn := map[string]bool{}
+	for _, sp := range ds.Species {
+		drawn[sp.ScientificName] = true
+		r, ok := rev[sp.ScientificName]
+		if !ok {
+			t.Errorf("%s is drawn and has no row in data/habitat-review.tsv; add one, pending until reviewed", sp.ScientificName)
+			continue
+		}
+		var avonet string
+		var ours []string
+		for _, a := range sp.Habitats {
+			if a.Origin == dataset.Published {
+				avonet = a.Value
+			} else {
+				ours = append(ours, a.Value)
+			}
+		}
+		if r.AVONET != avonet {
+			t.Errorf("%s: AVONET's habitat is %q, but the review was of %q; review the row again", sp.ScientificName, avonet, r.AVONET)
+		}
+		var want []string
+		if r.Status == "reviewed" {
+			for _, a := range r.Additions {
+				if a.Habitat != avonet {
+					want = append(want, a.Habitat)
+				}
+			}
+		}
+		if strings.Join(ours, ",") != strings.Join(want, ",") {
+			t.Errorf("%s (%s): the dataset adds %v, the review %v", sp.ScientificName, r.Status, ours, want)
+		}
+	}
+	for sci := range rev {
+		if !drawn[sci] {
+			t.Errorf("data/habitat-review.tsv has a row for %s, which BirdView does not draw", sci)
+		}
 	}
 }
