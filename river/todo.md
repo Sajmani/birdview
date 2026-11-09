@@ -1262,5 +1262,9 @@ from them may be recorded.
 [notes: Distance from shore](notes.md#distance-from-shore-as-evidence-for-the-open-sea-question)): the share of a
 bird's water records more than 10 km from shore splits AVONET's Marine cleanly into open-ocean
 birds (30% or more, about 75 species) and birds of the sea near shore (under 20%, 26), but cannot
-separate beach birds from sea ducks. Next: the owner's decision on whether to split Open sea by it,
-and if so, a committed tool and a requirement. Cost estimate for the full pipeline: on the issue.
+separate beach birds from sea ducks. **Built 2026-11-09**
+([decisions.openOceanSplit](requirements/decisions.md#openoceansplit)): Open sea is offered as Open ocean and Sea near shore, derived per bird
+from `data/sea-distance.tsv` by `cmd/birdview-sea`, with the 80% rule for birds seen from shore.
+Left: review rows for the birds near the thresholds (Sabine's Gull, which passes on tundra and
+inland records; Masked Booby, which misses at 79.5%); beach birds versus sea ducks; and the text
+sources, if ever. Cost estimate for the full pipeline: on the issue.

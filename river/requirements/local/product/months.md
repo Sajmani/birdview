@@ -138,11 +138,22 @@ exact union of AVONET's terms, so nothing is invented:
 
 | Group | AVONET's habitats |
 | --- | --- |
-| Shore and sea | Coastal, Marine |
+| Shore and sea | Coastal, and Marine as Sea near shore and Open ocean |
 | Fresh water | Wetland, Riverine |
 | Woods | Forest, Woodland |
 | Open country | Grassland, Shrubland, Desert, Rock |
 | Towns and farms | Human Modified |
+
+**AVONET's Marine is offered as two refinements, Sea near shore (`Marine-inshore`) and Open ocean
+(`Marine-offshore`), derived from where the bird's records lie**
+([decisions.openOceanSplit](../../decisions.md#openoceansplit), [dataset.seaDistanceDerived](dataset.md#seadistancederived)). A bird with Marine, AVONET's or
+BirdView's, is **Open ocean** when at least 25% of its records on water are more than 10 km from
+shore, and **Sea near shore** when fewer are, or when at least 80% of all its records are on land
+or within 10 km of shore; it can be both, as a tropicbird seen from its nesting cliffs and far out
+at sea is. A bird with fewer than 100 records on water is unmeasured and is both, saying so. A
+reviewed row of the habitat review may set the refinements by hand, with a reason, in place of the
+derived ones. An address naming `Marine`, as the filter wrote before 2026-11-09, redirects
+permanently to both refinements, which show the same birds; the heading names the pair "Open sea".
 
 **A group is a shortcut, not a value.** The address carries only AVONET's habitats
 (`habitat=Coastal&habitat=Marine`), and the filter matches them as before. A group's choice is

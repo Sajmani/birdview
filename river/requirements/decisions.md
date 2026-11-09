@@ -4845,3 +4845,43 @@ too rare to cover many species. Every other angle foreshortens some part, so a v
 matching the overlay would carry the camera's angle, not the bird's shape. The experiment was
 worth running: it showed which kind of evidence cannot be had, before any pipeline was built on it.
 
+---
+
+## openOceanSplit
+
+**Open sea is offered as open ocean and sea near shore, derived from distance to shore**
+
+Date: 2026-11-09
+Decided by: Sameer
+Status: accepted
+Affects: [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters), [dataset.seaDistanceDerived](local/product/dataset.md#seadistancederived), [tech.seaDistanceTable](local/tech/delivery.md#seadistancetable), [tech.stableUrls](local/tech/delivery.md#stableurls)
+
+### Decided
+
+AVONET's Marine is refined, per species, into **Open ocean** (`Marine-offshore`) and **Sea near
+shore** (`Marine-inshore`), not exclusive:
+
+1. **Open ocean** when at least **25%** of the bird's eBird records on water are more than 10 km
+   from shore.
+2. **Sea near shore** when fewer are, or when at least **80%** of all its records are on land or
+   within 10 km of shore.
+3. **Unmeasured**, and both, with fewer than **100** records on water.
+4. Applied to every bird with Marine, AVONET's or BirdView's. A reviewed habitat-review row naming
+   a refinement sets them by hand instead ([habitatReviewedPerSpecies](#habitatreviewedperspecies) gains this).
+5. Records counted: eBird's, inside BirdView's five sea boxes, cells whose center lies on Natural
+   Earth land dropped; land records from the bird's region counts.
+6. `habitat=Marine` redirects to both refinements; the heading calls the pair "Open sea".
+
+### Why
+
+[GitHub issue #10](https://github.com/google/birdview/issues/10) asked whether Coastal and Marine separate the birds a birder does. The
+research ([notes](../notes.md#distance-from-shore-as-evidence-for-the-open-sea-question)) found the share of water records beyond 10 km splits AVONET's Marine
+cleanly, with nothing between 20% and 30%, so 25% sits in the gap. That share alone filed
+tropicbirds as open ocean only, though White-tailed and Red-tailed are seen mostly from Hawaii's
+shores at their nesting cliffs (the owner's question, 2026-11-09); counting records on land too,
+80% of all records on land or within 10 km marks the birds a birder can watch from shore, and the
+owner chose 80% over 85% for the shearwaters and Sooty Tern it adds. No natural break falls between
+77% and 86%, so the edges go to review: Sabine's Gull passes on its tundra and inland records, and
+Masked Booby misses at 79.5%. Beach birds and sea ducks are not separated by this; that stays with
+the per-species review.
+

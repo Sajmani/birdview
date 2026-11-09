@@ -2059,7 +2059,7 @@ func TestHabitatGroupsFilter(t *testing.T) {
 		lines = append(lines, strings.Join(ls, " "))
 	}
 	want := []string{
-		"Shore and sea | Shore and estuary Open sea",
+		"Shore and sea | Shore and estuary Sea near shore Open ocean",
 		"Fresh water | Marsh and lake River and stream",
 		"Woods | Forest Woodland",
 		"Open country | Grassland Shrubland Desert Rock and scree",
@@ -2078,10 +2078,10 @@ func TestHabitatGroupsFilter(t *testing.T) {
 		on               bool
 		shortcut, single string
 	}{
-		{"/", false, "/?habitat=Coastal&habitat=Marine", "/?habitat=Coastal"},
-		{"/?habitat=Forest&habitat=Coastal", false, "/?habitat=Forest&habitat=Coastal&habitat=Marine", "/?habitat=Forest"},
-		{"/?habitat=Marine&habitat=Coastal&habitat=Forest", true, "/?habitat=Forest", "/?habitat=Marine&habitat=Forest"},
-		{"/?habitat=Coastal&habitat=Marine", true, "/", "/?habitat=Marine"},
+		{"/", false, "/?habitat=Coastal&habitat=Marine-inshore&habitat=Marine-offshore", "/?habitat=Coastal"},
+		{"/?habitat=Forest&habitat=Coastal", false, "/?habitat=Forest&habitat=Coastal&habitat=Marine-inshore&habitat=Marine-offshore", "/?habitat=Forest"},
+		{"/?habitat=Marine-inshore&habitat=Marine-offshore&habitat=Coastal&habitat=Forest", true, "/?habitat=Forest", "/?habitat=Marine-inshore&habitat=Marine-offshore&habitat=Forest"},
+		{"/?habitat=Coastal&habitat=Marine-inshore&habitat=Marine-offshore", true, "/", "/?habitat=Marine-inshore&habitat=Marine-offshore"},
 	} {
 		sc, coastal, _ := coast(c.url)
 		if sc.On != c.on || string(sc.URL) != c.shortcut {
@@ -2091,12 +2091,12 @@ func TestHabitatGroupsFilter(t *testing.T) {
 			t.Errorf("at %s, Shore and estuary goes to %s, want %s", c.url, coastal.URL, c.single)
 		}
 	}
-	if _, coastal, marine := coast("/?habitat=Coastal"); !coastal.On || marine.On {
-		t.Errorf("with habitat=Coastal, Shore and estuary is on %v and Open sea %v", coastal.On, marine.On)
+	if _, coastal, inshore := coast("/?habitat=Coastal"); !coastal.On || inshore.On {
+		t.Errorf("with habitat=Coastal, Shore and estuary is on %v and Sea near shore %v", coastal.On, inshore.On)
 	}
 
 	all := nextAt(s, "/?show=all&month=all")
-	p := nextAt(s, "/?show=all&month=all&habitat=Coastal&habitat=Marine")
+	p := nextAt(s, "/?show=all&month=all&habitat=Coastal&habitat=Marine-inshore&habitat=Marine-offshore")
 	got := map[string]bool{}
 	for _, tl := range p.Tiles {
 		got[tl.S.ID] = true
@@ -2104,7 +2104,7 @@ func TestHabitatGroupsFilter(t *testing.T) {
 	for _, tl := range all.Tiles {
 		in := false
 		for _, a := range tl.S.Habitats {
-			in = in || a.Value == "Coastal" || a.Value == "Marine"
+			in = in || a.Value == "Coastal" || strings.HasPrefix(a.Value, "Marine-")
 		}
 		if got[tl.S.ID] != in {
 			t.Errorf("Shore and sea: %s drawn %v, has %v", tl.S.ID, got[tl.S.ID], tl.S.Habitats)
@@ -2114,8 +2114,9 @@ func TestHabitatGroupsFilter(t *testing.T) {
 		t.Error("Shore and sea omits the heron, whose BirdView habitat is Coastal")
 	}
 	for url, heading := range map[string]string{
-		"/?month=all&habitat=Coastal&habitat=Marine&habitat=Forest": "Habitat: Shore and sea or Forest",
-		"/?month=all&habitat=Marine":                                "Habitat: Open sea",
+		"/?month=all&habitat=Coastal&habitat=Marine-inshore&habitat=Marine-offshore&habitat=Forest": "Habitat: Shore and sea or Forest",
+		"/?month=all&habitat=Marine-inshore&habitat=Marine-offshore":                                "Habitat: Open sea",
+		"/?month=all&habitat=Marine-offshore":                                                       "Habitat: Open ocean",
 	} {
 		if p := nextAt(s, url); !strings.Contains(p.Title, heading) {
 			t.Errorf("%s is headed %q, want %q in it", url, p.Title, heading)
@@ -2124,7 +2125,7 @@ func TestHabitatGroupsFilter(t *testing.T) {
 			t.Errorf("%s's Habitat reads %q, want it in %q", url, v, heading)
 		}
 	}
-	for _, url := range []string{"/?habitat=Marine&by=mass", "/?habitat=Forest&habitat=Woodland"} {
+	for _, url := range []string{"/?habitat=Marine-offshore&by=mass", "/?habitat=Forest&habitat=Woodland"} {
 		w := httptest.NewRecorder()
 		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, url, nil))
 		if w.Code != http.StatusOK {
@@ -2174,6 +2175,49 @@ func TestAllAlwaysOffered(t *testing.T) {
 			if marked := found[0][2] >= 0; marked != c.marked[name] {
 				t.Errorf("at %s, %s's All is marked %v, want %v", c.url, name, marked, c.marked[name])
 			}
+		}
+	}
+}
+
+// TestOpenOceanFilter asserts decisions.openOceanSplit in the filter: an address naming Marine, as
+// the filter wrote before 2026-11-09, redirects permanently to both refinements; each refinement
+// draws exactly the birds that carry it; and a bird's page shows its refinement as derived, with its
+// evidence and a link to the guide.
+//
+// Verifies: product.habitatAndDietFilters, tech.stableUrls, product.categoryProvenance. Criterion: acceptance.openOceanFilter.
+func TestOpenOceanFilter(t *testing.T) {
+	s := newTestServer(t)
+	for from, to := range map[string]string{
+		"/?habitat=Marine&by=mass":                 "/?by=mass&habitat=Marine-inshore&habitat=Marine-offshore",
+		"/?habitat=Coastal&habitat=Marine":         "/?habitat=Coastal&habitat=Marine-inshore&habitat=Marine-offshore",
+		"/?habitat=Marine&habitat=Marine-offshore": "/?habitat=Marine-inshore&habitat=Marine-offshore",
+	} {
+		w := httptest.NewRecorder()
+		s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, from, nil))
+		if w.Code != http.StatusMovedPermanently || w.Header().Get("Location") != to {
+			t.Errorf("GET %s = %d to %q, want 301 to %s", from, w.Code, w.Header().Get("Location"), to)
+		}
+	}
+	all := nextAt(s, "/?show=all&month=all")
+	for _, v := range []string{"Marine-inshore", "Marine-offshore"} {
+		p := nextAt(s, "/?show=all&month=all&habitat="+v)
+		for _, tl := range all.Tiles {
+			has := false
+			for _, a := range tl.S.Habitats {
+				has = has || a.Value == v
+			}
+			if hasTile(p, tl.S.ID) != has {
+				t.Errorf("habitat=%s: %s drawn %v, carries it %v", v, tl.S.ID, hasTile(p, tl.S.ID), has)
+			}
+		}
+	}
+	if !hasTile(nextAt(s, "/?show=all&month=all&habitat=Marine-inshore"), "thimur") {
+		t.Error("Sea near shore omits the murre, which carries it")
+	}
+	_, body := get(t, s, "/species/thimur")
+	for _, want := range []string{"Sea near shore", "derived", "more than 10 km from shore", "/docs/data#open-ocean-or-near-shore"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("the murre's page lacks %q", want)
 		}
 	}
 }

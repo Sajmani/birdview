@@ -108,7 +108,9 @@ Every setting that can be all starts its choices with **All**, marked when it is
 - **Habitat:** AVONET's habitats, a group to a line: **Shore and sea**, **Fresh water**, **Woods**,
   **Open country**, and towns and farmland. The group's name chooses all its habitats, or clears
   them when all are chosen, and each habitat can be chosen alone. A bird is shown when any of its
-  habitats is chosen.
+  habitats is chosen. At sea, **Sea near shore** is the birds you can see from land, and **Open
+  ocean** the ones you mostly need a boat for; a tropicbird, watched at its nesting cliffs and far
+  out at sea, is both ([how they are told apart](data.md#open-ocean-or-near-shore)).
 - **Diet:** what a bird mostly eats, per species, from **AVONET**.
 - For both, BirdView adds values where AVONET's single one hides where a birder sees the bird, and
   marks them as its own; [everything BirdView adds](/added) is listed in one place.

@@ -552,7 +552,7 @@ it are in [bindings.md](../bindings.md).
 | **Integrity** | [river/requirements/imported/naturalearthdata.com/naturalearth/PROVENANCE.md](imported/naturalearthdata.com/naturalearth/PROVENANCE.md) |
 | **Tier** | mandatory (copyright), though a public-domain source imposes nothing |
 | **Import style** | By reference, **pinned by hash, not vendored**: `cmd/birdview-boundaries` fetches the archive, checks its hash, and writes `data/region-boundaries.json` ([tech.regionBoundaries](local/tech/delivery.md#regionboundaries)) |
-| **Scope** | Region boundaries for the Here button ([product.hereSelectsLocalRegion](local/product/filtering.md#hereselectslocalregion)) |
+| **Scope** | Region boundaries for the Here button ([product.hereSelectsLocalRegion](local/product/filtering.md#hereselectslocalregion)); land and shore for distance from shore ([tech.seaDistanceTable](local/tech/delivery.md#seadistancetable)) |
 | **Adopted parts** | Admin-1 polygons for the 51 US units (50 states and DC), the 13 Canadian provinces and territories, and five US Minor Outlying Islands: Johnston, Midway, Navassa, Palmyra, and Wake |
 | **Exclusions** | Every other country, and Jarvis, Baker, and Howland, which are not BirdView regions |
 | **Owner** | Natural Earth (Tom Patterson, Nathaniel Vaughn Kelso, and contributors) |
@@ -563,10 +563,12 @@ License, quoted from <https://www.naturalearthdata.com/about/terms-of-use/>, rea
 > "All versions of Natural Earth raster + vector map data found on this website are in the public
 > domain. … No permission is needed to use Natural Earth. Crediting the authors is unnecessary."
 
-Also fetched 2026-11-08 **for research only**, not adopted: the 10m physical `ne_10m_land.zip`
+**Also adopted 2026-11-09**, by reference and pinned by hash, for distance from shore
+([tech.seaDistanceTable](local/tech/delivery.md#seadistancetable)): the 10m physical `ne_10m_land.zip`
 (SHA-256 `e547d749445eaa0964aba76738090ec88f5e63c4585122170f98c67a7ea922dc`) and
 `ne_10m_minor_islands.zip` (`47c0b3ce26df7b4dbabdbb251023918cb2f5c83462a426288f1f253da7284db2`),
-both 5.1.1, to measure distance from shore ([notes](../notes.md#distance-from-shore-as-evidence-for-the-open-sea-question)).
+both 5.1.1, fetched by `cmd/birdview-sea`; every polygon reaching west of 30° W is read. First
+fetched 2026-11-08 for research ([notes](../notes.md#distance-from-shore-as-evidence-for-the-open-sea-question)).
 
 Its borders and coastlines are not GADM's, which the occurrence records were filed under, so near
 a border or a shore the Here button may pick a neighboring region. GADM itself was not usable: its

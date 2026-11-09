@@ -332,7 +332,7 @@ func (s *server) next(w http.ResponseWriter, r *http.Request) {
 	// current code (decisions.regionCodesFromData, tech.stableUrls).
 	pins := s.canonicalPins(q)
 	regions := canonicalRegions(q)
-	if (pins || regions || canonicalFreq(q)) && !q.Has("bird") {
+	if (pins || regions || canonicalFreq(q) || canonicalHabitats(q)) && !q.Has("bird") {
 		http.Redirect(w, r, string(nextURL(q)), http.StatusMovedPermanently)
 		return
 	}
@@ -383,6 +383,28 @@ func canonicalFreq(q url.Values) bool {
 		q["freq"] = q["common"]
 	}
 	q.Del("common")
+	return true
+}
+
+// canonicalHabitats rewrites, in place, habitat=Marine, which the filter wrote before 2026-11-09, to
+// its two refinements, each once, and reports whether it rewrote it (decisions.openOceanSplit).
+func canonicalHabitats(q url.Values) bool {
+	if !slices.Contains(q["habitat"], "Marine") {
+		return false
+	}
+	var out []string
+	for _, v := range q["habitat"] {
+		vs := []string{v}
+		if v == "Marine" {
+			vs = []string{"Marine-inshore", "Marine-offshore"}
+		}
+		for _, w := range vs {
+			if !slices.Contains(out, w) {
+				out = append(out, w)
+			}
+		}
+	}
+	q["habitat"] = out
 	return true
 }
 
@@ -1196,11 +1218,11 @@ func habitatCtl(q url.Values, opt options) nextControl {
 		var ls []string
 		for _, t := range g.Terms {
 			all = all && opt.Habitats[t]
-			ls = append(ls, trait.LabelOf(trait.Habitats, t))
+			ls = append(ls, trait.LabelOf(trait.HabitatTerms, t))
 		}
 		var ch []nextChoice
 		for i, t := range g.Terms {
-			ch = append(ch, nextChoice{Label: ls[i], Title: trait.DescriptionOf(trait.Habitats, t),
+			ch = append(ch, nextChoice{Label: ls[i], Title: trait.DescriptionOf(trait.HabitatTerms, t),
 				On: opt.HasHabitats && opt.Habitats[t], URL: nextToggle(q, "habitat", t)})
 		}
 		grp := nextChoiceGroup{Lead: &nextChoice{Label: g.Label, Title: "All of " + nextList(ls), On: all,
@@ -1244,12 +1266,22 @@ func habitatNames(sel map[string]bool) []string {
 		var on []string
 		for _, t := range g.Terms {
 			if sel[t] {
-				on = append(on, trait.LabelOf(trait.Habitats, t))
+				on = append(on, trait.LabelOf(trait.HabitatTerms, t))
 			}
 		}
-		if len(on) == len(g.Terms) && len(on) > 1 {
+		switch {
+		case len(on) == len(g.Terms) && len(on) > 1:
 			out = append(out, g.Label)
-		} else {
+		case sel["Marine-inshore"] && sel["Marine-offshore"] && slices.Contains(g.Terms, "Marine-inshore"):
+			// Both refinements are AVONET's Marine, which the filter called Open sea
+			// (decisions.openOceanSplit).
+			for _, l := range on {
+				if l != trait.LabelOf(trait.HabitatTerms, "Marine-inshore") && l != trait.LabelOf(trait.HabitatTerms, "Marine-offshore") {
+					out = append(out, l)
+				}
+			}
+			out = append(out, "Open sea")
+		default:
 			out = append(out, on...)
 		}
 	}

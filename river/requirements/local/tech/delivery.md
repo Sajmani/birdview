@@ -79,7 +79,8 @@ a parameter, or a value it accepts needs a decision, and the old form keeps answ
 before or redirected. A region value that BirdView replaced, or that its source retired, redirects
 to the codes that replace it **without a message**, the page's heading naming the regions shown
 ([decisions.regionCodesFromData](../../decisions.md#regioncodesfromdata)). `common`, the reporting frequency's name until 2026-11-08, redirects to
-`freq` ([decisions.reportingFrequencyParam](../../decisions.md#reportingfrequencyparam)). One decision removed URLs outright: the comparison `/compare`, the
+`freq` ([decisions.reportingFrequencyParam](../../decisions.md#reportingfrequencyparam)). `habitat=Marine` redirects to its two refinements,
+`Marine-inshore` and `Marine-offshore` ([decisions.openOceanSplit](../../decisions.md#openoceansplit)). One decision removed URLs outright: the comparison `/compare`, the
 current-month link `/now`, and the `scale` and `species` parameters went with the classic view
 ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)). One changed what a URL
 shows: a home page address with no month showed the current month and now shows every month;
@@ -127,6 +128,26 @@ The sea boxes are written from the same Go table as the region filter's, so the 
 The source is fetched and checked against its hash when the file is regenerated, not committed: it
 is 14 MB worldwide, and BirdView needs the United States, Canada, and five atolls. See
 [imports.md](../../imports.md#natural-earth).
+
+## seaDistanceTable
+
+**Where each species' records lie relative to shore is derived once and committed**
+
+Subject: `data.sea_distance`
+Goals: [goals.rapidIteration](../../../goals/goals.md#rapiditeration), [goals.giveBack](../../../goals/goals.md#giveback), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
+
+`cmd/birdview-sea` writes `data/sea-distance.tsv` from the offshore-cells GBIF download (records with
+no GADM code, in 0.1° cells by species and month; [gbifDownloadsRecorded](process.md#gbifdownloadsrecorded)) and Natural Earth's 1:10m
+land and minor islands, pinned by hash and fetched, never committed
+([imports.md](../../imports.md#natural-earth)). It counts eBird records only, inside BirdView's sea boxes; drops each
+cell whose center lies on land, which GADM leaves uncoded in places; measures each remaining cell's
+center to the nearest shore; and writes, per drawn species, its records under 10 km, 10 to 30 km,
+and 30 km or more, with the download's key and DOI in the table's header. The table is committed,
+so the ingest needs neither the download nor the network.
+
+Rationale: the download is 90 MB and the polygons 3.5 MB; the derived counts are a few kilobytes
+that anyone can check against the method. The method was tried as research first
+([notes: Distance from shore](../../../notes.md#distance-from-shore-as-evidence-for-the-open-sea-question)).
 
 ## servesOnLocalhost
 

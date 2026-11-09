@@ -42,7 +42,7 @@ var reviewStatuses = map[string]bool{"pending": true, "proposed": true, "reviewe
 // habitat vocabulary, or one without a reason.
 func ParseHabitatReview(r io.Reader) (map[string]Review, error) {
 	known := map[string]bool{}
-	for _, t := range Habitats {
+	for _, t := range HabitatTerms {
 		known[t.Value] = true
 	}
 	out := map[string]Review{}

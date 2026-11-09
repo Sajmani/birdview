@@ -16,6 +16,9 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 ### Changed
 
 - A bird's neck, head, and body say whether their proportions are proposed or reviewed.
+- **Open sea is now Sea near shore and Open ocean**, told apart by where each bird's records lie:
+  the birds you can see from land, and the ones you mostly need a boat for. Tropicbirds, murres,
+  and puffins, watched at their colonies and far out, are both. Old Open sea addresses show both.
 - The 26 woodpeckers, loons, and grebes whose modeled wingspan stated its error as "NaN%" now state
   a measured one.
 - **Diving ducks and grebes** are drawn closer to how they fly: scaup, goldeneyes, scoters, and

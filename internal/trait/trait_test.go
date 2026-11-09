@@ -150,7 +150,7 @@ func TestMixedDietRuleReachesTheDataset(t *testing.T) {
 func TestEveryAssignmentHasAnOriginAndTheVocabularyKnowsIt(t *testing.T) {
 	sp := loadSpecies(t)
 	hab := map[string]bool{}
-	for _, term := range Habitats {
+	for _, term := range HabitatTerms {
 		hab[term.Value] = true
 	}
 	nic := map[string]bool{}

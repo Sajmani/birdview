@@ -107,6 +107,7 @@ commit it. [How BirdView's data is built](pipeline.md) diagrams them and the ing
 | `birdview-regions` | `data/region-presence.tsv`: which regions each species occurs in; with `-counties <download.zip> -state <GADM code>`, `data/county-presence/<state>.tsv` from a recorded GBIF download | one facet query per region, resumable; none for counties |
 | `birdview-status` | `data/status.tsv`: BirdView's own occurrence status per species | two passes, resumable |
 | `birdview-boundaries` | `data/region-boundaries.json`: region outlines for the Here button, from Natural Earth | one ~15 MB download, hash-checked |
+| `birdview-sea` | `data/sea-distance.tsv`: each species' eBird records on water by distance from shore, from the offshore-cells GBIF download and Natural Earth's land | ~2 min; two ~3.5 MB downloads, hash-checked and cached; needs the download under `fetched/gbif/` and a built dataset |
 
 `birdview-names` and `birdview-regions` read the built dataset, so run the ingest first.
 
@@ -172,6 +173,7 @@ cmd/birdview-gbifmap/    generator: GBIF backbone -> AviList name bridge
 cmd/birdview-regions/    generator: per-region presence
 cmd/birdview-status/     generator: BirdView's own occurrence status
 cmd/birdview-boundaries/ generator: region boundaries for the Here button
+cmd/birdview-sea/        generator: records on water by distance from shore
 cmd/birdview-gbifdownload/ requests, fetches, and records GBIF SQL downloads
 cmd/birdview-names/      measures how eBird and iNaturalist name each species
 cmd/birdview-smoke/      checks a running deployment from outside, after each deploy
@@ -183,6 +185,8 @@ internal/trait/          the habitat and diet vocabularies and BirdView's additi
 internal/morphology/     the segment models (head, body, neck) and rounding
 internal/region/         the regions, their two groupings, and their IDs
 internal/boundary/       the region boundary file and the reference lookup over it
+internal/shapefile/      the Natural Earth shapefile readers: polygons and attribute tables
+internal/geo/            on land or not, and distance to the nearest shore
 internal/month/          the twelve months and the rule for presence in one
 internal/gbif/           the paced GBIF client and the name bridge
 internal/status/         recurrence: episodes, and the status they imply

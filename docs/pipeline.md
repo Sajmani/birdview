@@ -109,6 +109,19 @@ flowchart LR
     month ·
     v_scientificname · *the name as published*
     n · *records*`"]
+    OFFDL["`GBIF SQL download: offshore cells
+    *records with no GADM code; kept in fetched/*
+    ─────────────
+    datasetkey · *eBird only is read*
+    lat10 · *the cell's latitude, in tenths*
+    lon10 · *its longitude, in tenths*
+    v_scientificname · *the name as published*
+    specieskey · *GBIF's key for it*
+    n · *records*`"]
+    NE["`Natural Earth 1:10m land and minor islands
+    *public domain; pinned by hash, fetched*
+    ─────────────
+    polygons · *every one reaching west of 30° W*`"]
     BACK["`GBIF backbone API
     *live*
     ─────────────
@@ -166,6 +179,7 @@ flowchart LR
   REGIONSCMD(["birdview-regions"])
   NAMESCMD(["birdview-names"])
   GBIFCMD(["birdview-gbifmap"])
+  SEACMD(["birdview-sea"])
 
   subgraph DATA["Committed tables in data/"]
     STATUS["`status.tsv
@@ -211,6 +225,13 @@ flowchart LR
     body factor ★ *empty is 1*
     wingspan factor ★ *modeled wingspans only*
     status · *proposed or reviewed, with reviewer and date*`"]
+    SEADIST["`sea-distance.tsv
+    *eBird records on water, by distance from shore*
+    ─────────────
+    scientific name · *join key*
+    under 10 km ★ *records*
+    10 to 30 km ★ *records*
+    30 km or more ★ *records*`"]
     COUNTIES["`county-presence/USA.33_1.tsv
     *one table per state, as region-presence.tsv*
     ─────────────
@@ -263,7 +284,9 @@ flowchart LR
     S8(["Step 8: regions
     attach counts, months, withheld flags;
     regions under the bar counted apart;
-    peak share gives the top region"])
+    peak share gives the top region;
+    refine Marine as open ocean
+    or sea near shore"])
   end
 
   JSON["`web/data/species.json
@@ -358,6 +381,12 @@ flowchart LR
   REGIONS --> S8
   HREV -->|"reviewed additions"| S5
   NREV -->|"neck ratios; head and body factors"| S4
+  OFFDL -->|"cells off land, in the sea boxes"| SEACMD
+  NE -->|"on land? distance to shore"| SEACMD
+  GT -->|"species key to AviList name"| SEACMD
+  SEACMD --> SEADIST
+  SEADIST -->|"with land counts: 25% beyond 10 km,
+  80% on land or within 10 km"| S8
   NREV -->|"wingspan factors"| S6
   COUNTIES -->|"after the peak share"| S8
 
@@ -380,6 +409,13 @@ everywhere; iNaturalist's count only in a region and month where eBird is confir
 the species. `status.Declared`, a short list in code, adds species the open records cannot speak
 for, each with its reason. See [where the data comes from](data.md#scope) and the
 [decision to count eBird first](../river/requirements/decisions.md#countebirdfirst).
+
+**Open ocean or near shore comes from distance to shore.** `birdview-sea` reads the offshore-cells
+download's eBird records, drops each 0.1° cell whose center lies on Natural Earth's land, and bands
+the rest by distance to shore, per species, into `data/sea-distance.tsv`. The ingest, after the
+regions, gives every bird with Marine the refinement that follows: open ocean when a quarter of its
+records on water lie more than 10 km out, sea near shore when fewer do or when 80% of all its
+records lie on land or within 10 km; see [where the data comes from](data.md#open-ocean-or-near-shore).
 
 **Proportions are reviewed by genus.** The neck ratio of step 4 comes from the family table in the
 code, and the head and body from mass, unless `data/proportions-review.tsv` has a row for the bird's

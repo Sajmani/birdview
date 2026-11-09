@@ -26,6 +26,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"birdview/internal/avilist"
@@ -57,6 +58,7 @@ func main() {
 		reviewPath      = flag.String("habitat-review", "data/habitat-review.tsv", "the habitat review (decisions.habitatReviewedPerSpecies)")
 		proportionsPath = flag.String("proportions-review", "data/proportions-review.tsv", "the proportions review (decisions.proportionsReviewedPerTaxon)")
 		countyDir       = flag.String("counties", "data/county-presence", "per-state county presence (built by birdview-regions -counties)")
+		seaPath         = flag.String("sea", "data/sea-distance.tsv", "where each species' records on water lie relative to shore (built by birdview-sea)")
 		bblPath         = flag.String("bbl", "third_party/bbl/speclist.html", "USGS Bird Banding Laboratory species list (banding codes)")
 		outPath         = flag.String("out", "web/data/species.json", "output path (a build artifact)")
 	)
@@ -75,6 +77,16 @@ func main() {
 	fmt.Print(report)
 
 	placed, err := applyRegions(ds, *regPath)
+	if err == nil {
+		// The sea refinements need each species' land records, so they follow the regions
+		// (dataset.seaDistanceDerived); before the counties, which are not counted as land.
+		var table seaTable
+		if table, err = loadSeaTable(*seaPath); err == nil {
+			refined, missing := applySea(ds, table)
+			fmt.Printf("  sea refinements  : %d birds with Marine refined; %d not in %s, so unmeasured (decisions.openOceanSplit)\n",
+				refined, missing, *seaPath)
+		}
+	}
 	if err == nil {
 		var nc int
 		if nc, err = applyCounties(ds, *countyDir); err == nil {
@@ -990,4 +1002,127 @@ func applyBanding(ds *dataset.Dataset, path string) (int, error) {
 		n++
 	}
 	return n, nil
+}
+
+// The thresholds of decisions.openOceanSplit.
+const (
+	seaOffshoreShare = 0.25 // of records on water more than 10 km out, for Open ocean
+	seaShoreShare    = 0.80 // of all records on land or within 10 km, for Sea near shore too
+	seaMinWater      = 100  // records on water, below which the split is unmeasured
+)
+
+// seaRow is one species' eBird records on water by distance from shore (tech.seaDistanceTable).
+type seaRow struct{ Near, Coastal, Offshore int64 }
+
+type seaTable map[string]seaRow
+
+func loadSeaTable(path string) (seaTable, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	t := seaTable{}
+	header := false
+	for n, line := range strings.Split(string(b), "\n") {
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		if !header {
+			header = true
+			continue
+		}
+		f := strings.Split(line, "\t")
+		if len(f) != 4 {
+			return nil, fmt.Errorf("%s line %d: %d fields, want 4", path, n+1, len(f))
+		}
+		var r seaRow
+		for i, v := range []*int64{&r.Near, &r.Coastal, &r.Offshore} {
+			if *v, err = strconv.ParseInt(f[i+1], 10, 64); err != nil {
+				return nil, fmt.Errorf("%s line %d: %v", path, n+1, err)
+			}
+		}
+		t[f[0]] = r
+	}
+	return t, nil
+}
+
+// applySea refines every bird with Marine (deriveSea) and reports how many were refined and how many
+// of those had no row in the table.
+func applySea(ds *dataset.Dataset, table seaTable) (refined, missing int) {
+	for i := range ds.Species {
+		ok, absent := deriveSea(&ds.Species[i], table)
+		if ok {
+			refined++
+		}
+		if absent {
+			missing++
+		}
+	}
+	return refined, missing
+}
+
+// deriveSea gives a bird with Marine its sea refinements, Open ocean, Sea near shore, or both, each
+// derived with its evidence (dataset.seaDistanceDerived, decisions.openOceanSplit). Refinements the
+// review set stand instead. It reports whether the bird has Marine, and whether it had no row.
+func deriveSea(sp *dataset.Species, table seaTable) (marine, absent bool) {
+	var kept []dataset.Assignment
+	reviewed := false
+	for _, a := range sp.Habitats {
+		if a.Value == "Marine" {
+			marine = true
+		}
+		if strings.HasPrefix(a.Value, "Marine-") {
+			if a.Origin != dataset.BirdView {
+				continue // an earlier derivation, rederived below
+			}
+			reviewed = true
+		}
+		kept = append(kept, a)
+	}
+	sp.Habitats = kept
+	if !marine || reviewed {
+		return marine, false
+	}
+	derived := func(value, why string) dataset.Assignment {
+		return dataset.Assignment{Value: value, Origin: dataset.Derived, Why: why, Doc: "data#open-ocean-or-near-shore"}
+	}
+	r, ok := table[sp.ScientificName]
+	water := r.Near + r.Coastal + r.Offshore
+	if !ok || water < seaMinWater {
+		why := fmt.Sprintf("only %s eBird records on water, under the %d needed to tell open ocean from sea near shore, so listed under both",
+			thousands(water), seaMinWater)
+		sp.Habitats = append(sp.Habitats, derived("Marine-inshore", why), derived("Marine-offshore", why))
+		return true, !ok
+	}
+	var land int64
+	for i, id := range sp.Regions {
+		if strings.Count(id, ".") == 1 && !strings.HasPrefix(id, "SEA.") && i < len(sp.RegionCounts) {
+			land += sp.RegionCounts[i]
+		}
+	}
+	far := float64(r.Coastal+r.Offshore) / float64(water)
+	shore := float64(land+r.Near) / float64(land+water)
+	farWhy := fmt.Sprintf("%.0f%% of its %s eBird records on water are more than 10 km from shore",
+		100*far, thousands(water))
+	if far >= seaOffshoreShare {
+		sp.Habitats = append(sp.Habitats, derived("Marine-offshore", farWhy+" (open ocean from 25%)"))
+	}
+	switch {
+	case far < seaOffshoreShare:
+		sp.Habitats = append(sp.Habitats, derived("Marine-inshore", farWhy+" (under 25%)"))
+	case shore >= seaShoreShare:
+		sp.Habitats = append(sp.Habitats, derived("Marine-inshore", fmt.Sprintf(
+			"%.0f%% of its %s records are on land or within 10 km of shore (seen from shore from 80%%)",
+			100*shore, thousands(land+water))))
+	}
+	return true, false
+}
+
+// thousands writes n with commas, as the pages do.
+func thousands(n int64) string {
+	s := strconv.FormatInt(n, 10)
+	for i := len(s) - 3; i > 0; i -= 3 {
+		s = s[:i] + "," + s[i:]
+	}
+	return s
 }

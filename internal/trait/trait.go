@@ -81,6 +81,17 @@ var Habitats = []Term{
 	{Value: "Marine", Label: "Open sea", Description: "Pelagic, on sea near coasts, including species in the intertidal zone on beaches, and those pelagic species nesting near the sea on cliffs, islets and islands."},
 }
 
+// SeaRefinements split AVONET's Marine by where a bird's records lie: open ocean, sea near shore, or
+// both (decisions.openOceanSplit). They are BirdView's own terms, derived per species, and are
+// offered in the filter in place of Marine.
+var SeaRefinements = []Term{
+	{Value: "Marine-inshore", Label: "Sea near shore", Description: "A bird of the sea that is seen from shore: fewer than a quarter of its eBird records on water lie more than 10 km out, or at least 80% of all its records lie on land or within 10 km of shore. BirdView's own refinement of AVONET's Marine."},
+	{Value: "Marine-offshore", Label: "Open ocean", Description: "A bird of the open ocean: at least a quarter of its eBird records on water lie more than 10 km from shore. BirdView's own refinement of AVONET's Marine."},
+}
+
+// HabitatTerms is every habitat value a bird can carry: AVONET's eleven and the sea refinements.
+var HabitatTerms = append(append([]Term{}, Habitats...), SeaRefinements...)
+
 // HabitatGroup is a shortcut in the habitat filter: one choice that selects or clears several of
 // AVONET's habitats at once, each still chosen on its own (decisions.habitatGroupShortcuts).
 type HabitatGroup struct {
@@ -91,7 +102,7 @@ type HabitatGroup struct {
 // HabitatGroups are the habitat filter's lines, in the order it offers them. Together they hold
 // every one of AVONET's habitats exactly once.
 var HabitatGroups = []HabitatGroup{
-	{Label: "Shore and sea", Terms: []string{"Coastal", "Marine"}},
+	{Label: "Shore and sea", Terms: []string{"Coastal", "Marine-inshore", "Marine-offshore"}},
 	{Label: "Fresh water", Terms: []string{"Wetland", "Riverine"}},
 	{Label: "Woods", Terms: []string{"Forest", "Woodland"}},
 	{Label: "Open country", Terms: []string{"Grassland", "Shrubland", "Desert", "Rock"}},

@@ -103,6 +103,28 @@ the species ([decisions.abaSpeciesWithoutAvonet](../../decisions.md#abaspecieswi
 species ([decisions.herringGullEuropeanRow](../../decisions.md#herringgulleuropeanrow)) or of its near-match donor ([decisions.whiteTernBorrows](../../decisions.md#whiteternborrows)).
 See [lengthAndWingspanSources](measurements.md#lengthandwingspansources).
 
+## seaDistanceDerived
+
+**Each bird of the sea carries where its records lie, and its open-ocean refinement follows from it**
+
+Subject: `dataset.sea_distance`
+Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
+
+Every species with the habitat Marine is given `Marine-offshore`, `Marine-inshore`, or both
+([product.habitatAndDietFilters](months.md#habitatanddietfilters), [decisions.openOceanSplit](../../decisions.md#openoceansplit)), each marked `derived` with its evidence as
+the reason: its eBird records on water under 10 km, 10 to 30 km, and 30 km or more from shore
+(from `data/sea-distance.tsv`, [tech.seaDistanceTable](../tech/delivery.md#seadistancetable)), its records on land (from its region counts), the share
+of its water records more than 10 km out, and the share of all its records on land or within 10 km.
+A bird with fewer than 100 records on water is given both, unmeasured, and says so. A reviewed
+habitat-review row that names either refinement sets them instead, with origin `birdview`. A
+species with Marine and no row in the table is reported by the ingest, as joins report drops
+([joinsReportDrops](#joinsreportdrops)), and is treated as unmeasured.
+
+Rationale: AVONET's Marine holds both the shearwater seen only from a boat and the eider in the
+surf. Distance from shore separates them ([decisions.openOceanSplit](../../decisions.md#openoceansplit) records the evidence), and
+deriving the refinement from the records, with the numbers shown, keeps it checkable rather than
+asserted.
+
 ## traitsPerSpecies
 
 **Traits carried per species**

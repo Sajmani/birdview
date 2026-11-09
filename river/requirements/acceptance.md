@@ -1987,7 +1987,7 @@ leading it in a column of leads (so the rule after them and the habitats start a
 long line wraps under its habitats) and Towns and farms led by its one habitat alone; the group's
 choice is marked only when all its habitats are, adds the missing ones (to any others chosen, or
 alone from all), and removes them all when all are chosen; each habitat still toggles alone;
-choosing Shore and sea draws exactly the birds with Coastal or Marine, AVONET's or BirdView's (the
+choosing Shore and sea draws exactly the birds with Coastal or a sea refinement of Marine, AVONET's or BirdView's (the
 heron, Coastal by BirdView's addition, among them); the heading and the setting's value name a fully
 chosen group by its label and other habitats by theirs; and an address naming AVONET's habitats is
 served, not redirected.
@@ -2523,6 +2523,58 @@ active.
 **Run:** `go test ./river/check/ -run TestActiveTodoHasIssue`
 **Status: verified 2026-11-09, passing.**
 Watched failing: 2026-11-09, with countyRegions marked active before its issue existed (the test reported countyRegions as active with no Issue: line linking its GitHub issue).
+
+### seaDistanceTable
+
+**Records on water are banded by distance from shore, land cells dropped**
+
+**Verifies:** [tech.seaDistanceTable](local/tech/delivery.md#seadistancetable) · **Level:** code · **Method:** the geometry on a synthetic island with a lake, and the generator's measure on synthetic rows in the North Atlantic box
+
+**Assertions:** a point inside land is on land and one in a lake or the sea is not; the distance to
+the nearest shore is the local distance to the nearest edge, and reads the cap past it; a polygon
+wholly east of the west limit is left out. The generator bands eBird rows by their cell center's
+distance (under 10 km, 10 to 30, 30 or more), drops a cell whose center is on land, leaves out
+iNaturalist rows and cells outside every sea box, counts unknown names apart, writes the table with
+the download's DOI, and refuses a download without the offshore-cells columns. Not run by the
+tests: the committed table, which reproduced the 2026-11-08 research exactly (869 species, 98,295
+records unmatched).
+
+**Run:** `go test ./internal/geo/ ./cmd/birdview-sea/`
+**Status: verified 2026-11-09, passing.**
+Watched failing: 2026-11-09, before the geometry existed (the test did not build: "undefined: NewShore"), and with the land test skipped in the generator ("Cory's Shearwater's bands are [3 5 18], want [3 5 7]").
+
+### seaRefinementsDerived
+
+**Every bird with Marine is refined as open ocean, sea near shore, or both, by the decision's rule**
+
+**Verifies:** [dataset.seaDistanceDerived](local/product/dataset.md#seadistancederived), [decisions.openOceanSplit](decisions.md#openoceansplit) · **Level:** code · **Method:** the built dataset
+
+**Assertions:** every bird with Marine carries at least one refinement and no other bird carries
+one; each is derived, or BirdView's by review; Black-footed Albatross is open ocean only,
+White-tailed Tropicbird both, Common Eider sea near shore only, American Robin neither; some bird is
+unmeasured, and every unmeasured bird is both; the albatross's reason gives its evidence; a
+refinement the review set stands alone. The groups hold AVONET's habitats once each, Marine as its
+two refinements, and the review accepts a refinement as an addition.
+
+**Run:** `go test ./cmd/birdview-ingest/ -run TestSeaRefinementsDerived && go test ./internal/trait/ -run TestHabitatGroupsPartitionAVONET`
+**Status: verified 2026-11-09, passing.**
+Watched failing: 2026-11-09, before the step existed (the test did not build: "undefined: deriveSea"), and without the 80% rule ("Phaethon lepturus is [Marine-offshore], want \"Marine-inshore,Marine-offshore\"").
+
+### openOceanFilter
+
+**The filter offers the refinements, and addresses naming Marine redirect to them**
+
+**Verifies:** [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters), [tech.stableUrls](local/tech/delivery.md#stableurls), [product.categoryProvenance](local/product/measurements.md#categoryprovenance) · **Level:** code · **Method:** the home page and a species page rendered and requested
+
+**Assertions:** `habitat=Marine` redirects permanently to `Marine-inshore` and `Marine-offshore`,
+each once, other parameters kept; each refinement draws exactly the birds carrying it; the Shore and
+sea line reads Shore and estuary, Sea near shore, Open ocean; the heading names both "Open sea" and
+one alone by its label; a bird's page shows its refinement as derived, with its evidence and a link
+to the guide.
+
+**Run:** `go test ./cmd/birdview/ -run 'TestOpenOceanFilter|TestHabitatGroupsFilter'`
+**Status: verified 2026-11-09, passing.**
+Watched failing: 2026-11-09, before the server knew the refinements ("GET /?habitat=Marine&by=mass = 200 to \"\", want 301"; "Habitat offers … Marine-inshore Marine-offshore"; "headed … Habitat: Marine-inshore or Marine-offshore").
 
 ### imageRecordsRevision
 

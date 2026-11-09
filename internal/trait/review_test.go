@@ -60,8 +60,9 @@ func TestHabitatReviewParsesAndApplies(t *testing.T) {
 	}
 }
 
-// TestHabitatGroupsPartitionAVONET asserts decisions.habitatGroupShortcuts: the five groups hold every one of
-// AVONET's habitats exactly once, in the order and with the labels the requirement gives.
+// TestHabitatGroupsPartitionAVONET asserts decisions.habitatGroupShortcuts and decisions.openOceanSplit:
+// the five groups hold every one of AVONET's habitats exactly once, Marine as its two refinements, in
+// the order and with the labels the requirement gives; the review accepts a refinement as an addition.
 //
 // Verifies: product.habitatAndDietFilters. Criterion: acceptance.habitatGroupsFilter.
 func TestHabitatGroupsPartitionAVONET(t *testing.T) {
@@ -80,11 +81,25 @@ func TestHabitatGroupsPartitionAVONET(t *testing.T) {
 		}
 	}
 	for _, h := range Habitats {
+		if h.Value == "Marine" {
+			if seen[h.Value] != "" {
+				t.Error("Marine is offered in a group itself; it is offered as its refinements")
+			}
+			continue
+		}
 		if seen[h.Value] == "" {
 			t.Errorf("AVONET's %s is in no group", h.Value)
 		}
 	}
-	want := "Shore and sea=Coastal,Marine|Fresh water=Wetland,Riverine|Woods=Forest,Woodland|Open country=Grassland,Shrubland,Desert,Rock|Towns and farms=Human Modified"
+	if LabelOf(HabitatTerms, "Marine-offshore") != "Open ocean" || LabelOf(HabitatTerms, "Marine-inshore") != "Sea near shore" {
+		t.Error("the refinements are not labeled Open ocean and Sea near shore")
+	}
+	src := "# h\n# scientific name\tname\tAVONET habitat\tstatus\treviewer\tdate\tadditions\n" +
+		"Xema sabini\tSabine's Gull\tMarine\treviewed\tSameer\t2026-11-09\tMarine-offshore: its shore records are breeding tundra and inland reservoirs\n"
+	if _, err := ParseHabitatReview(strings.NewReader(src)); err != nil {
+		t.Errorf("a reviewed Marine-offshore addition was refused: %v", err)
+	}
+	want := "Shore and sea=Coastal,Marine-inshore,Marine-offshore|Fresh water=Wetland,Riverine|Woods=Forest,Woodland|Open country=Grassland,Shrubland,Desert,Rock|Towns and farms=Human Modified"
 	if strings.Join(got, "|") != want {
 		t.Errorf("groups are %v, want %s", got, want)
 	}

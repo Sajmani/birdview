@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"sort"
 	"strings"
 	"testing"
 
@@ -42,6 +43,7 @@ const (
 	countyDir             = "../../data/county-presence"
 	habitatReviewFile     = "../../data/habitat-review.tsv"
 	proportionsReviewFile = "../../data/proportions-review.tsv"
+	seaFile               = "../../data/sea-distance.tsv"
 	bblFile               = "../../third_party/bbl/speclist.html"
 )
 
@@ -76,6 +78,11 @@ func load(t *testing.T) *dataset.Dataset {
 	if _, err := applyRegions(ds, regFile); err != nil {
 		t.Fatalf("applyRegions: %v", err)
 	}
+	table, err := loadSeaTable(seaFile)
+	if err != nil {
+		t.Fatalf("loadSeaTable: %v", err)
+	}
+	applySea(ds, table)
 	if _, err := applyCounties(ds, countyDir); err != nil {
 		t.Fatalf("applyCounties: %v", err)
 	}
@@ -982,9 +989,10 @@ func TestEveryDrawnBirdHasAHabitatReview(t *testing.T) {
 		var avonet string
 		var ours []string
 		for _, a := range sp.Habitats {
-			if a.Origin == dataset.Published {
+			switch a.Origin {
+			case dataset.Published:
 				avonet = a.Value
-			} else {
+			case dataset.BirdView: // the review's; derived sea refinements are checked apart
 				ours = append(ours, a.Value)
 			}
 		}
@@ -1093,4 +1101,86 @@ func factorOf(p dataset.Provenance) float64 {
 		return 1
 	}
 	return p.Factor
+}
+
+// TestSeaRefinementsDerived asserts dataset.seaDistanceDerived and decisions.openOceanSplit on the
+// built dataset: every bird with Marine gets Open ocean, Sea near shore, or both, derived with its
+// evidence; the cases the decision names come out as it says; a bird with too few records on water
+// gets both and says so; a bird without Marine gets neither; and a refinement the review set stands
+// alone, undisturbed by the derivation.
+//
+// Verifies: dataset.seaDistanceDerived, product.habitatAndDietFilters. Criterion: acceptance.seaRefinementsDerived.
+func TestSeaRefinementsDerived(t *testing.T) {
+	ds := load(t)
+	refs := func(sp *dataset.Species) (out []string, why string) {
+		for _, a := range sp.Habitats {
+			if strings.HasPrefix(a.Value, "Marine-") {
+				out = append(out, a.Value)
+				why += a.Why + " "
+				if a.Origin != dataset.Derived && a.Origin != dataset.BirdView {
+					t.Errorf("%s's %s has origin %s; a refinement is derived, or BirdView's by review", sp.ScientificName, a.Value, a.Origin)
+				}
+			}
+		}
+		sort.Strings(out)
+		return out, why
+	}
+	marine := func(sp *dataset.Species) bool {
+		for _, a := range sp.Habitats {
+			if a.Value == "Marine" {
+				return true
+			}
+		}
+		return false
+	}
+	want := map[string]string{
+		"Phoebastria nigripes": "Marine-offshore",                // Black-footed Albatross
+		"Phaethon lepturus":    "Marine-inshore,Marine-offshore", // White-tailed Tropicbird
+		"Somateria mollissima": "Marine-inshore",                 // Common Eider
+		"Turdus migratorius":   "",                               // American Robin
+	}
+	unmeasured := 0
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		got, why := refs(sp)
+		if w, ok := want[sp.ScientificName]; ok && strings.Join(got, ",") != w {
+			t.Errorf("%s is %v, want %q (%s)", sp.ScientificName, got, w, why)
+		}
+		if marine(sp) && len(got) == 0 {
+			t.Errorf("%s has Marine and no refinement", sp.ScientificName)
+		}
+		if !marine(sp) && len(got) > 0 {
+			t.Errorf("%s has no Marine but is refined %v", sp.ScientificName, got)
+		}
+		if strings.Contains(why, "under the 100") {
+			unmeasured++
+			if len(got) != 2 {
+				t.Errorf("%s is unmeasured but refined %v; an unmeasured bird is both", sp.ScientificName, got)
+			}
+		}
+	}
+	if unmeasured == 0 {
+		t.Error("no Marine bird is unmeasured; the minimum of 100 records on water is not applied")
+	}
+	if _, why := refs(findSpecies(t, ds, "Phoebastria nigripes")); !strings.Contains(why, "more than 10 km from shore") {
+		t.Errorf("the albatross's refinement does not give its evidence: %q", why)
+	}
+	// A refinement the review set stands alone.
+	sp := *findSpecies(t, ds, "Phaethon lepturus")
+	sp.Habitats = []dataset.Assignment{trait.Published("Marine"), trait.BirdView("Marine-offshore", "set by review")}
+	deriveSea(&sp, seaTable{"Phaethon lepturus": {Near: 3000, Coastal: 600, Offshore: 400}})
+	if got, _ := refs(&sp); strings.Join(got, ",") != "Marine-offshore" {
+		t.Errorf("with the review's Marine-offshore, the tropicbird is %v; the review's refinement stands alone", got)
+	}
+}
+
+func findSpecies(t *testing.T, ds *dataset.Dataset, sci string) *dataset.Species {
+	t.Helper()
+	for i := range ds.Species {
+		if ds.Species[i].ScientificName == sci {
+			return &ds.Species[i]
+		}
+	}
+	t.Fatalf("no %s", sci)
+	return nil
 }

@@ -380,8 +380,8 @@ Both come from **AVONET**, with its definitions quoted in the control. AVONET re
 primary habitat and one primary diet per species, so a bird that uses two is filed under one, and
 for a migrant the habitat is in practice where it breeds: Black-bellied Plover is Grassland.
 
-**The habitat filter arranges AVONET's eleven habitats in five groups**: Shore and sea (Coastal,
-Marine), Fresh water (Wetland, Riverine), Woods (Forest, Woodland), Open country (Grassland,
+**The habitat filter arranges AVONET's eleven habitats in five groups**: Shore and sea (Coastal, and
+Marine as Sea near shore and Open ocean), Fresh water (Wetland, Riverine), Woods (Forest, Woodland), Open country (Grassland,
 Shrubland, Desert, Rock), and Towns and farms (Human Modified). A group's name is a shortcut that
 chooses all its habitats; each can also be chosen alone, and a bird is shown when any of its
 habitats is chosen. A bird's page names its exact habitats. **BirdView reviews every bird's
@@ -390,6 +390,36 @@ habitats, species by species**, for where a North American birder sees it; the r
 BirdView adds values where that hides something, and **marks every addition**: `birdview` where
 BirdView decided it, `derived` where it follows from AVONET's own data by a stated rule. All are
 listed at [/added](/added).
+
+### Open ocean or near shore
+
+AVONET's **Marine** holds both the shearwater seen only from a boat and the eider in the surf, so
+BirdView refines it, bird by bird, from where its records lie. It counts each bird's **eBird
+records on water**: records GADM gives no region code, inside BirdView's sea boxes, in 0.1° cells
+whose center is not on Natural Earth's land, banded by the center's distance to shore (under 10 km,
+10 to 30 km, 30 km or more). Its records on land come from its region counts. Then:
+
+- **Open ocean** when at least **25%** of its records on water are more than 10 km from shore.
+  Petrels, shearwaters, storm-petrels, albatrosses, jaegers, most auklets, phalaropes, boobies, and
+  tropicbirds.
+- **Sea near shore** when fewer are, or when at least **80%** of all its records are on land or
+  within 10 km of shore: eiders, cormorants, Brown Pelican, Northern Gannet, Osprey, most terns,
+  and guillemots, and also the seabirds a birder watches from a headland or a colony, such as the
+  tropicbirds of Hawaii's cliffs, the murres and puffins, Laysan Albatross, and Black-vented
+  Shearwater off southern California.
+- **Both** for those last, and for a bird with fewer than **100** records on water, too few to tell.
+
+Each bird's page gives its numbers. The habitat review may set either by hand, with a reason. An
+address that names Open sea (`habitat=Marine`) now means both.
+
+**Known limits.** Records logged from the shore often fall just past GADM's coastline, so water
+within 10 km is mostly the coast itself; that is why this does not separate beach birds from sea
+ducks, which the review does. Pelagic-trip checklists plotted at the harbor raise a true seabird's
+share near shore, which is why the second threshold is as high as 80%. Caribbean and Mexican waters
+fall inside the sea boxes. No natural break separates 77% from 86%, so a few birds near 80% are
+for review: Sabine's Gull passes on its Alaskan tundra and inland reservoir records, and Masked
+Booby misses at 79.5%. The decision is
+[openOceanSplit](../river/requirements/decisions.md#openoceansplit).
 
 **The derived rule reads AVONET against itself.** Where AVONET's trophic *level* is `Omnivore` but
 its trophic *niche* names one food, the diet is mixed and the niche names the larger part. For a

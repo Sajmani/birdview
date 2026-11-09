@@ -1953,7 +1953,7 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 			out = append(out, row)
 		}
 	}
-	add("Habitat", sp.Habitats, trait.Habitats)
+	add("Habitat", sp.Habitats, trait.HabitatTerms)
 	add("Diet", sp.Niches, trait.Niches)
 
 	// One row for every region, sharing the one rule that put them all there.
@@ -2912,7 +2912,7 @@ func (s *server) added(w http.ResponseWriter, r *http.Request) {
 		for _, a := range sp.Habitats {
 			if a.Origin != dataset.Published {
 				rows = append(rows, row{"Habitat", sp.Name(dataset.LocaleNA),
-					trait.LabelOf(trait.Habitats, a.Value), string(a.Origin), a.Why})
+					trait.LabelOf(trait.HabitatTerms, a.Value), string(a.Origin), a.Why})
 			}
 		}
 		for _, a := range sp.Niches {

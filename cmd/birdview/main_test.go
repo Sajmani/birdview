@@ -188,6 +188,10 @@ func testDataset() *dataset.Dataset {
 		case "greblu": // heron: AVONET's wetland, plus the tidal flats it also works
 			sp[i].Habitats = append(sp[i].Habitats,
 				trait.BirdView("Coastal", "forages on tidal flats as readily as on fresh water"))
+		case "thimur": // murre: AVONET's Marine, refined from where its records lie (decisions.openOceanSplit)
+			sp[i].Habitats = append(sp[i].Habitats,
+				dataset.Assignment{Value: "Marine-inshore", Origin: dataset.Derived, Doc: "data#open-ocean-or-near-shore",
+					Why: "12% of its 2,000 eBird records on water are more than 10 km from shore (under 25%)"})
 		case "amecro": // crow: level says mixed, niche names one food
 			sp[i].Niches = append(sp[i].Niches,
 				trait.Derived("Invertivore", "AVONET's trophic level is Omnivore though its niche names seeds"))

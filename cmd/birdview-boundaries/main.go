@@ -31,7 +31,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"crypto/sha256"
-	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"flag"
@@ -46,6 +45,7 @@ import (
 
 	"birdview/internal/boundary"
 	"birdview/internal/region"
+	"birdview/internal/shapefile"
 )
 
 // The pinned source. See river/requirements/imported/naturalearthdata.com/naturalearth/PROVENANCE.md.
@@ -149,11 +149,11 @@ func build(zipBytes []byte, tolerance int32) (*boundary.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	shapes, err := readShapes(shp)
+	shapes, err := shapefile.Polygons(shp)
 	if err != nil {
 		return nil, err
 	}
-	records, err := readRecords(dbf)
+	records, err := shapefile.Records(dbf)
 	if err != nil {
 		return nil, err
 	}
@@ -351,76 +351,4 @@ func segDist(p, a, b [2]int32, squash float64) float64 {
 	}
 	t := math.Max(0, math.Min(1, ((px-ax)*dx+(py-ay)*dy)/(dx*dx+dy*dy)))
 	return math.Hypot(px-(ax+t*dx), py-(ay+t*dy))
-}
-
-// readShapes reads a polygon shapefile: for each record, its rings as
-// [lon, lat] points. A null shape has no rings.
-func readShapes(b []byte) ([][][][2]float64, error) {
-	if len(b) < 100 {
-		return nil, fmt.Errorf("shapefile too short")
-	}
-	if t := binary.LittleEndian.Uint32(b[32:]); t != 5 {
-		return nil, fmt.Errorf("shape type %d, want 5 (polygon)", t)
-	}
-	var out [][][][2]float64
-	for off := 100; off+8 <= len(b); {
-		n := int(binary.BigEndian.Uint32(b[off+4:])) * 2
-		c := b[off+8 : off+8+n]
-		off += 8 + n
-		if binary.LittleEndian.Uint32(c) == 0 {
-			out = append(out, nil)
-			continue
-		}
-		parts := int(binary.LittleEndian.Uint32(c[36:]))
-		points := int(binary.LittleEndian.Uint32(c[40:]))
-		starts := make([]int, parts+1)
-		for i := 0; i < parts; i++ {
-			starts[i] = int(binary.LittleEndian.Uint32(c[44+4*i:]))
-		}
-		starts[parts] = points
-		base := 44 + 4*parts
-		var rings [][][2]float64
-		for i := 0; i < parts; i++ {
-			var ring [][2]float64
-			for k := starts[i]; k < starts[i+1]; k++ {
-				x := math.Float64frombits(binary.LittleEndian.Uint64(c[base+16*k:]))
-				y := math.Float64frombits(binary.LittleEndian.Uint64(c[base+16*k+8:]))
-				ring = append(ring, [2]float64{x, y})
-			}
-			rings = append(rings, ring)
-		}
-		out = append(out, rings)
-	}
-	return out, nil
-}
-
-// readRecords reads a dBASE table into one map per record, values trimmed.
-func readRecords(b []byte) ([]map[string]string, error) {
-	if len(b) < 32 {
-		return nil, fmt.Errorf("dbf too short")
-	}
-	n := int(binary.LittleEndian.Uint32(b[4:]))
-	hlen := int(binary.LittleEndian.Uint16(b[8:]))
-	rlen := int(binary.LittleEndian.Uint16(b[10:]))
-	type field struct {
-		name string
-		len  int
-	}
-	var fields []field
-	for off := 32; off < hlen && b[off] != 0x0D; off += 32 {
-		name, _, _ := bytes.Cut(b[off:off+11], []byte{0}) // NUL-terminated, padding after
-		fields = append(fields, field{string(name), int(b[off+16])})
-	}
-	out := make([]map[string]string, 0, n)
-	for i := 0; i < n; i++ {
-		r := b[hlen+i*rlen : hlen+(i+1)*rlen]
-		rec := map[string]string{}
-		pos := 1
-		for _, f := range fields {
-			rec[f.name] = strings.Trim(string(r[pos:pos+f.len]), " \x00") // padded with either
-			pos += f.len
-		}
-		out = append(out, rec)
-	}
-	return out, nil
 }
