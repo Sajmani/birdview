@@ -1191,3 +1191,53 @@ cell would differ with no habitat classification at all. Open: cell size; the mi
 as for counties ([decisions.countyListingRule](requirements/decisions.md#countylistingrule)); keeping Here private, since the reader's location stays in
 the browser ([product.locationStaysInBrowser](requirements/local/product/filtering.md#locationstaysinbrowser)); and the data's size.
 
+
+## photoProportions
+
+**Check each species' drawn proportions against photographs, as a pipeline of its own**
+
+Status: parked
+Owner: Sameer
+Gate: a decision on photo sources and their terms, before anything is fetched
+
+[GitHub issue #7](https://github.com/google/birdview/issues/7): the Lesser Scaup's figure has the
+longer neck and larger head, and the Horned Grebe's the shorter neck and smaller head, the opposite
+of photographs of both in flight. The cause is family-wide models: `NeckRatios` gives Anatidae 0.70,
+set for swans and geese, and Podicipedidae 0.45, and head length follows the cube root of mass, so
+the heavier scaup gets the bigger head. Lowering the ratio for the diving ducks (*Aythya* and
+allies) and raising the grebes' is a quick fix of the two families the issue names
+([reviewNeckRatios](#reviewneckratios)).
+
+The ideal is per-species: measure neck, head, bill, and tail as shares of total length from photos
+of each bird in flight, and record them as a BirdView dataset with its method and sources, marked
+measured-from-photo. That is a pipeline: finding usable side-on flight photos, measuring them
+(by hand, or by a model with a reviewed sample), and recording the results with provenance. The
+owner's view (2026-11-08): measuring a photo, which copies nothing of it, seems acceptable, but
+fair use of the photos found has to be settled first. BirdView copies nothing from eBird or
+iNaturalist, least of all photographs ([product.ebirdLink](requirements/local/product/presentation.md#ebirdlink)), and automated access must respect
+each site's terms; openly licensed photos (Wikimedia Commons, or GBIF's media under CC0 and CC BY)
+are the likelier sources. Cost scales with species: about 1,082 now, about 11,000 worldwide.
+
+## habitatDataset
+
+**Research each species' usual habitats as a BirdView dataset of its own**
+
+Status: parked
+Owner: Sameer
+Gate: a decision on the classification and on which sources may be used; before worldwide species
+
+[GitHub issue #10](https://github.com/google/birdview/issues/10): AVONET's Coastal and Marine do not
+separate three groups a birder does: birds of the open ocean seen from boats (shearwaters, petrels),
+birds of the sea that are seen from shore (sea ducks, loons), and birds of beaches and flats
+(gulls, terns, shorebirds). AVONET codes every pelagic family Marine, splits gulls and terns 24
+Coastal to 21 Marine, and files sea ducks, loons, and grebes under Wetland, by breeding habitat.
+The 2026-11-07 review ([traitAudit](#traitaudit)) added habitats by hand, and the Shore and sea
+shortcut hides the inconsistency rather than fixing it.
+
+The fix is a pipeline that looks up each species' usual habitats, through the year and where North
+American birders see it, and records them as a BirdView dataset with sources and reasons, perhaps
+in BirdView's own classification (shore, nearshore water, offshore) defined over AVONET's terms.
+It is mostly text and data analysis, so cheaper than [photoProportions](#photoproportions), but
+still per-species work, and roughly ten times as much worldwide. BirdLife's habitats cannot be used
+(DataZone's terms forbid automated access), and text sources' licenses decide whether facts drawn
+from them may be recorded.
