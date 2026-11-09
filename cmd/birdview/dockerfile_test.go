@@ -221,4 +221,7 @@ func TestImageRecordsRevision(t *testing.T) {
 	if !regexp.MustCompile(`(?m)^!/REVISION$`).Match(upload) || !strings.Contains(string(upload), "#!include:.gitignore") {
 		t.Errorf(".gcloudignore must include .gitignore and re-include !/REVISION, or gcloud run deploy --source leaves it behind; it reads:\n%s", upload)
 	}
+	if regexp.MustCompile(`(?m)^/?\.gcloudignore$`).Match(upload) {
+		t.Error(".gcloudignore leaves itself out of the upload, so this test fails inside the image build")
+	}
 }

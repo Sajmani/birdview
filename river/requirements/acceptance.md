@@ -2466,12 +2466,14 @@ Watched failing: 2026-10-23, with the builder's `COPY --from=test` deleted, it r
 
 **Assertions:** the stage that builds the server copies `REVISION*` (so its absence does not fail the
 build) and links it with `-X main.revision=`; `.gitignore` ignores `/REVISION`; `.gcloudignore`
-includes `.gitignore` and re-includes `!/REVISION`. Not run by the test: that gcloud uploads the
+includes `.gitignore`, re-includes `!/REVISION`, and does not leave itself out (this test runs in
+the image build, where it must find the file). Not run by the test: that gcloud uploads the
 file, checked by hand on 2026-11-08 (`REVISION` listed, `.git` and `web/data/species.json` not),
 and that the deployed server names it, which the smoke check confirms after every deploy.
 
 **Run:** `go test ./cmd/birdview/ -run TestImageRecordsRevision`
 **Status: verified 2026-11-08, passing.**
+Watched failing: 2026-11-08, in the first deploy's image build, where `.gcloudignore` had left itself out of the upload (".gcloudignore must include .gitignore and re-include !/REVISION … it reads:" with nothing after it); the deploy stopped, as [tech.testedBeforeDeploy](local/tech/release.md#testedbeforedeploy) intends.
 Watched failing: 2026-11-08, before the Dockerfile and ignore files changed ("stage \"builder\" copies [go.mod go.sum cmd/birdview internal data web docs]; want REVISION*", and three more).
 
 ### smokeChecksDeployment

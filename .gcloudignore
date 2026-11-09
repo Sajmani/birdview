@@ -1,7 +1,6 @@
 # What `gcloud run deploy --source .` leaves out of the upload: what git ignores, but not the
 # REVISION file the deploy writes, which the image builds into the server
-# (tech.imageRecordsRevision).
-.gcloudignore
+# (tech.imageRecordsRevision). This file is uploaded too: the image build's tests read it.
 .git
 #!include:.gitignore
 !/REVISION
