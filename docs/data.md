@@ -86,7 +86,11 @@ cross-validation. See [the decision record](../river/requirements/decisions.md#f
 Each modeled wingspan states its own error. A passerine reads:
 
 > log-log regression of wingspan on wing chord, fitted on 360 empirical species in Passeriformes
-> from the Fox et al. 2026 dataset; cross-validated median error 4.7%
+> from the Fox et al. 2026 dataset; cross-validated (five-fold) median error 4.7%
+
+An order group of 5 to 9 empirical species, too few for five folds, is cross-validated by leaving
+out one species at a time: the woodpeckers read 2.7% from 8 species, and the loons and grebes 3.7%
+from 9. A small group's error is itself less certain than a large one's.
 
 AVONET's `Wing.Length` is the **wing chord**, one folded wing. Doubling it is wrong by a wide,
 species-dependent margin, and BirdView never does it.

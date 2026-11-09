@@ -13,7 +13,9 @@ Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.hone
   values are taken. Stored as the reported min/mid/max triple rather than a point value.
 - **Wingspan, modeled** — where no empirical value exists, a log-log regression of wingspan on
   wing chord, fitted **by the ingest** on those same empirical rows, per taxonomic order, with a
-  global fit for orders holding fewer than five empirical species. See
+  global fit for orders holding fewer than five empirical species. Each fit states its own
+  out-of-sample median error, by five-fold cross-validation, or by leave-one-out for a group of
+  fewer than ten species, too few for five folds. See
   [decisions.fittedWingspanModel](../../decisions.md#fittedwingspanmodel). Where the proportions
   review sets a wingspan factor for the genus or family, the modeled value is multiplied by it and
   the provenance says so; a measured wingspan is never adjusted

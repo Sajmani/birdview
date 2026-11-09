@@ -4,6 +4,23 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## wingspanErrorNaN
+
+**A modeled wingspan's stated error reads NaN% for small orders**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-11-09. Groups of 5 to 9 empirical species are cross-validated leave-one-out, so every
+fit states an error (Piciformes 2.7%, Gaviiformes_Podicipediformes 3.7%); 26 species were affected
+([acceptance.wingspanErrorStated](requirements/acceptance.md#wingspanerrorstated)).
+
+Found 2026-11-09 while testing the proportions review: Clark's Grebe's modeled wingspan reads "log-log
+regression of wingspan on wing chord, fitted on 9 empirical species in
+Gaviiformes_Podicipediformes … cross-validated median error NaN%". The fit itself gives a value; the
+cross-validated error is not computed for this pooled group, so the provenance states no error where
+[product.lengthAndWingspanSources](requirements/local/product/measurements.md#lengthandwingspansources) promises one. Find where the error is computed for
+pooled or small orders, and either compute it or say plainly that it could not be measured.
+
 ## plainMeasurementDefinitions
 
 **A reader asks what each measurement means, in everyday words, and to see a found bird at once**

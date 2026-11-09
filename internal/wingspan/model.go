@@ -47,6 +47,7 @@ type fit struct {
 	a, b      float64 // log(span_cm) = a + b*log(chord_mm)
 	n         int     // empirical species the fit was made from
 	medianErr float64 // cross-validated median absolute percentage error
+	cv        string  // how it was cross-validated: "five-fold" or "leave-one-out"
 }
 
 // minGroupSize is the smallest number of empirical species an order needs
@@ -70,8 +71,8 @@ func (m *Model) Predict(order string, chordMm float64) (float64, string) {
 	cm := math.Exp(f.a + f.b*math.Log(chordMm))
 	return cm * 10, fmt.Sprintf(
 		"log-log regression of wingspan on wing chord, fitted on %d empirical species in %s "+
-			"from the Fox et al. 2026 dataset; cross-validated median error %.1f%%",
-		f.n, scope, f.medianErr)
+			"from the Fox et al. 2026 dataset; cross-validated (%s) median error %.1f%%",
+		f.n, scope, f.cv, f.medianErr)
 }
 
 // buildModel fits one regression per order group plus a global fallback.
@@ -89,7 +90,7 @@ func buildModel(obs []observation) *Model {
 		}
 	}
 	a, b := ols(gx, gy)
-	m.global = fit{a, b, len(gx), crossValidate(obs)}
+	m.global = fit{a: a, b: b, n: len(gx), medianErr: crossValidate(obs), cv: cvMethod(len(obs))}
 
 	for g, rows := range byGroup {
 		if len(rows) < minGroupSize {
@@ -101,17 +102,33 @@ func buildModel(obs []observation) *Model {
 			ys = append(ys, math.Log(o.spanCm))
 		}
 		ga, gb := ols(xs, ys)
-		m.byGroup[g] = fit{ga, gb, len(rows), crossValidate(rows)}
+		m.byGroup[g] = fit{a: ga, b: gb, n: len(rows), medianErr: crossValidate(rows), cv: cvMethod(len(rows))}
 	}
 	return m
 }
 
-// crossValidate returns the median absolute percentage error under 5-fold
-// cross-validation, so the reported error is out-of-sample rather than the
-// fit's own residuals.
+// cvFolds is how many folds a group is cross-validated in: five, or one per species (leave-one-out)
+// for a group too small to give each of five folds two species. A group of 5 to 9 gets its own fit
+// (minGroupSize) and so needs an error too; five folds left those reading NaN.
+func cvFolds(n int) int {
+	if n < 10 {
+		return n
+	}
+	return 5
+}
+
+func cvMethod(n int) string {
+	if cvFolds(n) == 5 {
+		return "five-fold"
+	}
+	return "leave-one-out"
+}
+
+// crossValidate returns the median absolute percentage error under cross-validation (cvFolds), so
+// the reported error is out-of-sample rather than the fit's own residuals.
 func crossValidate(obs []observation) float64 {
-	const folds = 5
-	if len(obs) < folds*2 {
+	folds := cvFolds(len(obs))
+	if folds < 3 {
 		return math.NaN()
 	}
 	var errs []float64

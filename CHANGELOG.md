@@ -16,6 +16,8 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 ### Changed
 
 - A bird's neck, head, and body say whether their proportions are proposed or reviewed.
+- The 26 woodpeckers, loons, and grebes whose modeled wingspan stated its error as "NaN%" now state
+  a measured one.
 - **Diving ducks and grebes** are drawn closer to how they fly: scaup, goldeneyes, scoters, and
   eiders with shorter necks, grebes with longer necks and smaller heads. A Lesser Scaup's neck was
   longer than a Horned Grebe's.

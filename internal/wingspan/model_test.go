@@ -107,3 +107,35 @@ func contains(s, sub string) bool {
 	}
 	return false
 }
+
+// TestEveryFitStatesItsError asserts product.lengthAndWingspanSources: every fit states an
+// out-of-sample median error, by leave-one-out where a group is too small for five folds, so no
+// modeled wingspan reads "NaN%" (as Piciformes and the loons and grebes did).
+//
+// Verifies: product.lengthAndWingspanSources, product.metricProvenanceExplained. Criterion: acceptance.wingspanErrorStated.
+func TestEveryFitStatesItsError(t *testing.T) {
+	var small []observation
+	for i, chord := range []float64{90, 110, 130, 150, 170, 190, 210} {
+		small = append(small, observation{chordMm: chord, spanCm: 0.4*chord*(1+0.03*float64(i%3-1)) + 2})
+	}
+	if e := crossValidate(small); math.IsNaN(e) || e <= 0 {
+		t.Errorf("seven species give a cross-validated error of %v; want a finite out-of-sample error", e)
+	}
+	if _, err := os.Stat(foxFile); err != nil {
+		t.Skip("skipping: Fox wingspan workbook not present")
+	}
+	_, model, err := Open(foxFile)
+	if err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+	for g, f := range model.byGroup {
+		if math.IsNaN(f.medianErr) {
+			t.Errorf("the fit for %s (%d species) states no error", g, f.n)
+		}
+	}
+	for _, order := range []string{"Piciformes", "Gaviiformes", "Podicipediformes"} {
+		if _, desc := model.Predict(order, 150); contains(desc, "NaN") || !contains(desc, "leave-one-out") {
+			t.Errorf("%s's wingspan reads %q; want a leave-one-out error, not NaN", order, desc)
+		}
+	}
+}

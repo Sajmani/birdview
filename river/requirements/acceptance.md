@@ -2495,6 +2495,20 @@ of the same genus alone.
 Watched failing: 2026-11-09, for body and wingspan: before BodyLengthFor existed (the test did not build), and with the wingspan factor never applied ("Clark's Grebe's modeled wingspan is 829.8 (factor 0) … want 1.1 times the model's 829.8").
 Watched failing: 2026-11-09, before the parser existed (the tests did not build: "undefined: Review"), and with the ingest passing no table ("Lesser Scaup's neck model reads \"neck modeled as 0.70 x trunk (family-specific ratio for Anatidae)\"; want the Aythya row").
 
+### wingspanErrorStated
+
+**Every modeled wingspan states a measured out-of-sample error**
+
+**Verifies:** [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources), [product.metricProvenanceExplained](local/product/measurements.md#metricprovenanceexplained) · **Level:** code · **Method:** cross-validation on a synthetic small group, then every fit of the model built from the Fox workbook
+
+**Assertions:** seven species give a finite cross-validated error; every order group's fit states an
+error; and the woodpeckers' and the loons' and grebes' modeled wingspans name a leave-one-out error
+and never read "NaN".
+
+**Run:** `go test ./internal/wingspan/ -run TestEveryFitStatesItsError`
+**Status: verified 2026-11-09, passing.**
+Watched failing: 2026-11-09, before the fix: "the fit for Gaviiformes_Podicipediformes (9 species) states no error", and likewise for Otidiformes (7) and Piciformes (8); "Piciformes's wingspan reads … cross-validated median error NaN%".
+
 ### imageRecordsRevision
 
 **The image builds the deploy's REVISION into the server, and git never commits it**
