@@ -4885,3 +4885,37 @@ owner chose 80% over 85% for the shearwaters and Sooty Tern it adds. No natural 
 Masked Booby misses at 79.5%. Beach birds and sea ducks are not separated by this; that stays with
 the per-species review.
 
+---
+
+## birdPresets
+
+**Three kinds of bird, each a combination of settings: Shorebirds, Raptors, and Wading birds**
+
+Date: 2026-11-09
+Decided by: Sameer
+Status: accepted
+Affects: [product.birdPresets](local/product/presentation.md#birdpresets)
+
+### Decided
+
+A **Birds** setting, first on the count line, defaulting to All, offers:
+
+- **Shorebirds:** Recurvirostridae, Haematopodidae, Charadriidae, Jacanidae, and Scolopacidae, with
+  the habitats Coastal and Wetland (Shore and estuary, Marsh and lake). The habitats leave out
+  American Woodcock, Upland and Buff-breasted Sandpipers, and Mountain Plover, and keep the
+  shorebirds of inland reservoirs.
+- **Raptors:** Accipitridae, Pandionidae, Falconidae, and Cathartidae; owls are not included.
+- **Wading birds**, the North American name for the long-legged, long-billed birds of shallow
+  water: Ardeidae, Threskiornithidae, Ciconiidae, Phoenicopteridae, Aramidae, and Gruidae. By
+  family alone, since a diet filter would drop Cattle Egret; cranes included though they feed
+  mostly in fields.
+
+Seabirds, Waterfowl, and Gulls and terns were considered and left out: Open ocean alone selects the
+seabirds, and the other two are single families.
+
+### Why
+
+Filtering New York in August to the shorebirds of the shore took four families and a habitat, and
+the owner asked for one control that sets all the relevant settings for a kind of bird, placed
+first because a kind can span orders.
+

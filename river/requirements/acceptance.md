@@ -2576,6 +2576,26 @@ to the guide.
 **Status: verified 2026-11-09, passing.**
 Watched failing: 2026-11-09, before the server knew the refinements ("GET /?habitat=Marine&by=mass = 200 to \"\", want 301"; "Habitat offers … Marine-inshore Marine-offshore"; "headed … Habitat: Marine-inshore or Marine-offshore").
 
+### birdPresets
+
+**Birds fills in Family, Habitat, and Diet for a kind of bird, and keeps every other setting**
+
+**Verifies:** [product.birdPresets](local/product/presentation.md#birdpresets), [decisions.birdPresets](decisions.md#birdpresets) · **Level:** code · **Method:** the home page rendered on the fixture, and every choice's address on the built dataset
+
+**Assertions:** Birds is the first setting and reads all by default; Shorebirds from an address with
+a region, month, reporting frequency, order, family, and diet keeps the first four and sets exactly
+its families and habitats, no diet, and no name for the choice; at that address Birds names it, the
+heading says "Showing shorebirds" without the settings, choosing it again or All clears Family and
+Habitat and keeps the rest, and an added habitat reads custom; Wading birds draws the heron and not
+the stilt, Shorebirds the stilt and not the heron; every link from Birds changes Family, Habitat,
+and Diet only. On the built dataset every family a choice names is drawn, every habitat is in the
+vocabulary, and every choice draws birds (Shorebirds 64, Raptors 42, Wading birds 30 across every
+region and month).
+
+**Run:** `go test ./cmd/birdview/ -run 'TestBirdPresets|TestEveryPresetDrawsBirds|TestNextKeepsEveryParameter'`
+**Status: verified 2026-11-09, passing.**
+Watched failing: 2026-11-09, before the setting existed (the tests did not build: "undefined: birdPresets"), and with the Shorebirds check reading an address that still named New York ("Shorebirds must draw the stilt and not the heron", a fault in the test, corrected).
+
 ### imageRecordsRevision
 
 **The image builds the deploy's REVISION into the server, and git never commits it**

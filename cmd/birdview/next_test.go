@@ -126,8 +126,8 @@ func TestNextLandingIsThisMonthByFrequency(t *testing.T) {
 			t.Error("the count line still has a Show setting")
 		}
 	}
-	if c := nextAt(s, "/").Controls; len(c) == 0 || c[0].Label != "Order by" || !strings.HasPrefix(c[0].Value, "frequency") {
-		t.Errorf("the count line starts with %+v; want Order by frequency", c[0])
+	if c := nextAt(s, "/").Controls; len(c) < 2 || c[0].Label != "Birds" || c[1].Label != "Order by" || !strings.HasPrefix(c[1].Value, "frequency") {
+		t.Errorf("the count line starts with %v; want Birds, then Order by frequency", c[:2])
 	}
 }
 
@@ -623,7 +623,7 @@ func TestNextOrderReverses(t *testing.T) {
 	fixNextClock(t, time.October)
 	choices := func(target string) map[string]nextChoice {
 		out := map[string]nextChoice{}
-		for _, c := range nextAt(s, target).Controls[0].Groups[0].Choices {
+		for _, c := range controlNamed(t, nextAt(s, target), "Order by").Groups[0].Choices {
 			out[strings.Fields(c.Label)[0]] = c
 		}
 		return out
@@ -655,7 +655,7 @@ func TestNextOrderReverses(t *testing.T) {
 	if fwd.Tiles[0].S != rev.Tiles[len(rev.Tiles)-1].S {
 		t.Errorf("the most recorded duck, %s, is not at the end of the reversed order", fwd.Tiles[0].S.ID)
 	}
-	if v := nextAt(s, "/?rev=1").Controls[0].Value; v != "frequency \u2191" {
+	if v := controlNamed(t, nextAt(s, "/?rev=1"), "Order by").Value; v != "frequency \u2191" {
 		t.Errorf("reversed frequency reads %q", v)
 	}
 }
@@ -897,15 +897,15 @@ func TestNextHereAndNow(t *testing.T) {
 		t.Errorf("with May named, All is %+v; want it off, linking to no month", all)
 	}
 	for _, target := range []string{"/", "/?month=all"} {
-		if ch := nextAt(s, target).Controls[1].Groups[0].Choices; !ch[0].On || ch[1].On || ch[11].On {
+		if ch := controlNamed(t, nextAt(s, target), "Month").Groups[0].Choices; !ch[0].On || ch[1].On || ch[11].On {
 			t.Errorf("%s: All %t, Now %t, Oct %t; want only All chosen", target, ch[0].On, ch[1].On, ch[11].On)
 		}
 	}
 	// Now is a way to choose the current month, not a state: with October
 	// chosen, October is on and Now is not, and the summary is the month.
 	op := nextAt(s, "/?month=Oct")
-	if ch := op.Controls[1].Groups[0].Choices; ch[1].On || !ch[11].On || op.Controls[1].Value != "Oct" {
-		t.Errorf("with month=Oct: Now %t, Oct %t, summary %q; want only Oct, reading Oct", ch[1].On, ch[11].On, op.Controls[1].Value)
+	if ch := controlNamed(t, op, "Month").Groups[0].Choices; ch[1].On || !ch[11].On || controlNamed(t, op, "Month").Value != "Oct" {
+		t.Errorf("with month=Oct: Now %t, Oct %t, summary %q; want only Oct, reading Oct", ch[1].On, ch[11].On, controlNamed(t, op, "Month").Value)
 	}
 	if _, body := get(t, s, "/"); strings.Count(body, " data-now>") != 1 || strings.Contains(body, "(now)") {
 		t.Error(`/ does not mark exactly one link data-now for here.js, or still says "(now)"`)
@@ -1454,6 +1454,13 @@ func TestNextKeepsEveryParameter(t *testing.T) {
 			string(p.ClearPinsURL): clearPins,
 			string(p.CloseURL):     {"find"},
 		}
+		// Birds fills in Family, Habitat, and Diet together, and keeps everything else
+		// (product.birdPresets).
+		birdsLinks := controlNamed(t, p, "Birds")
+		special[string(birdsLinks.AllURL)] = []string{"family", "habitat", "niche"}
+		for _, ch := range birdsLinks.Groups[0].Choices {
+			special[string(ch.URL)] = []string{"family", "habitat", "niche"}
+		}
 		// The welcome line's examples are fixed starting points, not
 		// transitions; its birds around you now is checked here.
 		welcome := regexp.MustCompile(`(?s)<p class="welcome">.*?</p>`).FindString(body)
@@ -1509,10 +1516,7 @@ func TestNextKeepsEveryParameter(t *testing.T) {
 			}
 		}
 		// The templates the browser fills in.
-		here := p.Controls[2].HereURL
-		if p.Controls[2].Label != "Region" {
-			t.Fatalf("control 2 is %s, not Region", p.Controls[2].Label)
-		}
+		here := controlNamed(t, p, "Region").HereURL
 		hq, _ := url.ParseQuery(strings.TrimPrefix(strings.Replace(here, hereSlot, "CA", 1), "/?"))
 		if c := diff(hq); !slices.Equal(c, []string{"region"}) {
 			t.Errorf("Here changes %v, want only the region", c)
@@ -2144,7 +2148,7 @@ func TestAllAlwaysOffered(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	settings := []string{"Month", "Region", "County", "Reporting frequency", "Family", "Habitat", "Diet"}
+	settings := []string{"Birds", "Month", "Region", "County", "Reporting frequency", "Family", "Habitat", "Diet"}
 	all := "/?region=USA.5_1"
 	narrow := "/?region=USA.5.19_1&month=May&freq=1000&family=Corvidae&habitat=Forest&niche=Granivore"
 	allRe := regexp.MustCompile(`<a class="btn( on)?" href="[^"]*"[^>]*>All</a>`)
@@ -2152,7 +2156,7 @@ func TestAllAlwaysOffered(t *testing.T) {
 		url    string
 		marked map[string]bool
 	}{
-		{all, map[string]bool{"Month": true, "Region": false, "County": true, "Reporting frequency": true, "Family": true, "Habitat": true, "Diet": true}},
+		{all, map[string]bool{"Birds": true, "Month": true, "Region": false, "County": true, "Reporting frequency": true, "Family": true, "Habitat": true, "Diet": true}},
 		{narrow, map[string]bool{}},
 	} {
 		_, body := get(t, s, c.url)
@@ -2220,4 +2224,16 @@ func TestOpenOceanFilter(t *testing.T) {
 			t.Errorf("the murre's page lacks %q", want)
 		}
 	}
+}
+
+// controlNamed is the count line's setting with that label.
+func controlNamed(t *testing.T, p nextData, label string) nextControl {
+	t.Helper()
+	for _, c := range p.Controls {
+		if c.Label == label {
+			return c
+		}
+	}
+	t.Fatalf("the count line has no %s setting", label)
+	return nextControl{}
 }

@@ -16,6 +16,8 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 ### Changed
 
 - A bird's neck, head, and body say whether their proportions are proposed or reviewed.
+- **Birds**, a new first setting: **Shorebirds**, **Raptors**, or **Wading birds** fills in Family and
+  Habitat in one choice, keeping your region, months, and order.
 - **Nine more shorebirds** count as birds of the shore: Lesser Yellowlegs, Pectoral, Stilt, Spotted,
   and Baird's Sandpipers, Long-billed Dowitcher, Hudsonian Godwit, Wilson's Phalarope, and American
   Golden-Plover, which AVONET files under the marshes and grasslands they breed in.

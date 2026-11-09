@@ -904,7 +904,13 @@ func (s *server) nextTitle(opt options, pinnedOnly bool) string {
 		return "Showing pinned birds"
 	}
 	var b strings.Builder
-	b.WriteString("Showing birds")
+	preset := presetOf(opt)
+	if preset != nil {
+		// A kind of bird is named in place of the settings it fills in (product.birdPresets).
+		b.WriteString("Showing " + strings.ToLower(preset.Label))
+	} else {
+		b.WriteString("Showing birds")
+	}
 	if opt.HasRegions {
 		b.WriteString(" in " + nextList(s.regionNames(opt.Regions)))
 	}
@@ -919,7 +925,7 @@ func (s *server) nextTitle(opt options, pinnedOnly bool) string {
 	} else {
 		b.WriteString(" in every month")
 	}
-	if opt.HasSelection {
+	if opt.HasSelection && preset == nil {
 		var fs []string
 		for _, f := range s.fams {
 			if opt.Families[f.Name] {
@@ -937,10 +943,10 @@ func (s *server) nextTitle(opt options, pinnedOnly bool) string {
 		}
 		b.WriteString(" · " + label + ": " + nextList(ls))
 	}
-	if opt.HasHabitats {
+	if opt.HasHabitats && preset == nil {
 		b.WriteString(" · Habitat: " + nextList(habitatNames(opt.Habitats)))
 	}
-	if opt.HasNiches {
+	if opt.HasNiches && preset == nil {
 		terms("Diet", trait.Niches, opt.Niches)
 	}
 	if opt.Common > 0 {
@@ -1065,7 +1071,7 @@ func countyControl(q url.Values, opt options) (nextControl, bool) {
 // nextControls builds the count line: one control per setting.
 func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	var out []nextControl
-	out = append(out, nextOrderControl(q, opt))
+	out = append(out, birdsControl(q, opt), nextOrderControl(q, opt))
 
 	// Months. With none named, every month is chosen; month=all, which
 	// older addresses carry, is every month too.

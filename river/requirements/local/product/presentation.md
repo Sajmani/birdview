@@ -785,6 +785,35 @@ Rationale: a reader who sees a wrong wingspan or habitat knows which bird and wh
 which source or build it came from; filling those in makes a correction actionable without asking
 the reader to transcribe the page.
 
+## birdPresets
+
+**A Birds setting chooses a kind of bird by filling in Family, Habitat, and Diet**
+
+Subject: `presentation.bird_presets`
+Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.shareableViews](../../../goals/goals.md#shareableviews)
+
+The first setting on the count line is **Birds**, offering **All**, the default, and a few kinds of
+bird a birder names that no single setting selects ([decisions.birdPresets](../../decisions.md#birdpresets)):
+
+| Choice | Family | Habitat |
+| --- | --- | --- |
+| Shorebirds | stilts and avocets, oystercatchers, plovers, jacanas, sandpipers | Shore and estuary, Marsh and lake |
+| Raptors | hawks and eagles, Osprey, falcons, New World vultures | |
+| Wading birds | herons and egrets, ibises and spoonbills, storks, flamingos, Limpkin, cranes | |
+
+**A choice fills in the other settings; it is not a setting of its own.** Choosing one sets Family,
+Habitat, and Diet to its definition and leaves Region, Month, Reporting frequency, Order by, Show,
+and the pins as they were. The address carries the settings it filled in and no name for the
+choice, so a link keeps its meaning if a definition changes. Birds names the choice, and the heading
+says "Showing shorebirds" in place of the settings, whenever Family, Habitat, and Diet are exactly a
+choice's; changing any of them shows them again and Birds reads "custom". Choosing the named choice
+again, or All, clears Family, Habitat, and Diet.
+
+Rationale: a shorebird is a family and a habitat at once: the families alone bring in American
+Woodcock, and Shore and estuary alone brings in gulls and herons. Four family choices and two
+habitats to say "shorebirds" is the kind of work a birder should not have to do (Sameer,
+2026-11-09).
+
 ## inaturalistLink
 
 **The detail view and every tile link to the species on iNaturalist**
@@ -971,7 +1000,7 @@ home page in those. Its footer carries the full credits, which every other page 
   mass are text under the drawing.
 - **Order.** By how often recorded (the default, most often first), or by length, wingspan,
   mass, bill, or tail (smallest first). Choosing the chosen order again reverses it (`rev=1`).
-  Order by is the first setting on the count line.
+  Order by is the first setting on the count line after Birds ([birdPresets](#birdpresets)).
 - **Show.** Which birds are drawn is one setting with three answers, always in view under the
   heading, and one parameter, `show`: **First [100]** draws the first 100 of the order plus
   any pinned birds past them (`show=<n>`; 100 is the default, which the address leaves out), and

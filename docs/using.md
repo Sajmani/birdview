@@ -87,6 +87,11 @@ not colored, and the modeled head, neck, and body are gray.
 
 Every setting that can be all starts its choices with **All**, marked when it is chosen.
 
+- **Birds:** **All**, or a kind of bird no single setting picks: **Shorebirds** (the shorebird
+  families, on shores and in marshes, which leaves out American Woodcock), **Raptors** (hawks,
+  eagles, Osprey, falcons, and vultures), or **Wading birds** (herons, egrets, ibises, spoonbills,
+  storks, flamingos, Limpkin, and cranes). A choice fills in Family and Habitat for you and keeps
+  your region, months, and order; change either afterwards and Birds reads *custom*.
 - **Show:** **First** 100 (type another number), **All** the birds the settings match,
   or **Pinned** for only your pins. **Clear pins** unpins every bird; **Reset**, after the
   settings, returns every setting to its default and keeps the pins.
