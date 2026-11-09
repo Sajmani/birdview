@@ -23,14 +23,17 @@
   var form = document.getElementById("form");
   if (!form) return;
   var genus = form.elements.genus.value;
-  var neck = form.elements.neck, head = form.elements.head;
-  var start = { neck: neck.value, head: head.value };
+  // One slider for every modeled measurement; the wingspan's only where it is modeled.
+  var sliders = ["neck", "head", "body", "wing"].map(function (n) { return form.elements[n]; })
+    .filter(Boolean);
+  var start = sliders.map(function (el) { return el.value; });
   var pair = document.getElementById("pair");
   var overlay = document.getElementById("overlay");
 
   function show() {
-    document.getElementById("neckout").textContent = Number(neck.value).toFixed(2);
-    document.getElementById("headout").textContent = Number(head.value).toFixed(2);
+    sliders.forEach(function (el) {
+      form.querySelector('output[data-for="' + el.name + '"]').textContent = Number(el.value).toFixed(2);
+    });
   }
   // The overlay is the adjusted figure without its mass cube, which would only clutter the photo.
   function copyOverlay() {
@@ -47,13 +50,13 @@
     clearTimeout(timer);
     timer = setTimeout(function () {
       var n = ++asked;
-      fetch("/review/figure?genus=" + encodeURIComponent(genus) + "&neck=" + neck.value + "&head=" + head.value)
+      var q = sliders.map(function (el) { return "&" + el.name + "=" + el.value; }).join("");
+      fetch("/review/figure?genus=" + encodeURIComponent(genus) + q)
         .then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
         .then(function (html) { if (n === asked) { pair.innerHTML = html; copyOverlay(); } });
     }, 80);
   }
-  neck.addEventListener("input", redraw);
-  head.addEventListener("input", redraw);
+  sliders.forEach(function (el) { el.addEventListener("input", redraw); });
   Array.prototype.forEach.call(document.querySelectorAll("[data-nudge]"), function (b) {
     b.addEventListener("click", function () {
       var el = form.elements[b.dataset.nudge];
@@ -63,12 +66,14 @@
     });
   });
   document.getElementById("reset").addEventListener("click", function () {
-    neck.value = start.neck; head.value = start.head; redraw();
+    sliders.forEach(function (el, i) { el.value = start[i]; });
+    redraw();
   });
-  // Keys: [ and ] for the neck, - and = for the head.
+  // Keys: [ and ] for the neck, - and = for the head, ; and ' for the body.
   document.addEventListener("keydown", function (e) {
     if (e.target.tagName === "INPUT" && e.target.type === "text") return;
-    var keys = { "[": ["neck", -0.01], "]": ["neck", 0.01], "-": ["head", -0.01], "=": ["head", 0.01] };
+    var keys = { "[": ["neck", -0.01], "]": ["neck", 0.01], "-": ["head", -0.01], "=": ["head", 0.01],
+      ";": ["body", -0.01], "'": ["body", 0.01] };
     var k = keys[e.key];
     if (!k) return;
     var el = form.elements[k[0]];
@@ -152,7 +157,16 @@
   document.getElementById("ov").addEventListener("change", function (e) { overlay.hidden = !e.target.checked; });
   document.getElementById("op").addEventListener("input", function (e) { o.op = Number(e.target.value); place(); });
   document.getElementById("sz").addEventListener("input", function (e) { o.s = Number(e.target.value); place(); });
-  document.getElementById("rot").addEventListener("click", function () { o.r = (o.r + 90) % 360; place(); });
+  // Any angle: the slider, +90 in steps, or shift and the scroll wheel over the photograph.
+  var rotate = document.getElementById("rotate");
+  function turn(deg) {
+    o.r = ((Math.round(deg) + 540) % 360) - 180;
+    rotate.value = o.r;
+    document.getElementById("rotout").textContent = o.r + "°";
+    place();
+  }
+  rotate.addEventListener("input", function () { turn(Number(rotate.value)); });
+  document.getElementById("rot").addEventListener("click", function () { turn(o.r + 90); });
   document.getElementById("flip").addEventListener("click", function () { o.f = -o.f; place(); });
   var drag = null;
   overlay.addEventListener("pointerdown", function (e) {
@@ -168,6 +182,7 @@
   document.getElementById("stage").addEventListener("wheel", function (e) {
     if (overlay.hidden) return;
     e.preventDefault();
+    if (e.shiftKey) { turn(o.r + (e.deltaY < 0 ? 2 : -2)); return; }
     o.s = Math.min(4, Math.max(0.2, o.s * (e.deltaY < 0 ? 1.05 : 0.95)));
     document.getElementById("sz").value = o.s;
     place();

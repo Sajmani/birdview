@@ -91,7 +91,7 @@ func main() {
 	flag.BoolVar(&countiesEnabled, "counties", false, "serve the dataset's counties as regions; off until every supported region has them (decisions.countiesBehindFlag)")
 	canonical := flag.String("canonical", "", "the one host to answer at; other hosts are redirected to it over HTTPS. Unset serves every host")
 	// The proportions review tool, for one machine (tech.proportionsReviewTool).
-	reviewPath := flag.String("review", "", "serve the proportions review tool at /review over this table, e.g. data/neck-review.tsv; local only")
+	reviewPath := flag.String("review", "", "serve the proportions review tool at /review over this table, e.g. data/proportions-review.tsv; local only")
 	reviewer := flag.String("reviewer", "", "with -review, the name each reviewed row records")
 	flag.Parse()
 	if err := checkReviewFlags(*reviewPath, *reviewer, *canonical); err != nil {

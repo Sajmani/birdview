@@ -1250,3 +1250,19 @@ bird's water records more than 10 km from shore splits AVONET's Marine cleanly i
 birds (30% or more, about 75 species) and birds of the sea near shore (under 20%, 26), but cannot
 separate beach birds from sea ducks. Next: the owner's decision on whether to split Open sea by it,
 and if so, a committed tool and a requirement. Cost estimate for the full pipeline: on the issue.
+
+## wingspanErrorNaN
+
+**A modeled wingspan's stated error reads NaN% for small orders**
+
+Status: open
+Owner: Sameer
+Gate: before the next deploy that changes wingspans
+
+Found 2026-11-09 while testing the proportions review: Clark's Grebe's modeled wingspan reads "log-log
+regression of wingspan on wing chord, fitted on 9 empirical species in
+Gaviiformes_Podicipediformes … cross-validated median error NaN%". The fit itself gives a value; the
+cross-validated error is not computed for this pooled group, so the provenance states no error where
+[product.lengthAndWingspanSources](requirements/local/product/measurements.md#lengthandwingspansources) promises one. Find where the error is computed for
+pooled or small orders, and either compute it or say plainly that it could not be measured.
+

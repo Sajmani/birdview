@@ -202,12 +202,14 @@ flowchart LR
     AVONET habitat · *as reviewed; checked against AVONET*
     status · *pending, proposed, or reviewed*
     additions ★ *reviewed rows only: habitat and reason*`"]
-    NREV["`neck-review.tsv
+    NREV["`proportions-review.tsv
     *genus and family proportions; the review tool writes reviewed rows*
     ─────────────
     taxon · *genus, or family ending -idae*
     neck ratio ★ *empty keeps the family table*
     head factor ★ *empty is 1*
+    body factor ★ *empty is 1*
+    wingspan factor ★ *modeled wingspans only*
     status · *proposed or reviewed, with reviewer and date*`"]
     COUNTIES["`county-presence/USA.33_1.tsv
     *one table per state, as region-presence.tsv*
@@ -243,7 +245,8 @@ flowchart LR
     else via Renames; else NearMatches,
     from the sheet NearMatchSheets names"])
     S4(["Step 4: segments
-    head and body modeled from Mass;
+    head and body modeled from Mass,
+    × any reviewed factor;
     neck from body × genus or family ratio;
     total length = sum of segments"])
     S5(["Step 5: habitat and diet
@@ -252,7 +255,7 @@ flowchart LR
     S6(["Step 6: wingspan
     Fox's measured row if any;
     else a log-log fit on Wing.Length
-    within the order"])
+    within the order, × any reviewed factor"])
     S7(["Step 7: not drawn
     species out of scope keep
     their status and evidence,
@@ -354,7 +357,8 @@ flowchart LR
   AVO --> S6
   REGIONS --> S8
   HREV -->|"reviewed additions"| S5
-  NREV -->|"neck ratios and head factors"| S4
+  NREV -->|"neck ratios; head and body factors"| S4
+  NREV -->|"wingspan factors"| S6
   COUNTIES -->|"after the peak share"| S8
 
   JSON --> SERVER
@@ -377,8 +381,9 @@ the species. `status.Declared`, a short list in code, adds species the open reco
 for, each with its reason. See [where the data comes from](data.md#scope) and the
 [decision to count eBird first](../river/requirements/decisions.md#countebirdfirst).
 
-**Proportions are reviewed by genus.** The neck ratio and head factor of step 4 come from the family
-table in the code unless `data/neck-review.tsv` has a row for the bird's genus or family. Rows start
+**Proportions are reviewed by genus.** The neck ratio of step 4 comes from the family table in the
+code, and the head and body from mass, unless `data/proportions-review.tsv` has a row for the bird's
+genus or family; a row may also scale a modeled wingspan in step 6, never a measured one. Rows start
 as *proposed* and become *reviewed* through the local review tool (`birdview -review`), which draws
 each genus beside photographs from Wikimedia Commons; see [building](building.md#reviewing-proportions).
 

@@ -91,6 +91,10 @@ type Provenance struct {
 	// enough that a reader can check it. For the neck this must name both the
 	// per-family function and the ratio applied to this bird's family (product.neckModelPerFamily).
 	Model string `json:"model,omitempty"`
+
+	// Factor is the proportions review's factor applied to a modeled wingspan, 0 for none, so the
+	// review tool can recover the fitted value (decisions.allModeledProportionsReviewed).
+	Factor float64 `json:"factor,omitempty"`
 }
 
 // Metric is a value in millimeters (or grams, for mass) plus its provenance.

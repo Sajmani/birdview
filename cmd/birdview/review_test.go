@@ -25,18 +25,26 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"birdview/internal/dataset"
 )
 
 // reviewServer is the test server with review mode on, over a copy of a small table.
 func reviewServer(t *testing.T) (*server, string) {
 	t.Helper()
-	path := filepath.Join(t.TempDir(), "neck-review.tsv")
-	table := "# a test table\ntaxon\tneck ratio\thead factor\tstatus\treviewer\tdate\treason\n" +
-		"Ardea\t0.80\t\tproposed\t\t\tlong-necked heron\n"
+	path := filepath.Join(t.TempDir(), "proportions-review.tsv")
+	table := "# a test table\ntaxon\tneck ratio\thead factor\tbody factor\twingspan factor\tstatus\treviewer\tdate\treason\n" +
+		"Ardea\t0.80\t\t\t\tproposed\t\t\tlong-necked heron\n"
 	if err := os.WriteFile(path, []byte(table), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	s := newTestServer(t)
+	// The heron's wingspan stands for a modeled one, so its page offers the wingspan slider.
+	for i := range s.ds.Species {
+		if s.ds.Species[i].ID == "greblu" {
+			s.ds.Species[i].Wingspan.Prov = dataset.Provenance{Kind: dataset.Modeled, Model: "a fitted model"}
+		}
+	}
 	if err := s.enableReview(path, "Tester"); err != nil {
 		t.Fatal(err)
 	}
@@ -83,11 +91,11 @@ func TestReviewModeIsLocalAndOptIn(t *testing.T) {
 		}
 	}
 	for c, ok := range map[[3]string]bool{
-		{"", "", ""}:                                        true,
-		{"", "", "birdview.site"}:                           true,
-		{"data/neck-review.tsv", "Sameer", ""}:              true,
-		{"data/neck-review.tsv", "", ""}:                    false,
-		{"data/neck-review.tsv", "Sameer", "birdview.site"}: false,
+		{"", "", ""}:              true,
+		{"", "", "birdview.site"}: true,
+		{"data/proportions-review.tsv", "Sameer", ""}:              true,
+		{"data/proportions-review.tsv", "", ""}:                    false,
+		{"data/proportions-review.tsv", "Sameer", "birdview.site"}: false,
 	} {
 		if err := checkReviewFlags(c[0], c[1], c[2]); (err == nil) != ok {
 			t.Errorf("checkReviewFlags(%q, %q, %q) = %v; want accepted %v", c[0], c[1], c[2], err, ok)
@@ -96,9 +104,11 @@ func TestReviewModeIsLocalAndOptIn(t *testing.T) {
 }
 
 // TestReviewPageAndSave asserts the review tool's page and its writes: a genus's page draws its
-// representative bird as it is now and as adjusted, with sliders set to the current values, a
+// representative bird as it is now and as adjusted, with a slider for every modeled measurement (the
+// wingspan only where it is modeled) set to the current values, an overlay that turns to any angle, a
 // Commons search for its scientific name, and its eBird page; the figure endpoint redraws at the
-// values given; choosing adjusted, current, or the whole family writes a reviewed row with the
+// values given, the body slider changing its length; choosing adjusted, current, or the whole family
+// writes a reviewed row, a wingspan factor only for a modeled wingspan, with the
 // reviewer and today's date, and the next page reads it.
 //
 // Verifies: tech.proportionsReviewTool, product.neckModelPerFamily. Criterion: acceptance.proportionsReviewTool.
@@ -107,14 +117,32 @@ func TestReviewPageAndSave(t *testing.T) {
 	w := local(s, "GET", "/review?genus=Ardea", nil, "127.0.0.1")
 	body := w.Body.String()
 	for _, want := range []string{`data-sci="Ardea herodias"`, `name="neck"`, `value="0.80"`, `name="head"`,
-		`value="1.00"`, "Great Blue Heron", "ebird.org/species/", `id="current"`, `id="adjusted"`, "proposed"} {
+		`value="1.00"`, `name="body"`, `name="wing"`, `id="rotate"`, "Great Blue Heron", "ebird.org/species/",
+		`id="current"`, `id="adjusted"`, "proposed"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("the Ardea review page lacks %q", want)
 		}
 	}
+	if body := local(s, "GET", "/review?genus=Uria", nil, "127.0.0.1").Body.String(); strings.Contains(body, `name="wing"`) || !strings.Contains(body, `name="body"`) {
+		t.Error("the murre's page, whose wingspan is measured, must offer a body slider and no wingspan slider")
+	}
+	length := func(q string) float64 {
+		t.Helper()
+		w := local(s, "GET", "/review/figure?genus=Ardea&"+q, nil, "127.0.0.1")
+		_, adjusted, _ := strings.Cut(w.Body.String(), `id="adjusted"`)
+		m := regexp.MustCompile(`length (\d+) mm`).FindStringSubmatch(adjusted)
+		if m == nil {
+			t.Fatalf("the figure at %s gives no length:\n%s", q, w.Body.String())
+		}
+		v, _ := strconv.ParseFloat(m[1], 64)
+		return v
+	}
+	if short, long := length("neck=0.8&head=1&body=0.8&wing=1"), length("neck=0.8&head=1&body=1.2&wing=1"); long <= short {
+		t.Errorf("the figure is %.0f mm long at body 0.8 and %.0f mm at 1.2; the body slider does not redraw it", short, long)
+	}
 	neck := func(ratio string) float64 {
 		t.Helper()
-		w := local(s, "GET", "/review/figure?genus=Ardea&neck="+ratio+"&head=1", nil, "127.0.0.1")
+		w := local(s, "GET", "/review/figure?genus=Ardea&neck="+ratio+"&head=1&body=1&wing=1", nil, "127.0.0.1")
 		_, adjusted, _ := strings.Cut(w.Body.String(), `id="adjusted"`)
 		m := regexp.MustCompile(`neck (\d+(?:\.\d)?) mm`).FindStringSubmatch(adjusted)
 		if m == nil {
@@ -131,12 +159,12 @@ func TestReviewPageAndSave(t *testing.T) {
 		form url.Values
 		row  string
 	}{
-		{url.Values{"genus": {"Ardea"}, "choice": {"adjusted"}, "neck": {"0.90"}, "head": {"0.90"}, "reason": {"checked against photos"}},
-			"Ardea\t0.90\t0.90\treviewed\tTester\t" + today + "\tchecked against photos"},
-		{url.Values{"genus": {"Uria"}, "choice": {"current"}, "neck": {"0.30"}, "head": {"1.00"}},
-			"Uria\t0.10\t\treviewed\tTester\t" + today + "\t"},
-		{url.Values{"genus": {"Himantopus"}, "choice": {"adjusted"}, "family": {"on"}, "neck": {"0.50"}, "head": {"1.00"}},
-			"Recurvirostridae\t0.50\t\treviewed\tTester\t" + today + "\t"},
+		{url.Values{"genus": {"Ardea"}, "choice": {"adjusted"}, "neck": {"0.90"}, "head": {"0.90"}, "body": {"0.95"}, "wing": {"1.05"}, "reason": {"checked against photos"}},
+			"Ardea\t0.90\t0.90\t0.95\t1.05\treviewed\tTester\t" + today + "\tchecked against photos"},
+		{url.Values{"genus": {"Uria"}, "choice": {"current"}, "neck": {"0.30"}, "head": {"1.00"}, "body": {"1.00"}},
+			"Uria\t0.10\t\t\t\treviewed\tTester\t" + today + "\t"},
+		{url.Values{"genus": {"Himantopus"}, "choice": {"adjusted"}, "family": {"on"}, "neck": {"0.50"}, "head": {"1.00"}, "body": {"1.00"}, "wing": {"1.20"}},
+			"Recurvirostridae\t0.50\t\t\t\treviewed\tTester\t" + today + "\t"},
 	} {
 		w := local(s, "POST", "/review/save", c.form, "127.0.0.1")
 		if w.Code != http.StatusSeeOther || !strings.HasPrefix(w.Header().Get("Location"), "/review") {

@@ -1,0 +1,20 @@
+# Proportions review: neck ratio, and head, body, and wingspan factors, per genus or family
+# (decisions.proportionsReviewedPerTaxon, decisions.allModeledProportionsReviewed).
+# A taxon ending in -idae is a family; any other is a genus, which wins over its family. An empty
+# ratio or factor keeps what the models give. The wingspan factor applies only to a modeled wingspan.
+# status is proposed (drawn, and its page says it is not yet reviewed) or reviewed (reviewer and date
+# required). Reviewed rows are written by the review tool: go run ./cmd/birdview -review ...
+#
+taxon	neck ratio	head factor	body factor	wingspan factor	status	reviewer	date	reason
+Aechmophorus	0.80				proposed			grebes fly with the neck stretched out, Western and Clark's longest of all (issue #7)
+Aythya	0.35				proposed			diving ducks fly with a short thick neck; Anatidae's 0.70 is the geese's and swans' (issue #7)
+Bucephala	0.30				proposed			diving ducks fly with a short thick neck (issue #7)
+Clangula	0.35				proposed			diving ducks fly with a short thick neck (issue #7)
+Histrionicus	0.30				proposed			diving ducks fly with a short thick neck (issue #7)
+Melanitta	0.35				proposed			diving ducks fly with a short thick neck (issue #7)
+Oxyura	0.30				proposed			diving ducks fly with a short thick neck (issue #7)
+Podiceps	0.58				proposed			grebes fly with the neck stretched out (issue #7)
+Podicipedidae		0.65			proposed			heavy-bodied birds with small heads: mass alone gave a Horned Grebe a head 0.18 of its length (issue #7)
+Podilymbus	0.45				proposed			grebes fly with the neck stretched out (issue #7)
+Somateria	0.30				proposed			diving ducks fly with a short thick neck (issue #7)
+Tachybaptus	0.45				proposed			grebes fly with the neck stretched out (issue #7)

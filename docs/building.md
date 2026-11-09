@@ -82,7 +82,7 @@ restart after changing a Go file (for example, adding a field a template uses).
 | | `-wingspan` | `third_party/foxwingspan/wingspan_fox2026_AppendixS1.xlsx` |
 | | `-regions` | `data/region-presence.tsv` |
 | | `-habitat-review` | `data/habitat-review.tsv` |
-| | `-neck-review` | `data/neck-review.tsv` |
+| | `-proportions-review` | `data/proportions-review.tsv` |
 | | `-out` | `web/data/species.json` |
 | `birdview` | `-addr` | `localhost:8080` |
 | | `-data` | `web/data/species.json` |
@@ -309,18 +309,20 @@ Most of these are licensing rules, not style.
 
 ## Reviewing proportions
 
-Neck ratios and head factors are judged by eye, genus by genus, in a review mode of the server that
-only answers the machine it runs on:
+The modeled measurements (neck ratio, and head, body, and modeled wingspan factors) are judged by
+eye, genus by genus, in a review mode of the server that only answers the machine it runs on:
 
 ```
-go run ./cmd/birdview -review data/neck-review.tsv -reviewer <your name>
+go run ./cmd/birdview -review data/proportions-review.tsv -reviewer <your name>
 ```
 
 Open <http://localhost:8080/review>. Each genus shows its most reported bird drawn as it is now and
 as the sliders set it, the family's genera side by side, and photographs from Wikimedia Commons,
-each credited and shown from Commons, never stored. The adjusted figure can be laid over a
-photograph, dragged, sized with the scroll wheel, turned, and flipped. `[` and `]` change the neck
-ratio, `-` and `=` the head factor. **Current is better** or **Adjusted is better** writes the
+each credited and shown from Commons, never stored. There is a slider for each modeled measurement;
+the wingspan's appears only where the wingspan is modeled, and bill, tail, and wing chord, being
+measured, have none. The adjusted figure can be laid over a photograph, dragged, sized with the
+scroll wheel, turned to any angle with its slider or shift and the scroll wheel, and flipped. `[`
+and `]` change the neck ratio, `-` and `=` the head, `;` and `'` the body. **Current is better** or **Adjusted is better** writes the
 genus's row (or, with the box ticked, its family's) as reviewed, with your name and the date, and
 moves to the next genus. Run the ingest to draw what you saved, and commit the table. The server
 refuses `-review` together with `-canonical`, so a deployment cannot carry it.

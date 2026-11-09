@@ -223,6 +223,16 @@ func BodyLength(massG float64) (float64, string) {
 		trunkCoefficient, trunkExponent)
 }
 
+// BodyLengthFor is BodyLength times the review's body factor for the bird's genus or family, where
+// one is set (product.trunkFromMass, decisions.allModeledProportionsReviewed).
+func BodyLengthFor(massG float64, family, genus string, rv Review) (float64, string) {
+	v, model := BodyLength(massG)
+	if f, source := rv.BodyFactorFor(family, genus); f != 1 {
+		return v * f, fmt.Sprintf("%s x %.2f, %s", model, f, source)
+	}
+	return v, model
+}
+
 // trunkExponent is how fast the trunk grows with mass.
 //
 // It replaces an invented 0.31 that was too shallow, understating the large end

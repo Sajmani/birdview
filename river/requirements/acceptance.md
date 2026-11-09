@@ -2476,20 +2476,23 @@ Watched failing: 2026-11-08, with the hooks in place but no values: "Lesser Scau
 
 ### proportionsReviewTable
 
-**Neck ratios and head factors come from a reviewed table, which the build applies**
+**Neck ratios and head, body, and wingspan factors come from a reviewed table, which the build applies**
 
-**Verifies:** [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), [product.craniumFromMass](local/product/diagram.md#craniumfrommass), [decisions.proportionsReviewedPerTaxon](decisions.md#proportionsreviewedpertaxon) · **Level:** code · **Method:** the parser on fixtures and on `data/neck-review.tsv`, then the built dataset
+**Verifies:** [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), [product.craniumFromMass](local/product/diagram.md#craniumfrommass), [decisions.proportionsReviewedPerTaxon](decisions.md#proportionsreviewedpertaxon) · **Level:** code · **Method:** the parser on fixtures and on `data/proportions-review.tsv`, then the built dataset
 
 **Assertions:** a genus row wins over a family row and a family row over the code's family table;
 an empty value inherits; the provenance names the row and says "proposed, not yet reviewed" or
 "reviewed by" with the reviewer and date; an unknown status, a reviewed row without reviewer or date,
 a proposed row without a reason, a value out of range, a duplicate taxon, or a short row is refused;
 the table writes back exactly as read; every taxon in the committed table is a genus or family
-BirdView draws; and the built Lesser Scaup's neck names the *Aythya* row and the Horned Grebe's head
-the Podicipedidae factor.
+BirdView draws; the built Lesser Scaup's neck names the *Aythya* row and the Horned Grebe's head
+the Podicipedidae factor; a body factor scales the modeled trunk and is named; a wingspan factor
+scales Clark's Grebe's modeled wingspan, recording the factor, and leaves Western Grebe's measured one
+of the same genus alone.
 
-**Run:** `go test ./internal/morphology/ -run 'TestProportionReviewParsesAndApplies|TestDivingDucksAndGrebes' && go test ./cmd/birdview-ingest/ -run TestNeckReviewAppliesToDrawnTaxa`
+**Run:** `go test ./internal/morphology/ -run 'TestProportionReviewParsesAndApplies|TestDivingDucksAndGrebes' && go test ./cmd/birdview-ingest/ -run 'TestNeckReviewAppliesToDrawnTaxa|TestReviewFactorsReachTheBuild'`
 **Status: verified 2026-11-09, passing.**
+Watched failing: 2026-11-09, for body and wingspan: before BodyLengthFor existed (the test did not build), and with the wingspan factor never applied ("Clark's Grebe's modeled wingspan is 829.8 (factor 0) … want 1.1 times the model's 829.8").
 Watched failing: 2026-11-09, before the parser existed (the tests did not build: "undefined: Review"), and with the ingest passing no table ("Lesser Scaup's neck model reads \"neck modeled as 0.70 x trunk (family-specific ratio for Anatidae)\"; want the Aythya row").
 
 ### proportionsReviewTool
@@ -2502,14 +2505,17 @@ Watched failing: 2026-11-09, before the parser existed (the tests did not build:
 refused (403) for both the page and a save, and one from `127.0.0.1` or `[::1]` is answered; the
 server refuses `-review` with `-canonical` or without `-reviewer`. A genus's page names its
 representative bird, carries its scientific name for the Commons search, links its eBird page,
-draws the current and adjusted figures, and sets the sliders to the current values; the figure
-endpoint draws a longer neck for a larger ratio; choosing adjusted, current, or the whole family
-writes a reviewed row with the reviewer and today's date, keeps the table's header, goes on to the
+draws the current and adjusted figures, sets a slider for every modeled measurement to its current
+value (the wingspan's only where the wingspan is modeled), and offers an overlay angle slider; the
+figure endpoint draws a longer neck for a larger ratio and a longer bird for a larger body factor;
+choosing adjusted, current, or the whole family writes a reviewed row with the reviewer and today's
+date, a wingspan factor only for a modeled wingspan, keeps the table's header, goes on to the
 next genus, and the next page reads the row. Not checked by the tests: the Commons search and the
 overlay, which run in the browser and were checked by hand.
 
 **Run:** `go test ./cmd/birdview/ -run 'TestReviewModeIsLocalAndOptIn|TestReviewPageAndSave'`
 **Status: verified 2026-11-09, passing.**
+Watched failing: 2026-11-09, for every modeled measurement: before the body and wingspan sliders and the angle slider existed ("the Ardea review page lacks name=body", "the body slider does not redraw it", and the saved row missing its factors).
 Watched failing: 2026-11-09, with the local-only check removed ("/review from 192.0.2.1 answered 200; want 403") and with saves written as proposed (the reviewed row missing from the table).
 
 ### imageRecordsRevision

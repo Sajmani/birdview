@@ -132,7 +132,7 @@ Head length scales isometrically with body mass, **times a per-family factor for
 head is visibly smaller than its mass implies**: the grebes, heavy-bodied birds with small heads
 ([decisions.duckAndGrebeProportions](../../decisions.md#duckandgrebeproportions)). Like every modeled
 value it names its function and any factor applied (provenancePerMetric) and claims no measurement.
-The factors live in `data/neck-review.tsv` beside the neck ratios.
+The factors live in `data/proportions-review.tsv` beside the neck ratios.
 
 Rationale: an earlier model derived the cranium from bill depth with a 12 mm floor, and the floor
 bound for **442 of 841 species**, giving half the dataset one identical head. Mass is the only
@@ -158,8 +158,11 @@ Subject: `diagram.trunk_model`
 Value: `14.0329 x mass^0.37`
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
-Trunk length scales with body mass by a power law. Like every modeled value it names its function
-(provenancePerMetric) and claims no measurement.
+Trunk length scales with body mass by a power law, **times a per-genus or per-family factor where
+the proportions review sets one** (`data/proportions-review.tsv`,
+[decisions.allModeledProportionsReviewed](../../decisions.md#allmodeledproportionsreviewed)). Like
+every modeled value it names its function and any factor (provenancePerMetric) and claims no
+measurement.
 
 The **exponent is calibrated against measured skeletons** rather than chosen. It must lie inside
 the 95% confidence interval that published skeletal data give for a *multi-element* linear
@@ -198,7 +201,7 @@ the ratio applied to that bird's family or genus** — for example, "per-family 
 0.35".
 
 The family table is recorded in the code with this requirement cited beside it. **Genus and family
-overrides live in `data/neck-review.tsv`**, one row per taxon with its neck ratio, head factor, a
+overrides live in `data/proportions-review.tsv`**, one row per taxon with its neck ratio, head factor, a
 reason, and whether the owner has reviewed it; the provenance names the row and says which
 ([decisions.proportionsReviewedPerTaxon](../../decisions.md#proportionsreviewedpertaxon)). A
 proposed row is drawn, since every figure needs a neck, and says it is not yet reviewed.

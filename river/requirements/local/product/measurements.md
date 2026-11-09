@@ -14,7 +14,10 @@ Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.hone
 - **Wingspan, modeled** — where no empirical value exists, a log-log regression of wingspan on
   wing chord, fitted **by the ingest** on those same empirical rows, per taxonomic order, with a
   global fit for orders holding fewer than five empirical species. See
-  [decisions.fittedWingspanModel](../../decisions.md#fittedwingspanmodel).
+  [decisions.fittedWingspanModel](../../decisions.md#fittedwingspanmodel). Where the proportions
+  review sets a wingspan factor for the genus or family, the modeled value is multiplied by it and
+  the provenance says so; a measured wingspan is never adjusted
+  ([decisions.allModeledProportionsReviewed](../../decisions.md#allmodeledproportionsreviewed)).
 - **Length** — **modeled for every species.** No usable source of measured avian total length
   was found: Ricklefs 2017 was the only candidate and its terms prohibit the use
   ([decisions.ricklefsProhibited](../../decisions.md#ricklefsprohibited)).

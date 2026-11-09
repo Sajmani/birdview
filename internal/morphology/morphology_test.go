@@ -333,7 +333,7 @@ func realFamilies(t *testing.T) map[string]string {
 }
 
 // TestDivingDucksAndGrebes asserts decisions.duckAndGrebeProportions, from GitHub issue #7, with the
-// values now in data/neck-review.tsv (decisions.proportionsReviewedPerTaxon): drawn from their own
+// values now in data/proportions-review.tsv (decisions.proportionsReviewedPerTaxon): drawn from their own
 // masses, bills, and tails, a Lesser Scaup has the shorter neck and the larger head
 // of the pair beside a Horned Grebe, as photographs of both in flight show; Western Grebe's neck is
 // the longer of the grebes'; and geese keep the family's long neck.

@@ -26,6 +26,7 @@ import (
 
 	"birdview/internal/avonet"
 	"birdview/internal/dataset"
+	"birdview/internal/morphology"
 	"birdview/internal/region"
 	"birdview/internal/status"
 	"birdview/internal/taxonomy"
@@ -33,15 +34,15 @@ import (
 )
 
 const (
-	statusFile        = "../../data/status.tsv"
-	avoFile           = "../../third_party/avonet/AVONET Supplementary dataset 1.xlsx"
-	foxFile           = "../../third_party/foxwingspan/wingspan_fox2026_AppendixS1.xlsx"
-	avlFile           = "../../third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx"
-	regFile           = "../../data/region-presence.tsv"
-	countyDir         = "../../data/county-presence"
-	habitatReviewFile = "../../data/habitat-review.tsv"
-	neckReviewFile    = "../../data/neck-review.tsv"
-	bblFile           = "../../third_party/bbl/speclist.html"
+	statusFile            = "../../data/status.tsv"
+	avoFile               = "../../third_party/avonet/AVONET Supplementary dataset 1.xlsx"
+	foxFile               = "../../third_party/foxwingspan/wingspan_fox2026_AppendixS1.xlsx"
+	avlFile               = "../../third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx"
+	regFile               = "../../data/region-presence.tsv"
+	countyDir             = "../../data/county-presence"
+	habitatReviewFile     = "../../data/habitat-review.tsv"
+	proportionsReviewFile = "../../data/proportions-review.tsv"
+	bblFile               = "../../third_party/bbl/speclist.html"
 )
 
 // built caches the compiled dataset across tests: the AVONET workbook is 21 MB
@@ -60,8 +61,8 @@ func load(t *testing.T) *dataset.Dataset {
 	if err := loadHabitatReview(habitatReviewFile); err != nil {
 		t.Fatalf("loadHabitatReview: %v", err)
 	}
-	if err := loadNeckReview(neckReviewFile); err != nil {
-		t.Fatalf("loadNeckReview: %v", err)
+	if err := loadProportionsReview(proportionsReviewFile); err != nil {
+		t.Fatalf("loadProportionsReview: %v", err)
 	}
 	ds, _, err := build(statusFile, avoFile, foxFile, avlFile)
 	if err != nil {
@@ -1010,7 +1011,7 @@ func TestEveryDrawnBirdHasAHabitatReview(t *testing.T) {
 }
 
 // TestNeckReviewAppliesToDrawnTaxa asserts decisions.proportionsReviewedPerTaxon in the build: every
-// taxon in data/neck-review.tsv is a genus or family BirdView draws, and its rows reach the
+// taxon in data/proportions-review.tsv is a genus or family BirdView draws, and its rows reach the
 // species, the scaup's neck naming its genus row and the grebe's head its family factor.
 //
 // Verifies: product.neckModelPerFamily, product.craniumFromMass. Criterion: acceptance.proportionsReviewTable.
@@ -1029,9 +1030,9 @@ func TestNeckReviewAppliesToDrawnTaxa(t *testing.T) {
 			grebe = sp
 		}
 	}
-	for taxon := range neckReview {
+	for taxon := range proportionsReview {
 		if !drawn[taxon] {
-			t.Errorf("data/neck-review.tsv names %s, which is no genus or family BirdView draws", taxon)
+			t.Errorf("data/proportions-review.tsv names %s, which is no genus or family BirdView draws", taxon)
 		}
 	}
 	if scaup == nil || grebe == nil {
@@ -1043,4 +1044,53 @@ func TestNeckReviewAppliesToDrawnTaxa(t *testing.T) {
 	if m := grebe.Segments.Head.Prov.Model; !strings.Contains(m, "Podicipedidae") {
 		t.Errorf("Horned Grebe's head model reads %q; want the Podicipedidae factor", m)
 	}
+}
+
+// TestReviewFactorsReachTheBuild asserts decisions.allModeledProportionsReviewed in the build: a body
+// factor scales the modeled trunk and says so; a wingspan factor scales a modeled wingspan, saying so
+// and recording the factor, and leaves a measured wingspan of the same genus alone.
+//
+// Verifies: product.trunkFromMass, product.lengthAndWingspanSources. Criterion: acceptance.proportionsReviewTable.
+func TestReviewFactorsReachTheBuild(t *testing.T) {
+	base := load(t)
+	saved := proportionsReview
+	defer func() { proportionsReview = saved }()
+	proportionsReview = morphology.Review{
+		"Aix":          {Taxon: "Aix", Body: 0.9, Status: "reviewed", Reviewer: "Tester", Date: "2026-11-09"},
+		"Aechmophorus": {Taxon: "Aechmophorus", Neck: 0.8, Wing: 1.1, Status: "reviewed", Reviewer: "Tester", Date: "2026-11-09"},
+	}
+	ds, _, err := build(statusFile, avoFile, foxFile, avlFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	find := func(d *dataset.Dataset, sci string) *dataset.Species {
+		for i := range d.Species {
+			if d.Species[i].ScientificName == sci {
+				return &d.Species[i]
+			}
+		}
+		t.Fatalf("no %s", sci)
+		return nil
+	}
+	plain, _ := morphology.BodyLength(find(ds, "Aix sponsa").Mass.Value)
+	if wd := find(ds, "Aix sponsa"); math.Abs(wd.Segments.Body.Value-morphology.Round1(plain*0.9)) > 0.2 ||
+		!strings.Contains(wd.Segments.Body.Prov.Model, "0.90") {
+		t.Errorf("Wood Duck's body is %.1f, %q; want %.1f, naming the factor", wd.Segments.Body.Value, wd.Segments.Body.Prov.Model, plain*0.9)
+	}
+	clark, was := find(ds, "Aechmophorus clarkii"), find(base, "Aechmophorus clarkii")
+	if math.Abs(clark.Wingspan.Value-morphology.Round1(was.Wingspan.Value/factorOf(was.Wingspan.Prov)*1.1)) > 0.2 ||
+		clark.Wingspan.Prov.Factor != 1.1 || !strings.Contains(clark.Wingspan.Prov.Model, "1.10") {
+		t.Errorf("Clark's Grebe's modeled wingspan is %.1f (factor %g), %q; want 1.1 times the model's %.1f",
+			clark.Wingspan.Value, clark.Wingspan.Prov.Factor, clark.Wingspan.Prov.Model, was.Wingspan.Value)
+	}
+	if west, was := find(ds, "Aechmophorus occidentalis"), find(base, "Aechmophorus occidentalis"); west.Wingspan.Value != was.Wingspan.Value || west.Wingspan.Prov.Factor != 0 {
+		t.Errorf("Western Grebe's measured wingspan became %.1f from %.1f; a measured wingspan is never adjusted", west.Wingspan.Value, was.Wingspan.Value)
+	}
+}
+
+func factorOf(p dataset.Provenance) float64 {
+	if p.Factor == 0 {
+		return 1
+	}
+	return p.Factor
 }

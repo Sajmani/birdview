@@ -34,7 +34,8 @@
   .review .pair figure { margin: 0; text-align: center; }
   .review .pair figcaption { font-size: 13px; color: var(--dim); }
   .review .pair figcaption b { color: var(--ink); }
-  .review .controls label { display: grid; grid-template-columns: 110px 1fr 56px; gap: 8px; align-items: center; margin: 6px 0; }
+  .review .controls label { display: grid; grid-template-columns: 120px 30px 1fr 30px 48px; gap: 6px; align-items: center; margin: 6px 0; }
+  .review .controls label button { padding: 0 6px; }
   .review .controls input[type=range] { width: 100%; }
   .review .row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; align-items: center; }
   .review button { font: inherit; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
@@ -62,10 +63,10 @@
 
 {{if not .G.Genus}}
 <table class="queue">
-  <thead><tr><th>Family</th><th>Genus</th><th>Drawn as</th><th>Neck ratio</th><th>Head factor</th><th>Status</th></tr></thead>
+  <thead><tr><th>Family</th><th>Genus</th><th>Drawn as</th><th>Neck ratio</th><th>Head</th><th>Body</th><th>Wingspan</th><th>Status</th></tr></thead>
   <tbody>
   {{range .Queue}}<tr><td>{{.Family}}</td><td><a href="/review?genus={{.Genus}}"><i>{{.Genus}}</i></a></td><td>{{.Name}}</td>
-    <td>{{printf "%.2f" .Neck}}</td><td>{{printf "%.2f" .Head}}</td><td>{{.Status}}</td></tr>
+    <td>{{printf "%.2f" .Neck}}</td><td>&times;{{printf "%.2f" .Head}}</td><td>&times;{{printf "%.2f" .Body}}</td><td>&times;{{printf "%.2f" .Wing}}</td><td>{{.Status}}</td></tr>
   {{end}}
   </tbody>
 </table>
@@ -81,15 +82,22 @@
   <div id="pair" class="pair">{{template "reviewpair" .}}</div>
   <form class="controls" method="post" action="/review/save" id="form">
     <input type="hidden" name="genus" value="{{.G.Genus}}">
-    <label>Neck ratio <input type="range" name="neck" min="0.05" max="1.60" step="0.01" value="{{printf "%.2f" .Current.Neck}}"><output id="neckout">{{printf "%.2f" .Current.Neck}}</output></label>
-    <label>Head factor <input type="range" name="head" min="0.40" max="1.60" step="0.01" value="{{printf "%.2f" .Current.Head}}"><output id="headout">{{printf "%.2f" .Current.Head}}</output></label>
-    <div class="row">
-      <button type="button" data-nudge="neck" data-by="-0.05">Neck too long</button>
-      <button type="button" data-nudge="neck" data-by="0.05">Neck too short</button>
-      <button type="button" data-nudge="head" data-by="-0.05">Head too big</button>
-      <button type="button" data-nudge="head" data-by="0.05">Head too small</button>
-      <button type="button" id="reset">Reset</button>
-    </div>
+    {{/* One slider for every modeled measurement (decisions.allModeledProportionsReviewed); bill,
+         tail, and wing chord are measured. The wingspan only where it is modeled. */}}
+    <label>Neck ratio <button type="button" data-nudge="neck" data-by="-0.02" title="shorter">&minus;</button>
+      <input type="range" name="neck" min="0.05" max="1.60" step="0.01" value="{{printf "%.2f" .Current.Neck}}">
+      <button type="button" data-nudge="neck" data-by="0.02" title="longer">+</button><output data-for="neck">{{printf "%.2f" .Current.Neck}}</output></label>
+    <label>Head &times; <button type="button" data-nudge="head" data-by="-0.02" title="smaller">&minus;</button>
+      <input type="range" name="head" min="0.40" max="1.60" step="0.01" value="{{printf "%.2f" .Current.Head}}">
+      <button type="button" data-nudge="head" data-by="0.02" title="larger">+</button><output data-for="head">{{printf "%.2f" .Current.Head}}</output></label>
+    <label>Body &times; <button type="button" data-nudge="body" data-by="-0.02" title="shorter">&minus;</button>
+      <input type="range" name="body" min="0.50" max="1.60" step="0.01" value="{{printf "%.2f" .Current.Body}}">
+      <button type="button" data-nudge="body" data-by="0.02" title="longer">+</button><output data-for="body">{{printf "%.2f" .Current.Body}}</output></label>
+    {{if .WingModeled}}<label>Wingspan &times; <button type="button" data-nudge="wing" data-by="-0.02" title="narrower">&minus;</button>
+      <input type="range" name="wing" min="0.50" max="1.60" step="0.01" value="{{printf "%.2f" .Current.Wing}}">
+      <button type="button" data-nudge="wing" data-by="0.02" title="wider">+</button><output data-for="wing">{{printf "%.2f" .Current.Wing}}</output></label>
+    {{else}}<p class="credit">Wingspan, bill, tail, and wing chord are measured, so they have no slider.</p>{{end}}
+    <div class="row"><button type="button" id="reset">Reset</button></div>
     <label style="grid-template-columns: 110px 1fr">Reason <input type="text" name="reason" placeholder="optional: what you compared against"></label>
     <div class="row">
       <label style="display:inline-flex; gap:6px; margin:0"><input type="checkbox" name="family"> apply to all of {{.G.Family}}</label>
@@ -116,7 +124,8 @@
     <label style="display:inline-flex; gap:6px; margin:0"><input type="checkbox" id="ov" checked> overlay the adjusted figure</label>
     <label style="display:inline-flex; gap:6px; margin:0">opacity <input type="range" id="op" min="0.1" max="1" step="0.05" value="0.7"></label>
     <label style="display:inline-flex; gap:6px; margin:0">size <input type="range" id="sz" min="0.2" max="4" step="0.02" value="1"></label>
-    <button type="button" id="rot">rotate 90&deg;</button>
+    <label style="display:inline-flex; gap:6px; margin:0">angle <input type="range" id="rotate" min="-180" max="180" step="1" value="90"><output id="rotout">90&deg;</output></label>
+    <button type="button" id="rot">+90&deg;</button>
     <button type="button" id="flip">flip</button>
   </div>
   <div class="stage" id="stage"><img class="photo" id="photo" alt=""><div class="overlay" id="overlay" hidden></div></div>
@@ -132,10 +141,11 @@
 
 {{/* The current and adjusted figures, at one scale; redrawn as the sliders move. */}}
 {{define "reviewpair"}}
-<figure id="current">{{template "diagram" .Current.Tile}}
-  <figcaption><b>Current</b> neck {{printf "%.2f" .Current.Neck}}, head &times;{{printf "%.2f" .Current.Head}}<br>
-  neck {{printf "%.1f" .Current.NeckMm}} mm ({{printf "%.0f" (pct .Current.NeckShare)}}%), head {{printf "%.1f" .Current.HeadMm}} mm ({{printf "%.0f" (pct .Current.HeadShare)}}%), length {{printf "%.0f" .Current.TotalMm}} mm</figcaption></figure>
-<figure id="adjusted">{{template "diagram" .Adjusted.Tile}}
-  <figcaption><b>Adjusted</b> neck {{printf "%.2f" .Adjusted.Neck}}, head &times;{{printf "%.2f" .Adjusted.Head}}<br>
-  neck {{printf "%.1f" .Adjusted.NeckMm}} mm ({{printf "%.0f" (pct .Adjusted.NeckShare)}}%), head {{printf "%.1f" .Adjusted.HeadMm}} mm ({{printf "%.0f" (pct .Adjusted.HeadShare)}}%), length {{printf "%.0f" .Adjusted.TotalMm}} mm</figcaption></figure>
+<figure id="current">{{template "diagram" .Current.Tile}}<figcaption><b>Current</b> {{template "reviewnums" .Current}}</figcaption></figure>
+<figure id="adjusted">{{template "diagram" .Adjusted.Tile}}<figcaption><b>Adjusted</b> {{template "reviewnums" .Adjusted}}</figcaption></figure>
+{{end}}
+
+{{define "reviewnums"}}neck {{printf "%.2f" .Neck}}, head &times;{{printf "%.2f" .Head}}, body &times;{{printf "%.2f" .Body}}, wingspan &times;{{printf "%.2f" .Wing}}<br>
+  head {{printf "%.1f" .HeadMm}} mm ({{printf "%.0f" (pct .HeadShare)}}%), neck {{printf "%.1f" .NeckMm}} mm ({{printf "%.0f" (pct .NeckShare)}}%),
+  body {{printf "%.1f" .BodyMm}} mm ({{printf "%.0f" (pct .BodyShare)}}%), length {{printf "%.0f" .TotalMm}} mm, wingspan {{printf "%.0f" .WingMm}} mm
 {{end}}

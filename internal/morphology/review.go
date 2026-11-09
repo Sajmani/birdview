@@ -24,12 +24,14 @@ import (
 	"strings"
 )
 
-// Proportion is one row of data/neck-review.tsv: a genus's or family's neck ratio and head factor,
-// either of which may be empty to keep what the family table gives, and whether the owner has
-// reviewed it (decisions.proportionsReviewedPerTaxon).
+// Proportion is one row of data/proportions-review.tsv: a genus's or family's neck ratio and its head,
+// body, and wingspan factors, any of which may be empty to keep what the models give, and whether
+// the owner has reviewed it (decisions.proportionsReviewedPerTaxon,
+// decisions.allModeledProportionsReviewed).
 type Proportion struct {
 	Taxon      string
 	Neck, Head float64 // 0 keeps the family table's ratio, or a factor of 1
+	Body, Wing float64 // 0 is a factor of 1; Wing applies only to a modeled wingspan
 	Status     string  // "proposed" or "reviewed"
 	Reviewer   string
 	Date       string
@@ -43,7 +45,7 @@ type Review map[string]Proportion
 func IsFamily(taxon string) bool { return strings.HasSuffix(taxon, "idae") }
 
 // reviewColumns is the table's header row.
-const reviewColumns = "taxon\tneck ratio\thead factor\tstatus\treviewer\tdate\treason"
+const reviewColumns = "taxon\tneck ratio\thead factor\tbody factor\twingspan factor\tstatus\treviewer\tdate\treason"
 
 var isoDate = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 
@@ -67,16 +69,22 @@ func ParseReview(r io.Reader) (Review, error) {
 			continue
 		}
 		f := strings.Split(text, "\t")
-		if len(f) != 7 {
-			return nil, fmt.Errorf("line %d: %d columns, want 7", line, len(f))
+		if len(f) != 9 {
+			return nil, fmt.Errorf("line %d: %d columns, want 9", line, len(f))
 		}
-		p := Proportion{Taxon: f[0], Status: f[3], Reviewer: f[4], Date: f[5], Reason: f[6]}
+		p := Proportion{Taxon: f[0], Status: f[5], Reviewer: f[6], Date: f[7], Reason: f[8]}
 		var err error
 		if p.Neck, err = optional(f[1], 0.02, 2); err != nil {
 			return nil, fmt.Errorf("line %d: neck ratio: %v", line, err)
 		}
 		if p.Head, err = optional(f[2], 0.3, 2); err != nil {
 			return nil, fmt.Errorf("line %d: head factor: %v", line, err)
+		}
+		if p.Body, err = optional(f[3], 0.5, 2); err != nil {
+			return nil, fmt.Errorf("line %d: body factor: %v", line, err)
+		}
+		if p.Wing, err = optional(f[4], 0.5, 2); err != nil {
+			return nil, fmt.Errorf("line %d: wingspan factor: %v", line, err)
 		}
 		switch {
 		case p.Taxon == "":
@@ -128,8 +136,8 @@ func (rv Review) Write(w io.Writer, header string) error {
 	}
 	for _, t := range taxa {
 		p := rv[t]
-		if _, err := fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n", p.Taxon, num(p.Neck), num(p.Head),
-			p.Status, p.Reviewer, p.Date, p.Reason); err != nil {
+		if _, err := fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", p.Taxon, num(p.Neck), num(p.Head),
+			num(p.Body), num(p.Wing), p.Status, p.Reviewer, p.Date, p.Reason); err != nil {
 			return err
 		}
 	}
@@ -163,11 +171,26 @@ func (rv Review) NeckRatioFor(family, genus string) (float64, string) {
 // HeadFactorFor is the factor on the modeled cranium, 1 when no row sets one, and the words its
 // provenance gives the source.
 func (rv Review) HeadFactorFor(family, genus string) (float64, string) {
-	if p, ok := rv[genus]; ok && p.Head > 0 {
-		return p.Head, fmt.Sprintf("the factor for the genus %s; %s", genus, p.status())
+	return rv.factor(family, genus, func(p Proportion) float64 { return p.Head })
+}
+
+// BodyFactorFor is the factor on the modeled trunk, 1 when no row sets one.
+func (rv Review) BodyFactorFor(family, genus string) (float64, string) {
+	return rv.factor(family, genus, func(p Proportion) float64 { return p.Body })
+}
+
+// WingspanFactorFor is the factor on a modeled wingspan, 1 when no row sets one. The caller applies
+// it only to a modeled wingspan, never a measured one (decisions.allModeledProportionsReviewed).
+func (rv Review) WingspanFactorFor(family, genus string) (float64, string) {
+	return rv.factor(family, genus, func(p Proportion) float64 { return p.Wing })
+}
+
+func (rv Review) factor(family, genus string, of func(Proportion) float64) (float64, string) {
+	if p, ok := rv[genus]; ok && of(p) > 0 {
+		return of(p), fmt.Sprintf("the factor for the genus %s; %s", genus, p.status())
 	}
-	if p, ok := rv[family]; ok && p.Head > 0 {
-		return p.Head, fmt.Sprintf("the factor for %s; %s", family, p.status())
+	if p, ok := rv[family]; ok && of(p) > 0 {
+		return of(p), fmt.Sprintf("the factor for %s; %s", family, p.status())
 	}
 	return 1, ""
 }

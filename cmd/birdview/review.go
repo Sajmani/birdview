@@ -35,7 +35,7 @@ import (
 )
 
 // The review tool (tech.proportionsReviewTool): a local mode for judging each genus's neck ratio and
-// head factor against photographs, writing data/neck-review.tsv
+// head factor against photographs, writing data/proportions-review.tsv
 // (decisions.proportionsReviewedPerTaxon).
 
 // checkReviewFlags refuses review mode on a deployment, which a canonical host marks, and review mode
@@ -164,48 +164,75 @@ func (s *server) reviewQueue() []reviewGenus {
 // reviewBox is the drawing area of each figure on the review page.
 var reviewBox = view.Box{W: 300, H: 340}
 
-// reviewFig is one figure on the review page: the bird drawn at a neck ratio and head factor, and
-// its proportions as numbers.
+// setting is one value for every modeled measurement: the neck ratio and the head, body, and
+// wingspan factors (decisions.allModeledProportionsReviewed).
+type setting struct{ Neck, Head, Body, Wing float64 }
+
+// reviewFig is one figure on the review page: the bird drawn at a setting, and its proportions as
+// numbers.
 type reviewFig struct {
-	Tile           tile
-	Neck, Head     float64 // ratio and factor drawn
-	NeckMm, HeadMm float64
-	TotalMm        float64
-	NeckShare      float64
-	HeadShare      float64
+	Tile tile
+	setting
+	NeckMm, HeadMm, BodyMm float64
+	TotalMm, WingMm        float64
+	NeckShare, HeadShare   float64
+	BodyShare              float64
 }
 
-// proportions recomputes a bird's head, neck, and total length at a neck ratio and head factor; bill,
-// body, and tail stay as the dataset has them.
-func proportions(sp *dataset.Species, neck, head float64) (headMm, neckMm, total float64) {
+// sized is a bird's modeled measurements at a setting; bill, tail, and wing chord stay as measured,
+// and a measured wingspan stays as it is.
+type sized struct{ head, neck, body, total, wing float64 }
+
+func proportions(sp *dataset.Species, at setting) sized {
 	body, _ := morphology.BodyLength(sp.Mass.Value)
-	base, _ := morphology.HeadLength(sp.Mass.Value, "", "", nil)
-	headMm, neckMm = base*head, body*neck
-	return headMm, neckMm, sp.Segments.Bill.Value + headMm + neckMm + body + sp.Segments.Tail.Value
+	head, _ := morphology.HeadLength(sp.Mass.Value, "", "", nil)
+	z := sized{head: head * at.Head, body: body * at.Body, wing: sp.Wingspan.Value}
+	z.neck = z.body * at.Neck
+	z.total = sp.Segments.Bill.Value + z.head + z.neck + z.body + sp.Segments.Tail.Value
+	if sp.Wingspan.Prov.Kind == dataset.Modeled {
+		built := sp.Wingspan.Prov.Factor
+		if built == 0 {
+			built = 1
+		}
+		z.wing = sp.Wingspan.Value / built * at.Wing
+	}
+	return z
 }
 
-// figure draws sp at a neck ratio and head factor, to the scale of refLength.
-func (s *server) figure(sp *dataset.Species, neck, head, refLength float64) reviewFig {
-	h, n, total := proportions(sp, neck, head)
-	body, _ := morphology.BodyLength(sp.Mass.Value)
+// figure draws sp at a setting, to the scale of refLength.
+func (s *server) figure(sp *dataset.Species, at setting, refLength float64) reviewFig {
+	z := proportions(sp, at)
 	c := *sp
-	c.Segments.Head.Value, c.Segments.Neck.Value, c.Segments.Body.Value = h, n, body
-	c.TotalLength.Value = total
+	c.Segments.Head.Value, c.Segments.Neck.Value, c.Segments.Body.Value = z.head, z.neck, z.body
+	c.TotalLength.Value, c.Wingspan.Value = z.total, z.wing
 	g := view.Layout(&c, refLength, c.Wingspan.Value, reviewBox)
 	t := newTile(&c, g, reviewBox, unitsFor(true, c.Mass.Value), dataset.LocaleNA)
-	return reviewFig{Tile: t, Neck: neck, Head: head, NeckMm: n, HeadMm: h, TotalMm: total,
-		NeckShare: n / total, HeadShare: h / total}
+	return reviewFig{Tile: t, setting: at, NeckMm: z.neck, HeadMm: z.head, BodyMm: z.body,
+		TotalMm: z.total, WingMm: z.wing,
+		NeckShare: z.neck / z.total, HeadShare: z.head / z.total, BodyShare: z.body / z.total}
 }
 
-// current is the neck ratio and head factor a genus draws with now, and the words for where they
-// come from.
-func (rv *reviewState) current(g reviewGenus) (neck, head float64, source string) {
-	neck, source = rv.table.NeckRatioFor(g.Family, g.Genus)
-	head, hs := rv.table.HeadFactorFor(g.Family, g.Genus)
-	if hs != "" {
-		source += "; head: " + hs
+// current is the setting a genus draws with now, and the words for where it comes from.
+func (rv *reviewState) current(g reviewGenus) (setting, string) {
+	var at setting
+	var source string
+	at.Neck, source = rv.table.NeckRatioFor(g.Family, g.Genus)
+	for _, f := range []struct {
+		name string
+		v    *float64
+		of   func(string, string) (float64, string)
+	}{
+		{"head", &at.Head, rv.table.HeadFactorFor},
+		{"body", &at.Body, rv.table.BodyFactorFor},
+		{"wingspan", &at.Wing, rv.table.WingspanFactorFor},
+	} {
+		var src string
+		*f.v, src = f.of(g.Family, g.Genus)
+		if src != "" {
+			source += "; " + f.name + ": " + src
+		}
 	}
-	return neck, head, source
+	return at, source
 }
 
 func (rv *reviewState) find(genus string) (int, bool) {
@@ -223,6 +250,7 @@ type reviewPageData struct {
 
 	G                 reviewGenus
 	Name, EBirdURL    string
+	WingModeled       bool
 	Current, Adjusted reviewFig
 	Source            string
 	Strip             []reviewStripFig
@@ -234,8 +262,8 @@ type reviewPageData struct {
 
 type reviewQueueRow struct {
 	Family, Genus, Name string
-	Neck, Head          float64
-	Status              string
+	setting
+	Status string
 }
 
 type reviewStripFig struct {
@@ -253,7 +281,7 @@ func (s *server) reviewPage(w http.ResponseWriter, r *http.Request) {
 	i, ok := rv.find(r.URL.Query().Get("genus"))
 	if !ok {
 		for _, g := range rv.queue {
-			neck, head, _ := rv.current(g)
+			at, _ := rv.current(g)
 			status := "family table"
 			if p, ok := rv.table[g.Genus]; ok {
 				status = p.Status
@@ -261,16 +289,16 @@ func (s *server) reviewPage(w http.ResponseWriter, r *http.Request) {
 				status = p.Status + " (family)"
 			}
 			d.Queue = append(d.Queue, reviewQueueRow{Family: g.Family, Genus: g.Genus,
-				Name: g.Rep.Name(dataset.LocaleNA), Neck: neck, Head: head, Status: status})
+				Name: g.Rep.Name(dataset.LocaleNA), setting: at, Status: status})
 		}
 		s.render(w, "review.html", d)
 		return
 	}
 	g := rv.queue[i]
-	neck, head, source := rv.current(g)
-	_, _, total := proportions(g.Rep, neck, head)
+	at, source := rv.current(g)
 	d.G, d.Name, d.Source, d.Pos = g, g.Rep.Name(dataset.LocaleNA), source, i+1
-	d.Current = s.figure(g.Rep, neck, head, total)
+	d.WingModeled = g.Rep.Wingspan.Prov.Kind == dataset.Modeled
+	d.Current = s.figure(g.Rep, at, proportions(g.Rep, at).total)
 	d.Adjusted = d.Current
 	d.EBirdURL = d.Current.Tile.EBirdURL
 	if i > 0 {
@@ -285,14 +313,13 @@ func (s *server) reviewPage(w http.ResponseWriter, r *http.Request) {
 	for _, k := range rv.queue {
 		if k.Family == g.Family {
 			kin = append(kin, k)
-			n, h, _ := rv.current(k)
-			_, _, t := proportions(k.Rep, n, h)
-			longest = math.Max(longest, t)
+			kat, _ := rv.current(k)
+			longest = math.Max(longest, proportions(k.Rep, kat).total)
 		}
 	}
 	for _, k := range kin {
-		n, h, _ := rv.current(k)
-		d.Strip = append(d.Strip, reviewStripFig{Genus: k.Genus, Fig: s.figure(k.Rep, n, h, longest), Here: k.Genus == g.Genus})
+		kat, _ := rv.current(k)
+		d.Strip = append(d.Strip, reviewStripFig{Genus: k.Genus, Fig: s.figure(k.Rep, kat, longest), Here: k.Genus == g.Genus})
 	}
 	s.render(w, "review.html", d)
 }
@@ -309,21 +336,18 @@ func (s *server) reviewFigure(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	g := rv.queue[i]
-	curNeck, curHead, _ := rv.current(g)
+	cur, _ := rv.current(g)
 	rv.mu.Unlock()
-	neck, err1 := strconv.ParseFloat(r.URL.Query().Get("neck"), 64)
-	head, err2 := strconv.ParseFloat(r.URL.Query().Get("head"), 64)
-	if err1 != nil || err2 != nil || neck < 0.02 || neck > 2 || head < 0.3 || head > 2 {
-		http.Error(w, "neck from 0.02 to 2 and head from 0.3 to 2", http.StatusBadRequest)
+	at, err := settingOf(r.URL.Query().Get, cur)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	_, _, curTotal := proportions(g.Rep, curNeck, curHead)
-	_, _, total := proportions(g.Rep, neck, head)
-	ref := math.Max(curTotal, total)
+	ref := math.Max(proportions(g.Rep, cur).total, proportions(g.Rep, at).total)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	var buf bytes.Buffer
 	if err := s.tmpl.ExecuteTemplate(&buf, "reviewpair", struct{ Current, Adjusted reviewFig }{
-		s.figure(g.Rep, curNeck, curHead, ref), s.figure(g.Rep, neck, head, ref)}); err != nil {
+		s.figure(g.Rep, cur, ref), s.figure(g.Rep, at, ref)}); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -345,13 +369,11 @@ func (s *server) reviewSave(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	g := rv.queue[i]
-	neck, head, _ := rv.current(g)
+	at, _ := rv.current(g)
 	if r.FormValue("choice") == "adjusted" {
-		var err1, err2 error
-		neck, err1 = strconv.ParseFloat(r.FormValue("neck"), 64)
-		head, err2 = strconv.ParseFloat(r.FormValue("head"), 64)
-		if err1 != nil || err2 != nil {
-			http.Error(w, "neck and head must be numbers", http.StatusBadRequest)
+		var err error
+		if at, err = settingOf(r.FormValue, at); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 	}
@@ -359,10 +381,18 @@ func (s *server) reviewSave(w http.ResponseWriter, r *http.Request) {
 	if r.FormValue("family") == "on" {
 		taxon = g.Family
 	}
-	p := morphology.Proportion{Taxon: taxon, Neck: round2(neck), Status: "reviewed", Reviewer: rv.reviewer,
+	p := morphology.Proportion{Taxon: taxon, Neck: round2(at.Neck), Status: "reviewed", Reviewer: rv.reviewer,
 		Date: time.Now().Format("2006-01-02"), Reason: strings.Join(strings.Fields(r.FormValue("reason")), " ")}
-	if h := round2(head); h != 1 {
-		p.Head = h
+	factor := func(v float64) float64 {
+		if v = round2(v); v == 1 {
+			return 0
+		}
+		return v
+	}
+	p.Head, p.Body = factor(at.Head), factor(at.Body)
+	// A wingspan factor is kept only where the wingspan is modeled (decisions.allModeledProportionsReviewed).
+	if g.Rep.Wingspan.Prov.Kind == dataset.Modeled {
+		p.Wing = factor(at.Wing)
 	}
 	next := morphology.Review{}
 	for k, v := range rv.table {
@@ -396,3 +426,26 @@ func (s *server) reviewSave(w http.ResponseWriter, r *http.Request) {
 }
 
 func round2(v float64) float64 { return math.Round(v*100) / 100 }
+
+// settingOf reads a setting from a form or query, keeping a value of cur for any field not given.
+func settingOf(get func(string) string, cur setting) (setting, error) {
+	at := cur
+	for _, f := range []struct {
+		name   string
+		v      *float64
+		lo, hi float64
+	}{
+		{"neck", &at.Neck, 0.02, 2}, {"head", &at.Head, 0.3, 2}, {"body", &at.Body, 0.5, 2}, {"wing", &at.Wing, 0.5, 2},
+	} {
+		raw := get(f.name)
+		if raw == "" {
+			continue
+		}
+		v, err := strconv.ParseFloat(raw, 64)
+		if err != nil || v < f.lo || v > f.hi {
+			return cur, fmt.Errorf("%s must be a number from %g to %g", f.name, f.lo, f.hi)
+		}
+		*f.v = v
+	}
+	return at, nil
+}

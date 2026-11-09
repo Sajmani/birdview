@@ -4763,7 +4763,7 @@ remains [todo.photoProportions](../todo.md#photoproportions) with its cost estim
 
 Date: 2026-11-09
 Decided by: Sameer
-Status: accepted
+Status: amended by allModeledProportionsReviewed
 Amends: duckAndGrebeProportions
 Affects: [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), [product.craniumFromMass](local/product/diagram.md#craniumfrommass), [tech.proportionsReviewTool](local/tech/process.md#proportionsreviewtool)
 
@@ -4784,4 +4784,32 @@ Issue #7 showed family-wide values failing within a family, and the cheap fix wa
 without photographs. The owner asked for a tool that makes each review quick: photographs and
 figures side by side, a choice between current and adjusted, and sliders to set the proportions by
 hand. A table records each decision and who made it, which a constant in the code cannot.
+
+---
+
+## allModeledProportionsReviewed
+
+**Every modeled measurement can be reviewed, and the table is renamed for it**
+
+Date: 2026-11-09
+Decided by: Sameer
+Status: accepted
+Amends: proportionsReviewedPerTaxon
+Affects: [product.trunkFromMass](local/product/diagram.md#trunkfrommass), [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources), [tech.proportionsReviewTool](local/tech/process.md#proportionsreviewtool)
+
+### Decided
+
+The proportions review covers every modeled measurement, not only the neck and head: the review
+table gains a **body factor**, on the trunk model, and a **wingspan factor**, applied only where the
+wingspan is modeled; a measured wingspan is never adjusted. The table is renamed from
+`data/neck-review.tsv` to `data/proportions-review.tsv`. In the review tool, every one has a
+slider, and the overlay turns to any angle.
+
+### Why
+
+Reviewing a Wood Duck, the owner found the neck alone could not make the figure match the
+photograph: the body is modeled too, and lining the figure up needed turning it by less than 90°.
+Bill, tail, and wing chord are measured and stay as AVONET gives them. A modeled wingspan's
+regression states its own error, so a factor set by eye overrides a fitted model; the reviewed row
+and its provenance say so.
 
