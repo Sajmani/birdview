@@ -1243,3 +1243,10 @@ It is mostly text and data analysis, so cheaper than [photoProportions](#photopr
 still per-species work, and roughly ten times as much worldwide. BirdLife's habitats cannot be used
 (DataZone's terms forbid automated access), and text sources' licenses decide whether facts drawn
 from them may be recorded.
+
+**The cheap version is done as research** (2026-11-08,
+[notes: Distance from shore](notes.md#distance-from-shore-as-evidence-for-the-open-sea-question)): the share of a
+bird's water records more than 10 km from shore splits AVONET's Marine cleanly into open-ocean
+birds (30% or more, about 75 species) and birds of the sea near shore (under 20%, 26), but cannot
+separate beach birds from sea ducks. Next: the owner's decision on whether to split Open sea by it,
+and if so, a committed tool and a requirement. Cost estimate for the full pipeline: on the issue.

@@ -342,3 +342,36 @@ water").
 Each would carry a reason, as the current nine do (for example, Least Sandpiper: "migrates and
 winters on mudflats and salt marsh").
 
+## Distance from shore, as evidence for the open-sea question
+
+The cheap version of [todo.habitatDataset](todo.md#habitatdataset) (issue #10), run 2026-11-08 as
+research, not built into the dataset. **Method:** the offshore-cells download
+(`0025653-261023074918325`, records with no GADM code, in 0.1° cells by species and month), eBird
+records only, inside BirdView's five sea boxes; each cell's center tested against Natural Earth's
+10m land and minor-island polygons (5.1.1, public domain), cells on land dropped (the uncoded
+Caribbean land that misled pass 1), and the rest measured to the nearest shore and banded under
+10 km, 10–30 km, and 30 km or more. Species are matched through `data/gbif-taxa.tsv`; 98,295
+records of undrawn or unmatched names were left out. The table and the program are review
+artifacts (`sea-shares.tsv`, `sea-shares-analysis.go.txt`).
+
+**It separates the open ocean from the sea near shore.** The share of a bird's water records more
+than 10 km out splits AVONET's Marine, 113 species, in two. At 30% or more: petrels, shearwaters,
+storm-petrels, albatrosses, skuas and jaegers, most auklets and murrelets, Sabine's Gull, both
+phalaropes, boobies, and tropicbirds (Black-footed Albatross 89%, Leach's Storm-Petrel 83%, Sooty
+Shearwater 67%, Northern Fulmar 77%). Under 20%: 26 Marine birds of the sea near shore, among them
+the eiders, Harlequin Duck, the cormorants, Brown Pelican, Northern Gannet, Osprey, Laughing Gull,
+Royal, Common, Least, and Sandwich Terns, Black and Pigeon Guillemots, Marbled Murrelet, and
+Magnificent Frigatebird. Records 30 km or more out tell the same story as a share of all records:
+7% to 43% for the open-ocean birds, 0.0% to 0.3% for gulls, terns, sea ducks, loons, and grebes.
+
+**It cannot separate the beach from the surf.** Water records within 10 km are dominated by
+observers on the shore whose coordinates fall just past GADM's coastline: Purple Sandpiper has 17%
+of its records there and Sanderling 12%, as many as Black Scoter (10%), and even Mallard and
+American Robin have some. The third group of issue #10, birds of beaches and flats, still rests on
+the per-species review.
+
+**What it would take to use it:** a decision on the classification (for example, Open sea split
+into open ocean and sea near shore, by a stated threshold on this share), then a committed tool
+with Natural Earth's land file pinned by hash, as the region boundaries are, and the derived
+values marked `derived` on each bird's page.
+

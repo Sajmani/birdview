@@ -563,6 +563,11 @@ License, quoted from <https://www.naturalearthdata.com/about/terms-of-use/>, rea
 > "All versions of Natural Earth raster + vector map data found on this website are in the public
 > domain. … No permission is needed to use Natural Earth. Crediting the authors is unnecessary."
 
+Also fetched 2026-11-08 **for research only**, not adopted: the 10m physical `ne_10m_land.zip`
+(SHA-256 `e547d749445eaa0964aba76738090ec88f5e63c4585122170f98c67a7ea922dc`) and
+`ne_10m_minor_islands.zip` (`47c0b3ce26df7b4dbabdbb251023918cb2f5c83462a426288f1f253da7284db2`),
+both 5.1.1, to measure distance from shore ([notes](../notes.md#distance-from-shore-as-evidence-for-the-open-sea-question)).
+
 Its borders and coastlines are not GADM's, which the occurrence records were filed under, so near
 a border or a shore the Here button may pick a neighboring region. GADM itself was not usable: its
 license forbids redistribution, and the boundaries are sent to every reader's browser.
