@@ -377,9 +377,9 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 		}
 
 		// Segments: bill and tail measured, head/neck/body modeled.
-		headV, headModel := morphology.HeadLength(res.traits.Mass)
+		headV, headModel := morphology.HeadLength(res.traits.Mass, avr.Family)
 		bodyV, bodyModel := morphology.BodyLength(res.traits.Mass)
-		neckV, neckModel := morphology.NeckLength(bodyV, avr.Family)
+		neckV, neckModel := morphology.NeckLength(bodyV, avr.Family, strings.Fields(sci)[0])
 		bill, head, neck, body, tail, total := morphology.BalanceToSum(
 			res.traits.Culmen, headV, neckV, bodyV, res.traits.Tail)
 

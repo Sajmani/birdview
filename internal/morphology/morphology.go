@@ -119,6 +119,25 @@ var NeckRatios = map[string]float64{
 	"Jacanidae": 0.30,
 }
 
+// NeckRatiosByGenus overrides NeckRatios for a genus that flies with a visibly different neck from
+// the rest of its family (product.neckModelPerFamily, decisions.duckAndGrebeProportions). Set by
+// judgment, unvalidated, like the family table.
+var NeckRatiosByGenus = map[string]float64{
+	// Diving ducks fly with a short thick neck; Anatidae's 0.70 is the geese's and swans'.
+	"Aythya":       0.35,
+	"Melanitta":    0.35,
+	"Clangula":     0.35,
+	"Bucephala":    0.30,
+	"Somateria":    0.30,
+	"Histrionicus": 0.30,
+	"Oxyura":       0.30,
+	// Grebes fly with the neck stretched out; Western and Clark's longest of all.
+	"Aechmophorus": 0.80,
+	"Podiceps":     0.58,
+	"Podilymbus":   0.45,
+	"Tachybaptus":  0.45,
+}
+
 // NeckDefaultReviewed names the families looked at and left on
 // DefaultNeckRatio, so "not in NeckRatios" stops meaning two different things
 // at once: considered and found unremarkable, or never considered.
@@ -191,11 +210,24 @@ func NeckRatio(family string) (float64, bool) {
 //
 // There is deliberately no floor. A 2.5 g hummingbird lands near 10 mm, which is
 // about right, so a floor would only hide a bad coefficient.
-func HeadLength(massG float64) (float64, string) {
+//
+// A family in HeadScales draws its head that much smaller or larger (product.craniumFromMass).
+func HeadLength(massG float64, family string) (float64, string) {
 	m := math.Max(massG, 1.0)
 	v := headCoefficient * math.Cbrt(m)
+	if f, ok := HeadScales[family]; ok {
+		return v * f, fmt.Sprintf("cranium modeled as %.1f x mass^(1/3) x %.2f, the factor for %s (isometric, unvalidated)",
+			headCoefficient, f, family)
+	}
 	return v, fmt.Sprintf("cranium modeled as %.1f x mass^(1/3) (isometric, unvalidated)",
 		headCoefficient)
+}
+
+// HeadScales is the factor on the modeled cranium for a family whose head is visibly smaller or
+// larger than its mass implies (product.craniumFromMass, decisions.duckAndGrebeProportions).
+var HeadScales = map[string]float64{
+	// Heavy-bodied birds with small heads: mass alone gave a Horned Grebe a head 0.18 of its length.
+	"Podicipedidae": 0.65,
 }
 
 // headCoefficient sets the cranium scale. See HeadLength.
@@ -260,7 +292,11 @@ const anchorMassG = 63.4
 // Modeled. The returned description names the family and the exact ratio, as
 // product.neckModelPerFamily requires -- a model string naming a function but not its value would
 // tell the reader nothing they could check.
-func NeckLength(bodyMm float64, family string) (float64, string) {
+func NeckLength(bodyMm float64, family, genus string) (float64, string) {
+	if r, ok := NeckRatiosByGenus[genus]; ok {
+		return bodyMm * r,
+			fmt.Sprintf("neck modeled as %.2f x trunk (genus-specific ratio for %s, in %s)", r, genus, family)
+	}
 	ratio, explicit := NeckRatio(family)
 	kind := "family default"
 	if explicit {

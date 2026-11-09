@@ -4722,3 +4722,36 @@ were counted. "How common" reads as a claim about the birds; "Reporting frequenc
 measured. The parameter follows the label so the address reads the same way, and the redirect keeps
 the one day's links working, as [tech.stableUrls](local/tech/delivery.md#stableurls) requires of a renamed parameter.
 
+---
+
+## duckAndGrebeProportions
+
+**Diving ducks get shorter necks, and grebes longer necks and smaller heads**
+
+Date: 2026-11-08
+Decided by: Sameer
+Status: accepted
+Affects: [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), [product.craniumFromMass](local/product/diagram.md#craniumfrommass)
+
+### Decided
+
+The neck ratio may be set per genus where a genus flies with a visibly different neck from its
+family, and the head model may carry a per-family factor. The first uses, by judgment and
+unvalidated:
+
+- **Diving ducks**, whose family ratio of 0.70 was set for geese and swans: *Aythya* 0.35;
+  *Melanitta*, *Clangula* 0.35; *Bucephala*, *Somateria*, *Histrionicus*, *Oxyura* 0.30.
+- **Grebes:** *Aechmophorus* (Western, Clark's) 0.80; *Podiceps* 0.58; *Podilymbus*,
+  *Tachybaptus* 0.45; a head factor of 0.65 for Podicipedidae.
+
+Dabbling ducks, mergansers, geese, and swans keep the family's 0.70 until they are looked at.
+
+### Why
+
+[GitHub issue #7](https://github.com/google/birdview/issues/7): the Lesser Scaup drew the longer neck
+and the larger head beside a grebe, the opposite of photographs of both in flight. Every duck drew a
+neck a quarter of its length, because the family's ratio fits geese and swans; grebes, heavy for
+their length, drew heads of 0.18 of it from the mass model. The owner chose the cheap fix, values set
+by hand for the two families the issue names, over measuring every species from photographs, which
+remains [todo.photoProportions](../todo.md#photoproportions) with its cost estimate on the issue.
+

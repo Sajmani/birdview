@@ -47,9 +47,9 @@ Cocos and Brown Booby, and Vega and American Herring Gull.
 | **Tail** | **measured** — 1073 direct, 9 near-match | AVONET `Tail.Length` |
 | **Mass** | **measured** — 1073 direct, 9 near-match | AVONET `Mass` |
 | **Wingspan** | **391 measured**, 6 near-match, **685 modeled** | Fox et al. 2026 where empirical; otherwise a fitted regression |
-| **Head** | **modeled, unvalidated** — every species | `7.5 × mass^(1/3)` |
+| **Head** | **modeled, unvalidated** — every species | `7.5 × mass^(1/3)`, × 0.65 for grebes |
 | **Body** | **modeled, calibrated** — every species | `14.0329 × mass^0.37` |
-| **Neck** | **modeled, invented** — every species | a per-family ratio × the trunk |
+| **Neck** | **modeled, invented** — every species | a per-family (or per-genus) ratio × the trunk |
 | **Total length** | **modeled** — every species | `bill + head + neck + body + tail` |
 
 Counts are over all 1082 species in the dataset. Mass is in grams, lengths in millimeters. The
@@ -106,10 +106,13 @@ measured *trunk*.
 **Head (cranium) — `7.5 × mass^(1/3)`.** Isometric scaling, with the coefficient putting a 20 g
 passerine near 20 mm. A shape function, not a fit, and **unvalidated**. There is deliberately no
 minimum: a 2.5 g hummingbird lands near 10 mm, and a floor would only hide a bad coefficient.
+Grebes, heavy birds with small heads, take 0.65 of it; the bird's page names the factor.
 
 **Neck — a per-family ratio of the trunk. This one is invented.** No source measures neck length
 at this coverage. The ratios are a drawing parameter: Ardeidae 0.85, Phoenicopteridae 0.95,
 Anhingidae 0.90, Gruidae 0.85, down to Strigidae and Tytonidae at 0.08, every other family 0.18.
+A genus that flies with a different neck from its family has its own: the diving ducks 0.30 to
+0.35 against their family's 0.70, which fits the geese and swans, and the grebes 0.45 to 0.80.
 They are shown anyway — a heron's page reads *"neck modeled as 0.85 × trunk (family-specific
 ratio for Ardeidae)"* — because every figure draws a neck, and hiding the number would hide only
 the explanation.

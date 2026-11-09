@@ -2458,6 +2458,22 @@ hand on a copy of the tree with no `.git` and no built dataset: every package pa
 
 Watched failing: 2026-10-23, with the builder's `COPY --from=test` deleted, it reported that nothing makes the tests run.
 
+### duckAndGrebeProportions
+
+**A diving duck draws the shorter neck and larger head beside a grebe, as in photographs**
+
+**Verifies:** [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), [product.craniumFromMass](local/product/diagram.md#craniumfrommass), [decisions.duckAndGrebeProportions](decisions.md#duckandgrebeproportions) · **Level:** code · **Method:** the segment models run on each bird's own mass, bill, and tail
+
+**Assertions:** Lesser Scaup's neck is a smaller share of its length than Horned Grebe's, and its
+head a larger one; Western Grebe's neck is a larger share than Horned Grebe's; Canada Goose's neck
+is a larger share than the scaup's; the scaup's neck model names its genus ratio and the grebe's
+head model its family factor. Not checked by the test: that the values match photographs, which
+they were set by judgment to approach ([todo.photoProportions](../todo.md#photoproportions)).
+
+**Run:** `go test ./internal/morphology/ -run TestDivingDucksAndGrebes`
+**Status: verified 2026-11-08, passing.**
+Watched failing: 2026-11-08, with the hooks in place but no values: "Lesser Scaup's neck is 0.26 of its length and Horned Grebe's 0.19; the scaup's must be the shorter", and five more, matching issue #7.
+
 ### imageRecordsRevision
 
 **The image builds the deploy's REVISION into the server, and git never commits it**

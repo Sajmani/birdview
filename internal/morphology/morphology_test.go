@@ -66,7 +66,7 @@ func TestNeckModelNamesTheFamilyRatio(t *testing.T) {
 		{"Parulidae", "0.18"}, // not listed -- default
 	}
 	for _, c := range cases {
-		_, model := NeckLength(100, c.family)
+		_, model := NeckLength(100, c.family, "")
 		if !strings.Contains(model, c.want) {
 			t.Errorf("%s: model %q does not name the ratio %s", c.family, model, c.want)
 		}
@@ -81,10 +81,10 @@ func TestNeckModelNamesTheFamilyRatio(t *testing.T) {
 //
 // Verifies: product.neckModelPerFamily.
 func TestNeckRatioDefaultIsFlagged(t *testing.T) {
-	if _, model := NeckLength(100, "Parulidae"); !strings.Contains(model, "default") {
+	if _, model := NeckLength(100, "Parulidae", ""); !strings.Contains(model, "default") {
 		t.Errorf("unlisted family should be described as taking the default, got %q", model)
 	}
-	if _, model := NeckLength(100, "Ardeidae"); strings.Contains(model, "default") {
+	if _, model := NeckLength(100, "Ardeidae", ""); strings.Contains(model, "default") {
 		t.Errorf("listed family should not be described as taking the default, got %q", model)
 	}
 }
@@ -99,10 +99,10 @@ func TestNeckRatioDefaultIsFlagged(t *testing.T) {
 // live in the ingest test, where real trait data is available).
 func TestShapeDifferentiation(t *testing.T) {
 	const body = 100
-	heron, _ := NeckLength(body, "Ardeidae")
-	sparrow, _ := NeckLength(body, "Passerellidae")
-	owl, _ := NeckLength(body, "Strigidae")
-	sandpiper, _ := NeckLength(body, "Scolopacidae")
+	heron, _ := NeckLength(body, "Ardeidae", "")
+	sparrow, _ := NeckLength(body, "Passerellidae", "")
+	owl, _ := NeckLength(body, "Strigidae", "")
+	sandpiper, _ := NeckLength(body, "Scolopacidae", "")
 
 	if !(heron > sandpiper && sandpiper > sparrow && sparrow > owl) {
 		t.Errorf("neck ordering wrong: heron %.1f, sandpiper %.1f, sparrow %.1f, owl %.1f; "+
@@ -123,14 +123,14 @@ func TestHeadScalesWithMass(t *testing.T) {
 	// Expected values follow from the model definition, 7.5 * mass^(1/3), not
 	// from running it: 8 g gives 7.5*2 = 15, 1000 g gives 7.5*10 = 75.
 	for _, c := range []struct{ mass, want float64 }{{8, 15}, {1000, 75}, {27, 22.5}} {
-		if got, _ := HeadLength(c.mass); math.Abs(got-c.want) > 0.05 {
+		if got, _ := HeadLength(c.mass, ""); math.Abs(got-c.want) > 0.05 {
 			t.Errorf("HeadLength(%g) = %.2f, want %.2f", c.mass, got, c.want)
 		}
 	}
 	// Strictly increasing across the real mass range, with no plateau.
 	prev := 0.0
 	for _, m := range []float64{2.5, 5, 10, 20, 50, 100, 500, 2000, 11000} {
-		got, _ := HeadLength(m)
+		got, _ := HeadLength(m, "")
 		if got <= prev {
 			t.Errorf("head did not grow between the previous mass and %g g (%.1f then %.1f)",
 				m, prev, got)
@@ -250,9 +250,9 @@ func slope(x, y []float64) float64 {
 // description. A modeled value with an empty model string would satisfy the
 // schema while telling the reader nothing (product.provenancePerMetric).
 func TestModelsAreDescribed(t *testing.T) {
-	_, h := HeadLength(20)
+	_, h := HeadLength(20, "")
 	_, b := BodyLength(50)
-	_, n := NeckLength(100, "Anatidae")
+	_, n := NeckLength(100, "Anatidae", "")
 	for name, desc := range map[string]string{"head": h, "body": b, "neck": n} {
 		if strings.TrimSpace(desc) == "" {
 			t.Errorf("%s model returned an empty description", name)
@@ -330,4 +330,46 @@ func realFamilies(t *testing.T) map[string]string {
 		out[s.Family] = s.Order
 	}
 	return out
+}
+
+// TestDivingDucksAndGrebes asserts decisions.duckAndGrebeProportions, from GitHub issue #7: drawn
+// from their own masses, bills, and tails, a Lesser Scaup has the shorter neck and the larger head
+// of the pair beside a Horned Grebe, as photographs of both in flight show; Western Grebe's neck is
+// the longer of the grebes'; and geese keep the family's long neck.
+//
+// Verifies: product.neckModelPerFamily, product.craniumFromMass. Criterion: acceptance.duckAndGrebeProportions.
+func TestDivingDucksAndGrebes(t *testing.T) {
+	type bird struct {
+		family, genus    string
+		mass, bill, tail float64
+	}
+	share := func(b bird) (neck, head float64) {
+		h, _ := HeadLength(b.mass, b.family)
+		body, _ := BodyLength(b.mass)
+		n, _ := NeckLength(body, b.family, b.genus)
+		total := b.bill + h + n + body + b.tail
+		return n / total, h / total
+	}
+	scaupN, scaupH := share(bird{"Anatidae", "Aythya", 820, 47.3, 53.4})
+	grebeN, grebeH := share(bird{"Podicipedidae", "Podiceps", 453, 30.2, 33.2})
+	westernN, _ := share(bird{"Podicipedidae", "Aechmophorus", 1137, 73.2, 29.8})
+	gooseN, _ := share(bird{"Anatidae", "Branta", 2812, 50.0, 121.6})
+	if scaupN >= grebeN {
+		t.Errorf("Lesser Scaup's neck is %.2f of its length and Horned Grebe's %.2f; the scaup's must be the shorter", scaupN, grebeN)
+	}
+	if scaupH <= grebeH {
+		t.Errorf("Lesser Scaup's head is %.2f of its length and Horned Grebe's %.2f; the grebe's must be the smaller", scaupH, grebeH)
+	}
+	if westernN <= grebeN {
+		t.Errorf("Western Grebe's neck is %.2f of its length, Horned Grebe's %.2f; Western's is the longer", westernN, grebeN)
+	}
+	if gooseN <= scaupN {
+		t.Errorf("Canada Goose's neck is %.2f of its length, Lesser Scaup's %.2f; geese keep the long neck", gooseN, scaupN)
+	}
+	if _, model := NeckLength(100, "Anatidae", "Aythya"); !strings.Contains(model, "Aythya") {
+		t.Errorf("a scaup's neck model reads %q; it must name the genus ratio applied", model)
+	}
+	if _, model := HeadLength(453, "Podicipedidae"); !strings.Contains(model, "Podicipedidae") {
+		t.Errorf("a grebe's head model reads %q; it must name the factor applied", model)
+	}
 }

@@ -15,6 +15,9 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 
 ### Changed
 
+- **Diving ducks and grebes** are drawn closer to how they fly: scaup, goldeneyes, scoters, and
+  eiders with shorter necks, grebes with longer necks and smaller heads. A Lesser Scaup's neck was
+  longer than a Horned Grebe's.
 - **How common** is now **Reporting frequency**, since it measures how often a bird is reported,
   not how many are there. Addresses use `freq=` in place of `common=`, and old ones still work.
   A bird's page and the guide call the share of reports its reporting frequency too.

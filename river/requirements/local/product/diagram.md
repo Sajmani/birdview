@@ -128,8 +128,10 @@ Subject: `diagram.head_model`
 Value: `isometric on mass`
 Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
-Head length scales isometrically with body mass. Like every modeled value it names its function
-(provenancePerMetric) and claims no measurement.
+Head length scales isometrically with body mass, **times a per-family factor for a family whose
+head is visibly smaller than its mass implies**: the grebes, heavy-bodied birds with small heads
+([decisions.duckAndGrebeProportions](../../decisions.md#duckandgrebeproportions)). Like every modeled
+value it names its function and any factor applied (provenancePerMetric) and claims no measurement.
 
 Rationale: an earlier model derived the cranium from bill depth with a 12 mm floor, and the floor
 bound for **442 of 841 species**, giving half the dataset one identical head. Mass is the only
@@ -185,10 +187,14 @@ Subject: `diagram.neck_ratio`
 Value: `per-family modeling function`
 Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.honestData](../../../goals/goals.md#honestdata)
 
-The division of the remaining body axis between neck and body uses a per-family ratio. The
+The division of the remaining body axis between neck and body uses a per-family ratio, **overridden
+for a genus whose birds fly with a visibly different neck from the rest of their family**, as the
+diving ducks do among the long-necked geese and swans
+([decisions.duckAndGrebeProportions](../../decisions.md#duckandgrebeproportions)). The
 resulting **neck length is presented as a metric like any other**, in the detail view, carrying a
 provenance record whose `kind` is `modeled` and whose `model` **names the specific function and
-the ratio applied to that bird's family** — for example, "per-family neck ratio, Ardeidae = 0.35".
+the ratio applied to that bird's family or genus** — for example, "per-family neck ratio, Ardeidae =
+0.35".
 
 The ratio table is recorded in the code with this requirement cited beside it.
 

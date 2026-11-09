@@ -1200,13 +1200,15 @@ Status: parked
 Owner: Sameer
 Gate: a decision on photo sources and their terms, before anything is fetched
 
-[GitHub issue #7](https://github.com/google/birdview/issues/7): the Lesser Scaup's figure has the
-longer neck and larger head, and the Horned Grebe's the shorter neck and smaller head, the opposite
-of photographs of both in flight. The cause is family-wide models: `NeckRatios` gives Anatidae 0.70,
-set for swans and geese, and Podicipedidae 0.45, and head length follows the cube root of mass, so
-the heavier scaup gets the bigger head. Lowering the ratio for the diving ducks (*Aythya* and
-allies) and raising the grebes' is a quick fix of the two families the issue names
-([reviewNeckRatios](#reviewneckratios)).
+[GitHub issue #7](https://github.com/google/birdview/issues/7): the Lesser Scaup's figure had the
+longer neck, and the Horned Grebe's the shorter neck and the larger head (0.18 of its length, from
+the mass model), the opposite of photographs of both in flight. The cause was family-wide models:
+`NeckRatios` gives Anatidae 0.70, set for swans and geese. **The quick fix is done** (2026-11-08,
+[decisions.duckAndGrebeProportions](requirements/decisions.md#duckandgrebeproportions)): genus ratios for the diving ducks and grebes and a head factor
+for grebes, set by judgment. Still on the family's 0.70: the dabbling ducks, mergansers, geese, and
+swans, whose necks all draw about a quarter of their length, so a Canada Goose's is no longer than
+a Mallard's ([reviewNeckRatios](#reviewneckratios)). Cost estimate for the per-species version:
+on the issue, 2026-11-08.
 
 The ideal is per-species: measure neck, head, bill, and tail as shares of total length from photos
 of each bird in flight, and record them as a BirdView dataset with its method and sources, marked
