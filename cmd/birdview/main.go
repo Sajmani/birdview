@@ -1962,7 +1962,7 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 				"looking. Hiding it from a month on evidence that thin would state "+
 				"something about the bird that is really something about the survey.",
 				comma(n), where, month.MinRecords),
-			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "what this measures",
+			Doc: "/docs/data#reporting-frequency", DocLabel: "what this measures",
 		})
 	}
 
@@ -1992,7 +1992,7 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 			Value:  value,
 			Origin: string(dataset.Derived),
 			Detail: detail,
-			Doc:    "/docs/data#how-common-a-bird-is", DocLabel: "what this measures",
+			Doc:    "/docs/data#reporting-frequency", DocLabel: "what this measures",
 		})
 	}
 
@@ -2026,7 +2026,7 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 				"iNaturalist via GBIF: how much of what people record there is this bird, not how "+
 				"many there are.",
 				comma(c.Records), comma(c.RegionRecords), where),
-			Doc: "/docs/data#how-common-a-bird-is", DocLabel: "what this measures",
+			Doc: "/docs/data#reporting-frequency", DocLabel: "what this measures",
 		})
 	}
 	return out

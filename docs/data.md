@@ -243,10 +243,10 @@ years separates them — the flamingo's 931 records span thirteen days; Akikiki,
 has 376 across forty-five years — which is why **Scope** uses it. **Per-region presence** still
 uses the record bar, a known limitation.
 
-## How common a bird is
+## Reporting frequency
 
-Each bird shows how many of the observations recorded in the selected regions are of that bird,
-as **one in N**.
+Each bird shows its **reporting frequency**: how many of the observations recorded in the selected
+regions are of that bird, as **one in N**.
 
 ### What an observation is
 

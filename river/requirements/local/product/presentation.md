@@ -327,8 +327,9 @@ bottom quarter of the dataset rounds to nothing readable.
 **Selecting a region a bird is absent from lowers its share**, correctly: that region's records
 join the denominator and none join the numerator.
 
-Rationale: this is the closest honest answer open data gives to "how common is this bird": how often
-it is **reported** relative to other birds in the same place, which is not abundance. Two known,
+Rationale: this is the closest honest answer open data gives to a reader's "how common is this
+bird": its **reporting frequency**, how often it is reported relative to other birds in the same
+place, which is not abundance. Two known,
 uncorrected distortions — species eBird withholds look rarer, and a bird that draws a crowd is
 over-reported — are stated in [`docs/data.md`](../../../../docs/data.md).
 

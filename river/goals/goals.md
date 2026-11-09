@@ -30,7 +30,7 @@ Compare any set of birds side by side, whether a family, a habitat, or a few you
 
 **Know what to expect where you are**
 
-Learn which birds you could meet in a place and season, and how common each one is.
+Learn which birds you could meet in a place and season, and how often each one is reported.
 
 ## honestData
 
