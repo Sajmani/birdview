@@ -90,7 +90,13 @@ func main() {
 	// constant, because the host belongs to whoever deploys, not to the code.
 	flag.BoolVar(&countiesEnabled, "counties", false, "serve the dataset's counties as regions; off until every supported region has them (decisions.countiesBehindFlag)")
 	canonical := flag.String("canonical", "", "the one host to answer at; other hosts are redirected to it over HTTPS. Unset serves every host")
+	// The proportions review tool, for one machine (tech.proportionsReviewTool).
+	reviewPath := flag.String("review", "", "serve the proportions review tool at /review over this table, e.g. data/neck-review.tsv; local only")
+	reviewer := flag.String("reviewer", "", "with -review, the name each reviewed row records")
 	flag.Parse()
+	if err := checkReviewFlags(*reviewPath, *reviewer, *canonical); err != nil {
+		log.Fatalf("birdview: %v", err)
+	}
 
 	if *dev != "" {
 		if err := devAssets(*dev); err != nil {
@@ -112,6 +118,9 @@ func main() {
 		srv.feedback = *feedback
 		srv.canonical = *canonical
 		srv.revision = buildRevision()
+		if *reviewPath != "" {
+			err = srv.enableReview(*reviewPath, *reviewer)
+		}
 	}
 	if err != nil {
 		log.Fatalf("birdview: %v", err)
@@ -186,6 +195,8 @@ type server struct {
 	// feedback is the issue tracker readers are pointed at, or empty, in
 	// which case no page says anything about feedback at all (product.noPersonalAddress).
 	feedback string
+	// rv is the review tool's state, nil unless -review is set (tech.proportionsReviewTool).
+	rv *reviewState
 	// revision is the commit the server was built from, or "" when the build recorded none
 	// (tech.imageRecordsRevision).
 	revision string
@@ -1827,6 +1838,7 @@ func robots(w http.ResponseWriter, r *http.Request) {
 
 var funcs = template.FuncMap{
 	"f1":  func(v float64) string { return strconv.FormatFloat(v, 'f', 1, 64) },
+	"pct": func(v float64) float64 { return v * 100 },
 	"add": func(a, b float64) float64 { return a + b },
 	"sub": func(a, b float64) float64 { return a - b },
 	"div": func(a, b float64) float64 { return a / b },

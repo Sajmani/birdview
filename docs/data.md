@@ -113,6 +113,8 @@ at this coverage. The ratios are a drawing parameter: Ardeidae 0.85, Phoenicopte
 Anhingidae 0.90, Gruidae 0.85, down to Strigidae and Tytonidae at 0.08, every other family 0.18.
 A genus that flies with a different neck from its family has its own: the diving ducks 0.30 to
 0.35 against their family's 0.70, which fits the geese and swans, and the grebes 0.45 to 0.80.
+These overrides, and the head factors, are in `data/neck-review.tsv`, each marked proposed or
+reviewed, and a bird's page says which; they are being reviewed genus by genus against photographs.
 They are shown anyway — a heron's page reads *"neck modeled as 0.85 × trunk (family-specific
 ratio for Ardeidae)"* — because every figure draws a neck, and hiding the number would hide only
 the explanation.

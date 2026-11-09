@@ -2474,6 +2474,44 @@ they were set by judgment to approach ([todo.photoProportions](../todo.md#photop
 **Status: verified 2026-11-08, passing.**
 Watched failing: 2026-11-08, with the hooks in place but no values: "Lesser Scaup's neck is 0.26 of its length and Horned Grebe's 0.19; the scaup's must be the shorter", and five more, matching issue #7.
 
+### proportionsReviewTable
+
+**Neck ratios and head factors come from a reviewed table, which the build applies**
+
+**Verifies:** [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), [product.craniumFromMass](local/product/diagram.md#craniumfrommass), [decisions.proportionsReviewedPerTaxon](decisions.md#proportionsreviewedpertaxon) · **Level:** code · **Method:** the parser on fixtures and on `data/neck-review.tsv`, then the built dataset
+
+**Assertions:** a genus row wins over a family row and a family row over the code's family table;
+an empty value inherits; the provenance names the row and says "proposed, not yet reviewed" or
+"reviewed by" with the reviewer and date; an unknown status, a reviewed row without reviewer or date,
+a proposed row without a reason, a value out of range, a duplicate taxon, or a short row is refused;
+the table writes back exactly as read; every taxon in the committed table is a genus or family
+BirdView draws; and the built Lesser Scaup's neck names the *Aythya* row and the Horned Grebe's head
+the Podicipedidae factor.
+
+**Run:** `go test ./internal/morphology/ -run 'TestProportionReviewParsesAndApplies|TestDivingDucksAndGrebes' && go test ./cmd/birdview-ingest/ -run TestNeckReviewAppliesToDrawnTaxa`
+**Status: verified 2026-11-09, passing.**
+Watched failing: 2026-11-09, before the parser existed (the tests did not build: "undefined: Review"), and with the ingest passing no table ("Lesser Scaup's neck model reads \"neck modeled as 0.70 x trunk (family-specific ratio for Anatidae)\"; want the Aythya row").
+
+### proportionsReviewTool
+
+**The review tool is opt-in and local, and its choices write reviewed rows**
+
+**Verifies:** [tech.proportionsReviewTool](local/tech/process.md#proportionsreviewtool) · **Level:** code · **Method:** the server with and without `-review`, requests from the machine and from elsewhere, and saves against a temporary table
+
+**Assertions:** without `-review`, `/review` is not found; with it, a request from another address is
+refused (403) for both the page and a save, and one from `127.0.0.1` or `[::1]` is answered; the
+server refuses `-review` with `-canonical` or without `-reviewer`. A genus's page names its
+representative bird, carries its scientific name for the Commons search, links its eBird page,
+draws the current and adjusted figures, and sets the sliders to the current values; the figure
+endpoint draws a longer neck for a larger ratio; choosing adjusted, current, or the whole family
+writes a reviewed row with the reviewer and today's date, keeps the table's header, goes on to the
+next genus, and the next page reads the row. Not checked by the tests: the Commons search and the
+overlay, which run in the browser and were checked by hand.
+
+**Run:** `go test ./cmd/birdview/ -run 'TestReviewModeIsLocalAndOptIn|TestReviewPageAndSave'`
+**Status: verified 2026-11-09, passing.**
+Watched failing: 2026-11-09, with the local-only check removed ("/review from 192.0.2.1 answered 200; want 403") and with saves written as proposed (the reviewed row missing from the table).
+
 ### imageRecordsRevision
 
 **The image builds the deploy's REVISION into the server, and git never commits it**

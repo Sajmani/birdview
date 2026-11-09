@@ -65,3 +65,31 @@ be checked against the query and the file it came from.
 ---
 
 Project bindings are in [bindings.md](../../../bindings.md).
+
+## proportionsReviewTool
+
+**The owner reviews proportions in a local tool, never on the public site**
+
+Subject: `process.proportions_review`
+Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen), [goals.secure](../../../goals/goals.md#secure)
+
+Started with `-review <table> -reviewer <name>`, the server adds a review mode at `/review` for
+`data/neck-review.tsv` ([product.neckModelPerFamily](../product/diagram.md#neckmodelperfamily)). It
+answers only requests from the machine it runs on, and the server refuses to start with both
+`-review` and `-canonical`, so a deployment cannot carry it. For each genus, the representative
+bird (its most reported species) is drawn twice at one scale: as the table draws it now, and as
+sliders for its neck ratio and head factor redraw it. Beside the figures are photographs of the bird
+from **Wikimedia Commons**, found by the reviewer's browser through Commons' public search and shown
+from Commons with their author, license, and a link to their page. BirdView stores, copies, and
+measures none of them ([imports.md](../../imports.md#wikimedia-commons)). The figure can be laid over a photograph,
+moved, scaled, and turned, to compare outlines. Choosing **current** or **adjusted** writes the
+taxon's row as reviewed, with the reviewer, the date, and an optional reason; the next ingest draws
+it. Its pages are not public pages, so the checks of [tech.webPages](accessibility.md#webpages) do not
+crawl them.
+
+Rationale: no source measures necks and heads, so the values are the owner's judgment, and judging
+a number in a table against a bird in the air is slow. Putting the figure, the photographs, and the
+controls on one page turns each genus into a minute's decision, and recording who decided what keeps
+the judgment visible ([goals.honestData](../../../goals/goals.md#honestdata)). Photographs stay on Commons and are credited where shown,
+since BirdView copies no photograph ([product.ebirdLink](../product/presentation.md#ebirdlink)) (Sameer, 2026-11-09).
+

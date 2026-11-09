@@ -682,6 +682,23 @@ AviList's code for all but eight of BirdView's species and supplied the three Av
 
 ---
 
+## `wikimedia-commons`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | <https://commons.wikimedia.org/>, searched through its public API (`/w/api.php`) |
+| **Version** | Live, at review time |
+| **Integrity** | **Not vendored.** Nothing from it is stored or committed. |
+| **Tier** | mandatory (each file's own license, most CC BY or CC BY-SA, some public domain) |
+| **Import style** | **Consulted, not ingested.** The local review tool's page asks Commons for photographs of a bird and shows them from Commons, each with its author, license, and file page ([tech.proportionsReviewTool](local/tech/process.md#proportionsreviewtool)) |
+| **Scope** | The owner's judgment of neck and head proportions ([product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily)) |
+| **Adopted parts** | None stored. The values the owner chooses are BirdView's own judgment, not measurements of the photographs |
+| **Exclusions** | Everything on the public site; no photograph is shown there ([product.speciesPhotographs](local/product/diagram.md#speciesphotographs) stays withdrawn) |
+| **Owner** | Each photograph's author; Wikimedia Foundation hosts them |
+| **Status** | **Consulted from 2026-11-09**, in the local review tool only |
+
+---
+
 ## `ebird-sensitive`
 
 | Field | Value |

@@ -202,6 +202,13 @@ flowchart LR
     AVONET habitat · *as reviewed; checked against AVONET*
     status · *pending, proposed, or reviewed*
     additions ★ *reviewed rows only: habitat and reason*`"]
+    NREV["`neck-review.tsv
+    *genus and family proportions; the review tool writes reviewed rows*
+    ─────────────
+    taxon · *genus, or family ending -idae*
+    neck ratio ★ *empty keeps the family table*
+    head factor ★ *empty is 1*
+    status · *proposed or reviewed, with reviewer and date*`"]
     COUNTIES["`county-presence/USA.33_1.tsv
     *one table per state, as region-presence.tsv*
     ─────────────
@@ -237,7 +244,7 @@ flowchart LR
     from the sheet NearMatchSheets names"])
     S4(["Step 4: segments
     head and body modeled from Mass;
-    neck from body × family ratio;
+    neck from body × genus or family ratio;
     total length = sum of segments"])
     S5(["Step 5: habitat and diet
     AVONET's classes
@@ -347,6 +354,7 @@ flowchart LR
   AVO --> S6
   REGIONS --> S8
   HREV -->|"reviewed additions"| S5
+  NREV -->|"neck ratios and head factors"| S4
   COUNTIES -->|"after the peak share"| S8
 
   JSON --> SERVER
@@ -368,6 +376,11 @@ everywhere; iNaturalist's count only in a region and month where eBird is confir
 the species. `status.Declared`, a short list in code, adds species the open records cannot speak
 for, each with its reason. See [where the data comes from](data.md#scope) and the
 [decision to count eBird first](../river/requirements/decisions.md#countebirdfirst).
+
+**Proportions are reviewed by genus.** The neck ratio and head factor of step 4 come from the family
+table in the code unless `data/neck-review.tsv` has a row for the bird's genus or family. Rows start
+as *proposed* and become *reviewed* through the local review tool (`birdview -review`), which draws
+each genus beside photographs from Wikimedia Commons; see [building](building.md#reviewing-proportions).
 
 **Region counts come from the same source.** `birdview-regions` asks GBIF for every name recorded
 in every region, for the whole year and for each month. For species mostly seen at sea, it also

@@ -40,6 +40,7 @@ const (
 	regFile           = "../../data/region-presence.tsv"
 	countyDir         = "../../data/county-presence"
 	habitatReviewFile = "../../data/habitat-review.tsv"
+	neckReviewFile    = "../../data/neck-review.tsv"
 	bblFile           = "../../third_party/bbl/speclist.html"
 )
 
@@ -58,6 +59,9 @@ func load(t *testing.T) *dataset.Dataset {
 	// redistribute.
 	if err := loadHabitatReview(habitatReviewFile); err != nil {
 		t.Fatalf("loadHabitatReview: %v", err)
+	}
+	if err := loadNeckReview(neckReviewFile); err != nil {
+		t.Fatalf("loadNeckReview: %v", err)
 	}
 	ds, _, err := build(statusFile, avoFile, foxFile, avlFile)
 	if err != nil {
@@ -1002,5 +1006,41 @@ func TestEveryDrawnBirdHasAHabitatReview(t *testing.T) {
 		if !drawn[sci] {
 			t.Errorf("data/habitat-review.tsv has a row for %s, which BirdView does not draw", sci)
 		}
+	}
+}
+
+// TestNeckReviewAppliesToDrawnTaxa asserts decisions.proportionsReviewedPerTaxon in the build: every
+// taxon in data/neck-review.tsv is a genus or family BirdView draws, and its rows reach the
+// species, the scaup's neck naming its genus row and the grebe's head its family factor.
+//
+// Verifies: product.neckModelPerFamily, product.craniumFromMass. Criterion: acceptance.proportionsReviewTable.
+func TestNeckReviewAppliesToDrawnTaxa(t *testing.T) {
+	ds := load(t)
+	drawn := map[string]bool{}
+	var scaup, grebe *dataset.Species
+	for i := range ds.Species {
+		sp := &ds.Species[i]
+		drawn[sp.Family] = true
+		drawn[strings.Fields(sp.ScientificName)[0]] = true
+		switch sp.ScientificName {
+		case "Aythya affinis":
+			scaup = sp
+		case "Podiceps auritus":
+			grebe = sp
+		}
+	}
+	for taxon := range neckReview {
+		if !drawn[taxon] {
+			t.Errorf("data/neck-review.tsv names %s, which is no genus or family BirdView draws", taxon)
+		}
+	}
+	if scaup == nil || grebe == nil {
+		t.Fatal("the dataset has no Lesser Scaup or Horned Grebe")
+	}
+	if m := scaup.Segments.Neck.Prov.Model; !strings.Contains(m, "genus Aythya") {
+		t.Errorf("Lesser Scaup's neck model reads %q; want the Aythya row", m)
+	}
+	if m := grebe.Segments.Head.Prov.Model; !strings.Contains(m, "Podicipedidae") {
+		t.Errorf("Horned Grebe's head model reads %q; want the Podicipedidae factor", m)
 	}
 }

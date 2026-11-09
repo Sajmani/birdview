@@ -55,6 +55,7 @@ func main() {
 		avlPath    = flag.String("avilist", "third_party/avilist/AviList-v2025b-10Jun2026-extended.xlsx", "AviList checklist (extended release)")
 		regPath    = flag.String("regions", "data/region-presence.tsv", "per-region presence (built by birdview-regions)")
 		reviewPath = flag.String("habitat-review", "data/habitat-review.tsv", "the habitat review (decisions.habitatReviewedPerSpecies)")
+		neckPath   = flag.String("neck-review", "data/neck-review.tsv", "the proportions review (decisions.proportionsReviewedPerTaxon)")
 		countyDir  = flag.String("counties", "data/county-presence", "per-state county presence (built by birdview-regions -counties)")
 		bblPath    = flag.String("bbl", "third_party/bbl/speclist.html", "USGS Bird Banding Laboratory species list (banding codes)")
 		outPath    = flag.String("out", "web/data/species.json", "output path (a build artifact)")
@@ -62,6 +63,9 @@ func main() {
 	flag.Parse()
 
 	if err := loadHabitatReview(*reviewPath); err != nil {
+		log.Fatalf("birdview-ingest: %v", err)
+	}
+	if err := loadNeckReview(*neckPath); err != nil {
 		log.Fatalf("birdview-ingest: %v", err)
 	}
 	ds, report, err := build(*statusPath, *avoPath, *foxPath, *avlPath)
@@ -377,9 +381,10 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 		}
 
 		// Segments: bill and tail measured, head/neck/body modeled.
-		headV, headModel := morphology.HeadLength(res.traits.Mass, avr.Family)
+		genus := strings.Fields(sci)[0]
+		headV, headModel := morphology.HeadLength(res.traits.Mass, avr.Family, genus, neckReview)
 		bodyV, bodyModel := morphology.BodyLength(res.traits.Mass)
-		neckV, neckModel := morphology.NeckLength(bodyV, avr.Family, strings.Fields(sci)[0])
+		neckV, neckModel := morphology.NeckLength(bodyV, avr.Family, genus, neckReview)
 		bill, head, neck, body, tail, total := morphology.BalanceToSum(
 			res.traits.Culmen, headV, neckV, bodyV, res.traits.Tail)
 
@@ -770,6 +775,23 @@ func loadHabitatReview(path string) error {
 	defer f.Close()
 	habitatReview, err = trait.ParseHabitatReview(f)
 	return err
+}
+
+// neckReview is data/neck-review.tsv, read before build: its rows set neck ratios and head factors
+// per genus or family (decisions.proportionsReviewedPerTaxon).
+var neckReview morphology.Review
+
+func loadNeckReview(path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	neckReview, err = morphology.ParseReview(f)
+	if err != nil {
+		return fmt.Errorf("%s: %v", path, err)
+	}
+	return nil
 }
 
 // applyCounties joins every county table in dir onto the dataset after applyRegions, the same way

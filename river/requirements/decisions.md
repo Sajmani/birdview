@@ -4730,7 +4730,7 @@ the one day's links working, as [tech.stableUrls](local/tech/delivery.md#stableu
 
 Date: 2026-11-08
 Decided by: Sameer
-Status: accepted
+Status: amended by proportionsReviewedPerTaxon
 Affects: [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), [product.craniumFromMass](local/product/diagram.md#craniumfrommass)
 
 ### Decided
@@ -4754,4 +4754,34 @@ neck a quarter of its length, because the family's ratio fits geese and swans; g
 their length, drew heads of 0.18 of it from the mass model. The owner chose the cheap fix, values set
 by hand for the two families the issue names, over measuring every species from photographs, which
 remains [todo.photoProportions](../todo.md#photoproportions) with its cost estimate on the issue.
+
+---
+
+## proportionsReviewedPerTaxon
+
+**Neck ratios and head factors are reviewed per taxon, in a table, with a local tool**
+
+Date: 2026-11-09
+Decided by: Sameer
+Status: accepted
+Amends: duckAndGrebeProportions
+Affects: [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), [product.craniumFromMass](local/product/diagram.md#craniumfrommass), [tech.proportionsReviewTool](local/tech/process.md#proportionsreviewtool)
+
+### Decided
+
+Genus and family overrides of the neck ratio, and head factors, move from the code to
+`data/neck-review.tsv`, each row marked proposed or reviewed, with reviewer, date, and reason, as
+the habitat review is ([habitatReviewedPerSpecies](#habitatreviewedperspecies)). The values of
+[duckAndGrebeProportions](#duckandgrebeproportions) move there as **proposed**: they were set by
+judgment and not yet checked against photographs. The family table in the code stays as the base.
+Review proceeds family by family, Anatidae first, then Ardeidae, Scolopacidae, Threskiornithidae,
+Phalacrocoracidae, Laridae, and Rallidae, in a local review tool showing figures and openly licensed
+photographs side by side with sliders.
+
+### Why
+
+Issue #7 showed family-wide values failing within a family, and the cheap fix was set by eye
+without photographs. The owner asked for a tool that makes each review quick: photographs and
+figures side by side, a choice between current and adjusted, and sliders to set the proportions by
+hand. A table records each decision and who made it, which a constant in the code cannot.
 
