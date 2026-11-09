@@ -2734,10 +2734,16 @@ with its query, that table's rows with label, value, and provenance tag, and the
 versions and the server's revision; each link is under 8,000 bytes; the home page's Report it opens a
 new issue with no title and a body holding the page's address with its query, its heading with the
 settings in view, the source versions, and the revision; with no tracker set, neither page has a
-link.
+link. Across every page (the home page, species pages, the three kinds of page for a bird no longer
+drawn, `/added`, `/excluded`, and every guide), every link to the tracker but a numbered issue or the
+building guide's Contact opens a new issue whose body holds the page's address, the source versions,
+and the revision; the home page, a species page, and each no-longer-drawn page have one, and the
+Passenger Pigeon's names the bird and its verdict. A tracker setting that is not a GitHub issue list
+over HTTPS is refused.
 
-**Run:** `go test ./cmd/birdview/ -run 'TestReportDataIssueLinks|TestHomeReportLink'`
+**Run:** `go test ./cmd/birdview/ -run 'TestReportDataIssueLinks|TestHomeReportLink|TestEveryReportLinkFilledIn|TestFeedbackMustBeFillable'`
 **Status: verified 2026-11-08, passing.**
+Watched failing: 2026-11-08, for every page: the no-longer-drawn pages still linked to the bare tracker ("/species/paspig links to the tracker as https://github.com/google/birdview/issues"); and before checkFeedback existed (the test did not build: "undefined: checkFeedback").
 Watched failing: 2026-11-08, for the home page and the revision: before either was filled in ("Measurements and sources's issue body lacks \"BirdView server: 0123456789ab\"").
 Watched failing: 2026-11-08, before the links existed ("the species page has 0 Report a data issue links, want 2"), and with the fixture's source versions missing ("Measurements and sources's issue body lacks \"AVONET v7\"").
 

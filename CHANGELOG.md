@@ -10,6 +10,8 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 - **Report a data issue** under each table on a bird's page opens a GitHub issue with the bird, the
   table's values, and the data's versions filled in. The home page's **Report it** now fills in the
   page's address, its settings, and the versions too, and both name the exact build of the site.
+  So does **Report a problem** on the page for a bird BirdView no longer draws: every report link
+  on the site now fills in what it is about.
 
 ### Changed
 

@@ -85,7 +85,7 @@ restart after changing a Go file (for example, adding a field a template uses).
 | `birdview` | `-addr` | `localhost:8080` |
 | | `-data` | `web/data/species.json` |
 | | `-dev` | off |
-| | `-feedback` | none; the issue tracker URL pages point readers to, omitted when unset |
+| | `-feedback` | none; the GitHub issue list (`https://github.com/<owner>/<repo>/issues`) whose filled-in new issues every report link opens; no links when unset, and the server refuses any other kind of URL |
 | | `-canonical` | none; the one host to answer at, e.g. `birdview.site`; requests for any other host are redirected there over HTTPS |
 
 The defaults are relative paths, so run both commands from the repository root.

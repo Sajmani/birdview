@@ -769,7 +769,16 @@ as the page shows it, its label, value, and provenance tag; and the versions the
 [tech.imageRecordsRevision](../tech/release.md#imagerecordsrevision)). The reader adds what is
 wrong. The home page's **Found something wrong? Report it** opens a new issue the same way, its
 title left to the reader, with the page's address, its heading (the settings in view), how many
-birds match, and the same versions. With no tracker set, there is no link. The report is
+birds match, and the same versions. With no tracker set, there is no link.
+
+**Every link BirdView serves for reporting a problem opens an issue filled in this way**, never a
+bare link to the tracker: the page's address, what the page shows that a report would be about, the
+data's source versions, and the server's revision (Sameer, 2026-11-08). The page for a bird
+BirdView no longer draws ([undrawnSpeciesAnswer](#undrawnspeciesanswer)) fills in the bird's names,
+its verdict, and the evidence behind it. A page added later follows the same rule. The building
+guide's Contact, which names the tracker for contributors and reports on no page, is not a report
+link. Because only a GitHub issue list can be filled in from a link, the server refuses to start
+with a tracker setting that is not one. The report is
 [GitHub issue #9](https://github.com/google/birdview/issues/9) (Sameer, 2026-11-08).
 
 Rationale: a reader who sees a wrong wingspan or habitat knows which bird and which value, but not

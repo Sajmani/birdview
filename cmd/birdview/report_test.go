@@ -112,3 +112,78 @@ func TestHomeReportLink(t *testing.T) {
 		t.Error("with no tracker set, the home page still offers Report it")
 	}
 }
+
+// TestEveryReportLinkFilledIn asserts product.reportDataIssue's rule for every page: with a tracker
+// set, every link a page serves to the tracker opens a new issue whose body holds the page's
+// address, the source versions, and the server's revision, never the bare tracker. Links to a
+// numbered issue, and the building guide's Contact, are not report links. The home page, a species
+// page, and the page for a bird no longer drawn each have one, and the last names the bird and its
+// verdict.
+//
+// Verifies: product.reportDataIssue, product.undrawnSpeciesAnswer. Criterion: acceptance.reportDataIssueLinks.
+func TestEveryReportLinkFilledIn(t *testing.T) {
+	const tracker = "https://github.com/google/birdview/issues"
+	s := newTestServer(t)
+	s.feedback = tracker
+	s.ds.SourceVersions = map[string]string{"avonet": "AVONET v7"}
+	s.revision = "0123456789ab"
+	href := regexp.MustCompile(`href="([^"]*)"`)
+	numbered := regexp.MustCompile(`^` + regexp.QuoteMeta(tracker) + `/\d+$`)
+	reports := map[string][]string{}
+	for _, page := range []string{
+		"/", "/?month=May&habitat=Coastal", "/species/amecro", "/species/paspig", "/species/sedwar1",
+		"/species/lillov1", "/added", "/excluded",
+		"/docs", "/docs/using", "/docs/data", "/docs/pipeline", "/docs/building",
+	} {
+		_, body := get(t, s, page)
+		for _, m := range href.FindAllStringSubmatch(body, -1) {
+			link := html.UnescapeString(m[1])
+			if !strings.HasPrefix(link, tracker) || numbered.MatchString(link) {
+				continue
+			}
+			if page == "/docs/building" && link == tracker {
+				continue // the Contact, which reports on no page
+			}
+			u, err := url.Parse(link)
+			if err != nil || u.Path != "/google/birdview/issues/new" {
+				t.Errorf("%s links to the tracker as %s; every report link opens a filled-in new issue", page, link)
+				continue
+			}
+			b := u.Query().Get("body")
+			for _, want := range []string{"**Page:** http://example.com" + page, "avonet: AVONET v7", "BirdView server: 0123456789ab"} {
+				if !strings.Contains(b, want) {
+					t.Errorf("a report link on %s lacks %q:\n%s", page, want, b)
+				}
+			}
+			reports[page] = append(reports[page], b)
+		}
+	}
+	for _, page := range []string{"/", "/species/amecro", "/species/paspig", "/species/sedwar1", "/species/lillov1"} {
+		if len(reports[page]) == 0 {
+			t.Errorf("%s has no report link", page)
+		}
+	}
+	if b := strings.Join(reports["/species/paspig"], "\n"); !strings.Contains(b, "Passenger Pigeon") ||
+		!strings.Contains(b, "Ectopistes migratorius") || !strings.Contains(b, "its records recur, but they stopped") {
+		t.Errorf("the Passenger Pigeon's report link lacks its names or verdict:\n%s", b)
+	}
+}
+
+// TestFeedbackMustBeFillable asserts product.reportDataIssue's tracker rule: only a GitHub issue
+// list can be filled in from a link, so any other tracker setting is refused.
+//
+// Verifies: product.reportDataIssue. Criterion: acceptance.reportDataIssueLinks.
+func TestFeedbackMustBeFillable(t *testing.T) {
+	for v, ok := range map[string]bool{
+		"": true,
+		"https://github.com/google/birdview/issues":  true,
+		"https://github.com/google/birdview/issues/": true,
+		"https://example.com/bugs":                   false,
+		"https://github.com/google/birdview":         false,
+		"http://github.com/google/birdview/issues":   false,
+	} {
+		if err := checkFeedback(v); (err == nil) != ok {
+			t.Errorf("checkFeedback(%q) = %v; want accepted %v", v, err, ok)
+		}
+	}
+}

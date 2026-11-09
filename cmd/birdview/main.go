@@ -99,6 +99,9 @@ func main() {
 		log.Printf("birdview: DEV MODE, assets from %s — the embed is not being used", *dev)
 	}
 
+	if err := checkFeedback(*feedback); err != nil {
+		log.Fatalf("birdview: %v", err)
+	}
 	ds, err := load(*data)
 	if err != nil {
 		log.Fatalf("birdview: %v\n\nRun birdview-ingest first; the dataset is a build artifact "+
@@ -1283,16 +1286,12 @@ func (s *server) reportURL(r *http.Request, name, scientific, table string, line
 // issueURL opens a new issue in the tracker with its body filled in: the page's address, a place for
 // the reader's words, the lines given under the heading about, and the versions the data and the
 // server were built from (product.reportDataIssue). An empty title is left to the reader. It is
-// empty with no tracker set, and the tracker itself when it is not a GitHub issue list, which
-// cannot be filled in.
+// empty with no tracker set; checkFeedback has made sure any tracker set can be filled in.
 func (s *server) issueURL(r *http.Request, title, about string, lines []string) template.URL {
 	if s.feedback == "" {
 		return ""
 	}
 	base := strings.TrimSuffix(s.feedback, "/")
-	if !strings.HasSuffix(base, "/issues") {
-		return template.URL(s.feedback)
-	}
 	scheme, host := "http", r.Host
 	if r.TLS != nil {
 		scheme = "https"
@@ -1332,6 +1331,19 @@ func (s *server) issueURL(r *http.Request, title, about string, lines []string) 
 	}
 	q.Set("body", b.String())
 	return template.URL(base + "/new?" + q.Encode())
+}
+
+// githubIssues is a GitHub repository's issue list, the one kind of tracker a link can fill in.
+var githubIssues = regexp.MustCompile(`^https://github\.com/[\w.-]+/[\w.-]+/issues/?$`)
+
+// checkFeedback refuses a tracker setting that is not a GitHub issue list: every report link opens
+// a filled-in issue, and no other tracker can be filled in from a link (product.reportDataIssue).
+func checkFeedback(v string) error {
+	if v != "" && !githubIssues.MatchString(v) {
+		return fmt.Errorf("-feedback %q is not a GitHub issue list (https://github.com/<owner>/<repo>/issues); "+
+			"report links must open a filled-in issue (product.reportDataIssue)", v)
+	}
+	return nil
 }
 
 // reportLineMax is the longest table row a report quotes in full.
@@ -1394,7 +1406,9 @@ func foldNote(sp *dataset.Species, g view.Geometry, u units) string {
 // to interleave them ends up asserting the intersection — which for `absent`
 // would be counts that were never measured.
 type undrawnData struct {
-	Feedback string
+	// Feedback opens a new issue about this bird, filled in; empty with no tracker set
+	// (product.reportDataIssue).
+	Feedback template.URL
 	Home     template.URL
 	Opt      options
 
@@ -1444,7 +1458,7 @@ func (s *server) undrawn(w http.ResponseWriter, r *http.Request, u *dataset.Undr
 		comma(int64(u.Episodes)), comma(int64(u.Years)), where, comma(u.Records))
 
 	d := undrawnData{
-		Feedback: s.feedback, Home: homeLink(r), Opt: opt,
+		Home: homeLink(r), Opt: opt,
 		Name: name, AlsoCalled: other, U: u,
 	}
 	switch u.Status {
@@ -1462,6 +1476,13 @@ func (s *server) undrawn(w http.ResponseWriter, r *http.Request, u *dataset.Undr
 		d.Verdict = "the open record holds nothing that can be measured"
 		d.Why = "There are too few dated records of it, anywhere BirdView covers, to judge."
 	}
+
+	lines := []string{"Not drawn: " + d.Verdict + " (" + u.Status + ")"}
+	if d.Evidence != "" {
+		lines = append(lines, d.Evidence)
+	}
+	d.Feedback = s.issueURL(r, fmt.Sprintf("Data issue: %s (%s) not drawn", name, u.ScientificName),
+		"What the page says about "+name+" ("+u.ScientificName+")", lines)
 
 	// The body says what the status code says, and the status code is set
 	// before a byte of it is written.
