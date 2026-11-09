@@ -42,10 +42,17 @@ func failures(results []smoke.Result) map[string]string {
 //
 // Verifies: tech.smokeCheckAfterDeploy. Criterion: acceptance.smokeChecksDeployment.
 func TestSmokeChecksTheServer(t *testing.T) {
-	site := httptest.NewServer(newTestServer(t))
+	// A deployment sets a tracker and records its revision (tech.imageRecordsRevision).
+	deployed := func() *server {
+		s := newTestServer(t)
+		s.feedback = "https://github.com/google/birdview/issues"
+		s.revision = "0123456789ab"
+		return s
+	}
+	site := httptest.NewServer(deployed())
 	defer site.Close()
 	u, _ := url.Parse(site.URL)
-	other := newTestServer(t)
+	other := deployed()
 	other.canonical = u.Host
 	mirror := httptest.NewServer(other)
 	defer mirror.Close()
@@ -60,7 +67,9 @@ func TestSmokeChecksTheServer(t *testing.T) {
 
 	// Each breakage fails the check written for it. The handler wraps the
 	// healthy server and changes one thing.
-	healthy := newTestServer(t)
+	healthy := deployed()
+	unrecorded := deployed()
+	unrecorded.revision = ""
 	for _, c := range []struct {
 		name   string
 		check  string
@@ -94,6 +103,13 @@ func TestSmokeChecksTheServer(t *testing.T) {
 		{"unknown species served", "an unknown species is not found", func(w http.ResponseWriter, r *http.Request) bool {
 			if strings.HasPrefix(r.URL.Path, "/species/no-such") {
 				w.Write([]byte("ok"))
+				return true
+			}
+			return false
+		}},
+		{"revision not recorded", "the server names its revision", func(w http.ResponseWriter, r *http.Request) bool {
+			if r.URL.Path == "/" {
+				unrecorded.ServeHTTP(w, r)
 				return true
 			}
 			return false

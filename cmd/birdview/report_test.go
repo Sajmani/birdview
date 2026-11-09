@@ -32,6 +32,7 @@ func TestReportDataIssueLinks(t *testing.T) {
 	s := newTestServer(t)
 	s.feedback = "https://github.com/google/birdview/issues"
 	s.ds.SourceVersions = map[string]string{"avonet": "AVONET v7", "avilist": "AviList v2025b"}
+	s.revision = "0123456789ab"
 	_, body := get(t, s, "/species/amecro?units=metric")
 	links := regexp.MustCompile(`<a class="report" href="([^"]*)"[^>]*>Report a data issue</a>`).FindAllStringSubmatch(body, -1)
 	if len(links) != 2 {
@@ -59,7 +60,7 @@ func TestReportDataIssueLinks(t *testing.T) {
 		if !strings.Contains(title, "American Crow") || !strings.Contains(title, "Corvus brachyrhynchos") || !strings.Contains(title, table.title) {
 			t.Errorf("%s's issue title is %q; want the bird's names and %q", table.heading, title, table.title)
 		}
-		for _, want := range append([]string{"/species/amecro?units=metric", "avonet: AVONET v7", "avilist: AviList v2025b"}, table.rows...) {
+		for _, want := range append([]string{"/species/amecro?units=metric", "avonet: AVONET v7", "avilist: AviList v2025b", "BirdView server: 0123456789ab"}, table.rows...) {
 			if !strings.Contains(b, want) {
 				t.Errorf("%s's issue body lacks %q:\n%s", table.heading, want, b)
 			}
@@ -73,5 +74,41 @@ func TestReportDataIssueLinks(t *testing.T) {
 	s.feedback = ""
 	if _, body := get(t, s, "/species/amecro"); strings.Contains(body, "Report a data issue") {
 		t.Error("with no tracker set, the species page still offers Report a data issue")
+	}
+}
+
+// TestHomeReportLink asserts product.reportDataIssue's home page link: with a tracker set, Found
+// something wrong? Report it opens a new issue whose body holds the page's address, its heading (the
+// settings in view), the data's versions, and the server's revision, the title left to the reader;
+// with no tracker, no link.
+//
+// Verifies: product.reportDataIssue, tech.imageRecordsRevision. Criterion: acceptance.reportDataIssueLinks.
+func TestHomeReportLink(t *testing.T) {
+	s := newTestServer(t)
+	s.feedback = "https://github.com/google/birdview/issues"
+	s.ds.SourceVersions = map[string]string{"avonet": "AVONET v7"}
+	s.revision = "0123456789ab"
+	_, body := get(t, s, "/?month=May&freq=1000")
+	m := regexp.MustCompile(`<a href="([^"]*)">Report it</a>`).FindStringSubmatch(body)
+	if m == nil {
+		t.Fatal("the home page has no Report it link")
+	}
+	u, err := url.Parse(html.UnescapeString(m[1]))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if u.Scheme+"://"+u.Host+u.Path != "https://github.com/google/birdview/issues/new" || u.Query().Has("title") {
+		t.Errorf("Report it opens %s; want a new issue with the title left to the reader", u)
+	}
+	b := u.Query().Get("body")
+	for _, want := range []string{"/?month=May&freq=1000", "Showing birds in May", "At least 1 in 1,000",
+		"avonet: AVONET v7", "BirdView server: 0123456789ab"} {
+		if !strings.Contains(b, want) {
+			t.Errorf("the home page's issue body lacks %q:\n%s", want, b)
+		}
+	}
+	s.feedback = ""
+	if _, body := get(t, s, "/"); strings.Contains(body, "Report it") {
+		t.Error("with no tracker set, the home page still offers Report it")
 	}
 }

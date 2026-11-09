@@ -765,8 +765,11 @@ Under the species page's **Measurements and sources** and **Categories and sourc
 ([noPersonalAddress](#nopersonaladdress)) with its title and body filled in: the bird's English and
 scientific names and which table the report is about; the page's address; each row of that table
 as the page shows it, its label, value, and provenance tag; and the versions the data was built from
-(the dataset's source versions, and the server's revision when the build recorded one). The reader
-adds what is wrong. With no tracker set, there is no link. The report is
+(the dataset's source versions, and the commit the server was built from,
+[tech.imageRecordsRevision](../tech/release.md#imagerecordsrevision)). The reader adds what is
+wrong. The home page's **Found something wrong? Report it** opens a new issue the same way, its
+title left to the reader, with the page's address, its heading (the settings in view), how many
+birds match, and the same versions. With no tracker set, there is no link. The report is
 [GitHub issue #9](https://github.com/google/birdview/issues/9) (Sameer, 2026-11-08).
 
 Rationale: a reader who sees a wrong wingspan or habitat knows which bird and which value, but not

@@ -21,6 +21,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -181,5 +182,43 @@ func TestDockerStagesCopyWhatTheyBuild(t *testing.T) {
 		if !built[want] {
 			t.Errorf("found no Dockerfile stage that builds ./%s; stages parsed: %+v", want, stages)
 		}
+	}
+}
+
+// TestImageRecordsRevision asserts tech.imageRecordsRevision: the stage that builds the server
+// copies the REVISION file the deploy writes, if there is one, and builds its contents into the
+// binary; git never commits that file, and the upload to Cloud Build still carries it.
+//
+// Verifies: tech.imageRecordsRevision. Criterion: acceptance.imageRecordsRevision.
+func TestImageRecordsRevision(t *testing.T) {
+	root := filepath.Join("..", "..")
+	b, err := os.ReadFile(filepath.Join(root, "Dockerfile"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := strings.ReplaceAll(string(b), "\\\n", " ")
+	var stage *dockerStage
+	for _, st := range parseDockerfile(t, filepath.Join(root, "Dockerfile")) {
+		if slices.Contains(st.builds, "cmd/birdview") {
+			stage = &st
+		}
+	}
+	if stage == nil {
+		t.Fatal("found no Dockerfile stage that builds ./cmd/birdview")
+	}
+	if !slices.Contains(stage.copies, "REVISION*") {
+		t.Errorf("stage %q copies %v; want REVISION*, so the deploy's REVISION file reaches the build and its absence does not fail it", stage.name, stage.copies)
+	}
+	server := regexp.MustCompile(`go build[^\n]*\./cmd/birdview(\s|$)`).FindString(text)
+	if !strings.Contains(server, "-X main.revision=") {
+		t.Errorf("the server is built with %q; want -ldflags \"-X main.revision=...\" from REVISION", server)
+	}
+	ignore, _ := os.ReadFile(filepath.Join(root, ".gitignore"))
+	if !regexp.MustCompile(`(?m)^/REVISION$`).Match(ignore) {
+		t.Error(".gitignore does not ignore /REVISION; a deploy's REVISION file could be committed")
+	}
+	upload, _ := os.ReadFile(filepath.Join(root, ".gcloudignore"))
+	if !regexp.MustCompile(`(?m)^!/REVISION$`).Match(upload) || !strings.Contains(string(upload), "#!include:.gitignore") {
+		t.Errorf(".gcloudignore must include .gitignore and re-include !/REVISION, or gcloud run deploy --source leaves it behind; it reads:\n%s", upload)
 	}
 }

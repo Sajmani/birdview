@@ -23,6 +23,7 @@ package smoke
 
 import (
 	"fmt"
+	"html"
 	"io"
 	"net/http"
 	"net/url"
@@ -55,6 +56,7 @@ func Run(base string, redirectFrom []string, client *http.Client) []Result {
 	c.client = &cl
 
 	index := c.index()
+	c.revision(index)
 	c.revalidated()
 	c.thisMonth()
 	c.page("a species page", firstMatch(speciesLink, index, "/species/amecro"), "text/html")
@@ -75,6 +77,8 @@ type checker struct {
 }
 
 var (
+	issueLink    = regexp.MustCompile(`href="([^"]*/issues/new\?[^"]*)"`)
+	revisionLine = regexp.MustCompile(`BirdView server: ([0-9a-f]{7,})`)
 	speciesLink  = regexp.MustCompile(`href="(/species/[a-z0-9]+)"`)
 	boundaryLink = regexp.MustCompile(`"(/boundaries/[0-9a-f]+\.json)"`)
 )
@@ -131,6 +135,28 @@ func (c *checker) index() string {
 	}
 	c.record("the home page", joined(problems))
 	return string(body)
+}
+
+// revision checks that the home page's issue link names the commit the server was built from, so a
+// reader's report says which build it is about (tech.imageRecordsRevision). It fails when the
+// deploy wrote no REVISION file, and when the deployment sets no tracker.
+func (c *checker) revision(index string) {
+	const name = "the server names its revision"
+	m := issueLink.FindStringSubmatch(index)
+	if m == nil {
+		c.record(name, fmt.Errorf("the home page has no issue link; is -feedback set?"))
+		return
+	}
+	u, err := url.Parse(html.UnescapeString(m[1]))
+	if err != nil {
+		c.record(name, err)
+		return
+	}
+	if !revisionLine.MatchString(u.Query().Get("body")) {
+		c.record(name, fmt.Errorf("the issue link names no server revision; write REVISION before deploying (docs/building.md)"))
+		return
+	}
+	c.record(name, nil)
 }
 
 // thisMonth fetches month=now, Now without JavaScript, which redirects to

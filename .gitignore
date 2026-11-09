@@ -18,3 +18,7 @@
 *.bak
 
 .DS_Store
+
+# The commit a deploy builds, written just before it (tech.imageRecordsRevision); .gcloudignore
+# uploads it anyway.
+/REVISION

@@ -339,6 +339,18 @@ docker run --rm -p 8080:8080 birdview \
   -feedback <issue-tracker-url>
 ```
 
+### Recording the revision
+
+Before deploying, write the commit you are deploying to `REVISION` in the directory you build from:
+
+```
+git rev-parse HEAD > REVISION
+```
+
+The image builds it into the server, which names it at startup and in the issues readers open from
+its pages. git ignores the file, and `.gcloudignore` uploads it anyway. Without it the build still
+succeeds, but the server says its revision was not recorded and the smoke check below fails.
+
 ### After deploying
 
 Check the deployment from outside. The first argument is its address; any others are addresses
@@ -348,7 +360,8 @@ that should redirect to it:
 go run ./cmd/birdview-smoke https://birdview.example https://www.birdview.example
 ```
 
-It prints one line per check and exits non-zero if any fails. It fetches nothing larger than a
+It prints one line per check and exits non-zero if any fails. One check reads the revision from the
+home page's issue link, so it needs `-feedback` set and a `REVISION` written before the deploy. It fetches nothing larger than a
 page, so running it after every deploy costs little egress.
 
 ### Rolling back

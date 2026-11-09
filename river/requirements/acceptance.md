@@ -2458,6 +2458,22 @@ hand on a copy of the tree with no `.git` and no built dataset: every package pa
 
 Watched failing: 2026-10-23, with the builder's `COPY --from=test` deleted, it reported that nothing makes the tests run.
 
+### imageRecordsRevision
+
+**The image builds the deploy's REVISION into the server, and git never commits it**
+
+**Verifies:** [tech.imageRecordsRevision](local/tech/release.md#imagerecordsrevision) · **Level:** code · **Method:** the Dockerfile and ignore files read; the upload listed with `gcloud meta list-files-for-upload`
+
+**Assertions:** the stage that builds the server copies `REVISION*` (so its absence does not fail the
+build) and links it with `-X main.revision=`; `.gitignore` ignores `/REVISION`; `.gcloudignore`
+includes `.gitignore` and re-includes `!/REVISION`. Not run by the test: that gcloud uploads the
+file, checked by hand on 2026-11-08 (`REVISION` listed, `.git` and `web/data/species.json` not),
+and that the deployed server names it, which the smoke check confirms after every deploy.
+
+**Run:** `go test ./cmd/birdview/ -run TestImageRecordsRevision`
+**Status: verified 2026-11-08, passing.**
+Watched failing: 2026-11-08, before the Dockerfile and ignore files changed ("stage \"builder\" copies [go.mod go.sum cmd/birdview internal data web docs]; want REVISION*", and three more).
+
 ### smokeChecksDeployment
 
 **The smoke checks pass on a healthy deployment, and each fails for the breakage it guards**
@@ -2465,10 +2481,11 @@ Watched failing: 2026-10-23, with the builder's `COPY --from=test` deleted, it r
 **Verifies:** [tech.smokeCheckAfterDeploy](local/tech/release.md#smokecheckafterdeploy) · **Level:** code · **Method:** run the checks over real HTTP against this server, a canonical-host redirect to it, and broken variants
 **Assertions:** against the server and a second one redirecting to it, all of at least eight
 checks pass; with `robots.txt` gone, the home page uncompressed or not revalidated, `/?month=now`
-cacheable, an unknown species answered, or a guide gone, the check written for that breakage
-fails; and a host that serves the site instead of
+cacheable, an unknown species answered, a guide gone, or the home page's issue link naming no
+revision, the check written for that breakage fails; and a host that serves the site instead of
 redirecting fails the redirect check.
 **Run:** `go test ./cmd/birdview/ -run TestSmokeChecksTheServer`
+Watched failing: 2026-11-08, the revision check before it existed ("with revision not recorded, check \"the server names its revision\" passed").
 **Status: verified 2026-10-23, passing, and watched failing** by the broken variants above, which
 the test keeps. Run against birdview.site the same day, with `www.birdview.site` and the Cloud Run
 address as redirecting hosts: nine checks, all passing. On 2026-10-27 `/?month=all` replaced
@@ -2714,10 +2731,14 @@ Watched failing: 2026-10-05, by ignoring the region filter in `shareOf`, which m
 of the Measurements and Categories headings; each opens the tracker's new-issue page with a title
 naming the bird's English and scientific names and the table, and a body holding the page's address
 with its query, that table's rows with label, value, and provenance tag, and the dataset's source
-versions; each link is under 8,000 bytes; with no tracker set, there is no link.
+versions and the server's revision; each link is under 8,000 bytes; the home page's Report it opens a
+new issue with no title and a body holding the page's address with its query, its heading with the
+settings in view, the source versions, and the revision; with no tracker set, neither page has a
+link.
 
-**Run:** `go test ./cmd/birdview/ -run TestReportDataIssueLinks`
+**Run:** `go test ./cmd/birdview/ -run 'TestReportDataIssueLinks|TestHomeReportLink'`
 **Status: verified 2026-11-08, passing.**
+Watched failing: 2026-11-08, for the home page and the revision: before either was filled in ("Measurements and sources's issue body lacks \"BirdView server: 0123456789ab\"").
 Watched failing: 2026-11-08, before the links existed ("the species page has 0 Report a data issue links, want 2"), and with the fixture's source versions missing ("Measurements and sources's issue body lacks \"AVONET v7\"").
 
 ### noContactAddressPublished

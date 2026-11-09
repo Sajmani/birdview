@@ -108,11 +108,16 @@ func main() {
 	if err == nil {
 		srv.feedback = *feedback
 		srv.canonical = *canonical
+		srv.revision = buildRevision()
 	}
 	if err != nil {
 		log.Fatalf("birdview: %v", err)
 	}
-	fmt.Printf("BirdView: %d species, serving http://%s\n", len(ds.Species), *addr)
+	rev := srv.revision
+	if rev == "" {
+		rev = "not recorded"
+	}
+	fmt.Printf("BirdView: %d species, revision %s, serving http://%s\n", len(ds.Species), rev, *addr)
 	if err := http.ListenAndServe(*addr, srv); err != nil {
 		log.Fatalf("birdview: %v", err)
 	}
@@ -178,6 +183,9 @@ type server struct {
 	// feedback is the issue tracker readers are pointed at, or empty, in
 	// which case no page says anything about feedback at all (product.noPersonalAddress).
 	feedback string
+	// revision is the commit the server was built from, or "" when the build recorded none
+	// (tech.imageRecordsRevision).
+	revision string
 	// canonical is the one host this deployment answers at; a request for
 	// any other is redirected there (tech.oneCanonicalHost). Empty serves every host.
 	canonical string
@@ -1266,10 +1274,18 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 }
 
 // reportURL opens a new issue in the tracker about one table on a species page, its title naming
-// the bird and the table and its body holding the page's address, the table's rows as shown, and
-// the versions the data was built from (product.reportDataIssue). It is empty with no tracker set,
-// and the tracker itself when it is not a GitHub issue list, which cannot be filled in.
+// the bird and the table (product.reportDataIssue).
 func (s *server) reportURL(r *http.Request, name, scientific, table string, lines []string) template.URL {
+	return s.issueURL(r, fmt.Sprintf("Data issue: %s (%s) %s", name, scientific, table),
+		"The "+table+" as shown", lines)
+}
+
+// issueURL opens a new issue in the tracker with its body filled in: the page's address, a place for
+// the reader's words, the lines given under the heading about, and the versions the data and the
+// server were built from (product.reportDataIssue). An empty title is left to the reader. It is
+// empty with no tracker set, and the tracker itself when it is not a GitHub issue list, which
+// cannot be filled in.
+func (s *server) issueURL(r *http.Request, title, about string, lines []string) template.URL {
 	if s.feedback == "" {
 		return ""
 	}
@@ -1287,7 +1303,7 @@ func (s *server) reportURL(r *http.Request, name, scientific, table string, line
 	var b strings.Builder
 	fmt.Fprintf(&b, "**Page:** %s://%s%s\n\n", scheme, host, r.URL.RequestURI())
 	b.WriteString("**What is wrong, and a source if you have one:**\n\n\n\n")
-	fmt.Fprintf(&b, "**The %s as shown:**\n\n", table)
+	fmt.Fprintf(&b, "**%s:**\n\n", about)
 	for _, l := range lines {
 		// A row as long as a continent's regions would push the address past what the tracker
 		// accepts; the page's address carries the rest.
@@ -1305,11 +1321,15 @@ func (s *server) reportURL(r *http.Request, name, scientific, table string, line
 	for _, k := range keys {
 		fmt.Fprintf(&b, "- %s: %s\n", k, s.ds.SourceVersions[k])
 	}
-	if rev := buildRevision(); rev != "" {
-		fmt.Fprintf(&b, "- BirdView server: %s\n", rev)
+	rev := s.revision
+	if rev == "" {
+		rev = "not recorded"
 	}
+	fmt.Fprintf(&b, "- BirdView server: %s\n", rev)
 	q := url.Values{}
-	q.Set("title", fmt.Sprintf("Data issue: %s (%s) %s", name, scientific, table))
+	if title != "" {
+		q.Set("title", title)
+	}
 	q.Set("body", b.String())
 	return template.URL(base + "/new?" + q.Encode())
 }
@@ -1317,9 +1337,20 @@ func (s *server) reportURL(r *http.Request, name, scientific, table string, line
 // reportLineMax is the longest table row a report quotes in full.
 const reportLineMax = 400
 
-// buildRevision is the commit the server was built from, as the Go toolchain recorded it, or ""
-// when the build recorded none, as a container built without the repository's history does.
+// revision is set at link time, -ldflags "-X main.revision=<commit>", by the image build from the
+// REVISION file the deploy writes (tech.imageRecordsRevision).
+var revision string
+
+// buildRevision is the commit the server was built from: the one linked in, else the one the Go
+// toolchain recorded from a checkout, or "" when there is neither, as in an image built without a
+// REVISION file.
 func buildRevision() string {
+	if r := strings.TrimSpace(revision); r != "" {
+		if len(r) > 12 {
+			r = r[:12]
+		}
+		return r
+	}
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
 		return ""

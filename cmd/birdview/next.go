@@ -128,7 +128,9 @@ type nextMatch struct {
 }
 
 type nextData struct {
-	Feedback string
+	// Feedback opens a new issue about this page, filled in; empty with no tracker set
+	// (product.reportDataIssue).
+	Feedback template.URL
 	Title    string
 	Count    int
 	Total    int
@@ -594,7 +596,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 		}
 	}
 
-	page := nextData{Feedback: s.feedback, Count: len(base), Total: len(s.ds.Species),
+	page := nextData{Count: len(base), Total: len(s.ds.Species),
 		included: added, FindLimit: nextFindLimit,
 		FindScript: s.nextFindJS}
 	tq := cloneValues(q)
@@ -833,6 +835,8 @@ func (s *server) nextPage(r *http.Request) nextData {
 	}
 
 	page.Title = s.nextTitle(opt, pinnedOnly)
+	page.Feedback = s.issueURL(r, "", "The page as shown", []string{page.Title,
+		strconv.Itoa(page.Count) + " of " + strconv.Itoa(page.Total) + " birds match"})
 	page.Controls = s.nextControls(q, opt)
 	page.OrderLabel = nextOrderLabels[opt.Metric]
 	if opt.Metric == view.ByBill || opt.Metric == view.ByTail {

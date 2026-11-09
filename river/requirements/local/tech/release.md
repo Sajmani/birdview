@@ -43,6 +43,26 @@ run on what it produced. The bypass exists for an emergency fix that must ship p
 failure, and is a file rather than a deploy setting because a setting persists on the service
 and would silently skip the tests of every later deploy.
 
+## imageRecordsRevision
+
+**The deployed server knows the commit it was built from**
+
+Subject: `release.revision`
+Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.giveBack](../../../goals/goals.md#giveback)
+
+Before deploying, the deployer writes the commit being deployed to a file named `REVISION` in the
+build context (`git rev-parse HEAD > REVISION`). git never commits it; the upload to Cloud Build
+carries it anyway. The image build links its contents into the server, which names that revision
+when it starts and in every issue it opens for a reader
+([product.reportDataIssue](../product/presentation.md#reportdataissue)). A build without the file
+still succeeds, and its server says the revision was not recorded; the smoke check fails on it, so
+a deploy that forgot cannot pass unnoticed.
+
+Rationale: a reader's report is only as useful as knowing which build it describes, and the
+container image is built from an upload with no git history, so nothing else can tell the server
+its commit. A file, like `SKIP_TESTS`, needs no change to the deploy command's flags (Sameer,
+2026-11-08).
+
 ## smokeCheckAfterDeploy
 
 **Every deploy is checked from outside**
@@ -53,8 +73,9 @@ Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone), [goals.sh
 `birdview-smoke` checks a running deployment as a reader reaches it: the home page is served
 gzipped and carries a validator that revalidates, and `month=now` redirects to a named month and is never stored; a
 species page and a guide answer; `robots.txt` serves its policy; an unknown species is not found;
-the boundary file is cached as immutable; and each other address named redirects permanently to
-the canonical one. It fetches nothing larger than a page, and it runs after every deploy.
+the boundary file is cached as immutable; the home page's issue link names the server's revision
+([imageRecordsRevision](#imagerecordsrevision)); and each other address named redirects permanently
+to the canonical one. It fetches nothing larger than a page, and it runs after every deploy.
 
 Rationale: the tests check the code, not the deployment; flags, domains, and the platform in front
 can each break a page the tests never see, as a missing `-addr` would have. Egress is what the

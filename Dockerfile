@@ -63,7 +63,9 @@ RUN if [ -e SKIP_TESTS ]; then \
 FROM golang:1.26.9 AS builder
 
 WORKDIR /src
-COPY go.mod go.sum ./
+# REVISION, the commit being deployed, is written by the deploy and never committed; the wildcard
+# lets an image build without it, as a local one does (tech.imageRecordsRevision).
+COPY go.mod go.sum REVISION* ./
 RUN go mod download
 
 COPY cmd/birdview ./cmd/birdview
@@ -74,7 +76,8 @@ COPY docs ./docs
 # Depend on the test stage, so the server is not built until it has passed.
 COPY --from=test /tested /tested
 
-RUN CGO_ENABLED=0 go build -o /usr/local/bin/birdview ./cmd/birdview
+RUN CGO_ENABLED=0 go build -ldflags "-X main.revision=$(cat REVISION 2>/dev/null)" \
+      -o /usr/local/bin/birdview ./cmd/birdview
 
 FROM gcr.io/distroless/static-debian12:nonroot
 
