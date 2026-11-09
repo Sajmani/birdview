@@ -13,7 +13,7 @@ Acridotheres tristis	Common Myna	Human Modified	pending
 Acrocephalus dumetorum	Blyth's Reed Warbler	Wetland	pending			
 Acrocephalus familiaris	Millerbird	Shrubland	pending			
 Actitis hypoleucos	Common Sandpiper	Wetland	pending			
-Actitis macularius	Spotted Sandpiper	Wetland	pending			
+Actitis macularius	Spotted Sandpiper	Wetland	reviewed	Sameer	2026-11-09	Coastal: forages along beaches, jetties, and rocky shores as well as fresh water
 Aechmophorus clarkii	Clark's Grebe	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on bays and inshore sea
 Aechmophorus occidentalis	Western Grebe	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on bays and inshore sea
 Aegolius acadicus	Northern Saw-whet Owl	Forest	pending			
@@ -208,15 +208,15 @@ Calcarius pictus	Smith's Longspur	Grassland	pending
 Calidris acuminata	Sharp-tailed Sandpiper	Wetland	pending			
 Calidris alba	Sanderling	Coastal	pending			
 Calidris alpina	Dunlin	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on beaches and mudflats
-Calidris bairdii	Baird's Sandpiper	Grassland	pending			
+Calidris bairdii	Baird's Sandpiper	Grassland	reviewed	Sameer	2026-11-09	Coastal: migrates along beaches and their wrack lines as well as inland fields
 Calidris canutus	Red Knot	Coastal	pending			
 Calidris falcinellus	Broad-billed Sandpiper	Wetland	pending			
 Calidris ferruginea	Curlew Sandpiper	Coastal	pending			
 Calidris fuscicollis	White-rumped Sandpiper	Wetland	reviewed	Sameer	2026-11-07	Coastal: migrates along coasts
-Calidris himantopus	Stilt Sandpiper	Wetland	pending			
+Calidris himantopus	Stilt Sandpiper	Wetland	reviewed	Sameer	2026-11-09	Coastal: migrates through coastal impoundments and mudflats
 Calidris maritima	Purple Sandpiper	Grassland	reviewed	Sameer	2026-11-07	Coastal: winters on rocky shores
 Calidris mauri	Western Sandpiper	Shrubland	reviewed	Sameer	2026-11-07	Coastal: migrates and winters on Pacific and Gulf mudflats
-Calidris melanotos	Pectoral Sandpiper	Wetland	pending			
+Calidris melanotos	Pectoral Sandpiper	Wetland	reviewed	Sameer	2026-11-09	Coastal: migrates through coastal marsh and wet meadows by the shore as well as inland
 Calidris minuta	Little Stint	Grassland	pending			
 Calidris minutilla	Least Sandpiper	Wetland	reviewed	Sameer	2026-11-07	Coastal: migrates and winters on mudflats and salt marsh
 Calidris ptilocnemis	Rock Sandpiper	Grassland	reviewed	Sameer	2026-11-07	Coastal: winters on rocky Pacific shores
@@ -570,10 +570,10 @@ Leucosticte atrata	Black Rosy-Finch	Grassland	pending
 Leucosticte australis	Brown-capped Rosy-Finch	Grassland	pending			
 Leucosticte tephrocotis	Gray-crowned Rosy-Finch	Grassland	pending			
 Limnodromus griseus	Short-billed Dowitcher	Wetland	reviewed	Sameer	2026-11-07	Coastal: migrates and winters on coastal mudflats
-Limnodromus scolopaceus	Long-billed Dowitcher	Wetland	pending			
+Limnodromus scolopaceus	Long-billed Dowitcher	Wetland	reviewed	Sameer	2026-11-09	Coastal: migrates and winters on coastal marsh and mudflats as well as inland
 Limnothlypis swainsonii	Swainson's Warbler	Shrubland	pending			
 Limosa fedoa	Marbled Godwit	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on coastal mudflats
-Limosa haemastica	Hudsonian Godwit	Wetland	pending			
+Limosa haemastica	Hudsonian Godwit	Wetland	reviewed	Sameer	2026-11-09	Coastal: migrates through coastal mudflats and impoundments
 Limosa lapponica	Bar-tailed Godwit	Wetland	reviewed	Sameer	2026-11-07	Coastal: migrates through coastal mudflats
 Limosa limosa	Black-tailed Godwit	Wetland	pending			
 Locustella lanceolata	Lanceolated Warbler	Grassland	pending			
@@ -739,7 +739,7 @@ Phalacrocorax carbo	Great Cormorant	Wetland	reviewed	Sameer	2026-11-07	Coastal: 
 Phalaenoptilus nuttallii	Common Poorwill	Shrubland	pending			
 Phalaropus fulicarius	Red Phalarope	Marine	pending			
 Phalaropus lobatus	Red-necked Phalarope	Wetland	reviewed	Sameer	2026-11-07	Marine: migrates at sea
-Phalaropus tricolor	Wilson's Phalarope	Wetland	pending			
+Phalaropus tricolor	Wilson's Phalarope	Wetland	reviewed	Sameer	2026-11-09	Coastal: migrates through coastal impoundments and salt ponds
 Phasianus colchicus	Ring-necked Pheasant	Human Modified	pending			
 Phasianus versicolor	Green Pheasant	Human Modified	pending			
 Pheucticus chrysopeplus	Yellow Grosbeak	Forest	pending			
@@ -783,7 +783,7 @@ Plegadis falcinellus	Glossy Ibis	Wetland	pending
 Ploceus cucullatus	Village Weaver	Woodland	pending			
 Ploceus melanocephalus	Black-headed Weaver	Wetland	pending			
 Pluvialis apricaria	European Golden-Plover	Grassland	pending			
-Pluvialis dominica	American Golden-Plover	Grassland	pending			
+Pluvialis dominica	American Golden-Plover	Grassland	reviewed	Sameer	2026-11-09	Coastal: migrates through coastal mudflats and beaches as well as fields and sod farms
 Pluvialis fulva	Pacific Golden-Plover	Grassland	pending			
 Pluvialis squatarola	Black-bellied Plover	Grassland	reviewed	Sameer	2026-11-07	Coastal: migrates and winters on beaches and mudflats
 Podiceps auritus	Horned Grebe	Wetland	reviewed	Sameer	2026-11-07	Marine: winters on the ocean | Coastal: winters in bays and inlets as well as offshore
@@ -1011,7 +1011,7 @@ Toxostoma longirostre	Long-billed Thrasher	Shrubland	pending
 Toxostoma redivivum	California Thrasher	Shrubland	pending			
 Toxostoma rufum	Brown Thrasher	Shrubland	pending			
 Tringa brevipes	Gray-tailed Tattler	Wetland	pending			
-Tringa flavipes	Lesser Yellowlegs	Wetland	pending			
+Tringa flavipes	Lesser Yellowlegs	Wetland	reviewed	Sameer	2026-11-09	Coastal: migrates through coastal salt marsh and mudflats as well as inland
 Tringa glareola	Wood Sandpiper	Wetland	pending			
 Tringa incana	Wandering Tattler	Wetland	reviewed	Sameer	2026-11-07	Coastal: winters on rocky Pacific shores
 Tringa melanoleuca	Greater Yellowlegs	Wetland	reviewed	Sameer	2026-11-07	Coastal: common on salt marsh and mudflats

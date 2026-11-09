@@ -1142,7 +1142,10 @@ Left:
 - **Habitat:** reviewed species by species in `data/habitat-review.tsv`, which the build holds
   complete ([decisions.habitatReviewedPerSpecies](requirements/decisions.md#habitatreviewedperspecies)): 9 reviewed (the former `trait.Supplementary`
   entries) and 60 more (pass 1's water birds, approved by the owner on 2026-11-07, with Shore and
-  estuary added to Killdeer), so 69 reviewed and 1,013 pending. Next: the other families, landbirds
+  estuary added to Killdeer), and on 2026-11-09 nine more shorebirds pass 1 skipped, found missing
+from New York's coast in August (Lesser Yellowlegs, Pectoral, Stilt, Spotted, and Baird's
+Sandpipers, Long-billed Dowitcher, Hudsonian Godwit, Wilson's Phalarope, American Golden-Plover), so
+78 reviewed and 1,004 pending. Next: the other families, landbirds
   mostly; raptors, swallows, and blackbirds first.
 - **Diet:** the same audit for `Trophic.Niche`, which has the same one-value limit (a bird that eats
   insects in summer and seeds in winter has one niche); `mixedDiet` covers only AVONET's own

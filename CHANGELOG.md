@@ -16,6 +16,9 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 ### Changed
 
 - A bird's neck, head, and body say whether their proportions are proposed or reviewed.
+- **Nine more shorebirds** count as birds of the shore: Lesser Yellowlegs, Pectoral, Stilt, Spotted,
+  and Baird's Sandpipers, Long-billed Dowitcher, Hudsonian Godwit, Wilson's Phalarope, and American
+  Golden-Plover, which AVONET files under the marshes and grasslands they breed in.
 - **Open sea is now Sea near shore and Open ocean**, told apart by where each bird's records lie:
   the birds you can see from land, and the ones you mostly need a boat for. Tropicbirds, murres,
   and puffins, watched at their colonies and far out, are both. Old Open sea addresses show both.
