@@ -40,6 +40,7 @@ import (
 	"os"
 	pathpkg "path"
 	"regexp"
+	"runtime/debug"
 	"slices"
 	"sort"
 	"strconv"
@@ -1162,6 +1163,10 @@ type detailData struct {
 
 	// Tile is the species page's tile: the home page's, larger (product.tileOpensDetail).
 	Tile tile
+
+	// ReportMetrics and ReportCategories open a new issue about each table, filled in; empty
+	// with no tracker set (product.reportDataIssue).
+	ReportMetrics, ReportCategories template.URL
 }
 
 type metricRow struct {
@@ -1238,12 +1243,103 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 	t.Big = true
 	t.Commonest = s.shareWithSeams(sp, opt)
 
+	cats := s.categories(sp, opt)
+	var mlines, clines []string
+	for _, m := range rows {
+		mlines = append(mlines, fmt.Sprintf("%s: %s (%s)", m.Label, m.Value, m.Kind))
+	}
+	label := ""
+	for _, c := range cats {
+		if c.Label != "" {
+			label = c.Label
+		}
+		clines = append(clines, fmt.Sprintf("%s: %s (%s)", label, c.Value, c.Origin))
+	}
 	s.render(w, "detail.html", detailData{
 		S: sp, Name: t.Name, Tile: t,
-		Metrics: rows, Categories: s.categories(sp, opt), Opt: opt, Home: homeLink(r), EBirdURL: t.EBirdURL,
-		SameAs:   s.sameMeasurements(sp, opt.Locale),
-		FoldNote: foldNote(sp, t.Geom, one),
+		Metrics: rows, Categories: cats, Opt: opt, Home: homeLink(r), EBirdURL: t.EBirdURL,
+		SameAs:           s.sameMeasurements(sp, opt.Locale),
+		FoldNote:         foldNote(sp, t.Geom, one),
+		ReportMetrics:    s.reportURL(r, t.Name, sp.ScientificName, "measurements", mlines),
+		ReportCategories: s.reportURL(r, t.Name, sp.ScientificName, "categories", clines),
 	})
+}
+
+// reportURL opens a new issue in the tracker about one table on a species page, its title naming
+// the bird and the table and its body holding the page's address, the table's rows as shown, and
+// the versions the data was built from (product.reportDataIssue). It is empty with no tracker set,
+// and the tracker itself when it is not a GitHub issue list, which cannot be filled in.
+func (s *server) reportURL(r *http.Request, name, scientific, table string, lines []string) template.URL {
+	if s.feedback == "" {
+		return ""
+	}
+	base := strings.TrimSuffix(s.feedback, "/")
+	if !strings.HasSuffix(base, "/issues") {
+		return template.URL(s.feedback)
+	}
+	scheme, host := "http", r.Host
+	if r.TLS != nil {
+		scheme = "https"
+	}
+	if s.canonical != "" {
+		scheme, host = "https", s.canonical
+	}
+	var b strings.Builder
+	fmt.Fprintf(&b, "**Page:** %s://%s%s\n\n", scheme, host, r.URL.RequestURI())
+	b.WriteString("**What is wrong, and a source if you have one:**\n\n\n\n")
+	fmt.Fprintf(&b, "**The %s as shown:**\n\n", table)
+	for _, l := range lines {
+		// A row as long as a continent's regions would push the address past what the tracker
+		// accepts; the page's address carries the rest.
+		if r := []rune(l); len(r) > reportLineMax {
+			l = string(r[:reportLineMax]) + "… (shortened; see the page)"
+		}
+		b.WriteString("- " + l + "\n")
+	}
+	b.WriteString("\n**Built from:**\n\n")
+	keys := make([]string, 0, len(s.ds.SourceVersions))
+	for k := range s.ds.SourceVersions {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		fmt.Fprintf(&b, "- %s: %s\n", k, s.ds.SourceVersions[k])
+	}
+	if rev := buildRevision(); rev != "" {
+		fmt.Fprintf(&b, "- BirdView server: %s\n", rev)
+	}
+	q := url.Values{}
+	q.Set("title", fmt.Sprintf("Data issue: %s (%s) %s", name, scientific, table))
+	q.Set("body", b.String())
+	return template.URL(base + "/new?" + q.Encode())
+}
+
+// reportLineMax is the longest table row a report quotes in full.
+const reportLineMax = 400
+
+// buildRevision is the commit the server was built from, as the Go toolchain recorded it, or ""
+// when the build recorded none, as a container built without the repository's history does.
+func buildRevision() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return ""
+	}
+	rev, dirty := "", false
+	for _, st := range info.Settings {
+		switch st.Key {
+		case "vcs.revision":
+			rev = st.Value
+		case "vcs.modified":
+			dirty = st.Value == "true"
+		}
+	}
+	if len(rev) > 12 {
+		rev = rev[:12]
+	}
+	if rev != "" && dirty {
+		rev += " (modified)"
+	}
+	return rev
 }
 
 // foldNote is the sentence that explains a folded neck on the detail page, or "" when the neck is
@@ -1988,7 +2084,7 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 			}
 		}
 		out = append(out, categoryRow{
-			Label:  "Frequency",
+			Label:  "Reporting frequency",
 			Value:  value,
 			Origin: string(dataset.Derived),
 			Detail: detail,

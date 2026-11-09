@@ -753,6 +753,26 @@ visitors; removing it would be discourteous and risks the project being blocked.
 **This extends to addresses that are not ours.** A provenance record names who owns a source; it
 does not publish their mail.
 
+## reportDataIssue
+
+**A species page asks for corrections where its data is shown**
+
+Subject: `presentation.report_data_issue`
+Goals: [goals.giveBack](../../../goals/goals.md#giveback), [goals.honestData](../../../goals/goals.md#honestdata)
+
+Under the species page's **Measurements and sources** and **Categories and sources** headings, a
+**Report a data issue** link opens a new issue in the project's tracker
+([noPersonalAddress](#nopersonaladdress)) with its title and body filled in: the bird's English and
+scientific names and which table the report is about; the page's address; each row of that table
+as the page shows it, its label, value, and provenance tag; and the versions the data was built from
+(the dataset's source versions, and the server's revision when the build recorded one). The reader
+adds what is wrong. With no tracker set, there is no link. The report is
+[GitHub issue #9](https://github.com/google/birdview/issues/9) (Sameer, 2026-11-08).
+
+Rationale: a reader who sees a wrong wingspan or habitat knows which bird and which value, but not
+which source or build it came from; filling those in makes a correction actionable without asking
+the reader to transcribe the page.
+
 ## inaturalistLink
 
 **The detail view and every tile link to the species on iNaturalist**

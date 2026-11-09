@@ -3,12 +3,18 @@
 Major changes to BirdView, newest first: features, data sources, and how the drawings are made.
 Small fixes are in the commit history. With no numbered releases yet, changes are grouped by period.
 
-## 2026-11-08 — Reporting frequency
+## 2026-11-08 — Reporting frequency, and reporting data issues
+
+### Added
+
+- **Report a data issue** under each table on a bird's page opens a GitHub issue with the bird, the
+  table's values, and the data's versions filled in.
 
 ### Changed
 
 - **How common** is now **Reporting frequency**, since it measures how often a bird is reported,
   not how many are there. Addresses use `freq=` in place of `common=`, and old ones still work.
+  A bird's page and the guide call the share of reports its reporting frequency too.
 
 ## 2026-11-07 — How common, and habitats in groups
 

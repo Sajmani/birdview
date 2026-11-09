@@ -82,6 +82,7 @@
 {{template "diagramkey"}}
 
 <h2>Measurements and sources</h2>
+{{with .ReportMetrics}}<p class="note report-line"><a class="report" href="{{.}}" rel="noopener noreferrer">Report a data issue</a></p>{{end}}
 <table class="prov metrics">
   <tbody>
   {{range .Metrics}}
@@ -96,6 +97,7 @@
 </table>
 
 <h2>Categories and sources</h2>
+{{with .ReportCategories}}<p class="note report-line"><a class="report" href="{{.}}" rel="noopener noreferrer">Report a data issue</a></p>{{end}}
 <p class="note" style="margin-top:0">Anything not marked
   <span class="tag t-published">published</span> is BirdView's own;
   <a href="/added">everything it adds</a> is listed together.</p>

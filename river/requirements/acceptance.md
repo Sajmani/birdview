@@ -2704,6 +2704,22 @@ shape it was written to catch.
 
 Watched failing: 2026-10-05, by ignoring the region filter in `shareOf`, which makes the Alaska and everywhere figures identical; by appending one extra count in `applyRegions`, which desyncs the parallel slices; by removing the heading-id transformer, which reports `#scopeisrecurringavifauna` and `#avilistreplacesaba` dangling, and by renaming the `Commonest` heading in `docs/data.md`.
 
+### reportDataIssueLinks
+
+**Each table on a species page links to a filled-in issue, and only with a tracker set**
+
+**Verifies:** [product.reportDataIssue](local/product/presentation.md#reportdataissue), [product.noPersonalAddress](local/product/presentation.md#nopersonaladdress) · **Level:** code · **Method:** a species page rendered with and without a tracker, and its links parsed
+
+**Assertions:** with a tracker set, the page has exactly two Report a data issue links, one under each
+of the Measurements and Categories headings; each opens the tracker's new-issue page with a title
+naming the bird's English and scientific names and the table, and a body holding the page's address
+with its query, that table's rows with label, value, and provenance tag, and the dataset's source
+versions; each link is under 8,000 bytes; with no tracker set, there is no link.
+
+**Run:** `go test ./cmd/birdview/ -run TestReportDataIssueLinks`
+**Status: verified 2026-11-08, passing.**
+Watched failing: 2026-11-08, before the links existed ("the species page has 0 Report a data issue links, want 2"), and with the fixture's source versions missing ("Measurements and sources's issue body lacks \"AVONET v7\"").
+
 ### noContactAddressPublished
 
 **No served page publishes a contact address**

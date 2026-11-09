@@ -184,6 +184,7 @@ that small?", use this.
 
 ## Where the numbers come from
 
-Every bird's page gives the source of each number. [How the data is made](data.md) describes each
-input, and [one diagram](pipeline.md) shows how they become the drawings. Escaped cage, aviary, and
+Every bird's page gives the source of each number. If one looks wrong, **Report a data issue** under
+either table opens an issue on GitHub with the bird, its values, and the data's versions filled in;
+add what is wrong. [How the data is made](data.md) describes each input, and [one diagram](pipeline.md) shows how they become the drawings. Escaped cage, aviary, and
 farm birds are [listed separately](/excluded).
