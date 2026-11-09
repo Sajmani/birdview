@@ -203,7 +203,7 @@ flowchart LR
     status · *pending, proposed, or reviewed*
     additions ★ *reviewed rows only: habitat and reason*`"]
     NREV["`proportions-review.tsv
-    *genus and family proportions; the review tool writes reviewed rows*
+    *genus and family proportions, set by judgment; proposed until reviewed*
     ─────────────
     taxon · *genus, or family ending -idae*
     neck ratio ★ *empty keeps the family table*
@@ -383,9 +383,10 @@ for, each with its reason. See [where the data comes from](data.md#scope) and th
 
 **Proportions are reviewed by genus.** The neck ratio of step 4 comes from the family table in the
 code, and the head and body from mass, unless `data/proportions-review.tsv` has a row for the bird's
-genus or family; a row may also scale a modeled wingspan in step 6, never a measured one. Rows start
-as *proposed* and become *reviewed* through the local review tool (`birdview -review`), which draws
-each genus beside photographs from Wikimedia Commons; see [building](building.md#reviewing-proportions).
+genus or family; a row may also scale a modeled wingspan in step 6, never a measured one. Rows are
+*proposed*, set by judgment, until a source other than photographs supports them; photographs
+foreshorten the parts the figure draws
+([decision](../river/requirements/decisions.md#photoreviewunreliable)).
 
 **Region counts come from the same source.** `birdview-regions` asks GBIF for every name recorded
 in every region, for the whole year and for each month. For species mostly seen at sea, it also

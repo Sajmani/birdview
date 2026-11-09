@@ -3,7 +3,8 @@
 # A taxon ending in -idae is a family; any other is a genus, which wins over its family. An empty
 # ratio or factor keeps what the models give. The wingspan factor applies only to a modeled wingspan.
 # status is proposed (drawn, and its page says it is not yet reviewed) or reviewed (reviewer and date
-# required). Reviewed rows are written by the review tool: go run ./cmd/birdview -review ...
+# required, and the reason names the source). No row is reviewed from a comparison with photographs,
+# which foreshorten the parts the figure draws (decisions.photoReviewUnreliable).
 #
 taxon	neck ratio	head factor	body factor	wingspan factor	status	reviewer	date	reason
 Aechmophorus	0.80				proposed			grebes fly with the neck stretched out, Western and Clark's longest of all (issue #7)

@@ -93,7 +93,7 @@ type Provenance struct {
 	Model string `json:"model,omitempty"`
 
 	// Factor is the proportions review's factor applied to a modeled wingspan, 0 for none, so the
-	// review tool can recover the fitted value (decisions.allModeledProportionsReviewed).
+	// fitted value can be recovered (decisions.allModeledProportionsReviewed).
 	Factor float64 `json:"factor,omitempty"`
 }
 

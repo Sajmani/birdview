@@ -150,12 +150,6 @@ var noPages = map[string]string{
 	"/birds.json":  "the names the home page's find box searches, JSON",
 }
 
-// localOnlyTemplates are pages only a local tool serves, never the public site, and so outside the
-// crawl. Each says which tool.
-var localOnlyTemplates = map[string]string{
-	"review.html": "the proportions review tool, served only with -review and only to this machine (tech.proportionsReviewTool)",
-}
-
 // TestEveryKindOfPageIsDiscovered checks the discovery the other page checks
 // rely on: every route the server registers, and every page template it can
 // render, produced at least one page. A route or template added later that no
@@ -207,10 +201,7 @@ func TestEveryKindOfPageIsDiscovered(t *testing.T) {
 		if !strings.Contains(string(src), `{{define "`+filepath.Base(n)+`"}}`) {
 			continue
 		}
-		if why, local := localOnlyTemplates[filepath.Base(n)]; local {
-			t.Logf("%s is not crawled: %s", filepath.Base(n), why)
-			continue
-		}
+
 		pageTemplates++
 		if !templates[filepath.Base(n)] {
 			t.Errorf("template %s rendered no discovered page; add a seed so its pages are checked",

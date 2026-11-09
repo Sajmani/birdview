@@ -115,7 +115,9 @@ A genus that flies with a different neck from its family has its own: the diving
 0.35 against their family's 0.70, which fits the geese and swans, and the grebes 0.45 to 0.80.
 These overrides, and factors on the modeled head, body, and wingspan, are in
 `data/proportions-review.tsv`, each marked proposed or
-reviewed, and a bird's page says which; they are being reviewed genus by genus against photographs.
+reviewed, and a bird's page says which. They are not checked against photographs: almost none shows
+a bird as the figure draws it, body and spread wings in one plane, so every other angle would
+foreshorten some part ([decision](../river/requirements/decisions.md#photoreviewunreliable)).
 They are shown anyway — a heron's page reads *"neck modeled as 0.85 × trunk (family-specific
 ratio for Ardeidae)"* — because every figure draws a neck, and hiding the number would hide only
 the explanation.

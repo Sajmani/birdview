@@ -15,8 +15,7 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 
 ### Changed
 
-- A bird's neck and head say whether their proportions have been **reviewed** against photographs,
-  as they are being, genus by genus.
+- A bird's neck, head, and body say whether their proportions are proposed or reviewed.
 - **Diving ducks and grebes** are drawn closer to how they fly: scaup, goldeneyes, scoters, and
   eiders with shorter necks, grebes with longer necks and smaller heads. A Lesser Scaup's neck was
   longer than a Horned Grebe's.

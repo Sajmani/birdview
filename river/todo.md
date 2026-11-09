@@ -1196,9 +1196,18 @@ the browser ([product.locationStaysInBrowser](requirements/local/product/filteri
 
 **Check each species' drawn proportions against photographs, as a pipeline of its own**
 
-Status: parked
+Status: withdrawn 2026-11-09 ([decisions.photoReviewUnreliable](requirements/decisions.md#photoreviewunreliable))
 Owner: Sameer
-Gate: a decision on photo sources and their terms, before anything is fetched
+Gate: none; revive only with a source of photographs taken from directly below, wings spread
+
+**Withdrawn.** A local review tool put each genus's figure beside Commons photographs with an overlay
+and sliders (2026-11-09). Trying it, the owner found the evidence cannot be had: the figure is a plan
+view, body and spread wings in one plane, and almost no photograph shows a bird that way. Few are
+exactly broadside, and only a bird photographed from directly below with wings spread shows the
+wingspan undistorted, which is too rare to cover many species. Any other angle foreshortens some part,
+so values set by matching photographs, by hand or by a pipeline, would measure the camera's angle.
+The cost estimate on issue #7 assumed usable photographs and no longer applies. What follows is the
+record as it stood.
 
 [GitHub issue #7](https://github.com/google/birdview/issues/7): the Lesser Scaup's figure had the
 longer neck, and the Horned Grebe's the shorter neck and the larger head (0.18 of its length, from

@@ -2495,29 +2495,6 @@ of the same genus alone.
 Watched failing: 2026-11-09, for body and wingspan: before BodyLengthFor existed (the test did not build), and with the wingspan factor never applied ("Clark's Grebe's modeled wingspan is 829.8 (factor 0) … want 1.1 times the model's 829.8").
 Watched failing: 2026-11-09, before the parser existed (the tests did not build: "undefined: Review"), and with the ingest passing no table ("Lesser Scaup's neck model reads \"neck modeled as 0.70 x trunk (family-specific ratio for Anatidae)\"; want the Aythya row").
 
-### proportionsReviewTool
-
-**The review tool is opt-in and local, and its choices write reviewed rows**
-
-**Verifies:** [tech.proportionsReviewTool](local/tech/process.md#proportionsreviewtool) · **Level:** code · **Method:** the server with and without `-review`, requests from the machine and from elsewhere, and saves against a temporary table
-
-**Assertions:** without `-review`, `/review` is not found; with it, a request from another address is
-refused (403) for both the page and a save, and one from `127.0.0.1` or `[::1]` is answered; the
-server refuses `-review` with `-canonical` or without `-reviewer`. A genus's page names its
-representative bird, carries its scientific name for the Commons search, links its eBird page,
-draws the current and adjusted figures, sets a slider for every modeled measurement to its current
-value (the wingspan's only where the wingspan is modeled), and offers an overlay angle slider; the
-figure endpoint draws a longer neck for a larger ratio and a longer bird for a larger body factor;
-choosing adjusted, current, or the whole family writes a reviewed row with the reviewer and today's
-date, a wingspan factor only for a modeled wingspan, keeps the table's header, goes on to the
-next genus, and the next page reads the row. Not checked by the tests: the Commons search and the
-overlay, which run in the browser and were checked by hand.
-
-**Run:** `go test ./cmd/birdview/ -run 'TestReviewModeIsLocalAndOptIn|TestReviewPageAndSave'`
-**Status: verified 2026-11-09, passing.**
-Watched failing: 2026-11-09, for every modeled measurement: before the body and wingspan sliders and the angle slider existed ("the Ardea review page lacks name=body", "the body slider does not redraw it", and the saved row missing its factors).
-Watched failing: 2026-11-09, with the local-only check removed ("/review from 192.0.2.1 answered 200; want 403") and with saves written as proposed (the reviewed row missing from the table).
-
 ### imageRecordsRevision
 
 **The image builds the deploy's REVISION into the server, and git never commits it**

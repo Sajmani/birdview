@@ -4793,7 +4793,7 @@ hand. A table records each decision and who made it, which a constant in the cod
 
 Date: 2026-11-09
 Decided by: Sameer
-Status: accepted
+Status: amended by photoReviewUnreliable
 Amends: proportionsReviewedPerTaxon
 Affects: [product.trunkFromMass](local/product/diagram.md#trunkfrommass), [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources), [tech.proportionsReviewTool](local/tech/process.md#proportionsreviewtool)
 
@@ -4812,4 +4812,36 @@ photograph: the body is modeled too, and lining the figure up needed turning it 
 Bill, tail, and wing chord are measured and stay as AVONET gives them. A modeled wingspan's
 regression states its own error, so a factor set by eye overrides a fitted model; the reviewed row
 and its provenance say so.
+
+---
+
+## photoReviewUnreliable
+
+**Photographs cannot settle proportions, so the review tool is removed**
+
+Date: 2026-11-09
+Decided by: Sameer
+Status: accepted
+Amends: allModeledProportionsReviewed
+Affects: [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), [product.craniumFromMass](local/product/diagram.md#craniumfrommass), [product.trunkFromMass](local/product/diagram.md#trunkfrommass), [tech.proportionsReviewTool](local/tech/process.md#proportionsreviewtool)
+
+### Decided
+
+No row of `data/proportions-review.tsv` is marked reviewed on the strength of a comparison with
+photographs, and the local review tool that made such comparisons is removed. The table stays, with
+its rows proposed: it still carries the hand-set values of
+[duckAndGrebeProportions](#duckandgrebeproportions) and says on each bird's page that they are
+unreviewed. A row may still become reviewed by the owner's judgment from another source, with the
+source as its reason. The per-species photo pipeline of [todo.photoProportions](../todo.md#photoproportions) is withdrawn for
+the same reason.
+
+### Why
+
+The figure is a plan view: body axis and outstretched wings in one plane. Trying the tool on Wood
+Duck and other genera, the owner found that almost no photograph shows a bird that way. Few are
+exactly broadside, which alone keeps the body axis in the picture's plane, and none shows the
+wingspan undistorted except a bird photographed from directly below with its wings spread, which is
+too rare to cover many species. Every other angle foreshortens some part, so a value set by
+matching the overlay would carry the camera's angle, not the bird's shape. The experiment was
+worth running: it showed which kind of evidence cannot be had, before any pipeline was built on it.
 
