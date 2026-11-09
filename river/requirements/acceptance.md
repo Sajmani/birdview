@@ -2509,6 +2509,21 @@ and never read "NaN".
 **Status: verified 2026-11-09, passing.**
 Watched failing: 2026-11-09, before the fix: "the fit for Gaviiformes_Podicipediformes (9 species) states no error", and likewise for Otidiformes (7) and Piciformes (8); "Piciformes's wingspan reads … cross-validated median error NaN%".
 
+### activeTodoHasIssue
+
+**Every active todo item links its GitHub issue**
+
+**Verifies:** [tech.activeWorkHasIssue](local/tech/process.md#activeworkhasissue) · **Level:** code · **Method:** `river/todo.md` read, offline
+
+**Assertions:** every item whose status is `active` has an `Issue:` line linking one issue of
+`google/birdview`, as `[#N](https://github.com/google/birdview/issues/N)`. Not checked by the test,
+which does not reach GitHub: that the issue exists and links back, checked when an item is marked
+active.
+
+**Run:** `go test ./river/check/ -run TestActiveTodoHasIssue`
+**Status: verified 2026-11-09, passing.**
+Watched failing: 2026-11-09, with countyRegions marked active before its issue existed (the test reported countyRegions as active with no Issue: line linking its GitHub issue).
+
 ### imageRecordsRevision
 
 **The image builds the deploy's REVISION into the server, and git never commits it**

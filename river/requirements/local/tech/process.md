@@ -62,6 +62,25 @@ Rationale: GBIF's terms require citing each download by its DOI ([gbifterms.Cite
 the DOI has to be kept where the credits can find it; and a count derived from a download can only
 be checked against the query and the file it came from.
 
+## activeWorkHasIssue
+
+**Work in progress is marked active in the todo list and tracked by a GitHub issue**
+
+Subject: `process.active_work`
+Goals: [goals.rapidIteration](../../../goals/goals.md#rapiditeration), [goals.giveBack](../../../goals/goals.md#giveback)
+
+`river/todo.md` stays the record of every piece of open work, cited by identifier and checked with
+the rest of the bundle. An item being worked on now has `Status: active` and an `Issue:` field
+linking the GitHub issue that tracks it, and that issue links back to the item. Discussion, progress
+notes, and decisions waiting on the owner go on the issue; the design record stays on the item. When
+the work stops or finishes, the item's status changes and the issue closes or says why it waits.
+Reader reports and questions arrive as issues; one that becomes work gets a todo item linking it.
+
+Rationale: the project is worked on between other demands, so what is in flight must be answerable
+at a glance and from a phone; sixty open items in one file are neither. The issue gives that, with
+notifications and room for others to see and comment; the item keeps the citations, the offline
+copy agents read, and the record that changes in the same commit as the work (Sameer, 2026-11-09).
+
 ## proportionsReviewTool
 
 **A local tool for reviewing proportions against photographs**

@@ -39,7 +39,9 @@ it running as a foreground or tracked background task; that holds the turn open.
   the failure message.
 - A data-pipeline change updates [docs/pipeline.md](docs/pipeline.md) and re-renders it
   (product.pipelineDiagram).
-- Found or left work goes in `river/todo.md` as an item, never as a `TODO` in code.
+- Found or left work goes in `river/todo.md` as an item, never as a `TODO` in code. Work in
+  progress is `Status: active` with an `Issue:` link to a GitHub issue that links back
+  (tech.activeWorkHasIssue); `grep -n -B2 '^Status: active' river/todo.md` lists it.
 - **Never resolve a conflict in code**; take it to `decisions.md`.
 - Cite requirements in code as `// Verifies: product.scaleToggle.`
 

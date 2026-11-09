@@ -3,7 +3,9 @@ package todo
 # Open work
 
 Search `## <id>` for one item, or `grep -n -A1 '^## ' river/todo.md` for the list. `Status:` is
-open, parked, or deferred; `Gate:` says when it is due.
+active, open, parked, or deferred; `Gate:` says when it is due. **What is in flight:**
+`grep -n -B2 '^Status: active' river/todo.md`. An active item has an `Issue:` line linking the GitHub
+issue that tracks it, and the issue links back ([tech.activeWorkHasIssue](requirements/local/tech/process.md#activeworkhasissue)).
 
 Everything outstanding in BirdView: unfinished work, open questions, known defects, criteria not
 yet watched failing, and stale spec or doc text. Each item points at the requirement, decision, or
@@ -1036,7 +1038,8 @@ Mexican bird and Morelet's Seedeater is the one native to Texas
 
 **Regions down to counties, coded as the data codes them**
 
-Status: open
+Status: active
+Issue: [#11](https://github.com/google/birdview/issues/11)
 Owner: Sameer
 Gate: ships to birdview.site, with -counties turned on, only when every US state and Canadian
 province and territory has counties ([decisions.countiesBehindFlag](requirements/decisions.md#countiesbehindflag)); work in progress is pushed
@@ -1115,7 +1118,8 @@ each needing the year in the GBIF download (a `"year"` column in `data/gbif-quer
 
 **Audit every bird's habitat and diet, so the filters say what a birder expects**
 
-Status: open
+Status: active
+Issue: [#12](https://github.com/google/birdview/issues/12)
 Owner: Sameer
 Gate: before the Habitat and Diet filters are relied on further, and again before worldwide species
 
@@ -1233,7 +1237,8 @@ are the likelier sources. Cost scales with species: about 1,082 now, about 11,00
 
 **Research each species' usual habitats as a BirdView dataset of its own**
 
-Status: parked
+Status: active
+Issue: [#10](https://github.com/google/birdview/issues/10)
 Owner: Sameer
 Gate: a decision on the classification and on which sources may be used; before worldwide species
 

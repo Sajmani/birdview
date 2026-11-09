@@ -68,3 +68,25 @@ func section(text, ident string) string {
 	}
 	return rest
 }
+
+// TestActiveTodoHasIssue asserts tech.activeWorkHasIssue: every todo item with Status: active has an
+// Issue: field linking one GitHub issue of this project. It reads the file, not GitHub, so it runs
+// offline; that the issue links back is checked when the item is marked active.
+//
+// Verifies: tech.activeWorkHasIssue. Criterion: acceptance.activeTodoHasIssue.
+func TestActiveTodoHasIssue(t *testing.T) {
+	b, err := os.ReadFile(filepath.Join("..", "todo.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	issue := regexp.MustCompile(`(?m)^Issue: \[#\d+\]\(https://github\.com/google/birdview/issues/\d+\)\s*$`)
+	for _, item := range strings.Split(string(b), "\n## ")[1:] {
+		name, body, _ := strings.Cut(item, "\n")
+		if !regexp.MustCompile(`(?m)^Status: active\b`).MatchString(body) {
+			continue
+		}
+		if !issue.MatchString(body) {
+			t.Errorf("todo.%s is active but has no Issue: line linking its GitHub issue, as [#N](https://github.com/google/birdview/issues/N)", name)
+		}
+	}
+}
