@@ -28,7 +28,7 @@ import (
 // whose center lies on land is dropped, iNaturalist rows and cells outside every sea box are left
 // out, names no drawn species has are counted apart, and the table is written with its source.
 //
-// Verifies: tech.seaDistanceTable. Criterion: acceptance.seaDistanceTable.
+// Verifies: tech.seaDistanceTable. Criterion: dataset.seaDistanceTable.
 func TestMeasureBandsWaterRecords(t *testing.T) {
 	island := [][][][2]float64{{{{-60, 40}, {-59, 40}, {-59, 41}, {-60, 41}, {-60, 40}}}}
 	shore := geo.NewShore(island, -30)

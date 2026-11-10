@@ -43,7 +43,7 @@ func countLine(t *testing.T, s *server, path string) string {
 // when the home page's summary of its settings changes because of it; the
 // whole page would change anyway, since every link on it carries the query.
 //
-// Verifies: tech.stableUrls. Criterion: acceptance.stableUrlsKeepWorking.
+// Verifies: tech.stableUrls. Criterion: app.stableUrlsKeepWorking.
 func TestStableUrlsKeepWorking(t *testing.T) {
 	s := newTestServer(t)
 	for _, p := range []string{
@@ -75,7 +75,7 @@ func TestStableUrlsKeepWorking(t *testing.T) {
 // query intact; the canonical host itself is served, whatever its case or
 // port; and with no canonical host, every host is served.
 //
-// Verifies: tech.oneCanonicalHost. Criterion: acceptance.canonicalHostRedirects.
+// Verifies: tech.oneCanonicalHost. Criterion: app.canonicalHostRedirects.
 func TestCanonicalHostRedirects(t *testing.T) {
 	s := newTestServer(t)
 	request := func(host, target string) *httptest.ResponseRecorder {

@@ -301,7 +301,7 @@ func TestReadParsesTheLastSeenColumn(t *testing.T) {
 // BirdView over a filing choice -- and nothing else would notice, because
 // the dataset and the scope would shrink together.
 //
-// Verifies: product.namesRecordsFiledUnder, decisions.countEbirdFirst. Criterion: acceptance.ebirdCountedInatFillsGaps.
+// Verifies: product.namesRecordsFiledUnder, decisions.countEbirdFirst. Criterion: dataset.ebirdCountedInatFillsGaps.
 func TestScopeBringsBothHalvesOfASharedName(t *testing.T) {
 	rows := []Row{
 		{Name: "setophaga petechia", Status: Established},

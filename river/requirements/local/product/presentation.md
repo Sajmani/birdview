@@ -8,6 +8,7 @@ package product
 
 Subject: `presentation.mode`
 Value: `diagram`
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The diagram is the only way BirdView presents a species in v1. There is no photograph mode.
@@ -20,6 +21,7 @@ and shape comparable; photographs were always the enrichment.
 **Tile contents**
 
 Subject: `presentation.tile`
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Each species is one **tile**, laid out top to bottom, **the numbers first**
@@ -99,6 +101,7 @@ scientific name, never an identifier.
 
 Subject: `units.default`
 Value: `imperial`
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 One toggle switches the whole interface between:
@@ -118,6 +121,7 @@ a 12 g kinglet both round to 0.1 oz.
 
 **First load shows everything**
 
+Applies to: app
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
@@ -131,6 +135,7 @@ for. Opening filtered or empty would hide it.
 **Toggling a control keeps your place**
 
 Subject: `presentation.scroll`
+Applies to: app
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
@@ -150,6 +155,7 @@ ordering, sectioning, and geometry stay in Go where they are property-tested (se
 **The empty state says what to do**
 
 Subject: `presentation.empty_state`
+Applies to: app
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
@@ -177,6 +183,7 @@ describe the same filters differently.
 **The controls collapse**
 
 Subject: `presentation.controls`
+Applies to: app
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
@@ -200,6 +207,7 @@ falls on the reader who wants a filter rather than on every reader.
 **Every group offers "Only"**
 
 Subject: `presentation.filter_only`
+Applies to: app
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
@@ -222,6 +230,7 @@ arrival state took two steps, the first of which emptied the page.
 
 Subject: `presentation.units`
 Value: `mass unit fixed per comparison scope, smallest bird decides`
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Mass is written in **one unit across everything a page is comparing**. The scope is what the
@@ -245,6 +254,7 @@ value — a 3 g hummingbird is `0.11 oz` — because that is precision, not a se
 
 Subject: `presentation.share`
 Value: `one species' observations over all species observations, for the regions and months in view`
+Applies to: app
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata)
 
 Every species says how much of what people record in view is that bird, as **one in N**.
@@ -272,7 +282,7 @@ reopens the individuals ambiguity ([decisions.frequencyMetric](../../decisions.m
 [`decisions.md`](../../decisions.md) keep it as the technical term. The pages say what the number
 *is* instead: *how much of what people record there is this bird, not how many of them are out
 there.* This exemption does not follow
-[acceptance.noContactAddressPublished](../../acceptance.md#nocontactaddresspublished)'s precedent,
+[app.noContactAddressPublished](../../composed/internal/app/acceptance.md#nocontactaddresspublished)'s precedent,
 where exempting the spec was the wrong fix: a published address is harm anywhere; a term inside the
 document that defines it is not.
 
@@ -357,6 +367,7 @@ semicolons**, *Bronx, NY; Kings, NY; New York, NY; or 2 more*; a list of states 
 
 Subject: `presentation.species_url.out_of_scope`
 Value: `404 with a named bird and its measured reason`
+Applies to: app
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 
 `/species/<id>` for a bird the derivation classified but left out of scope returns **404 with a
@@ -395,6 +406,7 @@ records why the status code nevertheless differs from `/compare`'s.
 
 Subject: `ordering.frequency`
 Value: `ascending by one-in-N, banded by decade`
+Applies to: app
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 **Frequency** is a fourth ordering, over the number every tile already shows
@@ -426,6 +438,7 @@ Rationale: [shareOfRecords](#shareofrecords) put the share on every tile but gav
 
 Subject: `presentation.name_provenance`
 Value: `per-source binomial and count, shown where the sources disagree`
+Applies to: app
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Where the occurrence sources do not use the name BirdView serves, the species page says so,
@@ -478,6 +491,7 @@ disagreement is not transient: eBird filed 827,098 records under the shared name
 **The page explains itself**
 
 Subject: `presentation.help`
+Applies to: app
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
@@ -492,7 +506,7 @@ section explains solid against dashed, the wing chord and its ticks, and the est
 panel, above the controls themselves, in two columns.
 
 **A control is documented if and only if it exists**, which
-[acceptance.everyControlDocumented](../../acceptance.md#everycontroldocumented) checks by comparing
+`acceptance.everyControlDocumented` checks by comparing
 the two sets. It is a rule rather than a list because a list cannot notice what it omits.
 Documentation for a removed control is worse than none: it sends a reader looking for something
 that is not there.
@@ -518,6 +532,7 @@ controls.
 **Every page fits a phone held upright**
 
 Subject: `presentation.fit`
+Applies to: app
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 **Down to 360 CSS pixels wide, nothing on any page reaches past the edge of the window, and no text
@@ -539,6 +554,7 @@ is 375 to 430.
 **A tile opens a detail view**
 
 Subject: `presentation.detail_view`
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Clicking a tile opens a detail view that is **a larger version of the same tile** — the same
@@ -578,6 +594,7 @@ pixels tall, and the view of one bird has nothing to compare it against.
 
 Subject: `presentation.compare_view`
 Value: `/compare?species=<id>&species=<id>…`
+Applies to: app
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
@@ -623,6 +640,7 @@ metricProvenanceExplained is left out because a table per bird would bury the co
 
 Subject: `presentation.pick_mode`
 Value: `?species=<id>&species=<id>… — present, even empty, means picking`
+Applies to: app
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
@@ -693,21 +711,12 @@ filtered index to an unfiltered one.
 **What the project says about itself stays true**
 
 Subject: `docs.currency`
+Applies to: app
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
-**Every CC BY source whose output appears on a page is credited on that page.** This is a license
-condition, not a courtesy: AviList, AVONET, and Fox are all CC BY 4.0. It covers `detail.html`,
-whose names, families, and species codes all come from AviList, as well as the home page.
-
-**Each GBIF dataset is credited with its own license, and cited in full in the credits**
-([gbifterms.CiteApiDataByDerivedDataset](../../imported/gbif.org/gbifterms/gbifterms.md#citeapidatabyderiveddataset), [decisions.gbifTermsMet](../../decisions.md#gbiftermsmet)): the eBird Observation Dataset
-under CC BY 4.0 and iNaturalist's research-grade observations under CC BY-NC 4.0, wherever their
-output appears; and in the home page's credits, each by its publisher, title, DOI as a URL, and
-"accessed via GBIF.org", as GBIF's citation guidelines lay out. A GBIF download, once used, is cited
-by its own DOI ([gbifterms.CiteDownloadDoi](../../imported/gbif.org/gbifterms/gbifterms.md#citedownloaddoi)).
-
-**User-facing documentation describes the project as it is, not as it was.** `README.md` and
-`docs/` are read before the code and trusted first. Two kinds of staleness are forbidden:
+**User-facing documentation and page credits describe the project as it is, not as it was.**
+`README.md`, `docs/`, and the pages' credit lines are read before the code and trusted first. Two
+kinds of staleness are forbidden:
 
 - **A count that no longer matches the dataset**, such as 841 species after
   [decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba) cut the list to 839.
@@ -718,15 +727,16 @@ by its own DOI ([gbifterms.CiteDownloadDoi](../../imported/gbif.org/gbifterms/gb
 **Before any public deployment, the docs are checked against the spec**, since a release makes the
 claims promises to strangers.
 
-The check is mechanical where it can be — counts and credits against the dataset and the page —
-and a reading task where it cannot. [acceptance.creditsComplete](../../acceptance.md#creditscomplete)
-does the mechanical part, and records that prose accuracy is not something a test can hold.
+Rationale: the check is mechanical where it can be — counts and credits against the dataset and the
+page — and a reading task where it cannot. Which sources must be credited and under which licenses
+comes from those sources' terms ([imports.md](../../imports.md)), composed for the pages in `app`.
 
 ## noPersonalAddress
 
 **No personal address is published**
 
 Subject: `deploy.contact`
+Applies to: app
 Goals: [goals.giveBack](../../../goals/goals.md#giveback), [goals.maintainerPrivacy](../../../goals/goals.md#maintainerprivacy)
 
 No page BirdView serves carries a contact address. Reader feedback goes to the project's issue
@@ -742,7 +752,7 @@ point.
 
 *(This requirement does not quote the address it removed: the requirements are published with the
 repository, so a quotation would republish what the rule forbids, which is how
-[acceptance.noContactAddressPublished](../../acceptance.md#nocontactaddresspublished) first
+[app.noContactAddressPublished](../../composed/internal/app/acceptance.md#nocontactaddresspublished) first
 failed.)*
 
 **The `User-Agent` contact stays, and is a different thing.**
@@ -758,6 +768,7 @@ does not publish their mail.
 **A species page asks for corrections where its data is shown**
 
 Subject: `presentation.report_data_issue`
+Applies to: app
 Goals: [goals.giveBack](../../../goals/goals.md#giveback), [goals.honestData](../../../goals/goals.md#honestdata)
 
 Under the species page's **Measurements and sources** and **Categories and sources** headings, a
@@ -790,6 +801,7 @@ the reader to transcribe the page.
 **A Birds setting chooses a kind of bird by filling in Family, Habitat, and Diet**
 
 Subject: `presentation.bird_presets`
+Applies to: app
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 
 The first setting on the count line is **Birds**, offering **All**, the default, and a few kinds of
@@ -819,6 +831,7 @@ habitats to say "shorebirds" is the kind of work a birder should not have to do 
 **A setting that takes one choice looks like one: a joined row, one segment filled**
 
 Subject: `presentation.choose_one`
+Applies to: app
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Birds, Order by, Reporting frequency, Units, and Names each take exactly one choice. Each draws its
@@ -838,6 +851,7 @@ would replace the choice or add to it, and the chosen one was shown by color alo
 **The detail view and every tile link to the species on iNaturalist**
 
 Subject: `presentation.detail_view.external_link`
+Applies to: app
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 Status: **Withdrawn 2026-11-01**, replaced by [ebirdLink](#ebirdlink) ([decisions.ebirdLinkReplacesInaturalist](../../decisions.md#ebirdlinkreplacesinaturalist)).
 
@@ -881,6 +895,7 @@ URL that always "works" hides the failure. See
 **The detail view and every tile link to the species on eBird**
 
 Subject: `presentation.detail_view.external_link`
+Applies to: app
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 The detail view and every home page tile carry a link to the species' page on eBird,
@@ -918,6 +933,7 @@ bird. eBird files the bird under the same code BirdView shows beside its name.
 **The home page: one view of birds**
 
 Subject: `presentation.next`
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 **The home page, `/`, draws one set of birds, at one scale, in tiers**

@@ -27,7 +27,7 @@ import (
 // choice; Birds names a choice whose settings match exactly, and the heading says so; a changed
 // setting reads custom; choosing it again, or All, clears what it filled in.
 //
-// Verifies: product.birdPresets. Criterion: acceptance.birdPresets.
+// Verifies: product.birdPresets. Criterion: app.birdPresets.
 func TestBirdPresets(t *testing.T) {
 	s := newTestServer(t)
 	birds := func(target string) nextControl {
@@ -97,7 +97,7 @@ func TestBirdPresets(t *testing.T) {
 // choice names is drawn, every habitat is in the vocabulary, and every choice draws birds, so a
 // renamed family or a changed habitat cannot leave a choice empty.
 //
-// Verifies: product.birdPresets. Criterion: acceptance.birdPresets.
+// Verifies: product.birdPresets. Criterion: app.birdPresets.
 func TestEveryPresetDrawsBirds(t *testing.T) {
 	ds := realDataset(t)
 	fams := map[string]bool{}

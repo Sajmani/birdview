@@ -26,7 +26,7 @@ import (
 // row's do not; and a row that names a habitat outside AVONET's vocabulary, a reviewed row without
 // a reviewer or date, an addition without a reason, or an unknown status is refused.
 //
-// Verifies: product.habitatAndDietFilters. Criterion: acceptance.habitatReviewComplete.
+// Verifies: product.habitatAndDietFilters. Criterion: dataset.habitatReviewComplete.
 func TestHabitatReviewParsesAndApplies(t *testing.T) {
 	const table = "# comment\n" +
 		"Calidris minutilla\tLeast Sandpiper\tWetland\treviewed\tSameer\t2026-11-07\tCoastal: winters on mudflats\n" +
@@ -64,7 +64,7 @@ func TestHabitatReviewParsesAndApplies(t *testing.T) {
 // the five groups hold every one of AVONET's habitats exactly once, Marine as its two refinements, in
 // the order and with the labels the requirement gives; the review accepts a refinement as an addition.
 //
-// Verifies: product.habitatAndDietFilters. Criterion: acceptance.habitatGroupsFilter.
+// Verifies: product.habitatAndDietFilters. Criterion: app.habitatGroupsFilter.
 func TestHabitatGroupsPartitionAVONET(t *testing.T) {
 	var got []string
 	seen := map[string]string{}
@@ -75,9 +75,6 @@ func TestHabitatGroupsPartitionAVONET(t *testing.T) {
 				t.Errorf("%s is in both %s and %s", term, other, g.Label)
 			}
 			seen[term] = g.Label
-			if GroupOf(term) != g.Label {
-				t.Errorf("GroupOf(%q) = %q, want %q", term, GroupOf(term), g.Label)
-			}
 		}
 	}
 	for _, h := range Habitats {
@@ -108,7 +105,7 @@ func TestHabitatGroupsPartitionAVONET(t *testing.T) {
 // TestDietGroupsPartitionNiches asserts product.habitatAndDietFilters' diet groups: AVONET's trophic
 // levels, Plants and Animals, then Scavenges and Eats anything, holding every niche exactly once.
 //
-// Verifies: product.habitatAndDietFilters. Criterion: acceptance.habitatGroupsFilter.
+// Verifies: product.habitatAndDietFilters. Criterion: app.habitatGroupsFilter.
 func TestDietGroupsPartitionNiches(t *testing.T) {
 	var got []string
 	seen := map[string]bool{}

@@ -36,7 +36,7 @@ import (
 // against itself as `exact`, which is true and useless. Asking each database
 // how many records it holds is the only instrument that separates them.
 //
-// Verifies: product.sourceNamingMeasured. Criterion: acceptance.disagreementsDeclared.
+// Verifies: product.sourceNamingMeasured. Criterion: dataset.disagreementsDeclared.
 func TestSourceNamesAgree(t *testing.T) {
 	// Two asymmetric rules, because the two databases are not peers:
 	// iNaturalist is uniformly about 48x shallower than eBird, so what

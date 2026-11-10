@@ -40,7 +40,7 @@ func failures(results []smoke.Result) map[string]string {
 // canonical host would. They must all pass, and each kind of breakage a
 // deploy could bring must fail the check written for it.
 //
-// Verifies: tech.smokeCheckAfterDeploy. Criterion: acceptance.smokeChecksDeployment.
+// Verifies: tech.smokeCheckAfterDeploy. Criterion: repo.smokeChecksDeployment.
 func TestSmokeChecksTheServer(t *testing.T) {
 	// A deployment sets a tracker and records its revision (tech.imageRecordsRevision).
 	deployed := func() *server {

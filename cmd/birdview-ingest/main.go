@@ -79,7 +79,7 @@ func main() {
 	placed, err := applyRegions(ds, *regPath)
 	if err == nil {
 		// The sea refinements need each species' land records, so they follow the regions
-		// (dataset.seaDistanceDerived); before the counties, which are not counted as land.
+		// (product.seaDistanceDerived); before the counties, which are not counted as land.
 		var table seaTable
 		if table, err = loadSeaTable(*seaPath); err == nil {
 			refined, missing := applySea(ds, table)
@@ -406,7 +406,7 @@ func build(statusPath, avoPath, foxPath, avlPath string) (*dataset.Dataset, stri
 
 		// The eBird code is the id, so a URL is /species/amerob rather than a
 		// genus nobody can spell: the simplest of the species' codes, with the
-		// rest as aliases that redirect to it (product.ebirdLink, product.englishNameChoice, acceptance.stableSpeciesId).
+		// rest as aliases that redirect to it (product.ebirdLink, product.englishNameChoice, app.stableSpeciesId).
 		sid, code, aliases := codes(sci, avr.Code)
 
 		rec := dataset.Species{
@@ -621,7 +621,7 @@ func flagExotic(out []dataset.Species, exotic map[string]string) error {
 // after missing the drawn index, so a collision cannot hide a live page
 // today; it is fatal because the lookup order is an implementation detail and
 // the invariant is not. A build that quietly ships two meanings for one URL
-// has already lost the property the ids exist for (acceptance.stableSpeciesId).
+// has already lost the property the ids exist for (app.stableSpeciesId).
 func rejected(rows map[string]status.Row, avl avilist.Table,
 	drawn []dataset.Species) ([]dataset.Undrawn, error) {
 
@@ -916,7 +916,7 @@ func applyCounties(ds *dataset.Dataset, dir string) (int, error) {
 // Deriving it from Regions and RegionTotals makes the detail page and the
 // index the same arithmetic: the peak is always a region the bird is listed
 // in, and selecting that one region on the index reproduces the figure
-// exactly. acceptance.peakAndShareOneCalculation asserts that round trip over the whole dataset.
+// exactly. app.peakAndShareOneCalculation asserts that round trip over the whole dataset.
 //
 // Compared by cross-multiplication rather than by dividing: the products
 // stay far inside int64 -- the largest is about 1e17 against a 9.2e18 limit
@@ -1062,7 +1062,7 @@ func applySea(ds *dataset.Dataset, table seaTable) (refined, missing int) {
 }
 
 // deriveSea gives a bird with Marine its sea refinements, Open ocean, Sea near shore, or both, each
-// derived with its evidence (dataset.seaDistanceDerived, decisions.openOceanSplit). Refinements the
+// derived with its evidence (product.seaDistanceDerived, decisions.openOceanSplit). Refinements the
 // review set stand instead. It reports whether the bird has Marine, and whether it had no row.
 func deriveSea(sp *dataset.Species, table seaTable) (marine, absent bool) {
 	var kept []dataset.Assignment

@@ -1,16 +1,20 @@
 # Requirements — BirdView
 
-What BirdView must do and how it must be built, and where each requirement came from.
+What BirdView must do and how it must be built, and where each requirement came from. The module
+declaration lives in [`../README.md`](../README.md).
 
 | Path | What it holds |
 | --- | --- |
 | [`local/`](local/) | Sources written here: [`product`](local/product/product.md) (what BirdView must do) and [`tech`](local/tech/tech.md) (how it must be built) |
-| [`imported/`](imported/) | Sources written elsewhere, at their import path (the publisher's host, then the package name: `w3.org/wcag`, `figshare.com/avonet`), each with a `PROVENANCE.md` |
+| [`imported/`](imported/) | Sources written elsewhere, at their import path (`w3.org/wcag`, `gbif.org/gbifterms`, `figshare.com/avonet`), each with a `PROVENANCE.md` |
 | [`composed/internal/app/`](composed/internal/app/app.md) | Everything the web application must satisfy, and its criteria |
-| [`acceptance.md`](acceptance.md) | Criteria not yet moved into a composed package |
-| [`imports.md`](imports.md) | The register of every source BirdView is subject to or has evaluated: version, tier, and status. Retrieval details and hashes are in each `PROVENANCE.md` under `imported/` |
+| [`composed/internal/dataset/`](composed/internal/dataset/dataset.md) | Everything the data pipeline and dataset must satisfy, and its criteria |
+| [`composed/internal/repo/`](composed/internal/repo/repo.md) | Everything repository layout, build, container image, and release must satisfy, and its criteria |
+| [`imports.md`](imports.md) | The register of every source BirdView is subject to or has evaluated: version, tier, and status |
 | [`precedence.md`](precedence.md) | The standing rules for which tier of source outranks which |
-| [`decisions.md`](decisions.md) | The log of rulings, append-only: how a particular conflict or judgment was settled, and every gap knowingly accepted, by whom and why |
+| [`decisions.md`](decisions.md) | The log of rulings, append-only: how each conflict, scope, or gap was settled, by whom and why |
+| [`approvals.md`](approvals.md) | Machine-written approval records (`river approve --by <person>`) for each composed package |
+| [`sums.md`](sums.md) | Machine-written content hashes (`river sum -w`) over every input to composition |
 
 **One source is one package.** A source BirdView transcribed rules from is named for the source
 without punctuation — `inat-api` is `package inatapi` in
@@ -18,14 +22,10 @@ without punctuation — `inat-api` is `package inatapi` in
 name in `imports.md` and its package follows Go's rules. A source that contributes no requirements,
 such as a dataset, has a directory holding only its provenance.
 
-**Composed packages are built, not written.** `app` is composed from `local/` and `imported/` under
-`precedence.md` and `decisions.md`, says so in its first lines, and is changed by recomposing.
+**Composed packages are built, not written.** `app`, `dataset`, and `repo` are composed from
+`local/` and `imported/` under `precedence.md` and `decisions.md`, say so in their first lines, and
+are changed by recomposing. Mutable guardrail bindings and verification observations live in
+[`../conformance.md`](../conformance.md).
 
-**Where a composed package sits is the record of who may import it.** Nothing is exported:
-`app` is under `composed/internal/`.
-
-## Module
-
-```
-module birdview
-```
+**Where a composed package sits is the record of who may import it.** Nothing is exported: all
+three packages live under `composed/internal/`.

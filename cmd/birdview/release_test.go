@@ -56,7 +56,7 @@ func dockerStageText(t *testing.T) (map[string]string, []string) {
 // from it and the final image copies from the server build. Without that
 // copy, BuildKit would skip the test stage as unused.
 //
-// Verifies: tech.testedBeforeDeploy. Criterion: acceptance.dockerTestStageGates.
+// Verifies: tech.testedBeforeDeploy. Criterion: repo.dockerTestStageGates.
 func TestDockerTestStageGatesTheBuild(t *testing.T) {
 	stages, order := dockerStageText(t)
 	test, ok := stages["test"]
@@ -101,7 +101,7 @@ func indexOf(xs []string, x string) int {
 // runs the four standing checks under a shell with pipefail, and fails on any
 // skipped test.
 //
-// Verifies: tech.checksOnEveryChange. Criterion: acceptance.checksWorkflowIsSound.
+// Verifies: tech.checksOnEveryChange. Criterion: repo.checksWorkflowIsSound.
 func TestChecksWorkflow(t *testing.T) {
 	b, err := os.ReadFile(filepath.Join("..", "..", ".github", "workflows", "checks.yml"))
 	if err != nil {

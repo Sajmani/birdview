@@ -24,7 +24,7 @@ import (
 // every choice, All first where it has one, in one joined row, with exactly the chosen link marked
 // aria-current, and no words saying to choose one; a setting that takes one or more draws no row.
 //
-// Verifies: product.chooseOneSettings. Criterion: acceptance.chooseOneSettings.
+// Verifies: product.chooseOneSettings. Criterion: app.chooseOneSettings.
 func TestChooseOneSettings(t *testing.T) {
 	s := newTestServer(t)
 	body := mustGet(t, s, "/?by=length&freq=1000&units=metric")
@@ -71,7 +71,7 @@ func TestChooseOneSettings(t *testing.T) {
 // TestActionsColoredApart asserts product.nextView's rule for Here and Now: they act rather than
 // choose, so they carry the act class that colors them apart, as Reset is.
 //
-// Verifies: product.nextView. Criterion: acceptance.actionsColoredApart.
+// Verifies: product.nextView. Criterion: app.actionsColoredApart.
 func TestActionsColoredApart(t *testing.T) {
 	body := mustGet(t, newTestServer(t), "/")
 	if !regexp.MustCompile(`<a class="btn act" href="[^"]*month=now[^"]*"[^>]*data-now>Now</a>`).MatchString(body) {

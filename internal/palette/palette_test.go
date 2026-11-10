@@ -41,7 +41,7 @@ var abaFamilies = []string{
 // when it clears 7:1 against the text it actually carries, which may be black
 // or white. The expected value comes from WCAG, not from a run.
 //
-// Verifies: tech.badgeContrast, product.generatedBadgeColors, wcag.ContrastEnhanced. Criterion: acceptance.legibleDistinctColors.
+// Verifies: tech.badgeContrast, product.generatedBadgeColors, wcag.ContrastEnhanced. Criterion: dataset.legibleDistinctColors.
 func TestContrastAgainstOwnText(t *testing.T) {
 	for _, sw := range Generate(abaFamilies, 0) {
 		got, err := sw.ContrastWith()
@@ -95,7 +95,7 @@ func TestPresetsAlternate(t *testing.T) {
 // The expected value comes from the standard (7:1), not from running the
 // generator and recording what it produced.
 //
-// Verifies: tech.badgeContrast, product.generatedBadgeColors, wcag.ContrastEnhanced. Criterion: acceptance.legibleDistinctColors.
+// Verifies: tech.badgeContrast, product.generatedBadgeColors, wcag.ContrastEnhanced. Criterion: dataset.legibleDistinctColors.
 func TestContrast(t *testing.T) {
 	colors := Generate(abaFamilies, 0)
 	if len(colors) != len(abaFamilies) {
@@ -188,7 +188,7 @@ func TestDistinct(t *testing.T) {
 // "clearly different" threshold of 10, and far above the 2-6 the broken palette
 // achieved.
 //
-// Verifies: product.generatedBadgeColors. Criterion: acceptance.legibleDistinctColors.
+// Verifies: product.generatedBadgeColors. Criterion: dataset.legibleDistinctColors.
 func TestAdjacentFamiliesAreVisiblyDifferent(t *testing.T) {
 	const minDeltaE = 25.0
 

@@ -8,21 +8,18 @@ package tech
 
 Subject: `deployment.posture`
 Value: `public at birdview.site, a personal deployment; non-commercial in perpetuity`
-Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
+Applies to: repo, dataset, app
+Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 BirdView is served publicly at `birdview.site`, as Sameer's personal site, and will not become a
-commercial offering. Source obligations are recorded against this public, non-commercial case.
+commercial offering. Source obligations are evaluated against this public, non-commercial posture.
 
 It ran locally until 2026-10-22, when it went public
 ([decisions.publicPersonalDeployment](../../decisions.md#publicpersonaldeployment)); the identifier is kept from then so that every
-link to it still resolves. Going public needed no licensing re-litigation, because the obligations
-had been recorded against the public case all along, and since 2026-10-05 there has been no ABA
-licensing gate: [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence) and
-[decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba) replaced ABA scope and
-names, so nothing all-rights-reserved is read at build time or served.
+link to it still resolves. Since 2026-10-05 nothing all-rights-reserved has been read at build time
+or served ([decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence),
+[decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba)).
 
-Rationale: Macaulay Library permits embedding for non-commercial use only, and iNaturalist's
-default CC BY-NC corpus is usable on the same basis. Taking revenue would breach both. **The
-iNaturalist research-grade observations BirdView counts through GBIF are CC BY-NC 4.0**, which
-GBIF's terms make prevail over its own ([gbifterms.PublisherLicencesPrevail](../../imported/gbif.org/gbifterms/gbifterms.md#publisherlicencesprevail)); BirdView may count them
-because it is non-commercial ([decisions.gbifTermsMet](../../decisions.md#gbiftermsmet)).
+Rationale: BirdView is built to be read freely and to give back to the open-data ecosystem rather
+than to generate revenue. How non-commercial source licenses apply under this posture is composed
+from each source's terms ([decisions.gbifTermsMet](../../decisions.md#gbiftermsmet)).

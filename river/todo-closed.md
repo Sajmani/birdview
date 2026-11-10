@@ -4,6 +4,134 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## adoptRiverWithdrawalCascade
+
+**Adopt River's rule for what a withdrawn requirement leaves behind, then clean up and re-approve `app`**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-11-10. Upgraded to River 2.0 (at `.agents/skills/` pin `2b57ed5`, with
+`implementationReachability` checks and `river graph`), recomposed `app`, `dataset`, and `repo`
+with `*(excluded)*` markers on every withdrawn requirement, dropped all withdrawn criteria from
+`composed/`, regenerated [conformance.md](conformance.md), fixed
+`TestLumpsMergeIntoTheSpeciesBirdViewCarries` to cite
+[dataset.scopeMatchesStatusTable](requirements/composed/internal/dataset/acceptance.md#scopematchesstatustable)
+and `TestMassCubeIsRenderedAndExplained` to drop withdrawn
+[product.pageExplainsItself](requirements/local/product/presentation.md#pageexplainsitself), deleted the
+dead functions (`gbif.Load`, `gbif.validTier`, `gbif.Client.CountInBox`,
+`gbif.Client.CountOffLandInBox`, `morphology.IsFamily`, `morphology.Review.Write`, `trait.GroupOf`),
+moved `wingspan.publishedPredictions` to `testdata_helper_test.go`, and added
+`TestNoUnreachableCode` ([repo.noUnreachableCode](requirements/composed/internal/repo/acceptance.md#nounreachablecode))
+with its test-oracle allowlist.
+
+River says what a withdrawn goal does to the requirements citing it, but not what a withdrawn
+requirement does to its criteria, the tests citing them, and the code those tests keep alive.
+BirdView has done that cascade by hand and missed things: `view.ScaleMode` and `Scales` outlived
+[product.scaleToggle](requirements/local/product/diagram.md#scaletoggle) by two weeks, kept alive only by tests. Proposed to River on 2026-11-10 (Sameer's
+call what it adopts): withdrawal cascades in the same change; `river check` fails a criterion in
+force covering only withdrawn or excluded requirements, and a test citing only withdrawn criteria;
+each binding names an unreachable-code check; recomposition drops withdrawn criteria.
+
+Found 2026-11-10, to clean up once the new River is adopted:
+
+- **Dead code.** `go run golang.org/x/tools/cmd/deadcode@latest ./...` finds no callers at all,
+  tests included, for `gbif.Load` and `gbif.validTier` (`internal/gbif/gbif.go`),
+  `gbif.Client.CountInBox` (`internal/gbif/resolve.go`), and `morphology.IsFamily` and
+  `morphology.Review.Write` (`internal/morphology/review.go`); only tests call `trait.GroupOf` and
+  `gbif.Client.CountOffLandInBox`. The palette's contrast functions and `boundary.Parse` and
+  `Lookup` are test oracles on purpose and need an allowlist.
+- **A wrong citation.** `TestLumpsMergeIntoTheSpeciesBirdViewCarries`
+  (`cmd/birdview-status/main_test.go`) cites the withdrawn `acceptance.onlyNarrowsOneGroup`, but it
+  tests the pipeline's merging of lumps; re-point it to the criterion it actually decides.
+- **Found by River's new checks, 2026-11-10.** `TestMassCubeIsRenderedAndExplained`
+  (`cmd/birdview/main_test.go`) cites the withdrawn
+  [product.pageExplainsItself](requirements/local/product/presentation.md#pageexplainsitself). Three citations, in `TestSeaRefinementsDerived`,
+  `months.md`, and `decisions.md`, name `dataset.seaDistanceDerived`, which
+  is [product.seaDistanceDerived](requirements/local/product/dataset.md#seadistancederived): `dataset.md` is in package `product`.
+  Both fixed in the closing change, along with two more `dataset.seaDistanceDerived` comments in
+  `cmd/birdview-ingest/main.go`.
+- **`app` is unapproved.** It was approved at `99c0811` and edited by hand in 55 commits since,
+  though composed files change only by recomposing; the status line still reads as approved.
+  [product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink) was dropped without an Excluded entry while the classic view's
+  withdrawn requirements were listed under Excluded, so settle what Excluded is for, and whether
+  the withdrawn search criteria stay. Then recompose, have Sameer approve, and regenerate
+  [conformance.md](conformance.md), which now targets `app` as it stands rather than `99c0811`.
+
+## composeDatasetAndRepo
+
+**Compose `dataset` and `internal/repo`**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-11-10. Composed [dataset](requirements/composed/internal/dataset/dataset.md) (including
+the four morphometric and badge-color models, by Sameer's ruling in
+[decisions.riverV2PackagesAndSplits](requirements/decisions.md#riverv2packagesandsplits)) and
+[repo](requirements/composed/internal/repo/repo.md), migrated all live criteria into
+`composed/internal/{app,dataset,repo}/acceptance.md`, moved mutable guardrail citations and
+`Watched failing:` records to [conformance.md](conformance.md), and retired
+`requirements/acceptance.md` and `alignment.md`.
+
+Account for the local requirements no package listed yet, move each criterion out of `acceptance.md`
+into its package with `Covers:`, and delete the Traceability table once nothing is left in it.
+**Four waited on the morphometric-model ruling** —
+[product.craniumFromMass](requirements/local/product/diagram.md#craniumfrommass),
+[product.trunkFromMass](requirements/local/product/diagram.md#trunkfrommass),
+[product.neckModelPerFamily](requirements/local/product/diagram.md#neckmodelperfamily), and
+[product.generatedBadgeColors](requirements/local/product/dataset.md#generatedbadgecolors): each
+produces a value the app draws, and whether it is data (`dataset`) or a drawing instruction (`app`)
+was the owner's call.
+
+## separateRestatedRequirements
+
+**Before composition, separate the requirements that restate an imported source**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-11-10. Split [tech.fetchRestrictedInputs](requirements/local/tech/delivery.md#fetchrestrictedinputs),
+[product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue), and
+[tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater) into pure local
+intent plus composed obligations ([app.sourceCreditsAndLicenses](requirements/composed/internal/app/app.md#sourcecreditsandlicenses),
+[dataset.gbifOccurrenceAndApiTerms](requirements/composed/internal/dataset/dataset.md#gbifoccurrenceandapiterms),
+and [dataset.noWileyMaterialIngestedOrAutomated](requirements/composed/internal/dataset/dataset.md#nowileymaterialingestedorautomated))
+under [decisions.riverV2PackagesAndSplits](requirements/decisions.md#riverv2packagesandsplits).
+
+Classified 2026-10-16, each of the 81 read individually. **Composed — wholly an imported obligation,
+restated:**
+[tech.badgeContrast](requirements/local/tech/accessibility.md#badgecontrast), and
+[tech.textContrastFloor](requirements/local/tech/accessibility.md#textcontrastfloor) (WCAG 2.2 SC
+1.4.6 and 1.4.11). **Mixed — a local requirement with an imported obligation inside it, to split:**
+[tech.fetchRestrictedInputs](requirements/local/tech/delivery.md#fetchrestrictedinputs),
+[product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue),
+and [tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater).
+
+## licenseConditionFirst
+
+**Statement-first: one requirement still leads with a license condition**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-11-10. Rewrote [product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue)
+to lead with local guide currency and moved CC BY / CC BY-NC attribution to
+[app.sourceCreditsAndLicenses](requirements/composed/internal/app/app.md#sourcecreditsandlicenses)
+([decisions.riverV2PackagesAndSplits](requirements/decisions.md#riverv2packagesandsplits)).
+
+[product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue) opened with the CC BY credit rule, which was the imported half of a
+mixed requirement; its statement was fixed when split under [separateRestatedRequirements](#separaterestatedrequirements).
+
+## attributionCriterionNamesAba
+
+**[app.attributionComplete](requirements/composed/internal/app/acceptance.md#attributioncomplete) still asserts an ABA credit**
+
+Status: closed
+Owner: unassigned
+Closed: 2026-11-10. Updated [app.attributionComplete](requirements/composed/internal/app/acceptance.md#attributioncomplete)
+to match `TestAttributionIsComplete` after [decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence):
+GBIF (eBird Observation Dataset and iNaturalist Research-grade Observations) is credited for
+occurrence scope and region presence, and the stale ABA assertion is gone.
+
+Found 2026-10-23 during step 4 of [todo.deploymentPlumbing](todo.md#deploymentplumbing). Its assertions said "the ABA checklist is credited
+for the species list and *only* that", after [decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence) removed ABA on 2026-10-05.
+
 ## withdrawnWithClassic
 
 **Leftovers of the classic view**
@@ -30,7 +158,7 @@ Status: closed
 Owner: Sameer
 Closed: 2026-11-09. Groups of 5 to 9 empirical species are cross-validated leave-one-out, so every
 fit states an error (Piciformes 2.7%, Gaviiformes_Podicipediformes 3.7%); 26 species were affected
-([acceptance.wingspanErrorStated](requirements/acceptance.md#wingspanerrorstated)).
+([dataset.wingspanErrorStated](requirements/composed/internal/dataset/acceptance.md#wingspanerrorstated)).
 
 Found 2026-11-09 while testing the proportions review: Clark's Grebe's modeled wingspan reads "log-log
 regression of wingspan on wing chord, fitted on 9 empirical species in
@@ -216,7 +344,7 @@ Closed: 2026-10-22, by `COPY data ./data` in the `builder` stage and [tech.conta
 
 Found and fixed 2026-10-22. `cmd/birdview` has imported `birdview/data`, which embeds
 `region-boundaries.json`, since the Here button (`db8d1e7`, 2026-10-18), and the `builder` stage
-did not copy it, so `docker build` failed. [acceptance.dockerStagesCopyWhatTheyBuild](requirements/acceptance.md#dockerstagescopywhattheybuild) now checks
+did not copy it, so `docker build` failed. [repo.dockerStagesCopyWhatTheyBuild](requirements/composed/internal/repo/acceptance.md#dockerstagescopywhattheybuild) now checks
 every stage's `COPY` list against what its command imports. Docker is not installed on the
 maintainer's machine, so the fix was confirmed by building both stages from exactly the directories
 they copy, running the ingest as the image does (1,082 species), and serving from the binary and
@@ -234,7 +362,7 @@ Closed: 2026-10-05, by [decisions.honestSeaDenominator](requirements/decisions.m
 taken by faceting the box by `gadmLevel0Gid` and subtracting the land (`gbif.CountOffLandInBox`), so
 it is the same quantity a land region's total is. All five seas carry `total` rows in
 `data/region-presence.tsv`, and `Commonest` is computed in the ingest from the same numbers the
-index divides ([acceptance.peakAndShareOneCalculation](requirements/acceptance.md#peakandshareonecalculation)).
+index divides ([app.peakAndShareOneCalculation](requirements/composed/internal/app/acceptance.md#peakandshareonecalculation)).
 The item stayed open by oversight after the decision landed. What the fix does not cover, records on
 estuaries counting as sea, is in that decision
 
@@ -287,11 +415,11 @@ updated for post-[decisions.scopeFromRecurrence](requirements/decisions.md#scope
 match
 [product.lengthAndWingspanSources](requirements/local/product/measurements.md#lengthandwingspansources)'s
 three-sheet lookup;
-[acceptance.scopeMatchesStatusTable](requirements/acceptance.md#scopematchesstatustable),
-[acceptance.noRarityCodes](requirements/acceptance.md#noraritycodes),
-[acceptance.allFiveTraits](requirements/acceptance.md#allfivetraits),
-[acceptance.joinCoversEverySpecies](requirements/acceptance.md#joincoverseveryspecies) and the "no
-code" notes in [acceptance.md](requirements/acceptance.md) updated to the 1,082-species derived
+[dataset.scopeMatchesStatusTable](requirements/composed/internal/dataset/acceptance.md#scopematchesstatustable),
+[dataset.noRarityCodes](requirements/composed/internal/dataset/acceptance.md#noraritycodes),
+[dataset.allFiveTraits](requirements/composed/internal/dataset/acceptance.md#allfivetraits),
+[dataset.joinCoversEverySpecies](requirements/composed/internal/dataset/acceptance.md#joincoverseveryspecies) and the "no
+code" notes in [`acceptance.md`](conformance.md) updated to the 1,082-species derived
 scope; `AGENTS.md`, `README.md`, `web/web.go`, [docs/building.md](../docs/building.md)
 ([decisions.speciesUrlOutlivesSpecies](requirements/decisions.md#speciesurloutlivesspecies) bookmark
 note), [docs/data.md](../docs/data.md) (1,082 counts, withdrawn Böhmer neck derivation,
@@ -309,7 +437,7 @@ Closed: 2026-10-14
 **done 2026-10-14**,
 [decisions.escapedBirdsOffIndex](requirements/decisions.md#escapedbirdsoffindex),
 [product.escapedBirdsListed](requirements/local/product/measurements.md#escapedbirdslisted),
-[acceptance.escapedBirdsListedAndServed](requirements/acceptance.md#escapedbirdslistedandserved). 41
+[app.escapedBirdsListedAndServed](requirements/composed/internal/app/acceptance.md#escapedbirdslistedandserved). 41
 escaped cage, aviary and farm birds, Emu among them, are declared in `status.Exotic`, left off the
 index and its controls, and listed at `/excluded`; their pages stay. Long-feral populations such as
 Indian Peafowl in Florida and Red Junglefowl on Kauai are not listed
@@ -335,7 +463,7 @@ Closed: 2026-10-13
 
 **done 2026-10-13**,
 [decisions.herringGullEuropeanRow](requirements/decisions.md#herringgulleuropeanrow),
-[acceptance.herringGullFromEuropeanRow](requirements/acceptance.md#herringgullfromeuropeanrow). It
+[dataset.herringGullFromEuropeanRow](requirements/composed/internal/dataset/acceptance.md#herringgullfromeuropeanrow). It
 now reads `AVONET1_BirdLife`'s European-only *Larus argentatus*, labeled `measured`
 
 ## americanHerringGullRow
@@ -365,7 +493,7 @@ smithsonianus* holds the four Russian and Japanese specimens alongside four Nort
 Vega Gull borrows that row, as American Herring Gull uses it, and both tiles say *Same measurements
 as* the other
 ([product.borrowedMeasurementsSaySo](requirements/local/product/measurements.md#borrowedmeasurementssayso),
-[acceptance.sharedMeasurementsDisclosed](requirements/acceptance.md#sharedmeasurementsdisclosed))
+[app.sharedMeasurementsDisclosed](requirements/composed/internal/app/acceptance.md#sharedmeasurementsdisclosed))
 
 ## regionsTrinomials
 
@@ -376,7 +504,7 @@ Owner: Sameer
 Closed: 2026-10-06
 
 **done 2026-10-06**,
-[acceptance.occurrenceReadersAgree](requirements/acceptance.md#occurrencereadersagree). The rank
+[dataset.occurrenceReadersAgree](requirements/composed/internal/dataset/acceptance.md#occurrencereadersagree). The rank
 reduction moved into `taxonomy.Binomial` and runs inside `taxonomy.Occurrence` *before* either
 naming table is consulted, so `dryobates villosus harrisi` reaches `Leuconotopicus villosus` instead
 of nothing. The last of the three asymmetries
@@ -409,10 +537,10 @@ Closed: 2026-10-12
 
 Planned 2026-10-09; one change in four parts, in this order. **Done: parts (1) and (2) 2026-10-09**
 ([decisions.ebirdSilenceNotAbsence](requirements/decisions.md#ebirdsilencenotabsence),
-[acceptance.withheldMonthsExplained](requirements/acceptance.md#withheldmonthsexplained)) — the list
+[app.withheldMonthsExplained](requirements/composed/internal/app/acceptance.md#withheldmonthsexplained)) — the list
 restated and confirmed, 202 cells flagged, the month filter fixed; **parts (3) and (4) 2026-10-12**
 ([decisions.countEbirdFirst](requirements/decisions.md#countebirdfirst),
-[acceptance.ebirdCountedInatFillsGaps](requirements/acceptance.md#ebirdcountedinatfillsgaps)) —
+[dataset.ebirdCountedInatFillsGaps](requirements/composed/internal/dataset/acceptance.md#ebirdcountedinatfillsgaps)) —
 eBird counted, iNaturalist only in confirmed gaps, shared names carrying eBird's count,
 `WithheldByEBird` derived, scope re-run: 1,083 drawn species to 1,082, Mottled Owl the one to leave.
 **(1) A live bug comes first.** GBIF's eBird export applies eBird's published [Sensitive Species
@@ -631,7 +759,7 @@ Status: closed
 Owner: Sameer
 Closed: 2026-10-01
 
-built, [acceptance.comparisonSortRewritesUrl](requirements/acceptance.md#comparisonsortrewritesurl)
+built, `acceptance.comparisonSortRewritesUrl`
 
 ## massWaterCube
 
@@ -665,7 +793,7 @@ Closed: 2026-10-04
 
 done 2026-10-04,
 [product.oneUnitInComparison](requirements/local/product/presentation.md#oneunitincomparison) and
-[acceptance.massInOneUnit](requirements/acceptance.md#massinoneunit): the mass unit is now a
+[app.massInOneUnit](requirements/composed/internal/app/acceptance.md#massinoneunit): the mass unit is now a
 property of the comparison **scope** — a section or the whole set on the index, following the scale
 setting; the birds named in the address on the comparison page — and the **smallest** bird in the
 scope chooses it. A swan beside a sparrow reads `390.5 oz` and `0.93 oz`; two large birds keep
@@ -688,7 +816,7 @@ paragraphs after saying every name comes from AviList. README gained the GBIF ro
 [decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence) status.
 [product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue)
 keeps the reading gate: none of this was catchable by
-[acceptance.creditsComplete](requirements/acceptance.md#creditscomplete), which compares counts and
+[app.creditsComplete](requirements/composed/internal/app/acceptance.md#creditscomplete), which compares counts and
 credits, not whether prose is true
 
 ## deadSwatchRules

@@ -8,6 +8,7 @@ package product
 
 Subject: `diagram.segments`
 Value: `bill, head, neck, body, tail, wing crossbar`
+Applies to: app
 Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The diagram is a top-down view of a bird in flight, drawn as a vertical cross: top to bottom a bill
@@ -48,6 +49,7 @@ width, and a triangle would assert a fan shape the data does not support.
 **Segments abut exactly and sum to total length**
 
 Subject: `diagram.segments.sum`
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The five vertical segments meet without gap or overlap, and their lengths sum to the species'
@@ -69,6 +71,7 @@ detail view — uses the full total length, so comparability is unaffected. See
 
 Subject: `diagram.scale.mode`
 Value: `per-section (default) | global; global is the default under Frequency, Bill and Tail`
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
@@ -102,6 +105,7 @@ best, and stays one click away and named first in the help.
 
 Subject: `diagram.wingspan.scale`
 Value: `same as vertical axis`
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The crossbar's length represents wingspan at the same scale as the vertical axis, so its length
@@ -115,6 +119,7 @@ authoritative.
 
 **Proportion differentiates species**
 
+Applies to: app
 Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 A species' drawn proportions distinguish it by shape, not only by size: a dowitcher reads as
@@ -126,6 +131,7 @@ long-billed, an accipiter as long-tailed, a heron as long-necked.
 
 Subject: `diagram.head_model`
 Value: `isometric on mass`
+Applies to: dataset
 Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Head length scales isometrically with body mass, **times a per-family factor for a family whose
@@ -156,6 +162,7 @@ stands unvalidated. It is no longer moot: Emu, now in scope at 34 kg, draws a 24
 
 Subject: `diagram.trunk_model`
 Value: `14.0329 x mass^0.37`
+Applies to: dataset
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Trunk length scales with body mass by a power law, **times a per-genus or per-family factor where
@@ -189,6 +196,7 @@ original unvalidated 0.31 understated the large end of the current scope by abou
 
 Subject: `diagram.neck_ratio`
 Value: `per-family modeling function`
+Applies to: dataset
 Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.honestData](../../../goals/goals.md#honestdata)
 
 The division of the remaining body axis between neck and body uses a per-family ratio, **overridden
@@ -217,6 +225,7 @@ function that drew it. Supersedes the condition in [decisions.neckSplitUnmeasure
 **One diagram vocabulary, on every surface that draws one**
 
 Subject: `diagram.vocabulary.shared`
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Three surfaces draw the diagram: the **favicon**, the **home page**'s tiles, and the **detail
@@ -247,7 +256,7 @@ reason beside it.
 **The mechanism is most of the guarantee.** The home page and the detail view share one
 `diagram` template and one stylesheet, so they cannot diverge. The favicon is the only exception: a
 standalone asset that restates the palette by hand. **That restatement is what has to be
-checked**, by [acceptance.faviconFromPalette](../../acceptance.md#faviconfrompalette).
+checked**, by [app.faviconFromPalette](../../composed/internal/app/acceptance.md#faviconfrompalette).
 
 Rationale: the favicon once drew its crossbar `#5ccbfa` while the app drew `#0ea5e9`, lightened
 locally because the app's blue failed the icon's contrast standard. The app's blue also failed
@@ -261,6 +270,7 @@ fork it.
 
 Subject: `presentation.names.locale`
 Value: `na (default) | world`
+Applies to: app
 Goals: [goals.shareableViews](../../../goals/goals.md#shareableviews), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 A setting beside Units, **Names**, chooses between North American English names (eBird/Clements,
@@ -302,6 +312,7 @@ is one of the two reasons namesFromAvilist drops them.
 
 **Species photographs**
 
+Applies to: app
 Status: **Withdrawn from v1.** See [decisions.photographsWithdrawn](../../decisions.md#photographswithdrawn) for the research and the reasons
 it is deferred rather than abandoned.
 
@@ -309,6 +320,7 @@ it is deferred rather than abandoned.
 
 **Perched and in-flight selection**
 
+Applies to: app
 Status: **Withdrawn from v1** with speciesPhotographs. Note for whoever revives it: Wikimedia Commons has
 per-species `in flight` categories but no "perched" equivalent, so the design must treat in-flight
 as a positive filter and perched as the residual default.
@@ -317,10 +329,12 @@ as a positive filter and perched as the residual default.
 
 **Photograph attribution**
 
+Applies to: app
 Status: **Withdrawn from v1** with speciesPhotographs.
 
 ## photoCaching
 
 **Local caching of photographs**
 
+Applies to: app
 Status: **Withdrawn from v1** with speciesPhotographs.

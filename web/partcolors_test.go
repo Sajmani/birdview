@@ -53,7 +53,7 @@ var reTextColor = regexp.MustCompile(`(?:^|[;\s])color:\s*(#[0-9a-fA-F]{6})`)
 // except that the mass cube, drawn apart from the figure with its name beside it, is held apart
 // only under normal vision (decisions.massCubeSkyBlue).
 //
-// Verifies: product.oneDiagramVocabulary, product.labeledDetailDiagram. Criterion: acceptance.partColorsHoldApart.
+// Verifies: product.oneDiagramVocabulary, product.labeledDetailDiagram. Criterion: app.partColorsHoldApart.
 func TestPartColorsHoldApart(t *testing.T) {
 	type col struct {
 		name  string

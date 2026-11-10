@@ -15,7 +15,6 @@
 package morphology
 
 import (
-	"bytes"
 	"math"
 	"os"
 	"strings"
@@ -29,7 +28,7 @@ const reviewHeader = "# test\ntaxon\tneck ratio\thead factor\tbody factor\twings
 // value inherits, the provenance names the row and whether it is reviewed, malformed rows are
 // refused, and the table writes back as it was read.
 //
-// Verifies: product.neckModelPerFamily, product.craniumFromMass. Criterion: acceptance.proportionsReviewTable.
+// Verifies: product.neckModelPerFamily, product.craniumFromMass. Criterion: dataset.proportionsReviewTable.
 func TestProportionReviewParsesAndApplies(t *testing.T) {
 	src := reviewHeader +
 		"Aix\t\t\t0.90\t1.10\treviewed\tSameer\t2026-11-09\tcompared with a flight photo\n" +
@@ -65,13 +64,6 @@ func TestProportionReviewParsesAndApplies(t *testing.T) {
 	}
 	if f, _ := rv.WingspanFactorFor("Anatidae", "Aythya"); f != 1 {
 		t.Errorf("Aythya's wingspan factor is %g; with none set it must be 1", f)
-	}
-	var out bytes.Buffer
-	if err := rv.Write(&out, "# test\n"); err != nil {
-		t.Fatal(err)
-	}
-	if out.String() != src {
-		t.Errorf("the table wrote back as\n%s\nwant\n%s", out.String(), src)
 	}
 	for name, bad := range map[string]string{
 		"unknown status":          "Aythya\t0.35\t\t\t\tmaybe\t\t\tx\n",

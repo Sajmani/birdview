@@ -8,6 +8,7 @@ package product
 
 Subject: `dataset.scope`
 Value: `BirdView's regions, status established or rare`
+Applies to: dataset
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The dataset is the species whose observations **recur** in the regions BirdView covers: a
@@ -53,6 +54,7 @@ either dataset separates a feral population from a steady trickle of escapees. S
 
 Subject: `dataset.status`
 Value: `established | rare | vagrant | absent, plus withheld and exotic flags`
+Applies to: dataset, app
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata), [goals.giveBack](../../../goals/goals.md#giveback)
 
 Each species carries the status [scopeIsRecurringAvifauna](#scopeisrecurringavifauna) derives, and it is shown and filterable
@@ -71,6 +73,7 @@ next to its evidence invites correction where a hidden ingest filter does not.
 
 Subject: `dataset.status.exceptions`
 Value: `declared table, each entry with a written reason`
+Applies to: dataset
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Species whose status cannot be derived carry a declared one instead, from a committed table in
@@ -95,6 +98,7 @@ output looks right, which hides the judgment inside a number.
 
 Subject: `dataset.traits.source`
 Value: `AVONET, preferring AVONET2_eBird`
+Applies to: dataset
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Bill, wing, tail, and mass measurements come from [AVONET](../../imports.md#avonet) — its `AVONET2_eBird`
@@ -108,6 +112,7 @@ See [lengthAndWingspanSources](measurements.md#lengthandwingspansources).
 **Each bird of the sea carries where its records lie, and its open-ocean refinement follows from it**
 
 Subject: `dataset.sea_distance`
+Applies to: dataset
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 Every species with the habitat Marine is given `Marine-offshore`, `Marine-inshore`, or both
@@ -129,6 +134,7 @@ asserted.
 
 **Traits carried per species**
 
+Applies to: dataset
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Each species record carries scientific name, family, and these AVONET traits: `Beak.Length_Culmen`,
@@ -145,6 +151,7 @@ data invites someone to invent a use for it. A column that stops being used leav
 
 Subject: `dataset.names.source`
 Value: `AviList v2025b`
+Applies to: dataset
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 English common names in **both locales** ([englishNameChoice](diagram.md#englishnamechoice)), the **eBird species code**, family
@@ -172,6 +179,7 @@ would change its URL under a reader ([englishNameChoice](diagram.md#englishnamec
 
 Subject: `dataset.names.bandingCode`
 Value: `USGS Bird Banding Laboratory species list, 2026-10-27`
+Applies to: dataset, app
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 Each species carries the four-letter alpha code the USGS Bird Banding Laboratory assigns it
@@ -195,6 +203,7 @@ Government work in the public domain ([decisions.bandingCodesFromBbl](../../deci
 
 Subject: `badge.color.derivation`
 Value: `generated`
+Applies to: dataset
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Colors are generated as **two palettes**: one per taxonomic order, and one per family *within* its
@@ -222,6 +231,7 @@ adjacent in the selector, and every badge carries its family name.
 
 Subject: `dataset.join.key`
 Value: `scientific binomial, normalized`
+Applies to: dataset
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Species are joined across sources on scientific binomial, after stripping `(...)` parentheticals
@@ -241,6 +251,7 @@ lengthAndWingspanSources and tileMarksModeled; see [decisions.abaSpeciesWithoutA
 
 **Unmatched species are reported, not silently dropped**
 
+Applies to: dataset
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Ingest reports every species that fails to join, by name and count, and fails the build if the
@@ -255,6 +266,7 @@ failure, a taxonomy update silently shrinks the dataset and nobody notices.
 
 Subject: `build.join_loss`
 Value: `named and counted on every run; a declared bar above which the run refuses`
+Applies to: dataset
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Every join between two datasets reports the records it could not match: how many, under what
@@ -275,7 +287,7 @@ records; a genus move adds one name and seven million.
 
 **Normalizing is part of the join.** Every reader of the occurrence data normalizes through
 **one function**, and a criterion asserts the readers agree on the species rather than
-asserting either in isolation ([acceptance.occurrenceReadersAgree](../../acceptance.md#occurrencereadersagree)).
+asserting either in isolation ([dataset.occurrenceReadersAgree](../../composed/internal/dataset/acceptance.md#occurrencereadersagree)).
 
 **Rank is reduced before any name is looked up**, because the naming tables are keyed on
 binomials that `dryobates villosus harrisi` matches none of. The hybrid test runs *before* that
@@ -288,6 +300,7 @@ real bird with records of something that is not it.
 
 Subject: `build.name_correspondence`
 Value: `committed per-source record counts; a declared ratio band`
+Applies to: dataset
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 A committed table records how many records each occurrence source holds for every species

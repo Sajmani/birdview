@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -40,9 +39,6 @@ type Proportion struct {
 
 // Review is the table by taxon. A nil Review is the code's family table alone.
 type Review map[string]Proportion
-
-// IsFamily reports whether a taxon names a family, which every family name ending in -idae does.
-func IsFamily(taxon string) bool { return strings.HasSuffix(taxon, "idae") }
 
 // reviewColumns is the table's header row.
 const reviewColumns = "taxon\tneck ratio\thead factor\tbody factor\twingspan factor\tstatus\treviewer\tdate\treason"
@@ -116,32 +112,6 @@ func optional(v string, lo, hi float64) (float64, error) {
 		return 0, fmt.Errorf("%q is not a number from %g to %g", v, lo, hi)
 	}
 	return x, nil
-}
-
-// Write writes the table under the given comment header, rows in taxon order.
-func (rv Review) Write(w io.Writer, header string) error {
-	if _, err := io.WriteString(w, header+reviewColumns+"\n"); err != nil {
-		return err
-	}
-	taxa := make([]string, 0, len(rv))
-	for t := range rv {
-		taxa = append(taxa, t)
-	}
-	sort.Strings(taxa)
-	num := func(x float64) string {
-		if x == 0 {
-			return ""
-		}
-		return strconv.FormatFloat(x, 'f', 2, 64)
-	}
-	for _, t := range taxa {
-		p := rv[t]
-		if _, err := fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", p.Taxon, num(p.Neck), num(p.Head),
-			num(p.Body), num(p.Wing), p.Status, p.Reviewer, p.Date, p.Reason); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // status is how a row's provenance ends: who reviewed it, or that no one has.

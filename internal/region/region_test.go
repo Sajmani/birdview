@@ -190,7 +190,7 @@ func TestPelagicIsTheLastZone(t *testing.T) {
 // Two regions sharing a URL value makes one unreachable from every choice, and the
 // collision is silent: the page still renders, the wrong birds appear.
 //
-// Verifies: product.regionAndMonthFilter. Criterion: acceptance.regionUrlRoundTrips.
+// Verifies: product.regionAndMonthFilter. Criterion: app.regionUrlRoundTrips.
 func TestSlugsAreUniqueAndResolve(t *testing.T) {
 	seen := map[string]string{}
 	for _, id := range append(LandIDs(), MarineIDs()...) {
@@ -230,7 +230,7 @@ func TestSlugsAreUniqueAndResolve(t *testing.T) {
 // is its GADM code, the code its records are filed under; a sea box, which no source codes yet,
 // keeps its name in PascalCase until Marine Regions replaces it.
 //
-// Verifies: product.regionAndMonthFilter. Criterion: acceptance.regionUrlRoundTrips.
+// Verifies: product.regionAndMonthFilter. Criterion: app.regionUrlRoundTrips.
 func TestSlugIsDataCode(t *testing.T) {
 	for _, tc := range []struct{ id, want string }{
 		{"USA.5_1", "USA.5_1"},       // a state is its GADM code
@@ -258,7 +258,7 @@ func TestSlugIsDataCode(t *testing.T) {
 // working: each postal code and each island name resolves, as retired, to its region, and no
 // retired value is also a current one, which would make the redirect ambiguous.
 //
-// Verifies: tech.stableUrls, product.regionAndMonthFilter. Criterion: acceptance.regionUrlRoundTrips.
+// Verifies: tech.stableUrls, product.regionAndMonthFilter. Criterion: app.regionUrlRoundTrips.
 func TestRetiredValuesResolve(t *testing.T) {
 	for old, id := range map[string]string{
 		"CA": "USA.5_1", "NY": "USA.33_1", "BC": "CAN.2_1", "ON": "CAN.9_1", "DC": "USA.9_1",
@@ -294,7 +294,7 @@ func TestRetiredValuesResolve(t *testing.T) {
 // suffix round-trips, and that a malformed one is refused rather than read
 // as "nothing withheld".
 //
-// Verifies: decisions.ebirdSilenceNotAbsence. Criterion: acceptance.withheldMonthsExplained.
+// Verifies: decisions.ebirdSilenceNotAbsence. Criterion: app.withheldMonthsExplained.
 func TestPresenceReadsWithheldFlags(t *testing.T) {
 	const table = "total\tUSA.10_1\t1|1|1|1|1|1|1|1|1|1|1|1\n" +
 		"Passerina ciris\tUSA.10_1:0|0|0|12483|2349|1034|905|1680|2759|0|0|0!111000000111\n"
@@ -325,7 +325,7 @@ func TestPresenceReadsWithheldFlags(t *testing.T) {
 // TestCountyParentFromCode asserts a county's state is read from its code alone, so a county is
 // recognized whether or not it is registered (decisions.countyListingRule).
 //
-// Verifies: product.regionAndMonthFilter. Criterion: acceptance.countyListingApplied.
+// Verifies: product.regionAndMonthFilter. Criterion: app.countyListingApplied.
 func TestCountyParentFromCode(t *testing.T) {
 	for id, want := range map[string]string{"USA.33.24_1": "USA.33_1", "CAN.9.12_1": "CAN.9_1", "USA.33_1": "", "SEA.GULF": "", "GulfOfMexico": ""} {
 		got, ok := CountyParent(id)

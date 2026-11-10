@@ -36,7 +36,6 @@ import (
 
 	"birdview/internal/dataset"
 	"birdview/internal/month"
-	"birdview/internal/trait"
 )
 
 // fixNextClock sets /next's clock to a day in m for the rest of the test.
@@ -1387,7 +1386,9 @@ func TestNextWelcomeLine(t *testing.T) {
 				return slices.ContainsFunc(as, func(a dataset.Assignment) bool { return a.Value == v })
 			}
 			for _, tl := range p.Tiles {
-				open := slices.ContainsFunc(tl.S.Habitats, func(a dataset.Assignment) bool { return trait.GroupOf(a.Value) == "Open country" })
+				open := slices.ContainsFunc(tl.S.Habitats, func(a dataset.Assignment) bool {
+					return slices.Contains([]string{"Grassland", "Shrubland", "Desert", "Rock"}, a.Value)
+				})
 				if !open || !has(tl.S.Niches, "Vertivore") {
 					t.Errorf("the open-country hunters draw %s, of habitats %v and niches %v", tl.S.ID, tl.S.Habitats, tl.S.Niches)
 				}
@@ -2032,7 +2033,7 @@ func TestReportingFrequencyFilters(t *testing.T) {
 // toggles on its own; addresses name AVONET's habitats and are never redirected; and the heading
 // names a fully chosen group.
 //
-// Verifies: product.habitatAndDietFilters, tech.stableUrls. Criterion: acceptance.habitatGroupsFilter.
+// Verifies: product.habitatAndDietFilters, tech.stableUrls. Criterion: app.habitatGroupsFilter.
 func TestHabitatGroupsFilter(t *testing.T) {
 	s := newTestServer(t)
 	ctl := func(url string) nextControl {
@@ -2182,7 +2183,7 @@ func TestHabitatGroupsFilter(t *testing.T) {
 // TestAllAlwaysOffered asserts that every setting that can be all offers All exactly once, first,
 // whether or not the setting is all, and marks it only when it is, so the choices do not move.
 //
-// Verifies: product.nextView. Criterion: acceptance.allAlwaysOffered.
+// Verifies: product.nextView. Criterion: app.allAlwaysOffered.
 func TestAllAlwaysOffered(t *testing.T) {
 	countiesOn(t)
 	s, err := newServer(countyDataset())
@@ -2229,7 +2230,7 @@ func TestAllAlwaysOffered(t *testing.T) {
 // draws exactly the birds that carry it; and a bird's page shows its refinement as derived, with its
 // evidence and a link to the guide.
 //
-// Verifies: product.habitatAndDietFilters, tech.stableUrls, product.categoryProvenance. Criterion: acceptance.openOceanFilter.
+// Verifies: product.habitatAndDietFilters, tech.stableUrls, product.categoryProvenance. Criterion: app.openOceanFilter.
 func TestOpenOceanFilter(t *testing.T) {
 	s := newTestServer(t)
 	for from, to := range map[string]string{

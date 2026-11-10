@@ -90,7 +90,7 @@ func parseRobots(t *testing.T, body string) []robotsRule {
 // nothing with one, nor the boundary file. The pages come from the same crawl the accessibility checks use, so a
 // page added later is judged without anyone listing it here.
 //
-// Verifies: tech.crawlersSkipFilteredViews, tech.servesOnlyItsPages. Criterion: acceptance.robotsKeepsCrawlersToPages.
+// Verifies: tech.crawlersSkipFilteredViews, tech.servesOnlyItsPages. Criterion: app.robotsKeepsCrawlersToPages.
 func TestRobotsKeepsCrawlersToPages(t *testing.T) {
 	s := newTestServer(t)
 	w := httptest.NewRecorder()

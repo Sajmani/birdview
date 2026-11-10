@@ -45,11 +45,9 @@
 package gbif
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -80,17 +78,6 @@ const (
 
 // Resolved reports whether a tier names an AviList species.
 func (t Tier) Resolved() bool { return t == TierExact || t == TierSynonym || t == TierEpithet }
-
-var tiers = []Tier{TierExact, TierSynonym, TierEpithet, TierAmbiguous, TierNone}
-
-func validTier(s string) bool {
-	for _, t := range tiers {
-		if Tier(s) == t {
-			return true
-		}
-	}
-	return false
-}
 
 // Taxon is one GBIF backbone species as the mapping tool retrieves it.
 type Taxon struct {
@@ -288,58 +275,7 @@ func fold(e string) string {
 // deliberate non-match.
 const noName = "-"
 
-// Load reads a mapping table. One tab-separated record per line,
-// `gbif name<TAB>gbif species key<TAB>avilist name<TAB>tier`, with `#`
-// comments and blank lines ignored.
-func Load(r io.Reader) (Table, error) {
-	t := Table{}
-	claimed := map[string]string{} // avilist name -> the gbif name that claimed it
-	sc := bufio.NewScanner(r)
-	for line := 1; sc.Scan(); line++ {
-		s := strings.TrimSpace(sc.Text())
-		if s == "" || strings.HasPrefix(s, "#") {
-			continue
-		}
-		f := strings.Split(s, "\t")
-		if len(f) != 4 {
-			return nil, fmt.Errorf("gbif table line %d: got %d fields, want 4", line, len(f))
-		}
-		key, err := strconv.Atoi(f[1])
-		if err != nil {
-			return nil, fmt.Errorf("gbif table line %d: species key %q: %w", line, f[1], err)
-		}
-		if key <= 0 {
-			return nil, fmt.Errorf("gbif table line %d: species key %d is not positive", line, key)
-		}
-		if !validTier(f[3]) {
-			return nil, fmt.Errorf("gbif table line %d: unknown tier %q", line, f[3])
-		}
-		tier := Tier(f[3])
-		if tier.Resolved() == (f[2] == noName) {
-			return nil, fmt.Errorf("gbif table line %d: tier %q with AviList name %q", line, tier, f[2])
-		}
-		if _, dup := t[f[0]]; dup {
-			return nil, fmt.Errorf("gbif table line %d: %q appears twice", line, f[0])
-		}
-		e := Entry{GBIFName: f[0], GBIFKey: key, Tier: tier}
-		if tier.Resolved() {
-			e.AviList = f[2]
-			// The bridge must be injective. Two GBIF taxa pointing at one
-			// AviList species would merge two entries of a derived species
-			// list into one, and the count that disappeared would belong to
-			// whichever bird GBIF happened to list second.
-			if prev, dup := claimed[e.AviList]; dup {
-				return nil, fmt.Errorf("gbif table line %d: %q and %q both claim AviList %q",
-					line, prev, f[0], e.AviList)
-			}
-			claimed[e.AviList] = f[0]
-		}
-		t[f[0]] = e
-	}
-	return t, sc.Err()
-}
-
-// Write serializes a table in Load's format, sorted by GBIF name, so that
+// Write serializes a table in tab-separated format, sorted by GBIF name, so
 // regenerating it produces a reviewable diff rather than a reshuffle.
 func Write(w io.Writer, t Table) error {
 	names := make([]string, 0, len(t))

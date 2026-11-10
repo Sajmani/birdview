@@ -15,12 +15,15 @@
 package gbif
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -29,6 +32,54 @@ import (
 	"birdview/internal/status"
 	"birdview/internal/taxonomy"
 )
+
+func loadTableForTest(r io.Reader) (Table, error) {
+	valid := map[Tier]bool{
+		TierExact: true, TierSynonym: true, TierEpithet: true,
+		TierAmbiguous: true, TierNone: true,
+	}
+	t := Table{}
+	claimed := map[string]string{}
+	sc := bufio.NewScanner(r)
+	for line := 1; sc.Scan(); line++ {
+		s := strings.TrimSpace(sc.Text())
+		if s == "" || strings.HasPrefix(s, "#") {
+			continue
+		}
+		f := strings.Split(s, "\t")
+		if len(f) != 4 {
+			return nil, fmt.Errorf("gbif table line %d: got %d fields, want 4", line, len(f))
+		}
+		key, err := strconv.Atoi(f[1])
+		if err != nil {
+			return nil, fmt.Errorf("gbif table line %d: species key %q: %w", line, f[1], err)
+		}
+		if key <= 0 {
+			return nil, fmt.Errorf("gbif table line %d: species key %d is not positive", line, key)
+		}
+		tier := Tier(f[3])
+		if !valid[tier] {
+			return nil, fmt.Errorf("gbif table line %d: unknown tier %q", line, f[3])
+		}
+		if tier.Resolved() == (f[2] == noName) {
+			return nil, fmt.Errorf("gbif table line %d: tier %q with AviList name %q", line, tier, f[2])
+		}
+		if _, dup := t[f[0]]; dup {
+			return nil, fmt.Errorf("gbif table line %d: %q appears twice", line, f[0])
+		}
+		e := Entry{GBIFName: f[0], GBIFKey: key, Tier: tier}
+		if tier.Resolved() {
+			e.AviList = f[2]
+			if prev, dup := claimed[e.AviList]; dup {
+				return nil, fmt.Errorf("gbif table line %d: %q and %q both claim AviList %q",
+					line, prev, f[0], e.AviList)
+			}
+			claimed[e.AviList] = f[0]
+		}
+		t[f[0]] = e
+	}
+	return t, sc.Err()
+}
 
 const (
 	tableFile  = "../../data/gbif-taxa.tsv"
@@ -253,7 +304,7 @@ func TestTableRoundTripsAndRejectsJunk(t *testing.T) {
 	if err := Write(&b, in); err != nil {
 		t.Fatalf("Write: %v", err)
 	}
-	out, err := Load(strings.NewReader(b.String()))
+	out, err := loadTableForTest(strings.NewReader(b.String()))
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
@@ -288,12 +339,12 @@ func TestTableRoundTripsAndRejectsJunk(t *testing.T) {
 			"Regulus calendula\t1\tCorthylio calendula\tsynonym\n" +
 				"Regulus nowhere\t2\tCorthylio calendula\tsynonym\n"},
 	} {
-		if _, err := Load(strings.NewReader(bad.text)); err == nil {
+		if _, err := loadTableForTest(strings.NewReader(bad.text)); err == nil {
 			t.Errorf("%s: Load accepted %q", bad.name, bad.text)
 		}
 	}
 	// Comments and blanks are skipped, not treated as malformed.
-	if tbl, err := Load(strings.NewReader("# a comment\n\nCorvus cornix\t1\t-\tnone\n")); err != nil {
+	if tbl, err := loadTableForTest(strings.NewReader("# a comment\n\nCorvus cornix\t1\t-\tnone\n")); err != nil {
 		t.Errorf("Load rejected a comment or blank line: %v", err)
 	} else if len(tbl) != 1 {
 		t.Errorf("Load read %d entries past the comment, want 1", len(tbl))
@@ -321,7 +372,7 @@ func TestCommittedTableResolvesAlmostEverything(t *testing.T) {
 		t.Fatalf("opening the committed bridge: %v", err)
 	}
 	defer f.Close()
-	table, err := Load(f)
+	table, err := loadTableForTest(f)
 	if err != nil {
 		t.Fatalf("loading %s: %v", tableFile, err)
 	}
@@ -419,7 +470,7 @@ func TestCommittedTableIsExactlyWhatWriteProduces(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reading the committed bridge: %v", err)
 	}
-	table, err := Load(strings.NewReader(string(onDisk)))
+	table, err := loadTableForTest(strings.NewReader(string(onDisk)))
 	if err != nil {
 		t.Fatalf("loading %s: %v", tableFile, err)
 	}
@@ -489,7 +540,7 @@ func TestCommittedTableCoversBirdViewsSpecies(t *testing.T) {
 		t.Fatalf("opening the committed bridge: %v", err)
 	}
 	defer f.Close()
-	table, err := Load(f)
+	table, err := loadTableForTest(f)
 	if err != nil {
 		t.Fatalf("loading %s: %v", tableFile, err)
 	}
@@ -933,57 +984,5 @@ func TestPacingRecoversAfterACleanStreak(t *testing.T) {
 	if after >= widened {
 		t.Errorf("after %d clean requests the gap is still %v (was %v): widening "+
 			"without a way back pins a long run at the cap", c.CleanRun, after, widened)
-	}
-}
-
-// TestCountOffLandInBoxSubtractsTheLand checks the measurement decisions.honestSeaDenominator rests
-// on: a box's records minus those GADM places in a country are the records on
-// water.
-//
-// And it checks the guard, which is the half worth having. Faceting plain
-// `gadmGid` instead of `gadmLevel0Gid` returns every administrative level at
-// once, so a single record in Virginia is counted under USA, USA.47_1 and
-// USA.47_13 alike and the rows sum to several times the box. Subtracting
-// that gives a NEGATIVE off-land count, which would otherwise be clamped or
-// silently stored. Measured live before this was written: the Atlantic box
-// holds 413,188,208 records and a plain gadmGid facet summed to
-// 1,175,397,927 of them.
-//
-// Verifies: tech.identifiedClient, decisions.honestSeaDenominator.
-func TestCountOffLandInBoxSubtractsTheLand(t *testing.T) {
-	const onePerLevel = `{"count":1000,"facets":[{"field":"GADM_LEVEL_0_GID",
-	  "counts":[{"name":"USA","count":700},{"name":"CAN","count":200}]}]}`
-	srv, _, agents := fakeAPI(t, map[string]string{"/occurrence/search": onePerLevel})
-	c := NewClient()
-	c.BaseURL = srv.URL
-	c.Interval = 0
-
-	off, total, err := c.CountOffLandInBox(context.Background(), EBirdDatasetKey,
-		"pterodroma hasitata", []string{"US", "CA"}, 10, 66, -80, -40)
-	if err != nil {
-		t.Fatalf("CountOffLandInBox: %v", err)
-	}
-	if total != 1000 {
-		t.Errorf("total %d, want 1000", total)
-	}
-	if off != 100 {
-		t.Errorf("off land %d, want 100 — 1000 in the box less 700 in the USA and 200 in Canada", off)
-	}
-	if len(*agents) == 0 || (*agents)[0] == "" {
-		t.Error("no User-Agent sent (tech.identifiedClient)")
-	}
-
-	// Multi-level facet rows sum past the box: refuse, do not clamp.
-	const allLevels = `{"count":1000,"facets":[{"field":"GADM_GID",
-	  "counts":[{"name":"USA","count":700},{"name":"USA.47_1","count":400},
-	            {"name":"USA.47_13","count":120}]}]}`
-	srv2, _, _ := fakeAPI(t, map[string]string{"/occurrence/search": allLevels})
-	c2 := NewClient()
-	c2.BaseURL = srv2.URL
-	c2.Interval = 0
-	if off, _, err := c2.CountOffLandInBox(context.Background(), EBirdDatasetKey,
-		"x", nil, 10, 66, -80, -40); err == nil {
-		t.Errorf("rows summing past the box returned %d and no error; a facet over every "+
-			"GADM level must be refused, not turned into a negative count", off)
 	}
 }

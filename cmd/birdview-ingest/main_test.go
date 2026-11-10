@@ -101,7 +101,7 @@ func load(t *testing.T) *dataset.Dataset {
 // no concept for. Writing the total as a literal would make this test agree
 // with whatever the code last produced.
 //
-// Verifies: product.scopeIsRecurringAvifauna. Criterion: acceptance.scopeMatchesStatusTable.
+// Verifies: product.scopeIsRecurringAvifauna. Criterion: dataset.scopeMatchesStatusTable.
 func TestScopeIsWhatTheStatusTableSaysRecurs(t *testing.T) {
 	ds := load(t)
 	f, err := os.Open(statusFile)
@@ -157,7 +157,7 @@ const unmeasurable = 4
 // four-letter banding code, which is a legitimate part of a species' identity
 // and which product.namesFromAvilist requires. The requirement is about rarity specifically.
 //
-// Verifies: product.scopeIsRecurringAvifauna. Criterion: acceptance.noRarityCodes.
+// Verifies: product.scopeIsRecurringAvifauna. Criterion: dataset.noRarityCodes.
 func TestRarityCodeNeverReachesTheDataset(t *testing.T) {
 	ds := load(t)
 	var fields map[string]any
@@ -178,7 +178,7 @@ func TestRarityCodeNeverReachesTheDataset(t *testing.T) {
 // TestBandingCodesArePresent checks product.namesFromAvilist's newest requirement: the tile shows
 // the four-letter code, so the ingest must carry it.
 //
-// Verifies: product.namesFromAvilist. Criterion: acceptance.namesNeverDefaulted.
+// Verifies: product.namesFromAvilist. Criterion: dataset.namesNeverDefaulted.
 func TestSpeciesCodesArePresent(t *testing.T) {
 	ds := load(t)
 	var missing []string
@@ -214,7 +214,7 @@ func TestSpeciesCodesArePresent(t *testing.T) {
 // TestSpeciesCodesAreUniqueAndURLSafe guards the thing the code now carries
 // that an alpha code never did: it IS the URL (product.englishNameChoice).
 //
-// Verifies: product.englishNameChoice. Criterion: acceptance.stableSpeciesId.
+// Verifies: product.englishNameChoice. Criterion: app.stableSpeciesId.
 func TestSpeciesCodesAreUniqueAndURLSafe(t *testing.T) {
 	ds := load(t)
 	seen := map[string]string{}
@@ -232,7 +232,7 @@ func TestSpeciesCodesAreUniqueAndURLSafe(t *testing.T) {
 	}
 }
 
-// Verifies: product.namesFromAvilist. Criterion: acceptance.namesNeverDefaulted.
+// Verifies: product.namesFromAvilist. Criterion: dataset.namesNeverDefaulted.
 func TestNamesArePopulatedNotDefaulted(t *testing.T) {
 	ds := load(t)
 	for _, s := range ds.Species {
@@ -253,7 +253,7 @@ func TestNamesArePopulatedNotDefaulted(t *testing.T) {
 	}
 }
 
-// Verifies: product.segmentsSumToLength. Criterion: acceptance.segmentsSumExactly.
+// Verifies: product.segmentsSumToLength. Criterion: app.segmentsSumExactly.
 func TestSegmentsSumToTotalExactly(t *testing.T) {
 	ds := load(t)
 	for _, s := range ds.Species {
@@ -265,7 +265,7 @@ func TestSegmentsSumToTotalExactly(t *testing.T) {
 	}
 }
 
-// Verifies: product.provenancePerMetric. Criterion: acceptance.provenanceWellFormed.
+// Verifies: product.provenancePerMetric. Criterion: dataset.provenanceWellFormed.
 func TestEveryMetricHasWellFormedProvenance(t *testing.T) {
 	ds := load(t)
 	for i := range ds.Species {
@@ -296,7 +296,7 @@ func TestEveryMetricHasWellFormedProvenance(t *testing.T) {
 	}
 }
 
-// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric. Criterion: acceptance.provenanceMatchesSources.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric. Criterion: dataset.provenanceMatchesSources.
 func TestProvenanceMatchesTheSourcesUsed(t *testing.T) {
 	ds := load(t)
 	var measuredSpan, nearSpan, modeledSpan int
@@ -349,7 +349,7 @@ func TestProvenanceMatchesTheSourcesUsed(t *testing.T) {
 	}
 }
 
-// Verifies: product.neckModelPerFamily, product.provenancePerMetric. Criterion: acceptance.neckLengthSerialized.
+// Verifies: product.neckModelPerFamily, product.provenancePerMetric. Criterion: dataset.neckLengthSerialized.
 func TestNeckIsModeledAndNamesItsFamilyRatio(t *testing.T) {
 	ds := load(t)
 	for i := range ds.Species {
@@ -367,7 +367,7 @@ func TestNeckIsModeledAndNamesItsFamilyRatio(t *testing.T) {
 	}
 }
 
-// Verifies: product.lengthAndWingspanSources, product.segmentsSumToLength. Criterion: acceptance.totalIsSumOfSegments.
+// Verifies: product.lengthAndWingspanSources, product.segmentsSumToLength. Criterion: dataset.totalIsSumOfSegments.
 func TestTotalLengthSaysItIsASum(t *testing.T) {
 	ds := load(t)
 	m := ds.Species[0].TotalLength.Prov.Model
@@ -379,7 +379,7 @@ func TestTotalLengthSaysItIsASum(t *testing.T) {
 	}
 }
 
-// Verifies: product.joinOnBinomial, product.unmatchedSpeciesReported. Criterion: acceptance.joinCoversEverySpecies.
+// Verifies: product.joinOnBinomial, product.unmatchedSpeciesReported. Criterion: dataset.joinCoversEverySpecies.
 func TestNearMatchesAreExactlyTheMappedOnes(t *testing.T) {
 	ds := load(t)
 	got := map[string]bool{}
@@ -407,7 +407,7 @@ func TestNearMatchesAreExactlyTheMappedOnes(t *testing.T) {
 	}
 }
 
-// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric. Criterion: acceptance.whiteTernFromBirdlife.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric. Criterion: dataset.whiteTernFromBirdlife.
 func TestNearMatchBorrowsFromTheDeclaredSheet(t *testing.T) {
 	wb, err := avonet.Open(avoFile)
 	if err != nil {
@@ -485,7 +485,7 @@ func jsonMarshal(v any) ([]byte, error) { return json.Marshal(v) }
 // dataset drew an identical head that consumed a fixed share of every small
 // bird's length and differentiated nothing.
 //
-// Verifies: product.provenancePerMetric. Criterion: acceptance.craniumVaries.
+// Verifies: product.provenancePerMetric. Criterion: dataset.craniumVaries.
 func TestHeadIsNotAConstant(t *testing.T) {
 	ds := load(t)
 	counts := map[float64]int{}
@@ -532,7 +532,7 @@ func TestHeadIsNotAConstant(t *testing.T) {
 // Watched fail: appending one extra count in applyRegions reports the
 // mismatch and names the species.
 //
-// Verifies: product.shareOfRecords, decisions.seaShareDiffers. Criterion: acceptance.commonestShareIsShare, acceptance.commonestIsLargestShare.
+// Verifies: product.shareOfRecords, decisions.seaShareDiffers. Criterion: app.commonestShareIsShare, app.commonestIsLargestShare.
 func TestRegionCountsLineUp(t *testing.T) {
 	ds := load(t)
 	var withCounts int
@@ -613,7 +613,7 @@ func TestRegionCountsLineUp(t *testing.T) {
 	}
 }
 
-// Verifies: product.borrowedMeasurementsSaySo, decisions.vegaGullBorrows. Criterion: acceptance.sharedMeasurementsDisclosed.
+// Verifies: product.borrowedMeasurementsSaySo, decisions.vegaGullBorrows. Criterion: app.sharedMeasurementsDisclosed.
 func TestVegaGullSharesAmericanHerringGullsRow(t *testing.T) {
 	ds := load(t)
 	got := map[string]*dataset.Species{}
@@ -648,7 +648,7 @@ func TestVegaGullSharesAmericanHerringGullsRow(t *testing.T) {
 	}
 }
 
-// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric, decisions.herringGullEuropeanRow. Criterion: acceptance.herringGullFromEuropeanRow.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric, decisions.herringGullEuropeanRow. Criterion: dataset.herringGullFromEuropeanRow.
 func TestEuropeanHerringGullReadsItsOwnRow(t *testing.T) {
 	wb, err := avonet.Open(avoFile)
 	if err != nil {
@@ -693,11 +693,11 @@ func TestEuropeanHerringGullReadsItsOwnRow(t *testing.T) {
 	}
 }
 
-// TestBelowBarRegionsAreCountedNotListed asserts acceptance.belowBarCountsKept's second assertion:
+// TestBelowBarRegionsAreCountedNotListed asserts app.belowBarCountsKept's second assertion:
 // the ingest keeps a below-bar cell out of Regions, so no region or month
 // filter sees it, and carries its counts in the Below fields.
 //
-// Verifies: product.regionAndMonthFilter, decisions.belowBarCounted. Criterion: acceptance.belowBarCountsKept.
+// Verifies: product.regionAndMonthFilter, decisions.belowBarCounted. Criterion: app.belowBarCountsKept.
 func TestBelowBarRegionsAreCountedNotListed(t *testing.T) {
 	table := "total\tUSA.44_1\t10|10|10|10|10|10|10|10|10|10|10|10\n" +
 		"total\tUSA.5_1\t10|10|10|10|10|10|10|10|10|10|10|10\n" +
@@ -724,7 +724,7 @@ func TestBelowBarRegionsAreCountedNotListed(t *testing.T) {
 	}
 }
 
-// Verifies: product.statusIsPublished, product.escapedBirdsListed, decisions.escapedBirdsOffIndex. Criterion: acceptance.escapedBirdsListedAndServed.
+// Verifies: product.statusIsPublished, product.escapedBirdsListed, decisions.escapedBirdsOffIndex. Criterion: app.escapedBirdsListedAndServed.
 func TestExoticsAreFlaggedFromTheList(t *testing.T) {
 	ds := load(t)
 	if len(status.Exotic) < 30 {
@@ -917,7 +917,7 @@ func TestEverySpeciesHasAnEBirdCode(t *testing.T) {
 // under the bar joins the Below fields, the county's totals join the regions', each county is named
 // and placed in its state, and the peak share still names a state.
 //
-// Verifies: product.regionAndMonthFilter. Criterion: acceptance.countyListingApplied.
+// Verifies: product.regionAndMonthFilter. Criterion: app.countyListingApplied.
 func TestCountiesJoinedAsRegions(t *testing.T) {
 	dir := t.TempDir()
 	table := "#region\tUSA.33.24_1\tKings\n#region\tUSA.33.32_1\tNew York\n" +
@@ -966,7 +966,7 @@ func TestCountiesJoinedAsRegions(t *testing.T) {
 // draw, each row's AVONET habitat is AVONET's today, and exactly the reviewed rows' additions reach
 // the dataset. A new species, or an AVONET update, fails here, naming what to review.
 //
-// Verifies: product.habitatAndDietFilters. Criterion: acceptance.habitatReviewComplete.
+// Verifies: product.habitatAndDietFilters. Criterion: dataset.habitatReviewComplete.
 func TestEveryDrawnBirdHasAHabitatReview(t *testing.T) {
 	ds := load(t)
 	f, err := os.Open(habitatReviewFile)
@@ -1022,7 +1022,7 @@ func TestEveryDrawnBirdHasAHabitatReview(t *testing.T) {
 // taxon in data/proportions-review.tsv is a genus or family BirdView draws, and its rows reach the
 // species, the scaup's neck naming its genus row and the grebe's head its family factor.
 //
-// Verifies: product.neckModelPerFamily, product.craniumFromMass. Criterion: acceptance.proportionsReviewTable.
+// Verifies: product.neckModelPerFamily, product.craniumFromMass. Criterion: dataset.proportionsReviewTable.
 func TestNeckReviewAppliesToDrawnTaxa(t *testing.T) {
 	ds := load(t)
 	drawn := map[string]bool{}
@@ -1058,7 +1058,7 @@ func TestNeckReviewAppliesToDrawnTaxa(t *testing.T) {
 // factor scales the modeled trunk and says so; a wingspan factor scales a modeled wingspan, saying so
 // and recording the factor, and leaves a measured wingspan of the same genus alone.
 //
-// Verifies: product.trunkFromMass, product.lengthAndWingspanSources. Criterion: acceptance.proportionsReviewTable.
+// Verifies: product.trunkFromMass, product.lengthAndWingspanSources. Criterion: dataset.proportionsReviewTable.
 func TestReviewFactorsReachTheBuild(t *testing.T) {
 	base := load(t)
 	saved := proportionsReview
@@ -1103,13 +1103,13 @@ func factorOf(p dataset.Provenance) float64 {
 	return p.Factor
 }
 
-// TestSeaRefinementsDerived asserts dataset.seaDistanceDerived and decisions.openOceanSplit on the
+// TestSeaRefinementsDerived asserts product.seaDistanceDerived and decisions.openOceanSplit on the
 // built dataset: every bird with Marine gets Open ocean, Sea near shore, or both, derived with its
 // evidence; the cases the decision names come out as it says; a bird with too few records on water
 // gets both and says so; a bird without Marine gets neither; and a refinement the review set stands
 // alone, undisturbed by the derivation.
 //
-// Verifies: dataset.seaDistanceDerived, product.habitatAndDietFilters. Criterion: acceptance.seaRefinementsDerived.
+// Verifies: product.seaDistanceDerived, product.habitatAndDietFilters. Criterion: dataset.seaRefinementsDerived.
 func TestSeaRefinementsDerived(t *testing.T) {
 	ds := load(t)
 	refs := func(sp *dataset.Species) (out []string, why string) {

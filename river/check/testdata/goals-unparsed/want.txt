@@ -1,3 +1,0 @@
-# Goal files exist and none parse: the layout or parser changed.
-exit 1
-problem no-goals-parsed goals

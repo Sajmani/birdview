@@ -108,7 +108,7 @@ var ccBySources = []struct {
 // while the species and comparison pages omitted AviList, on pages built out
 // of AviList names from the title down.
 //
-// Verifies: product.selfDescriptionStaysTrue. Criterion: acceptance.creditsComplete.
+// Verifies: product.selfDescriptionStaysTrue. Criterion: app.creditsComplete.
 func TestEveryPageCreditsWhatItShows(t *testing.T) {
 	for _, page := range []string{"next.html", "detail.html"} {
 		b, err := Static.ReadFile("static/" + page)
@@ -141,7 +141,7 @@ func TestEveryPageCreditsWhatItShows(t *testing.T) {
 // families" is somebody else's study. A check that flagged those would be
 // turned off within a week.
 //
-// Verifies: product.selfDescriptionStaysTrue. Criterion: acceptance.creditsComplete.
+// Verifies: product.selfDescriptionStaysTrue. Criterion: app.creditsComplete.
 func TestDocsCountsMatchTheDataset(t *testing.T) {
 	species, families := datasetCounts(t)
 	pair := regexp.MustCompile(`(\d{2,4}) species (?:across|in) (\d{2,3}) families`)
@@ -175,7 +175,7 @@ func TestDocsCountsMatchTheDataset(t *testing.T) {
 // the ABA and the word it was relieved of. A sentence that names the real
 // source is disambiguating, not misattributing.
 //
-// Verifies: product.selfDescriptionStaysTrue. Criterion: acceptance.creditsComplete.
+// Verifies: product.selfDescriptionStaysTrue. Criterion: app.creditsComplete.
 func TestNoDocCreditsASourceForWhatItNoLongerSupplies(t *testing.T) {
 	relieved := []string{"names", "families", "species codes", "alpha code"}
 	// Sentence-ish: a full stop *followed by space*, or a line break. Table

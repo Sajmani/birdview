@@ -1,52 +1,46 @@
 # Bindings
 
-How BirdView applies [README.md](README.md). Where the two disagree, this file states the
-local amendment and why.
+How BirdView applies [README.md](README.md) and the River 2.0 skill at
+[../.agents/skills/river/SKILL.md](../.agents/skills/river/SKILL.md). Where they leave a choice to
+the project, or where BirdView states a local amendment, this file records it and why.
 
-## River adoption — in progress
+## River 2.0
 
-BirdView adopted specman on 2026-09-23 and is migrating to **River**, its successor. The method
-file is River's as of 2026-10-15; the bundle around it is still specman-shaped. Until the
-migration finishes, these are deliberate local departures from `README.md`, not drift:
+BirdView adopted specman on 2026-09-23, migrated to River 1.0 on 2026-10-15, and upgraded to
+**River 2.0** on 2026-11-10 ([decisions.riverV2PackagesAndSplits](requirements/decisions.md#riverv2packagesandsplits)).
 
-| Area | Current state | Why it has not moved yet |
-| --- | --- | --- |
-| **Method** | River's `README.md`, pin in its banner | — |
-| **Layout** | River's nested layout: `goals/`, `requirements/`, one package per source under `requirements/local/` or `requirements/imported/<origin>/` ([decisions.nestedLayout](requirements/decisions.md#nestedlayout)) | — |
-| **Identifiers** | Descriptive camelCase, qualified by kind outside their own file: `goals.*`, `product.*`, `tech.*`, `decisions.*`, `acceptance.*`; a transcribed source is its own package with exported names, [`inatapi.RequestRate`](requirements/imported/inaturalist.org/inatapi/inatapi.md#requestrate) ([decisions.descriptiveIdentifiers](requirements/decisions.md#descriptiveidentifiers)) | — |
-| **Composition** | `app` composed; see below the table | `dataset` and `internal/repo`; see below |
-| **Checks** | All in Go; see below the table | River's checker does not read composed packages yet, so BirdView checks its own |
-| **Stage adoption** | All four adopted: **Requirements**, **Implementation**, **Verification**, and **Release** since 2026-10-23 | Release was declared informal 2026-10-16 and adopted by Sameer on 2026-10-23, once birdview.site was public. Guardrails in [tech/release.md](requirements/local/tech/release.md); the deployment's probe, uptime check, alerting, and runbook live in the private `Sajmani/birdview-deploy` |
+| Area | State in BirdView |
+| --- | --- |
+| **Skill and module** | Skill installed at [../.agents/skills/river/](../.agents/skills/river/SKILL.md), pinned in [../.agents/skills/PROVENANCE.md](../.agents/skills/PROVENANCE.md); module declared in [README.md](README.md) (`module birdview`, `river 2.0`). |
+| **Layout** | `goals/`, `requirements/`, one package per source under `requirements/local/{product,tech}` or `requirements/imported/<origin>/<name>` ([decisions.nestedLayout](requirements/decisions.md#nestedlayout)), source sums in [requirements/sums.md](requirements/sums.md), and package approvals in [requirements/approvals.md](requirements/approvals.md). |
+| **Identifiers** | Descriptive camelCase, qualified by package outside their own file: `goals.*`, `product.*`, `tech.*`, `decisions.*`, `app.*`, `dataset.*`, `repo.*`; a transcribed source is its own package with exported names, [`inatapi.RequestRate`](requirements/imported/inaturalist.org/inatapi/inatapi.md#requestrate) ([decisions.descriptiveIdentifiers](requirements/decisions.md#descriptiveidentifiers)). |
+| **Composition** | [app](requirements/composed/internal/app/app.md), [dataset](requirements/composed/internal/dataset/dataset.md), and [repo](requirements/composed/internal/repo/repo.md) under `requirements/composed/internal/`, with criteria in each package's `acceptance.md` and guardrails in [conformance.md](conformance.md). |
+| **Checks** | `river check` plus BirdView's Go checks in `river/check/` (`go test ./river/check/`); see below. |
+| **Stage adoption** | All four adopted: **Requirements**, **Implementation**, **Verification**, and **Release** since 2026-10-23 (guardrails in [tech/release.md](requirements/local/tech/release.md); the deployment's probe, uptime check, alerting, and runbook live in the private `Sajmani/birdview-deploy`). |
 
-**Composition.** **`app` composed** in River's normalized form: it links the 52 local requirements
-that apply to the web application unchanged, excludes sixteen withdrawn ones (the four photograph
-requirements, and twelve withdrawn with the classic view on 2026-10-27),
-and writes out WCAG's contrast criteria over every web page and the stylesheet's contract. Its
-criteria for the composed items are in `requirements/composed/internal/app/acceptance.md`; every other criterion still
-waits in `requirements/acceptance.md`. Not yet composed: `dataset` and `internal/repo`, which account
-for the remaining 28 local requirements; the four mixed requirements in [todo.md](todo.md) are split
-first.
-
-**Checks.** All in **Go**, run by `go test`: River's checker, translated at River pin `f8252f5`,
-with River's shared cases copied at the same pin; BirdView's stricter goal rule; the vendored-file
-hashes; every quotation against its vendored source; every reference, anchor, and relative link; and
-the composition fields. **The rendered contrast and phone-width checks need Chrome**
-(`BIRDVIEW_CHROME` to point at one) and skip without it; CI has Chrome and fails on any skip, so since 2026-10-23 they gate on
-every push and pull request ([tech.checksOnEveryChange](requirements/local/tech/release.md#checksoneverychange)).
+**Checks.** `river check` enforces River 2.0's structural, accounting, sums, approval,
+host/dependency discovery, and reachability rules. `river/check/` adds BirdView's stricter goal rule
+(`TestEveryLocalRequirementCitesAGoal`), active-issue rule (`TestActiveTodoHasIssue`), vendored
+hashes (`TestVendoredHashesMatch`), verbatim quotations (`TestQuotationsAreVerbatim`),
+link/reference resolution (`TestReferencesResolve`, `TestRelativeLinksResolve`), composition
+cross-checks (`TestCompositionResolves`), and Go function reachability (`TestNoUnreachableCode`,
+with its test-oracle allowlist in `river/check/deadcode_test.go`). **The rendered contrast and
+phone-width checks need Chrome** (`BIRDVIEW_CHROME`) and skip without it; CI has Chrome and fails on
+any skip ([tech.checksOnEveryChange](requirements/local/tech/release.md#checksoneverychange)).
 
 ## Project bindings
 
-What this project declares, as [README.md](README.md) asks of every adopter.
+What this project declares, as the River skill asks of every adopter.
 
 | Binding | This project |
 | --- | --- |
-| **Standing checks** | `go build ./...`, `go vet ./...`, `gofmt -l .` (must print nothing), `go test ./...`. All four, in that order, before any change is called done. |
-| **ID citation syntax** | Go line comments, preserving the literal token: `// Verifies: product.scaleToggle, tech.badgeContrast.` |
+| **Standing checks** | `go build ./...`, `go vet ./...`, `gofmt -l .` (must print nothing), `go test ./...`, and `river check --allow-unapproved river` (`river check river` once approved). |
+| **ID citation syntax** | Go line comments preserving literal tokens: `// Verifies: product.scaleToggle. Criterion: app.foo.` |
 | **Artifact locations** | `river/`, with one exception below. Not served; the guides link to it in the published repository ([decisions.requirementsNotServed](requirements/decisions.md#requirementsnotserved)). |
 | **Subject vocabulary** | Dotted paths, lowercase, e.g. `diagram.scale.mode`, `badge.contrast.ratio`, `dataset.join.key`. New subjects are added by the project owner. |
 | **Hard safety constraints** | Never commit anything under `fetched/`. Never commit the built dataset. Never access or process Wiley Online Library material, by any means including an AI agent ([decisions.ricklefsProhibited](requirements/decisions.md#ricklefsprohibited)). Never fetch or process anything from BirdLife's DataZone by any automated means (see `requirements/imports.md` and `todo.md`). |
 | **External systems** | Tests make no network requests. Any source fetch is exercised against a local fixture or an `httptest` server, never against the live publisher. |
-| **Approval authority** | Sameer — gates, waivers, amendments, source deviations, risk acceptances. |
+| **Approval authority** | Sameer — gates, waivers, amendments, source deviations, risk acceptances, and `river approve --by Sameer river`. |
 | **Supported runtime** | Whatever the dependencies require ([tech.goVersionFollowsDeps](requirements/local/tech/delivery.md#goversionfollowsdeps)). No minimum Go version is maintained. |
 | **Source refresh cadence** | Annually. AviList, AOS, and eBird/Clements each revise on roughly yearly cycles, and [product.joinOnBinomial](requirements/local/product/dataset.md#joinonbinomial)'s synonym table depends on all three. |
 | **Existing docs** | `river/` owns requirements. `PROVENANCE` files under `river/requirements/imported/` own retrieval facts and hashes. A README, when written, owns usage instructions and duplicates neither. |
@@ -54,7 +48,7 @@ What this project declares, as [README.md](README.md) asks of every adopter.
 ## Location exception: the third_party directory
 
 **Every vendored third-party file lives under `third_party/<name>/`**, not under
-`river/requirements/imported/<origin>/<name>/`, and its provenance record stays where [README.md](README.md) puts it:
+`river/requirements/imported/<origin>/<name>/`, and its provenance record stays where River puts it:
 `river/requirements/imported/<origin>/<name>/PROVENANCE.md` names the out-of-place path and holds its hash. The
 directory names match, so `third_party/avonet/` is described by `river/requirements/imported/figshare.com/avonet/`.
 

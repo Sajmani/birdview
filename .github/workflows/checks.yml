@@ -60,3 +60,37 @@ jobs:
             echo "A skip is not a pass: every test can run here."
             exit 1
           fi
+
+  # Checks river/ with River's CLI, built at the pin in .agents/skills/PROVENANCE.md.
+  # Runs once the repository variable RIVER_REPO names a clonable River repository;
+  # pull requests pass --allow-unapproved until the owner approves, pushes to main
+  # require full approval.
+  river:
+    runs-on: ubuntu-latest
+    if: ${{ vars.RIVER_REPO != '' }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: Build river at the skill's pin
+        env:
+          RIVER_REPO: ${{ vars.RIVER_REPO }}
+        run: |
+          pin="$(sed -n 's/^| Pin | `\(.*\)` |$/\1/p' .agents/skills/PROVENANCE.md)"
+          test -n "$pin"
+          git clone --quiet "$RIVER_REPO" "$RUNNER_TEMP/river-src"
+          git -C "$RUNNER_TEMP/river-src" checkout --quiet "$pin"
+          (cd "$RUNNER_TEMP/river-src" && go build -o "$RUNNER_TEMP/river" ./cmd/river)
+      - name: river check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            "$RUNNER_TEMP/river" check --allow-unapproved river
+          else
+            "$RUNNER_TEMP/river" check river
+          fi
