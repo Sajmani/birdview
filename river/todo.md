@@ -198,7 +198,7 @@ that fails when its behavior breaks.
 
 Status: deferred
 Owner: Sameer
-Gate: when the River revision Sameer is working on settles; adopt that version, then do the cleanup
+Gate: when River settles its `implementationReachability` item (River's `TODO.md`); adopt that version, then do the cleanup
 
 River says what a withdrawn goal does to the requirements citing it, but not what a withdrawn
 requirement does to its criteria, the tests citing them, and the code those tests keep alive.
