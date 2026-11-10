@@ -1271,3 +1271,20 @@ from `data/sea-distance.tsv` by `cmd/birdview-sea`, with the 80% rule for birds 
 Left: review rows for the birds near the thresholds (Sabine's Gull, which passes on tundra and
 inland records; Masked Booby, which misses at 79.5%); beach birds versus sea ducks; and the text
 sources, if ever. Cost estimate for the full pipeline: on the issue.
+
+## chooseManySettings
+
+**Show that Month, Region, County, Family, Habitat, and Diet take one or more choices, and that All is apart**
+
+Status: open
+Owner: Sameer
+Gate: the owner's choice of design
+
+The choose-one settings were redrawn as joined rows on 2026-11-09
+([product.chooseOneSettings](requirements/local/product/presentation.md#chooseonesettings)). The settings that take one or more choices still draw separate
+buttons the same as before: nothing says a click adds rather than replaces, the chosen ones are
+shown by color alone, and All looks like one more choice though it is the alternative to choosing
+any. Proposed and not yet chosen: All set apart with a radio mark (○ All, ● All when in effect),
+chosen buttons with a check mark (✓ Forest), the hint "All, or choose one or more", and
+`aria-pressed` on each button and `aria-current` on All.
+
