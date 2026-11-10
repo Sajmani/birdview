@@ -981,17 +981,15 @@ func nextList(names []string) string {
 
 func (s *server) regionNames(sel map[string]bool) []string {
 	var out []string
-	for _, g := range region.Groupings[:1] {
-		for _, z := range g.Zones {
-			for _, rg := range region.InZone(g.Name, z) {
-				if sel[rg.ID] {
-					out = append(out, rg.Name)
-				}
-				// A chosen county follows its state, named with the state's code.
-				for _, c := range region.CountiesOf(rg.ID) {
-					if sel[c.ID] {
-						out = append(out, c.Label())
-					}
+	for _, z := range region.Zones {
+		for _, rg := range region.InZone(z) {
+			if sel[rg.ID] {
+				out = append(out, rg.Name)
+			}
+			// A chosen county follows its state, named with the state's code.
+			for _, c := range region.CountiesOf(rg.ID) {
+				if sel[c.ID] {
+					out = append(out, c.Label())
 				}
 			}
 		}
@@ -1111,10 +1109,9 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	if opt.HasRegions {
 		rc.Value = nextList(s.regionNames(opt.Regions))
 	}
-	g := region.Groupings[0]
-	for _, z := range g.Zones {
+	for _, z := range region.Zones {
 		grp := nextChoiceGroup{Name: z}
-		for _, rg := range region.InZone(g.Name, z) {
+		for _, rg := range region.InZone(z) {
 			grp.Choices = append(grp.Choices, nextChoice{Label: rg.Name, Title: rg.Code,
 				On: opt.HasRegions && opt.Regions[rg.ID], URL: nextToggle(q, "region", rg.Slug())})
 		}

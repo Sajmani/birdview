@@ -73,28 +73,12 @@ Subject: `presentation.region_filter.zones`
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
-The selector offers **two groupings** of the same regions, and the reader picks from either
-([decisions.regionsTwoWays](../../decisions.md#regionstwoways)). Each is a **partition**: every region sits in exactly one zone
-of each grouping, so a region appears exactly twice in the selector and no region is unreachable
-from either.
-
-**Common birds** is derived, not drawn: regions are clustered on how much their species lists
-overlap, from the same presence table the filter uses. Four regions are left alone because
-nothing is close enough — Hawaii's best match is 0.239 where every accepted placement is at least
-0.652. A grouping that swallowed them would claim a similarity it did not measure.
-
-**Geographic** is drawn, not derived, and says so. It is the grouping a reader already knows, so
-someone looking for Alaska finds it under Alaska; the derived grouping scatters the Arctic.
-
-**Geographic is offered first**, because a reader arrives wanting their own state.
-
-**Neither grouping may be presented as the other.** The UI labels which is which, because a
-hand-drawn grouping shown as measurement is the failure [decisions.regionsTwoWays](../../decisions.md#regionstwoways) was
-written to correct.
-
-Zone membership is **presentation only**. It changes which chips a group toggle selects and
-nothing about which birds a region contains — that is [regionAndMonthFilter](filtering.md#regionandmonthfilter)'s 1-ppm rule, and it is
-computed per region, never per zone.
+The classic view offered regions under two groupings, one by the map and one derived from how much
+their species lists overlap ([decisions.regionsTwoWays](../../decisions.md#regionstwoways)). The home page keeps only the map's zones,
+which help a reader find a region and claim nothing about birds
+([regionAndMonthFilter](filtering.md#regionandmonthfilter)). The derived grouping's code was deleted on 2026-11-09, when the owner
+chose not to restore it: Here, and looking up a destination, already narrow to the birds one is
+likely to see.
 
 ## familiesByOrder
 

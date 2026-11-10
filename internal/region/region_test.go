@@ -21,84 +21,39 @@ import (
 	"testing"
 )
 
-// TestEachGroupingPartitionsTheRegions guards the invariant the filter UI
-// needs: within one grouping, the zones partition the regions. A region in no
-// zone of a grouping is unreachable from that block, and one in two zones of
-// the same grouping appears twice in it.
+// TestZonesPartitionTheRegions checks the invariant the Region setting needs: the zones partition
+// the regions. A region in no zone is unreachable, and one in two zones appears twice.
 //
-// The invariant is per grouping, not global: a region is deliberately in two
-// zones overall, one from each grouping (product.regionsGroupedTwoWays).
-//
-// Verifies: product.regionAndMonthFilter, product.regionsGroupedTwoWays.
-func TestEachGroupingPartitionsTheRegions(t *testing.T) {
-	if len(Groupings) < 2 {
-		t.Fatalf("expected at least the two groupings of product.regionsGroupedTwoWays, got %d", len(Groupings))
-	}
-	for _, g := range Groupings {
-		seen := map[string]int{}
-		for _, z := range g.Zones {
-			got := InZone(g.Name, z)
-			if len(got) == 0 {
-				t.Errorf("%s: zone %q holds no regions", g.Name, z)
-			}
-			for _, r := range got {
-				seen[r.ID]++
-			}
+// Verifies: product.regionAndMonthFilter.
+func TestZonesPartitionTheRegions(t *testing.T) {
+	seen := map[string]int{}
+	for _, z := range Zones {
+		got := InZone(z)
+		if len(got) == 0 {
+			t.Errorf("zone %q holds no regions", z)
 		}
-		if len(seen) != Len() {
-			t.Errorf("%s: zones cover %d regions, the table has %d", g.Name, len(seen), Len())
-		}
-		for id, n := range seen {
-			if n != 1 {
-				t.Errorf("%s: %s appears in %d zones", g.Name, id, n)
-			}
-		}
-		// And every region's own zone for this grouping is one the UI
-		// offers, so a typo in the table cannot hide a region from every
-		// group at once.
-		known := map[string]bool{}
-		for _, z := range g.Zones {
-			known[z] = true
-		}
-		for _, id := range append(LandIDs(), MarineIDs()...) {
-			r, _ := Get(id)
-			if !known[r.Zone(g.Name)] {
-				t.Errorf("%s: %s names zone %q, which is not offered",
-					g.Name, id, r.Zone(g.Name))
-			}
+		for _, r := range got {
+			seen[r.ID]++
 		}
 	}
-}
-
-// TestGroupingsAreDistinct checks that the two groupings actually group
-// differently. Two identical groupings would render two identical blocks and
-// satisfy every other test here, while telling the reader nothing -- and the
-// whole point of decisions.regionsTwoWays is that the measured grouping disagrees with the
-// hand-drawn one.
-//
-// Verifies: product.regionsGroupedTwoWays.
-func TestGroupingsAreDistinct(t *testing.T) {
-	// Alaska is the documented disagreement: the clustering files it with
-	// British Columbia, geography files it with the Yukon.
-	ak, _ := Get("USA.2_1")
-	if ak.Zone(ByBirds) == ak.Zone(ByGeography) {
-		t.Errorf("Alaska is in %q under both groupings; decisions.regionsTwoWays records that they disagree",
-			ak.Zone(ByBirds))
+	if len(seen) != Len() {
+		t.Errorf("zones cover %d regions, the table has %d", len(seen), Len())
 	}
-	for _, g := range Groupings {
-		if g.Note == "" {
-			t.Errorf("grouping %q has no note saying whether it is measured or drawn", g.Name)
+	for id, n := range seen {
+		if n != 1 {
+			t.Errorf("%s appears in %d zones", id, n)
 		}
 	}
-	// The hand-drawn grouping is offered first: a reader arrives looking for
-	// their own state, not for a cluster analysis.
-	if Groupings[0].Name != ByGeography {
-		t.Errorf("the first grouping offered is %q, want %q — the map a reader "+
-			"already carries comes before the derived one",
-			Groupings[0].Name, ByGeography)
+	// And every region's own zone is one the setting offers, so a typo in the table cannot hide a
+	// region.
+	known := map[string]bool{}
+	for _, z := range Zones {
+		known[z] = true
 	}
-	if ZonesOf("no such grouping") != nil {
-		t.Error("ZonesOf invented a grouping that does not exist")
+	for _, id := range append(LandIDs(), MarineIDs()...) {
+		if r, _ := Get(id); !known[r.Zone()] {
+			t.Errorf("%s names zone %q, which is not offered", id, r.Zone())
+		}
 	}
 }
 
@@ -212,29 +167,22 @@ func TestMarineBoxesAreDisjoint(t *testing.T) {
 	}
 }
 
-// TestPelagicIsTheLastZone pins the ordering product.regionAndMonthFilter asks for, in **every**
-// grouping. The sea is the one group that is not somewhere a reader lives, so
-// it sits after the places that are, rather than between them.
+// TestPelagicIsTheLastZone pins the ordering product.regionAndMonthFilter asks for. The sea is the
+// one zone that is not somewhere a reader lives, so it sits after the places that are.
 //
-// Verifies: product.regionAndMonthFilter, product.regionsGroupedTwoWays.
+// Verifies: product.regionAndMonthFilter.
 func TestPelagicIsTheLastZone(t *testing.T) {
-	for _, g := range Groupings {
-		zs := g.Zones
-		if n := len(zs); n == 0 || zs[n-1] != "Pelagic" {
-			t.Fatalf("%s: zones end with %q, want Pelagic last; order is %v",
-				g.Name, zs[len(zs)-1], zs)
+	if n := len(Zones); n == 0 || Zones[n-1] != "Pelagic" {
+		t.Fatalf("zones end with %q, want Pelagic last; order is %v", Zones[len(Zones)-1], Zones)
+	}
+	// And it is exactly the marine regions, so no land region hides in it.
+	for _, r := range InZone("Pelagic") {
+		if r.Kind != Marine {
+			t.Errorf("%s is in the Pelagic zone but is a %s region", r.ID, r.Kind)
 		}
-		// And it is exactly the marine regions, so no land region hides in it.
-		for _, r := range InZone(g.Name, "Pelagic") {
-			if r.Kind != Marine {
-				t.Errorf("%s: %s is in the Pelagic zone but is a %s region",
-					g.Name, r.ID, r.Kind)
-			}
-		}
-		if n := len(InZone(g.Name, "Pelagic")); n != len(MarineIDs()) {
-			t.Errorf("%s: the Pelagic zone holds %d regions, there are %d marine ones",
-				g.Name, n, len(MarineIDs()))
-		}
+	}
+	if n := len(InZone("Pelagic")); n != len(MarineIDs()) {
+		t.Errorf("the Pelagic zone holds %d regions, there are %d marine ones", n, len(MarineIDs()))
 	}
 }
 

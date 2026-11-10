@@ -1655,7 +1655,7 @@ separate CC BY 4.0 publication, and nothing is taken from Cornell's own distribu
 
 Date: 2026-10-03
 Decided by: Sameer
-Status: accepted
+Status: superseded by regionZonesByMapOnly
 Affects: [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.regionsGroupedTwoWays](local/product/months.md#regionsgroupedtwoways)
 Subject: `presentation.region_filter.zones`
 Kind: Reversal — [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter) said zones "claim nothing about birds". They now claim something about birds, because a corrected measurement says they can.
@@ -4918,4 +4918,29 @@ seabirds, and the other two are single families.
 Filtering New York in August to the shorebirds of the shore took four families and a habitat, and
 the owner asked for one control that sets all the relevant settings for a kind of bird, placed
 first because a kind can span orders.
+
+---
+
+## regionZonesByMapOnly
+
+**Regions are grouped by the map only; the derived grouping is not restored**
+
+Date: 2026-11-09
+Decided by: Sameer
+Status: accepted
+Supersedes: regionsTwoWays
+Affects: [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter)
+
+### Decided
+
+The Region setting groups regions by the map's zones only. The grouping derived from shared species
+lists, withdrawn from view with the classic page ([classicViewRemoved](#classicviewremoved)), is not restored, and
+its code and tests are deleted. Counties are not grouped either, for the same reason.
+
+### Why
+
+Region is for narrowing to the birds one is likely to see. Here does that from where one stands,
+and a traveler looks up the destination by name; groups help a reader find a region in a list, which
+the map's zones do, and add nothing about birds. Clustering New York's counties the same way showed
+the derived groups mostly sort places by how well birded they are.
 

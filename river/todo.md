@@ -180,17 +180,19 @@ embedded map or photograph, a lookup against eBird's API) waits.
 
 ## withdrawnWithClassic
 
-**One behavior went with the classic view; the owner may want it back**
+**Leftovers of the classic view**
 
 Status: open
 Owner: Sameer
 Gate: owner's call
 
 Removed 2026-10-27 under [decisions.classicViewRemoved](requirements/decisions.md#classicviewremoved):
-the "Common birds" region grouping ([decisions.regionsTwoWays](requirements/decisions.md#regionstwoways))
-no longer appears anywhere. Restore it on request. The other, the Here-and-now link using the
-reader's month rather than the server's, was restored the same day under
-[decisions.homeShowsEveryMonth](requirements/decisions.md#homeshowseverymonth). `internal/view`'s `ScaleMode` and `Scales` are left
+the "Common birds" region grouping ([decisions.regionsTwoWays](requirements/decisions.md#regionstwoways)). **The owner chose not to
+restore it** (2026-11-09: groups of regions help find a region, not choose birds, and Here and
+looking up a destination already narrow to the birds one is likely to see), and its code was
+deleted from `internal/region` the same day. The Here-and-now link using the reader's month was
+restored on 2026-10-27 under
+[decisions.homeShowsEveryMonth](requirements/decisions.md#homeshowseverymonth). Left: `internal/view`'s `ScaleMode` and `Scales` are left
 over from the classic scale control and nothing calls them; delete them, since
 [homeSpeckScale](todo-closed.md#homespeckscale) closed without bringing back a scale choice.
 
@@ -570,10 +572,7 @@ still misses Wood Stork/NS, Spoonbill/ME, Fork-tailed Flycatcher/DE, and Baltimo
 which is a *contiguous slice in GBIF's own ordering, not a random sample* — all 300 American Robin
 records for Pennsylvania fell in January 2024, and a page-derived year count read 1 where the true
 count is 60. Any real rule must take both signals from facets over all records, which raises the
-cost. Costs a regenerated `data/region-presence.tsv` and dataset. **Knock-on: the "Common birds"
-zones were clustered *from* that table
-([decisions.regionsTwoWays](requirements/decisions.md#regionstwoways)), so they must be re-derived
-rather than left as a stale snapshot.** Documented for readers meanwhile under
+cost. Costs a regenerated `data/region-presence.tsv` and dataset. Documented for readers meanwhile under
 [Regions](../docs/data.md)
 
 ## coOccurrenceGrouping

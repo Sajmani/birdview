@@ -183,7 +183,7 @@ internal/wingspan/       the Fox dataset and the fitted wingspan regression
 internal/taxonomy/       the synonym tables, in both directions, and the order labels
 internal/trait/          the habitat and diet vocabularies and BirdView's additions
 internal/morphology/     the segment models (head, body, neck) and rounding
-internal/region/         the regions, their two groupings, and their IDs
+internal/region/         the regions, their zones on the map, and their IDs
 internal/boundary/       the region boundary file and the reference lookup over it
 internal/shapefile/      the Natural Earth shapefile readers: polygons and attribute tables
 internal/geo/            on land or not, and distance to the nearest shore
