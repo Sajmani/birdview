@@ -1085,6 +1085,14 @@ and island names redirecting, was done 2026-11-03. Left, in order:
    ([decisions.countiesBehindFlag](requirements/decisions.md#countiesbehindflag)).
    Original plan: a county picker prototype (drill-down, search, Here to a county) on the New York data, sized so
    no link lists many county codes.
+   **Grouping counties is deferred** (the owner, 2026-11-09): Region is for narrowing to the birds
+   one is likely to see, Here does that from where one stands, and a traveler looks up the
+   destination, so groups of counties do not help; finding a county by name and Here to a county
+   do. Compared before deferring: NYSOA's ten Kingbird regions (New York only, which makes them a
+   special case); clusters of counties by shared species, which on all listings sort counties by
+   how well birded they are and on commoner birds alone find the coast, the Adirondacks, and the
+   North Country but leave a 30-county remainder; and Bird Conservation Regions, uniform across the
+   continent but four or five to a large state.
 5. Boundaries keyed to GADM codes for Here at county scale, since
    [tech.regionBoundaries](requirements/local/tech/delivery.md#regionboundaries) uses Natural Earth.
 6. Seas: adopt [imports.marine-regions](requirements/imports.md#marine-regions), assign the download's offshore grid cells to its
