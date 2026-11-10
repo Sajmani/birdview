@@ -823,8 +823,9 @@ Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone), [goals.fl
 
 Birds, Order by, Reporting frequency, Units, and Names each take exactly one choice. Each draws its
 choices, All first where it offers one, as **one joined row of segments** with the chosen segment
-filled, under the words **Choose one**, and marks the chosen link `aria-current="true"`, so a screen
-reader says which is chosen as well as the color shows it. The settings that take one or more
+filled, and marks the chosen link `aria-current="true"`, so a screen reader says which is chosen as
+well as the color shows it. The row needs no words saying to choose one; the owner removed them
+(2026-11-09). The settings that take one or more
 choices (Month, Region, County, Family, Habitat, Diet) keep separate buttons until their own design
 is settled.
 

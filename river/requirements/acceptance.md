@@ -2598,18 +2598,18 @@ Watched failing: 2026-11-09, before the setting existed (the tests did not build
 
 ### chooseOneSettings
 
-**Each choose-one setting says so, draws one joined row, and marks the chosen choice for screen readers**
+**Each choose-one setting draws one joined row and marks the chosen choice for screen readers**
 
 **Verifies:** [product.chooseOneSettings](local/product/presentation.md#chooseonesettings) · **Level:** code · **Method:** the home page rendered and each setting's popover read
 
-**Assertions:** Birds, Order by, Reporting frequency, Units, and Names each say "Choose one" and
-draw every one of their choices inside one joined row (`role="group"`), Birds' All among them; in
-each, exactly the chosen link is marked `aria-current="true"`; Month, Region, Family, Habitat, and
-Diet say neither and draw no joined row. The contrast and phone-width checks cover the new styling.
+**Assertions:** Birds, Order by, Reporting frequency, Units, and Names each draw every one of their
+choices inside one joined row (`role="group"`), Birds' All among them, with no words saying to
+choose one; in each, exactly the chosen link is marked `aria-current="true"`; Month, Region, Family,
+Habitat, and Diet draw no joined row. The contrast and phone-width checks cover the new styling.
 
 **Run:** `go test ./cmd/birdview/ -run TestChooseOneSettings`
 **Status: verified 2026-11-09, passing.**
-Watched failing: 2026-11-09, before the joined row existed ("Birds does not say Choose one", "Birds draws no joined row", and likewise for the other four).
+Watched failing: 2026-11-09, before the joined row existed ("Birds draws no joined row", and likewise for the other four), and with the removed words still drawn ("Birds still says Choose one, which the owner removed").
 
 ### imageRecordsRevision
 

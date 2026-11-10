@@ -20,9 +20,9 @@ import (
 	"testing"
 )
 
-// TestChooseOneSettings asserts product.chooseOneSettings: each setting that takes one choice says
-// Choose one and draws every choice, All first where it has one, in one joined row, with exactly the
-// chosen link marked aria-current; a setting that takes one or more does neither.
+// TestChooseOneSettings asserts product.chooseOneSettings: each setting that takes one choice draws
+// every choice, All first where it has one, in one joined row, with exactly the chosen link marked
+// aria-current, and no words saying to choose one; a setting that takes one or more draws no row.
 //
 // Verifies: product.chooseOneSettings. Criterion: acceptance.chooseOneSettings.
 func TestChooseOneSettings(t *testing.T) {
@@ -42,8 +42,8 @@ func TestChooseOneSettings(t *testing.T) {
 		"Birds": "All", "Order by": "Length", "Reporting frequency": "1 in 1,000", "Units": "Metric", "Names": "North American",
 	} {
 		p := pop(label)
-		if !strings.Contains(p, "Choose one") {
-			t.Errorf("%s does not say Choose one", label)
+		if strings.Contains(p, "Choose one") {
+			t.Errorf("%s still says Choose one, which the owner removed", label)
 		}
 		seg := regexp.MustCompile(`(?s)<div class="seg" role="group"[^>]*>(.*?)</div>`).FindStringSubmatch(p)
 		if seg == nil {
@@ -62,7 +62,7 @@ func TestChooseOneSettings(t *testing.T) {
 		t.Error("Birds' All is not in its joined row")
 	}
 	for _, label := range []string{"Month", "Region", "Family", "Habitat", "Diet"} {
-		if p := pop(label); strings.Contains(p, "Choose one") || strings.Contains(p, `class="seg"`) {
+		if p := pop(label); strings.Contains(p, `class="seg"`) {
 			t.Errorf("%s takes one or more choices but is drawn as choose one", label)
 		}
 	}

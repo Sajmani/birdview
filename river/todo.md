@@ -1274,7 +1274,7 @@ sources, if ever. Cost estimate for the full pipeline: on the issue.
 
 ## chooseManySettings
 
-**Show that Month, Region, County, Family, Habitat, and Diet take one or more choices, and that All is apart**
+**Design the controls that are not a single choice: one-or-more choices, All, Here, Now, and Habitat's groups**
 
 Status: open
 Owner: Sameer
@@ -1285,6 +1285,14 @@ The choose-one settings were redrawn as joined rows on 2026-11-09
 buttons the same as before: nothing says a click adds rather than replaces, the chosen ones are
 shown by color alone, and All looks like one more choice though it is the alternative to choosing
 any. Proposed and not yet chosen: All set apart with a radio mark (○ All, ● All when in effect),
-chosen buttons with a check mark (✓ Forest), the hint "All, or choose one or more", and
-`aria-pressed` on each button and `aria-current` on All.
+chosen buttons with a check mark (✓ Forest), and `aria-pressed` on each button and `aria-current` on
+All. Three more controls behave differently again and need their own look (the owner, 2026-11-09):
+
+- **Here** (Region) is an action, not a choice: it asks the browser for the reader's location and
+  then chooses the region found, or says why it could not. It needs JavaScript and permission.
+- **Now** (Month) is a shortcut that resolves to one month by the reader's clock, and then shows as
+  that month chosen; it is never itself the chosen state.
+- **Habitat's group shortcuts** (Shore and sea, Fresh water, Woods, Open country) set or clear
+  several choices at once, and are in one of three states: all of their habitats chosen, some, or
+  none.
 
