@@ -178,24 +178,6 @@ were. Vendor eBird's terms of use under `third_party/`, transcribe what binds a 
 it, and record the finding as `inatterms` did. Until then, anything more than a link (a logo, an
 embedded map or photograph, a lookup against eBird's API) waits.
 
-## withdrawnWithClassic
-
-**Leftovers of the classic view**
-
-Status: open
-Owner: Sameer
-Gate: owner's call
-
-Removed 2026-10-27 under [decisions.classicViewRemoved](requirements/decisions.md#classicviewremoved):
-the "Common birds" region grouping ([decisions.regionsTwoWays](requirements/decisions.md#regionstwoways)). **The owner chose not to
-restore it** (2026-11-09: groups of regions help find a region, not choose birds, and Here and
-looking up a destination already narrow to the birds one is likely to see), and its code was
-deleted from `internal/region` the same day. The Here-and-now link using the reader's month was
-restored on 2026-10-27 under
-[decisions.homeShowsEveryMonth](requirements/decisions.md#homeshowseverymonth). Left: `internal/view`'s `ScaleMode` and `Scales` are left
-over from the classic scale control and nothing calls them; delete them, since
-[homeSpeckScale](todo-closed.md#homespeckscale) closed without bringing back a scale choice.
-
 ## cleanupLeftovers
 
 **Two criteria from the classic-view cleanup need a second look**

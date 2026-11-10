@@ -98,13 +98,12 @@ const neckFoldCompression = 2 / math.Pi
 
 // Layout places one bird inside a box at a shared scale.
 //
-// refLength and refWingspan are the largest total length and wingspan the
-// scale must accommodate -- the section's, or the whole set's in global mode (product.scaleToggle).
-// Passing the same references for every bird in a group is what makes them
-// comparable; the scale is chosen so the largest of each fits, and every other
-// bird is drawn smaller in proportion.
+// refLength and refWingspan are the largest total length and wingspan the scale must accommodate:
+// those of every bird shown (Reference), or the bird's own on its species page. Passing the same
+// references for every bird shown is what makes them comparable; the scale is chosen so the largest
+// fits, and every other bird is drawn smaller in proportion (product.nextView).
 //
-// Verifies: product.segmentComposition, product.segmentsSumToLength, product.scaleToggle, product.crossbarAtVerticalScale.
+// Verifies: product.segmentComposition, product.segmentsSumToLength, product.crossbarAtVerticalScale.
 func Layout(s *dataset.Species, refLength, refWingspan float64, box Box) Geometry {
 	scale := 0.0
 	if refLength > 0 {
@@ -161,5 +160,5 @@ func (g Geometry) NeckMid() float64 { return (g.YNeckTop + g.YShoulder) / 2 }
 //
 // Except when the neck is folded, where the S spans less height than the neck
 // is long and the drawing is correspondingly shorter (decisions.foldedNeckAsS). Length as data
-// is unaffected: Sections and Scales read TotalLength, never this.
+// is unaffected: Sections and Reference read TotalLength, never this.
 func (g Geometry) TotalHeight() float64 { return g.YTailTip - g.YBillTip }

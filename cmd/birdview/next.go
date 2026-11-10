@@ -730,13 +730,13 @@ func (s *server) nextPage(r *http.Request) nextData {
 	page.PinnedOnly = pinnedOnly
 
 	// One scale: every bird shown is drawn to the longest and widest of them.
-	var refLen, refSpan float64
+	shown := make([]*dataset.Species, 0, len(picks))
 	masses := make([]float64, 0, len(picks))
 	for _, pk := range picks {
-		refLen = math.Max(refLen, pk.sp.TotalLength.Value)
-		refSpan = math.Max(refSpan, pk.sp.Wingspan.Value)
+		shown = append(shown, pk.sp)
 		masses = append(masses, pk.sp.Mass.Value)
 	}
+	refLen, refSpan := view.Reference(shown)
 	u := unitsFor(opt.Metric3, masses...)
 	// The tiers' headings, in the page's units, with one precision for
 	// all so that neighbors read apart (product.sectionHeadersStateRange).

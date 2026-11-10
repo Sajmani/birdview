@@ -516,45 +516,15 @@ func diagrams(t *testing.T, body string) []string {
 	return out
 }
 
-// TestDiagramStaysInsideItsBox checks the whole scale chain end to end on the
-// rendered page: Scales picks a reference, Layout turns it into pixels, and the
-// template centers the result. An error anywhere in that chain shows up here as
-// a drawing that runs off the top or bottom of its own viewBox.
+// TestDiagramStaysInsideItsBox checks the whole scale chain end to end on the rendered page:
+// Reference picks the scale, Layout turns it into pixels, and the template centers the result. An
+// error anywhere in that chain shows up here as a drawing that runs off the top or bottom of its own
+// viewBox. The longest bird shown fills its box exactly, leaving no slack for an arithmetic error to
+// hide in; under the one scale the rest are drawn smaller, where a bad offset merely looks off-center.
 //
-// It runs under per-section scale deliberately. That is where the largest bird
-// in a section sets its own reference and fills the box exactly, leaving no
-// slack for an arithmetic error to hide in; under global scale almost every
-// bird is drawn small and a bad offset merely looks off-center -- visible to a
-// human, invisible to an assertion.
-//
-// It also runs at a wide step, and refuses to run without one. At the default
-// step every bird in this fixture lands in a section of its own, so a section's
-// minimum and maximum are the same bird and Scales cannot be caught returning
-// the wrong one -- the first version of this test passed happily with Scales
-// inverted to take the minimum. Grouping is the whole point, so the check that
-// grouping happened comes first.
-//
-// Verifies: product.tileContents, product.scaleToggle. Criteria: acceptance.tileCarriesHeaderAndMetrics, acceptance.sharedScale.
+// Verifies: product.tileContents, product.nextView. Criteria: acceptance.tileCarriesHeaderAndMetrics, app.nextViewDrawsOneSet.
 func TestDiagramStaysInsideItsBox(t *testing.T) {
-	const step = 100
-
-	var all []*dataset.Species
-	ds := testDataset()
-	for i := range ds.Species {
-		all = append(all, &ds.Species[i])
-	}
-	var grouped int
-	for _, sec := range view.Sections(all, view.ByLength, step) {
-		if len(sec.Species) > 1 {
-			grouped++
-		}
-	}
-	if grouped == 0 {
-		t.Fatalf("at step %d%% no section holds more than one species, so this test cannot "+
-			"see a wrong scale reference -- widen the fixture's size range", step)
-	}
-
-	_, body := get(t, newTestServer(t), fmt.Sprintf("/?month=all&show=all&step=%d", step))
+	_, body := get(t, newTestServer(t), "/?month=all&show=all")
 
 	coord := regexp.MustCompile(`\b(?:y1|y2|cy)="(-?[0-9.]+)"`)
 	for _, d := range diagrams(t, body) {
@@ -2137,8 +2107,9 @@ func realDataset(t *testing.T) *dataset.Dataset {
 	return ds
 }
 
-// The tile cube must never reach the crossbar, over every species at every
-// scale and metric the index offers.
+// The tile cube must never reach the crossbar, over every species at every scale the site draws it
+// at: its own, when it is alone on the page or on its species page and fills its tile, which is the
+// tightest case; and the whole set's, when every bird is shown.
 //
 // acceptance.massDrawnAsWaterCube recorded this as "0 overlaps in 841" in prose. It is a geometric
 // invariant over the real dataset, and prose cannot be run: decisions.trunkExponentCalibrated moved
@@ -2171,72 +2142,48 @@ func TestTileCubeNeverReachesTheCrossbar(t *testing.T) {
 		all = append(all, &ds.Species[i])
 	}
 
-	for _, scale := range []view.ScaleMode{view.PerSection, view.Global} {
-		for _, metric := range []view.Metric{view.ByLength, view.ByWingspan, view.ByMass} {
-			secs := view.Sections(all, metric, view.DefaultStepPercent)
-			refs := view.Scales(secs, scale)
-
-			spanRefs := make([]float64, len(secs))
-			var globalSpan float64
-			for i, sec := range secs {
-				for _, sp := range sec.Species {
-					if w := sp.Wingspan.Value; w > spanRefs[i] {
-						spanRefs[i] = w
-					}
-				}
-				if spanRefs[i] > globalSpan {
-					globalSpan = spanRefs[i]
-				}
+	setLen, setSpan := view.Reference(all)
+	for _, scale := range []string{"own", "whole set"} {
+		checked, overlaps := 0, 0
+		minClear, tightest, worst := math.Inf(1), "", ""
+		for _, sp := range all {
+			refLen, refSpan := sp.TotalLength.Value, sp.Wingspan.Value
+			if scale == "whole set" {
+				refLen, refSpan = setLen, setSpan
 			}
-			if scale == view.Global {
-				for i := range spanRefs {
-					spanRefs[i] = globalSpan
-				}
+			g := view.Layout(sp, refLen, refSpan, tileBox)
+			c := newMassCube(sp, tileBox.H, g.PxPerMm)
+			if c.Side <= 0 {
+				continue // no mass, no cube
 			}
-
-			checked, overlaps := 0, 0
-			minClear, tightest, worst := math.Inf(1), "", ""
-			for i, sec := range secs {
-				for _, sp := range sec.Species {
-					g := view.Layout(sp, refs[i], spanRefs[i], tileBox)
-					c := newMassCube(sp, tileBox.H, g.PxPerMm)
-					if c.Side <= 0 {
-						continue // no mass, no cube
-					}
-					checked++
-					// The crossbar is a horizontal line at YShoulder running
-					// CX +/- CrossbarHalfWidth. The cube is its front face
-					// plus the projection to the right. They are clear if the
-					// bar passes above the cube, or begins to its right;
-					// the clearance is whichever separation is larger.
-					vertical := c.Y - g.YShoulder
-					horizontal := (g.CX - g.CrossbarHalfWidth) - (c.X + c.Side + c.Depth)
-					clear := math.Max(vertical, horizontal)
-					if clear < minClear {
-						minClear, tightest = clear, sp.ScientificName
-					}
-					if clear <= 0 {
-						overlaps++
-						if worst == "" {
-							worst = fmt.Sprintf("%s: cube x[%.1f,%.1f] y[%.1f,%.1f], "+
-								"crossbar y=%.1f from x=%.1f",
-								sp.ScientificName, c.X, c.X+c.Side+c.Depth, c.Y, c.Y+c.Side,
-								g.YShoulder, g.CX-g.CrossbarHalfWidth)
-						}
-					}
+			checked++
+			// The crossbar is a horizontal line at YShoulder running CX +/- CrossbarHalfWidth.
+			// The cube is its front face plus the projection to the right. They are clear if the
+			// bar passes above the cube, or begins to its right; the clearance is whichever
+			// separation is larger.
+			vertical := c.Y - g.YShoulder
+			horizontal := (g.CX - g.CrossbarHalfWidth) - (c.X + c.Side + c.Depth)
+			clear := math.Max(vertical, horizontal)
+			if clear < minClear {
+				minClear, tightest = clear, sp.ScientificName
+			}
+			if clear <= 0 {
+				overlaps++
+				if worst == "" {
+					worst = fmt.Sprintf("%s: cube x[%.1f,%.1f] y[%.1f,%.1f], crossbar y=%.1f from x=%.1f",
+						sp.ScientificName, c.X, c.X+c.Side+c.Depth, c.Y, c.Y+c.Side,
+						g.YShoulder, g.CX-g.CrossbarHalfWidth)
 				}
 			}
-			if checked == 0 {
-				t.Fatalf("scale=%s metric=%s: no cubes checked; the test proves nothing",
-					scale, metric)
-			}
-			if overlaps > 0 {
-				t.Errorf("scale=%s metric=%s: the cube reaches the crossbar on %d of %d species. %s",
-					scale, metric, overlaps, checked, worst)
-			}
-			t.Logf("scale=%-7s metric=%-8s %d species, tightest clearance %.1fpx (%s)",
-				scale, metric, checked, minClear, tightest)
 		}
+		if checked == 0 {
+			t.Fatalf("scale=%s: no cubes checked; the test proves nothing", scale)
+		}
+		if overlaps > 0 {
+			t.Errorf("scale=%s: the cube reaches the crossbar on %d of %d species. %s",
+				scale, overlaps, checked, worst)
+		}
+		t.Logf("scale=%-9s %d species, tightest clearance %.1fpx (%s)", scale, checked, minClear, tightest)
 	}
 }
 

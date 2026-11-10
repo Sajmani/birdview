@@ -4,6 +4,24 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## withdrawnWithClassic
+
+**Leftovers of the classic view**
+
+Status: closed
+Owner: Sameer
+Closed: 2026-11-09. Both leftovers are gone: the "Common birds" grouping's code, and `internal/view`'s
+`ScaleMode` and `Scales`, replaced by `view.Reference`, the one scale the home page draws at.
+
+Removed 2026-10-27 under [decisions.classicViewRemoved](requirements/decisions.md#classicviewremoved):
+the "Common birds" region grouping ([decisions.regionsTwoWays](requirements/decisions.md#regionstwoways)). **The owner chose not to
+restore it** (2026-11-09: groups of regions help find a region, not choose birds, and Here and
+looking up a destination already narrow to the birds one is likely to see), and its code was
+deleted from `internal/region` the same day. The Here-and-now link using the reader's month was
+restored on 2026-10-27 under
+[decisions.homeShowsEveryMonth](requirements/decisions.md#homeshowseverymonth). `internal/view`'s `ScaleMode` and `Scales`, left over from the classic scale control, were
+deleted on 2026-11-09, since [homeSpeckScale](#homespeckscale) closed without bringing back a scale choice.
+
 ## wingspanErrorNaN
 
 **A modeled wingspan's stated error reads NaN% for small orders**

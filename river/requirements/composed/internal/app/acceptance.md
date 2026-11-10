@@ -371,6 +371,7 @@ included ([decisions.tileNumbersFirst](../../../decisions.md#tilenumbersfirst), 
 
 **Run:** `go test ./cmd/birdview/ -run 'TestNext|TestNowIsTheBrowsersMonth|TestHereAndNowLink'` (the browser checks gate where Chrome is installed)
 **Status: verified 2026-10-28, passing.**
+Watched failing: 2026-11-09, by `view.Reference` taking the last bird's wingspan rather than the widest ("with the longest bird not the widest (Latus brevis first), Reference is 800.0 and 500.0"), after `ScaleMode` and `Scales` were deleted and the page's one scale became `Reference`.
 Watched failing: 2026-11-01, by the mass label without its baseline trim ("mass labels' baselines are not on the cube's foot: [s-calhum -3px …]"); the probe first measured the label's box rather than its baseline and passed regardless, so it now measures a zero-height mark on the baseline.
 Watched failing: 2026-10-31, by iNat back in the top row ("iNat's foot -260px off the bottom line's"), by iNat at the pin's 28px ("iNat's foot 1px off the bottom line's"), and by no room kept for it on the bottom line, with the scientific name set at 16px ("s-arcwar2 scientific name runs 16px under iNat").
 Watched failing: 2026-10-30, by the pin back in the drawing's lower right corner ("s-calhum pin 25px from the top, 19px from the right"), by the notes above the drawing ("s-sedwre1 drawing 21px below s-anpswi's"), and by a name line keeping no room for the links, with the name set at 17px ("s-migwar name runs 53px under the links"; at 13px every name in the dataset ends short of them at 360px).

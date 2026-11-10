@@ -16,7 +16,7 @@
 // geometry. It is deliberately pure -- no HTML, no HTTP -- so the rules in
 // product.oneSelectedMetric through product.sectionHeadersStateRange and product.segmentComposition through product.crossbarAtVerticalScale can be property-tested directly.
 //
-// Verifies: product.oneSelectedMetric, product.ascendingOrder, product.sectionBreakRule, product.sectionThresholdDefault, product.sectionHeadersStateRange, product.scaleToggle, product.crossbarAtVerticalScale.
+// Verifies: product.oneSelectedMetric, product.ascendingOrder, product.sectionBreakRule, product.sectionThresholdDefault, product.sectionHeadersStateRange, product.crossbarAtVerticalScale.
 package view
 
 import (
@@ -158,47 +158,16 @@ func Decade(v float64, bands int) float64 {
 	return math.Pow(10, float64(k+bands))
 }
 
-// ScaleMode is the user toggle of product.scaleToggle.
-type ScaleMode string
-
-const (
-	// PerSection: every bird in a section shares a scale. The default, because
-	// it keeps every tile legible while staying honest within the section --
-	// a section spans at most N%.
-	PerSection ScaleMode = "section"
-
-	// Global: one scale across the whole filtered set, so a hummingbird really
-	// is a speck beside a swan. Honest across the full range, at the cost of
-	// legibility for small birds.
-	Global ScaleMode = "global"
-)
-
-// Scales returns the reference length each section is drawn against: the
-// largest total length in the section, or in the whole set when global.
+// Reference is the one scale every bird shown is drawn at: the longest total length and the widest
+// wingspan among them, so the largest fits its tile and the rest are drawn to scale beside it
+// (product.nextView).
 //
-// Returning a reference *length* rather than a pixels-per-mm factor keeps this
-// independent of tile size, which the renderer owns.
-//
-// Verifies: product.scaleToggle.
-func Scales(sections []Section, mode ScaleMode) []float64 {
-	refs := make([]float64, len(sections))
-	var overall float64
-	for i, sec := range sections {
-		var m float64
-		for _, s := range sec.Species {
-			if e := s.TotalLength.Value; e > m {
-				m = e
-			}
-		}
-		refs[i] = m
-		if m > overall {
-			overall = m
-		}
+// Returning reference measurements rather than a pixels-per-mm factor keeps this independent of
+// tile size, which the renderer owns.
+func Reference(birds []*dataset.Species) (length, span float64) {
+	for _, s := range birds {
+		length = math.Max(length, s.TotalLength.Value)
+		span = math.Max(span, s.Wingspan.Value)
 	}
-	if mode == Global {
-		for i := range refs {
-			refs[i] = overall
-		}
-	}
-	return refs
+	return length, span
 }

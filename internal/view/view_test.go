@@ -144,44 +144,30 @@ func TestSectionRangeMatchesContents(t *testing.T) {
 	}
 }
 
-// TestScaleModes asserts product.scaleToggle: one scale per section, or one for everything.
+// TestReferenceIsTheLongestAndWidest asserts the one scale of product.nextView: the reference every
+// bird shown is drawn at is the longest total length and the widest wingspan among them, which may
+// be two different birds.
 //
-// The second assertion is the one with teeth. "Identical within a section" is
-// satisfied trivially by a per-tile implementation whenever a section holds one
-// bird, so the test also requires that sections genuinely differ from each
-// other -- which a per-tile scale could not produce.
-//
-// Verifies: product.scaleToggle. Criterion: acceptance.sharedScale.
-func TestScaleModes(t *testing.T) {
-	secs := Sections(sample(), ByLength, DefaultStepPercent)
-	if len(secs) < 2 {
-		t.Fatal("sample should produce several sections")
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestReferenceIsTheLongestAndWidest(t *testing.T) {
+	species := sample()
+	var wantLen, wantSpan float64
+	for _, s := range species {
+		wantLen = math.Max(wantLen, s.TotalLength.Value)
+		wantSpan = math.Max(wantSpan, s.Wingspan.Value)
 	}
-
-	perSection := Scales(secs, PerSection)
-	distinct := map[float64]bool{}
-	for i, ref := range perSection {
-		var maxLen float64
-		for _, s := range secs[i].Species {
-			maxLen = math.Max(maxLen, s.TotalLength.Value)
-		}
-		if ref != maxLen {
-			t.Errorf("section %d reference %.1f, want its largest bird %.1f", i, ref, maxLen)
-		}
-		distinct[ref] = true
+	if l, w := Reference(species); l != wantLen || w != wantSpan {
+		t.Errorf("Reference is %.1f mm long and %.1f wide, want %.1f and %.1f", l, w, wantLen, wantSpan)
 	}
-	if len(distinct) < 2 {
-		t.Error("per-section references are all equal; that is a global scale, not a per-section one")
-	}
-
-	global := Scales(secs, Global)
-	for i, ref := range global {
-		if ref != global[0] {
-			t.Errorf("global reference differs between sections %d and 0", i)
+	long := bird("Longus tenuis", 50, 30, 20, 400, 300, 500, 1000)
+	wide := bird("Latus brevis", 30, 30, 20, 100, 60, 2000, 1000)
+	for _, set := range [][]*dataset.Species{{long, wide}, {wide, long}} {
+		if l, w := Reference(set); l != long.TotalLength.Value || w != wide.Wingspan.Value {
+			t.Errorf("with the longest bird not the widest (%s first), Reference is %.1f and %.1f; want the long one's length and the wide one's span", set[0].ScientificName, l, w)
 		}
 	}
-	if global[0] != math.Max(perSection[len(perSection)-1], global[0]) {
-		t.Error("global reference should be the largest bird overall")
+	if l, w := Reference(nil); l != 0 || w != 0 {
+		t.Errorf("no birds give a reference of %.1f and %.1f, want zero", l, w)
 	}
 }
 
@@ -215,15 +201,11 @@ func TestCrossbarIsToScale(t *testing.T) {
 // TestLargerBirdsDrawLarger is the property goals.sizeIntuition depends on: at a shared
 // scale, a bigger bird is bigger on screen.
 //
-// Verifies: product.scaleToggle. Criterion: acceptance.sharedScale.
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestLargerBirdsDrawLarger(t *testing.T) {
 	species := sample()
 	box := Box{W: 420, H: 160}
-	var refLen, refSpan float64
-	for _, s := range species {
-		refLen = math.Max(refLen, s.TotalLength.Value)
-		refSpan = math.Max(refSpan, s.Wingspan.Value)
-	}
+	refLen, refSpan := Reference(species)
 	for i := 1; i < len(species); i++ {
 		a, b := species[i-1], species[i]
 		ga := Layout(a, refLen, refSpan, box)
@@ -257,24 +239,20 @@ func TestSegmentsAbutInPixels(t *testing.T) {
 	}
 }
 
-// TestSharedScaleWithinSection asserts product.scaleToggle directly: birds given the same
-// references are drawn at the same pixels-per-millimeter.
+// TestSharedScale asserts product.nextView's one scale directly: birds given the same references are
+// drawn at the same pixels-per-millimeter.
 //
 // This exists because the weaker assertions did not bite. Breaking Layout to
-// scale each bird to its own length -- the exact failure product.scaleToggle forbids -- still
+// scale each bird to its own length -- the exact failure one scale forbids -- still
 // passed TestLargerBirdsDrawLarger and TestCrossbarIsToScale, because the
 // wingspan constraint happened to preserve size ordering. Comparing the scale
 // factor itself is the only check that cannot be satisfied by accident.
 //
-// Verifies: product.scaleToggle. Criterion: acceptance.sharedScale.
-func TestSharedScaleWithinSection(t *testing.T) {
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+func TestSharedScale(t *testing.T) {
 	species := sample()
 	box := Box{W: 420, H: 160}
-	var refLen, refSpan float64
-	for _, s := range species {
-		refLen = math.Max(refLen, s.TotalLength.Value)
-		refSpan = math.Max(refSpan, s.Wingspan.Value)
-	}
+	refLen, refSpan := Reference(species)
 	want := Layout(species[0], refLen, refSpan, box).PxPerMm
 	for _, s := range species {
 		if got := Layout(s, refLen, refSpan, box).PxPerMm; math.Abs(got-want) > 1e-12 {
@@ -370,11 +348,11 @@ func TestFoldedNeckIsTheSameStrokeInLessHeight(t *testing.T) {
 //
 // Two birds of identical total length, one folding and one not, must sort into
 // the same section and be measured against the same reference even though one
-// of them draws visibly shorter. If the fold ever leaks into Sections or Scales,
+// of them draws visibly shorter. If the fold ever leaks into Sections or Reference,
 // a heron starts sorting as a smaller bird than it is -- which is the one thing
 // this change was not allowed to do.
 //
-// Verifies: product.ascendingOrder, product.scaleToggle, product.segmentsSumToLength. Criterion: acceptance.foldedNeckSameStroke.
+// Verifies: product.ascendingOrder, product.nextView, product.segmentsSumToLength. Criterion: acceptance.foldedNeckSameStroke.
 func TestFoldedNeckDoesNotChangeOrdering(t *testing.T) {
 	heron, crane := foldingPair(200)
 	in := []*dataset.Species{heron, crane}
@@ -385,20 +363,18 @@ func TestFoldedNeckDoesNotChangeOrdering(t *testing.T) {
 	}
 	// The reference must be the folding bird's OWN full length, so it is also
 	// checked against a section holding nothing else. Asking only the mixed
-	// section proves nothing: Scales takes a maximum, so the extended twin masks
+	// pair proves nothing: Reference takes a maximum, so the extended twin masks
 	// any reduction applied to the heron -- which is exactly how the first
 	// version of this check passed while the fold leaked into the scale.
-	alone := Sections([]*dataset.Species{heron}, ByLength, DefaultStepPercent)
-	for _, mode := range []ScaleMode{PerSection, Global} {
-		for _, c := range []struct {
-			label string
-			ref   float64
-		}{{"heron alone", Scales(alone, mode)[0]}, {"mixed section", Scales(secs, mode)[0]}} {
-			if math.Abs(c.ref-heron.TotalLength.Value) > 1e-9 {
-				t.Errorf("%s, %s: scale reference is %.3f, want the full total length %.3f -- "+
-					"the folded neck has leaked into the scale", mode, c.label, c.ref,
-					heron.TotalLength.Value)
-			}
+	aloneLen, _ := Reference([]*dataset.Species{heron})
+	pairLen, _ := Reference(in)
+	for _, c := range []struct {
+		label string
+		ref   float64
+	}{{"heron alone", aloneLen}, {"heron and crane", pairLen}} {
+		if math.Abs(c.ref-heron.TotalLength.Value) > 1e-9 {
+			t.Errorf("%s: scale reference is %.3f, want the full total length %.3f -- "+
+				"the folded neck has leaked into the scale", c.label, c.ref, heron.TotalLength.Value)
 		}
 	}
 
