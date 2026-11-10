@@ -104,3 +104,30 @@ func TestHabitatGroupsPartitionAVONET(t *testing.T) {
 		t.Errorf("groups are %v, want %s", got, want)
 	}
 }
+
+// TestDietGroupsPartitionNiches asserts product.habitatAndDietFilters' diet groups: AVONET's trophic
+// levels, Plants and Animals, then Scavenges and Eats anything, holding every niche exactly once.
+//
+// Verifies: product.habitatAndDietFilters. Criterion: acceptance.habitatGroupsFilter.
+func TestDietGroupsPartitionNiches(t *testing.T) {
+	var got []string
+	seen := map[string]bool{}
+	for _, g := range DietGroups {
+		got = append(got, g.Label+"="+strings.Join(g.Terms, ","))
+		for _, term := range g.Terms {
+			if seen[term] {
+				t.Errorf("%s is in two diet groups", term)
+			}
+			seen[term] = true
+		}
+	}
+	for _, n := range Niches {
+		if !seen[n.Value] {
+			t.Errorf("the niche %s is in no diet group", n.Value)
+		}
+	}
+	want := "Plants=Granivore,Frugivore,Nectarivore,Herbivore terrestrial,Herbivore aquatic,Sap|Animals=Invertivore,Vertivore,Aquatic predator|Scavenges=Scavenger|Eats anything=Omnivore"
+	if strings.Join(got, "|") != want {
+		t.Errorf("diet groups are %v, want %s", got, want)
+	}
+}

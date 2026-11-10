@@ -940,20 +940,11 @@ func (s *server) nextTitle(opt options, pinnedOnly bool) string {
 		}
 		b.WriteString(" · Family: " + nextList(fs))
 	}
-	terms := func(label string, ts []trait.Term, sel map[string]bool) {
-		var ls []string
-		for _, t := range ts {
-			if sel[t.Value] {
-				ls = append(ls, t.Label)
-			}
-		}
-		b.WriteString(" · " + label + ": " + nextList(ls))
-	}
 	if opt.HasHabitats && preset == nil {
 		b.WriteString(" · Habitat: " + nextList(habitatNames(opt.Habitats)))
 	}
 	if opt.HasNiches && preset == nil {
-		terms("Diet", trait.Niches, opt.Niches)
+		b.WriteString(" · Diet: " + nextList(groupNames(opt.Niches, trait.DietGroups, trait.Niches)))
 	}
 	if opt.Common > 0 {
 		b.WriteString(" · At least 1 in " + comma(int64(opt.Common)))
@@ -1176,28 +1167,7 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	}
 	out = append(out, fc)
 
-	traitCtl := func(label, param string, terms []trait.Term, sel map[string]bool, has bool) nextControl {
-		c := nextControl{Label: label, Value: "all"}
-		var names []string
-		var ch []nextChoice
-		for _, t := range terms {
-			on := has && sel[t.Value]
-			if on {
-				names = append(names, t.Label)
-			}
-			ch = append(ch, nextChoice{Label: t.Label, Title: t.Description, On: on,
-				URL: nextToggle(q, param, t.Value)})
-		}
-		if has {
-			c.Value = nextList(names)
-		}
-		// All leads the line and the choices follow a rule, as Month's do, wrapping under
-		// themselves (product.habitatAndDietFilters).
-		c.Leads = true
-		c.Groups = []nextChoiceGroup{{Lead: &nextChoice{Label: "All", On: !has, URL: nextSet(q, param, "")}, Choices: ch}}
-		return c
-	}
-	out = append(out, habitatCtl(q, opt), traitCtl("Diet", "niche", trait.Niches, opt.Niches, opt.HasNiches))
+	out = append(out, habitatCtl(q, opt), dietCtl(q, opt))
 
 	uc := nextControl{Label: "Units", Value: "imperial", One: true}
 	if opt.Metric3 {
@@ -1226,40 +1196,57 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 // first and then each of its habitats, chosen on its own (decisions.habitatGroupShortcuts). A group
 // of one habitat needs no shortcut, so the habitat itself leads its line.
 func habitatCtl(q url.Values, opt options) nextControl {
-	// All heads the column of group names, aligned with them, with no rule beside it.
-	c := nextControl{Label: "Habitat", Value: "all", Leads: true, Groups: []nextChoiceGroup{{NoRule: true,
-		Lead: &nextChoice{Label: "All", On: !opt.HasHabitats, URL: nextSet(q, "habitat", "")}}}}
-	for _, g := range trait.HabitatGroups {
-		all := opt.HasHabitats
-		var ls []string
-		for _, t := range g.Terms {
-			all = all && opt.Habitats[t]
-			ls = append(ls, trait.LabelOf(trait.HabitatTerms, t))
-		}
-		var ch []nextChoice
-		for i, t := range g.Terms {
-			ch = append(ch, nextChoice{Label: ls[i], Title: trait.DescriptionOf(trait.HabitatTerms, t),
-				On: opt.HasHabitats && opt.Habitats[t], URL: nextToggle(q, "habitat", t)})
-		}
-		grp := nextChoiceGroup{Lead: &nextChoice{Label: g.Label, Title: "All of " + nextList(ls), On: all,
-			URL: habitatGroupToggle(q, g.Terms, all)}, Choices: ch}
-		if len(ch) == 1 {
-			grp = nextChoiceGroup{Lead: &ch[0]}
-		}
-		c.Groups = append(c.Groups, grp)
-	}
+	c := groupedCtl(q, "Habitat", "habitat", trait.HabitatGroups, trait.HabitatTerms, opt.Habitats, opt.HasHabitats)
 	if opt.HasHabitats {
 		c.Value = nextList(habitatNames(opt.Habitats))
 	}
 	return c
 }
 
-// habitatGroupToggle is the address with a group's habitats all removed when all are selected,
-// and otherwise all added; from all, that selects only the group's.
-func habitatGroupToggle(q url.Values, terms []string, all bool) template.URL {
+// dietCtl is the Diet setting, grouped by AVONET's trophic levels as Habitat is by its groups
+// (product.habitatAndDietFilters).
+func dietCtl(q url.Values, opt options) nextControl {
+	c := groupedCtl(q, "Diet", "niche", trait.DietGroups, trait.Niches, opt.Niches, opt.HasNiches)
+	if opt.HasNiches {
+		c.Value = nextList(groupNames(opt.Niches, trait.DietGroups, trait.Niches))
+	}
+	return c
+}
+
+// groupedCtl draws a setting as All heading a column of group names, aligned with them and with no
+// rule beside it, then a line per group: its shortcut, a rule, and its terms, each chosen on its own.
+func groupedCtl(q url.Values, label, param string, groups []trait.TermGroup, vocab []trait.Term,
+	sel map[string]bool, has bool) nextControl {
+	c := nextControl{Label: label, Value: "all", Leads: true, Groups: []nextChoiceGroup{{NoRule: true,
+		Lead: &nextChoice{Label: "All", On: !has, URL: nextSet(q, param, "")}}}}
+	for _, g := range groups {
+		all := has
+		var ls []string
+		for _, t := range g.Terms {
+			all = all && sel[t]
+			ls = append(ls, trait.LabelOf(vocab, t))
+		}
+		var ch []nextChoice
+		for i, t := range g.Terms {
+			ch = append(ch, nextChoice{Label: ls[i], Title: trait.DescriptionOf(vocab, t),
+				On: has && sel[t], URL: nextToggle(q, param, t)})
+		}
+		grp := nextChoiceGroup{Lead: &nextChoice{Label: g.Label, Title: "All of " + nextList(ls), On: all,
+			URL: groupToggle(q, param, g.Terms, all)}, Choices: ch}
+		if len(ch) == 1 {
+			grp = nextChoiceGroup{Lead: &ch[0]}
+		}
+		c.Groups = append(c.Groups, grp)
+	}
+	return c
+}
+
+// groupToggle is the address with a group's terms all removed when all are selected, and otherwise
+// all added; from all, that selects only the group's.
+func groupToggle(q url.Values, param string, terms []string, all bool) template.URL {
 	q = cloneValues(q)
 	var next []string
-	for _, v := range nextValues(q, "habitat") {
+	for _, v := range nextValues(q, param) {
 		if !slices.Contains(terms, v) {
 			next = append(next, v)
 		}
@@ -1267,38 +1254,49 @@ func habitatGroupToggle(q url.Values, terms []string, all bool) template.URL {
 	if !all {
 		next = append(next, terms...)
 	}
-	q.Del("habitat")
+	q.Del(param)
 	for _, v := range next {
-		q.Add("habitat", v)
+		q.Add(param, v)
 	}
 	return nextURL(q)
 }
 
-// habitatNames names the selected habitats: a group by its name when all its habitats are
-// selected, and otherwise each selected habitat by its label.
-func habitatNames(sel map[string]bool) []string {
+// groupNames names the selected terms: a group by its name when all its terms are selected, and
+// otherwise each selected term by its label.
+func groupNames(sel map[string]bool, groups []trait.TermGroup, vocab []trait.Term) []string {
 	var out []string
-	for _, g := range trait.HabitatGroups {
+	for _, g := range groups {
 		var on []string
 		for _, t := range g.Terms {
 			if sel[t] {
-				on = append(on, trait.LabelOf(trait.HabitatTerms, t))
+				on = append(on, trait.LabelOf(vocab, t))
 			}
 		}
-		switch {
-		case len(on) == len(g.Terms) && len(on) > 1:
+		if len(on) == len(g.Terms) && len(on) > 1 {
 			out = append(out, g.Label)
-		case sel["Marine-inshore"] && sel["Marine-offshore"] && slices.Contains(g.Terms, "Marine-inshore"):
-			// Both refinements are AVONET's Marine, which the filter called Open sea
-			// (decisions.openOceanSplit).
-			for _, l := range on {
-				if l != trait.LabelOf(trait.HabitatTerms, "Marine-inshore") && l != trait.LabelOf(trait.HabitatTerms, "Marine-offshore") {
-					out = append(out, l)
-				}
-			}
-			out = append(out, "Open sea")
-		default:
+		} else {
 			out = append(out, on...)
+		}
+	}
+	return out
+}
+
+// habitatNames is groupNames for habitats, naming both sea refinements together "Open sea", AVONET's
+// Marine, unless their whole group is chosen (decisions.openOceanSplit).
+func habitatNames(sel map[string]bool) []string {
+	names := groupNames(sel, trait.HabitatGroups, trait.HabitatTerms)
+	in, off := trait.LabelOf(trait.HabitatTerms, "Marine-inshore"), trait.LabelOf(trait.HabitatTerms, "Marine-offshore")
+	if !sel["Marine-inshore"] || !sel["Marine-offshore"] || !slices.Contains(names, in) {
+		return names
+	}
+	var out []string
+	for _, n := range names {
+		switch n {
+		case in:
+			out = append(out, "Open sea")
+		case off:
+		default:
+			out = append(out, n)
 		}
 	}
 	return out

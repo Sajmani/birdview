@@ -2076,11 +2076,41 @@ func TestHabitatGroupsFilter(t *testing.T) {
 	if g := ctl("/").Groups[0]; !g.NoRule || !g.Lead.On || g.Lead.Label != "All" {
 		t.Error("Habitat's All does not head the column of group names, marked and without a rule")
 	}
-	// Diet's choices sit beside its All, after a rule (product.habitatAndDietFilters).
-	diet := controlNamed(t, nextAt(s, "/?niche=Granivore"), "Diet")
-	if !diet.Leads || len(diet.Groups) != 1 || diet.Groups[0].Lead == nil || diet.Groups[0].Lead.Label != "All" ||
-		diet.Groups[0].Lead.On || diet.Groups[0].NoRule || len(diet.Groups[0].Choices) < 5 {
-		t.Errorf("Diet is not All, a rule, and its choices on one line: %+v", diet.Groups)
+	// Diet is grouped by AVONET's trophic levels, as Habitat is by its groups (product.habitatAndDietFilters).
+	dietLines := func(target string) (lines []string, d nextControl) {
+		d = controlNamed(t, nextAt(s, target), "Diet")
+		for _, g := range d.Groups {
+			ls := []string{g.Lead.Label}
+			if len(g.Choices) > 0 {
+				ls = append(ls, "|")
+			}
+			for _, ch := range g.Choices {
+				ls = append(ls, ch.Label)
+			}
+			lines = append(lines, strings.Join(ls, " "))
+		}
+		return lines, d
+	}
+	lines, diet := dietLines("/?niche=Granivore")
+	wantDiet := []string{
+		"All",
+		"Plants | Eats seeds Eats fruit Drinks nectar Eats plants Eats water plants Drinks sap",
+		"Animals | Eats insects Hunts animals Hunts in water",
+		"Scavenges",
+		"Eats anything",
+	}
+	if !diet.Leads || strings.Join(lines, "\n") != strings.Join(wantDiet, "\n") {
+		t.Errorf("Diet offers\n%s\nwant\n%s", strings.Join(lines, "\n"), strings.Join(wantDiet, "\n"))
+	}
+	if plants := diet.Groups[1].Lead; plants.On || string(plants.URL) != "/?niche=Granivore&niche=Frugivore&niche=Nectarivore&niche=Herbivore+terrestrial&niche=Herbivore+aquatic&niche=Sap" {
+		t.Errorf("from Eats seeds, Plants is on %v going to %s; want off, adding the rest of its line", plants.On, plants.URL)
+	}
+	plantsAll := "/?month=all&niche=Granivore&niche=Frugivore&niche=Nectarivore&niche=Herbivore+terrestrial&niche=Herbivore+aquatic&niche=Sap"
+	if _, d := dietLines(plantsAll); !d.Groups[1].Lead.On || string(d.Groups[1].Lead.URL) != "/?month=all" {
+		t.Errorf("with every plant food chosen, Plants is on %v going to %s; want on, clearing them", d.Groups[1].Lead.On, d.Groups[1].Lead.URL)
+	}
+	if p := nextAt(s, plantsAll); !strings.Contains(p.Title, "Diet: Plants") {
+		t.Errorf("every plant food is headed %q; want Diet: Plants", p.Title)
 	}
 	coast := func(url string) (shortcut, coastal, marine nextChoice) {
 		t.Helper()

@@ -16,6 +16,8 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 ### Changed
 
 - A bird's neck, head, and body say whether their proportions are proposed or reviewed.
+- **Diet** is grouped like Habitat, by AVONET's own trophic levels: **Plants** and **Animals** each choose
+  their whole line, then Scavenges and Eats anything.
 - **Here** and **Now** are colored green, apart from the choices, since they act rather than choose.
 - Settings that take one choice (Birds, Order by, Reporting frequency, Units, Names) now look like
   it: one joined row with the chosen part filled, and screen readers say which is chosen.

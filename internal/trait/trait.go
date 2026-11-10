@@ -92,21 +92,32 @@ var SeaRefinements = []Term{
 // HabitatTerms is every habitat value a bird can carry: AVONET's eleven and the sea refinements.
 var HabitatTerms = append(append([]Term{}, Habitats...), SeaRefinements...)
 
-// HabitatGroup is a shortcut in the habitat filter: one choice that selects or clears several of
-// AVONET's habitats at once, each still chosen on its own (decisions.habitatGroupShortcuts).
-type HabitatGroup struct {
+// TermGroup is a shortcut in the habitat or diet filter: one choice that selects or clears several
+// terms at once, each still chosen on its own (decisions.habitatGroupShortcuts). A group of one term
+// is that term alone, with no shortcut.
+type TermGroup struct {
 	Label string
 	Terms []string
 }
 
 // HabitatGroups are the habitat filter's lines, in the order it offers them. Together they hold
 // every one of AVONET's habitats exactly once.
-var HabitatGroups = []HabitatGroup{
+var HabitatGroups = []TermGroup{
 	{Label: "Shore and sea", Terms: []string{"Coastal", "Marine-inshore", "Marine-offshore"}},
 	{Label: "Fresh water", Terms: []string{"Wetland", "Riverine"}},
 	{Label: "Woods", Terms: []string{"Forest", "Woodland"}},
 	{Label: "Open country", Terms: []string{"Grassland", "Shrubland", "Desert", "Rock"}},
 	{Label: "Towns and farms", Terms: []string{"Human Modified"}},
+}
+
+// DietGroups are the diet filter's lines: AVONET's own trophic levels, Herbivore as Plants and
+// Carnivore as Animals, then the two levels of one niche each (product.habitatAndDietFilters). Sap,
+// BirdView's own niche, is a plant food.
+var DietGroups = []TermGroup{
+	{Label: "Plants", Terms: []string{"Granivore", "Frugivore", "Nectarivore", "Herbivore terrestrial", "Herbivore aquatic", "Sap"}},
+	{Label: "Animals", Terms: []string{"Invertivore", "Vertivore", "Aquatic predator"}},
+	{Label: "Scavenges", Terms: []string{"Scavenger"}},
+	{Label: "Eats anything", Terms: []string{"Omnivore"}},
 }
 
 // GroupOf names the group an AVONET habitat belongs to, or "" for a value no group holds.

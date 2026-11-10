@@ -163,8 +163,14 @@ one habitat, so its line is that habitat alone. The group names form a column, a
 the rule after them, which runs as one vertical line down to the last group, so every group's
 habitats start at the same place; a line too long for the screen wraps under its own habitats, not
 under the group name (Sameer, 2026-11-07). **All heads that column**, aligned right with the group
-names, without the rule beside it; and **Diet's choices sit beside its All the same way**, after a
-rule, wrapping under themselves (Sameer, 2026-11-09). The page's heading names a fully chosen group by its
+names, without the rule beside it (Sameer, 2026-11-09).
+
+**Diet's choices are grouped the same way, by AVONET's own trophic levels**, so nothing is invented:
+**Plants** (AVONET's Herbivore level: Eats seeds, Eats fruit, Drinks nectar, Eats plants, Eats water
+plants, and BirdView's Drinks sap, sap being a plant food) and **Animals** (its Carnivore level: Eats
+insects, Hunts animals, Hunts in water), each a shortcut leading its line, then Scavenges and Eats
+anything, each a level of one niche and so its own line with no shortcut. All heads the column, and
+the heading names a fully chosen group, "Diet: Plants" (Sameer, 2026-11-09). The page's heading names a fully chosen group by its
 label, and any other chosen habitat by its own.
 
 The groups answer "which birds am I likely to see here", and a birder stands in a place, not a
