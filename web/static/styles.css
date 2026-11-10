@@ -407,7 +407,7 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 /* Habitat: the group names in a column, set against one rule that runs the column's height, then
    each group's habitats, wrapping under themselves. */
 .leads { display: grid; grid-template-columns: max-content 1fr; gap: 0 8px; align-items: start; margin-bottom: 8px; }
-.leads > .btn { justify-self: end; margin-bottom: 8px; }
+.leads > .lead { justify-self: end; display: flex; gap: 4px; margin-bottom: 8px; }
 .leads > .popgroup { border-left: 1px solid var(--dim); padding-left: 8px; align-self: stretch;
   align-items: flex-start; align-content: flex-start; margin-bottom: 0; padding-bottom: 8px; }
 .leads > .popgroup.norule { border-left-color: transparent; }

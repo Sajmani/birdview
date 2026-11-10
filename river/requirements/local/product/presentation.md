@@ -996,7 +996,8 @@ home page in those. Its footer carries the full credits, which every other page 
   line: **All** (the default), **Now**, which selects only the current month by name (the
   browser's month; without JavaScript it goes to `month=now`, which the server redirects to its
   own month), a rule, and the twelve
-  months. On a phone too narrow for them, the line scrolls sideways. A **Reset**
+  months. On a phone too narrow for them, the months wrap under themselves, beside the rule, as
+  Habitat's and Diet's choices do; they no longer scroll sideways (Sameer, 2026-11-09). A **Reset**
   control, colored apart from the settings, returns to the landing set. **Here and Now, which act
   rather than choose, are colored apart too, in green** (Sameer, 2026-11-09). Choosing one option selects only it; choosing more adds them; choosing every
   selected option again returns to all. Nothing selected means all. **Every setting that can be all

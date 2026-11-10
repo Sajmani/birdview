@@ -874,18 +874,15 @@ func TestNextHereAndNow(t *testing.T) {
 		!strings.Contains(body, string(s.hereJS)[:200]) {
 		t.Error("/ has no Here button, status, or here.js")
 	}
-	// One line: All, Now, a rule, and the twelve months.
-	if len(mon.Groups) != 1 || !mon.Groups[0].OneLine || mon.AllURL != "" {
-		t.Fatalf("the Month setting has %d groups, one line %t, All link %q; want its choices on one line",
-			len(mon.Groups), len(mon.Groups) > 0 && mon.Groups[0].OneLine, mon.AllURL)
+	// All and Now beside each other, a rule, and the twelve months, which wrap under themselves.
+	if len(mon.Groups) != 1 || !mon.Leads || mon.Groups[0].OneLine || mon.AllURL != "" ||
+		mon.Groups[0].Lead == nil || mon.Groups[0].Also == nil {
+		t.Fatalf("the Month setting is %+v; want All and Now leading one line whose months wrap", mon)
 	}
-	ch := mon.Groups[0].Choices
+	ch := append([]nextChoice{*mon.Groups[0].Lead, *mon.Groups[0].Also}, mon.Groups[0].Choices...)
 	var labels []string
-	for i, c := range ch {
+	for _, c := range ch {
 		labels = append(labels, c.Label)
-		if c.Sep != (i == 2) {
-			t.Errorf("month choice %s has a rule before it: %t; want one only between Now and Jan", c.Label, c.Sep)
-		}
 	}
 	if want := append([]string{"All", "Now"}, month.Abbrev[:]...); !slices.Equal(labels, want) {
 		t.Errorf("the month choices are %v, want %v", labels, want)
@@ -896,15 +893,19 @@ func TestNextHereAndNow(t *testing.T) {
 	if all := ch[0]; all.On || string(all.URL) != "/?by=mass&region=USA.5_1&show=pinned" {
 		t.Errorf("with May named, All is %+v; want it off, linking to no month", all)
 	}
+	monthChoices := func(p nextData) []nextChoice {
+		g := controlNamed(t, p, "Month").Groups[0]
+		return append([]nextChoice{*g.Lead, *g.Also}, g.Choices...)
+	}
 	for _, target := range []string{"/", "/?month=all"} {
-		if ch := controlNamed(t, nextAt(s, target), "Month").Groups[0].Choices; !ch[0].On || ch[1].On || ch[11].On {
+		if ch := monthChoices(nextAt(s, target)); !ch[0].On || ch[1].On || ch[11].On {
 			t.Errorf("%s: All %t, Now %t, Oct %t; want only All chosen", target, ch[0].On, ch[1].On, ch[11].On)
 		}
 	}
 	// Now is a way to choose the current month, not a state: with October
 	// chosen, October is on and Now is not, and the summary is the month.
 	op := nextAt(s, "/?month=Oct")
-	if ch := controlNamed(t, op, "Month").Groups[0].Choices; ch[1].On || !ch[11].On || controlNamed(t, op, "Month").Value != "Oct" {
+	if ch := monthChoices(op); ch[1].On || !ch[11].On || controlNamed(t, op, "Month").Value != "Oct" {
 		t.Errorf("with month=Oct: Now %t, Oct %t, summary %q; want only Oct, reading Oct", ch[1].On, ch[11].On, controlNamed(t, op, "Month").Value)
 	}
 	if _, body := get(t, s, "/"); strings.Count(body, " data-now>") != 1 || strings.Contains(body, "(now)") {

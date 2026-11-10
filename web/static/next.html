@@ -132,7 +132,7 @@
           title="Here needs JavaScript and permission to use your location">Here</button>
         <span class="herestatus" role="status" aria-live="polite"></span>{{end}}</p>{{end}}
       {{if .Leads}}<div class="leads">
-      {{range .Groups}}{{with .Lead}}{{template "choice" .}}{{end}}
+      {{range .Groups}}<span class="lead">{{with .Lead}}{{template "choice" .}}{{end}}{{with .Also}}{{template "choice" .}}{{end}}</span>
         <div class="popgroup{{if .NoRule}} norule{{end}}">{{range .Choices}}{{template "choice" .}}
         {{end}}</div>
       {{end}}</div>

@@ -16,6 +16,7 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 ### Changed
 
 - A bird's neck, head, and body say whether their proportions are proposed or reviewed.
+- **Months wrap** on a narrow screen, beside All and Now, instead of scrolling sideways.
 - **Diet** is grouped like Habitat, by AVONET's own trophic levels: **Plants** and **Animals** each choose
   their whole line, then Scavenges and Eats anything.
 - **Here** and **Now** are colored green, apart from the choices, since they act rather than choose.

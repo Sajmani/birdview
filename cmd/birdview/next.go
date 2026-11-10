@@ -82,6 +82,8 @@ type nextChoiceGroup struct {
 	Lead *nextChoice
 	// NoRule draws no rule beside the lead: Habitat's All, which heads the column of group names.
 	NoRule bool
+	// Also is a second choice drawn beside the lead, before the rule: Month's Now beside its All.
+	Also *nextChoice
 }
 
 // nextControl is one setting on the count line: its name, what it is set to,
@@ -1093,17 +1095,16 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	if len(ms) > 0 {
 		mc.Value = nextList(ms)
 	}
-	// All is a choice like the rest rather than the setting's All link, so
-	// every option sits on the one line.
+	// All and Now lead the line, then a rule, then the twelve months, which wrap under themselves
+	// on a narrow screen, as Habitat's and Diet's choices do (product.nextView).
 	allMonths := nextChoice{Label: "All", Title: "Every month", On: !opt.HasMonths,
 		URL: nextSet(q, "month", "")}
 	// Now selects only the current month. Its address names month=now, which
 	// here.js rewrites to the browser's month and the server, without the
 	// script, redirects to its own; the page itself never reads the clock.
-	mch[0].Sep = true
-	mch = append([]nextChoice{allMonths, {Label: "Now", Title: "This month only",
-		URL: nextSet(q, "month", "now"), Now: true}}, mch...)
-	mc.Groups = []nextChoiceGroup{{Choices: mch, OneLine: true}}
+	now := nextChoice{Label: "Now", Title: "This month only", URL: nextSet(q, "month", "now"), Now: true}
+	mc.Leads = true
+	mc.Groups = []nextChoiceGroup{{Lead: &allMonths, Also: &now, Choices: mch}}
 	out = append(out, mc)
 
 	rc := nextControl{Label: "Region", Value: "all", AllURL: nextSet(q, "region", ""), AllOn: !opt.HasRegions}
