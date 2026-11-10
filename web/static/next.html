@@ -133,7 +133,7 @@
         <span class="herestatus" role="status" aria-live="polite"></span>{{end}}</p>{{end}}
       {{if .Leads}}<div class="leads">
       {{range .Groups}}{{with .Lead}}{{template "choice" .}}{{end}}
-        <div class="popgroup">{{range .Choices}}{{template "choice" .}}
+        <div class="popgroup{{if .NoRule}} norule{{end}}">{{range .Choices}}{{template "choice" .}}
         {{end}}</div>
       {{end}}</div>
       {{else}}{{range .Groups}}

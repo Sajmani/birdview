@@ -162,7 +162,9 @@ again removes them all. Each habitat on its line can still be chosen alone. Town
 one habitat, so its line is that habitat alone. The group names form a column, aligned right against
 the rule after them, which runs as one vertical line down to the last group, so every group's
 habitats start at the same place; a line too long for the screen wraps under its own habitats, not
-under the group name (Sameer, 2026-11-07). The page's heading names a fully chosen group by its
+under the group name (Sameer, 2026-11-07). **All heads that column**, aligned right with the group
+names, without the rule beside it; and **Diet's choices sit beside its All the same way**, after a
+rule, wrapping under themselves (Sameer, 2026-11-09). The page's heading names a fully chosen group by its
 label, and any other chosen habitat by its own.
 
 The groups answer "which birds am I likely to see here", and a birder stands in a place, not a

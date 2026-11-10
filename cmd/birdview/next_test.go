@@ -2063,6 +2063,7 @@ func TestHabitatGroupsFilter(t *testing.T) {
 		lines = append(lines, strings.Join(ls, " "))
 	}
 	want := []string{
+		"All",
 		"Shore and sea | Shore and estuary Sea near shore Open ocean",
 		"Fresh water | Marsh and lake River and stream",
 		"Woods | Forest Woodland",
@@ -2072,9 +2073,18 @@ func TestHabitatGroupsFilter(t *testing.T) {
 	if strings.Join(lines, "\n") != strings.Join(want, "\n") {
 		t.Errorf("Habitat offers\n%s\nwant\n%s", strings.Join(lines, "\n"), strings.Join(want, "\n"))
 	}
+	if g := ctl("/").Groups[0]; !g.NoRule || !g.Lead.On || g.Lead.Label != "All" {
+		t.Error("Habitat's All does not head the column of group names, marked and without a rule")
+	}
+	// Diet's choices sit beside its All, after a rule (product.habitatAndDietFilters).
+	diet := controlNamed(t, nextAt(s, "/?niche=Granivore"), "Diet")
+	if !diet.Leads || len(diet.Groups) != 1 || diet.Groups[0].Lead == nil || diet.Groups[0].Lead.Label != "All" ||
+		diet.Groups[0].Lead.On || diet.Groups[0].NoRule || len(diet.Groups[0].Choices) < 5 {
+		t.Errorf("Diet is not All, a rule, and its choices on one line: %+v", diet.Groups)
+	}
 	coast := func(url string) (shortcut, coastal, marine nextChoice) {
 		t.Helper()
-		g := ctl(url).Groups[0]
+		g := ctl(url).Groups[1]
 		return *g.Lead, g.Choices[0], g.Choices[1]
 	}
 	for _, c := range []struct {

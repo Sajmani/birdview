@@ -1995,6 +1995,7 @@ served, not redirected.
 **Run:** `go test ./internal/trait/ -run TestHabitatGroupsPartitionAVONET && go test ./cmd/birdview/ -run TestHabitatGroupsFilter`
 **Status: verified 2026-11-07, passing.**
 Watched failing: 2026-11-07, with the filter matching AVONET's values instead of their groups (eight failures, among them "Coast and sea omits the heron"), and before the groups existed.
+Since 2026-11-09 also: Habitat's All heads the column of group names, marked when in effect and with no rule beside it, and Diet is one line of All, a rule, and its choices. Watched failing: 2026-11-09, with Diet laid out as before ("Diet is not All, a rule, and its choices on one line").
 Watched failing: 2026-11-07, with the leads in a column: against the one-line layout, "a Habitat line has no lead". The alignment itself was checked by screenshot at 900, 560, and 400 pixels wide. The leads aligned right, with the rule running beside Towns and farmland too, were checked by screenshot at 560 pixels wide on 2026-11-07.
 Watched failing: 2026-11-07, as shortcuts: with the group's choice always adding its habitats ("at /?habitat=Coastal&habitat=Marine, Coast and sea is on true going to /?habitat=Coastal&habitat=Marine; want on true going to /") and with the heading never naming a group ("headed … Shore and estuary, Coastal and open sea, or Forest", want "Habitat: Coast and sea or Forest").
 

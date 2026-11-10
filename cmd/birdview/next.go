@@ -77,8 +77,11 @@ type nextChoiceGroup struct {
 	// OneLine keeps the choices on one line, scrolling sideways where the
 	// screen is too narrow for them, as the twelve months are.
 	OneLine bool
-	// Lead is the choice that heads the group, set off by a rule: a habitat group's shortcut.
+	// Lead is the choice that heads the group, set off by a rule: a habitat group's shortcut, or
+	// All.
 	Lead *nextChoice
+	// NoRule draws no rule beside the lead: Habitat's All, which heads the column of group names.
+	NoRule bool
 }
 
 // nextControl is one setting on the count line: its name, what it is set to,
@@ -1185,11 +1188,13 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 			ch = append(ch, nextChoice{Label: t.Label, Title: t.Description, On: on,
 				URL: nextToggle(q, param, t.Value)})
 		}
-		c.AllURL, c.AllOn = nextSet(q, param, ""), !has
 		if has {
 			c.Value = nextList(names)
 		}
-		c.Groups = []nextChoiceGroup{{Choices: ch}}
+		// All leads the line and the choices follow a rule, as Month's do, wrapping under
+		// themselves (product.habitatAndDietFilters).
+		c.Leads = true
+		c.Groups = []nextChoiceGroup{{Lead: &nextChoice{Label: "All", On: !has, URL: nextSet(q, param, "")}, Choices: ch}}
 		return c
 	}
 	out = append(out, habitatCtl(q, opt), traitCtl("Diet", "niche", trait.Niches, opt.Niches, opt.HasNiches))
@@ -1221,7 +1226,9 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 // first and then each of its habitats, chosen on its own (decisions.habitatGroupShortcuts). A group
 // of one habitat needs no shortcut, so the habitat itself leads its line.
 func habitatCtl(q url.Values, opt options) nextControl {
-	c := nextControl{Label: "Habitat", Value: "all", Leads: true, AllURL: nextSet(q, "habitat", ""), AllOn: !opt.HasHabitats}
+	// All heads the column of group names, aligned with them, with no rule beside it.
+	c := nextControl{Label: "Habitat", Value: "all", Leads: true, Groups: []nextChoiceGroup{{NoRule: true,
+		Lead: &nextChoice{Label: "All", On: !opt.HasHabitats, URL: nextSet(q, "habitat", "")}}}}
 	for _, g := range trait.HabitatGroups {
 		all := opt.HasHabitats
 		var ls []string
