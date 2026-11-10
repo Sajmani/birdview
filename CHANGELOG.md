@@ -16,6 +16,7 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 ### Changed
 
 - A bird's neck, head, and body say whether their proportions are proposed or reviewed.
+- **Here** and **Now** are colored green, apart from the choices, since they act rather than choose.
 - Settings that take one choice (Birds, Order by, Reporting frequency, Units, Names) now look like
   it: one joined row with the chosen part filled, and screen readers say which is chosen.
 - **Birds**, a new first setting: **Shorebirds**, **Raptors**, or **Wading birds** fills in Family and

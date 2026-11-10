@@ -67,3 +67,20 @@ func TestChooseOneSettings(t *testing.T) {
 		}
 	}
 }
+
+// TestActionsColoredApart asserts product.nextView's rule for Here and Now: they act rather than
+// choose, so they carry the act class that colors them apart, as Reset is.
+//
+// Verifies: product.nextView. Criterion: acceptance.actionsColoredApart.
+func TestActionsColoredApart(t *testing.T) {
+	body := mustGet(t, newTestServer(t), "/")
+	if !regexp.MustCompile(`<a class="btn act" href="[^"]*month=now[^"]*"[^>]*data-now>Now</a>`).MatchString(body) {
+		t.Error("Now is not colored apart as an action")
+	}
+	if !regexp.MustCompile(`<button type="button" class="btn here act"`).MatchString(body) {
+		t.Error("Here is not colored apart as an action")
+	}
+	if n := strings.Count(body, " act\""); n != 2 {
+		t.Errorf("%d controls are colored as actions; want exactly Here and Now", n)
+	}
+}

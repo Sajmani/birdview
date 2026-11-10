@@ -2612,6 +2612,19 @@ Habitat, and Diet draw no joined row. The contrast and phone-width checks cover 
 **Status: verified 2026-11-09, passing.**
 Watched failing: 2026-11-09, before the joined row existed ("Birds draws no joined row", and likewise for the other four), and with the removed words still drawn ("Birds still says Choose one, which the owner removed").
 
+### actionsColoredApart
+
+**Here and Now are colored apart as actions, and nothing else is**
+
+**Verifies:** [product.nextView](local/product/presentation.md#nextview) · **Level:** code · **Method:** the home page rendered; the contrast check covers the color
+
+**Assertions:** Now (Month) is a link with the act class, Here (Region) a button with it, and no
+other control carries it.
+
+**Run:** `go test ./cmd/birdview/ -run TestActionsColoredApart`
+**Status: verified 2026-11-09, passing.**
+Watched failing: 2026-11-09, without the class ("Now is not colored apart as an action", "Here is not colored apart as an action").
+
 ### imageRecordsRevision
 
 **The image builds the deploy's REVISION into the server, and git never commits it**

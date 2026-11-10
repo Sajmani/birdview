@@ -127,7 +127,7 @@
       {{if or .AllURL .HereURL}}<p>{{if .AllURL}}<a class="btn{{if .AllOn}} on{{end}}" href="{{.AllURL}}">All</a>{{end}}
         {{if .HereURL}}{{/* here.js finds the reader's region in the browser and
              asks for this address with it, as choosing it by hand would
-             (product.hereSelectsLocalRegion, product.locationStaysInBrowser). */}}<button type="button" class="btn here" aria-disabled="true"
+             (product.hereSelectsLocalRegion, product.locationStaysInBrowser). */}}<button type="button" class="btn here act" aria-disabled="true"
           data-template="{{.HereURL}}" data-boundaries="{{.Boundaries}}"
           title="Here needs JavaScript and permission to use your location">Here</button>
         <span class="herestatus" role="status" aria-live="polite"></span>{{end}}</p>{{end}}
@@ -354,4 +354,4 @@
 
 {{/* One choice in a setting's popover: a family as its badge, anything else as a button. */}}
 {{define "choice"}}{{if .Color}}<a class="chip{{if .On}} on{{end}}" href="{{.URL}}"
-  style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">{{.Label}}<em>{{.Title}}</em></a>{{else}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}{{if .Now}} data-now{{end}}>{{.Label}}</a>{{end}}{{end}}
+  style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">{{.Label}}<em>{{.Title}}</em></a>{{else}}<a class="btn{{if .On}} on{{end}}{{if .Now}} act{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}{{if .Now}} data-now{{end}}>{{.Label}}</a>{{end}}{{end}}

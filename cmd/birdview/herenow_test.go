@@ -51,7 +51,7 @@ import (
 func TestBoundaryFileIsServedByHash(t *testing.T) {
 	s := newTestServer(t)
 	body := mustGet(t, s, "/?month=all")
-	here := mustMatch(t, body, `(<button type="button" class="btn here"[^>]*>)`, "the Here button")
+	here := mustMatch(t, body, `(<button type="button" class="btn here[^"]*"[^>]*>)`, "the Here button")
 	bURL := mustMatch(t, here, `data-boundaries="([^"]+)"`, "the boundary file's URL")
 	w := httptest.NewRecorder()
 	s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, bURL, nil))

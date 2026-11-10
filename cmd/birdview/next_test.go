@@ -870,7 +870,7 @@ func TestNextHereAndNow(t *testing.T) {
 		t.Errorf("Here looks regions up in %q, want %q", region.Boundaries, s.boundaryURL)
 	}
 	_, body := get(t, s, "/")
-	if !strings.Contains(body, `class="btn here"`) || !strings.Contains(body, `class="herestatus"`) ||
+	if !strings.Contains(body, `class="btn here act"`) || !strings.Contains(body, `class="herestatus"`) ||
 		!strings.Contains(body, string(s.hereJS)[:200]) {
 		t.Error("/ has no Here button, status, or here.js")
 	}

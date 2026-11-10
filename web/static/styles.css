@@ -57,6 +57,9 @@ footer a:visited { color: var(--accent-visited); }
    with the text at full contrast, because the floor holds for inactive
    controls too (product.hereSelectsLocalRegion). */
 .here { font: inherit; font-size: 13px; cursor: pointer; }
+/* Here and Now act rather than choose, so they are colored apart, as Reset is, in green
+   (product.nextView). */
+.btn.act, .btn.act:visited { background: #12321f; border-color: #2f8050; color: var(--ink); }
 .here[aria-disabled="true"] { border-style: dotted; background: transparent; cursor: not-allowed; }
 .herestatus { color: var(--ink); font-size: 13px; }
 .welcome { margin: 6px 0 0; font-size: 15px; }
