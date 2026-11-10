@@ -93,7 +93,7 @@ func birdsControl(q url.Values, opt options) nextControl {
 	for _, k := range presetKeys {
 		cleared.Del(k)
 	}
-	c := nextControl{Label: "Birds", Value: "all", AllURL: nextURL(cleared),
+	c := nextControl{Label: "Birds", Value: "all", One: true, AllURL: nextURL(cleared),
 		AllOn: !opt.HasSelection && !opt.HasHabitats && !opt.HasNiches}
 	cur := presetOf(opt)
 	if !c.AllOn {

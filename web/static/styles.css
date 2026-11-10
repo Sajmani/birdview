@@ -394,6 +394,12 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .popgroup.oneline { flex-wrap: nowrap; }
 .popgroup.oneline .btn { padding-left: 7px; padding-right: 7px; }
 .popgroup.oneline > * { flex: none; }
+/* A setting that takes one choice: its choices as one joined row (product.chooseOneSettings). */
+.seg { display: inline-flex; flex-wrap: wrap; margin-bottom: 8px; }
+.seg > .btn { border-radius: 0; margin: 0 -1px 0 0; }
+.seg > .btn:first-child { border-radius: 6px 0 0 6px; }
+.seg > .btn:last-child { border-radius: 0 6px 6px 0; margin-right: 0; }
+.seg > .btn.on { position: relative; }
 .popgroup .sep { align-self: stretch; width: 1px; background: var(--dim); margin: 2px 4px; }
 /* Habitat: the group names in a column, set against one rule that runs the column's height, then
    each group's habitats, wrapping under themselves. */

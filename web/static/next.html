@@ -118,6 +118,11 @@
   <details class="ctl" name="ctl" data-ctl="{{.Label}}">
     <summary><b>{{.Label}}</b> {{.Value}}</summary>
     <div class="pop">
+      {{if .One}}{{/* One choice: one joined row, All first, the chosen segment filled and marked
+           for screen readers (product.chooseOneSettings). */}}
+      <p class="hint">Choose one.{{with .Note}} {{.}}{{end}}</p>
+      <div class="seg" role="group" aria-label="{{.Label}}">{{if .AllURL}}<a class="btn{{if .AllOn}} on{{end}}" href="{{.AllURL}}"{{if .AllOn}} aria-current="true"{{end}}>All</a>{{end}}{{range .Groups}}{{range .Choices}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}{{if .On}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}{{end}}</div>
+      {{else}}
       {{with .Note}}<p class="hint">{{.}}</p>{{end}}
       {{if or .AllURL .HereURL}}<p>{{if .AllURL}}<a class="btn{{if .AllOn}} on{{end}}" href="{{.AllURL}}">All</a>{{end}}
         {{if .HereURL}}{{/* here.js finds the reader's region in the browser and
@@ -138,6 +143,7 @@
         {{end}}
       </div>
       {{end}}{{end}}
+      {{end}}
     </div>
   </details>
   {{end}}

@@ -95,6 +95,9 @@ type nextControl struct {
 	// Leads draws each group's Lead in a column, so the rule after it and the choices start
 	// at the same place on every line; Habitat only.
 	Leads bool
+	// One marks a setting that takes exactly one choice, drawn as one joined row with All first
+	// (product.chooseOneSettings).
+	One bool
 	// HereURL is this address with the region a placeholder for here.js to
 	// fill, and Boundaries the file it looks the region up in; Region only.
 	HereURL, Boundaries string
@@ -1128,7 +1131,7 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	}
 	// Reporting frequency: a threshold on the share each tile states, in the same steps as the
 	// frequency tiers (product.reportingFrequencyFilter).
-	hc := nextControl{Label: "Reporting frequency", Value: "all"}
+	hc := nextControl{Label: "Reporting frequency", Value: "all", One: true}
 	hcAll := nextChoice{Label: "All", Title: "Every bird the other settings choose", On: opt.Common == 0, URL: nextSet(q, "freq", "")}
 	hcs := []nextChoice{hcAll}
 	for _, n := range []int{100, 1000, 10000} {
@@ -1191,7 +1194,7 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	}
 	out = append(out, habitatCtl(q, opt), traitCtl("Diet", "niche", trait.Niches, opt.Niches, opt.HasNiches))
 
-	uc := nextControl{Label: "Units", Value: "imperial"}
+	uc := nextControl{Label: "Units", Value: "imperial", One: true}
 	if opt.Metric3 {
 		uc.Value = "metric"
 	}
@@ -1201,7 +1204,7 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	}}}
 	out = append(out, uc)
 
-	nc := nextControl{Label: "Names", Value: "North Amer"}
+	nc := nextControl{Label: "Names", Value: "North Amer", One: true}
 	world := opt.Locale == dataset.LocaleWorld
 	if world {
 		nc.Value = "world"
@@ -1338,7 +1341,7 @@ var nextOrderLabels = func() map[view.Metric]string {
 // nextOrderControl is the Order by setting: frequency, the default, and the
 // five sizes.
 func nextOrderControl(q url.Values, opt options) nextControl {
-	oc := nextControl{Label: "Order by"}
+	oc := nextControl{Label: "Order by", One: true}
 	rev := nextReversed(q)
 	var och []nextChoice
 	for _, m := range nextOrders {

@@ -2596,6 +2596,21 @@ region and month).
 **Status: verified 2026-11-09, passing.**
 Watched failing: 2026-11-09, before the setting existed (the tests did not build: "undefined: birdPresets"), and with the Shorebirds check reading an address that still named New York ("Shorebirds must draw the stilt and not the heron", a fault in the test, corrected).
 
+### chooseOneSettings
+
+**Each choose-one setting says so, draws one joined row, and marks the chosen choice for screen readers**
+
+**Verifies:** [product.chooseOneSettings](local/product/presentation.md#chooseonesettings) · **Level:** code · **Method:** the home page rendered and each setting's popover read
+
+**Assertions:** Birds, Order by, Reporting frequency, Units, and Names each say "Choose one" and
+draw every one of their choices inside one joined row (`role="group"`), Birds' All among them; in
+each, exactly the chosen link is marked `aria-current="true"`; Month, Region, Family, Habitat, and
+Diet say neither and draw no joined row. The contrast and phone-width checks cover the new styling.
+
+**Run:** `go test ./cmd/birdview/ -run TestChooseOneSettings`
+**Status: verified 2026-11-09, passing.**
+Watched failing: 2026-11-09, before the joined row existed ("Birds does not say Choose one", "Birds draws no joined row", and likewise for the other four).
+
 ### imageRecordsRevision
 
 **The image builds the deploy's REVISION into the server, and git never commits it**

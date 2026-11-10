@@ -16,6 +16,8 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
 ### Changed
 
 - A bird's neck, head, and body say whether their proportions are proposed or reviewed.
+- Settings that take one choice (Birds, Order by, Reporting frequency, Units, Names) now look like
+  it: one joined row with the chosen part filled, and screen readers say which is chosen.
 - **Birds**, a new first setting: **Shorebirds**, **Raptors**, or **Wading birds** fills in Family and
   Habitat in one choice, keeping your region, months, and order.
 - **Nine more shorebirds** count as birds of the shore: Lesser Yellowlegs, Pectoral, Stilt, Spotted,

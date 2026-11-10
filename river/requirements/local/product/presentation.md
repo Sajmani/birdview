@@ -814,6 +814,24 @@ Woodcock, and Shore and estuary alone brings in gulls and herons. Four family ch
 habitats to say "shorebirds" is the kind of work a birder should not have to do (Sameer,
 2026-11-09).
 
+## chooseOneSettings
+
+**A setting that takes one choice looks like one: a joined row, one segment filled**
+
+Subject: `presentation.choose_one`
+Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
+
+Birds, Order by, Reporting frequency, Units, and Names each take exactly one choice. Each draws its
+choices, All first where it offers one, as **one joined row of segments** with the chosen segment
+filled, under the words **Choose one**, and marks the chosen link `aria-current="true"`, so a screen
+reader says which is chosen as well as the color shows it. The settings that take one or more
+choices (Month, Region, County, Family, Habitat, Diet) keep separate buttons until their own design
+is settled.
+
+Rationale: both kinds of setting drew the same separate buttons, so nothing said whether a click
+would replace the choice or add to it, and the chosen one was shown by color alone (Sameer,
+2026-11-09). A segmented row is the familiar look of a choice among exclusive options.
+
 ## inaturalistLink
 
 **The detail view and every tile link to the species on iNaturalist**
