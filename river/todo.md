@@ -217,11 +217,11 @@ Found 2026-11-10, to clean up once the new River is adopted:
   `gbif.Client.CountOffLandInBox`. The palette's contrast functions and `boundary.Parse` and
   `Lookup` are test oracles on purpose and need an allowlist.
 - **A wrong citation.** `TestLumpsMergeIntoTheSpeciesBirdViewCarries`
-  (`cmd/birdview-status/main_test.go`) cites the withdrawn `acceptance.onlyNarrowsOneGroup`, but it
+  (`cmd/birdview-status/main_test.go`) cites the withdrawn [acceptance.onlyNarrowsOneGroup](requirements/acceptance.md#onlynarrowsonegroup), but it
   tests the pipeline's merging of lumps; re-point it to the criterion it actually decides.
 - **`app` is unapproved.** It was approved at `99c0811` and edited by hand in 55 commits since,
   though composed files change only by recomposing; the status line still reads as approved.
-  `product.inaturalistLink` was dropped without an Excluded entry while the classic view's
+  [product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink) was dropped without an Excluded entry while the classic view's
   withdrawn requirements were listed under Excluded, so settle what Excluded is for, and whether
   the withdrawn search criteria stay. Then recompose, have Sameer approve, and regenerate
   [alignment.md](alignment.md), which now targets `app` as it stands rather than `99c0811`.
