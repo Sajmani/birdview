@@ -192,6 +192,40 @@ ETag, which is untrue for `/?month=now` (bare `/` has carried one since
 criteria are now decided only through [app.nextViewDrawsOneSet](requirements/composed/internal/app/acceptance.md#nextviewdrawsoneset); check that each still has a test
 that fails when its behavior breaks.
 
+## adoptRiverWithdrawalCascade
+
+**Adopt River's rule for what a withdrawn requirement leaves behind, then clean up and re-approve `app`**
+
+Status: deferred
+Owner: Sameer
+Gate: when the River revision Sameer is working on settles; adopt that version, then do the cleanup
+
+River says what a withdrawn goal does to the requirements citing it, but not what a withdrawn
+requirement does to its criteria, the tests citing them, and the code those tests keep alive.
+BirdView has done that cascade by hand and missed things: `view.ScaleMode` and `Scales` outlived
+[product.scaleToggle](requirements/local/product/diagram.md#scaletoggle) by two weeks, kept alive only by tests. Proposed to River on 2026-11-10 (Sameer's
+call what it adopts): withdrawal cascades in the same change; `river check` fails a criterion in
+force covering only withdrawn or excluded requirements, and a test citing only withdrawn criteria;
+each binding names an unreachable-code check; recomposition drops withdrawn criteria.
+
+Found 2026-11-10, to clean up once the new River is adopted:
+
+- **Dead code.** `go run golang.org/x/tools/cmd/deadcode@latest ./...` finds no callers at all,
+  tests included, for `gbif.Load` and `gbif.validTier` (`internal/gbif/gbif.go`),
+  `gbif.Client.CountInBox` (`internal/gbif/resolve.go`), and `morphology.IsFamily` and
+  `morphology.Review.Write` (`internal/morphology/review.go`); only tests call `trait.GroupOf` and
+  `gbif.Client.CountOffLandInBox`. The palette's contrast functions and `boundary.Parse` and
+  `Lookup` are test oracles on purpose and need an allowlist.
+- **A wrong citation.** `TestLumpsMergeIntoTheSpeciesBirdViewCarries`
+  (`cmd/birdview-status/main_test.go`) cites the withdrawn `acceptance.onlyNarrowsOneGroup`, but it
+  tests the pipeline's merging of lumps; re-point it to the criterion it actually decides.
+- **`app` is unapproved.** It was approved at `99c0811` and edited by hand in 55 commits since,
+  though composed files change only by recomposing; the status line still reads as approved.
+  `product.inaturalistLink` was dropped without an Excluded entry while the classic view's
+  withdrawn requirements were listed under Excluded, so settle what Excluded is for, and whether
+  the withdrawn search criteria stay. Then recompose, have Sameer approve, and regenerate
+  [alignment.md](alignment.md), which now targets `app` as it stands rather than `99c0811`.
+
 ## tightenProse
 
 **Tighten all prose and page text; less is more**
