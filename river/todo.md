@@ -219,6 +219,11 @@ Found 2026-11-10, to clean up once the new River is adopted:
 - **A wrong citation.** `TestLumpsMergeIntoTheSpeciesBirdViewCarries`
   (`cmd/birdview-status/main_test.go`) cites the withdrawn [acceptance.onlyNarrowsOneGroup](requirements/acceptance.md#onlynarrowsonegroup), but it
   tests the pipeline's merging of lumps; re-point it to the criterion it actually decides.
+- **Found by River's new checks, 2026-11-10.** `TestMassCubeIsRenderedAndExplained`
+  (`cmd/birdview/main_test.go`) cites the withdrawn
+  [product.pageExplainsItself](requirements/local/product/presentation.md#pageexplainsitself). Three citations, in `TestSeaRefinementsDerived`,
+  `months.md`, and `decisions.md`, name `dataset.seaDistanceDerived`, which
+  is [product.seaDistanceDerived](requirements/local/product/dataset.md#seadistancederived): `dataset.md` is in package `product`.
 - **`app` is unapproved.** It was approved at `99c0811` and edited by hand in 55 commits since,
   though composed files change only by recomposing; the status line still reads as approved.
   [product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink) was dropped without an Excluded entry while the classic view's
