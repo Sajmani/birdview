@@ -19,6 +19,25 @@ open" note in a decision record instead.
 move it to [todo-closed.md](todo-closed.md). Items are never deleted: a closed one records why a
 question that looks open is not. Design notes behind items are in [notes.md](notes.md).
 
+## tileCornersInCi
+
+**The tile-corner browser check fails in CI at phone width, so `main` has been red since 2026-11-02**
+
+Status: open
+Issue: [#16](https://github.com/google/birdview/issues/16)
+Owner: Sameer
+Gate: next; a red `main` hides every new failure ([tech.checksOnEveryChange](requirements/local/tech/release.md#checksoneverychange))
+
+`checks` has failed in its `go test` step on every push to `main` since `391fcd1`, and PR #15 failed
+the same way. `TestNextTileCornerAndRows` reports, at the 360px phone width, the scientific name
+running 1px under the eBird link on 20 tiles, and four tiles with the longest names (`gnlthr`,
+`anpswi`, `vauswi`) 8px wider than their box ([app.nextViewDrawsOneSet](requirements/composed/internal/app/acceptance.md#nextviewdrawsoneset),
+[app.ebirdLinkOnTilesAndPages](requirements/composed/internal/app/acceptance.md#ebirdlinkontilesandpages)). Likely the runner's fallback fonts are
+slightly wider than where the layout was tuned, and the probe allows no slack. Reproduce in Chrome,
+leave room beside the eBird link and truncate long names rather than widen the tile, and decide
+whether the probe allows 1px of rounding or names the font it assumes. Headless Chrome hangs on the
+agent's cloudtop, so reproducing there needs `--no-sandbox` or a run in CI.
+
 ## scalableInterface
 
 **The interface is sized for North America by state, not for the world by county**
