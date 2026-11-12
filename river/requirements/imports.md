@@ -220,7 +220,7 @@ names both DOIs in its header, which is where the attribution lives while nothin
 served.
 
 **No API terms are transcribed, and the gap is deliberate.** `www.gbif.org/terms` returns HTTP 403
-to an identified client, and [README.md](../README.md#sources) forbids supplying from memory a
+to an identified client, and [discovery.md](../../.agents/skills/river/references/discovery.md) forbids supplying from memory a
 rule that could not be retrieved — a plausible rate limit is indistinguishable from a real one.
 What *was* retrievable is `api.gbif.org/robots.txt`, which disallows one image path and nothing
 else. So the pacing in `cmd/birdview-gbifmap` — 100 ms between requests across four workers, about
@@ -798,6 +798,23 @@ asking VLIZ. Credit is required.
 
 ---
 
+## `goldmark`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | <https://github.com/yuin/goldmark> (`github.com/yuin/goldmark` in `go.mod`) |
+| **Version** | `v1.8.6`, pinned in `go.sum` |
+| **Integrity** | `go.sum` (`h1:d0VcaP1sx9GkFVkoW+KtggpGi2KZ965i14b0+bDQST4=`) |
+| **Tier** | mandatory (copyright license) |
+| **Import style** | Go module dependency (`github.com/yuin/goldmark`), compiled into `cmd/birdview` |
+| **Scope** | Rendering the Markdown guides under `docs/` to HTML at `/docs` (`cmd/birdview`) |
+| **Adopted parts** | CommonMark parser and HTML renderer, plus `extension` (`Table`, `Strikethrough`, `Linkify`), `ast`, `parser`, `text`, and `util` |
+| **Exclusions** | None |
+| **Owner** | Yusuke Inuzuka |
+| **Status** | **Adopted.** MIT License (Copyright (c) 2019 Yusuke Inuzuka); imposes copyright-notice retention in source or substantial copies and no behavioral requirements on BirdView. |
+
+---
+
 ## Where geography enters
 
 **Only through BirdView's own derivation, never through a source.** Recorded because it is the
@@ -924,6 +941,13 @@ dataset. Viable later for hand-curated species.
 
 Photo sources, all researched in detail. Out of scope while [product.speciesPhotographs](local/product/diagram.md#speciesphotographs) is withdrawn;
 Commons is the recommendation when it returns.
+
+### GitHub (`github.com`)
+
+`github.com` is named in `cmd/birdview/main.go` only as BirdView's own public source repository
+(`https://github.com/google/birdview`) and as the pattern checked on `-feedback` issue-tracker links
+([product.noPersonalAddress](local/product/presentation.md#nopersonaladdress), [product.reportDataIssue](local/product/presentation.md#reportdataissue)). BirdView calls no GitHub API at build time or
+runtime, so GitHub imposes no third-party requirements on the application.
 
 ### Why AviList does not replace the ABA checklist
 

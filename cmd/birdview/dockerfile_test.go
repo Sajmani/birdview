@@ -142,7 +142,7 @@ func covered(dir string, copies []string) bool {
 // It reads the Go sources rather than running docker, which the tests must
 // not need; what that leaves unchecked is in the criterion.
 //
-// Verifies: tech.containerImageBuilds. Criterion: acceptance.dockerStagesCopyWhatTheyBuild.
+// Verifies: tech.containerImageBuilds. Criterion: repo.dockerStagesCopyWhatTheyBuild.
 func TestDockerStagesCopyWhatTheyBuild(t *testing.T) {
 	root := filepath.Join("..", "..")
 	mod, err := os.ReadFile(filepath.Join(root, "go.mod"))
@@ -189,7 +189,7 @@ func TestDockerStagesCopyWhatTheyBuild(t *testing.T) {
 // copies the REVISION file the deploy writes, if there is one, and builds its contents into the
 // binary; git never commits that file, and the upload to Cloud Build still carries it.
 //
-// Verifies: tech.imageRecordsRevision. Criterion: acceptance.imageRecordsRevision.
+// Verifies: tech.imageRecordsRevision. Criterion: repo.imageRecordsRevision.
 func TestImageRecordsRevision(t *testing.T) {
 	root := filepath.Join("..", "..")
 	b, err := os.ReadFile(filepath.Join(root, "Dockerfile"))

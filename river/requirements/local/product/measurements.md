@@ -7,6 +7,7 @@ package product
 **Where length and wingspan come from**
 
 Subject: `measurement.source`
+Applies to: dataset
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.honestData](../../../goals/goals.md#honestdata)
 
 - **Wingspan, measured** — Fox et al. 2026, filtered to `needs_prediction = 0` so only empirical
@@ -47,6 +48,7 @@ See [decisions.noOpenLengthAndWingspan](../../decisions.md#noopenlengthandwingsp
 
 **The tile marks any metric that is not measured**
 
+Applies to: app
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 On the tile itself — where numbers and the scaled diagram appear — any metric whose `kind` is not
@@ -61,6 +63,7 @@ metadata nobody sees, and BirdView presents modeled numbers as data, which the p
 
 Subject: `measurement.provenance.record`
 Value: `{kind, source, sourceTaxon, model}`
+Applies to: dataset, app
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 Every metric BirdView presents — total length, wingspan, mass, and each diagram segment — carries
@@ -99,6 +102,7 @@ than a redesign.
 **Every measurement says what it is, in everyday words, before where it came from**
 
 Subject: `measurement.definition`
+Applies to: app
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Each measurement BirdView names has **one plain sentence saying what it measures**, written for a
@@ -128,6 +132,7 @@ says that, and an estimate keeps its `~`.
 **The diagram shows which lengths are measured and which are modeled**
 
 Subject: `diagram.provenance`
+Applies to: app
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Stroke style carries provenance. A **solid** stroke is a measured length; a **dashed** stroke is a
@@ -167,6 +172,7 @@ span model is wrong, so the model's error falls on the inner segment. See
 **The detail tile names each segment and its measurement, keyed to the drawing by color**
 
 Subject: `presentation.detail_view.diagram_labels`
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.honestData](../../../goals/goals.md#honestdata)
 
 **Every metric the detail view reports appears on its tile.** The provenance table may explain
@@ -260,6 +266,7 @@ would name a quantity no source states.
 
 **The detail view explains each metric's provenance**
 
+Applies to: app
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 In the detail view (tileOpensDetail), **every** metric — the three main metrics and all five diagram
@@ -276,6 +283,7 @@ Showing the segments individually is what makes the diagram auditable.
 **The detail view lists every category the bird is in, and where each came from**
 
 Subject: `presentation.detail.categories`
+Applies to: app
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 The detail view names every category a bird is in — its family and order, the regions it is
@@ -323,6 +331,7 @@ hashing. Serving them would be the redistribution
 
 Subject: `presentation.docs.pipeline`
 Value: `docs/pipeline.md: every source and table, its fields, and every step between them`
+Applies to: app
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.giveBack](../../../goals/goals.md#giveback)
 
 The documentation carries **one diagram of how the dataset is built**: every published source and
@@ -356,6 +365,7 @@ off the server.
 
 Subject: `presentation.shared_measurements`
 Value: `a note on the tile and the detail page of each species, naming the others`
+Applies to: app
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Where two or more drawn species take their AVONET traits from **the same row** — a near-match
@@ -383,6 +393,7 @@ drawings coincide is visible only by comparing two detail pages.
 
 Subject: `presentation.index.exotic`
 Value: `declared list; off the home page, listed at /excluded, detail pages kept`
+Applies to: app
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata)
 
 **A bird whose records here are escapes is not drawn on the home page.** Recurrence cannot tell a

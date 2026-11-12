@@ -29,7 +29,7 @@ import (
 // one per million of the county's records and 5; every other species with records there is
 // written under the bar, so its records still count; and the county's total counts every name.
 //
-// Verifies: product.regionAndMonthFilter. Criterion: acceptance.countyListingApplied.
+// Verifies: product.regionAndMonthFilter. Criterion: app.countyListingApplied.
 func TestCountyListingRule(t *testing.T) {
 	const small, big = "USA.33.24_1", "USA.33.32_1"
 	eb := gbif.EBirdDatasetKey
@@ -96,7 +96,7 @@ func TestCountyListingRule(t *testing.T) {
 // TestCountyRowsFromDownload reads the county download's file as GBIF writes it: a zip holding one
 // tab-separated table with a header.
 //
-// Verifies: tech.gbifDownloadsRecorded. Criterion: acceptance.countyListingApplied.
+// Verifies: tech.gbifDownloadsRecorded. Criterion: app.countyListingApplied.
 func TestCountyRowsFromDownload(t *testing.T) {
 	var buf bytes.Buffer
 	zw := zip.NewWriter(&buf)

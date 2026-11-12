@@ -260,7 +260,7 @@ const (
 	// must fall, as a share of its rate in the same region's other months.
 	withheldRate = 0.05
 	// outRecords is how many times eBird's count iNaturalist must hold for
-	// a whole-year listing to count as applied: acceptance.disagreementsDeclared's existing test for
+	// a whole-year listing to count as applied: dataset.disagreementsDeclared's existing test for
 	// a source that out-records eBird, applied to one region.
 	outRecords = 3
 )

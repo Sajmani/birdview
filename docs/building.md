@@ -214,33 +214,37 @@ formats strings belongs in another package.
 **The requirements are normative and live in [`river/`](../river).** Code implements them; where
 this guide and `river/` disagree, `river/` wins.
 
-[`river/README.md`](../river/README.md) describes the method, River. To make a change you need
-only the loop below.
+[`river/README.md`](../river/README.md) declares the River 2.0 module; the method copy lives at
+[`.agents/skills/river/`](../.agents/skills/river/SKILL.md). To make a change you need only the loop
+below.
 
 ### The bundle
 
 | File | Contents |
 | --- | --- |
-| [`README.md`](../river/README.md) | the method, River, copied in unchanged |
+| [`README.md`](../river/README.md) | the River 2.0 module declaration and directory index |
 | [`bindings.md`](../river/bindings.md) | how BirdView applies the method, and where it departs from it |
 | [`goals/`](../river/goals/goals.md) | why the project exists: fourteen goals, `goals.*` |
 | [`requirements/local/product/`](../river/requirements/local/product/product.md) | what it must do, one file per group: `product.*` |
 | [`requirements/local/tech/`](../river/requirements/local/tech/tech.md) | technical constraints, one file per group: `tech.*` |
-| [`requirements/composed/internal/app/`](../river/requirements/composed/internal/app/app.md) | every requirement the web application must meet, and their criteria |
-| [`requirements/README.md`](../river/requirements/README.md) | what each requirements file and directory holds, and the module declaration |
+| [`requirements/composed/internal/app/`](../river/requirements/composed/internal/app/app.md) | every requirement the web application must meet, and its criteria (`app.*`) |
+| [`requirements/composed/internal/dataset/`](../river/requirements/composed/internal/dataset/dataset.md) | every requirement the data pipeline and dataset must meet, and its criteria (`dataset.*`) |
+| [`requirements/composed/internal/repo/`](../river/requirements/composed/internal/repo/repo.md) | every requirement repository layout, build, and release must meet, and its criteria (`repo.*`) |
+| [`requirements/README.md`](../river/requirements/README.md) | what each requirements file and directory holds |
 | [`requirements/imports.md`](../river/requirements/imports.md) | every body of rules or data the project is subject to |
 | [`requirements/precedence.md`](../river/requirements/precedence.md) | which tier of source outranks which |
-| [`requirements/decisions.md`](../river/requirements/decisions.md) | how each conflict was resolved: `decisions.*` |
-| [`requirements/acceptance.md`](../river/requirements/acceptance.md) | how each remaining requirement is checked: `acceptance.*` |
+| [`requirements/decisions.md`](../river/requirements/decisions.md) | how each conflict or scope was resolved: `decisions.*` |
+| [`requirements/approvals.md`](../river/requirements/approvals.md) | composed-package approvals (`river approve`) |
+| [`conformance.md`](../river/conformance.md) | which guardrails check each criterion, and `Watched failing:` observations |
 | [`todo.md`](../river/todo.md) | everything still open: work, questions, unverified criteria, stale text |
 | [`arch.md`](../river/arch.md) | how the code is organized |
-| [`check/`](../river/check) | the spec checks |
+| [`check/`](../river/check) | BirdView's repository-specific spec checks |
 
-Each requirement has an ID such as `product.scaleToggle`; its first paragraph is the rule and the
+Each requirement has an ID such as `product.tileContents`; its first paragraph is the rule and the
 rest is rationale. Cite IDs in code comments as the literal token, so one search finds every use:
 
 ```go
-// Verifies: product.scaleToggle, tech.badgeContrast.
+// Verifies: product.tileContents, tech.badgeContrast. Criterion: app.tileCarriesHeaderAndMetrics.
 ```
 
 ### The loop

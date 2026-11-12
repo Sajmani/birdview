@@ -34,17 +34,18 @@ func inTree(file, tree string) bool {
 
 // packageItems reads every item in the bundle's packages: the sources, the
 // composed packages, and the decisions.
-func packageItems(t *testing.T) map[string]pkgItem {
+func packageItems(t *testing.T) (map[string]pkgItem, map[string]bool) {
 	t.Helper()
 	bundle, _ := filepath.Abs("..")
 	req := filepath.Join(bundle, "requirements")
 	files := map[string][]string{"decisions": {filepath.Join(req, "decisions.md")}}
-	// Local sources are under local/<pkg>/, imported ones under
-	// imported/<origin>/<pkg>/, composed packages under composed/<visibility>/<pkg>/;
-	// PROVENANCE.md declares no package.
 	local, _ := filepath.Glob(filepath.Join(req, "local", "*", "*.md"))
 	imported, _ := filepath.Glob(filepath.Join(req, "imported", "*", "*", "*.md"))
 	composed, _ := filepath.Glob(filepath.Join(req, "composed", "*", "*", "*.md"))
+	composedPkgs := map[string]bool{}
+	for _, f := range composed {
+		composedPkgs[filepath.Base(filepath.Dir(f))] = true
+	}
 	for _, f := range append(append(local, imported...), composed...) {
 		if filepath.Base(f) == "PROVENANCE.md" {
 			continue
@@ -52,11 +53,8 @@ func packageItems(t *testing.T) map[string]pkgItem {
 		pkg := filepath.Base(filepath.Dir(f))
 		files[pkg] = append(files[pkg], f)
 	}
-	// A transcribed source exports capitalized names; every other package's
-	// names start lower case, which also keeps a section heading such as
-	// "### Diagram" from reading as an item.
-	lower := regexp.MustCompile(`(?m)^#{2,3} ([a-z][A-Za-z]+)[ \t]*$`)
-	upper := regexp.MustCompile(`(?m)^#{2,3} ([A-Z][A-Za-z]+)[ \t]*$`)
+	lower := regexp.MustCompile(`(?m)^#{2,3} ([a-z][A-Za-z0-9]*)[ \t]*$`)
+	upper := regexp.MustCompile(`(?m)^#{2,3} ([A-Z][A-Za-z0-9]*)[ \t]*$`)
 	items := map[string]pkgItem{}
 	for pkg, fs := range files {
 		for _, f := range fs {
@@ -76,12 +74,12 @@ func packageItems(t *testing.T) map[string]pkgItem {
 			}
 		}
 	}
-	return items
+	return items, composedPkgs
 }
 
 // title is an item's bold title line.
 func (it pkgItem) title() string {
-	m := regexp.MustCompile(`^\s*\*\*(.+?)\*\*\s*\n`).FindStringSubmatch(it.body)
+	m := regexp.MustCompile(`^\s*\*\*(.+?)\*\*`).FindStringSubmatch(it.body)
 	if m == nil {
 		return ""
 	}
@@ -94,7 +92,7 @@ type listed struct {
 	ref, title, decision, file string
 }
 
-var listLine = regexp.MustCompile(`(?m)^- \[([a-z]+\.[A-Za-z]+)\]\([^)]*\) — (.+?)(?:\. Excluded by \[(decisions\.[A-Za-z]+)\]\([^)]*\))?\s*$`)
+var listLine = regexp.MustCompile(`(?m)^- \[([a-z]+\.[A-Za-z0-9]+)\]\([^)]*\)(?: \*\(excluded\)\*)? — (.+?)(?:\. Excluded by \[(decisions\.[A-Za-z0-9]+)\]\([^)]*\))?\s*$`)
 
 // composedLists reads every list line in the composed packages.
 func composedLists(t *testing.T) []listed {
@@ -113,18 +111,36 @@ func composedLists(t *testing.T) []listed {
 	return out
 }
 
-// fieldLink is a field entry written as a link, whose text is the name.
 var fieldLink = regexp.MustCompile(`^\[([^\]]+)\]\([^)]*\)$`)
 
-// field returns the comma-separated names in an item's field, or nil. An entry
-// may be a bare name or a link to the item it names.
+// field returns the comma-separated names in an item's field (joining indented
+// continuation lines), or nil.
 func field(body, name string) []string {
-	m := regexp.MustCompile(`(?m)^` + name + `:\s*(.+)$`).FindStringSubmatch(body)
-	if m == nil {
+	lines := strings.Split(body, "\n")
+	prefix := name + ":"
+	var raw string
+	found := false
+	for i, line := range lines {
+		if strings.HasPrefix(line, prefix) {
+			parts := []string{strings.TrimSpace(strings.TrimPrefix(line, prefix))}
+			for j := i + 1; j < len(lines); j++ {
+				if len(lines[j]) == 0 || (lines[j][0] != ' ' && lines[j][0] != '\t') {
+					break
+				}
+				if s := strings.TrimSpace(lines[j]); s != "" {
+					parts = append(parts, s)
+				}
+			}
+			raw = strings.Join(parts, " ")
+			found = true
+			break
+		}
+	}
+	if !found {
 		return nil
 	}
 	var out []string
-	for _, v := range strings.Split(m[1], ",") {
+	for _, v := range strings.Split(raw, ",") {
 		v = strings.TrimSpace(v)
 		if l := fieldLink.FindStringSubmatch(v); l != nil {
 			v = l[1]
@@ -136,7 +152,6 @@ func field(body, name string) []string {
 	return out
 }
 
-// qualify resolves a reference made from inside pkg: bare names are pkg's own.
 func qualify(pkg, ref string) string {
 	if strings.Contains(ref, ".") {
 		return ref
@@ -144,36 +159,42 @@ func qualify(pkg, ref string) string {
 	return pkg + "." + ref
 }
 
-// TestCompositionResolves checks the fields composition adds, following River's
-// requirements-over-domains rule:
+// TestCompositionResolves checks the fields composition adds, following River
+// 2.0's composition and domain-binding rules:
 //
-//   - Applies to: names a domain the source defines;
+//   - Applies to: names either a composed package in this module (`app`,
+//     `dataset`, `repo`) or a domain an imported source defines;
 //   - Binds: names an imported domain, and each domain is bound once;
-//   - every domain an adopted requirement applies to is bound locally, since a
-//     requirement over a domain nobody bound applies to nothing, silently;
-//   - Composed from: and Covers: name items that exist.
+//   - every imported domain an adopted requirement applies to is bound locally,
+//     since a requirement over a domain nobody bound applies to nothing;
+//   - Composed from: and Covers: name items that exist;
+//   - every listed title matches its source verbatim, and every local
+//     requirement is accounted for across `app`, `dataset`, and `repo`.
 //
-// A composed requirement no criterion covers is counted, not failed, as River
-// counts an uncovered requirement.
-//
-// Verifies: process integrity. Criterion: acceptance.compositionResolves.
+// Verifies: tech.bundleIsNormative. Criterion: repo.compositionResolves.
 func TestCompositionResolves(t *testing.T) {
-	items := packageItems(t)
+	items, composedPkgs := packageItems(t)
 	if len(items) == 0 {
 		t.Fatal("no items parsed; the layout has changed and this check proves nothing")
 	}
 	exists := func(ref string) bool { _, ok := items[ref]; return ok }
 
-	applied := map[string][]string{} // domain -> requirements over it
-	bound := map[string][]string{}   // domain -> local requirements binding it
+	applied := map[string][]string{}
+	bound := map[string][]string{}
 	covered := map[string]bool{}
 	checked := 0
 	for key, it := range items {
+		if it.pkg == "decisions" {
+			continue
+		}
 		for _, d := range field(it.body, "Applies to") {
 			checked++
+			if composedPkgs[d] {
+				continue
+			}
 			d = qualify(it.pkg, d)
 			if !exists(d) {
-				t.Errorf("%s applies to %s, which is not defined", key, d)
+				t.Errorf("%s applies to %s, which is neither a composed package nor a defined domain", key, d)
 			}
 			applied[d] = append(applied[d], key)
 		}
@@ -212,10 +233,9 @@ func TestCompositionResolves(t *testing.T) {
 		t.Fatal("no composition fields found; the layout has changed and this check proves nothing")
 	}
 
-	// The lists of what applies unchanged, and what is excluded.
 	accounted := map[string]bool{}
 	for _, it := range items {
-		if !inTree(it.file, "local") && !inTree(it.file, "imported") {
+		if !inTree(it.file, "local") && !inTree(it.file, "imported") && it.pkg != "decisions" {
 			for _, ref := range field(it.body, "Composed from") {
 				accounted[qualify(it.pkg, ref)] = true
 			}
@@ -245,9 +265,6 @@ func TestCompositionResolves(t *testing.T) {
 	if len(lists) == 0 {
 		t.Fatal("no listed requirements found in any composed package; the list form has changed")
 	}
-	// Every local requirement is included, excluded, or composed from by some
-	// package. Counted rather than failed while dataset and internal/repo are
-	// still to compose (river/todo.md).
 	var unaccounted []string
 	for key, it := range items {
 		if (it.pkg == "product" || it.pkg == "tech") && !accounted[key] {
@@ -255,10 +272,10 @@ func TestCompositionResolves(t *testing.T) {
 		}
 	}
 	sort.Strings(unaccounted)
-	t.Logf("%d local requirements in no composed package yet: %v", len(unaccounted), unaccounted)
+	if len(unaccounted) > 0 {
+		t.Errorf("%d local requirements in no composed package: %v", len(unaccounted), unaccounted)
+	}
 
-	// Coverage of the composed packages: everything under requirements/ that
-	// is not a source and not the decisions.
 	var uncovered []string
 	for key, it := range items {
 		isSource := inTree(it.file, "local") || inTree(it.file, "imported")

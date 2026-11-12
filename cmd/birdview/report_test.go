@@ -27,7 +27,7 @@ import (
 // names the bird and the table and whose body holds the page's address, that table's rows, and the
 // data's versions; with no tracker, no link.
 //
-// Verifies: product.reportDataIssue, product.noPersonalAddress. Criterion: acceptance.reportDataIssueLinks.
+// Verifies: product.reportDataIssue, product.noPersonalAddress. Criterion: app.reportDataIssueLinks.
 func TestReportDataIssueLinks(t *testing.T) {
 	s := newTestServer(t)
 	s.feedback = "https://github.com/google/birdview/issues"
@@ -82,7 +82,7 @@ func TestReportDataIssueLinks(t *testing.T) {
 // settings in view), the data's versions, and the server's revision, the title left to the reader;
 // with no tracker, no link.
 //
-// Verifies: product.reportDataIssue, tech.imageRecordsRevision. Criterion: acceptance.reportDataIssueLinks.
+// Verifies: product.reportDataIssue, tech.imageRecordsRevision. Criterion: app.reportDataIssueLinks.
 func TestHomeReportLink(t *testing.T) {
 	s := newTestServer(t)
 	s.feedback = "https://github.com/google/birdview/issues"
@@ -120,7 +120,7 @@ func TestHomeReportLink(t *testing.T) {
 // page, and the page for a bird no longer drawn each have one, and the last names the bird and its
 // verdict.
 //
-// Verifies: product.reportDataIssue, product.undrawnSpeciesAnswer. Criterion: acceptance.reportDataIssueLinks.
+// Verifies: product.reportDataIssue, product.undrawnSpeciesAnswer. Criterion: app.reportDataIssueLinks.
 func TestEveryReportLinkFilledIn(t *testing.T) {
 	const tracker = "https://github.com/google/birdview/issues"
 	s := newTestServer(t)
@@ -172,7 +172,7 @@ func TestEveryReportLinkFilledIn(t *testing.T) {
 // TestFeedbackMustBeFillable asserts product.reportDataIssue's tracker rule: only a GitHub issue
 // list can be filled in from a link, so any other tracker setting is refused.
 //
-// Verifies: product.reportDataIssue. Criterion: acceptance.reportDataIssueLinks.
+// Verifies: product.reportDataIssue. Criterion: app.reportDataIssueLinks.
 func TestFeedbackMustBeFillable(t *testing.T) {
 	for v, ok := range map[string]bool{
 		"": true,

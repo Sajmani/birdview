@@ -165,7 +165,7 @@ func (c *Commonest) OneIn() int {
 type Species struct {
 	// ID is the eBird species code where AviList supplies one -- "amerob" --
 	// and otherwise the scientific-name slug. It is the species URL and must
-	// be stable across rebuilds (product.englishNameChoice, acceptance.stableSpeciesId).
+	// be stable across rebuilds (product.englishNameChoice, app.stableSpeciesId).
 	ID string `json:"id"`
 
 	// Names carries BOTH English names, keyed by Locale, because the locale is
@@ -287,7 +287,7 @@ func (s *Species) Name(l Locale) string {
 }
 
 // AllMetrics returns every metric the interface may present, so that checks
-// over "every presented metric" (acceptance.provenanceWellFormed) cannot miss one by enumerating the
+// over "every presented metric" (dataset.provenanceWellFormed) cannot miss one by enumerating the
 // struct by hand.
 func (s *Species) AllMetrics() map[string]*Metric {
 	return map[string]*Metric{

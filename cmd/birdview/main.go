@@ -244,7 +244,7 @@ func sameHost(requested, canonical string) bool {
 // body, because hashing the body means buffering it, and the index is 3.3 MB
 // before compression. That is sound only because a page is a pure function
 // of (dataset, templates, static files, request URI) -- there is no clock in
-// the render path -- and acceptance.honestRevalidation asserts that rather than trusting it.
+// the render path -- and app.honestRevalidation asserts that rather than trusting it.
 func (s *server) revalidated(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// -dev re-reads templates per request, so no fingerprint taken at
@@ -2164,7 +2164,7 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 			// ranges over everything again and the qualifier went -- and
 			// "top" says plainly that this is the maximum of the same
 			// figure the index shows, which selecting this one region there
-			// reproduces exactly (acceptance.peakAndShareOneCalculation).
+			// reproduces exactly (app.peakAndShareOneCalculation).
 			Label:  "Top region",
 			Value:  fmt.Sprintf("%s — 1 in %s species observations there", where, comma(int64(c.OneIn()))),
 			Origin: string(dataset.Derived),

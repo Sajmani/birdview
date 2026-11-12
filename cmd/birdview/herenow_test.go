@@ -47,7 +47,7 @@ import (
 // page's Here button loads: named by its hash, cached for a year, and nothing
 // else served under its directory.
 //
-// Verifies: tech.regionBoundaries, tech.cacheLifetimeStated.
+// Verifies: tech.regionBoundaries, tech.cacheLifetimeStated. Criterion: app.boundariesCoverEveryRegion.
 func TestBoundaryFileIsServedByHash(t *testing.T) {
 	s := newTestServer(t)
 	body := mustGet(t, s, "/?month=all")
@@ -255,7 +255,7 @@ func TestHereInTheBrowser(t *testing.T) {
 // also in the guide's "Some things to try", and the link to that list lands
 // on its heading.
 //
-// Verifies: product.nextView.
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestWelcomeLine(t *testing.T) {
 	s := newTestServer(t)
 	body := mustGet(t, s, "/")
@@ -453,7 +453,7 @@ func TestGuidesReflow(t *testing.T) {
 // home page sorts ascending by bill or tail length and says so in Order by.
 //
 // Verifies: product.oneSelectedMetric, product.ascendingOrder.
-// Criterion: acceptance.billAndTailOrderings.
+// Criterion: app.billAndTailOrderings.
 func TestBillAndTailOrderings(t *testing.T) {
 	s := newTestServer(t)
 	for _, c := range []struct {
@@ -487,7 +487,7 @@ func TestBillAndTailOrderings(t *testing.T) {
 // names the ordering it belongs to, as Order by labels it: "Tail Tier 1"
 // under Tail.
 //
-// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.tierHeadingsNameTheOrdering.
+// Verifies: product.sectionHeadersStateRange. Criterion: app.tierHeadingsNameTheOrdering.
 func TestTierHeadersNameTheOrdering(t *testing.T) {
 	s := newTestServer(t)
 	for by, label := range map[string]string{"": "Frequency", "length": "Length", "wingspan": "Wingspan",
@@ -515,7 +515,7 @@ func TestTierHeadersNameTheOrdering(t *testing.T) {
 // ends already differ at two decimals of an inch; a page of wide tiers with
 // wide gaps gets none.
 //
-// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.tierHeadingDigits.
+// Verifies: product.sectionHeadersStateRange. Criterion: app.tierHeadingDigits.
 func TestHeadingDigits(t *testing.T) {
 	u := unitsFor(false, 10)
 	narrow := []tierSpan{{5.0, 6.0, u}, {6.05, 7.0, u}, {8.0, 9.0, u}}
@@ -540,7 +540,7 @@ func TestHeadingDigits(t *testing.T) {
 // A heading once ran on to where the next tier began, which made four herons
 // and an ibis look as if they spanned the five inches up to the pelicans.
 //
-// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.tierHeadingsHoldTheirBirds.
+// Verifies: product.sectionHeadersStateRange. Criterion: app.tierHeadingsHoldTheirBirds.
 func TestTierRangesHoldTheirBirds(t *testing.T) {
 	s := newTestServer(t)
 	heading := regexp.MustCompile(`<span class="tier">[^<]+</span>\s*([^<&]+?)(?: &ndash; ([^<]+?))?\s*<span class="n">`)
@@ -594,7 +594,7 @@ func TestTierRangesHoldTheirBirds(t *testing.T) {
 // after the range in the count line's style, not pushed to the far edge in
 // its own, where it read as part of something else or was not seen at all.
 //
-// Verifies: product.sectionHeadersStateRange. Criterion: acceptance.tierCountFollowsTheRange.
+// Verifies: product.sectionHeadersStateRange. Criterion: app.tierCountFollowsTheRange.
 func TestTierCountFollowsTheRange(t *testing.T) {
 	css, err := fs.ReadFile(assetFS, "static/styles.css")
 	if err != nil {

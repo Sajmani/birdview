@@ -192,45 +192,6 @@ ETag, which is untrue for `/?month=now` (bare `/` has carried one since
 criteria are now decided only through [app.nextViewDrawsOneSet](requirements/composed/internal/app/acceptance.md#nextviewdrawsoneset); check that each still has a test
 that fails when its behavior breaks.
 
-## adoptRiverWithdrawalCascade
-
-**Adopt River's rule for what a withdrawn requirement leaves behind, then clean up and re-approve `app`**
-
-Status: deferred
-Owner: Sameer
-Gate: when River settles its `implementationReachability` item (River's `TODO.md`); adopt that version, then do the cleanup
-
-River says what a withdrawn goal does to the requirements citing it, but not what a withdrawn
-requirement does to its criteria, the tests citing them, and the code those tests keep alive.
-BirdView has done that cascade by hand and missed things: `view.ScaleMode` and `Scales` outlived
-[product.scaleToggle](requirements/local/product/diagram.md#scaletoggle) by two weeks, kept alive only by tests. Proposed to River on 2026-11-10 (Sameer's
-call what it adopts): withdrawal cascades in the same change; `river check` fails a criterion in
-force covering only withdrawn or excluded requirements, and a test citing only withdrawn criteria;
-each binding names an unreachable-code check; recomposition drops withdrawn criteria.
-
-Found 2026-11-10, to clean up once the new River is adopted:
-
-- **Dead code.** `go run golang.org/x/tools/cmd/deadcode@latest ./...` finds no callers at all,
-  tests included, for `gbif.Load` and `gbif.validTier` (`internal/gbif/gbif.go`),
-  `gbif.Client.CountInBox` (`internal/gbif/resolve.go`), and `morphology.IsFamily` and
-  `morphology.Review.Write` (`internal/morphology/review.go`); only tests call `trait.GroupOf` and
-  `gbif.Client.CountOffLandInBox`. The palette's contrast functions and `boundary.Parse` and
-  `Lookup` are test oracles on purpose and need an allowlist.
-- **A wrong citation.** `TestLumpsMergeIntoTheSpeciesBirdViewCarries`
-  (`cmd/birdview-status/main_test.go`) cites the withdrawn [acceptance.onlyNarrowsOneGroup](requirements/acceptance.md#onlynarrowsonegroup), but it
-  tests the pipeline's merging of lumps; re-point it to the criterion it actually decides.
-- **Found by River's new checks, 2026-11-10.** `TestMassCubeIsRenderedAndExplained`
-  (`cmd/birdview/main_test.go`) cites the withdrawn
-  [product.pageExplainsItself](requirements/local/product/presentation.md#pageexplainsitself). Three citations, in `TestSeaRefinementsDerived`,
-  `months.md`, and `decisions.md`, name `dataset.seaDistanceDerived`, which
-  is [product.seaDistanceDerived](requirements/local/product/dataset.md#seadistancederived): `dataset.md` is in package `product`.
-- **`app` is unapproved.** It was approved at `99c0811` and edited by hand in 55 commits since,
-  though composed files change only by recomposing; the status line still reads as approved.
-  [product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink) was dropped without an Excluded entry while the classic view's
-  withdrawn requirements were listed under Excluded, so settle what Excluded is for, and whether
-  the withdrawn search criteria stay. Then recompose, have Sameer approve, and regenerate
-  [alignment.md](alignment.md), which now targets `app` as it stands rather than `99c0811`.
-
 ## tightenProse
 
 **Tighten all prose and page text; less is more**
@@ -332,21 +293,6 @@ stylesheet checks skip shapes on purpose and the rendered check measures text on
 rendered check to strokes and fills against adjacent colors is the obvious route; "required to
 understand the content" needs a ruling per diagram part
 
-## composeDatasetAndRepo
-
-**Compose `dataset` and `internal/repo`**
-
-Status: open
-Owner: Sameer
-Gate: ready; `app` was approved 2026-10-25
-
-, which must account for the 24 local requirements no package lists yet (`TestCompositionResolves`
-logs them), then move each criterion out of [acceptance.md](requirements/acceptance.md) into its
-package with `Covers:` and delete the Traceability table once nothing is left in it. **Four wait on
-the morphometric-model ruling** — [product.craniumFromMass](requirements/local/product/diagram.md#craniumfrommass), [product.trunkFromMass](requirements/local/product/diagram.md#trunkfrommass),
-[product.neckModelPerFamily](requirements/local/product/diagram.md#neckmodelperfamily), and [product.generatedBadgeColors](requirements/local/product/dataset.md#generatedbadgecolors): each produces a value the app draws,
-and whether it is data (`dataset`) or a drawing instruction (`app`) is the owner's call
-
 ## largeSourceFiles
 
 **Two source files are large enough to make reading by anchor matter**
@@ -358,52 +304,6 @@ Gate: when evidence warrants
 `presentation.md` is about 13,000 tokens for 20 requirements and `measurements.md` about 6,700.
 Agents are told to read by anchor (AGENTS.md), so splitting is deferred; split if trajectories show
 whole-file reads
-
-## licenseConditionFirst
-
-**Statement-first: one requirement still leads with a license condition**
-
-Status: open
-Owner: Sameer
-Gate: with the split
-
-[product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue) opens with the CC BY credit rule, which is the imported half of a
-mixed requirement; its statement is fixed when it is split (row above on separating restated
-imports)
-
-## separateRestatedRequirements
-
-**Before composition, separate the requirements that restate an imported source**
-
-Status: open
-Owner: Sameer
-Gate: before composition
-
-Classified 2026-10-16, each of the 81 read individually. **Composed — wholly an imported obligation,
-restated:**
-[tech.badgeContrast](requirements/local/tech/accessibility.md#badgecontrast), and
-[tech.textContrastFloor](requirements/local/tech/accessibility.md#textcontrastfloor) (WCAG 2.2 SC
-1.4.6 and 1.4.11). These belong in a composed package citing the source, not in `tech`. **Mixed — a
-local requirement with an imported obligation inside it, to split:**
-[tech.fetchRestrictedInputs](requirements/local/tech/delivery.md#fetchrestrictedinputs) (*do not
-redistribute* is the licenses'; *fetch at build time* is BirdView's mechanism),
-[product.selfDescriptionStaysTrue](requirements/local/product/presentation.md#selfdescriptionstaystrue)
-(*credit every CC BY source* is a license condition; docs currency is local),
-and [tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater) (*never
-commercial* follows the non-commercial licenses). **The other 73 are local intent**, including
-those that name a source — choosing AviList for names is BirdView's decision, made with licenses in
-mind, not an obligation AviList imposes. Two findings on the way: the WCAG manifest entry still says
-other text is held to 4.5:1, which
-[decisions.oneContrastFloor](requirements/decisions.md#onecontrastfloor) replaced with one 7:1
-floor; and Wikimedia and Macaulay Library are cited as rationale from the photograph era, with no
-code reading either. **Progress 2026-10-16:** WCAG is now vendored and transcribed (`wcag`), the
-stale manifest entry is fixed, and the two contrast requirements serve as the guarantee half of
-[app.stylesheetContract](requirements/composed/internal/app/app.md#stylesheetcontract), with their WCAG obligation
-composed separately as [app.pagesMeetTextContrast](requirements/composed/internal/app/app.md#pagesmeettextcontrast).
-The three mixed requirements are still to split. **2026-11-01:** three of the original list
-went with iNaturalist ([decisions.inaturalistSourcesRetired](requirements/decisions.md#inaturalistsourcesretired)): [tech.pacedInaturalistMapping](requirements/local/tech/process.md#pacedinaturalistmapping) and
-[product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink) are withdrawn, and [tech.identifiedClient](requirements/local/tech/delivery.md#identifiedclient) no longer restates an
-imported source
 
 ## presenceOverSelection
 
@@ -476,7 +376,7 @@ Owner: unassigned
 Gate: opportunistic
 
 The rank fold of
-[acceptance.occurrenceReadersAgree](requirements/acceptance.md#occurrencereadersagree) moved
+[dataset.occurrenceReadersAgree](requirements/composed/internal/dataset/acceptance.md#occurrencereadersagree) moved
 iNaturalist's trinomials into their wild species, and the proportional gainers were `Gallus gallus`
 **+11.9%**, `Anser cygnoides` **+20.0%**, and `Anser anser` **+6.9%** — the same signature as the
 declared `Columba livia` (+1.3%) and `Cairina moschata` (+10.0%). `taxonomy.DomesticForms` names
@@ -495,7 +395,7 @@ Gate: opportunistic
 
 [product.namesRecordsFiledUnder](requirements/local/product/presentation.md#namesrecordsfiledunder)
 asks for each source's binomial *and how many records it holds under it*, and
-[acceptance.disputedNamesShown](requirements/acceptance.md#disputednamesshown) ships only the
+[app.disputedNamesShown](requirements/composed/internal/app/acceptance.md#disputednamesshown) ships only the
 binomial. [`data/source-names.tsv`](../data/source-names.tsv) has per-source counts and no reader,
 but it queries the **AviList** name only — for Hairy Woodpecker it records eBird 0, not the
 7,310,342 under *Dryobates villosus*, which is the number a reader wants. Closing it needs
@@ -563,7 +463,7 @@ Nothing does. The server fixture hardcodes `commonestOf` and every test renders 
 claim has never met data — which is why
 [decisions.seaShareDiffers](requirements/decisions.md#seasharediffers)(a) shipped. The check belongs
 over the real dataset, as
-[acceptance.outOfScopeExplained](requirements/acceptance.md#outofscopeexplained)'s id-collision half
+[app.outOfScopeExplained](requirements/composed/internal/app/acceptance.md#outofscopeexplained)'s id-collision half
 is
 
 ## vagrantOutscoresResident
@@ -705,33 +605,31 @@ because it reverses [decisions.massAsWaterCube](requirements/decisions.md#massas
 
 ## criteriaNeverFailed
 
-**Eight acceptance criteria have never been watched failing**
+**Seven acceptance criteria have never been watched failing**
 
 Status: open
 Owner: unassigned
-Gate: opportunistic; [acceptance.tileMarksNonMeasured](requirements/acceptance.md#tilemarksnonmeasured) and [acceptance.nothingRestrictedTracked](requirements/acceptance.md#nothingrestrictedtracked) guard hard rules
+Gate: opportunistic; [app.tileMarksNonMeasured](requirements/composed/internal/app/acceptance.md#tilemarksnonmeasured) and [repo.nothingRestrictedTracked](requirements/composed/internal/repo/acceptance.md#nothingrestrictedtracked) guard hard rules
 
-Still `planned` in [acceptance.md](requirements/acceptance.md):
-[acceptance.allFiveTraits](requirements/acceptance.md#allfivetraits) (all five AVONET traits on
+Without a `Watched failing:` observation in [`conformance.md`](conformance.md):
+[dataset.allFiveTraits](requirements/composed/internal/dataset/acceptance.md#allfivetraits) (all five AVONET traits on
 every record),
-[acceptance.joinCoversEverySpecies](requirements/acceptance.md#joincoverseveryspecies) (join
+[dataset.joinCoversEverySpecies](requirements/composed/internal/dataset/acceptance.md#joincoverseveryspecies) (join
 coverage monitored),
-[acceptance.unmatchedFailsBuild](requirements/acceptance.md#unmatchedfailsbuild) (unmatched species
+[dataset.unmatchedFailsBuild](requirements/composed/internal/dataset/acceptance.md#unmatchedfailsbuild) (unmatched species
 fail the build above a threshold),
-[acceptance.proportionsDifferentiate](requirements/acceptance.md#proportionsdifferentiate)
+[app.proportionsDifferentiate](requirements/composed/internal/app/acceptance.md#proportionsdifferentiate)
 (proportions differentiate species),
-[acceptance.tileMarksNonMeasured](requirements/acceptance.md#tilemarksnonmeasured) (the tile marks
+[app.tileMarksNonMeasured](requirements/composed/internal/app/acceptance.md#tilemarksnonmeasured) (the tile marks
 every non-measured metric),
-[acceptance.nothingRestrictedTracked](requirements/acceptance.md#nothingrestrictedtracked) (nothing
-restricted is tracked — the document calls it its highest-value check),
-[acceptance.outboundRequestsIdentified](requirements/acceptance.md#outboundrequestsidentified)
-(outbound requests identify the client), and
-[acceptance.abaFileHashMatches](requirements/acceptance.md#abafilehashmatches) (the fetched ABA file
-matches its hash). [acceptance.joinCoversEverySpecies](requirements/acceptance.md#joincoverseveryspecies) and [acceptance.proportionsDifferentiate](requirements/acceptance.md#proportionsdifferentiate) are
-already cited by tests, so they may only need the mutation run and a status;
-[acceptance.abaFileHashMatches](requirements/acceptance.md#abafilehashmatches) is probably obsolete since
+[repo.nothingRestrictedTracked](requirements/composed/internal/repo/acceptance.md#nothingrestrictedtracked) (nothing
+restricted is tracked — the document calls it its highest-value check), and
+[dataset.outboundRequestsIdentified](requirements/composed/internal/dataset/acceptance.md#outboundrequestsidentified)
+(outbound requests identify the client). [dataset.joinCoversEverySpecies](requirements/composed/internal/dataset/acceptance.md#joincoverseveryspecies) and [app.proportionsDifferentiate](requirements/composed/internal/app/acceptance.md#proportionsdifferentiate) are
+already cited by tests, so they may only need the mutation run and a recorded observation;
+`abaFileHashMatches` was dropped as obsolete during the River 2.0 upgrade since
 [decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence) removed the ABA
-input, and wants withdrawing rather than verifying
+input.
 
 ## riverReleaseFindings
 
@@ -779,20 +677,6 @@ flaked the same way on 2026-10-26: `TestTaxonIdentifiesItselfAndPaces` measured 
 change. Measure the gap at the client's send instead, or widen the tolerance with that reason.
 By 2026-10-27 both flaked in most local full runs, though not yet in CI. The iNaturalist test was
 deleted 2026-11-01 with the client it tested ([decisions.inaturalistSourcesRetired](requirements/decisions.md#inaturalistsourcesretired)); the GBIF one remains.
-
-## attributionCriterionNamesAba
-
-**[acceptance.attributionComplete](requirements/acceptance.md#attributioncomplete) still asserts an ABA credit**
-
-Status: open
-Owner: unassigned
-Gate: opportunistic
-
-Found 2026-10-23 during step 4 of [deploymentPlumbing](#deploymentplumbing). Its assertions say "the ABA checklist is credited
-for the species list and *only* that", but
-[decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence) removed ABA on
-2026-10-05 and the footer credits GBIF for scope. Check what `TestAttributionIsComplete` actually
-asserts, then correct whichever of the two is wrong, and add GBIF to the named credits
 
 ## nearMatchSplits
 

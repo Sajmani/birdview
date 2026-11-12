@@ -60,7 +60,7 @@ func goMatches(s *server, q string) []string {
 //
 // The home page's find box matches by this rule (product.nextView).
 //
-// Verifies: product.nextView.
+// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
 func TestSearchMatchesNamesCodesAndTaxa(t *testing.T) {
 	s := newTestServer(t)
 	for _, c := range searchCases {

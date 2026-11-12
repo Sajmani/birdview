@@ -8,6 +8,7 @@ package tech
 
 Subject: `process.spec_location`
 Value: `river/`
+Applies to: repo
 Goals: [goals.giveBack](../../../goals/goals.md#giveback), [goals.honestData](../../../goals/goals.md#honestdata)
 
 The repository follows the loop in [README.md](../../../README.md). `AGENTS.md` names `river/` as
@@ -17,6 +18,7 @@ normative so agents reading the instruction file are pointed at it.
 
 **The iNaturalist mapping is built by a separate, paced tool**
 
+Applies to: dataset
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen), [goals.rapidIteration](../../../goals/goals.md#rapiditeration)
 Status: **Withdrawn 2026-11-01**, with the mapping it governed ([decisions.inaturalistSourcesRetired](../../decisions.md#inaturalistsourcesretired)).
 
@@ -36,6 +38,7 @@ accepted cost: a stale ID fails visibly and the refresh is one command.
 
 **No source is consumed before it is recorded**
 
+Applies to: repo
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 Every input source appears in [imports.md](../../imports.md) with its tier, pin, license,
@@ -48,6 +51,7 @@ be redistributed and the third lacked the fields it was chosen for.
 
 **Every GBIF download is requested from a committed query and recorded before it is read**
 
+Applies to: dataset
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 A GBIF download BirdView reads is requested from a SQL query committed under `data/gbif-queries/`,
@@ -67,6 +71,7 @@ be checked against the query and the file it came from.
 **Work in progress is marked active in the todo list and tracked by a GitHub issue**
 
 Subject: `process.active_work`
+Applies to: repo
 Goals: [goals.rapidIteration](../../../goals/goals.md#rapiditeration), [goals.giveBack](../../../goals/goals.md#giveback)
 
 `river/todo.md` stays the record of every piece of open work, cited by identifier and checked with
@@ -85,6 +90,7 @@ copy agents read, and the record that changes in the same commit as the work (Sa
 
 **A local tool for reviewing proportions against photographs**
 
+Applies to: dataset
 Status: **Withdrawn 2026-11-09.** Photographs foreshorten the parts the figure draws in one plane, so
 a comparison with them cannot settle a proportion; the tool was removed. See
 [decisions.photoReviewUnreliable](../../decisions.md#photoreviewunreliable). It lived in

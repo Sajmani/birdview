@@ -60,4 +60,4 @@ As-served hashes are carried over from `birdsync`'s record and have **not** been
 because the unstripped files were never in this repository. The as-stored hashes have been.
 
 The paths above are anchored at the repository root with `//` so the vendored-hash check in `river/check/pins_test.go` can
-verify them (acceptance.vendoredHashesMatch).
+verify them (repo.vendoredHashesMatch).

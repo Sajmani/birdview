@@ -8,6 +8,7 @@ package product
 
 Subject: `ordering.metric`
 Value: `length | wingspan | mass | bill | tail | frequency`
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The user chooses whether the dataset is ordered by total length, wingspan, body mass, bill length,
@@ -21,6 +22,7 @@ segments are modeled from mass.
 
 **Ascending order**
 
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition)
 
 Species are sorted ascending by the selected metric unless the reader reverses it, **and the page says which way that
@@ -39,6 +41,7 @@ first" elsewhere would otherwise read it as a defect. See
 **Sections break at N% above the section minimum**
 
 Subject: `sectioning.rule`
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Under the three size metrics, a new section begins at the first species more than N% larger than
@@ -58,6 +61,7 @@ sections are its tiers ([nextView](presentation.md#nextview)).
 
 Subject: `sectioning.step_percent`
 Value: `10`
+Applies to: app
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The section step N defaults to 10%: a tier holds the birds up to 10% larger than its smallest
@@ -71,6 +75,7 @@ page offers no control for it.
 
 **Section headers state range and count**
 
+Applies to: app
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition)
 
 Each tier shows its range in the currently selected metric and the number of birds in it, under
@@ -95,6 +100,7 @@ far apart they are.
 **A histogram shows how many species each tier holds**
 
 Subject: `sectioning.histogram`
+Applies to: app
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 Above the birds, a histogram has one bar per tier, in tier order, each as tall as its

@@ -3,8 +3,8 @@ package decisions
 # Decisions
 
 How each conflict was settled, each judgment made and each gap knowingly accepted, by whom and
-why. Oldest first. The format and the rules for adding an entry are in River's README
-([Keeping the bundle's files](../README.md#keeping-the-bundles-files)); the checker enforces the
+why. Oldest first. The format and the rules for adding an entry are in the River skill
+([decisions.md](../../.agents/skills/river/references/decisions.md)); the checker enforces the
 fields. Older entries also carry `Subject:` and `Kind:`, and their bodies are as first written.
 
 ```
@@ -72,6 +72,18 @@ dropped as a simplification.
 - **[product.tileMarksModeled](local/product/measurements.md#tilemarksmodeled)** Active, and load-bearing for this decision.
 - Honest expectation: most v1 lengths will be estimates. Ricklefs covers passerines only, so
   roughly half of the 841 species have no measured length available at any price.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.lengthAndWingspanSources sha256:ef8e31d060fe9a9487f624481a20fca719a6a67bc264fad9b54814b8806a8454
+product.scopeIsRecurringAvifauna sha256:ccadbc2c21d598c8bd3a4cb01196e5d507395c0276694bbab8c5dd780d692a46
+product.tileMarksModeled sha256:f294f6d5b00cbb4271d7f56b9e54ffa18d895f83aed98f3ecedd8813feddd083
+tech.fetchRestrictedInputs sha256:13b3f08bafea342cf2671269f30a1752701066c7b071ccbf04c39c2752399118
+tech.recordBeforeConsuming sha256:5a1d061386108577c4e8cd77304c42789345e07e2e81446e24526aedd52cc9ea
+```
 
 ---
 
@@ -148,7 +160,7 @@ Ricklefs 2017 is the only source of real total-length measurements for North Ame
 this project found. Crossref reports only Wiley version-of-record terms and no CC license, and the
 Wiley terms page returns HTTP 403 to automated retrieval — so **the terms have not been read**.
 
-Per [README.md](../README.md#sources), the gap is left unfilled rather
+Per [README.md](../README.md), the gap is left unfilled rather
 than guessed at. Specifically *not* relied upon: that the `RS-eco/traitdata` R package
 redistributes the data under GPL-3 (a package license does not establish the data's license), and
 the argument that measurements are uncopyrightable facts (a legal judgment nobody here is
@@ -198,6 +210,14 @@ length is labeled `modeled`, and the product is honest and complete.
 
 ricklefsProhibited is therefore **not a blocker** and should not be treated as one. It governs how good v1's
 length data is, not whether v1 can ship.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.lengthAndWingspanSources sha256:ef8e31d060fe9a9487f624481a20fca719a6a67bc264fad9b54814b8806a8454
+```
 
 ---
 
@@ -257,6 +277,14 @@ This is consistent with noOpenLengthAndWingspan rather than in tension with it, 
 distinction holds only while the ratio stays out of the dataset and out of the UI's numbers. If a
 neck length ever appears as a value, this decision is void and must be reopened.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.neckModelPerFamily sha256:cfea26dad403759948ba6bcd8d1697f7e4fa13de9ec66d9b598484c9f55d6f8a
+```
+
 ---
 
 ## photographsWithdrawn
@@ -295,6 +323,18 @@ the work is not repeated:
 **Decision:** ship v1 with diagrams only. [product.speciesPhotographs](local/product/diagram.md#speciesphotographs) through [product.photoCaching](local/product/diagram.md#photocaching) are withdrawn, not abandoned.
 
 **Resulting status:** [product.diagramOnlyMode](local/product/presentation.md#diagramonlymode) reduced to a single mode · [product.speciesPhotographs](local/product/diagram.md#speciesphotographs)–[product.photoCaching](local/product/diagram.md#photocaching) Withdrawn.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.diagramOnlyMode sha256:5cd4659ff72a1a57a8cc6b9880155131ef9559ed7c33e73c9ef7ab4b7e250357
+product.perchedOrInFlight sha256:9f45c399e4d6b87f33fe0885c2affe007f694a530dea2d3969e938906f55768e
+product.photoAttribution sha256:233c8371913dba67420071b354cedc84dce53588d581f89700aad2b1854a5527
+product.photoCaching sha256:6878fc62a1744f5af5257c86dd1f5bcff8ee4362b853bf36484340e6aca26e8b
+product.speciesPhotographs sha256:8d68bd2c79e7250b7f62fea7f1dac2a785e414f7dd5a9b7213fa7796bc54bce0
+```
 
 ---
 
@@ -431,6 +471,15 @@ is really a split whose `AVONET2_eBird` row represents the combined taxon. Mappi
 therefore the same borrowing problem in a quieter form, and each needs a human taxonomic check
 before entering the mapping table.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.joinOnBinomial sha256:8019beb663429268c4d1aa006c850545391fb0683451b22447a8abaaf7866eea
+product.provenancePerMetric sha256:47c3fb5f10f47c86189a2f42a4b7fe8b895ac84da91da53d2961f5c65980b2c3
+```
+
 ---
 
 ## neckLengthAsMetric
@@ -479,7 +528,7 @@ binary, after [noOpenLengthAndWingspan](#noopenlengthandwingspan) on modeled len
 - **[product.tileOpensDetail](local/product/presentation.md#tileopensdetail)** amended: the detail view is a larger version of the same tile, plus per-segment
   measurements and provenance.
 - **[product.tileContents](local/product/presentation.md#tilecontents)** amended: the tile header carries scientific name as well as common name and badge.
-- **[acceptance.neckLengthSerialized](acceptance.md#necklengthserialized)** inverted: it asserted the neck length never leaves the drawing layer; it now asserts
+- **[dataset.neckLengthSerialized](composed/internal/dataset/acceptance.md#necklengthserialized)** inverted: it asserted the neck length never leaves the drawing layer; it now asserts
   the neck length *is* serialized, with a `model` naming the family ratio.
 - **neckSplitUnmeasured** stands as history. Its reasoning was right for the constraints of its time; only its
   condition is superseded.
@@ -490,6 +539,18 @@ Surfacing the segments makes the composition of total length visible. A reader w
 **measured** bill inside a **modeled** total and may reasonably ask how both are true. The answer
 is that total length is the sum of five segments, two measured and three modeled — now stated in
 [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources) so the detail view can say it rather than leave the reader to infer it.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.lengthAndWingspanSources sha256:ef8e31d060fe9a9487f624481a20fca719a6a67bc264fad9b54814b8806a8454
+product.metricProvenanceExplained sha256:ac232ca3809e47a2fe65069d296f0925c13ffb1fb1f336fa1ffddded4df2b4b9
+product.neckModelPerFamily sha256:cfea26dad403759948ba6bcd8d1697f7e4fa13de9ec66d9b598484c9f55d6f8a
+product.tileContents sha256:681ebefd859b1d23bbebf13b47aaf709c6017409c516cb4b9eda0bae6b01fb54
+product.tileOpensDetail sha256:307be6e7d786669bca79969970bb237a417cb3bd13f143c5d9ccf2cbbc69c9f3
+```
 
 ---
 
@@ -537,7 +598,7 @@ Fitted this way and asked for the same 9,194 species Fox predicted, BirdView's m
 theirs to a **mean of 1.32%** and a median under 1%, with 1.4% of species differing by more than
 10% — mostly extreme-aspect seabirds. It is, in effect, their model reconstructed.
 
-That comparison is now a standing check ([acceptance.wingspanModelReconstructsFox](acceptance.md#wingspanmodelreconstructsfox)), so a regression in the fitting code shows up as
+That comparison is now a standing check ([dataset.wingspanModelReconstructsFox](composed/internal/dataset/acceptance.md#wingspanmodelreconstructsfox)), so a regression in the fitting code shows up as
 disagreement with an external published reference rather than as a silently worse dataset.
 
 Note what could **not** be tested: Fox report no predicted value for species that have an
@@ -556,9 +617,18 @@ about 5%, and the figure falls out of the fitting already being done.
 
 - **[product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources)** amended: the modeled-wingspan branch names the fitted regression.
 - **[product.provenancePerMetric](local/product/measurements.md#provenancepermetric)** amended: a `model` states the computation *and its measured error* where one exists.
-- **[acceptance.wingspanModelReconstructsFox](acceptance.md#wingspanmodelreconstructsfox)** added: agreement with Fox's published predictions stays within 2% mean.
+- **[dataset.wingspanModelReconstructsFox](composed/internal/dataset/acceptance.md#wingspanmodelreconstructsfox)** added: agreement with Fox's published predictions stays within 2% mean.
 - `morphology.Wingspan`, the invented model, is deleted rather than left for someone to reach for.
 - Coverage is unchanged at 301 measured, 7 near-match, 533 modeled; only the modeled values move.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.lengthAndWingspanSources sha256:ef8e31d060fe9a9487f624481a20fca719a6a67bc264fad9b54814b8806a8454
+product.provenancePerMetric sha256:47c3fb5f10f47c86189a2f42a4b7fe8b895ac84da91da53d2961f5c65980b2c3
+```
 
 ---
 
@@ -609,7 +679,7 @@ named in the provenance of every value they produce, never presented as measurem
 
 ### Consequence the renderer had to absorb
 
-[acceptance.legsFromTarsusWithdrawn](acceptance.md#legsfromtarsuswithdrawn) recorded an invariant: feet never fall below the tail tip, which is what let the renderer
+`acceptance.legsFromTarsusWithdrawn` recorded an invariant: feet never fall below the tail tip, which is what let the renderer
 center a diagram on its bill-to-tail extent. **The modeled leg makes that false** for 11 of the
 841 species — an American Flamingo by 30% of its own length, then Whooping Crane, Reddish Egret
 and Black-necked Stilt. That is correct anatomy, so the renderer accommodates it: `VerticalExtent`
@@ -624,7 +694,7 @@ behind the body rather than crossing it and the junction mark.
 
 - **[product.segmentComposition](local/product/diagram.md#segmentcomposition)** amended: legs are the modeled exposed leg, not the measured tarsus; the rejection
   above is superseded; the draw order is stated.
-- **[acceptance.legsFromTarsusWithdrawn](acceptance.md#legsfromtarsuswithdrawn)** rewritten: the feet-above-tail assertion is inverted into a drawn-extent invariant,
+- **`acceptance.legsFromTarsusWithdrawn`** rewritten: the feet-above-tail assertion is inverted into a drawn-extent invariant,
   and the leg model gains dataset-wide checks.
 - **[product.provenancePerMetric](local/product/measurements.md#provenancepermetric)** unchanged but newly load-bearing: `Species.Leg` is modeled, `Species.Tarsus` measured,
   and both are serialized and shown.
@@ -715,8 +785,8 @@ whose entire premise is that everything in it is to scale. That cost is higher t
 - **[product.segmentComposition](local/product/diagram.md#segmentcomposition)** amended: five segments and a crossbar. No legs. The flight premise is stated there.
 - **[product.scaleToggle](local/product/diagram.md#scaletoggle)** reverted: the scale reference is the largest total length again, not the drawn extent.
 - **product.traitsFromAvonet/product.traitsPerSpecies** amended: `Tarsus.Length` is no longer ingested, leaving five AVONET traits.
-- **[acceptance.legsFromTarsusWithdrawn](acceptance.md#legsfromtarsuswithdrawn)** withdrawn — the requirement it verified no longer exists.
-- **[acceptance.allFiveTraits](acceptance.md#allfivetraits)** amended: five traits, not six.
+- **`acceptance.legsFromTarsusWithdrawn`** withdrawn — the requirement it verified no longer exists.
+- **[dataset.allFiveTraits](composed/internal/dataset/acceptance.md#allfivetraits)** amended: five traits, not six.
 - Deleted from the code: `morphology.LegFactors`, `DefaultLegFactor`, `LegLength`;
   `dataset.Species.Leg` and `.Tarsus`; `avonet.Traits.Tarsus`; `view.VerticalExtent`,
   `Geometry.DrawnHeight`, `LegCos`, `legRake`, `legSin` and the leg coordinates; the leg strokes,
@@ -731,6 +801,17 @@ the families that fold it — Ardeidae and Pelecanidae fly with the head drawn b
 shoulders, while our Ardeidae neck ratio of 0.85 is the second-highest in the table. Fixing it
 collides with [product.segmentsSumToLength](local/product/diagram.md#segmentssumtolength), since a folded-neck heron's drawn extent is genuinely shorter than its
 catalogued total length. **Resolved by [foldedNeckAsS](#foldedneckass).**
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.scaleToggle sha256:dc965113eddd0f351a06f819b43eb1aa77cefab09c338c06ec1e59b3bdfdcc26
+product.segmentComposition sha256:dcca20320694e19f7c866fdd574ab6487a93ae2817d05b8a7a45b1ee0bb750b1
+product.traitsFromAvonet sha256:9df9529f2e9d62e9188048f55b18fe0134d67c59448fde6e0b6dd15722bd1bb6
+product.traitsPerSpecies sha256:3c951210441ec4e7f5b07625332f225bf83cf7a3c2612ccd2296d7a28d514605
+```
 
 ---
 
@@ -799,8 +880,17 @@ a stick is not misleading.
 - **[product.segmentComposition](local/product/diagram.md#segmentcomposition)** amended: the neck is a stick or an S depending on the family's flight posture.
 - **[product.segmentsSumToLength](local/product/diagram.md#segmentssumtolength)** amended: the rationale is qualified — drawn extent equals total length except where the
   neck is folded, and the sum over the *metrics* is unaffected.
-- **[acceptance.foldedNeckSameStroke](acceptance.md#foldednecksamestroke)** added.
+- **[app.foldedNeckSameStroke](composed/internal/app/acceptance.md#foldednecksamestroke)** added.
 - No change to [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), the neck-ratio model, or to any serialized value.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.segmentComposition sha256:dcca20320694e19f7c866fdd574ab6487a93ae2817d05b8a7a45b1ee0bb750b1
+product.segmentsSumToLength sha256:4171b74cd768d9f4904df192c964b127acc1ec16cd21ca48d11544557ec00e05
+```
 
 ---
 
@@ -913,8 +1003,8 @@ independently, which is a useful accident: two unrelated rules point the same wa
 - **[product.inaturalistLink](local/product/presentation.md#inaturalistlink)** added: the detail view links to iNaturalist when, and only when, the match is
   confident.
 - **[tech.pacedInaturalistMapping](local/tech/process.md#pacedinaturalistmapping)** added: the mapping tool paces its requests and identifies itself.
-- **[acceptance.inaturalistLinkConfidentOnly](acceptance.md#inaturalistlinkconfidentonly)** added.
-- The existing **[tech.identifiedClient](local/tech/delivery.md#identifiedclient)** (identify the client) and **[acceptance.outboundRequestsIdentified](acceptance.md#outboundrequestsidentified)** already discharge [`inatapi.UserAgent`](imported/inaturalist.org/inatapi/inatapi.md#useragent),
+- **`acceptance.inaturalistLinkConfidentOnly`** added.
+- The existing **[tech.identifiedClient](local/tech/delivery.md#identifiedclient)** (identify the client) and **[dataset.outboundRequestsIdentified](composed/internal/dataset/acceptance.md#outboundrequestsidentified)** already discharge [`inatapi.UserAgent`](imported/inaturalist.org/inatapi/inatapi.md#useragent),
   which is why that requirement needed no new work.
 
 ---
@@ -968,7 +1058,7 @@ runs.
 ### The second assertion, which is the one that matters
 
 A contrast check over *declared* colors is blind to the colour nobody declared — which is precisely
-how this bug shipped. So [acceptance.noTextBelowContrastFloor](acceptance.md#notextbelowcontrastfloor) also asserts the stylesheet carries top-level `a` and `a:visited`
+how this bug shipped. So [app.noTextBelowContrastFloor](composed/internal/app/acceptance.md#notextbelowcontrastfloor) also asserts the stylesheet carries top-level `a` and `a:visited`
 rules, making "someone forgot" impossible rather than merely unlikely.
 
 Colors are now set by a global rule rather than per component, so a new link inherits a good color
@@ -988,13 +1078,23 @@ accent.
 - **`sources.md`**: the `wcag` scope widens from badges to badges *plus* link and text colors. Both
   already-adopted criteria are now used, at the two floors above.
 - **[tech.textContrastFloor](local/tech/accessibility.md#textcontrastfloor)** added.
-- **[acceptance.noTextBelowContrastFloor](acceptance.md#notextbelowcontrastfloor)** added, watched failing three ways, including against the original defect.
+- **[app.noTextBelowContrastFloor](composed/internal/app/acceptance.md#notextbelowcontrastfloor)** added, watched failing three ways, including against the original defect.
 - `--accent-visited` added; link colors moved to global `a` / `a:visited` rules; `.tile`, `.btn` and
   `.chip` given explicit `:visited` rules so the global rule cannot recolor them.
 - Still excluded, and still claimed nowhere: keyboard access, focus order, timing, reading level.
   **BirdView claims no WCAG conformance level.**
 
 **The two-floor scheme was superseded the next day by [oneContrastFloor](#onecontrastfloor).**
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+tech.textContrastFloor sha256:e3a8fd713c59d8ebb1819cc21853da82ba9049064ed77d7e35cbb4fd6d1bcda2
+wcag.ContrastEnhanced sha256:d46a16da6a5886e74672ce36e4b8c59e42943247701cc95fc1f1e6d1a09273ab
+wcag.ContrastMinimum sha256:07cde0e1e367ac09f120e6288407da5589d113d6c4792c787eec6ab03b19d2e1
+```
 
 ---
 
@@ -1047,7 +1147,7 @@ the next time an exception looks cheaper than a fix.
 ### Resulting status
 
 - **[tech.textContrastFloor](local/tech/accessibility.md#textcontrastfloor)** amended: one floor, 7:1, links and text alike, against both surfaces.
-- **[acceptance.noTextBelowContrastFloor](acceptance.md#notextbelowcontrastfloor)** amended: the measured assertion is now a single floor, and the watched-failing list
+- **[app.noTextBelowContrastFloor](composed/internal/app/acceptance.md#notextbelowcontrastfloor)** amended: the measured assertion is now a single floor, and the watched-failing list
   gains the two restored colors.
 - The test's two-tier machinery — a separate link floor, and the selector tokenizer that decided
   which rules were links — is deleted rather than left switched off. It is recoverable from history
@@ -1055,6 +1155,14 @@ the next time an exception looks cheaper than a fix.
 - **`sources.md`** unchanged: both WCAG criteria were already adopted, and only which one governs
   ordinary text has moved.
 - Still claimed nowhere: any WCAG conformance level.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+tech.textContrastFloor sha256:e3a8fd713c59d8ebb1819cc21853da82ba9049064ed77d7e35cbb4fd6d1bcda2
+```
 
 ---
 
@@ -1144,13 +1252,22 @@ which a reader can only ask once but must be able to answer.
 ### Resulting status
 
 - **[product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled)** added; **[product.segmentComposition](local/product/diagram.md#segmentcomposition)** amended, since the tail's stroke style now means something else.
-- **[acceptance.diagramDistinguishesModeled](acceptance.md#diagramdistinguishesmodeled)** added.
+- **[app.diagramDistinguishesModeled](composed/internal/app/acceptance.md#diagramdistinguishesmodeled)** added.
 - `dataset.Species.WingChord` added: AVONET's `Wing.Length`, previously consumed by the wingspan
   model and discarded. Note this is the **ornithological** chord, carpal joint to primary tip, not
   the aerodynamic chord of leading edge to trailing edge — the two share a name, and only the first
   can be drawn along a crossbar.
 - The `?prov=1` prototype flag and its head/body variant switches are **removed**; the rendering is
   unconditional.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.measuredVersusModeled sha256:6820baff8e8a75f82c39e98ac987492d82fe2efbb474d398fa7572ac792b1df4
+product.segmentComposition sha256:dcca20320694e19f7c866fdd574ab6487a93ae2817d05b8a7a45b1ee0bb750b1
+```
 
 ---
 
@@ -1224,7 +1341,7 @@ the other cannot.
 ### Resulting status
 
 - **[product.inaturalistLink](local/product/presentation.md#inaturalistlink)** amended: both names must still agree, but each is compared more thoroughly.
-- **[acceptance.inaturalistLinkConfidentOnly](acceptance.md#inaturalistlinkconfidentonly)** extended: a case per bucket, plus the assertion that a differing genus is refused when
+- **`acceptance.inaturalistLinkConfidentOnly`** extended: a case per bucket, plus the assertion that a differing genus is refused when
   the common name does not agree.
 - Coverage is now a **required** 841 of 841, asserted over the built dataset rather than reported.
   A species that stops resolving is a fault, not an absence.
@@ -1239,7 +1356,7 @@ the other cannot.
 
 Date: 2026-09-27
 Decided by: Sameer
-Status: amended by frequencyGlobalScale
+Status: superseded by classicScaleDecisionsRetired; amended earlier by frequencyGlobalScale
 Affects: [product.scaleToggle](local/product/diagram.md#scaletoggle), [product.pageExplainsItself](local/product/presentation.md#pageexplainsitself)
 Subject: `diagram.scale.mode`, `presentation.help`
 Kind: Direct — a later decision reverses a default an earlier one argued for
@@ -1284,9 +1401,18 @@ diagram cannot drift from the renderer.
 - **[product.scaleToggle](local/product/diagram.md#scaletoggle)** amended: per-section is the default and is listed first.
 - **[product.pageExplainsItself](local/product/presentation.md#pageexplainsitself)** amended: three sections in a stated order, and the diagram section is a rendered,
   labeled diagram.
-- **[acceptance.sharedScale](acceptance.md#sharedscale)** and **[acceptance.pageExplainsControls](acceptance.md#pageexplainscontrols)** amended, and the tests that asserted the global default inverted.
+- **`acceptance.sharedScale`** and **`acceptance.pageExplainsControls`** amended, and the tests that asserted the global default inverted.
 - The help diagram is drawn from a real species with a **modeled** wingspan, so the dashed inner
   crossbar of [product.measuredVersusModeled](local/product/measurements.md#measuredversusmodeled) is visible in the legend rather than only in the prose beside it.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.pageExplainsItself sha256:ca5a8a817c6566e8e91016b0f213b01f281cbb08dce9cf76987b65e17de2411b
+product.scaleToggle sha256:dc965113eddd0f351a06f819b43eb1aa77cefab09c338c06ec1e59b3bdfdcc26
+```
 
 ---
 
@@ -1308,7 +1434,7 @@ disappeared. [product.pickFromIndex](local/product/presentation.md#pickfromindex
 the `species` parameter that the compare view writes.
 
 **a. Leaving the compare view keeps the species list.** Commit `10e938d` removed it, and
-[acceptance.comparisonSharesScale](acceptance.md#comparisonsharesscale) asserted that no link back to the index may carry `species`.
+`acceptance.comparisonSharesScale` asserted that no link back to the index may carry `species`.
 
 **b. An unrecognised id is dropped and named, not a 404.** `/compare` refused the whole page; it
 now renders the species it recognises and says which it could not.
@@ -1409,6 +1535,14 @@ root. The mitigation is that the number is right beside it and the diagram key n
 square is. If it proves misleading in use, the thing to remove is the square and not the number —
 the number is what [product.labeledDetailDiagram](local/product/measurements.md#labeleddetaildiagram) requires.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.labeledDetailDiagram sha256:437cc885482ca19391824b8f2bb03c7bb060d309ce2857e1da9472f0e20c4afa
+```
+
 ## massCubeOnTiles
 
 **The mass cube goes on the index tiles too**
@@ -1424,7 +1558,7 @@ Kind: Direct — a later decision reverses a scope an earlier one set
 ### What changed
 
 [massAsWaterCube](#massaswatercube) put the cube of water on the annotated diagrams and kept it off the index
-tiles, and [acceptance.massDrawnAsWaterCube](acceptance.md#massdrawnaswatercube) asserted that exclusion. The tiles now carry it as
+tiles, and [app.massDrawnAsWaterCube](composed/internal/app/acceptance.md#massdrawnaswatercube) asserted that exclusion. The tiles now carry it as
 well, in the same lower-left corner, **without the mass label** — a tile carries no labels at all
 ([product.tileContents](local/product/presentation.md#tilecontents)), and the mass is already in its footer.
 
@@ -1459,6 +1593,14 @@ bird at a time, or two or three on a comparison page assembled by hand.
 The cube stays off the tile in no other way: no label, no leader, no footer row of its own. The
 tile's contract is unchanged apart from the shape itself.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.tileContents sha256:681ebefd859b1d23bbebf13b47aaf709c6017409c516cb4b9eda0bae6b01fb54
+```
+
 ## trunkExponentCalibrated
 
 **The trunk's mass exponent is calibrated against skeletons, not invented**
@@ -1474,7 +1616,7 @@ Kind: Direct — a measurement contradicts a constant the project chose by eye
 
 `BodyLength` modeled the trunk as `18.0 x mass^0.31`, an unvalidated constant carried since the
 first ingest. It is now **`14.0329 x mass^0.37`**, and the exponent is pinned to published skeletal
-measurement by [product.trunkFromMass](local/product/diagram.md#trunkfrommass) and [acceptance.trunkScalesLikeSkeletons](acceptance.md#trunkscaleslikeskeletons).
+measurement by [product.trunkFromMass](local/product/diagram.md#trunkfrommass) and [dataset.trunkScalesLikeSkeletons](composed/internal/dataset/acceptance.md#trunkscaleslikeskeletons).
 
 ### Why
 
@@ -1558,6 +1700,14 @@ Every length in the dataset moves, so section boundaries, the global scale ancho
 within sections all shift. That churn is why this lands as its own commit, ahead of the AviList
 names work rather than beside it: two large dataset changes at once would be impossible to tell
 apart in review or in a screenshot.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.trunkFromMass sha256:0a586382da80cea99ec28c5863803a1be4cfa49587beccba67e475c6bc3fd8ab
+```
 
 ## avilistReplacesAba
 
@@ -1648,6 +1798,16 @@ unchanged, and no number moved.
 **It is not a route into Cornell's data.** [requirements.md](imports.md#avilist) records why the
 Clements and Cornell columns are usable here when eBird/Clements itself is rejected: AviList is a
 separate CC BY 4.0 publication, and nothing is taken from Cornell's own distribution.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.englishNameChoice sha256:379fd174567ae26046c146ca789e37ade350f7d23f705e0ee1f1643890946db9
+product.familiesByOrder sha256:93d8850173e3aecd4f63c67b535ebf07eb05fe2946f0a0aea34877d8cba682ae
+product.namesFromAvilist sha256:542e69c602c77c6fd99e4a1556502c6d570b8a49a4ea9e3f07483ff6e331a701
+```
 
 ## regionsTwoWays
 
@@ -1748,7 +1908,7 @@ partition, still testable, but it is a real weakening and anything relying on th
 breaks loudly.
 
 **The bird zones are only as good as the presence table.** They are derived from a generated
-file, so a regeneration can move them. [acceptance.zonesAnswerToData](acceptance.md#zonesanswertodata) recomputes cohesion from
+file, so a regeneration can move them. `acceptance.zonesAnswerToData` recomputes cohesion from
 that table rather than pinning the names, so a drift that makes the grouping dishonest fails a
 test instead of going unnoticed.
 
@@ -1808,11 +1968,19 @@ name itself and the Pelagic zone it sits in. That is accepted.
 **Three marine names were shortened.** `North Pacific, off the west coast` would have slugged to
 `NorthPacificOffTheWestCoast`, so the clarifier moved to a separate gloss shown in the chip's
 tooltip, leaving the name proper. The slug is **derived** from the name rather than stored, so a
-renamed region cannot keep a stale URL ([acceptance.regionUrlRoundTrips](acceptance.md#regionurlroundtrips)).
+renamed region cannot keep a stale URL ([app.regionUrlRoundTrips](composed/internal/app/acceptance.md#regionurlroundtrips)).
 
 **Old URLs break, and no alias is kept.** Nothing links to BirdView yet, so this is free now and
 would not be later — the same argument [avilistReplacesAba](#avilistreplacesaba) made for species URLs. Accepting both
 forms would mean two identifiers for one region and a second thing to keep in step.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.regionAndMonthFilter sha256:70108f5867ddfa9cd977f2961d8975f593708b6f599803257f3d2edc3a2330bc
+```
 
 ## familiesTwoWays
 
@@ -1923,6 +2091,14 @@ common.
 ([product.tileContents](local/product/presentation.md#tilecontents)); groupings beyond family are navigation. Every tile is one height
 and a second badge costs a line on all of them.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.familiesByOrder sha256:93d8850173e3aecd4f63c67b535ebf07eb05fe2946f0a0aea34877d8cba682ae
+```
+
 ## familyInTwoGroups
 
 **A family may be in two birder groups, and that is not a route to habitat**
@@ -1981,8 +2157,16 @@ rails. An axis that is wrong about ducks is not worth a row of chips.
 Nightbirds showing as not fully selected, because the owls it holds have gone. That is correct
 and it is also surprising, and it is the price of the overlap. With one overlapping family it
 is explicable; with several axes it would be unpredictable, which is why
-[acceptance.familyGroupingComplete](acceptance.md#familygroupingcomplete) caps the number of duplicated placements rather than trusting
+[app.familyGroupingComplete](composed/internal/app/acceptance.md#familygroupingcomplete) caps the number of duplicated placements rather than trusting
 restraint.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.familiesByOrder sha256:93d8850173e3aecd4f63c67b535ebf07eb05fe2946f0a0aea34877d8cba682ae
+```
 
 ## habitatDietSpeciesLevel
 
@@ -2040,7 +2224,7 @@ landfill. Each is marked **`birdview`** with a reason, never merged into AVONET'
 
 **Two of the first five did nothing at all**, keyed on `Phalacrocorax auritus` and
 `Larus argentatus` where AviList says `Nannopterum auritum` and `Larus smithsonianus`. A map
-lookup that misses is silent, so [acceptance.habitatDietFilterPerSpecies](acceptance.md#habitatdietfilterperspecies) now checks every key against the
+lookup that misses is silent, so [dataset.habitatDietFilterPerSpecies](composed/internal/dataset/acceptance.md#habitatdietfilterperspecies) now checks every key against the
 dataset.
 
 ### What it costs
@@ -2053,6 +2237,15 @@ one that is merely less convenient.
 
 **One value per species is still a simplification**, and the control says so rather than
 implying completeness.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.familiesByOrder sha256:93d8850173e3aecd4f63c67b535ebf07eb05fe2946f0a0aea34877d8cba682ae
+product.habitatAndDietFilters sha256:48315c9732d4db189bb14e00e5889a818161ba5743a07475895d93759beb1205
+```
 
 ## scopeFromRecurrence
 
@@ -2263,6 +2456,16 @@ inventing a coefficient and then finding data to justify it; the honest order is
 distribution first and then declare the cut with a written reason. This is the one piece of the
 model still owed a number.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.declaredExceptions sha256:9a28ddbb4f98a887977e08028626c5bc4f4f5590097450dd62f37dee4f63841e
+product.scopeIsRecurringAvifauna sha256:ccadbc2c21d598c8bd3a4cb01196e5d507395c0276694bbab8c5dd780d692a46
+product.statusIsPublished sha256:bcf416f48c6868083e61771a2290ae68ad57f582fe1d95045a8895f070657b09
+```
+
 ## speciesUrlOutlivesSpecies
 
 **A species URL outlives the species, but does not keep its 200**
@@ -2359,6 +2562,15 @@ most of them onto strictly more evidence; **no species changed status, and scope
   which it had omitted, and to point at [product.undrawnSpeciesAnswer](local/product/presentation.md#undrawnspeciesanswer).
 - [product.undrawnSpeciesAnswer](local/product/presentation.md#undrawnspeciesanswer) — Active, new.
 - [compareUrlContract](#compareurlcontract)(b) — stands unchanged for `/compare`.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.scopeIsRecurringAvifauna sha256:ccadbc2c21d598c8bd3a4cb01196e5d507395c0276694bbab8c5dd780d692a46
+product.undrawnSpeciesAnswer sha256:57c5839c45ef1565ad067fac6a81c5efab137ea0bf6596f353bcd03b29bd1932
+```
 
 ## seaShareDiffers
 
@@ -2551,6 +2763,15 @@ share — and would need a CR of its own, a regenerated `region-presence.tsv`, a
 whether "on water" may be labelled with an ocean's name. Tracked below; nothing is changed on
 the strength of this experiment alone.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.regionAndMonthFilter sha256:70108f5867ddfa9cd977f2961d8975f593708b6f599803257f3d2edc3a2330bc
+product.shareOfRecords sha256:0ce59640a16f4a5508e3220dd633e5c36afaf9df221a873bd2d4190bc1caabb0
+```
+
 ## honestSeaDenominator
 
 **A sea gets an honest denominator, and its share back**
@@ -2599,7 +2820,7 @@ the page named a place a reader could not then find in the filter.
 
 `Commonest` is now computed in the ingest from `Regions`, `RegionCounts` and `RegionTotals` —
 the same numbers the index divides. The two pages are the same arithmetic by construction, and
-[acceptance.peakAndShareOneCalculation](acceptance.md#peakandshareonecalculation) asserts the round trip over all 1,059 placed species.
+[app.peakAndShareOneCalculation](composed/internal/app/acceptance.md#peakandshareonecalculation) asserts the round trip over all 1,059 placed species.
 `status.CommonestBy` is deleted.
 
 **The Atlantic Yellow-nosed Albatross now reads 1 in 282,315 in the North Atlantic**, which is
@@ -2632,8 +2853,16 @@ That is a deliberate trade: re-measuring it costs a `CountFor` for every species
 - [product.shareOfRecords](local/product/presentation.md#shareofrecords) — Active; amended, the share ranges over every region again.
 - [seaShareDiffers](#seasharediffers) — option A's *no share at sea* half is superseded here. Its structural
   guard is not: `shareIn` still takes both sides of the ratio from one test, and
-  [acceptance.commonestIsLargestShare](acceptance.md#commonestislargestshare) still asserts it. What was wrong there was the number, and
+  [app.commonestIsLargestShare](composed/internal/app/acceptance.md#commonestislargestshare) still asserts it. What was wrong there was the number, and
   what was right was the shape.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.shareOfRecords sha256:0ce59640a16f4a5508e3220dd633e5c36afaf9df221a873bd2d4190bc1caabb0
+```
 
 ## frequencyMetric
 
@@ -2732,13 +2961,24 @@ Global is the default under Frequency now.*
 - [product.sectionThresholdDefault](local/product/ordering.md#sectionthresholddefault) — Active; scoped likewise.
 - [product.orderByFrequency](local/product/presentation.md#orderbyfrequency) — Active, new.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.oneSelectedMetric sha256:0aaf9b36c2bef855eb9bb743a9ec4c41e88d5851dd64ff975828526932e110db
+product.orderByFrequency sha256:6edcfb46b26ba2af2e309d55df696bdd2457ae6c28609d8afde8e5d2adaf927e
+product.sectionBreakRule sha256:ac32fadb7915a489ebd18f7c5399b3ab08ae21a87840036b9dcdbdb8a80bf24a
+product.sectionThresholdDefault sha256:d5315487b7469e98ded77e4a160a5eb974afe6cbf312f355c4f8db69f3c6660d
+```
+
 ## frequencyGlobalScale
 
 **Frequency defaults to global scale, because per-section has nothing to stand on there**
 
 Date: 2026-10-05
 Decided by: Sameer
-Status: accepted
+Status: superseded by classicScaleDecisionsRetired
 Amends: frequencyMetric, perSectionDefault
 Affects: [product.scaleToggle](local/product/diagram.md#scaletoggle)
 Subject: `diagram.scale.mode`
@@ -2797,6 +3037,14 @@ default the other way.
 - [product.scaleToggle](local/product/diagram.md#scaletoggle) — Active; the default is per-section for the size metrics and
   global for frequency.
 - [frequencyMetric](#frequencymetric) — its "no worse than Global" aside is withdrawn, above.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.scaleToggle sha256:dc965113eddd0f351a06f819b43eb1aa77cefab09c338c06ec1e59b3bdfdcc26
+```
 
 ## sharedCountShownOnBoth
 
@@ -2872,6 +3120,15 @@ It does not make the Frequency ordering right for Mangrove Yellow Warbler, which
 sit in a tier its own records do not earn. That is the honest consequence of eBird not
 separating the two: the records are real, the tier is real, and the attribution is the part
 nobody knows. The label is what keeps the page from asserting the part nobody knows.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.namesRecordsFiledUnder sha256:fb967cf0dc0ab95032416d4a0f8cddef957a9a217434c22bb878f3f95bd401b8
+product.shareOfRecords sha256:0ce59640a16f4a5508e3220dd633e5c36afaf9df221a873bd2d4190bc1caabb0
+```
 
 ## regionJoinNormalizes
 
@@ -3027,6 +3284,15 @@ them the controls behave differently *before* they click, which is the thing wor
 Each sits under its own group behind a thin rule the width of the wider of the buttons or the
 text — an inline-flex column sizes to its widest child, so the Frequency rule tracks its own
 caption without anything being measured.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.joinsReportDrops sha256:1c1875de512e602918f4daadb0fc0798d2a3c950245661afe456ecdd8e28d9e4
+product.orderByFrequency sha256:6edcfb46b26ba2af2e309d55df696bdd2457ae6c28609d8afde8e5d2adaf927e
+```
 
 ## monthPresence
 
@@ -3189,8 +3455,16 @@ the equator. The twelve months stand unlabeled and ungrouped.
 **A "This month" control.** Dropped by the owner: clicking **All** when every month is
 selected clears them, so the current month is two clicks away and a dedicated control buys
 one. It would also have made the index time-dependent, breaking
-[acceptance.honestRevalidation](acceptance.md#honestrevalidation)'s invariant that a page is a pure function of its build and
+[app.honestRevalidation](composed/internal/app/acceptance.md#honestrevalidation)'s invariant that a page is a pure function of its build and
 its URL.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.regionAndMonthFilter sha256:70108f5867ddfa9cd977f2961d8975f593708b6f599803257f3d2edc3a2330bc
+```
 
 ## ebirdSilenceNotAbsence
 
@@ -3228,7 +3502,7 @@ measurement of absence.
    - **a seasonal window** is confirmed when eBird's monthly rate inside it is **at most 5%** of
      its rate in the same region's other months;
    - **a whole-year listing** is confirmed when iNaturalist holds **at least three times** what
-     eBird does there — [acceptance.disagreementsDeclared](acceptance.md#disagreementsdeclared)'s existing test for a source that
+     eBird does there — [dataset.disagreementsDeclared](composed/internal/dataset/acceptance.md#disagreementsdeclared)'s existing test for a source that
      out-records eBird, applied to one region.
    Only months the window covers **entirely** are marked; a month it half covers still holds
    half its records and is judged on them.
@@ -3259,6 +3533,14 @@ Presence ([product.regionAndMonthFilter](local/product/filtering.md#regionandmon
 alone and using iNaturalist only where eBird is confirmed silent is the larger change in work
 arising; this decision builds the table and the confirmation it will need, and fixes the bug
 that was live.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.namesRecordsFiledUnder sha256:fb967cf0dc0ab95032416d4a0f8cddef957a9a217434c22bb878f3f95bd401b8
+```
 
 ## countEbirdFirst
 
@@ -3319,6 +3601,18 @@ have dropped Long-eared Owl from every US state: eBird's silence there is total,
 iNaturalist records do not reach 1 per million of New York's 62 million. Fixing the threshold
 without knowing where eBird withholds trades one error for its opposite.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.namesRecordsFiledUnder sha256:fb967cf0dc0ab95032416d4a0f8cddef957a9a217434c22bb878f3f95bd401b8
+product.regionAndMonthFilter sha256:70108f5867ddfa9cd977f2961d8975f593708b6f599803257f3d2edc3a2330bc
+product.scopeIsRecurringAvifauna sha256:ccadbc2c21d598c8bd3a4cb01196e5d507395c0276694bbab8c5dd780d692a46
+product.shareOfRecords sha256:0ce59640a16f4a5508e3220dd633e5c36afaf9df221a873bd2d4190bc1caabb0
+product.statusIsPublished sha256:bcf416f48c6868083e61771a2290ae68ad57f582fe1d95045a8895f070657b09
+```
+
 ---
 
 ## whiteTernBorrows
@@ -3370,9 +3664,17 @@ on the eBird row.
 
 - [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources) — Active; the traits line names the exception.
 - [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) — Active and unchanged; the sheet already appears in `source`.
-- [acceptance.whiteTernFromBirdlife](acceptance.md#whiteternfrombirdlife) — new.
+- [dataset.whiteTernFromBirdlife](composed/internal/dataset/acceptance.md#whiteternfrombirdlife) — new.
 - abaSpeciesWithoutAvonet's open taxonomic check on the four disguised splits is **not** closed by this record.
 - Open: whether Vega Gull should borrow from BirdLife's *Larus argentatus* in the same way.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.lengthAndWingspanSources sha256:ef8e31d060fe9a9487f624481a20fca719a6a67bc264fad9b54814b8806a8454
+```
 
 ---
 
@@ -3447,8 +3749,16 @@ Both are recorded in [todo.md](../todo.md).
 
 - [product.borrowedMeasurementsSaySo](local/product/measurements.md#borrowedmeasurementssayso) — new.
 - [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources), [product.provenancePerMetric](local/product/measurements.md#provenancepermetric) — Active and unchanged.
-- [acceptance.whiteTernFromBirdlife](acceptance.md#whiteternfrombirdlife) — Vega Gull now expects `AVONET1_BirdLife`.
-- [acceptance.sharedMeasurementsDisclosed](acceptance.md#sharedmeasurementsdisclosed) — new.
+- [dataset.whiteTernFromBirdlife](composed/internal/dataset/acceptance.md#whiteternfrombirdlife) — Vega Gull now expects `AVONET1_BirdLife`.
+- [app.sharedMeasurementsDisclosed](composed/internal/app/acceptance.md#sharedmeasurementsdisclosed) — new.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.borrowedMeasurementsSaySo sha256:fc9107b4ff572b4a3cb5493332d17c9d9dc53243827f6d0f04741101cc981671
+```
 
 ---
 
@@ -3495,7 +3805,15 @@ specimens are tagged American Herring Gull; the other 4 carry no subspecies.
 ### Status of requirements touched
 
 - [product.lengthAndWingspanSources](local/product/measurements.md#lengthandwingspansources) — Active; the traits line names this case.
-- [acceptance.herringGullFromEuropeanRow](acceptance.md#herringgullfromeuropeanrow) — new.
+- [dataset.herringGullFromEuropeanRow](composed/internal/dataset/acceptance.md#herringgullfromeuropeanrow) — new.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.lengthAndWingspanSources sha256:ef8e31d060fe9a9487f624481a20fca719a6a67bc264fad9b54814b8806a8454
+```
 
 ---
 
@@ -3535,7 +3853,15 @@ nothing about where the bar sits, so it is done on its own.
 
 - [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter) — Active; membership no longer decides what is counted.
 - [product.shareOfRecords](local/product/presentation.md#shareofrecords) — Active and unchanged; its figure now has all the records it names.
-- [acceptance.belowBarCountsKept](acceptance.md#belowbarcountskept) — new.
+- [app.belowBarCountsKept](composed/internal/app/acceptance.md#belowbarcountskept) — new.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.regionAndMonthFilter sha256:70108f5867ddfa9cd977f2961d8975f593708b6f599803257f3d2edc3a2330bc
+```
 
 ---
 
@@ -3582,7 +3908,17 @@ distracting.
 - [product.escapedBirdsListed](local/product/measurements.md#escapedbirdslisted) — new.
 - [product.statusIsPublished](local/product/dataset.md#statusispublished) — Active; `exotic` exists, as a declared list.
 - [product.declaredExceptions](local/product/dataset.md#declaredexceptions) — Active; its second class is now implemented for escapes.
-- [acceptance.escapedBirdsListedAndServed](acceptance.md#escapedbirdslistedandserved) — new.
+- [app.escapedBirdsListedAndServed](composed/internal/app/acceptance.md#escapedbirdslistedandserved) — new.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.declaredExceptions sha256:9a28ddbb4f98a887977e08028626c5bc4f4f5590097450dd62f37dee4f63841e
+product.escapedBirdsListed sha256:26c1e2f8c216f569dd1ef099b8661a1264629c7ca3f9dde3f790154eb226be0f
+product.statusIsPublished sha256:bcf416f48c6868083e61771a2290ae68ad57f582fe1d95045a8895f070657b09
+```
 
 ## stickFigure
 
@@ -3617,12 +3953,20 @@ site, *diagram* now means only the pipeline diagram.
 ### Status of requirements touched
 
 - [product.segmentComposition](local/product/diagram.md#segmentcomposition) — Active; states the reader-facing term.
-- [acceptance.readersToldStickFigure](acceptance.md#readerstoldstickfigure) — new.
+- [app.readersToldStickFigure](composed/internal/app/acceptance.md#readerstoldstickfigure) — new.
 
 ## Work arising
 
 Moved to [todo.md](../todo.md) on 2026-10-13, with the design notes that supported it, so that
 everything outstanding is in one file. Decisions stay here; open work does not.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.segmentComposition sha256:dcca20320694e19f7c866fdd574ab6487a93ae2817d05b8a7a45b1ee0bb750b1
+```
 
 ---
 
@@ -3651,7 +3995,7 @@ from outside. `repoLinks` in `cmd/birdview` maps one to the other, so neither na
 
 ### What the move exposed
 
-`TestServedDocumentsHaveNoBrokenLinks` ([acceptance.categoryOriginShown](acceptance.md#categoryoriginshown)) was written for exactly the bug a move like this
+`TestServedDocumentsHaveNoBrokenLinks` ([app.categoryOriginShown](composed/internal/app/acceptance.md#categoryoriginshown)) was written for exactly the bug a move like this
 causes — a repository link like `../river/product.md` left unrewritten, so a browser gets a 404 —
 and passed over 53 of them, because it followed only links that began with `/`. An unrewritten
 link is relative, so it was skipped rather than fetched. The test could never have caught its own
@@ -3667,6 +4011,14 @@ provenance records under `river/sources/`. They are listed by name in the test r
 excused, so a new broken link still fails and a fixed one must leave the list. What they should
 become — links to the published repository, or plain code spans — is undecided and logged in
 [todo.md](../todo.md).
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+tech.bundleIsNormative sha256:8739c4edb3f68656e2ef8e5cd45ed3af22daee1dc7006acde07a76f931c8305d
+```
 
 ---
 
@@ -3718,11 +4070,11 @@ requirement linked to source code or a data table the site could not serve.
 
 ### Guardrails, and one coverage gap closed
 
-The broken-links check ([acceptance.categoryOriginShown](acceptance.md#categoryoriginshown)) now confirms that every repository link names a file that
+The broken-links check ([app.categoryOriginShown](composed/internal/app/acceptance.md#categoryoriginshown)) now confirms that every repository link names a file that
 exists in the checkout, and was watched failing on a misspelled one. The 26 known-broken links
 are gone, and the list that held them is deleted.
 
-**Stopping serving would have quietly cut [acceptance.noContactAddressPublished](acceptance.md#nocontactaddresspublished)'s coverage.** The
+**Stopping serving would have quietly cut [app.noContactAddressPublished](composed/internal/app/acceptance.md#nocontactaddresspublished)'s coverage.** The
 personal-address check scanned the requirements because they were served; they are still
 public with the repository. It now reads `river/*.md` from the checkout — the same files — and
 was watched failing on an address planted in `river/goals.md`.
@@ -3731,6 +4083,14 @@ was watched failing on an address planted in `river/goals.md`.
 
 GitHub builds a heading's anchor from its full text, so a link to `decisions.md#seasharediffers` opens
 the file at the top rather than at the entry. Logged in [todo.md](../todo.md).
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.categoryProvenance sha256:be7f6f787de132befcf7607419b74b0ab795994c2764ffb72f662e87c2e15869
+```
 
 ---
 
@@ -3752,7 +4112,7 @@ and 46 decisions — went from letter-and-number codes, a `P`, `T`, `AC` or `CR`
 to descriptive camelCase:
 [product.scopeIsRecurringAvifauna](local/product/dataset.md#scopeisrecurringavifauna),
 [tech.fetchRestrictedInputs](local/tech/delivery.md#fetchrestrictedinputs),
-[acceptance.bothCommandsBuild](acceptance.md#bothcommandsbuild),
+[repo.bothCommandsBuild](composed/internal/repo/acceptance.md#bothcommandsbuild),
 [decisions.scopeFromRecurrence](#scopefromrecurrence). This is River's convention, adopted with
 the method.
 
@@ -3858,7 +4218,7 @@ Here and Now ([product.hereSelectsLocalRegion](local/product/filtering.md#herese
    said `no-cache` and an ETag on *every* response.
 2. **A Now link carrying the server's month would put a clock into the page.** The requirement's
    ETag is a fingerprint of the build and the URL, sound only because a page has "no clock
-   anywhere in the render path", which [acceptance.honestRevalidation](acceptance.md#honestrevalidation) checks. After a month ended,
+   anywhere in the render path", which [app.honestRevalidation](composed/internal/app/acceptance.md#honestrevalidation) checks. After a month ended,
    a browser revalidating a cached index would get 304 and keep last month's Now link.
 
 ### Decided
@@ -3875,6 +4235,16 @@ Here and Now ([product.hereSelectsLocalRegion](local/product/filtering.md#herese
   every cached page would refetch in full once a month.
 - **Now only with JavaScript**, inactive otherwise like Here. It drops the server-month fallback
   the owner accepted.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.hereSelectsLocalRegion sha256:9df7e4a553f704d749f32014ba68e9396137bfce0ae520418342560c07550c3e
+product.nowSelectsCurrentMonth sha256:6a17bf07bd554f2ce65d94e5db37f365d0385923991395a5cf3e0861425f6e32
+tech.cacheLifetimeStated sha256:4122b934485424f8d7dd05bf36bae60da75aab57d7fad18b56f1a90080584eab
+```
 
 ---
 
@@ -3916,6 +4286,15 @@ they are not filtered away silently.
 Later decisions built on the reinstated filter (regionsTwoWays, seaShareDiffers, monthPresence,
 countEbirdFirst, belowBarCounted) without this entry existing; it records what they assumed.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.filtersCompose sha256:023c16782626f4f6d36f2fd84d031ad3b34874799b090e0038324b7cb7e193b0
+product.regionAndMonthFilter sha256:70108f5867ddfa9cd977f2961d8975f593708b6f599803257f3d2edc3a2330bc
+```
+
 ---
 
 ## publicPersonalDeployment
@@ -3954,6 +4333,15 @@ approve: a default is what a local run gets without anyone choosing, and a serve
 every interface by default would expose a developer's machine to its network, so the deployment
 states its address instead, `-addr 0.0.0.0:8080`, because Cloud Run must reach it.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+tech.localNowPublicLater sha256:2939bb0dccbc52a5971820e38deffae8a6f19fd9cddd7c39d6716bb5e4f06e46
+tech.servesOnLocalhost sha256:31e0135bd4bac4c589975d7209b931de9cb324290c351a519dd335e64525cd27
+```
+
 ---
 
 ## bandingCodesFromBbl
@@ -3989,6 +4377,14 @@ and Cackling Goose). The page names a second list for such birds, but no longer 
 are left without one: BirdView presents facts, and a code computed by the Laboratory's rules would
 be a code no authority assigned. Every species already has its eBird code. Decided 2026-10-27 by
 Sameer, closing [uncodedBirds](../todo-closed.md#uncodedbirds).
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.bandingCodes sha256:484c6f6a79da576f81fa5cbe2b59e8688b3499deb885ff154f97e0f2000bb620
+```
 
 ---
 
@@ -4029,6 +4425,15 @@ page compares birds with pins, where the classic view used picks. Old `/compare`
 working, which [compareUrlContract](#compareurlcontract) argued against while a comparison view
 existed.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.nextView sha256:8dcf5548dd80816163cf438983783565d8b604981530ddc3b3717ccf7fc9bfe9
+tech.stableUrls sha256:22414d0a3929afd9c2f2f2fe32bfad472f4acda4d9f6a3e0eb9fe0818c6be75f
+```
+
 ---
 
 ## homeShowsEveryMonth
@@ -4062,6 +4467,16 @@ revalidates, and only the `month=now` redirect is unstored
 ([decisions.hereAndNowCaching](#hereandnowcaching)). An address with no month, bookmarked before
 this, now shows every month rather than the month it is opened in.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.nextView sha256:8dcf5548dd80816163cf438983783565d8b604981530ddc3b3717ccf7fc9bfe9
+tech.smokeCheckAfterDeploy sha256:a8c972d26782431c9164efcd4dd5d5b7cede1108572bc5c01f561bd05a97e08b
+tech.stableUrls sha256:22414d0a3929afd9c2f2f2fe32bfad472f4acda4d9f6a3e0eb9fe0818c6be75f
+```
+
 ---
 
 ## tileNumbersFirst
@@ -4094,6 +4509,17 @@ right corner, where it stood level with the mass cube; the cube is unchanged. Th
 suggestions (a month hint, a type face for small text, pinned birds first, the cube's meaning) are
 open as [todo.homePageReaderFeedback](../todo.md#homepagereaderfeedback).
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.bandingCodes sha256:484c6f6a79da576f81fa5cbe2b59e8688b3499deb885ff154f97e0f2000bb620
+product.inaturalistLink sha256:3959be1e36c0f834d7b1227cb06470641daf689f99017a166fb81b06c2829ef5
+product.nextView sha256:8dcf5548dd80816163cf438983783565d8b604981530ddc3b3717ccf7fc9bfe9
+product.tileContents sha256:681ebefd859b1d23bbebf13b47aaf709c6017409c516cb4b9eda0bae6b01fb54
+```
+
 ---
 
 ## tileMeasurementLines
@@ -4125,6 +4551,16 @@ cut the scientific name on half of them; the iNat link costs one tile at 360px a
 scientific name (Cactus Wren). The mass label is the one label on a tile because the mass has no
 part of the bird to sit beside, and the cube is its picture.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.bandingCodes sha256:484c6f6a79da576f81fa5cbe2b59e8688b3499deb885ff154f97e0f2000bb620
+product.inaturalistLink sha256:3959be1e36c0f834d7b1227cb06470641daf689f99017a166fb81b06c2829ef5
+product.tileContents sha256:681ebefd859b1d23bbebf13b47aaf709c6017409c516cb4b9eda0bae6b01fb54
+```
+
 ---
 
 ## ebirdLinkReplacesInaturalist
@@ -4151,6 +4587,16 @@ confidence rule, while every species shows its eBird code beside its name alread
 are not vendored; a link copies nothing, and checking them is open as
 [todo.ebirdTermsUnread](../todo.md#ebirdtermsunread).
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.ebirdLink sha256:be37399c52fad358c0ea77d17b9285b8ccf98a8ad779977fcee4e34d4ba02618
+product.inaturalistLink sha256:3959be1e36c0f834d7b1227cb06470641daf689f99017a166fb81b06c2829ef5
+product.tileContents sha256:681ebefd859b1d23bbebf13b47aaf709c6017409c516cb4b9eda0bae6b01fb54
+```
+
 ---
 
 ## inaturalistSourcesRetired
@@ -4176,6 +4622,15 @@ GBIF, under `gbif`.
 ### Why
 
 The owner asked for the cleanup once the link moved to eBird.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+tech.identifiedClient sha256:87363ca77354801c348a4f6398fc6d94d4ca0583ea0d6d5b10a1ca9bebc8015d
+tech.pacedInaturalistMapping sha256:348d9c0c7a68f8715cd702b06c14d4e1555e84ccbb6be721cf8a75a378d775e8
+```
 
 ---
 
@@ -4224,6 +4679,15 @@ Each species the table changes keeps its earlier page address, so links to it st
 code beside the name and its eBird link use the table's code. The three AviList draws more
 narrowly than eBird link to eBird's broader species.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.ebirdLink sha256:be37399c52fad358c0ea77d17b9285b8ccf98a8ad779977fcee4e34d4ba02618
+product.namesFromAvilist sha256:542e69c602c77c6fd99e4a1556502c6d570b8a49a4ea9e3f07483ff6e331a701
+```
+
 ---
 
 ## ebirdCodeAliases
@@ -4258,6 +4722,15 @@ answering, redirected. Cornell's codes for a narrower concept count as aliases o
 contains it, as `eamwre1`, Eastern Marsh Wren, finds Marsh Wren; that sends a reader to the bird
 BirdView draws for it, not to a different one.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.ebirdLink sha256:be37399c52fad358c0ea77d17b9285b8ccf98a8ad779977fcee4e34d4ba02618
+tech.stableUrls sha256:22414d0a3929afd9c2f2f2fe32bfad472f4acda4d9f6a3e0eb9fe0818c6be75f
+```
+
 ---
 
 ## textSizeFloor
@@ -4288,6 +4761,17 @@ the owner chose to retire the leader lines, which he liked, for names keyed by c
 tile on both pages now that the home tile carries what the species tile did. A labeled diagram at
 wide widths only, with leaders, remains possible later. Monospace was what made the measurement
 lines too wide to enlarge.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.labeledDetailDiagram sha256:437cc885482ca19391824b8f2bb03c7bb060d309ce2857e1da9472f0e20c4afa
+product.tileContents sha256:681ebefd859b1d23bbebf13b47aaf709c6017409c516cb4b9eda0bae6b01fb54
+product.tileOpensDetail sha256:307be6e7d786669bca79969970bb237a417cb3bd13f143c5d9ccf2cbbc69c9f3
+tech.textSizeFloor sha256:aab613c4188da7769a9af082ee3f172494dc5db23f541dfcd1d7c9a518303618
+```
 
 ---
 
@@ -4320,6 +4804,15 @@ reads as three families rather than six colors. The bill's earlier `#f59e0b` and
 were 6.8:1 on the panel, which is why the names first took lighter tints; every color now clears
 the floor on its own. The cube stays a blue, so it still reads as water.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.labeledDetailDiagram sha256:437cc885482ca19391824b8f2bb03c7bb060d309ce2857e1da9472f0e20c4afa
+product.oneDiagramVocabulary sha256:a018c2abff5874932df86399cebcdafd5664b62596b53984d2c674dda6d73e7f
+```
+
 ---
 
 ## pinnedGroupLeads
@@ -4347,6 +4840,14 @@ The owner, reconsidering, chose a group over moving the birds, so the tiers stil
 pinned bird falls. The 2026-11-01 reader run found pinned birds under Pinned only stacked one per tier
 in a single column, which readers called scrolling rather than comparing
 ([todo.pinnedSideBySide](../todo-closed.md#pinnedsidebyside)); the group lays them out in a row.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.nextView sha256:8dcf5548dd80816163cf438983783565d8b604981530ddc3b3717ccf7fc9bfe9
+```
 
 ---
 
@@ -4380,6 +4881,15 @@ the deepest that holds apart from the emerald for tritanopes; the head and neck 
 to `#94a3b8`, so the white tail is not mistaken for them, which their strokes allow since their
 names are plain text and a stroke needs only 3:1.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.labeledDetailDiagram sha256:437cc885482ca19391824b8f2bb03c7bb060d309ce2857e1da9472f0e20c4afa
+product.oneDiagramVocabulary sha256:a018c2abff5874932df86399cebcdafd5664b62596b53984d2c674dda6d73e7f
+```
+
 ---
 
 ## innerSpanDerived
@@ -4410,6 +4920,15 @@ chose Inner span, then Inner on the tile, because "Inner span" overflowed a 360p
 datasets, specimens, and axes (Fox's spread-wing wingspan, AVONET's closed-wing chord), and
 subtracting them doubles the chord's error and magnifies the wingspan's: for the Great Blue Heron
 1,826 mm − 2 × 467 mm = 892 mm, where a 3% error in the wingspan is a 6% error in the result.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.labeledDetailDiagram sha256:437cc885482ca19391824b8f2bb03c7bb060d309ce2857e1da9472f0e20c4afa
+product.tileContents sha256:681ebefd859b1d23bbebf13b47aaf709c6017409c516cb4b9eda0bae6b01fb54
+```
 
 ---
 
@@ -4442,6 +4961,14 @@ beside it, so a reader who cannot tell its color from the wing's still cannot mi
 wing. WCAG 1.4.1 asks only that color not be the only cue, which place, shape, and label satisfy;
 the ΔE rule is BirdView's own, stricter one, and it still holds among the figure's parts, which
 touch one another and are told apart by color.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.oneDiagramVocabulary sha256:a018c2abff5874932df86399cebcdafd5664b62596b53984d2c674dda6d73e7f
+```
 
 ---
 
@@ -4513,6 +5040,16 @@ message.
   GADM's; at county scale Here needs boundaries keyed to GADM codes, and sea boundaries keyed to
   Marine Regions ids, which is open ([todo.countyRegions](../todo.md#countyregions)).
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.regionAndMonthFilter sha256:70108f5867ddfa9cd977f2961d8975f593708b6f599803257f3d2edc3a2330bc
+tech.regionBoundaries sha256:ae3a3078c216330c02735eae520b68c98c9d0b1b2d1c03545c2f40823e1336c8
+tech.stableUrls sha256:22414d0a3929afd9c2f2f2fe32bfad472f4acda4d9f6a3e0eb9fe0818c6be75f
+```
+
 ---
 
 ## gbifTermsMet
@@ -4541,6 +5078,17 @@ The owner confirmed the use is non-commercial, which the posture requirement had
 2026-10-22 without connecting it to these counts. The guidelines ask that data read from the
 search API, which carries no DOI, be credited to each publisher or covered by a derived dataset;
 crediting the publishers is the direct form, and needs no account or registration.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+gbifterms.CiteApiDataByDerivedDataset sha256:946cb5f209b4f225310f58d3e11b8a1e42680ed854b46e977c9d269ffc92dcc5
+gbifterms.PublisherLicencesPrevail sha256:6ba420a09fbb25db656169540d8612b55a8a2213c41408086a3e9e8c8afaca2e
+product.selfDescriptionStaysTrue sha256:ab6ede1533e9e9e9be7840e3a91cbe41d4d07e946a36b29a035476e475266d8e
+tech.localNowPublicLater sha256:2939bb0dccbc52a5971820e38deffae8a6f19fd9cddd7c39d6716bb5e4f06e46
+```
 
 ---
 
@@ -4577,6 +5125,14 @@ distinct years, both needing the year in the download ([todo.countyFloorRevisit]
 the set barely narrows (New York City's five list 428 of the state's 450), so the county's share
 ordering is where the choice shows.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.regionAndMonthFilter sha256:70108f5867ddfa9cd977f2961d8975f593708b6f599803257f3d2edc3a2330bc
+```
+
 ---
 
 ## countiesBehindFlag
@@ -4604,6 +5160,15 @@ work pushed rather than kept local. A flag lets `main` stay deployable with coun
 branch would have done the same at the cost of merging later. The flag removes counties rather than
 only hiding the setting, because a county left in the data would be counted with its state in every
 figure over all regions.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.nextView sha256:8dcf5548dd80816163cf438983783565d8b604981530ddc3b3717ccf7fc9bfe9
+product.regionAndMonthFilter sha256:70108f5867ddfa9cd977f2961d8975f593708b6f599803257f3d2edc3a2330bc
+```
 
 ---
 
@@ -4638,6 +5203,14 @@ build holds complete is that process, since a new species, or a changed AVONET v
 naming it. `trait.Supplementary` said it was "kept deliberately short", which the requirement's "as
 many as apply" already overruled; a review of every species settles it.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.habitatAndDietFilters sha256:48315c9732d4db189bb14e00e5889a818161ba5743a07475895d93759beb1205
+```
+
 ---
 
 ## habitatGroups
@@ -4669,6 +5242,16 @@ than eleven, and invents no category, each group being a union of AVONET's own t
 chose this over letting the place stand in for habitat, which remains an idea for later
 ([todo.placeAsHabitat](../todo.md#placeashabitat)).
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.habitatAndDietFilters sha256:48315c9732d4db189bb14e00e5889a818161ba5743a07475895d93759beb1205
+product.nextView sha256:8dcf5548dd80816163cf438983783565d8b604981530ddc3b3717ccf7fc9bfe9
+tech.stableUrls sha256:22414d0a3929afd9c2f2f2fe32bfad472f4acda4d9f6a3e0eb9fe0818c6be75f
+```
+
 ---
 
 ## habitatGroupShortcuts
@@ -4698,6 +5281,15 @@ groups are rearranged, needs no redirect, and keeps the filter's values the data
 codes are ([regionCodesFromData](#regioncodesfromdata)); the shortcut keeps the coarse choice a birder wants one click
 away, and the habitats themselves remain choosable.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.habitatAndDietFilters sha256:48315c9732d4db189bb14e00e5889a818161ba5743a07475895d93759beb1205
+tech.stableUrls sha256:22414d0a3929afd9c2f2f2fe32bfad472f4acda4d9f6a3e0eb9fe0818c6be75f
+```
+
 ---
 
 ## reportingFrequencyParam
@@ -4721,6 +5313,15 @@ The filter measures the share of reports, not how many birds are present or how 
 were counted. "How common" reads as a claim about the birds; "Reporting frequency" says what was
 measured. The parameter follows the label so the address reads the same way, and the redirect keeps
 the one day's links working, as [tech.stableUrls](local/tech/delivery.md#stableurls) requires of a renamed parameter.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.reportingFrequencyFilter sha256:2fd283371496c51ee3f26dffcd9609b6d1aac17dc55973db173deb69b64984b4
+tech.stableUrls sha256:22414d0a3929afd9c2f2f2fe32bfad472f4acda4d9f6a3e0eb9fe0818c6be75f
+```
 
 ---
 
@@ -4755,6 +5356,15 @@ their length, drew heads of 0.18 of it from the mass model. The owner chose the 
 by hand for the two families the issue names, over measuring every species from photographs, which
 remains [todo.photoProportions](../todo.md#photoproportions) with its cost estimate on the issue.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.craniumFromMass sha256:4ad174053c162c1e491beb1555a10e461c15901bcd06c809d681a3d406b19c29
+product.neckModelPerFamily sha256:cfea26dad403759948ba6bcd8d1697f7e4fa13de9ec66d9b598484c9f55d6f8a
+```
+
 ---
 
 ## proportionsReviewedPerTaxon
@@ -4785,6 +5395,16 @@ without photographs. The owner asked for a tool that makes each review quick: ph
 figures side by side, a choice between current and adjusted, and sliders to set the proportions by
 hand. A table records each decision and who made it, which a constant in the code cannot.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.craniumFromMass sha256:4ad174053c162c1e491beb1555a10e461c15901bcd06c809d681a3d406b19c29
+product.neckModelPerFamily sha256:cfea26dad403759948ba6bcd8d1697f7e4fa13de9ec66d9b598484c9f55d6f8a
+tech.proportionsReviewTool sha256:6a072e2c2ab65166d1747704304dbe72c91013f418f87b69d8080192a4d9d78c
+```
+
 ---
 
 ## allModeledProportionsReviewed
@@ -4812,6 +5432,16 @@ photograph: the body is modeled too, and lining the figure up needed turning it 
 Bill, tail, and wing chord are measured and stay as AVONET gives them. A modeled wingspan's
 regression states its own error, so a factor set by eye overrides a fitted model; the reviewed row
 and its provenance say so.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.lengthAndWingspanSources sha256:ef8e31d060fe9a9487f624481a20fca719a6a67bc264fad9b54814b8806a8454
+product.trunkFromMass sha256:0a586382da80cea99ec28c5863803a1be4cfa49587beccba67e475c6bc3fd8ab
+tech.proportionsReviewTool sha256:6a072e2c2ab65166d1747704304dbe72c91013f418f87b69d8080192a4d9d78c
+```
 
 ---
 
@@ -4845,6 +5475,17 @@ too rare to cover many species. Every other angle foreshortens some part, so a v
 matching the overlay would carry the camera's angle, not the bird's shape. The experiment was
 worth running: it showed which kind of evidence cannot be had, before any pipeline was built on it.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.craniumFromMass sha256:4ad174053c162c1e491beb1555a10e461c15901bcd06c809d681a3d406b19c29
+product.neckModelPerFamily sha256:cfea26dad403759948ba6bcd8d1697f7e4fa13de9ec66d9b598484c9f55d6f8a
+product.trunkFromMass sha256:0a586382da80cea99ec28c5863803a1be4cfa49587beccba67e475c6bc3fd8ab
+tech.proportionsReviewTool sha256:6a072e2c2ab65166d1747704304dbe72c91013f418f87b69d8080192a4d9d78c
+```
+
 ---
 
 ## openOceanSplit
@@ -4854,7 +5495,7 @@ worth running: it showed which kind of evidence cannot be had, before any pipeli
 Date: 2026-11-09
 Decided by: Sameer
 Status: accepted
-Affects: [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters), [dataset.seaDistanceDerived](local/product/dataset.md#seadistancederived), [tech.seaDistanceTable](local/tech/delivery.md#seadistancetable), [tech.stableUrls](local/tech/delivery.md#stableurls)
+Affects: [product.habitatAndDietFilters](local/product/months.md#habitatanddietfilters), [product.seaDistanceDerived](local/product/dataset.md#seadistancederived), [tech.seaDistanceTable](local/tech/delivery.md#seadistancetable), [tech.stableUrls](local/tech/delivery.md#stableurls)
 
 ### Decided
 
@@ -4884,6 +5525,17 @@ owner chose 80% over 85% for the shearwaters and Sooty Tern it adds. No natural 
 77% and 86%, so the edges go to review: Sabine's Gull passes on its tundra and inland records, and
 Masked Booby misses at 79.5%. Beach birds and sea ducks are not separated by this; that stays with
 the per-species review.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.habitatAndDietFilters sha256:48315c9732d4db189bb14e00e5889a818161ba5743a07475895d93759beb1205
+product.seaDistanceDerived sha256:eca8ab54a1d0a1cd9fc4af3ee7bf48f230c7be222a937fb4f8ba96e8c4c43cbf
+tech.seaDistanceTable sha256:1eec6859455536eb20a19edb2351fa1abed40793bd69f563af8e9aa356f458e6
+tech.stableUrls sha256:22414d0a3929afd9c2f2f2fe32bfad472f4acda4d9f6a3e0eb9fe0818c6be75f
+```
 
 ---
 
@@ -4919,6 +5571,14 @@ Filtering New York in August to the shorebirds of the shore took four families a
 the owner asked for one control that sets all the relevant settings for a kind of bird, placed
 first because a kind can span orders.
 
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.birdPresets sha256:e86ac0adb2769e1048c8dd5b6873c5a5c9a45f05e4e7b62d3876a513ecdef755
+```
+
 ---
 
 ## regionZonesByMapOnly
@@ -4943,4 +5603,133 @@ Region is for narrowing to the birds one is likely to see. Here does that from w
 and a traveler looks up the destination by name; groups help a reader find a region in a list, which
 the map's zones do, and add nothing about birds. Clustering New York's counties the same way showed
 the derived groups mostly sort places by how well birded they are.
+
+### Sums
+
+Recorded by `river upgrade` on 2026-11-10, not when decided.
+
+```
+product.regionAndMonthFilter sha256:70108f5867ddfa9cd977f2961d8975f593708b6f599803257f3d2edc3a2330bc
+```
+
+---
+
+## riverV2PackagesAndSplits
+
+**Compose BirdView into `app`, `dataset`, and `repo` under River 2.0, place morphometric and badge-color models in `dataset`, and separate restated license rules from local requirements**
+
+Date: 2026-11-10
+Decided by: Sameer
+Status: accepted
+Affects: [product.craniumFromMass](local/product/diagram.md#craniumfrommass), [product.trunkFromMass](local/product/diagram.md#trunkfrommass), [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), [product.generatedBadgeColors](local/product/dataset.md#generatedbadgecolors),
+  [product.selfDescriptionStaysTrue](local/product/presentation.md#selfdescriptionstaystrue), [tech.fetchRestrictedInputs](local/tech/delivery.md#fetchrestrictedinputs), [tech.localNowPublicLater](local/tech/posture.md#localnowpubliclater), [gbifterms.RetainOwnershipIdentifier](imported/gbif.org/gbifterms/gbifterms.md#retainownershipidentifier)
+
+### Decided
+
+1. **Three internal composed packages.** BirdView's requirements compose into `composed/internal/app`
+   (the web server and user interface), `composed/internal/dataset` (the data pipeline, ingest,
+   taxonomy, occurrence derivation, morphometric and badge-color models, and data-source terms), and
+   `composed/internal/repo` (repository structure, build, container image, release gates, and
+   process). Legacy `requirements/acceptance.md` retires into those three packages and
+   `river/conformance.md`, dropping withdrawn criteria from `composed/`.
+2. **Morphometric and badge-color models belong to `dataset`.** [product.craniumFromMass](local/product/diagram.md#craniumfrommass),
+   [product.trunkFromMass](local/product/diagram.md#trunkfrommass), [product.neckModelPerFamily](local/product/diagram.md#neckmodelperfamily), and [product.generatedBadgeColors](local/product/dataset.md#generatedbadgecolors) are computed and
+   serialized into `species.json` by `birdview-ingest`, so they belong to `dataset`; `app` keeps the
+   rendering rules that draw them.
+3. **Three mixed requirements split into local intent and composed source obligations.**
+   [tech.fetchRestrictedInputs](local/tech/delivery.md#fetchrestrictedinputs) states BirdView's local `fetched/` build-input mechanism without
+   restating publisher prohibitions; [product.selfDescriptionStaysTrue](local/product/presentation.md#selfdescriptionstaystrue) states local documentation
+   and page-credit currency while CC BY and GBIF attribution obligations compose into `app`; and
+   [tech.localNowPublicLater](local/tech/posture.md#localnowpubliclater) states BirdView's personal, non-commercial deployment posture while
+   GBIF's prevailing-license rules compose into `dataset` and `app` ([gbifTermsMet](#gbiftermsmet)).
+   [gbifterms.RetainOwnershipIdentifier](imported/gbif.org/gbifterms/gbifterms.md#retainownershipidentifier) is excluded in `dataset` because BirdView shares no
+   occurrence record onward, only derived per-region lists and counts.
+
+### Why
+
+Upgrading to River 2.0 completes the separation between immutable source transcriptions, pure local
+intent, and composed obligations, and aligns each requirement and acceptance criterion with the
+component (`app`, `dataset`, or `repo`) it governs. Keeping morphometric and palette generation in
+`dataset` matches both the build boundary (`birdview-ingest`) and any future dataset publication.
+
+### Sums
+
+```
+gbifterms.RetainOwnershipIdentifier sha256:09647506f378ef1878820b53cc5fb9128ed3e852e26a5d160b857b86efc96fcf
+product.craniumFromMass sha256:4ad174053c162c1e491beb1555a10e461c15901bcd06c809d681a3d406b19c29
+product.generatedBadgeColors sha256:0ef8f8a5ed6e3d7153f6ba5a2252ac60a02f0653e27caee92242cfc2d9edfa59
+product.neckModelPerFamily sha256:cfea26dad403759948ba6bcd8d1697f7e4fa13de9ec66d9b598484c9f55d6f8a
+product.selfDescriptionStaysTrue sha256:ab6ede1533e9e9e9be7840e3a91cbe41d4d07e946a36b29a035476e475266d8e
+product.trunkFromMass sha256:0a586382da80cea99ec28c5863803a1be4cfa49587beccba67e475c6bc3fd8ab
+tech.fetchRestrictedInputs sha256:13b3f08bafea342cf2671269f30a1752701066c7b071ccbf04c39c2752399118
+tech.localNowPublicLater sha256:2939bb0dccbc52a5971820e38deffae8a6f19fd9cddd7c39d6716bb5e4f06e46
+```
+
+---
+
+## gbifPipelineTermsScope
+
+**GBIF's API, registration, record-sharing, and warranty clauses apply to `dataset`**
+
+Date: 2026-11-10
+Decided by: Sameer
+Status: accepted
+Applies to: dataset
+Affects: [gbifterms.RetainOwnershipIdentifier](imported/gbif.org/gbifterms/gbifterms.md#retainownershipidentifier), [gbifterms.ApiWithinSpecifications](imported/gbif.org/gbifterms/gbifterms.md#apiwithinspecifications),
+  [gbifterms.AccurateRegistration](imported/gbif.org/gbifterms/gbifterms.md#accurateregistration), [gbifterms.DataNotGuaranteed](imported/gbif.org/gbifterms/gbifterms.md#datanotguaranteed)
+
+### Decided
+
+Within `gbifterms`, the four pipeline and platform clauses — API use, download-account
+registration, record-level ownership identifiers, and absence of data/service warranty — apply to
+`dataset`, which queries GBIF and builds the derived tables. The three citation and license clauses
+([gbifterms.CiteDownloadDoi](imported/gbif.org/gbifterms/gbifterms.md#citedownloaddoi), [gbifterms.CiteApiDataByDerivedDataset](imported/gbif.org/gbifterms/gbifterms.md#citeapidatabyderiveddataset), [gbifterms.PublisherLicencesPrevail](imported/gbif.org/gbifterms/gbifterms.md#publisherlicencesprevail))
+apply to both `dataset` and `app`, since `app` renders the public source credits.
+
+### Why
+
+`cmd/birdview` makes no network request at runtime ([tech.selfContainedServer](local/tech/delivery.md#selfcontainedserver)) and holds no GBIF
+credentials or raw occurrence records, so scoping those four clauses to `dataset` matches the
+architectural boundary without excluding them from the module.
+
+### Sums
+
+```
+gbifterms.AccurateRegistration sha256:41b022fbb883f9ecc348126cb8577c4e62d2d1e4d4ffd987ca53c8089d20d080
+gbifterms.ApiWithinSpecifications sha256:6e4f0b7f98d27b45922e05157834343e51ff306126902c9bed15c70581c6a557
+gbifterms.DataNotGuaranteed sha256:d16460d893bfa19364afa9988cd999b95142c0054a53e7d1c781df8fc3b90f13
+gbifterms.RetainOwnershipIdentifier sha256:09647506f378ef1878820b53cc5fb9128ed3e852e26a5d160b857b86efc96fcf
+```
+
+---
+
+## classicScaleDecisionsRetired
+
+**Both classic-view scale-default decisions are superseded with the classic view**
+
+Date: 2026-11-11
+Decided by: Sameer
+Status: accepted
+Supersedes: perSectionDefault, frequencyGlobalScale
+Affects: [product.nextView](local/product/presentation.md#nextview)
+
+### Decided
+
+[perSectionDefault](#persectiondefault) and [frequencyGlobalScale](#frequencyglobalscale) are
+superseded: the home page ([product.nextView](local/product/presentation.md#nextview)) draws one
+shared scale across the shown birds and has neither a per-section scale toggle nor the classic
+view's collapsible Presentation panel.
+
+### Why
+
+[classicViewRemoved](#classicviewremoved) withdrew [product.scaleToggle](local/product/diagram.md#scaletoggle)
+and [product.pageExplainsItself](local/product/presentation.md#pageexplainsitself) when the classic
+view was removed on 2026-10-27, leaving nothing in force for either scale-default decision to
+govern.
+
+### Sums
+
+```
+product.nextView sha256:8dcf5548dd80816163cf438983783565d8b604981530ddc3b3717ccf7fc9bfe9
+```
 

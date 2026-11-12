@@ -259,7 +259,7 @@ const trunkExponent = 0.37
 // little shorter, large birds substantially longer.
 //
 // Derivation: 18.0 * 63.4^0.31 / 63.4^0.37 = 14.0329. Carried to four decimals
-// because acceptance.trunkScalesLikeSkeletons checks the anchor to 0.01 mm and 14.03 misses it by 0.013.
+// because dataset.trunkScalesLikeSkeletons checks the anchor to 0.01 mm and 14.03 misses it by 0.013.
 const trunkCoefficient = 14.0329
 
 // anchorMassG is the mass at which the recalibration of decisions.trunkExponentCalibrated is a no-op: the
@@ -285,7 +285,7 @@ func NeckLength(bodyMm float64, family, genus string, rv Review) (float64, strin
 func Round1(v float64) float64 { return math.Round(v*10) / 10 }
 
 // BalanceToSum adjusts body so the five rounded segments sum exactly to the
-// rounded total, which product.segmentsSumToLength requires and acceptance.segmentsSumExactly asserts without tolerance.
+// rounded total, which product.segmentsSumToLength requires and app.segmentsSumExactly asserts without tolerance.
 //
 // Rounding each segment independently leaves the sum up to 0.2 mm adrift; an
 // earlier design did exactly that and broke the stated invariant for 27.6% of

@@ -8,6 +8,7 @@ package tech
 
 Subject: `badge.contrast.ratio`
 Value: `>= 7.0`
+Applies to: app
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Every generated badge color yields a contrast ratio of at least 7:1 against **the text it actually
@@ -24,6 +25,7 @@ Rationale: WCAG is a **mandatory** source scoped to the contrast criteria only â
 **Link and text colors meet a stated contrast floor**
 
 Subject: `text.contrast.ratio`
+Applies to: app
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Every text color the stylesheet declares for text on a bare surface clears **7:1** (WCAG 2.2
@@ -59,6 +61,7 @@ all text, with no lower floor for secondary text; see
 
 Subject: `text.size.floor`
 Value: `13px floor; body 15px, 16px at 600px wide or less`
+Applies to: app
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Every piece of visible text on every web page ([webPages](#webpages)) **renders at 13 CSS pixels
@@ -84,6 +87,7 @@ BirdView's own: 13px is the smallest size common platform guidance allows for se
 
 Subject: `pages.domain`
 Binds: [wcag.WebPage](../../imported/w3.org/wcag/wcag.md#webpage)
+Applies to: app
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 **Every response the server sends as `text/html`, `image/svg+xml`, or `text/plain`, at any route,

@@ -11,6 +11,7 @@ repository, and live with it (`bindings.md`, Stage adoption).
 **Every push to main and every pull request runs the standing checks**
 
 Subject: `release.ci`
+Applies to: repo
 Goals: [goals.secure](../../../goals/goals.md#secure), [goals.rapidIteration](../../../goals/goals.md#rapiditeration)
 
 GitHub Actions runs the four standing checks on every push to `main` and every pull request, with
@@ -28,6 +29,7 @@ write access give it nothing to find.
 **A deploy builds only code whose tests pass**
 
 Subject: `release.test_gate`
+Applies to: repo
 Goals: [goals.secure](../../../goals/goals.md#secure), [goals.honestData](../../../goals/goals.md#honestdata)
 
 Building the container image runs every test except the spec checks, against the dataset the image
@@ -48,6 +50,7 @@ and would silently skip the tests of every later deploy.
 **The deployed server knows the commit it was built from**
 
 Subject: `release.revision`
+Applies to: repo
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.giveBack](../../../goals/goals.md#giveback)
 
 Before deploying, the deployer writes the commit being deployed to a file named `REVISION` in the
@@ -68,6 +71,7 @@ its commit. A file, like `SKIP_TESTS`, needs no change to the deploy command's f
 **Every deploy is checked from outside**
 
 Subject: `release.smoke`
+Applies to: repo
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 
 `birdview-smoke` checks a running deployment as a reader reaches it: the home page is served

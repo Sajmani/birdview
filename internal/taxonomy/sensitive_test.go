@@ -24,7 +24,7 @@ import (
 // id or a country, and WithheldByEBird -- now derived from the list -- holds
 // exactly the species it should.
 //
-// Verifies: decisions.ebirdSilenceNotAbsence. Criterion: acceptance.withheldMonthsExplained.
+// Verifies: decisions.ebirdSilenceNotAbsence. Criterion: app.withheldMonthsExplained.
 func TestEBirdSensitiveIsWellFormed(t *testing.T) {
 	if len(EBirdSensitive) < 60 {
 		t.Fatalf("only %d entries; the table is nearly empty and this asserts almost nothing",
@@ -79,7 +79,7 @@ func TestEBirdSensitiveIsWellFormed(t *testing.T) {
 // NOT be marked; marking it would put "withheld by eBird" on a month eBird
 // plainly published.
 //
-// Verifies: decisions.ebirdSilenceNotAbsence. Criterion: acceptance.withheldMonthsExplained.
+// Verifies: decisions.ebirdSilenceNotAbsence. Criterion: app.withheldMonthsExplained.
 func TestWindowsCoverWholeMonthsOnly(t *testing.T) {
 	months := func(w Withholding) string {
 		var b strings.Builder
@@ -140,7 +140,7 @@ func TestWindowsCoverWholeMonthsOnly(t *testing.T) {
 // acted on only where the records show it applied, using the counts of the
 // cases decisions.ebirdSilenceNotAbsence names.
 //
-// Verifies: decisions.ebirdSilenceNotAbsence. Criterion: acceptance.withheldMonthsExplained.
+// Verifies: decisions.ebirdSilenceNotAbsence. Criterion: app.withheldMonthsExplained.
 func TestConfirmedMonthsBelievesTheRecordsOverTheList(t *testing.T) {
 	marks := func(m [12]bool) string {
 		var b strings.Builder

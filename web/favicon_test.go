@@ -23,8 +23,6 @@ import (
 // The favicon is the one surface that cannot reference the stylesheet, so it
 // restates the diagram's palette by hand (product.oneDiagramVocabulary). Index, detail, and comparison
 // share one `diagram` template and one stylesheet and cannot diverge at all.
-//
-// Verifies: product.oneDiagramVocabulary. Criterion: acceptance.faviconFromPalette.
 
 var (
 	reHexAny   = regexp.MustCompile(`#[0-9a-fA-F]{3,8}`)
@@ -116,6 +114,7 @@ func partColor(t *testing.T, part string) string {
 	return strings.ToLower(h)
 }
 
+// Verifies: product.oneDiagramVocabulary. Criterion: app.faviconFromPalette.
 func TestFaviconUsesTheAppPalette(t *testing.T) {
 	icon, err := Static.ReadFile("static/favicon.svg")
 	if err != nil {

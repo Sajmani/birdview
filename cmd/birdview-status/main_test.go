@@ -102,7 +102,7 @@ func keys(m map[string]map[string]int64) []string {
 // first version called mergeLumps directly and passed with the call removed
 // from main, verifying the function and not the pipeline.
 //
-// Verifies: product.scopeIsRecurringAvifauna. Criterion: acceptance.onlyNarrowsOneGroup.
+// Verifies: product.scopeIsRecurringAvifauna. Criterion: dataset.scopeMatchesStatusTable.
 func TestLumpsMergeIntoTheSpeciesBirdViewCarries(t *testing.T) {
 	// eBird files everything under the lump; iNaturalist under the split.
 	in := map[string]map[string]int64{
@@ -225,9 +225,9 @@ func TestBestRegionIsDeterministic(t *testing.T) {
 // a real difference and not a defect, and a check pinned to an intermediate
 // value would call it one.
 //
-// Watched fail: see acceptance.occurrenceReadersAgree.
+// Watched fail: see dataset.occurrenceReadersAgree.
 //
-// Verifies: product.regionAndMonthFilter, product.shareOfRecords, product.joinsReportDrops. Criterion: acceptance.occurrenceReadersAgree.
+// Verifies: product.regionAndMonthFilter, product.shareOfRecords, product.joinsReportDrops. Criterion: dataset.occurrenceReadersAgree.
 func TestBothReadersOfTheOccurrenceDataAgreeOnTheSpecies(t *testing.T) {
 	// One verbatim name of each shape the facet actually contains, with the
 	// species each is a record of.
@@ -310,7 +310,7 @@ func TestBothReadersOfTheOccurrenceDataAgreeOnTheSpecies(t *testing.T) {
 // decides which species BirdView draws: recurrence is measured on eBird's
 // dates, plus iNaturalist's only in months eBird is confirmed to withhold.
 //
-// Verifies: product.scopeIsRecurringAvifauna, decisions.countEbirdFirst. Criterion: acceptance.ebirdCountedInatFillsGaps.
+// Verifies: product.scopeIsRecurringAvifauna, decisions.countEbirdFirst. Criterion: dataset.ebirdCountedInatFillsGaps.
 func TestScopeCountsEBirdAndFillsOnlyItsDeclaredGaps(t *testing.T) {
 	eb, in := gbif.EBirdDatasetKey, iNatDatasetKey
 

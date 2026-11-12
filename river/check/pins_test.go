@@ -31,7 +31,7 @@ import (
 // no file to hash; aba is fetched at build and verified by the ingest instead
 // (acceptance.abaFileHashMatches).
 //
-// Verifies: tech.recordBeforeConsuming. Criterion: acceptance.vendoredHashesMatch.
+// Verifies: tech.recordBeforeConsuming. Criterion: repo.vendoredHashesMatch.
 func TestVendoredHashesMatch(t *testing.T) {
 	// Table rows of the form | `//path` | origin | `sha256` |
 	row := regexp.MustCompile("\\|\\s*`//([^`]+)`\\s*\\|[^|]*\\|\\s*`([0-9a-f]{64})`\\s*\\|")

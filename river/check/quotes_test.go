@@ -35,7 +35,7 @@ import (
 // fragments, each checked on its own. The attribution line, starting with an em
 // dash, is not part of the quotation.
 //
-// Verifies: tech.recordBeforeConsuming. Criterion: acceptance.quotationsAreVerbatim.
+// Verifies: tech.recordBeforeConsuming. Criterion: repo.quotationsAreVerbatim.
 func TestQuotationsAreVerbatim(t *testing.T) {
 	row := regexp.MustCompile("\\|\\s*`//([^`]+\\.html)`\\s*\\|")
 	records, err := filepath.Glob(filepath.Join("..", "requirements", "imported", "*", "*", "PROVENANCE.md"))

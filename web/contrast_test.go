@@ -83,7 +83,7 @@ func hexRGB(t *testing.T, h string) (uint8, uint8, uint8) {
 // on a bare surface must clear the floor, and no link may go uncolored at all --
 // a rule that only checks declared colors cannot see the color nobody declared.
 //
-// Verifies: tech.textContrastFloor, wcag.ContrastEnhanced. Criterion: acceptance.noTextBelowContrastFloor.
+// Verifies: tech.textContrastFloor, wcag.ContrastEnhanced. Criterion: app.noTextBelowContrastFloor.
 func TestStylesheetContrast(t *testing.T) {
 	css := stripComments(string(mustReadStyles(t)))
 
@@ -184,7 +184,7 @@ var (
 // the selector it is missing, which is the failure being fixed rather than a
 // fix for it.
 //
-// Verifies: tech.textContrastFloor, wcag.ContrastEnhanced. Criterion: acceptance.noTextBelowContrastFloor.
+// Verifies: tech.textContrastFloor, wcag.ContrastEnhanced. Criterion: app.noTextBelowContrastFloor.
 func TestSVGTextContrast(t *testing.T) {
 	css := stripComments(string(mustReadStyles(t)))
 
@@ -266,7 +266,7 @@ func TestSVGTextContrast(t *testing.T) {
 // carries a bare `a` rule and a bare `a:visited` rule -- the catch-alls that
 // make "someone forgot" impossible rather than merely unlikely.
 //
-// Verifies: tech.textContrastFloor. Criterion: acceptance.noTextBelowContrastFloor.
+// Verifies: tech.textContrastFloor. Criterion: app.noTextBelowContrastFloor.
 func TestNoLinkUsesTheBrowserDefault(t *testing.T) {
 	css := string(mustReadStyles(t))
 	for _, want := range []struct{ sel, why string }{
@@ -290,7 +290,7 @@ func stripComments(css string) string {
 // TestStrokeStyleCarriesProvenance asserts product.measuredVersusModeled where it is actually defined:
 // in the stylesheet, one rule per drawn element.
 //
-// Verifies: product.measuredVersusModeled. Criterion: acceptance.diagramDistinguishesModeled.
+// Verifies: product.measuredVersusModeled. Criterion: app.diagramDistinguishesModeled.
 func TestStrokeStyleCarriesProvenance(t *testing.T) {
 	css := stripComments(string(mustReadStyles(t)))
 

@@ -1,7 +1,0 @@
-# Requirements
-
-## Module
-
-```
-module example
-```

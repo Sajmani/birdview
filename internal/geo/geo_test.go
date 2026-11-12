@@ -32,7 +32,7 @@ func square() [][][][2]float64 {
 // is on land, a point in a lake or the sea is not, and the distance to the nearest shore is the
 // local great-circle distance to the nearest edge, capped.
 //
-// Verifies: tech.seaDistanceTable. Criterion: acceptance.seaDistanceTable.
+// Verifies: tech.seaDistanceTable. Criterion: dataset.seaDistanceTable.
 func TestShoreLandAndDistance(t *testing.T) {
 	s := NewShore(square(), 10)
 	for _, c := range []struct {

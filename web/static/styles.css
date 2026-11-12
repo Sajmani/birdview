@@ -32,7 +32,7 @@ footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 12px;
 /* Every link is colored here, not per-component. A link with no rule inherits
    the browser default -- #0000EE unvisited, #551A8B visited -- which against
    this background is 1.9:1 and 1.6:1, effectively invisible. That is exactly
-   what happened to the iNaturalist link on the detail page (tech.textContrastFloor, acceptance.noTextBelowContrastFloor). */
+   what happened to the iNaturalist link on the detail page (tech.textContrastFloor, app.noTextBelowContrastFloor). */
 a { color: var(--accent); }
 a:visited { color: var(--accent-visited); }
 footer a { color: var(--accent); }

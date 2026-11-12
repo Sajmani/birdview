@@ -31,7 +31,6 @@
 package trait
 
 import (
-	"slices"
 	"strings"
 
 	"birdview/internal/dataset"
@@ -120,16 +119,6 @@ var DietGroups = []TermGroup{
 	{Label: "Eats anything", Terms: []string{"Omnivore"}},
 }
 
-// GroupOf names the group an AVONET habitat belongs to, or "" for a value no group holds.
-func GroupOf(habitat string) string {
-	for _, g := range HabitatGroups {
-		if slices.Contains(g.Terms, habitat) {
-			return g.Label
-		}
-	}
-	return ""
-}
-
 // Niches in the order the control offers them: plant food, then animal food,
 // then the two that are neither.
 var Niches = []Term{
@@ -186,7 +175,7 @@ var Supplementary = map[string][]extra{
 // The rules are written as rules, not as a list of 64 species keys. A typed
 // list would need every scientific name to be right, and the first five
 // hand-typed entries in Supplementary had two names AviList does not use
-// (acceptance.habitatDietFilterPerSpecies).
+// (dataset.habitatDietFilterPerSpecies).
 
 // plantFoodOf names the plant half for a family AVONET codes Invertivore at
 // an Omnivore level. **That there is a plant half is AVONET's statement;

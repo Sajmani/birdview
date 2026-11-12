@@ -59,7 +59,7 @@ response is discarded after the ID is taken.
 > differentiate your requests"
 
 **Implemented as [tech.identifiedClient](../../../local/tech/delivery.md#identifiedclient)**, which BirdView already required of every outbound
-request before this source was adopted, and which [acceptance.outboundRequestsIdentified](../../../acceptance.md#outboundrequestsidentified) already checks.
+request before this source was adopted, and which [dataset.outboundRequestsIdentified](../../../composed/internal/dataset/acceptance.md#outboundrequestsidentified) already checks.
 
 ## JwtAuthorization
 

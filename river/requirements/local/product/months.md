@@ -55,6 +55,7 @@ sea, where no land polygon reaches. They are not errors and must not be filtered
 **Filters compose**
 
 Subject: `presentation.filters`
+Applies to: app
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 What is shown is what every active filter admits: region and family narrow the list together.
@@ -70,6 +71,7 @@ filter and what it is set to, so a reader can tell which one emptied the page.
 **Regions are grouped two ways**
 
 Subject: `presentation.region_filter.zones`
+Applies to: app
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
 
@@ -85,6 +87,7 @@ likely to see.
 **Families are grouped by taxonomic order**
 
 Subject: `presentation.family_filter.groups`
+Applies to: app
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The family selector groups families by **AviList's taxonomic order**, in checklist sequence.
@@ -109,6 +112,7 @@ with every habitat their species use drops the precision of "Fresh Water" to **3
 **Filter by habitat and by diet**
 
 Subject: `presentation.trait_filter`
+Applies to: dataset, app
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Two more filters, **assigned per species**: where a bird mostly lives and what it mostly eats.
@@ -130,7 +134,7 @@ exact union of AVONET's terms, so nothing is invented:
 
 **AVONET's Marine is offered as two refinements, Sea near shore (`Marine-inshore`) and Open ocean
 (`Marine-offshore`), derived from where the bird's records lie**
-([decisions.openOceanSplit](../../decisions.md#openoceansplit), [dataset.seaDistanceDerived](dataset.md#seadistancederived)). A bird with Marine, AVONET's or
+([decisions.openOceanSplit](../../decisions.md#openoceansplit), [product.seaDistanceDerived](dataset.md#seadistancederived)). A bird with Marine, AVONET's or
 BirdView's, is **Open ocean** when at least 25% of its records on water are more than 10 km from
 shore, and **Sea near shore** when fewer are, or when at least 80% of all its records are on land
 or within 10 km of shore; it can be both, as a tropicbird seen from its nesting cliffs and far out

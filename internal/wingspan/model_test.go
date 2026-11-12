@@ -32,7 +32,7 @@ const foxFile = "../../third_party/foxwingspan/wingspan_fox2026_AppendixS1.xlsx"
 // from running this implementation. A regression in the fitting code moves
 // these numbers immediately.
 //
-// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric. Criterion: acceptance.wingspanModelReconstructsFox.
+// Verifies: product.lengthAndWingspanSources, product.provenancePerMetric. Criterion: dataset.wingspanModelReconstructsFox.
 func TestModelAgreesWithFoxPublishedPredictions(t *testing.T) {
 	if _, err := os.Stat(foxFile); err != nil {
 		t.Skip("skipping: Fox wingspan workbook not present")
@@ -112,7 +112,7 @@ func contains(s, sub string) bool {
 // out-of-sample median error, by leave-one-out where a group is too small for five folds, so no
 // modeled wingspan reads "NaN%" (as Piciformes and the loons and grebes did).
 //
-// Verifies: product.lengthAndWingspanSources, product.metricProvenanceExplained. Criterion: acceptance.wingspanErrorStated.
+// Verifies: product.lengthAndWingspanSources, product.metricProvenanceExplained. Criterion: dataset.wingspanErrorStated.
 func TestEveryFitStatesItsError(t *testing.T) {
 	var small []observation
 	for i, chord := range []float64{90, 110, 130, 150, 170, 190, 210} {

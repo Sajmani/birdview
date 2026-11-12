@@ -381,41 +381,16 @@ func (c *Client) DatesIn(ctx context.Context, datasetKey, gadmGid, name string) 
 	return dates, body.Count, truncated, nil
 }
 
-// CountInBox returns how many records for one verbatim name fall inside a
-// coordinate box. Used to decide which ocean a pelagic species belongs to.
-func (c *Client) CountInBox(ctx context.Context, datasetKey, name string,
-	countries []string, minLat, maxLat, minLon, maxLon float64) (int64, error) {
-	q := url.Values{}
-	q.Set("datasetKey", datasetKey)
-	for _, country := range countries {
-		q.Add("country", country)
-	}
-	q.Set("verbatimScientificName", name)
-	q.Set("decimalLatitude", fmt.Sprintf("%g,%g", minLat, maxLat))
-	q.Set("decimalLongitude", fmt.Sprintf("%g,%g", minLon, maxLon))
-	q.Set("limit", "0")
-	var body facetResponse
-	if err := c.get(ctx, "/occurrence/search?"+q.Encode(), &body); err != nil {
-		return 0, fmt.Errorf("counting %q in box: %w", name, err)
-	}
-	return body.Count, nil
-}
-
-// CountOffLandInBox returns how many records inside a coordinate box fall on
-// no land at all, and how many the box holds in total.
+// MonthlyOffLandInBox returns how many records per month inside a coordinate
+// box fall on no land at all, and how many the box holds in total, in two
+// requests rather than twenty-four.
 //
 // This is what makes a marine region mean something. GADM covers land, so a
 // record on a beach carries a country and a record on the water carries
-// none; faceting the box by gadmLevel0Gid and subtracting gives exactly the
-// off-land half, with the coastline itself as the boundary. No distance
-// threshold is involved, and none would help: measured east of Cape Hatteras,
-// composition does not taper with distance, it flips between the band that
-// holds coastline (4.9% off land, led by Northern Cardinal) and the band that
-// does not (100% off land, led by Wilson's Storm-Petrel). See decisions.honestSeaDenominator.
-//
-// One request for both numbers: a facet response carries the unfiltered count
-// beside the facet rows, so this costs exactly what the plain count it
-// replaces did.
+// none. GBIF ORs repeated gadmGid values, so one month facet over the box gives
+// the total per month and a second restricted to `gadmGid=USA|CAN` gives the
+// part on land; the difference is water. Verified 2026-10-07
+// (decisions.honestSeaDenominator).
 //
 // An empty name counts every bird instead of one species, which is how a
 // sea's own denominator is measured.
@@ -423,22 +398,9 @@ func (c *Client) CountInBox(ctx context.Context, datasetKey, name string,
 // What it does NOT exclude is water inside a bay: an estuary has no GADM
 // country either, so Chesapeake Bay reads 8.8% off land. The result is
 // therefore "on water", not "at sea", and overstates the open ocean by
-// roughly 3%. GBIF would accept a WKT geometry that carves the coast off
-// properly, which is the refinement available if that 3% ever matters.
-// MonthlyOffLandInBox is CountOffLandInBox split by month, in two requests
-// rather than twenty-four.
-//
-// GBIF ORs repeated gadmGid values, so one month facet over the box gives
-// the total per month and a second restricted to `gadmGid=USA|CAN` gives the
-// part on land; the difference is water. Verified 2026-10-07.
-//
-// It differs from CountOffLandInBox by counting as on-land only what is
-// inside the USA or CAN polygons, where that function sums every
-// gadmLevel0Gid the box returns. Measured over the Gulf box, the two
-// disagree by **11 records in 108 million** — records inside a third
-// country's polygon — which is 0.00001%, against the ~3% by which "on
-// water" already overstates "at sea". Named explicitly rather than left for
-// someone to discover as a drift between two tables.
+// roughly 3%. Measured over the Gulf box, restricting on-land to USA or CAN
+// polygons differs from summing every gadmLevel0Gid by 11 records in 108
+// million (0.00001%).
 //
 // Verifies: product.regionAndMonthFilter, decisions.monthPresence.
 func (c *Client) MonthlyOffLandInBox(ctx context.Context, datasetKey, name string,
@@ -496,9 +458,8 @@ func (c *Client) MonthlyOffLandInBox(ctx context.Context, datasetKey, name strin
 	for i := range offLand {
 		offLand[i] = total[i] - onLand[i]
 		if offLand[i] < 0 {
-			// Negative water is the loud failure mode CountOffLandInBox was
-			// given for faceting the wrong field, and it is kept here for
-			// the same reason: it means the two queries are not nested.
+			// Negative water means the two queries are not nested (for example,
+			// faceting across multiple GADM levels so rows sum past the box).
 			return offLand, total, fmt.Errorf(
 				"month %d in box holds %d records of which %d are on land, which is more "+
 					"than all of them; the two queries are not asking about the same set",
@@ -506,49 +467,6 @@ func (c *Client) MonthlyOffLandInBox(ctx context.Context, datasetKey, name strin
 		}
 	}
 	return offLand, total, nil
-}
-
-func (c *Client) CountOffLandInBox(ctx context.Context, datasetKey, name string,
-	countries []string, minLat, maxLat, minLon, maxLon float64) (offLand, total int64, err error) {
-
-	q := url.Values{}
-	q.Set("datasetKey", datasetKey)
-	for _, country := range countries {
-		q.Add("country", country)
-	}
-	if name != "" {
-		q.Set("verbatimScientificName", name)
-	} else {
-		q.Set("taxonKey", strconv.Itoa(AvesTaxonKey))
-	}
-	q.Set("decimalLatitude", fmt.Sprintf("%g,%g", minLat, maxLat))
-	q.Set("decimalLongitude", fmt.Sprintf("%g,%g", minLon, maxLon))
-	q.Set("limit", "0")
-	q.Set("facet", "gadmLevel0Gid")
-	// Level 0 is the country, and one row per country is all there is to
-	// page: faceting plain gadmGid returns every level at once and the rows
-	// then sum to more than the box holds, because a record in Virginia is
-	// counted under USA, USA.47_1 and USA.47_13 alike. That mistake reads as
-	// a NEGATIVE off-land count, which is at least loud.
-	q.Set("facetLimit", "100")
-
-	var body facetResponse
-	if err := c.get(ctx, "/occurrence/search?"+q.Encode(), &body); err != nil {
-		return 0, 0, fmt.Errorf("counting %q off land in box: %w", name, err)
-	}
-	total = body.Count
-	var onLand int64
-	if len(body.Facets) > 0 {
-		for _, f := range body.Facets[0].Counts {
-			onLand += f.Count
-		}
-	}
-	if onLand > total {
-		return 0, 0, fmt.Errorf(
-			"counting %q off land in box: %d records on land exceeds the %d in the box; "+
-				"the facet is returning more than one GADM level", name, onLand, total)
-	}
-	return total - onLand, total, nil
 }
 
 // RegionName returns the GADM level-1 name for a region id, by reading it off

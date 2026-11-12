@@ -1,3 +1,0 @@
-# A bundle with no requirements fails as a parser check.
-exit 1
-problem no-requirements requirements/local

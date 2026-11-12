@@ -97,4 +97,4 @@ These five keep their scientific-name slug as their id, and no eBird code is sho
 Re-download from the DOI, compare the hash, and re-run the coverage count above. Expect the
 synonym table to need entries: AviList revises annually and a genus move is the common case. A
 species that silently loses its code would change its URL, which is why
-[acceptance.stableSpeciesId](../../../acceptance.md#stablespeciesid) asserts id stability rather than trusting the join.
+[app.stableSpeciesId](../../../composed/internal/app/acceptance.md#stablespeciesid) asserts id stability rather than trusting the join.

@@ -77,9 +77,9 @@ func TestOccurrenceNormalizesEveryKnownName(t *testing.T) {
 // species name, joins cleanly, and credits a real bird with records of
 // something that is not it.
 //
-// Watched fail: see acceptance.occurrenceReadersAgree.
+// Watched fail: see dataset.occurrenceReadersAgree.
 //
-// Verifies: product.regionAndMonthFilter, product.joinsReportDrops. Criterion: acceptance.occurrenceReadersAgree.
+// Verifies: product.regionAndMonthFilter, product.joinsReportDrops. Criterion: dataset.occurrenceReadersAgree.
 func TestBinomialReducesRankWithoutInventingSpecies(t *testing.T) {
 	species := map[string]string{
 		"turdus migratorius":                "turdus migratorius",

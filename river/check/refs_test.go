@@ -28,43 +28,39 @@ import (
 
 // TestReferencesResolve checks that every reference to a goal, requirement,
 // criterion, or decision resolves, across every tracked file outside
-// third_party/:
+// third_party/ and .agents/skills/:
 //
-//   - every qualified reference -- a goal, product, tech, decision or
-//     criterion name, and a transcribed source's exported name -- names an
-//     item its package defines;
-//   - every anchored link into the bundle lands on a heading that exists,
-//     an item's anchor being its identifier lowercased;
+//   - every qualified reference -- a goal, product, tech, decision, todo, or
+//     composed-package name, and a transcribed source's exported name -- names
+//     an item its package defines;
+//   - every anchored link into the bundle lands on a heading that exists;
 //   - a link whose text names an item lands on that item: the file that
 //     defines it, at its anchor;
-//   - no identifier in a superseded form survives anywhere: a letter code and
-//     three digits, or a source name, a slash, and an R number.
+//   - no identifier in a superseded form (G/P/T/AC/CR-NNN, source/RN, or
+//     unquoted acceptance.foo) survives anywhere.
 //
-// It catches a name that was renamed, one invented in a decision record and
-// never written down, and a link that lands nowhere.
-//
-// Verifies: process integrity. Criterion: acceptance.decisionReferencesExist.
+// Verifies: tech.bundleIsNormative. Criterion: repo.decisionReferencesExist.
 func TestReferencesResolve(t *testing.T) {
 	bundle, _ := filepath.Abs("..")
 	repo := filepath.Dir(bundle)
 
-	lowerItem := regexp.MustCompile(`(?m)^#{2,3} ([a-z][A-Za-z]+)[ \t]*$`)
-	upperItem := regexp.MustCompile(`(?m)^#{2,3} ([A-Z][A-Za-z]+)[ \t]*$`)
+	lowerItem := regexp.MustCompile(`(?m)^#{2,3} ([a-z][A-Za-z0-9]*)[ \t]*$`)
+	upperItem := regexp.MustCompile(`(?m)^#{2,3} ([A-Z][A-Za-z0-9]*)[ \t]*$`)
 	glob := func(pattern string) []string {
 		m, _ := filepath.Glob(filepath.Join(bundle, pattern))
 		sort.Strings(m)
 		return m
 	}
 	packages := map[string][]string{
-		"goals":      glob("goals/*.md"),
-		"product":    glob("requirements/local/product/*.md"),
-		"tech":       glob("requirements/local/tech/*.md"),
-		"decisions":  {filepath.Join(bundle, "requirements", "decisions.md")},
-		"acceptance": {filepath.Join(bundle, "requirements", "acceptance.md")},
-		// A composed package: its requirements and its criteria.
-		"app": glob("requirements/composed/internal/app/*.md"),
+		"goals":     glob("goals/*.md"),
+		"product":   glob("requirements/local/product/*.md"),
+		"tech":      glob("requirements/local/tech/*.md"),
+		"decisions": {filepath.Join(bundle, "requirements", "decisions.md")},
+		"todo":      {filepath.Join(bundle, "todo.md"), filepath.Join(bundle, "todo-closed.md")},
+		"app":       glob("requirements/composed/internal/app/*.md"),
+		"dataset":   glob("requirements/composed/internal/dataset/*.md"),
+		"repo":      glob("requirements/composed/internal/repo/*.md"),
 	}
-	// A transcribed source is its own package, with exported names.
 	exported := map[string]bool{}
 	dirs, _ := filepath.Glob(filepath.Join(bundle, "requirements", "imported", "*", "*"))
 	for _, d := range dirs {
@@ -105,7 +101,7 @@ func TestReferencesResolve(t *testing.T) {
 	})
 
 	extensions := map[string]bool{"md": true, "py": true, "go": true, "svg": true, "json": true, "tsv": true, "html": true, "css": true}
-	qualified := regexp.MustCompile(`\b(goals|product|tech|decisions|acceptance|app)\.([a-z][A-Za-z]+)\b`)
+	qualified := regexp.MustCompile(`\b(goals|product|tech|decisions|app|dataset|repo)\.([a-z][A-Za-z0-9]+)\b`)
 	var names []string
 	for pkg := range exported {
 		names = append(names, pkg)
@@ -113,21 +109,20 @@ func TestReferencesResolve(t *testing.T) {
 	sort.Strings(names)
 	var exportedRef *regexp.Regexp
 	if len(names) > 0 {
-		exportedRef = regexp.MustCompile(`\b(` + strings.Join(names, "|") + `)\.([A-Z][A-Za-z]+)\b`)
+		exportedRef = regexp.MustCompile(`\b(` + strings.Join(names, "|") + `)\.([A-Z][A-Za-z0-9]+)\b`)
 	}
-	legacy := regexp.MustCompile(`\b(?:G|P|T|AC|CR)-\d{3}\b|\b[a-z][a-z-]*/R\d+\b`)
+	legacy := regexp.MustCompile(`\b(?:G|P|T|AC|CR)-\d{3}\b|\b[a-z][a-z-]*/R\d+\b|\bacceptance\.[a-z][A-Za-z0-9]+\b`)
+	inlineCode := regexp.MustCompile("`[^`\n]+`")
 	link := regexp.MustCompile(`\]\(([^)\s#]*)#([^)\s]+)\)`)
-	citation := regexp.MustCompile("\\[`?([a-z]+)\\.([A-Za-z]+)`?\\]\\(([^)\\s]*)\\)")
-	// Translated or copied from River, so their names are River's.
-	fromRiver := map[string]bool{"river/README.md": true, "river/check/check.go": true, "river/check/check_test.go": true}
+	citation := regexp.MustCompile("\\[`?([a-z]+)\\.([A-Za-z0-9]+)`?\\]\\(([^)\\s]*)\\)")
 
-	out, err := exec.Command("git", "-C", repo, "ls-files").Output()
+	out, err := exec.Command("git", "-C", repo, "ls-files", "--cached", "--others", "--exclude-standard").Output()
 	if err != nil {
-		t.Fatalf("listing tracked files: %v; this check reads exactly what git tracks", err)
+		t.Fatalf("listing tracked files: %v; this check reads what git tracks", err)
 	}
 	refs := 0
 	for _, rel := range strings.Split(strings.TrimSpace(string(out)), "\n") {
-		if strings.HasPrefix(rel, "third_party/") || strings.HasPrefix(rel, "river/check/testdata/") {
+		if strings.HasPrefix(rel, "third_party/") || strings.HasPrefix(rel, ".agents/skills/") {
 			continue
 		}
 		path := filepath.Join(repo, filepath.FromSlash(rel))
@@ -136,26 +131,30 @@ func TestReferencesResolve(t *testing.T) {
 			continue
 		}
 		text := string(b)
-		if !fromRiver[rel] {
-			for _, re := range []*regexp.Regexp{qualified, exportedRef} {
-				if re == nil {
+		scanText := text
+		if strings.HasSuffix(rel, ".md") {
+			scanText = inlineCode.ReplaceAllString(fenced.ReplaceAllString(text, ""), "")
+		}
+		for _, re := range []*regexp.Regexp{qualified, exportedRef} {
+			if re == nil {
+				continue
+			}
+			for _, m := range re.FindAllStringSubmatch(scanText, -1) {
+				if extensions[m[2]] {
 					continue
 				}
-				for _, m := range re.FindAllStringSubmatch(text, -1) {
-					if extensions[m[2]] {
-						continue // goals.md, refs.go: a file, not a reference
-					}
-					refs++
-					if _, ok := defined[m[1]][m[2]]; !ok {
-						t.Errorf("%s: %s.%s names nothing package %s defines", rel, m[1], m[2], m[1])
-					}
+				refs++
+				if _, ok := defined[m[1]][m[2]]; !ok {
+					t.Errorf("%s: %s.%s names nothing package %s defines", rel, m[1], m[2], m[1])
 				}
 			}
-			// The checks have to describe the form they reject.
-			if !strings.HasPrefix(rel, "river/check/") {
-				for _, m := range legacy.FindAllString(text, -1) {
-					t.Errorf("%s: %s is a superseded identifier", rel, m)
+		}
+		if !strings.HasPrefix(rel, "river/check/") {
+			for _, m := range legacy.FindAllString(scanText, -1) {
+				if m == "acceptance.md" {
+					continue
 				}
+				t.Errorf("%s: %s is a superseded identifier", rel, m)
 			}
 		}
 		if !strings.HasSuffix(rel, ".md") {
@@ -167,25 +166,25 @@ func TestReferencesResolve(t *testing.T) {
 			}
 			return filepath.Clean(filepath.Join(filepath.Dir(path), filepath.FromSlash(target)))
 		}
-		// A link inside a fenced code block is an example, not a link.
-		text = fenced.ReplaceAllString(text, "")
-		for _, m := range citation.FindAllStringSubmatch(text, -1) {
+		noFence := fenced.ReplaceAllString(text, "")
+		for _, m := range citation.FindAllStringSubmatch(noFence, -1) {
 			pkg, name, url := m[1], m[2], m[3]
 			want, ok := defined[pkg][name]
 			if !ok || extensions[name] {
 				continue
 			}
 			target, frag, _ := strings.Cut(url, "#")
+			// river/conformance.md headings are "## <pkg>.<criterion>", not the criterion's definition.
 			if resolve(target) != want || frag != strings.ToLower(name) {
 				r, _ := filepath.Rel(bundle, want)
 				t.Errorf("%s: [%s.%s](%s) does not land on it; link to %s#%s", rel, pkg, name, url,
 					filepath.ToSlash(r), strings.ToLower(name))
 			}
 		}
-		for _, m := range link.FindAllStringSubmatch(text, -1) {
+		for _, m := range link.FindAllStringSubmatch(noFence, -1) {
 			dest := resolve(m[1])
 			if !strings.HasPrefix(dest, bundle+string(filepath.Separator)) || !strings.HasSuffix(dest, ".md") {
-				continue // only links into the bundle are held to its anchors
+				continue
 			}
 			if !anchors[dest][m[2]] {
 				r, _ := filepath.Rel(bundle, dest)
@@ -194,7 +193,7 @@ func TestReferencesResolve(t *testing.T) {
 		}
 	}
 	counts := []string{}
-	for _, pkg := range append([]string{"goals", "product", "tech", "decisions", "acceptance", "app"}, names...) {
+	for _, pkg := range append([]string{"goals", "product", "tech", "decisions", "app", "dataset", "repo"}, names...) {
 		counts = append(counts, strconv.Itoa(len(defined[pkg]))+" "+pkg)
 	}
 	t.Logf("%s; %d references resolve", strings.Join(counts, ", "), refs)
@@ -203,26 +202,20 @@ func TestReferencesResolve(t *testing.T) {
 // TestRelativeLinksResolve checks that every relative link in a tracked
 // Markdown file lands on a file or directory that exists, anchored or not,
 // including the READMEs this project writes for its vendored files under
-// third_party/. TestReferencesResolve holds anchored links into the bundle to
-// their headings and skips third_party/ altogether, so a plain link to a file
-// that has moved went unnoticed: all five vendored READMEs still pointed at the
-// pre-River spec/ tree after the bundle moved.
+// third_party/.
 //
-// Links starting with "/" are the server's own URLs, in guides it serves, and
-// are not paths in the repository.
-//
-// Verifies: process integrity. Criterion: acceptance.decisionReferencesExist.
+// Verifies: tech.bundleIsNormative. Criterion: repo.decisionReferencesExist.
 func TestRelativeLinksResolve(t *testing.T) {
 	bundle, _ := filepath.Abs("..")
 	repo := filepath.Dir(bundle)
-	out, err := exec.Command("git", "-C", repo, "ls-files", "*.md").Output()
+	out, err := exec.Command("git", "-C", repo, "ls-files", "--cached", "--others", "--exclude-standard", "*.md").Output()
 	if err != nil {
 		t.Fatalf("listing tracked files: %v; this check reads exactly what git tracks", err)
 	}
 	link := regexp.MustCompile(`\]\(([^)\s]+)\)`)
 	checked := 0
 	for _, rel := range strings.Split(strings.TrimSpace(string(out)), "\n") {
-		if strings.HasPrefix(rel, "river/check/testdata/") {
+		if strings.HasPrefix(rel, ".agents/skills/") {
 			continue
 		}
 		path := filepath.Join(repo, filepath.FromSlash(rel))
@@ -244,13 +237,8 @@ func TestRelativeLinksResolve(t *testing.T) {
 	t.Logf("%d relative links resolve", checked)
 }
 
-// fenced matches a fenced code block, whose contents Markdown does not render
-// as links. River's README.md shows a composed package's list inside one.
 var fenced = regexp.MustCompile("(?ms)^```.*?^```[ \t]*$")
 
-// slug is a heading's anchor as a code host derives it: lowercased, markup and
-// punctuation removed, spaces made hyphens. Letters outside ASCII survive, as
-// they do in Python's \w and on GitHub.
 func slug(heading string) string {
 	s := strings.ToLower(strings.TrimSpace(heading))
 	s = regexp.MustCompile("[`*]").ReplaceAllString(s, "")

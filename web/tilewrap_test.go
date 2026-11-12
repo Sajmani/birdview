@@ -30,8 +30,6 @@ import (
 // is checkable is that the rules making wrapping impossible are present, and
 // that the markup gives them something to act on -- which is the shape the bug
 // actually had. A declaration was missing, not mismeasured.
-//
-// Verifies: product.tileContents. Criterion: acceptance.tileHeaderNeverWraps.
 
 // rule returns the declaration block of a top-level selector, exactly as
 // written, so an assertion can look for a property in it.
@@ -46,6 +44,7 @@ func rule(t *testing.T, sel string) string {
 	return m[1]
 }
 
+// Verifies: product.tileContents. Criterion: app.tileHeaderNeverWraps.
 func TestTileHeaderCannotWrap(t *testing.T) {
 	for _, c := range []struct{ sel, prop, why string }{
 		{".nameline", "flex-wrap: nowrap",
@@ -84,7 +83,7 @@ var (
 // is long enough to prove otherwise. The tile, which both pages draw, carries
 // the codes beside the common name (product.tileContents, product.tileOpensDetail).
 //
-// Verifies: product.tileContents. Criterion: acceptance.tileHeaderNeverWraps.
+// Verifies: product.tileContents. Criterion: app.tileHeaderNeverWraps.
 func TestBandingCodeIsOutsideTheTruncatingElement(t *testing.T) {
 	for _, c := range []struct {
 		file, what string
@@ -121,7 +120,7 @@ func TestBandingCodeIsOutsideTheTruncatingElement(t *testing.T) {
 // tile's cube, page text laid over the drawing, is in the measurement lines' type and size (product.tileContents,
 // decisions.tileMeasurementLines): the same font declaration, word for word.
 //
-// Verifies: product.tileContents. Criterion: acceptance.tileCarriesHeaderAndMetrics.
+// Verifies: product.tileContents. Criterion: app.tileCarriesHeaderAndMetrics.
 func TestMassLabelSetLikeTheMeasurements(t *testing.T) {
 	font := regexp.MustCompile(`font:\s*([^;]+);`)
 	ft, ml := font.FindStringSubmatch(rule(t, ".ft")), font.FindStringSubmatch(rule(t, ".ml"))

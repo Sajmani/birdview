@@ -32,7 +32,7 @@ import (
 // guards against is a rounding residue that appears for some values and not
 // others -- an earlier design broke it for 27.6% of its species.
 //
-// Verifies: product.segmentsSumToLength. Criterion: acceptance.segmentsSumExactly.
+// Verifies: product.segmentsSumToLength. Criterion: app.segmentsSumExactly.
 func TestSegmentsSumExactly(t *testing.T) {
 	r := rand.New(rand.NewSource(1))
 	for i := 0; i < 20000; i++ {
@@ -54,7 +54,7 @@ func TestSegmentsSumExactly(t *testing.T) {
 // model string must name the numeric ratio applied to this bird's family, not
 // merely say that a per-family ratio exists.
 //
-// Verifies: product.neckModelPerFamily. Criterion: acceptance.neckLengthSerialized.
+// Verifies: product.neckModelPerFamily. Criterion: dataset.neckLengthSerialized.
 func TestNeckModelNamesTheFamilyRatio(t *testing.T) {
 	cases := []struct {
 		family string
@@ -95,7 +95,7 @@ func TestNeckRatioDefaultIsFlagged(t *testing.T) {
 // A heron's neck is the defining feature of its silhouette and an owl's is
 // invisible; whatever the absolute numbers, that ordering must hold.
 //
-// Verifies: product.proportionDifferentiates. Criterion: acceptance.proportionsDifferentiate (partial -- the bill and tail orderings
+// Verifies: product.proportionDifferentiates. Criterion: app.proportionsDifferentiate (partial -- the bill and tail orderings
 // live in the ingest test, where real trait data is available).
 func TestShapeDifferentiation(t *testing.T) {
 	const body = 100
@@ -118,7 +118,7 @@ func TestShapeDifferentiation(t *testing.T) {
 // one head that varied with nothing. Isometric scaling has no floor, so a
 // regression to a constant shows up as a flat curve here.
 //
-// Verifies: product.provenancePerMetric. Criterion: acceptance.craniumVaries.
+// Verifies: product.provenancePerMetric. Criterion: dataset.craniumVaries.
 func TestHeadScalesWithMass(t *testing.T) {
 	// Expected values follow from the model definition, 7.5 * mass^(1/3), not
 	// from running it: 8 g gives 7.5*2 = 15, 1000 g gives 7.5*10 = 75.
@@ -170,7 +170,7 @@ const (
 // clamped, would fail here while a direct comparison against trunkExponent
 // would still pass.
 //
-// Verifies: product.trunkFromMass. Criterion: acceptance.trunkScalesLikeSkeletons.
+// Verifies: product.trunkFromMass. Criterion: dataset.trunkScalesLikeSkeletons.
 func TestTrunkScalesLikeMeasuredSkeletons(t *testing.T) {
 	// The band must actually discriminate. A criterion whose bounds admit the
 	// value it replaced cannot fail, which is the failure mode this project
@@ -276,7 +276,7 @@ func TestModelsAreDescribed(t *testing.T) {
 // Watched fail: deleting Stercorariidae from NeckRatios reports it as
 // unreviewed; so does removing Procellariidae from NeckDefaultReviewed.
 //
-// Verifies: product.neckModelPerFamily. Criterion: acceptance.neckRatiosReviewed.
+// Verifies: product.neckModelPerFamily. Criterion: dataset.neckRatiosReviewed.
 func TestEveryFamilyHasBeenReviewed(t *testing.T) {
 	ds := realFamilies(t)
 	var missing []string
@@ -338,7 +338,7 @@ func realFamilies(t *testing.T) map[string]string {
 // of the pair beside a Horned Grebe, as photographs of both in flight show; Western Grebe's neck is
 // the longer of the grebes'; and geese keep the family's long neck.
 //
-// Verifies: product.neckModelPerFamily, product.craniumFromMass. Criterion: acceptance.duckAndGrebeProportions.
+// Verifies: product.neckModelPerFamily, product.craniumFromMass. Criterion: dataset.duckAndGrebeProportions.
 func TestDivingDucksAndGrebes(t *testing.T) {
 	type bird struct {
 		family, genus    string
