@@ -19,9 +19,11 @@
 package main
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -819,7 +821,12 @@ func loadProportionsReview(path string) error {
 // state, the state's GADM code being the county's less its last part. Run after the peak share is
 // computed, so that still names a state: a county is inside one.
 func applyCounties(ds *dataset.Dataset, dir string) (int, error) {
-	paths, err := filepath.Glob(filepath.Join(dir, "*.tsv"))
+	// Committed gzipped (decisions.countyTablesCompressed); a plain table left beside them would be
+	// skipped without a word, so it is refused.
+	if plain, _ := filepath.Glob(filepath.Join(dir, "*.tsv")); len(plain) > 0 {
+		return 0, fmt.Errorf("%s is not gzipped; county tables are read as <state>.tsv.gz", plain[0])
+	}
+	paths, err := filepath.Glob(filepath.Join(dir, "*.tsv.gz"))
 	if err != nil {
 		return 0, err
 	}
@@ -836,11 +843,11 @@ func applyCounties(ds *dataset.Dataset, dir string) (int, error) {
 	}
 	n := 0
 	for _, path := range paths {
-		b, err := os.ReadFile(path)
+		b, err := readGzip(path)
 		if err != nil {
 			return n, err
 		}
-		state := strings.TrimSuffix(filepath.Base(path), ".tsv")
+		state := strings.TrimSuffix(filepath.Base(path), ".tsv.gz")
 		prefix := state[:strings.LastIndex(state, "_")] + "."
 		for _, line := range strings.Split(string(b), "\n") {
 			f := strings.Split(line, "\t")
@@ -1125,4 +1132,19 @@ func thousands(n int64) string {
 		s = s[:i] + "," + s[i:]
 	}
 	return s
+}
+
+// readGzip reads a gzipped file whole.
+func readGzip(path string) ([]byte, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	zr, err := gzip.NewReader(f)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", path, err)
+	}
+	defer zr.Close()
+	return io.ReadAll(zr)
 }

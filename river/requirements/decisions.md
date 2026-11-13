@@ -5098,7 +5098,7 @@ tech.localNowPublicLater sha256:2939bb0dccbc52a5971820e38deffae8a6f19fd9cddd7c39
 
 Date: 2026-11-03
 Decided by: Sameer
-Status: accepted
+Status: amended by countyTablesCompressed
 Affects: [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter)
 
 ### Decided
@@ -5733,3 +5733,39 @@ govern.
 product.nextView sha256:8dcf5548dd80816163cf438983783565d8b604981530ddc3b3717ccf7fc9bfe9
 ```
 
+---
+
+## countyTablesCompressed
+
+**County tables are committed gzipped, one per state, and the full set waits for a server that can hold it**
+
+Date: 2026-11-12
+Decided by: Sameer
+Status: accepted
+Amends: countyListingRule
+Affects: [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter)
+
+### Decided
+
+Settles item 3 of [countyListingRule](#countylistingrule), left open until counties scaled past New York. Each state's
+county table is committed as `data/county-presence/<state>.tsv.gz`, the presence table's text format
+gzipped without a name or timestamp, so a rebuild from the same download gives the same bytes;
+`birdview-regions -counties` writes it and the ingest reads it. The tables for every other state and
+province are committed only once the server holds counties without joining them into each species,
+since the image builds its dataset from everything in `data/`.
+
+### Why
+
+The US and Canada download (10.15468/dl.g5frng) builds 64 tables, 39 MB as text and 12 MB
+compressed; committed as text, each rebuild would add as much again to the history. Compressed
+tables are not reviewable as diffs, but they are generated from a recorded download by a committed
+command, as `data/region-presence.tsv` is. Joined into `species.json` as New York's is, the full set
+takes the dataset from 14.7 MB to 213 MB and the server from 65 MB to 910 MB resident, past Cloud
+Run's default of 512 MiB, so committing it before the server changes would break the live site
+although counties are off there.
+
+### Sums
+
+```
+product.regionAndMonthFilter sha256:70108f5867ddfa9cd977f2961d8975f593708b6f599803257f3d2edc3a2330bc
+```

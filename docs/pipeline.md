@@ -232,7 +232,7 @@ flowchart LR
     under 10 km ★ *records*
     10 to 30 km ★ *records*
     30 km or more ★ *records*`"]
-    COUNTIES["`county-presence/USA.33_1.tsv
+    COUNTIES["`county-presence/USA.33_1.tsv.gz
     *one table per state, as region-presence.tsv*
     ─────────────
     #region · *county id and name*

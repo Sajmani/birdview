@@ -15,6 +15,8 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"math"
 	"net/url"
@@ -913,7 +915,7 @@ func TestEverySpeciesHasAnEBirdCode(t *testing.T) {
 }
 
 // TestCountiesJoinedAsRegions asserts the ingest carries a county table into the dataset
-// (decisions.countyListingRule): a listed county joins the species' regions with its counts and months, one
+// (decisions.countyListingRule), read gzipped as committed (decisions.countyTablesCompressed): a listed county joins the species' regions with its counts and months, one
 // under the bar joins the Below fields, the county's totals join the regions', each county is named
 // and placed in its state, and the peak share still names a state.
 //
@@ -924,7 +926,11 @@ func TestCountiesJoinedAsRegions(t *testing.T) {
 		"total\tUSA.33.24_1\t100|100|100|100|100|100|100|100|100|100|100|100\n" +
 		"total\tUSA.33.32_1\t50|50|50|50|50|50|50|50|50|50|50|50\n" +
 		"Turdus migratorius\tUSA.33.24_1:5|5|5|5|5|5|5|5|5|5|5|5,USA.33.32_1~:1|0|0|0|0|0|0|0|0|0|0|1\n"
-	if err := os.WriteFile(filepath.Join(dir, "USA.33_1.tsv"), []byte(table), 0o644); err != nil {
+	var gz bytes.Buffer
+	zw := gzip.NewWriter(&gz)
+	zw.Write([]byte(table))
+	zw.Close()
+	if err := os.WriteFile(filepath.Join(dir, "USA.33_1.tsv.gz"), gz.Bytes(), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	peak := &dataset.Commonest{Region: "USA.33_1", Records: 900, RegionRecords: 60000}
@@ -1183,4 +1189,18 @@ func findSpecies(t *testing.T, ds *dataset.Dataset, sci string) *dataset.Species
 	}
 	t.Fatalf("no %s", sci)
 	return nil
+}
+
+// TestPlainCountyTableRefused refuses a county table left ungzipped, which the ingest would
+// otherwise skip without a word (decisions.countyTablesCompressed).
+//
+// Verifies: product.regionAndMonthFilter. Criterion: app.countyListingApplied.
+func TestPlainCountyTableRefused(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "USA.33_1.tsv"), []byte("#region\tUSA.33.24_1\tKings\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := applyCounties(&dataset.Dataset{}, dir); err == nil || !strings.Contains(err.Error(), "not gzipped") {
+		t.Errorf("a plain USA.33_1.tsv gave %v; want it refused as not gzipped", err)
+	}
 }

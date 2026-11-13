@@ -17,12 +17,17 @@ package main
 import (
 	"archive/zip"
 	"bytes"
+	"compress/gzip"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"birdview/internal/gbif"
+	"birdview/internal/region"
 )
 
 // TestCountyListingRule asserts decisions.countyListingRule on rows shaped like the county download: a
@@ -153,5 +158,48 @@ func TestCountiesSplitByState(t *testing.T) {
 	}
 	if _, err := countiesByState([]countyRow{{GID: "USA.33_1"}}); err == nil {
 		t.Error("a state's code in the county column was accepted as a county")
+	}
+}
+
+// TestCountyTableGzippedReproducibly writes a county table where it is committed, gzipped, and
+// requires the same bytes from a second write, so rebuilding from the same download changes nothing
+// (decisions.countyTablesCompressed).
+//
+// Verifies: product.regionAndMonthFilter. Criterion: app.countyListingApplied.
+func TestCountyTableGzippedReproducibly(t *testing.T) {
+	species := []string{"Turdus migratorius"}
+	regionsOf := map[string][]region.Reported{"Turdus migratorius": {{ID: "USA.33.24_1", Records: 12,
+		Months: [12]int64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}}}}
+	names := map[string]string{"USA.33.24_1": "Kings"}
+	totals := map[string]int64{"USA.33.24_1": 1200}
+	monthly := map[string][12]int64{"USA.33.24_1": {100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}}
+	dir := t.TempDir()
+	var got [2][]byte
+	for i := range got {
+		path := filepath.Join(dir, fmt.Sprintf("%d", i), "USA.33_1.tsv.gz")
+		if err := write(path, species, regionsOf, names, totals, monthly, "# a rule\n"); err != nil {
+			t.Fatal(err)
+		}
+		b, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got[i] = b
+		time.Sleep(1100 * time.Millisecond) // a timestamp in the header would differ
+	}
+	if !bytes.Equal(got[0], got[1]) {
+		t.Error("two writes of the same table differ; the gzip header carries a name or a time")
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(got[0]))
+	if err != nil {
+		t.Fatalf("the table is not gzipped: %v", err)
+	}
+	text, err := io.ReadAll(zr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(text), "#region\tUSA.33.24_1\tKings\n") ||
+		!strings.Contains(string(text), "Turdus migratorius\tUSA.33.24_1:1|1|1|1|1|1|1|1|1|1|1|1") {
+		t.Errorf("the table reads back as:\n%s", text)
 	}
 }

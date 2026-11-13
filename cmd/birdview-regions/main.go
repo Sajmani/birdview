@@ -36,6 +36,8 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"flag"
@@ -123,7 +125,7 @@ func main() {
 		counties = flag.String("counties", "",
 			"build one state's county table from this recorded GBIF download, instead of querying GBIF")
 		state     = flag.String("state", "USA.33_1", "with -counties: the state's GADM code, or all for every state the download covers")
-		countyOut = flag.String("county-out", filepath.Join("data", "county-presence"), "with -counties: the directory each <state>.tsv is written to")
+		countyOut = flag.String("county-out", filepath.Join("data", "county-presence"), "with -counties: the directory each <state>.tsv.gz is written to")
 	)
 	flag.Parse()
 
@@ -157,7 +159,7 @@ func main() {
 			if len(byState[st]) == 0 {
 				log.Fatalf("birdview-regions: %s has no records in %s", *counties, st)
 			}
-			out := filepath.Join(*countyOut, st+".tsv")
+			out := filepath.Join(*countyOut, st+".tsv.gz")
 			if err := writeCounties(byState[st], download, st, *outPath, out, ds); err != nil {
 				log.Fatalf("birdview-regions: %s: %v", st, err)
 			}
@@ -773,7 +775,23 @@ func write(path string, species []string, regionsOf map[string][]region.Reported
 		}
 		fmt.Fprintf(&b, "%s\t%s\n", sp, strings.Join(parts, ","))
 	}
-	return os.WriteFile(path, []byte(b.String()), 0o644)
+	if !strings.HasSuffix(path, ".gz") {
+		return os.WriteFile(path, []byte(b.String()), 0o644)
+	}
+	// No name or timestamp in the header, so the same table compresses to the same bytes and a
+	// rebuild from the same download changes nothing (decisions.countyTablesCompressed).
+	var gz bytes.Buffer
+	zw, err := gzip.NewWriterLevel(&gz, gzip.BestCompression)
+	if err != nil {
+		return err
+	}
+	if _, err := zw.Write([]byte(b.String())); err != nil {
+		return err
+	}
+	if err := zw.Close(); err != nil {
+		return err
+	}
+	return os.WriteFile(path, gz.Bytes(), 0o644)
 }
 
 // withheldSuffix renders the months eBird is confirmed to withhold as

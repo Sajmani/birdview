@@ -999,7 +999,7 @@ and island names redirecting, was done 2026-11-03. Left, in order:
      GADM's Lake Ontario unit takes in shoreline (American Robin is its sixth-commonest bird).
    Original plan: a New York spike on that data: records per county, file size, and a minimum record count for
    small counties, where one record per million is less than one record.
-4. *Prototype done 2026-11-03:* New York's county table (`data/county-presence/USA.33_1.tsv`, built
+4. *Prototype done 2026-11-03:* New York's county table (`data/county-presence/USA.33_1.tsv.gz` since 2026-11-12, built
    by `birdview-regions -counties`), joined by the ingest and served as regions; a **County**
    setting follows Region when New York or its counties are chosen. Left: searching counties by name,
    since the setting lists 63 alphabetically; Here to a county, which needs step 5; how the setting
@@ -1028,10 +1028,10 @@ and island names redirecting, was done 2026-11-03. Left, in order:
     divisions. `birdview-regions -counties … -state all` builds all 64 tables, **39 MB** (Texas 3.2 MB),
     kept out of the repository until the decision below. **Measured, joined as the prototype joins New York:**
     `species.json` grows from 14.7 MB to 213 MB (18.7 MB gzipped), the server from 65 MB to 910 MB
-    resident, and a Texas page from 0.04 s to 0.76 s; Cloud Run's default is 512 MiB. **Owner's
-    decision, before committing the tables:** how the 39 MB is kept in the repository
-    ([decisions.countyListingRule](requirements/decisions.md#countylistingrule) item 3), and how the server holds counties, since joining them into each species does not
-    scale.
+    resident, and a Texas page from 0.04 s to 0.76 s; Cloud Run's default is 512 MiB. Kept gzipped,
+    one per state ([decisions.countyTablesCompressed](requirements/decisions.md#countytablescompressed), the owner, 2026-11-12); the other 63 are committed
+    once the server holds counties without joining them into each species, which is the owner's
+    decision next.
 5. Boundaries keyed to GADM codes for Here at county scale, since
    [tech.regionBoundaries](requirements/local/tech/delivery.md#regionboundaries) uses Natural Earth.
 6. Seas: adopt [imports.marine-regions](requirements/imports.md#marine-regions), assign the download's offshore grid cells to its
