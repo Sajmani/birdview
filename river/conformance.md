@@ -645,7 +645,8 @@ Watched failing: 2026-11-07, with Least Sandpiper's row removed ("Calidris minut
 Criterion: [app.countyListingApplied](requirements/composed/internal/app/acceptance.md#countylistingapplied)
 Guardrails: `cmd/birdview-ingest/main_test.go:TestCountiesJoinedAsRegions`;
   `cmd/birdview-regions/county_test.go:TestCountyListingRule`;
-  `cmd/birdview-regions/county_test.go:TestCountyRowsFromDownload`; `cmd/birdview/main_test.go:TestCountyIsARegion`;
+  `cmd/birdview-regions/county_test.go:TestCountyRowsFromDownload`;
+  `cmd/birdview-regions/county_test.go:TestCountiesSplitByState`; `cmd/birdview/main_test.go:TestCountyIsARegion`;
   `cmd/birdview/main_test.go:TestCountySettingDrillsDown`; `cmd/birdview/main_test.go:TestCountiesOffByDefault`;
   `cmd/birdview/main_test.go:TestPlaceAndMonthsAreNotJoinedByAComma`;
   `internal/region/region_test.go:TestCountyParentFromCode`
@@ -653,6 +654,7 @@ Gates: yes, in `go test ./...` (CI and image build)
 Watched failing: 2026-11-03, with the state-list condition removed ("Nymphicus hollandicus in USA.33.24_1: listed true … want listed false"), and before a state's withholding covered its counties ("a state's entry must cover its own counties").
 Watched failing: 2026-11-03, before the server knew counties ("Los Angeles draws [amerob amecro annhum thimur blasti greblu]", "the heading reads \"Showing birds in every month\"") and while "every region" summed a county with its state ("1 in 1,461 with the county and 1 in 2,275 without"); and before the County setting existed ("choosing California, which has counties, shows no County setting").
 Watched failing: 2026-11-04, with a county's months after a comma ("the hummingbird's share line does not read \"in Los Angeles, CA (Jun)\"") and a list of counties joined by commas ("five counties list as \"Bronx, NY, Kings, NY, New York, NY, or 2 more\"").
+Watched failing: 2026-11-12, with each county's rows filed under its own code instead of its state's ("split into 4 states, want 3"; "USA.33_1 holds [], want [USA.33.24_1 USA.33.42_1]"; "a state's code in the county column was accepted as a county").
 
 ## app.everydayDefinitionsShown
 

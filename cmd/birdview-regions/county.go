@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -174,13 +173,24 @@ func stateList(presencePath, stateGID string) (map[string]bool, error) {
 	return out, nil
 }
 
-// writeCounties builds one state's county table from a recorded download and writes it in the
-// presence table's format, named by GBIF's GADM endpoint (decisions.countyListingRule, decisions.regionCodesFromData).
-func writeCounties(zipPath, stateGID, presencePath, outPath string, species []string) error {
-	rows, err := readCountyRows(zipPath)
-	if err != nil {
-		return err
+// countiesByState splits a county download's rows by the state each county is in, read from its
+// GADM code, so one download serves every state it covers (tech.gbifDownloadsRecorded).
+func countiesByState(rows []countyRow) (map[string][]countyRow, error) {
+	out := map[string][]countyRow{}
+	for _, r := range rows {
+		st, ok := region.CountyParent(r.GID)
+		if !ok {
+			return nil, fmt.Errorf("the download names %q, which is not a county's GADM code", r.GID)
+		}
+		out[st] = append(out[st], r)
 	}
+	return out, nil
+}
+
+// writeCounties builds one state's county table from a recorded download's rows for that state and
+// writes it in the presence table's format, named by GBIF's GADM endpoint (decisions.countyListingRule,
+// decisions.regionCodesFromData).
+func writeCounties(rows []countyRow, download, stateGID, presencePath, outPath string, species []string) error {
 	listed, err := stateList(presencePath, stateGID)
 	if err != nil {
 		return err
@@ -214,5 +224,5 @@ func writeCounties(zipPath, stateGID, presencePath, outPath string, species []st
 		"# A county lists a species its state lists, at one per million of the county's records\n"+
 			"# and at least %d records (decisions.countyListingRule). From GBIF download %s,\n"+
 			"# whose DOI is recorded in data/gbif-downloads.tsv (tech.gbifDownloadsRecorded).\n",
-		minCountyRecords, strings.TrimSuffix(filepath.Base(zipPath), ".zip")))
+		minCountyRecords, download))
 }

@@ -349,7 +349,7 @@ flowchart LR
   TSENS -->|"confirm withheld months"| REGIONSCMD
   REGIONSCMD -->|"count eBird, iNaturalist only in confirmed gaps;
   present at 1 per million; every count kept"| REGIONS
-  DL -->|"-counties: one state's counties"| REGIONSCMD
+  DL -->|"-counties: each state's counties"| REGIONSCMD
   REGIONS -->|"the state's list"| REGIONSCMD
   REGIONSCMD -->|"listed if the state lists it,
   at 1 per million and 5 records"| COUNTIES

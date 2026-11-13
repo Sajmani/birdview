@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"birdview/internal/gbif"
@@ -114,5 +115,43 @@ func TestCountyRowsFromDownload(t *testing.T) {
 	}
 	if len(rows) != 1 || rows[0] != (countyRow{Dataset: gbif.EBirdDatasetKey, GID: "USA.33.24_1", Month: 7, Name: "Turdus migratorius", N: 19}) {
 		t.Errorf("read %+v", rows)
+	}
+}
+
+// TestCountiesSplitByState splits one download covering several states and provinces into each
+// state's rows, by the state each county's GADM code names, so one download builds every state's
+// table.
+//
+// Verifies: tech.gbifDownloadsRecorded. Criterion: app.countyListingApplied.
+func TestCountiesSplitByState(t *testing.T) {
+	rows := []countyRow{
+		{Dataset: gbif.EBirdDatasetKey, GID: "USA.33.24_1", Month: 7, Name: "Turdus migratorius", N: 19},
+		{Dataset: gbif.EBirdDatasetKey, GID: "USA.44.101_1", Month: 1, Name: "Turdus migratorius", N: 4},
+		{Dataset: gbif.EBirdDatasetKey, GID: "CAN.9.12_1", Month: 5, Name: "Turdus migratorius", N: 8},
+		{Dataset: gbif.EBirdDatasetKey, GID: "USA.33.42_1", Month: 7, Name: "Corvus brachyrhynchos", N: 3},
+	}
+	got, err := countiesByState(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string][]string{
+		"USA.33_1": {"USA.33.24_1", "USA.33.42_1"},
+		"USA.44_1": {"USA.44.101_1"},
+		"CAN.9_1":  {"CAN.9.12_1"},
+	}
+	if len(got) != len(want) {
+		t.Errorf("split into %d states, want %d: %v", len(got), len(want), got)
+	}
+	for st, gids := range want {
+		var have []string
+		for _, r := range got[st] {
+			have = append(have, r.GID)
+		}
+		if strings.Join(have, ",") != strings.Join(gids, ",") {
+			t.Errorf("%s holds %v, want %v", st, have, gids)
+		}
+	}
+	if _, err := countiesByState([]countyRow{{GID: "USA.33_1"}}); err == nil {
+		t.Error("a state's code in the county column was accepted as a county")
 	}
 }

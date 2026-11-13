@@ -122,8 +122,8 @@ func main() {
 			"resumable cache of the raw land facets; delete to refetch")
 		counties = flag.String("counties", "",
 			"build one state's county table from this recorded GBIF download, instead of querying GBIF")
-		state     = flag.String("state", "USA.33_1", "with -counties: the state's GADM code")
-		countyOut = flag.String("county-out", "", "with -counties: the table to write (default data/county-presence/<state>.tsv)")
+		state     = flag.String("state", "USA.33_1", "with -counties: the state's GADM code, or all for every state the download covers")
+		countyOut = flag.String("county-out", filepath.Join("data", "county-presence"), "with -counties: the directory each <state>.tsv is written to")
 	)
 	flag.Parse()
 
@@ -136,14 +136,33 @@ func main() {
 	// Counties come from a recorded download, not from per-region queries, which county scale
 	// would multiply about fortyfold (decisions.countyListingRule, tech.gbifDownloadsRecorded).
 	if *counties != "" {
-		out := *countyOut
-		if out == "" {
-			out = filepath.Join("data", "county-presence", *state+".tsv")
-		}
-		if err := writeCounties(*counties, *state, *outPath, out, ds); err != nil {
+		rows, err := readCountyRows(*counties)
+		if err != nil {
 			log.Fatalf("birdview-regions: %v", err)
 		}
-		log.Printf("birdview-regions: wrote %s", out)
+		byState, err := countiesByState(rows)
+		if err != nil {
+			log.Fatalf("birdview-regions: %v", err)
+		}
+		states := []string{*state}
+		if *state == "all" {
+			states = states[:0]
+			for st := range byState {
+				states = append(states, st)
+			}
+			sort.Strings(states)
+		}
+		download := strings.TrimSuffix(filepath.Base(*counties), ".zip")
+		for _, st := range states {
+			if len(byState[st]) == 0 {
+				log.Fatalf("birdview-regions: %s has no records in %s", *counties, st)
+			}
+			out := filepath.Join(*countyOut, st+".tsv")
+			if err := writeCounties(byState[st], download, st, *outPath, out, ds); err != nil {
+				log.Fatalf("birdview-regions: %s: %v", st, err)
+			}
+			log.Printf("birdview-regions: wrote %s", out)
+		}
 		return
 	}
 

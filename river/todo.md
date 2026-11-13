@@ -1022,7 +1022,16 @@ and island names redirecting, was done 2026-11-03. Left, in order:
     `birdview-gbifdownload -key` once it finishes. The first request, 0002857-261110092616502,
     returned no rows: GBIF's 2026-11-10 snapshot renamed occurrence status `PRESENT` to `DETECTED`,
     found by two probe downloads (0002893-… and 0002968-…, none of them read or recorded). Rerun
-    today, `ny-counties.sql` and `offshore-cells.sql` would also return nothing.
+    today, `ny-counties.sql` and `offshore-cells.sql` would also return nothing. **Fetched
+    2026-11-12** as 0004730-261110092616502 (10.15468/dl.g5frng, 8.0 M rows): 51 states with DC and
+    13 provinces and territories, 3,148 US counties and 293 Canadian units, which match the census
+    divisions. `birdview-regions -counties … -state all` builds all 64 tables, **39 MB** (Texas 3.2 MB),
+    kept out of the repository until the decision below. **Measured, joined as the prototype joins New York:**
+    `species.json` grows from 14.7 MB to 213 MB (18.7 MB gzipped), the server from 65 MB to 910 MB
+    resident, and a Texas page from 0.04 s to 0.76 s; Cloud Run's default is 512 MiB. **Owner's
+    decision, before committing the tables:** how the 39 MB is kept in the repository
+    ([decisions.countyListingRule](requirements/decisions.md#countylistingrule) item 3), and how the server holds counties, since joining them into each species does not
+    scale.
 5. Boundaries keyed to GADM codes for Here at county scale, since
    [tech.regionBoundaries](requirements/local/tech/delivery.md#regionboundaries) uses Natural Earth.
 6. Seas: adopt [imports.marine-regions](requirements/imports.md#marine-regions), assign the download's offshore grid cells to its

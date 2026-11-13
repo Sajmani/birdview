@@ -104,7 +104,7 @@ commit it. [How BirdView's data is built](pipeline.md) diagrams them and the ing
 | Command | Writes | Cost |
 | --- | --- | --- |
 | `birdview-gbifmap` | `data/gbif-taxa.tsv`: GBIF backbone name → AviList name | ~5 min, ~2,800 requests |
-| `birdview-regions` | `data/region-presence.tsv`: which regions each species occurs in; with `-counties <download.zip> -state <GADM code>`, `data/county-presence/<state>.tsv` from a recorded GBIF download | one facet query per region, resumable; none for counties |
+| `birdview-regions` | `data/region-presence.tsv`: which regions each species occurs in; with `-counties <download.zip> -state <GADM code>` (or `-state all`), `data/county-presence/<state>.tsv` for each state from a recorded GBIF download | one facet query per region, resumable; none for counties |
 | `birdview-status` | `data/status.tsv`: BirdView's own occurrence status per species | two passes, resumable |
 | `birdview-boundaries` | `data/region-boundaries.json`: region outlines for the Here button, from Natural Earth | one ~15 MB download, hash-checked |
 | `birdview-sea` | `data/sea-distance.tsv`: each species' eBird records on water by distance from shore, from the offshore-cells GBIF download and Natural Earth's land | ~2 min; two ~3.5 MB downloads, hash-checked and cached; needs the download under `fetched/gbif/` and a built dataset |
