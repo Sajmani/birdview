@@ -1015,7 +1015,14 @@ and island names redirecting, was done 2026-11-03. Left, in order:
    special case); clusters of counties by shared species, which on all listings sort counties by
    how well birded they are and on commoner birds alone find the coast, the Adirondacks, and the
    North Country but leave a 30-county remainder; and Bird Conservation Regions, uniform across the
-   continent but four or five to a large state.
+       continent but four or five to a large state.
+    **In progress 2026-11-12: every state and province in one download.**
+    `data/gbif-queries/us-ca-counties.sql` widens the New York query to `level0gid IN ('USA', 'CAN')`;
+    the owner requested it from GBIF's website, and it is fetched and recorded with
+    `birdview-gbifdownload -key` once it finishes. The first request, 0002857-261110092616502,
+    returned no rows: GBIF's 2026-11-10 snapshot renamed occurrence status `PRESENT` to `DETECTED`,
+    found by two probe downloads (0002893-… and 0002968-…, none of them read or recorded). Rerun
+    today, `ny-counties.sql` and `offshore-cells.sql` would also return nothing.
 5. Boundaries keyed to GADM codes for Here at county scale, since
    [tech.regionBoundaries](requirements/local/tech/delivery.md#regionboundaries) uses Natural Earth.
 6. Seas: adopt [imports.marine-regions](requirements/imports.md#marine-regions), assign the download's offshore grid cells to its
