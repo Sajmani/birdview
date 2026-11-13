@@ -4,3 +4,4 @@
 # key	doi	created	license	records	query	sha256
 0025636-261023074918325	10.15468/dl.ttkwue	2026-11-03	http://creativecommons.org/licenses/by-nc/4.0/legalcode	191349	data/gbif-queries/ny-counties.sql	04752a45a2d953a312dfbb11889e58a9eed5bef56fdebd9af5def9614f55fec9
 0025653-261023074918325	10.15468/dl.4jngjn	2026-11-03	http://creativecommons.org/licenses/by-nc/4.0/legalcode	3119545	data/gbif-queries/offshore-cells.sql	ac2db09211aeeeedf28871f244e8457eacbc02698b7f6cd6445bab89823bbc95
+0004730-261110092616502	10.15468/dl.g5frng	2026-11-12	http://creativecommons.org/licenses/by-nc/4.0/legalcode	8009928	data/gbif-queries/us-ca-counties.sql	79531a7c2b8102ef115fa6cd8af10011b12fbef0a5237413ae2c7f43e01bea22
