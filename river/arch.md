@@ -9,7 +9,7 @@ Two commands over a shared set of internal packages, plus six generators that wr
 tables under `data/`, and a checker for deployments. Generators run by hand, never by the build.
 
 ```
-cmd/birdview-ingest      compiles sources and data/ tables into web/data/species.json (a build artifact)
+cmd/birdview-ingest      compiles sources and data/ tables into web/data/species.json, and counties.gob.gz apart (build artifacts)
 cmd/birdview             serves it on localhost, rendering HTML server-side
 cmd/birdview-status      generator: data/status.tsv, BirdView's own occurrence status (the scope)
 cmd/birdview-regions     generator: data/region-presence.tsv, per-region and per-month presence
@@ -89,6 +89,7 @@ AVONET ──────────────────► resolve each sp
 Fox wingspans ───────────► empirical value, else the fitted order-level ──────┤
                              regression                                       ├─► species.json ─► server
 data/region-presence.tsv ► regions, months, share of records ─────────────────┘
+data/county-presence/ ───► counties, apart from the species ──────────────────► counties.gob.gz ─► server, with -counties
 ```
 
 The generators that write those `data/` tables query GBIF (eBird and iNaturalist records) over

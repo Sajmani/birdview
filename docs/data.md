@@ -237,6 +237,11 @@ Trindade Petrel, Craveri's Murrelet, Guadalupe Murrelet, and Atlantic Yellow-nos
 seen beyond any land polygon. Six species on the home page, among them Desertas Petrel and Little
 Curlew, reach the bar nowhere; their pages show no Regions row.
 
+**Counties, where BirdView serves them, list a bird under a stricter rule**: its state must list it,
+and it needs at least 5 records in the county as well as 1 per million of the county's records. A
+bird's page does not name every county. After each state or province it says how many of its
+counties list the bird out of how many it has: *TX 254/254* for American Robin.
+
 **The ocean boxes are approximate**: disjoint coordinate rectangles, so a record falls in at most
 one, drawn to separate the birds rather than to follow any published maritime limit.
 

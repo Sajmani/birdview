@@ -63,6 +63,7 @@ func main() {
 		seaPath         = flag.String("sea", "data/sea-distance.tsv", "where each species' records on water lie relative to shore (built by birdview-sea)")
 		bblPath         = flag.String("bbl", "third_party/bbl/speclist.html", "USGS Bird Banding Laboratory species list (banding codes)")
 		outPath         = flag.String("out", "web/data/species.json", "output path (a build artifact)")
+		countiesOut     = flag.String("counties-out", "", "where the counties are written, held apart from the species (default counties.gob.gz beside -out)")
 	)
 	flag.Parse()
 
@@ -89,10 +90,10 @@ func main() {
 				refined, missing, *seaPath)
 		}
 	}
+	var counties *dataset.Counties
 	if err == nil {
-		var nc int
-		if nc, err = applyCounties(ds, *countyDir); err == nil {
-			fmt.Printf("  counties         : %d, from %s (decisions.countyListingRule)\n", nc, *countyDir)
+		if counties, err = compileCounties(ds, *countyDir); err == nil {
+			fmt.Printf("  counties         : %d, from %s, held apart (decisions.countiesServedApart)\n", len(counties.Counties), *countyDir)
 		}
 	}
 	if err != nil {
@@ -126,6 +127,30 @@ func main() {
 		log.Fatalf("birdview-ingest: encoding %s: %v", *outPath, err)
 	}
 	fmt.Printf("wrote %d species to %s\n", len(ds.Species), *outPath)
+
+	// Beside species.json, as the server looks for it (decisions.countiesServedApart). Without county
+	// data an old file is removed, so a server never pairs this dataset with another build's counties.
+	cpath := *countiesOut
+	if cpath == "" {
+		cpath = filepath.Join(filepath.Dir(*outPath), "counties.gob.gz")
+	}
+	if counties == nil {
+		if err := os.Remove(cpath); err != nil && !os.IsNotExist(err) {
+			log.Fatalf("birdview-ingest: %v", err)
+		}
+		return
+	}
+	cf, err := os.Create(cpath)
+	if err != nil {
+		log.Fatalf("birdview-ingest: %v", err)
+	}
+	if err := counties.Write(cf); err != nil {
+		log.Fatalf("birdview-ingest: encoding %s: %v", cpath, err)
+	}
+	if err := cf.Close(); err != nil {
+		log.Fatalf("birdview-ingest: %v", err)
+	}
+	fmt.Printf("wrote %d counties to %s\n", len(counties.Counties), cpath)
 }
 
 // resolution records which source row a species' traits came from, and how
@@ -815,95 +840,83 @@ func loadProportionsReview(path string) error {
 	return nil
 }
 
-// applyCounties joins every county table in dir onto the dataset after applyRegions, the same way
-// (product.regionAndMonthFilter, decisions.countyListingRule): listed counties into each species' Regions, the rest into the
-// Below fields, and their totals beside the states'. Each county is carried with its name and its
-// state, the state's GADM code being the county's less its last part. Run after the peak share is
-// computed, so that still names a state: a county is inside one.
-func applyCounties(ds *dataset.Dataset, dir string) (int, error) {
+// compileCounties reads every county table in dir into the counties the server holds apart from
+// the species (decisions.countiesServedApart, decisions.countyListingRule): each county with its name, its state, its
+// totals, and the listed and under-the-bar records of each drawn species there. Nothing is joined
+// into the species, so the peak share and every state's figures are what they are without counties.
+func compileCounties(ds *dataset.Dataset, dir string) (*dataset.Counties, error) {
 	// Committed gzipped (decisions.countyTablesCompressed); a plain table left beside them would be
 	// skipped without a word, so it is refused.
 	if plain, _ := filepath.Glob(filepath.Join(dir, "*.tsv")); len(plain) > 0 {
-		return 0, fmt.Errorf("%s is not gzipped; county tables are read as <state>.tsv.gz", plain[0])
+		return nil, fmt.Errorf("%s is not gzipped; county tables are read as <state>.tsv.gz", plain[0])
 	}
 	paths, err := filepath.Glob(filepath.Join(dir, "*.tsv.gz"))
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	sort.Strings(paths)
-	if ds.RegionTotals == nil {
-		ds.RegionTotals = map[string]int64{}
-	}
-	if ds.RegionMonthlyTotals == nil {
-		ds.RegionMonthlyTotals = map[string][12]int64{}
-	}
-	bySci := map[string]*dataset.Species{}
+	out := &dataset.Counties{}
+	index := map[string]int{}
 	for i := range ds.Species {
-		bySci[ds.Species[i].ScientificName] = &ds.Species[i]
+		index[ds.Species[i].ScientificName] = i
+		out.Species = append(out.Species, ds.Species[i].ScientificName)
 	}
-	n := 0
 	for _, path := range paths {
 		b, err := readGzip(path)
 		if err != nil {
-			return n, err
+			return nil, err
 		}
 		state := strings.TrimSuffix(filepath.Base(path), ".tsv.gz")
 		prefix := state[:strings.LastIndex(state, "_")] + "."
+		first := len(out.Counties)
 		for _, line := range strings.Split(string(b), "\n") {
 			f := strings.Split(line, "\t")
 			if len(f) == 3 && f[0] == "#region" {
 				if !strings.HasPrefix(f[1], prefix) {
-					return n, fmt.Errorf("%s names %s, which is not a county of %s", path, f[1], state)
+					return nil, fmt.Errorf("%s names %s, which is not a county of %s", path, f[1], state)
 				}
 				// Registered before the table is read, whose loader accepts only known regions.
 				if err := region.AddCounty(f[1], f[2], state); err != nil {
-					return n, fmt.Errorf("%s: %w", path, err)
+					return nil, fmt.Errorf("%s: %w", path, err)
 				}
-				ds.Counties = append(ds.Counties, dataset.County{ID: f[1], Name: f[2], State: state})
-				n++
+				out.Counties = append(out.Counties, dataset.County{ID: f[1], Name: f[2], State: state})
+				out.Entries = append(out.Entries, nil)
 			}
+		}
+		at := map[string]int{}
+		for k := first; k < len(out.Counties); k++ {
+			at[out.Counties[k].ID] = k
 		}
 		table, totals, monthly, err := region.LoadPresence(strings.NewReader(string(b)))
 		if err != nil {
-			return n, fmt.Errorf("%s: %w", path, err)
+			return nil, fmt.Errorf("%s: %w", path, err)
 		}
 		for id, v := range totals {
-			ds.RegionTotals[id] = v
-		}
-		for id, v := range monthly {
-			ds.RegionMonthlyTotals[id] = v
+			k, ok := at[id]
+			if !ok {
+				return nil, fmt.Errorf("%s totals %s, which it does not name", path, id)
+			}
+			out.Counties[k].Total, out.Counties[k].Monthly = v, monthly[id]
 		}
 		for sci, rs := range table {
-			sp := bySci[sci]
-			if sp == nil {
+			sp, ok := index[sci]
+			if !ok {
 				continue
 			}
 			for _, r := range rs {
-				if r.Below {
-					sp.BelowRegions = append(sp.BelowRegions, r.ID)
-					sp.BelowCounts = append(sp.BelowCounts, r.Records)
-					sp.BelowMonths = append(sp.BelowMonths, r.Months)
-					continue
+				k, ok := at[r.ID]
+				if !ok {
+					return nil, fmt.Errorf("%s lists %s in %s, which it does not name", path, sci, r.ID)
 				}
-				sp.Regions = append(sp.Regions, r.ID)
-				sp.RegionCounts = append(sp.RegionCounts, r.Records)
-				sp.RegionMonths = append(sp.RegionMonths, r.Months)
-				var bits uint16
-				for m, on := range r.Withheld {
-					if on {
-						bits |= 1 << m
-					}
+				e, err := dataset.NewCountyEntry(sp, r.Months, r.Below, r.Withheld)
+				if err != nil {
+					return nil, fmt.Errorf("%s: %s in %s: %w", path, sci, r.ID, err)
 				}
-				if bits != 0 {
-					if sp.RegionWithheld == nil {
-						sp.RegionWithheld = map[string]uint16{}
-					}
-					sp.RegionWithheld[r.ID] = bits
-				}
+				out.Entries[k] = append(out.Entries[k], e)
 			}
 		}
 	}
-	return n, nil
+	return out, out.Index()
 }
 
 // peakShare picks the region where a species is the largest fraction of what

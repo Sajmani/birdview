@@ -556,6 +556,7 @@ func nextPin(q url.Values, id string) template.URL {
 func (s *server) nextPage(r *http.Request) nextData {
 	q := r.URL.Query()
 	opt := nextOptions(r)
+	opt.Counties = s.counties
 	// Every month unless the address names some (month=now has already
 	// been redirected to a month by next).
 

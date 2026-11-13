@@ -5769,3 +5769,44 @@ although counties are off there.
 ```
 product.regionAndMonthFilter sha256:70108f5867ddfa9cd977f2961d8975f593708b6f599803257f3d2edc3a2330bc
 ```
+
+---
+
+## countiesServedApart
+
+**The server holds counties apart from species, loaded once and compact; a bird's page counts its counties per state**
+
+Date: 2026-11-12
+Decided by: Sameer
+Status: accepted
+Affects: [product.regionAndMonthFilter](local/product/filtering.md#regionandmonthfilter), [product.nextView](local/product/presentation.md#nextview)
+
+### Decided
+
+1. **Counties are compiled apart from species.** The ingest no longer joins counties into each
+   species' regions; it writes them to a compiled county file beside `species.json`, and the server
+   loads it once at startup, with `-counties`, into a compact table per county. The home page reads a
+   county's entries only when that county is chosen.
+2. **A bird's page names its states and provinces with how many of each one's counties list it out
+   of how many it has** ("CA 12/58"), not each county.
+3. **Counties in several states are an address the server answers, not a choice the page offers.**
+   The County setting offers one state's counties, which is how readers are expected to choose them;
+   any number of counties in any number of states remains a valid address, served correctly.
+
+Considered and not chosen: loading a state's counties when a page first asks for one, which saves
+memory an idle instance would not use but costs a parse on the first request for each state after
+every cold start, a cache with locking, and an index anyway for anything spanning states.
+
+### Why
+
+Joined into species as New York's prototype was, the US and Canada's 3,441 counties and 931,618
+entries took `species.json` from 14.7 MB to 213 MB, the server from 65 MB to 910 MB resident, past
+Cloud Run's default 512 MiB, and a Texas page from 0.04 s to 0.76 s, because every page walked every
+county of every species. Held apart, a page touches only the counties chosen.
+
+### Sums
+
+```
+product.nextView sha256:763782f18c45d6e461768eded3d3b98e4b224f3c3be08d64a492336435efb023
+product.regionAndMonthFilter sha256:2ad6fb868acdbb7cc2d42cf034db79e92ed0958aa7a5715980d965734f741c0f
+```

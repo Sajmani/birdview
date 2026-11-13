@@ -39,6 +39,7 @@ import (
 	"net/url"
 	"os"
 	pathpkg "path"
+	"path/filepath"
 	"regexp"
 	"runtime/debug"
 	"slices"
@@ -88,6 +89,7 @@ func main() {
 	// The deployment's one public host, e.g. birdview.site; requests for any
 	// other host are redirected to it (tech.oneCanonicalHost). A flag, not a
 	// constant, because the host belongs to whoever deploys, not to the code.
+	countyData := flag.String("county-data", "", "with -counties: the counties the ingest wrote (default counties.gob.gz beside -data)")
 	flag.BoolVar(&countiesEnabled, "counties", false, "serve the dataset's counties as regions; off until every supported region has them (decisions.countiesBehindFlag)")
 	canonical := flag.String("canonical", "", "the one host to answer at; other hosts are redirected to it over HTTPS. Unset serves every host")
 	flag.Parse()
@@ -107,7 +109,18 @@ func main() {
 		log.Fatalf("birdview: %v\n\nRun birdview-ingest first; the dataset is a build artifact "+
 			"and is not committed (tech.datasetNeverCommitted).", err)
 	}
-	srv, err := newServer(ds)
+	var counties *dataset.Counties
+	if countiesEnabled {
+		cpath := *countyData
+		if cpath == "" {
+			cpath = filepath.Join(filepath.Dir(*data), "counties.gob.gz")
+		}
+		if counties, err = loadCounties(cpath); err != nil {
+			log.Fatalf("birdview: -counties: %v\n\nRun birdview-ingest first; it writes the counties beside "+
+				"the dataset (decisions.countiesServedApart).", err)
+		}
+	}
+	srv, err := newServer(ds, counties)
 	if err == nil {
 		srv.feedback = *feedback
 		srv.canonical = *canonical
@@ -165,7 +178,10 @@ type server struct {
 	ds   *dataset.Dataset
 	all  *dataset.Dataset
 	tmpl *template.Template
-	byID map[string]*dataset.Species
+	// counties is the county data held apart from the species, nil without -counties
+	// (decisions.countiesServedApart, decisions.countiesBehindFlag).
+	counties *countyView
+	byID     map[string]*dataset.Species
 	// idOf maps an AviList scientific name to the served id, so a page can
 	// name another species without searching the slice (product.namesRecordsFiledUnder).
 	idOf map[string]string
@@ -327,7 +343,7 @@ func renamed(old, current string) (what, how string) {
 // direction -- the cost is one refetch after a deploy, and the alternative
 // is a page styled by a stylesheet it was not written for, which is the
 // failure that is hard to recognize as a caching problem.
-func fingerprint(ds *dataset.Dataset) (string, error) {
+func fingerprint(ds *dataset.Dataset, counties *countyView) (string, error) {
 	h := sha256.New()
 	paths, err := fs.Glob(assetFS, "static/*")
 	if err != nil {
@@ -355,6 +371,10 @@ func fingerprint(ds *dataset.Dataset) (string, error) {
 		return "", err
 	}
 	h.Write(b)
+	// The counties' file, by its hash, when they are served: a county's page changes with them.
+	if counties != nil {
+		fmt.Fprintf(h, "counties\x00%s\x00", counties.c.Sum())
+	}
 	return hex.EncodeToString(h.Sum(nil)[:16]), nil
 }
 
@@ -503,54 +523,13 @@ func devAssets(dir string) error {
 // devDir is non-empty in dev mode, and is what makes render re-parse.
 var devDir string
 
-// stripCounties takes the dataset's counties out of it: from every species' regions, from the
-// regions' totals.
-func stripCounties(ds *dataset.Dataset) {
-	if len(ds.Counties) == 0 {
-		return
-	}
-	county := map[string]bool{}
-	for _, c := range ds.Counties {
-		county[c.ID] = true
-		delete(ds.RegionTotals, c.ID)
-		delete(ds.RegionMonthlyTotals, c.ID)
-	}
-	keep := func(ids []string, counts []int64, months [][12]int64) ([]string, []int64, [][12]int64) {
-		var i2 []string
-		var c2 []int64
-		var m2 [][12]int64
-		for i, id := range ids {
-			if county[id] {
-				continue
-			}
-			i2 = append(i2, id)
-			if i < len(counts) {
-				c2 = append(c2, counts[i])
-			}
-			if i < len(months) {
-				m2 = append(m2, months[i])
-			}
-		}
-		return i2, c2, m2
-	}
-	for i := range ds.Species {
-		sp := &ds.Species[i]
-		sp.Regions, sp.RegionCounts, sp.RegionMonths = keep(sp.Regions, sp.RegionCounts, sp.RegionMonths)
-		sp.BelowRegions, sp.BelowCounts, sp.BelowMonths = keep(sp.BelowRegions, sp.BelowCounts, sp.BelowMonths)
-		for id := range sp.RegionWithheld {
-			if county[id] {
-				delete(sp.RegionWithheld, id)
-			}
-		}
-	}
-	ds.Counties = nil
-}
-
 // countiesEnabled serves the dataset's counties, set by -counties. Off by default until every
 // supported region has counties (decisions.countiesBehindFlag).
 var countiesEnabled bool
 
-func newServer(ds *dataset.Dataset) (*server, error) {
+// newServer builds the server over a dataset. counties are what the ingest left beside the dataset, served as regions when -counties says so
+// and ignored otherwise; nil for none (decisions.countiesServedApart, decisions.countiesBehindFlag).
+func newServer(ds *dataset.Dataset, counties *dataset.Counties) (*server, error) {
 	tmpl, err := template.New("").Funcs(funcs).ParseFS(assetFS, "static/*.html")
 	if err != nil {
 		return nil, fmt.Errorf("parsing templates: %w", err)
@@ -558,18 +537,14 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	s := &server{mux: http.NewServeMux(), ds: ds, tmpl: tmpl, devDir: devDir,
 		byID: map[string]*dataset.Species{}, undrawnByID: map[string]*dataset.Undrawn{}, aliasOf: map[string]string{},
 		idOf: map[string]string{}}
-	// The dataset's counties become regions, by their GADM codes (decisions.countyListingRule), when -counties says
-	// so; otherwise they are taken out of the dataset, so none is counted alongside its state
-	// (decisions.countiesBehindFlag).
-	if countiesEnabled {
-		for _, c := range ds.Counties {
-			if err := region.AddCounty(c.ID, c.Name, c.State); err != nil {
-				return nil, err
-			}
+	// The counties become regions, by their GADM codes (decisions.countyListingRule), when -counties says so;
+	// otherwise none resolves (decisions.countiesBehindFlag).
+	region.RemoveCounties()
+	if countiesEnabled && counties != nil {
+		s.counties = newCountyView(counties)
+		if err := s.counties.register(); err != nil {
+			return nil, err
 		}
-	} else {
-		region.RemoveCounties()
-		stripCounties(ds)
 	}
 	// Inlined into the home page rather than fetched, as its other scripts are.
 	js, err := fs.ReadFile(assetFS, "static/here.js")
@@ -589,7 +564,7 @@ func newServer(ds *dataset.Dataset) (*server, error) {
 	// taken now would go stale on the first edit -- which is the precise
 	// bug -dev exists to avoid. Left empty there, and revalidated skips.
 	if devDir == "" {
-		s.build, err = fingerprint(ds)
+		s.build, err = fingerprint(ds, s.counties)
 		if err != nil {
 			return nil, fmt.Errorf("fingerprinting the build: %w", err)
 		}
@@ -724,6 +699,9 @@ type options struct {
 	// Regions and HasRegions draw the same distinction for product.regionAndMonthFilter's filter.
 	Regions    map[string]bool
 	HasRegions bool
+	// Counties is where a chosen county's records are read, apart from the species; nil without
+	// -counties (decisions.countiesServedApart).
+	Counties *countyView
 	// Months and HasMonths draw the same distinction over the twelve
 	// (product.regionAndMonthFilter, decisions.monthPresence). Indexed 0 to 11, January first.
 	Months    map[int]bool
@@ -1057,6 +1035,12 @@ func (s *server) filterSpecies(opt options) ([]*dataset.Species, map[string]bool
 				return true
 			}
 		}
+		// A chosen county is read from the counties, held apart from the species (decisions.countiesServedApart).
+		for id := range opt.Regions {
+			if e, ok := opt.Counties.entry(sp, id); ok && !e.Below() {
+				return true
+			}
+		}
 		return false
 	}
 	// Months narrow the list as every other filter does (product.regionAndMonthFilter, decisions.monthPresence).
@@ -1064,6 +1048,32 @@ func (s *server) filterSpecies(opt options) ([]*dataset.Species, map[string]bool
 	// selected month, which is the same "any" the region and habitat
 	// filters use: picking two places asks for birds in either.
 	allMonths := !opt.HasMonths || len(opt.Months) == month.Count
+	// shown says whether a species listed in a region is there in a selected month, given its
+	// months there, the region's monthly totals, and the months eBird withholds it there.
+	shown := func(months, totals [12]int64, withheld [12]bool) bool {
+		// A month eBird withholds this species here is missing by
+		// policy, so it is not judged: the species is shown, and its
+		// tile says why (decisions.ebirdSilenceNotAbsence). Painted Bunting was hidden from
+		// Florida in January this way -- eBird publishes none of its
+		// Florida records from October to March.
+		for m := range withheld {
+			if withheld[m] && opt.Months[m] {
+				return true
+			}
+		}
+		in, ok := month.Present(months, totals)
+		if !ok {
+			// Too thin to say when. Shown in every month rather than
+			// hidden from any, and the tile says so (decisions.monthPresence).
+			return true
+		}
+		for m := range in {
+			if in[m] && opt.Months[m] {
+				return true
+			}
+		}
+		return false
+	}
 	inMonth := func(sp *dataset.Species) bool {
 		if allMonths {
 			return true
@@ -1075,27 +1085,18 @@ func (s *server) filterSpecies(opt options) ([]*dataset.Species, map[string]bool
 			if i >= len(sp.RegionMonths) {
 				continue
 			}
-			// A month eBird withholds this species here is missing by
-			// policy, so it is not judged: the species is shown, and its
-			// tile says why (decisions.ebirdSilenceNotAbsence). Painted Bunting was hidden from
-			// Florida in January this way -- eBird publishes none of its
-			// Florida records from October to March.
-			withheld := sp.WithheldIn(id)
-			for m := range withheld {
-				if withheld[m] && opt.Months[m] {
-					return true
-				}
-			}
-			in, ok := month.Present(sp.RegionMonths[i], s.ds.RegionMonthlyTotals[id])
-			if !ok {
-				// Too thin to say when. Shown in every month rather than
-				// hidden from any, and the tile says so (decisions.monthPresence).
+			if shown(sp.RegionMonths[i], s.ds.RegionMonthlyTotals[id], sp.WithheldIn(id)) {
 				return true
 			}
-			for m := range in {
-				if in[m] && opt.Months[m] {
-					return true
-				}
+		}
+		for id := range opt.Regions {
+			e, ok := opt.Counties.entry(sp, id)
+			if !ok || e.Below() {
+				continue
+			}
+			ct, _ := opt.Counties.county(id)
+			if shown(e.Monthly(), ct.Monthly, e.Withheld()) {
+				return true
 			}
 		}
 		return false
@@ -1210,6 +1211,7 @@ func (s *server) detail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	opt := parseOptions(r)
+	opt.Counties = s.counties
 	// The home page's tile, larger (product.tileOpensDetail): the same box, drawn to the bird's
 	// own scale, so the bird is as large as the view allows whatever scale
 	// the home page drew it at. Beside a swan a small bird is a few pixels
@@ -1437,6 +1439,7 @@ type undrawnData struct {
 // Verifies: product.undrawnSpeciesAnswer.
 func (s *server) undrawn(w http.ResponseWriter, r *http.Request, u *dataset.Undrawn) {
 	opt := parseOptions(r)
+	opt.Counties = s.counties
 	name := u.Name(opt.Locale)
 	other := u.Names[dataset.LocaleNA]
 	if opt.Locale == dataset.LocaleNA {
@@ -1958,23 +1961,36 @@ func (s *server) categories(sp *dataset.Species, opt options) []categoryRow {
 
 	// One row for every region, sharing the one rule that put them all there.
 	if len(sp.Regions) > 0 {
+		// A state with counties carries how many of them list the bird out of how many it has, "CA
+		// 12/58", rather than every county (decisions.countiesServedApart).
+		counties := opt.Counties.countiesIn(sp)
 		codes := make([]string, 0, len(sp.Regions))
 		for _, id := range sp.Regions {
 			if rg, ok := region.Get(id); ok {
-				codes = append(codes, rg.Code)
-				if rg.Code == "" {
-					codes[len(codes)-1] = rg.Name
+				code := rg.Code
+				if code == "" {
+					code = rg.Name
 				}
+				if n, ok := counties[id]; ok {
+					code += " " + n
+				}
+				codes = append(codes, code)
 			}
 		}
 		sort.Strings(codes)
+		sep, detail := " ", "reported there in at least 1 record per million, from eBird and "+
+			"iNaturalist records via GBIF"
+		if counties != nil {
+			sep = ", "
+			detail += "; after a state, how many of its counties list the bird, with at least 5 " +
+				"records in each, out of how many it has"
+		}
 		out = append(out, categoryRow{
 			Label:  fmt.Sprintf("Regions (%d)", len(codes)),
-			Value:  strings.Join(codes, " "),
+			Value:  strings.Join(codes, sep),
 			Origin: string(dataset.Derived),
-			Detail: "reported there in at least 1 record per million, from eBird and " +
-				"iNaturalist records via GBIF",
-			Doc: "/docs/data#regions", DocLabel: "how regions are decided",
+			Detail: detail,
+			Doc:    "/docs/data#regions", DocLabel: "how regions are decided",
 		})
 	}
 
@@ -2309,6 +2325,26 @@ func shareIn(sp *dataset.Species, ds *dataset.Dataset, opt options) (num, den in
 			}
 		}
 	}
+	// Chosen counties, read from the counties held apart (decisions.countiesServedApart): on both sides,
+	// under the bar or not, and only when chosen without their state.
+	if all {
+		return num, den
+	}
+	for id := range opt.Regions {
+		ct, ok := opt.Counties.county(id)
+		if !ok || opt.Regions[ct.State] {
+			continue
+		}
+		e, listed := opt.Counties.entry(sp, id)
+		for m := 0; m < month.Count; m++ {
+			if inMonth(m) {
+				den += ct.Monthly[m]
+				if listed {
+					num += int64(e.Months[m])
+				}
+			}
+		}
+	}
 	return num, den
 }
 
@@ -2571,11 +2607,7 @@ func (s *server) sameMeasurements(sp *dataset.Species, loc dataset.Locale) []sea
 func (s *server) withheldIn(sp *dataset.Species, opt options) map[string][12]bool {
 	allMonths := !opt.HasMonths || len(opt.Months) == month.Count
 	out := map[string][12]bool{}
-	for id := range sp.RegionWithheld {
-		if opt.HasRegions && !opt.Regions[id] {
-			continue
-		}
-		w := sp.WithheldIn(id)
+	keep := func(id string, w [12]bool) {
 		set := false
 		for m := range w {
 			if !allMonths && !opt.Months[m] {
@@ -2585,6 +2617,17 @@ func (s *server) withheldIn(sp *dataset.Species, opt options) map[string][12]boo
 		}
 		if set {
 			out[id] = w
+		}
+	}
+	for id := range sp.RegionWithheld {
+		if opt.HasRegions && !opt.Regions[id] {
+			continue
+		}
+		keep(id, sp.WithheldIn(id))
+	}
+	for id := range opt.Regions {
+		if e, ok := opt.Counties.entry(sp, id); ok && !e.Below() {
+			keep(id, e.Withheld())
 		}
 	}
 	return out
@@ -2655,6 +2698,19 @@ func (s *server) abstains(sp *dataset.Species, opt options) (where string, most 
 			return "", 0, false
 		}
 		if n := sp.RegionCounts[i]; n > bestN {
+			best, bestN = id, n
+		}
+	}
+	for id := range opt.Regions {
+		e, ok := opt.Counties.entry(sp, id)
+		if !ok || e.Below() {
+			continue
+		}
+		ct, _ := opt.Counties.county(id)
+		if _, ok := month.Present(e.Monthly(), ct.Monthly); ok {
+			return "", 0, false
+		}
+		if n := e.Records(); n > bestN {
 			best, bestN = id, n
 		}
 	}

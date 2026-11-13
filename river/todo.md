@@ -999,7 +999,7 @@ and island names redirecting, was done 2026-11-03. Left, in order:
      GADM's Lake Ontario unit takes in shoreline (American Robin is its sixth-commonest bird).
    Original plan: a New York spike on that data: records per county, file size, and a minimum record count for
    small counties, where one record per million is less than one record.
-4. *Prototype done 2026-11-03:* New York's county table (`data/county-presence/USA.33_1.tsv.gz` since 2026-11-12, built
+4. *Prototype done 2026-11-03:* New York's county table (now `data/county-presence/USA.33_1.tsv.gz`, built
    by `birdview-regions -counties`), joined by the ingest and served as regions; a **County**
    setting follows Region when New York or its counties are chosen. Left: searching counties by name,
    since the setting lists 63 alphabetically; Here to a county, which needs step 5; how the setting
@@ -1029,9 +1029,11 @@ and island names redirecting, was done 2026-11-03. Left, in order:
     kept out of the repository until the decision below. **Measured, joined as the prototype joins New York:**
     `species.json` grows from 14.7 MB to 213 MB (18.7 MB gzipped), the server from 65 MB to 910 MB
     resident, and a Texas page from 0.04 s to 0.76 s; Cloud Run's default is 512 MiB. Kept gzipped,
-    one per state ([decisions.countyTablesCompressed](requirements/decisions.md#countytablescompressed), the owner, 2026-11-12); the other 63 are committed
-    once the server holds counties without joining them into each species, which is the owner's
-    decision next.
+    one per state ([decisions.countyTablesCompressed](requirements/decisions.md#countytablescompressed), the owner, 2026-11-12). **All 64 committed
+    2026-11-12**, 11 MB, with counties held apart from the species ([decisions.countiesServedApart](requirements/decisions.md#countiesservedapart)):
+    `species.json` is 10.5 MB and `counties.gob.gz` 10.2 MB; with `-counties` the server is 170 MB
+    resident against 63 MB without, and a Texas page with every bird takes 0.16 s. Left before
+    turning counties on: finding a county by name, since Texas has 254; and Here to a county (step 5).
 5. Boundaries keyed to GADM codes for Here at county scale, since
    [tech.regionBoundaries](requirements/local/tech/delivery.md#regionboundaries) uses Natural Earth.
 6. Seas: adopt [imports.marine-regions](requirements/imports.md#marine-regions), assign the download's offshore grid cells to its

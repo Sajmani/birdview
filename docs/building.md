@@ -54,14 +54,15 @@ names each with its citation, and every other page links to it.
 From the repository root:
 
 ```
-go run ./cmd/birdview-ingest     # compiles web/data/species.json
+go run ./cmd/birdview-ingest     # compiles web/data/species.json, and counties.gob.gz beside it
 go run ./cmd/birdview            # serves http://localhost:8080
 ```
 
 The ingest prints a coverage summary: species in scope, and how many traits and wingspans are
 measured, near-match, or modeled. Expect **1082 species in 99 families across 27 orders**.
 
-**The server reads `species.json` once, at startup.** Restart it after re-running the ingest.
+**The server reads `species.json` once, at startup**, and with `-counties` the counties the ingest
+wrote apart beside it. Restart it after re-running the ingest.
 
 **Use `-dev web` while editing the UI.** Templates and static files are embedded with `go:embed`,
 so a normal server keeps serving the versions it was built with, with no sign they are stale.
@@ -83,9 +84,13 @@ restart after changing a Go file (for example, adding a field a template uses).
 | | `-regions` | `data/region-presence.tsv` |
 | | `-habitat-review` | `data/habitat-review.tsv` |
 | | `-proportions-review` | `data/proportions-review.tsv` |
+| | `-counties` | `data/county-presence` |
 | | `-out` | `web/data/species.json` |
+| | `-counties-out` | `counties.gob.gz` beside `-out` |
 | `birdview` | `-addr` | `localhost:8080` |
 | | `-data` | `web/data/species.json` |
+| | `-counties` | off; serve counties as regions, until every state and province has them |
+| | `-county-data` | `counties.gob.gz` beside `-data` |
 | | `-dev` | off |
 | | `-feedback` | none; the GitHub issue list (`https://github.com/<owner>/<repo>/issues`) whose filled-in new issues every report link opens; no links when unset, and the server refuses any other kind of URL |
 | | `-canonical` | none; the one host to answer at, e.g. `birdview.site`; requests for any other host are redirected there over HTTPS |
@@ -126,7 +131,7 @@ updated, the ingest's tests fail and name the rows to add or review again.
 its key, DOI, license, and hash in `data/gbif-downloads.tsv`, the DOI being what the credits cite.
 It needs a GBIF account, read from `GBIF_USER` and `GBIF_PASSWORD`; given `-key`, it fetches and
 records a download already requested from GBIF's website, with no credentials. `-validate` only asks
-GBIF whether it would accept the query. Nothing reads its downloads yet ([county regions](../river/todo.md#countyregions)).
+GBIF whether it would accept the query. `birdview-regions -counties` reads the county download.
 
 A sixth command, `birdview-names`, writes `data/source-names.tsv`: how many records eBird and
 iNaturalist each hold under each species' name, used to find names the two disagree about. Only a
@@ -196,7 +201,7 @@ internal/palette/        family and order colors, with contrast guarantees
 internal/smoke/          the post-deploy checks birdview-smoke runs
 data/                    the committed generated tables
 web/static/              templates, CSS, the Here script, and the favicon, embedded
-web/data/                the built species.json (gitignored)
+web/data/                the built species.json and counties.gob.gz (gitignored)
 docs/                    this documentation, also served at /docs
 third_party/             vendored sources, each under its own license
 river/                   the requirements bundle; normative, not served
@@ -287,7 +292,7 @@ reversed.
 
 Most of these are licensing rules, not style.
 
-- **Never commit the built dataset**, `web/data/species.json`. It is reproducible from the
+- **Never commit the built dataset**, `web/data/species.json` and `counties.gob.gz`. It is reproducible from the
   committed inputs in one command, and a stale copy in the tree is worse than none.
 - **Never read or process Wiley Online Library material**, including Ricklefs (2017). Its terms
   prohibit AI ingestion and automated access, and the source is
@@ -322,12 +327,13 @@ Deploying needs only the container image below, or the server binary and a built
 The `Dockerfile` at the repository root builds a minimal static image, based on
 `gcr.io/distroless/static-debian12:nonroot`, in four stages:
 
-1. **`ingest`** builds and runs `birdview-ingest`, producing `/out/species.json`.
+1. **`ingest`** builds and runs `birdview-ingest`, producing `/out/species.json` and `/out/counties.gob.gz`.
 2. **`test`** runs every test except the spec checks against that dataset. If one fails, the
    build stops, so a failing change cannot be deployed. Tests that need Chrome skip here; CI runs
    them.
 3. **`builder`** builds the static `birdview` server binary, and only after `test` has passed.
-4. **The final image** copies in only the binary and the dataset, as `/data/species.json`.
+4. **The final image** copies in only the binary and the dataset, as `/data/species.json` and
+   `/data/counties.gob.gz`, which the server reads only with `-counties`.
 
 **To deploy despite failing tests**, for an urgent fix past an unrelated failure, put an empty
 file named `SKIP_TESTS` in the directory you build from, and delete it afterwards. Never commit

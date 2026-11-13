@@ -12,7 +12,7 @@ the box lives.
 
 Square boxes are data: a published source, a table in code, or a file a command writes. Rounded
 boxes are things that run: a command, or a numbered step inside `birdview-ingest`. The steps are
-not files; the ingest runs all eight in memory and writes only `species.json`. Dotted arrows are
+not files; the ingest runs all eight in memory and writes `species.json`, and the counties apart in `counties.gob.gz`. Dotted arrows are
 facts copied into code rather than data read by a program. The diagram's corner repeats this
 legend.
 
@@ -250,7 +250,7 @@ flowchart LR
     tier ✗`"]
   end
 
-  subgraph INGEST["birdview-ingest: eight steps, in memory; only species.json is written"]
+  subgraph INGEST["birdview-ingest: eight steps, in memory; writes species.json, and counties apart"]
     direction TB
     S1(["Step 1: scope
     keep established or rare;
@@ -289,6 +289,15 @@ flowchart LR
     or sea near shore"])
   end
 
+  CJSON["`web/data/counties.gob.gz
+  *build artifact, not committed*
+  ─────────────
+  county id, name, state ★
+  every bird record there, by month ★ *the denominator*
+  each species' months there ★ *the filter and the 1 in N*
+  under the bar · *the 1 in N, never a filter*
+  withheld months ★`"]
+
   JSON["`web/data/species.json
   *build artifact, not committed*
   ─────────────
@@ -309,7 +318,6 @@ flowchart LR
   mass ★ *with its provenance*
   habitats ★ *each with its origin*
   niches ★ *each with its origin*
-  counties · *a county's name and state*
   regions · *the region filter*
   regionCounts ★ *the 1 in N*
   regionMonths · *the month filter*
@@ -388,9 +396,10 @@ flowchart LR
   SEADIST -->|"with land counts: 25% beyond 10 km,
   80% on land or within 10 km"| S8
   NREV -->|"wingspan factors"| S6
-  COUNTIES -->|"after the peak share"| S8
+  COUNTIES -->|"compiled apart from the species"| CJSON
 
   JSON --> SERVER
+  CJSON -->|"-counties only; read for a chosen county"| SERVER
   NAMES -->|"Recorded as, read directly"| SERVER
   TSENS -->|"withheld notes, read directly"| SERVER
   SERVER --> PAGES
@@ -444,7 +453,8 @@ Where a name table applies to a species, its page says so under *Recorded as*.
 (step 1), names them and their families from AviList (2), measures them from AVONET (3), models
 the segments no source measures (4), assigns habitat and diet (5), takes wingspan from Fox where it
 was measured and estimates it where it was not (6), records the species it does not draw and why
-(7), and attaches the region counts (8). Every metric carries its
+(7), and attaches the region counts (8). Counties are compiled apart, into `counties.gob.gz`, which
+the server reads only with `-counties` and only for the counties chosen. Every metric carries its
 provenance (*measured*, *near-match*, or *modeled*), and the page shows which. See
 [what is measured and what is modeled](data.md).
 

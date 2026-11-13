@@ -85,8 +85,8 @@ func load(t *testing.T) *dataset.Dataset {
 		t.Fatalf("loadSeaTable: %v", err)
 	}
 	applySea(ds, table)
-	if _, err := applyCounties(ds, countyDir); err != nil {
-		t.Fatalf("applyCounties: %v", err)
+	if _, err := compileCounties(ds, countyDir); err != nil {
+		t.Fatalf("compileCounties: %v", err)
 	}
 	if _, err := applyBanding(ds, bblFile); err != nil {
 		t.Fatalf("applyBanding: %v", err)
@@ -914,13 +914,14 @@ func TestEverySpeciesHasAnEBirdCode(t *testing.T) {
 	}
 }
 
-// TestCountiesJoinedAsRegions asserts the ingest carries a county table into the dataset
-// (decisions.countyListingRule), read gzipped as committed (decisions.countyTablesCompressed): a listed county joins the species' regions with its counts and months, one
-// under the bar joins the Below fields, the county's totals join the regions', each county is named
-// and placed in its state, and the peak share still names a state.
+// TestCountiesCompiledApart asserts the ingest compiles a county table apart from the species
+// (decisions.countiesServedApart, decisions.countyListingRule), read gzipped as committed (decisions.countyTablesCompressed): each county is
+// named, placed in its state, and carries its totals; a listed county's records and months, and one
+// under the bar, are in that county's entries; the species' own regions, totals, and peak share are
+// untouched; and the compiled counties survive being written and read back.
 //
 // Verifies: product.regionAndMonthFilter. Criterion: app.countyListingApplied.
-func TestCountiesJoinedAsRegions(t *testing.T) {
+func TestCountiesCompiledApart(t *testing.T) {
 	dir := t.TempDir()
 	table := "#region\tUSA.33.24_1\tKings\n#region\tUSA.33.32_1\tNew York\n" +
 		"total\tUSA.33.24_1\t100|100|100|100|100|100|100|100|100|100|100|100\n" +
@@ -940,30 +941,37 @@ func TestCountiesJoinedAsRegions(t *testing.T) {
 			Regions: []string{"USA.33_1"}, RegionCounts: []int64{900},
 			RegionMonths: [][12]int64{{75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75}}, Commonest: peak}},
 	}
-	n, err := applyCounties(ds, dir)
+	before := ds.Species[0].Regions
+	c, err := compileCounties(ds, dir)
 	if err != nil {
 		t.Fatal(err)
 	}
+	var buf bytes.Buffer
+	if err := c.Write(&buf); err != nil {
+		t.Fatal(err)
+	}
+	if c, err = dataset.ReadCounties(&buf); err != nil {
+		t.Fatal(err)
+	}
+	if len(c.Counties) != 2 {
+		t.Fatalf("compiled %+v", c.Counties)
+	}
+	kings, ok := c.County("USA.33.24_1")
+	if !ok || kings.Name != "Kings" || kings.State != "USA.33_1" || kings.Total != 1200 || kings.Monthly[0] != 100 {
+		t.Errorf("Kings compiled as %+v (found %v)", kings, ok)
+	}
+	if e, ok := c.Entry("USA.33.24_1", 0); !ok || e.Below() || e.Records() != 60 || e.Months[0] != 5 {
+		t.Errorf("the robin in Kings is %+v (found %v); want listed, 60 records, 5 in January", e, ok)
+	}
+	if e, ok := c.Entry("USA.33.32_1", 0); !ok || !e.Below() || e.Records() != 2 {
+		t.Errorf("the robin in New York County is %+v (found %v); want under the bar with 2", e, ok)
+	}
 	s := ds.Species[0]
-	if n != 2 || len(ds.Counties) != 2 {
-		t.Fatalf("joined %d counties, carried %+v", n, ds.Counties)
-	}
-	for _, c := range ds.Counties {
-		if c.State != "USA.33_1" || (c.ID == "USA.33.24_1" && c.Name != "Kings") {
-			t.Errorf("carried the county %+v", c)
-		}
-	}
-	if len(s.Regions) != 2 || s.Regions[1] != "USA.33.24_1" || s.RegionCounts[1] != 60 || s.RegionMonths[1][0] != 5 {
-		t.Errorf("regions %v counts %v; want Kings added with 60", s.Regions, s.RegionCounts)
-	}
-	if len(s.BelowRegions) != 1 || s.BelowRegions[0] != "USA.33.32_1" || s.BelowCounts[0] != 2 {
-		t.Errorf("below regions %v counts %v; want New York County with 2", s.BelowRegions, s.BelowCounts)
-	}
-	if ds.RegionTotals["USA.33.24_1"] != 1200 || ds.RegionMonthlyTotals["USA.33.32_1"][0] != 50 {
-		t.Errorf("county totals %v, monthly %v", ds.RegionTotals, ds.RegionMonthlyTotals)
+	if len(s.Regions) != len(before) || len(s.BelowRegions) != 0 || len(ds.RegionTotals) != 1 {
+		t.Errorf("counties were joined into the species (regions %v, below %v) or the totals (%v)", s.Regions, s.BelowRegions, ds.RegionTotals)
 	}
 	if s.Commonest != peak {
-		t.Errorf("the peak share moved to %+v; it names a state, whose counties are inside it", s.Commonest)
+		t.Errorf("the peak share moved to %+v", s.Commonest)
 	}
 }
 
@@ -1200,7 +1208,7 @@ func TestPlainCountyTableRefused(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "USA.33_1.tsv"), []byte("#region\tUSA.33.24_1\tKings\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := applyCounties(&dataset.Dataset{}, dir); err == nil || !strings.Contains(err.Error(), "not gzipped") {
+	if _, err := compileCounties(&dataset.Dataset{}, dir); err == nil || !strings.Contains(err.Error(), "not gzipped") {
 		t.Errorf("a plain USA.33_1.tsv gave %v; want it refused as not gzipped", err)
 	}
 }

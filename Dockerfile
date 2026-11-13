@@ -52,6 +52,7 @@ FROM golang:1.26.9 AS test
 WORKDIR /src
 COPY . .
 COPY --from=ingest /out/species.json web/data/species.json
+COPY --from=ingest /out/counties.gob.gz web/data/counties.gob.gz
 
 RUN if [ -e SKIP_TESTS ]; then \
       echo '!!! SKIP_TESTS is present: this image was built WITHOUT running the tests (tech.testedBeforeDeploy)'; \
@@ -83,6 +84,8 @@ FROM gcr.io/distroless/static-debian12:nonroot
 
 COPY --from=builder /usr/local/bin/birdview /usr/local/bin/birdview
 COPY --from=ingest  /out/species.json       /data/species.json
+# The counties the ingest held apart, read only with -counties (decisions.countiesServedApart).
+COPY --from=ingest  /out/counties.gob.gz     /data/counties.gob.gz
 
 EXPOSE 8080
 

@@ -26,7 +26,7 @@ func TestEmbedIsTheDefault(t *testing.T) {
 	if devDir != "" {
 		t.Fatalf("devDir is %q at rest; a deployed binary would read from disk", devDir)
 	}
-	s, err := newServer(testDataset())
+	s, err := newServer(testDataset(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}

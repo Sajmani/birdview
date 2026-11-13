@@ -643,12 +643,14 @@ Watched failing: 2026-11-07, with Least Sandpiper's row removed ("Calidris minut
 ## app.countyListingApplied
 
 Criterion: [app.countyListingApplied](requirements/composed/internal/app/acceptance.md#countylistingapplied)
-Guardrails: `cmd/birdview-ingest/main_test.go:TestCountiesJoinedAsRegions`;
+Guardrails: `cmd/birdview-ingest/main_test.go:TestCountiesCompiledApart`;
   `cmd/birdview-regions/county_test.go:TestCountyListingRule`;
   `cmd/birdview-regions/county_test.go:TestCountyRowsFromDownload`;
   `cmd/birdview-regions/county_test.go:TestCountiesSplitByState`;
   `cmd/birdview-regions/county_test.go:TestCountyTableGzippedReproducibly`;
   `cmd/birdview-ingest/main_test.go:TestPlainCountyTableRefused`; `cmd/birdview/main_test.go:TestCountyIsARegion`;
+  `cmd/birdview/main_test.go:TestCountiesInSeveralStatesByAddress`;
+  `cmd/birdview/main_test.go:TestSpeciesPageCountsCounties`;
   `cmd/birdview/main_test.go:TestCountySettingDrillsDown`; `cmd/birdview/main_test.go:TestCountiesOffByDefault`;
   `cmd/birdview/main_test.go:TestPlaceAndMonthsAreNotJoinedByAComma`;
   `internal/region/region_test.go:TestCountyParentFromCode`
@@ -658,6 +660,8 @@ Watched failing: 2026-11-03, before the server knew counties ("Los Angeles draws
 Watched failing: 2026-11-04, with a county's months after a comma ("the hummingbird's share line does not read \"in Los Angeles, CA (Jun)\"") and a list of counties joined by commas ("five counties list as \"Bronx, NY, Kings, NY, New York, NY, or 2 more\"").
 Watched failing: 2026-11-12, with each county's rows filed under its own code instead of its state's ("split into 4 states, want 3"; "USA.33_1 holds [], want [USA.33.24_1 USA.33.42_1]"; "a state's code in the county column was accepted as a county").
 Watched failing: 2026-11-12, with the ingest reading only plain tables ("joined 0 counties, carried []"), with a timestamp in the gzip header ("two writes of the same table differ; the gzip header carries a name or a time"), with the table written ungzipped ("the table is not gzipped: gzip: invalid header"), and with a plain table accepted ("a plain USA.33_1.tsv gave <nil>; want it refused as not gzipped").
+Watched failing: 2026-11-12, after counties moved apart from the species: with the under-the-bar flag dropped in compiling ("the robin in New York County is {… Flags:0 …} (found true); want under the bar with 2"), and with no county counts on a bird's page ("with counties the hummingbird's regions do not read \"CA 1/2, OR\"").
+Watched failing: 2026-11-12, with chosen counties left out of the share ("annhum across both counties reads []; want 1 in 200") and out of the region filter ("Los Angeles and Philadelphia draw []; want the hummingbird and the crow").
 
 ## app.everydayDefinitionsShown
 

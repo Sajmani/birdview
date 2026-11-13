@@ -1025,7 +1025,9 @@ home page in those. Its footer carries the full credits, which every other page 
   by name. Choosing a county from the state replaces the state with it, since the state already
   holds every county's birds; choosing more adds them; removing the last returns to the state, as
   does County's **All**. With no state chosen, or several, there is no County setting; a county is
-  still reachable by its address.
+  still reachable by its address. **Counties in several states can be chosen by address, and the
+  server answers any such choice; offering one state's counties at a time is a limit of the setting,
+  not of the address or the server** ([decisions.countiesServedApart](../../decisions.md#countiesservedapart)).
 - **Tiers.** The ordered set breaks into tiers
   ([sectionBreakRule](ordering.md#sectionbreakrule), [orderByFrequency](#orderbyfrequency)): a size tier spans one step of the scale from its
   smallest bird, a frequency tier a decade of "1 in N", and birds with no records a tier of their

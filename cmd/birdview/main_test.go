@@ -333,7 +333,7 @@ func worldName(common string) string {
 
 func newTestServer(t *testing.T) *server {
 	t.Helper()
-	s, err := newServer(testDataset())
+	s, err := newServer(testDataset(), nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -1125,7 +1125,7 @@ func TestEbirdLinks(t *testing.T) {
 			ds.Species[i].SpeciesCode = ""
 		}
 	}
-	s, err := newServer(ds)
+	s, err := newServer(ds, nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -2245,7 +2245,7 @@ func TestUnitsForTakesTheSmallestBird(t *testing.T) {
 // Verifies: product.oneUnitInComparison. Criterion: app.massInOneUnit.
 func TestNoSectionMixesMassUnits(t *testing.T) {
 	ds := realDataset(t)
-	srv, err := newServer(ds)
+	srv, err := newServer(ds, nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -3274,7 +3274,7 @@ func TestResponsesCompressWhenAsked(t *testing.T) {
 // Verifies: product.orderByFrequency, decisions.frequencyMetric. Criterion: app.frequencyTiers.
 func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 	ds := realDataset(t)
-	srv, err := newServer(ds)
+	srv, err := newServer(ds, nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -3444,7 +3444,7 @@ func mustComma(t *testing.T, s string) int64 {
 // Verifies: product.orderByFrequency, product.shareOfRecords. Criterion: app.frequencyTiers.
 func TestFrequencyTiersAreNotNamed(t *testing.T) {
 	ds := realDataset(t)
-	srv, err := newServer(ds)
+	srv, err := newServer(ds, nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -3474,7 +3474,7 @@ func TestFrequencyTiersAreNotNamed(t *testing.T) {
 // Verifies: product.namesRecordsFiledUnder, decisions.sharedCountShownOnBoth. Criterion: app.sharedCountDisclosed.
 func TestSharedNamesAreDisclosed(t *testing.T) {
 	ds := realDataset(t)
-	srv, err := newServer(ds)
+	srv, err := newServer(ds, nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -3575,7 +3575,7 @@ func TestSharedNamesAreDisclosed(t *testing.T) {
 //
 // Verifies: product.tileOpensDetail, product.shareOfRecords. Criterion: app.detailSaysWhatTileSays.
 func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
-	s, err := newServer(realDataset(t))
+	s, err := newServer(realDataset(t), nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -3684,7 +3684,7 @@ func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
 // Verifies: product.namesRecordsFiledUnder. Criterion: app.disputedNamesShown.
 func TestEveryNameDisagreementIsOnThePage(t *testing.T) {
 	ds := realDataset(t)
-	s, err := newServer(ds)
+	s, err := newServer(ds, nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -3792,7 +3792,7 @@ func TestEveryNameDisagreementIsOnThePage(t *testing.T) {
 //
 // Verifies: tech.cacheLifetimeStated. Criterion: app.honestRevalidation.
 func TestResponsesCarryAValidator(t *testing.T) {
-	s, err := newServer(realDataset(t))
+	s, err := newServer(realDataset(t), nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -3863,7 +3863,7 @@ func TestResponsesCarryAValidator(t *testing.T) {
 	// be satisfied by a constant.
 	ds2 := realDataset(t)
 	ds2.Species[0].Mass.Value += 1
-	s2, err := newServer(ds2)
+	s2, err := newServer(ds2, nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -3893,7 +3893,7 @@ func TestResponsesCarryAValidator(t *testing.T) {
 //
 // Verifies: product.namesRecordsFiledUnder. Criterion: app.nameDisclosureLegible.
 func TestTheNameDisclosureExplainsItselfAndLinksSomewhereUseful(t *testing.T) {
-	s, err := newServer(realDataset(t))
+	s, err := newServer(realDataset(t), nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -4202,7 +4202,7 @@ func TestMonthsNarrowTheListAndTheFigureTogether(t *testing.T) {
 // newTestServerReal builds a server over the compiled dataset, or skips.
 func newTestServerReal(t *testing.T) *server {
 	t.Helper()
-	s, err := newServer(realDataset(t))
+	s, err := newServer(realDataset(t), nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -4375,7 +4375,7 @@ func tileOf(t *testing.T, page, id string) string {
 // Verifies: product.borrowedMeasurementsSaySo, decisions.vegaGullBorrows. Criterion: app.sharedMeasurementsDisclosed.
 func TestSameMeasurementsAreNoted(t *testing.T) {
 	ds := realDataset(t)
-	srv, err := newServer(ds)
+	srv, err := newServer(ds, nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -4440,7 +4440,7 @@ func TestSameMeasurementsNeedNoTable(t *testing.T) {
 	borrowed.Kind = dataset.NearMatch
 	borrower.Segments.Bill.Prov = borrowed
 
-	srv, err := newServer(ds)
+	srv, err := newServer(ds, nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -4508,7 +4508,7 @@ func TestRecordsBelowTheBarCount(t *testing.T) {
 // Verifies: product.escapedBirdsListed, decisions.escapedBirdsOffIndex. Criterion: app.escapedBirdsListedAndServed.
 func TestExoticsAreOffTheIndexAndListed(t *testing.T) {
 	ds := realDataset(t)
-	srv, err := newServer(ds)
+	srv, err := newServer(ds, nil)
 	if err != nil {
 		t.Fatalf("newServer: %v", err)
 	}
@@ -4845,19 +4845,39 @@ func TestFoundBirdLinksToItsPage(t *testing.T) {
 }
 
 // countyDataset is the test dataset with one California county, Los Angeles, which holds the
-// hummingbird and not the stilt (decisions.countyListingRule).
-func countyDataset() *dataset.Dataset {
+// hummingbird and not the stilt (decisions.countyListingRule), held apart as the ingest leaves it
+// (decisions.countiesServedApart).
+func countyDataset() (*dataset.Dataset, *dataset.Counties) {
 	ds := testDataset()
-	const la = "USA.5.19_1"
-	ds.Counties = []dataset.County{{ID: la, Name: "Los Angeles", State: "USA.5_1"}}
-	ds.RegionTotals[la] = 400000
+	la := dataset.County{ID: "USA.5.19_1", Name: "Los Angeles", State: "USA.5_1", Total: 400000,
+		Monthly: [12]int64{33337, 33333, 33333, 33333, 33333, 33333, 33333, 33333, 33333, 33333, 33333, 33333}}
+	return ds, testCounties(ds, []dataset.County{la}, map[string]map[string][12]int64{
+		"USA.5.19_1": {"annhum": {250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250}},
+	})
+}
+
+// testCounties builds the counties for a test: each county's listed species, by id, with their
+// twelve monthly counts.
+func testCounties(ds *dataset.Dataset, counties []dataset.County, listed map[string]map[string][12]int64) *dataset.Counties {
+	c := &dataset.Counties{Counties: counties, Entries: make([][]dataset.CountyEntry, len(counties))}
+	idx := map[string]int{}
 	for i := range ds.Species {
-		if ds.Species[i].ID == "annhum" {
-			ds.Species[i].Regions = append(ds.Species[i].Regions, la)
-			ds.Species[i].RegionCounts = append(ds.Species[i].RegionCounts, 3000)
+		idx[ds.Species[i].ID] = i
+		c.Species = append(c.Species, ds.Species[i].ScientificName)
+	}
+	for k, ct := range counties {
+		for id, months := range listed[ct.ID] {
+			e, err := dataset.NewCountyEntry(idx[id], months, false, [12]bool{})
+			if err != nil {
+				panic(err)
+			}
+			c.Entries[k] = append(c.Entries[k], e)
 		}
 	}
-	return ds
+	if err := c.Index(); err != nil {
+		panic(err)
+	}
+	return c
 }
 
 // TestCountyIsARegion asserts a county works as a region by its GADM code (product.regionAndMonthFilter,
@@ -4891,7 +4911,7 @@ func TestCountyIsARegion(t *testing.T) {
 	if got := share("/?show=all&month=all&region=USA.5.19_1"); got != "133" {
 		t.Errorf("the hummingbird in Los Angeles is 1 in %s; want 1 in 133, 3,000 of 400,000", got)
 	}
-	plain, err := newServer(testDataset())
+	plain, err := newServer(testDataset(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -4905,6 +4925,67 @@ func TestCountyIsARegion(t *testing.T) {
 	}
 }
 
+// TestCountiesInSeveralStatesByAddress asserts decisions.countiesServedApart's third point: the County
+// setting offers one state's counties, but an address naming counties in two states is answered,
+// listing the birds either county lists and dividing by both counties' records.
+//
+// Verifies: product.regionAndMonthFilter, product.nextView. Criterion: app.countyListingApplied.
+func TestCountiesInSeveralStatesByAddress(t *testing.T) {
+	countiesOn(t)
+	ds, cs := countyDataset()
+	philadelphia := dataset.County{ID: "USA.39.51_1", Name: "Philadelphia", State: "USA.39_1", Total: 200000,
+		Monthly: [12]int64{0: 200000}}
+	cs = testCounties(ds, append(cs.Counties, philadelphia), map[string]map[string][12]int64{
+		"USA.5.19_1":  {"annhum": {0: 3000}},
+		"USA.39.51_1": {"amecro": {0: 600}},
+	})
+	s, err := newServer(ds, cs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	const both = "/?show=all&month=all&region=USA.5.19_1&region=USA.39.51_1"
+	p := nextAt(s, both)
+	if !hasTile(p, "annhum") || !hasTile(p, "amecro") || hasTile(p, "blasti") || hasTile(p, "amerob") {
+		t.Errorf("Los Angeles and Philadelphia draw %v; want the hummingbird and the crow, each listed in one", tileIDs(p))
+	}
+	_, body := get(t, s, both)
+	for id, want := range map[string]string{"annhum": "200", "amecro": "1,000"} {
+		m := regexp.MustCompile(`<b>1 in ([\d,]+)</b>`).FindStringSubmatch(tileOf(t, body, id))
+		if m == nil || m[1] != want {
+			t.Errorf("%s across both counties reads %v; want 1 in %s, of the two counties' 600,000 records", id, m, want)
+		}
+	}
+}
+
+// TestSpeciesPageCountsCounties asserts decisions.countiesServedApart's second point: with counties served,
+// a bird's page names each state with how many of its counties list the bird out of how many it
+// has, and a state without counties as before; without them the row is unchanged.
+//
+// Verifies: product.regionAndMonthFilter. Criterion: app.countyListingApplied.
+func TestSpeciesPageCountsCounties(t *testing.T) {
+	plain, err := newServer(countyDataset())
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, body := get(t, plain, "/species/annhum")
+	if !strings.Contains(body, "CA OR") {
+		t.Errorf("without -counties the hummingbird's regions do not read \"CA OR\"")
+	}
+	countiesOn(t)
+	ds, cs := countyDataset()
+	cs = testCounties(ds, append(cs.Counties, dataset.County{ID: "USA.5.37_1", Name: "San Diego", State: "USA.5_1",
+		Total: 300000, Monthly: [12]int64{0: 300000}}), map[string]map[string][12]int64{
+		"USA.5.19_1": {"annhum": {0: 3000}}})
+	s, err := newServer(ds, cs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, body = get(t, s, "/species/annhum")
+	if !strings.Contains(body, "CA 1/2, OR") {
+		t.Errorf("with counties the hummingbird's regions do not read \"CA 1/2, OR\": one of California's two counties lists it, and Oregon has none")
+	}
+}
+
 // TestCountySettingDrillsDown asserts the County setting (product.nextView): it follows Region only when
 // the regions chosen are one state with counties or counties of that state; choosing a county from
 // the state replaces the state; choosing more adds them; removing the last, or All, returns to the
@@ -4913,10 +4994,10 @@ func TestCountyIsARegion(t *testing.T) {
 // Verifies: product.nextView, product.regionAndMonthFilter. Criterion: app.countyListingApplied.
 func TestCountySettingDrillsDown(t *testing.T) {
 	countiesOn(t)
-	ds := countyDataset()
-	ds.Counties = append(ds.Counties, dataset.County{ID: "USA.5.37_1", Name: "San Diego", State: "USA.5_1"})
-	ds.RegionTotals["USA.5.37_1"] = 300000
-	s, err := newServer(ds)
+	ds, cs := countyDataset()
+	cs = testCounties(ds, append(cs.Counties, dataset.County{ID: "USA.5.37_1", Name: "San Diego", State: "USA.5_1",
+		Total: 300000, Monthly: [12]int64{0: 300000}}), nil)
+	s, err := newServer(ds, cs)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -4991,7 +5072,7 @@ func TestCountiesOffByDefault(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	plain, err := newServer(testDataset())
+	plain, err := newServer(testDataset(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -5020,16 +5101,12 @@ func TestCountiesOffByDefault(t *testing.T) {
 // Verifies: product.shareOfRecords, product.nextView. Criterion: app.countyListingApplied.
 func TestPlaceAndMonthsAreNotJoinedByAComma(t *testing.T) {
 	countiesOn(t)
-	ds := countyDataset()
+	ds := testDataset()
 	// June figures for the county, so a June share has something to divide by.
-	ds.RegionMonthlyTotals = map[string][12]int64{"USA.5.19_1": {5: 40000}}
-	for i := range ds.Species {
-		if ds.Species[i].ID == "annhum" {
-			ds.Species[i].RegionMonths = make([][12]int64, len(ds.Species[i].Regions))
-			ds.Species[i].RegionMonths[len(ds.Species[i].Regions)-1][5] = 300
-		}
-	}
-	s, err := newServer(ds)
+	c := testCounties(ds, []dataset.County{{ID: "USA.5.19_1", Name: "Los Angeles", State: "USA.5_1",
+		Total: 40000, Monthly: [12]int64{5: 40000}}}, map[string]map[string][12]int64{
+		"USA.5.19_1": {"annhum": {5: 300}}})
+	s, err := newServer(ds, c)
 	if err != nil {
 		t.Fatal(err)
 	}

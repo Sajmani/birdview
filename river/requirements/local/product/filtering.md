@@ -54,7 +54,9 @@ alone would list a bird on a single sighting; the state's list keeps out the cag
 vagrants a county's small total would let in. **The region a bird is "commonest in" stays a state,
 province, or sea**: a county is inside a state, and naming one of thousands would rarely tell a
 reader where the bird is common. **Counties are served only when the server runs with `-counties`**,
-until every US state and Canadian province has them ([decisions.countiesBehindFlag](../../decisions.md#countiesbehindflag)).
+until every US state and Canadian province has them ([decisions.countiesBehindFlag](../../decisions.md#countiesbehindflag)). **A bird's page names
+its states and provinces, each with how many of its counties list the bird out of how many it has**
+("CA 12/58"), rather than every county ([decisions.countiesServedApart](../../decisions.md#countiesservedapart)).
 
 It follows the same rule as families: nothing selected means every region. The data is GBIF's, which serves eBird and iNaturalist under CC BY 4.0 with GADM regions as a
 queryable field ([decisions.regionFilterReinstated](../../decisions.md#regionfilterreinstated)).

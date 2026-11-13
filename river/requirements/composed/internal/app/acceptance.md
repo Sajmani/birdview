@@ -995,11 +995,19 @@ BirdView does not draw counts in the county's total and nowhere else; the twelve
 total; the download's zipped table is read by its header; and a state's eBird withholding covers its
 counties.
 
-Joined and served: the ingest carries a county table's listed and under-the-bar cells, its totals,
-and each county's name and state into the dataset without moving the peak share off a state
-(`TestCountiesJoinedAsRegions`); and on the home page a county is a region by its GADM code, listing
+Compiled and served apart ([decisions.countiesServedApart](../../../decisions.md#countiesservedapart)): the ingest reads each state's gzipped table,
+refusing a plain one ([decisions.countyTablesCompressed](../../../decisions.md#countytablescompressed)), and compiles each county's name, state, totals,
+and listed and under-the-bar records apart from the species, which keep their own regions and peak
+share, and the compiled counties survive being written and read back (`TestCountiesCompiledApart`,
+`TestPlainCountyTableRefused`); one download is split by each county's state, and a table is
+written gzipped to the same bytes every time (`TestCountiesSplitByState`,
+`TestCountyTableGzippedReproducibly`). On the home page a county is a region by its GADM code, listing
 only its own birds, named with its state's code, giving each bird the county's own share, and never
-counted twice, in every region or beside its own state (`TestCountyIsARegion`). The County setting
+counted twice, in every region or beside its own state (`TestCountyIsARegion`); an address naming
+counties in two states lists the birds either lists and divides by both counties' records
+(`TestCountiesInSeveralStatesByAddress`); and a bird's page names each state with how many of its
+counties list the bird out of how many it has, "CA 1/2", and is unchanged without `-counties`
+(`TestSpeciesPageCountsCounties`). The County setting
 appears only for one state with counties or counties of one state, a county chosen from the state
 replaces it, more counties add, and removing the last or All returns to the state
 (`TestCountySettingDrillsDown`). Without `-counties`, the default, a county's code resolves to

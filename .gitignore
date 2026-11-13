@@ -6,6 +6,7 @@
 # The built dataset is a build artifact, not a source file (tech.datasetNeverCommitted): it is
 # reproducible from the committed inputs in one command.
 /web/data/species.json
+/web/data/counties.gob.gz
 
 # Compiled binaries. Every command is named birdview-*, and `go build
 # ./cmd/<name>` without -o drops the binary in the working directory -- which
