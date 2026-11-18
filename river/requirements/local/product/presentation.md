@@ -36,8 +36,7 @@ Each species is one **tile**, laid out top to bottom, **the numbers first**
 1. a header of four lines, then a rule: the **common name followed by its banding code and its
    eBird species code in parentheses**, with the **pin** in the tile's top-right corner
    ([nextView](#nextview)); **length, bill, and tail**; **wingspan, inner, and chord**, the chord left
-   out where it is unknown, the inner span where the chords meet, and the inner span on a tile
-   narrower than its full width ([decisions.innerOffNarrowTiles](../../decisions/decisions.md#inneroffnarrowtiles)); and the share line ([shareOfRecords](#shareofrecords)). The
+   out where it is unknown and the inner span where the chords meet; and the share line ([shareOfRecords](#shareofrecords)). The
    measurements are named in full and in the selected unit system, in a proportional face with
    figures of even width so that numbers align down a column. On the detail view the first line
    also carries head, neck, and body ([labeledDetailDiagram](measurements.md#labeleddetaildiagram)), and wraps where it must;
@@ -72,7 +71,9 @@ Tiles wrap to fill the available display width.
 **Every tile is the same height above its drawing, and nothing inside one may wrap to make it
 taller.** Each line of the header and the line under the rule is one line, and the diagram has a
 fixed aspect. Only the notes, last, may add lines, so a tile that has them
-grows below its drawing and every drawing in a row stays level. Where text does not fit, it
+grows below its drawing and every drawing in a row stays level. **On a tile narrower than its full
+width, which stands alone in its row, the measurement lines wrap**, and only between measurements,
+so a name keeps its value ([decisions.measurementLinesWrapOnPhones](../../decisions/decisions.md#measurementlineswraponphones)). Where other text does not fit, it
 **truncates on its one line**, giving way in order of what a reader can reconstruct:
 
 | | gives way |

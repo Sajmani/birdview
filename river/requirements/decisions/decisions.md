@@ -4400,7 +4400,7 @@ Date: 2026-10-31
 
 Decided by: Sameer
 
-Status: amended by innerOffNarrowTiles
+Status: amended by measurementLinesWrapOnPhones
 
 Amends: tileNumbersFirst
 
@@ -5544,9 +5544,9 @@ and which let the county changes reach main with stale approvals while `river ch
 
 ---
 
-## innerOffNarrowTiles
+## measurementLinesWrapOnPhones
 
-**A tile narrower than its full width leaves Inner off its wing line**
+**On a tile narrower than its full width, the measurement lines wrap between measurements**
 
 Date: 2026-11-17
 
@@ -5556,23 +5556,25 @@ Status: accepted
 
 Amends: tileMeasurementLines
 
-Affects: [product.tileContents](../local/product/presentation.md#tilecontents), [product.labeledDetailDiagram](../local/product/measurements.md#labeleddetaildiagram)
+Affects: [product.tileContents](../local/product/presentation.md#tilecontents)
 
 ### Decided
 
-On a home-page tile narrower than its full 396px, which is a screen under 420px wide, the wing line
-reads **wingspan and chord**, without Inner. A full-width tile keeps Inner, and so does the species
-page's tile, whose lines may wrap; the crossbar is drawn either way, and its tooltip and the
-measurements table still name and explain it. The checks measure the tiles in metric as well as
-imperial.
+On a home-page tile narrower than its full 396px, which is a screen under 420px wide, the
+measurement lines may wrap, and only between measurements: a name and its value stay together on
+one line. Every measurement stays on the tile, Inner included. A full-width tile keeps each line to
+one line, as before. The checks measure the tiles in metric as well as imperial.
+
+Considered and not chosen: leaving Inner off narrow tiles, which fit the wing line but not the
+length line in CI's fonts; writing the unit once per line, and narrower gaps, which fit today's
+fonts only with a little to spare.
 
 ### Why
 
-Measured 2026-11-17 at 360px with nothing truncated, the wing line overflowed its tile on 997 of
-2,082 lines in metric in the Mac's system font, by up to 38px, and on 548 imperial and 1,042 metric
-lines in DejaVu Sans, a common Linux fallback, by up to 64px; the checks had passed only because they
-tested imperial in the Mac's font, and CI failed. Without Inner every wing line fits, in both fonts
-and units. Inner is the one figure on the line that is derived rather than measured, and the
-drawing still shows it. Truncating instead would cut a number ("Chord 33…"), which reads as another
-value. At full width the widest wing line needs 352px of the tile's 374px in the Mac's font.
-
+Measured 2026-11-17 at 360px, the wing line overflowed its tile in metric on 997 of 2,082 lines in
+the Mac's system font and on more in DejaVu Sans, a common Linux fallback; on the CI runner, whose
+Linux Chrome draws text a few percent wider still, the metric length line overflowed by up to 20px
+as well. The checks had passed only because they tested imperial in the Mac's font. Lines that
+never wrap fit only for the fonts they were tuned in. Under 420px the tiles stack one per row, so
+the reason a tile's lines may not wrap, that drawings side by side stay level, does not arise there.
+Truncating would cut a number ("Chord 33…"), which reads as another value.

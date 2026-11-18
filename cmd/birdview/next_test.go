@@ -1196,7 +1196,7 @@ func TestNextTileCornerAndRows(t *testing.T) {
 		inner.ServeHTTP(w, r)
 	}))
 	defer ts.Close()
-	// The phone again in metric, whose wing line is the widest (decisions.innerOffNarrowTiles), with the
+	// The phone again in metric, whose lines are the widest (decisions.measurementLinesWrapOnPhones), with the
 	// largest birds first, whose wing lines are longest.
 	for _, size := range []string{"laptop", "phone", "phone in metric"} {
 		target := ts.URL + page
