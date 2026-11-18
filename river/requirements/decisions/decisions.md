@@ -4400,7 +4400,7 @@ Date: 2026-10-31
 
 Decided by: Sameer
 
-Status: accepted
+Status: amended by measurementLinesWrapOnPhones
 
 Amends: tileNumbersFirst
 
@@ -5541,3 +5541,40 @@ Affects: [tech.bundleIsNormative](../local/tech/process.md#bundleisnormative), [
 River 2.x kept a second record of approval beside source control, which the owner found redundant
 and which let the county changes reach main with stale approvals while `river check
 --allow-unapproved` reported them only as notes. River 3.0 has no lenient mode.
+
+---
+
+## measurementLinesWrapOnPhones
+
+**On a tile narrower than its full width, the measurement lines wrap between measurements**
+
+Date: 2026-11-17
+
+Decided by: Sameer
+
+Status: accepted
+
+Amends: tileMeasurementLines
+
+Affects: [product.tileContents](../local/product/presentation.md#tilecontents)
+
+### Decided
+
+On a home-page tile narrower than its full 396px, which is a screen under 420px wide, the
+measurement lines may wrap, and only between measurements: a name and its value stay together on
+one line. Every measurement stays on the tile, Inner included. A full-width tile keeps each line to
+one line, as before. The checks measure the tiles in metric as well as imperial.
+
+Considered and not chosen: leaving Inner off narrow tiles, which fit the wing line but not the
+length line in CI's fonts; writing the unit once per line, and narrower gaps, which fit today's
+fonts only with a little to spare.
+
+### Why
+
+Measured 2026-11-17 at 360px, the wing line overflowed its tile in metric on 997 of 2,082 lines in
+the Mac's system font and on more in DejaVu Sans, a common Linux fallback; on the CI runner, whose
+Linux Chrome draws text a few percent wider still, the metric length line overflowed by up to 20px
+as well. The checks had passed only because they tested imperial in the Mac's font. Lines that
+never wrap fit only for the fonts they were tuned in. Under 420px the tiles stack one per row, so
+the reason a tile's lines may not wrap, that drawings side by side stay level, does not arise there.
+Truncating would cut a number ("Chord 33…"), which reads as another value.

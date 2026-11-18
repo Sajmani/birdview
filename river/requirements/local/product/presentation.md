@@ -71,7 +71,9 @@ Tiles wrap to fill the available display width.
 **Every tile is the same height above its drawing, and nothing inside one may wrap to make it
 taller.** Each line of the header and the line under the rule is one line, and the diagram has a
 fixed aspect. Only the notes, last, may add lines, so a tile that has them
-grows below its drawing and every drawing in a row stays level. Where text does not fit, it
+grows below its drawing and every drawing in a row stays level. **On a tile narrower than its full
+width, which stands alone in its row, the measurement lines wrap**, and only between measurements,
+so a name keeps its value ([decisions.measurementLinesWrapOnPhones](../../decisions/decisions.md#measurementlineswraponphones)). Where other text does not fit, it
 **truncates on its one line**, giving way in order of what a reader can reconstruct:
 
 | | gives way |

@@ -139,6 +139,8 @@ Watched failing: 2026-11-08, with the `Reporting frequency` threshold unapplied 
 
 Watched failing: 2026-11-09, by `view.Reference` taking the last bird's wingspan rather than the widest (`Reference is 800.0 and 500.0`) after the page consolidated onto one shared scale.
 
+Watched failing: 2026-11-17, with the measurement lines unable to wrap at 360px in metric ("at phone in metric, 102 of 104 tiles are wider than their box or draw off center (#4): [p-gnlthr wider by 9px …"), and in CI with Inner left off the wing line, on the length line ("s-cocboo1 wider by 10px, … .est \"Tail 20.4 cm\" reaching 20px past the padding"), before [decisions.measurementLinesWrapOnPhones](../requirements/decisions/decisions.md#measurementlineswraponphones).
+
 ## app.ebirdLinkOnTilesAndPages
 
 Criterion: [app.ebirdLinkOnTilesAndPages](../requirements/composed/internal/app/acceptance.md#ebirdlinkontilesandpages)

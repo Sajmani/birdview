@@ -348,6 +348,10 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 /* A phone held upright (product.fitsAPhone). Nothing may reach past the edge of
    the window or out of the box it sits in, down to 360px. A table too wide to
    fit scrolls inside itself rather than taking the page with it. */
+/* Under 420px a home-page tile is narrower than its full 396px and stands alone in its row, so its
+   measurement lines wrap, between measurements only, rather than run out of the tile in a wider font
+   (decisions.measurementLinesWrapOnPhones). */
+@media (max-width: 419px) { .tile .ft { flex-wrap: wrap; row-gap: 2px; } }
 @media (max-width: 600px) {
   body { padding: 16px 12px; font-size: 16px; }
   .tilewrap { max-width: 100%; }
