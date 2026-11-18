@@ -69,7 +69,15 @@ window.addEventListener("load", function () {
       // drawing off center (#4).
       var wide = tile.scrollWidth - tile.clientWidth;
       var shift = Math.round(g.left + g.width / 2 - (r.left + r.width / 2));
-      if (wide > 1 || Math.abs(shift) > 1) out.uncentered.push(t.id + " wider by " + wide + "px, drawing off by " + shift + "px");
+      if (wide > 1 || Math.abs(shift) > 1) {
+        // Name what sticks out furthest, so a failure says which part to fix.
+        var worst = "", far = r.right - 11;
+        tile.querySelectorAll("*").forEach(function (e) {
+          var right = e.getBoundingClientRect().right;
+          if (right > far + 0.5) { far = right; worst = (e.className && e.className.baseVal === undefined ? "." + String(e.className).split(" ")[0] : e.tagName.toLowerCase()) + " \"" + (e.textContent || "").replace(/\s+/g, " ").trim().slice(0, 40) + "\""; }
+        });
+        out.uncentered.push(t.id + " wider by " + wide + "px, drawing off by " + shift + "px" + (worst ? ", " + worst + " reaching " + Math.round(far - (r.right - 11)) + "px past the padding" : ""));
+      }
       var key = Math.round(r.top);
       (rows[key] = rows[key] || []).push({ id: t.id, top: g.top });
     });
