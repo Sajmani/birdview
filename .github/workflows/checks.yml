@@ -62,9 +62,9 @@ jobs:
           fi
 
   # Checks river/ with River's CLI, built at the pin in .agents/skills/PROVENANCE.md.
-  # Runs once the repository variable RIVER_REPO names a clonable River repository;
-  # pull requests pass --allow-unapproved until the owner approves, pushes to main
-  # require full approval.
+  # Runs once the repository variable RIVER_REPO names a clonable River repository.
+  # On a pull request it also writes the requirements impact, river diff against
+  # the base branch, to the job summary for the reviewer.
   river:
     runs-on: ubuntu-latest
     if: ${{ vars.RIVER_REPO != '' }}
@@ -73,6 +73,8 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
@@ -86,11 +88,11 @@ jobs:
           git -C "$RUNNER_TEMP/river-src" checkout --quiet "$pin"
           (cd "$RUNNER_TEMP/river-src" && go build -o "$RUNNER_TEMP/river" ./cmd/river)
       - name: river check
+        run: '"$RUNNER_TEMP/river" check river'
+      - name: Requirements impact
+        if: ${{ github.event_name == 'pull_request' }}
         env:
-          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          if [ "$EVENT_NAME" = "pull_request" ]; then
-            "$RUNNER_TEMP/river" check --allow-unapproved river
-          else
-            "$RUNNER_TEMP/river" check river
-          fi
+          git fetch --quiet origin "$BASE_REF"
+          "$RUNNER_TEMP/river" diff --base "origin/$BASE_REF" --format pr river >> "$GITHUB_STEP_SUMMARY"
