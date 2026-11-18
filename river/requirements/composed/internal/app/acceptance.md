@@ -219,7 +219,8 @@ month named or with `month=all` and links to no month; Now is never chosen, link
 and is the one link marked `data-now` for here.js; with October named, October alone is chosen. In headless Chrome, choosing
 May in Month loads a page with Month open and nothing else, and loading it again after no choice
 opens nothing. In headless Chrome at 1280 px and in a 360 px frame, on the birds by length with
-the two longest names pinned, every pin stands in its tile's top-right corner, within the tile's
+the two longest names pinned, and again in the 360 px frame in metric with the largest wingspans
+first, where a narrow tile leaves Inner off ([decisions.innerOffNarrowTiles](../../../decisions/decisions.md#inneroffnarrowtiles)), every pin stands in its tile's top-right corner, within the tile's
 11px of border and padding of the top and right edges, and the common name ends short of it;
 every eBird link stands in the lower-right corner, its foot within a pixel of the bottom line's and
 its top below the rule, and the scientific name ends short of it; every mass label's baseline is

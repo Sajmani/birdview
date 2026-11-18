@@ -4400,7 +4400,7 @@ Date: 2026-10-31
 
 Decided by: Sameer
 
-Status: accepted
+Status: amended by innerOffNarrowTiles
 
 Amends: tileNumbersFirst
 
@@ -5541,3 +5541,38 @@ Affects: [tech.bundleIsNormative](../local/tech/process.md#bundleisnormative), [
 River 2.x kept a second record of approval beside source control, which the owner found redundant
 and which let the county changes reach main with stale approvals while `river check
 --allow-unapproved` reported them only as notes. River 3.0 has no lenient mode.
+
+---
+
+## innerOffNarrowTiles
+
+**A tile narrower than its full width leaves Inner off its wing line**
+
+Date: 2026-11-17
+
+Decided by: Sameer
+
+Status: accepted
+
+Amends: tileMeasurementLines
+
+Affects: [product.tileContents](../local/product/presentation.md#tilecontents), [product.labeledDetailDiagram](../local/product/measurements.md#labeleddetaildiagram)
+
+### Decided
+
+On a home-page tile narrower than its full 396px, which is a screen under 420px wide, the wing line
+reads **wingspan and chord**, without Inner. A full-width tile keeps Inner, and so does the species
+page's tile, whose lines may wrap; the crossbar is drawn either way, and its tooltip and the
+measurements table still name and explain it. The checks measure the tiles in metric as well as
+imperial.
+
+### Why
+
+Measured 2026-11-17 at 360px with nothing truncated, the wing line overflowed its tile on 997 of
+2,082 lines in metric in the Mac's system font, by up to 38px, and on 548 imperial and 1,042 metric
+lines in DejaVu Sans, a common Linux fallback, by up to 64px; the checks had passed only because they
+tested imperial in the Mac's font, and CI failed. Without Inner every wing line fits, in both fonts
+and units. Inner is the one figure on the line that is derived rather than measured, and the
+drawing still shows it. Truncating instead would cut a number ("Chord 33…"), which reads as another
+value. At full width the widest wing line needs 352px of the tile's 374px in the Mac's font.
+

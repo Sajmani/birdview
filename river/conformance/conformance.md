@@ -139,6 +139,8 @@ Watched failing: 2026-11-08, with the `Reporting frequency` threshold unapplied 
 
 Watched failing: 2026-11-09, by `view.Reference` taking the last bird's wingspan rather than the widest (`Reference is 800.0 and 500.0`) after the page consolidated onto one shared scale.
 
+Watched failing: 2026-11-17, with the wing line carrying Inner at 360px in metric ("at phone in metric, 102 of 104 tiles are wider than their box or draw off center (#4): [p-gnlthr wider by 9px …"), before [decisions.innerOffNarrowTiles](../requirements/decisions/decisions.md#inneroffnarrowtiles); passing after it in the Mac's system font and with DejaVu Sans substituted.
+
 ## app.ebirdLinkOnTilesAndPages
 
 Criterion: [app.ebirdLinkOnTilesAndPages](../requirements/composed/internal/app/acceptance.md#ebirdlinkontilesandpages)

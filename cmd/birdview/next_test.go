@@ -1179,6 +1179,10 @@ func TestNextTileCornerAndRows(t *testing.T) {
 	inner := instrument(s, nextTileProbe, nil)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/__phone" {
+			framed := page
+			if u := r.URL.Query().Get("u"); u != "" {
+				framed = u
+			}
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			fmt.Fprintf(w, `<!doctype html><html><body style="margin:0">`+
 				`<iframe id="f" src="%s" style="border:0;width:%dpx;height:800px"></iframe>`+
@@ -1186,23 +1190,28 @@ func TestNextTileCornerAndRows(t *testing.T) {
 				`var d = document.getElementById('f').contentDocument;`+
 				`var v = d && d.documentElement.getAttribute('data-probe');`+
 				`if (v) document.documentElement.setAttribute('data-probe', v);`+
-				`}, 100);</script></body></html>`, html.EscapeString(page), phoneWidth)
+				`}, 100);</script></body></html>`, html.EscapeString(framed), phoneWidth)
 			return
 		}
 		inner.ServeHTTP(w, r)
 	}))
 	defer ts.Close()
-	for _, size := range []string{"laptop", "phone"} {
-		url := ts.URL + page
-		if size == "phone" {
-			url = ts.URL + "/__phone"
+	// The phone again in metric, whose wing line is the widest (decisions.innerOffNarrowTiles), with the
+	// largest birds first, whose wing lines are longest.
+	for _, size := range []string{"laptop", "phone", "phone in metric"} {
+		target := ts.URL + page
+		switch size {
+		case "phone":
+			target = ts.URL + "/__phone"
+		case "phone in metric":
+			target = ts.URL + "/__phone?u=" + url.QueryEscape("/?by=wingspan&rev=1&units=metric&pin=migwar&pin=gnlthr")
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 		out, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
 			"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
 			"--disable-component-update", "--disable-sync", "--disable-extensions",
 			"--user-data-dir="+t.TempDir(), "--window-size=1280,800", "--virtual-time-budget=8000",
-			"--dump-dom", url).Output()
+			"--dump-dom", target).Output()
 		cancel()
 		if err != nil {
 			t.Fatalf("chrome at %s: %v", size, err)

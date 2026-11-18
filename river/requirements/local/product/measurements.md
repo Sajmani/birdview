@@ -204,7 +204,7 @@ bar, not one colored part, so it is plain text, like Length.
 ([decisions.innerSpanDerived](../../decisions/decisions.md#innerspanderived)). It is **derived, never shown as a measurement**: it subtracts measurements from two
 sources taken on different specimens and different axes, a spread wing tip to tip against a closed
 wing wrist to tip, so the number measures nothing anyone measured, and subtraction enlarges their
-uncertainty. The tile names it **Inner**, short enough that the wing line fits a phone; its tooltip and its
+uncertainty. The tile names it **Inner**, and leaves it off a tile narrower than its full width, where the wing line would not fit ([decisions.innerOffNarrowTiles](../../decisions/decisions.md#inneroffnarrowtiles)); its tooltip and its
 row in the measurements table, named Inner span, say how it is derived and from what. It carries the `~`, and it is left out where twice the chord reaches the wingspan, where the
 drawing does not split the bar. The name says
 which part it measures, so color is never the only cue. Head, neck, and body are modeled and drawn
