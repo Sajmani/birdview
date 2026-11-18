@@ -42,7 +42,7 @@ import (
 	"birdview/internal/shapefile"
 )
 
-// The pinned sources. See river/requirements/imports.md#natural-earth.
+// The pinned sources. See river/requirements/imports/imports.md#natural-earth.
 var archives = []struct{ url, sha256, stem string }{
 	{"https://naciscdn.org/naturalearth/10m/physical/ne_10m_land.zip",
 		"e547d749445eaa0964aba76738090ec88f5e63c4585122170f98c67a7ea922dc", "ne_10m_land"},

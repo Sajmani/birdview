@@ -993,7 +993,7 @@ func TestGBIFDatasetsCitedWithTheirLicenses(t *testing.T) {
 // own readers.
 //
 // Delete this test only when a written grant exists and is recorded in
-// river/requirements/imports.md.
+// river/requirements/imports/.
 //
 // Verifies: goals.goodDataCitizen. Criterion: app.attributionComplete.
 func TestNoUnearnedPermissionClaim(t *testing.T) {

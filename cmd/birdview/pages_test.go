@@ -326,7 +326,7 @@ var dataContrast = regexp.MustCompile(`data-contrast="([^"]*)"`)
 // served on its own was outside every check.
 //
 // It needs Chrome, and skips without it; on the owner's machine it gates, as
-// river/bindings.md records.
+// river/bindings/bindings.md records.
 //
 // Verifies: wcag.ContrastEnhanced. Criterion: app.renderedTextContrast.
 func TestRenderedTextContrast(t *testing.T) {
