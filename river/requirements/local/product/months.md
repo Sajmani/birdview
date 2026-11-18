@@ -23,7 +23,7 @@ and **4.8%** in December, so a raw share would make every bird a May bird. A rat
 exactly as present as usual. It is [shareOfRecords](presentation.md#shareofrecords)'s logic at month granularity.
 
 This is **not** the recurrence rule of [scopeIsRecurringAvifauna](dataset.md#scopeisrecurringavifauna), which is the better instrument and
-cannot be had at the price — see [decisions.monthPresence](../../decisions.md#monthpresence) for the measurements, the
+cannot be had at the price — see [decisions.monthPresence](../../decisions/decisions.md#monthpresence) for the measurements, the
 calibration, and why 0.2 is not load-bearing.
 
 **Below 200 records in a region, the month filter abstains.** Millerbird has 28 records in
@@ -33,7 +33,7 @@ says why. This affects a quarter of the species-region cells and **0.0345% of th
 
 **A month eBird withholds is not judged either.** Where eBird's Sensitive Species list keeps a
 species out of its records in a region and season, and the records confirm it
-([decisions.ebirdSilenceNotAbsence](../../decisions.md#ebirdsilencenotabsence)), those months are missing by policy: the species is shown, and
+([decisions.ebirdSilenceNotAbsence](../../decisions/decisions.md#ebirdsilencenotabsence)), those months are missing by policy: the species is shown, and
 the tile says *Withheld by eBird in Florida (Oct–Mar)*. Judging them hid Painted Bunting from
 Florida in January, the heart of its season there.
 
@@ -55,7 +55,9 @@ sea, where no land polygon reaches. They are not errors and must not be filtered
 **Filters compose**
 
 Subject: `presentation.filters`
+
 Applies to: app
+
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 What is shown is what every active filter admits: region and family narrow the list together.
@@ -71,12 +73,15 @@ filter and what it is set to, so a reader can tell which one emptied the page.
 **Regions are grouped two ways**
 
 Subject: `presentation.region_filter.zones`
+
 Applies to: app
+
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
-Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
+
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
 
 The classic view offered regions under two groupings, one by the map and one derived from how much
-their species lists overlap ([decisions.regionsTwoWays](../../decisions.md#regionstwoways)). The home page keeps only the map's zones,
+their species lists overlap ([decisions.regionsTwoWays](../../decisions/decisions.md#regionstwoways)). The home page keeps only the map's zones,
 which help a reader find a region and claim nothing about birds
 ([regionAndMonthFilter](filtering.md#regionandmonthfilter)). The derived grouping's code was deleted on 2026-11-09, when the owner
 chose not to restore it: Here, and looking up a destination, already narrow to the birds one is
@@ -87,7 +92,9 @@ likely to see.
 **Families are grouped by taxonomic order**
 
 Subject: `presentation.family_filter.groups`
+
 Applies to: app
+
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The family selector groups families by **AviList's taxonomic order**, in checklist sequence.
@@ -99,7 +106,7 @@ label and 15 orders hold exactly one family. For the other orders the taxonomic 
 what a birder would say — Waterfowl, Owls, Tubenoses, Grebes.
 
 **A hand-drawn "birder groups" grouping was withdrawn**
-([decisions.habitatDietSpeciesLevel](../../decisions.md#habitatdietspecieslevel)): it answered a species-level question at family level and
+([decisions.habitatDietSpeciesLevel](../../decisions/decisions.md#habitatdietspecieslevel)): it answered a species-level question at family level and
 misfiled birds, such as an Anhinga under seabirds. Letting a reader ask for birds of a kind is
 done per species by [habitatAndDietFilters](#habitatanddietfilters).
 
@@ -112,7 +119,9 @@ with every habitat their species use drops the precision of "Fresh Water" to **3
 **Filter by habitat and by diet**
 
 Subject: `presentation.trait_filter`
+
 Applies to: dataset, app
+
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Two more filters, **assigned per species**: where a bird mostly lives and what it mostly eats.
@@ -121,7 +130,7 @@ options shows birds in **either**, because picking two places asks for the birds
 and not for the birds that use both.
 
 **Habitat's choices are arranged in five groups of AVONET's habitats, one group to a line, each
-line led by a choice that takes the whole group** ([decisions.habitatGroupShortcuts](../../decisions.md#habitatgroupshortcuts)). Each group is an
+line led by a choice that takes the whole group** ([decisions.habitatGroupShortcuts](../../decisions/decisions.md#habitatgroupshortcuts)). Each group is an
 exact union of AVONET's terms, so nothing is invented:
 
 | Group | AVONET's habitats |
@@ -134,7 +143,7 @@ exact union of AVONET's terms, so nothing is invented:
 
 **AVONET's Marine is offered as two refinements, Sea near shore (`Marine-inshore`) and Open ocean
 (`Marine-offshore`), derived from where the bird's records lie**
-([decisions.openOceanSplit](../../decisions.md#openoceansplit), [product.seaDistanceDerived](dataset.md#seadistancederived)). A bird with Marine, AVONET's or
+([decisions.openOceanSplit](../../decisions/decisions.md#openoceansplit), [product.seaDistanceDerived](dataset.md#seadistancederived)). A bird with Marine, AVONET's or
 BirdView's, is **Open ocean** when at least 25% of its records on water are more than 10 km from
 shore, and **Sea near shore** when fewer are, or when at least 80% of all its records are on land
 or within 10 km of shore; it can be both, as a tropicbird seen from its nesting cliffs and far out
@@ -172,7 +181,7 @@ are AVONET's own strings, and the value in the URL — `?niche=Invertivore`; the
 plain-English label for each — "Eats insects" for `Invertivore` — with AVONET's own definition as
 its description: *Species obtaining at least 60% of food resources from invertebrates…* Translating the word
 while keeping the classification is a far lighter liberty than inventing a classification, which
-is what [decisions.familiesTwoWays](../../decisions.md#familiestwoways) records.
+is what [decisions.familiesTwoWays](../../decisions/decisions.md#familiestwoways) records.
 
 **Per species is why this works.** A family-level habitat misfiles 23–35% of birds: Double-crested
 Cormorant is marine and Neotropic Cormorant is not.
@@ -182,7 +191,7 @@ further habitats and diets as apply** — there is no limit of one — and tags 
 never merged into the published value ([categoryProvenance](measurements.md#categoryprovenance)).
 
 **Every bird's habitats are reviewed, species by species, for where a North American birder sees
-it** ([decisions.habitatReviewedPerSpecies](../../decisions.md#habitatreviewedperspecies)). AVONET's one value is in practice where a migrant breeds:
+it** ([decisions.habitatReviewedPerSpecies](../../decisions/decisions.md#habitatreviewedperspecies)). AVONET's one value is in practice where a migrant breeds:
 Black-bellied Plover is Grassland, the peeps miss Shore and estuary, the loons miss Open sea. So
 `data/habitat-review.tsv` holds a row for **every species BirdView draws**: AVONET's habitat as it
 stood when reviewed, the habitats BirdView adds with a reason for each, and the review's status,
@@ -210,7 +219,7 @@ auditor asks. Published assignments are excluded — there are 1,678 and they ar
 
 Every addition must be visibly this project's and rest on something stateable: a different
 AVONET taxonomy sheet that says so, or a fact derivable from BirdView's own data. An addition
-supported only by seeming right is the failure [decisions.familiesTwoWays](../../decisions.md#familiestwoways) was written about,
+supported only by seeming right is the failure [decisions.familiesTwoWays](../../decisions/decisions.md#familiestwoways) was written about,
 and is not permitted however it is tagged.
 
 **No option carries a count.** How many birds are still showing is what the count line says.

@@ -4,13 +4,13 @@ package repo
 
 **Composed, not authored.** Change it by changing a source and recomposing, never by editing files in
 this directory by hand. Composed from `tech` and `decisions` under
-[precedence.md](../../../precedence.md); approvals are recorded in
-[approvals.md](../../../approvals.md).
+[precedence.md](../../../precedence/precedence.md); its
+`composed.sum`, written by `river compose`, records what it was composed from.
 
 Everything BirdView's repository layout, build inputs and artifacts, container image, continuous
 integration, deployment posture, and development process must satisfy. Its acceptance criteria are
 in [`acceptance.md`](acceptance.md), and the guardrails and verification observations covering them
-are in [conformance.md](../../../../conformance.md).
+are in [conformance.md](../../../../conformance/conformance.md).
 
 ## Composed from
 
@@ -23,9 +23,9 @@ are in [conformance.md](../../../../conformance.md).
 | Source | Tier | Pin |
 | --- | --- | --- |
 | [`tech`](../../../local/tech/tech.md) | local | the commit this file is in |
-| [`decisions`](../../../decisions.md) | — | the commit this file is in |
+| [`decisions`](../../../decisions/decisions.md) | — | the commit this file is in |
 
-Precedence is the ranking in [precedence.md](../../../precedence.md). **No conflict arose.**
+Precedence is the ranking in [precedence.md](../../../precedence/precedence.md). **No conflict arose.**
 
 ## Applies unchanged
 

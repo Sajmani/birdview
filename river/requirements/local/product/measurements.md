@@ -7,7 +7,9 @@ package product
 **Where length and wingspan come from**
 
 Subject: `measurement.source`
+
 Applies to: dataset
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.honestData](../../../goals/goals.md#honestdata)
 
 - **Wingspan, measured** — Fox et al. 2026, filtered to `needs_prediction = 0` so only empirical
@@ -17,22 +19,22 @@ Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.hone
   global fit for orders holding fewer than five empirical species. Each fit states its own
   out-of-sample median error, by five-fold cross-validation, or by leave-one-out for a group of
   fewer than ten species, too few for five folds. See
-  [decisions.fittedWingspanModel](../../decisions.md#fittedwingspanmodel). Where the proportions
+  [decisions.fittedWingspanModel](../../decisions/decisions.md#fittedwingspanmodel). Where the proportions
   review sets a wingspan factor for the genus or family, the modeled value is multiplied by it and
   the provenance says so; a measured wingspan is never adjusted
-  ([decisions.allModeledProportionsReviewed](../../decisions.md#allmodeledproportionsreviewed)).
+  ([decisions.allModeledProportionsReviewed](../../decisions/decisions.md#allmodeledproportionsreviewed)).
 - **Length** — **modeled for every species.** No usable source of measured avian total length
   was found: Ricklefs 2017 was the only candidate and its terms prohibit the use
-  ([decisions.ricklefsProhibited](../../decisions.md#ricklefsprohibited)).
+  ([decisions.ricklefsProhibited](../../decisions/decisions.md#ricklefsprohibited)).
 - **Traits** — AVONET, read from whichever of its three taxonomy sheets carries the species as its
-  own taxon ([decisions.abaSpeciesWithoutAvonet](../../decisions.md#abaspecieswithoutavonet)).
+  own taxon ([decisions.abaSpeciesWithoutAvonet](../../decisions/decisions.md#abaspecieswithoutavonet)).
   A near-match borrows its parent's row from the eBird sheet, except where another sheet holds a
   narrower concept of that parent: Blue-billed White-Tern borrows `AVONET1_BirdLife`'s *Gygis
   alba*, which excludes the Little White Tern
-  ([decisions.whiteTernBorrows](../../decisions.md#whiteternborrows)). The same holds for a
+  ([decisions.whiteTernBorrows](../../decisions/decisions.md#whiteternborrows)). The same holds for a
   species' own row: European Herring Gull is read from `AVONET1_BirdLife`'s *Larus argentatus*,
   because the eBird sheet's row of that name contains every herring gull
-  ([decisions.herringGullEuropeanRow](../../decisions.md#herringgulleuropeanrow)).
+  ([decisions.herringGullEuropeanRow](../../decisions/decisions.md#herringgulleuropeanrow)).
 - **Everything not covered above** — modeled.
 
 **Total length is a composite.** It is the sum of the five segments (segmentsSumToLength), of
@@ -42,13 +44,14 @@ modeled total.
 
 Rationale: AVONET records neither dimension, and no open source supplies both across the ABA
 avifauna. Mixing sources of differing authority is acceptable *only* under provenancePerMetric.
-See [decisions.noOpenLengthAndWingspan](../../decisions.md#noopenlengthandwingspan).
+See [decisions.noOpenLengthAndWingspan](../../decisions/decisions.md#noopenlengthandwingspan).
 
 ## tileMarksModeled
 
 **The tile marks any metric that is not measured**
 
 Applies to: app
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 On the tile itself — where numbers and the scaled diagram appear — any metric whose `kind` is not
@@ -62,8 +65,11 @@ metadata nobody sees, and BirdView presents modeled numbers as data, which the p
 **Every presented metric carries a provenance record**
 
 Subject: `measurement.provenance.record`
+
 Value: `{kind, source, sourceTaxon, model}`
+
 Applies to: dataset, app
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 Every metric BirdView presents — total length, wingspan, mass, and each diagram segment — carries
@@ -93,8 +99,8 @@ own; a near-match names its donor and its source; a modeled value names its mode
 then learn where a measurement came from as easily as an estimate, without opening the species
 page.
 
-Rationale: one record covers what [decisions.noOpenLengthAndWingspan](../../decisions.md#noopenlengthandwingspan) solved for lengths and
-[decisions.abaSpeciesWithoutAvonet](../../decisions.md#abaspecieswithoutavonet) for split taxa, so each later gap is a labeling problem rather
+Rationale: one record covers what [decisions.noOpenLengthAndWingspan](../../decisions/decisions.md#noopenlengthandwingspan) solved for lengths and
+[decisions.abaSpeciesWithoutAvonet](../../decisions/decisions.md#abaspecieswithoutavonet) for split taxa, so each later gap is a labeling problem rather
 than a redesign.
 
 ## everydayDefinitions
@@ -102,7 +108,9 @@ than a redesign.
 **Every measurement says what it is, in everyday words, before where it came from**
 
 Subject: `measurement.definition`
+
 Applies to: app
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Each measurement BirdView names has **one plain sentence saying what it measures**, written for a
@@ -111,11 +119,11 @@ measurement's tooltip on a tile, before where the value came from
 ([provenancePerMetric](#provenancepermetric)); it leads the measurement's row in the species page's table; and the guide
 lists them all. A reader asked for exactly this: "Inner" and "Chord" were unfamiliar, and the
 explanations described how values were calculated "rather than what they actually represent"
-([todo.plainMeasurementDefinitions](../../../todo-closed.md#plainmeasurementdefinitions)).
+([todo.plainMeasurementDefinitions](../../../../todo-closed.md#plainmeasurementdefinitions)).
 
 | Name | Definition | The source's own |
 | --- | --- | --- |
-| Length | From the tip of the bill to the tip of the tail. | the sum of the drawn segments ([decisions.noOpenLengthAndWingspan](../../decisions.md#noopenlengthandwingspan)) |
+| Length | From the tip of the bill to the tip of the tail. | the sum of the drawn segments ([decisions.noOpenLengthAndWingspan](../../decisions/decisions.md#noopenlengthandwingspan)) |
 | Bill | From the tip of the bill to where it meets the skull. | AVONET: "Length from the tip of the beak to the base of the skull" |
 | Tail | From where the tail leaves the body to the tip of its longest feather. | AVONET: "Distance between the tip of the longest rectrix and the point at which the two central rectrices protrude from the skin" |
 | Wingspan | From the tip of one wing to the tip of the other, across the body, with both wings fully extended. | Fox et al.: "Wingspan, the tip-to-tip distance of fully extended wings"; the body between the wings included |
@@ -132,7 +140,9 @@ says that, and an estimate keeps its `~`.
 **The diagram shows which lengths are measured and which are modeled**
 
 Subject: `diagram.provenance`
+
 Applies to: app
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Stroke style carries provenance. A **solid** stroke is a measured length; a **dashed** stroke is a
@@ -163,16 +173,18 @@ available the crossbar is drawn whole, dashed if the span is modeled.
 Rationale: the `~` markers of tileMarksModeled sit on the numbers, so a reader looking at the shape
 — a heron's long neck, entirely modeled — had no cue. A silent drawing was the largest remaining
 gap in the commitment that a modeled value is never presented as a measurement
-([decisions.noOpenLengthAndWingspan](../../decisions.md#noopenlengthandwingspan)). The crossbar split keeps the outer segment true even when the
+([decisions.noOpenLengthAndWingspan](../../decisions/decisions.md#noopenlengthandwingspan)). The crossbar split keeps the outer segment true even when the
 span model is wrong, so the model's error falls on the inner segment. See
-[decisions.drawingCarriesProvenance](../../decisions.md#drawingcarriesprovenance).
+[decisions.drawingCarriesProvenance](../../decisions/decisions.md#drawingcarriesprovenance).
 
 ## labeledDetailDiagram
 
 **The detail tile names each segment and its measurement, keyed to the drawing by color**
 
 Subject: `presentation.detail_view.diagram_labels`
+
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.honestData](../../../goals/goals.md#honestdata)
 
 **Every metric the detail view reports appears on its tile.** The provenance table may explain
@@ -182,14 +194,14 @@ means adding it to the tile. It is a rule rather than a list because a list let 
 The detail view's tile is the home page's tile, larger ([tileOpensDetail](presentation.md#tileopensdetail)), and its measurement lines
 carry every segment: **length, bill, head, neck, body, and tail**, then **wingspan, inner span, and
 wing chord**, named Wingspan, Inner, and Chord. An estimated value carries the same `~` as everywhere else. The drawing itself carries
-one label, the mass beside its cube, as on the home page ([decisions.textSizeFloor](../../decisions.md#textsizefloor)).
+one label, the mass beside its cube, as on the home page ([decisions.textSizeFloor](../../decisions/decisions.md#textsizefloor)).
 
 **A measurement's name is set in its part's color** ([oneDiagramVocabulary](diagram.md#onediagramvocabulary)): **Bill** amber, **Tail**
 white, **Inner** emerald, **Chord** orchid, and **Mass** blue. **Wingspan** names the whole
 bar, not one colored part, so it is plain text, like Length.
 
 **The inner span is the crossbar between the chord ticks**, the wingspan less two wing chords
-([decisions.innerSpanDerived](../../decisions.md#innerspanderived)). It is **derived, never shown as a measurement**: it subtracts measurements from two
+([decisions.innerSpanDerived](../../decisions/decisions.md#innerspanderived)). It is **derived, never shown as a measurement**: it subtracts measurements from two
 sources taken on different specimens and different axes, a spread wing tip to tip against a closed
 wing wrist to tip, so the number measures nothing anyone measured, and subtraction enlarges their
 uncertainty. The tile names it **Inner**, short enough that the wing line fits a phone; its tooltip and its
@@ -212,7 +224,7 @@ readable.
 **Total length is the tile's Length.** It states the bird's length, not the drawing's height (below).
 
 **Where the figure is shorter than the total length, the page says why.** A bird that flies with
-its neck folded has the neck drawn as an S ([decisions.foldedNeckAsS](../../decisions.md#foldedneckass)), so the figure spans less
+its neck folded has the neck drawn as an S ([decisions.foldedNeckAsS](../../decisions/decisions.md#foldedneckass)), so the figure spans less
 height than the total length labeled beneath it. Its detail page says so beside the neck note, with
 the species' own neck length and total length. That the S is the same length of line in less
 height, and that sorting, sections, and every measurement use the full length, stays here rather
@@ -240,16 +252,16 @@ mass (Sameer, 2026-10-25).
 **Mass is labeled beside its cube**, its baseline on the cube's foot, on both pages.
 
 The **home page's tiles carry the cube too** ([tileContents](presentation.md#tilecontents),
-[decisions.massCubeOnTiles](../../decisions.md#masscubeontiles)), for what length and wingspan cannot show: **bulk against elongation**.
+[decisions.massCubeOnTiles](../../decisions/decisions.md#masscubeontiles)), for what length and wingspan cannot show: **bulk against elongation**.
 Read against the bird's own length, it is about **27%** of the drawing height for alcids, dense
 divers, and **10–13%** for long-tailed light-bodied species like the Scissor-tailed Flycatcher and
 the magpie (measured after
-[decisions.trunkExponentCalibrated](../../decisions.md#trunkexponentcalibrated); the ratio is
+[decisions.trunkExponentCalibrated](../../decisions/decisions.md#trunkexponentcalibrated); the ratio is
 scale-invariant, so it holds at any scale).
 
 **The cube compresses, so the number is required.** A Bushtit and a Common Raven differ in mass by
 **175×** and their cubes by 5.6×. The number carries the magnitude and the cube the sense of it.
-See [decisions.massAsWaterCube](../../decisions.md#massaswatercube), and
+See [decisions.massAsWaterCube](../../decisions/decisions.md#massaswatercube), and
 [crossbarAtVerticalScale](diagram.md#crossbaratverticalscale) for why a disc or bar sized by mass —
 a second, arbitrary scale — is refused.
 
@@ -257,9 +269,9 @@ Mass is **measured for 831 of 841 species**, so it is usually the only unmarked 
 figure and the only solid-stroked whole-bird mark.
 
 **Total length states the bird's length, not the drawing's height.** For the folded-neck families
-of [decisions.foldedNeckAsS](../../decisions.md#foldedneckass) these differ: the neck's S spans 2/π
+of [decisions.foldedNeckAsS](../../decisions/decisions.md#foldedneckass) these differ: the neck's S spans 2/π
 of its length, so the figure is 6–9% shorter than the Length across the 14 species affected. The
-neck measurement follows the same rule ([decisions.foldedNeckAsS](../../decisions.md#foldedneckass)); a number taken from the drawn extent
+neck measurement follows the same rule ([decisions.foldedNeckAsS](../../decisions/decisions.md#foldedneckass)); a number taken from the drawn extent
 would name a quantity no source states.
 
 ## metricProvenanceExplained
@@ -267,6 +279,7 @@ would name a quantity no source states.
 **The detail view explains each metric's provenance**
 
 Applies to: app
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 In the detail view (tileOpensDetail), **every** metric — the three main metrics and all five diagram
@@ -283,7 +296,9 @@ Showing the segments individually is what makes the diagram auditable.
 **The detail view lists every category the bird is in, and where each came from**
 
 Subject: `presentation.detail.categories`
+
 Applies to: app
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 The detail view names every category a bird is in — its family and order, the regions it is
@@ -311,7 +326,7 @@ one line and links to the fuller account in `docs/`.
 site does, including offline ([tech.selfContainedServer](../tech/delivery.md#selfcontainedserver)).
 
 **The requirement documents are not served**
-([decisions.requirementsNotServed](../../decisions.md#requirementsnotserved)). They are working
+([decisions.requirementsNotServed](../../decisions/decisions.md#requirementsnotserved)). They are working
 documents, published with the repository at `github.com/google/birdview`, and a guide that cites a
 requirement links to it there.
 
@@ -330,8 +345,11 @@ hashing. Serving them would be the redistribution
 **The documentation draws the data pipeline, field by field**
 
 Subject: `presentation.docs.pipeline`
+
 Value: `docs/pipeline.md: every source and table, its fields, and every step between them`
+
 Applies to: app
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.giveBack](../../../goals/goals.md#giveback)
 
 The documentation carries **one diagram of how the dataset is built**: every published source and
@@ -364,15 +382,18 @@ off the server.
 **A drawing made from another drawn species' measurements says so**
 
 Subject: `presentation.shared_measurements`
+
 Value: `a note on the tile and the detail page of each species, naming the others`
+
 Applies to: app
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Where two or more drawn species take their AVONET traits from **the same row** — a near-match
 borrowing a relative's measurements under [provenancePerMetric](#provenancepermetric), and the
 relative drawn from that same row — their drawings are alike because their measurements are, not
 because the birds are. Borrowing is honest when labeled
-([decisions.abaSpeciesWithoutAvonet](../../decisions.md#abaspecieswithoutavonet)), but two
+([decisions.abaSpeciesWithoutAvonet](../../decisions/decisions.md#abaspecieswithoutavonet)), but two
 identical tiles look like a finding, and the near-match label does not say the other is the source.
 
 **Every such species says so where it is drawn.** Its tile carries the line *Same measurements
@@ -385,15 +406,18 @@ automatically.
 
 Rationale: [goals.honestData](../../../goals/goals.md#honestdata) — otherwise the reason two
 drawings coincide is visible only by comparing two detail pages.
-[decisions.vegaGullBorrows](../../decisions.md#vegagullborrows).
+[decisions.vegaGullBorrows](../../decisions/decisions.md#vegagullborrows).
 
 ## escapedBirdsListed
 
 **Escaped and kept birds are left off the home page, and listed**
 
 Subject: `presentation.index.exotic`
+
 Value: `declared list; off the home page, listed at /excluded, detail pages kept`
+
 Applies to: app
+
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata)
 
 **A bird whose records here are escapes is not drawn on the home page.** Recurrence cannot tell a
@@ -414,4 +438,4 @@ region control, and is not counted by them.
 
 Rationale: [goals.honestData](../../../goals/goals.md#honestdata) — removing a bird a reader may
 have seen, with no trace, is what the goals forbid; a list that says why is the honest version.
-[decisions.escapedBirdsOffIndex](../../decisions.md#escapedbirdsoffindex).
+[decisions.escapedBirdsOffIndex](../../decisions/decisions.md#escapedbirdsoffindex).

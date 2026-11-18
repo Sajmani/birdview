@@ -6,7 +6,7 @@ package repo
 
 How each requirement in [repo.md](repo.md) is decided. Each criterion names what it covers in
 `Covers:`; mutable guardrail bindings and `Watched failing:` observations live in
-[conformance.md](../../../../conformance.md).
+[conformance.md](../../../../conformance/conformance.md).
 
 ---
 
@@ -37,7 +37,7 @@ Covers: [tech.recordBeforeConsuming](../../../local/tech/process.md#recordbefore
 against `river/requirements/imported/*/*/PROVENANCE.md`
 
 **Scope exception:** `wiley` is quoted, not vendored, so it has no hash to check — see
-[imports.md](../../../imports.md#wiley). `aba` is fetched at build and checked by sortsAscending instead.
+[imports.md](../../../imports/imports.md#wiley). `aba` is fetched at build and checked by sortsAscending instead.
 
 ## quotationsAreVerbatim
 
@@ -153,7 +153,7 @@ machine; tests that need Chrome skip in the image and gate in CI instead.
 
 Covers: [tech.activeWorkHasIssue](../../../local/tech/process.md#activeworkhasissue)
 
-**Method:** `river/todo.md` read, offline
+**Method:** `todo.md` read, offline
 
 **Assertions:** every item whose status is `active` has an `Issue:` line linking one issue of
 `google/birdview`, as `[#N](https://github.com/google/birdview/issues/N)`. Not checked by the test,

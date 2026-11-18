@@ -1,7 +1,7 @@
 # fox-wingspan — provenance
 
 Vendored copy of the avian wingspan database, BirdView's only source of measured wingspan. See
-[imports.md](../../../imports.md#fox-wingspan) for the adoption record.
+[imports.md](../../../imports/imports.md#fox-wingspan) for the adoption record.
 
 ## What was retrieved
 
@@ -31,7 +31,7 @@ it says only that BirdWingData's B-measures were excluded "as they omit the inte
 
 The file lives at the repository root under the same location exception as the AVONET workbook —
 it is a build input, not a rules document. See
-[../../bindings.md](../../../../bindings.md#location-exception-the-third_party-directory).
+[../../bindings.md](../../../../bindings/bindings.md#location-exception-the-third_party-directory).
 
 ## What the file contains
 
@@ -50,7 +50,7 @@ The columns BirdView reads:
 **The predicted columns are deliberately not read.** `wingspan_predicted_order` and
 `wingspan_predicted_global` are regressions from AVONET wing chord. Ingesting them would
 reintroduce modeled-as-measured values under a source that looks authoritative, which is the error
-[decisions.noOpenLengthAndWingspan](../../../decisions.md#noopenlengthandwingspan) exists to prevent. BirdView models its own estimates and labels
+[decisions.noOpenLengthAndWingspan](../../../decisions/decisions.md#noopenlengthandwingspan) exists to prevent. BirdView models its own estimates and labels
 them.
 
 ## Measured coverage for BirdView's scope

@@ -2,10 +2,10 @@ package todo
 
 # Open work
 
-Search `## <id>` for one item, or `grep -n -A1 '^## ' river/todo.md` for the list. `Status:` is
+Search `## <id>` for one item, or `grep -n -A1 '^## ' todo.md` for the list. `Status:` is
 active, open, parked, or deferred; `Gate:` says when it is due. **What is in flight:**
-`grep -n -B2 '^Status: active' river/todo.md`. An active item has an `Issue:` line linking the GitHub
-issue that tracks it, and the issue links back ([tech.activeWorkHasIssue](requirements/local/tech/process.md#activeworkhasissue)).
+`grep -n -B2 '^Status: active' todo.md`. An active item has an `Issue:` line linking the GitHub
+issue that tracks it, and the issue links back ([tech.activeWorkHasIssue](river/requirements/local/tech/process.md#activeworkhasissue)).
 
 Everything outstanding in BirdView: unfinished work, open questions, known defects, criteria not
 yet watched failing, and stale spec or doc text. Each item points at the requirement, decision, or
@@ -17,22 +17,25 @@ open" note in a decision record instead.
 
 **Closing an item.** Set `Status: closed`, replace `Gate:` with `Closed:` and what closed it, and
 move it to [todo-closed.md](todo-closed.md). Items are never deleted: a closed one records why a
-question that looks open is not. Design notes behind items are in [notes.md](notes.md).
+question that looks open is not. Design notes behind items are in [notes.md](river/notes.md).
 
 ## tileCornersInCi
 
 **The tile-corner browser check fails in CI at phone width, so `main` has been red since 2026-11-02**
 
 Status: open
+
 Issue: [#16](https://github.com/google/birdview/issues/16)
+
 Owner: Sameer
-Gate: next; a red `main` hides every new failure ([tech.checksOnEveryChange](requirements/local/tech/release.md#checksoneverychange))
+
+Gate: next; a red `main` hides every new failure ([tech.checksOnEveryChange](river/requirements/local/tech/release.md#checksoneverychange))
 
 `checks` has failed in its `go test` step on every push to `main` since `391fcd1`, and PR #15 failed
 the same way. `TestNextTileCornerAndRows` reports, at the 360px phone width, the scientific name
 running 1px under the eBird link on 20 tiles, and four tiles with the longest names (`gnlthr`,
-`anpswi`, `vauswi`) 8px wider than their box ([app.nextViewDrawsOneSet](requirements/composed/internal/app/acceptance.md#nextviewdrawsoneset),
-[app.ebirdLinkOnTilesAndPages](requirements/composed/internal/app/acceptance.md#ebirdlinkontilesandpages)). Likely the runner's fallback fonts are
+`anpswi`, `vauswi`) 8px wider than their box ([app.nextViewDrawsOneSet](river/requirements/composed/internal/app/acceptance.md#nextviewdrawsoneset),
+[app.ebirdLinkOnTilesAndPages](river/requirements/composed/internal/app/acceptance.md#ebirdlinkontilesandpages)). Likely the runner's fallback fonts are
 slightly wider than where the layout was tuned, and the probe allows no slack. Reproduce in Chrome,
 leave room beside the eBird link and truncate long names rather than widen the tile, and decide
 whether the probe allows 1px of rounding or names the font it assumes. Headless Chrome hangs on the
@@ -43,7 +46,9 @@ agent's cloudtop, so reproducing there needs `--no-sandbox` or a run in CI.
 **The interface is sized for North America by state, not for the world by county**
 
 Status: open
+
 Owner: Sameer
+
 Gate: before worldwide species or county-sized regions; the readers' complaints make it due sooner
 
 The dataset can grow to the whole world (about ten times the species) and to county-sized regions
@@ -57,20 +62,20 @@ that just compares stick figures, picked from a list or a search bar; advanced f
 as in the iNaturalist app; and the explanations on their own page, as in the Sibley app. Joe doubted
 the average field birder wants "so much info". Karen and Ryan both hit the phone layout
 ([#2](https://github.com/google/birdview/issues/2), fixed by
-[product.fitsAPhone](requirements/local/product/presentation.md#fitsaphone)).
+[product.fitsAPhone](river/requirements/local/product/presentation.md#fitsaphone)).
 
 A redesign needs a decision first. The panels already start closed
-([product.collapsibleControls](requirements/local/product/presentation.md#collapsiblecontrols)), and the 2026-10-25 prose pass cut the page text; beyond that,
+([product.collapsibleControls](river/requirements/local/product/presentation.md#collapsiblecontrols)), and the 2026-10-25 prose pass cut the page text; beyond that,
 from smallest to largest: move Presentation to the guide and leave a one-line key, or make
 search-and-compare the landing view and the full index the advanced one. Region choice at county scale needs search or a map, not chips.
-The search box ([product.searchBox](requirements/local/product/filtering.md#searchbox), [#3](https://github.com/google/birdview/issues/3)) is the first
+The search box ([product.searchBox](river/requirements/local/product/filtering.md#searchbox), [#3](https://github.com/google/birdview/issues/3)) is the first
 step, done 2026-10-25. Next, decided 2026-10-25: move Presentation to the guide and leave a one-line
 key (option (a)); option (b) waits for a discussion of options and for
 [simulatedUserTests](#simulatedusertests).
 [tightenProse](#tightenprose) is the text half of the same complaint.
 
 Done 2026-10-26, option (b), by the owner's call and without the simulated comparison: the one-set
-view built at `/next` became the home page ([product.nextView](requirements/local/product/presentation.md#nextview)), with search-and-pin, one
+view built at `/next` became the home page ([product.nextView](river/requirements/local/product/presentation.md#nextview)), with search-and-pin, one
 scale, a Show setting, and each setting on one count line; the index stayed a day as the classic
 view at `/classic` and was removed 2026-10-27. Deployed as `82821a6`. Left: region choice at
 county scale (search or a map, not chips) and the worldwide dataset;
@@ -81,7 +86,9 @@ county scale (search or a map, not chips) and the worldwide dataset;
 **Test the interface with simulated users**
 
 Status: open
+
 Owner: Sameer
+
 Gate: before a redesign under [scalableInterface](#scalableinterface) is accepted
 
 Agents given a persona and a task drive the site in headless Chrome, at phone and laptop widths,
@@ -95,8 +102,8 @@ Calibrate before trusting it: run it against `4f25193`, the revision the first r
 whether the simulated users report what they did (the phone layout, the density, the missing
 search). Then use it to compare designs.
 
-Built and first run 2026-10-25 ([usertests/](../usertests/README.md),
-[summary](../usertests/results/2026-10-25/summary.md)): four readers on `4f25193` and on
+Built and first run 2026-10-25 ([usertests/](usertests/README.md),
+[summary](usertests/results/2026-10-25/summary.md)): four readers on `4f25193` and on
 `b3b2f93`. The old run found the missing search, the density, and the backwards month toggle, but
 saw the phone overflow only weakly; mean ease rose from 2.25 to 3.1. Left: run it before and after
 Presentation moves to the guide, and decide whether results stay in the repository. Since
@@ -108,7 +115,9 @@ Presentation moves to the guide, and decide whether results stay in the reposito
 **Ask the first readers back to the new home page**
 
 Status: open
+
 Owner: Sameer
+
 Gate: owner's call; [homeSpeckScale](todo-closed.md#homespeckscale) is settled
 
 Ryan, Karen, and Joe gave the first feedback (2026-10-25), and Shai Mitra is also to be asked; none
@@ -121,60 +130,66 @@ before, and record what they say under [scalableInterface](#scalableinterface).
 **A reader's suggestions for the home page, 2026-10-30**
 
 Status: open
+
 Owner: Sameer
+
 Gate: owner's call on each; requirement first
 
-Feedback from a reader of the home page ([product.nextView](requirements/local/product/presentation.md#nextview)), relayed by the owner:
+Feedback from a reader of the home page ([product.nextView](river/requirements/local/product/presentation.md#nextview)), relayed by the owner:
 
 1. **Month:** say that several months can be chosen ("click as many as you want").
 2. **Tile layout:** move length, wingspan, and mass up beside or below the name, above the stick
    figure, since they are what the page is for; move the banding codes and Latin name below the
    line. Set the measurements in a face designed for small text ("old eyes"). **Layout done
-   2026-10-30, revised 2026-10-31** ([decisions.tileNumbersFirst](requirements/decisions.md#tilenumbersfirst),
-   [decisions.tileMeasurementLines](requirements/decisions.md#tilemeasurementlines)). **Type
+   2026-10-30, revised 2026-10-31** ([decisions.tileNumbersFirst](river/requirements/decisions/decisions.md#tilenumbersfirst),
+   [decisions.tileMeasurementLines](river/requirements/decisions/decisions.md#tilemeasurementlines)). **Type
    enlarged 2026-11-01**: nothing below 13px, measurements in the system sans-serif with even-width
-   figures ([decisions.textSizeFloor](requirements/decisions.md#textsizefloor)). Left: whether a bundled legibility face such as Atkinson
+   figures ([decisions.textSizeFloor](river/requirements/decisions/decisions.md#textsizefloor)). Left: whether a bundled legibility face such as Atkinson
    Hyperlegible is worth an `imports.md` entry, and whether the measurements, still the dim gray,
    should be full-contrast ink.
 3. **Pins:** keep the pinned bird at the top of the results as a reference, whatever the Show
-   setting. **Done 2026-11-01** as the Pinned group ([decisions.pinnedGroupLeads](requirements/decisions.md#pinnedgroupleads)).
+   setting. **Done 2026-11-01** as the Pinned group ([decisions.pinnedGroupLeads](river/requirements/decisions/decisions.md#pinnedgroupleads)).
 4. **Mass cube:** at first it looked like a button for a 3-D view, and among similar birds (gulls)
    the cubes were all about the same size, so their meaning did not come through. Show the hover
    text sooner, or draw a vessel of water (a fish tank, a water-cooler bottle) so the volume reads
-   as water ([decisions.massAsWaterCube](requirements/decisions.md#massaswatercube); compare
+   as water ([decisions.massAsWaterCube](river/requirements/decisions/decisions.md#massaswatercube); compare
    [massAsLine](#massasline)).
 5. **iNaturalist link on every tile** (the owner's addition), not only on the detail view
-   ([product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink)). The
+   ([product.inaturalistLink](river/requirements/local/product/presentation.md#inaturalistlink)). The
    tile is one link to the detail view, so this one must be a sibling, like the pin. **Not with
    iNaturalist's logo:** its Terms of Use name "the iNaturalist Bird Logo Design" as a trademark
    and grant "no right or license to reproduce" it, and
-   [inatterms](requirements/imported/inaturalist.org/inatterms/inatterms.md) adopted iNaturalist on
+   [inatterms](river/requirements/imported/inaturalist.org/inatterms/inatterms.md) adopted iNaturalist on
    the finding that BirdView names it in words rather than reproducing a logo. Use a word or a
    glyph of BirdView's own, unless iNaturalist grants permission in writing. **Done 2026-10-30**,
    as the word **iNat**, in the tile's lower-right corner since 2026-10-31. Replaced 2026-11-01 by
-   an **eBird** link ([decisions.ebirdLinkReplacesInaturalist](requirements/decisions.md#ebirdlinkreplacesinaturalist)).
+   an **eBird** link ([decisions.ebirdLinkReplacesInaturalist](river/requirements/decisions/decisions.md#ebirdlinkreplacesinaturalist)).
 
 The reader also asked what "1 in 6,322 species observations" in New York means, so the line does
-not explain itself ([product.shareOfRecords](requirements/local/product/presentation.md#shareofrecords)).
+not explain itself ([product.shareOfRecords](river/requirements/local/product/presentation.md#shareofrecords)).
 
 ## massUnitConsistent
 
 **A bird's mass changes unit between pages**
 
 Status: open
+
 Owner: unassigned
+
 Gate: opportunistic
 
 The unit follows the birds on screen, so the Mallard is 29.8 oz on the home page and 1.9 lb when
 pinned or on its own page. Four of eight readers on 2026-11-01 tripped on it. Decide whether one
-bird should read the same everywhere ([product.imperialByDefault](requirements/local/product/presentation.md#imperialbydefault)).
+bird should read the same everywhere ([product.imperialByDefault](river/requirements/local/product/presentation.md#imperialbydefault)).
 
 ## harnessOpensSettings
 
 **The simulated readers cannot open the home page's settings**
 
 Status: open
+
 Owner: unassigned
+
 Gate: before the next reader run
 
 `usertests/tools/page --open` knows only the classic view's panel names and `shot` cannot click, so
@@ -187,12 +202,14 @@ also still tells readers the find box sends `q=` rather than `find=`.
 **eBird's terms of use are not vendored, and the eBird link was adopted without reading them**
 
 Status: open
+
 Owner: Sameer
+
 Gate: before any use of eBird beyond a plain link
 
-[product.ebirdLink](requirements/local/product/presentation.md#ebirdlink) links to eBird species pages and copies nothing, which
+[product.ebirdLink](river/requirements/local/product/presentation.md#ebirdlink) links to eBird species pages and copies nothing, which
 needs no license. But iNaturalist's adoption read and transcribed its terms
-([inatterms](requirements/imported/inaturalist.org/inatterms/inatterms.md)), and eBird's never
+([inatterms](river/requirements/imported/inaturalist.org/inatterms/inatterms.md)), and eBird's never
 were. Vendor eBird's terms of use under `third_party/`, transcribe what binds a site that links to
 it, and record the finding as `inatterms` did. Until then, anything more than a link (a logo, an
 embedded map or photograph, a lookup against eBird's API) waits.
@@ -202,13 +219,15 @@ embedded map or photograph, a lookup against eBird's API) waits.
 **Two criteria from the classic-view cleanup need a second look**
 
 Status: open
+
 Owner: unassigned
+
 Gate: opportunistic
 
 Found by the 2026-10-27 cleanup. The honestRevalidation criterion says every response carries an
 ETag, which is untrue for `/?month=now` (bare `/` has carried one since
-[decisions.homeShowsEveryMonth](requirements/decisions.md#homeshowseverymonth)); correct the wording. Some Habitat and Diet
-criteria are now decided only through [app.nextViewDrawsOneSet](requirements/composed/internal/app/acceptance.md#nextviewdrawsoneset); check that each still has a test
+[decisions.homeShowsEveryMonth](river/requirements/decisions/decisions.md#homeshowseverymonth)); correct the wording. Some Habitat and Diet
+criteria are now decided only through [app.nextViewDrawsOneSet](river/requirements/composed/internal/app/acceptance.md#nextviewdrawsoneset); check that each still has a test
 that fails when its behavior breaks.
 
 ## tightenProse
@@ -216,13 +235,15 @@ that fails when its behavior breaks.
 **Tighten all prose and page text; less is more**
 
 Status: open
+
 Owner: Sameer
+
 Gate: when convenient
 
 Second pass 2026-10-25, on what readers see: the page templates, the text built in Go
 (`main.go` notes, verdicts, tooltips, `/added` and `/excluded`), the region grouping notes, and
 `docs/using.md`. Design reasoning left the pages for river/; two requirements were amended to
-allow it ([product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram)'s cube and folded-neck notes). First pass done 2026-10-20: README, AGENTS.md, CONTRIBUTING, CHANGELOG, the four guides, every
+allow it ([product.labeledDetailDiagram](river/requirements/local/product/measurements.md#labeleddetaildiagram)'s cube and folded-neck notes). First pass done 2026-10-20: README, AGENTS.md, CONTRIBUTING, CHANGELOG, the four guides, every
 product and tech requirement, `app.md`, and the page templates, about 30% shorter overall. Left:
 `decisions.md` and `acceptance.md` (history and verification records; decide whether to tighten
 them at all), `imports.md`, `notes.md`, `arch.md`, `bindings.md`, code comments, and page
@@ -236,7 +257,9 @@ asserted by tests; grep before editing.
 **Record each imported source's version in imports.md only**
 
 Status: open
+
 Owner: Sameer
+
 Gate: when convenient
 
 River's decision `requirementsReadme` puts a source's version in `imports.md` and leaves
@@ -250,10 +273,12 @@ inside file names and URLs stay, since they are the files' names.
 **labeledDetailDiagram says two different things about where the mass label goes**
 
 Status: open
+
 Owner: Sameer
+
 Gate: needs the owner's call
 
-[product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram)
+[product.labeledDetailDiagram](river/requirements/local/product/measurements.md#labeleddetaildiagram)
 says total length and mass are labeled below the tail tip, and later that mass is labeled under its
 cube, not in the stack under the tail. Found during the prose pass; it predates it. Check what the
 page does, and correct the statement that is wrong.
@@ -263,10 +288,12 @@ page does, and correct the statement that is wrong.
 **The cranium model overdraws the largest birds, and one is now in scope**
 
 Status: open
+
 Owner: Sameer
+
 Gate: when convenient
 
-[product.craniumFromMass](requirements/local/product/diagram.md#craniumfrommass) said its
+[product.craniumFromMass](river/requirements/local/product/diagram.md#craniumfrommass) said its
 overestimate at large mass cost nothing because the heaviest bird in scope was 11 kg. Emu is now in
 scope at 34 kg and draws a 243 mm cranium. Check it against a measured emu skull, and if it is far
 off, fit or cap the coefficient.
@@ -276,15 +303,17 @@ off, fit or cap the coefficient.
 **Separate drawings for males and females are not supported by the data; investigated 2026-10-18 and deferred**
 
 Status: open
+
 Owner: Sameer
+
 Gate: when a usable sex-specific mass source is found
 
 Mass is the blocker: it is pooled per species in every vendored source, and head, body, and the mass
 cube are modeled from it
-([product.craniumFromMass](requirements/local/product/diagram.md#craniumfrommass),
-[product.trunkFromMass](requirements/local/product/diagram.md#trunkfrommass)), so per-sex bill,
+([product.craniumFromMass](river/requirements/local/product/diagram.md#craniumfrommass),
+[product.trunkFromMass](river/requirements/local/product/diagram.md#trunkfrommass)), so per-sex bill,
 wing, and tail on a shared body would draw a bird nobody measured
-([product.tileMarksModeled](requirements/local/product/measurements.md#tilemarksmodeled)). What
+([product.tileMarksModeled](river/requirements/local/product/measurements.md#tilemarksmodeled)). What
 exists: AVONET's unused `AVONET_Raw_Data` sheet sexes each specimen for bill, wing chord, secondary,
 tail, and tarsus, but only **213 of 1,082** drawn species have five or more of each sex, and **9 of
 61** drawn raptors; Fox's sex-specific wingspan columns are filled for **2** drawn species. Where
@@ -294,7 +323,7 @@ five specimens per sex is likely noise. **Leads for sex-specific mass, none chec
 al. 2015's amniote database (believed public domain, with a figshare copy; license and coverage
 unverified). Lislevand et al. 2007 and Ecology's data papers generally sit on **Wiley, which
 BirdView may not read**
-([decisions.ricklefsProhibited](requirements/decisions.md#ricklefsprohibited)); check where any
+([decisions.ricklefsProhibited](river/requirements/decisions/decisions.md#ricklefsprohibited)); check where any
 candidate is hosted before touching it. Dunning's handbook and Birds of the World are closed. A
 cheaper step that needs no new source: per-sex wing chord and tail as numbers, with specimen counts,
 on the detail page
@@ -304,10 +333,12 @@ on the detail page
 **WCAG 1.4.11 has no check**
 
 Status: open
+
 Owner: Sameer
+
 Gate: before any accessibility claim
 
-[app.pagesMeetNonTextContrast](requirements/composed/internal/app/app.md#pagesmeetnontextcontrast) is uncovered: the
+[app.pagesMeetNonTextContrast](river/requirements/composed/internal/app/app.md#pagesmeetnontextcontrast) is uncovered: the
 stylesheet checks skip shapes on purpose and the rendered check measures text only. Extending the
 rendered check to strokes and fills against adjacent colors is the obvious route; "required to
 understand the content" needs a ruling per diagram part
@@ -317,7 +348,9 @@ understand the content" needs a ruling per diagram part
 **Two source files are large enough to make reading by anchor matter**
 
 Status: open
+
 Owner: Sameer
+
 Gate: when evidence warrants
 
 `presentation.md` is about 13,000 tokens for 20 requirements and `measurements.md` about 6,700.
@@ -329,22 +362,24 @@ whole-file reads
 **Judge presence over the whole selection, against a threshold the reader sets**
 
 Status: parked
+
 Owner: Sameer
+
 Gate: parked
 
 Chosen in principle 2026-10-09 (option B of the regions-scaling design) and parked before
 implementation. A species is present when its share of the selection's records — the tile's own *1
 in N* — beats a threshold shown as a control: *show birds at least* 1 in 10,000 · 100,000 ·
 1,000,000 · 10,000,000 · 100,000,000 · any record. Proposed defaults, **undecided**: 1 in 1,000,000;
-the arrival page left unfiltered so scope stays [product.scopeIsRecurringAvifauna](requirements/local/product/dataset.md#scopeisrecurringavifauna)'s job; and
-[decisions.monthPresence](requirements/decisions.md#monthpresence)'s month rule applied to the summed counts of the selected regions. Measured
+the arrival page left unfiltered so scope stays [product.scopeIsRecurringAvifauna](river/requirements/local/product/dataset.md#scopeisrecurringavifauna)'s job; and
+[decisions.monthPresence](river/requirements/decisions/decisions.md#monthpresence)'s month rule applied to the summed counts of the selected regions. Measured
 at 1 in 1,000,000: New York 491 → 443, the Northeast's nine states 564 → 470, all land regions 1,057
 → 836. Two defects it would fix, both real today:
-[product.regionAndMonthFilter](requirements/local/product/filtering.md#regionandmonthfilter)'s "in
+[product.regionAndMonthFilter](river/requirements/local/product/filtering.md#regionandmonthfilter)'s "in
 either source" judges iNaturalist against its own small total, so one observation passes — 45 of New
 York's species are present on that alone, Diamond Dove among them; and `birdview-regions` discarded
 counts under the bar at write time — **fixed on its own 2026-10-13,
-[decisions.belowBarCounted](requirements/decisions.md#belowbarcounted)**: every count is now kept
+[decisions.belowBarCounted](river/requirements/decisions/decisions.md#belowbarcounted)**: every count is now kept
 and the bar decides membership only, which left 47 drawn species reading zero before it. Keeping
 every count costs 11% more cells. Works on today's 74 regions; would make counties a data change
 rather than a rules change
@@ -354,7 +389,9 @@ rather than a rules change
 **Every committed table comes from the live GBIF API and cannot be re-derived**
 
 Status: open
+
 Owner: Sameer
+
 Gate: before publishing the dataset
 
 Each build command issues thousands of throttled HTTPS queries to `api.gbif.org`, so two runs a week
@@ -367,7 +404,7 @@ small file with a citable DOI but needs an account; or a GBIF Parquet snapshot q
 which needs no account — the better fit if others are to work with BirdView directly — at the cost
 of tens of GB and a query engine. Either way the switch is **once, for the whole pipeline**: two
 sources at different freshness is the disagreement
-[decisions.honestSeaDenominator](requirements/decisions.md#honestseadenominator) already fixed.
+[decisions.honestSeaDenominator](river/requirements/decisions/decisions.md#honestseadenominator) already fixed.
 Every pinned figure must be re-derived from the new input rather than adjusted to match
 
 ## unusedAvonetColumns
@@ -375,13 +412,15 @@ Every pinned figure must be re-derived from the new input rather than adjusted t
 **AVONET's `Family1`–`3` and `Secondary1` are read and never used**
 
 Status: open
+
 Owner: unassigned
+
 Gate: opportunistic
 
 Found drawing
-[product.pipelineDiagram](requirements/local/product/measurements.md#pipelinediagram)'s pipeline
+[product.pipelineDiagram](river/requirements/local/product/measurements.md#pipelinediagram)'s pipeline
 diagram, which marks both ✗. `avonet.FamilyOf` is documented as a cross-check against ABA's family,
-and ABA is gone ([decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence));
+and ABA is gone ([decisions.scopeFromRecurrence](river/requirements/decisions/decisions.md#scopefromrecurrence));
 `Secondary1` is a required column whose value nothing reads. Either use them — `FamilyOf` could
 cross-check AviList's family the way it once checked ABA's — or stop reading them, and update the
 diagram either way
@@ -391,16 +430,18 @@ diagram either way
 **Three more domestic forms behave like the two that are declared**
 
 Status: open
+
 Owner: unassigned
+
 Gate: opportunistic
 
 The rank fold of
-[dataset.occurrenceReadersAgree](requirements/composed/internal/dataset/acceptance.md#occurrencereadersagree) moved
+[dataset.occurrenceReadersAgree](river/requirements/composed/internal/dataset/acceptance.md#occurrencereadersagree) moved
 iNaturalist's trinomials into their wild species, and the proportional gainers were `Gallus gallus`
 **+11.9%**, `Anser cygnoides` **+20.0%**, and `Anser anser` **+6.9%** — the same signature as the
 declared `Columba livia` (+1.3%) and `Cairina moschata` (+10.0%). `taxonomy.DomesticForms` names
 only the latter two, so
-[product.sourceNamingMeasured](requirements/local/product/dataset.md#sourcenamingmeasured)'s ratio
+[product.sourceNamingMeasured](river/requirements/local/product/dataset.md#sourcenamingmeasured)'s ratio
 check reads the other three as undeclared disagreements if it ever flags them. Either declare them
 or record why the two are special; measuring it needs a `cmd/birdview-names` run
 
@@ -409,13 +450,15 @@ or record why the two are special; measuring it needs a `cmd/birdview-names` run
 **The record counts behind a name disagreement are not on the page**
 
 Status: open
+
 Owner: Sameer
+
 Gate: opportunistic
 
-[product.namesRecordsFiledUnder](requirements/local/product/presentation.md#namesrecordsfiledunder)
+[product.namesRecordsFiledUnder](river/requirements/local/product/presentation.md#namesrecordsfiledunder)
 asks for each source's binomial *and how many records it holds under it*, and
-[app.disputedNamesShown](requirements/composed/internal/app/acceptance.md#disputednamesshown) ships only the
-binomial. [`data/source-names.tsv`](../data/source-names.tsv) has per-source counts and no reader,
+[app.disputedNamesShown](river/requirements/composed/internal/app/acceptance.md#disputednamesshown) ships only the
+binomial. [`data/source-names.tsv`](data/source-names.tsv) has per-source counts and no reader,
 but it queries the **AviList** name only — for Hairy Woodpecker it records eBird 0, not the
 7,310,342 under *Dryobates villosus*, which is the number a reader wants. Closing it needs
 `cmd/birdview-names` to query the alias as well, a GBIF run, and the counts plumbed through the
@@ -426,12 +469,14 @@ ingest
 **Nothing reads `data/gbif-taxa.tsv`**
 
 Status: open
+
 Owner: unassigned
+
 Gate: opportunistic
 
 It is generated by `cmd/birdview-gbifmap`, committed, and consumed by no code. It carries a
 GBIF-to-AviList name bridge with an `ambiguous` tier that would be the natural home for
-[decisions.sharedCountShownOnBoth](requirements/decisions.md#sharedcountshownonboth)'s shared names
+[decisions.sharedCountShownOnBoth](river/requirements/decisions/decisions.md#sharedcountshownonboth)'s shared names
 — except that it files `Setophaga petechia -> Setophaga petechia` as `exact`, correctly, which is
 why the bridge could not find them. Either wire it in or retire it
 
@@ -440,10 +485,12 @@ why the bridge could not find them. Either wire it in or retire it
 **The name sweep is a throwaway and should not be**
 
 Status: open
+
 Owner: Sameer
+
 Gate: before the next AviList release
 
-Finding [decisions.sharedCountShownOnBoth](requirements/decisions.md#sharedcountshownonboth)'s cases
+Finding [decisions.sharedCountShownOnBoth](river/requirements/decisions/decisions.md#sharedcountshownonboth)'s cases
 took 2,166 queries comparing what each database reports under each AviList binomial — the only
 method that catches a name whose strings match and whose meanings differ. It ran once from a scratch
 binary. As a committed command it would catch the next split the week it lands, rather than when a
@@ -455,18 +502,20 @@ the outlying islands, which is why *Sternula albifrons* looked like a finding an
 **Give the recurrence test a coordinate-box form, and find out whether the pelagics clear the bar on their own**
 
 Status: open
+
 Owner: Sameer
+
 Gate: opportunistic; it could retire hand-declared exceptions
 
 `DatesIn` filters by `gadmGid`; GBIF assigns none to open ocean, so no pelagic's at-sea records have
 ever been tested for recurrence. Four
-[product.declaredExceptions](requirements/local/product/dataset.md#declaredexceptions) exceptions
+[product.declaredExceptions](river/requirements/local/product/dataset.md#declaredexceptions) exceptions
 exist in that blind spot, and
-[decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence)'s claim that
+[decisions.scopeFromRecurrence](river/requirements/decisions/decisions.md#scopefromrecurrence)'s claim that
 recurrence is insensitive to observer effort has never been tested where observers are scarcest. The
 `eventDate` facet does accept a lat/lon box — probed 2026-10-05 — so the client method is small; the
 cost is a re-run of `birdview-status` against live GBIF. Note the boxes overlap the coast
-([decisions.seaShareDiffers](requirements/decisions.md#seasharediffers)), so a naive run would count
+([decisions.seaShareDiffers](river/requirements/decisions/decisions.md#seasharediffers)), so a naive run would count
 shore records as sea
 
 ## commonestIsLargest
@@ -474,15 +523,17 @@ shore records as sea
 **Assert that `Commonest` is the largest share**
 
 Status: open
+
 Owner: unassigned
-Gate: with [decisions.seaShareDiffers](requirements/decisions.md#seasharediffers)
+
+Gate: with [decisions.seaShareDiffers](river/requirements/decisions/decisions.md#seasharediffers)
 
 Nothing does. The server fixture hardcodes `commonestOf` and every test renders it back, so
-[product.shareOfRecords](requirements/local/product/presentation.md#shareofrecords)'s central
+[product.shareOfRecords](river/requirements/local/product/presentation.md#shareofrecords)'s central
 claim has never met data — which is why
-[decisions.seaShareDiffers](requirements/decisions.md#seasharediffers)(a) shipped. The check belongs
+[decisions.seaShareDiffers](river/requirements/decisions/decisions.md#seasharediffers)(a) shipped. The check belongs
 over the real dataset, as
-[app.outOfScopeExplained](requirements/composed/internal/app/acceptance.md#outofscopeexplained)'s id-collision half
+[app.outOfScopeExplained](river/requirements/composed/internal/app/acceptance.md#outofscopeexplained)'s id-collision half
 is
 
 ## vagrantOutscoresResident
@@ -490,10 +541,12 @@ is
 **Region membership counts records, so a one-off vagrant can outscore a resident**
 
 Status: deferred
+
 Owner: Sameer
+
 Gate: deferred 2026-10-04; before anyone reads a region list as a range map
 
-[product.regionAndMonthFilter](requirements/local/product/filtering.md#regionandmonthfilter)'s
+[product.regionAndMonthFilter](river/requirements/local/product/filtering.md#regionandmonthfilter)'s
 1-ppm rule is anti-correlated with what it measures: the more surprising a bird, the bigger the
 crowd, the more records. **Two examples are in the data as shipped** — American Flamingo in
 Pennsylvania (931 records, one pond, thirteen days, post-Idalia) and **Lucy's Warbler, a Sonoran
@@ -513,18 +566,20 @@ which is a *contiguous slice in GBIF's own ordering, not a random sample* — al
 records for Pennsylvania fell in January 2024, and a page-derived year count read 1 where the true
 count is 60. Any real rule must take both signals from facets over all records, which raises the
 cost. Costs a regenerated `data/region-presence.tsv` and dataset. Documented for readers meanwhile under
-[Regions](../docs/data.md)
+[Regions](docs/data.md)
 
 ## coOccurrenceGrouping
 
 **Group families by what is seen together**
 
 Status: open
+
 Owner: Sameer
+
 Gate: opportunistic; needs a stratified crawl of ~400–800 county-days into a committed table
 
 Crawl eBird checklists and cluster families by co-occurrence, as a third grouping
-([decisions.familiesTwoWays](requirements/decisions.md#familiestwoways)). This is the honest version
+([decisions.familiesTwoWays](river/requirements/decisions/decisions.md#familiestwoways)). This is the honest version
 of the habitat idea — co-occurrence is natively a *family*-level property, so nothing is averaged
 and nothing is misfiled. Two findings make it tractable, both measured 2026-10-03: GBIF's eBird
 export carries **no `eventID`**, but a checklist reconstructs from `recordedBy` + `eventDate` +
@@ -540,12 +595,14 @@ the atolls were
 **Publish the BirdView dataset as a source in its own right**
 
 Status: open
+
 Owner: Sameer
+
 Gate: ready: the repo exists as `google/birdview` since 2026-10-08
 
 The project consumes four published datasets and credits each by DOI; it now derives work worth the
 same treatment — the occurrence status
-([decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence)), the region
+([decisions.scopeFromRecurrence](river/requirements/decisions/decisions.md#scopefromrecurrence)), the region
 presence and shares, the supplementary habitat and diet assignments, the neck and trunk models, and
 the wingspan regression. None of it is reachable except by scraping the app. **What the shape should
 be is the open question, not whether.** `web/data/species.json` is a serving artifact, not a
@@ -566,7 +623,9 @@ attribution flows through, and BirdView should pick its own license rather than 
 **Ask Ricklefs or ESA for permission to use the measured-length data**
 
 Status: open
+
 Owner: Sameer
+
 Gate: **after a working demo**
 
 ## perchedToggle
@@ -574,26 +633,30 @@ Gate: **after a working demo**
 **Assess whether a perched/standing toggle is achievable at any honest accuracy**
 
 Status: open
+
 Owner: unassigned
+
 Gate: before it is offered to users
 
-([decisions.foldedNeckAsS](requirements/decisions.md#foldedneckass))
+([decisions.foldedNeckAsS](river/requirements/decisions/decisions.md#foldedneckass))
 
 ## reviewNeckRatios
 
 **Review `NeckRatios` against the full family list**
 
 Status: open
+
 Owner: Sameer
+
 Gate: opportunistic; still the weakest model
 
 24 of 90 families carry a ratio and **66 take the default 0.18, covering 548 species**. This is the
 half of the old entry that is actually tractable, and the one that catches the next short-necked
-Limpkin. ~~Derive the values from [`bohmer-neck`](requirements/imports.md#bohmer-neck)
-instead~~ — **withdrawn 2026-10-04**: [`imports.md`](requirements/imports.md#bohmer-neck)
+Limpkin. ~~Derive the values from [`bohmer-neck`](river/requirements/imports/imports.md#bohmer-neck)
+instead~~ — **withdrawn 2026-10-04**: [`imports.md`](river/requirements/imports/imports.md#bohmer-neck)
 already records why, and the old entry ignored it. Böhmer measures the **full cervical column
 including the part inside the body contour**, where
-[product.neckModelPerFamily](requirements/local/product/diagram.md#neckmodelperfamily) models the
+[product.neckModelPerFamily](river/requirements/local/product/diagram.md#neckmodelperfamily) models the
 *exposed* neck of a silhouette. Converting one to the other needs the fraction of the column that
 shows in flight, per family, unmeasured — which is exactly what `NeckRatios` already is. It would
 move the guess, not remove it, and add a dependency on a 103-species `.docx` that is
@@ -604,10 +667,12 @@ consulted-not-ingested
 **Find a source that measures a trunk**
 
 Status: open
+
 Owner: unassigned
+
 Gate: opportunistic; would upgrade a calibration to a fit
 
-[decisions.trunkExponentCalibrated](requirements/decisions.md#trunkexponentcalibrated)'s exponent is inferred from neck and leg, and that is its weakest
+[decisions.trunkExponentCalibrated](river/requirements/decisions/decisions.md#trunkexponentcalibrated)'s exponent is inferred from neck and leg, and that is its weakest
 link
 
 ## massAsLine
@@ -615,39 +680,43 @@ link
 **Replace the cube with a mass line proportional to mass**
 
 Status: parked
+
 Owner: Sameer
+
 Gate: parked 2026-10-02 — resume from that section, do not re-derive
 
 Replace the cube with a mass **line** proportional to mass. Measured and written up in [Mass as a
-proportional line](notes.md#mass-as-a-proportional-line-replacing-the-cube--parked); needs a CR,
-because it reverses [decisions.massAsWaterCube](requirements/decisions.md#massaswatercube)
+proportional line](river/notes.md#mass-as-a-proportional-line-replacing-the-cube--parked); needs a CR,
+because it reverses [decisions.massAsWaterCube](river/requirements/decisions/decisions.md#massaswatercube)
 
 ## criteriaNeverFailed
 
 **Seven acceptance criteria have never been watched failing**
 
 Status: open
-Owner: unassigned
-Gate: opportunistic; [app.tileMarksNonMeasured](requirements/composed/internal/app/acceptance.md#tilemarksnonmeasured) and [repo.nothingRestrictedTracked](requirements/composed/internal/repo/acceptance.md#nothingrestrictedtracked) guard hard rules
 
-Without a `Watched failing:` observation in [`conformance.md`](conformance.md):
-[dataset.allFiveTraits](requirements/composed/internal/dataset/acceptance.md#allfivetraits) (all five AVONET traits on
+Owner: unassigned
+
+Gate: opportunistic; [app.tileMarksNonMeasured](river/requirements/composed/internal/app/acceptance.md#tilemarksnonmeasured) and [repo.nothingRestrictedTracked](river/requirements/composed/internal/repo/acceptance.md#nothingrestrictedtracked) guard hard rules
+
+Without a `Watched failing:` observation in [`conformance.md`](river/conformance/conformance.md):
+[dataset.allFiveTraits](river/requirements/composed/internal/dataset/acceptance.md#allfivetraits) (all five AVONET traits on
 every record),
-[dataset.joinCoversEverySpecies](requirements/composed/internal/dataset/acceptance.md#joincoverseveryspecies) (join
+[dataset.joinCoversEverySpecies](river/requirements/composed/internal/dataset/acceptance.md#joincoverseveryspecies) (join
 coverage monitored),
-[dataset.unmatchedFailsBuild](requirements/composed/internal/dataset/acceptance.md#unmatchedfailsbuild) (unmatched species
+[dataset.unmatchedFailsBuild](river/requirements/composed/internal/dataset/acceptance.md#unmatchedfailsbuild) (unmatched species
 fail the build above a threshold),
-[app.proportionsDifferentiate](requirements/composed/internal/app/acceptance.md#proportionsdifferentiate)
+[app.proportionsDifferentiate](river/requirements/composed/internal/app/acceptance.md#proportionsdifferentiate)
 (proportions differentiate species),
-[app.tileMarksNonMeasured](requirements/composed/internal/app/acceptance.md#tilemarksnonmeasured) (the tile marks
+[app.tileMarksNonMeasured](river/requirements/composed/internal/app/acceptance.md#tilemarksnonmeasured) (the tile marks
 every non-measured metric),
-[repo.nothingRestrictedTracked](requirements/composed/internal/repo/acceptance.md#nothingrestrictedtracked) (nothing
+[repo.nothingRestrictedTracked](river/requirements/composed/internal/repo/acceptance.md#nothingrestrictedtracked) (nothing
 restricted is tracked — the document calls it its highest-value check), and
-[dataset.outboundRequestsIdentified](requirements/composed/internal/dataset/acceptance.md#outboundrequestsidentified)
-(outbound requests identify the client). [dataset.joinCoversEverySpecies](requirements/composed/internal/dataset/acceptance.md#joincoverseveryspecies) and [app.proportionsDifferentiate](requirements/composed/internal/app/acceptance.md#proportionsdifferentiate) are
+[dataset.outboundRequestsIdentified](river/requirements/composed/internal/dataset/acceptance.md#outboundrequestsidentified)
+(outbound requests identify the client). [dataset.joinCoversEverySpecies](river/requirements/composed/internal/dataset/acceptance.md#joincoverseveryspecies) and [app.proportionsDifferentiate](river/requirements/composed/internal/app/acceptance.md#proportionsdifferentiate) are
 already cited by tests, so they may only need the mutation run and a recorded observation;
 `abaFileHashMatches` was dropped as obsolete during the River 2.0 upgrade since
-[decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence) removed the ABA
+[decisions.scopeFromRecurrence](river/requirements/decisions/decisions.md#scopefromrecurrence) removed the ABA
 input.
 
 ## riverReleaseFindings
@@ -655,14 +724,16 @@ input.
 **What adopting River's Release stage taught, to send upstream**
 
 Status: open
+
 Owner: Sameer
+
 Gate: next River session
 
 Found 2026-10-22 and 23, taking birdview.site public and adopting Release. Each is a place River's
 README was silent or assumed something BirdView did not have:
 
-- **A decision recorded after it was made.** [decisions.publicPersonalDeployment](requirements/decisions.md#publicpersonaldeployment) and
-  [decisions.regionFilterReinstated](requirements/decisions.md#regionfilterreinstated) needed a `Recorded:` field River's entry format does not define.
+- **A decision recorded after it was made.** [decisions.publicPersonalDeployment](river/requirements/decisions/decisions.md#publicpersonaldeployment) and
+  [decisions.regionFilterReinstated](river/requirements/decisions/decisions.md#regionfilterreinstated) needed a `Recorded:` field River's entry format does not define.
 - **Guardrails in a private repository.** River says the bundle cites guardrails from a mutable
   record. BirdView's health probe and uptime check live in `Sajmani/birdview-deploy`, which is
   private, so the citation names something most readers cannot open. River should say whether
@@ -683,7 +754,9 @@ README was silent or assumed something BirdView did not have:
 **The GBIF client's pacing test can fail under load, as the iNaturalist one did**
 
 Status: open
+
 Owner: unassigned
+
 Gate: if CI goes red on it
 
 Found 2026-10-23. `TestLookupHonorsTheSourceRequirements` measured two requests 114 ms apart against
@@ -692,20 +765,22 @@ five. The gaps are timed at the fake server, so a first request delayed in arriv
 next gap without the client pacing any faster. The GBIF client's test has the same shape and
 flaked the same way on 2026-10-26: `TestTaxonIdentifiesItselfAndPaces` measured 53.8 ms against a
 60 ms interval in a full run, and passed three runs alone. Now that
-[tech.checksOnEveryChange](requirements/local/tech/release.md#checksoneverychange) fails CI on any failure, a flake here would read as a broken
+[tech.checksOnEveryChange](river/requirements/local/tech/release.md#checksoneverychange) fails CI on any failure, a flake here would read as a broken
 change. Measure the gap at the client's send instead, or widen the tolerance with that reason.
 By 2026-10-27 both flaked in most local full runs, though not yet in CI. The iNaturalist test was
-deleted 2026-11-01 with the client it tested ([decisions.inaturalistSourcesRetired](requirements/decisions.md#inaturalistsourcesretired)); the GBIF one remains.
+deleted 2026-11-01 with the client it tested ([decisions.inaturalistSourcesRetired](river/requirements/decisions/decisions.md#inaturalistsourcesretired)); the GBIF one remains.
 
 ## nearMatchSplits
 
 **Four near-matches are splits awaiting a human taxonomic check**
 
 Status: open
+
 Owner: Sameer
+
 Gate: needs the owner's call
 
-[decisions.abaSpeciesWithoutAvonet](requirements/decisions.md#abaspecieswithoutavonet), *Still
+[decisions.abaSpeciesWithoutAvonet](river/requirements/decisions/decisions.md#abaspecieswithoutavonet), *Still
 unresolved*. *Astur atricapillus*, *Ardea ibis*, *Gygis candida*, and *Tyto furcata* borrow from
 AVONET rows for the combined pre-split taxon. Checked 2026-10-13: AviList v2025b lists each parent
 and daughter as separate species, and no AVONET sheet has a row for any daughter, so `near-match` is
@@ -718,10 +793,12 @@ it
 **AVONET's mass column was not split where BirdLife splits a pair**
 
 Status: open
+
 Owner: unassigned
+
 Gate: opportunistic
 
-[decisions.abaSpeciesWithoutAvonet](requirements/decisions.md#abaspecieswithoutavonet)'s caveat,
+[decisions.abaSpeciesWithoutAvonet](river/requirements/decisions/decisions.md#abaspecieswithoutavonet)'s caveat,
 carried forward and never closed: *Larus smithsonianus*/*argentatus*, *Calonectris
 borealis*/*diomedea*, and *Pterodroma deserta*/*feae* each share one mass, so their linear traits
 differ and sorting by mass shows them as identical. The same holds for every white tern (117 g)
@@ -731,7 +808,9 @@ differ and sorting by mass shows them as identical. The same holds for every whi
 **Launch birdview.site from a personal mirror of this repository**
 
 Status: open
+
 Owner: Sameer
+
 Gate: the next step for a public deployment
 
 Decided 2026-10-22: `birdview.site` belongs to Sameer personally and is served at his own expense
@@ -768,27 +847,27 @@ apply to it. In order:
    feedback link names `google/birdview` issues.
 3. ~~**Build the dataset for deployment.**~~ Done: the `Dockerfile`'s first stage runs the ingest
    and copies `species.json` into the image, so no deploy step supplies it
-   ([tech.datasetNeverCommitted](requirements/local/tech/delivery.md#datasetnevercommitted)).
+   ([tech.datasetNeverCommitted](river/requirements/local/tech/delivery.md#datasetnevercommitted)).
 4. ~~**Amend the requirements for public serving**~~, requirement first:
-   [tech.localNowPublicLater](requirements/local/tech/posture.md#localnowpubliclater) (its value is `local`) and
-   [tech.servesOnLocalhost](requirements/local/tech/delivery.md#servesonlocalhost). The stable surface is done:
-   [tech.stableUrls](requirements/local/tech/delivery.md#stableurls), 2026-10-23. **Done 2026-10-23:** both amended under
-   [decisions.publicPersonalDeployment](requirements/decisions.md#publicpersonaldeployment), which records the 2026-10-22 decision to go public; the
+   [tech.localNowPublicLater](river/requirements/local/tech/posture.md#localnowpubliclater) (its value is `local`) and
+   [tech.servesOnLocalhost](river/requirements/local/tech/delivery.md#servesonlocalhost). The stable surface is done:
+   [tech.stableUrls](river/requirements/local/tech/delivery.md#stableurls), 2026-10-23. **Done 2026-10-23:** both amended under
+   [decisions.publicPersonalDeployment](river/requirements/decisions/decisions.md#publicpersonaldeployment), which records the 2026-10-22 decision to go public; the
    stage-adoption row of `bindings.md` no longer says BirdView is undeployed.
 5. ~~**Write the first release criteria**~~, BirdView's first use of River's Release stage: a health
    check, monitoring and alerts, a rollback path, and what happens when an ingest input changes.
-   **Done 2026-10-23** (`7fcea0b`): [tech/release.md](requirements/local/tech/release.md) — CI on every change, a Dockerfile test stage
+   **Done 2026-10-23** (`7fcea0b`): [tech/release.md](river/requirements/local/tech/release.md) — CI on every change, a Dockerfile test stage
    gating every image, and `birdview-smoke` after every deploy; rollback documented in
    `docs/building.md`; Release adopted in `bindings.md`. The deployment's own settings are in
    place since 2026-10-23, recorded in the private `Sajmani/birdview-deploy`: a startup probe on
    `/robots.txt`, an uptime check on a species page from three regions every 15 minutes, and an
    email alert when it fails.
 6. **Operational checks:** TLS, caching behavior
-   ([decisions.hereAndNowCaching](requirements/decisions.md#hereandnowcaching)), no tracking, a feedback channel that exposes
+   ([decisions.hereAndNowCaching](river/requirements/decisions/decisions.md#hereandnowcaching)), no tracking, a feedback channel that exposes
    no personal address, basic rate limiting. If step 7 puts Firebase Hosting in front, check
    through it too: its CDN caches by `Cache-Control`, so confirm pages still revalidate
-   ([tech.cacheLifetimeStated](requirements/local/tech/delivery.md#cachelifetimestated)) and arrive gzipped with `Vary` intact
-   ([tech.compressedResponses](requirements/local/tech/delivery.md#compressedresponses)).
+   ([tech.cacheLifetimeStated](river/requirements/local/tech/delivery.md#cachelifetimestated)) and arrive gzipped with `Vary` intact
+   ([tech.compressedResponses](river/requirements/local/tech/delivery.md#compressedresponses)).
 7. ~~**Point `birdview.site` at the host.**~~ Three ways onto Cloud Run with TLS: a Cloud Run domain
    mapping (simplest, but preview and in some regions only); Firebase Hosting rewriting to the
    service (free, certificate included); or a global external load balancer (about $18 a month).
@@ -803,12 +882,12 @@ apply to it. In order:
    Checked on both hosts on 2026-10-23: the same results as the `run.app` checks in step 2, and
    HTTP redirects to HTTPS on each. The service is capped at 2 instances
    (`--max-instances=2`) and the project has a $10 budget alert. ~~`www` serves the site itself~~:
-   since 2026-10-23 the server takes `-canonical` ([tech.oneCanonicalHost](requirements/local/tech/delivery.md#onecanonicalhost)), so deploying with
+   since 2026-10-23 the server takes `-canonical` ([tech.oneCanonicalHost](river/requirements/local/tech/delivery.md#onecanonicalhost)), so deploying with
    `--args=-addr,0.0.0.0:8080,-data,/data/species.json,-feedback,https://github.com/google/birdview/issues,-canonical,birdview.site`
    redirects `www` and the Cloud Run address to `birdview.site`; deployed 2026-10-23 as revision
    `birdview-00004-z2b`, and checked: both answer 301 with path and query intact, plain HTTP takes
    one more hop through Google's own HTTPS redirect, and `birdview.site` serves as before. ~~And there is no `robots.txt`~~: added 2026-10-23 under
-   [tech.crawlersSkipFilteredViews](requirements/local/tech/delivery.md#crawlersskipfilteredviews), asking crawlers to skip every URL with a query string.
+   [tech.crawlersSkipFilteredViews](river/requirements/local/tech/delivery.md#crawlersskipfilteredviews), asking crawlers to skip every URL with a query string.
 8. **Sync and deploy automatically.** A push to the mirror's `main` fires a Cloud Build trigger,
    connected through the Cloud Build GitHub app installed on the `Sajmani` account, that builds
    the image and deploys it. The sync that feeds it should also run from Google Cloud: Cloud
@@ -827,7 +906,9 @@ apply to it. In order:
 **Move BirdView's source of truth to the personal repository**
 
 Status: open
+
 Owner: Sameer
+
 Gate: before building BirdView's software factory; and once continuing development in a personal
 repository is confirmed as approved
 
@@ -846,72 +927,84 @@ River's published parts until River itself is public, then come from River's pub
 **Hummingbirds and gamebirds take the global wingspan fit**
 
 Status: open
+
 Owner: unassigned
+
 Gate: opportunistic; needs a wingspan source for those orders
 
 , not an order-level one, because neither order has five empirical species and Galliformes has none.
 Their estimates carry roughly 7.3% median error against 4.6% for well-covered orders. Moved from
-[arch.md](arch.md)
+[arch.md](river/arch.md)
 
 ## bridgeConceptMismatch
 
 **A resolved row in the GBIF bridge can be name-correct and concept-wrong**
 
 Status: open
+
 Owner: unassigned
+
 Gate: opportunistic
 
 Where GBIF has not followed a split, its name maps to whichever half kept it: GBIF's `Circus
 cyaneus` maps to the Eurasian Hen Harrier while 3.8 million of its records are Northern Harriers.
-Nine such cases are listed in [imports.md](requirements/imports.md#gbif); the table has
+Nine such cases are listed in [imports.md](river/requirements/imports/imports.md#gbif); the table has
 one AviList column and cannot express them, and nothing detects them automatically. Moved from
-[arch.md](arch.md)
+[arch.md](river/arch.md)
 
 ## headAspectConstant
 
 **`headAspect` is an unexamined drawing constant**
 
 Status: open
+
 Owner: unassigned
+
 Gate: opportunistic
 
 It produces no metric, so it carries no provenance, but it is as invented as the neck ratio. Moved
-from [arch.md](arch.md)
+from [arch.md](river/arch.md)
 
 ## detailTileRerender
 
 **The detail view re-renders the tile at 1.9×**
 
 Status: open
+
 Owner: unassigned
+
 Gate: opportunistic
 
 rather than sharing a sized component, so a tile layout change has to be made in both places. Moved
-from [arch.md](arch.md)
+from [arch.md](river/arch.md)
 
 ## avonetReadThrice
 
 **The ingest reads the 21 MB AVONET workbook three times**
 
 Status: open
+
 Owner: unassigned
+
 Gate: only if build time starts to matter
 
 , once per taxonomy sheet — about four seconds, which has not been worth optimizing. Moved from
-[arch.md](arch.md)
+[arch.md](river/arch.md)
 
 ## photographsWithdrawn
 
-**Photographs ([product.speciesPhotographs](requirements/local/product/diagram.md#speciesphotographs)–[product.photoCaching](requirements/local/product/diagram.md#photocaching)) are withdrawn from v1, not abandoned**
+**Photographs ([product.speciesPhotographs](river/requirements/local/product/diagram.md#speciesphotographs)–[product.photoCaching](river/requirements/local/product/diagram.md#photocaching)) are withdrawn from v1, not abandoned**
 
 Status: open
+
 Owner: unassigned
+
 Gate: not planned
 
-[decisions.photographsWithdrawn](requirements/decisions.md#photographswithdrawn). Any revival goes
+[decisions.photographsWithdrawn](river/requirements/decisions/decisions.md#photographswithdrawn). Any revival goes
 through the spec first and stays within
-[product.inaturalistLink](requirements/local/product/presentation.md#inaturalistlink) and
-[tech.selfContainedServer](requirements/local/tech/delivery.md#selfcontainedserver): BirdView
+[product.inaturalistLink](river/requirements/local/product/presentation.md#inaturalistlink) and
+[tech.selfContainedServer](river/requirements/local/tech/delivery.md#selfcontainedserver): BirdView
 links to photographs and never embeds, hotlinks, or caches one
 
 ## broadEbirdRows
@@ -919,10 +1012,12 @@ links to photographs and never embeds, hotlinks, or caches one
 **Other species may be drawn from an eBird row broader than their AviList concept**
 
 Status: open
+
 Owner: unassigned
+
 Gate: opportunistic
 
-[decisions.herringGullEuropeanRow](requirements/decisions.md#herringgulleuropeanrow) found European
+[decisions.herringGullEuropeanRow](river/requirements/decisions/decisions.md#herringgulleuropeanrow) found European
 Herring Gull labeled `measured` from `AVONET2_eBird`'s 2022 *Larus argentatus*, which averages 16
 specimens of which 6 are European. The ingest prefers the eBird sheet everywhere, and nothing looks
 for other species where AviList's concept is narrower and a BirdLife row matches it better. AVONET's
@@ -934,7 +1029,9 @@ to find them
 **Other clones of `google/birdview` predate the history rewrite of 2026-10-13**
 
 Status: open
+
 Owner: Sameer
+
 Gate: until every other clone is replaced
 
 The stray `birdview-regions` binary and a root-level copy of AVONET's `Supplementary dataset 2.xlsx`
@@ -947,10 +1044,12 @@ objects until its own garbage collection, or until Support purges them
 **Three birds were kept on the index as doubtful, not as wild**
 
 Status: open
+
 Owner: Sameer
+
 Gate: needs the owner's call
 
-[decisions.escapedBirdsOffIndex](requirements/decisions.md#escapedbirdsoffindex) left West Indian
+[decisions.escapedBirdsOffIndex](river/requirements/decisions/decisions.md#escapedbirdsoffindex) left West Indian
 Whistling-Duck (15 records: Alabama, Texas, Florida, Virginia), Cuban Grassquit (22, all Florida),
 and Cinnamon-rumped Seedeater (131, mostly California and Arizona) off `status.Exotic` because their
 records may be wild vagrants. Each needs a judgment: add it to the list with a reason, or leave it.
@@ -962,12 +1061,15 @@ Mexican bird and Morelet's Seedeater is the one native to Texas
 **Regions down to counties, coded as the data codes them**
 
 Status: active
-Issue: [#11](https://github.com/google/birdview/issues/11)
-Owner: Sameer
-Gate: ships to birdview.site, with -counties turned on, only when every US state and Canadian
-province and territory has counties ([decisions.countiesBehindFlag](requirements/decisions.md#countiesbehindflag)); work in progress is pushed
 
-[decisions.regionCodesFromData](requirements/decisions.md#regioncodesfromdata) names regions by GADM code on land and Marine Regions id at sea, and
+Issue: [#11](https://github.com/google/birdview/issues/11)
+
+Owner: Sameer
+
+Gate: ships to birdview.site, with -counties turned on, only when every US state and Canadian
+province and territory has counties ([decisions.countiesBehindFlag](river/requirements/decisions/decisions.md#countiesbehindflag)); work in progress is pushed
+
+[decisions.regionCodesFromData](river/requirements/decisions/decisions.md#regioncodesfromdata) names regions by GADM code on land and Marine Regions id at sea, and
 redirects every value BirdView wrote before. Step 1, land regions by GADM code with postal codes
 and island names redirecting, was done 2026-11-03. Left, in order:
 
@@ -978,19 +1080,19 @@ and island names redirecting, was done 2026-11-03. Left, in order:
    Original plan: **a GBIF download** in place of per-region queries, which county scale would multiply about
    fortyfold and which is kinder to GBIF: species by county by month for New York, and species by
    grid cell by month for records with no GADM code, offshore. Needs a GBIF account and SQL download
-   access; each download has a DOI to cite, which changes [imports.gbif](requirements/imports.md#gbif) and the credits.
+   access; each download has a DOI to cite, which changes [imports.gbif](river/requirements/imports/imports.md#gbif) and the credits.
 3. *Done 2026-11-03 (eBird only):* 63 units, 112 k to 4.9 M eBird records each; at today's rule a
    county lists 235 to 410 species, 9% of listings on fewer than 5 records; 50 species reach a county
    list but not the state's, cage birds and vagrants; NYC's five counties together list 428 of the
    state's 450, so in dense counties the share ordering matters more than the set; ~40 MB of
-   presence for the US by county. Details in [notes: The New York county spike](notes.md#the-new-york-county-spike).
-   **Answered 2026-11-03** ([decisions.countyListingRule](requirements/decisions.md#countylistingrule)): a floor of 5 records over all years
+   presence for the US by county. Details in [notes: The New York county spike](river/notes.md#the-new-york-county-spike).
+   **Answered 2026-11-03** ([decisions.countyListingRule](river/requirements/decisions/decisions.md#countylistingrule)): a floor of 5 records over all years
    with the state list required, counties narrowing and ordering like states, and per-state tables
    for the server; alternatives to the floor parked in [countyFloorRevisit](#countyfloorrevisit). The questions as asked:
    - *Minimum record count:* a fixed floor (5 or 10 records) or one per year, since records
      accumulate over decades.
    - *Vagrants:* whether a county listing also requires the bird to be on its state's list, or to
-     recur as [product.scopeIsRecurringAvifauna](requirements/local/product/dataset.md#scopeisrecurringavifauna) requires, rather than only to reach a count.
+     recur as [product.scopeIsRecurringAvifauna](river/requirements/local/product/dataset.md#scopeisrecurringavifauna) requires, rather than only to reach a count.
    - *What a county view is for:* narrowing the set, or chiefly ordering it by local share; it
      shapes the picker more than the bar does.
    - *Storage and delivery:* about 40 MB for the US, which the server cannot embed as it does
@@ -1005,7 +1107,7 @@ and island names redirecting, was done 2026-11-03. Left, in order:
    since the setting lists 63 alphabetically; Here to a county, which needs step 5; how the setting
    scales to Texas's 254; and the remaining states' downloads and tables, and Canada's census
    divisions (the owner's call, 2026-11-03). Served only with `-counties` until then
-   ([decisions.countiesBehindFlag](requirements/decisions.md#countiesbehindflag)).
+   ([decisions.countiesBehindFlag](river/requirements/decisions/decisions.md#countiesbehindflag)).
    Original plan: a county picker prototype (drill-down, search, Here to a county) on the New York data, sized so
    no link lists many county codes.
    **Grouping counties is deferred** (the owner, 2026-11-09): Region is for narrowing to the birds
@@ -1029,14 +1131,14 @@ and island names redirecting, was done 2026-11-03. Left, in order:
     kept out of the repository until the decision below. **Measured, joined as the prototype joins New York:**
     `species.json` grows from 14.7 MB to 213 MB (18.7 MB gzipped), the server from 65 MB to 910 MB
     resident, and a Texas page from 0.04 s to 0.76 s; Cloud Run's default is 512 MiB. Kept gzipped,
-    one per state ([decisions.countyTablesCompressed](requirements/decisions.md#countytablescompressed), the owner, 2026-11-12). **All 64 committed
-    2026-11-12**, 11 MB, with counties held apart from the species ([decisions.countiesServedApart](requirements/decisions.md#countiesservedapart)):
+    one per state ([decisions.countyTablesCompressed](river/requirements/decisions/decisions.md#countytablescompressed), the owner, 2026-11-12). **All 64 committed
+    2026-11-12**, 11 MB, with counties held apart from the species ([decisions.countiesServedApart](river/requirements/decisions/decisions.md#countiesservedapart)):
     `species.json` is 10.5 MB and `counties.gob.gz` 10.2 MB; with `-counties` the server is 170 MB
     resident against 63 MB without, and a Texas page with every bird takes 0.16 s. Left before
     turning counties on: finding a county by name, since Texas has 254; and Here to a county (step 5).
 5. Boundaries keyed to GADM codes for Here at county scale, since
-   [tech.regionBoundaries](requirements/local/tech/delivery.md#regionboundaries) uses Natural Earth.
-6. Seas: adopt [imports.marine-regions](requirements/imports.md#marine-regions), assign the download's offshore grid cells to its
+   [tech.regionBoundaries](river/requirements/local/tech/delivery.md#regionboundaries) uses Natural Earth.
+6. Seas: adopt [imports.marine-regions](river/requirements/imports/imports.md#marine-regions), assign the download's offshore grid cells to its
    areas while building the data, replace the five sea boxes, and redirect their names. Asking VLIZ
    about serving its boundaries gates only Here at sea, the one use that sends them to readers.
 
@@ -1045,11 +1147,13 @@ and island names redirecting, was done 2026-11-03. Left, in order:
 **Revisit the county floor if county lists grow with eBird**
 
 Status: parked
+
 Owner: Sameer
+
 Gate: when a regenerated county table lists noticeably more species than the one before it, or
 before counties outside the US and Canada
 
-[decisions.countyListingRule](requirements/decisions.md#countylistingrule) lists a bird in a county at 5 records over all years. A fixed count gets
+[decisions.countyListingRule](river/requirements/decisions/decisions.md#countylistingrule) lists a bird in a county at 5 records over all years. A fixed count gets
 easier to reach as eBird grows (New York added 6.6 M records in 2025 alone), though the requirement
 that the state also list the bird bounds what can get through. Alternatives the owner considered,
 each needing the year in the GBIF download (a `"year"` column in `data/gbif-queries/ny-counties.sql`):
@@ -1057,26 +1161,29 @@ each needing the year in the GBIF download (a `"year"` column in `data/gbif-quer
 1. **A recent window:** count only the last 10 years, so old records age out and the floor means
    the same thing each year.
 2. **Distinct years:** require records in at least N different years, as
-   [product.scopeIsRecurringAvifauna](requirements/local/product/dataset.md#scopeisrecurringavifauna) does for scope, which separates a resident from a bird that visited once and
+   [product.scopeIsRecurringAvifauna](river/requirements/local/product/dataset.md#scopeisrecurringavifauna) does for scope, which separates a resident from a bird that visited once and
    drew a crowd.
 3. **A relative floor:** a share of the county's records larger than one per million, so it scales
    with effort as the state bar does; the spike's table in
-   [notes: The New York county spike](notes.md#the-new-york-county-spike) gives the counts it would trade against.
+   [notes: The New York county spike](river/notes.md#the-new-york-county-spike) gives the counts it would trade against.
 
 ## traitAudit
 
 **Audit every bird's habitat and diet, so the filters say what a birder expects**
 
 Status: active
+
 Issue: [#12](https://github.com/google/birdview/issues/12)
+
 Owner: Sameer
+
 Gate: before the Habitat and Diet filters are relied on further, and again before worldwide species
 
 Habitat and Diet come from AVONET, one primary value per species, with BirdView's additions for
-nine birds ([product.habitatAndDietFilters](requirements/local/product/months.md#habitatanddietfilters)). A reader found Least Sandpiper under Marsh and lake and
+nine birds ([product.habitatAndDietFilters](river/requirements/local/product/months.md#habitatanddietfilters)). A reader found Least Sandpiper under Marsh and lake and
 missing, with the other peeps, from Shore and estuary. The owner's judgment: without intuitively
 correct values these filters are not only useless but misleading. Findings so far, for habitat, in
-[notes: The habitat audit, pass 1](notes.md#the-habitat-audit-pass-1):
+[notes: The habitat audit, pass 1](river/notes.md#the-habitat-audit-pass-1):
 
 1. AVONET's single habitat is in practice the breeding habitat for migrants: Black-bellied Plover,
    Semipalmated and Purple Sandpiper are Grassland (tundra), the scoters and every loon and grebe
@@ -1089,7 +1196,7 @@ correct values these filters are not only useless but misleading. Findings so fa
 Left:
 
 - **Habitat:** reviewed species by species in `data/habitat-review.tsv`, which the build holds
-  complete ([decisions.habitatReviewedPerSpecies](requirements/decisions.md#habitatreviewedperspecies)): 9 reviewed (the former `trait.Supplementary`
+  complete ([decisions.habitatReviewedPerSpecies](river/requirements/decisions/decisions.md#habitatreviewedperspecies)): 9 reviewed (the former `trait.Supplementary`
   entries) and 60 more (pass 1's water birds, approved by the owner on 2026-11-07, with Shore and
   estuary added to Killdeer), and on 2026-11-09 nine more shorebirds pass 1 skipped, found missing
 from New York's coast in August (Lesser Yellowlegs, Pectoral, Stilt, Spotted, and Baird's
@@ -1110,7 +1217,9 @@ Sandpipers, Long-billed Dowitcher, Hudsonian Godwit, Wilson's Phalarope, America
 **An anchor bird, chosen by the reader, to measure other birds against**
 
 Status: parked
+
 Owner: Sameer
+
 Gate: after [traitAudit](#traitaudit), and once a group such as "all shorebirds" can be chosen in one step
 
 From issue #8 and a conversation with Dennis Hrehowsik, who with Bobbi Manian teaches gull
@@ -1123,7 +1232,7 @@ sized shore bird." Explored 2026-11-07 (the review artifacts `pin-twins-spec.md`
 - **Twins**, birds within 10% in length, wingspan, bill, and tail, are mostly a bird's relatives,
   or across families trivia in which a birder knows one bird of the pair. Dropped.
 - **Grouping larger, same, smaller** than an anchor adds little to the tiers.
-- **[product.reportingFrequencyFilter](requirements/local/product/filtering.md#reportingfrequencyfilter)**, built from this, does most of the work: familiar birds sorted by size line
+- **[product.reportingFrequencyFilter](river/requirements/local/product/filtering.md#reportingfrequencyfilter)**, built from this, does most of the work: familiar birds sorted by size line
   up across families.
 
 Left for an anchor: a pin-like control with a ship's-anchor icon marking one bird, and every tile
@@ -1136,7 +1245,9 @@ shorebirds only family by family, under Charadriiformes ("Shorebirds, Gulls, and
 **Let the place stand in for habitat: birds recorded near here, this month**
 
 Status: parked
+
 Owner: Sameer
+
 Gate: after counties ship ([countyRegions](#countyregions))
 
 Proposed 2026-11-07 as the longer-term answer to "which birds am I likely to see here", which
@@ -1144,16 +1255,18 @@ eBird's hotspots answer by place rather than by habitat (though Plumb Beach is b
 and bay at once). GBIF records carry coordinates, so a SQL download grouped by small grid cells (a
 kilometer or two) and month would give the birds recorded near a point, and a beach cell and a park
 cell would differ with no habitat classification at all. Open: cell size; the minimum record count,
-as for counties ([decisions.countyListingRule](requirements/decisions.md#countylistingrule)); keeping Here private, since the reader's location stays in
-the browser ([product.locationStaysInBrowser](requirements/local/product/filtering.md#locationstaysinbrowser)); and the data's size.
+as for counties ([decisions.countyListingRule](river/requirements/decisions/decisions.md#countylistingrule)); keeping Here private, since the reader's location stays in
+the browser ([product.locationStaysInBrowser](river/requirements/local/product/filtering.md#locationstaysinbrowser)); and the data's size.
 
 
 ## photoProportions
 
 **Check each species' drawn proportions against photographs, as a pipeline of its own**
 
-Status: withdrawn 2026-11-09 ([decisions.photoReviewUnreliable](requirements/decisions.md#photoreviewunreliable))
+Status: withdrawn 2026-11-09 ([decisions.photoReviewUnreliable](river/requirements/decisions/decisions.md#photoreviewunreliable))
+
 Owner: Sameer
+
 Gate: none; revive only with a source of photographs taken from directly below, wings spread
 
 **Withdrawn.** A local review tool put each genus's figure beside Commons photographs with an overlay
@@ -1169,7 +1282,7 @@ record as it stood.
 longer neck, and the Horned Grebe's the shorter neck and the larger head (0.18 of its length, from
 the mass model), the opposite of photographs of both in flight. The cause was family-wide models:
 `NeckRatios` gives Anatidae 0.70, set for swans and geese. **The quick fix is done** (2026-11-08,
-[decisions.duckAndGrebeProportions](requirements/decisions.md#duckandgrebeproportions)): genus ratios for the diving ducks and grebes and a head factor
+[decisions.duckAndGrebeProportions](river/requirements/decisions/decisions.md#duckandgrebeproportions)): genus ratios for the diving ducks and grebes and a head factor
 for grebes, set by judgment. Still on the family's 0.70: the dabbling ducks, mergansers, geese, and
 swans, whose necks all draw about a quarter of their length, so a Canada Goose's is no longer than
 a Mallard's ([reviewNeckRatios](#reviewneckratios)). Cost estimate for the per-species version:
@@ -1181,7 +1294,7 @@ measured-from-photo. That is a pipeline: finding usable side-on flight photos, m
 (by hand, or by a model with a reviewed sample), and recording the results with provenance. The
 owner's view (2026-11-08): measuring a photo, which copies nothing of it, seems acceptable, but
 fair use of the photos found has to be settled first. BirdView copies nothing from eBird or
-iNaturalist, least of all photographs ([product.ebirdLink](requirements/local/product/presentation.md#ebirdlink)), and automated access must respect
+iNaturalist, least of all photographs ([product.ebirdLink](river/requirements/local/product/presentation.md#ebirdlink)), and automated access must respect
 each site's terms; openly licensed photos (Wikimedia Commons, or GBIF's media under CC0 and CC BY)
 are the likelier sources. Cost scales with species: about 1,082 now, about 11,000 worldwide.
 
@@ -1190,8 +1303,11 @@ are the likelier sources. Cost scales with species: about 1,082 now, about 11,00
 **Research each species' usual habitats as a BirdView dataset of its own**
 
 Status: active
+
 Issue: [#10](https://github.com/google/birdview/issues/10)
+
 Owner: Sameer
+
 Gate: a decision on the classification and on which sources may be used; before worldwide species
 
 [GitHub issue #10](https://github.com/google/birdview/issues/10): AVONET's Coastal and Marine do not
@@ -1211,11 +1327,11 @@ still per-species work, and roughly ten times as much worldwide. BirdLife's habi
 from them may be recorded.
 
 **The cheap version is done as research** (2026-11-08,
-[notes: Distance from shore](notes.md#distance-from-shore-as-evidence-for-the-open-sea-question)): the share of a
+[notes: Distance from shore](river/notes.md#distance-from-shore-as-evidence-for-the-open-sea-question)): the share of a
 bird's water records more than 10 km from shore splits AVONET's Marine cleanly into open-ocean
 birds (30% or more, about 75 species) and birds of the sea near shore (under 20%, 26), but cannot
 separate beach birds from sea ducks. **Built 2026-11-09**
-([decisions.openOceanSplit](requirements/decisions.md#openoceansplit)): Open sea is offered as Open ocean and Sea near shore, derived per bird
+([decisions.openOceanSplit](river/requirements/decisions/decisions.md#openoceansplit)): Open sea is offered as Open ocean and Sea near shore, derived per bird
 from `data/sea-distance.tsv` by `cmd/birdview-sea`, with the 80% rule for birds seen from shore.
 Left: review rows for the birds near the thresholds (Sabine's Gull, which passes on tundra and
 inland records; Masked Booby, which misses at 79.5%); beach birds versus sea ducks; and the text
@@ -1226,11 +1342,13 @@ sources, if ever. Cost estimate for the full pipeline: on the issue.
 **Design the controls that are not a single choice: one-or-more choices, All, Here, Now, and Habitat's groups**
 
 Status: open
+
 Owner: Sameer
+
 Gate: the owner's choice of design
 
 The choose-one settings were redrawn as joined rows on 2026-11-09
-([product.chooseOneSettings](requirements/local/product/presentation.md#chooseonesettings)). The settings that take one or more choices still draw separate
+([product.chooseOneSettings](river/requirements/local/product/presentation.md#chooseonesettings)). The settings that take one or more choices still draw separate
 buttons the same as before: nothing says a click adds rather than replaces, the chosen ones are
 shown by color alone, and All looks like one more choice though it is the alternative to choosing
 any. Proposed and not yet chosen: All set apart with a radio mark (○ All, ● All when in effect),

@@ -1,7 +1,7 @@
 # aba — provenance
 
 **Nothing is vendored here, and that is deliberate.** See
-[imports.md](../../../imports.md#aba) for the adoption record.
+[imports.md](../../../imports/imports.md#aba) for the adoption record.
 
 ## Why this directory is empty of documents
 
@@ -105,16 +105,16 @@ The 22 in-scope misses fall into three kinds, which matter very differently:
 Searching all three AVONET taxonomy sheets rather than `AVONET2_eBird` alone shows that only
 **6** of the 22 are absent from AVONET entirely — *Larus vegae*, *Numenius hudsonicus*,
 *Sturnella lilianae*, *Vireo swainsoni*, *Sula brewsteri* and *Anthus japonicus*. See
-[decisions.abaSpeciesWithoutAvonet](../../../decisions.md#abaspecieswithoutavonet) for the full disposition and the mass caveat.
+[decisions.abaSpeciesWithoutAvonet](../../../decisions/decisions.md#abaspecieswithoutavonet) for the full disposition and the mass caveat.
 
 **The rename/split classification above is provisional.** It was derived mechanically from
 whether the parent name still appears in ABA 8.19, and that test under-detects: *Astur
 atricapillus* is a split from Eurasian Goshawk, and looks like a rename only because the Eurasian
 bird is not on the ABA list. Each entry needs a human taxonomic check before it enters the mapping
-table. See [decisions.abaSpeciesWithoutAvonet](../../../decisions.md#abaspecieswithoutavonet).
+table. See [decisions.abaSpeciesWithoutAvonet](../../../decisions/decisions.md#abaspecieswithoutavonet).
 
 ## Open action
 
 Ask `info@aba.org` for written permission to redistribute the checklist in a non-commercial,
 attributed, open-source project. Permission would let tech.datasetNeverCommitted relax and make a clean checkout
-buildable with no network access. Recorded in [../../decisions.md](../../../decisions.md#work-arising).
+buildable with no network access. Recorded in [../../decisions.md](../../../decisions/decisions.md#work-arising).

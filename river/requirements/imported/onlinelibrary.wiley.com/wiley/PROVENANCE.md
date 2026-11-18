@@ -2,7 +2,7 @@
 
 The Wiley Online Library Terms of Use, consulted to decide whether Ricklefs 2017 could be used as
 a source of measured avian total length. It cannot. See [wiley.md](wiley.md) for the
-transcription and [../../decisions.md](../../../decisions.md#ricklefsprohibited) for the decision.
+transcription and [../../decisions.md](../../../decisions/decisions.md#ricklefsprohibited) for the decision.
 
 ## What was retrieved
 

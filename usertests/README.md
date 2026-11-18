@@ -1,7 +1,7 @@
 # Simulated users
 
 Agents that each play one reader, given only BirdView's pages and a few tasks, so a design can be
-tried before real readers see it ([simulatedUserTests](../river/todo.md#simulatedusertests)).
+tried before real readers see it ([simulatedUserTests](../todo.md#simulatedusertests)).
 
 - [personas.md](personas.md): who the readers are, one per heading.
 - [tasks.md](tasks.md): what each is asked to do. This is all a reader is shown.

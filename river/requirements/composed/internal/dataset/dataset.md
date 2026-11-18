@@ -4,15 +4,15 @@ package dataset
 
 **Composed, not authored.** Change it by changing a source and recomposing, never by editing files in
 this directory by hand. Composed from `gbifterms`, `wiley`, `inatapi`, `inatterms`, `product`,
-`tech`, and `decisions` under [precedence.md](../../../precedence.md); approvals are recorded in
-[approvals.md](../../../approvals.md).
+`tech`, and `decisions` under [precedence.md](../../../precedence/precedence.md); its
+`composed.sum`, written by `river compose`, records what it was composed from.
 
 Everything the BirdView data pipeline and built dataset (`cmd/birdview-ingest`,
 `cmd/birdview-status`, `cmd/birdview-regions`, `cmd/birdview-sea`, `cmd/birdview-names`,
 `cmd/birdview-gbifmap`, `cmd/birdview-gbifdownload`, `data/`, and the ingest packages under
 `internal/`) must satisfy. Its acceptance criteria are in [`acceptance.md`](acceptance.md), and the
 guardrails and verification observations covering them are in
-[conformance.md](../../../../conformance.md).
+[conformance.md](../../../../conformance/conformance.md).
 
 ## Composed from
 
@@ -35,12 +35,12 @@ guardrails and verification observations covering them are in
 | [`inatapi`](../../../imported/inaturalist.org/inatapi/inatapi.md) | governing (retired) | Revised 2025-02-27; SHA-256 in [PROVENANCE.md](../../../imported/inaturalist.org/inatapi/PROVENANCE.md) |
 | [`product`](../../../local/product/product.md) | local | the commit this file is in |
 | [`tech`](../../../local/tech/tech.md) | local | the commit this file is in |
-| [`decisions`](../../../decisions.md) | — | the commit this file is in |
+| [`decisions`](../../../decisions/decisions.md) | — | the commit this file is in |
 
-Precedence is the ranking in [precedence.md](../../../precedence.md): mandatory sources outrank
+Precedence is the ranking in [precedence.md](../../../precedence/precedence.md): mandatory sources outrank
 governing and local ones. Where Wiley's Rules of Use prohibited automated retrieval and repository
-incorporation, Ricklefs 2017 was rejected ([decisions.ricklefsProhibited](../../../decisions.md#ricklefsprohibited)). Where direct iNaturalist API and
-link use was retired ([decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)), `inatapi` and `inatterms` are excluded.
+incorporation, Ricklefs 2017 was rejected ([decisions.ricklefsProhibited](../../../decisions/decisions.md#ricklefsprohibited)). Where direct iNaturalist API and
+link use was retired ([decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)), `inatapi` and `inatterms` are excluded.
 
 ## Applies unchanged
 
@@ -81,23 +81,23 @@ link use was retired ([decisions.inaturalistSourcesRetired](../../../decisions.m
 
 ## Excluded requirements
 
-- [tech.pacedInaturalistMapping](../../../local/tech/process.md#pacedinaturalistmapping) *(excluded)* — The iNaturalist mapping is built by a separate, paced tool. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [tech.proportionsReviewTool](../../../local/tech/process.md#proportionsreviewtool) *(excluded)* — A local tool for reviewing proportions against photographs. Excluded by [decisions.photoReviewUnreliable](../../../decisions.md#photoreviewunreliable)
-- [gbifterms.RetainOwnershipIdentifier](../../../imported/gbif.org/gbifterms/gbifterms.md#retainownershipidentifier) *(excluded)* — A record shared onward keeps the identifier of its owner. Excluded by [decisions.riverV2PackagesAndSplits](../../../decisions.md#riverv2packagesandsplits)
-- [inatapi.RequestRate](../../../imported/inaturalist.org/inatapi/inatapi.md#requestrate) *(excluded)* — About one request per second, about 10,000 a day. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [inatapi.LargestPageSize](../../../imported/inaturalist.org/inatapi/inatapi.md#largestpagesize) *(excluded)* — Use the largest supported page size. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [inatapi.IdAboveBeyondPageCap](../../../imported/inaturalist.org/inatapi/inatapi.md#idabovebeyondpagecap) *(excluded)* — Page numbers cap at 10,000 results; use `id_above` beyond that. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [inatapi.UserAgent](../../../imported/inaturalist.org/inatapi/inatapi.md#useragent) *(excluded)* — Identify the client with a User-Agent. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [inatapi.JwtAuthorization](../../../imported/inaturalist.org/inatapi/inatapi.md#jwtauthorization) *(excluded)* — JWTs, expiring in 24 hours, in an Authorization header. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [inatapi.NoGroupAccounts](../../../imported/inaturalist.org/inatapi/inatapi.md#nogroupaccounts) *(excluded)* — Users log in as themselves; no group accounts. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [inatapi.AuthenticateOnlyWhenNecessary](../../../imported/inaturalist.org/inatapi/inatapi.md#authenticateonlywhennecessary) *(excluded)* — Authenticate only when necessary. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [inatapi.MediaDownloadCaps](../../../imported/inaturalist.org/inatapi/inatapi.md#mediadownloadcaps) *(excluded)* — One IP; media download volume caps. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [inatterms.ContributorKeepsRights](../../../imported/inaturalist.org/inatterms/inatterms.md#contributorkeepsrights) *(excluded)* — A contributor keeps their rights, and licenses by default as CC BY-NC. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [inatterms.AccountHolderResponsible](../../../imported/inaturalist.org/inatterms/inatterms.md#accountholderresponsible) *(excluded)* — The account holder is responsible for everything done under the account. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [inatterms.RateDoesNotHinderOthers](../../../imported/inaturalist.org/inatterms/inatterms.md#ratedoesnothinderothers) *(excluded)* — Post at a rate and volume that doesn't hinder other users. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [inatterms.NoMachineGeneratedContent](../../../imported/inaturalist.org/inatterms/inatterms.md#nomachinegeneratedcontent) *(excluded)* — Machine generated content is prohibited. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [inatterms.DoNotBehaveLikeMachine](../../../imported/inaturalist.org/inatterms/inatterms.md#donotbehavelikemachine) *(excluded)* — Don't behave like a machine. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
-- [inatterms.DuplicatesUndesirable](../../../imported/inaturalist.org/inatterms/inatterms.md#duplicatesundesirable) *(excluded)* — Duplicates are undesirable but not an offense. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions.md#inaturalistsourcesretired)
+- [tech.pacedInaturalistMapping](../../../local/tech/process.md#pacedinaturalistmapping) *(excluded)* — The iNaturalist mapping is built by a separate, paced tool. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [tech.proportionsReviewTool](../../../local/tech/process.md#proportionsreviewtool) *(excluded)* — A local tool for reviewing proportions against photographs. Excluded by [decisions.photoReviewUnreliable](../../../decisions/decisions.md#photoreviewunreliable)
+- [gbifterms.RetainOwnershipIdentifier](../../../imported/gbif.org/gbifterms/gbifterms.md#retainownershipidentifier) *(excluded)* — A record shared onward keeps the identifier of its owner. Excluded by [decisions.riverV2PackagesAndSplits](../../../decisions/decisions.md#riverv2packagesandsplits)
+- [inatapi.RequestRate](../../../imported/inaturalist.org/inatapi/inatapi.md#requestrate) *(excluded)* — About one request per second, about 10,000 a day. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [inatapi.LargestPageSize](../../../imported/inaturalist.org/inatapi/inatapi.md#largestpagesize) *(excluded)* — Use the largest supported page size. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [inatapi.IdAboveBeyondPageCap](../../../imported/inaturalist.org/inatapi/inatapi.md#idabovebeyondpagecap) *(excluded)* — Page numbers cap at 10,000 results; use `id_above` beyond that. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [inatapi.UserAgent](../../../imported/inaturalist.org/inatapi/inatapi.md#useragent) *(excluded)* — Identify the client with a User-Agent. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [inatapi.JwtAuthorization](../../../imported/inaturalist.org/inatapi/inatapi.md#jwtauthorization) *(excluded)* — JWTs, expiring in 24 hours, in an Authorization header. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [inatapi.NoGroupAccounts](../../../imported/inaturalist.org/inatapi/inatapi.md#nogroupaccounts) *(excluded)* — Users log in as themselves; no group accounts. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [inatapi.AuthenticateOnlyWhenNecessary](../../../imported/inaturalist.org/inatapi/inatapi.md#authenticateonlywhennecessary) *(excluded)* — Authenticate only when necessary. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [inatapi.MediaDownloadCaps](../../../imported/inaturalist.org/inatapi/inatapi.md#mediadownloadcaps) *(excluded)* — One IP; media download volume caps. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [inatterms.ContributorKeepsRights](../../../imported/inaturalist.org/inatterms/inatterms.md#contributorkeepsrights) *(excluded)* — A contributor keeps their rights, and licenses by default as CC BY-NC. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [inatterms.AccountHolderResponsible](../../../imported/inaturalist.org/inatterms/inatterms.md#accountholderresponsible) *(excluded)* — The account holder is responsible for everything done under the account. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [inatterms.RateDoesNotHinderOthers](../../../imported/inaturalist.org/inatterms/inatterms.md#ratedoesnothinderothers) *(excluded)* — Post at a rate and volume that doesn't hinder other users. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [inatterms.NoMachineGeneratedContent](../../../imported/inaturalist.org/inatterms/inatterms.md#nomachinegeneratedcontent) *(excluded)* — Machine generated content is prohibited. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [inatterms.DoNotBehaveLikeMachine](../../../imported/inaturalist.org/inatterms/inatterms.md#donotbehavelikemachine) *(excluded)* — Don't behave like a machine. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
+- [inatterms.DuplicatesUndesirable](../../../imported/inaturalist.org/inatterms/inatterms.md#duplicatesundesirable) *(excluded)* — Duplicates are undesirable but not an offense. Excluded by [decisions.inaturalistSourcesRetired](../../../decisions/decisions.md#inaturalistsourcesretired)
 
 ---
 
@@ -108,7 +108,8 @@ link use was retired ([decisions.inaturalistSourcesRetired](../../../decisions.m
 **GBIF API and download tools pace requests, record DOIs, and count CC BY-NC iNaturalist observations only under BirdView's non-commercial posture**
 
 Composed from: [gbifterms.CiteDownloadDoi](../../../imported/gbif.org/gbifterms/gbifterms.md#citedownloaddoi), [gbifterms.CiteApiDataByDerivedDataset](../../../imported/gbif.org/gbifterms/gbifterms.md#citeapidatabyderiveddataset), [gbifterms.PublisherLicencesPrevail](../../../imported/gbif.org/gbifterms/gbifterms.md#publisherlicencesprevail), [gbifterms.ApiWithinSpecifications](../../../imported/gbif.org/gbifterms/gbifterms.md#apiwithinspecifications),
-  [gbifterms.AccurateRegistration](../../../imported/gbif.org/gbifterms/gbifterms.md#accurateregistration), [gbifterms.DataNotGuaranteed](../../../imported/gbif.org/gbifterms/gbifterms.md#datanotguaranteed), [tech.localNowPublicLater](../../../local/tech/posture.md#localnowpubliclater), [decisions.gbifTermsMet](../../../decisions.md#gbiftermsmet), [decisions.ebirdSilenceNotAbsence](../../../decisions.md#ebirdsilencenotabsence)
+  [gbifterms.AccurateRegistration](../../../imported/gbif.org/gbifterms/gbifterms.md#accurateregistration), [gbifterms.DataNotGuaranteed](../../../imported/gbif.org/gbifterms/gbifterms.md#datanotguaranteed), [tech.localNowPublicLater](../../../local/tech/posture.md#localnowpubliclater), [decisions.gbifTermsMet](../../../decisions/decisions.md#gbiftermsmet), [decisions.ebirdSilenceNotAbsence](../../../decisions/decisions.md#ebirdsilencenotabsence)
+
 Goals: [goals.goodDataCitizen](../../../../goals/goals.md#gooddatacitizen), [goals.honestData](../../../../goals/goals.md#honestdata)
 
 Every BirdView command that queries GBIF identifies itself and paces its requests so as never to
@@ -120,10 +121,10 @@ accurately registered maintainer account whose credentials stay out of the repos
 their headers ([gbifterms.CiteApiDataByDerivedDataset](../../../imported/gbif.org/gbifterms/gbifterms.md#citeapidatabyderiveddataset)). Because dataset publishers' licenses
 prevail ([gbifterms.PublisherLicencesPrevail](../../../imported/gbif.org/gbifterms/gbifterms.md#publisherlicencesprevail)) and iNaturalist's research-grade dataset is CC BY-NC
 4.0, BirdView counts iNaturalist records only while its deployment remains personal and
-non-commercial ([tech.localNowPublicLater](../../../local/tech/posture.md#localnowpubliclater), [decisions.gbifTermsMet](../../../decisions.md#gbiftermsmet)). Because GBIF guarantees
+non-commercial ([tech.localNowPublicLater](../../../local/tech/posture.md#localnowpubliclater), [decisions.gbifTermsMet](../../../decisions/decisions.md#gbiftermsmet)). Because GBIF guarantees
 neither data completeness nor uninterrupted service ([gbifterms.DataNotGuaranteed](../../../imported/gbif.org/gbifterms/gbifterms.md#datanotguaranteed)), the pipeline
 measures suppression and naming disagreements rather than assuming silence is absence
-([decisions.ebirdSilenceNotAbsence](../../../decisions.md#ebirdsilencenotabsence)).
+([decisions.ebirdSilenceNotAbsence](../../../decisions/decisions.md#ebirdsilencenotabsence)).
 
 ## noWileyMaterialIngestedOrAutomated
 
@@ -131,7 +132,8 @@ measures suppression and naming disagreements rather than assuming silence is ab
 
 Composed from: [wiley.NoRetrievalStorage](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#noretrievalstorage), [wiley.NoIntegrationOrDerivatives](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#nointegrationorderivatives), [wiley.NoAutomatedAccess](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#noautomatedaccess),
   [wiley.NoRepositoryIncorporation](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#norepositoryincorporation), [wiley.NoAiProcessing](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#noaiprocessing), [wiley.WhatIsPermitted](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#whatispermitted), [wiley.MiningNeedsAgreement](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#miningneedsagreement),
-  [decisions.ricklefsProhibited](../../../decisions.md#ricklefsprohibited)
+  [decisions.ricklefsProhibited](../../../decisions/decisions.md#ricklefsprohibited)
+
 Goals: [goals.goodDataCitizen](../../../../goals/goals.md#gooddatacitizen)
 
 Without a separate written agreement ([wiley.MiningNeedsAgreement](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#miningneedsagreement)), BirdView neither fetches nor
@@ -139,5 +141,5 @@ scrapes any material from Wiley Online Library by program or agent ([wiley.NoAut
 passes none to AI tools ([wiley.NoAiProcessing](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#noaiprocessing)), stores none in git or `third_party/`
 ([wiley.NoRetrievalStorage](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#noretrievalstorage), [wiley.NoRepositoryIncorporation](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#norepositoryincorporation)), and integrates none — including
 Ricklefs 2017 — into the dataset ([wiley.NoIntegrationOrDerivatives](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#nointegrationorderivatives),
-[decisions.ricklefsProhibited](../../../decisions.md#ricklefsprohibited)). Only the brief scholarly quotations of Wiley's own Rules of Use in
+[decisions.ricklefsProhibited](../../../decisions/decisions.md#ricklefsprohibited)). Only the brief scholarly quotations of Wiley's own Rules of Use in
 `wiley.md` are kept, under [wiley.WhatIsPermitted](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#whatispermitted).

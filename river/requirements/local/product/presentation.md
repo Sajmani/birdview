@@ -7,8 +7,11 @@ package product
 **Diagram is the only presentation mode in v1**
 
 Subject: `presentation.mode`
+
 Value: `diagram`
+
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The diagram is the only way BirdView presents a species in v1. There is no photograph mode.
@@ -21,12 +24,14 @@ and shape comparable; photographs were always the enrichment.
 **Tile contents**
 
 Subject: `presentation.tile`
+
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Each species is one **tile**, laid out top to bottom, **the numbers first**
-([decisions.tileNumbersFirst](../../decisions.md#tilenumbersfirst),
-[decisions.tileMeasurementLines](../../decisions.md#tilemeasurementlines)):
+([decisions.tileNumbersFirst](../../decisions/decisions.md#tilenumbersfirst),
+[decisions.tileMeasurementLines](../../decisions/decisions.md#tilemeasurementlines)):
 
 1. a header of four lines, then a rule: the **common name followed by its banding code and its
    eBird species code in parentheses**, with the **pin** in the tile's top-right corner
@@ -36,7 +41,7 @@ Each species is one **tile**, laid out top to bottom, **the numbers first**
    figures of even width so that numbers align down a column. On the detail view the first line
    also carries head, neck, and body ([labeledDetailDiagram](measurements.md#labeleddetaildiagram)), and wraps where it must;
 2. the diagram, **vertically centered** in its area, carrying the **mass cube** in its lower-left
-   corner ([decisions.massCubeOnTiles](../../decisions.md#masscubeontiles)) with the **mass** named beside it, and no other label;
+   corner ([decisions.massCubeOnTiles](../../decisions/decisions.md#masscubeontiles)) with the **mass** named beside it, and no other label;
 3. below a rule, the **short family badge**, the family's scientific name alone, then the
    **scientific name**, with the **eBird link** at the line's right end, in the tile's
    lower-right corner ([ebirdLink](#ebirdlink)); and last, any notes on the
@@ -100,8 +105,11 @@ scientific name, never an identifier.
 **Imperial by default, metric available**
 
 Subject: `units.default`
+
 Value: `imperial`
+
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 One toggle switches the whole interface between:
@@ -122,8 +130,10 @@ a 12 g kinglet both round to 0.1 oz.
 **First load shows everything**
 
 Applies to: app
+
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
-Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
+
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
 
 The initial view has every family selected and shows all species, ordered by length.
 
@@ -135,9 +145,12 @@ for. Opening filtered or empty would hide it.
 **Toggling a control keeps your place**
 
 Subject: `presentation.scroll`
+
 Applies to: app
+
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
-Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
+
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
 
 Changing any control preserves the scroll position **and the collapsed state of the Presentation
 and Controls panels**, as does returning from a detail view.
@@ -155,9 +168,12 @@ ordering, sectioning, and geometry stay in Go where they are property-tested (se
 **The empty state says what to do**
 
 Subject: `presentation.empty_state`
+
 Applies to: app
+
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
-Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
+
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
 
 With nothing selected, the display area reads *"Select birds to display in Controls above"*.
 
@@ -183,9 +199,12 @@ describe the same filters differently.
 **The controls collapse**
 
 Subject: `presentation.controls`
+
 Applies to: app
+
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
-Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
+
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
 
 The controls are **several collapsible panels**, each starting **closed** and each remembering its
 own state across navigations (togglesKeepPlace): **Controls** for the display toggles, **Regions**, **Diet
@@ -207,9 +226,12 @@ falls on the reader who wants a filter rather than on every reader.
 **Every group offers "Only"**
 
 Subject: `presentation.filter_only`
+
 Applies to: app
+
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
-Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
+
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
 
 Beside each group selector in **Regions**, **Diet and Habitat**, and **Families** sits an
 **Only** control that selects that group and deselects everything else **within its own
@@ -229,8 +251,11 @@ arrival state took two steps, the first of which emptied the page.
 **One unit across whatever is being compared**
 
 Subject: `presentation.units`
+
 Value: `mass unit fixed per comparison scope, smallest bird decides`
+
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Mass is written in **one unit across everything a page is comparing**. The scope is what the
@@ -253,8 +278,11 @@ value — a 3 g hummingbird is `0.11 oz` — because that is precision, not a se
 **Each bird says how much of what people record it is**
 
 Subject: `presentation.share`
+
 Value: `one species' observations over all species observations, for the regions and months in view`
+
 Applies to: app
+
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata)
 
 Every species says how much of what people record in view is that bird, as **one in N**.
@@ -275,11 +303,11 @@ arithmetic.
 of individuals, the quantity deliberately ignored; "species" also says the denominator grows with
 how many kinds observers list, as [`docs/data.md`](../../../../docs/data.md) explains. *Records*
 is internal, *checklist entries* names a mechanism the interface never shows, and *sightings*
-reopens the individuals ambiguity ([decisions.frequencyMetric](../../decisions.md#frequencymetric)).
+reopens the individuals ambiguity ([decisions.frequencyMetric](../../decisions/decisions.md#frequencymetric)).
 
 **The interface never uses the word “share”**, and neither does
 [`docs/`](../../../../docs/data.md); on screen it read as jargon. This document and
-[`decisions.md`](../../decisions.md) keep it as the technical term. The pages say what the number
+[`decisions.md`](../../decisions/decisions.md) keep it as the technical term. The pages say what the number
 *is* instead: *how much of what people record there is this bird, not how many of them are out
 there.* This exemption does not follow
 [app.noContactAddressPublished](../../composed/internal/app/acceptance.md#nocontactaddresspublished)'s precedent,
@@ -287,7 +315,7 @@ where exempting the spec was the wrong fix: a published address is harm anywhere
 document that defines it is not.
 
 **The share ranges over every region, land and sea**
-([decisions.honestSeaDenominator](../../decisions.md#honestseadenominator)). A sea's denominator is
+([decisions.honestSeaDenominator](../../decisions/decisions.md#honestseadenominator)). A sea's denominator is
 every bird observation on **open water** inside its box: GADM covers land, so a record on the water
 carries no country. Land and sea totals are the same quantity and **disjoint by construction**, so
 they compare and sum without double counting.
@@ -317,14 +345,14 @@ where the species peaks, labeled **Top region**.
 **The peak and the home page's share are one calculation, not two that agree.** Both use the same
 per-region counts and totals, so selecting the named region on the home page reproduces the detail
 page's figure exactly, and the peak is always a region the bird is listed in
-([decisions.honestSeaDenominator](../../decisions.md#honestseadenominator)).
+([decisions.honestSeaDenominator](../../decisions/decisions.md#honestseadenominator)).
 
 **A bird watched from the shore counts to the shore.** The sea boxes overlap the land regions — all
 six of the Black-capped Petrel's North Carolina records fall inside the Atlantic box — so a sea
 counts only open water. **45 species peak at sea**; the Atlantic Yellow-nosed Albatross is 1 in
 282,315 in the North Atlantic rather than 1 in 1,177,757 in Maine. Bay water carries no GADM
 country either, so the figure is *on water* rather than *at sea* and overstates the open ocean by
-roughly 3% ([decisions.honestSeaDenominator](../../decisions.md#honestseadenominator));
+roughly 3% ([decisions.honestSeaDenominator](../../decisions/decisions.md#honestseadenominator));
 [`docs/data.md`](../../../../docs/data.md) says so.
 
 **Share, not record count: a count says where the birdwatchers are, a share says where the bird
@@ -366,8 +394,11 @@ semicolons**, *Bronx, NY; Kings, NY; New York, NY; or 2 more*; a list of states 
 **A species BirdView does not draw still answers for itself**
 
 Subject: `presentation.species_url.out_of_scope`
+
 Value: `404 with a named bird and its measured reason`
+
 Applies to: app
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 
 `/species/<id>` for a bird the derivation classified but left out of scope returns **404 with a
@@ -395,9 +426,9 @@ English name and no stable id.
 
 Rationale: the status table classifies 1,426 species against the dataset's 1,083, so the derivation
 knows *where did this bird go* for 334 rejected birds, 328 of which AviList can name.
-[decisions.compareUrlContract](../../decisions.md#compareurlcontract) settled the same question for
+[decisions.compareUrlContract](../../decisions/decisions.md#compareurlcontract) settled the same question for
 comparison links: a link is made to be kept, and a reader who kept one is owed the reason it
-stopped working. [decisions.speciesUrlOutlivesSpecies](../../decisions.md#speciesurloutlivesspecies)
+stopped working. [decisions.speciesUrlOutlivesSpecies](../../decisions/decisions.md#speciesurloutlivesspecies)
 records why the status code nevertheless differs from `/compare`'s.
 
 ## orderByFrequency
@@ -405,8 +436,11 @@ records why the status code nevertheless differs from `/compare`'s.
 **Birds can be ordered by how often they are recorded**
 
 Subject: `ordering.frequency`
+
 Value: `ascending by one-in-N, banded by decade`
+
 Applies to: app
+
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 **Frequency** is a fourth ordering, over the number every tile already shows
@@ -418,7 +452,7 @@ what is displayed.
 
 **Sections are decades, anchored at powers of ten**: `1 in 10 – 99`, `1 in 100 – 999`, and so on,
 nine of them over the whole dataset. Anchored absolutely, not to the data, so a tier means the same
-under every filter. See [decisions.frequencyMetric](../../decisions.md#frequencymetric) for the
+under every filter. See [decisions.frequencyMetric](../../decisions/decisions.md#frequencymetric) for the
 measurements.
 
 **No tier carries a name**, not "Common", not "Scarce": a named band is a rarity threshold, which
@@ -437,8 +471,11 @@ Rationale: [shareOfRecords](#shareofrecords) put the share on every tile but gav
 **A species says which names its records were filed under**
 
 Subject: `presentation.name_provenance`
+
 Value: `per-source binomial and count, shown where the sources disagree`
+
 Applies to: app
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Where the occurrence sources do not use the name BirdView serves, the species page says so,
@@ -462,7 +499,7 @@ Four kinds of disagreement, and they are not interchangeable:
 **A source can also withhold a species in some places and seasons only.** eBird's Sensitive
 Species list names regions and date windows as well as species — Painted Bunting in Florida
 from October to mid-April, Short-eared Owl in New York from April to July. Where the records
-confirm the withholding ([decisions.ebirdSilenceNotAbsence](../../decisions.md#ebirdsilencenotabsence)), the species page lists those regions
+confirm the withholding ([decisions.ebirdSilenceNotAbsence](../../decisions/decisions.md#ebirdsilencenotabsence)), the species page lists those regions
 and months, and a tile whose regions include one says so: *Withheld by eBird in Florida,
 Oct–Mar*. The count there is iNaturalist's alone, and far below the bird's real record.
 
@@ -491,9 +528,12 @@ disagreement is not transient: eBird filed 827,098 records under the shared name
 **The page explains itself**
 
 Subject: `presentation.help`
+
 Applies to: app
+
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
-Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
+
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
 
 Below the title, a **Presentation** panel carries two sections side by side, each half the page:
 **the diagram**, then **where the numbers come from**.
@@ -532,7 +572,9 @@ controls.
 **Every page fits a phone held upright**
 
 Subject: `presentation.fit`
+
 Applies to: app
+
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 **Down to 360 CSS pixels wide, nothing on any page reaches past the edge of the window, and no text
@@ -554,11 +596,13 @@ is 375 to 430.
 **A tile opens a detail view**
 
 Subject: `presentation.detail_view`
+
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Clicking a tile opens a detail view that is **a larger version of the same tile** — the same
-template, header, diagram, metrics, and layout ([decisions.textSizeFloor](../../decisions.md#textsizefloor)) — with the bird drawn **as large as
+template, header, diagram, metrics, and layout ([decisions.textSizeFloor](../../decisions/decisions.md#textsizefloor)) — with the bird drawn **as large as
 the view allows, whatever scale the home page drew it at**, plus:
 
 - the measurement of **every individual diagram segment**, on the tile's measurement lines: bill,
@@ -593,10 +637,14 @@ pixels tall, and the view of one bird has nothing to compare it against.
 **A comparison view holds several birds to one scale**
 
 Subject: `presentation.compare_view`
+
 Value: `/compare?species=<id>&species=<id>…`
+
 Applies to: app
+
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
-Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
+
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
 
 A **comparison view** draws any number of chosen species together **on a single shared scale**, so
 they can be read directly against one another. It answers [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)'s question — *is a Merlin
@@ -639,10 +687,14 @@ metricProvenanceExplained is left out because a table per bird would bury the co
 **Birds are picked for comparison from the index, and the picks are the mode**
 
 Subject: `presentation.pick_mode`
+
 Value: `?species=<id>&species=<id>… — present, even empty, means picking`
+
 Applies to: app
+
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.shareableViews](../../../goals/goals.md#shareableviews)
-Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
+
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
 
 A reader assembles a comparison by **picking birds from the index**, where the diagrams and the
 family filter already are, rather than from a separate chooser that would duplicate both.
@@ -689,7 +741,7 @@ An id that matches no species is **dropped, and the page says which ids it dropp
 and in the comparison view alike. Every link the page then builds omits it, so the set repairs
 itself on the next click. Species ids derive from scientific names, which change — the Sandhill
 Crane was `grus_canadensis` and is `antigone_canadensis` — and a comparison URL is made to be kept.
-See [decisions.compareUrlContract](../../decisions.md#compareurlcontract).
+See [decisions.compareUrlContract](../../decisions/decisions.md#compareurlcontract).
 
 ### What a tile link carries, and the one thing it does not
 
@@ -711,7 +763,9 @@ filtered index to an unfiltered one.
 **What the project says about itself stays true**
 
 Subject: `docs.currency`
+
 Applies to: app
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 **User-facing documentation and page credits describe the project as it is, not as it was.**
@@ -719,24 +773,26 @@ Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCi
 kinds of staleness are forbidden:
 
 - **A count that no longer matches the dataset**, such as 841 species after
-  [decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba) cut the list to 839.
+  [decisions.avilistReplacesAba](../../decisions/decisions.md#avilistreplacesaba) cut the list to 839.
 - **A source credited for something it no longer supplies**, such as the ABA Checklist credited
-  for names and families after [decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba), or for scope after
-  [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence).
+  for names and families after [decisions.avilistReplacesAba](../../decisions/decisions.md#avilistreplacesaba), or for scope after
+  [decisions.scopeFromRecurrence](../../decisions/decisions.md#scopefromrecurrence).
 
 **Before any public deployment, the docs are checked against the spec**, since a release makes the
 claims promises to strangers.
 
 Rationale: the check is mechanical where it can be — counts and credits against the dataset and the
 page — and a reading task where it cannot. Which sources must be credited and under which licenses
-comes from those sources' terms ([imports.md](../../imports.md)), composed for the pages in `app`.
+comes from those sources' terms ([imports.md](../../imports/imports.md)), composed for the pages in `app`.
 
 ## noPersonalAddress
 
 **No personal address is published**
 
 Subject: `deploy.contact`
+
 Applies to: app
+
 Goals: [goals.giveBack](../../../goals/goals.md#giveback), [goals.maintainerPrivacy](../../../goals/goals.md#maintainerprivacy)
 
 No page BirdView serves carries a contact address. Reader feedback goes to the project's issue
@@ -768,7 +824,9 @@ does not publish their mail.
 **A species page asks for corrections where its data is shown**
 
 Subject: `presentation.report_data_issue`
+
 Applies to: app
+
 Goals: [goals.giveBack](../../../goals/goals.md#giveback), [goals.honestData](../../../goals/goals.md#honestdata)
 
 Under the species page's **Measurements and sources** and **Categories and sources** headings, a
@@ -801,11 +859,13 @@ the reader to transcribe the page.
 **A Birds setting chooses a kind of bird by filling in Family, Habitat, and Diet**
 
 Subject: `presentation.bird_presets`
+
 Applies to: app
+
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 
 The first setting on the count line is **Birds**, offering **All**, the default, and a few kinds of
-bird a birder names that no single setting selects ([decisions.birdPresets](../../decisions.md#birdpresets)):
+bird a birder names that no single setting selects ([decisions.birdPresets](../../decisions/decisions.md#birdpresets)):
 
 | Choice | Family | Habitat |
 | --- | --- | --- |
@@ -831,7 +891,9 @@ habitats to say "shorebirds" is the kind of work a birder should not have to do 
 **A setting that takes one choice looks like one: a joined row, one segment filled**
 
 Subject: `presentation.choose_one`
+
 Applies to: app
+
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Birds, Order by, Reporting frequency, Units, and Names each take exactly one choice. Each draws its
@@ -851,15 +913,18 @@ would replace the choice or add to it, and the chosen one was shown by color alo
 **The detail view and every tile link to the species on iNaturalist**
 
 Subject: `presentation.detail_view.external_link`
+
 Applies to: app
+
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
-Status: **Withdrawn 2026-11-01**, replaced by [ebirdLink](#ebirdlink) ([decisions.ebirdLinkReplacesInaturalist](../../decisions.md#ebirdlinkreplacesinaturalist)).
+
+Status: **Withdrawn 2026-11-01**, replaced by [ebirdLink](#ebirdlink) ([decisions.ebirdLinkReplacesInaturalist](../../decisions/decisions.md#ebirdlinkreplacesinaturalist)).
 
 The detail view and every home page tile carry a link to the species' iNaturalist taxon page, so a
 reader who has just learned how big a bird is can go and see one. On the detail view the link names
 the species and iNaturalist in a sentence. On a tile it reads **iNat**, in the tile's lower-right
 corner, and its accessible name is the bird's name and "on iNaturalist"
-([decisions.tileNumbersFirst](../../decisions.md#tilenumbersfirst), [decisions.tileMeasurementLines](../../decisions.md#tilemeasurementlines)).
+([decisions.tileNumbersFirst](../../decisions/decisions.md#tilenumbersfirst), [decisions.tileMeasurementLines](../../decisions/decisions.md#tilemeasurementlines)).
 
 **Words, never iNaturalist's logo.** iNaturalist's terms name its bird logo as a trademark and
 grant "no right or license to reproduce" it; the adoption of iNaturalist rests on BirdView naming
@@ -879,7 +944,7 @@ name becoming a link to the wrong bird.
 
 **Coverage is expected to be total.** Every in-scope species resolves under these rules, and a
 species that stops resolving is a fault to investigate rather than an absence to accept — see
-[decisions.fullInaturalistCoverage](../../decisions.md#fullinaturalistcoverage).
+[decisions.fullInaturalistCoverage](../../decisions/decisions.md#fullinaturalistcoverage).
 
 BirdView **links and never copies**. No photograph is embedded, hotlinked, cached, or reproduced;
 the reader arrives on iNaturalist, where each image carries its own license.
@@ -888,25 +953,27 @@ the reader arrives on iNaturalist, where each image carries its own license.
 Rationale: BirdView will never have photographs, and a reader surprised by a size wants to see the
 bird. A link to the *wrong* bird is worse than none, and an absent link is legible where a search
 URL that always "works" hides the failure. See
-[decisions.inaturalistLinkAdopted](../../decisions.md#inaturalistlinkadopted).
+[decisions.inaturalistLinkAdopted](../../decisions/decisions.md#inaturalistlinkadopted).
 
 ## ebirdLink
 
 **The detail view and every tile link to the species on eBird**
 
 Subject: `presentation.detail_view.external_link`
+
 Applies to: app
+
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 The detail view and every home page tile carry a link to the species' page on eBird,
 `https://ebird.org/species/<eBird species code>`, so a reader who has just learned how big a bird
 is can go and see one. On the detail view the link names the species and eBird in a sentence. On a
 tile it reads **eBird**, in the tile's lower-right corner, and its accessible name is the bird's
-name and "on eBird" ([decisions.ebirdLinkReplacesInaturalist](../../decisions.md#ebirdlinkreplacesinaturalist)).
+name and "on eBird" ([decisions.ebirdLinkReplacesInaturalist](../../decisions/decisions.md#ebirdlinkreplacesinaturalist)).
 
 **Every species has a code and a link.** A species' codes are the one it carries from AviList
 ([namesFromAvilist](dataset.md#namesfromavilist)) and any other a declared table, `taxonomy.EBirdCodes`, records for it from Cornell's
-current taxonomy ([decisions.ebirdCodesComplete](../../decisions.md#ebirdcodescomplete), [decisions.ebirdCodeAliases](../../decisions.md#ebirdcodealiases)). AviList gives none to
+current taxonomy ([decisions.ebirdCodesComplete](../../decisions/decisions.md#ebirdcodescomplete), [decisions.ebirdCodeAliases](../../decisions/decisions.md#ebirdcodealiases)). AviList gives none to
 a few species it draws more narrowly than eBird, and the table gives eBird's, as Ruddy Duck is
 `rudduc`.
 
@@ -933,14 +1000,16 @@ bird. eBird files the bird under the same code BirdView shows beside its name.
 **The home page: one view of birds**
 
 Subject: `presentation.next`
+
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 **The home page, `/`, draws one set of birds, at one scale, in tiers**
-(Sameer, 2026-10-26; [scalableInterface](../../../todo.md#scalableinterface)). It was built as a
+(Sameer, 2026-10-26; [scalableInterface](../../../../todo.md#scalableinterface)). It was built as a
 prototype at `/next` and replaced the index as the home page the same day; the index, kept for a
 day as the classic view at `/classic`, was removed on 2026-10-27
-([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)). A species page's **Pin** pins
+([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)). A species page's **Pin** pins
 or unpins the bird on the home page the reader came from: the home page leaves its pins and its
 toggle address in the tab's session, so the species page shows Pin or Unpin, and pinning goes back
 and asks the home page to toggle the bird, which it does at the place the reader left (Sameer,
@@ -982,7 +1051,7 @@ home page in those. Its footer carries the full credits, which every other page 
   the first 100, and the sentence above the birds says how many are ("… the first 100 of 1006 birds, plus 2 pins"). **The pinned birds
   also lead the page, as a Pinned group** where the first tier would begin: a heading naming how
   many, then their tiles in the page's order, untiered, side by side; the tiers follow, the pinned
-  birds still in them ([decisions.pinnedGroupLeads](../../decisions.md#pinnedgroupleads)). With nothing pinned there is no group, and under
+  birds still in them ([decisions.pinnedGroupLeads](../../decisions/decisions.md#pinnedgroupleads)). With nothing pinned there is no group, and under
   **Pinned (k)** the group is the whole page. The histogram counts the tiers only. Pinning or
   unpinning leaves the page where it was. The pinned birds are listed above the find box in
   alphabetical order: a bird's name goes to its tile in the group, and its pin unpins it. **Pinned (k)**, always in view above them, compares
@@ -994,7 +1063,7 @@ home page in those. Its footer carries the full credits, which every other page 
   order (not their English descriptions, which name other birds). As the reader types, it says how many
   birds match, and once there are 10 or fewer it lists them, each with its pin and **its name
   linking to its species page**, so one bird's measurements are a tap away without pinning it
-  (Sameer, 2026-11-03, on a reader's request: [todo.plainMeasurementDefinitions](../../../todo-closed.md#plainmeasurementdefinitions)). Without
+  (Sameer, 2026-11-03, on a reader's request: [todo.plainMeasurementDefinitions](../../../../todo-closed.md#plainmeasurementdefinitions)). Without
   JavaScript, Enter does the same. Pinning keeps the box's text, so the list stays open and
   several of its birds can be pinned and unpinned in turn, from the list or from their tiles;
   the list's **×** closes it, dropping the text.
@@ -1020,14 +1089,14 @@ home page in those. Its footer carries the full credits, which every other page 
   offers All as its first choice, always, marked when it is chosen**, so the choices stay where they
   are when the reader moves between all and a narrower choice (Sameer, 2026-11-07).
 - **County follows Region when one state with counties is chosen** ([filtering.regionAndMonthFilter](filtering.md#regionandmonthfilter),
-  [decisions.countyListingRule](../../decisions.md#countylistingrule)). When the regions chosen are one state BirdView has counties for, or
+  [decisions.countyListingRule](../../decisions/decisions.md#countylistingrule)). When the regions chosen are one state BirdView has counties for, or
   counties of that one state, a **County** setting follows Region and lists that state's counties
   by name. Choosing a county from the state replaces the state with it, since the state already
   holds every county's birds; choosing more adds them; removing the last returns to the state, as
   does County's **All**. With no state chosen, or several, there is no County setting; a county is
   still reachable by its address. **Counties in several states can be chosen by address, and the
   server answers any such choice; offering one state's counties at a time is a limit of the setting,
-  not of the address or the server** ([decisions.countiesServedApart](../../decisions.md#countiesservedapart)).
+  not of the address or the server** ([decisions.countiesServedApart](../../decisions/decisions.md#countiesservedapart)).
 - **Tiers.** The ordered set breaks into tiers
   ([sectionBreakRule](ordering.md#sectionbreakrule), [orderByFrequency](#orderbyfrequency)): a size tier spans one step of the scale from its
   smallest bird, a frequency tier a decade of "1 in N", and birds with no records a tier of their
@@ -1074,4 +1143,4 @@ home page in those. Its footer carries the full credits, which every other page 
 
 Rationale: the first readers and the simulated ones found the index dense and its toggles
 backward, wanted search first, and could not read the comparison on a phone. See the proposal
-recorded with [scalableInterface](../../../todo.md#scalableinterface).
+recorded with [scalableInterface](../../../../todo.md#scalableinterface).

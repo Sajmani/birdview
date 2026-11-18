@@ -4,7 +4,7 @@ package wcag
 
 Tier: **mandatory**. Scope: the contrast of what BirdView draws — text, and the graphics a reader
 needs to read a diagram. BirdView adopts these criteria and **claims no conformance level**; the
-other success criteria are not adopted (see [imports.md](../../../imports.md#wcag)).
+other success criteria are not adopted (see [imports.md](../../../imports/imports.md#wcag)).
 
 Quotations are verbatim from the vendored Recommendation, with its markup removed. Each item says
 what the quotation means for BirdView. Copyright © 2020-2024 World Wide Web Consortium; this file
@@ -108,7 +108,7 @@ Applies to: WebPage
 
 **For BirdView: the floor for all text, including large text.** BirdView holds every text color to
 7:1 and does not use the large-text allowance, which is stricter than this criterion asks and is
-BirdView's own choice ([decisions.oneContrastFloor](../../../decisions.md#onecontrastfloor)). Diagram labels are text, painted with
+BirdView's own choice ([decisions.oneContrastFloor](../../../decisions/decisions.md#onecontrastfloor)). Diagram labels are text, painted with
 SVG `fill`. BirdView has no logo text and no images of text.
 
 ## NonTextContrast

@@ -6,7 +6,7 @@ package app
 
 How each requirement in [app.md](app.md) is decided. Each criterion names what it covers in
 `Covers:`; mutable guardrail bindings and `Watched failing:` observations live in
-[conformance.md](../../../../conformance.md).
+[conformance.md](../../../../conformance/conformance.md).
 
 **Uncovered:** [pagesMeetNonTextContrast](app.md#pagesmeetnontextcontrast). No criterion decides
 WCAG 1.4.11 yet; the stylesheet checks skip shapes and the rendered check measures text only.
@@ -52,7 +52,7 @@ stylesheet contract — the SVG documents — in full. A plain-text page is not 
 colors.
 
 This is the end-to-end check on [stylesheetContract](app.md#stylesheetcontract). It gates where Chrome is installed and skips
-without it ([bindings.md](../../../../bindings.md)).
+without it ([bindings.md](../../../../bindings/bindings.md)).
 
 ## pagesFitAPhone
 
@@ -225,7 +225,7 @@ every eBird link stands in the lower-right corner, its foot within a pixel of th
 its top below the rule, and the scientific name ends short of it; every mass label's baseline is
 within a pixel of its cube's foot; and every drawing starts within
 a pixel of the others in its row, tiles with notes and tiles stretched to a taller neighbor
-included ([decisions.tileNumbersFirst](../../../decisions.md#tilenumbersfirst), [decisions.tileMeasurementLines](../../../decisions.md#tilemeasurementlines)).
+included ([decisions.tileNumbersFirst](../../../decisions/decisions.md#tilenumbersfirst), [decisions.tileMeasurementLines](../../../decisions/decisions.md#tilemeasurementlines)).
 
 ## ebirdLinkOnTilesAndPages
 
@@ -238,7 +238,7 @@ link reading **eBird** whose href is exactly `https://ebird.org/species/<code>`,
 name and "on eBird", and placed after the tile's own link closes rather than inside it; their
 species pages link to the same address in a sentence naming the bird and eBird. With the stilt's
 code removed, neither its tile nor its page links to eBird. No page links to an iNaturalist taxon
-page, and neither page carries an image ([decisions.ebirdLinkReplacesInaturalist](../../../decisions.md#ebirdlinkreplacesinaturalist)). In headless
+page, and neither page carries an image ([decisions.ebirdLinkReplacesInaturalist](../../../decisions/decisions.md#ebirdlinkreplacesinaturalist)). In headless
 Chrome, at least nine in ten measured tiles carry the link, in the lower-right corner
 (`TestNextTileCornerAndRows`, under [nextViewDrawsOneSet](acceptance.md#nextviewdrawsoneset)).
 
@@ -255,7 +255,7 @@ Ruddy Duck, White-necked Petrel, and American Barn Owl, which AviList gives none
 and keep AviList's as an alias; Marsh Wren `marwre` and Willet `willet1` keep AviList's and take
 Cornell's as an alias; Mallard keeps `mallar3` with none. No code, id or alias, answers for two
 species, drawn or not. `taxonomy.SimplerEBirdCode` takes fewer digits, then the shorter, then
-AviList's, and `taxonomy.SpeciesCodes` applies it ([decisions.ebirdCodeAliases](../../../decisions.md#ebirdcodealiases)).
+AviList's, and `taxonomy.SpeciesCodes` applies it ([decisions.ebirdCodeAliases](../../../decisions/decisions.md#ebirdcodealiases)).
 
 ## everyCodeReachesItsSpecies
 
@@ -292,7 +292,7 @@ Covers: [product.nextView](../../../local/product/presentation.md#nextview)
 comes before the first tier, then their two tiles, shortest first, with anchors `p-<id>`; both
 are still drawn in their tiers below; the pinned list links to `#p-<id>`; the histogram is the
 same as with nothing pinned; with nothing pinned there is no group; and under Pinned only,
-reversed, the page is the group alone, heron first ([decisions.pinnedGroupLeads](../../../decisions.md#pinnedgroupleads)).
+reversed, the page is the group alone, heron first ([decisions.pinnedGroupLeads](../../../decisions/decisions.md#pinnedgroupleads)).
 
 ## bandingCodesShown
 
@@ -522,11 +522,11 @@ Covers: [product.tileContents](../../../local/product/presentation.md#tileconten
 
 **Assertions:** every tile shows the common name, the eBird code in parentheses, the scientific
 name, a family badge, an SVG diagram, and the main metrics **named in full** — `Length`,
-`Wingspan`, `Mass`, not `L`, `W`, `M` ([decisions.massCubeOnTiles](../../../decisions.md#masscubeontiles)). On the crow's tile they run in
+`Wingspan`, `Mass`, not `L`, `W`, `M` ([decisions.massCubeOnTiles](../../../decisions/decisions.md#masscubeontiles)). On the crow's tile they run in
 order: the common name, the banding code, the eBird code, length, bill, tail, wingspan, chord, and
 the share line, then the drawing with the mass label in it, then the family badge and the
 scientific name; the badge reads the family's scientific name alone
-([decisions.tileMeasurementLines](../../../decisions.md#tilemeasurementlines)). On every fixture tile the mass label's baseline is on the cube's foot, it
+([decisions.tileMeasurementLines](../../../decisions/decisions.md#tilemeasurementlines)). On every fixture tile the mass label's baseline is on the cube's foot, it
 starts right of the cube, and it is the drawing's only text; and the stylesheet sets `.tl` in
 `.ft`'s font.
 
@@ -556,7 +556,7 @@ unit test pinning the conversions
 
 **Assertions:** the tile's two measurement lines carry every length on them, at least four, and
 its mass label one mass value, in the selected system's units, and they differ between the two
-systems ([decisions.tileMeasurementLines](../../../decisions.md#tilemeasurementlines)); mass converts as `1 oz = 28.349523125 g`.
+systems ([decisions.tileMeasurementLines](../../../decisions/decisions.md#tilemeasurementlines)); mass converts as `1 oz = 28.349523125 g`.
 
 ## detailDrawsFullScale
 
@@ -589,21 +589,21 @@ Covers: [sourceCreditsAndLicenses](app.md#sourcecreditsandlicenses)
 **Method:** rendering test over the footer
 
 **Assertions:** each CC BY source is credited with creator, a link to its deposit and a link to the
-license — **AVONET, Fox, and AviList by name and DOI**; the ABA checklist is never credited, scope having moved to BirdView's recurrence derivation over GBIF ([decisions.scopeFromRecurrence](../../../decisions.md#scopefromrecurrence)); the footer discloses that lengths are modeled; the detail view
+license — **AVONET, Fox, and AviList by name and DOI**; the ABA checklist is never credited, scope having moved to BirdView's recurrence derivation over GBIF ([decisions.scopeFromRecurrence](../../../decisions/decisions.md#scopefromrecurrence)); the footer discloses that lengths are modeled; the detail view
 carries credit too, being a shareable URL of its own; and **no page claims a permission the
 project does not hold**. **The two GBIF datasets** are cited in the home page's credits by
 publisher, title, DOI as a URL, and "accessed via GBIF.org", and the home page, the species page,
 and the page for an undrawn bird each give iNaturalist's license as CC BY-NC 4.0, never as CC BY
-4.0 with eBird's ([decisions.gbifTermsMet](../../../decisions.md#gbiftermsmet)).
+4.0 with eBird's ([decisions.gbifTermsMet](../../../decisions/decisions.md#gbiftermsmet)).
 by reinstating a "used by permission" claim. **AviList added 2026-10-02**
-([decisions.avilistReplacesAba](../../../decisions.md#avilistreplacesaba)) and watched failing by deleting its credit while leaving its names
+([decisions.avilistReplacesAba](../../../decisions/decisions.md#avilistreplacesaba)) and watched failing by deleting its credit while leaving its names
 on every tile — which is the shape the obligation actually has: CC BY permits the use *because*
 of the attribution, so an unasserted credit is a license breach waiting to happen.
 
 The second half exists because the first version of this footer said the ABA checklist was "used by
 permission". It is not — that request has not been sent. Claiming a right you have not been granted
 is worse than claiming none, because it misleads the rights holder's own readers. Remove that
-assertion only when a written grant exists and is recorded in [imports.md](../../../imports.md).
+assertion only when a written grant exists and is recorded in [imports.md](../../../imports/imports.md).
 
 ## foldedNeckSameStroke
 
@@ -658,7 +658,7 @@ control, whose hand-written pairs nothing read. Watched failing since: selected-
 `#2a7fa8` is reported at 2.42:1 against its own `--accent` background. That change was first
 caught by [app.renderedTextContrast](../../../composed/internal/app/acceptance.md#renderedtextcontrast), with this check passing.
 
-**Since 2026-11-01 no SVG text is styled** ([decisions.textSizeFloor](../../../decisions.md#textsizefloor)): the drawing's one label is page text,
+**Since 2026-11-01 no SVG text is styled** ([decisions.textSizeFloor](../../../decisions/decisions.md#textsizefloor)): the drawing's one label is page text,
 held to the floor as `color`. The SVG text check stays and reports that it found nothing to check;
 a `fill` on a text rule added later is held to the floor again. Its old guard, failing when it
 checked nothing, now cannot tell a broken parser from an absent subject, so the parser is shown
@@ -715,7 +715,7 @@ is the assertion that catches a revert to the old meaning of dash.
 
 **Assertions, the neck exception:** the neck's dash pattern differs from the body's. Stated as a
 requirement of the check, not merely tolerated by it, because the two look like an inconsistency
-and tidying them into agreement makes short necks render solid ([decisions.drawingCarriesProvenance](../../../decisions.md#drawingcarriesprovenance)).
+and tidying them into agreement makes short necks render solid ([decisions.drawingCarriesProvenance](../../../decisions/decisions.md#drawingcarriesprovenance)).
 
 **Assertions, rendering:** a species with a **measured** wingspan emits no dashed crossbar segment;
 one with a **modeled** wingspan emits exactly one, flanked by two solid segments and marked by two
@@ -748,9 +748,9 @@ lines and mass label name **every row of the measurements table**, total length 
 wing chord as Chord, with the table's value and a `~` exactly where the table's kind is not
 `measured`, in both unit systems. Written against the table rather than a list of metric names, so
 it maintains itself. Bill, Inner, Chord, Tail, and Mass are keyed to their parts' colors and
-Wingspan is not ([decisions.innerSpanDerived](../../../decisions.md#innerspanderived)); the drawing
+Wingspan is not ([decisions.innerSpanDerived](../../../decisions/decisions.md#innerspanderived)); the drawing
 holds no text and no leader line; and the badge carries the family's common name
-([decisions.textSizeFloor](../../../decisions.md#textsizefloor)). Until 2026-11-01 this criterion held the labels inside the drawing to
+([decisions.textSizeFloor](../../../decisions/decisions.md#textsizefloor)). Until 2026-11-01 this criterion held the labels inside the drawing to
 a layout, a paint order, and a column; those assertions went with the labels.
 
 ## tileValuesNameTheirSource
@@ -793,7 +793,7 @@ table**, read out of the rendered table. The fixture is a **folded-neck species*
 drawn height is 6–9% short of its total length, so a Length taken from the drawing would differ;
 the test stops if the fixture ever stops folding its neck. Until 2026-11-01 the total length was a
 label under the tail, held to a placement and a room in the box; those assertions went with the
-label ([decisions.textSizeFloor](../../../decisions.md#textsizefloor)).
+label ([decisions.textSizeFloor](../../../decisions/decisions.md#textsizefloor)).
 
 ## massDrawnAsWaterCube
 
@@ -816,7 +816,7 @@ common origin and lets two cubes be compared directly; a base that drifted with 
 cost that without changing any number. The projection has **non-zero depth**, or it is the square
 this replaced. It stays inside the drawing area above and never reaches the bird's axis to the
 right. Its label, page text over the drawing since 2026-11-01, starts right of the cube and stands
-on its foot, placed in percent of the drawing ([decisions.textSizeFloor](../../../decisions.md#textsizefloor)); before, it hung under the
+on its foot, placed in percent of the drawing ([decisions.textSizeFloor](../../../decisions/decisions.md#textsizefloor)); before, it hung under the
 face and was held clear of the left edge, and a strip under the drawing was reserved for it.
 
 **Assertions, provenance:** solid when the mass is measured, dashed when it is not, as [product.measuredVersusModeled](../../../local/product/measurements.md#measuredversusmodeled)
@@ -829,13 +829,13 @@ not documentation of the feature, it is the feature.
 
 **Assertions, the home page tiles:** **every** tile carries a cube — counted against the number of
 tiles, not merely found once — and **no tile carries a label of any kind**, the mass being named
-in the footer instead ([decisions.massCubeOnTiles](../../../decisions.md#masscubeontiles)). This reverses what this criterion asserted
-when it was written, which was that tiles carry none; the reasoning is in [decisions.massCubeOnTiles](../../../decisions.md#masscubeontiles).
+in the footer instead ([decisions.massCubeOnTiles](../../../decisions/decisions.md#masscubeontiles)). This reverses what this criterion asserted
+when it was written, which was that tiles carry none; the reasoning is in [decisions.massCubeOnTiles](../../../decisions/decisions.md#masscubeontiles).
 
 **Assertions, clearance:** across the real dataset the tile cube never reaches the crossbar, at
 every scale and metric the index offers — 839 species × 6 combinations, asserted rather than
 recorded. This was prose, **"0 overlaps in 841"**, and it rotted the moment lengths moved:
-[decisions.trunkExponentCalibrated](../../../decisions.md#trunkexponentcalibrated) invalidated the figure and nothing failed, because nothing ran. It
+[decisions.trunkExponentCalibrated](../../../decisions/decisions.md#trunkexponentcalibrated) invalidated the figure and nothing failed, because nothing ran. It
 was caught by reading.
 
 What is asserted is a **clearance greater than zero**, taken from the requirement; the tightest
@@ -886,8 +886,8 @@ page and the panel; each name on the tile (`.k-bill`, `.k-tail`, `.k-wing`, `.k-
 is set in exactly its part's stroke color; and every two parts, with the gray head, neck, and body,
 differ by a CIEDE2000 ΔE of at least 10 under normal vision and under protanopia, deuteranopia, and
 tritanopia simulated with Machado, Oliveira, and Fernandes's 2009 matrices at full severity
-([decisions.partColorsByMeasurement](../../../decisions.md#partcolorsbymeasurement)), except that the mass cube is held apart only under normal vision
-([decisions.massCubeSkyBlue](../../../decisions.md#masscubeskyblue)). The ΔE formula is pinned on a color against itself and black against
+([decisions.partColorsByMeasurement](../../../decisions/decisions.md#partcolorsbymeasurement)), except that the mass cube is held apart only under normal vision
+([decisions.massCubeSkyBlue](../../../decisions/decisions.md#masscubeskyblue)). The ΔE formula is pinned on a color against itself and black against
 white.
 
 ## tileHeaderNeverWraps
@@ -914,7 +914,7 @@ the drawing down.
 overflow the tile instead.
 
 **Assertions, markup:** the species page's name line and the tile's each contain a `.cnname`,
-and the codes are siblings of it rather than inside it ([decisions.tileMeasurementLines](../../../decisions.md#tilemeasurementlines)). A code nested in the truncating element is
+and the codes are siblings of it rather than inside it ([decisions.tileMeasurementLines](../../../decisions/decisions.md#tilemeasurementlines)). A code nested in the truncating element is
 the defect this criterion exists to prevent, and it looks identical until a name is long enough.
 
 ## regionFilterBehaves
@@ -995,8 +995,8 @@ BirdView does not draw counts in the county's total and nowhere else; the twelve
 total; the download's zipped table is read by its header; and a state's eBird withholding covers its
 counties.
 
-Compiled and served apart ([decisions.countiesServedApart](../../../decisions.md#countiesservedapart)): the ingest reads each state's gzipped table,
-refusing a plain one ([decisions.countyTablesCompressed](../../../decisions.md#countytablescompressed)), and compiles each county's name, state, totals,
+Compiled and served apart ([decisions.countiesServedApart](../../../decisions/decisions.md#countiesservedapart)): the ingest reads each state's gzipped table,
+refusing a plain one ([decisions.countyTablesCompressed](../../../decisions/decisions.md#countytablescompressed)), and compiles each county's name, state, totals,
 and listed and under-the-bar records apart from the species, which keep their own regions and peak
 share, and the compiled counties survive being written and read back (`TestCountiesCompiledApart`,
 `TestPlainCountyTableRefused`); one download is split by each county's state, and a table is
@@ -1042,7 +1042,7 @@ rendering and redirect test over the home page
 
 **Assertions, the URL value:** a land region's is its GADM code (`USA.5_1`, `CAN.2_1`, `UMI.4_1`)
 and a sea box's its PascalCase name (`GulfOfMexico`), and no internal `SEA.*` id resolves in a URL
-([decisions.regionCodesFromData](../../../decisions.md#regioncodesfromdata)); values are **unique across all 74 regions** and URL-safe
+([decisions.regionCodesFromData](../../../decisions/decisions.md#regioncodesfromdata)); values are **unique across all 74 regions** and URL-safe
 without escaping. Uniqueness is the load-bearing one — two regions sharing a value makes one of
 them unreachable, and the collision would be silent.
 
@@ -1057,7 +1057,7 @@ values answer 200.
 
 **Assertions, no invented codes:** every non-empty postal code is two characters, and the ten regions
 with no standard abbreviation carry an **empty** code rather than a made-up one
-([decisions.regionUrlIsPostalCode](../../../decisions.md#regionurlispostalcode)). The codes now only label choices, but the rule still holds.
+([decisions.regionUrlIsPostalCode](../../../decisions/decisions.md#regionurlispostalcode)). The codes now only label choices, but the rule still holds.
 
 **Assertions, rendering:** region links carry GADM codes for land and names for the sea boxes,
 and no retired value; a choice with a postal code is named with the code as its tooltip, and a
@@ -1075,13 +1075,13 @@ the compiled dataset, plus a rendering test over the selector and a tile
 **Assertions, coverage:** every family of the dataset sits in exactly one taxonomic order, and
 every order holds at least one family. Checked **against the compiled dataset, not a fixture** —
 the family list comes from AviList, which renamed 55 of 90 English family names in
-[decisions.avilistReplacesAba](../../../decisions.md#avilistreplacesaba), so a family that is added or renamed must fail a test rather
+[decisions.avilistReplacesAba](../../../decisions/decisions.md#avilistreplacesaba), so a family that is added or renamed must fail a test rather
 than silently vanish from the control.
 
 **The hand-drawn birder grouping this criterion also covered is gone**, retired by
-[decisions.habitatDietSpeciesLevel](../../../decisions.md#habitatdietspecieslevel) in favour of the per-species filters of
+[decisions.habitatDietSpeciesLevel](../../../decisions/decisions.md#habitatdietspecieslevel) in favour of the per-species filters of
 [product.habitatAndDietFilters](../../../local/product/months.md#habitatanddietfilters). Its distinctness and ordering assertions went with it, and so did
-[decisions.familyInTwoGroups](../../../decisions.md#familyintwogroups)'s cap on duplicate placements — there is no hand-drawn grouping
+[decisions.familyInTwoGroups](../../../decisions/decisions.md#familyintwogroups)'s cap on duplicate placements — there is no hand-drawn grouping
 left for a family to be placed in twice.
 
 **Assertions, the tile:** a tile carries **exactly one badge**. This is the assertion that
@@ -1105,7 +1105,7 @@ credited AviList and `detail.html` and `compare.html` did not, while showing Avi
 families, and species codes throughout.
 
 **Assertions, counts:** every species or family count stated in `README.md` or `docs/` matches
-the compiled dataset. `docs/data.md` said 841 species after [decisions.avilistReplacesAba](../../../decisions.md#avilistreplacesaba) cut
+the compiled dataset. `docs/data.md` said 841 species after [decisions.avilistReplacesAba](../../../decisions/decisions.md#avilistreplacesaba) cut
 the list to 839.
 
 **Assertions, attribution claims:** no document credits a source for something it no longer
@@ -1166,7 +1166,7 @@ served, and the rule stands for the guides.
 
 **Assertions, what is not served:** nothing under `river/` or `third_party/` is served.
 `river/requirements/imported/` and `third_party/` hold other people's terms and must not be reachable
-([tech.fetchRestrictedInputs](../../../local/tech/delivery.md#fetchrestrictedinputs)). Since [decisions.requirementsNotServed](../../../decisions.md#requirementsnotserved) nothing under `river/` is embedded
+([tech.fetchRestrictedInputs](../../../local/tech/delivery.md#fetchrestrictedinputs)). Since [decisions.requirementsNotServed](../../../decisions/decisions.md#requirementsnotserved) nothing under `river/` is embedded
 at all; the probes remain, so that serving the requirements again cannot quietly bring the
 vendored terms back with them.
 
@@ -1212,7 +1212,7 @@ parameter to a value the pages write and compare the home page's settings summar
 guides, `/added` and `/excluded` answer 200; and each of `by`, `rev`, `step`, `units`, `names`,
 `pin`, `show`, `family`, `region`, `month`, `habitat` and `niche` changes the home page's title,
 count line, tier headings, or pinned list, which together name every setting. The comparison,
-`/now`, `scale` and `species` left this list on 2026-10-27 ([decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)). The count line
+`/now`, `scale` and `species` left this list on 2026-10-27 ([decisions.classicViewRemoved](../../../decisions/decisions.md#classicviewremoved)). The count line
 is compared rather than the page, because every link on the page carries the query, so any
 parameter at all would change the page.
 **Does not cover:** that a URL shows the same birds it did, which moves with the data by design;
@@ -1388,7 +1388,7 @@ provenance table recorded it — a provenance record names who owns a source wit
 their mail. And once on this bundle: the requirement and this criterion both quoted the address
 as an example, and the spec is served, so they republished on `/spec/tech` and
 `/spec/acceptance` precisely what the rule forbids. Neither quotes it now. Exempting the spec
-was the wrong fix, because the spec is a page readers reach. Since [decisions.requirementsNotServed](../../../decisions.md#requirementsnotserved)
+was the wrong fix, because the spec is a page readers reach. Since [decisions.requirementsNotServed](../../../decisions/decisions.md#requirementsnotserved)
 it is no longer served, but it is still published with the repository, so the check reads
 `river/*.md` from the checkout instead — the same files, with no loss of coverage.
 
@@ -1450,7 +1450,7 @@ they are not served.
 
 **Why assertion 1 is over the real dataset.** The server fixture hardcodes `commonestOf` and
 every test renders it back, so the claim has only ever been checked against a value the test
-itself supplied. That is how [decisions.seaShareDiffers](../../../decisions.md#seasharediffers)(a) shipped: a value the fixture
+itself supplied. That is how [decisions.seaShareDiffers](../../../decisions/decisions.md#seasharediffers)(a) shipped: a value the fixture
 provides is a value no fixture test can falsify.
 
 **Why assertion 3 is stated as an invariant and not as a region list.** The numerator and the
@@ -1473,15 +1473,15 @@ Covers: [product.shareOfRecords](../../../local/product/presentation.md#shareofr
    detail page's figure exactly.**
 2. The peak is always **a region the species is listed in**. The old figure could name one the
    reader would not find in the filter at all.
-3. At least one species peaks at sea, or the case [decisions.honestSeaDenominator](../../../decisions.md#honestseadenominator) exists for is unexercised. (45 do.)
+3. At least one species peaks at sea, or the case [decisions.honestSeaDenominator](../../../decisions/decisions.md#honestseadenominator) exists for is unexercised. (45 do.)
 4. The row is labeled **Top region**, and none of its superseded names survives — not
    `Commonest in`, not `Commonest land region`. Rejecting the old forms as well as requiring
    the new one is what would have caught `Commonest land region` outliving
-   [decisions.honestSeaDenominator](../../../decisions.md#honestseadenominator), which gave the seas the denominator that qualifier existed
+   [decisions.honestSeaDenominator](../../../decisions/decisions.md#honestseadenominator), which gave the seas the denominator that qualifier existed
    for.
 4. Every region has a record total, seas included.
 5. A sea's total **exceeds the sum of the species placed there**. A denominator built out of
-   its own numerators is the shape of the [decisions.seaShareDiffers](../../../decisions.md#seasharediffers) bug, and the only part of it a test can see
+   its own numerators is the shape of the [decisions.seaShareDiffers](../../../decisions/decisions.md#seasharediffers) bug, and the only part of it a test can see
    without the network.
 6. `CountOffLandInBox` subtracts the land, and **refuses** a facet whose rows sum past the box
    rather than returning a negative count.
@@ -1549,7 +1549,7 @@ Covers: [product.orderByFrequency](../../../local/product/presentation.md#orderb
    design exists for.
 6. No tier header contains `common`, `scarce`, `rare`, `abundant`, `uncommon` or `everyday`.
 7. Scale defaults to **global** under Frequency and **per-section** under the size metrics
-   ([decisions.frequencyGlobalScale](../../../decisions.md#frequencyglobalscale)), and **both** values remain selectable under both.
+   ([decisions.frequencyGlobalScale](../../../decisions/decisions.md#frequencyglobalscale)), and **both** values remain selectable under both.
 8. The Order by row **aligns on the text baseline**, so the label, the size buttons, and the
    Frequency button sit on one line with the captions hanging below. Both the declaration and
    the class that carries it are asserted: either alone matches nothing.
@@ -1657,7 +1657,7 @@ answer with nothing on either page to reveal the substitution — which is why a
 exists and why the row is built by `shareWithSeams`, the same function the tile calls, rather
 than recomputed. Two call sites deriving one number from the same inputs is exactly how the
 index and the detail page came to disagree about where a bird is commonest
-([decisions.honestSeaDenominator](../../../decisions.md#honestseadenominator)).
+([decisions.honestSeaDenominator](../../../decisions/decisions.md#honestseadenominator)).
 
 ## disputedNamesShown
 
@@ -1676,7 +1676,7 @@ five naming tables and the rendered detail pages
    lump, the covering name for a shared name, `domestic and feral` for a form,
    `withheld by eBird` for a suppression.
 3. **No species outside those tables carries the row.** 26 of 1,083 are in the tables — 27
-   until [decisions.countEbirdFirst](../../../decisions.md#countebirdfirst) derived `WithheldByEBird` from eBird's list and Desertas
+   until [decisions.countEbirdFirst](../../../decisions/decisions.md#countebirdfirst) derived `WithheldByEBird` from eBird's list and Desertas
    Petrel, on no entry of it, left — plus 24 that eBird withholds only in some regions or
    seasons ([withheldMonthsExplained](acceptance.md#withheldmonthsexplained)). The other 1,033 must stay silent.
 4. The expected set is floored at 25 species, so emptying the tables cannot make the rest

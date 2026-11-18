@@ -38,7 +38,7 @@ its own license and a README naming the source and how to cite it. The iNaturali
 openly licensed; they and the WCAG text are kept so every quotation of them in
 [`river/`](../river) can be checked against the exact words. Retrieval details and hashes are in
 [`river/requirements/imported/`](../river/requirements/imported), and the
-[source register](../river/requirements/imports.md) records every source considered,
+[source register](../river/requirements/imports/imports.md) records every source considered,
 including the rejected ones and why.
 
 **BirdView links to eBird and copies nothing from it or from iNaturalist**: no photograph is
@@ -219,7 +219,7 @@ formats strings belongs in another package.
 **The requirements are normative and live in [`river/`](../river).** Code implements them; where
 this guide and `river/` disagree, `river/` wins.
 
-[`river/README.md`](../river/README.md) declares the River 2.1 module; the method copy lives at
+[`river/README.md`](../river/README.md) declares the River 3.0 module; the method copy lives at
 [`.agents/skills/river/`](../.agents/skills/river/SKILL.md). To make a change you need only the loop
 below.
 
@@ -227,8 +227,8 @@ below.
 
 | File | Contents |
 | --- | --- |
-| [`README.md`](../river/README.md) | the River 2.1 module declaration and directory index |
-| [`bindings.md`](../river/bindings.md) | how BirdView applies the method, and where it departs from it |
+| [`README.md`](../river/README.md) | the River 3.0 module declaration and directory index |
+| [`bindings/`](../river/bindings/bindings.md) | how BirdView applies the method, and where it departs from it |
 | [`goals/`](../river/goals/goals.md) | why the project exists: sixteen goals, `goals.*` |
 | [`requirements/local/product/`](../river/requirements/local/product/product.md) | what it must do, one file per group: `product.*` |
 | [`requirements/local/tech/`](../river/requirements/local/tech/tech.md) | technical constraints, one file per group: `tech.*` |
@@ -236,12 +236,12 @@ below.
 | [`requirements/composed/internal/dataset/`](../river/requirements/composed/internal/dataset/dataset.md) | every requirement the data pipeline and dataset must meet, and its criteria (`dataset.*`) |
 | [`requirements/composed/internal/repo/`](../river/requirements/composed/internal/repo/repo.md) | every requirement repository layout, build, and release must meet, and its criteria (`repo.*`) |
 | [`requirements/README.md`](../river/requirements/README.md) | what each requirements file and directory holds |
-| [`requirements/imports.md`](../river/requirements/imports.md) | every body of rules or data the project is subject to |
-| [`requirements/precedence.md`](../river/requirements/precedence.md) | which tier of source outranks which |
-| [`requirements/decisions.md`](../river/requirements/decisions.md) | how each conflict or scope was resolved: `decisions.*` |
-| [`requirements/approvals.md`](../river/requirements/approvals.md) | composed-package approvals (`river approve`) |
-| [`conformance.md`](../river/conformance.md) | which guardrails check each criterion, and `Watched failing:` observations |
-| [`todo.md`](../river/todo.md) | everything still open: work, questions, unverified criteria, stale text |
+| [`requirements/imports/`](../river/requirements/imports/imports.md) | every body of rules or data the project is subject to |
+| [`requirements/precedence/`](../river/requirements/precedence/precedence.md) | which tier of source outranks which |
+| [`requirements/decisions/`](../river/requirements/decisions/decisions.md) | how each conflict or scope was resolved: `decisions.*` |
+| [`requirements/sums.md`](../river/requirements/sums.md) | content sums of every input to composition (`river sum -w`); each composed package's `composed.sum` records what it was composed from (`river compose`) |
+| [`conformance/`](../river/conformance/conformance.md) | which guardrails check each criterion, and `Watched failing:` observations |
+| [`todo.md`](../todo.md) (repository root) | everything still open: work, questions, unverified criteria, stale text |
 | [`arch.md`](../river/arch.md) | how the code is organized |
 | [`check/`](../river/check) | BirdView's repository-specific spec checks |
 
@@ -255,24 +255,26 @@ rest is rationale. Cite IDs in code comments as the literal token, so one search
 ### The loop
 
 A change goes requirement, then acceptance criterion, then code. An agent or contributor may draft
-requirements and criteria; the project owner approves them. Not every change needs all three:
+requirements and criteria; the project owner approves them by reviewing the pull request, whose
+"Requirements impact" section `river diff --base main --format pr river` drafts. Not every change
+needs all three:
 
 | Change | What it needs |
 | --- | --- |
 | New feature or changed behavior | Edit the requirement, then the criterion, then the code |
 | Bug fix | If a requirement already forbids the bug, add a criterion under it, then fix. If none does, that is a gap in the spec: add the requirement first |
 | Refactor | No spec change, and the suite stays green. If you must change a check's *assertions*, it is not a refactor |
-| Adopting a new source | An entry in `imports.md`, then a pass to compose its requirements and resolve conflicts with the existing ones. Expect conflicts |
+| Adopting a new source | An entry in `river/requirements/imports/`, then a pass to compose its requirements and resolve conflicts with the existing ones. Expect conflicts |
 | Docs only | No spec change, unless writing the doc shows the spec is wrong |
 
-Open work is tracked in [`todo.md`](../river/todo.md), not in `TODO` comments. Read it before
+Open work is tracked in [`todo.md`](../todo.md), not in `TODO` comments. Read it before
 starting something new, and add an item for anything you find or leave unfinished.
 
 ### Three rules
 
 **Never resolve a conflict in code.** If two requirements disagree, or a change reverses something
 the spec states, stop and record a new entry in
-[`decisions.md`](../river/requirements/decisions.md). Silently choosing one is the failure this
+[`river/requirements/decisions/`](../river/requirements/decisions/decisions.md). Silently choosing one is the failure this
 process exists to prevent.
 
 **Never edit a requirement to match code that violates it** without saying so and getting
@@ -296,15 +298,15 @@ Most of these are licensing rules, not style.
   committed inputs in one command, and a stale copy in the tree is worse than none.
 - **Never read or process Wiley Online Library material**, including Ricklefs (2017). Its terms
   prohibit AI ingestion and automated access, and the source is
-  [rejected](../river/requirements/decisions.md#ricklefsprohibited). Do not revive it as a length
+  [rejected](../river/requirements/decisions/decisions.md#ricklefsprohibited). Do not revive it as a length
   source.
 - **Never fetch, download, or programmatically process anything from BirdLife's DataZone**
   (`datazone.birdlife.org`). Its terms forbid automated access and text and data mining; see
-  [the register entry](../river/requirements/imports.md#birdlife-checklist). AVONET's BirdLife
+  [the register entry](../river/requirements/imports/imports.md#birdlife-checklist). AVONET's BirdLife
   sheet is part of AVONET, under CC BY 4.0, and is not affected.
 - **Only AVONET, the Fox wingspan data, and AviList may be committed as source data.** All three
   are CC BY 4.0. Before adding a fourth, read
-  [`imports.md`](../river/requirements/imports.md): most candidates evaluated could not
+  [`imports.md`](../river/requirements/imports/imports.md): most candidates evaluated could not
   be redistributed. The generated tables under `data/` are not source data but the project's own
   reductions, with their provenance in their headers. The vendored terms and WCAG text are kept for
   quotation, not as data.
@@ -312,7 +314,7 @@ Most of these are licensing rules, not style.
   and its provenance under `river/requirements/imported/<origin>/<name>/`.
 - **Never present a modeled value as a measurement.** Every length and wingspan is marked measured
   or modeled, and the page shows which; see
-  [this decision](../river/requirements/decisions.md#noopenlengthandwingspan).
+  [this decision](../river/requirements/decisions/decisions.md#noopenlengthandwingspan).
 
 `AGENTS.md` carries the same rules for AI coding agents.
 

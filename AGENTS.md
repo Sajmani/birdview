@@ -12,10 +12,10 @@ Names like `product.scaleToggle` are citations, linked to their definitions; fol
 | --- | --- |
 | The method and the change loop | [.agents/skills/river/SKILL.md](.agents/skills/river/SKILL.md) and [river/README.md](river/README.md) |
 | Composed requirements (`app`, `dataset`, `repo`) | [app.md](river/requirements/composed/internal/app/app.md), [dataset.md](river/requirements/composed/internal/dataset/dataset.md), [repo.md](river/requirements/composed/internal/repo/repo.md) |
-| Guardrails and verification observations | [river/conformance.md](river/conformance.md) |
-| Open work | [river/todo.md](river/todo.md) (`grep -n -A1 '^## '`) |
+| Guardrails and verification observations | [river/conformance/](river/conformance/conformance.md) |
+| Open work | [todo.md](todo.md) (`grep -n -A1 '^## '`) |
 | Code shape, gotchas, local server | [river/arch.md](river/arch.md) |
-| Settled conflicts | [river/requirements/decisions.md](river/requirements/decisions.md) |
+| Settled conflicts | [river/requirements/decisions/](river/requirements/decisions/decisions.md) |
 
 Read a requirement by its heading, not its file; its first paragraph is the rule.
 
@@ -23,7 +23,7 @@ Read a requirement by its heading, not its file; its first paragraph is the rule
 
 ```
 go build ./... && go vet ./... && gofmt -l . && go test ./...   # gofmt must print nothing
-river sum -w river && river check --allow-unapproved river
+river sum -w river && river check river
 ```
 
 Project-specific spec checks are Go tests in `river/check/` (including `TestNoUnreachableCode`, with
@@ -38,17 +38,20 @@ it running as a foreground or tracked background task; that holds the turn open.
 ## Making a change
 
 - Requirement first (statement first), then recompose (`composed/internal/{app,dataset,repo}`) and
-  criteria, then code and `river/conformance.md`, in one commit.
-- Present `river diff river` for human review; run `river approve --by Sameer river` (or `... river goals` for
-  the goal set) **only** when Sameer approves (never self-approve).
+  criteria, then code and `river/conformance/`, in one commit.
+- After recomposing, run `river sum -w river`, then `river compose river <pkg>` for each package
+  recomposed; it writes the package's `composed.sum`. Never hand-edit a `composed.sum`.
+- Source control approves: every pull request that changes `river/` carries a "Requirements impact"
+  section, your triage above `river diff --base main --format pr river`
+  ([pull-requests.md](.agents/skills/river/references/pull-requests.md)). Sameer reviews it.
 - **Watch every new check fail**, make the mutation fail loudly if its anchor is missing, and read
   the failure message.
 - A data-pipeline change updates [docs/pipeline.md](docs/pipeline.md) and re-renders it
   (product.pipelineDiagram).
-- Found or left work goes in `river/todo.md` as an item, never as a `TODO` in code. Work in
-  progress is `Status: active` with an `Issue:` link to a GitHub issue that links back
-  (tech.activeWorkHasIssue); `grep -n -B2 '^Status: active' river/todo.md` lists it.
-- **Never resolve a conflict in code**; take it to `decisions.md`.
+- Found or left work goes in `todo.md` at the repository root as an item, never as a `TODO` in
+  code. Work in progress is `Status: active` with an `Issue:` link to a GitHub issue that links back
+  (tech.activeWorkHasIssue); `grep -n -B2 '^Status: active' todo.md` lists it.
+- **Never resolve a conflict in code**; take it to `river/requirements/decisions/`.
 - Cite requirements and criteria in code as `// Verifies: product.scaleToggle. Criterion: app.foo.`
 
 ## Hard rules: licensing
@@ -60,7 +63,7 @@ it running as a foreground or tracked background task; that holds the turn open.
 - **Never fetch or process anything from BirdLife's DataZone**; its terms forbid automated access.
 - **Never commit the built dataset** (tech.datasetNeverCommitted).
 - **Only AVONET, the Fox wingspan data, and AviList may be committed as source data.** Check
-  `river/requirements/imports.md` before adding any other. The generated tables in `data/`
+  `river/requirements/imports/` before adding any other. The generated tables in `data/`
   are committed on purpose.
 - **Third-party files live under `third_party/<name>/`** with their own license, no Apache header;
   provenance in `river/requirements/imported/<origin>/<name>/PROVENANCE.md`.

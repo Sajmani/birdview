@@ -24,7 +24,7 @@ Every number carries one of three kinds, shown on the detail page for any bird:
 
 A `~` in the tile footer marks anything not measured. A modeled value is never presented as a
 measurement; see [the decision on length and wingspan
-sources](../river/requirements/decisions.md#noopenlengthandwingspan).
+sources](../river/requirements/decisions/decisions.md#noopenlengthandwingspan).
 
 **Near-match** applies to nine drawn species that are recent splits AVONET does not yet treat
 separately: American Goshawk, Vega Gull, Hudsonian Whimbrel, Western Cattle-Egret, American Barn
@@ -81,7 +81,7 @@ For the 9,194 species Fox et al. predicted, it matches their published predictio
 1.32%**; a test checks that agreement, so a fault in the fitting code shows up against an external
 reference. Fox et al. give no prediction for species with an empirical value, so there is no
 held-out comparison: the 1.32% is agreement between two models, and the error figures are our own
-cross-validation. See [the decision record](../river/requirements/decisions.md#fittedwingspanmodel).
+cross-validation. See [the decision record](../river/requirements/decisions/decisions.md#fittedwingspanmodel).
 
 Each modeled wingspan states its own error. A passerine reads:
 
@@ -121,7 +121,7 @@ These overrides, and factors on the modeled head, body, and wingspan, are in
 `data/proportions-review.tsv`, each marked proposed or
 reviewed, and a bird's page says which. They are not checked against photographs: almost none shows
 a bird as the figure draws it, body and spread wings in one plane, so every other angle would
-foreshorten some part ([decision](../river/requirements/decisions.md#photoreviewunreliable)).
+foreshorten some part ([decision](../river/requirements/decisions/decisions.md#photoreviewunreliable)).
 They are shown anyway — a heron's page reads *"neck modeled as 0.85 × trunk (family-specific
 ratio for Ardeidae)"* — because every figure draws a neck, and hiding the number would hide only
 the explanation.
@@ -139,7 +139,7 @@ plane, so one scale for both is accurate.
 storks, ibises, flamingos, stilts, rails, loons, grebes — the projection past the tail depends on
 the femur, toes, hip, and *full* tibiotarsus, but AVONET measures only the tarsometatarsus; a leg
 modeled from it gives a White Ibis −14 mm of projection, though its legs visibly trail.
-[The decision record](../river/requirements/decisions.md#inflightnolegs) has the numbers.
+[The decision record](../river/requirements/decisions/decisions.md#inflightnolegs) has the numbers.
 
 **Herons and pelicans get an S-shaped neck**, because they fly with the head drawn back, the field
 mark that separates a heron from a crane, stork, or ibis. Two semicircles fit the full neck length
@@ -163,11 +163,11 @@ finely than eBird (Ruddy Duck, White-necked Petrel, American Barn Owl, which lin
 species), and a second code for eight more. Where a species has two, BirdView shows and links with
 the simpler: fewer digits; if that ties, shorter; so Fork-tailed Swift is `fotswi`, not `fotswi1`.
 Every code finds the species, and `/species/<code>` redirects to its page. See
-[the decision record](../river/requirements/decisions.md#ebirdcodealiases).
+[the decision record](../river/requirements/decisions/decisions.md#ebirdcodealiases).
 
 BirdView **links and never copies**: no photograph, sound, or map is embedded, hotlinked, or
 cached. Until 2026-11-01 the link went to iNaturalist, through a table of taxon IDs matched by
-scientific and common name ([the earlier record](../river/requirements/decisions.md#inaturalistlinkadopted)).
+scientific and common name ([the earlier record](../river/requirements/decisions/decisions.md#inaturalistlinkadopted)).
 
 ## Scope
 
@@ -304,7 +304,7 @@ billion, because zero in a billion records and zero in nine hundred are differen
 GADM covers land, so a beach record carries a country and a record on the water none. A sea's
 denominator is thus comparable with a state's, 44 species are commonest at sea, and selecting
 both double-counts nothing. See
-[the decision record](../river/requirements/decisions.md#honestseadenominator). Bay water also
+[the decision record](../river/requirements/decisions/decisions.md#honestseadenominator). Bay water also
 has no GADM country, so 8.8% of Chesapeake Bay records count as off land, overstating the
 open-ocean figure by roughly 3%.
 
@@ -330,7 +330,7 @@ statement about the bird.
 **The list is checked, not trusted**: it states current policy, while records reflect the policy
 when published, and for 26 of the 230 places it names eBird's records are present anyway. A bird is
 marked withheld only where the records show the gap. See [the decision
-record](../river/requirements/decisions.md#ebirdsilencenotabsence). Because withholding and a
+record](../river/requirements/decisions/decisions.md#ebirdsilencenotabsence). Because withholding and a
 different name both return nothing, names were also checked against every plausible alternative.
 
 **The same bird under another name.** eBird files seven species under names AviList has replaced,
@@ -424,7 +424,7 @@ share near shore, which is why the second threshold is as high as 80%. Caribbean
 fall inside the sea boxes. No natural break separates 77% from 86%, so a few birds near 80% are
 for review: Sabine's Gull passes on its Alaskan tundra and inland reservoir records, and Masked
 Booby misses at 79.5%. The decision is
-[openOceanSplit](../river/requirements/decisions.md#openoceansplit).
+[openOceanSplit](../river/requirements/decisions/decisions.md#openoceansplit).
 
 **The derived rule reads AVONET against itself.** Where AVONET's trophic *level* is `Omnivore` but
 its trophic *niche* names one food, the diet is mixed and the niche names the larger part. For a
@@ -449,7 +449,7 @@ In rough order of how much it would change the picture:
    compact songbirds with little exposed neck. All are judged from flight silhouettes. Böhmer et
    al. 2019 measures the full cervical column, including the part inside the body contour, while
    BirdView models the *exposed* neck, and converting between them needs an unmeasured per-family
-   fraction ([source notes](../river/requirements/imports.md#bohmer-neck)). Vertebra counts
+   fraction ([source notes](../river/requirements/imports/imports.md#bohmer-neck)). Vertebra counts
    are dimensionless: proportions, never millimeters.
 2. **The head model is unvalidated, and the body model is calibrated but not fitted.** The head
    coefficient is fitted against nothing; the trunk exponent rests on *necks and legs*, since no
@@ -465,7 +465,7 @@ In rough order of how much it would change the picture:
 **If you know a source that fixes any of these**, particularly a validation set for head or trunk
 length or an openly licensed body-length dataset, that is the most useful contribution anyone
 could make. Adopting a source follows the process in
-[river/requirements/imports.md](../river/requirements/imports.md) and the
+[river/requirements/imports/imports.md](../river/requirements/imports/imports.md) and the
 source-adoption path in [docs/building.md](building.md).
 
 Corrections are welcome, especially to the biology. Report them on the project's issue tracker.

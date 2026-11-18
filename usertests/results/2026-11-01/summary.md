@@ -43,7 +43,7 @@ the ticks are all that separates the chord from the rest.
 - **Mass changes unit between pages**: the Mallard is 29.8 oz on the home page and 1.9 lb when
   pinned (Dan, Maya, Lena, Funmi).
 - **One mass per species**, no sex or range, for strongly dimorphic raptors (Dan, Funmi, Maya);
-  already [sexSpecificDrawings](../../../river/todo.md#sexspecificdrawings).
+  already [sexSpecificDrawings](../../../todo.md#sexspecificdrawings).
 - **The modeled total length runs short**: the heron's 34.7 in against about 46 in in field guides
   (Dan, Funmi).
 - **Small birds are specks on a phone tile** at the page's shared scale (Maya, Lena).
