@@ -4,6 +4,38 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## tileCornersInCi
+
+**The tile-corner browser check fails in CI at phone width, so `main` has been red since 2026-11-02**
+
+Status: closed
+
+Issue: [#16](https://github.com/google/birdview/issues/16)
+
+Owner: Sameer
+
+Closed: 2026-11-17. `main` is green again at `9e61571` (CI run on the merge of #19). Two causes: the line under the rule reserved a fixed 52px for the eBird link, now the link's own width (`5ded8a7`); and the measurement lines did not fit a 360px tile in wider fonts or in metric, so a tile narrower than its full width now wraps them between measurements ([decisions.measurementLinesWrapOnPhones](river/requirements/decisions/decisions.md#measurementlineswraponphones), #19). The tile check now also runs at 360px in metric and names what sticks out of a tile.
+
+`checks` has failed in its `go test` step on every push to `main` since `391fcd1`, and PR #15 failed
+the same way. `TestNextTileCornerAndRows` reports, at the 360px phone width, the scientific name
+running 1px under the eBird link on 20 tiles, and four tiles with the longest names (`gnlthr`,
+`anpswi`, `vauswi`) 8px wider than their box ([app.nextViewDrawsOneSet](river/requirements/composed/internal/app/acceptance.md#nextviewdrawsoneset),
+[app.ebirdLinkOnTilesAndPages](river/requirements/composed/internal/app/acceptance.md#ebirdlinkontilesandpages)). Likely the runner's fallback fonts are
+slightly wider than where the layout was tuned, and the probe allows no slack. Reproduce in Chrome,
+leave room beside the eBird link and truncate long names rather than widen the tile, and decide
+whether the probe allows 1px of rounding or names the font it assumes. Headless Chrome hangs on the
+agent's cloudtop, so reproducing there needs `--no-sandbox` or a run in CI.
+
+**Reproduced 2026-11-17** on a Mac by substituting DejaVu Sans, a wide Linux fallback, for every
+face but the codes' monospace. Two causes. (1) Fixed: the line under the rule reserved a fixed 52px
+for the eBird link, which is 47px wide in the Mac's system font and 53px in DejaVu; it now reserves
+the link's own width, an invisible copy in the link's type. (2) Open, the owner's call: **the wing
+line does not fit a 360px tile.** Measured with nothing truncated, it overflows on 4 imperial lines
+in the Mac's font and 548 in DejaVu (up to 32px), and in metric on 997 lines in the Mac's font (up
+to 38px) and 1,042 in DejaVu (up to 64px); the checks pass in the Mac's font only because they test
+imperial. Without Inner, every wing line fits in both fonts and both units. Truncating would cut a
+number ("Chord 33…"), which reads as a different value.
+
 ## adoptRiverWithdrawalCascade
 
 **Adopt River's rule for what a withdrawn requirement leaves behind, then clean up and re-approve `app`**
