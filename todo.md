@@ -41,6 +41,16 @@ leave room beside the eBird link and truncate long names rather than widen the t
 whether the probe allows 1px of rounding or names the font it assumes. Headless Chrome hangs on the
 agent's cloudtop, so reproducing there needs `--no-sandbox` or a run in CI.
 
+**Reproduced 2026-11-17** on a Mac by substituting DejaVu Sans, a wide Linux fallback, for every
+face but the codes' monospace. Two causes. (1) Fixed: the line under the rule reserved a fixed 52px
+for the eBird link, which is 47px wide in the Mac's system font and 53px in DejaVu; it now reserves
+the link's own width, an invisible copy in the link's type. (2) Open, the owner's call: **the wing
+line does not fit a 360px tile.** Measured with nothing truncated, it overflows on 4 imperial lines
+in the Mac's font and 548 in DejaVu (up to 32px), and in metric on 997 lines in the Mac's font (up
+to 38px) and 1,042 in DejaVu (up to 64px); the checks pass in the Mac's font only because they test
+imperial. Without Inner, every wing line fits in both fonts and both units. Truncating would cut a
+number ("Chord 33…"), which reads as a different value.
+
 ## scalableInterface
 
 **The interface is sized for North America by state, not for the world by county**

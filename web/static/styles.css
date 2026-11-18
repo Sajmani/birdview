@@ -452,7 +452,11 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
    it. The line keeps room for it. */
 .tilewrap > .ebird { grid-area: 3 / 1 / 4 / 2; justify-self: end; align-self: end;
   margin: 0 11px 0 0; z-index: 1; }
-.tile .idline { padding-right: 52px; }
+/* The line keeps room for the link by holding an invisible copy of it, set in the link's own
+   type, so the room is the link's width in whatever font the reader has rather than a width
+   assumed from one font (product.tileContents). */
+.tile .idline::after { content: "eBird"; visibility: hidden; flex: none; margin-left: auto;
+  padding: 0 6px; border: 1px solid transparent; font-size: 13px; font-weight: 600; }
 .ebird, .ebird:visited { display: inline-flex; align-items: center; height: 22px; padding: 0 6px;
   box-sizing: border-box; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);
   color: var(--ink); font-size: 13px; font-weight: 600; text-decoration: none; }

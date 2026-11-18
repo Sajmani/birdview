@@ -149,6 +149,8 @@ Gates: yes, in `go test ./...` (CI and image build)
 
 Watched failing: 2026-11-01, against the iNaturalist links as they stood ("greblu's tile has no eBird link", "a page still links to an iNaturalist taxon page").
 
+Watched failing: 2026-11-17, in CI and locally with DejaVu Sans substituted for the system font, against the line under the rule reserving a fixed 52px for the eBird link, which is 53px wide in that font ("p-migwar scientific name runs 1px under eBird", on 20 tiles at 360px).
+
 ## app.everySpeciesHasAnEBirdCode
 
 Criterion: [app.everySpeciesHasAnEBirdCode](../requirements/composed/internal/app/acceptance.md#everyspecieshasanebirdcode)
