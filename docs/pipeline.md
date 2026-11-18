@@ -417,7 +417,7 @@ those dates fall into episodes and years it assigns a status: *established*, *ra
 everywhere; iNaturalist's count only in a region and month where eBird is confirmed to withhold
 the species. `status.Declared`, a short list in code, adds species the open records cannot speak
 for, each with its reason. See [where the data comes from](data.md#scope) and the
-[decision to count eBird first](../river/requirements/decisions.md#countebirdfirst).
+[decision to count eBird first](../river/requirements/decisions/decisions.md#countebirdfirst).
 
 **Open ocean or near shore comes from distance to shore.** `birdview-sea` reads the offshore-cells
 download's eBird records, drops each 0.1° cell whose center lies on Natural Earth's land, and bands
@@ -431,7 +431,7 @@ code, and the head and body from mass, unless `data/proportions-review.tsv` has 
 genus or family; a row may also scale a modeled wingspan in step 6, never a measured one. Rows are
 *proposed*, set by judgment, until a source other than photographs supports them; photographs
 foreshorten the parts the figure draws
-([decision](../river/requirements/decisions.md#photoreviewunreliable)).
+([decision](../river/requirements/decisions/decisions.md#photoreviewunreliable)).
 
 **Region counts come from the same source.** `birdview-regions` asks GBIF for every name recorded
 in every region, for the whole year and for each month. For species mostly seen at sea, it also
@@ -485,4 +485,4 @@ depends on it.
 
 - For what each figure means and how far to trust it: [where the data comes from](data.md).
 - For running the pipeline yourself: [building BirdView](building.md).
-- For every source's license, version, and hash: [the source register](../river/requirements/imports.md).
+- For every source's license, version, and hash: [the source register](../river/requirements/imports/imports.md).

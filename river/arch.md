@@ -73,7 +73,7 @@ Enter, and a phone shows a setting's choices under the whole count line).
 The routes: the home page `/`, species pages `/species/<id>`, the guides `/docs/`, `/added`,
 `/excluded`, `/birds.json`, the boundary file under `/boundaries/`, `/robots.txt`, and `/static/`.
 The classic view, `/compare`, and `/now` were removed on 2026-10-27
-([decisions.classicViewRemoved](requirements/decisions.md#classicviewremoved)).
+([decisions.classicViewRemoved](requirements/decisions/decisions.md#classicviewremoved)).
 
 This is what let [app.familyFilterSelectsAndClears](requirements/composed/internal/app/acceptance.md#familyfilterselectsandclears) and [app.unitToggleSwitches](requirements/composed/internal/app/acceptance.md#unittoggleswitches) be real checks rather than declared gaps.
 
@@ -96,13 +96,13 @@ The generators that write those `data/` tables query GBIF (eBird and iNaturalist
 the network; the ingest itself reads only files in the repository. The species link goes to eBird
 by the eBird code AviList supplies, so it needs no table ([product.ebirdLink](requirements/local/product/presentation.md#ebirdlink)).
 
-Resolution order (`resolve` in `cmd/birdview-ingest`) is the substance of [decisions.abaSpeciesWithoutAvonet](requirements/decisions.md#abaspecieswithoutavonet): prefer any row that is genuinely *this* taxon —
+Resolution order (`resolve` in `cmd/birdview-ingest`) is the substance of [decisions.abaSpeciesWithoutAvonet](requirements/decisions/decisions.md#abaspecieswithoutavonet): prefer any row that is genuinely *this* taxon —
 whatever name or sheet it is filed under — over borrowing a relative's measurements. In order: a
-sheet pinned per species (`taxonomy.OwnRowSheets`, [decisions.herringGullEuropeanRow](requirements/decisions.md#herringgulleuropeanrow)); the AviList
+sheet pinned per species (`taxonomy.OwnRowSheets`, [decisions.herringGullEuropeanRow](requirements/decisions/decisions.md#herringgulleuropeanrow)); the AviList
 name in `AVONET2_eBird`; then that name, the name AviList renamed it from, and AVONET's older
 labels, each across the eBird, BirdLife, and BirdTree sheets. All of these are `measured`. Only when
 no such row exists does a near-match to the pre-split parent apply (`taxonomy.NearMatches`, with
-`NearMatchSheets` pinning a narrower sheet, [decisions.whiteTernBorrows](requirements/decisions.md#whiteternborrows)), and the label then says so.
+`NearMatchSheets` pinning a narrower sheet, [decisions.whiteTernBorrows](requirements/decisions/decisions.md#whiteternborrows)), and the label then says so.
 
 ## The invariant that shapes the code
 
@@ -149,15 +149,15 @@ this code's job.
 
 ## Known rough edges
 
-Listed in [todo.md](todo.md) with the rest of the open work, since 2026-10-13.
+Listed in [todo.md](../todo.md) with the rest of the open work, since 2026-10-13.
 
 ## Gotchas
 
 - **The neck/body ratio has no measured basis, and is surfaced anyway** ([product.neckModelPerFamily](requirements/local/product/diagram.md#neckmodelperfamily)).
   The neck length is serialized and shown with `kind: modeled` and a `model` naming the function
   and that family's ratio. Do not drop the model string: naming it is what makes showing the number
-  defensible ([decisions.neckLengthAsMetric](requirements/decisions.md#necklengthasmetric), which
-  superseded [decisions.neckSplitUnmeasured](requirements/decisions.md#necksplitunmeasured)).
+  defensible ([decisions.neckLengthAsMetric](requirements/decisions/decisions.md#necklengthasmetric), which
+  superseded [decisions.neckSplitUnmeasured](requirements/decisions/decisions.md#necksplitunmeasured)).
 - **Per-tile diagram scaling destroys the product** ([product.scaleToggle](requirements/local/product/diagram.md#scaletoggle)). It makes a hummingbird
   and a swan identical on screen. Scale is per-section or global, never per-tile.
 - **The wing crossbar is to scale with the vertical axis** ([product.crossbarAtVerticalScale](requirements/local/product/diagram.md#crossbaratverticalscale)), which
@@ -166,7 +166,7 @@ Listed in [todo.md](todo.md) with the rest of the open work, since 2026-10-13.
   assuming otherwise. Names come from AviList ([product.namesFromAvilist](requirements/local/product/dataset.md#namesfromavilist)); length and wingspan from
   [product.lengthAndWingspanSources](requirements/local/product/measurements.md#lengthandwingspansources).
 - **Scope is recurrence, not abundance** ([product.scopeIsRecurringAvifauna](requirements/local/product/dataset.md#scopeisrecurringavifauna),
-  [decisions.scopeFromRecurrence](requirements/decisions.md#scopefromrecurrence)). A record count measures observer effort, which under-reports
+  [decisions.scopeFromRecurrence](requirements/decisions/decisions.md#scopefromrecurrence)). A record count measures observer effort, which under-reports
   pelagics and island endemics and over-reports vagrants.
 - **Identify the client on outbound requests** ([tech.identifiedClient](requirements/local/tech/delivery.md#identifiedclient)). Go's default user agent
   earns a 403 from Wikimedia.

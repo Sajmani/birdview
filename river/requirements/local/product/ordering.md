@@ -7,12 +7,15 @@ package product
 **One primary metric, user-selected**
 
 Subject: `ordering.metric`
+
 Value: `length | wingspan | mass | bill | tail | frequency`
+
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The user chooses whether the dataset is ordered by total length, wingspan, body mass, bill length,
-tail length, or how often the bird is recorded ([orderByFrequency](presentation.md#orderbyfrequency), [decisions.frequencyMetric](../../decisions.md#frequencymetric)).
+tail length, or how often the bird is recorded ([orderByFrequency](presentation.md#orderbyfrequency), [decisions.frequencyMetric](../../decisions/decisions.md#frequencymetric)).
 
 **Bill and tail are absolute lengths, not proportions.** They are measured for every species; a
 ratio to total length would put modeled values under every ratio, since three of total length's
@@ -23,6 +26,7 @@ segments are modeled from mass.
 **Ascending order**
 
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition)
 
 Species are sorted ascending by the selected metric unless the reader reverses it, **and the page says which way that
@@ -34,21 +38,23 @@ order's summary carries an arrow, and choosing the chosen order again reverses i
 The direction is stated for every metric, not only the one that departs: Frequency ascends a
 reciprocal — *1 in N* rises as the bird gets scarcer — so a reader who has learned "smallest
 first" elsewhere would otherwise read it as a defect. See
-[decisions.frequencyMetric](../../decisions.md#frequencymetric) for why renaming it was declined.
+[decisions.frequencyMetric](../../decisions/decisions.md#frequencymetric) for why renaming it was declined.
 
 ## sectionBreakRule
 
 **Sections break at N% above the section minimum**
 
 Subject: `sectioning.rule`
+
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Under the three size metrics, a new section begins at the first species more than N% larger than
 the **minimum** species of the previous section.
 
 Frequency is banded by decade instead
-([orderByFrequency](presentation.md#orderbyfrequency), [decisions.frequencyMetric](../../decisions.md#frequencymetric)): this rule would give it 128 sections, and its
+([orderByFrequency](presentation.md#orderbyfrequency), [decisions.frequencyMetric](../../decisions/decisions.md#frequencymetric)): this rule would give it 128 sections, and its
 bands would move whenever the region filter did.
 
 Rationale: bird size follows a power law, so fixed-width bins crowd small birds and isolate large
@@ -60,8 +66,11 @@ sections are its tiers ([nextView](presentation.md#nextview)).
 **N defaults to 10 and is adjustable**
 
 Subject: `sectioning.step_percent`
+
 Value: `10`
+
 Applies to: app
+
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The section step N defaults to 10%: a tier holds the birds up to 10% larger than its smallest
@@ -76,6 +85,7 @@ page offers no control for it.
 **Section headers state range and count**
 
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition)
 
 Each tier shows its range in the currently selected metric and the number of birds in it, under
@@ -100,7 +110,9 @@ far apart they are.
 **A histogram shows how many species each tier holds**
 
 Subject: `sectioning.histogram`
+
 Applies to: app
+
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 Above the birds, a histogram has one bar per tier, in tier order, each as tall as its

@@ -153,7 +153,7 @@ func section(text, ident string) string {
 //
 // Verifies: tech.activeWorkHasIssue. Criterion: repo.activeTodoHasIssue.
 func TestActiveTodoHasIssue(t *testing.T) {
-	b, err := os.ReadFile(filepath.Join("..", "todo.md"))
+	b, err := os.ReadFile(filepath.Join("..", "..", "todo.md"))
 	if err != nil {
 		t.Fatal(err)
 	}

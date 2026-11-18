@@ -1,9 +1,11 @@
+package precedence
+
 # Precedence — BirdView
 
 The standing rules for which source outranks which. Highest first. Composition uses this to resolve
 a conflict mechanically; anything it cannot resolve escalates to a person and is recorded in
-[decisions.md](decisions.md). Each source's tier, and why, is in its entry in
-[imports.md](imports.md).
+[decisions.md](../decisions/decisions.md). Each source's tier, and why, is in its entry in
+[imports.md](../imports/imports.md).
 
 | Tier | Sources | Why |
 | --- | --- | --- |

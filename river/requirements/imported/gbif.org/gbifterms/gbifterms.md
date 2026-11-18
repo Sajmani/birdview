@@ -4,7 +4,7 @@ package gbifterms
 
 Tier: **mandatory**. Scope: BirdView's use of data obtained through GBIF: today, eBird and
 iNaturalist occurrence counts read from GBIF's occurrence search API, and GADM and taxon lookups;
-proposed, SQL occurrence downloads ([todo.countyRegions](../../../../todo.md#countyregions)).
+proposed, SQL occurrence downloads ([todo.countyRegions](../../../../../todo.md#countyregions)).
 
 GBIF's terms govern access and attribution; **the licenses of the datasets prevail over them**
 ([PublisherLicencesPrevail](#publisherlicencesprevail)), so the two datasets' own licenses are
@@ -54,7 +54,7 @@ the page footer and the data guide. Several downloads are each cited, or listed 
 > as an easy way of obtaining a DOI for citing the data."
 > — Citation guidelines, GBIF data accessed using third-party tools
 
-**For BirdView: applies today, and met by citing the publishers** ([decisions.gbifTermsMet](../../../decisions.md#gbiftermsmet)).
+**For BirdView: applies today, and met by citing the publishers** ([decisions.gbifTermsMet](../../../decisions/decisions.md#gbiftermsmet)).
 BirdView's region presence, recurrence, and counts come from the occurrence search API, so no DOI
 covers them. The home page's credits cite both datasets by publisher, title, DOI as a URL, and
 "accessed via GBIF.org", with the dates retrieved ([product.selfDescriptionStaysTrue](../../../local/product/presentation.md#selfdescriptionstaystrue)). A derived
@@ -74,9 +74,9 @@ this with [CiteDownloadDoi](#citedownloaddoi) for whatever the downloads cover.
 **For BirdView: the licenses differ, and one is non-commercial.** The eBird Observation Dataset is
 CC BY 4.0. iNaturalist's research-grade observations are **CC BY-NC 4.0** (both from the datasets'
 GBIF records, `api.gbif.org/v1/dataset/{key}`, read 2026-11-03). BirdView already counts
-iNaturalist records where eBird withholds a species ([decisions.countEbirdFirst](../../../decisions.md#countebirdfirst)), so the
+iNaturalist records where eBird withholds a species ([decisions.countEbirdFirst](../../../decisions/decisions.md#countebirdfirst)), so the
 non-commercial term reaches it now, not only with downloads. **BirdView is non-commercial**
-([tech.localNowPublicLater](../../../local/tech/posture.md#localnowpubliclater), confirmed in [decisions.gbifTermsMet](../../../decisions.md#gbiftermsmet)), so it may count them, and every page
+([tech.localNowPublicLater](../../../local/tech/posture.md#localnowpubliclater), confirmed in [decisions.gbifTermsMet](../../../decisions/decisions.md#gbiftermsmet)), so it may count them, and every page
 showing their output names each dataset's own license.
 
 ## RetainOwnershipIdentifier
@@ -88,7 +88,7 @@ showing their output names each dataset's own license.
 > — Data user agreement, Provisions, 2
 
 **Not applicable as written.** BirdView shares no occurrence record onward: no coordinate, date,
-observer, or record reaches its dataset ([imports.gbif](../../../imports.md#gbif)), only per-region lists and counts
+observer, or record reaches its dataset ([imports.gbif](../../../imports/imports.md#gbif)), only per-region lists and counts
 derived from them. If it ever publishes records, each keeps its `datasetKey`, which the citation
 guidelines also ask be preserved through filtering.
 
@@ -126,7 +126,7 @@ credentials never enter the repository.
 > — Data user agreement, Provisions, 1
 
 **For BirdView: informative.** It is why BirdView measures what it derives rather than trusting it
-([decisions.ebirdSilenceNotAbsence](../../../decisions.md#ebirdsilencenotabsence)), and why its pipeline
+([decisions.ebirdSilenceNotAbsence](../../../decisions/decisions.md#ebirdsilencenotabsence)), and why its pipeline
 retries and records retrieval dates.
 
 ## Not adopted

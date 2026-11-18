@@ -7,8 +7,11 @@ package product
 **Segment composition**
 
 Subject: `diagram.segments`
+
 Value: `bill, head, neck, body, tail, wing crossbar`
+
 Applies to: app
+
 Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The diagram is a top-down view of a bird in flight, drawn as a vertical cross: top to bottom a bill
@@ -17,12 +20,12 @@ wings. The tail is visibly distinguished from the body; the neck is an S where t
 in flight; there are no legs.
 
 The flight premise is stated because leaving it unstated made the leg question unanswerable; see
-[decisions.inFlightNoLegs](../../decisions.md#inflightnolegs).
+[decisions.inFlightNoLegs](../../decisions/decisions.md#inflightnolegs).
 
 **Readers are told it is a stick figure.** Text BirdView serves to readers calls the drawing a
 *stick figure*, usually *drawn to scale* where it is introduced, and *the figure* or *the drawing*
 after that. *Diagram* stays the word in this spec and in the code, and on the site it means only
-the data-pipeline diagram ([pipelineDiagram](measurements.md#pipelinediagram)); see [decisions.stickFigure](../../decisions.md#stickfigure).
+the data-pipeline diagram ([pipelineDiagram](measurements.md#pipelinediagram)); see [decisions.stickFigure](../../decisions/decisions.md#stickfigure).
 
 The tail is distinguished from the body by stroke style, color, and a mark at the junction between
 them. Under measuredVersusModeled the tail is measured and so solid, the body modeled and so
@@ -32,13 +35,13 @@ dashed; the junction mark carries the distinction on its own if the two ever sha
 with the head drawn back onto the shoulders, and for those the neck is drawn as an **S of two
 semicircular arcs**. The stroke is still exactly the neck long at the diagram's scale, so it
 occupies `2/π ≈ 63.7%` of that length vertically — a consequence of the shape, not a chosen
-parameter; see [decisions.foldedNeckAsS](../../decisions.md#foldedneckass).
+parameter; see [decisions.foldedNeckAsS](../../decisions/decisions.md#foldedneckass).
 
 **There are no legs.** Most birds tuck them in flight, and for those that trail them — herons,
 cranes, storks, ibises, flamingos, stilts, rails, loons, grebes — what shows is the projection past
 the tail tip. That depends on the femur, the toes, and the hip's position, which no source
 measures, and on the feathered tibiotarsus, which a standing-posture leg model leaves out.
-[decisions.inFlightNoLegs](../../decisions.md#inflightnolegs) records the evidence and
+[decisions.inFlightNoLegs](../../decisions/decisions.md#inflightnolegs) records the evidence and
 what the removal costs.
 
 Rationale: the tail is a stick rather than a triangle because no trait in any source gives a tail
@@ -49,7 +52,9 @@ width, and a triangle would assert a fan shape the data does not support.
 **Segments abut exactly and sum to total length**
 
 Subject: `diagram.segments.sum`
+
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The five vertical segments meet without gap or overlap, and their lengths sum to the species'
@@ -63,22 +68,26 @@ vertical extent of 827 of 841 species. The folded-neck families of segmentCompos
 than their cataloged length, because the S occupies less height than the neck is long. Everything
 that treats length as data — ordering, sectioning, the scale reference of scaleToggle, and the
 detail view — uses the full total length, so comparability is unaffected. See
-[decisions.foldedNeckAsS](../../decisions.md#foldedneckass).
+[decisions.foldedNeckAsS](../../decisions/decisions.md#foldedneckass).
 
 ## scaleToggle
 
 **Scale is a user toggle, defaulting to per-section**
 
 Subject: `diagram.scale.mode`
+
 Value: `per-section (default) | global; global is the default under Frequency, Bill and Tail`
+
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
-Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
+
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
 
 The user switches between a single scale across the entire filtered set, and a scale shared by all
 species within a section. **Per-section is the default, and is listed first.**
 
-**Except under Frequency, where global is the default** ([decisions.frequencyGlobalScale](../../decisions.md#frequencyglobalscale)).
+**Except under Frequency, where global is the default** ([decisions.frequencyGlobalScale](../../decisions/decisions.md#frequencyglobalscale)).
 Per-section scaling relies on [sectionBreakRule](ordering.md#sectionbreakrule) bounding a section's width, and a frequency tier
 has no such bound: one tier runs from 72 mm to 1,201 mm, and the single 140 mm bird in the last
 tier would be drawn the height of the 1,201 mm Trumpeter Swan six tiers above it. Both choices stay one click away under either ordering.
@@ -96,7 +105,7 @@ tile — makes a hummingbird and a swan identical on screen.
 
 Per-section is the default because at global scale a median bird is a few pixels tall, too small
 to show the stroke styles of measuredVersusModeled, the chord ticks, or the labels of
-labeledDetailDiagram ([decisions.perSectionDefault](../../decisions.md#persectiondefault)). Global still makes the cross-family comparison
+labeledDetailDiagram ([decisions.perSectionDefault](../../decisions/decisions.md#persectiondefault)). Global still makes the cross-family comparison
 best, and stays one click away and named first in the help.
 
 ## crossbarAtVerticalScale
@@ -104,8 +113,11 @@ best, and stays one click away and named first in the help.
 **The wing crossbar is drawn at the vertical scale**
 
 Subject: `diagram.wingspan.scale`
+
 Value: `same as vertical axis`
+
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The crossbar's length represents wingspan at the same scale as the vertical axis, so its length
@@ -120,6 +132,7 @@ authoritative.
 **Proportion differentiates species**
 
 Applies to: app
+
 Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 A species' drawn proportions distinguish it by shape, not only by size: a dowitcher reads as
@@ -130,13 +143,16 @@ long-billed, an accipiter as long-tailed, a heron as long-necked.
 **The cranium is modeled from mass**
 
 Subject: `diagram.head_model`
+
 Value: `isometric on mass`
+
 Applies to: dataset
+
 Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Head length scales isometrically with body mass, **times a per-family factor for a family whose
 head is visibly smaller than its mass implies**: the grebes, heavy-bodied birds with small heads
-([decisions.duckAndGrebeProportions](../../decisions.md#duckandgrebeproportions)). Like every modeled
+([decisions.duckAndGrebeProportions](../../decisions/decisions.md#duckandgrebeproportions)). Like every modeled
 value it names its function and any factor applied (provenancePerMetric) and claims no measurement.
 The factors live in `data/proportions-review.tsv` beside the neck ratios.
 
@@ -148,7 +164,7 @@ default. There is deliberately **no floor**: a floor would only conceal a bad co
 Known limitation: birds of similar mass get similar heads, so within a size tier the shape signal
 comes from bill, tail, neck, and wingspan.
 
-**[decisions.trunkExponentCalibrated](../../decisions.md#trunkexponentcalibrated) leaves the cube root alone.** Single skeletal elements
+**[decisions.trunkExponentCalibrated](../../decisions/decisions.md#trunkexponentcalibrated) leaves the cube root alone.** Single skeletal elements
 scale at 0.314–0.325, chains of them higher; the head is one element and keeps 1/3, the trunk is a
 chain and does not. See [trunkFromMass](#trunkfrommass).
 
@@ -161,19 +177,22 @@ stands unvalidated. It is no longer moot: Emu, now in scope at 34 kg, draws a 24
 **The trunk is modeled allometrically from mass**
 
 Subject: `diagram.trunk_model`
+
 Value: `14.0329 x mass^0.37`
+
 Applies to: dataset
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Trunk length scales with body mass by a power law, **times a per-genus or per-family factor where
 the proportions review sets one** (`data/proportions-review.tsv`,
-[decisions.allModeledProportionsReviewed](../../decisions.md#allmodeledproportionsreviewed)). Like
+[decisions.allModeledProportionsReviewed](../../decisions/decisions.md#allmodeledproportionsreviewed)). Like
 every modeled value it names its function and any factor (provenancePerMetric) and claims no
 measurement.
 
 The **exponent is calibrated against measured skeletons** rather than chosen. It must lie inside
 the 95% confidence interval that published skeletal data give for a *multi-element* linear
-dimension ([`bohmer-neck`](../../imports.md#bohmer-neck)) — **0.338 to 0.401**, the intersection of the
+dimension ([`bohmer-neck`](../../imports/imports.md#bohmer-neck)) — **0.338 to 0.401**, the intersection of the
 intervals for neck length and total leg length. Single bones scale near isometry, chains of them
 higher, and a trunk is a chain.
 
@@ -188,21 +207,24 @@ decision, recorded as one.
 Rationale: three of the five segments are driven by mass, so this exponent governs how much longer
 a big bird is drawn than a small one, which is what [goals.sizeIntuition](../../../goals/goals.md#sizeintuition) exists to convey. The
 original unvalidated 0.31 understated the large end of the current scope by about 1.65×. See
-[decisions.trunkExponentCalibrated](../../decisions.md#trunkexponentcalibrated) for the measurement, and for what it does not establish.
+[decisions.trunkExponentCalibrated](../../decisions/decisions.md#trunkexponentcalibrated) for the measurement, and for what it does not establish.
 
 ## neckModelPerFamily
 
 **The neck/body split is a named per-family model**
 
 Subject: `diagram.neck_ratio`
+
 Value: `per-family modeling function`
+
 Applies to: dataset
+
 Goals: [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.honestData](../../../goals/goals.md#honestdata)
 
 The division of the remaining body axis between neck and body uses a per-family ratio, **overridden
 for a genus whose birds fly with a visibly different neck from the rest of their family**, as the
 diving ducks do among the long-necked geese and swans
-([decisions.duckAndGrebeProportions](../../decisions.md#duckandgrebeproportions)). The
+([decisions.duckAndGrebeProportions](../../decisions/decisions.md#duckandgrebeproportions)). The
 resulting **neck length is presented as a metric like any other**, in the detail view, carrying a
 provenance record whose `kind` is `modeled` and whose `model` **names the specific function and
 the ratio applied to that bird's family or genus** — for example, "per-family neck ratio, Ardeidae =
@@ -211,21 +233,23 @@ the ratio applied to that bird's family or genus** — for example, "per-family 
 The family table is recorded in the code with this requirement cited beside it. **Genus and family
 overrides live in `data/proportions-review.tsv`**, one row per taxon with its neck ratio, head factor, a
 reason, and whether the owner has reviewed it; the provenance names the row and says which
-([decisions.proportionsReviewedPerTaxon](../../decisions.md#proportionsreviewedpertaxon)). A
+([decisions.proportionsReviewedPerTaxon](../../decisions/decisions.md#proportionsreviewedpertaxon)). A
 proposed row is drawn, since every figure needs a neck, and says it is not yet reviewed.
 
 Rationale: no source measures avian neck length at this coverage, and one ratio for every species
 would make every bird the same shape, defeating [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize). Naming the per-family
 constant is what makes it acceptable: the reader sees the neck either way, and can read the exact
-function that drew it. Supersedes the condition in [decisions.neckSplitUnmeasured](../../decisions.md#necksplitunmeasured); see
-[decisions.neckLengthAsMetric](../../decisions.md#necklengthasmetric).
+function that drew it. Supersedes the condition in [decisions.neckSplitUnmeasured](../../decisions/decisions.md#necksplitunmeasured); see
+[decisions.neckLengthAsMetric](../../decisions/decisions.md#necklengthasmetric).
 
 ## oneDiagramVocabulary
 
 **One diagram vocabulary, on every surface that draws one**
 
 Subject: `diagram.vocabulary.shared`
+
 Applies to: app
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Three surfaces draw the diagram: the **favicon**, the **home page**'s tiles, and the **detail
@@ -236,7 +260,7 @@ three.
 crossbar, wing chord, mass cube — has one color, and every surface uses that color for that part. A surface
 may not pick its own shade of a part, however good its local reason.
 
-**The colors** ([decisions.partColorsRevised](../../decisions.md#partcolorsrevised), [decisions.massCubeSkyBlue](../../decisions.md#masscubeskyblue)): **bill** amber `#fbbf24`, **tail** white `#ffffff`, **crossbar**
+**The colors** ([decisions.partColorsRevised](../../decisions/decisions.md#partcolorsrevised), [decisions.massCubeSkyBlue](../../decisions/decisions.md#masscubeskyblue)): **bill** amber `#fbbf24`, **tail** white `#ffffff`, **crossbar**
 emerald `#34d399`, **chord**, the crossbar's measured outer segments, orchid `#ffc7f7`, ending at
 the ticks, **mass cube** sky blue `#7dd3fc`, and gray for the modeled head and neck `#94a3b8` and body
 `#64748b`. All strokes are thin. **Every part color is also a text color**, clearing 7:1 on the page and the panel
@@ -269,8 +293,11 @@ fork it.
 **The reader chooses which English name, and the URL does not change**
 
 Subject: `presentation.names.locale`
+
 Value: `na (default) | world`
+
 Applies to: app
+
 Goals: [goals.shareableViews](../../../goals/goals.md#shareableviews), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 A setting beside Units, **Names**, chooses between North American English names (eBird/Clements,
@@ -313,7 +340,8 @@ is one of the two reasons namesFromAvilist drops them.
 **Species photographs**
 
 Applies to: app
-Status: **Withdrawn from v1.** See [decisions.photographsWithdrawn](../../decisions.md#photographswithdrawn) for the research and the reasons
+
+Status: **Withdrawn from v1.** See [decisions.photographsWithdrawn](../../decisions/decisions.md#photographswithdrawn) for the research and the reasons
 it is deferred rather than abandoned.
 
 ## perchedOrInFlight
@@ -321,6 +349,7 @@ it is deferred rather than abandoned.
 **Perched and in-flight selection**
 
 Applies to: app
+
 Status: **Withdrawn from v1** with speciesPhotographs. Note for whoever revives it: Wikimedia Commons has
 per-species `in flight` categories but no "perched" equivalent, so the design must treat in-flight
 as a positive filter and perched as the residual default.
@@ -330,6 +359,7 @@ as a positive filter and perched as the residual default.
 **Photograph attribution**
 
 Applies to: app
+
 Status: **Withdrawn from v1** with speciesPhotographs.
 
 ## photoCaching
@@ -337,4 +367,5 @@ Status: **Withdrawn from v1** with speciesPhotographs.
 **Local caching of photographs**
 
 Applies to: app
+
 Status: **Withdrawn from v1** with speciesPhotographs.

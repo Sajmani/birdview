@@ -4,13 +4,13 @@ package app
 
 **Composed, not authored.** Change it by changing a source and recomposing, never by editing files in
 this directory by hand. Composed from `wcag`, `product`, `tech`, and `decisions` under
-[precedence.md](../../../precedence.md); approvals are recorded in
-[approvals.md](../../../approvals.md).
+[precedence.md](../../../precedence/precedence.md); its
+`composed.sum`, written by `river compose`, records what it was composed from.
 
 Everything the BirdView web application (`cmd/birdview`, `web/`, `docs/`, and
 `cmd/birdview-boundaries`) must satisfy. Its acceptance criteria are in [`acceptance.md`](acceptance.md),
 and the guardrails and verification observations covering them are in
-[conformance.md](../../../../conformance.md).
+[conformance.md](../../../../conformance/conformance.md).
 
 ## Composed from
 
@@ -29,9 +29,9 @@ and the guardrails and verification observations covering them are in
 | [`gbifterms`](../../../imported/gbif.org/gbifterms/gbifterms.md) | mandatory (page-credit clauses) | GBIF Data User Agreement (15 September 2026) and Citation Guidelines; SHA-256 in [PROVENANCE.md](../../../imported/gbif.org/gbifterms/PROVENANCE.md) |
 | [`product`](../../../local/product/product.md) | local | the commit this file is in |
 | [`tech`](../../../local/tech/tech.md) | local | the commit this file is in |
-| [`decisions`](../../../decisions.md) | — | the commit this file is in |
+| [`decisions`](../../../decisions/decisions.md) | — | the commit this file is in |
 
-Precedence is the ranking in [precedence.md](../../../precedence.md): a mandatory source beats a
+Precedence is the ranking in [precedence.md](../../../precedence/precedence.md): a mandatory source beats a
 local one. **No conflict arose.** BirdView's local requirements only tighten what WCAG and source
 licenses ask, which a lower tier may do.
 
@@ -119,23 +119,23 @@ licenses ask, which a lower tier may do.
 
 ## Excluded requirements
 
-- [product.speciesPhotographs](../../../local/product/diagram.md#speciesphotographs) *(excluded)* — Species photographs. Excluded by [decisions.photographsWithdrawn](../../../decisions.md#photographswithdrawn)
-- [product.perchedOrInFlight](../../../local/product/diagram.md#perchedorinflight) *(excluded)* — Perched and in-flight selection. Excluded by [decisions.photographsWithdrawn](../../../decisions.md#photographswithdrawn)
-- [product.photoAttribution](../../../local/product/diagram.md#photoattribution) *(excluded)* — Photograph attribution. Excluded by [decisions.photographsWithdrawn](../../../decisions.md#photographswithdrawn)
-- [product.photoCaching](../../../local/product/diagram.md#photocaching) *(excluded)* — Local caching of photographs. Excluded by [decisions.photographsWithdrawn](../../../decisions.md#photographswithdrawn)
-- [product.comparisonOneScale](../../../local/product/presentation.md#comparisononescale) *(excluded)* — A comparison view holds several birds to one scale. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
-- [product.pickFromIndex](../../../local/product/presentation.md#pickfromindex) *(excluded)* — Birds are picked for comparison from the index, and the picks are the mode. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
-- [product.collapsibleControls](../../../local/product/presentation.md#collapsiblecontrols) *(excluded)* — The controls collapse. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
-- [product.togglesKeepPlace](../../../local/product/presentation.md#toggleskeepplace) *(excluded)* — Toggling a control keeps your place. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
-- [product.onlyPerGroup](../../../local/product/presentation.md#onlypergroup) *(excluded)* — Every group offers "Only". Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
-- [product.helpfulEmptyState](../../../local/product/presentation.md#helpfulemptystate) *(excluded)* — The empty state says what to do. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
-- [product.pageExplainsItself](../../../local/product/presentation.md#pageexplainsitself) *(excluded)* — The page explains itself. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
-- [product.firstLoadShowsAll](../../../local/product/presentation.md#firstloadshowsall) *(excluded)* — First load shows everything. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
-- [product.searchBox](../../../local/product/filtering.md#searchbox) *(excluded)* — A search box narrows the index as you type. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
-- [product.scaleToggle](../../../local/product/diagram.md#scaletoggle) *(excluded)* — Scale is a user toggle, defaulting to per-section. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
-- [product.nowSelectsCurrentMonth](../../../local/product/filtering.md#nowselectscurrentmonth) *(excluded)* — Now selects the current month. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
-- [product.regionsGroupedTwoWays](../../../local/product/months.md#regionsgroupedtwoways) *(excluded)* — Regions are grouped two ways. Excluded by [decisions.classicViewRemoved](../../../decisions.md#classicviewremoved)
-- [product.inaturalistLink](../../../local/product/presentation.md#inaturalistlink) *(excluded)* — The detail view and every tile link to the species on iNaturalist. Excluded by [decisions.ebirdLinkReplacesInaturalist](../../../decisions.md#ebirdlinkreplacesinaturalist)
+- [product.speciesPhotographs](../../../local/product/diagram.md#speciesphotographs) *(excluded)* — Species photographs. Excluded by [decisions.photographsWithdrawn](../../../decisions/decisions.md#photographswithdrawn)
+- [product.perchedOrInFlight](../../../local/product/diagram.md#perchedorinflight) *(excluded)* — Perched and in-flight selection. Excluded by [decisions.photographsWithdrawn](../../../decisions/decisions.md#photographswithdrawn)
+- [product.photoAttribution](../../../local/product/diagram.md#photoattribution) *(excluded)* — Photograph attribution. Excluded by [decisions.photographsWithdrawn](../../../decisions/decisions.md#photographswithdrawn)
+- [product.photoCaching](../../../local/product/diagram.md#photocaching) *(excluded)* — Local caching of photographs. Excluded by [decisions.photographsWithdrawn](../../../decisions/decisions.md#photographswithdrawn)
+- [product.comparisonOneScale](../../../local/product/presentation.md#comparisononescale) *(excluded)* — A comparison view holds several birds to one scale. Excluded by [decisions.classicViewRemoved](../../../decisions/decisions.md#classicviewremoved)
+- [product.pickFromIndex](../../../local/product/presentation.md#pickfromindex) *(excluded)* — Birds are picked for comparison from the index, and the picks are the mode. Excluded by [decisions.classicViewRemoved](../../../decisions/decisions.md#classicviewremoved)
+- [product.collapsibleControls](../../../local/product/presentation.md#collapsiblecontrols) *(excluded)* — The controls collapse. Excluded by [decisions.classicViewRemoved](../../../decisions/decisions.md#classicviewremoved)
+- [product.togglesKeepPlace](../../../local/product/presentation.md#toggleskeepplace) *(excluded)* — Toggling a control keeps your place. Excluded by [decisions.classicViewRemoved](../../../decisions/decisions.md#classicviewremoved)
+- [product.onlyPerGroup](../../../local/product/presentation.md#onlypergroup) *(excluded)* — Every group offers "Only". Excluded by [decisions.classicViewRemoved](../../../decisions/decisions.md#classicviewremoved)
+- [product.helpfulEmptyState](../../../local/product/presentation.md#helpfulemptystate) *(excluded)* — The empty state says what to do. Excluded by [decisions.classicViewRemoved](../../../decisions/decisions.md#classicviewremoved)
+- [product.pageExplainsItself](../../../local/product/presentation.md#pageexplainsitself) *(excluded)* — The page explains itself. Excluded by [decisions.classicViewRemoved](../../../decisions/decisions.md#classicviewremoved)
+- [product.firstLoadShowsAll](../../../local/product/presentation.md#firstloadshowsall) *(excluded)* — First load shows everything. Excluded by [decisions.classicViewRemoved](../../../decisions/decisions.md#classicviewremoved)
+- [product.searchBox](../../../local/product/filtering.md#searchbox) *(excluded)* — A search box narrows the index as you type. Excluded by [decisions.classicViewRemoved](../../../decisions/decisions.md#classicviewremoved)
+- [product.scaleToggle](../../../local/product/diagram.md#scaletoggle) *(excluded)* — Scale is a user toggle, defaulting to per-section. Excluded by [decisions.classicViewRemoved](../../../decisions/decisions.md#classicviewremoved)
+- [product.nowSelectsCurrentMonth](../../../local/product/filtering.md#nowselectscurrentmonth) *(excluded)* — Now selects the current month. Excluded by [decisions.classicViewRemoved](../../../decisions/decisions.md#classicviewremoved)
+- [product.regionsGroupedTwoWays](../../../local/product/months.md#regionsgroupedtwoways) *(excluded)* — Regions are grouped two ways. Excluded by [decisions.classicViewRemoved](../../../decisions/decisions.md#classicviewremoved)
+- [product.inaturalistLink](../../../local/product/presentation.md#inaturalistlink) *(excluded)* — The detail view and every tile link to the species on iNaturalist. Excluded by [decisions.ebirdLinkReplacesInaturalist](../../../decisions/decisions.md#ebirdlinkreplacesinaturalist)
 
 ---
 
@@ -146,12 +146,13 @@ licenses ask, which a lower tier may do.
 **Every BirdView web page meets WCAG 1.4.6 in full, without the large-text allowance**
 
 Composed from: [wcag.WebPage](../../../imported/w3.org/wcag/wcag.md#webpage), [wcag.FullPages](../../../imported/w3.org/wcag/wcag.md#fullpages), [wcag.ContrastRatio](../../../imported/w3.org/wcag/wcag.md#contrastratio), [wcag.ContrastMinimum](../../../imported/w3.org/wcag/wcag.md#contrastminimum), [wcag.ContrastEnhanced](../../../imported/w3.org/wcag/wcag.md#contrastenhanced), [tech.webPages](../../../local/tech/accessibility.md#webpages),
-  [decisions.oneContrastFloor](../../../decisions.md#onecontrastfloor)
+  [decisions.oneContrastFloor](../../../decisions/decisions.md#onecontrastfloor)
+
 Goals: [goals.openToEveryone](../../../../goals/goals.md#opentoeveryone)
 
 Every web page, as [tech.webPages](../../../local/tech/accessibility.md#webpages) defines one, meets [wcag.ContrastEnhanced](../../../imported/w3.org/wcag/wcag.md#contrastenhanced) over every part of the
 page ([wcag.FullPages](../../../imported/w3.org/wcag/wcag.md#fullpages)), measured as [wcag.ContrastRatio](../../../imported/w3.org/wcag/wcag.md#contrastratio) defines. All text is held to 7:1, large text
-included: [wcag.ContrastEnhanced](../../../imported/w3.org/wcag/wcag.md#contrastenhanced) allows 4.5:1 for large text, and [decisions.oneContrastFloor](../../../decisions.md#onecontrastfloor) gives
+included: [wcag.ContrastEnhanced](../../../imported/w3.org/wcag/wcag.md#contrastenhanced) allows 4.5:1 for large text, and [decisions.oneContrastFloor](../../../decisions/decisions.md#onecontrastfloor) gives
 that up. Meeting this meets [wcag.ContrastMinimum](../../../imported/w3.org/wcag/wcag.md#contrastminimum) too.
 
 **No page is excepted.** A page that sets no colors, such as a plain-text error response, is drawn
@@ -162,6 +163,7 @@ in the reader's own colors and meets this with nothing to measure.
 **Every BirdView web page meets WCAG 1.4.11 in full**
 
 Composed from: [wcag.WebPage](../../../imported/w3.org/wcag/wcag.md#webpage), [wcag.FullPages](../../../imported/w3.org/wcag/wcag.md#fullpages), [wcag.NonTextContrast](../../../imported/w3.org/wcag/wcag.md#nontextcontrast), [tech.webPages](../../../local/tech/accessibility.md#webpages)
+
 Goals: [goals.openToEveryone](../../../../goals/goals.md#opentoeveryone)
 
 Every web page meets [wcag.NonTextContrast](../../../imported/w3.org/wcag/wcag.md#nontextcontrast) over every part of the page: the graphics a reader needs
@@ -172,6 +174,7 @@ to read a diagram, and the controls and their states, have 3:1 against adjacent 
 **The stylesheet and the palette carry text contrast for every page that uses only them**
 
 Composed from: [tech.textContrastFloor](../../../local/tech/accessibility.md#textcontrastfloor), [tech.badgeContrast](../../../local/tech/accessibility.md#badgecontrast), [wcag.ContrastRatio](../../../imported/w3.org/wcag/wcag.md#contrastratio)
+
 Goals: [goals.openToEveryone](../../../../goals/goals.md#opentoeveryone)
 
 The stylesheet meets pagesMeetTextContrast for any page that takes its colors from it, so that
@@ -194,7 +197,8 @@ requirement is checked once on the stylesheet rather than once per page.
 **Every page credits the CC BY and GBIF sources whose output it shows, naming each dataset's license and DOI**
 
 Composed from: [gbifterms.CiteApiDataByDerivedDataset](../../../imported/gbif.org/gbifterms/gbifterms.md#citeapidatabyderiveddataset), [gbifterms.CiteDownloadDoi](../../../imported/gbif.org/gbifterms/gbifterms.md#citedownloaddoi), [gbifterms.PublisherLicencesPrevail](../../../imported/gbif.org/gbifterms/gbifterms.md#publisherlicencesprevail), [tech.localNowPublicLater](../../../local/tech/posture.md#localnowpubliclater),
-  [decisions.gbifTermsMet](../../../decisions.md#gbiftermsmet), [decisions.riverV2PackagesAndSplits](../../../decisions.md#riverv2packagesandsplits)
+  [decisions.gbifTermsMet](../../../decisions/decisions.md#gbiftermsmet), [decisions.riverV2PackagesAndSplits](../../../decisions/decisions.md#riverv2packagesandsplits)
+
 Goals: [goals.goodDataCitizen](../../../../goals/goals.md#gooddatacitizen), [goals.honestData](../../../../goals/goals.md#honestdata)
 
 Every CC BY source whose output appears on a page is credited on that page: AviList, AVONET, and Fox
@@ -204,5 +208,5 @@ dataset is credited with its own prevailing license ([gbifterms.PublisherLicence
 [tech.localNowPublicLater](../../../local/tech/posture.md#localnowpubliclater)) — the eBird Observation Dataset under CC BY 4.0 and iNaturalist's
 research-grade observations under CC BY-NC 4.0 — wherever its output appears, and in the home page's
 credits by publisher, title, DOI as a URL, retrieval date, and "accessed via GBIF.org"
-([gbifterms.CiteApiDataByDerivedDataset](../../../imported/gbif.org/gbifterms/gbifterms.md#citeapidatabyderiveddataset), [decisions.gbifTermsMet](../../../decisions.md#gbiftermsmet)). Any GBIF download used is cited by its
+([gbifterms.CiteApiDataByDerivedDataset](../../../imported/gbif.org/gbifterms/gbifterms.md#citeapidatabyderiveddataset), [decisions.gbifTermsMet](../../../decisions/decisions.md#gbiftermsmet)). Any GBIF download used is cited by its
 own DOI URL ([gbifterms.CiteDownloadDoi](../../../imported/gbif.org/gbifterms/gbifterms.md#citedownloaddoi)).

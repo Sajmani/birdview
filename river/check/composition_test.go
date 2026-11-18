@@ -38,7 +38,8 @@ func packageItems(t *testing.T) (map[string]pkgItem, map[string]bool) {
 	t.Helper()
 	bundle, _ := filepath.Abs("..")
 	req := filepath.Join(bundle, "requirements")
-	files := map[string][]string{"decisions": {filepath.Join(req, "decisions.md")}}
+	decisions, _ := filepath.Glob(filepath.Join(req, "decisions", "*.md"))
+	files := map[string][]string{"decisions": decisions}
 	local, _ := filepath.Glob(filepath.Join(req, "local", "*", "*.md"))
 	imported, _ := filepath.Glob(filepath.Join(req, "imported", "*", "*", "*.md"))
 	composed, _ := filepath.Glob(filepath.Join(req, "composed", "*", "*", "*.md"))

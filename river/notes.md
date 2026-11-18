@@ -1,6 +1,6 @@
 # Background notes
 
-Design notes that items in [todo.md](todo.md) and [todo-closed.md](todo-closed.md) refer to, moved
+Design notes that items in [todo.md](../todo.md) and [todo-closed.md](../todo-closed.md) refer to, moved
 from decisions.md on 2026-10-13. Search `## <heading>`; `grep -n '^## ' river/notes.md` lists them.
 
 Design notes the rows above refer to, moved here from decisions.md with the list on 2026-10-13.
@@ -81,7 +81,7 @@ scale is the default ([product.scaleToggle](requirements/local/product/diagram.m
 mass prints as `1.2 lb` and the Eared Grebe's as `14.5 oz`, because the formatter switches unit at
 16 oz. Two birds of the same length, one third heavier, in units a reader has to convert before
 comparing. The cubes are directly comparable where the labels are not — an argument for the shape
-that nobody made when [decisions.massAsWaterCube](requirements/decisions.md#massaswatercube) adopted it.
+that nobody made when [decisions.massAsWaterCube](requirements/decisions/decisions.md#massaswatercube) adopted it.
 
 **Where that leaves the line.** The case for it is weaker than when this section was written: it
 would buy proportionality over a range where the cube is already legible, and pay the price set
@@ -115,7 +115,7 @@ relativity. What the cube has that a normalized bar would not is that its size *
 absolute — you could measure it against the bird with one ruler. A normalized bar is a bar-chart
 row: very readable, making no physical claim.
 
-**It therefore needs a CR, because it reverses rather than extends [decisions.massAsWaterCube](requirements/decisions.md#massaswatercube).** [product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram) currently
+**It therefore needs a CR, because it reverses rather than extends [decisions.massAsWaterCube](requirements/decisions/decisions.md#massaswatercube).** [product.labeledDetailDiagram](requirements/local/product/measurements.md#labeleddetaildiagram) currently
 states that "a disc or bar sized by mass — a second, arbitrary scale — is still refused", and
 [product.crossbarAtVerticalScale](requirements/local/product/diagram.md#crossbaratverticalscale)'s rationale is that a mark on its own convenient scale "looks authoritative and says
 something false". Those are the sentences a CR would have to overturn, not work around.
@@ -177,7 +177,7 @@ inventing each entry independently and waiting for someone to spot the next Limp
 
 Two things are unknown and should not be assumed: whether a dataset exists at BirdView's coverage,
 and whether its license permits use. Both have sunk candidate sources before. Adoption would follow
-the usual path — a `imports.md` entry and a compose-and-resolve pass.
+the usual path — an entry in `river/requirements/imports/` and a compose-and-resolve pass.
 
 ## Sketch: one dash per vertebra
 
@@ -210,13 +210,13 @@ goal, and would be the thing to test.
 *Recorded 2026-09-23.* Offering "show them perched" sounds like a rendering switch and is not one.
 A perched bird needs two things BirdView does not have.
 
-**Legs.** [decisions.inFlightNoLegs](requirements/decisions.md#inflightnolegs) removed them because a flight silhouette does not show them; a perched
-silhouette is mostly leg. Restoring them restores every problem [decisions.inFlightNoLegs](requirements/decisions.md#inflightnolegs) recorded — the femur, the
+**Legs.** [decisions.inFlightNoLegs](requirements/decisions/decisions.md#inflightnolegs) removed them because a flight silhouette does not show them; a perched
+silhouette is mostly leg. Restoring them restores every problem [decisions.inFlightNoLegs](requirements/decisions/decisions.md#inflightnolegs) recorded — the femur, the
 toes, and the hip position are unmeasured, and the tarsus alone understates the visible leg most in
-the birds whose legs define them. A perched view would need the exposed-leg model that [decisions.legFromTarsus](requirements/decisions.md#legfromtarsus)
-invented and [decisions.inFlightNoLegs](requirements/decisions.md#inflightnolegs) deleted, and it would still have no source to validate against.
+the birds whose legs define them. A perched view would need the exposed-leg model that [decisions.legFromTarsus](requirements/decisions/decisions.md#legfromtarsus)
+invented and [decisions.inFlightNoLegs](requirements/decisions/decisions.md#inflightnolegs) deleted, and it would still have no source to validate against.
 
-**A second neck model.** The current ratios are a standing-posture model used, until [decisions.foldedNeckAsS](requirements/decisions.md#foldedneckass), in a
+**A second neck model.** The current ratios are a standing-posture model used, until [decisions.foldedNeckAsS](requirements/decisions/decisions.md#foldedneckass), in a
 flight drawing. A perched view needs the perched extension for every family, which is a different
 invented table again — a perched heron's neck is neither folded flat nor fully extended, and where
 it sits between those is not published at this coverage.
@@ -239,7 +239,7 @@ handled honestly.
 Neither ask blocks v1, which is what makes waiting free:
 
 - **Ricklefs / ESA** would *add* capability. Every length is currently `modeled`
-  ([decisions.ricklefsProhibited](requirements/decisions.md#ricklefsprohibited)); a grant would make roughly half of them measured. Nothing breaks without
+  ([decisions.ricklefsProhibited](requirements/decisions/decisions.md#ricklefsprohibited)); a grant would make roughly half of them measured. Nothing breaks without
   it.
 - **ABA** would *simplify the build*. Fetch-at-build already works under [tech.fetchRestrictedInputs](requirements/local/tech/delivery.md#fetchrestrictedinputs), so a grant would
   only remove the network step and let [tech.datasetNeverCommitted](requirements/local/tech/delivery.md#datasetnevercommitted) relax. Nothing breaks without it either.
@@ -260,7 +260,7 @@ fixed and the mix of kinds as the thing that moves.
 
 ## The New York county spike
 
-*Run 2026-11-03 for [todo.countyRegions](todo.md#countyregions), step 3. Not a decision.* GBIF download
+*Run 2026-11-03 for [todo.countyRegions](../todo.md#countyregions), step 3. Not a decision.* GBIF download
 `0025636-261023074918325` (DOI 10.15468/dl.ttkwue), bird records in New York by dataset, GADM
 county, month, and verbatim name, from `data/gbif-queries/ny-counties.sql`. Method: eBird only,
 today's rule (listed at one record per million of the area's eBird bird records, the
@@ -291,7 +291,7 @@ trims small counties: Lewis falls from 243 to 209 at *k* = 5; Suffolk does not c
 **The county bar admits what the state bar excludes.** With *k* = 5, 50 species reach some county's
 list but not New York's: Cockatiel (4 counties), African Collared-Dove (4), Bar-headed Goose (3),
 Taiga Bean-Goose (3), Egyptian Goose (2), and Brewer's Blackbird (3), a genuine vagrant. The state
-bar is about 62 records; a county's can be under one. [decisions.escapedBirdsOffIndex](requirements/decisions.md#escapedbirdsoffindex)
+bar is about 62 records; a county's can be under one. [decisions.escapedBirdsOffIndex](requirements/decisions/decisions.md#escapedbirdsoffindex)
 removes the cage birds by species wherever they are; the vagrants would remain.
 
 **New York City.** The five boroughs together list 428 species at *k* = 1, 410 at 5, and 392 at 10,
@@ -304,7 +304,7 @@ about 40 MB, against today's 1.5 MB table, which the server embeds.
 
 ## The habitat audit, pass 1
 
-*Run 2026-11-07 for [todo.traitAudit](todo.md#traitaudit). Not a decision.* Over the 1,041 birds on the index in
+*Run 2026-11-07 for [todo.traitAudit](../todo.md#traitaudit). Not a decision.* Over the 1,041 birds on the index in
 `web/data/species.json`.
 
 **The data.** Every bird has exactly one AVONET habitat; BirdView adds others for nine. AVONET's
@@ -344,7 +344,7 @@ winters on mudflats and salt marsh").
 
 ## Distance from shore, as evidence for the open-sea question
 
-The cheap version of [todo.habitatDataset](todo.md#habitatdataset) (issue #10), run 2026-11-08 as
+The cheap version of [todo.habitatDataset](../todo.md#habitatdataset) (issue #10), run 2026-11-08 as
 research, not built into the dataset. **Method:** the offshore-cells download
 (`0025653-261023074918325`, records with no GADM code, in 0.1° cells by species and month), eBird
 records only, inside BirdView's five sea boxes; each cell's center tested against Natural Earth's

@@ -7,8 +7,11 @@ package tech
 **Badge contrast meets WCAG 2.2 SC 1.4.6**
 
 Subject: `badge.contrast.ratio`
+
 Value: `>= 7.0`
+
 Applies to: app
+
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Every generated badge color yields a contrast ratio of at least 7:1 against **the text it actually
@@ -18,14 +21,16 @@ Requiring black text would be stricter than WCAG and would cost about a third of
 distinguishable colors available to [product.generatedBadgeColors](../product/dataset.md#generatedbadgecolors).
 
 Rationale: WCAG is a **mandatory** source scoped to the contrast criteria only — see
-[imports.md](../../imports.md#wcag). BirdView makes no broader conformance claim.
+[imports.md](../../imports/imports.md#wcag). BirdView makes no broader conformance claim.
 
 ## textContrastFloor
 
 **Link and text colors meet a stated contrast floor**
 
 Subject: `text.contrast.ratio`
+
 Applies to: app
+
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Every text color the stylesheet declares for text on a bare surface clears **7:1** (WCAG 2.2
@@ -51,7 +56,7 @@ unvisited and `#551A8B` visited — which on this background is 1.90:1 and 1.62:
 Rationale: hand-written CSS is as dangerous as a generated palette; the iNaturalist link of
 [product.inaturalistLink](../product/presentation.md#inaturalistlink) shipped with no color rule and was effectively invisible. One floor covers
 all text, with no lower floor for secondary text; see
-[decisions.oneContrastFloor](../../decisions.md#onecontrastfloor).
+[decisions.oneContrastFloor](../../decisions/decisions.md#onecontrastfloor).
 
 ---
 
@@ -60,8 +65,11 @@ all text, with no lower floor for secondary text; see
 **No text renders below 13px, and running text is 15px, 16px on a phone**
 
 Subject: `text.size.floor`
+
 Value: `13px floor; body 15px, 16px at 600px wide or less`
+
 Applies to: app
+
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Every piece of visible text on every web page ([webPages](#webpages)) **renders at 13 CSS pixels
@@ -72,7 +80,7 @@ the page's own font size, is **15px**, and **16px** at a width of 600px or less,
 also zooms into any form field set smaller.
 
 Codes, badges, tags, notes, and labels are held to the same 13px; there is no smaller size for
-secondary text ([decisions.textSizeFloor](../../decisions.md#textsizefloor)).
+secondary text ([decisions.textSizeFloor](../../decisions/decisions.md#textsizefloor)).
 
 Rationale: the first readers found the page dense and the type small ("old eyes"), and on a phone
 the species page's diagram labels rendered at 3.5px. WCAG sets no minimum size, so the number is
@@ -86,8 +94,11 @@ BirdView's own: 13px is the smallest size common platform guidance allows for se
 **What counts as a BirdView web page**
 
 Subject: `pages.domain`
+
 Binds: [wcag.WebPage](../../imported/w3.org/wcag/wcag.md#webpage)
+
 Applies to: app
+
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 **Every response the server sends as `text/html`, `image/svg+xml`, or `text/plain`, at any route,
@@ -102,7 +113,7 @@ so a page added later is a web page the day it exists.
 **This binds WCAG's definition and does not narrow it.** WCAG makes a web page of any resource
 obtained from a URI, so an error response or an SVG opened on its own is one. Leaving a page out
 would excuse it from a mandatory source, which takes an accepted gap in
-[decisions.md](../../decisions.md), page by page.
+[decisions.md](../../decisions/decisions.md), page by page.
 
 Rationale: treating "the pages" as what the stylesheet styles left out the pipeline diagram,
 served as its own SVG document with its own colors, and the page templates, served as raw source

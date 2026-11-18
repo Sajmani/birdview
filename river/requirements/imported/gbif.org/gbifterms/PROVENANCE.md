@@ -1,7 +1,7 @@
 # gbif-terms — provenance
 
 Vendored copies of GBIF's data user agreement and citation guidelines. See
-[imports.md](../../../imports.md#gbif-terms) for the adoption record and [gbifterms.md](gbifterms.md)
+[imports.md](../../../imports/imports.md#gbif-terms) for the adoption record and [gbifterms.md](gbifterms.md)
 for the transcription.
 
 ## What was retrieved

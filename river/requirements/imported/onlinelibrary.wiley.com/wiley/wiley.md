@@ -154,4 +154,4 @@ because nobody here is qualified to make it, and because the contract binds inde
 whether copyright does.
 
 The clean path to this data, if it is ever wanted, is the author or ESA — not the platform. See
-[decisions.ricklefsProhibited](../../../decisions.md#ricklefsprohibited).
+[decisions.ricklefsProhibited](../../../decisions/decisions.md#ricklefsprohibited).

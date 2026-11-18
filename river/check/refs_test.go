@@ -55,8 +55,8 @@ func TestReferencesResolve(t *testing.T) {
 		"goals":     glob("goals/*.md"),
 		"product":   glob("requirements/local/product/*.md"),
 		"tech":      glob("requirements/local/tech/*.md"),
-		"decisions": {filepath.Join(bundle, "requirements", "decisions.md")},
-		"todo":      {filepath.Join(bundle, "todo.md"), filepath.Join(bundle, "todo-closed.md")},
+		"decisions": glob("requirements/decisions/*.md"),
+		"todo":      {filepath.Join(repo, "todo.md"), filepath.Join(repo, "todo-closed.md")},
 		"app":       glob("requirements/composed/internal/app/*.md"),
 		"dataset":   glob("requirements/composed/internal/dataset/*.md"),
 		"repo":      glob("requirements/composed/internal/repo/*.md"),
@@ -174,7 +174,7 @@ func TestReferencesResolve(t *testing.T) {
 				continue
 			}
 			target, frag, _ := strings.Cut(url, "#")
-			// river/conformance.md headings are "## <pkg>.<criterion>", not the criterion's definition.
+			// river/conformance/ headings are "## <pkg>.<criterion>", not the criterion's definition.
 			if resolve(target) != want || frag != strings.ToLower(name) {
 				r, _ := filepath.Rel(bundle, want)
 				t.Errorf("%s: [%s.%s](%s) does not land on it; link to %s#%s", rel, pkg, name, url,

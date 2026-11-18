@@ -1,7 +1,7 @@
 # bbl — provenance
 
 Vendored copy of the USGS Bird Banding Laboratory's species list, BirdView's source of four-letter
-banding codes. See [imports.md](../../../imports.md#bbl) for the adoption record.
+banding codes. See [imports.md](../../../imports/imports.md#bbl) for the adoption record.
 
 ## What was retrieved
 

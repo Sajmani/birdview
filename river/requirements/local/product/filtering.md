@@ -7,6 +7,7 @@ package product
 **Filter by family**
 
 Applies to: app
+
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The user can filter to any subset of families, multi-select, by the home page's rule
@@ -37,7 +38,9 @@ birder already knows, and the source provides it for free.
 **Filter by region and month**
 
 Subject: `presentation.region_filter`
+
 Applies to: dataset, app
+
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The reader filters to any subset of US states and Canadian provinces, multi-select, as the family
@@ -45,7 +48,7 @@ filter works. A species is listed in a region when it reaches 1 record per milli
 bird observations, counted from eBird — or from iNaturalist only where eBird is confirmed to
 withhold it there — and its records below the bar still count in its figure.
 
-**A US county is a region too, listed under a stricter rule** ([decisions.countyListingRule](../../decisions.md#countylistingrule)): a
+**A US county is a region too, listed under a stricter rule** ([decisions.countyListingRule](../../decisions/decisions.md#countylistingrule)): a
 species is listed in a county when its state lists it, and its records in the county reach both one
 per million of the county's bird observations and **at least 5 records**, over all years, counted
 as for a state. A county narrows the set and orders it by the county's own share of records, as a
@@ -54,16 +57,16 @@ alone would list a bird on a single sighting; the state's list keeps out the cag
 vagrants a county's small total would let in. **The region a bird is "commonest in" stays a state,
 province, or sea**: a county is inside a state, and naming one of thousands would rarely tell a
 reader where the bird is common. **Counties are served only when the server runs with `-counties`**,
-until every US state and Canadian province has them ([decisions.countiesBehindFlag](../../decisions.md#countiesbehindflag)). **A bird's page names
+until every US state and Canadian province has them ([decisions.countiesBehindFlag](../../decisions/decisions.md#countiesbehindflag)). **A bird's page names
 its states and provinces, each with how many of its counties list the bird out of how many it has**
-("CA 12/58"), rather than every county ([decisions.countiesServedApart](../../decisions.md#countiesservedapart)).
+("CA 12/58"), rather than every county ([decisions.countiesServedApart](../../decisions/decisions.md#countiesservedapart)).
 
 It follows the same rule as families: nothing selected means every region. The data is GBIF's, which serves eBird and iNaturalist under CC BY 4.0 with GADM regions as a
-queryable field ([decisions.regionFilterReinstated](../../decisions.md#regionfilterreinstated)).
+queryable field ([decisions.regionFilterReinstated](../../decisions/decisions.md#regionfilterreinstated)).
 
 **Membership is per region and relative.** iNaturalist is judged against its own total, and only
 where eBird is confirmed to withhold the species there
-([decisions.countEbirdFirst](../../decisions.md#countebirdfirst)). The bar is relative because eBird's volume doubled in five
+([decisions.countEbirdFirst](../../decisions/decisions.md#countebirdfirst)). The bar is relative because eBird's volume doubled in five
 years, so an absolute bar would admit more species over time for no ecological reason, and
 because effort differs between regions — California has 114 million records against Hawaii's
 2.5 million.
@@ -71,7 +74,7 @@ because effort differs between regions — California has 114 million records ag
 **Membership decides where a species is listed, not what it counts.** Records in a region where
 the species stays below the bar are kept and counted in its figure ([shareOfRecords](presentation.md#shareofrecords)); they only
 leave it off that region's list. Otherwise Emu, established on 19 eBird records in Texas, would
-read *0 in 1,237,352,304* ([decisions.belowBarCounted](../../decisions.md#belowbarcounted)).
+read *0 in 1,237,352,304* ([decisions.belowBarCounted](../../decisions/decisions.md#belowbarcounted)).
 
 **Deciding membership per region keeps the endemics** without a special case: the Millerbird's
 handful of records is nothing against a continental billion, and 22 per million within Hawaii.
@@ -81,7 +84,7 @@ sits with Washington and Oregon, not with Nova Scotia. Zones are presentation on
 region holds is decided per region, never per zone.
 
 **A region appears in a URL as the code its records are filed under**
-([decisions.regionCodesFromData](../../decisions.md#regioncodesfromdata)): a land region as its **GADM code**, as GBIF attaches it,
+([decisions.regionCodesFromData](../../decisions/decisions.md#regioncodesfromdata)): a land region as its **GADM code**, as GBIF attaches it,
 at any level — `?region=USA.33_1` for New York, `?region=USA.33.24_1` for Kings County — and a sea
 region as its **Marine Regions id**, prefixed — `?region=MRGID:25281` for the United States part of
 the Gulf of Mexico. **No code is invented**: every code is the data's own, and the same code keys
@@ -103,7 +106,9 @@ sees what the link now means.
 **Filter by how often a bird is reported where and when the reader is looking**
 
 Subject: `presentation.common_filter`
+
 Applies to: app
+
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 A **Reporting frequency** setting keeps only the birds that are **at least 1 in 100, 1 in 1,000, or 1 in
@@ -117,7 +122,7 @@ It is a threshold on the share, not a count of birds, so it means the same in a 
 the continent, in the steps the frequency tiers use ([orderByFrequency](presentation.md#orderbyfrequency)). The address carries it as
 `freq=100`, `freq=1000`, or `freq=10000`; any other value is ignored. The setting is named for what
 it measures, reports, not birds present or individuals counted
-([decisions.reportingFrequencyParam](../../decisions.md#reportingfrequencyparam)). The page's heading names
+([decisions.reportingFrequencyParam](../../decisions/decisions.md#reportingfrequencyparam)). The page's heading names
 it ("· At least 1 in 1,000"), and the setting follows Region (and County, where shown) on the count
 line.
 
@@ -131,7 +136,9 @@ ones, as birders do with an anchor bird (Sameer, 2026-11-07).
 **Here selects the region the reader is in**
 
 Subject: `presentation.region_filter.here`
+
 Applies to: app
+
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 A **Here** button in the home page's Region setting replaces the region selection with the one
@@ -153,7 +160,7 @@ rather than inside the Region setting, which starts closed. Without JavaScript t
 lands.
 
 **Without JavaScript, Here is shown inactive** — dotted border, no background, text at the full
-contrast floor ([decisions.oneContrastFloor](../../decisions.md#onecontrastfloor)) — and focusable, with a tooltip saying it needs
+contrast floor ([decisions.oneContrastFloor](../../decisions/decisions.md#onecontrastfloor)) — and focusable, with a tooltip saying it needs
 JavaScript and permission to use the reader's location. It does nothing when pressed. Dotted,
 because a dashed border once marked buttons that were active.
 
@@ -162,9 +169,12 @@ because a dashed border once marked buttons that were active.
 **Now selects the current month**
 
 Subject: `presentation.month_filter.now`
+
 Applies to: app
+
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
-Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
+
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
 
 A **Now** button beside **All** in Months replaces the month selection with the current month on
 the reader's own clock, every other setting kept. Without JavaScript it uses the server's month.
@@ -174,14 +184,16 @@ then the twelve months.
 Without JavaScript the button links to `/now`, which redirects to the index for the server's
 current month and is never cached; with it, the script points the button at the reader's month
 directly, and `/now` is not requested. Either way no page carries a month taken from the server's
-clock, which [tech.cacheLifetimeStated](../tech/delivery.md#cachelifetimestated) depends on ([decisions.hereAndNowCaching](../../decisions.md#hereandnowcaching)).
+clock, which [tech.cacheLifetimeStated](../tech/delivery.md#cachelifetimestated) depends on ([decisions.hereAndNowCaching](../../decisions/decisions.md#hereandnowcaching)).
 
 ## locationStaysInBrowser
 
 **The reader's location never leaves the browser**
 
 Subject: `privacy.location`
+
 Applies to: app
+
 Goals: [goals.readerPrivacy](../../../goals/goals.md#readerprivacy)
 
 The reader's position is used only inside the browser to choose a region, and is never sent,
@@ -197,9 +209,12 @@ would leak both.
 **A search box narrows the index as you type**
 
 Subject: `presentation.search`
+
 Applies to: app
+
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
-Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions.md#classicviewremoved)).
+
+Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
 
 **A text box above the count line keeps the birds that match what is typed and hides the rest.** A
 bird matches when what is typed, ignoring case and punctuation, appears unbroken within one of its

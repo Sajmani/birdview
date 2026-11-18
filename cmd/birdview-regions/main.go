@@ -26,7 +26,7 @@
 //     species entirely. Spotted Owl, Gyrfalcon, Northern Hawk Owl, and the
 //     critically endangered Hawaiian endemics have zero eBird records and
 //     hundreds in iNaturalist. An eBird-only table omits exactly the birds a
-//     reader is most likely to look up. See river/requirements/imports.md, `gbif`.
+//     reader is most likely to look up. See river/requirements/imports/, `gbif`.
 //
 // Names are faceted VERBATIM — as the publisher wrote them — not through
 // GBIF's backbone, which drops what it cannot resolve and reported zero

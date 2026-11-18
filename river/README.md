@@ -1,22 +1,23 @@
 # River module
 
-This repository's goals, requirements, and the records River keeps about them. The River 2.1 skill
+This repository's goals, requirements, and the records River keeps about them. The River 3.0 skill
 lives at [`../.agents/skills/river/`](../.agents/skills/river/SKILL.md) (pinned in
 [`../.agents/skills/PROVENANCE.md`](../.agents/skills/PROVENANCE.md)).
 
 - [`arch.md`](arch.md)
-- [`bindings.md`](bindings.md)
+- [`bindings/`](bindings/bindings.md)
 - [`check/`](check/)
-- [`conformance.md`](conformance.md)
+- [`conformance/`](conformance/conformance.md)
 - [`goals/`](goals/)
 - [`notes.md`](notes.md)
 - [`requirements/`](requirements/)
-- [`todo-closed.md`](todo-closed.md)
-- [`todo.md`](todo.md)
+
+Open work is outside the module, in [`../todo.md`](../todo.md) (closed items in
+[`../todo-closed.md`](../todo-closed.md)).
 
 ## Module
 
 ```
 module birdview
-river 2.1
+river 3.0
 ```

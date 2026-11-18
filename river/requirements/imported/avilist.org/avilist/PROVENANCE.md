@@ -2,7 +2,7 @@
 
 Vendored copy of the global avian checklist. BirdView's source of **English names, family and
 order names, and the per-species eBird code** (product.namesFromAvilist). See
-[imports.md](../../../imports.md#avilist) for the adoption record.
+[imports.md](../../../imports/imports.md#avilist) for the adoption record.
 
 ## What was retrieved
 
@@ -26,7 +26,7 @@ BirdView reads. Checked by downloading it: 14 columns against the extended file'
 
 The file lives at the repository root under the same location exception as the AVONET workbook —
 it is a build input, not a rules document. See
-[../../bindings.md](../../../../bindings.md#location-exception-the-third_party-directory).
+[../../bindings.md](../../../../bindings/bindings.md#location-exception-the-third_party-directory).
 
 ## What the file contains
 
@@ -51,7 +51,7 @@ are populated only where the taxon concept matches Clements exactly. Measured 20
 
 ## Why the Clements and Cornell columns are usable here
 
-[imports.md](../../../imports.md) rejects eBird/Clements as a source, because Cornell's own terms
+[imports.md](../../../imports/imports.md) rejects eBird/Clements as a source, because Cornell's own terms
 forbid redistribution without written authorization. That rejection governs **Cornell's
 distribution under Cornell's terms**, and this is not it.
 

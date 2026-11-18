@@ -7,8 +7,11 @@ package product
 **Scope is the recurring avifauna of the regions BirdView covers**
 
 Subject: `dataset.scope`
+
 Value: `BirdView's regions, status established or rare`
+
 Applies to: dataset
+
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The dataset is the species whose observations **recur** in the regions BirdView covers: a
@@ -16,7 +19,7 @@ species is in scope when, in at least one of them, its records fall in repeated 
 multiple years.
 
 **The records are eBird's**, and iNaturalist's only in a region and month where eBird is
-confirmed to withhold the species ([decisions.countEbirdFirst](../../decisions.md#countebirdfirst)). Otherwise a species
+confirmed to withhold the species ([decisions.countEbirdFirst](../../decisions/decisions.md#countebirdfirst)). Otherwise a species
 iNaturalist alone photographed in repeated years — feral peafowl, escaped parakeets — would
 recur on evidence eBird's reviewers never saw.
 
@@ -26,12 +29,12 @@ Canadian provinces and territories, 5 US Minor Outlying Islands, and 5 stretches
 The ABA Area additionally includes **St-Pierre et Miquelon**, for which BirdView has no region;
 BirdView additionally covers **Johnston Atoll, Palmyra Atoll, Wake Island, and Navassa Island**,
 which lie well outside it. The product does not name that boundary: the page says *(all
-regions)* ([decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence)).
+regions)* ([decisions.scopeFromRecurrence](../../decisions/decisions.md#scopefromrecurrence)).
 
 Status is derived by [`birdview-status`](../../../../cmd/birdview-status) and committed to
 [`data/status.tsv`](../../../../data/status.tsv); `established` and `rare` are in scope, `vagrant`,
 `historical`, and `absent` are not. A species the table classifies but leaves out still has a
-page saying so ([undrawnSpeciesAnswer](presentation.md#undrawnspeciesanswer)). See [decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence).
+page saying so ([undrawnSpeciesAnswer](presentation.md#undrawnspeciesanswer)). See [decisions.scopeFromRecurrence](../../decisions/decisions.md#scopefromrecurrence).
 
 Rationale: a bird a reader will actually meet is one that keeps turning up, and **recurrence
 measures that where a record count cannot**. Record counts measure observer effort: they
@@ -53,12 +56,15 @@ either dataset separates a feral population from a steady trickle of escapees. S
 **Status is published, not just used**
 
 Subject: `dataset.status`
+
 Value: `established | rare | vagrant | absent, plus withheld and exotic flags`
+
 Applies to: dataset, app
+
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata), [goals.giveBack](../../../goals/goals.md#giveback)
 
 Each species carries the status [scopeIsRecurringAvifauna](#scopeisrecurringavifauna) derives, and it is shown and filterable
-alongside Habitat and Diet ([decisions.habitatDietSpeciesLevel](../../decisions.md#habitatdietspecieslevel)) rather than consumed silently at
+alongside Habitat and Diet ([decisions.habitatDietSpeciesLevel](../../decisions/decisions.md#habitatdietspecieslevel)) rather than consumed silently at
 ingest. The flags `withheld` — eBird suppresses the species, so the evidence is iNaturalist's —
 and `exotic` are orthogonal to the status, because a bird can be withheld *and* established.
 `exotic` is a declared list, not a measurement, and what it does is [escapedBirdsListed](measurements.md#escapedbirdslisted).
@@ -72,8 +78,11 @@ next to its evidence invites correction where a hidden ingest filter does not.
 **Where the data cannot speak, the exception is declared and named**
 
 Subject: `dataset.status.exceptions`
+
 Value: `declared table, each entry with a written reason`
+
 Applies to: dataset
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Species whose status cannot be derived carry a declared one instead, from a committed table in
@@ -89,7 +98,7 @@ which every entry names its reason. Two classes qualify, and no others:
   home page ([escapedBirdsListed](measurements.md#escapedbirdslisted)); their status is still the derived one.
 
 Rationale: a declared, visible exception can be argued with. The alternative is what
-[decisions.scopeFromRecurrence](../../decisions.md#scopefromrecurrence) rejected for the whole model: tuning a coefficient until the
+[decisions.scopeFromRecurrence](../../decisions/decisions.md#scopefromrecurrence) rejected for the whole model: tuning a coefficient until the
 output looks right, which hides the judgment inside a number.
 
 ## traitsFromAvonet
@@ -97,14 +106,17 @@ output looks right, which hides the judgment inside a number.
 **Morphometric traits come from AVONET**
 
 Subject: `dataset.traits.source`
+
 Value: `AVONET, preferring AVONET2_eBird`
+
 Applies to: dataset
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
-Bill, wing, tail, and mass measurements come from [AVONET](../../imports.md#avonet) — its `AVONET2_eBird`
+Bill, wing, tail, and mass measurements come from [AVONET](../../imports/imports.md#avonet) — its `AVONET2_eBird`
 sheet first, then `AVONET1_BirdLife` or `AVONET3_BirdTree` where the eBird sheet lacks a row for
-the species ([decisions.abaSpeciesWithoutAvonet](../../decisions.md#abaspecieswithoutavonet)), or where another sheet holds a narrower concept of the
-species ([decisions.herringGullEuropeanRow](../../decisions.md#herringgulleuropeanrow)) or of its near-match donor ([decisions.whiteTernBorrows](../../decisions.md#whiteternborrows)).
+the species ([decisions.abaSpeciesWithoutAvonet](../../decisions/decisions.md#abaspecieswithoutavonet)), or where another sheet holds a narrower concept of the
+species ([decisions.herringGullEuropeanRow](../../decisions/decisions.md#herringgulleuropeanrow)) or of its near-match donor ([decisions.whiteTernBorrows](../../decisions/decisions.md#whiteternborrows)).
 See [lengthAndWingspanSources](measurements.md#lengthandwingspansources).
 
 ## seaDistanceDerived
@@ -112,11 +124,13 @@ See [lengthAndWingspanSources](measurements.md#lengthandwingspansources).
 **Each bird of the sea carries where its records lie, and its open-ocean refinement follows from it**
 
 Subject: `dataset.sea_distance`
+
 Applies to: dataset
+
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 Every species with the habitat Marine is given `Marine-offshore`, `Marine-inshore`, or both
-([product.habitatAndDietFilters](months.md#habitatanddietfilters), [decisions.openOceanSplit](../../decisions.md#openoceansplit)), each marked `derived` with its evidence as
+([product.habitatAndDietFilters](months.md#habitatanddietfilters), [decisions.openOceanSplit](../../decisions/decisions.md#openoceansplit)), each marked `derived` with its evidence as
 the reason: its eBird records on water under 10 km, 10 to 30 km, and 30 km or more from shore
 (from `data/sea-distance.tsv`, [tech.seaDistanceTable](../tech/delivery.md#seadistancetable)), its records on land (from its region counts), the share
 of its water records more than 10 km out, and the share of all its records on land or within 10 km.
@@ -126,7 +140,7 @@ species with Marine and no row in the table is reported by the ingest, as joins 
 ([joinsReportDrops](#joinsreportdrops)), and is treated as unmeasured.
 
 Rationale: AVONET's Marine holds both the shearwater seen only from a boat and the eider in the
-surf. Distance from shore separates them ([decisions.openOceanSplit](../../decisions.md#openoceansplit) records the evidence), and
+surf. Distance from shore separates them ([decisions.openOceanSplit](../../decisions/decisions.md#openoceansplit) records the evidence), and
 deriving the refinement from the records, with the numbers shown, keeps it checkable rather than
 asserted.
 
@@ -135,6 +149,7 @@ asserted.
 **Traits carried per species**
 
 Applies to: dataset
+
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Each species record carries scientific name, family, and these AVONET traits: `Beak.Length_Culmen`,
@@ -143,24 +158,27 @@ Each species record carries scientific name, family, and these AVONET traits: `B
 Rationale: this is the set the diagram and its derivations consume. AVONET's other columns —
 `Beak.Width`, `Beak.Depth`, `Hand-Wing.Index` — are deliberately not ingested; carrying unused
 data invites someone to invent a use for it. A column that stops being used leaves, as
-`Tarsus.Length` did when the flight premise removed the legs ([decisions.inFlightNoLegs](../../decisions.md#inflightnolegs)).
+`Tarsus.Length` did when the flight premise removed the legs ([decisions.inFlightNoLegs](../../decisions/decisions.md#inflightnolegs)).
 
 ## namesFromAvilist
 
 **Names come from AviList**
 
 Subject: `dataset.names.source`
+
 Value: `AviList v2025b`
+
 Applies to: dataset
+
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 English common names in **both locales** ([englishNameChoice](diagram.md#englishnamechoice)), the **eBird species code**, family
 scientific and English names, the order, and the family **sequence** all come from
-[AviList](../../imports.md#avilist); [ebirdLink](presentation.md#ebirdlink) adds eBird codes AviList lacks and chooses among a species'
+[AviList](../../imports/imports.md#avilist); [ebirdLink](presentation.md#ebirdlink) adds eBird codes AviList lacks and chooses among a species'
 codes. Scientific names come from the scope list, and are the join key.
 
 Rationale: **licensing.** The ABA checklist supplied all of this but is all rights reserved, so
-it blocked public deployment ([decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba)). AviList is CC BY 4.0 and carries
+it blocked public deployment ([decisions.avilistReplacesAba](../../decisions/decisions.md#avilistreplacesaba)). AviList is CC BY 4.0 and carries
 the same four things.
 
 **AviList recognizes 7 of BirdView's species under a different name and 2 not at all.** The seven
@@ -178,12 +196,15 @@ would change its URL under a reader ([englishNameChoice](diagram.md#englishnamec
 **Each bird carries its four-letter banding code, where the Bird Banding Laboratory gives one**
 
 Subject: `dataset.names.bandingCode`
+
 Value: `USGS Bird Banding Laboratory species list, 2026-10-27`
+
 Applies to: dataset, app
+
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 Each species carries the four-letter alpha code the USGS Bird Banding Laboratory assigns it
-(`AMRO` for American Robin), from the Laboratory's species list ([bbl](../../imports.md#bbl)),
+(`AMRO` for American Robin), from the Laboratory's species list ([bbl](../../imports/imports.md#bbl)),
 joined by scientific name: where two rows share a scientific name, the row named as the species;
 with no scientific match, the one row with the species' North American English name; and a code
 two species would share goes to neither. A species the Laboratory does not list, as for most
@@ -194,16 +215,19 @@ the find box finds a bird by either code. Addresses stay the eBird code, which e
 including any added from outside the Laboratory's area (Sameer, 2026-10-27).
 
 Rationale: birders know birds by these codes, and the owner asked for them (2026-10-27). The ABA's
-and IBP's lists were not usable ([decisions.avilistReplacesAba](../../decisions.md#avilistreplacesaba)); the Laboratory's is a U.S.
-Government work in the public domain ([decisions.bandingCodesFromBbl](../../decisions.md#bandingcodesfrombbl)).
+and IBP's lists were not usable ([decisions.avilistReplacesAba](../../decisions/decisions.md#avilistreplacesaba)); the Laboratory's is a U.S.
+Government work in the public domain ([decisions.bandingCodesFromBbl](../../decisions/decisions.md#bandingcodesfrombbl)).
 
 ## generatedBadgeColors
 
 **Family badge colors are generated**
 
 Subject: `badge.color.derivation`
+
 Value: `generated`
+
 Applies to: dataset
+
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Colors are generated as **two palettes**: one per taxonomic order, and one per family *within* its
@@ -230,8 +254,11 @@ adjacent in the selector, and every badge carries its family name.
 **Sources join on normalized scientific binomial**
 
 Subject: `dataset.join.key`
+
 Value: `scientific binomial, normalized`
+
 Applies to: dataset
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Species are joined across sources on scientific binomial, after stripping `(...)` parentheticals
@@ -245,13 +272,14 @@ prefixes churn on every taxonomy update.
 
 A rename may be mapped freely. A **split** cannot be mapped without borrowing the parent species'
 measurements, which makes the value no longer a measurement *of that species* and engages
-lengthAndWingspanSources and tileMarksModeled; see [decisions.abaSpeciesWithoutAvonet](../../decisions.md#abaspecieswithoutavonet).
+lengthAndWingspanSources and tileMarksModeled; see [decisions.abaSpeciesWithoutAvonet](../../decisions/decisions.md#abaspecieswithoutavonet).
 
 ## unmatchedSpeciesReported
 
 **Unmatched species are reported, not silently dropped**
 
 Applies to: dataset
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Ingest reports every species that fails to join, by name and count, and fails the build if the
@@ -265,8 +293,11 @@ failure, a taxonomy update silently shrinks the dataset and nobody notices.
 **Every join reports what it dropped**
 
 Subject: `build.join_loss`
+
 Value: `named and counted on every run; a declared bar above which the run refuses`
+
 Applies to: dataset
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Every join between two datasets reports the records it could not match: how many, under what
@@ -276,7 +307,7 @@ the run **refuses to write** rather than exceed it.
 Rationale: [goals.honestData](../../../goals/goals.md#honestdata) at the point where data disappears. A join is where a record
 can cease to exist without anyone deciding it should, and the loss is invisible on both sides.
 `birdview-regions` once discarded **37 names and 10,015,688 records** in silence, 9,954,362 of
-them belonging to ten species BirdView draws ([decisions.regionJoinNormalizes](../../decisions.md#regionjoinnormalizes)).
+them belonging to ten species BirdView draws ([decisions.regionJoinNormalizes](../../decisions/decisions.md#regionjoinnormalizes)).
 
 **A discarded record is worse than absent, because it still counts.** It reaches the
 denominator of [product.shareOfRecords](presentation.md#shareofrecords)'s share and no species' numerator: Hairy Woodpecker
@@ -299,8 +330,11 @@ real bird with records of something that is not it.
 **How each source names a species is measured, not assumed**
 
 Subject: `build.name_correspondence`
+
 Value: `committed per-source record counts; a declared ratio band`
+
 Applies to: dataset
+
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 A committed table records how many records each occurrence source holds for every species
@@ -325,5 +359,5 @@ percentile 10.7×, 95th 148×** — so every kind of disagreement shows as an ou
 
 **Only 7 of 1,019 species fall outside 1×–1000×, and every one is a real finding**: the band
 caught two unrecorded withheld species, Great Gray Owl and Black Rail, and an error in
-[`imports.md`](../../imports.md). Each declared exception names which of the four shapes it is, so
+[`imports.md`](../../imports/imports.md). Each declared exception names which of the four shapes it is, so
 the table reads as a statement about taxonomy rather than a list of numbers to ignore.

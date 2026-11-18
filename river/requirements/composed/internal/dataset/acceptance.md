@@ -6,7 +6,7 @@ package dataset
 
 How each requirement in [dataset.md](dataset.md) is decided. Each criterion names what it covers in
 `Covers:`; mutable guardrail bindings and `Watched failing:` observations live in
-[conformance.md](../../../../conformance.md).
+[conformance.md](../../../../conformance/conformance.md).
 
 ---
 
@@ -73,7 +73,7 @@ shipped for every one of its species.
 **three**, and they are **named, not counted** — *Oxyura jamaicensis*, *Pterodroma cervicalis*,
 *Tyto furcata*, each a taxon AviList recognizes and Clements has no 1:1 counterpart for — and
 `taxonomy.EBirdCodes` declares theirs as AviList's gaps and no other species' as one
-([decisions.ebirdCodesComplete](../../../decisions.md#ebirdcodescomplete)). A fourth gap appearing means the join moved, and shows as a
+([decisions.ebirdCodesComplete](../../../decisions/decisions.md#ebirdcodescomplete)). A fourth gap appearing means the join moved, and shows as a
 species with no code at all, which a percentage threshold would have absorbed in silence.
 
 ## joinCoversEverySpecies
@@ -134,7 +134,7 @@ Covers: [product.lengthAndWingspanSources](../../../local/product/measurements.m
 
 **Assertions:** every length has `kind = modeled`; exactly the species with an empirical Fox value
 have `kind = measured` for wingspan; the six species named in
-[decisions.abaSpeciesWithoutAvonet](../../../decisions.md#abaspecieswithoutavonet) have `kind = near-match` for their AVONET-derived traits.
+[decisions.abaSpeciesWithoutAvonet](../../../decisions/decisions.md#abaspecieswithoutavonet) have `kind = near-match` for their AVONET-derived traits.
 
 ## totalIsSumOfSegments
 
@@ -193,7 +193,7 @@ over the real mass range, then check it against an interval taken from published
 
 **Assertions, the exponent:** fitting log trunk on log mass across the dataset's mass range
 recovers an exponent inside **0.338 – 0.401** — the intersection of the 95% confidence intervals
-[`bohmer-neck`](../../../imports.md#bohmer-neck) reports for neck length and total leg length, the two
+[`bohmer-neck`](../../../imports/imports.md#bohmer-neck) reports for neck length and total leg length, the two
 multi-element dimensions it measures.
 
 **Assertions, the interval actually discriminates:** the superseded exponent **0.310 lies outside
@@ -291,7 +291,7 @@ Covers: [product.neckModelPerFamily](../../../local/product/diagram.md#neckmodel
 head a larger one; Western Grebe's neck is a larger share than Horned Grebe's; Canada Goose's neck
 is a larger share than the scaup's; the scaup's neck model names its genus ratio and the grebe's
 head model its family factor. Not checked by the test: that the values match photographs, which
-they were set by judgment to approach ([todo.photoProportions](../../../../todo.md#photoproportions)).
+they were set by judgment to approach ([todo.photoProportions](../../../../../todo.md#photoproportions)).
 
 ## proportionsReviewTable
 
@@ -392,7 +392,7 @@ Covers: [product.joinsReportDrops](../../../local/product/dataset.md#joinsreport
 1. `taxonomy.Occurrence` maps **every** entry of `AviListRenames` and `CountedAs` onto its
    AviList name, from the lowercased form the occurrence data actually supplies.
 2. A name in neither table passes through unchanged.
-3. A **shared** name ([decisions.sharedCountShownOnBoth](../../../decisions.md#sharedcountshownonboth)) is *not* folded — those are disclosed,
+3. A **shared** name ([decisions.sharedCountShownOnBoth](../../../decisions/decisions.md#sharedcountshownonboth)) is *not* folded — those are disclosed,
    not reassigned, and folding one would assert a division nobody measured.
 4. `birdview-regions` lists every name matching no drawn species with its record count, and
    **refuses to write** above `maxOrphanFraction`.
@@ -454,7 +454,7 @@ Covers: [product.joinsReportDrops](../../../local/product/dataset.md#joinsreport
 4. The two commands' one permitted difference holds: `birdview-status` drops a name that
    identifies no species, and `birdview-regions` keeps it verbatim.
 
-**Why the property and not the three bugs.** [decisions.regionJoinNormalizes](../../../decisions.md#regionjoinnormalizes) was three
+**Why the property and not the three bugs.** [decisions.regionJoinNormalizes](../../../decisions/decisions.md#regionjoinnormalizes) was three
 asymmetries found one at a time over two days, each invisible from inside the command that had
 it right: `birdview-regions` applied neither `AviListRenames` nor `CountedAs`, and once it did,
 still did not reduce a trinomial. Nothing compared the two readers, so every fix left the next
@@ -544,7 +544,7 @@ Covers: [product.lengthAndWingspanSources](../../../local/product/measurements.m
 **Assertions:** *Gygis candida*'s bill and tail are `near-match`, with `sourceTaxon` *Gygis alba*
 and `source` naming `AVONET1_BirdLife`, and carry that row's values, 49.7 mm and 103.8 mm, read
 from the workbook rather than written into the test. Vega Gull borrows `AVONET1_BirdLife`'s
-*Larus smithsonianus* ([decisions.vegaGullBorrows](../../../decisions.md#vegagullborrows)). Every other near-match species still
+*Larus smithsonianus* ([decisions.vegaGullBorrows](../../../decisions/decisions.md#vegagullborrows)). Every other near-match species still
 borrows from `AVONET2_eBird`. A sheet named in `taxonomy.NearMatchSheets` that does not hold the parent
 fails the build instead of falling back to another sheet.
 

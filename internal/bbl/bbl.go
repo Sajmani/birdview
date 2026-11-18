@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Package bbl reads the USGS Bird Banding Laboratory's species list, the
-// source of BirdView's four-letter banding codes (imports.md `bbl`). The
+// source of BirdView's four-letter banding codes (river/requirements/imports/ `bbl`). The
 // list is a U.S. Government work in the public domain; it is vendored as
 // the page the Laboratory serves, third_party/bbl/speclist.html.
 package bbl
