@@ -5504,3 +5504,40 @@ Joined into species as New York's prototype was, the US and Canada's 3,441 count
 entries took `species.json` from 14.7 MB to 213 MB, the server from 65 MB to 910 MB resident, past
 Cloud Run's default 512 MiB, and a Texas page from 0.04 s to 0.76 s, because every page walked every
 county of every species. Held apart, a page touches only the counties chosen.
+---
+
+## riverThreeUpgrade
+
+**BirdView moves to River 3.0: source control approves, composed packages are stamped, and open work leaves the module**
+
+Date: 2026-11-18
+
+Decided by: Sameer
+
+Status: accepted
+
+Affects: [tech.bundleIsNormative](../local/tech/process.md#bundleisnormative), [tech.activeWorkHasIssue](../local/tech/process.md#activeworkhasissue)
+
+### Decided
+
+1. **River 3.0.** BirdView declares `river 3.0` and pins the skill at River `b9d61fd`. `river
+   upgrade` moved decisions, precedence, imports, conformance, and bindings into package
+   directories, removed `requirements/approvals.md` and each decision's `### Sums`, and put each
+   field line in its own paragraph.
+2. **Source control approves.** River 3.0 has no approvals of its own. The review rule in
+   `river/bindings/` is the record: commits on main, merged through pull requests that Sameer
+   reviews or opens. Each pull request that changes `river/` carries a Requirements impact section
+   from `river diff --base main --format pr`.
+3. **Composed packages are stamped.** `app`, `dataset`, and `repo` were reviewed against their
+   inputs, including the county changes that had landed on main after their last approval, and
+   stamped with `river compose`. A package whose inputs or files move without recomposing fails
+   `river check`.
+4. **Open work leaves the module.** `todo.md` and `todo-closed.md` move to the repository root;
+   [tech.activeWorkHasIssue](../local/tech/process.md#activeworkhasissue) names the new path, and
+   BirdView's own Go tests keep checking it.
+
+### Why
+
+River 2.x kept a second record of approval beside source control, which the owner found redundant
+and which let the county changes reach main with stale approvals while `river check
+--allow-unapproved` reported them only as notes. River 3.0 has no lenient mode.
