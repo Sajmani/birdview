@@ -5111,7 +5111,7 @@ Dabbling ducks, mergansers, geese, and swans keep the family's 0.70 until they a
 
 ### Why
 
-[GitHub issue #7](https://github.com/google/birdview/issues/7): the Lesser Scaup drew the longer neck
+[GitHub issue #7](https://github.com/Sajmani/birdview/issues/7): the Lesser Scaup drew the longer neck
 and the larger head beside a grebe, the opposite of photographs of both in flight. Every duck drew a
 neck a quarter of its length, because the family's ratio fits geese and swans; grebes, heavy for
 their length, drew heads of 0.18 of it from the mass model. The owner chose the cheap fix, values set
@@ -5252,7 +5252,7 @@ shore** (`Marine-inshore`), not exclusive:
 
 ### Why
 
-[GitHub issue #10](https://github.com/google/birdview/issues/10) asked whether Coastal and Marine separate the birds a birder does. The
+[GitHub issue #10](https://github.com/Sajmani/birdview/issues/10) asked whether Coastal and Marine separate the birds a birder does. The
 research ([notes](../../notes.md#distance-from-shore-as-evidence-for-the-open-sea-question)) found the share of water records beyond 10 km splits AVONET's Marine
 cleanly, with nothing between 20% and 30%, so 25% sits in the gap. That share alone filed
 tropicbirds as open ocean only, though White-tailed and Red-tailed are seen mostly from Hawaii's

@@ -222,7 +222,7 @@ defaults*, and *Clear the filters* drop it. Opened from an address with `q`, the
 matches with or without JavaScript; without it, Enter in the box loads the page with the search.
 
 Rationale: the first readers asked for a search bar to pick birds by name
-([#3](https://github.com/google/birdview/issues/3)), and a box keeps working at ten times the
+([#3](https://github.com/Sajmani/birdview/issues/3)), and a box keeps working at ten times the
 species where scrolling and chips do not. The words to match are prepared by the server, so the
 rule lives in Go; the browser only looks them up, and a test holds it to the Go matcher (Sameer,
 2026-10-25: filter in the browser; add `q` on the next click).

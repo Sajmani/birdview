@@ -311,7 +311,7 @@ site does, including offline ([tech.selfContainedServer](../tech/delivery.md#sel
 
 **The requirement documents are not served**
 ([decisions.requirementsNotServed](../../decisions/decisions.md#requirementsnotserved)). They are working
-documents, published with the repository at `github.com/google/birdview`, and a guide that cites a
+documents, published with the repository at `github.com/Sajmani/birdview`, and a guide that cites a
 requirement links to it there.
 
 **Links are rewritten when the document is rendered, never in the file.**

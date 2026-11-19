@@ -125,7 +125,7 @@ Covers: [product.tierHistogram](../../../local/product/ordering.md#tierhistogram
 
 **Method:** on the rendered home page, every bird shown, under several orderings and a filter, the
 histogram has exactly one bar per tier, in order, a single tier included (one pinned bird draws
-one bar at 100%; [#6](https://github.com/google/birdview/issues/6)); each bar links to its
+one bar at 100%; [#6](https://github.com/Sajmani/birdview/issues/6)); each bar links to its
 tier's heading; each bar's height is its
 tier's count as a percentage of the largest tier's, rounded; and each bar's label names the tier
 and ends with its count. Under the size orderings, a stretch with no birds is one empty bucket per

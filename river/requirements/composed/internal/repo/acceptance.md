@@ -156,7 +156,7 @@ Covers: [tech.activeWorkHasIssue](../../../local/tech/process.md#activeworkhasis
 **Method:** `todo.md` read, offline
 
 **Assertions:** every item whose status is `active` has an `Issue:` line linking one issue of
-`google/birdview`, as `[#N](https://github.com/google/birdview/issues/N)`. Not checked by the test,
+`Sajmani/birdview`, as `[#N](https://github.com/Sajmani/birdview/issues/N)`. Not checked by the test,
 which does not reach GitHub: that the issue exists and links back, checked when an item is marked
 active.
 

@@ -157,14 +157,14 @@ func TestActiveTodoHasIssue(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	issue := regexp.MustCompile(`(?m)^Issue: \[#\d+\]\(https://github\.com/google/birdview/issues/\d+\)\s*$`)
+	issue := regexp.MustCompile(`(?m)^Issue: \[#\d+\]\(https://github\.com/Sajmani/birdview/issues/\d+\)\s*$`)
 	for _, item := range strings.Split(string(b), "\n## ")[1:] {
 		name, body, _ := strings.Cut(item, "\n")
 		if !regexp.MustCompile(`(?m)^Status: active\b`).MatchString(body) {
 			continue
 		}
 		if !issue.MatchString(body) {
-			t.Errorf("todo.%s is active but has no Issue: line linking its GitHub issue, as [#N](https://github.com/google/birdview/issues/N)", name)
+			t.Errorf("todo.%s is active but has no Issue: line linking its GitHub issue, as [#N](https://github.com/Sajmani/birdview/issues/N)", name)
 		}
 	}
 }

@@ -45,7 +45,7 @@ func TestSmokeChecksTheServer(t *testing.T) {
 	// A deployment sets a tracker and records its revision (tech.imageRecordsRevision).
 	deployed := func() *server {
 		s := newTestServer(t)
-		s.feedback = "https://github.com/google/birdview/issues"
+		s.feedback = "https://github.com/Sajmani/birdview/issues"
 		s.revision = "0123456789ab"
 		return s
 	}

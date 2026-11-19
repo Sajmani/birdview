@@ -560,7 +560,7 @@ choices open on the screen, moved left as far as they need.
 
 Rationale: most people who reach birdview.site are on phones, and the first readers' first
 complaint was text running out of its panels and region rows running off the screen
-([#2](https://github.com/google/birdview/issues/2)). 360 pixels is a small Android phone; an iPhone
+([#2](https://github.com/Sajmani/birdview/issues/2)). 360 pixels is a small Android phone; an iPhone
 is 375 to 430.
 
 ## tileOpensDetail
@@ -808,7 +808,7 @@ its verdict, and the evidence behind it. A page added later follows the same rul
 guide's Contact, which names the tracker for contributors and reports on no page, is not a report
 link. Because only a GitHub issue list can be filled in from a link, the server refuses to start
 with a tracker setting that is not one. The report is
-[GitHub issue #9](https://github.com/google/birdview/issues/9) (Sameer, 2026-11-08).
+[GitHub issue #9](https://github.com/Sajmani/birdview/issues/9) (Sameer, 2026-11-08).
 
 Rationale: a reader who sees a wrong wingspan or habitat knows which bird and which value, but not
 which source or build it came from; filling those in makes a correction actionable without asking
@@ -1005,7 +1005,7 @@ home page in those. Its footer carries the full credits, which every other page 
   **Pinned (k)** the group is the whole page. The histogram counts the tiers only. Pinning or
   unpinning leaves the page where it was. The pinned birds are listed above the find box in
   alphabetical order: a bird's name goes to its tile in the group, and its pin unpins it. **Pinned (k)**, always in view above them, compares
-  them ([#5](https://github.com/google/birdview/issues/5): a reader who had pinned two birds
+  them ([#5](https://github.com/Sajmani/birdview/issues/5): a reader who had pinned two birds
   could not find how to compare them). Unpinning returns the bird to the settings'
   choice; nothing removes a bird the settings choose. A box above the set finds birds by name: a
   bird matches when what is typed, ignoring case and punctuation, appears unbroken in one of its
