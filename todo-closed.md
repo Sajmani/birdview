@@ -4,13 +4,33 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## sourceOfTruth
+
+**Move BirdView's source of truth to the personal repository**
+
+Status: closed
+
+Owner: Sameer
+
+Closed: 2026-11-18, by [decisions.personalRepoIsSourceOfTruth](river/requirements/decisions/decisions.md#personalrepoissourceoftruth) and [moveToPersonalRepo](todo.md#movetopersonalrepo): `github.com/Sajmani/birdview` is detached from `google/birdview`, holds all 13 copied issues, and is the source of truth.
+
+Planned 2026-10-22: an agent-driven software factory for BirdView, run from Sameer's own accounts
+the way a customer would run one, belongs where the code lives; if this repository stayed the
+source of truth, every change the factory made would be an outside contribution to it. So, once
+approved, `github.com/Sajmani/birdview` becomes the source of truth and this repository is archived
+with a note saying where development continues. Exactly one repository receives changes at any
+time. **First, confirm** that continuing development there, on personal time and accounts, is
+approved: the existing files carry this organization's copyright, and serving a clone is not the
+same question as developing one. Afterwards BirdView is an outside adopter of River: re-pins copy
+River's published parts until River itself is public, then come from River's public origin.
+
 ## tileCornersInCi
 
 **The tile-corner browser check fails in CI at phone width, so `main` has been red since 2026-11-02**
 
 Status: closed
 
-Issue: [#16](https://github.com/google/birdview/issues/16)
+Issue: [#13](https://github.com/Sajmani/birdview/issues/13)
 
 Owner: Sameer
 
@@ -994,7 +1014,7 @@ Closed: 2026-10-27
 All four simulated readers, on both revisions, tapped October or New York and lost it, because
 everything starts selected and a tap drops one ([product.regionAndMonthFilter](river/requirements/local/product/filtering.md#regionandmonthfilter)); three of the
 four built the address by hand instead. Karen's wording complaint
-([#1](https://github.com/google/birdview/issues/1)) was the same problem seen from the help text.
+([#1](https://github.com/Sajmani/birdview/issues/1)) was the same problem seen from the help text.
 One answer: when everything is selected, a tap on one item selects only it, as Only does, and
 later taps add and remove. That changes the requirement, and families too. The home page adopted
 this rule on 2026-10-26 ([product.nextView](river/requirements/local/product/presentation.md#nextview)); what is left is the classic view, if it stays

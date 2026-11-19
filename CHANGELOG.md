@@ -149,7 +149,7 @@ Small fixes are in the commit history. With no numbered releases yet, changes ar
   matching birds.
 - **Pins**: pin any bird, from the find list, its tile, or its species page, to keep it on the page
   whatever the settings. **Pinned**, always in view under the heading, shows only them,
-  side by side at one scale ([#5](https://github.com/google/birdview/issues/5)).
+  side by side at one scale ([#5](https://github.com/Sajmani/birdview/issues/5)).
 - **New here? Try** compares small, medium, large, and huge birds with pins.
 - Tiers with headings and a histogram with a bar per tier, under every ordering.
 - Four-letter **banding codes** from the USGS Bird Banding Laboratory's public-domain list, beside

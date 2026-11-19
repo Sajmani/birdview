@@ -30,7 +30,7 @@ import (
 // Verifies: app.reportDataIssueLinks
 func TestReportDataIssueLinks(t *testing.T) {
 	s := newTestServer(t)
-	s.feedback = "https://github.com/google/birdview/issues"
+	s.feedback = "https://github.com/Sajmani/birdview/issues"
 	s.ds.SourceVersions = map[string]string{"avonet": "AVONET v7", "avilist": "AviList v2025b"}
 	s.revision = "0123456789ab"
 	_, body := get(t, s, "/species/amecro?units=metric")
@@ -53,7 +53,7 @@ func TestReportDataIssueLinks(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if u.Scheme+"://"+u.Host+u.Path != "https://github.com/google/birdview/issues/new" {
+		if u.Scheme+"://"+u.Host+u.Path != "https://github.com/Sajmani/birdview/issues/new" {
 			t.Errorf("%s's link opens %s, want a new issue", table.heading, u)
 		}
 		title, b := u.Query().Get("title"), u.Query().Get("body")
@@ -85,7 +85,7 @@ func TestReportDataIssueLinks(t *testing.T) {
 // Verifies: app.reportDataIssueLinks
 func TestHomeReportLink(t *testing.T) {
 	s := newTestServer(t)
-	s.feedback = "https://github.com/google/birdview/issues"
+	s.feedback = "https://github.com/Sajmani/birdview/issues"
 	s.ds.SourceVersions = map[string]string{"avonet": "AVONET v7"}
 	s.revision = "0123456789ab"
 	_, body := get(t, s, "/?month=May&freq=1000")
@@ -97,7 +97,7 @@ func TestHomeReportLink(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if u.Scheme+"://"+u.Host+u.Path != "https://github.com/google/birdview/issues/new" || u.Query().Has("title") {
+	if u.Scheme+"://"+u.Host+u.Path != "https://github.com/Sajmani/birdview/issues/new" || u.Query().Has("title") {
 		t.Errorf("Report it opens %s; want a new issue with the title left to the reader", u)
 	}
 	b := u.Query().Get("body")
@@ -122,7 +122,7 @@ func TestHomeReportLink(t *testing.T) {
 //
 // Verifies: app.reportDataIssueLinks
 func TestEveryReportLinkFilledIn(t *testing.T) {
-	const tracker = "https://github.com/google/birdview/issues"
+	const tracker = "https://github.com/Sajmani/birdview/issues"
 	s := newTestServer(t)
 	s.feedback = tracker
 	s.ds.SourceVersions = map[string]string{"avonet": "AVONET v7"}
@@ -145,7 +145,7 @@ func TestEveryReportLinkFilledIn(t *testing.T) {
 				continue // the Contact, which reports on no page
 			}
 			u, err := url.Parse(link)
-			if err != nil || u.Path != "/google/birdview/issues/new" {
+			if err != nil || u.Path != "/Sajmani/birdview/issues/new" {
 				t.Errorf("%s links to the tracker as %s; every report link opens a filled-in new issue", page, link)
 				continue
 			}
@@ -176,11 +176,11 @@ func TestEveryReportLinkFilledIn(t *testing.T) {
 func TestFeedbackMustBeFillable(t *testing.T) {
 	for v, ok := range map[string]bool{
 		"": true,
-		"https://github.com/google/birdview/issues":  true,
-		"https://github.com/google/birdview/issues/": true,
-		"https://example.com/bugs":                   false,
-		"https://github.com/google/birdview":         false,
-		"http://github.com/google/birdview/issues":   false,
+		"https://github.com/Sajmani/birdview/issues":  true,
+		"https://github.com/Sajmani/birdview/issues/": true,
+		"https://example.com/bugs":                    false,
+		"https://github.com/Sajmani/birdview":         false,
+		"http://github.com/Sajmani/birdview/issues":   false,
 	} {
 		if err := checkFeedback(v); (err == nil) != ok {
 			t.Errorf("checkFeedback(%q) = %v; want accepted %v", v, err, ok)

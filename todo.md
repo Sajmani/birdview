@@ -35,53 +35,38 @@ worked on from a Google laptop or with Google tools**. So step 1 is the last cha
 everything after it runs on the personal machine, with Sameer's own `gh` login and tokens; no
 agent session on the work machine touches `Sajmani/birdview` again, not even `gh repo sync`.
 
-1. **Here, last: freeze `google/birdview`.** This item, the decision, and `CONTRIBUTING.md` land
-   by pull request; after it merges, nothing more is pushed here.
-2. **Set up the personal machine.** Go (the version in `go.mod`), Chrome for the browser checks
-   (`BIRDVIEW_CHROME`), gcloud signed in as `ajmani@gmail.com` (it already deploys project
-   `birdview-site`), and `gh auth login` as `Sajmani`. Clone `git@github.com:Sajmani/birdview.git`;
-   the fork is already at `google/birdview`'s `main`, so pull once from
-   `https://github.com/google/birdview.git` if it is behind. Run the Go checks (`AGENTS.md`,
-   *Commands*) to prove the setup.
+1. ~~**Here, last: freeze `google/birdview`.**~~ Done 2026-11-18 (`e501bb6`, PR #21).
+2. ~~**Set up the personal machine.**~~ Done 2026-11-18: Go 1.26.9, Chrome, `gh` (`Sajmani`), and
+   `gcloud` (`ajmani@gmail.com`, project `birdview-site`); `go build`, `go vet`, `gofmt`,
+   `birdview-ingest`, and `go test ./...` (including headless Chrome tests and `river/check`) all
+   pass.
    - **The `river` CLI is not available there yet.** River's repository is at a Google-internal
      URL and is not published, so `river check`, `river sum`, `river compose`, and `river diff`
-     cannot run until River moves too. BirdView's own spec checks (`go test ./river/check/`) and
-     the vendored skill (`.agents/skills/river/`) still work. Until River is published under
-     Sameer's own account: change nothing under `river/requirements/composed/` that needs a
-     re-stamp, and say in each pull request that changes `river/` that `river check` was not run.
-     Moving River is the same question, for River ([sourceOfTruth](#sourceoftruth) notes it).
+     cannot run until River is open-sourced. BirdView's own spec checks (`go test ./river/check/`)
+     and the vendored skill (`.agents/skills/river/`) still work. Until River is published:
+     note in each pull request that changes `river/` that `river check` was not run.
+     Moving River is the same question, for River ([sourceOfTruth](todo-closed.md#sourceoftruth) notes it).
    - **`fetched/` is not in the clone** (`tech.fetchRestrictedInputs`). The ingest needs none of
      it. Rebuilding the county tables or `data/sea-distance.tsv` needs the GBIF downloads:
      `go run ./cmd/birdview-gbifdownload -query data/gbif-queries/<query>.sql -key <key>`
      re-fetches each by the key recorded in `data/gbif-downloads.tsv`, with no credentials.
-3. **Make the repository stand alone.** In GitHub settings for `Sajmani/birdview`: ask GitHub Support to
-   detach the fork ("Leave fork network"), so search and the network graph treat it as the
-   original; turn on Issues and Pull requests; keep the ruleset on `main` that blocks deletion and
-   force-pushes, and decide whether it should also require pull requests.
-4. **Copy the issues.** 13 issues (#11 and #12 open), 15 comments, and nine labels. For each, oldest
-   first: `gh issue create --repo Sajmani/birdview` with the same title, the body prefixed
-   "*Copied from google/birdview#N, opened by @user on DATE.*", each comment added with
-   `gh issue comment`, and closed issues closed. Keep a table of old and new numbers. Pull requests
-   are not copied: ask `bevinkatti` to reopen PR #14 against `Sajmani/birdview`.
-5. **One commit for the new home**, in `Sajmani/birdview`:
-   - `github.com/google/birdview` becomes `github.com/Sajmani/birdview` everywhere outside
-     `third_party/` and vendored text: `cmd/birdview/main.go`'s `repository`, the report tests,
-     `docs/building.md`, `river/check/birdview_test.go`'s `Issue:` pattern, the requirements and
-     criteria that name the repository, and every `[#N]` issue link, renumbered from the
-     table in step 4. `git grep -n google/birdview` finds them; decisions keep their history but
-     relink.
-   - `CONTRIBUTING.md`: no CLA; contributions under Apache 2.0, which section 5 of the license
-     already covers; drop the Google community-guidelines link or replace it with
-     `CODE_OF_CONDUCT.md`'s own terms.
-   - `CODE_OF_CONDUCT.md`: its enforcement section sends reports to `sameer@google.com` and escalates
-     to Google's Open Source Programs Office and `opensource@google.com`. Name a personal contact,
-     and drop the Google escalation path.
-   - `AGENTS.md` and this file: push to `origin` (`Sajmani/birdview`) only; drop the
-     `gh repo sync` step and the HTTPS fallback through `google/birdview`; the deploy clone
-     (`~/src/birdview-site`) can become a plain clone of the same repository, or go.
-   - `.github/workflows/checks.yml` runs as is; the `cla/google` check goes with the org.
-   - Close [deploymentPlumbing](#deploymentplumbing)'s mirror steps and [sourceOfTruth](#sourceoftruth) as done
-     by this move.
+3. ~~**Make the repository stand alone.**~~ Done 2026-11-18: detached from the `google/birdview`
+   fork network, Issues and Pull requests enabled.
+4. ~~**Copy the issues.**~~ Done 2026-11-18: all 13 issues and 15 comments copied oldest-first to
+   `Sajmani/birdview` (`#1`–`#12` kept their numbers, with `#11` and `#12` open and `#8` closed as
+   not planned; `google/birdview#16` became `#13`). Still to do: ask `bevinkatti` to reopen PR #14
+   against `Sajmani/birdview`.
+5. ~~**One commit for the new home**~~, in `Sajmani/birdview` (done 2026-11-18):
+   - Renamed `github.com/google/birdview` to `github.com/Sajmani/birdview` in code, tests, docs,
+     `river/check/birdview_test.go`, requirements/criteria, `CHANGELOG.md`, and issue links (`#16`
+     renumbered to `#13`).
+   - Updated `CONTRIBUTING.md` (Apache 2.0, no CLA, pointing to `CODE_OF_CONDUCT.md`),
+     `CODE_OF_CONDUCT.md` (`birdview@ajmani.net`, Google escalation removed), and `README.md`
+     (Google disclaimer and VRP section removed).
+   - Closed [deploymentPlumbing](#deploymentplumbing)'s mirror steps and moved
+     [sourceOfTruth](todo-closed.md#sourceoftruth) to [todo-closed.md](todo-closed.md).
+   - Note: `river sum`/`river compose`/`river check` were not run because the `river` CLI is not
+     yet available outside Google; re-stamp once River is open-sourced.
 6. **Redeploy** from the repository root, as `docs/building.md` (*Deploying*) describes:
    `git rev-parse HEAD > REVISION`, then
 
@@ -123,14 +108,14 @@ regions. Ryan found it "pretty intimidating with all of that text" and suggested
 that just compares stick figures, picked from a list or a search bar; advanced filters behind a menu,
 as in the iNaturalist app; and the explanations on their own page, as in the Sibley app. Joe doubted
 the average field birder wants "so much info". Karen and Ryan both hit the phone layout
-([#2](https://github.com/google/birdview/issues/2), fixed by
+([#2](https://github.com/Sajmani/birdview/issues/2), fixed by
 [product.fitsAPhone](river/requirements/local/product/presentation.md#fitsaphone)).
 
 A redesign needs a decision first. The panels already start closed
 ([product.collapsibleControls](river/requirements/local/product/presentation.md#collapsiblecontrols)), and the 2026-10-25 prose pass cut the page text; beyond that,
 from smallest to largest: move Presentation to the guide and leave a one-line key, or make
 search-and-compare the landing view and the full index the advanced one. Region choice at county scale needs search or a map, not chips.
-The search box ([product.searchBox](river/requirements/local/product/filtering.md#searchbox), [#3](https://github.com/google/birdview/issues/3)) is the first
+The search box ([product.searchBox](river/requirements/local/product/filtering.md#searchbox), [#3](https://github.com/Sajmani/birdview/issues/3)) is the first
 step, done 2026-10-25. Next, decided 2026-10-25: move Presentation to the guide and leave a one-line
 key (option (a)); option (b) waits for a discussion of options and for
 [simulatedUserTests](#simulatedusertests).
@@ -950,39 +935,12 @@ apply to it. In order:
    `birdview-00004-z2b`, and checked: both answer 301 with path and query intact, plain HTTP takes
    one more hop through Google's own HTTPS redirect, and `birdview.site` serves as before. ~~And there is no `robots.txt`~~: added 2026-10-23 under
    [tech.crawlersSkipFilteredViews](river/requirements/local/tech/delivery.md#crawlersskipfilteredviews), asking crawlers to skip every URL with a query string.
-8. **Sync and deploy automatically.** A push to the mirror's `main` fires a Cloud Build trigger,
-   connected through the Cloud Build GitHub app installed on the `Sajmani` account, that builds
-   the image and deploys it. The sync that feeds it should also run from Google Cloud: Cloud
-   Scheduler starts a small Cloud Build job, hourly say, that runs `gh repo sync` with a
-   fine-grained token for the mirror alone, kept in Secret Manager. Nothing is committed to
-   either repository. A scheduled GitHub Action was considered and is worse here: its workflow
-   file would have to be committed to the mirror, which breaks the one-way rule, or to this
-   repository, which puts personal deployment plumbing in this organization's repository; and
-   GitHub turns scheduled workflows off in forks until enabled. **Grant the token Contents and
-   Workflows, read and write, on the mirror alone**: without Workflows, the sync fails the day
-   this repository adds a file under `.github/workflows/`. If [sourceOfTruth](#sourceoftruth) moves
-   development to the mirror, the sync job goes and the deploy trigger stays.
-
-## sourceOfTruth
-
-**Move BirdView's source of truth to the personal repository**
-
-Status: open
-
-Owner: Sameer
-
-Gate: before building BirdView's software factory; and once continuing development in a personal
-repository is confirmed as approved
-
-Planned 2026-10-22: an agent-driven software factory for BirdView, run from Sameer's own accounts
-the way a customer would run one, belongs where the code lives; if this repository stayed the
-source of truth, every change the factory made would be an outside contribution to it. So, once
-approved, `github.com/Sajmani/birdview` becomes the source of truth and this repository is archived
-with a note saying where development continues. Exactly one repository receives changes at any
-time. **First, confirm** that continuing development there, on personal time and accounts, is
-approved: the existing files carry this organization's copyright, and serving a clone is not the
-same question as developing one. Afterwards BirdView is an outside adopter of River: re-pins copy
-River's published parts until River itself is public, then come from River's public origin.
+8. **Deploy automatically** (~~sync and~~ mirror steps closed 2026-11-18 by
+   [decisions.personalRepoIsSourceOfTruth](river/requirements/decisions/decisions.md#personalrepoissourceoftruth)
+   and [sourceOfTruth](todo-closed.md#sourceoftruth): `Sajmani/birdview` is now the source of truth,
+   so no mirror sync job is needed). A push to `Sajmani/birdview`'s `main` can optionally fire a
+   Cloud Build trigger, connected through the Cloud Build GitHub app installed on the `Sajmani`
+   account, that builds the image and deploys it.
 
 ## smallOrderWingspanFit
 
@@ -1124,7 +1082,7 @@ Mexican bird and Morelet's Seedeater is the one native to Texas
 
 Status: active
 
-Issue: [#11](https://github.com/google/birdview/issues/11)
+Issue: [#11](https://github.com/Sajmani/birdview/issues/11)
 
 Owner: Sameer
 
@@ -1235,7 +1193,7 @@ each needing the year in the GBIF download (a `"year"` column in `data/gbif-quer
 
 Status: active
 
-Issue: [#12](https://github.com/google/birdview/issues/12)
+Issue: [#12](https://github.com/Sajmani/birdview/issues/12)
 
 Owner: Sameer
 
@@ -1340,7 +1298,7 @@ so values set by matching photographs, by hand or by a pipeline, would measure t
 The cost estimate on issue #7 assumed usable photographs and no longer applies. What follows is the
 record as it stood.
 
-[GitHub issue #7](https://github.com/google/birdview/issues/7): the Lesser Scaup's figure had the
+[GitHub issue #7](https://github.com/Sajmani/birdview/issues/7): the Lesser Scaup's figure had the
 longer neck, and the Horned Grebe's the shorter neck and the larger head (0.18 of its length, from
 the mass model), the opposite of photographs of both in flight. The cause was family-wide models:
 `NeckRatios` gives Anatidae 0.70, set for swans and geese. **The quick fix is done** (2026-11-08,
@@ -1366,13 +1324,13 @@ are the likelier sources. Cost scales with species: about 1,082 now, about 11,00
 
 Status: active
 
-Issue: [#10](https://github.com/google/birdview/issues/10)
+Issue: [#10](https://github.com/Sajmani/birdview/issues/10)
 
 Owner: Sameer
 
 Gate: a decision on the classification and on which sources may be used; before worldwide species
 
-[GitHub issue #10](https://github.com/google/birdview/issues/10): AVONET's Coastal and Marine do not
+[GitHub issue #10](https://github.com/Sajmani/birdview/issues/10): AVONET's Coastal and Marine do not
 separate three groups a birder does: birds of the open ocean seen from boats (shearwaters, petrels),
 birds of the sea that are seen from shore (sea ducks, loons), and birds of beaches and flats
 (gulls, terns, shorebirds). AVONET codes every pelagic family Marine, splits gulls and terns 24

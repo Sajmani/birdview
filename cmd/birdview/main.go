@@ -2874,7 +2874,7 @@ func (s *server) renderMarkdown(w http.ResponseWriter, set, title string, src []
 type repoLinks struct{ base string }
 
 // repository is where BirdView's source is published.
-const repository = "https://github.com/google/birdview"
+const repository = "https://github.com/Sajmani/birdview"
 
 // repoURL links to path, relative to the repository root, on the code host.
 // A path with no extension in its last element is a directory.

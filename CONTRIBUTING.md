@@ -2,19 +2,14 @@
 
 ## Before you begin
 
-### Sign our Contributor License Agreement
+### Licensing
 
-Contributions must be accompanied by a
-[Contributor License Agreement](https://cla.developers.google.com/about) (CLA). You (or your
-employer) keep the copyright; the CLA gives us permission to use and redistribute your
-contribution as part of the project. If you or your employer have already signed the Google CLA,
-even for another project, you probably don't need to sign again. See or sign your agreements at
-<https://cla.developers.google.com/>.
+Contributions are submitted under the [Apache License 2.0](LICENSE) (see section 5 of the license).
+No Contributor License Agreement is required.
 
-### Review our Community Guidelines
+### Code of Conduct
 
-This project follows [Google's Open Source Community
-Guidelines](https://opensource.google/conduct/).
+This project follows [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Contribution process
 

@@ -55,17 +55,8 @@ BirdView's own code and documentation are licensed under the [Apache License 2.0
 **Everything under [`third_party/`](third_party) is not**: each directory there carries its own
 license and a README naming its source.
 
-This is not an officially supported Google product.
-
 ## Contributing
 
 Report problems and corrections as issues; corrections to the biology are especially welcome. See
 [CONTRIBUTING.md](CONTRIBUTING.md) to contribute code and [CHANGELOG.md](CHANGELOG.md) for major
 changes.
-
-## Security
-
-Eligibility for the [Google Open Source Software Vulnerability Rewards
-Program](https://bughunters.google.com/open-source-security) is determined by the [Google Open
-Source Software Vulnerability Reward Program
-Rules](https://bughunters.google.com/about/rules/open-source/google-open-source-software-vulnerability-reward-program-rules).

@@ -951,7 +951,7 @@ Commons is the recommendation when it returns.
 ### GitHub (`github.com`)
 
 `github.com` is named in `cmd/birdview/main.go` only as BirdView's own public source repository
-(`https://github.com/google/birdview`) and as the pattern checked on `-feedback` issue-tracker links
+(`https://github.com/Sajmani/birdview`) and as the pattern checked on `-feedback` issue-tracker links
 ([product.noPersonalAddress](../local/product/presentation.md#nopersonaladdress), [product.reportDataIssue](../local/product/presentation.md#reportdataissue)). BirdView calls no GitHub API at build time or
 runtime, so GitHub imposes no third-party requirements on the application.
 
