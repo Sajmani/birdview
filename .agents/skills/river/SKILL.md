@@ -8,7 +8,7 @@ description: >-
   read before editing code, which changes need a person's decision, how to run River's checks, and
   where the full rules are.
 metadata:
-  river: "3.0"
+  river: "3.1"
 ---
 
 # River
@@ -69,6 +69,9 @@ the requirement.
 3. Record the mapping and the observation in the criterion's section in `river/conformance/`,
    never in the criterion: `Watched failing: <date>, by <how>`. The format is in
    [`references/verification.md`](references/verification.md), *Recording conformance*.
+4. Once the implementation meets a composed package's blocking criteria and its guardrails pass,
+   commit, run `river implement <package>`, and commit the `Implements:` record it writes
+   (*Implementation alignment* in the same file).
 
 ## Checking
 
@@ -82,13 +85,14 @@ is done.
 | `stale-composition`, `composition-unstamped` | A composed package's files or inputs changed since its stamp, or it has none | Recompose, then `river compose <package>` |
 | `unaccounted-requirement` | A source item is not included, composed from, or excluded in a package it applies to | Recompose, accounting for it |
 | `stale-sums` | `requirements/sums.md` is out of date | Run `river sum -w`; never edit it by hand |
-| `covers-*`, `guardrail-*` | A criterion or guardrail cites something withdrawn, excluded, or missing | Repoint it, or drop it on recomposition |
+| `covers-*`, `guardrail-*` | A criterion or guardrail cites something withdrawn, excluded, or missing, or a named test is gone | Repoint it, restore the test, or drop it on recomposition |
+| `criterion-unguarded`, `implementation-behind` (note) | A criterion blocking unless met has no guardrail; a package moved past its `Implements:` commit | Build and guard it, then `river implement <package>` |
 | `unlinked-reference`, `broken-reference-link` | A qualified name is not a link, or its link leads nowhere | Link it; `river links -w` repoints moved items |
 | `version-too-old` | The module declares River 1.x or 2.x | Run `river upgrade`, or use River built at the module's pin |
 | `unrecorded-dependency`, `unrecorded-host` (notes) | A dependency or host is not in `imports/` | Follow [`references/discovery.md`](references/discovery.md); never just add the name |
 
 The `## Module` block in `river/README.md` declares the River version the module follows
-(`river 3.0`). `river graph` shows what reaches what, from guardrails to sources, before or after a
+(`river 3.1`; an older module upgrades with [`references/upgrading.md`](references/upgrading.md)). `river graph` shows what reaches what, from guardrails to sources, before or after a
 change; `river upgrade` migrates an older module and its skill copy. Install the CLI with
 `go install ./cmd/river` from a River checkout at the skill's pin, and refresh the skill copy with
 `river install-skill`. Every code and command is in [`references/checks.md`](references/checks.md).
@@ -114,6 +118,7 @@ section (`^## `) within it:
 | [`discovery.md`](references/discovery.md) | Finding what governs a new dependency |
 | [`checks.md`](references/checks.md) | The `river` CLI and what a River module's checks must cover |
 | [`adopting.md`](references/adopting.md) | Installing this skill, adopting stage by stage, migrating existing requirements |
+| [`upgrading.md`](references/upgrading.md) | Upgrading a module with `river upgrade`: each version step, and every item it leaves for you |
 
 Phases River does not yet define (goals, gradients, release guardrails, experimentation) are
 described in `ROADMAP.md` at the root of River's own repository.

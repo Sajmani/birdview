@@ -10,8 +10,6 @@ Subject: `presentation.mode`
 
 Value: `diagram`
 
-Applies to: app
-
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 The diagram is the only way BirdView presents a species in v1. There is no photograph mode.
@@ -24,8 +22,6 @@ and shape comparable; photographs were always the enrichment.
 **Tile contents**
 
 Subject: `presentation.tile`
-
-Applies to: app
 
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
@@ -110,8 +106,6 @@ Subject: `units.default`
 
 Value: `imperial`
 
-Applies to: app
-
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 One toggle switches the whole interface between:
@@ -131,8 +125,6 @@ a 12 g kinglet both round to 0.1 oz.
 
 **First load shows everything**
 
-Applies to: app
-
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
@@ -147,8 +139,6 @@ for. Opening filtered or empty would hide it.
 **Toggling a control keeps your place**
 
 Subject: `presentation.scroll`
-
-Applies to: app
 
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
@@ -170,8 +160,6 @@ ordering, sectioning, and geometry stay in Go where they are property-tested (se
 **The empty state says what to do**
 
 Subject: `presentation.empty_state`
-
-Applies to: app
 
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
@@ -202,8 +190,6 @@ describe the same filters differently.
 
 Subject: `presentation.controls`
 
-Applies to: app
-
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
@@ -228,8 +214,6 @@ falls on the reader who wants a filter rather than on every reader.
 **Every group offers "Only"**
 
 Subject: `presentation.filter_only`
-
-Applies to: app
 
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
@@ -256,8 +240,6 @@ Subject: `presentation.units`
 
 Value: `mass unit fixed per comparison scope, smallest bird decides`
 
-Applies to: app
-
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Mass is written in **one unit across everything a page is comparing**. The scope is what the
@@ -282,8 +264,6 @@ value — a 3 g hummingbird is `0.11 oz` — because that is precision, not a se
 Subject: `presentation.share`
 
 Value: `one species' observations over all species observations, for the regions and months in view`
-
-Applies to: app
 
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata)
 
@@ -399,8 +379,6 @@ Subject: `presentation.species_url.out_of_scope`
 
 Value: `404 with a named bird and its measured reason`
 
-Applies to: app
-
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 
 `/species/<id>` for a bird the derivation classified but left out of scope returns **404 with a
@@ -441,8 +419,6 @@ Subject: `ordering.frequency`
 
 Value: `ascending by one-in-N, banded by decade`
 
-Applies to: app
-
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 **Frequency** is a fourth ordering, over the number every tile already shows
@@ -475,8 +451,6 @@ Rationale: [shareOfRecords](#shareofrecords) put the share on every tile but gav
 Subject: `presentation.name_provenance`
 
 Value: `per-source binomial and count, shown where the sources disagree`
-
-Applies to: app
 
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
@@ -531,8 +505,6 @@ disagreement is not transient: eBird filed 827,098 records under the shared name
 
 Subject: `presentation.help`
 
-Applies to: app
-
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
@@ -575,8 +547,6 @@ controls.
 
 Subject: `presentation.fit`
 
-Applies to: app
-
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 **Down to 360 CSS pixels wide, nothing on any page reaches past the edge of the window, and no text
@@ -598,8 +568,6 @@ is 375 to 430.
 **A tile opens a detail view**
 
 Subject: `presentation.detail_view`
-
-Applies to: app
 
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
@@ -641,8 +609,6 @@ pixels tall, and the view of one bird has nothing to compare it against.
 Subject: `presentation.compare_view`
 
 Value: `/compare?species=<id>&species=<id>…`
-
-Applies to: app
 
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
@@ -691,8 +657,6 @@ metricProvenanceExplained is left out because a table per bird would bury the co
 Subject: `presentation.pick_mode`
 
 Value: `?species=<id>&species=<id>… — present, even empty, means picking`
-
-Applies to: app
 
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 
@@ -766,8 +730,6 @@ filtered index to an unfiltered one.
 
 Subject: `docs.currency`
 
-Applies to: app
-
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 **User-facing documentation and page credits describe the project as it is, not as it was.**
@@ -792,8 +754,6 @@ comes from those sources' terms ([imports.md](../../imports/imports.md)), compos
 **No personal address is published**
 
 Subject: `deploy.contact`
-
-Applies to: app
 
 Goals: [goals.giveBack](../../../goals/goals.md#giveback), [goals.maintainerPrivacy](../../../goals/goals.md#maintainerprivacy)
 
@@ -826,8 +786,6 @@ does not publish their mail.
 **A species page asks for corrections where its data is shown**
 
 Subject: `presentation.report_data_issue`
-
-Applies to: app
 
 Goals: [goals.giveBack](../../../goals/goals.md#giveback), [goals.honestData](../../../goals/goals.md#honestdata)
 
@@ -862,8 +820,6 @@ the reader to transcribe the page.
 
 Subject: `presentation.bird_presets`
 
-Applies to: app
-
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 
 The first setting on the count line is **Birds**, offering **All**, the default, and a few kinds of
@@ -894,8 +850,6 @@ habitats to say "shorebirds" is the kind of work a birder should not have to do 
 
 Subject: `presentation.choose_one`
 
-Applies to: app
-
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 Birds, Order by, Reporting frequency, Units, and Names each take exactly one choice. Each draws its
@@ -915,8 +869,6 @@ would replace the choice or add to it, and the chosen one was shown by color alo
 **The detail view and every tile link to the species on iNaturalist**
 
 Subject: `presentation.detail_view.external_link`
-
-Applies to: app
 
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
@@ -963,8 +915,6 @@ URL that always "works" hides the failure. See
 
 Subject: `presentation.detail_view.external_link`
 
-Applies to: app
-
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 The detail view and every home page tile carry a link to the species' page on eBird,
@@ -1002,8 +952,6 @@ bird. eBird files the bird under the same code BirdView shows beside its name.
 **The home page: one view of birds**
 
 Subject: `presentation.next`
-
-Applies to: app
 
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 

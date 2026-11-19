@@ -51,7 +51,7 @@ func pct(total int64, shares [Count]float64) [Count]int64 {
 //
 // Watched fail: see app.monthsFilterAndAbstain.
 //
-// Verifies: product.regionAndMonthFilter, decisions.monthPresence. Criterion: app.monthsFilterAndAbstain.
+// Verifies: decisions.monthPresence, app.monthsFilterAndAbstain
 func TestPresentRecoversKnownSeasons(t *testing.T) {
 	// Measured shares of each species' own New York records, 2026-10-07.
 	cases := []struct {
@@ -117,7 +117,7 @@ func TestPresentRecoversKnownSeasons(t *testing.T) {
 // year. A caller that conflated them would show the same page for a
 // well-measured resident and a bird nobody has visited.
 //
-// Verifies: product.regionAndMonthFilter, decisions.monthPresence. Criterion: app.monthsFilterAndAbstain.
+// Verifies: decisions.monthPresence, app.monthsFilterAndAbstain
 func TestPresentAbstainsBelowTheFloor(t *testing.T) {
 	hi := [Count]int64{270765, 278287, 290821, 208088, 155439, 157946,
 		150425, 152932, 165468, 230652, 198060, 245694}

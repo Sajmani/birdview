@@ -10,8 +10,6 @@ Subject: `process.spec_location`
 
 Value: `river/`
 
-Applies to: repo
-
 Goals: [goals.giveBack](../../../goals/goals.md#giveback), [goals.honestData](../../../goals/goals.md#honestdata)
 
 The repository follows the loop in [README.md](../../../README.md). `AGENTS.md` names `river/` as
@@ -20,8 +18,6 @@ normative so agents reading the instruction file are pointed at it.
 ## pacedInaturalistMapping
 
 **The iNaturalist mapping is built by a separate, paced tool**
-
-Applies to: dataset
 
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen), [goals.rapidIteration](../../../goals/goals.md#rapiditeration)
 
@@ -43,8 +39,6 @@ accepted cost: a stale ID fails visibly and the refresh is one command.
 
 **No source is consumed before it is recorded**
 
-Applies to: repo
-
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 Every input source appears in [imports.md](../../imports/imports.md) with its tier, pin, license,
@@ -56,8 +50,6 @@ be redistributed and the third lacked the fields it was chosen for.
 ## gbifDownloadsRecorded
 
 **Every GBIF download is requested from a committed query and recorded before it is read**
-
-Applies to: dataset
 
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
@@ -79,8 +71,6 @@ be checked against the query and the file it came from.
 
 Subject: `process.active_work`
 
-Applies to: repo
-
 Goals: [goals.rapidIteration](../../../goals/goals.md#rapiditeration), [goals.giveBack](../../../goals/goals.md#giveback)
 
 `todo.md`, at the repository root, stays the record of every piece of open work, cited by identifier and checked with
@@ -98,8 +88,6 @@ copy agents read, and the record that changes in the same commit as the work (Sa
 ## proportionsReviewTool
 
 **A local tool for reviewing proportions against photographs**
-
-Applies to: dataset
 
 Status: **Withdrawn 2026-11-09.** Photographs foreshorten the parts the figure draws in one plane, so
 a comparison with them cannot settle a proportion; the tool was removed. See

@@ -35,7 +35,7 @@ func committed(t *testing.T) *boundary.File {
 
 // TestKnownPoints checks the committed boundary file against geography.
 //
-// Verifies: tech.regionBoundaries. Criterion: app.boundariesResolveKnownPoints.
+// Verifies: app.boundariesResolveKnownPoints
 func TestKnownPoints(t *testing.T) {
 	f := committed(t)
 	for _, p := range boundary.KnownPoints {
@@ -49,7 +49,7 @@ func TestKnownPoints(t *testing.T) {
 // a region, that the sea boxes are internal/region's own, and that the file
 // stays within the size every index page pays to load it.
 //
-// Verifies: tech.regionBoundaries. Criterion: app.boundariesCoverEveryRegion.
+// Verifies: app.boundariesCoverEveryRegion
 func TestCoverage(t *testing.T) {
 	f := committed(t)
 	have := map[string]boundary.Land{}

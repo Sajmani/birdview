@@ -47,7 +47,7 @@ import (
 // page's Here button loads: named by its hash, cached for a year, and nothing
 // else served under its directory.
 //
-// Verifies: tech.regionBoundaries, tech.cacheLifetimeStated. Criterion: app.boundariesCoverEveryRegion.
+// Verifies: app.boundariesCoverEveryRegion
 func TestBoundaryFileIsServedByHash(t *testing.T) {
 	s := newTestServer(t)
 	body := mustGet(t, s, "/?month=all")
@@ -79,7 +79,7 @@ var dataAttr = func(name string) *regexp.Regexp { return regexp.MustCompile(name
 // and a point outside every region must each say so and go nowhere; and no
 // request may carry the position, or show that Here was pressed.
 //
-// Verifies: product.hereSelectsLocalRegion, product.locationStaysInBrowser.
+// Verifies: app.hereLookupAgreesInTheBrowser, app.hereSendsNothingExtra.
 // Criteria: app.hereLookupAgreesInTheBrowser, app.hereSendsNothingExtra.
 func TestHereInTheBrowser(t *testing.T) {
 	chrome := findChrome()
@@ -255,7 +255,7 @@ func TestHereInTheBrowser(t *testing.T) {
 // also in the guide's "Some things to try", and the link to that list lands
 // on its heading.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestWelcomeLine(t *testing.T) {
 	s := newTestServer(t)
 	body := mustGet(t, s, "/")
@@ -301,8 +301,7 @@ func TestWelcomeLine(t *testing.T) {
 // region and sets the month to Now, keeping the rest; refused, it stays and
 // says so in the welcome line, naming the Region setting.
 //
-// Verifies: product.hereSelectsLocalRegion, product.locationStaysInBrowser.
-// Criterion: app.hereLookupAgreesInTheBrowser.
+// Verifies: app.hereLookupAgreesInTheBrowser.
 func TestHereAndNowLink(t *testing.T) {
 	chrome := findChrome()
 	if chrome == "" {
@@ -410,7 +409,7 @@ func TestHereAndNowLink(t *testing.T) {
 // with every other setting kept, rather than to month=now, which only a
 // reader without the script follows (TestNextWithoutAMonthIsNotStored).
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNowIsTheBrowsersMonth(t *testing.T) {
 	chrome := findChrome()
 	if chrome == "" {
@@ -452,8 +451,7 @@ func TestGuidesReflow(t *testing.T) {
 // TestBillAndTailOrderings checks the two orderings by measured parts: the
 // home page sorts ascending by bill or tail length and says so in Order by.
 //
-// Verifies: product.oneSelectedMetric, product.ascendingOrder.
-// Criterion: app.billAndTailOrderings.
+// Verifies: app.billAndTailOrderings.
 func TestBillAndTailOrderings(t *testing.T) {
 	s := newTestServer(t)
 	for _, c := range []struct {
@@ -487,7 +485,7 @@ func TestBillAndTailOrderings(t *testing.T) {
 // names the ordering it belongs to, as Order by labels it: "Tail Tier 1"
 // under Tail.
 //
-// Verifies: product.sectionHeadersStateRange. Criterion: app.tierHeadingsNameTheOrdering.
+// Verifies: app.tierHeadingsNameTheOrdering
 func TestTierHeadersNameTheOrdering(t *testing.T) {
 	s := newTestServer(t)
 	for by, label := range map[string]string{"": "Frequency", "length": "Length", "wingspan": "Wingspan",
@@ -515,7 +513,7 @@ func TestTierHeadersNameTheOrdering(t *testing.T) {
 // ends already differ at two decimals of an inch; a page of wide tiers with
 // wide gaps gets none.
 //
-// Verifies: product.sectionHeadersStateRange. Criterion: app.tierHeadingDigits.
+// Verifies: app.tierHeadingDigits
 func TestHeadingDigits(t *testing.T) {
 	u := unitsFor(false, 10)
 	narrow := []tierSpan{{5.0, 6.0, u}, {6.05, 7.0, u}, {8.0, 9.0, u}}
@@ -540,7 +538,7 @@ func TestHeadingDigits(t *testing.T) {
 // A heading once ran on to where the next tier began, which made four herons
 // and an ibis look as if they spanned the five inches up to the pelicans.
 //
-// Verifies: product.sectionHeadersStateRange. Criterion: app.tierHeadingsHoldTheirBirds.
+// Verifies: app.tierHeadingsHoldTheirBirds
 func TestTierRangesHoldTheirBirds(t *testing.T) {
 	s := newTestServer(t)
 	heading := regexp.MustCompile(`<span class="tier">[^<]+</span>\s*([^<&]+?)(?: &ndash; ([^<]+?))?\s*<span class="n">`)
@@ -594,7 +592,7 @@ func TestTierRangesHoldTheirBirds(t *testing.T) {
 // after the range in the count line's style, not pushed to the far edge in
 // its own, where it read as part of something else or was not seen at all.
 //
-// Verifies: product.sectionHeadersStateRange. Criterion: app.tierCountFollowsTheRange.
+// Verifies: app.tierCountFollowsTheRange
 func TestTierCountFollowsTheRange(t *testing.T) {
 	css, err := fs.ReadFile(assetFS, "static/styles.css")
 	if err != nil {
@@ -626,7 +624,7 @@ func TestTierCountFollowsTheRange(t *testing.T) {
 // tier included (#6: two pinned birds in one tier drew no histogram, under a
 // line calling it their distribution).
 //
-// Verifies: product.tierHistogram. Criterion: app.tierHistogramMatchesTiers.
+// Verifies: app.tierHistogramMatchesTiers
 func TestTierHistogram(t *testing.T) {
 	s := newTestServer(t)
 	bar := regexp.MustCompile(`<a href="#tier-(\d+)" style="height:(\d+)%" aria-label="([^"]+)"`)

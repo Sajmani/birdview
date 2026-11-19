@@ -155,7 +155,7 @@ var noPages = map[string]string{
 // render, produced at least one page. A route or template added later that no
 // seed or link reaches fails here, rather than going unchecked.
 //
-// Verifies: tech.webPages. Criterion: app.everyPageIsFound.
+// Verifies: app.everyPageIsFound
 func TestEveryKindOfPageIsDiscovered(t *testing.T) {
 	s := newTestServer(t)
 	pages := discoverPages(t, s)
@@ -231,7 +231,7 @@ var (
 // document served on its own is outside the contract by its scope, and
 // TestRenderedTextContrast renders every one of those in full.
 //
-// Verifies: tech.textContrastFloor, tech.badgeContrast. Criterion: app.pagesKeepToTheStylesheet.
+// Verifies: app.pagesKeepToTheStylesheet
 func TestPagesKeepToTheStylesheetContract(t *testing.T) {
 	s := newTestServer(t)
 	palette := map[string]bool{}
@@ -328,7 +328,7 @@ var dataContrast = regexp.MustCompile(`data-contrast="([^"]*)"`)
 // It needs Chrome, and skips without it; on the owner's machine it gates, as
 // river/bindings/bindings.md records.
 //
-// Verifies: wcag.ContrastEnhanced. Criterion: app.renderedTextContrast.
+// Verifies: app.renderedTextContrast
 func TestRenderedTextContrast(t *testing.T) {
 	chrome := findChrome()
 	if chrome == "" {

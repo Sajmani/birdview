@@ -114,7 +114,7 @@ func partColor(t *testing.T, part string) string {
 	return strings.ToLower(h)
 }
 
-// Verifies: product.oneDiagramVocabulary. Criterion: app.faviconFromPalette.
+// Verifies: app.faviconFromPalette
 func TestFaviconUsesTheAppPalette(t *testing.T) {
 	icon, err := Static.ReadFile("static/favicon.svg")
 	if err != nil {

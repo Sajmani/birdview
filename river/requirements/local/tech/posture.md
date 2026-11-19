@@ -10,8 +10,6 @@ Subject: `deployment.posture`
 
 Value: `public at birdview.site, a personal deployment; non-commercial in perpetuity`
 
-Applies to: repo, dataset, app
-
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
 BirdView is served publicly at `birdview.site`, as Sameer's personal site, and will not become a

@@ -12,8 +12,6 @@ repository, and live with it (`bindings.md`, Stage adoption).
 
 Subject: `release.ci`
 
-Applies to: repo
-
 Goals: [goals.secure](../../../goals/goals.md#secure), [goals.rapidIteration](../../../goals/goals.md#rapiditeration)
 
 GitHub Actions runs the four standing checks on every push to `main` and every pull request, with
@@ -31,8 +29,6 @@ write access give it nothing to find.
 **A deploy builds only code whose tests pass**
 
 Subject: `release.test_gate`
-
-Applies to: repo
 
 Goals: [goals.secure](../../../goals/goals.md#secure), [goals.honestData](../../../goals/goals.md#honestdata)
 
@@ -55,8 +51,6 @@ and would silently skip the tests of every later deploy.
 
 Subject: `release.revision`
 
-Applies to: repo
-
 Goals: [goals.honestData](../../../goals/goals.md#honestdata), [goals.giveBack](../../../goals/goals.md#giveback)
 
 Before deploying, the deployer writes the commit being deployed to a file named `REVISION` in the
@@ -77,8 +71,6 @@ its commit. A file, like `SKIP_TESTS`, needs no change to the deploy command's f
 **Every deploy is checked from outside**
 
 Subject: `release.smoke`
-
-Applies to: repo
 
 Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone), [goals.shareableViews](../../../goals/goals.md#shareableviews)
 

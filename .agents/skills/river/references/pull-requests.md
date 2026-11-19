@@ -14,8 +14,9 @@ river diff --base main --format pr
 
 (`--base` defaults to the merge base with `main`.) It reports, by area: requirements added,
 changed, withdrawn, or removed; imported sources re-pinned and what changed upstream; composed
-packages recomposed and how, and those now stale; precedence rows; criteria, and requirements
-newly without one; guardrails, criteria newly without one, and new watched-failing lines; and
+packages recomposed and how, re-stamped with their files unchanged, and those now stale; precedence rows; criteria, and requirements
+newly without one; guardrails, criteria newly without one, and new watched-failing lines;
+implementation alignments moved and how far each package is behind its alignment; and
 decisions added, superseded, or amended, with the existing decisions affecting each moved
 requirement. Long lists are capped; `river diff --base main` gives them in full.
 
@@ -24,7 +25,10 @@ requirement. Long lists are capped; `river diff --base main` gives them in full.
 1. **Needs your call:** one line each, saying why. Typical entries: a requirement whose meaning
    changed; a new exclusion or precedence change; a criterion weakened or withdrawn; a guardrail
    removed; coverage lost (a requirement with no criterion, or a criterion with no guardrail); an
-   existing decision the change may contradict.
+   existing decision the change may contradict; a package `re-stamped, package files unchanged`
+   after an input whose meaning changed: was the package re-examined against it, or only
+   re-stamped?; implementation behind requirements (`implementation-behind`) where the criteria
+   not yet built include ones that block unless met: say which, and when they will be built.
 2. **Unaffected:** one summary line per area, such as "13 decisions affect
    `tech.layoutVersion`; none is contradicted: the change moves a list, not the rule".
 3. **Amended here:** what this pull request itself supersedes or amends, and why.

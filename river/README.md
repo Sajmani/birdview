@@ -19,5 +19,5 @@ Open work is outside the module, in [`../todo.md`](../todo.md) (closed items in
 
 ```
 module birdview
-river 3.0
+river 3.1
 ```

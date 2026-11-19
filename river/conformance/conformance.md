@@ -1346,9 +1346,9 @@ Watched failing: 2026-10-05, across 3 mutations (---; the tile marker is suppres
 
 Criterion: [dataset.regionJoinReportsUnmatched](../requirements/composed/internal/dataset/acceptance.md#regionjoinreportsunmatched)
 
-Guardrails: none yet (planned)
+Guardrails: `internal/taxonomy/mapping_test.go:TestOccurrenceNormalizesEveryKnownName`
 
-Gates: no
+Gates: yes, in `go test ./...` (CI and image build)
 
 Watched failing: 2026-10-05, across 3 mutations (---; `Occurrence` skips `AviListRenames` — the shipped bug; `Occurrence` folds the shared name into *aestiva*).
 

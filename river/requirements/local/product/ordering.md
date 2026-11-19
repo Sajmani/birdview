@@ -10,8 +10,6 @@ Subject: `ordering.metric`
 
 Value: `length | wingspan | mass | bill | tail | frequency`
 
-Applies to: app
-
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The user chooses whether the dataset is ordered by total length, wingspan, body mass, bill length,
@@ -24,8 +22,6 @@ segments are modeled from mass.
 ## ascendingOrder
 
 **Ascending order**
-
-Applies to: app
 
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition)
 
@@ -45,8 +41,6 @@ first" elsewhere would otherwise read it as a defect. See
 **Sections break at N% above the section minimum**
 
 Subject: `sectioning.rule`
-
-Applies to: app
 
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
@@ -69,8 +63,6 @@ Subject: `sectioning.step_percent`
 
 Value: `10`
 
-Applies to: app
-
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The section step N defaults to 10%: a tier holds the birds up to 10% larger than its smallest
@@ -83,8 +75,6 @@ page offers no control for it.
 ## sectionHeadersStateRange
 
 **Section headers state range and count**
-
-Applies to: app
 
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition)
 
@@ -110,8 +100,6 @@ far apart they are.
 **A histogram shows how many species each tier holds**
 
 Subject: `sectioning.histogram`
-
-Applies to: app
 
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 

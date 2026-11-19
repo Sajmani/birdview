@@ -139,6 +139,64 @@ licenses ask, which a lower tier may do.
 
 ---
 
+### Excluded by [decisions.appScope](../../../decisions/decisions.md#appscope)
+
+- [gbifterms.AccurateRegistration](../../../imported/gbif.org/gbifterms/gbifterms.md#accurateregistration)
+- [gbifterms.ApiWithinSpecifications](../../../imported/gbif.org/gbifterms/gbifterms.md#apiwithinspecifications)
+- [gbifterms.DataNotGuaranteed](../../../imported/gbif.org/gbifterms/gbifterms.md#datanotguaranteed)
+- [gbifterms.RetainOwnershipIdentifier](../../../imported/gbif.org/gbifterms/gbifterms.md#retainownershipidentifier)
+- [inatapi.AuthenticateOnlyWhenNecessary](../../../imported/inaturalist.org/inatapi/inatapi.md#authenticateonlywhennecessary)
+- [inatapi.IdAboveBeyondPageCap](../../../imported/inaturalist.org/inatapi/inatapi.md#idabovebeyondpagecap)
+- [inatapi.JwtAuthorization](../../../imported/inaturalist.org/inatapi/inatapi.md#jwtauthorization)
+- [inatapi.LargestPageSize](../../../imported/inaturalist.org/inatapi/inatapi.md#largestpagesize)
+- [inatapi.MediaDownloadCaps](../../../imported/inaturalist.org/inatapi/inatapi.md#mediadownloadcaps)
+- [inatapi.NoGroupAccounts](../../../imported/inaturalist.org/inatapi/inatapi.md#nogroupaccounts)
+- [inatapi.RequestRate](../../../imported/inaturalist.org/inatapi/inatapi.md#requestrate)
+- [inatapi.UserAgent](../../../imported/inaturalist.org/inatapi/inatapi.md#useragent)
+- [inatterms.AccountHolderResponsible](../../../imported/inaturalist.org/inatterms/inatterms.md#accountholderresponsible)
+- [inatterms.ContributorKeepsRights](../../../imported/inaturalist.org/inatterms/inatterms.md#contributorkeepsrights)
+- [inatterms.DoNotBehaveLikeMachine](../../../imported/inaturalist.org/inatterms/inatterms.md#donotbehavelikemachine)
+- [inatterms.DuplicatesUndesirable](../../../imported/inaturalist.org/inatterms/inatterms.md#duplicatesundesirable)
+- [inatterms.NoMachineGeneratedContent](../../../imported/inaturalist.org/inatterms/inatterms.md#nomachinegeneratedcontent)
+- [inatterms.RateDoesNotHinderOthers](../../../imported/inaturalist.org/inatterms/inatterms.md#ratedoesnothinderothers)
+- [product.craniumFromMass](../../../local/product/diagram.md#craniumfrommass)
+- [product.declaredExceptions](../../../local/product/dataset.md#declaredexceptions)
+- [product.generatedBadgeColors](../../../local/product/dataset.md#generatedbadgecolors)
+- [product.joinOnBinomial](../../../local/product/dataset.md#joinonbinomial)
+- [product.joinsReportDrops](../../../local/product/dataset.md#joinsreportdrops)
+- [product.lengthAndWingspanSources](../../../local/product/measurements.md#lengthandwingspansources)
+- [product.namesFromAvilist](../../../local/product/dataset.md#namesfromavilist)
+- [product.neckModelPerFamily](../../../local/product/diagram.md#neckmodelperfamily)
+- [product.scopeIsRecurringAvifauna](../../../local/product/dataset.md#scopeisrecurringavifauna)
+- [product.seaDistanceDerived](../../../local/product/dataset.md#seadistancederived)
+- [product.sourceNamingMeasured](../../../local/product/dataset.md#sourcenamingmeasured)
+- [product.traitsFromAvonet](../../../local/product/dataset.md#traitsfromavonet)
+- [product.traitsPerSpecies](../../../local/product/dataset.md#traitsperspecies)
+- [product.trunkFromMass](../../../local/product/diagram.md#trunkfrommass)
+- [product.unmatchedSpeciesReported](../../../local/product/dataset.md#unmatchedspeciesreported)
+- [tech.activeWorkHasIssue](../../../local/tech/process.md#activeworkhasissue)
+- [tech.bundleIsNormative](../../../local/tech/process.md#bundleisnormative)
+- [tech.checksOnEveryChange](../../../local/tech/release.md#checksoneverychange)
+- [tech.containerImageBuilds](../../../local/tech/delivery.md#containerimagebuilds)
+- [tech.datasetNeverCommitted](../../../local/tech/delivery.md#datasetnevercommitted)
+- [tech.fetchRestrictedInputs](../../../local/tech/delivery.md#fetchrestrictedinputs)
+- [tech.gbifDownloadsRecorded](../../../local/tech/process.md#gbifdownloadsrecorded)
+- [tech.goVersionFollowsDeps](../../../local/tech/delivery.md#goversionfollowsdeps)
+- [tech.identifiedClient](../../../local/tech/delivery.md#identifiedclient)
+- [tech.imageRecordsRevision](../../../local/tech/release.md#imagerecordsrevision)
+- [tech.recordBeforeConsuming](../../../local/tech/process.md#recordbeforeconsuming)
+- [tech.seaDistanceTable](../../../local/tech/delivery.md#seadistancetable)
+- [tech.smokeCheckAfterDeploy](../../../local/tech/release.md#smokecheckafterdeploy)
+- [tech.testedBeforeDeploy](../../../local/tech/release.md#testedbeforedeploy)
+- [tech.twoCommandsOneModule](../../../local/tech/delivery.md#twocommandsonemodule)
+- [wiley.MiningNeedsAgreement](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#miningneedsagreement)
+- [wiley.NoAiProcessing](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#noaiprocessing)
+- [wiley.NoAutomatedAccess](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#noautomatedaccess)
+- [wiley.NoIntegrationOrDerivatives](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#nointegrationorderivatives)
+- [wiley.NoRepositoryIncorporation](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#norepositoryincorporation)
+- [wiley.NoRetrievalStorage](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#noretrievalstorage)
+- [wiley.WhatIsPermitted](../../../imported/onlinelibrary.wiley.com/wiley/wiley.md#whatispermitted)
+
 ## Composed requirements
 
 ## pagesMeetTextContrast
@@ -147,6 +205,8 @@ licenses ask, which a lower tier may do.
 
 Composed from: [wcag.WebPage](../../../imported/w3.org/wcag/wcag.md#webpage), [wcag.FullPages](../../../imported/w3.org/wcag/wcag.md#fullpages), [wcag.ContrastRatio](../../../imported/w3.org/wcag/wcag.md#contrastratio), [wcag.ContrastMinimum](../../../imported/w3.org/wcag/wcag.md#contrastminimum), [wcag.ContrastEnhanced](../../../imported/w3.org/wcag/wcag.md#contrastenhanced), [tech.webPages](../../../local/tech/accessibility.md#webpages),
   [decisions.oneContrastFloor](../../../decisions/decisions.md#onecontrastfloor)
+
+Applies to: WebPage
 
 Goals: [goals.openToEveryone](../../../../goals/goals.md#opentoeveryone)
 
@@ -163,6 +223,8 @@ in the reader's own colors and meets this with nothing to measure.
 **Every BirdView web page meets WCAG 1.4.11 in full**
 
 Composed from: [wcag.WebPage](../../../imported/w3.org/wcag/wcag.md#webpage), [wcag.FullPages](../../../imported/w3.org/wcag/wcag.md#fullpages), [wcag.NonTextContrast](../../../imported/w3.org/wcag/wcag.md#nontextcontrast), [tech.webPages](../../../local/tech/accessibility.md#webpages)
+
+Applies to: WebPage
 
 Goals: [goals.openToEveryone](../../../../goals/goals.md#opentoeveryone)
 

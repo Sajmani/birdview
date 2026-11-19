@@ -5384,8 +5384,6 @@ Decided by: Sameer
 
 Status: accepted
 
-Applies to: dataset
-
 Affects: [gbifterms.RetainOwnershipIdentifier](../imported/gbif.org/gbifterms/gbifterms.md#retainownershipidentifier), [gbifterms.ApiWithinSpecifications](../imported/gbif.org/gbifterms/gbifterms.md#apiwithinspecifications),
   [gbifterms.AccurateRegistration](../imported/gbif.org/gbifterms/gbifterms.md#accurateregistration), [gbifterms.DataNotGuaranteed](../imported/gbif.org/gbifterms/gbifterms.md#datanotguaranteed)
 
@@ -5578,3 +5576,81 @@ as well. The checks had passed only because they tested imperial in the Mac's fo
 never wrap fit only for the fonts they were tuned in. Under 420px the tiles stack one per row, so
 the reason a tile's lines may not wrap, that drawings side by side stay level, does not arise there.
 Truncating would cut a number ("Chord 33…"), which reads as another value.
+
+## appScope
+
+**Composed package app excludes the source items River 3.0 routed only to other packages**
+
+Date: 2026-11-19
+
+Decided by: Sameer
+
+Status: accepted
+
+Affects: none
+
+### Decided
+
+From River 3.1 every composed package accounts for every source item. Under River 3.0, `Applies to:`
+routed 55 source item(s) to other packages and not to app, so app did not
+account for them; it now excludes them, under `### Excluded by` this decision in requirements/composed/internal/app/app.md.
+Each stays governed by the packages that include it or compose from it.
+
+### Why
+
+`river upgrade` drafted this from the module's routing. Whether app truly does not govern each
+item is the owner's to confirm.
+
+---
+
+## datasetScope
+
+**Composed package dataset excludes the source items River 3.0 routed only to other packages**
+
+Date: 2026-11-19
+
+Decided by: Sameer
+
+Status: accepted
+
+Affects: none
+
+### Decided
+
+From River 3.1 every composed package accounts for every source item. Under River 3.0, `Applies to:`
+routed 75 source item(s) to other packages and not to dataset, so dataset did not
+account for them; it now excludes them, under `### Excluded by` this decision in requirements/composed/internal/dataset/dataset.md.
+Each stays governed by the packages that include it or compose from it.
+
+### Why
+
+`river upgrade` drafted this from the module's routing. Whether dataset truly does not govern each
+item is the owner's to confirm.
+
+---
+
+## repoScope
+
+**Composed package repo excludes the source items River 3.0 routed only to other packages**
+
+Date: 2026-11-19
+
+Decided by: Sameer
+
+Status: accepted
+
+Affects: none
+
+### Decided
+
+From River 3.1 every composed package accounts for every source item. Under River 3.0, `Applies to:`
+routed 114 source item(s) to other packages and not to repo, so repo did not
+account for them; it now excludes them, under `### Excluded by` this decision in requirements/composed/internal/repo/repo.md.
+Each stays governed by the packages that include it or compose from it.
+
+### Why
+
+`river upgrade` drafted this from the module's routing. Whether repo truly does not govern each
+item is the owner's to confirm.
+
+---

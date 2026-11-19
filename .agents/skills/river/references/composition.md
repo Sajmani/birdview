@@ -56,9 +56,11 @@ the same three inputs gets the same result ([*Blind recomposition*](#blind-recom
      has `Composed from:` linking every source item and
      decision it rests on (plain names in an exported package, which links only within its own
      directory);
-   - mark each excluded item with `*(excluded)*` immediately after its link (`- [pkg.item](…) *(excluded)* — …`),
-     usually under `## Excluded`, and link the decision that excluded it. A withdrawn item is
-     excluded the same way, linking the decision that withdrew it.
+   - exclude each item the package does not govern under `## Excluded`: group the items one decision
+     excludes under `### Excluded by [decisions.<id>](…)`, one link per line with an optional note
+     after an em dash; or, for a single item, write `*(excluded)*` immediately after its link and
+     link the decision (`- [pkg.item](…) *(excluded)* — …`). A withdrawn item is excluded the same
+     way, by the decision that withdrew it.
 5. **Check that every source item is accounted for**
    ([*Accounted for*](#accounted-for)). None may be omitted from a package it applies to, or from
    every package in the River module; one that is has silently dropped out. The CLI's accounting check
@@ -87,15 +89,31 @@ excluded it (`- [pkg.item](…) *(excluded)* — …`). A mention in prose, or i
 `Covers:`, does not account for it, and a list line without `*(excluded)*` counts as an inclusion
 even if its prose says "not applicable" (`note [ambiguous-exclusion]`).
 
-**Which packages owe accounting depends on what each package governs:**
-- **One composed package:** it represents the whole project and must account for every local and
-  imported source item in the River module.
-- **Several composed packages** (such as `app` and `dataset`, or exported `framework` and internal
-  `build`): an item with `Applies to:` (on the local item, or in an interpretation decision for an
-  imported item) must be accounted for in **every** composed package that represents or `Binds:`
-  that target; an item without `Applies to:` must be accounted for in **every** composed package
-  whose `## Composed from` names its source; and every source item in the module must be accounted
-  for in at least one composed package. `river check` reports any gap as `unaccounted-requirement`.
+**Every composed package accounts for every source item in force** (from River 3.1), exactly
+once: included, composed from, or excluded. Nothing routes an item to some packages and not others,
+and `Applies to:` names only a class ([*Projecting horizontal requirements*](#projecting-horizontal-requirements)).
+A package that leaves one out fails `unaccounted-requirement`; an `Applies to:` naming a composed
+package, or what one binds, fails `applies-to-routing`. So excluding is made cheap: group what one
+decision excludes, such as a package's scope.
+
+```markdown
+## Excluded
+
+### Excluded by [decisions.webScope](../../../decisions/scope.md#webscope)
+
+- [product.alphaRule](../../../local/product/product.md#alpharule)
+- [product.betaRule](../../../local/product/product.md#betarule) — batch jobs only
+```
+
+The heading's decision must exist and be in force (`excluded-without-decision`). An exclusion names
+items, never a pattern (a file, a package, a class): a new source item then fails in every package
+until each decides about it, so nothing is excluded by accident.
+
+A module declaring River 3.0 still routes: an item with `Applies to:` is owed by each package
+representing or binding that target, one without by each package whose `## Composed from` names
+its source, and every item by at least one; River 3.1's obligations are notes
+(`unaccounted-in-package`, `applies-to-routing`). `river upgrade` converts routing into exclusion
+groups ([`upgrading.md`](upgrading.md), *3.0 to 3.1*).
 ## Obligations become rules
 
 **Include a source item unchanged only if it already says what this project must do.** An
@@ -122,11 +140,12 @@ assumption, such as *every request goes through the framework*.
 ## Projecting horizontal requirements
 
 **A horizontal requirement is mapped over classes of things, never over a list of instances.**
-Six steps:
+Seven steps:
 
 1. **Recognize it.** "All", "any", "every", "each", or a rule stated for a kind of thing (a page,
    a request, a record, a dataset) marks a horizontal requirement.
-2. **Name the classes it applies to**, in the source's own term: `Applies to: wcag.WebPage`. If
+2. **Name the classes it applies to**, in the source's own term: `Applies to: wcag.WebPage`. A class,
+   never a composed package: from River 3.1, `Applies to:` routes nothing. If
    the source says, its transcription carries the field. If it doesn't, record the class in an
    **interpretation decision** whose `Affects:` names the imported items, and link it from the
    import's entry in `river/requirements/imports/`. Never edit imported text to add the field.
@@ -140,10 +159,27 @@ Six steps:
    lists the instances.** Verification discovers them from the system, from what it declares
    (routes, templates, handlers) and by following links, so a new instance inherits its
    obligations by existing.
+   **Composing never consumes a horizontal requirement.** Where a horizontal item narrows a
+   local one, say *no log record holds an email address* against *log the failed request's
+   payload*, compose the narrowed item from both, and **also state the horizontal item over its
+   class**: include it unchanged, or compose it into a class-level rule. It still governs every
+   instance, including ones no requirement mentions, because the implementation may do more than
+   its requirements ask. A class-level rule is a composed item that carries `Applies to:` with the
+   same class; one without it counts as narrowed. A horizontal item both included and cited in
+   narrowed items' `Composed from:` is not `included-and-composed`; one cited only in narrowed
+   items fails `horizontal-only-narrowed`, which names the item's classes and the rules composed
+   from it. If one of those rules already states the item over its whole class, add
+   `Applies to: <class>` to that rule; otherwise include the item, or compose a class-level rule.
 5. **Several horizontal rules on one class:** where they agree, each applies. Where they
    conflict, precedence settles it; where precedence can't, a person does, and the ruling is a
    decision ([*Overlaps and collisions*](#overlaps-and-collisions)).
-6. **Intermediaries carry contracts.** Where a stylesheet or framework makes every instance meet
+6. **Verify over the class.** Write a criterion that covers the horizontal item itself, or its
+   class-level rule, besides any criterion on the narrowed items, with a guardrail that discovers
+   the instances from the system: every route the server declares, every log call, every template.
+   Covering only the narrowed items leaves the rest of the class unchecked
+   (`note [horizontal-unverified]`). `examples/signup/` is the worked case: its class criterion's
+   test sends every declared route requests carrying an email address and reads every log record.
+7. **Intermediaries carry contracts.** Where a stylesheet or framework makes every instance meet
    a rule, its contract states the guarantee, the assumption, and the scope, and the project
    checks the assumption for each kind of user, not the rule for each instance
    ([`verification.md`](verification.md), *Verification and guardrails*).

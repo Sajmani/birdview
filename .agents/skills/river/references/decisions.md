@@ -39,7 +39,10 @@ Reaffirms: <id>      (optional: an earlier decision this one confirms still hold
 
 Then `### Decided`, the decision itself, before the reasons; `---` ends the entry. Other fields may
 follow these, and `Status:` may carry a note after a semicolon. Every name in `Affects:`,
-`Supersedes:`, `Amends:`, and `Reaffirms:` must exist; the checker fails one that doesn't.
+`Supersedes:`, `Amends:`, and `Reaffirms:` must exist; the checker fails one that doesn't. The
+decision names in `Supersedes:`, `Amends:`, `Reaffirms:`, and `Status:` may be plain identifiers
+or links (`[readRate](terms.md#readrate)`); link one in another topic file. The checker reads a
+link's label.
 
 ## Rules
 

@@ -28,7 +28,7 @@ const reviewHeader = "# test\ntaxon\tneck ratio\thead factor\tbody factor\twings
 // value inherits, the provenance names the row and whether it is reviewed, malformed rows are
 // refused, and the table writes back as it was read.
 //
-// Verifies: product.neckModelPerFamily, product.craniumFromMass. Criterion: dataset.proportionsReviewTable.
+// Verifies: dataset.proportionsReviewTable
 func TestProportionReviewParsesAndApplies(t *testing.T) {
 	src := reviewHeader +
 		"Aix\t\t\t0.90\t1.10\treviewed\tSameer\t2026-11-09\tcompared with a flight photo\n" +

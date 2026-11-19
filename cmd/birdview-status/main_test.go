@@ -102,7 +102,7 @@ func keys(m map[string]map[string]int64) []string {
 // first version called mergeLumps directly and passed with the call removed
 // from main, verifying the function and not the pipeline.
 //
-// Verifies: product.scopeIsRecurringAvifauna. Criterion: dataset.scopeMatchesStatusTable.
+// Verifies: dataset.scopeMatchesStatusTable
 func TestLumpsMergeIntoTheSpeciesBirdViewCarries(t *testing.T) {
 	// eBird files everything under the lump; iNaturalist under the split.
 	in := map[string]map[string]int64{
@@ -164,7 +164,7 @@ func TestLumpsMergeIntoTheSpeciesBirdViewCarries(t *testing.T) {
 // self-consistent whatever order it saw -- which is why this calls many
 // times and compares.
 //
-// Verifies: product.undrawnSpeciesAnswer, decisions.scopeFromRecurrence.
+// Verifies: app.outOfScopeExplained, decisions.scopeFromRecurrence.
 func TestBestRegionIsDeterministic(t *testing.T) {
 	since := time.Date(2001, 1, 1, 0, 0, 0, 0, time.UTC)
 	recent := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
@@ -227,7 +227,7 @@ func TestBestRegionIsDeterministic(t *testing.T) {
 //
 // Watched fail: see dataset.occurrenceReadersAgree.
 //
-// Verifies: product.regionAndMonthFilter, product.shareOfRecords, product.joinsReportDrops. Criterion: dataset.occurrenceReadersAgree.
+// Verifies: dataset.occurrenceReadersAgree
 func TestBothReadersOfTheOccurrenceDataAgreeOnTheSpecies(t *testing.T) {
 	// One verbatim name of each shape the facet actually contains, with the
 	// species each is a record of.
@@ -310,7 +310,7 @@ func TestBothReadersOfTheOccurrenceDataAgreeOnTheSpecies(t *testing.T) {
 // decides which species BirdView draws: recurrence is measured on eBird's
 // dates, plus iNaturalist's only in months eBird is confirmed to withhold.
 //
-// Verifies: product.scopeIsRecurringAvifauna, decisions.countEbirdFirst. Criterion: dataset.ebirdCountedInatFillsGaps.
+// Verifies: decisions.countEbirdFirst, dataset.ebirdCountedInatFillsGaps
 func TestScopeCountsEBirdAndFillsOnlyItsDeclaredGaps(t *testing.T) {
 	eb, in := gbif.EBirdDatasetKey, iNatDatasetKey
 
