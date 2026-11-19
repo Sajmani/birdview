@@ -62,7 +62,7 @@ func tileIDs(p nextData) []string {
 // bird, of every month, or the months the address names, most often
 // recorded first.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextLandingIsThisMonthByFrequency(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -133,7 +133,7 @@ func TestNextLandingIsThisMonthByFrequency(t *testing.T) {
 // TestNextDrawsOneScale checks that every bird / shows is drawn at the
 // same pixels per millimeter, the longest bird's, whatever the order.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextDrawsOneScale(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -166,7 +166,7 @@ func TestNextDrawsOneScale(t *testing.T) {
 // TestNextOrders checks the order: sizes smallest first, frequency most
 // often recorded first.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextOrders(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -193,7 +193,7 @@ func TestNextOrders(t *testing.T) {
 // that a filter or a family asks for every bird of that kind, and that an
 // emptied filter means all rather than none.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextFiltersCombineAndEmptyIsAll(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -263,7 +263,7 @@ func pinOf(p nextData, id string) (template.URL, bool, bool) {
 // the find box emptied; pinning a bird already drawn marks it pinned; and
 // unpinning either returns the address it came from. Nothing excludes a bird.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextPins(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -317,7 +317,7 @@ func TestNextPins(t *testing.T) {
 // says how many birds match, and lists them only when there are
 // nextFindLimit or fewer.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextFindCountsThenLists(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -345,7 +345,7 @@ var nextFindProbe string
 // and checks that, for each query, the script says what the server's page
 // says for the same find=, and lists the same birds with the same links.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextFindInTheBrowser(t *testing.T) {
 	chrome := findChrome()
 	if chrome == "" {
@@ -447,7 +447,7 @@ func TestNextFindInTheBrowser(t *testing.T) {
 // one selects only it; choosing more adds them; choosing a selected one
 // removes it; removing the last returns to all.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextToggle(t *testing.T) {
 	q := func(s string) url.Values { v, _ := url.ParseQuery(s); return v }
 	for _, c := range []struct{ from, v, want string }{
@@ -476,7 +476,7 @@ func TestNextToggle(t *testing.T) {
 // line is two rows, what is drawn with Show, Clear pins, and Reset, then the
 // settings.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextShowAll(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -616,7 +616,7 @@ func TestNextShowAll(t *testing.T) {
 // to its reverse and back, the others link to themselves in their usual
 // direction, and a reversed order runs the other way.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextOrderReverses(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -664,7 +664,7 @@ func TestNextOrderReverses(t *testing.T) {
 // Now without JavaScript, redirects to the clock's month with every other
 // setting kept, and is neither stored nor revalidated.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextWithoutAMonthIsNotStored(t *testing.T) {
 	s := newTestServer(t)
 	s.build = "test-build"
@@ -699,7 +699,7 @@ func TestNextWithoutAMonthIsNotStored(t *testing.T) {
 // is a <details> sharing one name, which is what makes the browser close the
 // others when one opens, and that Reset is there and goes to the landing set.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextControlsOpenOneAtATime(t *testing.T) {
 	s := newTestServer(t)
 	_, body := get(t, s, "/?region=USA.10_1")
@@ -718,7 +718,7 @@ func TestNextControlsOpenOneAtATime(t *testing.T) {
 // unpinned birds are left out before, between, and after pinned birds, and
 // none once Show all is chosen.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -806,7 +806,7 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 // the pinned ones; show=all is the default; and choosing a filter leaves the
 // pinned-only view.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextShowPinned(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -845,7 +845,7 @@ func TestNextShowPinned(t *testing.T) {
 // Now is the second month choice, after All, which is chosen when no month
 // is named; Now links to month=now and is never itself chosen.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextHereAndNow(t *testing.T) {
 	s := newTestServer(t)
 	fixNextClock(t, time.October)
@@ -922,7 +922,7 @@ var nextStayProbe string
 // frames, which share the session's storage, since headless Chrome does not
 // finish a dump across navigations.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextSettingStaysOpen(t *testing.T) {
 	chrome := findChrome()
 	if chrome == "" {
@@ -966,7 +966,7 @@ func TestNextSettingStaysOpen(t *testing.T) {
 // TestNextFamilyBadges checks that the Family setting draws each family as
 // its badge does on the tiles: its color, its name, and its description.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextFamilyBadges(t *testing.T) {
 	s := newTestServer(t)
 	var fam *nextControl
@@ -1011,7 +1011,7 @@ func TestNextFamilyBadges(t *testing.T) {
 // drops the pins and keeps every setting, and appears only when something
 // is pinned.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextResetKeepsPins(t *testing.T) {
 	s := newTestServer(t)
 	p := nextAt(s, "/?by=mass&region=USA.10_1&month=May&pin=annhum&pin=amecro&show=pinned&rev=1")
@@ -1036,7 +1036,7 @@ func TestNextResetKeepsPins(t *testing.T) {
 // its tile and its pin unpinning it; and that no pin link jumps the page to a
 // tile.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextPinnedList(t *testing.T) {
 	s := newTestServer(t)
 	p := nextAt(s, "/?by=mass&month=all&pin=annhum&pin=amecro&pin=nosuchbird")
@@ -1087,7 +1087,7 @@ func TestNextPinnedList(t *testing.T) {
 // TestNextHeading checks the heading above the Show choices: what is drawn,
 // in words, naming every chosen setting.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextHeading(t *testing.T) {
 	s := newTestServer(t)
 	for target, want := range map[string]string{
@@ -1113,7 +1113,7 @@ var nextPinProbe string
 // with the navigation cancelled, and loads its address in a frame, which
 // shares the session's storage; the frame opens scrolled to the same place.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextPinKeepsPlace(t *testing.T) {
 	chrome := findChrome()
 	if chrome == "" {
@@ -1163,7 +1163,7 @@ var nextTileProbe string
 // first tiles include ones with notes and ones stretched to a taller
 // neighbor in their row, with the two longest names pinned.
 //
-// Verifies: product.nextView, product.tileContents. Criteria: app.nextViewDrawsOneSet, app.ebirdLinkOnTilesAndPages.
+// Verifies: app.nextViewDrawsOneSet, app.ebirdLinkOnTilesAndPages.
 func TestNextTileCornerAndRows(t *testing.T) {
 	chrome := findChrome()
 	if chrome == "" {
@@ -1272,7 +1272,7 @@ var nextFirstProbe string
 // typed count, and clicking into the box does not. Without the script, First
 // is still a submit button.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextFirstCommitsOnClick(t *testing.T) {
 	s := newTestServer(t)
 	if body := mustGet(t, s, "/"); !strings.Contains(body, `<button type="submit" title="Show the first this many birds">First</button>`) {
@@ -1324,7 +1324,7 @@ func TestNextFirstCommitsOnClick(t *testing.T) {
 // whose birds around you now is /#here-and-now with its status naming the
 // Region setting.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextWelcomeLine(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -1422,7 +1422,7 @@ func TestNextWelcomeLine(t *testing.T) {
 // you now replaces the region, sets the month to Now, and leaves Pinned only.
 // A tile's species page carries only the units and names.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextKeepsEveryParameter(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -1553,7 +1553,7 @@ func TestNextKeepsEveryParameter(t *testing.T) {
 // the order as its name and an arrow, months by their three letters, all
 // for every region, imperial or metric, and North Amer or world.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextShortValues(t *testing.T) {
 	s := newTestServer(t)
 	fixNextClock(t, time.October)
@@ -1601,7 +1601,7 @@ var detailBackProbe string
 // its link to the home page in the species page's units and names. Species
 // links from the home page carry only those two settings.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestSpeciesBackUsesHistory(t *testing.T) {
 	s := newTestServer(t)
 	p := nextAt(s, "/?by=mass&month=all&units=metric&pin=amecro&region=USA.10_1&show=all")
@@ -1660,7 +1660,7 @@ func TestSpeciesBackUsesHistory(t *testing.T) {
 // drawn and with every bird shown when not; reversed, the tiers run the
 // other way; and frequency tiers are decades of "1 in N".
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestNextTiers(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -1789,7 +1789,7 @@ func TestNextTiers(t *testing.T) {
 // the find box's list, which finds a bird by its code in any case. Addresses
 // stay the eBird code, which every bird has: /species/AMRO is no page.
 //
-// Verifies: product.bandingCodes. Criterion: app.bandingCodesShown.
+// Verifies: app.bandingCodesShown
 func TestBandingCodesOnThePages(t *testing.T) {
 	s := newTestServerReal(t)
 	fixNextClock(t, time.October)
@@ -1828,7 +1828,7 @@ var detailPinProbe string
 // Without the script it is a link to the home page with the bird pinned, and
 // a bird left off the home page has none.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestSpeciesPinAsksTheHomePage(t *testing.T) {
 	s := newTestServer(t)
 	body := mustGet(t, s, "/species/amecro")
@@ -1902,7 +1902,7 @@ func TestSpeciesPinAsksTheHomePage(t *testing.T) {
 // the pinned list links into the group; the histogram is unchanged; with nothing pinned there is
 // no group; and under Pinned only the group is the whole page, reversed with the order.
 //
-// Verifies: product.nextView. Criterion: app.pinnedGroupLeads.
+// Verifies: app.pinnedGroupLeads
 func TestPinnedGroupLeadsThePage(t *testing.T) {
 	s := newTestServer(t)
 	body := mustGet(t, s, "/?month=all&by=length&pin=greblu&pin=annhum")
@@ -1954,7 +1954,7 @@ func TestPinnedGroupLeadsThePage(t *testing.T) {
 // setting, the setting offers All and the three thresholds with the chosen one marked, the heading
 // names it, and a value it does not offer is ignored.
 //
-// Verifies: product.reportingFrequencyFilter. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestReportingFrequencyFilters(t *testing.T) {
 	s := newTestServer(t)
 	all := nextAt(s, "/?show=all&month=all")
@@ -2042,7 +2042,7 @@ func TestReportingFrequencyFilters(t *testing.T) {
 // toggles on its own; addresses name AVONET's habitats and are never redirected; and the heading
 // names a fully chosen group.
 //
-// Verifies: product.habitatAndDietFilters, tech.stableUrls. Criterion: app.habitatGroupsFilter.
+// Verifies: app.habitatGroupsFilter
 func TestHabitatGroupsFilter(t *testing.T) {
 	s := newTestServer(t)
 	ctl := func(url string) nextControl {
@@ -2192,7 +2192,7 @@ func TestHabitatGroupsFilter(t *testing.T) {
 // TestAllAlwaysOffered asserts that every setting that can be all offers All exactly once, first,
 // whether or not the setting is all, and marks it only when it is, so the choices do not move.
 //
-// Verifies: product.nextView. Criterion: app.allAlwaysOffered.
+// Verifies: app.allAlwaysOffered
 func TestAllAlwaysOffered(t *testing.T) {
 	countiesOn(t)
 	s, err := newServer(countyDataset())
@@ -2239,7 +2239,7 @@ func TestAllAlwaysOffered(t *testing.T) {
 // draws exactly the birds that carry it; and a bird's page shows its refinement as derived, with its
 // evidence and a link to the guide.
 //
-// Verifies: product.habitatAndDietFilters, tech.stableUrls, product.categoryProvenance. Criterion: app.openOceanFilter.
+// Verifies: app.openOceanFilter
 func TestOpenOceanFilter(t *testing.T) {
 	s := newTestServer(t)
 	for from, to := range map[string]string{

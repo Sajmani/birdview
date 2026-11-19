@@ -26,7 +26,7 @@ import (
 // the presence bar is written with its mark and its counts, and reads back
 // as below; an unmarked cell reads back as present.
 //
-// Verifies: product.regionAndMonthFilter, decisions.belowBarCounted. Criterion: app.belowBarCountsKept.
+// Verifies: decisions.belowBarCounted, app.belowBarCountsKept
 func TestBelowBarCellsRoundTrip(t *testing.T) {
 	below := region.Reported{ID: "USA.44_1", Records: 19,
 		Months: [12]int64{2, 1, 3, 1, 2, 1, 1, 2, 2, 1, 2, 1}, Below: true}

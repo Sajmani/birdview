@@ -34,7 +34,7 @@ import (
 // recorded with its key, DOI, license, and the SHA-256 of what was fetched; a download whose SQL is
 // not the committed query is refused rather than recorded under it.
 //
-// Verifies: tech.gbifDownloadsRecorded, gbifterms.CiteDownloadDoi.
+// Verifies: dataset.gbifDownloadsRecorded.
 func TestDownloadSubmitsWaitsAndRecords(t *testing.T) {
 	const query = `SELECT datasetkey, "month", COUNT(*) AS n FROM occurrence GROUP BY datasetkey, "month"`
 	// GBIF's validator returns the query in its own formatting, which is what its website submits.

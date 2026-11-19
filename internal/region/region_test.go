@@ -24,7 +24,7 @@ import (
 // TestZonesPartitionTheRegions checks the invariant the Region setting needs: the zones partition
 // the regions. A region in no zone is unreachable, and one in two zones appears twice.
 //
-// Verifies: product.regionAndMonthFilter.
+// Verifies: app.regionFilterBehaves.
 func TestZonesPartitionTheRegions(t *testing.T) {
 	seen := map[string]int{}
 	for _, z := range Zones {
@@ -66,7 +66,7 @@ func TestZonesPartitionTheRegions(t *testing.T) {
 // Two regions sharing a code would be indistinguishable on screen, so
 // non-empty codes must still be unique. Empty ones collide by design.
 //
-// Verifies: product.regionAndMonthFilter.
+// Verifies: app.regionUrlRoundTrips.
 func TestCodesAreStandardOrAbsent(t *testing.T) {
 	seen := map[string]string{}
 	coded := 0
@@ -102,7 +102,7 @@ func TestCodesAreStandardOrAbsent(t *testing.T) {
 // tell Ohio from Oklahoma -- only the generator's name read-back does that --
 // but it does catch a malformed id before a network run burns ten minutes.
 //
-// Verifies: product.regionAndMonthFilter.
+// Verifies: app.regionUrlRoundTrips.
 func TestLandIDsLookLikeGADM(t *testing.T) {
 	re := regexp.MustCompile(`^(USA|CAN|UMI)\.\d+_1$`)
 	for _, id := range LandIDs() {
@@ -129,7 +129,7 @@ func TestLandIDsLookLikeGADM(t *testing.T) {
 // claim that was simply false — the boxes abut at 66°N rather than overlapping,
 // so no ordering matters. The test caught the error in its own comment.
 //
-// Verifies: product.regionAndMonthFilter.
+// Verifies: app.regionFilterBehaves.
 func TestMarineBoxesAreDisjoint(t *testing.T) {
 	ids := MarineIDs()
 	if len(ids) < 2 {
@@ -170,7 +170,7 @@ func TestMarineBoxesAreDisjoint(t *testing.T) {
 // TestPelagicIsTheLastZone pins the ordering product.regionAndMonthFilter asks for. The sea is the
 // one zone that is not somewhere a reader lives, so it sits after the places that are.
 //
-// Verifies: product.regionAndMonthFilter.
+// Verifies: app.regionFilterBehaves.
 func TestPelagicIsTheLastZone(t *testing.T) {
 	if n := len(Zones); n == 0 || Zones[n-1] != "Pelagic" {
 		t.Fatalf("zones end with %q, want Pelagic last; order is %v", Zones[len(Zones)-1], Zones)
@@ -190,7 +190,7 @@ func TestPelagicIsTheLastZone(t *testing.T) {
 // Two regions sharing a URL value makes one unreachable from every choice, and the
 // collision is silent: the page still renders, the wrong birds appear.
 //
-// Verifies: product.regionAndMonthFilter. Criterion: app.regionUrlRoundTrips.
+// Verifies: app.regionUrlRoundTrips
 func TestSlugsAreUniqueAndResolve(t *testing.T) {
 	seen := map[string]string{}
 	for _, id := range append(LandIDs(), MarineIDs()...) {
@@ -230,7 +230,7 @@ func TestSlugsAreUniqueAndResolve(t *testing.T) {
 // is its GADM code, the code its records are filed under; a sea box, which no source codes yet,
 // keeps its name in PascalCase until Marine Regions replaces it.
 //
-// Verifies: product.regionAndMonthFilter. Criterion: app.regionUrlRoundTrips.
+// Verifies: app.regionUrlRoundTrips
 func TestSlugIsDataCode(t *testing.T) {
 	for _, tc := range []struct{ id, want string }{
 		{"USA.5_1", "USA.5_1"},       // a state is its GADM code
@@ -258,7 +258,7 @@ func TestSlugIsDataCode(t *testing.T) {
 // working: each postal code and each island name resolves, as retired, to its region, and no
 // retired value is also a current one, which would make the redirect ambiguous.
 //
-// Verifies: tech.stableUrls, product.regionAndMonthFilter. Criterion: app.regionUrlRoundTrips.
+// Verifies: app.regionUrlRoundTrips
 func TestRetiredValuesResolve(t *testing.T) {
 	for old, id := range map[string]string{
 		"CA": "USA.5_1", "NY": "USA.33_1", "BC": "CAN.2_1", "ON": "CAN.9_1", "DC": "USA.9_1",
@@ -325,7 +325,7 @@ func TestPresenceReadsWithheldFlags(t *testing.T) {
 // TestCountyParentFromCode asserts a county's state is read from its code alone, so a county is
 // recognized whether or not it is registered (decisions.countyListingRule).
 //
-// Verifies: product.regionAndMonthFilter. Criterion: app.countyListingApplied.
+// Verifies: app.countyListingApplied
 func TestCountyParentFromCode(t *testing.T) {
 	for id, want := range map[string]string{"USA.33.24_1": "USA.33_1", "CAN.9.12_1": "CAN.9_1", "USA.33_1": "", "SEA.GULF": "", "GulfOfMexico": ""} {
 		got, ok := CountyParent(id)

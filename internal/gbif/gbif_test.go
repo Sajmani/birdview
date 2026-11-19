@@ -129,7 +129,7 @@ func testIndex() *Index {
 // the epithet tier searches all of AviList, reddens "epithet must not cross a
 // family" as well.
 //
-// Verifies: tech.recordBeforeConsuming.
+// Verifies: dataset.disagreementsDeclared.
 func TestResolveTiers(t *testing.T) {
 	idx := testIndex()
 	cases := []struct {
@@ -249,7 +249,7 @@ func TestResolveTiers(t *testing.T) {
 // "alba" fold to "al" and "aestiva" to "aestiv" -- the first pair of "must
 // stay apart" cases below then collapses and the test reddens.
 //
-// Verifies: tech.recordBeforeConsuming.
+// Verifies: dataset.disagreementsDeclared.
 func TestFoldCrossesGenusAndCaseButNotSpecies(t *testing.T) {
 	same := [][2]string{
 		{"jubatus", "jubata"},         // gender follows the genus
@@ -291,7 +291,7 @@ func TestFoldCrossesGenusAndCaseButNotSpecies(t *testing.T) {
 // the test goes red. Removing the tier/name agreement check does the same for
 // the two cases after it.
 //
-// Verifies: tech.recordBeforeConsuming.
+// Verifies: dataset.disagreementsDeclared.
 func TestTableRoundTripsAndRejectsJunk(t *testing.T) {
 	in := Table{
 		"Phalacrocorax auritus": {GBIFName: "Phalacrocorax auritus", GBIFKey: 2481875,
@@ -365,7 +365,7 @@ func TestTableRoundTripsAndRejectsJunk(t *testing.T) {
 // to "Phalacrocorax auritum" reddens it; so does lowering wantResolved by
 // hand-editing four rows of the committed table to tier=none.
 //
-// Verifies: tech.recordBeforeConsuming.
+// Verifies: dataset.disagreementsDeclared.
 func TestCommittedTableResolvesAlmostEverything(t *testing.T) {
 	f, err := os.Open(tableFile)
 	if err != nil {
@@ -464,7 +464,7 @@ func TestCommittedTableResolvesAlmostEverything(t *testing.T) {
 // Watched fail: changing one word of Write's header literal reddens it, and so
 // does swapping two data lines in data/gbif-taxa.tsv by hand.
 //
-// Verifies: tech.recordBeforeConsuming.
+// Verifies: dataset.disagreementsDeclared.
 func TestCommittedTableIsExactlyWhatWriteProduces(t *testing.T) {
 	onDisk, err := os.ReadFile(tableFile)
 	if err != nil {
@@ -509,7 +509,7 @@ func TestCommittedTableIsExactlyWhatWriteProduces(t *testing.T) {
 // name, which is what the project had -- drops the count from 813 to 780 and
 // the test goes red.
 //
-// Verifies: tech.recordBeforeConsuming.
+// Verifies: dataset.disagreementsDeclared.
 func TestCommittedTableCoversBirdViewsSpecies(t *testing.T) {
 	// BirdView's species, from the committed status table rather than from
 	// the ABA checklist (decisions.scopeFromRecurrence). This used to skip on a clean checkout
@@ -614,7 +614,7 @@ const (
 // leaves Go's default Go-http-client/1.1 and the first two assertions redden;
 // making pace() return immediately reddens the third, as does pacing each worker alone.
 //
-// Verifies: tech.identifiedClient.
+// Verifies: dataset.outboundRequestsIdentified.
 func TestTaxonIdentifiesItselfAndPaces(t *testing.T) {
 	srv, times, agents := fakeAPI(t, map[string]string{
 		"/species/2481875":          cormorantJSON,
@@ -667,7 +667,7 @@ func TestTaxonIdentifiesItselfAndPaces(t *testing.T) {
 // Watched fail: dropping the `r.Rank == "SPECIES"` condition in Taxon admits
 // "Nannopterum auritum auritum" and the length check goes red.
 //
-// Verifies: tech.recordBeforeConsuming.
+// Verifies: dataset.disagreementsDeclared.
 func TestTaxonKeepsOnlySpeciesRankSynonyms(t *testing.T) {
 	srv, _, _ := fakeAPI(t, map[string]string{
 		"/species/2481875":          cormorantJSON,
@@ -704,7 +704,7 @@ func TestTaxonKeepsOnlySpeciesRankSynonyms(t *testing.T) {
 // never advancing offset trips the duplicate-key guard, which is the last case
 // below.
 //
-// Verifies: tech.recordBeforeConsuming.
+// Verifies: dataset.disagreementsDeclared.
 func TestSpeciesKeysPagesUntilTheFacetIsEmpty(t *testing.T) {
 	all := []struct {
 		key   string
@@ -786,7 +786,7 @@ func TestSpeciesKeysPagesUntilTheFacetIsEmpty(t *testing.T) {
 // 404 server sees 4 requests, not 1); making it retry nothing reddens the
 // first (the 503 never reaches its 200).
 //
-// Verifies: tech.identifiedClient.
+// Verifies: dataset.outboundRequestsIdentified.
 func TestGetRetriesServerErrorsButNotClientErrors(t *testing.T) {
 	var hits int
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -866,7 +866,7 @@ func TestGetRetriesServerErrorsButNotClientErrors(t *testing.T) {
 // error makes it return a short slice with no error, and both assertions here
 // redden.
 //
-// Verifies: tech.recordBeforeConsuming.
+// Verifies: dataset.disagreementsDeclared.
 func TestTaxaFailsTheBatchOnATransportError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/synonyms") {

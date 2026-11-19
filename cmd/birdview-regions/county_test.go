@@ -35,7 +35,7 @@ import (
 // one per million of the county's records and 5; every other species with records there is
 // written under the bar, so its records still count; and the county's total counts every name.
 //
-// Verifies: product.regionAndMonthFilter. Criterion: app.countyListingApplied.
+// Verifies: app.countyListingApplied
 func TestCountyListingRule(t *testing.T) {
 	const small, big = "USA.33.24_1", "USA.33.32_1"
 	eb := gbif.EBirdDatasetKey
@@ -102,7 +102,7 @@ func TestCountyListingRule(t *testing.T) {
 // TestCountyRowsFromDownload reads the county download's file as GBIF writes it: a zip holding one
 // tab-separated table with a header.
 //
-// Verifies: tech.gbifDownloadsRecorded. Criterion: app.countyListingApplied.
+// Verifies: app.countyListingApplied
 func TestCountyRowsFromDownload(t *testing.T) {
 	var buf bytes.Buffer
 	zw := zip.NewWriter(&buf)
@@ -127,7 +127,7 @@ func TestCountyRowsFromDownload(t *testing.T) {
 // state's rows, by the state each county's GADM code names, so one download builds every state's
 // table.
 //
-// Verifies: tech.gbifDownloadsRecorded. Criterion: app.countyListingApplied.
+// Verifies: app.countyListingApplied
 func TestCountiesSplitByState(t *testing.T) {
 	rows := []countyRow{
 		{Dataset: gbif.EBirdDatasetKey, GID: "USA.33.24_1", Month: 7, Name: "Turdus migratorius", N: 19},
@@ -165,7 +165,7 @@ func TestCountiesSplitByState(t *testing.T) {
 // requires the same bytes from a second write, so rebuilding from the same download changes nothing
 // (decisions.countyTablesCompressed).
 //
-// Verifies: product.regionAndMonthFilter. Criterion: app.countyListingApplied.
+// Verifies: app.countyListingApplied
 func TestCountyTableGzippedReproducibly(t *testing.T) {
 	species := []string{"Turdus migratorius"}
 	regionsOf := map[string][]region.Reported{"Turdus migratorius": {{ID: "USA.33.24_1", Records: 12,

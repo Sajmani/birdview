@@ -153,6 +153,21 @@ func field(body, name string) []string {
 	return out
 }
 
+// importedClass finds the one item named class in an imported source, as River 3.1 resolves an
+// unqualified Applies to:, or "" if there is none or more than one.
+func importedClass(items map[string]pkgItem, class string) string {
+	found := ""
+	for key, it := range items {
+		if inTree(it.file, "imported") && strings.HasSuffix(key, "."+class) {
+			if found != "" {
+				return ""
+			}
+			found = key
+		}
+	}
+	return found
+}
+
 func qualify(pkg, ref string) string {
 	if strings.Contains(ref, ".") {
 		return ref
@@ -164,7 +179,8 @@ func qualify(pkg, ref string) string {
 // 2.0's composition and domain-binding rules:
 //
 //   - Applies to: names either a composed package in this module (`app`,
-//     `dataset`, `repo`) or a domain an imported source defines;
+//     `dataset`, `repo`) or a domain an imported source defines, unqualified as
+//     River 3.1 writes a class when only one source defines it;
 //   - Binds: names an imported domain, and each domain is bound once;
 //   - every imported domain an adopted requirement applies to is bound locally,
 //     since a requirement over a domain nobody bound applies to nothing;
@@ -192,6 +208,13 @@ func TestCompositionResolves(t *testing.T) {
 			checked++
 			if composedPkgs[d] {
 				continue
+			}
+			// River 3.1 names a class in the source's own term, unqualified (`WebPage`), and finds
+			// it among the imported sources; a qualified name is taken as written.
+			if !strings.Contains(d, ".") && !exists(qualify(it.pkg, d)) {
+				if q := importedClass(items, d); q != "" {
+					d = q
+				}
 			}
 			d = qualify(it.pkg, d)
 			if !exists(d) {

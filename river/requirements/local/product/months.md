@@ -56,8 +56,6 @@ sea, where no land polygon reaches. They are not errors and must not be filtered
 
 Subject: `presentation.filters`
 
-Applies to: app
-
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 What is shown is what every active filter admits: region and family narrow the list together.
@@ -73,8 +71,6 @@ filter and what it is set to, so a reader can tell which one emptied the page.
 **Regions are grouped two ways**
 
 Subject: `presentation.region_filter.zones`
-
-Applies to: app
 
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
@@ -92,8 +88,6 @@ likely to see.
 **Families are grouped by taxonomic order**
 
 Subject: `presentation.family_filter.groups`
-
-Applies to: app
 
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
@@ -119,8 +113,6 @@ with every habitat their species use drops the precision of "Fresh Water" to **3
 **Filter by habitat and by diet**
 
 Subject: `presentation.trait_filter`
-
-Applies to: dataset, app
 
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 

@@ -255,7 +255,7 @@ func TestHistoricalRecordsAreNotPresence(t *testing.T) {
 // reports a zero date for Passenger Pigeon; dropping the time.Parse call
 // leaves the date zero on the full row too.
 //
-// Verifies: product.undrawnSpeciesAnswer.
+// Verifies: app.outOfScopeExplained.
 func TestReadParsesTheLastSeenColumn(t *testing.T) {
 	const full = "# a comment\n" +
 		"ectopistes migratorius\thistorical\tCAN.9_1\t89\t52\t145\tCAN.6_1\t4\t303189\t1902-05-18\n" +
@@ -301,7 +301,7 @@ func TestReadParsesTheLastSeenColumn(t *testing.T) {
 // BirdView over a filing choice -- and nothing else would notice, because
 // the dataset and the scope would shrink together.
 //
-// Verifies: product.namesRecordsFiledUnder, decisions.countEbirdFirst. Criterion: dataset.ebirdCountedInatFillsGaps.
+// Verifies: decisions.countEbirdFirst, dataset.ebirdCountedInatFillsGaps
 func TestScopeBringsBothHalvesOfASharedName(t *testing.T) {
 	rows := []Row{
 		{Name: "setophaga petechia", Status: Established},

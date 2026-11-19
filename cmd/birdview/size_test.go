@@ -42,7 +42,7 @@ var dataSize = regexp.MustCompile(`data-size="([^"]*)"`)
 //
 // It needs Chrome, and skips without it, as TestRenderedTextContrast does.
 //
-// Verifies: tech.textSizeFloor. Criterion: app.textMeetsSizeFloor.
+// Verifies: app.textMeetsSizeFloor
 func TestRenderedTextSize(t *testing.T) {
 	chrome := findChrome()
 	if chrome == "" {

@@ -57,7 +57,7 @@ type fitResult struct {
 //
 // It needs Chrome, and skips without it, as TestRenderedTextContrast does.
 //
-// Verifies: product.fitsAPhone. Criterion: app.pagesFitAPhone.
+// Verifies: app.pagesFitAPhone
 func TestPagesFitAPhone(t *testing.T) {
 	chrome := findChrome()
 	if chrome == "" {
@@ -157,7 +157,7 @@ const showRowProbe = `window.addEventListener("load", function () {
 // Show row's four choices (First [box], All, Pinned, Clear pins) sit on one
 // line, as the owner asked (#6's screenshot had them on two).
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestShowRowFitsAPhone(t *testing.T) {
 	chrome := findChrome()
 	if chrome == "" {

@@ -13,6 +13,7 @@ contract. Record the CLI version you run in `bindings/`, beside the skill's pin.
 | --- | --- |
 | `river check [module]` | Checks the River module (default `river/`), reporting every finding and exiting 1 on any problem |
 | `river compose [--dry-run] [module] [<package>...]` | Writes each named composed package's `composed.sum` (all, with none named), refusing while any other problem remains |
+| `river implement [--dry-run] [module] [<package>...]` | Records HEAD as the commit each named composed package's implementation meets (all, with none named), as `Implements: <package> at <commit>` in `conformance/`; refuses on uncommitted changes under the module or while `river check` has problems |
 | `river diff [--base <ref>] [--format text\|pr] [module]` | Reports what moved since a git ref (default: the merge base with `main`), by area ([`pull-requests.md`](pull-requests.md)) |
 | `river graph [--format text\|mermaid] [--node <q> \| --if-withdrawn <id> \| --if-changed <id>] [module]` | Shows the graph from guardrails through criteria and requirements to imported sources, one node's neighborhood, or the cascade of withdrawing or changing a node |
 | `river links [-w] [module] [<extra path>...]` | Lists, or with `-w` rewrites, links whose target file no longer defines the item they name; exits 1 on a dry run that finds any |
@@ -56,7 +57,8 @@ with `version-too-old`: run `river upgrade`, or check it with River built at the
 
 **River's versions are semantic.** A minor version is compatible: a module that passed still
 passes, unedited. A major version is not, and `river upgrade` migrates a module across majors: it
-makes the edits a tool can, writes them without committing, and lists what needs you.
+makes the edits a tool can, writes them without committing, and lists what needs you. It also takes
+a module to a newer minor, as from 3.0 to 3.1. [`upgrading.md`](upgrading.md) walks through each step.
 
 | Version | What it is |
 | --- | --- |
@@ -64,6 +66,7 @@ makes the edits a tool can, writes them without committing, and lists what needs
 | 2.0 | `sums.md` and `approvals.md`; `## Composed from`; `*(excluded)*`; per-item precedence rows; strict failures |
 | 2.1 | Goal graph, imported goals, and goal versions |
 | 3.0 | Core only: source control approves and each composed package carries `composed.sum`; decisions record no sums; goals dormant and gradients set aside; built-in packages as directories; open work out of the module; `river compose`, `river diff --base`, `river links` |
+| 3.1 | The Implementation edge (`Implements:`, `Blocks:`, `river implement`, named guardrails that must exist); tests' `Verifies:` name criteria; horizontal requirements stated over their class. Its failures, marked *3.1* below, are notes for a 3.0 module ([`upgrading.md`](upgrading.md)) |
 
 ## Codes
 
@@ -71,12 +74,17 @@ Fix a composition problem by recomposing, never by editing the composed package.
 
 | Code | Meaning | Fix |
 | --- | --- | --- |
-| `unaccounted-requirement` | A source item is not accounted for in a composed package it applies to | Recompose: include, compose from, or exclude it |
+| `unaccounted-requirement` | A source item is not accounted for in a composed package: from 3.1, in any of them; in 3.0, one it applies to | Recompose: include, compose from, or exclude it (`### Excluded by [decisions.<id>](…)`) |
+| `unaccounted-in-package` (note, 3.0) | A package does not account for items its routing sends elsewhere, which 3.1 requires | Exclude them; `river upgrade` writes the groups |
+| `applies-to-routing` (*3.1*) | `Applies to:` names a composed package or what one binds: routing, gone in 3.1 | Remove it, and exclude the item where it doesn't apply |
+| `decision-undecided` (*3.1*) | A decision `river upgrade` drafted still says `Decided by: UNDECIDED` | Ask the owner to confirm it and write their name |
 | `not-composed` (note) | Sources exist and no composed package yet | Compose when the project is ready |
 | `composed-sources` | A package has no `## Composed from` list, or it misses or misnames a source | List its sources: `- product (Local)` |
-| `included-and-composed` | A package accounts for one source item in more than one way | Recompose, accounting for each item once |
+| `included-and-composed` | A package accounts for one source item in more than one way (a horizontal item may be included and also feed narrowed items) | Recompose, accounting for each item once |
+| `horizontal-only-narrowed` (*3.1*) | A horizontal item (`Applies to:`) is cited only in narrowed items' `Composed from:`, never stated over its class | Add `Applies to: <class>` to a composed rule that already states it over its class; else include it unchanged, or compose a class-level rule |
+| `horizontal-unverified` (note) | No criterion covers a horizontal item in force, or its class-level rule, directly | Compose a class-level criterion whose guardrail discovers the instances |
 | `excluded-missing-marker` | A line under `## Excluded` lacks `*(excluded)*` after the item | Write `- [pkg.item](…) *(excluded)* — …` |
-| `excluded-without-decision` | An excluded item names no existing decision | Link the decision that excluded it, or record one |
+| `excluded-without-decision` | An excluded item, or a `### Excluded by` group heading, names no existing decision in force | Link the decision that excluded it, or record one |
 | `withdrawn-not-excluded` | A withdrawn source item is included or composed from | Mark it `*(excluded)*` with the decision that withdrew it |
 | `ambiguous-exclusion` (note) | An included line uses exclusion wording | If excluded, add `*(excluded)*` and link the decision |
 | `composition-unstamped` | A composed package has no `composed.sum` | Finish composing, then run `river compose <package>` |
@@ -86,6 +94,14 @@ Fix a composition problem by recomposing, never by editing the composed package.
 | `covers-empty`, `covers-unresolved`, `covers-withdrawn`, `covers-excluded` | A criterion's `Covers:` names nothing, nothing that exists, a withdrawn item, or one the package excludes | Repoint `Covers:`, or drop the criterion on recomposition |
 | `withdrawn-criterion` | A criterion or composed item inside `composed/` is marked withdrawn | Recompose without it |
 | `guardrail-withdrawn`, `guardrail-unknown` | A conformance entry or a `Verifies:` comment cites something withdrawn, excluded, or nonexistent | Delete or repoint the guardrail |
+| `verifies-not-criterion` (*3.1*) | A test's `Verifies:` comment names a requirement, not an acceptance criterion (production code may name requirements) | Name the criterion covering it; compose one if none does |
+| `guardrail-missing` (*3.1*) | A conformance entry names a guardrail `path:Name` whose file is gone or no longer defines it | Repoint `Guardrails:` at the test that implements the criterion, or restore it |
+| `criterion-unguarded` (*3.1*) | A criterion with `Blocks: unless met` has no guardrail, in conformance or a test's `Verifies:` | Write and name its guardrail, or ask the owner to relax `Blocks:` |
+| `guardrail-dropped` (*3.1*) | A criterion blocking once met was watched failing and has no guardrail any more | Restore or replace the guardrail; a person accepts a regression |
+| `blocks-malformed` (*3.1*) | `Blocks:` is not `once met`, `unless met`, or `never` | Fix the value |
+| `implementation-unaligned` (note), `implementation-behind` (note) | A composed package has no `Implements:` record, or changed since its commit (listing the newer criteria) | Implement and guard them, then `river implement <package>` |
+| `implementation-commit-unknown`, `implementation-malformed` (*3.1*) | An `Implements:` commit git cannot resolve, or a record that is malformed, repeated, or names no composed package | Run `river implement <package>` |
+| `implementation-unchecked` (note) | Outside git, or in a shallow clone, the alignment's history cannot be read | Nothing, or check from a full clone |
 | `decision-unknown-requirement`, `decision-unknown-ref`, `reaffirms-unknown` | A decision names an item or entry that doesn't exist | Fix the name, or supersede the decision |
 | `decision-missing-field`, `decision-bad-status`, `decision-status-mismatch` | A decision lacks a field, or its `Status:` and the entry it names disagree | Fix the entry's format |
 | `decision-sums-ignored` (note) | A decision still carries a 2.x `### Sums` block | Leave it; `river upgrade` removes it |

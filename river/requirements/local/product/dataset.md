@@ -10,8 +10,6 @@ Subject: `dataset.scope`
 
 Value: `BirdView's regions, status established or rare`
 
-Applies to: dataset
-
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The dataset is the species whose observations **recur** in the regions BirdView covers: a
@@ -59,8 +57,6 @@ Subject: `dataset.status`
 
 Value: `established | rare | vagrant | absent, plus withheld and exotic flags`
 
-Applies to: dataset, app
-
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata), [goals.giveBack](../../../goals/goals.md#giveback)
 
 Each species carries the status [scopeIsRecurringAvifauna](#scopeisrecurringavifauna) derives, and it is shown and filterable
@@ -80,8 +76,6 @@ next to its evidence invites correction where a hidden ingest filter does not.
 Subject: `dataset.status.exceptions`
 
 Value: `declared table, each entry with a written reason`
-
-Applies to: dataset
 
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
@@ -109,8 +103,6 @@ Subject: `dataset.traits.source`
 
 Value: `AVONET, preferring AVONET2_eBird`
 
-Applies to: dataset
-
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Bill, wing, tail, and mass measurements come from [AVONET](../../imports/imports.md#avonet) — its `AVONET2_eBird`
@@ -124,8 +116,6 @@ See [lengthAndWingspanSources](measurements.md#lengthandwingspansources).
 **Each bird of the sea carries where its records lie, and its open-ocean refinement follows from it**
 
 Subject: `dataset.sea_distance`
-
-Applies to: dataset
 
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.honestData](../../../goals/goals.md#honestdata), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
@@ -148,8 +138,6 @@ asserted.
 
 **Traits carried per species**
 
-Applies to: dataset
-
 Goals: [goals.sizeIntuition](../../../goals/goals.md#sizeintuition), [goals.shapeNotOnlySize](../../../goals/goals.md#shapenotonlysize)
 
 Each species record carries scientific name, family, and these AVONET traits: `Beak.Length_Culmen`,
@@ -167,8 +155,6 @@ data invites someone to invent a use for it. A column that stops being used leav
 Subject: `dataset.names.source`
 
 Value: `AviList v2025b`
-
-Applies to: dataset
 
 Goals: [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
@@ -199,8 +185,6 @@ Subject: `dataset.names.bandingCode`
 
 Value: `USGS Bird Banding Laboratory species list, 2026-10-27`
 
-Applies to: dataset, app
-
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.goodDataCitizen](../../../goals/goals.md#gooddatacitizen)
 
 Each species carries the four-letter alpha code the USGS Bird Banding Laboratory assigns it
@@ -225,8 +209,6 @@ Government work in the public domain ([decisions.bandingCodesFromBbl](../../deci
 Subject: `badge.color.derivation`
 
 Value: `generated`
-
-Applies to: dataset
 
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison), [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
 
@@ -257,8 +239,6 @@ Subject: `dataset.join.key`
 
 Value: `scientific binomial, normalized`
 
-Applies to: dataset
-
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Species are joined across sources on scientific binomial, after stripping `(...)` parentheticals
@@ -278,8 +258,6 @@ lengthAndWingspanSources and tileMarksModeled; see [decisions.abaSpeciesWithoutA
 
 **Unmatched species are reported, not silently dropped**
 
-Applies to: dataset
-
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
 Ingest reports every species that fails to join, by name and count, and fails the build if the
@@ -295,8 +273,6 @@ failure, a taxonomy update silently shrinks the dataset and nobody notices.
 Subject: `build.join_loss`
 
 Value: `named and counted on every run; a declared bar above which the run refuses`
-
-Applies to: dataset
 
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 
@@ -332,8 +308,6 @@ real bird with records of something that is not it.
 Subject: `build.name_correspondence`
 
 Value: `committed per-source record counts; a declared ratio band`
-
-Applies to: dataset
 
 Goals: [goals.honestData](../../../goals/goals.md#honestdata)
 

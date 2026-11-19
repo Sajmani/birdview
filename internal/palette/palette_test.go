@@ -41,7 +41,7 @@ var abaFamilies = []string{
 // when it clears 7:1 against the text it actually carries, which may be black
 // or white. The expected value comes from WCAG, not from a run.
 //
-// Verifies: tech.badgeContrast, product.generatedBadgeColors, wcag.ContrastEnhanced. Criterion: dataset.legibleDistinctColors.
+// Verifies: dataset.legibleDistinctColors
 func TestContrastAgainstOwnText(t *testing.T) {
 	for _, sw := range Generate(abaFamilies, 0) {
 		got, err := sw.ContrastWith()
@@ -61,7 +61,7 @@ func TestContrastAgainstOwnText(t *testing.T) {
 // raises it to about 69. If every swatch comes back light, that capacity has
 // been silently given up again.
 //
-// Verifies: product.generatedBadgeColors.
+// Verifies: dataset.legibleDistinctColors.
 func TestUsesBothHalvesOfTheGamut(t *testing.T) {
 	var light, dark int
 	for _, sw := range Generate(abaFamilies, 0) {
@@ -81,7 +81,7 @@ func TestUsesBothHalvesOfTheGamut(t *testing.T) {
 // silently breaks it, which is how two pale Passeriformes families ended up at
 // dE 4.4.
 //
-// Verifies: product.generatedBadgeColors.
+// Verifies: dataset.legibleDistinctColors.
 func TestPresetsAlternate(t *testing.T) {
 	if !AlternatesLightAndDark() {
 		t.Error("preset cycle does not strictly alternate light and dark; " +
@@ -95,7 +95,7 @@ func TestPresetsAlternate(t *testing.T) {
 // The expected value comes from the standard (7:1), not from running the
 // generator and recording what it produced.
 //
-// Verifies: tech.badgeContrast, product.generatedBadgeColors, wcag.ContrastEnhanced. Criterion: dataset.legibleDistinctColors.
+// Verifies: dataset.legibleDistinctColors
 func TestContrast(t *testing.T) {
 	colors := Generate(abaFamilies, 0)
 	if len(colors) != len(abaFamilies) {
@@ -117,7 +117,7 @@ func TestContrast(t *testing.T) {
 // the WCAG formula independently of this package, so a bug in RelativeLuminance
 // cannot make TestContrast pass vacuously.
 //
-// Verifies: tech.badgeContrast.
+// Verifies: dataset.legibleDistinctColors.
 func TestKnownContrastValues(t *testing.T) {
 	cases := []struct {
 		hex  string
@@ -148,7 +148,7 @@ func TestKnownContrastValues(t *testing.T) {
 // TestDeterministic asserts the same families always yield the same colors, so
 // a rebuild does not reshuffle badges for no reason.
 //
-// Verifies: product.generatedBadgeColors.
+// Verifies: dataset.legibleDistinctColors.
 func TestDeterministic(t *testing.T) {
 	a := Generate(abaFamilies, 0)
 	shuffled := append([]string(nil), abaFamilies...)
@@ -165,7 +165,7 @@ func TestDeterministic(t *testing.T) {
 // hand-curated palette gave Falconidae and Icteridae the same hex, in a table
 // whose whole purpose was telling families apart.
 //
-// Verifies: product.generatedBadgeColors.
+// Verifies: dataset.legibleDistinctColors.
 func TestDistinct(t *testing.T) {
 	seen := map[string]string{}
 	for fam, sw := range Generate(abaFamilies, 0) {
@@ -188,7 +188,7 @@ func TestDistinct(t *testing.T) {
 // "clearly different" threshold of 10, and far above the 2-6 the broken palette
 // achieved.
 //
-// Verifies: product.generatedBadgeColors. Criterion: dataset.legibleDistinctColors.
+// Verifies: dataset.legibleDistinctColors
 func TestAdjacentFamiliesAreVisiblyDifferent(t *testing.T) {
 	const minDeltaE = 25.0
 

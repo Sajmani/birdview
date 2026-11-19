@@ -51,7 +51,7 @@ func sample() []*dataset.Species {
 	}
 }
 
-// Verifies: product.ascendingOrder. Criterion: app.sortsAscending.
+// Verifies: app.sortsAscending
 func TestSortedAscending(t *testing.T) {
 	for _, m := range []Metric{ByLength, ByWingspan, ByMass} {
 		secs := Sections(sample(), m, DefaultStepPercent)
@@ -76,7 +76,7 @@ func TestSortedAscending(t *testing.T) {
 // section drifting wide one bird at a time -- the failure an implementation
 // keyed on the previous maximum would produce while passing casual inspection.
 //
-// Verifies: product.sectionBreakRule, product.sectionThresholdDefault. Criterion: app.sectionBoundariesObeyRule.
+// Verifies: app.sectionBoundariesObeyRule
 func TestSectionRule(t *testing.T) {
 	r := rand.New(rand.NewSource(7))
 	for _, step := range []float64{5, 10, DefaultStepPercent, 25, 50} {
@@ -108,7 +108,7 @@ func TestSectionRule(t *testing.T) {
 
 // TestSectionsPartition checks every species lands in exactly one section.
 //
-// Verifies: product.sectionBreakRule. Criterion: app.sectionBoundariesObeyRule.
+// Verifies: app.sectionBoundariesObeyRule
 func TestSectionsPartition(t *testing.T) {
 	in := sample()
 	var n int
@@ -130,7 +130,7 @@ func TestSectionsPartition(t *testing.T) {
 // TestSectionRangeMatchesContents verifies the header can state a range that is
 // actually true of its members.
 //
-// Verifies: product.sectionHeadersStateRange. Criterion: app.sectionHeadersMatch.
+// Verifies: app.sectionHeadersMatch
 func TestSectionRangeMatchesContents(t *testing.T) {
 	for _, sec := range Sections(sample(), ByMass, DefaultStepPercent) {
 		lo, hi := math.Inf(1), math.Inf(-1)
@@ -148,7 +148,7 @@ func TestSectionRangeMatchesContents(t *testing.T) {
 // bird shown is drawn at is the longest total length and the widest wingspan among them, which may
 // be two different birds.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestReferenceIsTheLongestAndWidest(t *testing.T) {
 	species := sample()
 	var wantLen, wantSpan float64
@@ -179,7 +179,7 @@ func TestReferenceIsTheLongestAndWidest(t *testing.T) {
 // size -- larger birds drew shorter crossbars, and the 300 largest species
 // floored out. This assertion catches that class exactly.
 //
-// Verifies: product.crossbarAtVerticalScale. Criterion: app.crossbarToScale.
+// Verifies: app.crossbarToScale
 func TestCrossbarIsToScale(t *testing.T) {
 	species := sample()
 	box := Box{W: 420, H: 160}
@@ -201,7 +201,7 @@ func TestCrossbarIsToScale(t *testing.T) {
 // TestLargerBirdsDrawLarger is the property goals.sizeIntuition depends on: at a shared
 // scale, a bigger bird is bigger on screen.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestLargerBirdsDrawLarger(t *testing.T) {
 	species := sample()
 	box := Box{W: 420, H: 160}
@@ -221,7 +221,7 @@ func TestLargerBirdsDrawLarger(t *testing.T) {
 // TestSegmentsAbutInPixels checks the drawn parts meet without gap or overlap,
 // which is product.segmentsSumToLength expressed in the renderer rather than in the data.
 //
-// Verifies: product.segmentComposition, product.segmentsSumToLength.
+// Verifies: app.diagramPartsInOrder, app.segmentsSumExactly.
 func TestSegmentsAbutInPixels(t *testing.T) {
 	s := sample()[5] // heron: a long neck makes ordering errors obvious
 	g := Layout(s, s.TotalLength.Value, s.Wingspan.Value, Box{W: 420, H: 160})
@@ -248,7 +248,7 @@ func TestSegmentsAbutInPixels(t *testing.T) {
 // wingspan constraint happened to preserve size ordering. Comparing the scale
 // factor itself is the only check that cannot be satisfied by accident.
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestSharedScale(t *testing.T) {
 	species := sample()
 	box := Box{W: 420, H: 160}
@@ -295,7 +295,7 @@ func foldingPair(neck float64) (folds, extends *dataset.Species) {
 // satisfy by accident, and the compression is checked against 2/pi rather than
 // against whatever the code happens to produce.
 //
-// Verifies: product.segmentComposition, product.segmentsSumToLength. Criterion: app.foldedNeckSameStroke.
+// Verifies: app.foldedNeckSameStroke
 func TestFoldedNeckIsTheSameStrokeInLessHeight(t *testing.T) {
 	const neck = 200.0
 	heron, crane := foldingPair(neck)
@@ -352,7 +352,7 @@ func TestFoldedNeckIsTheSameStrokeInLessHeight(t *testing.T) {
 // a heron starts sorting as a smaller bird than it is -- which is the one thing
 // this change was not allowed to do.
 //
-// Verifies: product.ascendingOrder, product.nextView, product.segmentsSumToLength. Criterion: app.foldedNeckSameStroke.
+// Verifies: app.foldedNeckSameStroke
 func TestFoldedNeckDoesNotChangeOrdering(t *testing.T) {
 	heron, crane := foldingPair(200)
 	in := []*dataset.Species{heron, crane}
@@ -399,7 +399,7 @@ func TestFoldedNeckDoesNotChangeOrdering(t *testing.T) {
 // feature -- folded a 5%-of-length stub. The bug survived decisions.foldedNeckAsS review because
 // each table looked reasonable on its own.
 //
-// Verifies: product.segmentComposition, product.neckModelPerFamily. Criterion: app.foldingFamiliesHaveNecks.
+// Verifies: app.foldingFamiliesHaveNecks
 func TestEveryFoldedFamilyHasALongNeck(t *testing.T) {
 	for fam := range foldedNecks {
 		ratio, explicit := morphology.NeckRatio(fam)
@@ -422,7 +422,7 @@ func TestEveryFoldedFamilyHasALongNeck(t *testing.T) {
 // any other rule, the outer segment stops being the chord and the claim the
 // drawing makes becomes false.
 //
-// Verifies: product.measuredVersusModeled. Criterion: app.diagramDistinguishesModeled.
+// Verifies: app.diagramDistinguishesModeled
 func TestChordTickMarksTheMeasuredPortion(t *testing.T) {
 	box := Box{W: 420, H: 160}
 	s := bird("Ardea herodias", 140, 40, 200, 300, 180, 1825, 2400)

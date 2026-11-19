@@ -6,8 +6,6 @@ package product
 
 **Filter by family**
 
-Applies to: app
-
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 The user can filter to any subset of families, multi-select, by the home page's rule
@@ -38,8 +36,6 @@ birder already knows, and the source provides it for free.
 **Filter by region and month**
 
 Subject: `presentation.region_filter`
-
-Applies to: dataset, app
 
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
@@ -107,8 +103,6 @@ sees what the link now means.
 
 Subject: `presentation.common_filter`
 
-Applies to: app
-
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance), [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 
 A **Reporting frequency** setting keeps only the birds that are **at least 1 in 100, 1 in 1,000, or 1 in
@@ -136,8 +130,6 @@ ones, as birders do with an anchor bird (Sameer, 2026-11-07).
 **Here selects the region the reader is in**
 
 Subject: `presentation.region_filter.here`
-
-Applies to: app
 
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
@@ -170,8 +162,6 @@ because a dashed border once marked buttons that were active.
 
 Subject: `presentation.month_filter.now`
 
-Applies to: app
-
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 Status: **Withdrawn 2026-10-27**, with the classic view, which the owner removed when the home page replaced it ([decisions.classicViewRemoved](../../decisions/decisions.md#classicviewremoved)).
@@ -192,8 +182,6 @@ clock, which [tech.cacheLifetimeStated](../tech/delivery.md#cachelifetimestated)
 
 Subject: `privacy.location`
 
-Applies to: app
-
 Goals: [goals.readerPrivacy](../../../goals/goals.md#readerprivacy)
 
 The reader's position is used only inside the browser to choose a region, and is never sent,
@@ -209,8 +197,6 @@ would leak both.
 **A search box narrows the index as you type**
 
 Subject: `presentation.search`
-
-Applies to: app
 
 Goals: [goals.flexibleComparison](../../../goals/goals.md#flexiblecomparison)
 

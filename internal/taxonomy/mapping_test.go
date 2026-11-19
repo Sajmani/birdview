@@ -29,7 +29,7 @@ import (
 // 7,310,342 Dryobates villosus records matched no drawn species and went
 // into the denominator of every share and no numerator at all.
 //
-// Verifies: product.regionAndMonthFilter, product.shareOfRecords, product.joinsReportDrops.
+// Verifies: dataset.regionJoinReportsUnmatched.
 func TestOccurrenceNormalizesEveryKnownName(t *testing.T) {
 	for from, to := range AviListRenames {
 		if got := Occurrence(from); got != strings.ToLower(to) {
@@ -79,7 +79,7 @@ func TestOccurrenceNormalizesEveryKnownName(t *testing.T) {
 //
 // Watched fail: see dataset.occurrenceReadersAgree.
 //
-// Verifies: product.regionAndMonthFilter, product.joinsReportDrops. Criterion: dataset.occurrenceReadersAgree.
+// Verifies: dataset.occurrenceReadersAgree
 func TestBinomialReducesRankWithoutInventingSpecies(t *testing.T) {
 	species := map[string]string{
 		"turdus migratorius":                "turdus migratorius",
@@ -126,7 +126,7 @@ func TestBinomialReducesRankWithoutInventingSpecies(t *testing.T) {
 // applies it: the species' own code is the one with fewer digits, then the
 // shorter, then AviList's, and every other code it has is an alias.
 //
-// Verifies: product.ebirdLink. Criterion: app.everySpeciesHasAnEBirdCode.
+// Verifies: app.everySpeciesHasAnEBirdCode
 func TestSpeciesCodesChooseBySimplerRule(t *testing.T) {
 	for _, c := range []struct{ avilist, other, want string }{
 		{"fotswi1", "fotswi", "fotswi"},   // fewer digits

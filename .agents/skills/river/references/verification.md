@@ -21,7 +21,8 @@ excluded, recomposition drops the criterion from `composed/` (`withdrawn-criteri
 withdrawn or excluded item), and any guardrail or `conformance` entry still citing it fails
 (`guardrail-withdrawn`) so obsolete tests and dead code do not linger. Use `river graph
 --if-withdrawn <id>` before withdrawing a requirement to see every criterion and guardrail
-that becomes unreachable.
+that becomes unreachable. An imported package's criterion covering only items this module excludes
+reads as `excluded`, not unreachable: the imported text is not this module's to edit.
 
 **A criterion must have been watched failing before it is trusted.** A check that cannot fail is
 indistinguishable from one that passes, and it is worse than nothing because it reports safety.
@@ -81,11 +82,24 @@ The citation does not live in the composed package. A criterion is immutable wit
 the guardrail implementing it is operational, and swapping one tool for another must not force a
 new requirements version. Cite guardrails from a mutable, descriptive record.
 
+**A test may also name what it implements in a `Verifies:` comment**, beside the code:
+`// Verifies: app.ServedContrast`. In a test file, a `Verifies:` comment names acceptance criteria,
+each a criterion in a composed package or in an imported package, and **never a requirement**: a
+guardrail implements a criterion, and the criterion's `Covers:` says what it decides. Naming a
+requirement fails from River 3.1 (`verifies-not-criterion`); name the criterion covering it
+instead, and if none does, compose one first. In production code, a `Verifies:` comment means
+"implements" and may name requirements; it is never a guardrail.
+
 **Check exhaustively what varies, and sample the instances.** A thousand pages rendered from one
 template need every template checked, and every data-dependent input to the property checked in
 full — not a thousand renders. Where an intermediary carries the requirement, three checks cover
 it and none is per instance: the intermediary's **guarantee**, once; its **assumption**, for each
 kind of user; and the **scope**, so the part it does not cover has its own criterion.
+
+**A horizontal requirement is verified over its class**, not only through the items narrowed from
+it: one criterion covers it (or its class-level rule) directly, and its guardrail finds the
+instances from the system, so a route or a log call nobody listed is checked by existing
+([`composition.md`](composition.md), *Projecting horizontal requirements*).
 
 **Then check the result end to end anyway**, gating on a sample and informing on the full set.
 The contract checks can all pass over a real violation when the contract is wrong — a stylesheet
@@ -112,9 +126,11 @@ holds one section per criterion, headed by the criterion's qualified name, with 
 
 Criterion: [app.ServedContrast](../requirements/composed/internal/app/app.md#servedcontrast)
 
-Guardrails: `page_test.go` TestServedPageContrast
+Guardrails: `page_test.go:TestServedPageContrast`
 
 Gates: CI on every change; release
+
+Blocks: unless met
 
 Watched failing: 2026-10-22, by setting the panel text to #777777; the test failed on the panel
 
@@ -125,9 +141,39 @@ Watched failing: 2026-10-24, by adding an SVG label painted with fill; the test 
 - **`Guardrails:`** names each test, checker, monitor, or human review that implements it, where
   it lives, or `none`.
 - **`Gates:`** says where each guardrail gates and where it only informs, or `informs only`.
+- **`Blocks:`** when the criterion blocks a change: `once met` (the default: from the first time it
+  is met, a regression fails), `unless met` (it must be guarded from the start), or `never`.
 - **`Watched failing:`** one line per observation: the date, how the behavior was broken, and
   what failed. None means not yet watched failing.
+
+`river check` holds these to the code. A guardrail named `path:Name`, relative to the repository
+root, must exist: a Go file defining `func Name(`, or another file naming it
+(`guardrail-missing`). A criterion that blocks unless met needs a guardrail, here or in a
+`Verifies:` comment in a test (`criterion-unguarded`). A criterion once watched failing, blocking
+once met, may not lose its guardrail (`guardrail-dropped`).
 
 When a criterion's `Covers:` is repointed, as when a composed item replaces a local one, its
 section here keeps its observations ([`composition.md`](composition.md), *Replacing a local
 item*).
+
+## Implementation alignment
+
+Requirements may run ahead of the code: a composed package can gain criteria before anyone builds
+them. **The conformance package records which commit of each composed package's requirements the
+implementation meets**, one line per package:
+
+```markdown
+Implements: app at 3651340
+```
+
+It claims the implementation meets the package's blocking criteria as of that commit. After you
+implement a package's criteria, pass their guardrails, and record each `Watched failing:`, commit,
+then run `river implement <package>` (every composed package when you name none). It records HEAD in
+the file already holding the package's line, else beside the other records, else in a new
+`conformance/implementation.md`, and refuses on uncommitted changes under the module or while
+`river check` has problems. Commit the record with the change; review approves it.
+
+`river check` reads the package at that commit through git. When the package has changed since, it
+notes `implementation-behind` with the criteria added or changed since. Those are not built yet,
+not regressed, so they do not fail as unguarded until the alignment moves past them. A package with
+no record is noted `implementation-unaligned`; a commit git cannot resolve fails.

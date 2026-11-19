@@ -356,7 +356,7 @@ func get(t *testing.T, s *server, path string) (int, string) {
 	return w.Code, w.Body.String()
 }
 
-// Verifies: tech.twoCommandsOneModule, tech.servesOnLocalhost. Criterion: repo.bothCommandsBuild.
+// Verifies: repo.bothCommandsBuild
 func TestRoutesServe(t *testing.T) {
 	s := newTestServer(t)
 	for _, path := range []string{
@@ -394,7 +394,7 @@ var externalSubresource = regexp.MustCompile(
 // page loads, not where it points, and CC BY obliges BirdView to link out to
 // every source and license.
 //
-// Verifies: tech.selfContainedServer. Criterion: app.noServerNetworkRequest.
+// Verifies: app.noServerNetworkRequest
 func TestNoExternalResources(t *testing.T) {
 	s := newTestServer(t)
 	for _, path := range []string{"/?month=all&show=all", "/species/greblu"} {
@@ -405,7 +405,7 @@ func TestNoExternalResources(t *testing.T) {
 	}
 }
 
-// Verifies: product.tileContents. Criterion: app.tileCarriesHeaderAndMetrics.
+// Verifies: app.tileCarriesHeaderAndMetrics
 func TestTileShowsHeaderAndMetrics(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/?month=all&show=all")
 	for _, want := range []string{
@@ -471,7 +471,7 @@ func TestTileShowsHeaderAndMetrics(t *testing.T) {
 // every tile, the mass, set as page text placed in percent of the drawing, starts right of the
 // cube and stands on the cube's foot, and the drawing holds no text of its own.
 //
-// Verifies: product.tileContents. Criterion: app.tileCarriesHeaderAndMetrics.
+// Verifies: app.tileCarriesHeaderAndMetrics
 func TestTileMassLabelSitsOnTheCube(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/?month=all&show=all")
 	face := regexp.MustCompile(`(?s)<rect class="mcface" x="([\d.]+)" y="([\d.]+)"\s*width="([\d.]+)" height="([\d.]+)"/>`)
@@ -522,7 +522,7 @@ func diagrams(t *testing.T, body string) []string {
 // viewBox. The longest bird shown fills its box exactly, leaving no slack for an arithmetic error to
 // hide in; under the one scale the rest are drawn smaller, where a bad offset merely looks off-center.
 //
-// Verifies: product.tileContents, product.nextView. Criteria: app.tileCarriesHeaderAndMetrics, app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet, app.tileCarriesHeaderAndMetrics.
 func TestDiagramStaysInsideItsBox(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/?month=all&show=all")
 
@@ -566,7 +566,7 @@ func TestDiagramStaysInsideItsBox(t *testing.T) {
 // of the tile's height and bottom-alignment reads as a rendering fault rather
 // than as the size difference it is.
 //
-// Verifies: product.tileContents. Criterion: app.tileCarriesHeaderAndMetrics.
+// Verifies: app.tileCarriesHeaderAndMetrics
 func TestDiagramIsVerticallyCentered(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/?month=all&show=all")
 
@@ -594,7 +594,7 @@ func TestDiagramIsVerticallyCentered(t *testing.T) {
 // view lists all five segments as well as the three main metrics, each with its
 // provenance explained.
 //
-// Verifies: product.tileOpensDetail, product.metricProvenanceExplained. Criterion: app.detailShowsProvenance.
+// Verifies: app.detailShowsProvenance
 func TestDetailShowsEverySegmentWithProvenance(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/species/greblu")
 	for _, label := range []string{"Total length", "Wingspan", "Mass",
@@ -620,7 +620,7 @@ func TestDetailShowsEverySegmentWithProvenance(t *testing.T) {
 	}
 }
 
-// Verifies: product.familyFilter. Criterion: app.familyFilterSelectsAndClears.
+// Verifies: app.familyFilterSelectsAndClears
 func TestFamilyFilter(t *testing.T) {
 	s := newTestServer(t)
 	_, all := get(t, s, "/?month=all&show=all")
@@ -719,7 +719,7 @@ func footer(t *testing.T, body string) string {
 // difference between checking the requirement and checking that some part of
 // the page happens to mention the right unit.
 //
-// Verifies: product.imperialByDefault. Criterion: app.unitToggleSwitches.
+// Verifies: app.unitToggleSwitches
 func TestUnitToggle(t *testing.T) {
 	s := newTestServer(t)
 
@@ -768,7 +768,7 @@ func countAny(s string, tokens []string) int {
 // Expected values are computed from the definition (1 oz = 28.349523125 g),
 // not read off a run.
 //
-// Verifies: product.imperialByDefault. Criterion: app.unitToggleSwitches.
+// Verifies: app.unitToggleSwitches
 func TestMassUnitsBySystem(t *testing.T) {
 	cases := []struct {
 		g                float64
@@ -796,7 +796,7 @@ func TestMassUnitsBySystem(t *testing.T) {
 // is the honest comparison. Inheriting that here would leave nothing to look at
 // on the page devoted to it.
 //
-// Verifies: product.tileOpensDetail. Criterion: app.detailDrawsFullScale.
+// Verifies: app.detailDrawsFullScale
 func TestDetailDrawsFullScale(t *testing.T) {
 	s := newTestServer(t)
 	// The hummingbird is the smallest fixture bird, so it is the one that would
@@ -828,7 +828,7 @@ func TestDetailDrawsFullScale(t *testing.T) {
 // own color. Checking the stylesheet is crude but it catches precisely the
 // regression, which a rendering test cannot see.
 //
-// Verifies: product.generatedBadgeColors, tech.badgeContrast. Criterion: app.badgeTextInheritsColor.
+// Verifies: app.badgeTextInheritsColor
 func TestChipTextInheritsItsBackgroundsTextColor(t *testing.T) {
 	css, err := web.Static.ReadFile("static/styles.css")
 	if err != nil {
@@ -902,7 +902,7 @@ func mustMatch(t *testing.T, body, pattern, what string) string {
 // An earlier footer named the datasets but linked neither the deposits nor the
 // license, which is credit rather than attribution.
 //
-// Verifies: tech.localNowPublicLater, goals.goodDataCitizen. Criterion: app.attributionComplete.
+// Verifies: goals.goodDataCitizen, app.attributionComplete
 func TestAttributionIsComplete(t *testing.T) {
 	_, body := get(t, newTestServer(t), "/?month=all&show=all")
 	f := body[strings.Index(body, "<footer"):]
@@ -952,7 +952,7 @@ func s2(t *testing.T) *server { t.Helper(); return newTestServer(t) }
 // page that shows their output gives each its own license, iNaturalist's being CC BY-NC 4.0, not
 // the CC BY 4.0 the footers once claimed for both.
 //
-// Verifies: product.selfDescriptionStaysTrue, gbifterms.PublisherLicencesPrevail. Criterion: app.attributionComplete.
+// Verifies: app.attributionComplete
 func TestGBIFDatasetsCitedWithTheirLicenses(t *testing.T) {
 	s := newTestServer(t)
 	_, home := get(t, s, "/?month=all&show=all")
@@ -1025,7 +1025,7 @@ func neckRow(t *testing.T, body string) string {
 // silhouette only -- if it ever reached the numbers, BirdView would be quietly
 // reporting a shorter heron than it measured.
 //
-// Verifies: product.segmentComposition, product.segmentsSumToLength, product.tileOpensDetail. Criterion: app.foldedNeckSameStroke.
+// Verifies: app.foldedNeckSameStroke
 func TestFoldedNeckRendersAsAnArc(t *testing.T) {
 	s := newTestServer(t)
 	_, body := get(t, s, "/?month=all&show=all")
@@ -1077,7 +1077,7 @@ func boolToInt(b bool) int {
 // alias and land on the own code; the find box finds a bird by an alias; and a
 // code no species has is still a plain 404.
 //
-// Verifies: product.ebirdLink, tech.stableUrls. Criterion: app.everyCodeReachesItsSpecies.
+// Verifies: app.everyCodeReachesItsSpecies
 func TestEveryCodeReachesItsSpecies(t *testing.T) {
 	s := newTestServer(t)
 	for alias, want := range map[string]string{
@@ -1117,7 +1117,7 @@ func TestEveryCodeReachesItsSpecies(t *testing.T) {
 // taxon pages any more (decisions.ebirdLinkReplacesInaturalist). Neither page carries an image: the link
 // is the word, and BirdView copies nothing.
 //
-// Verifies: product.ebirdLink, product.tileContents. Criterion: app.ebirdLinkOnTilesAndPages.
+// Verifies: app.ebirdLinkOnTilesAndPages
 func TestEbirdLinks(t *testing.T) {
 	ds := testDataset()
 	for i := range ds.Species {
@@ -1194,7 +1194,7 @@ func TestEbirdLinks(t *testing.T) {
 // served, or served but referenced by nothing -- so this checks the two ends
 // match.
 //
-// Verifies: tech.selfContainedServer. Criterion: app.ownRenderableFavicon.
+// Verifies: app.ownRenderableFavicon
 func TestFaviconIsServedLocally(t *testing.T) {
 	s := newTestServer(t)
 
@@ -1244,7 +1244,7 @@ func TestFaviconIsServedLocally(t *testing.T) {
 // wingspan draws no dashed segment, a modeled one draws exactly one, flanked by
 // two solid segments and marked by two ticks.
 //
-// Verifies: product.measuredVersusModeled. Criterion: app.diagramDistinguishesModeled.
+// Verifies: app.diagramDistinguishesModeled
 func TestCrossbarSplitsAtTheChord(t *testing.T) {
 	s := newTestServer(t)
 	// The outer segments are the chord, drawn in its own color (product.oneDiagramVocabulary); they
@@ -1292,7 +1292,7 @@ func TestCrossbarSplitsAtTheChord(t *testing.T) {
 // drawing, and the guide the home page links its "stick figures" to explains it
 // for the tiles.
 //
-// Verifies: product.measuredVersusModeled. Criterion: app.diagramDistinguishesModeled.
+// Verifies: app.diagramDistinguishesModeled
 func TestBothPagesExplainTheStrokeCode(t *testing.T) {
 	s := newTestServer(t)
 	for _, path := range []string{"/docs/using", "/species/greblu"} {
@@ -1331,7 +1331,7 @@ func metricsOf(t *testing.T, body string) map[string]string {
 // Written against the table rather than a list of metric names, so it maintains itself: mass
 // was once reported in the table and absent from the drawing for weeks.
 //
-// Verifies: product.labeledDetailDiagram, product.tileOpensDetail. Criterion: app.segmentLabelsDontCollide.
+// Verifies: app.segmentLabelsDontCollide
 func TestDetailTileNamesEverySegment(t *testing.T) {
 	for _, units := range []string{"metric", "imperial"} {
 		body := mustGet(t, newTestServer(t), "/species/greblu?units="+units)
@@ -1395,7 +1395,7 @@ func TestDetailTileNamesEverySegment(t *testing.T) {
 // (decisions.foldedNeckAsS), so its drawn height is 6-9% short of its total length -- which is
 // what makes the assertion bite. For an unfolded bird the two agree.
 //
-// Verifies: product.labeledDetailDiagram. Criterion: app.totalLengthLabeled.
+// Verifies: app.totalLengthLabeled
 func TestDetailTileStatesTotalLength(t *testing.T) {
 	body := mustGet(t, newTestServer(t), "/species/greblu?units=metric")
 	row, _, _ := strings.Cut(metricsOf(t, body)["Total length"], "|")
@@ -1482,7 +1482,7 @@ func massCubeOf(t *testing.T, body string) (class string, x, y, side float64, ok
 // the diagram's px/mm — derived from the definition of the gram, never read
 // off a run.
 //
-// Verifies: product.labeledDetailDiagram. Criterion: app.massDrawnAsWaterCube.
+// Verifies: app.massDrawnAsWaterCube
 func TestMassCubeIsWaterToScale(t *testing.T) {
 	ds := testDataset()
 
@@ -1551,7 +1551,7 @@ func TestMassCubeIsWaterToScale(t *testing.T) {
 // An unexplained shape beside a bird reads as part of the bird, so the key
 // naming it is not documentation of the feature — it is the feature.
 //
-// Verifies: product.labeledDetailDiagram. Criterion: app.massDrawnAsWaterCube.
+// Verifies: app.massDrawnAsWaterCube
 func TestMassCubeIsRenderedAndExplained(t *testing.T) {
 	s := newTestServer(t)
 	for _, u := range []string{
@@ -1604,7 +1604,7 @@ func TestMassCubeIsRenderedAndExplained(t *testing.T) {
 // American one (see worldName), so a toggle that serves the same string both
 // ways fails here rather than passing on data that cannot tell them apart.
 //
-// Verifies: product.englishNameChoice. Criterion: app.nameLocaleToggle.
+// Verifies: app.nameLocaleToggle
 func TestNameLocaleTogglesNamesAndNothingElse(t *testing.T) {
 	s := newTestServer(t)
 	sp := findSpecies(t, "amerob")
@@ -1638,7 +1638,7 @@ func TestNameLocaleTogglesNamesAndNothingElse(t *testing.T) {
 // TestNameFallsBackToWorldWhenNoNorthAmericanName covers the five species with
 // no eBird/Clements concept: they must render a bird, not a blank (product.englishNameChoice).
 //
-// Verifies: product.englishNameChoice. Criterion: app.nameLocaleToggle.
+// Verifies: app.nameLocaleToggle
 func TestNameFallsBackToWorldWhenNoNorthAmericanName(t *testing.T) {
 	sp := dataset.Species{
 		ID:    "nonam",
@@ -1670,7 +1670,7 @@ func box(t *testing.T, body, label string) string {
 
 // TestRegionFilter asserts product.regionAndMonthFilter and its composition with family (product.filtersCompose).
 //
-// Verifies: product.regionAndMonthFilter, product.filtersCompose. Criterion: app.regionFilterBehaves.
+// Verifies: app.regionFilterBehaves
 func TestRegionFilter(t *testing.T) {
 	s := newTestServer(t)
 
@@ -1732,7 +1732,7 @@ func TestRegionFilter(t *testing.T) {
 // their GADM codes, sea boxes by name, and every older value redirected to the current one
 // (decisions.regionCodesFromData).
 //
-// Verifies: product.regionAndMonthFilter, tech.stableUrls. Criterion: app.regionUrlRoundTrips.
+// Verifies: app.regionUrlRoundTrips
 func TestRegionURLsCarryDataCodes(t *testing.T) {
 	s := newTestServer(t)
 	_, body := get(t, s, "/?month=all&show=all")
@@ -1784,7 +1784,7 @@ func TestRegionURLsCarryDataCodes(t *testing.T) {
 // more entry — and because every tile is one height, so a second badge costs
 // a line on all of them (app.tileHeaderNeverWraps).
 //
-// Verifies: product.tileContents. Criterion: app.familyGroupingComplete.
+// Verifies: app.familyGroupingComplete
 func TestTileCarriesExactlyOneBadge(t *testing.T) {
 	s := newTestServer(t)
 	for _, path := range []string{"/?month=all&show=all", "/species/greblu"} {
@@ -1818,7 +1818,7 @@ func TestTileCarriesExactlyOneBadge(t *testing.T) {
 // TestDetailListsEveryCategoryWithItsOrigin asserts product.categoryProvenance: the detail page
 // names every group the bird is sorted into and says who decided.
 //
-// Verifies: product.categoryProvenance. Criterion: app.categoryOriginShown.
+// Verifies: app.categoryOriginShown
 func TestDetailListsEveryCategoryWithItsOrigin(t *testing.T) {
 	s := newTestServer(t)
 	// The robin, which has regions. The heron is deliberately in none, and
@@ -1925,7 +1925,7 @@ func stripTags(s string) string {
 // skipped rather than fetched, and the test passed over 53 of them when the
 // bundle moved from spec/ to river/.
 //
-// Verifies: product.categoryProvenance. Criterion: app.categoryOriginShown.
+// Verifies: app.categoryOriginShown
 func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
 	s := newTestServer(t)
 	seen := map[string]bool{}
@@ -2009,7 +2009,7 @@ func TestServedDocumentsHaveNoBrokenLinks(t *testing.T) {
 // probes stay, so that serving the requirements again cannot quietly bring
 // the vendored terms back with them.
 //
-// Verifies: tech.fetchRestrictedInputs. Criterion: app.categoryOriginShown.
+// Verifies: app.categoryOriginShown
 func TestVendoredTermsAreNotServed(t *testing.T) {
 	s := newTestServer(t)
 	for _, path := range []string{
@@ -2031,7 +2031,7 @@ func TestVendoredTermsAreNotServed(t *testing.T) {
 // with an HTML comment and was listed in the index as "<!--". The
 // requirements are no longer served (decisions.requirementsNotServed); the rule stands for the guides.
 //
-// Verifies: product.categoryProvenance. Criterion: app.categoryOriginShown.
+// Verifies: app.categoryOriginShown
 func TestDocumentTitlesAreHeadings(t *testing.T) {
 	s := newTestServer(t)
 	for _, set := range []string{"/docs"} {
@@ -2054,7 +2054,7 @@ func TestDocumentTitlesAreHeadings(t *testing.T) {
 // Somebody auditing BirdView wants the whole of it at once, and a claim
 // that is only discoverable one species at a time is not really disclosed.
 //
-// Verifies: product.categoryProvenance. Criterion: app.categoryOriginShown.
+// Verifies: app.categoryOriginShown
 func TestAddedListsEveryUnpublishedAssignment(t *testing.T) {
 	s := newTestServer(t)
 	body := mustGet(t, s, "/added")
@@ -2134,7 +2134,7 @@ func realDataset(t *testing.T) *dataset.Dataset {
 // app.massDrawnAsWaterCube's own mutation for the arithmetic -- overlaps on 785 of 839 species
 // by length, 730 by wingspan, and 790 by mass.
 //
-// Verifies: product.labeledDetailDiagram. Criterion: app.massDrawnAsWaterCube.
+// Verifies: app.massDrawnAsWaterCube
 func TestTileCubeNeverReachesTheCrossbar(t *testing.T) {
 	ds := realDataset(t)
 	all := make([]*dataset.Species, 0, len(ds.Species))
@@ -2197,7 +2197,7 @@ func TestTileCubeNeverReachesTheCrossbar(t *testing.T) {
 // smallest renders the 27 g sparrow as "0.1 lb" -- one significant figure
 // for a bird, against "0.95 oz".
 //
-// Verifies: product.oneUnitInComparison. Criterion: app.massInOneUnit.
+// Verifies: app.massInOneUnit
 func TestUnitsForTakesTheSmallestBird(t *testing.T) {
 	const sparrow, swan = 27.0, 10886.0 // g: House Sparrow, Trumpeter Swan
 
@@ -2242,7 +2242,7 @@ func TestUnitsForTakesTheSmallestBird(t *testing.T) {
 // Watched fail: reverting the index to a per-value unit makes sections
 // render both oz and lb.
 //
-// Verifies: product.oneUnitInComparison. Criterion: app.massInOneUnit.
+// Verifies: app.massInOneUnit
 func TestNoSectionMixesMassUnits(t *testing.T) {
 	ds := realDataset(t)
 	srv, err := newServer(ds, nil)
@@ -2289,7 +2289,7 @@ func TestNoSectionMixesMassUnits(t *testing.T) {
 // Watched fail: returning "estimated" from provenanceTip for NearMatch
 // reports the donor missing.
 //
-// Verifies: product.provenancePerMetric, product.measuredVersusModeled. Criterion: app.unitToggleSwitches.
+// Verifies: app.unitToggleSwitches
 func TestNearMatchTooltipNamesTheDonor(t *testing.T) {
 	near := dataset.Provenance{Kind: dataset.NearMatch, SourceTaxon: "Sturnella magna"}
 	got := provenanceTip(near, "Sturnella neglecta")
@@ -2330,7 +2330,7 @@ func TestNearMatchTooltipNamesTheDonor(t *testing.T) {
 // Watched fail: renaming the "Commonest" heading in docs/data.md to
 // anything else reports the dangling citation.
 //
-// Verifies: product.categoryProvenance. Criterion: app.categoryOriginShown.
+// Verifies: app.categoryOriginShown
 func TestCitedAnchorsResolve(t *testing.T) {
 	s := newTestServer(t)
 
@@ -2401,7 +2401,7 @@ func TestCitedAnchorsResolve(t *testing.T) {
 // Watched fail: ignoring opt.Regions in shareOf and always summing every
 // region makes the one-region and all-region shares identical.
 //
-// Verifies: product.shareOfRecords. Criterion: app.commonestShareIsShare.
+// Verifies: app.commonestShareIsShare
 func TestTileShareFollowsTheRegionFilter(t *testing.T) {
 	s := newTestServer(t)
 
@@ -2455,7 +2455,7 @@ func TestTileShareFollowsTheRegionFilter(t *testing.T) {
 //
 // Watched fail: see app.figureSaysWhatItCounts.
 //
-// Verifies: product.shareOfRecords. Criterion: app.figureSaysWhatItCounts.
+// Verifies: app.figureSaysWhatItCounts
 func TestTheUnitSaysSpeciesAndNotBird(t *testing.T) {
 	s := newTestServer(t)
 	_, body := get(t, s, "/?month=all&show=all")
@@ -2531,7 +2531,7 @@ func atoiComma(t *testing.T, s string) int {
 // Watched fail: putting the old sentence back in the header reports it on
 // every page that renders the header.
 //
-// Verifies: product.noPersonalAddress. Criterion: app.noContactAddressPublished.
+// Verifies: app.noContactAddressPublished
 func TestNoPersonalAddressIsPublished(t *testing.T) {
 	s := newTestServer(t)
 	pages := []string{"/?month=all&show=all", "/species/greblu", "/species/amerob", "/added", "/docs/"}
@@ -2617,7 +2617,7 @@ func TestNoPersonalAddressIsPublished(t *testing.T) {
 // address serving no bird is fine; 410 would claim a permanence that a scope
 // regenerated from live data does not have (decisions.speciesUrlOutlivesSpecies).
 //
-// Verifies: product.undrawnSpeciesAnswer, decisions.speciesUrlOutlivesSpecies. Criterion: app.outOfScopeExplained.
+// Verifies: decisions.speciesUrlOutlivesSpecies, app.outOfScopeExplained
 func TestUndrawnSpeciesNamesItselfAt404(t *testing.T) {
 	s := newTestServer(t)
 
@@ -2706,7 +2706,7 @@ func TestUndrawnSpeciesNamesItselfAt404(t *testing.T) {
 // lookup order, which is an implementation detail nothing pins, and a live
 // species page becomes an epitaph.
 //
-// Verifies: product.undrawnSpeciesAnswer. Criterion: app.outOfScopeExplained.
+// Verifies: app.outOfScopeExplained
 func TestNoIDIsBothDrawnAndNot(t *testing.T) {
 	ds := realDataset(t)
 	if len(ds.Undrawn) == 0 {
@@ -2742,7 +2742,7 @@ func TestNoIDIsBothDrawnAndNot(t *testing.T) {
 // stops it being satisfied by an ingest that emits no evidence at all, which
 // would pass a check written only one way round.
 //
-// Verifies: product.undrawnSpeciesAnswer. Criterion: app.outOfScopeExplained.
+// Verifies: app.outOfScopeExplained
 func TestAbsentSpeciesCarryNoEvidence(t *testing.T) {
 	ds := realDataset(t)
 	seen := map[string]int{}
@@ -2791,7 +2791,7 @@ func TestAbsentSpeciesCarryNoEvidence(t *testing.T) {
 // ranking leaves out (decisions.countyListingRule): a county is inside a state, and naming one of thousands
 // would rarely tell a reader where the bird is common.
 //
-// Verifies: product.shareOfRecords, decisions.seaShareDiffers, decisions.honestSeaDenominator. Criterion: app.commonestIsLargestShare.
+// Verifies: decisions.seaShareDiffers, decisions.honestSeaDenominator, app.commonestIsLargestShare
 func TestCommonestIsTheLargestShare(t *testing.T) {
 	ds := realDataset(t)
 	var checked, skipped int
@@ -2841,7 +2841,7 @@ func TestCommonestIsTheLargestShare(t *testing.T) {
 // Also asserts the direction decisions.honestSeaDenominator reversed: every region now HAS a total,
 // seas included. Both halves, so a regression in either direction shows.
 //
-// Verifies: product.shareOfRecords, decisions.seaShareDiffers, decisions.honestSeaDenominator. Criterion: app.commonestIsLargestShare.
+// Verifies: decisions.seaShareDiffers, decisions.honestSeaDenominator, app.commonestIsLargestShare
 func TestShareRangesOverOneSetOfRegions(t *testing.T) {
 	ds := realDataset(t)
 	for _, id := range append(region.LandIDs(), region.MarineIDs()...) {
@@ -2925,7 +2925,7 @@ func TestShareRangesOverOneSetOfRegions(t *testing.T) {
 // apart -- a dash says neither, and cannot even be told from a figure that
 // failed to render.
 //
-// Verifies: product.shareOfRecords. Criterion: app.commonestIsLargestShare.
+// Verifies: app.commonestIsLargestShare
 func TestShareStatesZeroRatherThanDashing(t *testing.T) {
 	s := newTestServer(t)
 
@@ -2979,7 +2979,7 @@ func TestShareStatesZeroRatherThanDashing(t *testing.T) {
 // failure was not in the logic of either page but in the pairing, and a
 // pairing is only wrong for the species where the two tables disagree.
 //
-// Verifies: product.shareOfRecords, decisions.honestSeaDenominator. Criterion: app.peakAndShareOneCalculation.
+// Verifies: decisions.honestSeaDenominator, app.peakAndShareOneCalculation
 func TestCommonestRoundTripsThroughTheIndex(t *testing.T) {
 	ds := realDataset(t)
 	var checked, atSea int
@@ -3062,7 +3062,7 @@ func TestCommonestRoundTripsThroughTheIndex(t *testing.T) {
 // none if that sea's total went missing, which is what the marine regions
 // did for months.
 //
-// Verifies: product.shareOfRecords, decisions.honestSeaDenominator. Criterion: app.commonestIsLargestShare.
+// Verifies: decisions.honestSeaDenominator, app.commonestIsLargestShare
 func TestMissingTotalsDoNotClaimTheBirdIsAbsent(t *testing.T) {
 	ds := realDataset(t)
 	var sp *dataset.Species
@@ -3130,7 +3130,7 @@ func TestMissingTotalsDoNotClaimTheBirdIsAbsent(t *testing.T) {
 // sense and are correct where they stand; the metric always appears as
 // "share of" or behind a determiner, which is what this looks for.
 //
-// Verifies: product.shareOfRecords. Criterion: app.commonestIsLargestShare.
+// Verifies: app.commonestIsLargestShare
 func TestInterfaceNeverSaysShare(t *testing.T) {
 	s := newTestServer(t)
 	pages := []string{
@@ -3165,7 +3165,7 @@ func TestInterfaceNeverSaysShare(t *testing.T) {
 // the index inlines an SVG per species and is megabytes of markup, and egress
 // is the only axis of a serverless deployment that costs real money.
 //
-// Verifies: tech.compressedResponses. Criterion: app.responsesCompress.
+// Verifies: app.responsesCompress
 func TestResponsesCompressWhenAsked(t *testing.T) {
 	s := newTestServer(t)
 	fetch := func(path string, gzipOK bool) (*http.Response, []byte) {
@@ -3271,7 +3271,7 @@ func TestResponsesCompressWhenAsked(t *testing.T) {
 // TestFrequencyOrdersAndBandsByDecade asserts product.orderByFrequency over the real dataset:
 // Frequency is a fourth ordering, commonest first, in tiers of powers of ten.
 //
-// Verifies: product.orderByFrequency, decisions.frequencyMetric. Criterion: app.frequencyTiers.
+// Verifies: decisions.frequencyMetric, app.frequencyTiers
 func TestFrequencyOrdersAndBandsByDecade(t *testing.T) {
 	ds := realDataset(t)
 	srv, err := newServer(ds, nil)
@@ -3441,7 +3441,7 @@ func mustComma(t *testing.T, s string) int64 {
 // Cheap to write, and the thing most likely to be added later by someone
 // trying to be helpful.
 //
-// Verifies: product.orderByFrequency, product.shareOfRecords. Criterion: app.frequencyTiers.
+// Verifies: app.frequencyTiers
 func TestFrequencyTiersAreNotNamed(t *testing.T) {
 	ds := realDataset(t)
 	srv, err := newServer(ds, nil)
@@ -3471,7 +3471,7 @@ func TestFrequencyTiersAreNotNamed(t *testing.T) {
 // resident sitting 51st most-recorded in North America — and a note on a
 // page nobody opened would not have caught it.
 //
-// Verifies: product.namesRecordsFiledUnder, decisions.sharedCountShownOnBoth. Criterion: app.sharedCountDisclosed.
+// Verifies: decisions.sharedCountShownOnBoth, app.sharedCountDisclosed
 func TestSharedNamesAreDisclosed(t *testing.T) {
 	ds := realDataset(t)
 	srv, err := newServer(ds, nil)
@@ -3573,7 +3573,7 @@ func TestSharedNamesAreDisclosed(t *testing.T) {
 //
 // Watched fail: see app.detailSaysWhatTileSays.
 //
-// Verifies: product.tileOpensDetail, product.shareOfRecords. Criterion: app.detailSaysWhatTileSays.
+// Verifies: app.detailSaysWhatTileSays
 func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
 	s, err := newServer(realDataset(t), nil)
 	if err != nil {
@@ -3681,7 +3681,7 @@ func TestTheDetailPageSaysEverythingTheTileSays(t *testing.T) {
 //
 // Watched fail: see app.disputedNamesShown.
 //
-// Verifies: product.namesRecordsFiledUnder. Criterion: app.disputedNamesShown.
+// Verifies: app.disputedNamesShown
 func TestEveryNameDisagreementIsOnThePage(t *testing.T) {
 	ds := realDataset(t)
 	s, err := newServer(ds, nil)
@@ -3790,7 +3790,7 @@ func TestEveryNameDisagreementIsOnThePage(t *testing.T) {
 //
 // Watched fail: see app.honestRevalidation.
 //
-// Verifies: tech.cacheLifetimeStated. Criterion: app.honestRevalidation.
+// Verifies: app.honestRevalidation
 func TestResponsesCarryAValidator(t *testing.T) {
 	s, err := newServer(realDataset(t), nil)
 	if err != nil {
@@ -3891,7 +3891,7 @@ func TestResponsesCarryAValidator(t *testing.T) {
 //
 // Watched fail: see app.nameDisclosureLegible.
 //
-// Verifies: product.namesRecordsFiledUnder. Criterion: app.nameDisclosureLegible.
+// Verifies: app.nameDisclosureLegible
 func TestTheNameDisclosureExplainsItselfAndLinksSomewhereUseful(t *testing.T) {
 	s, err := newServer(realDataset(t), nil)
 	if err != nil {
@@ -4005,7 +4005,7 @@ func TestTheNameDisclosureExplainsItselfAndLinksSomewhereUseful(t *testing.T) {
 //
 // Watched fail: see app.monthsFilterAndAbstain.
 //
-// Verifies: product.regionAndMonthFilter, decisions.monthPresence. Criterion: app.monthsFilterAndAbstain.
+// Verifies: decisions.monthPresence, app.monthsFilterAndAbstain
 func TestMonthScopeWraps(t *testing.T) {
 	mk := func(ms ...int) options {
 		o := options{HasMonths: true, Months: map[int]bool{}}
@@ -4066,7 +4066,7 @@ func selectedMonths(m map[int]bool) []string {
 //
 // Watched fail: see app.monthsFilterAndAbstain.
 //
-// Verifies: product.regionAndMonthFilter, decisions.monthPresence. Criterion: app.monthsFilterAndAbstain.
+// Verifies: decisions.monthPresence, app.monthsFilterAndAbstain
 func TestAllTwelveMonthsIsTheWholeYear(t *testing.T) {
 	ds := realDataset(t)
 	every := options{HasMonths: true, Months: map[int]bool{}}
@@ -4157,7 +4157,7 @@ func TestAllTwelveMonthsIsTheWholeYear(t *testing.T) {
 //
 // Watched fail: see app.monthsFilterAndAbstain.
 //
-// Verifies: product.regionAndMonthFilter, product.shareOfRecords, decisions.monthPresence. Criterion: app.monthsFilterAndAbstain.
+// Verifies: decisions.monthPresence, app.monthsFilterAndAbstain
 func TestMonthsNarrowTheListAndTheFigureTogether(t *testing.T) {
 	s := newTestServerReal(t)
 
@@ -4223,7 +4223,7 @@ func newTestServerReal(t *testing.T) *server {
 //
 // Watched fail: see app.monthsFilterAndAbstain.
 //
-// Verifies: product.regionAndMonthFilter, product.tileOpensDetail, decisions.monthPresence. Criterion: app.monthsFilterAndAbstain.
+// Verifies: decisions.monthPresence, app.monthsFilterAndAbstain
 func TestAbstainedTilesSayWhy(t *testing.T) {
 	s := newTestServerReal(t)
 	const path = "/?show=all&region=USA.12_1&month=Jun"
@@ -4274,7 +4274,7 @@ func TestAbstainedTilesSayWhy(t *testing.T) {
 //
 // Watched fail: see app.withheldMonthsExplained.
 //
-// Verifies: product.regionAndMonthFilter, product.namesRecordsFiledUnder, decisions.ebirdSilenceNotAbsence. Criterion: app.withheldMonthsExplained.
+// Verifies: decisions.ebirdSilenceNotAbsence, app.withheldMonthsExplained
 func TestWithheldMonthsAreNotJudged(t *testing.T) {
 	s := newTestServerReal(t)
 	tile := func(path, id string) (shown bool, text string) {
@@ -4372,7 +4372,7 @@ func tileOf(t *testing.T, page, id string) string {
 // of sharedRows, and Vega with American Herring Gull is named outright so a
 // grouping that found nothing could not pass.
 //
-// Verifies: product.borrowedMeasurementsSaySo, decisions.vegaGullBorrows. Criterion: app.sharedMeasurementsDisclosed.
+// Verifies: decisions.vegaGullBorrows, app.sharedMeasurementsDisclosed
 func TestSameMeasurementsAreNoted(t *testing.T) {
 	ds := realDataset(t)
 	srv, err := newServer(ds, nil)
@@ -4429,7 +4429,7 @@ func TestSameMeasurementsAreNoted(t *testing.T) {
 // TestSameMeasurementsNeedNoTable asserts app.sharedMeasurementsDisclosed's fourth assertion: making a
 // fixture species borrow another's row is enough for both tiles to say so.
 //
-// Verifies: product.borrowedMeasurementsSaySo. Criterion: app.sharedMeasurementsDisclosed.
+// Verifies: app.sharedMeasurementsDisclosed
 func TestSameMeasurementsNeedNoTable(t *testing.T) {
 	ds := testDataset()
 	if len(ds.Species) < 3 {
@@ -4461,7 +4461,7 @@ func TestSameMeasurementsNeedNoTable(t *testing.T) {
 // species has, listed or not. Emu is named because it is the case that
 // was found, and a species with records that reads zero is the bug.
 //
-// Verifies: product.regionAndMonthFilter, product.shareOfRecords, decisions.belowBarCounted. Criterion: app.belowBarCountsKept.
+// Verifies: decisions.belowBarCounted, app.belowBarCountsKept
 func TestRecordsBelowTheBarCount(t *testing.T) {
 	ds := realDataset(t)
 	var emu *dataset.Species
@@ -4505,7 +4505,7 @@ func TestRecordsBelowTheBarCount(t *testing.T) {
 // family control, /excluded lists every one with its reason and a link, and
 // each keeps a detail page that says why it is not on the index.
 //
-// Verifies: product.escapedBirdsListed, decisions.escapedBirdsOffIndex. Criterion: app.escapedBirdsListedAndServed.
+// Verifies: decisions.escapedBirdsOffIndex, app.escapedBirdsListedAndServed
 func TestExoticsAreOffTheIndexAndListed(t *testing.T) {
 	ds := realDataset(t)
 	srv, err := newServer(ds, nil)
@@ -4588,7 +4588,7 @@ func TestExoticsAreOffTheIndexAndListed(t *testing.T) {
 // Visible text only: class names, template comments, and the code keep
 // "diagram", by design.
 //
-// Verifies: product.segmentComposition. Criterion: app.readersToldStickFigure.
+// Verifies: app.readersToldStickFigure
 func TestReadersAreToldItIsAStickFigure(t *testing.T) {
 	s := newTestServer(t)
 	strip := []*regexp.Regexp{
@@ -4628,7 +4628,7 @@ func TestReadersAreToldItIsAStickFigure(t *testing.T) {
 // source for the bare directory. Found by enumerating the server's routes for
 // the web pages WCAG applies to; no link leads there, so a crawl would not.
 //
-// Verifies: tech.servesOnlyItsPages. Criterion: app.staticServesAssetsOnly.
+// Verifies: app.staticServesAssetsOnly
 func TestStaticServesAssetsOnly(t *testing.T) {
 	s := newTestServer(t)
 	for _, p := range []string{"/static/", "/static/next.html", "/static/detail.html",
@@ -4648,7 +4648,7 @@ func TestStaticServesAssetsOnly(t *testing.T) {
 // than the total length labeled beneath it, with that bird's own numbers, and that a bird drawn at
 // full extent says nothing of the kind.
 //
-// Verifies: product.labeledDetailDiagram. Criterion: app.foldedFigureExplained.
+// Verifies: app.foldedFigureExplained
 func TestFoldedFigureExplained(t *testing.T) {
 	s := newTestServer(t)
 	_, heron := get(t, s, "/species/greblu")
@@ -4674,7 +4674,7 @@ func TestFoldedFigureExplained(t *testing.T) {
 // tooltip saying it is derived and from what, and left out where twice the chord reaches the
 // wingspan, where the drawing does not split the bar.
 //
-// Verifies: product.labeledDetailDiagram, product.tileContents. Criterion: app.innerSpanDerived.
+// Verifies: app.innerSpanDerived
 func TestInnerSpanIsDerived(t *testing.T) {
 	sp := findSpecies(t, "greblu")
 	if sp.WingChord.Value <= 0 || 2*sp.WingChord.Value >= sp.Wingspan.Value {
@@ -4715,7 +4715,7 @@ func TestInnerSpanIsDerived(t *testing.T) {
 // and a modeled one its model. Until 2026-11-01 only values that were not measured had one, so a
 // reader could learn where an estimate came from and not where a measurement did.
 //
-// Verifies: product.provenancePerMetric. Criterion: app.tileValuesNameTheirSource.
+// Verifies: app.tileValuesNameTheirSource
 func TestTileValuesNameTheirSource(t *testing.T) {
 	sp := findSpecies(t, "greblu")
 	body := mustGet(t, newTestServer(t), "/species/greblu?units=metric")
@@ -4782,7 +4782,7 @@ func definitionsFromRequirement(t *testing.T) map[string]string {
 // species page's tile begins with its plain definition and then says where the value came from;
 // each row of the measurements table begins with it too; and the guide lists every one.
 //
-// Verifies: product.everydayDefinitions. Criterion: app.everydayDefinitionsShown.
+// Verifies: app.everydayDefinitionsShown
 func TestTooltipsSayWhatEachMeasures(t *testing.T) {
 	defs := definitionsFromRequirement(t)
 	body := mustGet(t, newTestServer(t), "/species/greblu?units=metric")
@@ -4834,7 +4834,7 @@ func TestTooltipsSayWhatEachMeasures(t *testing.T) {
 // the units and names the home page draws with, so one bird's measurements need no pin
 // (product.nextView).
 //
-// Verifies: product.nextView. Criterion: app.nextViewDrawsOneSet.
+// Verifies: app.nextViewDrawsOneSet
 func TestFoundBirdLinksToItsPage(t *testing.T) {
 	body := mustGet(t, newTestServer(t), "/?find=crow&units=metric&names=world&month=all")
 	finds := body[strings.Index(body, `<div class="finds"`):]
@@ -4885,7 +4885,7 @@ func testCounties(ds *dataset.Dataset, counties []dataset.County, listed map[str
 // code, gives each bird its own share of the county's records, and is never counted twice, neither
 // in "every region" nor alongside its own state.
 //
-// Verifies: product.regionAndMonthFilter. Criterion: app.countyListingApplied.
+// Verifies: app.countyListingApplied
 func TestCountyIsARegion(t *testing.T) {
 	countiesOn(t)
 	s, err := newServer(countyDataset())
@@ -4929,7 +4929,7 @@ func TestCountyIsARegion(t *testing.T) {
 // setting offers one state's counties, but an address naming counties in two states is answered,
 // listing the birds either county lists and dividing by both counties' records.
 //
-// Verifies: product.regionAndMonthFilter, product.nextView. Criterion: app.countyListingApplied.
+// Verifies: app.countyListingApplied
 func TestCountiesInSeveralStatesByAddress(t *testing.T) {
 	countiesOn(t)
 	ds, cs := countyDataset()
@@ -4961,7 +4961,7 @@ func TestCountiesInSeveralStatesByAddress(t *testing.T) {
 // a bird's page names each state with how many of its counties list the bird out of how many it
 // has, and a state without counties as before; without them the row is unchanged.
 //
-// Verifies: product.regionAndMonthFilter. Criterion: app.countyListingApplied.
+// Verifies: app.countyListingApplied
 func TestSpeciesPageCountsCounties(t *testing.T) {
 	plain, err := newServer(countyDataset())
 	if err != nil {
@@ -4991,7 +4991,7 @@ func TestSpeciesPageCountsCounties(t *testing.T) {
 // the state replaces the state; choosing more adds them; removing the last, or All, returns to the
 // state.
 //
-// Verifies: product.nextView, product.regionAndMonthFilter. Criterion: app.countyListingApplied.
+// Verifies: app.countyListingApplied
 func TestCountySettingDrillsDown(t *testing.T) {
 	countiesOn(t)
 	ds, cs := countyDataset()
@@ -5063,7 +5063,7 @@ func countiesOn(t *testing.T) {
 // the dataset carries them. A county's code resolves to nothing, there is no County setting, and
 // every figure is what it was without county data, so no county is counted alongside its state.
 //
-// Verifies: product.regionAndMonthFilter. Criterion: app.countyListingApplied.
+// Verifies: app.countyListingApplied
 func TestCountiesOffByDefault(t *testing.T) {
 	if countiesEnabled {
 		t.Fatal("counties are served by default; they are behind -counties until every supported region has them")
@@ -5098,7 +5098,7 @@ func TestCountiesOffByDefault(t *testing.T) {
 // with its state's code, takes its months in parentheses, not after another comma, and a list of
 // counties is separated by semicolons while a list of states keeps its commas.
 //
-// Verifies: product.shareOfRecords, product.nextView. Criterion: app.countyListingApplied.
+// Verifies: app.countyListingApplied
 func TestPlaceAndMonthsAreNotJoinedByAComma(t *testing.T) {
 	countiesOn(t)
 	ds := testDataset()

@@ -23,7 +23,7 @@ import (
 // the species rows, with known codes where they should be, and none of the
 // rows that are not one species.
 //
-// Verifies: product.bandingCodes. Criterion: app.bandingCodesShown.
+// Verifies: app.bandingCodesShown
 func TestParseTheVendoredList(t *testing.T) {
 	b, err := os.ReadFile("../../third_party/bbl/speclist.html")
 	if err != nil {
@@ -57,7 +57,7 @@ func TestParseTheVendoredList(t *testing.T) {
 // own: in the vendored list they overlap (most such rows also lack a
 // scientific name), so a list built here gives each its own row.
 //
-// Verifies: product.bandingCodes. Criterion: app.bandingCodesShown.
+// Verifies: app.bandingCodesShown
 func TestParseSkipsWhatIsNotOneSpecies(t *testing.T) {
 	row := func(code, common, sci string) string {
 		return "<tr><td>1</td><td>" + code + "</td><td>" + common + "</td><td>2</td><td>x</td><td>" +
