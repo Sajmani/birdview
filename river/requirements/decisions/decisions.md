@@ -4206,7 +4206,7 @@ Recorded: 2026-10-23, from the launch plan in `deploymentPlumbing` (commit `aeb0
 
 Decided by: Sameer
 
-Status: accepted
+Status: amended by personalRepoIsSourceOfTruth
 
 Affects: [tech.localNowPublicLater](../local/tech/posture.md#localnowpubliclater), [tech.servesOnLocalhost](../local/tech/delivery.md#servesonlocalhost)
 
@@ -5654,3 +5654,39 @@ Each stays governed by the packages that include it or compose from it.
 item is the owner's to confirm.
 
 ---
+
+## personalRepoIsSourceOfTruth
+
+**`github.com/Sajmani/birdview` becomes BirdView's source of truth, and `google/birdview` is archived**
+
+Date: 2026-11-18
+
+Decided by: Sameer
+
+Status: accepted
+
+Amends: publicPersonalDeployment
+
+Affects: [tech.activeWorkHasIssue](../local/tech/process.md#activeworkhasissue)
+
+### Decided
+
+1. **`github.com/Sajmani/birdview` is the source of truth**, no longer a one-way mirror, and
+   `github.com/google/birdview` is archived with a note pointing there. Exactly one repository
+   receives changes at any time.
+2. **The condition, from Google's open-source office:** archiving `google/birdview` is fine as long
+   as `Sajmani/birdview` is never worked on from a Google laptop or with Google tools. Development
+   moves to Sameer's personal machine and his own accounts and tokens.
+3. **Contributions are under Apache 2.0, with no CLA.** Google's CLA governed the `google`
+   organization's repositories only. Existing files keep their copyright headers.
+4. **Issues move by copying**: each of `google/birdview`'s issues is recreated in the new repository,
+   and links in the bundle point at the new numbers.
+
+### Why
+
+Sameer intends to accept contributions from AVONET's team and others, and Google's CLA is a
+barrier for outside contributors. Planned since 2026-10-22 (`todo.md`, `sourceOfTruth`): a
+software factory run from Sameer's own accounts belongs where the code lives, and serving a clone
+is not the same question as developing one, which is why approval was asked first. A transfer of
+the repository was not asked about; copying the issues keeps the move inside what was approved.
+

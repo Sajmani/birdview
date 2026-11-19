@@ -27,30 +27,58 @@ Status: open
 
 Owner: Sameer
 
-Gate: first, after the owner's current errands; before telling AVONET's team where to contribute
+Gate: first; the steps after step 1 run only on Sameer's personal machine
 
-Google's open-source office agreed (Sameer, 2026-11-18) that `google/birdview` may be archived, on
-one condition: **no work on `Sajmani/birdview` from a Google laptop or with Google tools.** So the
-move happens on Sameer's personal machine with his own GitHub token, and nothing below is done
-from the work machine once `Sajmani/birdview` is the source of truth. A transfer of the repository
-was not asked about; copying the issues is the plan.
+Decided in [decisions.personalRepoIsSourceOfTruth](river/requirements/decisions/decisions.md#personalrepoissourceoftruth). Google's open-source office agreed
+(2026-11-18) that `google/birdview` may be archived as long as **`Sajmani/birdview` is never
+worked on from a Google laptop or with Google tools**. So step 1 is the last change made here, and
+everything after it runs on the personal machine, with Sameer's own `gh` login and tokens; no
+agent session on the work machine touches `Sajmani/birdview` again, not even `gh repo sync`.
 
-- **The repository.** `Sajmani/birdview` is a GitHub fork of `google/birdview` with issues off. Detach
-  the fork (GitHub Support), or recreate it as a plain repository, and turn issues on.
-- **Issues and pull requests.** Copy the open issues (#11, #12) and the closed ones worth keeping,
-  13 in all, with their comments; ask `bevinkatti` to reopen PR #14 against the new repository.
-- **Names in the code.** 37 lines in 16 files name `github.com/google/birdview`: the server's
-  `-feedback` default and report links, docs, requirements, and `todo.md`'s `Issue:` links. Change
-  them in one commit, and redeploy with `-feedback https://github.com/Sajmani/birdview/issues`.
-- **Contributions.** `cla/google` goes with the org. Choose a policy (DCO sign-off, or Apache 2.0's
-  own terms) and say so in `CONTRIBUTING.md`. Existing files keep their Google LLC headers.
-- **River.** BirdView keeps its vendored skill in `.agents/skills/`; River itself lives at a
-  Google-internal URL, so the `river` CI job (`RIVER_REPO`) and future re-pins wait on River's own
-  move (River's `TODO.md`: `adopterCiRunsRiver`).
-- **The workflow.** AGENTS.md's push-and-sync steps lose the second remote. The personal machine
-  needs Go, Chrome for the browser checks, and gcloud, which already deploys as
-  `ajmani@gmail.com`.
-- **Then archive `google/birdview`**, its README pointing at the new home.
+1. **Here, last: freeze `google/birdview`.** This item, the decision, and `CONTRIBUTING.md` land
+   by pull request; after it merges, nothing more is pushed here.
+2. **Set up the personal machine.** Go (the version in `go.mod`), Chrome for the browser checks
+   (`BIRDVIEW_CHROME`), gcloud signed in as `ajmani@gmail.com` (it already deploys project
+   `birdview-site`), and `gh auth login` as `Sajmani`. Clone `git@github.com:Sajmani/birdview.git`;
+   the fork is already at `google/birdview`'s `main`, so pull once from
+   `https://github.com/google/birdview.git` if it is behind. Run the four standing checks
+   (`AGENTS.md`, *Commands*) to prove the setup.
+3. **Make the repository stand alone.** In GitHub settings for `Sajmani/birdview`: ask GitHub Support to
+   detach the fork ("Leave fork network"), so search and the network graph treat it as the
+   original; turn on Issues and Pull requests; keep the ruleset on `main` that blocks deletion and
+   force-pushes, and decide whether it should also require pull requests.
+4. **Copy the issues.** 13 issues (#11 and #12 open), 15 comments, and nine labels. For each, oldest
+   first: `gh issue create --repo Sajmani/birdview` with the same title, the body prefixed
+   "*Copied from google/birdview#N, opened by @user on DATE.*", each comment added with
+   `gh issue comment`, and closed issues closed. Keep a table of old and new numbers. Pull requests
+   are not copied: ask `bevinkatti` to reopen PR #14 against `Sajmani/birdview`.
+5. **One commit for the new home**, in `Sajmani/birdview`:
+   - `github.com/google/birdview` becomes `github.com/Sajmani/birdview` everywhere outside
+     `third_party/` and vendored text: `cmd/birdview/main.go`'s `repository`, the report tests,
+     `docs/building.md`, `river/check/birdview_test.go`'s `Issue:` pattern, the requirements and
+     criteria that name the repository, and every `[#N]` issue link, renumbered from the
+     table in step 4. `git grep -n google/birdview` finds them; decisions keep their history but
+     relink.
+   - `CONTRIBUTING.md`: no CLA; contributions under Apache 2.0, which section 5 of the license
+     already covers; drop the Google community-guidelines link or replace it with
+     `CODE_OF_CONDUCT.md`'s own terms.
+   - `CODE_OF_CONDUCT.md`: its enforcement section sends reports to `sameer@google.com` and escalates
+     to Google's Open Source Programs Office and `opensource@google.com`. Name a personal contact,
+     and drop the Google escalation path.
+   - `AGENTS.md` and this file: push to `origin` (`Sajmani/birdview`) only; drop the
+     `gh repo sync` step and the HTTPS fallback through `google/birdview`; the deploy clone
+     (`~/src/birdview-site`) can become a plain clone of the same repository, or go.
+   - `.github/workflows/checks.yml` runs as is; the `cla/google` check goes with the org.
+   - Close [deploymentPlumbing](#deploymentplumbing)'s mirror steps and [sourceOfTruth](#sourceoftruth) as done
+     by this move.
+6. **Redeploy** with `-feedback,https://github.com/Sajmani/birdview/issues` in place of the
+   `google/birdview` one, and run `birdview-smoke`.
+7. **Archive `google/birdview`.** The last commit there is a README that says, at the top,
+   "Development has moved to https://github.com/Sajmani/birdview", and each of its open issues
+   gets a comment linking its copy before it is closed. That README commit and the archive are
+   made from a Google-managed session, since `google/birdview` is the org's repository, and they
+   touch nothing in `Sajmani/birdview`.
+8. **Then tell AVONET's team** where to contribute.
 
 ## scalableInterface
 
