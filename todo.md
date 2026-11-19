@@ -19,6 +19,39 @@ open" note in a decision record instead.
 move it to [todo-closed.md](todo-closed.md). Items are never deleted: a closed one records why a
 question that looks open is not. Design notes behind items are in [notes.md](river/notes.md).
 
+## moveToPersonalRepo
+
+**Make `Sajmani/birdview` the source of truth and archive `google/birdview`, before accepting outside contributions**
+
+Status: open
+
+Owner: Sameer
+
+Gate: first, after the owner's current errands; before telling AVONET's team where to contribute
+
+Google's open-source office agreed (Sameer, 2026-11-18) that `google/birdview` may be archived, on
+one condition: **no work on `Sajmani/birdview` from a Google laptop or with Google tools.** So the
+move happens on Sameer's personal machine with his own GitHub token, and nothing below is done
+from the work machine once `Sajmani/birdview` is the source of truth. A transfer of the repository
+was not asked about; copying the issues is the plan.
+
+- **The repository.** `Sajmani/birdview` is a GitHub fork of `google/birdview` with issues off. Detach
+  the fork (GitHub Support), or recreate it as a plain repository, and turn issues on.
+- **Issues and pull requests.** Copy the open issues (#11, #12) and the closed ones worth keeping,
+  13 in all, with their comments; ask `bevinkatti` to reopen PR #14 against the new repository.
+- **Names in the code.** 37 lines in 16 files name `github.com/google/birdview`: the server's
+  `-feedback` default and report links, docs, requirements, and `todo.md`'s `Issue:` links. Change
+  them in one commit, and redeploy with `-feedback https://github.com/Sajmani/birdview/issues`.
+- **Contributions.** `cla/google` goes with the org. Choose a policy (DCO sign-off, or Apache 2.0's
+  own terms) and say so in `CONTRIBUTING.md`. Existing files keep their Google LLC headers.
+- **River.** BirdView keeps its vendored skill in `.agents/skills/`; River itself lives at a
+  Google-internal URL, so the `river` CI job (`RIVER_REPO`) and future re-pins wait on River's own
+  move (River's `TODO.md`: `adopterCiRunsRiver`).
+- **The workflow.** AGENTS.md's push-and-sync steps lose the second remote. The personal machine
+  needs Go, Chrome for the browser checks, and gcloud, which already deploys as
+  `ajmani@gmail.com`.
+- **Then archive `google/birdview`**, its README pointing at the new home.
+
 ## scalableInterface
 
 **The interface is sized for North America by state, not for the world by county**
