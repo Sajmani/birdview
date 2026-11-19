@@ -4,6 +4,58 @@ package todo
 
 Items moved here from [todo.md](todo.md) when they closed. Search `## <id>`.
 
+## moveToPersonalRepo
+
+**Make `Sajmani/birdview` the source of truth and archive `google/birdview`, before accepting outside contributions**
+
+Status: closed
+
+Owner: Sameer
+
+Closed: 2026-11-18. All steps completed: `Sajmani/birdview` detached from `google/birdview` with Issues and Pull requests enabled; all 13 issues and 15 comments copied (`#1`–`#12` unchanged, `#16` → `#13`); repository links, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and `README.md` updated in PR #14 (`060fbb0`); redeployed to Cloud Run as revision `birdview-00035-74x` with `-feedback https://github.com/Sajmani/birdview/issues` and all 11 `birdview-smoke` checks passing; `google/birdview` archived; and follow-up reply drafted to Joe Tobias (AVONET). Left pending River's open-sourcing: re-stamp `river/` once the `river` CLI is available.
+
+Decided in [decisions.personalRepoIsSourceOfTruth](river/requirements/decisions/decisions.md#personalrepoissourceoftruth). Google's open-source office agreed
+(2026-11-18) that `google/birdview` may be archived as long as **`Sajmani/birdview` is never
+worked on from a Google laptop or with Google tools**. So step 1 was the last change made there, and
+everything after it ran on the personal machine, with Sameer's own `gh` login and tokens; no
+agent session on the work machine touches `Sajmani/birdview` again, not even `gh repo sync`.
+
+1. **Freeze `google/birdview`.** Done 2026-11-18 (`e501bb6`, PR #21).
+2. **Set up the personal machine.** Done 2026-11-18: Go 1.26.9, Chrome, `gh` (`Sajmani`), and
+   `gcloud` (`ajmani@gmail.com`, project `birdview-site`); `go build`, `go vet`, `gofmt`,
+   `birdview-ingest`, and `go test ./...` (including headless Chrome tests and `river/check`) all
+   pass.
+   - **The `river` CLI is not available here yet.** River's repository is at a Google-internal
+     URL and is not published, so `river check`, `river sum`, `river compose`, and `river diff`
+     cannot run until River is open-sourced. BirdView's own spec checks (`go test ./river/check/`)
+     and the vendored skill (`.agents/skills/river/`) still work. Until River is published:
+     note in each pull request that changes `river/` that `river check` was not run.
+     Moving River is the same question, for River ([sourceOfTruth](#sourceoftruth) notes it).
+   - **`fetched/` is not in the clone** (`tech.fetchRestrictedInputs`). The ingest needs none of
+     it. Rebuilding the county tables or `data/sea-distance.tsv` needs the GBIF downloads:
+     `go run ./cmd/birdview-gbifdownload -query data/gbif-queries/<query>.sql -key <key>`
+     re-fetches each by the key recorded in `data/gbif-downloads.tsv`, with no credentials.
+3. **Make the repository stand alone.** Done 2026-11-18: detached from the `google/birdview`
+   fork network, Issues and Pull requests enabled.
+4. **Copy the issues.** Done 2026-11-18: all 13 issues and 15 comments copied oldest-first to
+   `Sajmani/birdview` (`#1`–`#12` kept their numbers, with `#11` and `#12` open and `#8` closed as
+   not planned; `google/birdview#16` became `#13`).
+5. **One commit for the new home**, in `Sajmani/birdview` (done 2026-11-18, PR #14 / `060fbb0`):
+   - Renamed `github.com/google/birdview` to `github.com/Sajmani/birdview` in code, tests, docs,
+     `river/check/birdview_test.go`, requirements/criteria, `CHANGELOG.md`, and issue links (`#16`
+     renumbered to `#13`).
+   - Updated `CONTRIBUTING.md` (Apache 2.0, no CLA, pointing to `CODE_OF_CONDUCT.md`),
+     `CODE_OF_CONDUCT.md` (`birdview@ajmani.net`, Google escalation removed), and `README.md`
+     (Google disclaimer and VRP section removed).
+   - Closed [deploymentPlumbing](todo.md#deploymentplumbing)'s mirror steps and moved
+     [sourceOfTruth](#sourceoftruth) here.
+6. **Redeploy** from the repository root (done 2026-11-18): deployed `060fbb0` to Cloud Run as
+   revision `birdview-00035-74x` with `-feedback https://github.com/Sajmani/birdview/issues` and
+   `-canonical birdview.site` (no `-counties` until [countyRegions](todo.md#countyregions) is ready);
+   all 11 `birdview-smoke` checks passed.
+7. **Archive `google/birdview`.** Done 2026-11-18 from a Google-managed session.
+8. **Tell AVONET's team** where to contribute. Reply drafted 2026-11-18 on the AVONET email thread.
+
 ## sourceOfTruth
 
 **Move BirdView's source of truth to the personal repository**
@@ -12,7 +64,7 @@ Status: closed
 
 Owner: Sameer
 
-Closed: 2026-11-18, by [decisions.personalRepoIsSourceOfTruth](river/requirements/decisions/decisions.md#personalrepoissourceoftruth) and [moveToPersonalRepo](todo.md#movetopersonalrepo): `github.com/Sajmani/birdview` is detached from `google/birdview`, holds all 13 copied issues, and is the source of truth.
+Closed: 2026-11-18, by [decisions.personalRepoIsSourceOfTruth](river/requirements/decisions/decisions.md#personalrepoissourceoftruth) and [moveToPersonalRepo](#movetopersonalrepo): `github.com/Sajmani/birdview` is detached from `google/birdview`, holds all 13 copied issues, and is the source of truth.
 
 Planned 2026-10-22: an agent-driven software factory for BirdView, run from Sameer's own accounts
 the way a customer would run one, belongs where the code lives; if this repository stayed the
