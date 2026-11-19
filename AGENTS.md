@@ -52,7 +52,8 @@ it running as a foreground or tracked background task; that holds the turn open.
   code. Work in progress is `Status: active` with an `Issue:` link to a GitHub issue that links back
   (tech.activeWorkHasIssue); `grep -n -B2 '^Status: active' todo.md` lists it.
 - **Never resolve a conflict in code**; take it to `river/requirements/decisions/`.
-- Cite requirements and criteria in code as `// Verifies: product.scaleToggle. Criterion: app.foo.`
+- A test names the criteria it checks, as `// Verifies: app.foo, app.bar.` (River 3.1 refuses a
+  requirement there). Production code may cite the requirements it implements the same way.
 
 ## Hard rules: licensing
 
@@ -72,6 +73,12 @@ it running as a foreground or tracked background task; that holds the turn open.
 - **Never present a modeled value as a measurement** (product.tileMarksModeled).
 
 ## Conventions
+
+**Never write machine state into the repository**: no absolute paths, home directories, or local
+checkout layout; use repository-relative paths and canonical URLs.
+
+**Deploy only when Sameer asks**, as `docs/building.md` (*Deploying*) describes, and run
+`birdview-smoke` after.
 
 In prose, use American English and the Oxford comma. But **never edit a quotation or a vendored
 document**, and keep formatters away from `third_party/`, `river/requirements/imported/`,

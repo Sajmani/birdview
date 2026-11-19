@@ -41,8 +41,19 @@ agent session on the work machine touches `Sajmani/birdview` again, not even `gh
    (`BIRDVIEW_CHROME`), gcloud signed in as `ajmani@gmail.com` (it already deploys project
    `birdview-site`), and `gh auth login` as `Sajmani`. Clone `git@github.com:Sajmani/birdview.git`;
    the fork is already at `google/birdview`'s `main`, so pull once from
-   `https://github.com/google/birdview.git` if it is behind. Run the four standing checks
-   (`AGENTS.md`, *Commands*) to prove the setup.
+   `https://github.com/google/birdview.git` if it is behind. Run the Go checks (`AGENTS.md`,
+   *Commands*) to prove the setup.
+   - **The `river` CLI is not available there yet.** River's repository is at a Google-internal
+     URL and is not published, so `river check`, `river sum`, `river compose`, and `river diff`
+     cannot run until River moves too. BirdView's own spec checks (`go test ./river/check/`) and
+     the vendored skill (`.agents/skills/river/`) still work. Until River is published under
+     Sameer's own account: change nothing under `river/requirements/composed/` that needs a
+     re-stamp, and say in each pull request that changes `river/` that `river check` was not run.
+     Moving River is the same question, for River ([sourceOfTruth](#sourceoftruth) notes it).
+   - **`fetched/` is not in the clone** (`tech.fetchRestrictedInputs`). The ingest needs none of
+     it. Rebuilding the county tables or `data/sea-distance.tsv` needs the GBIF downloads:
+     `go run ./cmd/birdview-gbifdownload -query data/gbif-queries/<query>.sql -key <key>`
+     re-fetches each by the key recorded in `data/gbif-downloads.tsv`, with no credentials.
 3. **Make the repository stand alone.** In GitHub settings for `Sajmani/birdview`: ask GitHub Support to
    detach the fork ("Leave fork network"), so search and the network graph treat it as the
    original; turn on Issues and Pull requests; keep the ruleset on `main` that blocks deletion and
@@ -71,8 +82,20 @@ agent session on the work machine touches `Sajmani/birdview` again, not even `gh
    - `.github/workflows/checks.yml` runs as is; the `cla/google` check goes with the org.
    - Close [deploymentPlumbing](#deploymentplumbing)'s mirror steps and [sourceOfTruth](#sourceoftruth) as done
      by this move.
-6. **Redeploy** with `-feedback,https://github.com/Sajmani/birdview/issues` in place of the
-   `google/birdview` one, and run `birdview-smoke`.
+6. **Redeploy** from the repository root, as `docs/building.md` (*Deploying*) describes:
+   `git rev-parse HEAD > REVISION`, then
+
+   ```
+   gcloud run deploy birdview --source . --region us-central1 --allow-unauthenticated --quiet \
+     --args=-addr,0.0.0.0:8080,-data,/data/species.json,-feedback,https://github.com/Sajmani/birdview/issues,-canonical,birdview.site
+   go run ./cmd/birdview-smoke https://birdview.site https://www.birdview.site https://birdview-570018079643.us-central1.run.app
+   ```
+
+   No `-counties` on the live site until counties are ready ([countyRegions](#countyregions)). If
+   gcloud fails locally after Cloud Build succeeds, deploy the image Cloud Build made, by digest,
+   with the same `--args`. Locally, AGENTS.md's server runs with
+   `-counties -feedback https://github.com/Sajmani/birdview/issues`, after `go run ./cmd/birdview-ingest`
+   whenever data changed.
 7. **Archive `google/birdview`.** The last commit there is a README that says, at the top,
    "Development has moved to https://github.com/Sajmani/birdview", and each of its open issues
    gets a comment linking its copy before it is closed. That README commit and the archive are
