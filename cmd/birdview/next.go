@@ -365,6 +365,17 @@ func (s *server) next(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, string(nextURL(q)), http.StatusSeeOther)
 		return
 	}
+	if r.URL.RawQuery != "" {
+		release := s.gate.acquire(isLargeNextView(q))
+		if release == nil {
+			w.Header().Del("ETag")
+			w.Header().Set("Cache-Control", "no-store")
+			w.Header().Set("Retry-After", "5")
+			http.Error(w, "Too many filtered requests; please try again in a few seconds.", http.StatusTooManyRequests)
+			return
+		}
+		defer release()
+	}
 	s.render(w, "next.html", s.nextPage(r))
 }
 

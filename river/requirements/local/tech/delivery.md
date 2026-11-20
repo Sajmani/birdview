@@ -50,16 +50,51 @@ HTML page of its own, and the home page's template source at the bare `/static/`
 
 Subject: `server.robots`
 
-Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone)
+Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone), [goals.secure](../../../goals/goals.md#secure)
 
 The server answers `/robots.txt` with a policy that lets every crawler fetch each page that has no
 query string, and asks it to fetch nothing with a query string, nor the region boundary file.
+Filtered home views (`/` with a query string) also send `X-Robots-Tag: noindex, nofollow`, and the
+home page's links to query-string views carry `rel="nofollow"`. Self-identified crawlers that
+request a disallowed URL (any URL with a query string, or `/boundaries/`) receive `403 Forbidden`
+with `Cache-Control: no-store`, and home-page query strings corrupted by naive HTML-entity decoding
+(`®` / `%C2%AE`) receive `400 Bad Request` with `Cache-Control: no-store`.
 
 Rationale: every control is a query parameter, so the home page links to hundreds of variants of
 itself, each linking to hundreds more: an unbounded set of near-duplicate pages, each costing the
 egress a public deployment pays for. What is worth indexing has no query string: the home page,
-about a thousand species pages, the guides, and the added and excluded lists. A `robots.txt` is a request that well-behaved crawlers
-honor, not a limit; what bounds the cost of one that ignores it is the deployment's instance cap.
+about a thousand species pages, the guides, and the added and excluded lists. In practice, several
+crawlers (including `meta-externalagent`) ignored `/robots.txt` and crawled `/?...` anyway, while
+broken scrapers decoded `&region=` into `®ion=`; reinforcing `/robots.txt` with `X-Robots-Tag`,
+`rel="nofollow"`, and explicit rejection of self-identified crawlers and corrupted queries on
+disallowed URLs enforces the policy without blocking legitimate readers, link-preview fetchers, or
+monitoring checks.
+
+## filteredViewsBounded
+
+**Filtered views cannot starve query-free pages or saturate the server**
+
+Subject: `server.filtered_load`
+
+Goals: [goals.openToEveryone](../../../goals/goals.md#opentoeveryone), [goals.secure](../../../goals/goals.md#secure)
+
+Rendering filtered home views (`/` with a query string) is bounded in both concurrency and rate per
+server instance, with a tighter bound for large views (`show=all` or `show` above the default cap).
+Requests beyond the bound fail fast with `429 Too Many Requests`, `Retry-After`, and
+`Cache-Control: no-store` (and no `ETag`). Query-free pages (`/`, species pages, guides, `/added`,
+`/excluded`, `/static/`, `/birds.json`, and `/robots.txt`), redirects, and `304 Not Modified`
+revalidations are never gated by this limit, so a flood against filtered views cannot starve the
+rest of the site.
+
+Rationale: on 2026-11-19 and 2026-11-20, distributed residential-proxy crawlers ignored
+`/robots.txt` and crawled combinatorial filter and pin links (`?by=length&pin=...&show=all`) at up
+to ~4,500 requests per minute from hundreds of distinct residential IPs. Because `show=all` renders
+all ~1,041 species tiles (~450 ms CPU and ~260 KiB compressed each), the flood saturated both Cloud
+Run instances under `--max-instances=2`, filling Cloud Run's request queue so Google Frontend
+rejected legitimate readers and uptime checks on `/` and `/species/amecro` with `429 Rate exceeded.`,
+while burning ~50 GiB of egress in 36 hours. Shedding excess filtered renders in sub-millisecond
+time inside the server keeps query-free pages responsive and caps worst-case egress without tracking
+readers or setting cookies ([goals.readerPrivacy](../../../goals/goals.md#readerprivacy)).
 
 ## stableUrls
 

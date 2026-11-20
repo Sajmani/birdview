@@ -144,6 +144,7 @@ Precedence is the ranking in [precedence.md](../../../precedence/precedence.md).
 - [tech.cacheLifetimeStated](../../../local/tech/delivery.md#cachelifetimestated)
 - [tech.compressedResponses](../../../local/tech/delivery.md#compressedresponses)
 - [tech.crawlersSkipFilteredViews](../../../local/tech/delivery.md#crawlersskipfilteredviews)
+- [tech.filteredViewsBounded](../../../local/tech/delivery.md#filteredviewsbounded)
 - [tech.gbifDownloadsRecorded](../../../local/tech/process.md#gbifdownloadsrecorded)
 - [tech.identifiedClient](../../../local/tech/delivery.md#identifiedclient)
 - [tech.oneCanonicalHost](../../../local/tech/delivery.md#onecanonicalhost)

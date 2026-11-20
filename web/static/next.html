@@ -38,13 +38,13 @@
   <p class="welcome">Try
     <a href="{{.HereNowURL}}">the birds around you now</a> &middot;
     compare some
-    <a href="/?by=length&amp;pin=winwre3&amp;pin=lucwar&amp;pin=ruckin&amp;pin=bubhum&amp;pin=lesgol&amp;pin=bushti&amp;show=pinned">tiny birds</a>,
-    <a href="/?by=length&amp;pin=leasan&amp;pin=houspa&amp;pin=dowwoo&amp;pin=houfin&amp;pin=barswa&amp;pin=easpho&amp;show=pinned">small birds</a>,
-    <a href="/?by=length&amp;pin=blujay&amp;pin=amekes&amp;pin=calthr&amp;pin=moudov&amp;pin=belkin1&amp;pin=chwwid&amp;show=pinned">medium birds</a>,
-    <a href="/?by=length&amp;pin=turvul&amp;pin=gbbgul&amp;pin=greegr&amp;pin=cangoo&amp;pin=grecor&amp;pin=rosspo1&amp;show=pinned">large birds</a>,
-    <a href="/?by=length&amp;pin=calcon&amp;pin=amwpel&amp;pin=mutswa&amp;pin=magfri&amp;pin=baleag&amp;pin=bkfalb&amp;show=pinned">huge birds</a> &middot;
-    see the <a href="/?habitat=Grassland&amp;habitat=Shrubland&amp;habitat=Desert&amp;habitat=Rock&amp;niche=Vertivore">open-country hunters</a>,
-    all <a href="/?family=Ardeidae&amp;family=Anatidae&amp;month=all">herons and ducks</a> &middot;
+    <a href="/?by=length&amp;pin=winwre3&amp;pin=lucwar&amp;pin=ruckin&amp;pin=bubhum&amp;pin=lesgol&amp;pin=bushti&amp;show=pinned" rel="nofollow">tiny birds</a>,
+    <a href="/?by=length&amp;pin=leasan&amp;pin=houspa&amp;pin=dowwoo&amp;pin=houfin&amp;pin=barswa&amp;pin=easpho&amp;show=pinned" rel="nofollow">small birds</a>,
+    <a href="/?by=length&amp;pin=blujay&amp;pin=amekes&amp;pin=calthr&amp;pin=moudov&amp;pin=belkin1&amp;pin=chwwid&amp;show=pinned" rel="nofollow">medium birds</a>,
+    <a href="/?by=length&amp;pin=turvul&amp;pin=gbbgul&amp;pin=greegr&amp;pin=cangoo&amp;pin=grecor&amp;pin=rosspo1&amp;show=pinned" rel="nofollow">large birds</a>,
+    <a href="/?by=length&amp;pin=calcon&amp;pin=amwpel&amp;pin=mutswa&amp;pin=magfri&amp;pin=baleag&amp;pin=bkfalb&amp;show=pinned" rel="nofollow">huge birds</a> &middot;
+    see the <a href="/?habitat=Grassland&amp;habitat=Shrubland&amp;habitat=Desert&amp;habitat=Rock&amp;niche=Vertivore" rel="nofollow">open-country hunters</a>,
+    all <a href="/?family=Ardeidae&amp;family=Anatidae&amp;month=all" rel="nofollow">herons and ducks</a> &middot;
     <a href="/docs/using#some-things-to-try">more ideas</a>
     <span class="welcomestatus" role="status" aria-live="polite" data-where="Region"
           data-template="{{.HereNowTemplate}}"></span></p>
@@ -67,9 +67,9 @@
       value="{{.Cap}}" aria-label="How many birds to show before the rest are hidden"
       title="How many birds to show; click First or press Enter to apply">
   </form>
-  <a class="btn{{if eq .Show "all"}} on{{end}}" href="{{.ShowAllURL}}" title="Show every bird the settings match, with your pins">All ({{.Matching}})</a>
-  <a class="btn{{if eq .Show "pinned"}} on{{end}}" href="{{.ShowPinnedURL}}" title="Show only the birds you have pinned">Pinned ({{len .Pinned}})</a>
-  {{with .ClearPinsURL}}<a class="reset" href="{{.}}" title="Unpin every bird, keeping the settings">Clear pins</a>{{end}}
+  <a class="btn{{if eq .Show "all"}} on{{end}}" href="{{.ShowAllURL}}" rel="nofollow" title="Show every bird the settings match, with your pins">All ({{.Matching}})</a>
+  <a class="btn{{if eq .Show "pinned"}} on{{end}}" href="{{.ShowPinnedURL}}" rel="nofollow" title="Show only the birds you have pinned">Pinned ({{len .Pinned}})</a>
+  {{with .ClearPinsURL}}<a class="reset" href="{{.}}" rel="nofollow" title="Unpin every bird, keeping the settings">Clear pins</a>{{end}}
 </div>
 <template id="pinicon">{{template "pinicon"}}</template>
 {{/* The pinned birds, in alphabetical order: the name goes to the bird's tile,
@@ -77,7 +77,7 @@
 {{with .Pinned}}<div class="pinned" role="region" aria-label="Pinned birds">
   <span class="lbl">Pinned</span>
   <ul>
-    {{range .}}<li><a class="pin on" href="{{.URL}}" aria-pressed="true" title="Unpin {{.Name}}" aria-label="Unpin {{.Name}}">{{template "pinicon"}}</a>
+    {{range .}}<li><a class="pin on" href="{{.URL}}" rel="nofollow" aria-pressed="true" title="Unpin {{.Name}}" aria-label="Unpin {{.Name}}">{{template "pinicon"}}</a>
       <a class="pinname" href="#{{.Anchor}}" title="{{.Scientific}}">{{.Name}}</a></li>
     {{end}}
   </ul>
@@ -97,10 +97,10 @@
 <div class="finds" role="status" aria-live="polite" data-birds="{{.BirdsURL}}"
      data-toggle="{{.ToggleURL}}" data-close="{{.CloseURL}}" data-pinned="{{.PinnedIDs}}" data-limit="{{.FindLimit}}" data-detail="{{.DetailSuffix}}">
   {{if .Find}}
-  <p class="found"><a class="findclose" href="{{.CloseURL}}" title="Close the list" aria-label="Close the list">&times;</a>{{if eq .Found 0}}No bird&rsquo;s name contains &ldquo;{{.Find}}&rdquo;.{{else if eq .Found 1}}1 bird matches.{{else}}{{.Found}} birds match.{{end}}{{if gt .Found .FindLimit}} Type more to list them.{{end}}</p>
+  <p class="found"><a class="findclose" href="{{.CloseURL}}" rel="nofollow" title="Close the list" aria-label="Close the list">&times;</a>{{if eq .Found 0}}No bird&rsquo;s name contains &ldquo;{{.Find}}&rdquo;.{{else if eq .Found 1}}1 bird matches.{{else}}{{.Found}} birds match.{{end}}{{if gt .Found .FindLimit}} Type more to list them.{{end}}</p>
   {{if .Matches}}
   <ul>
-    {{range .Matches}}<li><a class="pin{{if .Pinned}} on{{end}}" href="{{.URL}}" aria-pressed="{{if .Pinned}}true{{else}}false{{end}}"
+    {{range .Matches}}<li><a class="pin{{if .Pinned}} on{{end}}" href="{{.URL}}" rel="nofollow" aria-pressed="{{if .Pinned}}true{{else}}false{{end}}"
       title="{{if .Pinned}}Unpin{{else}}Pin{{end}} {{.Name}}" aria-label="{{if .Pinned}}Unpin{{else}}Pin{{end}} {{.Name}}">{{template "pinicon"}}</a>
       <a class="sp" href="{{.DetailURL}}">{{.Name}}</a>{{with .Banding}} <span class="code">{{.}}</span>{{end}} <span class="code">({{.ID}})</span> <i>{{.Scientific}}</i></li>
     {{end}}
@@ -121,10 +121,10 @@
       {{if .One}}{{/* One choice: one joined row, All first, the chosen segment filled and marked
            for screen readers (product.chooseOneSettings). */}}
       {{with .Note}}<p class="hint">{{.}}</p>{{end}}
-      <div class="seg" role="group" aria-label="{{.Label}}">{{if .AllURL}}<a class="btn{{if .AllOn}} on{{end}}" href="{{.AllURL}}"{{if .AllOn}} aria-current="true"{{end}}>All</a>{{end}}{{range .Groups}}{{range .Choices}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}{{if .On}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}{{end}}</div>
+      <div class="seg" role="group" aria-label="{{.Label}}">{{if .AllURL}}<a class="btn{{if .AllOn}} on{{end}}" href="{{.AllURL}}" rel="nofollow"{{if .AllOn}} aria-current="true"{{end}}>All</a>{{end}}{{range .Groups}}{{range .Choices}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}" rel="nofollow"{{with .Title}} title="{{.}}"{{end}}{{if .On}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}{{end}}</div>
       {{else}}
       {{with .Note}}<p class="hint">{{.}}</p>{{end}}
-      {{if or .AllURL .HereURL}}<p>{{if .AllURL}}<a class="btn{{if .AllOn}} on{{end}}" href="{{.AllURL}}">All</a>{{end}}
+      {{if or .AllURL .HereURL}}<p>{{if .AllURL}}<a class="btn{{if .AllOn}} on{{end}}" href="{{.AllURL}}" rel="nofollow">All</a>{{end}}
         {{if .HereURL}}{{/* here.js finds the reader's region in the browser and
              asks for this address with it, as choosing it by hand would
              (product.hereSelectsLocalRegion, product.locationStaysInBrowser). */}}<button type="button" class="btn here act" aria-disabled="true"
@@ -147,14 +147,14 @@
     </div>
   </details>
   {{end}}
-  <a class="reset" href="{{.ResetURL}}" title="Every setting back to its default: birds of every month, most often recorded first. Pins are kept.">Reset</a>
+  <a class="reset" href="{{.ResetURL}}" rel="nofollow" title="Every setting back to its default: birds of every month, most often recorded first. Pins are kept.">Reset</a>
   </div>
 </div>
 
 {{/* One bar per tier, as tall as its count against the largest, each a link
      to its tier's heading, with every bird shown when that tier is not drawn
      (product.nextView). Heights are inline because they are data. */}}
-{{if .Histogram}}<nav class="hist" aria-label="Birds in each tier">{{range .Histogram}}{{if .Empty}}<span class="gap"></span>{{else}}<a href="{{.URL}}" style="height:{{.Percent}}%" aria-label="{{.Label}}" title="{{.Label}}"></a>{{end}}{{end}}</nav>{{end}}
+{{if .Histogram}}<nav class="hist" aria-label="Birds in each tier">{{range .Histogram}}{{if .Empty}}<span class="gap"></span>{{else}}<a href="{{.URL}}" style="height:{{.Percent}}%" aria-label="{{.Label}}" title="{{.Label}}" rel="nofollow"></a>{{end}}{{end}}</nav>{{end}}
 {{/* What the histogram counts, then what is drawn below it. The histogram counts every bird the
      settings match, whatever is drawn, so that any tier can be reached from it; under Pinned only it
      counts the pinned birds (product.nextView). */}}
@@ -166,12 +166,12 @@
     <a class="totop" href="#top">back to top</a></h3>{{else if .Tier}}<h3 class="tierhd" id="tier-{{.Tier.Index}}"><span class="tier">{{.Tier.Label}} Tier {{.Tier.Index}}</span>
     {{with .Tier}}{{if .Note}}{{.Note}}{{else if eq .Min .Max}}{{.Min}}{{else if .Max}}{{.Min}} &ndash; {{.Max}}{{else}}{{.Min}} and beyond{{end}}
     <span class="n">{{.Count}} {{if eq .Count 1}}bird{{else}}birds{{end}}</span>{{end}}
-    <a class="totop" href="#top">back to top</a></h3>{{else}}<p class="gap">{{.Hidden}} {{if eq .Hidden 1}}bird{{else}}birds{{end}} hidden — <a href="{{$.MoreURL}}">Show all</a></p>{{end}}{{end}}
+    <a class="totop" href="#top">back to top</a></h3>{{else}}<p class="gap">{{.Hidden}} {{if eq .Hidden 1}}bird{{else}}birds{{end}} hidden — <a href="{{$.MoreURL}}" rel="nofollow">Show all</a></p>{{end}}{{end}}
 </div>
 {{else if .PinnedOnly}}
-<p class="empty">No birds are pinned yet. Find a bird above to pin it, or <a href="{{.ShowFirstURL}}">show the birds the settings match</a>.</p>
+<p class="empty">No birds are pinned yet. Find a bird above to pin it, or <a href="{{.ShowFirstURL}}" rel="nofollow">show the birds the settings match</a>.</p>
 {{else}}
-<p class="empty">No birds match. <a href="{{.ResetURL}}">Reset</a>.</p>
+<p class="empty">No birds match. <a href="{{.ResetURL}}" rel="nofollow">Reset</a>.</p>
 {{end}}
 
 <footer id="credits">
@@ -353,5 +353,5 @@
 </html>{{end}}
 
 {{/* One choice in a setting's popover: a family as its badge, anything else as a button. */}}
-{{define "choice"}}{{if .Color}}<a class="chip{{if .On}} on{{end}}" href="{{.URL}}"
-  style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">{{.Label}}<em>{{.Title}}</em></a>{{else}}<a class="btn{{if .On}} on{{end}}{{if .Now}} act{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}{{if .Now}} data-now{{end}}>{{.Label}}</a>{{end}}{{end}}
+{{define "choice"}}{{if .Color}}<a class="chip{{if .On}} on{{end}}" href="{{.URL}}" rel="nofollow"
+  style="background:{{.Color}};color:{{.TextColor}};border-color:{{.Color}}">{{.Label}}<em>{{.Title}}</em></a>{{else}}<a class="btn{{if .On}} on{{end}}{{if .Now}} act{{end}}" href="{{.URL}}" rel="nofollow"{{with .Title}} title="{{.}}"{{end}}{{if .Now}} data-now{{end}}>{{.Label}}</a>{{end}}{{end}}

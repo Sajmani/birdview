@@ -125,6 +125,7 @@ func main() {
 		srv.feedback = *feedback
 		srv.canonical = *canonical
 		srv.revision = buildRevision()
+		srv.gate = newFilteredGate()
 	}
 	if err != nil {
 		log.Fatalf("birdview: %v", err)
@@ -212,6 +213,10 @@ type server struct {
 	// dataset, the templates, and the static files. It is the first half of
 	// every ETag (tech.cacheLifetimeStated).
 	build string
+	// gate bounds concurrent renders and rate for filtered home views so
+	// crawlers cannot saturate the server or starve query-free pages
+	// (tech.filteredViewsBounded).
+	gate *filteredGate
 }
 
 type familyOption struct {
@@ -229,7 +234,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "https://"+s.canonical+r.URL.RequestURI(), http.StatusMovedPermanently)
 		return
 	}
-	compressed(s.revalidated(s.mux)).ServeHTTP(w, r)
+	compressed(s.enforceCrawlers(s.revalidated(s.mux))).ServeHTTP(w, r)
 }
 
 // sameHost reports whether a request's Host names the canonical host,

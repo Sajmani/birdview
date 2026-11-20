@@ -110,6 +110,7 @@ licenses ask, which a lower tier may do.
 - [tech.selfContainedServer](../../../local/tech/delivery.md#selfcontainedserver) — The server is self-contained at runtime
 - [tech.servesOnlyItsPages](../../../local/tech/delivery.md#servesonlyitspages) — The server serves its pages and what they load, and nothing else
 - [tech.crawlersSkipFilteredViews](../../../local/tech/delivery.md#crawlersskipfilteredviews) — Crawlers are asked to skip filtered views
+- [tech.filteredViewsBounded](../../../local/tech/delivery.md#filteredviewsbounded) — Filtered views cannot starve query-free pages or saturate the server
 - [tech.stableUrls](../../../local/tech/delivery.md#stableurls) — These URLs keep working; everything else may change
 - [tech.oneCanonicalHost](../../../local/tech/delivery.md#onecanonicalhost) — A deployment answers at one address
 - [tech.servesOnLocalhost](../../../local/tech/delivery.md#servesonlocalhost) — Listens on localhost:8080 unless told otherwise

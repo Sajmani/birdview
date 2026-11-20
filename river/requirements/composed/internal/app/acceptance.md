@@ -1197,8 +1197,48 @@ stylesheet are allowed. The crawl must offer at least three of each kind, or the
 rather than passing on nothing. An unknown field in the policy fails it too, so a typo cannot drop
 a rule. `TestRobotsMatcher` pins the matcher to RFC 9309's precedence: the longest match wins,
 Allow wins a tie, `*` and `$` are wildcards, and paths are case-sensitive.
-**Does not cover:** whether any crawler obeys it, which no test can decide; the deployment's
-instance cap is what bounds one that does not.
+**Does not cover:** whether residential-proxy crawlers that spoof browser user-agents obey
+`/robots.txt` or `rel="nofollow"`; [filteredViewsShedLoad](#filteredviewsshedload) bounds their
+effect on the server.
+
+## crawlersEnforcedOnFilteredViews
+
+**Filtered views carry `X-Robots-Tag` and `rel="nofollow"`, reject self-identified crawlers on disallowed paths, and reject `&reg`-corrupted queries**
+
+Covers: [tech.crawlersSkipFilteredViews](../../../local/tech/delivery.md#crawlersskipfilteredviews)
+
+**Method:** inspect response headers on filtered and query-free pages; parse `<a>` elements on the
+home page; request disallowed paths (`/?...` and `/boundaries/...`) and allowed paths (`/`,
+`/species/amecro`, `/docs/using`, `/robots.txt`) with self-identified crawler, browser, uptime-check,
+and smoke-check user-agents; request a `&reg`-corrupted query (`/?pin=bulshe%C2%AEion%3DPalmyraAtoll`).
+
+**Assertions:** filtered home responses carry `X-Robots-Tag: noindex, nofollow`, while query-free
+pages (`/`, `/species/amecro`, `/docs/using`) do not; every `<a>` link to a query-string URL (`/?...`)
+on the home page carries `rel="nofollow"`, while links to species pages and guides do not;
+self-identified crawlers (`meta-externalagent/1.1`, `GPTBot`, `Bytespider`, etc.) receive `403` with
+`Cache-Control: no-store` and no `ETag` on `/?...` and `/boundaries/...`, and `200` on allowed
+query-free paths; normal browsers, `GoogleStackdriverMonitoring-UptimeChecks`, and
+`birdview-smoke/1.0` are not rejected; and `&reg`-corrupted queries return `400` with
+`Cache-Control: no-store` and no `ETag`.
+
+## filteredViewsShedLoad
+
+**Excess filtered home renders fail fast with 429 while query-free pages stay responsive**
+
+Covers: [tech.filteredViewsBounded](../../../local/tech/delivery.md#filteredviewsbounded)
+
+**Method:** hold an in-flight large render (`/?show=all`) and in-flight filtered renders (`/?by=...`)
+using the server's render hook (`onRender`), then issue concurrent filtered, large, redirect, and
+query-free requests; separately, run a token-bucket rate test with a controlled clock against
+`/?show=all` and `/?by=length`.
+
+**Assertions:** while the large-view slot is held, another `/?show=all` returns `429` with
+`Retry-After`, `Cache-Control: no-store`, and no `ETag`, while query-free pages (`/`,
+`/species/amecro`, `/docs/using`, `/robots.txt`), `/?month=now` (303), and `If-None-Match`
+revalidations (304) still succeed; while all filtered slots are held, another filtered view returns
+`429` while query-free pages still return `200`; once the held renders complete, subsequent filtered
+requests succeed; and when the rate burst is exhausted, further filtered or large renders return
+`429` until the clock advances enough to refill a token.
 
 ## stableUrlsKeepWorking
 

@@ -157,6 +157,7 @@ link use was retired ([decisions.inaturalistSourcesRetired](../../../decisions/d
 - [tech.crawlersSkipFilteredViews](../../../local/tech/delivery.md#crawlersskipfilteredviews)
 - [tech.datasetNeverCommitted](../../../local/tech/delivery.md#datasetnevercommitted)
 - [tech.fetchRestrictedInputs](../../../local/tech/delivery.md#fetchrestrictedinputs)
+- [tech.filteredViewsBounded](../../../local/tech/delivery.md#filteredviewsbounded)
 - [tech.goVersionFollowsDeps](../../../local/tech/delivery.md#goversionfollowsdeps)
 - [tech.imageRecordsRevision](../../../local/tech/release.md#imagerecordsrevision)
 - [tech.oneCanonicalHost](../../../local/tech/delivery.md#onecanonicalhost)

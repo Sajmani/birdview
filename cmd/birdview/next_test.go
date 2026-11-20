@@ -767,7 +767,7 @@ func TestNextAddedPastTheFirstIsDrawn(t *testing.T) {
 	two := "/?by=length&pin=fuwduc&pin=amecro"
 	p := nextAt(s, two)
 	_, body := get(t, s, two)
-	tokens := regexp.MustCompile(`id="(s-[a-z0-9]+)"|<p class="gap">([0-9]+) birds? hidden — <a href="([^"]+)">Show all</a></p>`).
+	tokens := regexp.MustCompile(`id="(s-[a-z0-9]+)"|<p class="gap">([0-9]+) birds? hidden — <a href="([^"]+)"(?: rel="nofollow")?>Show all</a></p>`).
 		FindAllStringSubmatch(body, -1)
 	if len(tokens) != nextCap+5 {
 		t.Fatalf("%s has %d tiles and gaps, want %d tiles and 3 gaps", two, len(tokens), nextCap+2)
@@ -1358,7 +1358,7 @@ func TestNextWelcomeLine(t *testing.T) {
 		t.Errorf("from a changed address, the birds around you now is %s with template %s; want every setting kept, then the region replaced and the month Now",
 			p.HereNowURL, p.HereNowTemplate)
 	}
-	links := regexp.MustCompile(`<a href="([^"]+)">([^<]+)</a>`).FindAllStringSubmatch(w[1], -1)
+	links := regexp.MustCompile(`<a href="([^"]+)"(?: rel="nofollow")?>([^<]+)</a>`).FindAllStringSubmatch(w[1], -1)
 	sizes := 0
 	for _, l := range links {
 		href, text := html.UnescapeString(l[1]), l[2]

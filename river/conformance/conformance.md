@@ -1045,6 +1045,26 @@ Gates: yes, in `go test ./...` (CI and image build)
 
 Watched failing: 2026-10-23, before the route existed, `GET /robots.txt` answered 404; with `Disallow: /*?` deleted, it reported each filtered view of the index as allowed.
 
+## app.crawlersEnforcedOnFilteredViews
+
+Criterion: [app.crawlersEnforcedOnFilteredViews](../requirements/composed/internal/app/acceptance.md#crawlersenforcedonfilteredviews)
+
+Guardrails: `cmd/birdview/guard_test.go:TestCrawlersEnforcedOnFilteredViews`
+
+Gates: yes, in `go test ./...` (CI and image build)
+
+Watched failing: 2026-11-20, against the code before `guard.go` and the template edits, every filtered view lacked `X-Robots-Tag`, every query-string link lacked `rel="nofollow"`, self-identified crawlers (`meta-externalagent`, `GPTBot`, `Bytespider`, `Scrapy`) received 200 on `/?...` and `/boundaries/...`, and `&reg`-corrupted queries returned 200.
+
+## app.filteredViewsShedLoad
+
+Criterion: [app.filteredViewsShedLoad](../requirements/composed/internal/app/acceptance.md#filteredviewsshedload)
+
+Guardrails: `cmd/birdview/guard_test.go:TestFilteredViewsShedLoad`
+
+Gates: yes, in `go test ./...` (CI and image build)
+
+Watched failing: 2026-11-20, against the code before `filteredGate` existed, concurrent `/?show=all` and a 3rd concurrent filtered view returned 200 instead of 429; with `tokenBucket.available`'s token check removed, requests past the large and filtered bursts returned 200 instead of 429.
+
 ## app.stableUrlsKeepWorking
 
 Criterion: [app.stableUrlsKeepWorking](../requirements/composed/internal/app/acceptance.md#stableurlskeepworking)

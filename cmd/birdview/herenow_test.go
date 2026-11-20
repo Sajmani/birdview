@@ -273,7 +273,7 @@ func TestWelcomeLine(t *testing.T) {
 	if end := strings.Index(list[3:], "\n## "); end >= 0 {
 		list = list[:end+3]
 	}
-	links := regexp.MustCompile(`<a href="([^"]+)">([^<]+)</a>`).FindAllStringSubmatch(welcome, -1)
+	links := regexp.MustCompile(`<a href="([^"]+)"(?: rel="nofollow")?>([^<]+)</a>`).FindAllStringSubmatch(welcome, -1)
 	if len(links) < 3 {
 		t.Fatalf("the welcome line has %d links", len(links))
 	}
