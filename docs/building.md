@@ -30,7 +30,9 @@ Everything the build needs is in the repository.
 | [Fox et al. 2026 wingspan database](https://doi.org/10.6084/m9.figshare.32089083) | CC BY 4.0 | the workbook, in [`third_party/foxwingspan/`](../third_party/foxwingspan) | measured wingspans |
 | [GBIF](https://www.gbif.org): the [eBird Observation Dataset](https://doi.org/10.15468/aomfnb) and the [iNaturalist research-grade observations](https://doi.org/10.15468/ab3s5x) | CC BY 4.0 (eBird); CC BY-NC 4.0 (iNaturalist), usable because BirdView is non-commercial | only tables BirdView derives, under `data/`; never a record | where each bird recurs, the regions, how common it is |
 | [iNaturalist](https://www.inaturalist.org) terms, retired | © iNaturalist | the terms, in [`third_party/inatterms/`](../third_party/inatterms) and [`third_party/inatapi/`](../third_party/inatapi) | nothing since 2026-11-01; kept as the record of an earlier link |
-| [Natural Earth](https://www.naturalearthdata.com/) 1:10m states and provinces | public domain | the derived `data/region-boundaries.json`; the source is fetched by hash only to regenerate it | the Here button |
+| [Natural Earth](https://www.naturalearthdata.com/) 1:10m states and provinces | public domain | the derived `data/region-boundaries.json`; the source is fetched by hash only to regenerate it | the Here button (stage 1) |
+| [U.S. Census Bureau](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html) 2021 1:5m county boundaries | public domain (17 U.S.C. § 105) | the derived `data/county-boundaries/USA.*.json.gz`; the source is fetched by hash only to regenerate it | the Here button (US counties under `-counties`) |
+| [Statistics Canada](https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/boundary-limites/index2021-eng.cfm?year=21) 2021 census division boundaries | [Statistics Canada Open Licence](https://www.statcan.gc.ca/en/terms-conditions/open-licence) | the derived `data/county-boundaries/CAN.*.json.gz`; the source is fetched by hash only to regenerate it | the Here button (Canadian census divisions under `-counties`) |
 | [WCAG 2.2](https://www.w3.org/TR/2024/REC-WCAG22-20241212/) | W3C Document License | the Recommendation, in [`third_party/wcag/`](../third_party/wcag) | the accessibility rules BirdView meets, quoted |
 
 **Nothing under `third_party/` is covered by BirdView's Apache 2.0 license.** Each directory has
@@ -111,7 +113,7 @@ commit it. [How BirdView's data is built](pipeline.md) diagrams them and the ing
 | `birdview-gbifmap` | `data/gbif-taxa.tsv`: GBIF backbone name → AviList name | ~5 min, ~2,800 requests |
 | `birdview-regions` | `data/region-presence.tsv`: which regions each species occurs in; with `-counties <download.zip> -state <GADM code>` (or `-state all`), `data/county-presence/<state>.tsv.gz` for each state from a recorded GBIF download, gzipped (decisions.countyTablesCompressed) | one facet query per region, resumable; none for counties |
 | `birdview-status` | `data/status.tsv`: BirdView's own occurrence status per species | two passes, resumable |
-| `birdview-boundaries` | `data/region-boundaries.json`: region outlines for the Here button, from Natural Earth | one ~15 MB download, hash-checked |
+| `birdview-boundaries` | `data/region-boundaries.json` (Natural Earth states, provinces, islands, and sea boxes); with `-counties`, `data/county-boundaries/<state>.json.gz` (U.S. Census 2021 counties and Statistics Canada 2021 census divisions) | one ~15 MB download (state/province), or ~2.7 MB + ~140 MB archives (`-counties`), hash-checked |
 | `birdview-sea` | `data/sea-distance.tsv`: each species' eBird records on water by distance from shore, from the offshore-cells GBIF download and Natural Earth's land | ~2 min; two ~3.5 MB downloads, hash-checked and cached; needs the download under `fetched/gbif/` and a built dataset |
 
 `birdview-names` and `birdview-regions` read the built dataset, so run the ingest first.

@@ -582,6 +582,52 @@ license forbids redistribution, and the boundaries are sent to every reader's br
 
 ---
 
+## `us-census-boundaries`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | https://www.census.gov/programs-surveys/geography/technical-documentation/naming-convention/cartographic-boundary-file.html — archive at `https://www2.census.gov/geo/tiger/GENZ2021/shp/cb_2021_us_county_5m.zip` |
+| **Version** | 2021 Cartographic Boundary Files, 1:5,000,000 scale |
+| **Integrity** | [river/requirements/imported/census.gov/cartographic-boundaries/PROVENANCE.md](../imported/census.gov/cartographic-boundaries/PROVENANCE.md) |
+| **Tier** | mandatory (copyright), though a public-domain source imposes nothing |
+| **Import style** | By reference, **pinned by hash, not vendored**: `cmd/birdview-boundaries -counties` reads the archive, checks its SHA-256, and writes `data/county-boundaries/USA.*.json.gz` ([tech.regionBoundaries](../local/tech/delivery.md#regionboundaries)) |
+| **Scope** | US county boundaries for Here's second-stage lookup ([product.hereSelectsLocalRegion](../local/product/filtering.md#hereselectslocalregion), [decisions.herePinpointsCountyTwoStage](../decisions/decisions.md#herepinpointscountytwostage)) |
+| **Adopted parts** | County and county-equivalent polygons for the 50 US states and DC, mapped to GADM 4.1 level-2 codes |
+| **Exclusions** | Territories outside BirdView's scope (Puerto Rico, US Virgin Islands, Guam, American Samoa, Northern Mariana Islands) |
+| **Owner** | U.S. Census Bureau |
+| **Status** | **Adopted 2026-11-21.** Retrieved, hashed, and matched to all US land counties; credited in the footer. |
+
+Public domain as a U.S. Government work under 17 U.S.C. § 105. The Census Bureau requests source
+attribution and notes that *TIGER/Line®* and *Census TIGER®* are registered trademarks (not used in
+BirdView's name) and that cartographic boundary files are statistical, not legal, descriptions.
+
+---
+
+## `statcan-boundaries`
+
+| Field | Value |
+| --- | --- |
+| **Origin** | https://www.statcan.gc.ca/en/subjects/standard/geography/boundary-files — archive `lcd_000b21a_e.zip` |
+| **Version** | 2021 Census – Boundary files (Census divisions) |
+| **Integrity** | [river/requirements/imported/statcan.gc.ca/census-divisions/PROVENANCE.md](../imported/statcan.gc.ca/census-divisions/PROVENANCE.md) |
+| **Tier** | mandatory (licence) |
+| **Import style** | By reference, **pinned by hash, not vendored**: `cmd/birdview-boundaries -counties` reads the archive from `fetched/`, checks its SHA-256, inverse-projects from `NAD83_Statistics_Canada_Lambert` (EPSG:3347), and writes `data/county-boundaries/CAN.*.json.gz` ([tech.regionBoundaries](../local/tech/delivery.md#regionboundaries)) |
+| **Scope** | Canadian census-division boundaries for Here's second-stage lookup ([product.hereSelectsLocalRegion](../local/product/filtering.md#hereselectslocalregion), [decisions.herePinpointsCountyTwoStage](../decisions/decisions.md#herepinpointscountytwostage)) |
+| **Adopted parts** | All 293 Canadian census divisions, mapped to GADM 4.1 level-2 codes |
+| **Exclusions** | None |
+| **Owner** | Statistics Canada |
+| **Status** | **Adopted 2026-11-21.** Retrieved, hashed, and matched; verbatim attribution carried in the home page footer. |
+
+Licensed under the [Statistics Canada Open Licence](https://www.statcan.gc.ca/en/terms-conditions/open-licence)
+(modified 2025-07-10, read 2026-11-21): worldwide, royalty-free, non-exclusive licence to use,
+reproduce, publish, freely distribute, or sell Value-added Products. Required verbatim attribution
+for Value-added Products:
+
+> "Adapted from Statistics Canada, 2021 Census – Boundary files (Census divisions), 2021. This does
+> not constitute an endorsement by Statistics Canada of this product."
+
+---
+
 ## `bbl`
 
 | Field | Value |

@@ -1594,3 +1594,21 @@ Guardrails: `river/check/deadcode_test.go:TestNoUnreachableCode`
 Gates: yes, in `go test ./...` (CI)
 
 Watched failing: 2026-11-10, both against the codebase before cleanup (`gbif.Load`, `gbif.validTier`, `gbif.Client.CountInBox`, `gbif.Client.CountOffLandInBox`, `morphology.IsFamily`, `morphology.Review.Write`, `trait.GroupOf`, and `wingspan.publishedPredictions` in a non-test file) and by planting `unusedCascadeProbe` in `internal/trait/trait.go` (`1 unreachable function(s) in non-test code: birdview/internal/trait.unusedCascadeProbe`).
+
+## app.herePinpointsCounty
+
+Criterion: [app.herePinpointsCounty](../requirements/composed/internal/app/acceptance.md#herepinpointscounty)
+
+Guardrails: `cmd/birdview-boundaries/counties_test.go:TestCountyBoundariesCoverageAndKnownPoints`;
+  `cmd/birdview/county_here_test.go:TestCountyBoundaryRoute`;
+  `cmd/birdview/county_here_test.go:TestFooterCreditsCountyBoundaries`;
+  `cmd/birdview/county_here_test.go:TestHerePinpointsCountyInTheBrowser`
+
+Gates: yes, in `go test ./...` (CI and image build; browser check skips without Chrome)
+
+Watched failing: 2026-11-21, across 5 mutations:
+- zeroing latitude in `lambertToLonLat` failed `TestLambertInverseKnownCities` on all 7 Canadian cities;
+- replacing `data/county-boundaries/USA.33_1.json.gz` with empty rings failed `TestCountyBoundariesCoverageAndKnownPoints` on all 62 NY land counties and Brooklyn (`stage 2 = "", want "USA.33.24_1"`);
+- changing `Cache-Control` on `/boundaries/<hash>/<state>.json` to `no-store` failed `TestCountyBoundaryRoute` (`Cache-Control = "no-store", want immutable`);
+- removing the Statistics Canada attribution from `web/static/next.html` failed `TestFooterCreditsCountyBoundaries` on both verbatim sentences;
+- skipping stage 2 in `web/static/here.js` failed `TestHerePinpointsCountyInTheBrowser/Here_in_Kings_NY` (`navigated to pages [/?by=mass&month=May /?by=mass&month=May&region=USA.33_1], want /?by=mass&month=May&region=USA.33.24_1` and `fetched county boundaries [], want only [/boundaries/.../USA.33_1.json]`).

@@ -128,7 +128,7 @@
         {{if .HereURL}}{{/* here.js finds the reader's region in the browser and
              asks for this address with it, as choosing it by hand would
              (product.hereSelectsLocalRegion, product.locationStaysInBrowser). */}}<button type="button" class="btn here act" aria-disabled="true"
-          data-template="{{.HereURL}}" data-boundaries="{{.Boundaries}}"
+          data-template="{{.HereURL}}" data-boundaries="{{.Boundaries}}"{{with .CountyBoundaries}} data-county-boundaries="{{.}}"{{end}}
           title="Here needs JavaScript and permission to use your location">Here</button>{{end}}
         {{range .Selected}}{{template "choice" .}}
         {{end}}{{if .HereURL}}<span class="herestatus" role="status" aria-live="polite"></span>{{end}}</div>{{end}}
@@ -219,9 +219,14 @@
       <a href="https://doi.org/10.6084/m9.figshare.32089083">doi:10.6084/m9.figshare.32089083</a>,
       licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
       Only empirical wingspans are used; the rest are modeled.</li>
-    <li><b>Region boundaries and coastlines</b> &mdash; Made with
-      <a href="https://www.naturalearthdata.com/">Natural Earth</a>, in the public domain.
-      Used by the Here button, in your browser, and to measure each record's distance from shore.</li>
+    <li><b>Region boundaries and coastlines</b> &mdash; State, province, island, and sea coastlines
+      made with <a href="https://www.naturalearthdata.com/">Natural Earth</a>, in the public domain,
+      used by the Here button, in your browser, and to measure each record's distance from shore.
+      County boundaries from the
+      <a href="https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html">U.S. Census Bureau</a>
+      (2021 Cartographic Boundary Files, public domain).
+      Adapted from Statistics Canada, 2021 Census – Boundary files (Census divisions), 2021.
+      This does not constitute an endorsement by Statistics Canada of this product.</li>
     <li><b>Names, families, and species codes</b> &mdash; AviList Core Team (2026).
       <i>AviList: The Global Avian Checklist, v2025b.</i>
       <a href="https://doi.org/10.2173/avilist.v2025b">doi:10.2173/avilist.v2025b</a>,

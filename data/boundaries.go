@@ -17,10 +17,17 @@
 // read from disk and are not embedded.
 package data
 
-import _ "embed"
+import "embed"
 
 // Boundaries is region-boundaries.json, written by cmd/birdview-boundaries
 // (tech.regionBoundaries).
 //
 //go:embed region-boundaries.json
 var Boundaries []byte
+
+// CountyBoundaries holds the per-state gzipped county and census-division
+// boundary files under county-boundaries/<state>.json.gz, written by
+// cmd/birdview-boundaries -counties (tech.regionBoundaries).
+//
+//go:embed county-boundaries/*.json.gz
+var CountyBoundaries embed.FS

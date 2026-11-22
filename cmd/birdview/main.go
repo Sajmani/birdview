@@ -175,6 +175,11 @@ type server struct {
 	// carries the file's hash, so it can be cached for a year
 	// (tech.regionBoundaries, decisions.hereAndNowCaching).
 	boundaryURL string
+	// countyBoundaryPrefix is "/boundaries/<hash>/" when -counties is enabled,
+	// serving per-state county/census-division boundaries for Here's second
+	// stage (decisions.herePinpointsCountyTwoStage, tech.regionBoundaries).
+	// Empty without -counties.
+	countyBoundaryPrefix string
 	// ds is what the home page draws: every species except the exotics
 	// (product.escapedBirdsListed). all is the whole dataset, for the detail pages and the lists
 	// that must name every bird.
@@ -381,8 +386,33 @@ func fingerprint(ds *dataset.Dataset, counties *countyView) (string, error) {
 	// The counties' file, by its hash, when they are served: a county's page changes with them.
 	if counties != nil {
 		fmt.Fprintf(h, "counties\x00%s\x00", counties.c.Sum())
+		csum, err := countyBoundariesHash()
+		if err != nil {
+			return "", err
+		}
+		fmt.Fprintf(h, "county-boundaries\x00%s\x00", csum)
 	}
 	return hex.EncodeToString(h.Sum(nil)[:16]), nil
+}
+
+// countyBoundariesHash returns a 16-hex-character content hash over all
+// embedded per-state county boundary files.
+func countyBoundariesHash() (string, error) {
+	paths, err := fs.Glob(data.CountyBoundaries, "county-boundaries/*.json.gz")
+	if err != nil {
+		return "", err
+	}
+	sort.Strings(paths)
+	h := sha256.New()
+	for _, p := range paths {
+		b, err := fs.ReadFile(data.CountyBoundaries, p)
+		if err != nil {
+			return "", err
+		}
+		fmt.Fprintf(h, "%s\x00%d\x00", p, len(b))
+		h.Write(b)
+	}
+	return hex.EncodeToString(h.Sum(nil)[:8]), nil
 }
 
 // gzipPool reuses compressors. A gzip.Writer carries a ~64 KiB window and a
@@ -662,6 +692,13 @@ func newServer(ds *dataset.Dataset, counties *dataset.Counties) (*server, error)
 	}
 	sum := sha256.Sum256(data.Boundaries)
 	s.boundaryURL = "/boundaries/" + hex.EncodeToString(sum[:8]) + ".json"
+	if counties != nil {
+		csum, err := countyBoundariesHash()
+		if err != nil {
+			return nil, err
+		}
+		s.countyBoundaryPrefix = "/boundaries/" + csum + "/"
+	}
 	s.routes = []route{
 		{"/static/", http.StripPrefix("/static/", staticFiles(assets))},
 		{"/added", http.HandlerFunc(s.added)},
@@ -1811,17 +1848,42 @@ const hereSlot = "__REGION__"
 // in the welcome line's template, as the month= value.
 const nowSlot = "__MONTH__"
 
-// boundaries serves the region boundary file at its hashed URL, and only
-// there. The URL changes whenever the file does, so it is cached for a year
-// (tech.cacheLifetimeStated's one exception).
+// stateSlot is the placeholder here.js replaces with a state or province GADM
+// ID when fetching its county boundaries (decisions.herePinpointsCountyTwoStage).
+const stateSlot = "__STATE__"
+
+// boundaries serves the region boundary file at its hashed URL, and — when
+// -counties is enabled — each state's county boundary file under its hashed
+// prefix. The URL changes whenever the files do, so they are cached for a year
+// (tech.cacheLifetimeStated's one exception, tech.regionBoundaries).
 func (s *server) boundaries(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != s.boundaryURL {
-		http.NotFound(w, r)
+	if r.URL.Path == s.boundaryURL {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		w.Write(data.Boundaries)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
-	w.Write(data.Boundaries)
+	if s.countyBoundaryPrefix != "" && strings.HasPrefix(r.URL.Path, s.countyBoundaryPrefix) {
+		rest := strings.TrimPrefix(r.URL.Path, s.countyBoundaryPrefix)
+		state, ok := strings.CutSuffix(rest, ".json")
+		if ok && state != "" && !strings.Contains(state, "/") {
+			gzBytes, err := fs.ReadFile(data.CountyBoundaries, "county-boundaries/"+state+".json.gz")
+			if err == nil {
+				gr, err := gzip.NewReader(bytes.NewReader(gzBytes))
+				if err == nil {
+					defer gr.Close()
+					raw, err := io.ReadAll(gr)
+					if err == nil {
+						w.Header().Set("Content-Type", "application/json")
+						w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+						w.Write(raw)
+						return
+					}
+				}
+			}
+		}
+	}
+	http.NotFound(w, r)
 }
 
 // robotsPolicy asks crawlers to skip every URL with a query string, which is
