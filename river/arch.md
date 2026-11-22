@@ -14,7 +14,7 @@ cmd/birdview             serves it on localhost, rendering HTML server-side
 cmd/birdview-status      generator: data/status.tsv, BirdView's own occurrence status (the scope)
 cmd/birdview-regions     generator: data/region-presence.tsv, per-region and per-month presence
 cmd/birdview-gbifmap     generator: data/gbif-taxa.tsv, the GBIF -> AviList name bridge
-cmd/birdview-boundaries  generator: data/region-boundaries.json, from Natural Earth
+cmd/birdview-boundaries  generator: data/region-boundaries.json (Natural Earth) and data/county-boundaries/ (U.S. Census + StatCan)
 cmd/birdview-names       generator: data/source-names.tsv; only a test reads it
 cmd/birdview-smoke       checks a running deployment from outside, after each deploy
 internal/avilist         names, families, orders, sequence, and eBird codes from AviList
@@ -34,7 +34,7 @@ internal/view            ordering, sectioning, scale, and diagram geometry; pure
 internal/xlsx            the standard-library workbook reader behind the three source readers
 internal/smoke           the post-deploy checks; a package so the server's tests can run them
 web/static/              embedded templates (shared.html holds the tile and diagram), CSS, scripts, favicon
-data/                    the committed generated tables; region-boundaries.json is embedded
+data/                    the committed generated tables; region-boundaries.json and county-boundaries/ are embedded
 docs/                    the guides, embedded and served at /docs
 .github/workflows/       CI: the standing checks on every push and pull request
 Dockerfile               ingest, test, build; the test stage gates every image
@@ -55,8 +55,11 @@ interaction, which is unnoticeable on localhost.
 ([product.nextView](requirements/local/product/presentation.md#nextview)). The first is `here.js`,
 behind Here in the Place setting and the welcome line's `#here-and-now`. It looks up the reader's
 region in the browser so their position never reaches the server
-([product.locationStaysInBrowser](requirements/local/product/filtering.md#locationstaysinbrowser)),
-and a test holds it to the Go lookup in `internal/boundary`.
+([product.locationStaysInBrowser](requirements/local/product/filtering.md#locationstaysinbrowser)):
+stage 1 tests the preloaded `region-boundaries.json` (states, provinces, islands, seas), and under
+`-counties` stage 2 fetches `/boundaries/<hash>/<state>.json` to pinpoint the county or census
+division locally ([decisions.herePinpointsCountyTwoStage](requirements/decisions/decisions.md#herepinpointscountytwostage)).
+Tests hold it to the Go lookup in `internal/boundary`.
 
 The second is `next-find.js`, which counts and lists the birds the find box matches as the reader
 types, each with its pin. It reads each bird's search text from `/birds.json`, which the server

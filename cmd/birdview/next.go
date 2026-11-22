@@ -104,8 +104,10 @@ type nextControl struct {
 	// (product.chooseOneSettings).
 	One bool
 	// HereURL is this address with the region a placeholder for here.js to
-	// fill, and Boundaries the file it looks the region up in; Place only.
-	HereURL, Boundaries string
+	// fill, Boundaries the file it looks the state/province up in, and
+	// CountyBoundaries (under -counties) the per-state county boundary URL
+	// template; Place only.
+	HereURL, Boundaries, CountyBoundaries string
 	// Open starts the setting's <details> open (used when a no-JS place= search ran).
 	Open bool
 	// Selected holds the currently chosen places as removable chips at the top
@@ -903,6 +905,9 @@ func (s *server) nextPage(r *http.Request) nextData {
 			hq.Set("region", hereSlot)
 			page.Controls[i].HereURL = strings.Replace(string(nextURL(hq)), url.QueryEscape(hereSlot), hereSlot, 1)
 			page.Controls[i].Boundaries = s.boundaryURL
+			if s.countyBoundaryPrefix != "" {
+				page.Controls[i].CountyBoundaries = s.countyBoundaryPrefix + stateSlot + ".json"
+			}
 		}
 	}
 	hn := cloneValues(q)

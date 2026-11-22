@@ -1041,6 +1041,35 @@ and a headless Chrome test holding `next-place.js` to the server's matcher and t
    matches and toggle links as `next-place.js` produces in headless Chrome from `/places.json`.
    `/places.json` is never gated by the filtered-view rate limiter.
 
+## herePinpointsCounty
+
+**With -counties enabled, Here resolves state first and then fetches that state's county boundaries to pinpoint the county**
+
+Covers: [product.hereSelectsLocalRegion](../../../local/product/filtering.md#hereselectslocalregion), [product.locationStaysInBrowser](../../../local/product/filtering.md#locationstaysinbrowser), [tech.regionBoundaries](../../../local/tech/delivery.md#regionboundaries)
+
+**Method:** unit tests over the committed per-state county boundary files and inverse Lambert
+projection, HTTP route tests, and a headless Chrome test driving Here and `#here-and-now`
+
+**Assertions:**
+
+1. **All 64 states and provinces covered and small.** Every US state/DC and Canadian
+   province/territory has a committed `data/county-boundaries/<state>.json.gz`, each under 200 KB
+   compressed, and known coordinates (Brooklyn/Kings NY, Los Angeles CA, San Antonio/Bexar TX,
+   Chicago/Cook IL, Toronto ON, Montréal QC, Vancouver BC, Halifax NS) resolve to their exact GADM
+   county/census-division IDs.
+2. **Immutable per-state route.** `/boundaries/<hash>/<state>.json` answers 200 with
+   `Cache-Control: public, max-age=31536000, immutable` when `-counties` is enabled (404 for
+   unknown state, wrong hash, or without `-counties`; 403 for disallowed crawlers under
+   `/boundaries/`).
+3. **Two-stage browser lookup.** In headless Chrome with `-counties`, pressing Here (and arriving
+   via `#here-and-now`) at coordinates in Kings NY, Los Angeles CA, and Montréal QC requests only
+   that state's county boundary file and navigates to `/?region=USA.33.24_1`,
+   `/?region=USA.5.19_1`, and `/?region=CAN.11.20_1`; a point inside a state's border but outside
+   county polygons falls back to the state; without `-counties`, Here stops at the state and
+   requests no county file.
+4. **Required attribution.** The home page footer credits the U.S. Census Bureau and carries
+   Statistics Canada's verbatim Value-added Product notice.
+
 ## everydayDefinitionsShown
 
 **Every measurement says what it is before where it came from, in the requirement's own words**

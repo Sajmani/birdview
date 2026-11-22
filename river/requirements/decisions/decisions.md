@@ -5739,3 +5739,46 @@ and disambiguated county one step away while scaling to worldwide regions later.
 provinces, islands, and seas in a collapsed browse disclosure keeps the popover compact on a phone
 while letting readers discover seas and outlying islands they would not think to type.
 
+---
+
+## herePinpointsCountyTwoStage
+
+**With -counties enabled, Here resolves state first from the preloaded boundary file, then fetches that state's county boundaries to pinpoint the county**
+
+Date: 2026-11-21
+
+Decided by: Sameer
+
+Status: accepted
+
+Affects: [product.hereSelectsLocalRegion](../local/product/filtering.md#hereselectslocalregion), [product.locationStaysInBrowser](../local/product/filtering.md#locationstaysinbrowser), [tech.regionBoundaries](../local/tech/delivery.md#regionboundaries)
+
+### Decided
+
+1. **Two-stage lookup in the browser.** Every home page still preloads `region-boundaries.json`
+   (158 KB compressed, under the 200 KB cap) to resolve state, province, atoll, or sea locally. When
+   `-counties` is enabled and Here (or `#here-and-now`) resolves a land region that has county
+   boundaries, `here.js` fetches that single state's immutable county boundary file
+   (`/boundaries/<hash>/<state>.json`), resolves the county locally in the browser, and navigates
+   to `/?region=<county>`. If the position falls outside county polygons (such as on coastal water
+   or a Great Lake) or the county file fails to load, Here falls back to the state. Without
+   `-counties`, Here stops at stage 1 and requests no county file.
+2. **Privacy trade-off.** Exact coordinates still never leave the browser and are never sent,
+   stored, or logged. Fetching `/boundaries/<hash>/<state>.json` on Here press does reveal to the
+   server that Here was used and which state the reader is in; this is an accepted narrowing of
+   [product.locationStaysInBrowser](../local/product/filtering.md#locationstaysinbrowser), because milliseconds later Here navigates to
+   `/?region=<county>` (which already names the county and state), and per-state files keep the
+   landing page under 200 KB and scale to worldwide counties.
+3. **Sources.** US county boundaries come from the U.S. Census Bureau 2021 1:5m Cartographic
+   Boundary File (public domain); Canadian census-division boundaries come from Statistics Canada's
+   2021 Census Division Cartographic Boundary File (Statistics Canada Open Licence, with the
+   required verbatim credit in BirdView's footer). Both are pinned by SHA-256 and never committed;
+   their derived per-state files (`data/county-boundaries/*.json.gz`) are committed and embedded.
+
+### Why
+
+Preloading all 3,441 US and Canadian counties on every home page would blow past
+[tech.regionBoundaries](../local/tech/delivery.md#regionboundaries)'s 200 KB cap and cannot scale worldwide. Two-stage lookup adds zero bytes
+to normal page loads, transfers only ~5–30 KB on a Here press (cached immutable for a year), keeps
+exact coordinates in the browser, and extends directly to any country added later.
+

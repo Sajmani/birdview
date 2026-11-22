@@ -16,9 +16,15 @@
  *
  * Find the region the reader is in, here in the browser, and ask for the
  * page with that region selected -- the same request choosing it by hand
- * would make. The position is never sent anywhere, and the boundary file is
- * fetched on every page load, pressed or not, so the server cannot even tell
- * that Here was used (product.locationStaysInBrowser).
+ * would make. Exact coordinates are never sent anywhere, and the state/province
+ * boundary file is fetched on every page load, pressed or not
+ * (product.locationStaysInBrowser).
+ *
+ * Under -counties (decisions.herePinpointsCountyTwoStage), once stage 1
+ * resolves a US state or Canadian province locally, Here fetches that one
+ * state's immutable county boundary file and resolves the county locally in
+ * the browser, falling back to the state if the point lies outside county
+ * polygons or the file fails to load.
  *
  * The lookup mirrors internal/boundary's Lookup: land rings by the even-odd
  * rule, in file order, then the sea boxes. TestHereInTheBrowser holds the
@@ -45,8 +51,8 @@
 
   // Decoded once: each ring to a flat [lon, lat, lon, lat, ...] array in
   // degrees, with the region's bounding box to skip most of them quickly.
-  function decode(f) {
-    land = f.land.map(function (l) {
+  function decodeRings(list) {
+    return (list || []).map(function (l) {
       var rings = [], box = [Infinity, -Infinity, Infinity, -Infinity];
       l.rings.forEach(function (enc) {
         var pts = new Float64Array(enc.length), x = 0, y = 0;
@@ -62,7 +68,11 @@
       });
       return { region: l.region, rings: rings, box: box };
     });
-    sea = f.sea;
+  }
+
+  function decode(f) {
+    land = decodeRings(f.land);
+    sea = f.sea || [];
   }
 
   function inRing(pts, lat, lon) {
@@ -76,9 +86,9 @@
     return inside;
   }
 
-  function lookup(lat, lon) {
-    for (var k = 0; k < land.length; k++) {
-      var l = land[k], b = l.box;
+  function lookupLand(list, lat, lon) {
+    for (var k = 0; k < list.length; k++) {
+      var l = list[k], b = l.box;
       if (lat < b[0] || lat > b[1] || lon < b[2] || lon > b[3]) continue;
       var inside = false;
       for (var r = 0; r < l.rings.length; r++) {
@@ -86,6 +96,12 @@
       }
       if (inside) return l.region;
     }
+    return "";
+  }
+
+  function lookup(lat, lon) {
+    var hit = lookupLand(land, lat, lon);
+    if (hit) return hit;
     for (var s = 0; s < sea.length; s++) {
       var x = sea[s].box;
       if (lat >= x[0] && lat <= x[1] && lon >= x[2] && lon <= x[3]) return sea[s].region;
@@ -93,12 +109,48 @@
     return "";
   }
 
+  var countyTemplate = here.getAttribute("data-county-boundaries");
+  var countyCache = {};
+  function loadCounties(state) {
+    if (!countyCache[state]) {
+      var url = countyTemplate.replace("__STATE__", encodeURIComponent(state));
+      countyCache[state] = fetch(url).then(function (r) {
+        if (!r.ok) return null;
+        return r.json().then(function (f) { return decodeRings(f.land); });
+      }).catch(function () { return null; });
+    }
+    return countyCache[state];
+  }
+
+  function resolve(lat, lon) {
+    return ready.then(function () {
+      var landSlug = lookupLand(land, lat, lon);
+      if (landSlug) {
+        if (!countyTemplate || !(landSlug.indexOf("USA.") === 0 || landSlug.indexOf("CAN.") === 0)) {
+          return landSlug;
+        }
+        return loadCounties(landSlug).then(function (counties) {
+          return (counties && lookupLand(counties, lat, lon)) || landSlug;
+        });
+      }
+      for (var s = 0; s < sea.length; s++) {
+        var x = sea[s].box;
+        if (lat >= x[0] && lat <= x[1] && lon >= x[2] && lon <= x[3]) return sea[s].region;
+      }
+      return "";
+    });
+  }
+
   var ready = fetch(here.getAttribute("data-boundaries"))
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(decode);
   ready.catch(function () {});
 
-  window.BirdViewHere = { ready: ready, lookup: function (lat, lon) { return lookup(lat, lon); } };
+  window.BirdViewHere = {
+    ready: ready,
+    lookup: function (lat, lon) { return lookup(lat, lon); },
+    resolve: resolve
+  };
 
   if (!("geolocation" in navigator)) {
     here.title = "Here needs a browser that can share your location";
@@ -128,8 +180,7 @@
       };
       tell("Finding where you are\u2026");
       navigator.geolocation.getCurrentPosition(function (pos) {
-        ready.then(function () {
-          var slug = lookup(pos.coords.latitude, pos.coords.longitude);
+        resolve(pos.coords.latitude, pos.coords.longitude).then(function (slug) {
           if (!slug) {
             tell("You are outside every region BirdView covers, so the page is unchanged.");
             return;
@@ -152,8 +203,7 @@
   here.addEventListener("click", function () {
     say("Finding where you are\u2026");
     navigator.geolocation.getCurrentPosition(function (pos) {
-      ready.then(function () {
-        var slug = lookup(pos.coords.latitude, pos.coords.longitude);
+      resolve(pos.coords.latitude, pos.coords.longitude).then(function (slug) {
         if (!slug) {
           say("You are outside every region BirdView covers, so the regions are unchanged.");
           return;

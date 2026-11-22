@@ -133,7 +133,10 @@ Subject: `presentation.region_filter.here`
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
 A **Here** button in the home page's Place setting replaces the region selection with the one
-region the reader is in, every other setting kept. If the reader refuses permission, their location cannot
+region the reader is in, every other setting kept. When `-counties` is enabled and the reader's
+state or province has county boundaries, Here narrows to the county or census division the reader
+is in (falling back to the state or province if the position falls outside county polygons;
+[decisions.herePinpointsCountyTwoStage](../../decisions/decisions.md#herepinpointscountytwostage)). If the reader refuses permission, their location cannot
 be found, or it falls in no region BirdView covers, the page says which of the three happened and
 leaves the region selection unchanged.
 
@@ -184,12 +187,11 @@ Subject: `privacy.location`
 Goals: [goals.readerPrivacy](../../../goals/goals.md#readerprivacy)
 
 The reader's position is used only inside the browser to choose a region, and is never sent,
-stored, or logged. The region boundaries load with every home page whether or not Here is
-pressed, and pressing Here produces exactly the request that choosing that region by hand would.
-
-So the server cannot tell that Here was used, let alone where the reader is. Loading the
-boundaries only when Here is pressed would leak the first; sending the position to the server
-would leak both.
+stored, or logged. The state, province, island, and sea boundaries load with every home page
+whether or not Here is pressed. Under `-counties`, once Here resolves a state or province locally,
+the browser fetches that one state's county boundary file to resolve the county locally
+([decisions.herePinpointsCountyTwoStage](../../decisions/decisions.md#herepinpointscountytwostage)); exact coordinates still never leave the browser, and
+pressing Here produces the same page request that choosing that county by hand would.
 
 ## searchBox
 

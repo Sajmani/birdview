@@ -477,9 +477,11 @@ in `species.json`. The server also finds species drawn from the same AVONET row,
 provenance, and notes the shared measurements on both.
 
 `birdview-boundaries` sits outside this pipeline. It writes `data/region-boundaries.json`, the
-region outlines the Here button tests a reader's position against, from Natural Earth's states and
-provinces and BirdView's own sea boxes. The server reads it directly; nothing in the dataset
-depends on it.
+state, province, island, and sea outlines the Here button tests a reader's position against (from
+Natural Earth and BirdView's own sea boxes), and with `-counties` writes
+`data/county-boundaries/<state>.json.gz`, the per-state county and census-division outlines (from
+the U.S. Census Bureau and Statistics Canada) used for Here's second-stage lookup under `-counties`.
+The server embeds and serves them directly; nothing in the dataset depends on them.
 
 ## Where to go next
 

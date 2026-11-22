@@ -23,8 +23,9 @@
 // cannot drift.
 //
 //	birdview-boundaries [-archive ne_10m_admin_1_states_provinces.zip] [-out data/region-boundaries.json]
+//	birdview-boundaries -counties -us-archive fetched/cb_2021_us_county_5m.zip -can-archive fetched/lcd_000b21a_e.zip
 //
-// Without -archive it downloads the archive.
+// Without -archive (or -us-archive) it downloads the archive.
 package main
 
 import (
@@ -70,7 +71,19 @@ func main() {
 	archive := flag.String("archive", "", "the Natural Earth archive; downloaded if empty")
 	out := flag.String("out", "data/region-boundaries.json", "where to write the boundary file")
 	tolerance := flag.Int("tolerance", 4, "simplification tolerance, in thousandths of a degree on the ground (4 is about 450 m)")
+	counties := flag.Bool("counties", false, "generate per-state county/census-division boundary files instead of region-boundaries.json")
+	usArchive := flag.String("us-archive", "", "the U.S. Census 2021 1:5m county archive (cb_2021_us_county_5m.zip); downloaded if empty")
+	canArchive := flag.String("can-archive", "", "the Statistics Canada 2021 census division archive (lcd_000b21a_e.zip)")
+	countyPresence := flag.String("county-presence", "data/county-presence", "directory of per-state GADM county presence tables")
+	outDir := flag.String("out-dir", "data/county-boundaries", "directory to write per-state county boundary files")
 	flag.Parse()
+
+	if *counties {
+		if err := runCounties(*usArchive, *canArchive, *countyPresence, *outDir, int32(*tolerance)); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 
 	zipBytes, err := load(*archive)
 	if err != nil {
