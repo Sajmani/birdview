@@ -118,9 +118,9 @@
   var welcome = document.querySelector(".welcomestatus[data-template]");
   function asked() { return new URLSearchParams(location.hash.slice(1)).has("here-and-now"); }
   if (welcome) {
-    // The page names where a region is chosen by hand, its Region setting;
+    // The page names where a region is chosen by hand, its Place setting;
     // a failure leaves the page as it was.
-    var where = welcome.getAttribute("data-where") || "Region";
+    var where = welcome.getAttribute("data-where") || "Place";
     var arrive = function () {
       var tell = function (text) {
         welcome.textContent = text;

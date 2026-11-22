@@ -117,8 +117,7 @@ the continent, in the steps the frequency tiers use ([orderByFrequency](presenta
 `freq=100`, `freq=1000`, or `freq=10000`; any other value is ignored. The setting is named for what
 it measures, reports, not birds present or individuals counted
 ([decisions.reportingFrequencyParam](../../decisions/decisions.md#reportingfrequencyparam)). The page's heading names
-it ("· At least 1 in 1,000"), and the setting follows Region (and County, where shown) on the count
-line.
+it ("· At least 1 in 1,000"), and the setting follows Place on the count line.
 
 Rationale: sorting by frequency already shows the commonest birds first, but only in that order;
 sorted by length, "the first 100" is the 100 smallest. Choosing the set by how familiar its birds
@@ -133,7 +132,7 @@ Subject: `presentation.region_filter.here`
 
 Goals: [goals.localRelevance](../../../goals/goals.md#localrelevance)
 
-A **Here** button in the home page's Region setting replaces the region selection with the one
+A **Here** button in the home page's Place setting replaces the region selection with the one
 region the reader is in, every other setting kept. If the reader refuses permission, their location cannot
 be found, or it falls in no region BirdView covers, the page says which of the three happened and
 leaves the region selection unchanged.
@@ -148,7 +147,7 @@ browser asks for the reader's location and goes to the page with their region an
 to the browser's current month ([nextView](presentation.md#nextview)). The fragment is never sent to
 the server, so the link reveals nothing locationStaysInBrowser does not allow. If the region cannot
 be found the page stays where the link landed and says why, beside the link that was followed
-rather than inside the Region setting, which starts closed. Without JavaScript the link simply
+rather than inside the Place setting, which starts closed. Without JavaScript the link simply
 lands.
 
 **Without JavaScript, Here is shown inactive** — dotted border, no background, text at the full

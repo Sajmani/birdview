@@ -1085,8 +1085,12 @@ and island names redirecting, was done 2026-11-03. Left, in order:
     one per state ([decisions.countyTablesCompressed](river/requirements/decisions/decisions.md#countytablescompressed), the owner, 2026-11-12). **All 64 committed
     2026-11-12**, 11 MB, with counties held apart from the species ([decisions.countiesServedApart](river/requirements/decisions/decisions.md#countiesservedapart)):
     `species.json` is 10.5 MB and `counties.gob.gz` 10.2 MB; with `-counties` the server is 170 MB
-    resident against 63 MB without, and a Texas page with every bird takes 0.16 s. Left before
-    turning counties on: finding a county by name, since Texas has 254; and Here to a county (step 5).
+    resident against 63 MB without, and a Texas page with every bird takes 0.16 s. **Unified Place
+    search done 2026-11-21** ([decisions.placeControlUnifiesRegionsAndCounties](river/requirements/decisions/decisions.md#placecontrolunifiesregionsandcounties)):
+    one **Place** setting replaces Region and County, with live search over all 74 regions and
+    3,441 counties (`/places.json`, states ranked ahead of counties, top 12 always shown, state/county
+    replacement, cross-state county sets, no-JS `place=` fallback, and a collapsed *"Browse states,
+    provinces, and seas"* disclosure). Left before turning `-counties` on: Here to a county (step 5).
 5. Boundaries keyed to GADM codes for Here at county scale, since
    [tech.regionBoundaries](river/requirements/local/tech/delivery.md#regionboundaries) uses Natural Earth.
 6. Seas: adopt [imports.marine-regions](river/requirements/imports/imports.md#marine-regions), assign the download's offshore grid cells to its

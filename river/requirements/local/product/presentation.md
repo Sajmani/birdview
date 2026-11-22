@@ -1025,9 +1025,8 @@ home page in those. Its footer carries the full credits, which every other page 
   so it works without JavaScript. Family draws each family as its badge, with its description. Only one
   is open at a time, and a tap elsewhere closes it. A choice
   loads a new page, and the setting it was chosen in is open there, at the same place on the page,
-  so several choices can be made in a row. Region
-  offers **Here**, which finds the reader's region in the browser
-  ([hereSelectsLocalRegion](filtering.md#hereselectslocalregion)). Month's choices sit on one
+  so several choices can be made in a row. **Place** replaces Region and County
+  ([decisions.placeControlUnifiesRegionsAndCounties](../../decisions/decisions.md#placecontrolunifiesregionsandcounties), keeping `region=` in the address): its popover holds **All**, **Here** (which finds the reader's region in the browser, [hereSelectsLocalRegion](filtering.md#hereselectslocalregion)), any currently selected places as removable chips, a **place search box**, and a collapsed **Browse states, provinces, and seas** disclosure holding the geographic-zone chips. Typing in the place search box normalizes case, diacritics, and punctuation and matches each place's name, parent state/province name, and postal code (`washington ny`, `kings ca`, `ny`, `bering sea`), ranking states, provinces, islands, and seas ahead of counties (exact, prefix, word-prefix, substring, alphabetical tie-break). It always lists the top 12 matches, with a note naming the total when more match; with JavaScript it reads `/places.json` lazily, and without JavaScript Enter submits `place=<query>` and the server renders the same ranked matches with the popover open. Picking a county whose parent state is selected replaces the state with the county; picking a state when any of its counties are selected replaces those counties with the state; clicking a selected place unselects it, and unselecting the last returns to **All**. Counties in several states can be chosen directly in Place ([decisions.countiesServedApart](../../decisions/decisions.md#countiesservedapart)). Month's choices sit on one
   line: **All** (the default), **Now**, which selects only the current month by name (the
   browser's month; without JavaScript it goes to `month=now`, which the server redirects to its
   own month), a rule, and the twelve
@@ -1038,15 +1037,6 @@ home page in those. Its footer carries the full credits, which every other page 
   selected option again returns to all. Nothing selected means all. **Every setting that can be all
   offers All as its first choice, always, marked when it is chosen**, so the choices stay where they
   are when the reader moves between all and a narrower choice (Sameer, 2026-11-07).
-- **County follows Region when one state with counties is chosen** ([filtering.regionAndMonthFilter](filtering.md#regionandmonthfilter),
-  [decisions.countyListingRule](../../decisions/decisions.md#countylistingrule)). When the regions chosen are one state BirdView has counties for, or
-  counties of that one state, a **County** setting follows Region and lists that state's counties
-  by name. Choosing a county from the state replaces the state with it, since the state already
-  holds every county's birds; choosing more adds them; removing the last returns to the state, as
-  does County's **All**. With no state chosen, or several, there is no County setting; a county is
-  still reachable by its address. **Counties in several states can be chosen by address, and the
-  server answers any such choice; offering one state's counties at a time is a limit of the setting,
-  not of the address or the server** ([decisions.countiesServedApart](../../decisions/decisions.md#countiesservedapart)).
 - **Tiers.** The ordered set breaks into tiers
   ([sectionBreakRule](ordering.md#sectionbreakrule), [orderByFrequency](#orderbyfrequency)): a size tier spans one step of the scale from its
   smallest bird, a frequency tier a decade of "1 in N", and birds with no records a tier of their

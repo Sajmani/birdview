@@ -166,6 +166,8 @@ type server struct {
 	hereJS template.JS
 	// nextFindJS is web/static/next-find.js, inlined into the home page (product.nextView).
 	nextFindJS template.JS
+	// nextPlaceJS is web/static/next-place.js, inlined into the home page (product.nextView).
+	nextPlaceJS template.JS
 	// search is each species' normalized search text, by id, which the
 	// home page's find box matches against (product.nextView).
 	search map[string]string
@@ -562,6 +564,11 @@ func newServer(ds *dataset.Dataset, counties *dataset.Counties) (*server, error)
 		return nil, fmt.Errorf("reading next-find.js: %w", err)
 	}
 	s.nextFindJS = template.JS(js)
+	js, err = fs.ReadFile(assetFS, "static/next-place.js")
+	if err != nil {
+		return nil, fmt.Errorf("reading next-place.js: %w", err)
+	}
+	s.nextPlaceJS = template.JS(js)
 	s.search = searchTexts(ds)
 
 	// Once, at startup: every response's ETag is built from this (tech.cacheLifetimeStated).
@@ -664,6 +671,7 @@ func newServer(ds *dataset.Dataset, counties *dataset.Counties) (*server, error)
 		{"/docs", http.HandlerFunc(s.document)},
 		{"/docs/", http.HandlerFunc(s.document)},
 		{"/birds.json", http.HandlerFunc(s.nextBirds)},
+		{"/places.json", http.HandlerFunc(s.nextPlaces)},
 		{"/boundaries/", http.HandlerFunc(s.boundaries)},
 		{"/robots.txt", http.HandlerFunc(robots)},
 		{"/species/", http.HandlerFunc(s.detail)},

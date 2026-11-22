@@ -82,7 +82,7 @@ Rendering filtered home views (`/` with a query string) is bounded in both concu
 server instance, with a tighter bound for large views (`show=all` or `show` above the default cap).
 Requests beyond the bound fail fast with `429 Too Many Requests`, `Retry-After`, and
 `Cache-Control: no-store` (and no `ETag`). Query-free pages (`/`, species pages, guides, `/added`,
-`/excluded`, `/static/`, `/birds.json`, and `/robots.txt`), redirects, and `304 Not Modified`
+`/excluded`, `/static/`, `/birds.json`, `/places.json`, and `/robots.txt`), redirects, and `304 Not Modified`
 revalidations are never gated by this limit, so a flood against filtered views cannot starve the
 rest of the site.
 

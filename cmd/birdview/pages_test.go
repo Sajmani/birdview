@@ -148,6 +148,7 @@ func discoverPages(t *testing.T, s *server) []webPage {
 var noPages = map[string]string{
 	"/boundaries/": "the region boundary file, JSON",
 	"/birds.json":  "the names the home page's find box searches, JSON",
+	"/places.json": "the places the home page's Place box searches, JSON",
 }
 
 // TestEveryKindOfPageIsDiscovered checks the discovery the other page checks

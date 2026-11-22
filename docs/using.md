@@ -101,9 +101,11 @@ Every setting that can be all starts its choices with **All**, marked when it is
   and a Cooper's Hawk sort close together by length and mass, and far apart by wingspan.
 - **Month:** **All**, the default, is every month; **Now** is this month, by your device's clock.
   A bird with too few records to tell is shown in every month, and says so.
-- **Region:** states, provinces, and stretches of open sea. A bird is listed in a region when at
-  least 1 in a million of the region's bird records are of it. **Here** chooses the region you are
-  in; your browser works it out, so your location never reaches the server. Here needs JavaScript.
+- **Place:** states, provinces, islands, stretches of open sea, and (where enabled) counties. Type
+  part of a name or postal code to find and add places, or open *Browse states, provinces, and
+  seas*. A bird is listed in a region when at least 1 in a million of the region's bird records are
+  of it. **Here** chooses the region you are in; your browser works it out, so your location never
+  reaches the server. Here needs JavaScript.
 - **Reporting frequency:** only the birds that are at least 1 in 100, 1 in 1,000, or 1 in 10,000 of the
   species observations in the regions and months you chose. Combined with an order such as
   **Length** or **Wingspan**, it lines up the familiar birds of a place and season by size, so a

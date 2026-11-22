@@ -51,9 +51,9 @@ So the server computes sections and geometry and renders HTML. Every control is 
 and every detail view is a URL, which also makes any view shareable. The cost is a page load per
 interaction, which is unnoticeable on localhost.
 
-**Three exceptions, all deliberate**, all on the home page
+**Four exceptions, all deliberate**, all on the home page
 ([product.nextView](requirements/local/product/presentation.md#nextview)). The first is `here.js`,
-behind Here in the Region setting and the welcome line's `#here-and-now`. It looks up the reader's
+behind Here in the Place setting and the welcome line's `#here-and-now`. It looks up the reader's
 region in the browser so their position never reaches the server
 ([product.locationStaysInBrowser](requirements/local/product/filtering.md#locationstaysinbrowser)),
 and a test holds it to the Go lookup in `internal/boundary`.
@@ -64,14 +64,19 @@ builds with the Go matcher's rule (`cmd/birdview/search.go`), and its links go t
 `bird=` toggle, which decides what pinning means. A test holds it to the server's page for the same
 query.
 
-The third, inline in `next.html`, moves an opened setting's choices left only as far as keeps them
+The third is `next-place.js`, which ranks and lists states, provinces, islands, seas, and (under
+`-counties`) counties inside the Place popover as the reader types, reading `/places.json` and
+applying the same matching, ranking, and state/county replacement rules as `cmd/birdview/place.go`.
+A browser test holds it to the server's `place=` rendering.
+
+The fourth, inline in `next.html`, moves an opened setting's choices left only as far as keeps them
 on the screen, closes them on a tap elsewhere, and reopens the setting a choice was made in, at the
-same scroll position. The rule all three protect is that *logic* stays in Go, not that the client
-is inert; without JavaScript the page still works, minus these three (the find box then needs
-Enter, and a phone shows a setting's choices under the whole count line).
+same scroll position. The rule all four protect is that *logic* stays in Go, not that the client
+is inert; without JavaScript the page still works, minus these four (the bird and place search
+boxes then need Enter, and a phone shows a setting's choices under the whole count line).
 
 The routes: the home page `/`, species pages `/species/<id>`, the guides `/docs/`, `/added`,
-`/excluded`, `/birds.json`, the boundary file under `/boundaries/`, `/robots.txt`, and `/static/`.
+`/excluded`, `/birds.json`, `/places.json`, the boundary file under `/boundaries/`, `/robots.txt`, and `/static/`.
 The classic view, `/compare`, and `/now` were removed on 2026-10-27
 ([decisions.classicViewRemoved](requirements/decisions/decisions.md#classicviewremoved)).
 

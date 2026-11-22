@@ -114,7 +114,7 @@ Covers: [product.locationStaysInBrowser](../../../local/product/filtering.md#loc
 
 **Method:** in headless Chrome, record every request: the boundary file is requested when the
 home page loads, before anything is pressed; pressing Here then makes exactly one request,
-identical to the one choosing that region alone in the Region setting would make, and no request
+identical to the one choosing that region alone in the Place setting would make, and no request
 carries a coordinate.
 
 ## tierHistogramMatchesTiers
@@ -192,7 +192,7 @@ and ducks draw only those families in every month, and the birds around you now 
 with #here-and-now, its template replacing the region and setting the month to a slot for the
 browser's month, and keeping
 every other setting; in headless Chrome, from /?by=mass&month=May in California it lands on
-/?by=mass&month=<the browser's month>&region=CA and, refused, says the page is unchanged and to choose under Region. The
+/?by=mass&month=<the browser's month>&region=CA and, refused, says the page is unchanged and to choose under Place. The
 same holds when the link is clicked on the page, which changes only the fragment. In headless
 Chrome, after here.js runs, Now links to the browser's month with every other setting kept
 (`TestNowIsTheBrowsersMonth`). In headless Chrome, the script's × goes where the server's does, and a
@@ -977,9 +977,9 @@ Covers: [product.nextView](../../../local/product/presentation.md#nextview)
 
 **Method:** the home page rendered with every such setting all, and with every one narrowed
 
-**Assertions:** Month, Region, County, Reporting frequency, Family, Habitat, and Diet each offer exactly one
-All, as their first choice, at an address where each is all (Region aside, set to a state so County
-shows) and at one where each is narrowed; All is marked exactly when its setting is all.
+**Assertions:** Month, Place, Reporting frequency, Family, Habitat, and Diet each offer exactly one
+All, as their first choice, at an address where each is all and at one where each is narrowed; All
+is marked exactly when its setting is all.
 
 ## countyListingApplied
 
@@ -1008,15 +1008,38 @@ counted twice, in every region or beside its own state (`TestCountyIsARegion`); 
 counties in two states lists the birds either lists and divides by both counties' records
 (`TestCountiesInSeveralStatesByAddress`); and a bird's page names each state with how many of its
 counties list the bird out of how many it has, "CA 1/2", and is unchanged without `-counties`
-(`TestSpeciesPageCountsCounties`). The County setting
-appears only for one state with counties or counties of one state, a county chosen from the state
-replaces it, more counties add, and removing the last or All returns to the state
-(`TestCountySettingDrillsDown`). Without `-counties`, the default, a county's code resolves to
-nothing, there is no County setting, and every figure equals the one without county data
+(`TestSpeciesPageCountsCounties`). Without `-counties`, the default, a county's code resolves to
+nothing, `/places.json` serves no counties, and every figure equals the one without county data
 (`TestCountiesOffByDefault`); and a county is recognized by its code whether or not it is
 registered (`TestCountyParentFromCode`). A county's months follow it in parentheses on the share
 line, and a list of counties is separated by semicolons while a list of states keeps its commas
 (`TestPlaceAndMonthsAreNotJoinedByAComma`).
+
+## placeSearchFindsAndReplaces
+
+**The Place setting finds states, provinces, islands, seas, and counties by name, ranks states above counties, shows the top 12, and replaces parents and children**
+
+Covers: [product.nextView](../../../local/product/presentation.md#nextview), [product.regionAndMonthFilter](../../../local/product/filtering.md#regionandmonthfilter)
+
+**Method:** unit tests over `placeMatches` and `placeToggle`, server rendering tests for `place=`,
+and a headless Chrome test holding `next-place.js` to the server's matcher and toggle links
+
+**Assertions:**
+
+1. **No separate County setting.** Place replaces Region and County on the count line; the browse
+   disclosure starts collapsed inside Place.
+2. **Ranking and top-12 truncation.** Matching normalizes case, diacritics (`quebec` finds
+   `Québec`), and punctuation, matching name, parent state/province name, and postal code
+   (`washington ny`, `washington ar`, `kings ca`, `ny`, `atlantic`). States, provinces, islands, and
+   seas rank ahead of counties; a broad query such as `washington` still lists the state first and
+   shows the top 12 with a note naming the total.
+3. **State and county replacement.** Selecting a county while its parent state is chosen replaces
+   the state with that county; selecting a state while any of its counties are chosen replaces those
+   counties with the state; counties from different states compose; unselecting the last returns to
+   All.
+4. **With and without JavaScript.** Submitting `?place=<query>` opens Place with the same ranked
+   matches and toggle links as `next-place.js` produces in headless Chrome from `/places.json`.
+   `/places.json` is never gated by the filtered-view rate limiter.
 
 ## everydayDefinitionsShown
 
@@ -1315,7 +1338,7 @@ Covers: [product.chooseOneSettings](../../../local/product/presentation.md#choos
 
 **Assertions:** Birds, Order by, Reporting frequency, Units, and Names each draw every one of their
 choices inside one joined row (`role="group"`), Birds' All among them, with no words saying to
-choose one; in each, exactly the chosen link is marked `aria-current="true"`; Month, Region, Family,
+choose one; in each, exactly the chosen link is marked `aria-current="true"`; Month, Place, Family,
 Habitat, and Diet draw no joined row. The contrast and phone-width checks cover the new styling.
 
 ## actionsColoredApart
@@ -1326,7 +1349,7 @@ Covers: [product.nextView](../../../local/product/presentation.md#nextview)
 
 **Method:** the home page rendered; the contrast check covers the color
 
-**Assertions:** Now (Month) is a link with the act class, Here (Region) a button with it, and no
+**Assertions:** Now (Month) is a link with the act class, Here (Place) a button with it, and no
 other control carries it.
 
 ## massInOneUnit

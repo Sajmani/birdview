@@ -46,7 +46,7 @@
     see the <a href="/?habitat=Grassland&amp;habitat=Shrubland&amp;habitat=Desert&amp;habitat=Rock&amp;niche=Vertivore" rel="nofollow">open-country hunters</a>,
     all <a href="/?family=Ardeidae&amp;family=Anatidae&amp;month=all" rel="nofollow">herons and ducks</a> &middot;
     <a href="/docs/using#some-things-to-try">more ideas</a>
-    <span class="welcomestatus" role="status" aria-live="polite" data-where="Region"
+    <span class="welcomestatus" role="status" aria-live="polite" data-where="Place"
           data-template="{{.HereNowTemplate}}"></span></p>
 </header>
 
@@ -115,7 +115,7 @@
   <div class="countrow">
   {{range .Controls}}
   {{/* One name for all, so opening one closes the others. */}}
-  <details class="ctl" name="ctl" data-ctl="{{.Label}}">
+  <details class="ctl" name="ctl" data-ctl="{{.Label}}"{{if .Open}} open{{end}}>
     <summary><b>{{.Label}}</b> {{.Value}}</summary>
     <div class="pop">
       {{if .One}}{{/* One choice: one joined row, All first, the chosen segment filled and marked
@@ -124,18 +124,44 @@
       <div class="seg" role="group" aria-label="{{.Label}}">{{if .AllURL}}<a class="btn{{if .AllOn}} on{{end}}" href="{{.AllURL}}" rel="nofollow"{{if .AllOn}} aria-current="true"{{end}}>All</a>{{end}}{{range .Groups}}{{range .Choices}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}" rel="nofollow"{{with .Title}} title="{{.}}"{{end}}{{if .On}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}{{end}}</div>
       {{else}}
       {{with .Note}}<p class="hint">{{.}}</p>{{end}}
-      {{if or .AllURL .HereURL}}<p>{{if .AllURL}}<a class="btn{{if .AllOn}} on{{end}}" href="{{.AllURL}}" rel="nofollow">All</a>{{end}}
+      {{if or .AllURL .HereURL}}<div class="popgroup">{{if .AllURL}}<a class="btn{{if .AllOn}} on{{end}}" href="{{.AllURL}}" rel="nofollow">All</a>{{end}}
         {{if .HereURL}}{{/* here.js finds the reader's region in the browser and
              asks for this address with it, as choosing it by hand would
              (product.hereSelectsLocalRegion, product.locationStaysInBrowser). */}}<button type="button" class="btn here act" aria-disabled="true"
           data-template="{{.HereURL}}" data-boundaries="{{.Boundaries}}"
-          title="Here needs JavaScript and permission to use your location">Here</button>
-        <span class="herestatus" role="status" aria-live="polite"></span>{{end}}</p>{{end}}
+          title="Here needs JavaScript and permission to use your location">Here</button>{{end}}
+        {{range .Selected}}{{template "choice" .}}
+        {{end}}{{if .HereURL}}<span class="herestatus" role="status" aria-live="polite"></span>{{end}}</div>{{end}}
+      {{with .Place}}
+      <form class="placesearch" action="/" method="get">
+        {{range .Fields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
+        <input type="search" name="place" value="{{.Query}}" placeholder="{{.Placeholder}}"
+               aria-label="{{.Placeholder}}" autocomplete="off" spellcheck="false">
+      </form>
+      <div class="placefinds" role="status" aria-live="polite" data-places="{{.PlacesURL}}"
+           data-base="{{.BaseQuery}}" data-close="{{.CloseURL}}" data-selected="{{.SelectedData}}" data-limit="{{.Limit}}">
+        {{if .Query}}
+        <p class="found"><a class="findclose" href="{{.CloseURL}}" rel="nofollow" title="Clear place search" aria-label="Clear place search">&times;</a>{{if eq .Found 0}}No place matches &ldquo;{{.Query}}&rdquo;.{{else if eq .Found 1}}1 place matches.{{else if gt .Found .Limit}}Showing {{.Limit}} of {{.Found}} matches &mdash; add a state or province to narrow.{{else}}{{.Found}} places match.{{end}}</p>
+        {{if .Matches}}<div class="popgroup">{{range .Matches}}{{template "choice" .}}
+        {{end}}</div>{{end}}
+        {{end}}
+      </div>
+      {{end}}
       {{if .Leads}}<div class="leads">
       {{range .Groups}}<span class="lead">{{with .Lead}}{{template "choice" .}}{{end}}{{with .Also}}{{template "choice" .}}{{end}}</span>
         <div class="popgroup{{if .NoRule}} norule{{end}}">{{range .Choices}}{{template "choice" .}}
         {{end}}</div>
       {{end}}</div>
+      {{else if .Browse}}<details class="browse">
+        <summary>Browse states, provinces, and seas</summary>
+        {{range .Groups}}
+        <div class="popgroup{{if .OneLine}} oneline{{end}}">
+          {{with .Name}}<span class="lbl">{{.}}</span>{{end}}
+          {{range .Choices}}{{if .Sep}}<span class="sep" aria-hidden="true"></span>{{end}}{{template "choice" .}}
+          {{end}}
+        </div>
+        {{end}}
+      </details>
       {{else}}{{range .Groups}}
       <div class="popgroup{{if .OneLine}} oneline{{end}}">
         {{with .Name}}<span class="lbl">{{.}}</span>{{end}}
@@ -231,6 +257,7 @@
   become the drawings.</p>
 </footer>
 <script>{{.FindScript}}</script>
+<script>{{.PlaceScript}}</script>
 <script>{{.HereScript}}</script>
 <script>
 /* Places an opened setting's choices under it, moved left only as far as
@@ -260,6 +287,10 @@
   }
   ctls.forEach(function (d) {
     d.addEventListener("toggle", function () { place(d); });
+    d.querySelectorAll("details.browse").forEach(function (b) {
+      b.addEventListener("toggle", function () { place(d); });
+    });
+    d.addEventListener("input", function () { place(d); });
     place(d);
   });
   document.addEventListener("click", function (e) {
