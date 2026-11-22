@@ -61,7 +61,7 @@ func TestChooseOneSettings(t *testing.T) {
 	if !strings.Contains(regexp.MustCompile(`(?s)<div class="seg"[^>]*>.*?</div>`).FindString(pop("Birds")), ">All</a>") {
 		t.Error("Birds' All is not in its joined row")
 	}
-	for _, label := range []string{"Month", "Region", "Family", "Habitat", "Diet"} {
+	for _, label := range []string{"Month", "Place", "Family", "Habitat", "Diet"} {
 		if p := pop(label); strings.Contains(p, `class="seg"`) {
 			t.Errorf("%s takes one or more choices but is drawn as choose one", label)
 		}

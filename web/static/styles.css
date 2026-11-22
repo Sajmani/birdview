@@ -392,7 +392,7 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .ctl[open] > summary { border-color: var(--accent); }
 .ctl > summary b { font-weight: 600; margin-right: 5px; }
 .pop { position: absolute; z-index: 5; top: calc(100% + 4px); left: 0; width: max-content;
-  max-width: min(720px, calc(100vw - 16px)); max-height: 60vh; overflow: auto;
+  box-sizing: border-box; max-width: min(720px, calc(100vw - 32px)); max-height: 60vh; overflow: auto;
   background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
   padding: 10px 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, .45); }
 .pop p { margin: 0 0 8px; }
@@ -424,9 +424,21 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .finds li { margin: 4px 0; }
 .finds .found { margin: 6px 0 0; color: var(--dim); }
 /* The list's ×: closes it, dropping the find box's text. */
-.finds .findclose, .finds .findclose:visited { display: inline-block; margin-right: 8px; padding: 0 6px;
+.finds .findclose, .finds .findclose:visited,
+.placefinds .findclose, .placefinds .findclose:visited { display: inline-block; margin-right: 8px; padding: 0 6px;
   border: 1px solid var(--line); border-radius: 4px; color: var(--ink); text-decoration: none; }
-.finds .findclose:hover { border-color: var(--accent); }
+.finds .findclose:hover, .placefinds .findclose:hover { border-color: var(--accent); }
+/* Place search box and collapsed browse disclosure inside the Place popover. */
+.placesearch { margin: 0 0 8px; }
+.placesearch input { width: min(320px, 100%); box-sizing: border-box; font: inherit; font-size: 16px;
+  color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+  padding: 5px 9px; }
+.placesearch input::placeholder { color: var(--dim); opacity: 1; }
+.placesearch input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.placefinds .found { margin: 0 0 8px; color: var(--dim); font-size: 13px; }
+.browse { margin-top: 4px; }
+.browse > summary { cursor: pointer; color: var(--dim); font-size: 13px; padding: 2px 0; }
+.browse[open] > summary { margin-bottom: 6px; color: var(--ink); }
 /* The pin: a push pin in a box, filled when the bird is pinned. On a tile it
    sits in the top-right corner, on the name line (product.tileContents). The tile's four parts
    (header, drawing, the names under the rule, notes) are rows of the

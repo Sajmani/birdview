@@ -104,8 +104,18 @@ type nextControl struct {
 	// (product.chooseOneSettings).
 	One bool
 	// HereURL is this address with the region a placeholder for here.js to
-	// fill, and Boundaries the file it looks the region up in; Region only.
+	// fill, and Boundaries the file it looks the region up in; Place only.
 	HereURL, Boundaries string
+	// Open starts the setting's <details> open (used when a no-JS place= search ran).
+	Open bool
+	// Selected holds the currently chosen places as removable chips at the top
+	// of the Place popover.
+	Selected []nextChoice
+	// Place holds the Place popover's search box state and server-rendered matches.
+	Place *placeSearch
+	// Browse places Groups inside a collapsed "Browse states, provinces, and seas"
+	// disclosure below the search box.
+	Browse bool
 }
 
 // nextPinned is one pinned bird in the list under the find box.
@@ -210,6 +220,7 @@ type nextData struct {
 	DetailSuffix string
 	FindLimit    int
 	FindScript   template.JS
+	PlaceScript  template.JS
 	HereScript   template.JS
 	// ResetURL returns every setting to its default and keeps the pins;
 	// ClearPinsURL drops the pins and keeps every setting, empty when
@@ -640,7 +651,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 
 	page := nextData{Count: len(base), Total: len(s.ds.Species),
 		included: added, FindLimit: nextFindLimit,
-		FindScript: s.nextFindJS}
+		FindScript: s.nextFindJS, PlaceScript: s.nextPlaceJS}
 	tq := cloneValues(q)
 	tq.Del("find")
 	tq.Del("bird")
@@ -885,9 +896,10 @@ func (s *server) nextPage(r *http.Request) nextData {
 		page.OrderLabel += " length" // "Bill length distribution", not "Bill distribution"
 	}
 	for i := range page.Controls {
-		if page.Controls[i].Label == "Region" {
+		if page.Controls[i].Label == "Place" {
 			hq := cloneValues(q)
 			hq.Del("region")
+			hq.Del("place")
 			hq.Set("region", hereSlot)
 			page.Controls[i].HereURL = strings.Replace(string(nextURL(hq)), url.QueryEscape(hereSlot), hereSlot, 1)
 			page.Controls[i].Boundaries = s.boundaryURL
@@ -1009,74 +1021,6 @@ func (s *server) regionNames(sel map[string]bool) []string {
 	return out
 }
 
-// countyControl is the County setting (product.nextView, decisions.countyListingRule): present when the regions chosen are one
-// state with counties, or counties of one state. From the state, a county replaces it; among
-// counties, a choice toggles; removing the last, or All, returns to the state.
-func countyControl(q url.Values, opt options) (nextControl, bool) {
-	if !opt.HasRegions || len(opt.Regions) == 0 {
-		return nextControl{}, false
-	}
-	state := ""
-	chosen := map[string]bool{}
-	for id := range opt.Regions {
-		rg, ok := region.Get(id)
-		if !ok {
-			return nextControl{}, false
-		}
-		switch {
-		case rg.Kind == region.County && (state == "" || state == rg.Parent):
-			state = rg.Parent
-			chosen[id] = true
-		case rg.Kind == region.Land && len(opt.Regions) == 1:
-			state = id
-		default:
-			return nextControl{}, false
-		}
-	}
-	counties := region.CountiesOf(state)
-	if len(counties) == 0 {
-		return nextControl{}, false
-	}
-	// The chosen counties in the order the address names them, so a choice adds at the end.
-	var current []string
-	for _, v := range nextValues(q, "region") {
-		if rg, ok := region.BySlug(v); ok && chosen[rg.ID] {
-			current = append(current, rg.Slug())
-		}
-	}
-	st, _ := region.Get(state)
-	c := nextControl{Label: "County", Value: "all"}
-	var names []string
-	grp := nextChoiceGroup{Name: "Counties in " + st.Name}
-	for _, rg := range counties {
-		on := chosen[rg.ID]
-		if on {
-			names = append(names, rg.Name)
-		}
-		var next []string
-		for _, v := range current {
-			if v != rg.Slug() {
-				next = append(next, v)
-			}
-		}
-		if !on {
-			next = append(next, rg.Slug())
-		}
-		if len(next) == 0 {
-			next = []string{st.Slug()}
-		}
-		nq := cloneValues(q)
-		nq["region"] = next
-		grp.Choices = append(grp.Choices, nextChoice{Label: rg.Name, Title: rg.Label(), On: on, URL: nextURL(nq)})
-	}
-	c.Groups = []nextChoiceGroup{grp}
-	c.AllURL, c.AllOn = nextSet(q, "region", st.Slug()), len(names) == 0
-	if len(names) > 0 {
-		c.Value = nextList(names)
-	}
-	return c, true
-}
-
 // nextControls builds the count line: one control per setting.
 func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	var out []nextControl
@@ -1117,22 +1061,7 @@ func (s *server) nextControls(q url.Values, opt options) []nextControl {
 	mc.Groups = []nextChoiceGroup{{Lead: &allMonths, Also: &now, Choices: mch}}
 	out = append(out, mc)
 
-	rc := nextControl{Label: "Region", Value: "all", AllURL: nextSet(q, "region", ""), AllOn: !opt.HasRegions}
-	if opt.HasRegions {
-		rc.Value = nextList(s.regionNames(opt.Regions))
-	}
-	for _, z := range region.Zones {
-		grp := nextChoiceGroup{Name: z}
-		for _, rg := range region.InZone(z) {
-			grp.Choices = append(grp.Choices, nextChoice{Label: rg.Name, Title: rg.Code,
-				On: opt.HasRegions && opt.Regions[rg.ID], URL: nextToggle(q, "region", rg.Slug())})
-		}
-		rc.Groups = append(rc.Groups, grp)
-	}
-	out = append(out, rc)
-	if cc, ok := countyControl(q, opt); ok {
-		out = append(out, cc)
-	}
+	out = append(out, s.placeControl(q, opt))
 	// Reporting frequency: a threshold on the share each tile states, in the same steps as the
 	// frequency tiers (product.reportingFrequencyFilter).
 	hc := nextControl{Label: "Reporting frequency", Value: "all", One: true}

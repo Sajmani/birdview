@@ -1652,7 +1652,8 @@ func TestNameFallsBackToWorldWhenNoNorthAmericanName(t *testing.T) {
 }
 
 // box returns one setting on the home page's count line, by its label, so
-// a test that counts choices says WHICH setting it means.
+// a test that counts choices says WHICH setting it means. Handles nested
+// <details> (such as Place's collapsed browse disclosure).
 func box(t *testing.T, body, label string) string {
 	t.Helper()
 	open := `<details class="ctl" name="ctl" data-ctl="` + label + `"`
@@ -1661,11 +1662,26 @@ func box(t *testing.T, body, label string) string {
 		t.Fatalf("no setting %q on the count line", label)
 	}
 	rest := body[i:]
-	j := strings.Index(rest, "</details>")
-	if j < 0 {
-		t.Fatalf("setting %q is never closed", label)
+	depth, pos := 0, 0
+	for pos < len(rest) {
+		no := strings.Index(rest[pos:], "<details")
+		nc := strings.Index(rest[pos:], "</details>")
+		if nc < 0 {
+			t.Fatalf("setting %q is never closed", label)
+		}
+		if no >= 0 && no < nc {
+			depth++
+			pos += no + len("<details")
+			continue
+		}
+		depth--
+		if depth == 0 {
+			return rest[:pos+nc]
+		}
+		pos += nc + len("</details>")
 	}
-	return rest[:j]
+	t.Fatalf("setting %q is never closed", label)
+	return ""
 }
 
 // TestRegionFilter asserts product.regionAndMonthFilter and its composition with family (product.filtersCompose).
@@ -1711,7 +1727,7 @@ func TestRegionFilter(t *testing.T) {
 	if !strings.Contains(both, "No birds match") {
 		t.Error("an empty intersection does not report a failed match")
 	}
-	for _, want := range []string{"Region", "California", "Family", "Corvidae"} {
+	for _, want := range []string{"Place", "California", "Family", "Corvidae"} {
 		if !strings.Contains(both, want) {
 			t.Errorf("the empty state does not name %q", want)
 		}
@@ -1736,7 +1752,7 @@ func TestRegionFilter(t *testing.T) {
 func TestRegionURLsCarryDataCodes(t *testing.T) {
 	s := newTestServer(t)
 	_, body := get(t, s, "/?month=all&show=all")
-	sel := html.UnescapeString(box(t, body, "Region"))
+	sel := html.UnescapeString(box(t, body, "Place"))
 	for _, want := range []string{"region=USA.5_1", "region=CAN.2_1", "region=UMI.4_1", "region=GulfOfMexico"} {
 		if !strings.Contains(sel, want) {
 			t.Errorf("no link carries %q", want)
@@ -4986,71 +5002,6 @@ func TestSpeciesPageCountsCounties(t *testing.T) {
 	}
 }
 
-// TestCountySettingDrillsDown asserts the County setting (product.nextView): it follows Region only when
-// the regions chosen are one state with counties or counties of that state; choosing a county from
-// the state replaces the state; choosing more adds them; removing the last, or All, returns to the
-// state.
-//
-// Verifies: app.countyListingApplied
-func TestCountySettingDrillsDown(t *testing.T) {
-	countiesOn(t)
-	ds, cs := countyDataset()
-	cs = testCounties(ds, append(cs.Counties, dataset.County{ID: "USA.5.37_1", Name: "San Diego", State: "USA.5_1",
-		Total: 300000, Monthly: [12]int64{0: 300000}}), nil)
-	s, err := newServer(ds, cs)
-	if err != nil {
-		t.Fatal(err)
-	}
-	county := func(target string) *nextControl {
-		p := nextAt(s, target)
-		for i := range p.Controls {
-			if p.Controls[i].Label == "County" {
-				return &p.Controls[i]
-			}
-		}
-		return nil
-	}
-	choice := func(c *nextControl, name string) nextChoice {
-		for _, g := range c.Groups {
-			for _, ch := range g.Choices {
-				if ch.Label == name {
-					return ch
-				}
-			}
-		}
-		t.Fatalf("County offers no %s", name)
-		return nextChoice{}
-	}
-	for _, target := range []string{"/", "/?region=USA.5_1&region=USA.38_1", "/?region=USA.38_1"} {
-		if c := county(target); c != nil {
-			t.Errorf("%s has a County setting; only one state with counties, or its counties, has one", target)
-		}
-	}
-	c := county("/?region=USA.5_1")
-	if c == nil {
-		t.Fatal("choosing California, which has counties, shows no County setting")
-	}
-	if la := choice(c, "Los Angeles"); la.On || string(la.URL) != "/?region=USA.5.19_1" {
-		t.Errorf("from California, Los Angeles goes to %s (on %v); want the county in place of the state", la.URL, la.On)
-	}
-	if !c.AllOn || string(c.AllURL) != "/?region=USA.5_1" || c.Value != "all" {
-		t.Errorf("from the state, County reads %q with All at %q (marked %v); want all, marked", c.Value, c.AllURL, c.AllOn)
-	}
-	c = county("/?region=USA.5.19_1")
-	if c == nil {
-		t.Fatal("a chosen county shows no County setting")
-	}
-	if la := choice(c, "Los Angeles"); !la.On || string(la.URL) != "/?region=USA.5_1" {
-		t.Errorf("with Los Angeles chosen, choosing it again goes to %s (on %v); want back to California", la.URL, la.On)
-	}
-	if sd := choice(c, "San Diego"); sd.On || string(sd.URL) != "/?region=USA.5.19_1&region=USA.5.37_1" {
-		t.Errorf("with Los Angeles chosen, San Diego goes to %s; want both counties", sd.URL)
-	}
-	if c.AllOn || string(c.AllURL) != "/?region=USA.5_1" || c.Value != "Los Angeles" {
-		t.Errorf("with Los Angeles chosen, County reads %q with All at %q; want Los Angeles, and All back to California", c.Value, c.AllURL)
-	}
-}
-
 // countiesOn serves counties for one test, as the server's -counties flag does.
 func countiesOn(t *testing.T) {
 	t.Helper()
@@ -5083,6 +5034,9 @@ func TestCountiesOffByDefault(t *testing.T) {
 		if c.Label == "County" {
 			t.Error("a County setting appears without -counties")
 		}
+	}
+	if _, body := get(t, s, "/places.json"); strings.Contains(body, "USA.5.19_1") {
+		t.Error("/places.json serves counties without -counties")
 	}
 	for _, path := range []string{"/?show=all&month=all", "/?show=all&month=all&region=USA.5_1"} {
 		_, a := get(t, s, path)

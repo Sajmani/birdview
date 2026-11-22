@@ -913,7 +913,7 @@ Guardrails: `cmd/birdview-ingest/main_test.go:TestCountiesCompiledApart`;
   `cmd/birdview-ingest/main_test.go:TestPlainCountyTableRefused`; `cmd/birdview/main_test.go:TestCountyIsARegion`;
   `cmd/birdview/main_test.go:TestCountiesInSeveralStatesByAddress`;
   `cmd/birdview/main_test.go:TestSpeciesPageCountsCounties`;
-  `cmd/birdview/main_test.go:TestCountySettingDrillsDown`; `cmd/birdview/main_test.go:TestCountiesOffByDefault`;
+  `cmd/birdview/main_test.go:TestCountiesOffByDefault`;
   `cmd/birdview/main_test.go:TestPlaceAndMonthsAreNotJoinedByAComma`;
   `internal/region/region_test.go:TestCountyParentFromCode`
 
@@ -922,6 +922,19 @@ Gates: yes, in `go test ./...` (CI and image build)
 Watched failing: 2026-11-03, with the state-list condition removed ("Nymphicus hollandicus in USA.33.24_1: listed true … want listed false"), and before a state's withholding covered its counties ("a state's entry must cover its own counties").
 
 Watched failing: 2026-11-03, before the server knew counties ("Los Angeles draws [amerob amecro annhum thimur blasti greblu]", "the heading reads \"Showing birds in every month\"") and while "every region" summed a county with its state ("1 in 1,461 with the county and 1 in 2,275 without"); and before the County setting existed ("choosing California, which has counties, shows no County setting").
+
+## app.placeSearchFindsAndReplaces
+
+Criterion: [app.placeSearchFindsAndReplaces](../requirements/composed/internal/app/acceptance.md#placesearchfindsandreplaces)
+
+Guardrails: `cmd/birdview/place_test.go:TestPlaceSearchRankingAndDiacritics`;
+  `cmd/birdview/place_test.go:TestPlaceToggleReplacesParentAndChild`;
+  `cmd/birdview/place_test.go:TestPlaceSearchNoJS`;
+  `cmd/birdview/place_test.go:TestPlaceSearchInTheBrowser`
+
+Gates: yes, in `go test ./...` (`TestPlaceSearchInTheBrowser` runs with Chrome in CI and locally)
+
+Watched failing: 2026-11-21, with non-county priority dropped in `placeMatches` ("atlantic = [{USA.31.1_1 Atlantic, NJ ...} {NorthAtlantic North Atlantic ...}], want North Atlantic before Atlantic, NJ"); with state/county replacement removed in `placeToggle` ("CA -> LA = \"/?region=USA.5_1&region=USA.5.19_1\", want /?region=USA.5.19_1", "LA+SD+PHL -> +CA = \"/?region=USA.5.19_1&region=USA.5.37_1&region=USA.39.51_1&region=USA.5_1\", want /?region=USA.39.51_1&region=USA.5_1"); with `rc.Open` left false on `place=` ("submitting place= did not open the Place popover"); and in headless Chrome with state/county replacement removed in `next-place.js`'s `toggleURL` ("typing \"kings ca\": script items differ from server: got: btn|Kings, CA|/?month=May&region=USA.5_1&region=USA.5.16_1 want: btn|Kings, CA|/?month=May&region=USA.5.16_1").
 
 Watched failing: 2026-11-04, with a county's months after a comma ("the hummingbird's share line does not read \"in Los Angeles, CA (Jun)\"") and a list of counties joined by commas ("five counties list as \"Bronx, NY, Kings, NY, New York, NY, or 2 more\"").
 

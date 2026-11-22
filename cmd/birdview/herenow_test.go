@@ -320,11 +320,11 @@ func TestHereAndNowLink(t *testing.T) {
 	inCA := "/?by=mass&month=" + thisMonth + "&region=USA.5_1"
 	for _, c := range []struct{ name, start, geo, lands, says string }{
 		{"home in California", "/?by=mass&month=May", "38.5816,-121.4944", inCA, ""},
-		{"home refused", "/", "denied", "/", "refused, so the page is unchanged. Choose yours under Region."},
+		{"home refused", "/", "denied", "/", "refused, so the page is unchanged. Choose yours under Place."},
 		// Clicked on the page, not arrived by: the link only adds the
 		// fragment, so the page must answer its change.
 		{"home clicked in California", "/?by=mass&month=May", "follow=1&geo=38.5816,-121.4944", inCA, ""},
-		{"home clicked refused", "/?region=USA.10_1", "follow=1&geo=denied", "/?region=USA.10_1", "refused, so the page is unchanged. Choose yours under Region."},
+		{"home clicked refused", "/?region=USA.10_1", "follow=1&geo=denied", "/?region=USA.10_1", "refused, so the page is unchanged. Choose yours under Place."},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			t.Parallel()

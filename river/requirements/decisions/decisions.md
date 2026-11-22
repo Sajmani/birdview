@@ -5476,7 +5476,7 @@ Date: 2026-11-12
 
 Decided by: Sameer
 
-Status: accepted
+Status: amended by placeControlUnifiesRegionsAndCounties
 
 Affects: [product.regionAndMonthFilter](../local/product/filtering.md#regionandmonthfilter), [product.nextView](../local/product/presentation.md#nextview)
 
@@ -5689,4 +5689,53 @@ barrier for outside contributors. Planned since 2026-10-22 (`todo.md`, `sourceOf
 software factory run from Sameer's own accounts belongs where the code lives, and serving a clone
 is not the same question as developing one, which is why approval was asked first. A transfer of
 the repository was not asked about; copying the issues keeps the move inside what was approved.
+
+---
+
+## placeControlUnifiesRegionsAndCounties
+
+**One Place setting replaces Region and County, with live search over states, provinces, islands, seas, and counties, plus a collapsed browse list**
+
+Date: 2026-11-21
+
+Decided by: Sameer
+
+Status: accepted
+
+Amends: countiesServedApart
+
+Affects: [product.nextView](../local/product/presentation.md#nextview), [product.hereSelectsLocalRegion](../local/product/filtering.md#hereselectslocalregion), [product.reportingFrequencyFilter](../local/product/filtering.md#reportingfrequencyfilter), [tech.filteredViewsBounded](../local/tech/delivery.md#filteredviewsbounded)
+
+### Decided
+
+1. **One setting, named Place.** A single **Place** setting replaces both **Region** and **County**
+   on the home page's count line. Its URL query parameter stays `region=` ([tech.stableUrls](../local/tech/delivery.md#stableurls)).
+2. **Search first, browse collapsed.** The Place popover holds **All**, **Here**, any currently
+   selected places as removable chips, a search box (`Find a state, province, county, or sea` with
+   `-counties`, or `Find a state, province, or sea` without), and a collapsed *"Browse states,
+   provinces, and seas"* disclosure holding the geographic-zone chips.
+3. **Always show the top 12 ranked matches.** Search normalizes case, diacritics, and punctuation
+   (so `quebec` finds `Québec`) and matches against each place's name, parent state/province name,
+   and postal code (`washington ny`, `kings ca`, `ny`, `bering sea`). States, provinces, islands,
+   and seas rank ahead of counties (exact, then prefix, then word-prefix, then substring,
+   alphabetical tie-break). The top 12 matches are always listed — never hidden above a threshold —
+   with a truncation note naming the total when more match. With JavaScript, a script reads
+   `/places.json` lazily on focus; without JavaScript, Enter submits `place=<query>` and the server
+   renders the same ranked matches inside the reopened Place popover.
+4. **State and county replacement, cross-state sets allowed.** Picking a county whose parent state
+   is currently selected replaces that state with the county; picking a state when one or more of
+   its counties are selected replaces those counties with the state. Clicking a selected place
+   unselects it, and unselecting the last returns to **All**. Counties in several states can be
+   chosen directly in Place (amending point 3 of [countiesServedApart](#countiesservedapart)).
+
+### Why
+
+Texas has 254 counties and the US and Canada together have 3,441; a chip list in a separate County
+setting does not scale, forces two reloads for a destination lookup, and blocks multi-state county
+sets the server already answers. Complete county names such as Washington (33 matches, including the
+state), Jefferson (26), and Franklin (24) would become unreachable if matches above 10 were hidden as
+in the bird find box; ranking states above counties and always showing the top 12 keeps every state
+and disambiguated county one step away while scaling to worldwide regions later. Keeping states,
+provinces, islands, and seas in a collapsed browse disclosure keeps the popover compact on a phone
+while letting readers discover seas and outlying islands they would not think to type.
 

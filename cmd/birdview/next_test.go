@@ -853,14 +853,14 @@ func TestNextHereAndNow(t *testing.T) {
 	var region, mon *nextControl
 	for i := range p.Controls {
 		switch p.Controls[i].Label {
-		case "Region":
+		case "Place":
 			region = &p.Controls[i]
 		case "Month":
 			mon = &p.Controls[i]
 		}
 	}
 	if region == nil || mon == nil {
-		t.Fatal("no Region or Month setting")
+		t.Fatal("no Place or Month setting")
 	}
 	if got := strings.Replace(region.HereURL, hereSlot, "USA.10_1", 1); got != "/?by=mass&month=May&region=USA.10_1&show=pinned" {
 		t.Errorf("Here, filled with Florida, is %s", got)
@@ -1347,7 +1347,7 @@ func TestNextWelcomeLine(t *testing.T) {
 		t.Error(`the welcome line still begins "New here?"; Try is enough`)
 	}
 	if !strings.Contains(w[1], `<a href="/#here-and-now">the birds around you now</a>`) ||
-		!strings.Contains(w[1], `data-where="Region"`) || !strings.Contains(w[1], `data-template="/?month=__MONTH__&amp;region=__REGION__"`) ||
+		!strings.Contains(w[1], `data-where="Place"`) || !strings.Contains(w[1], `data-template="/?month=__MONTH__&amp;region=__REGION__"`) ||
 		!strings.Contains(w[1], `<a href="/docs/using#some-things-to-try">more ideas</a>`) {
 		t.Errorf("the welcome line lacks the birds around you now, its status, or more ideas:\n%s", w[1])
 	}
@@ -1520,6 +1520,8 @@ func TestNextKeepsEveryParameter(t *testing.T) {
 			own := "show"
 			if strings.HasPrefix(f[1], "search") {
 				own = "find"
+			} else if strings.HasPrefix(f[1], "placesearch") {
+				own = "place"
 			}
 			q[own] = orig[own]
 			if c := diff(q); len(c) != 0 {
@@ -1527,7 +1529,7 @@ func TestNextKeepsEveryParameter(t *testing.T) {
 			}
 		}
 		// The templates the browser fills in.
-		here := controlNamed(t, p, "Region").HereURL
+		here := controlNamed(t, p, "Place").HereURL
 		hq, _ := url.ParseQuery(strings.TrimPrefix(strings.Replace(here, hereSlot, "CA", 1), "/?"))
 		if c := diff(hq); !slices.Equal(c, []string{"region"}) {
 			t.Errorf("Here changes %v, want only the region", c)
@@ -1565,7 +1567,7 @@ func TestNextShortValues(t *testing.T) {
 		return out
 	}
 	for target, want := range map[string]map[string]string{
-		"/":           {"Order by": "frequency \u2193", "Month": "all", "Region": "all", "Units": "imperial", "Names": "North Amer"},
+		"/":           {"Order by": "frequency \u2193", "Month": "all", "Place": "all", "Units": "imperial", "Names": "North Amer"},
 		"/?month=Oct": {"Month": "Oct"},
 		"/?by=length&month=May&month=Jun&units=metric&names=world": {"Order by": "length \u2191", "Month": "May or Jun", "Units": "metric", "Names": "world"},
 		"/?by=mass&rev=1": {"Order by": "mass \u2193"},
@@ -2199,15 +2201,15 @@ func TestAllAlwaysOffered(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	settings := []string{"Birds", "Month", "Region", "County", "Reporting frequency", "Family", "Habitat", "Diet"}
-	all := "/?region=USA.5_1"
+	settings := []string{"Birds", "Month", "Place", "Reporting frequency", "Family", "Habitat", "Diet"}
+	all := "/"
 	narrow := "/?region=USA.5.19_1&month=May&freq=1000&family=Corvidae&habitat=Forest&niche=Granivore"
 	allRe := regexp.MustCompile(`<a class="btn( on)?" href="[^"]*"[^>]*>All</a>`)
 	for _, c := range []struct {
 		url    string
 		marked map[string]bool
 	}{
-		{all, map[string]bool{"Birds": true, "Month": true, "Region": false, "County": true, "Reporting frequency": true, "Family": true, "Habitat": true, "Diet": true}},
+		{all, map[string]bool{"Birds": true, "Month": true, "Place": true, "Reporting frequency": true, "Family": true, "Habitat": true, "Diet": true}},
 		{narrow, map[string]bool{}},
 	} {
 		_, body := get(t, s, c.url)
