@@ -1612,3 +1612,22 @@ Watched failing: 2026-11-21, across 5 mutations:
 - changing `Cache-Control` on `/boundaries/<hash>/<state>.json` to `no-store` failed `TestCountyBoundaryRoute` (`Cache-Control = "no-store", want immutable`);
 - removing the Statistics Canada attribution from `web/static/next.html` failed `TestFooterCreditsCountyBoundaries` on both verbatim sentences;
 - skipping stage 2 in `web/static/here.js` failed `TestHerePinpointsCountyInTheBrowser/Here_in_Kings_NY` (`navigated to pages [/?by=mass&month=May /?by=mass&month=May&region=USA.33_1], want /?by=mass&month=May&region=USA.33.24_1` and `fetched county boundaries [], want only [/boundaries/.../USA.33_1.json]`).
+
+## app.overlayModeComparesPinnedBirds
+
+Criterion: [app.overlayModeComparesPinnedBirds](../requirements/composed/internal/app/acceptance.md#overlaymodecomparespinnedbirds)
+
+Guardrails: `cmd/birdview/overlay_test.go:TestOverlayShowRowAndPinBounds`;
+  `cmd/birdview/overlay_test.go:TestOverlayGeometryAlignmentAndURL`;
+  `cmd/birdview/overlay_test.go:TestOverlayInTheBrowser`;
+  `cmd/birdview/phone_test.go:TestShowRowFitsAPhone`
+
+Gates: yes, in `go test ./...` (CI and image build; browser check skips without Chrome)
+
+Watched failing: 2026-11-22, across 6 mutations:
+- disabling the `>8` pin check in `cmd/birdview/next.go` failed `TestOverlayShowRowAndPinBounds` (`9 pins: Show row did not disable Overlay`);
+- returning `g.YShoulder` for `"bill"` in `overlayAnchorY` failed `TestOverlayGeometryAlignmentAndURL` on all three birds (`align=bill: bird greblu y=24.00, guide=121.70`);
+- zeroing `staggerY` in `cmd/birdview/overlay.go` failed `TestOverlayGeometryAlignmentAndURL` (`shift=1 vertical steps = (0.00, 0.00), want exact 14.00`);
+- omitting layer bring-to-front and `history.replaceState` in `web/static/next-overlay.js` failed `TestOverlayInTheBrowser` (`selectedLast="annhum", want "amecro"` and missing `dy=amecro:-` in URL);
+- removing `.ov-bar .seg { margin-bottom: 0; }` in `web/static/styles.css` failed `TestOverlayInTheBrowser` bar alignment check (`desktop ov-bar control 4 top=412px, want aligned with first (408px)`);
+- setting `.ov-stage` to `width: 500px` in `web/static/styles.css` failed `TestOverlayInTheBrowser` phone check (`360px overlay page scrollWidth=512 > clientWidth=360`).

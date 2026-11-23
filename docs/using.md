@@ -14,13 +14,14 @@ The page opens on the birds of every month, most often recorded first, the first
 them. Every bird shown is drawn to one scale.
 
 Under the header, a heading says what is shown, such as *Showing birds in New York in October*.
-Under it, **First**, **All**, and **Pinned** choose which birds are shown, and
-**Clear pins** unpins every bird.
+Under it, **First**, **All**, **Pinned**, and (once two or more birds are pinned) **Overlay**
+choose how the birds are shown, and **Clear pins** unpins every bird.
 
 **Pin** a bird, from its tile or the **find box**, to keep it on the page whatever the settings;
 the pinned birds are listed above the box, and they also lead the list of birds, side by side, as a
 **Pinned** group before the first tier, while staying in their tiers. To compare only the birds you
-choose, pin them and click **Pinned**. The find box finds birds by English or scientific name, code, family, or order
+choose, pin them and click **Pinned** — or click **Overlay** (for 2–8 pinned birds) to draw their
+stick figures on top of one another to one scale. The find box finds birds by English or scientific name, code, family, or order
 as you type, and lists them once there are 10 or fewer. Where a bird has more than one eBird code,
 any of them finds it; the simplest is the one shown.
 
@@ -93,8 +94,11 @@ Every setting that can be all starts its choices with **All**, marked when it is
   storks, flamingos, Limpkin, and cranes). A choice fills in Family and Habitat for you and keeps
   your region, months, and order; change either afterwards and Birds reads *custom*.
 - **Show:** **First** 100 (type another number), **All** the birds the settings match,
-  or **Pinned** for only your pins. **Clear pins** unpins every bird; **Reset**, after the
-  settings, returns every setting to its default and keeps the pins.
+  **Pinned** for only your pins, or **Overlay** (appears at 2+ pins, active for 2–8) to stack
+  pinned stick figures to one scale — align by **Wings**, **Bill**, **Tail**, or **Center**, toggle
+  **Spread ↔** / **Spread ↕** to separate overlaps, and tap or drag any bird vertically to compare
+  parts directly. **Clear pins** unpins every bird; **Reset**, after the settings, returns every
+  setting to its default and keeps the pins.
 - **Order by:** **Frequency**, how often a bird is recorded, most often first (see
   [below](#sorting-by-how-often-a-bird-is-recorded)), or **Length**, **Wingspan**, **Mass**,
   **Bill**, or **Tail**, smallest first. Choose the order again to reverse it. A Northern Harrier

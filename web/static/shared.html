@@ -108,14 +108,8 @@
    title="{{if .Pinned}}Unpin{{else}}Pin{{end}} {{.Name}}" aria-label="{{if .Pinned}}Unpin{{else}}Pin{{end}} {{.Name}}">{{template "pinicon"}}</a>{{end}}
 {{define "pinicon"}}<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M10.2 1.5l4.3 4.3-1.4.5-2.3 2.3.6 3.6-1.3 1.3-2.9-2.9-4.1 4.1-.9-.9 4.1-4.1-2.9-2.9 1.3-1.3 3.6.6 2.3-2.3z"/></svg>{{end}}
 
-{{define "diagram"}}
-{{$g := .Geom}}{{$b := .Box}}
-<svg class="dia" viewBox="0 0 {{f1 $b.W}} {{f1 $b.H}}" preserveAspectRatio="xMidYMid meet" role="img"
-     aria-label="scaled outline of {{.Name}}">
-  {{/* .TopOffset, not a formula over $b.H: the box is taller than the drawing
-       area by the total-length strip, so recomputing the centering here put the
-       bird 12px low and disagreed with the labels, which use .TopOffset. */}}
-  <g transform="translate(0,{{f1 .TopOffset}})">
+{{define "birdstrokes"}}
+{{$g := .Geom}}
     {{if $g.ChordTickX}}
     {{/* Outer thirds are the MEASURED wing chord: carpal joint to primary tip,
          so always solid. The inner span carries the whole model error, so it
@@ -142,13 +136,24 @@
     <line class="junction" x1="{{f1 (sub $g.CX 4)}}" y1="{{f1 $g.YBodyEnd}}"
           x2="{{f1 (add $g.CX 4)}}" y2="{{f1 $g.YBodyEnd}}"/>
     <line class="tail" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBodyEnd}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YTailTip}}"/>
-  </g>
-  {{with .MassCube}}{{if .Side}}
-  {{/* The cube of water that weighs what the bird weighs, in oblique
-       projection (product.labeledDetailDiagram, decisions.massAsWaterCube). The FACE's base sits on the bottom of the
-       drawing area in every diagram, so the projection grows up and right
-       from a corner that never moves and two cubes can be compared by eye.
-       Top and right faces first, front face over them: nearest last. */}}
+{{end}}
+
+{{/* Wide invisible hit targets behind an overlay bird's thin strokes so
+     grabbing directly on the canvas works cleanly with mouse or touch. */}}
+{{define "birdhit"}}
+{{$g := .Geom}}
+    <line x1="{{f1 (sub $g.CX $g.CrossbarHalfWidth)}}" y1="{{f1 $g.YShoulder}}"
+          x2="{{f1 (add $g.CX $g.CrossbarHalfWidth)}}" y2="{{f1 $g.YShoulder}}"/>
+    <line x1="{{f1 $g.CX}}" y1="{{f1 $g.YBillTip}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YTailTip}}"/>
+    <ellipse cx="{{f1 $g.CX}}" cy="{{f1 $g.YHeadCenter}}" rx="{{f1 $g.HeadRx}}" ry="{{f1 $g.HeadRy}}"/>
+{{end}}
+
+{{/* The cube of water that weighs what the bird weighs, in oblique
+     projection (product.labeledDetailDiagram, decisions.massAsWaterCube). The FACE's base sits on the bottom of the
+     drawing area in every diagram, so the projection grows up and right
+     from a corner that never moves and two cubes can be compared by eye.
+     Top and right faces first, front face over them: nearest last. */}}
+{{define "masscube"}}
   <g class="masscube{{if .Est}} est{{end}}">
     <title>{{.Title}}</title>
     <polygon class="mctop" points="{{f1 .X}},{{f1 .Y}}
@@ -162,7 +167,19 @@
     <rect class="mcface" x="{{f1 .X}}" y="{{f1 .Y}}"
           width="{{f1 .Side}}" height="{{f1 .Side}}"/>
   </g>
-  {{end}}{{end}}
+{{end}}
+
+{{define "diagram"}}
+{{$b := .Box}}
+<svg class="dia" viewBox="0 0 {{f1 $b.W}} {{f1 $b.H}}" preserveAspectRatio="xMidYMid meet" role="img"
+     aria-label="scaled outline of {{.Name}}">
+  {{/* .TopOffset, not a formula over $b.H: the box is taller than the drawing
+       area by the total-length strip, so recomputing the centering here put the
+       bird 12px low and disagreed with the labels, which use .TopOffset. */}}
+  <g transform="translate(0,{{f1 .TopOffset}})">
+{{template "birdstrokes" .}}
+  </g>
+  {{with .MassCube}}{{if .Side}}{{template "masscube" .}}{{end}}{{end}}
 </svg>
 {{end}}
 

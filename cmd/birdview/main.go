@@ -168,6 +168,8 @@ type server struct {
 	nextFindJS template.JS
 	// nextPlaceJS is web/static/next-place.js, inlined into the home page (product.nextView).
 	nextPlaceJS template.JS
+	// nextOverlayJS is web/static/next-overlay.js, inlined when show=overlay is active (decisions.overlayMode).
+	nextOverlayJS template.JS
 	// search is each species' normalized search text, by id, which the
 	// home page's find box matches against (product.nextView).
 	search map[string]string
@@ -599,6 +601,11 @@ func newServer(ds *dataset.Dataset, counties *dataset.Counties) (*server, error)
 		return nil, fmt.Errorf("reading next-place.js: %w", err)
 	}
 	s.nextPlaceJS = template.JS(js)
+	js, err = fs.ReadFile(assetFS, "static/next-overlay.js")
+	if err != nil {
+		return nil, fmt.Errorf("reading next-overlay.js: %w", err)
+	}
+	s.nextOverlayJS = template.JS(js)
 	s.search = searchTexts(ds)
 
 	// Once, at startup: every response's ETag is built from this (tech.cacheLifetimeStated).
@@ -1905,6 +1912,8 @@ func robots(w http.ResponseWriter, r *http.Request) {
 
 var funcs = template.FuncMap{
 	"f1":  func(v float64) string { return strconv.FormatFloat(v, 'f', 1, 64) },
+	"f2":  func(v float64) string { return strconv.FormatFloat(v, 'f', 2, 64) },
+	"f4":  func(v float64) string { return strconv.FormatFloat(v, 'f', 4, 64) },
 	"add": func(a, b float64) float64 { return a + b },
 	"sub": func(a, b float64) float64 { return a - b },
 	"div": func(a, b float64) float64 { return a / b },

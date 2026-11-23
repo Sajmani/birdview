@@ -982,16 +982,20 @@ home page in those. Its footer carries the full credits, which every other page 
 - **The order of the page** (Sameer, 2026-10-28). Under the header, top to bottom: a heading
   saying what is drawn ("Showing pinned birds", or "Showing birds in" the regions and months
   chosen, then any chosen family, habitat, and diet under their settings' labels); the **Show**
-  choices and **Clear pins**, on one line; the pinned birds; the find box; the other settings,
+  choices and **Clear pins**, on one line (plus **Overlay** once 2 or more birds are pinned, wrapping
+  cleanly inside 360px; [decisions.overlayMode](../../decisions/decisions.md#overlaymode)); the pinned birds; the find box; the other settings,
   then **Reset**; the histogram; then a sentence naming the order, what the histogram counts,
   and what is drawn ("Length distribution of all 1006 birds, showing the first 100, plus 2
   pins"); then the
   birds. The steps a reader takes to compare birds, show pinned, see the pins, find more, come
   first; the settings that narrow the set come after. The Show choices are short (**First**,
-  **All**, **Pinned**, since the heading already says "Showing") so that with **Clear pins** they
-  fit one line at 360px; a find-list match reads as one line of text that wraps, and a tier
+  **All**, **Pinned**, since the heading already says "Showing") so that for 0–1 pins they fit one
+  line at 360px with **Clear pins**; a find-list match reads as one line of text that wraps, and a tier
   heading wraps only between its label, range, count, and back to top. The same layout serves
-  every width; only the page margin narrows on a phone.
+  every width; only the page margin narrows on a phone. With 2–8 birds pinned, **Overlay**
+  (`show=overlay`) draws the pinned birds layered on one shared-scale canvas with vertical
+  alignment, optional centerline spread, and shareable millimeter shifts (`dy=<id>:<mm>`); above 8
+  pinned birds **Overlay** stays visible but disabled.
 - **The set.** With no filter, it is every bird, most often recorded first: every month unless
   the address names some (`month=all`, which older addresses carry, is every month too). Every
   filter (family, region, month, habitat, diet) narrows the set, and pinned birds join it.

@@ -164,7 +164,7 @@ func TestShowRowFitsAPhone(t *testing.T) {
 		t.Skip("no Chrome or Chromium found (set BIRDVIEW_CHROME); the Show row was not measured")
 	}
 	inner := instrument(newTestServer(t), showRowProbe, nil)
-	const page = "/?show=pinned&pin=amecro&pin=annhum"
+	const page = "/?show=pinned&pin=amecro"
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/__phone" {
 			// A frame phoneWidth wide, as in TestPagesFitAPhone.

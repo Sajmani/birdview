@@ -171,13 +171,18 @@ type nextData struct {
 	// Show first box's form sends with it, and ShowAllURL and ShowPinnedURL
 	// are the other two choices. Matching is how many birds the settings
 	// match, pins included, whatever is shown.
-	Show          string
-	Cap           string
-	ShowFields    []hiddenField
-	ShowAllURL    template.URL
-	ShowPinnedURL template.URL
-	ShowFirstURL  template.URL
-	Matching      int
+	Show            string
+	Cap             string
+	ShowFields      []hiddenField
+	ShowAllURL      template.URL
+	ShowPinnedURL   template.URL
+	ShowOverlayURL  template.URL
+	ShowFirstURL    template.URL
+	ShowOverlay     bool
+	OverlayDisabled bool
+	OverlayLimit    int
+	Overlay         *overlayView
+	Matching        int
 	// OrderLabel names the chosen order ("Length", "Bill length"), which the
 	// sentence under the histogram leads with ("Length distribution of …").
 	OrderLabel string
@@ -219,11 +224,12 @@ type nextData struct {
 	BirdsURL  string
 	// DetailSuffix is what follows /species/<id> in a species page's address from here: the
 	// units and names, or nothing. The find script builds the list's links with it.
-	DetailSuffix string
-	FindLimit    int
-	FindScript   template.JS
-	PlaceScript  template.JS
-	HereScript   template.JS
+	DetailSuffix  string
+	FindLimit     int
+	FindScript    template.JS
+	PlaceScript   template.JS
+	HereScript    template.JS
+	OverlayScript template.JS
 	// ResetURL returns every setting to its default and keeps the pins;
 	// ClearPinsURL drops the pins and keeps every setting, empty when
 	// nothing is pinned.
@@ -280,12 +286,18 @@ func nextToggle(q url.Values, key, v string) template.URL {
 	return nextURL(q)
 }
 
-// leavePinnedOnly drops show=pinned and keeps any other show: for the two
-// transitions that mean to leave the pinned birds, Clear pins (nothing is
-// pinned after it) and the birds around you now (which are not pins).
+// leavePinnedOnly drops show=pinned and show=overlay (and overlay-only query
+// parameters) while keeping any other show: for Clear pins and #here-and-now.
 func leavePinnedOnly(q url.Values) {
-	if q.Get("show") == "pinned" {
+	switch q.Get("show") {
+	case "pinned":
 		q.Del("show")
+	case "overlay":
+		q.Del("show")
+		q.Del("align")
+		q.Del("spread")
+		q.Del("shift")
+		q.Del("dy")
 	}
 }
 
@@ -452,12 +464,12 @@ func canonicalRegions(q url.Values) bool {
 	return changed
 }
 
-// nextShowOf reads show: "pinned", "all", or "first" with the count to draw
-// before the gap rows. ok is false when show is absent or reads as the
+// nextShowOf reads show: "pinned", "overlay", "all", or "first" with the count
+// to draw before the gap rows. ok is false when show is absent or reads as the
 // default, the first nextCap, so the address can leave it out.
 func nextShowOf(q url.Values) (mode string, n int, ok bool) {
 	v := strings.TrimSpace(q.Get("show"))
-	if v == "pinned" || v == "all" {
+	if v == "pinned" || v == "all" || v == "overlay" {
 		return v, nextCap, true
 	}
 	if c, err := strconv.Atoi(v); err == nil && c > 0 && c != nextCap {
@@ -570,6 +582,7 @@ func nextPin(q url.Values, id string) template.URL {
 		q.Add("pin", v)
 	}
 	if was {
+		overlayDropPin(q, id)
 		return nextURL(q)
 	}
 	q.Add("pin", id)
@@ -584,11 +597,12 @@ func (s *server) nextPage(r *http.Request) nextData {
 	// Every month unless the address names some (month=now has already
 	// been redirected to a month by next).
 
-	// show=pinned draws only the pinned birds: a comparison of the reader's
-	// own picks. Otherwise the birds the settings match are drawn, the first
-	// of them or all (show=all).
+	// show=pinned draws only the pinned birds; show=overlay overlays 2-8 pinned
+	// birds on one shared-scale diagram. Otherwise the birds the settings match
+	// are drawn, the first of them or all (show=all).
 	mode, capN, _ := nextShowOf(q)
-	pinnedOnly := mode == "pinned"
+	overlayMode := mode == "overlay"
+	pinnedOnly := mode == "pinned" || overlayMode
 	matched, _ := s.filterSpecies(opt)
 	var base []*dataset.Species
 	if !pinnedOnly {
@@ -678,16 +692,16 @@ func (s *server) nextPage(r *http.Request) nextData {
 	after := 0
 	page.Show, page.Cap = mode, strconv.Itoa(capN)
 	for _, k := range sortedKeys(q) {
-		if k == "show" || k == "bird" {
+		if k == "show" || k == "bird" || k == "align" || k == "spread" || k == "shift" || k == "dy" {
 			continue
 		}
 		for _, v := range q[k] {
 			page.ShowFields = append(page.ShowFields, hiddenField{k, v})
 		}
 	}
-	page.ShowAllURL = nextSet(q, "show", "all")
-	page.ShowPinnedURL = nextSet(q, "show", "pinned")
-	page.ShowFirstURL = nextSet(q, "show", "")
+	page.ShowAllURL = nextSet(q, "show", "all", "align", "spread", "shift", "dy")
+	page.ShowPinnedURL = nextSet(q, "show", "pinned", "align", "spread", "shift", "dy")
+	page.ShowFirstURL = nextSet(q, "show", "", "align", "spread", "shift", "dy")
 	page.Matching = len(matched)
 	inMatched := map[string]bool{}
 	for _, sp := range matched {
@@ -753,6 +767,12 @@ func (s *server) nextPage(r *http.Request) nextData {
 		page.ClearPinsURL = nextSet(q, "pin", "", "show")
 	}
 	page.PinnedOnly = pinnedOnly
+	page.OverlayLimit = overlayMaxPins
+	page.ShowOverlay = len(added) >= overlayMinPins || overlayMode
+	page.OverlayDisabled = len(added) > overlayMaxPins
+	if len(added) >= overlayMinPins && !page.OverlayDisabled {
+		page.ShowOverlayURL = nextSet(q, "show", "overlay")
+	}
 
 	// One scale: every bird shown is drawn to the longest and widest of them.
 	shown := make([]*dataset.Species, 0, len(picks))
@@ -763,102 +783,107 @@ func (s *server) nextPage(r *http.Request) nextData {
 	}
 	refLen, refSpan := view.Reference(shown)
 	u := unitsFor(opt.Metric3, masses...)
-	// The tiers' headings, in the page's units, with one precision for
-	// all so that neighbors read apart (product.sectionHeadersStateRange).
-	metricLabel := map[view.Metric]string{view.ByFrequency: "Frequency", view.ByLength: "Length",
-		view.ByWingspan: "Wingspan", view.ByMass: "Mass", view.ByBill: "Bill", view.ByTail: "Tail"}[opt.Metric]
-	page.Tiers = make([]nextTier, len(secs))
-	spans := make([]tierSpan, len(secs))
-	for i, sec := range secs {
-		page.Tiers[i] = nextTier{Index: i + 1, Label: metricLabel, Count: len(sec.Species)}
-		if opt.Metric == view.ByFrequency {
-			page.Tiers[i].Min, page.Tiers[i].Max, page.Tiers[i].Note = frequencyBand(sec.Min, sec.Max, opt.Decades)
+	if overlayMode {
+		page.Overlay = s.buildOverlay(q, keep["pin"], opt, u)
+		page.OverlayScript = s.nextOverlayJS
+	} else {
+		// The tiers' headings, in the page's units, with one precision for
+		// all so that neighbors read apart (product.sectionHeadersStateRange).
+		metricLabel := map[view.Metric]string{view.ByFrequency: "Frequency", view.ByLength: "Length",
+			view.ByWingspan: "Wingspan", view.ByMass: "Mass", view.ByBill: "Bill", view.ByTail: "Tail"}[opt.Metric]
+		page.Tiers = make([]nextTier, len(secs))
+		spans := make([]tierSpan, len(secs))
+		for i, sec := range secs {
+			page.Tiers[i] = nextTier{Index: i + 1, Label: metricLabel, Count: len(sec.Species)}
+			if opt.Metric == view.ByFrequency {
+				page.Tiers[i].Min, page.Tiers[i].Max, page.Tiers[i].Note = frequencyBand(sec.Min, sec.Max, opt.Decades)
+			}
+			spans[i] = tierSpan{sec.Min, sec.Max, u}
 		}
-		spans[i] = tierSpan{sec.Min, sec.Max, u}
-	}
-	if opt.Metric != view.ByFrequency {
-		// Neighbors are neighbors on the scale, whichever way it is shown.
-		asc := slices.Clone(spans)
-		if rev {
-			slices.Reverse(asc)
-		}
-		extra := headingDigits(asc, opt.Metric)
-		for i, sp := range spans {
-			page.Tiers[i].Min = sp.u.formatDigits(sp.lo, opt.Metric, extra)
-			page.Tiers[i].Max = sp.u.formatDigits(sp.hi, opt.Metric, extra)
-		}
-	}
-	for _, pk := range picks {
-		page.Tiers[tierOf[pk.sp]].Drawn = true
-	}
-	// One bar per tier, with an empty bar for each step of the scale no
-	// bird falls in, built in ascending order and then turned to the order
-	// shown.
-	views := make([]sectionView, len(secs))
-	raw := slices.Clone(secs)
-	for i, t := range page.Tiers {
-		views[i] = sectionView{Index: t.Index, Min: t.Min, Max: t.Max, Note: t.Note, Count: t.Count}
-	}
-	if rev {
-		slices.Reverse(views)
-		slices.Reverse(raw)
-	}
-	bars := histogram(metricLabel, views, raw, opt.Metric, opt.Step)
-	if rev {
-		slices.Reverse(bars)
-	}
-	for _, b := range bars {
-		nb := nextBar{histBar: b}
-		if !b.Empty {
-			nb.URL = template.URL("#" + nextTierAnchor(b.Index))
-			if !page.Tiers[b.Index-1].Drawn {
-				nb.URL = page.ShowAllURL + nb.URL
+		if opt.Metric != view.ByFrequency {
+			// Neighbors are neighbors on the scale, whichever way it is shown.
+			asc := slices.Clone(spans)
+			if rev {
+				slices.Reverse(asc)
+			}
+			extra := headingDigits(asc, opt.Metric)
+			for i, sp := range spans {
+				page.Tiers[i].Min = sp.u.formatDigits(sp.lo, opt.Metric, extra)
+				page.Tiers[i].Max = sp.u.formatDigits(sp.hi, opt.Metric, extra)
 			}
 		}
-		page.Histogram = append(page.Histogram, nb)
-	}
+		for _, pk := range picks {
+			page.Tiers[tierOf[pk.sp]].Drawn = true
+		}
+		// One bar per tier, with an empty bar for each step of the scale no
+		// bird falls in, built in ascending order and then turned to the order
+		// shown.
+		views := make([]sectionView, len(secs))
+		raw := slices.Clone(secs)
+		for i, t := range page.Tiers {
+			views[i] = sectionView{Index: t.Index, Min: t.Min, Max: t.Max, Note: t.Note, Count: t.Count}
+		}
+		if rev {
+			slices.Reverse(views)
+			slices.Reverse(raw)
+		}
+		bars := histogram(metricLabel, views, raw, opt.Metric, opt.Step)
+		if rev {
+			slices.Reverse(bars)
+		}
+		for _, b := range bars {
+			nb := nextBar{histBar: b}
+			if !b.Empty {
+				nb.URL = template.URL("#" + nextTierAnchor(b.Index))
+				if !page.Tiers[b.Index-1].Drawn {
+					nb.URL = page.ShowAllURL + nb.URL
+				}
+			}
+			page.Histogram = append(page.Histogram, nb)
+		}
 
-	// The Pinned group leads the page: every pinned bird, in the page's
-	// order and untiered, before the first tier; under Pinned only it is the
-	// page (product.nextView, decisions.pinnedGroupLeads). Its tiles have their own anchors, so a bird
-	// drawn twice is still addressed once in each place.
-	newPageTile := func(sp *dataset.Species, anchor string) tile {
-		t := newTile(sp, view.Layout(sp, refLen, refSpan, tileBox), tileBox, u, opt.Locale)
-		t.DetailURL, t.Anchor = nextDetailLink(q, sp.ID), anchor
-		t.Commonest, t.SameAs = s.shareWithSeams(sp, opt), s.sameMeasurements(sp, opt.Locale)
-		t.PinURL, t.Pinned = nextPin(q, sp.ID), added[sp.ID]
-		return t
-	}
-	for _, pk := range picks {
-		if added[pk.sp.ID] {
-			page.GroupTiles = append(page.GroupTiles, newPageTile(pk.sp, pinnedAnchor(pk.sp.ID)))
+		// The Pinned group leads the page: every pinned bird, in the page's
+		// order and untiered, before the first tier; under Pinned only it is the
+		// page (product.nextView, decisions.pinnedGroupLeads). Its tiles have their own anchors, so a bird
+		// drawn twice is still addressed once in each place.
+		newPageTile := func(sp *dataset.Species, anchor string) tile {
+			t := newTile(sp, view.Layout(sp, refLen, refSpan, tileBox), tileBox, u, opt.Locale)
+			t.DetailURL, t.Anchor = nextDetailLink(q, sp.ID), anchor
+			t.Commonest, t.SameAs = s.shareWithSeams(sp, opt), s.sameMeasurements(sp, opt.Locale)
+			t.PinURL, t.Pinned = nextPin(q, sp.ID), added[sp.ID]
+			return t
 		}
-	}
-	if len(page.GroupTiles) > 0 {
-		page.Items = append(page.Items, nextItem{Group: len(page.GroupTiles)})
-		for i := range page.GroupTiles {
-			page.Items = append(page.Items, nextItem{Tile: &page.GroupTiles[i]})
+		for _, pk := range picks {
+			if added[pk.sp.ID] {
+				page.GroupTiles = append(page.GroupTiles, newPageTile(pk.sp, pinnedAnchor(pk.sp.ID)))
+			}
 		}
-	}
+		if len(page.GroupTiles) > 0 {
+			page.Items = append(page.Items, nextItem{Group: len(page.GroupTiles)})
+			for i := range page.GroupTiles {
+				page.Items = append(page.Items, nextItem{Tile: &page.GroupTiles[i]})
+			}
+		}
 
-	page.Tiles = make([]tile, len(picks))
-	lastTier := -1
-	for i, pk := range picks {
-		page.Tiles[i] = newPageTile(pk.sp, tileAnchor(pk.sp.ID))
-		if pinnedOnly {
-			continue // the group is the page
+		page.Tiles = make([]tile, len(picks))
+		lastTier := -1
+		for i, pk := range picks {
+			page.Tiles[i] = newPageTile(pk.sp, tileAnchor(pk.sp.ID))
+			if pinnedOnly {
+				continue // the group is the page
+			}
+			if pk.before > 0 {
+				page.Items = append(page.Items, nextItem{Hidden: pk.before})
+			}
+			if t := tierOf[pk.sp]; t != lastTier {
+				lastTier = t
+				page.Items = append(page.Items, nextItem{Tier: &page.Tiers[t]})
+			}
+			page.Items = append(page.Items, nextItem{Tile: &page.Tiles[i]})
 		}
-		if pk.before > 0 {
-			page.Items = append(page.Items, nextItem{Hidden: pk.before})
+		if after > 0 && !pinnedOnly {
+			page.Items = append(page.Items, nextItem{Hidden: after})
 		}
-		if t := tierOf[pk.sp]; t != lastTier {
-			lastTier = t
-			page.Items = append(page.Items, nextItem{Tier: &page.Tiers[t]})
-		}
-		page.Items = append(page.Items, nextItem{Tile: &page.Tiles[i]})
-	}
-	if after > 0 && !pinnedOnly {
-		page.Items = append(page.Items, nextItem{Hidden: after})
 	}
 
 	// The find box: how many birds match, and which once few enough.
@@ -889,7 +914,11 @@ func (s *server) nextPage(r *http.Request) nextData {
 		}
 	}
 
-	page.Title = s.nextTitle(opt, pinnedOnly)
+	if overlayMode {
+		page.Title = "Overlaying pinned birds"
+	} else {
+		page.Title = s.nextTitle(opt, pinnedOnly)
+	}
 	page.Feedback = s.issueURL(r, "", "The page as shown", []string{page.Title,
 		strconv.Itoa(page.Count) + " of " + strconv.Itoa(page.Total) + " birds match"})
 	page.Controls = s.nextControls(q, opt)

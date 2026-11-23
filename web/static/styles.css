@@ -507,3 +507,53 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .pinbtn svg { fill: currentColor; }
 .pinbtn.on { background: var(--accent); border-color: var(--accent); color: #06283d; }
 
+/* Overlay mode (decisions.overlayMode): 2 to 8 pinned birds layered on one
+   shared-scale SVG, colored by bird identity. */
+.btn.disabled { border-style: dotted; background: transparent; color: var(--dim); cursor: not-allowed; }
+.ov-c0 { color: #67e8f9; }
+.ov-c1 { color: #fcd34d; }
+.ov-c2 { color: #fda4af; }
+.ov-c3 { color: #6ee7b7; }
+.ov-c4 { color: #f0abfc; }
+.ov-c5 { color: #fdba74; }
+.ov-c6 { color: #bef264; }
+.ov-c7 { color: #f8fafc; }
+
+.ov-wrap { margin-top: 14px; max-width: 760px; }
+.ov-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 10px; }
+.ov-bar .seg { margin-bottom: 0; }
+.ov-bar .reset { padding: 3px 6px; border-radius: 6px; }
+.ov-stage { width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 6px; }
+.ov-guide { stroke: var(--line); stroke-width: 1; stroke-dasharray: 4 4; }
+.ov-dia .bill, .ov-dia .head, .ov-dia .neck, .ov-dia .body, .ov-dia .tail,
+.ov-dia .wing, .ov-dia .chord, .ov-dia .chordtick, .ov-dia .junction { stroke: currentColor; }
+.ov-dia .masscube polygon, .ov-dia .masscube rect { stroke: currentColor; }
+.ov-dia .mcface { fill: currentColor; fill-opacity: 0.24; }
+.ov-dia .mctop  { fill: currentColor; fill-opacity: 0.40; }
+.ov-dia .mcside { fill: currentColor; fill-opacity: 0.12; }
+.ov-dia .ov-bird { opacity: 0.82; cursor: ns-resize; touch-action: none; }
+.ov-dia .ov-cube { opacity: 0.78; }
+.ov-dia.has-sel { cursor: ns-resize; touch-action: none; }
+.ov-dia.has-sel .ov-bird { opacity: 0.35; }
+.ov-dia.has-sel .ov-bird.selected { opacity: 1; }
+.ov-dia.has-sel .ov-cube { opacity: 0.25; }
+.ov-dia.has-sel .ov-cube.selected { opacity: 1; }
+.ov-dia .ov-hit line, .ov-dia .ov-hit path, .ov-dia .ov-hit ellipse {
+  fill: none; stroke: #000000; stroke-opacity: 0; stroke-width: 18; stroke-linecap: round;
+  pointer-events: stroke; }
+.ov-dia .ov-hit ellipse { fill: #000000; fill-opacity: 0; pointer-events: all; }
+.ov-hint { margin: 8px 0; color: var(--dim); font-size: 13px; }
+.ov-legend { display: flex; flex-direction: column; gap: 6px; }
+.ov-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+.ov-row.selected { border-color: var(--accent); background: #0b1220; }
+.ov-pick { font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.ov-pick[aria-pressed="true"] { border-color: var(--accent); outline: 1px solid var(--accent); }
+.ov-dot { font-size: 15px; line-height: 1; }
+.ov-stats { color: var(--dim); font-size: 13px; }
+.ov-detail { font-size: 13px; text-decoration: none; }
+.ov-detail:hover { text-decoration: underline; }
+.ov-nudge { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; }
+.ov-dy { color: var(--dim); font-size: 13px; font-variant-numeric: tabular-nums; min-width: 5.5ch; text-align: right; }
+

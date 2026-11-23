@@ -5782,3 +5782,55 @@ Preloading all 3,441 US and Canadian counties on every home page would blow past
 to normal page loads, transfers only ~5–30 KB on a Here press (cached immutable for a year), keeps
 exact coordinates in the browser, and extends directly to any country added later.
 
+---
+
+## overlayMode
+
+**An Overlay view compares 2–8 pinned birds on a single shared-scale diagram, with color marking the bird and vertical alignment and spread in the URL**
+
+Date: 2026-11-22
+
+Decided by: Sameer (on a suggestion from Ryan M, [#18](https://github.com/Sajmani/birdview/issues/18))
+
+Status: accepted
+
+Affects: [product.nextView](../local/product/presentation.md#nextview), [product.oneDiagramVocabulary](../local/product/diagram.md#onediagramvocabulary), [product.measuredVersusModeled](../local/product/measurements.md#measuredversusmodeled)
+
+### Decided
+
+1. **Entry point and pin bounds.** Once 2 or more birds are pinned, **Overlay (k)** appears in
+   the home page's Show row immediately after **Pinned (k)** (`show=overlay`). It is active for
+   **2 to 8** pinned birds and disabled (`aria-disabled="true"`) when more than 8 birds are pinned.
+   Visiting `show=overlay` directly with fewer than 2 or more than 8 pins displays a clear message
+   and a link back to Pinned or Reset instead of drawing an unreadable overlay.
+2. **Exception to [product.oneDiagramVocabulary](../local/product/diagram.md#onediagramvocabulary).**
+   In Overlay mode, color encodes **which bird** rather than anatomical part, using 8 fixed
+   high-contrast stylesheet classes (`.ov-c0` through `.ov-c7`), each clearing WCAG 7:1 contrast on
+   both `--bg` and `--panel`. Birds and their nested lower-left water-mass cubes paint largest behind
+   smallest with slight transparency; all non-color diagram cues remain intact (solid vs. dashed
+   strokes for measured vs. modeled lengths, hollow head oval, folded-neck S-curve, wing-chord
+   ticks, and body/tail junction tick).
+3. **Alignment, horizontal/vertical spread, and shareable millimeter offsets.** Above the canvas, **Align** chooses
+   **Wings** (default — aligns shoulders), **Bill** (bill tips), **Tail** (tail tips), or **Center**,
+   clearing manual shifts; **Spread ↔** (`spread=1`) gently offsets vertical centerlines horizontally
+   so overlapping bills and tails can be read side by side without changing vertical scale; and
+   **Spread ↕** (`shift=1`) staggers birds vertically by the same step so overlapping wing crossbars
+   separate without changing alignment presets or scale. Manual
+   vertical shifts are stored in the URL as repeatable `dy=<id>:<mm>` parameters in real
+   millimeters so shared links match across screen sizes, updated in place during interactive drags
+   and nudges via `history.replaceState`.
+4. **Selecting and moving.** Clicking a bird in the legend selects it and brings it to the front at
+   full opacity (dimming others on the canvas, leaving legend text at full contrast), allowing
+   vertical drag anywhere on the canvas and `ArrowUp`/`ArrowDown` keyboard nudges; grabbing a bird
+   directly on the canvas via a wide transparent hit stroke selects and drags it in one motion; and
+   inline up/down/reset buttons on each legend row work with or without JavaScript. Shows only the
+   overlay canvas and legend (no duplicate tiles below). `.showrow` remains on one line at 360px
+   with 0–1 pins and wraps cleanly inside 360px when Overlay joins at 2+ pins.
+
+### Why
+
+Overlaying stick figures directly reveals proportion differences (bill reach, neck vs. body ratio,
+tail length, wingspan) that side-by-side tiles leave to mental arithmetic. Capping the view at 8
+birds keeps colors distinguishable for color-blind readers, per-bird CSS classes preserve the closed
+stylesheet contract, and millimeter offsets keep shared URLs viewport-independent.
+
