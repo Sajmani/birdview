@@ -240,7 +240,9 @@ three.
 
 **Color is shared exactly.** Each part of the diagram — bill, head, neck, body, tail, wing
 crossbar, wing chord, mass cube — has one color, and every surface uses that color for that part. A surface
-may not pick its own shade of a part, however good its local reason.
+may not pick its own shade of a part, however good its local reason. (For Overlay mode's per-bird
+identity palette, which keeps stroke provenance and structural cues unchanged, see
+[decisions.overlayMode](../../decisions/decisions.md#overlaymode).)
 
 **The colors** ([decisions.partColorsRevised](../../decisions/decisions.md#partcolorsrevised), [decisions.massCubeSkyBlue](../../decisions/decisions.md#masscubeskyblue)): **bill** amber `#fbbf24`, **tail** white `#ffffff`, **crossbar**
 emerald `#34d399`, **chord**, the crossbar's measured outer segments, orchid `#ffc7f7`, ending at

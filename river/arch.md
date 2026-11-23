@@ -51,7 +51,7 @@ So the server computes sections and geometry and renders HTML. Every control is 
 and every detail view is a URL, which also makes any view shareable. The cost is a page load per
 interaction, which is unnoticeable on localhost.
 
-**Four exceptions, all deliberate**, all on the home page
+**Five exceptions, all deliberate**, all on the home page
 ([product.nextView](requirements/local/product/presentation.md#nextview)). The first is `here.js`,
 behind Here in the Place setting and the welcome line's `#here-and-now`. It looks up the reader's
 region in the browser so their position never reaches the server
@@ -74,9 +74,14 @@ A browser test holds it to the server's `place=` rendering.
 
 The fourth, inline in `next.html`, moves an opened setting's choices left only as far as keeps them
 on the screen, closes them on a tap elsewhere, and reopens the setting a choice was made in, at the
-same scroll position. The rule all four protect is that *logic* stays in Go, not that the client
-is inert; without JavaScript the page still works, minus these four (the bird and place search
-boxes then need Enter, and a phone shows a setting's choices under the whole count line).
+same scroll position. The fifth is `next-overlay.js`, inlined only in Overlay mode
+(`show=overlay`), which brings a clicked bird to the front, handles vertical pointer drags and
+`ArrowUp`/`ArrowDown` nudges, and syncs millimeter `dy=` offsets via `history.replaceState`, while
+layout geometry, color assignment, and non-JavaScript alignment, spread, and up/down nudge links
+stay in Go (`cmd/birdview/overlay.go`). The rule all five protect is that *logic* stays in Go, not
+that the client is inert; without JavaScript the page still works, minus these five (the bird and
+place search boxes then need Enter, Overlay alignment, spread, and nudge links reload via URL, and
+a phone shows a setting's choices under the whole count line).
 
 The routes: the home page `/`, species pages `/species/<id>`, the guides `/docs/`, `/added`,
 `/excluded`, `/birds.json`, `/places.json`, the boundary file under `/boundaries/`, `/robots.txt`, and `/static/`.

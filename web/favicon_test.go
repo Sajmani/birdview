@@ -29,30 +29,53 @@ var (
 	rePaint    = regexp.MustCompile(`(?:^|[;\s])(?:stroke|fill|background(?:-color)?|border-color):\s*([^;]+)`)
 	reClassAtt = regexp.MustCompile(`class="([^"]*)"`)
 	reAction   = regexp.MustCompile(`{{[^}]*}}`)
-	reDiagTpl  = regexp.MustCompile(`(?s){{define "diagram"}}(.*?)\n{{end}}`)
+	reDefHdr   = regexp.MustCompile(`^"([^"]+)"}}(.*)`)
+	reUseTpl   = regexp.MustCompile(`{{template "([^"]+)"[^}]*}}`)
 	reVarRef   = regexp.MustCompile(`var\((--[a-z-]+)\)`)
 	reXMLComm  = regexp.MustCompile(`(?s)<!--.*?-->`)
 )
 
 // diagramParts is the set of class tokens the diagram template actually emits,
-// read from the template rather than listed here. A part added to the drawing
-// is covered automatically; a list would quietly stop covering it.
+// read from the template (following nested {{template "..."}} calls) rather
+// than listed here. A part added to the drawing is covered automatically; a
+// list would quietly stop covering it.
 func diagramParts(t *testing.T) map[string]bool {
 	t.Helper()
 	b, err := Static.ReadFile("static/shared.html")
 	if err != nil {
 		t.Fatalf("reading the embedded shared templates: %v", err)
 	}
-	m := reDiagTpl.FindStringSubmatch(string(b))
-	if m == nil {
+	defs := map[string]string{}
+	for _, chunk := range regexp.MustCompile(`(?m)^{{define `).Split(string(b), -1)[1:] {
+		if m := reDefHdr.FindStringSubmatch(strings.ReplaceAll(chunk, "\n", "\x00")); m != nil {
+			defs[m[1]] = strings.ReplaceAll(m[2], "\x00", "\n")
+		}
+	}
+	if _, ok := defs["diagram"]; !ok {
 		t.Fatal(`no {{define "diagram"}} block; the part set cannot be derived`)
 	}
 	parts := map[string]bool{}
-	for _, c := range reClassAtt.FindAllStringSubmatch(m[1], -1) {
-		for _, tok := range strings.Fields(reAction.ReplaceAllString(c[1], " ")) {
-			parts[tok] = true
+	seen := map[string]bool{}
+	var walk func(name string)
+	walk = func(name string) {
+		if seen[name] {
+			return
+		}
+		seen[name] = true
+		body, ok := defs[name]
+		if !ok {
+			t.Fatalf("diagram template calls undefined partial %q", name)
+		}
+		for _, c := range reClassAtt.FindAllStringSubmatch(body, -1) {
+			for _, tok := range strings.Fields(reAction.ReplaceAllString(c[1], " ")) {
+				parts[tok] = true
+			}
+		}
+		for _, u := range reUseTpl.FindAllStringSubmatch(body, -1) {
+			walk(u[1])
 		}
 	}
+	walk("diagram")
 	return parts
 }
 

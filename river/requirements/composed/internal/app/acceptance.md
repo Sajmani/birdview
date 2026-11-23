@@ -159,7 +159,8 @@ the same order, in the gap row at the end; the herons draw every heron with no l
 draws 50, says 50 in the box, and is kept by a filter but not Reset; `show=all` is kept by a
 filter too. Under the heading, the Show row reads First [box], a form that sends every other
 setting but show and the find box, then All with the count the settings match, Pinned
-(2), and Clear pins, the chosen one marked, all on one line at 360px (`TestShowRowFitsAPhone`); Show is no longer a closed setting. The page runs, top
+(1), and Clear pins, the chosen one marked, all on one line at 360px (`TestShowRowFitsAPhone`;
+at 2+ pins Overlay joins after Pinned and the row wraps cleanly inside 360px); Show is no longer a closed setting. The page runs, top
 to bottom: the header, the heading, the Show row, the pinned list, the find box, one count row
 (Order by through Names, then Reset), the histogram, the sentence, and the birds. The sentence
 names the order, what the histogram counts, and what is drawn: "Mass distribution of all", "Frequency
@@ -1069,6 +1070,32 @@ projection, HTTP route tests, and a headless Chrome test driving Here and `#here
    requests no county file.
 4. **Required attribution.** The home page footer credits the U.S. Census Bureau and carries
    Statistics Canada's verbatim Value-added Product notice.
+
+## overlayModeComparesPinnedBirds
+
+**Overlay compares 2–8 pinned birds on one shared-scale diagram with alignment, spread, shift, and shareable vertical offsets**
+
+Covers: [product.nextView](../../../local/product/presentation.md#nextview), [product.oneDiagramVocabulary](../../../local/product/diagram.md#onediagramvocabulary), [product.measuredVersusModeled](../../../local/product/measurements.md#measuredversusmodeled), [product.fitsAPhone](../../../local/product/presentation.md#fitsaphone)
+
+**Method:** unit tests over URL parameters and overlay layout geometry, server HTML rendering checks,
+and headless Chrome interaction and phone-width checks
+
+**Assertions:**
+
+1. **Show bar and pin limits.** `Overlay (k)` appears after `Pinned (k)` only at 2+ pinned birds,
+   is enabled for 2–8 pins (`show=overlay`), and is disabled above 8 pins; requesting `show=overlay`
+   with <2 or >8 pins renders a clear notice instead of an overlay.
+2. **Shared scale, order, alignment, and provenance.** All pinned birds share one pixels-per-mm scale,
+   paint largest behind smallest, align at Wings (`align=wings`, default), Bill, Tail, or Center,
+   spread horizontally when `spread=1`, stagger vertically by the same step when `shift=1`,
+   preserve solid/dashed stroke classes and structural marks
+   without inline color styles or attributes, and apply millimeter `dy=<id>:<mm>` shifts across
+   viewports.
+3. **Interactive selection, nudge, drag, bar alignment, and 360px fit.** In headless Chrome, clicking
+   a legend row selects and brings that bird to the front, nudging/dragging shifts the bird
+   vertically and updates `dy=` in the URL via `history.replaceState`, the `Spread ↔` and `Spread ↕`
+   controls align vertically with `Wings|Bill|Tail|Center`, and at 360px the Overlay page and
+   `.showrow` have no horizontal overflow.
 
 ## everydayDefinitionsShown
 
