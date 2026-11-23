@@ -138,16 +138,6 @@
     <line class="tail" x1="{{f1 $g.CX}}" y1="{{f1 $g.YBodyEnd}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YTailTip}}"/>
 {{end}}
 
-{{/* Wide invisible hit targets behind an overlay bird's thin strokes so
-     grabbing directly on the canvas works cleanly with mouse or touch. */}}
-{{define "birdhit"}}
-{{$g := .Geom}}
-    <line x1="{{f1 (sub $g.CX $g.CrossbarHalfWidth)}}" y1="{{f1 $g.YShoulder}}"
-          x2="{{f1 (add $g.CX $g.CrossbarHalfWidth)}}" y2="{{f1 $g.YShoulder}}"/>
-    <line x1="{{f1 $g.CX}}" y1="{{f1 $g.YBillTip}}" x2="{{f1 $g.CX}}" y2="{{f1 $g.YTailTip}}"/>
-    <ellipse cx="{{f1 $g.CX}}" cy="{{f1 $g.YHeadCenter}}" rx="{{f1 $g.HeadRx}}" ry="{{f1 $g.HeadRy}}"/>
-{{end}}
-
 {{/* The cube of water that weighs what the bird weighs, in oblique
      projection (product.labeledDetailDiagram, decisions.massAsWaterCube). The FACE's base sits on the bottom of the
      drawing area in every diagram, so the projection grows up and right

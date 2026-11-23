@@ -976,7 +976,8 @@ home page in those. Its footer carries the full credits, which every other page 
   around you now (this address with `#here-and-now`: the
   reader's region found in the browser replaces the region, the month is set to the browser's
   current month, and every other setting is kept), tiny, small, medium, large, and huge birds (six
-  pinned and shown alone, by length), the open-country hunters (Habitat's Open country and Diet Hunts
+  pinned and shown alone, by length), overlaying four shorebirds (Least, Baird's, and White-rumped
+  Sandpipers and Sanderling, by length with horizontal and vertical spread), the open-country hunters (Habitat's Open country and Diet Hunts
   animals), all herons and ducks, and more ideas. A rule ends the
   header.
 - **The order of the page** (Sameer, 2026-10-28). Under the header, top to bottom: a heading
@@ -994,7 +995,7 @@ home page in those. Its footer carries the full credits, which every other page 
   heading wraps only between its label, range, count, and back to top. The same layout serves
   every width; only the page margin narrows on a phone. With 2–8 birds pinned, **Overlay**
   (`show=overlay`) draws the pinned birds layered on one shared-scale canvas with vertical
-  alignment, optional centerline spread, and shareable millimeter shifts (`dy=<id>:<mm>`); above 8
+  alignment, optional centerline spread, and shareable 2D millimeter drags (`drag=<id>:<dx>,<dy>`); above 8
   pinned birds **Overlay** stays visible but disabled.
 - **The set.** With no filter, it is every bird, most often recorded first: every month unless
   the address names some (`month=all`, which older addresses carry, is every month too). Every

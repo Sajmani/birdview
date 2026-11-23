@@ -15,13 +15,10 @@
 /* Overlay interaction (decisions.overlayMode).
  *
  * The server renders the full shared-scale SVG and legend so the page works
- * cleanly without JavaScript. This script adds:
- *   - selecting a bird from the legend (or directly on the canvas) to bring it
- *     forward and dim the others;
- *   - dragging vertically (directly on a bird, or anywhere on the canvas once a
- *     bird is selected) and nudging via ▲/▼ buttons or arrow keys;
- *   - syncing vertical shifts in real millimeters (dy=<id>:<mm>) into the URL
- *     via history.replaceState so shared links match across screen sizes. */
+ * cleanly without JavaScript. Birds are not draggable on the canvas until one
+ * is selected below, keeping page touch scrolling intact; once selected, this
+ * script supports 2D canvas drags and arrow-key nudges while syncing 2D offsets
+ * in real millimeters (drag=<id>:<dx>,<dy>) via history.replaceState. */
 (function () {
   "use strict";
   var wrap = document.querySelector(".ov-wrap");
@@ -32,15 +29,18 @@
   var nudgeMm = parseInt(wrap.getAttribute("data-nudge-mm"), 10) || 10;
   var boxW = parseFloat(wrap.getAttribute("data-box-w")) || 640;
   var origBoxH = parseFloat(wrap.getAttribute("data-box-h")) || 468;
-  var metric = wrap.getAttribute("data-metric") === "1";
+  var origViewX = parseFloat(wrap.getAttribute("data-view-x")) || 0;
+  var pad = 24;
   var maxOffset = 5000;
   if (!(pxPerMm > 0)) return;
 
   var birdsLayer = svg.querySelector(".ov-birds");
   var cubesLayer = svg.querySelector(".ov-cubes");
+  var guideLine = svg.querySelector(".ov-guide");
   var resetBtn = wrap.querySelector(".ov-reset");
   var spreadBtn = wrap.querySelector(".ov-spread");
   var shiftBtn = wrap.querySelector(".ov-shift");
+  var alignLinks = Array.prototype.slice.call(wrap.querySelectorAll(".ov-bar .seg a[href]"));
 
   var birds = {};
   var order = [];
@@ -51,16 +51,16 @@
       id: id,
       el: el,
       cubeEl: svg.querySelector('.ov-cube[data-id="' + id + '"]'),
+      baseX: parseFloat(el.getAttribute("data-base-x")) || 0,
       baseY: parseFloat(el.getAttribute("data-base-y")) || 0,
-      dx: parseFloat(el.getAttribute("data-dx")) || 0,
-      dy: parseInt(el.getAttribute("data-dy"), 10) || 0,
+      dragX: parseInt(el.getAttribute("data-drag-x"), 10) || 0,
+      dragY: parseInt(el.getAttribute("data-drag-y"), 10) || 0,
+      cx: parseFloat(el.getAttribute("data-cx")) || 0,
+      halfW: parseFloat(el.getAttribute("data-half-w")) || 0,
       span: parseFloat(el.getAttribute("data-span")) || 0,
       row: row,
       pick: row ? row.querySelector(".ov-pick") : null,
-      dyEl: row ? row.querySelector(".ov-dy") : null,
-      zeroEl: row ? row.querySelector(".ov-zero") : null,
-      upEl: row ? row.querySelector(".ov-up") : null,
-      dnEl: row ? row.querySelector(".ov-dn") : null
+      zeroEl: row ? row.querySelector(".ov-zero") : null
     };
     birds[id] = b;
     order.push(id);
@@ -68,10 +68,18 @@
 
   var selectedId = "";
 
+  function clampMm(v) {
+    v = Math.round(v);
+    if (v < -maxOffset) return -maxOffset;
+    if (v > maxOffset) return maxOffset;
+    return v;
+  }
+
   function select(id) {
     if (id && !birds[id]) id = "";
     selectedId = id;
     svg.classList.toggle("has-sel", !!id);
+    if (!id) svg.classList.remove("dragging");
     order.forEach(function (k) {
       var b = birds[k];
       var on = k === id;
@@ -86,74 +94,91 @@
     }
   }
 
-  function formatShift(mm) {
-    if (!mm) return "";
-    var sign = mm > 0 ? "+" : "";
-    if (metric) return sign + (mm / 10).toFixed(1) + " cm";
-    return sign + (mm / 25.4).toFixed(2) + " in";
-  }
-
   function updateBounds() {
+    var minX = 0;
+    var maxX = boxW;
     var minY = 0;
     var maxY = origBoxH;
     order.forEach(function (id) {
       var b = birds[id];
-      var y = b.baseY + b.dy * pxPerMm;
-      if (y - 24 < minY) minY = y - 24;
-      if (y + b.span + 24 > maxY) maxY = y + b.span + 24;
+      var x = b.baseX + b.dragX * pxPerMm;
+      var y = b.baseY + b.dragY * pxPerMm;
+      var left = x + b.cx - b.halfW - pad;
+      var right = x + b.cx + b.halfW + pad;
+      if (left < minX) minX = left;
+      if (right > maxX) maxX = right;
+      if (y - pad < minY) minY = y - pad;
+      if (y + b.span + pad > maxY) maxY = y + b.span + pad;
     });
-    svg.setAttribute("viewBox", "0 " + minY.toFixed(2) + " " + boxW.toFixed(1) + " " + (maxY - minY).toFixed(2));
+    svg.setAttribute(
+      "viewBox",
+      minX.toFixed(2) + " " + minY.toFixed(2) + " " + (maxX - minX).toFixed(2) + " " + (maxY - minY).toFixed(2)
+    );
+    if (guideLine) {
+      guideLine.setAttribute("x1", minX.toFixed(2));
+      guideLine.setAttribute("x2", maxX.toFixed(2));
+    }
     if (cubesLayer) {
-      var drop = maxY - origBoxH;
-      if (drop > 0.01) cubesLayer.setAttribute("transform", "translate(0," + drop.toFixed(2) + ")");
-      else cubesLayer.removeAttribute("transform");
+      var dx = minX - origViewX;
+      var dy = maxY - origBoxH;
+      if (Math.abs(dx) > 0.01 || Math.abs(dy) > 0.01) {
+        cubesLayer.setAttribute("transform", "translate(" + dx.toFixed(2) + "," + dy.toFixed(2) + ")");
+      } else {
+        cubesLayer.removeAttribute("transform");
+      }
     }
   }
 
-  function syncURL() {
-    var params = new URLSearchParams(location.search);
+  function appendDrags(params, ids, verticalToo) {
+    params.delete("drag");
     params.delete("dy");
-    var ids = order.slice().sort();
     ids.forEach(function (id) {
-      if (birds[id].dy !== 0) {
-        params.append("dy", id + ":" + birds[id].dy);
+      var b = birds[id];
+      var dy = verticalToo ? b.dragY : 0;
+      if (b.dragX !== 0 || dy !== 0) {
+        params.append("drag", id + ":" + b.dragX + "," + dy);
       }
     });
+  }
+
+  function syncURL() {
+    var ids = order.slice().sort();
+    var params = new URLSearchParams(location.search);
+    appendDrags(params, ids, true);
     var qs = params.toString();
-    var target = location.pathname + (qs ? "?" + qs : "") + location.hash;
-    history.replaceState(null, "", target);
+    history.replaceState(null, "", location.pathname + (qs ? "?" + qs : "") + location.hash);
 
     [spreadBtn, shiftBtn].forEach(function (btn) {
       if (!btn) return;
       var su = new URL(btn.href, location.origin);
-      su.searchParams.delete("dy");
-      ids.forEach(function (id) {
-        if (birds[id].dy !== 0) su.searchParams.append("dy", id + ":" + birds[id].dy);
-      });
+      appendDrags(su.searchParams, ids, true);
       btn.href = su.pathname + su.search;
+    });
+
+    alignLinks.forEach(function (link) {
+      var au = new URL(link.href, location.origin);
+      appendDrags(au.searchParams, ids, false);
+      link.href = au.pathname + au.search;
     });
   }
 
-  function applyOffset(id, mm, save) {
+  function applyOffset(id, mmX, mmY, save) {
     var b = birds[id];
     if (!b) return;
-    mm = Math.round(mm);
-    if (mm < -maxOffset) mm = -maxOffset;
-    if (mm > maxOffset) mm = maxOffset;
-    b.dy = mm;
-    b.el.setAttribute("data-dy", String(mm));
-    var y = b.baseY + mm * pxPerMm;
-    b.el.setAttribute("transform", "translate(" + b.dx.toFixed(2) + "," + y.toFixed(2) + ")");
-    if (b.dyEl) {
-      b.dyEl.textContent = formatShift(mm);
-      if (mm === 0) b.dyEl.setAttribute("hidden", "");
-      else b.dyEl.removeAttribute("hidden");
-    }
+    mmX = clampMm(mmX);
+    mmY = clampMm(mmY);
+    b.dragX = mmX;
+    b.dragY = mmY;
+    b.el.setAttribute("data-drag-x", String(mmX));
+    b.el.setAttribute("data-drag-y", String(mmY));
+    var x = b.baseX + mmX * pxPerMm;
+    var y = b.baseY + mmY * pxPerMm;
+    b.el.setAttribute("transform", "translate(" + x.toFixed(2) + "," + y.toFixed(2) + ")");
     if (b.zeroEl) {
-      if (mm === 0) b.zeroEl.setAttribute("hidden", "");
+      if (mmX === 0 && mmY === 0) b.zeroEl.setAttribute("hidden", "");
       else b.zeroEl.removeAttribute("hidden");
     }
-    var any = order.some(function (k) { return birds[k].dy !== 0; });
+    var any = order.some(function (k) { return birds[k].dragX !== 0 || birds[k].dragY !== 0; });
     if (resetBtn) {
       if (!any) resetBtn.setAttribute("hidden", "");
       else resetBtn.removeAttribute("hidden");
@@ -169,24 +194,10 @@
         select(selectedId === id ? "" : id);
       });
     }
-    if (b.upEl) {
-      b.upEl.addEventListener("click", function (e) {
-        e.preventDefault();
-        select(id);
-        applyOffset(id, b.dy - nudgeMm);
-      });
-    }
-    if (b.dnEl) {
-      b.dnEl.addEventListener("click", function (e) {
-        e.preventDefault();
-        select(id);
-        applyOffset(id, b.dy + nudgeMm);
-      });
-    }
     if (b.zeroEl) {
       b.zeroEl.addEventListener("click", function (e) {
         e.preventDefault();
-        applyOffset(id, 0);
+        applyOffset(id, 0, 0);
       });
     }
   });
@@ -194,7 +205,7 @@
   if (resetBtn) {
     resetBtn.addEventListener("click", function (e) {
       e.preventDefault();
-      order.forEach(function (id) { applyOffset(id, 0, false); });
+      order.forEach(function (id) { applyOffset(id, 0, 0, false); });
       syncURL();
     });
   }
@@ -203,24 +214,24 @@
 
   svg.addEventListener("pointerdown", function (e) {
     if (e.button && e.button !== 0) return;
-    var hitBird = e.target.closest && e.target.closest(".ov-bird[data-id]");
-    var id = hitBird ? hitBird.getAttribute("data-id") : selectedId;
-    if (!id || !birds[id]) return;
-    if (hitBird && selectedId !== id) {
-      select(id);
-    }
+    if (!selectedId || !birds[selectedId]) return;
     var rect = svg.getBoundingClientRect();
     var vb = svg.viewBox.baseVal;
-    var scaleY = rect.height > 0 && vb && vb.height > 0 ? vb.height / rect.height : 1;
+    var scale = 1;
+    if (rect.width > 0 && rect.height > 0 && vb && vb.width > 0 && vb.height > 0) {
+      scale = Math.max(vb.width / rect.width, vb.height / rect.height);
+    }
     drag = {
-      id: id,
+      id: selectedId,
       pointerId: e.pointerId,
+      startClientX: e.clientX,
       startClientY: e.clientY,
-      startDy: birds[id].dy,
-      scaleY: scaleY,
-      fromBird: !!hitBird,
+      startDragX: birds[selectedId].dragX,
+      startDragY: birds[selectedId].dragY,
+      scale: scale,
       moved: false
     };
+    svg.classList.add("dragging");
     if (svg.setPointerCapture) {
       try { svg.setPointerCapture(e.pointerId); } catch (err) {}
     }
@@ -228,12 +239,15 @@
 
   svg.addEventListener("pointermove", function (e) {
     if (!drag) return;
-    var clientDelta = e.clientY - drag.startClientY;
-    if (Math.abs(clientDelta) >= 3) drag.moved = true;
+    var dxClient = e.clientX - drag.startClientX;
+    var dyClient = e.clientY - drag.startClientY;
+    if (Math.hypot(dxClient, dyClient) >= 3) drag.moved = true;
     if (!drag.moved) return;
-    var nextMm = Math.round(drag.startDy + (clientDelta * drag.scaleY) / pxPerMm);
-    if (nextMm !== birds[drag.id].dy) {
-      applyOffset(drag.id, nextMm);
+    var nextX = clampMm(drag.startDragX + (dxClient * drag.scale) / pxPerMm);
+    var nextY = clampMm(drag.startDragY + (dyClient * drag.scale) / pxPerMm);
+    var b = birds[drag.id];
+    if (nextX !== b.dragX || nextY !== b.dragY) {
+      applyOffset(drag.id, nextX, nextY);
     }
   });
 
@@ -241,10 +255,11 @@
     if (!drag) return;
     var was = drag;
     drag = null;
+    svg.classList.remove("dragging");
     if (svg.releasePointerCapture) {
       try { svg.releasePointerCapture(e.pointerId); } catch (err) {}
     }
-    if (!was.moved && !was.fromBird && selectedId) {
+    if (!was.moved && selectedId) {
       select("");
     }
   }
@@ -258,12 +273,19 @@
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
     var fine = Math.max(1, Math.round(nudgeMm / 5));
     var step = e.shiftKey ? nudgeMm : fine;
-    if (e.key === "ArrowUp") {
+    var b = birds[selectedId];
+    if (e.key === "ArrowLeft") {
       e.preventDefault();
-      applyOffset(selectedId, birds[selectedId].dy - step);
+      applyOffset(selectedId, b.dragX - step, b.dragY);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      applyOffset(selectedId, b.dragX + step, b.dragY);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      applyOffset(selectedId, b.dragX, b.dragY - step);
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      applyOffset(selectedId, birds[selectedId].dy + step);
+      applyOffset(selectedId, b.dragX, b.dragY + step);
     } else if (e.key === "Escape") {
       select("");
     }
