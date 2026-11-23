@@ -1031,31 +1031,50 @@ func TestNextResetKeepsPins(t *testing.T) {
 	}
 }
 
-// TestNextPinnedList checks the list of pinned birds under the find box: one
-// entry per pinned bird, in alphabetical order by name, its name linking to
-// its tile and its pin unpinning it; and that no pin link jumps the page to a
-// tile.
+// TestNextPinnedList checks the list of pinned birds above the find box: one
+// entry per pinned bird, in URL pin order (deduplicated at first occurrence,
+// invariant across Order by and Names; decisions.pinnedListFollowsPinOrder), its
+// name linking to its tile and its pin unpinning it; and that no pin link jumps
+// the page to a tile.
 //
 // Verifies: app.nextViewDrawsOneSet
 func TestNextPinnedList(t *testing.T) {
 	s := newTestServer(t)
+	pinnedAnchors := func(p nextData) []string {
+		var anchors []string
+		for _, e := range p.Pinned {
+			anchors = append(anchors, e.Anchor)
+		}
+		return anchors
+	}
 	p := nextAt(s, "/?by=mass&month=all&pin=annhum&pin=amecro&pin=nosuchbird")
-	var names []string
-	for _, e := range p.Pinned {
-		names = append(names, e.Anchor)
-	}
+	names := pinnedAnchors(p)
 	// Into the Pinned group, where each pinned bird has its own tile (decisions.pinnedGroupLeads).
-	if !slices.Equal(names, []string{"p-amecro", "p-annhum"}) {
-		t.Fatalf("the pinned list links to %v, want p-amecro then p-annhum (alphabetical, not pin or mass order)", names)
+	if !slices.Equal(names, []string{"p-annhum", "p-amecro"}) {
+		t.Fatalf("the pinned list links to %v, want [p-annhum p-amecro] (URL pin order, not alphabetical or mass order)", names)
 	}
-	if string(p.Pinned[0].URL) != "/?by=mass&month=all&pin=annhum&pin=nosuchbird" {
+	if string(p.Pinned[0].URL) != "/?by=mass&month=all&pin=amecro&pin=nosuchbird" {
 		t.Errorf("the first entry's pin goes to %s, want the page without that pin", p.Pinned[0].URL)
 	}
 	// Under IOC names, thimur ("Murre Thick-billed") precedes amerob ("Robin
-	// American"), though amerob precedes thimur by id, pin order, and mass.
+	// American") alphabetically, but URL pin order keeps amerob before thimur.
 	wp := nextAt(s, "/?by=mass&month=all&names=world&pin=amerob&pin=thimur")
-	if len(wp.Pinned) != 2 || wp.Pinned[0].Anchor != "p-thimur" || wp.Pinned[1].Anchor != "p-amerob" {
-		t.Errorf("under IOC names, the pinned list is %+v, want thimur before amerob", wp.Pinned)
+	if got := pinnedAnchors(wp); !slices.Equal(got, []string{"p-amerob", "p-thimur"}) {
+		t.Errorf("under IOC names, the pinned list is %v, want [p-amerob p-thimur]", got)
+	}
+	// Changing Order by or rev=1 keeps the pinned list in URL pin order.
+	for _, query := range []string{
+		"/?by=wingspan&month=all&pin=annhum&pin=amecro",
+		"/?by=mass&rev=1&month=all&pin=annhum&pin=amecro",
+	} {
+		if got := pinnedAnchors(nextAt(s, query)); !slices.Equal(got, []string{"p-annhum", "p-amecro"}) {
+			t.Errorf("%s: pinned list is %v, want [p-annhum p-amecro]", query, got)
+		}
+	}
+	// Duplicate pin parameters deduplicate at first occurrence.
+	dup := nextAt(s, "/?month=all&pin=thimur&pin=annhum&pin=thimur&pin=amecro")
+	if got := pinnedAnchors(dup); !slices.Equal(got, []string{"p-thimur", "p-annhum", "p-amecro"}) {
+		t.Errorf("duplicate pins produced %v, want [p-thimur p-annhum p-amecro]", got)
 	}
 	unpinned := 0
 	for _, tl := range p.Tiles {

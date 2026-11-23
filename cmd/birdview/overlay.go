@@ -31,11 +31,15 @@ const (
 	overlayMinPins = 2
 	overlayMaxPins = 8
 
-	overlayBoxW       = 640.0
-	overlayDrawH      = 420.0
-	overlayPad        = 24.0
-	overlaySpreadStep = 14.0
-	overlayMaxOffset  = 5000
+	overlayBoxW          = 640.0
+	overlayMinBirdsH     = 260.0
+	overlayPad           = 24.0
+	overlaySpreadStep    = 14.0
+	overlayMinCubeSlot   = 46.0
+	overlayCubeGap       = 14.0
+	overlayCubeGapY      = 20.0
+	overlayCubeLabelBand = 46.0
+	overlayMaxOffset     = 5000
 )
 
 // overlayView is the home page's show=overlay state: 2 to 8 pinned birds
@@ -47,6 +51,10 @@ type overlayView struct {
 	MaxPins         int
 
 	ViewX, ViewW float64
+	CubeMinX     float64
+	CubeMaxX     float64
+	CubeBaseY    float64
+	CubeReserveH float64
 	BoxW, BoxH   float64
 	PxPerMm      float64
 	GuideY       float64
@@ -60,7 +68,7 @@ type overlayView struct {
 	ResetURL     template.URL
 	Aligns       []overlayAlignChoice
 	Layers       []overlayBird // sorted largest behind smallest (SVG paint order)
-	Legend       []overlayBird // sorted by active Order by setting (matching Pinned list / colors)
+	Legend       []overlayBird // sorted by active Order by setting (matching Pinned group tiles)
 }
 
 type overlayAlignChoice struct {
@@ -77,6 +85,7 @@ type overlayBird struct {
 	Scientific string
 	Anchor     string
 	ColorIdx   int
+	Label      string
 	DetailURL  template.URL
 	PinURL     template.URL
 
@@ -88,14 +97,19 @@ type overlayBird struct {
 	WingModeled bool
 	MassCube    massCube
 
-	BaseX   float64
-	BaseY   float64
-	X       float64
-	Y       float64
-	SpanPx  float64
-	DragXMM int
-	DragYMM int
-	Zero    template.URL
+	BaseX       float64
+	BaseY       float64
+	X           float64
+	Y           float64
+	SpanPx      float64
+	TagLeft     float64
+	TagTop      float64
+	CubeTagX    float64
+	CubeTagLeft float64
+	CubeTagTop  float64
+	DragXMM     int
+	DragYMM     int
+	Zero        template.URL
 }
 
 var overlayAlignOptions = []struct {
@@ -240,7 +254,7 @@ func overlayAnchorY(g view.Geometry, align string) float64 {
 	}
 }
 
-func (s *server) buildOverlay(q url.Values, species []*dataset.Species, opt options, u units) *overlayView {
+func (s *server) buildOverlay(q url.Values, species []*dataset.Species, pinOrder []string, opt options, u units) *overlayView {
 	ov := &overlayView{
 		PinCount: len(species),
 		MaxPins:  overlayMaxPins,
@@ -257,6 +271,10 @@ func (s *server) buildOverlay(q url.Values, species []*dataset.Species, opt opti
 	allowed := make(map[string]bool, len(species))
 	for _, sp := range species {
 		allowed[sp.ID] = true
+	}
+	pinSlot := make(map[string]int, len(pinOrder))
+	for i, id := range pinOrder {
+		pinSlot[id] = i
 	}
 
 	align := overlayAlign(q)
@@ -313,7 +331,7 @@ func (s *server) buildOverlay(q url.Values, species []*dataset.Species, opt opti
 	ov.NudgeMM = nudgeMM
 
 	edgePad := math.Max(overlayPad, float64(len(species)-1)*overlaySpreadStep/2+16)
-	layoutBox := view.Box{W: overlayBoxW - 2*edgePad, H: overlayDrawH}
+	layoutBox := view.Box{W: overlayBoxW - 2*edgePad, H: overlayMinBirdsH}
 
 	type placed struct {
 		sp       *dataset.Species
@@ -343,10 +361,14 @@ func (s *server) buildOverlay(q url.Values, species []*dataset.Species, opt opti
 		if shift {
 			staggerY = stepOffset
 		}
+		slot := i
+		if sidx, ok := pinSlot[sp.ID]; ok {
+			slot = sidx
+		}
 		dr := drags[sp.ID]
 		items[i] = placed{
 			sp:       sp,
-			idx:      i,
+			idx:      slot,
 			geom:     g,
 			baseX:    baseX,
 			staggerY: staggerY,
@@ -360,9 +382,34 @@ func (s *server) buildOverlay(q url.Values, species []*dataset.Species, opt opti
 
 	minX := 0.0
 	maxX := overlayBoxW
-	minY := 0.0
-	maxY := overlayDrawH
+	totalCubeRowW := 0.0
+	cubeSlots := make([]float64, len(items))
 	maxCubeHeight := 0.0
+	for i, it := range items {
+		side := massCubeSide(it.sp.Mass.Value) * it.geom.PxPerMm
+		visW := side * (1 + massCubeDepth)
+		slotW := math.Max(visW, overlayMinCubeSlot)
+		cubeSlots[i] = slotW
+		totalCubeRowW += slotW
+		if i > 0 {
+			totalCubeRowW += overlayCubeGap
+		}
+		if visW > maxCubeHeight {
+			maxCubeHeight = visW
+		}
+	}
+	cubeRowLeft := overlayBoxW/2 - totalCubeRowW/2
+	if left := cubeRowLeft - overlayPad; left < minX {
+		minX = left
+	}
+	if right := cubeRowLeft + totalCubeRowW + overlayPad; right > maxX {
+		maxX = right
+	}
+	ov.CubeMinX = minX
+	ov.CubeMaxX = maxX
+
+	minY := 0.0
+	birdsMaxY := overlayMinBirdsH
 	for _, it := range items {
 		x := it.baseX + it.dragXPx
 		if left := x + it.geom.CX - it.geom.CrossbarHalfWidth - overlayPad; left < minX {
@@ -376,32 +423,39 @@ func (s *server) buildOverlay(q url.Values, species []*dataset.Species, opt opti
 		if y < minY {
 			minY = y
 		}
-		if bot := y + it.geom.YTailTip; bot > maxY {
-			maxY = bot
-		}
-		if h := massCubeSide(it.sp.Mass.Value) * it.geom.PxPerMm * (1 + massCubeDepth); h > maxCubeHeight {
-			maxCubeHeight = h
+		if bot := y + it.geom.YTailTip; bot > birdsMaxY {
+			birdsMaxY = bot
 		}
 	}
 	topOffset := overlayPad - minY
-	boxH := maxY + topOffset + overlayPad
-	if minH := maxCubeHeight + 2*overlayPad; boxH < minH {
-		boxH = minH
-	}
+	birdsFloor := birdsMaxY + topOffset
+	cubeFloorY := birdsFloor + overlayCubeGapY + maxCubeHeight
+	boxH := cubeFloorY + overlayCubeLabelBand
 	ov.ViewX = minX
 	ov.ViewW = maxX - minX
+	ov.CubeBaseY = cubeFloorY
+	ov.CubeReserveH = boxH - birdsFloor
 	ov.BoxW = overlayBoxW
 	ov.BoxH = boxH
 	ov.GuideY = maxAnchor + topOffset
 
 	birds := make([]overlayBird, len(items))
+	curCubeX := cubeRowLeft
 	for i, it := range items {
 		sp := it.sp
 		baseY := maxAnchor - it.anchorY + it.staggerY + topOffset
 		x := it.baseX + it.dragXPx
 		y := baseY + it.dragYPx
 		cube := newMassCube(sp, boxH, it.geom.PxPerMm)
-		cube.X = minX + 12
+		if cube.Side > 0 {
+			visW := cube.Side + cube.Depth
+			cube.X = curCubeX + (cubeSlots[i]-visW)/2
+			cube.Y = cubeFloorY - cube.Side
+		}
+		curCubeX += cubeSlots[i] + overlayCubeGap
+		cubeTagX := cube.X + cube.Side/2
+		cubeTagLeft := math.Max(4, math.Min(96, (cubeTagX-ov.ViewX)/ov.ViewW*100))
+		cubeTagTop := math.Max(4, math.Min(96, (cubeFloorY+24)/boxH*100))
 		var zeroURL template.URL
 		if it.drag.X != 0 || it.drag.Y != 0 {
 			zeroURL = overlayClearOneDrag(q, allowed, sp.ID)
@@ -412,6 +466,7 @@ func (s *server) buildOverlay(q url.Values, species []*dataset.Species, opt opti
 			Scientific:  sp.ScientificName,
 			Anchor:      pinnedAnchor(sp.ID),
 			ColorIdx:    it.idx,
+			Label:       strconv.Itoa(it.idx + 1),
 			DetailURL:   nextDetailLink(q, sp.ID),
 			PinURL:      nextPin(q, sp.ID),
 			Length:      u.format(sp.TotalLength.Value, view.ByLength),
@@ -425,11 +480,16 @@ func (s *server) buildOverlay(q url.Values, species []*dataset.Species, opt opti
 			X:           x,
 			Y:           y,
 			SpanPx:      it.geom.YTailTip,
+			CubeTagX:    cubeTagX,
+			CubeTagLeft: cubeTagLeft,
+			CubeTagTop:  cubeTagTop,
 			DragXMM:     it.drag.X,
 			DragYMM:     it.drag.Y,
 			Zero:        zeroURL,
 		}
 	}
+
+	placeOverlayTags(birds, ov.ViewX, ov.ViewW, ov.BoxH)
 
 	ov.Legend = make([]overlayBird, len(birds))
 	copy(ov.Legend, birds)
@@ -448,4 +508,48 @@ func (s *server) buildOverlay(q url.Values, species []*dataset.Species, opt opti
 		return li.ID < lj.ID
 	})
 	return ov
+}
+
+// placeOverlayTags positions each bird's numbered badge near its right wingtip,
+// nudging colliding badges vertically so SSR/non-JS renders stay legible.
+func placeOverlayTags(birds []overlayBird, viewX, viewW, boxH float64) {
+	if viewW <= 0 || boxH <= 0 || len(birds) == 0 {
+		return
+	}
+	const minDX, minDY = 30.0, 26.0
+	type pt struct{ x, y float64 }
+	minX, maxX := viewX+18, viewX+viewW-18
+	minY, maxY := overlayPad/2, boxH-overlayPad/2
+	placed := make([]pt, 0, len(birds))
+	for i := range birds {
+		b := &birds[i]
+		px := math.Max(minX, math.Min(maxX, b.X+b.Geom.CX+b.Geom.CrossbarHalfWidth))
+		baseY := math.Max(minY, math.Min(maxY, b.Y+b.Geom.YShoulder-16))
+		py := baseY
+		conflicts := func(y float64) bool {
+			for _, p := range placed {
+				if math.Abs(px-p.x) < minDX && math.Abs(y-p.y) < minDY {
+					return true
+				}
+			}
+			return false
+		}
+		if conflicts(py) {
+			for step := 1; step <= 8; step++ {
+				up := baseY - float64(step)*minDY
+				if up >= minY && !conflicts(up) {
+					py = up
+					break
+				}
+				dn := baseY + float64(step)*minDY
+				if dn <= maxY && !conflicts(dn) {
+					py = dn
+					break
+				}
+			}
+		}
+		placed = append(placed, pt{px, py})
+		b.TagLeft = math.Max(4, math.Min(96, (px-viewX)/viewW*100))
+		b.TagTop = math.Max(4, math.Min(96, py/boxH*100))
+	}
 }

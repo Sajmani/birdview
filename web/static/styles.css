@@ -525,6 +525,16 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .ov-arrow { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 .ov-stage { width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
   padding: 6px; }
+.ov-canvas { position: relative; }
+.ov-canvas .ov-dia { display: block; width: 100%; height: auto; }
+.ov-tags { position: absolute; inset: 0; pointer-events: none; }
+.ov-num, .ov-tag { display: inline-flex; align-items: center; justify-content: center;
+  box-sizing: border-box; min-width: 20px; height: 20px; padding: 0 5px;
+  border: 1.5px solid currentColor; border-radius: 999px; background: var(--bg);
+  font-size: 13px; font-weight: 700; line-height: 1; }
+.ov-tag { position: absolute; transform: translate(-50%, -50%); }
+.ov-canvas.has-sel .ov-tag { opacity: 0.35; }
+.ov-canvas.has-sel .ov-tag.selected { opacity: 1; z-index: 2; }
 .ov-guide { stroke: var(--line); stroke-width: 1; stroke-dasharray: 4 4; }
 .ov-dia .bill, .ov-dia .head, .ov-dia .neck, .ov-dia .body, .ov-dia .tail,
 .ov-dia .wing, .ov-dia .chord, .ov-dia .chordtick, .ov-dia .junction { stroke: currentColor; }
@@ -550,7 +560,6 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .ov-row.selected { border-color: var(--accent); background: #0b1220; }
 .ov-pick { font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
 .ov-pick[aria-pressed="true"] { border-color: var(--accent); outline: 1px solid var(--accent); }
-.ov-dot { font-size: 15px; line-height: 1; }
 .ov-stats { color: var(--dim); font-size: 13px; }
 .ov-detail { font-size: 13px; text-decoration: none; }
 .ov-detail:hover { text-decoration: underline; }

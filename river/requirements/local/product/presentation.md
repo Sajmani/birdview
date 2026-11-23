@@ -1009,7 +1009,7 @@ home page in those. Its footer carries the full credits, which every other page 
   birds still in them ([decisions.pinnedGroupLeads](../../decisions/decisions.md#pinnedgroupleads)). With nothing pinned there is no group, and under
   **Pinned (k)** the group is the whole page. The histogram counts the tiers only. Pinning or
   unpinning leaves the page where it was. The pinned birds are listed above the find box in
-  alphabetical order: a bird's name goes to its tile in the group, and its pin unpins it. **Pinned (k)**, always in view above them, compares
+  URL `pin` order ([decisions.pinnedListFollowsPinOrder](../../decisions/decisions.md#pinnedlistfollowspinorder); matching Overlay's `1`–`8` pin order, deduplicated at first occurrence, and unchanged by **Order by** or **Names**): a bird's name goes to its tile in the group, and its pin unpins it. **Pinned (k)**, always in view above them, compares
   them ([#5](https://github.com/Sajmani/birdview/issues/5): a reader who had pinned two birds
   could not find how to compare them). Unpinning returns the bird to the settings'
   choice; nothing removes a bird the settings choose. A box above the set finds birds by name: a
