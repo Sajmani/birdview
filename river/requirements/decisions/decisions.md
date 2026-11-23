@@ -5805,30 +5805,36 @@ Affects: [product.nextView](../local/product/presentation.md#nextview), [product
    and a link back to Pinned or Reset instead of drawing an unreadable overlay.
 2. **Exception to [product.oneDiagramVocabulary](../local/product/diagram.md#onediagramvocabulary).**
    In Overlay mode, color encodes **which bird** rather than anatomical part, using 8 fixed
-   high-contrast stylesheet classes (`.ov-c0` through `.ov-c7`), each clearing WCAG 7:1 contrast on
-   both `--bg` and `--panel`. Birds and their nested lower-left water-mass cubes paint largest behind
-   smallest with slight transparency; all non-color diagram cues remain intact (solid vs. dashed
-   strokes for measured vs. modeled lengths, hollow head oval, folded-neck S-curve, wing-chord
-   ticks, and body/tail junction tick).
+   high-contrast stylesheet classes (`.ov-c0` through `.ov-c7`) assigned by **URL `pin` order**
+   together with matching numbered `1`–`8` badges (`.ov-num` in the legend, `>= 13px` `.ov-wtag`
+   HTML badges above each right wingtip de-overlapped vertically on close wingtips, and `>= 13px`
+   `.ov-ctag` HTML badges directly beneath each bird's mass cube), so changing **Order by** never
+   recolors or renumbers a bird and 2–8 pins never collide. Each class clears WCAG 7:1 contrast on
+   both `--bg` and `--panel`. Birds paint largest behind smallest with slight transparency while
+   keeping all non-color diagram cues intact (solid vs. dashed strokes for measured vs. modeled
+   lengths, hollow head oval, folded-neck S-curve, wing-chord ticks, and body/tail junction tick).
+   The birds' to-scale water-mass cubes sit in a horizontal row along the bottom below the birds'
+   tails on one shared floor in **Order by** order, each labeled below with its matching `1`–`8`
+   badge; dragging a bird downward pushes the cube row down cleanly so they never overlap.
 3. **Alignment, horizontal/vertical spread, ordering, and shareable 2D millimeter drags.** Above the
    canvas, **Align** chooses **Wings** (default — aligns shoulders), **Bill** (bill tips), **Tail**
    (tail tips), or **Center**, clearing vertical drags while preserving horizontal drags (`dx`);
    **Spread ↔** (`spread=1`) and **Spread ↕** (`shift=1`) render matching monochrome inline SVG
    arrows (so cross-platform glyph/emoji styling stays uniform) and preserve manual drags while
    gently staggering centerlines horizontally (so bills and tails separate side by side) or vertically
-   (so wing crossbars separate) without changing scale. Legend rows, **Spread ↔**, **Spread ↕**,
-   and palette assignment follow the active **Order by** control (including reversal, `rev=1`),
-   matching **Pinned**, while SVG paint order remains largest behind smallest. Manual
-   2D drags are stored in the URL as repeatable `drag=<id>:<dx>,<dy>` parameters in real
-   millimeters so shared links match across screen sizes, updated in place during interactive drags
-   and keyboard nudges via `history.replaceState`.
+   (so wing crossbars separate) without changing scale. Legend rows, **Spread ↔**, and **Spread ↕**
+   follow the active **Order by** control (including reversal, `rev=1`), matching **Pinned**, while
+   per-bird colors and `1`–`8` numbers stay fixed to URL `pin` order and SVG paint order remains
+   largest behind smallest. Manual 2D drags are stored in the URL as repeatable `drag=<id>:<dx>,<dy>`
+   parameters in real millimeters so shared links match across screen sizes, updated in place during
+   interactive drags and keyboard nudges via `history.replaceState`.
 4. **Selecting and moving.** Birds on the canvas are not draggable (keeping touch scrolling normal)
    until selected below. Below the canvas, the provenance caption is followed by a blank-line gap,
    a header reading **Select a bird below to highlight and drag**, and **Reset drags** (when any
    bird has been dragged). Clicking a bird in the legend selects it and brings it to the front at
    full opacity (dimming others on the canvas, leaving legend text at full contrast), enabling 2D
    dragging anywhere on the canvas and `ArrowLeft`/`ArrowRight`/`ArrowUp`/`ArrowDown` keyboard
-   nudges (expanding the SVG viewBox as needed while keeping mass cubes lower-left); tapping the
+   nudges (expanding the SVG viewBox as needed and pushing the bottom mass-cube row down as needed); tapping the
    canvas without dragging, clicking the selected legend button again, or pressing `Escape`
    deselects. Legend rows carry the selector button, measurements, a `Details` link, and a compact
    per-bird `×` reset link when dragged (no `▲`/`▼` arrow buttons). Shows only the overlay canvas
@@ -5841,4 +5847,33 @@ Overlaying stick figures directly reveals proportion differences (bill reach, ne
 tail length, wingspan) that side-by-side tiles leave to mental arithmetic. Capping the view at 8
 birds keeps colors distinguishable for color-blind readers, per-bird CSS classes preserve the closed
 stylesheet contract, and millimeter offsets keep shared URLs viewport-independent.
+
+---
+
+## pinnedListFollowsPinOrder
+
+**The pinned list above the find box follows URL `pin` order instead of alphabetical order**
+
+Date: 2026-11-23
+
+Decided by: Sameer
+
+Status: accepted
+
+Affects: [product.nextView](../local/product/presentation.md#nextview)
+
+Subject: `next.pinnedList.order`
+
+Kind: Direct — a later decision reverses an earlier rule
+
+### Decided
+
+1. **URL `pin` order, matching Overlay's pin sequence.** The `PINNED` list above the find box lists each pinned bird in URL `pin` order (first occurrence wins on duplicate `pin=` parameters, and newly pinned birds append at the end), matching the stable `1`–`8` pin and color order in [overlayMode](#overlaymode).
+2. **Invariant across `Order by` and `Names`.** Changing **Order by** (including reversal `rev=1`) or English name usage (**Names**) never reorders the `PINNED` list.
+3. **Group tiles and Overlay layout keep `Order by`.** The `Pinned` group of tiles below, and Overlay mode's legend rows, horizontal/vertical spread, and bottom mass-cube row, continue to follow the active **Order by** setting.
+
+### Why
+
+Alphabetical order caused the `PINNED` strip above the find box to disagree with Overlay mode's stable `1`–`8` pin order (for example, listing four shorebirds alphabetically instead of in their `1, 2, 3, 4` pin and color sequence). Following URL `pin` order keeps the `PINNED` strip aligned with Overlay's pin numbers and in the exact order the reader pinned the birds.
+
 

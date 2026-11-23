@@ -141,6 +141,8 @@ Watched failing: 2026-11-09, by `view.Reference` taking the last bird's wingspan
 
 Watched failing: 2026-11-17, with the measurement lines unable to wrap at 360px in metric ("at phone in metric, 102 of 104 tiles are wider than their box or draw off center (#4): [p-gnlthr wider by 9px …"), and in CI with Inner left off the wing line, on the length line ("s-cocboo1 wider by 10px, … .est \"Tail 20.4 cm\" reaching 20px past the padding"), before [decisions.measurementLinesWrapOnPhones](../requirements/decisions/decisions.md#measurementlineswraponphones).
 
+Watched failing: 2026-11-23, with the alphabetical `sort.Slice` on `page.Pinned` still active (`TestNextPinnedList`: "the pinned list links to [p-amecro p-annhum], want [p-annhum p-amecro] (URL pin order, not alphabetical or mass order)"), under [decisions.pinnedListFollowsPinOrder](../requirements/decisions/decisions.md#pinnedlistfollowspinorder).
+
 ## app.ebirdLinkOnTilesAndPages
 
 Criterion: [app.ebirdLinkOnTilesAndPages](../requirements/composed/internal/app/acceptance.md#ebirdlinkontilesandpages)
@@ -1624,11 +1626,14 @@ Guardrails: `cmd/birdview/overlay_test.go:TestOverlayShowRowAndPinBounds`;
 
 Gates: yes, in `go test ./...` (CI and image build; browser check skips without Chrome)
 
-Watched failing: 2026-11-23, across 7 mutations:
+Watched failing: 2026-11-23, across 10 mutations:
 - disabling the `>8` pin check in `cmd/birdview/next.go` failed `TestOverlayShowRowAndPinBounds` (`9 pins: Show row did not disable Overlay`);
 - returning `g.YShoulder` for `"bill"` in `overlayAnchorY` failed `TestOverlayGeometryAlignmentAndURL` on all three birds (`align=bill: bird greblu y=24.00, guide=121.70`);
 - zeroing `staggerY` in `cmd/birdview/overlay.go` failed `TestOverlayGeometryAlignmentAndURL` (`shift=1 vertical steps = (0.00, 0.00), want exact 14.00`);
 - passing raw URL pin order `keep["pin"]` to `buildOverlay` instead of sorted `shown` failed `TestOverlayGeometryAlignmentAndURL` across `Order by` metrics (`order "&by=length": legend = [thimur amecro blasti], want [blasti thimur amecro]`, `order "&by=mass": legend = [thimur amecro blasti], want [blasti amecro thimur]`);
+- keying Overlay colors/badges to sort index instead of URL `pin` order failed `TestOverlayGeometryAlignmentAndURL` (`order "&by=length" SVG layer amecro class = ov-c2, want ov-c1 (locked to URL pin order)`);
+- rendering `.ov-cubes` stacked at lower-left over `.Layers` instead of a horizontal bottom row in `Order by` order failed `TestOverlayGeometryAlignmentAndURL` (`cubes amecro (x=12.00,w=62.16) and thimur (x=12.00) overlap horizontally` and `cube row order = [amecro thimur blasti], want [blasti thimur amecro]`);
+- omitting `.ov-wtag` / `.ov-ctag` badges from `web/static/next.html` failed `TestOverlayInTheBrowser` (`desktop [annhum,amecro,greblu]: got 0 .ov-tag badges, want 3` and `close wingtips [thimur,amecro,blasti] cubes: got 0 .ov-tag badges, want 3`);
 - allowing unselected pointer drags on `.ov-bird` before `selectedId` is set failed `TestOverlayInTheBrowser` (`unselected drag moved or selected bird: hasSel=true dx="" dy="" url="...&dy=amecro%3A82"`);
 - removing `.ov-bar .seg { margin-bottom: 0; }` in `web/static/styles.css` failed `TestOverlayInTheBrowser` bar alignment check (`desktop ov-bar control 4 top=412px, want aligned with first (408px)`);
 - setting `.ov-stage` to `width: 500px` in `web/static/styles.css` failed `TestOverlayInTheBrowser` phone check (`360px overlay page scrollWidth=512 > clientWidth=360`).

@@ -147,25 +147,26 @@ func TestOverlayGeometryAlignmentAndURL(t *testing.T) {
 	// Three birds with distinct silhouettes and provenance: hummingbird (smallest),
 	// crow (wing modeled, solid tail/bill, dashed body), heron (largest, folded neck).
 	parseAttrs := func(body string) (layers []struct {
-		id, cls            string
-		baseX, baseY, x, y float64
-		dragX, dragY       int
+		id, cls                  string
+		baseX, baseY, x, y, span float64
+		dragX, dragY             int
 	}, guideY float64) {
 		gm := mustMatch(t, body, `<line class="ov-guide"[^>]*y1="([^"]+)"`, "overlay guide")
 		guideY, _ = strconv.ParseFloat(gm, 64)
-		reBird := regexp.MustCompile(`<g class="ov-bird (ov-c\d)" data-id="([^"]+)" data-base-x="([^"]+)" data-base-y="([^"]+)" data-drag-x="([^"]+)" data-drag-y="([^"]+)"[^>]*transform="translate\(([^,]+),([^)]+)\)"`)
+		reBird := regexp.MustCompile(`<g class="ov-bird (ov-c\d)" data-id="([^"]+)" data-base-x="([^"]+)" data-base-y="([^"]+)" data-drag-x="([^"]+)" data-drag-y="([^"]+)"[^>]*data-span="([^"]+)"[^>]*transform="translate\(([^,]+),([^)]+)\)"`)
 		for _, m := range reBird.FindAllStringSubmatch(body, -1) {
 			bx, _ := strconv.ParseFloat(m[3], 64)
 			by, _ := strconv.ParseFloat(m[4], 64)
 			dxMM, _ := strconv.Atoi(m[5])
 			dyMM, _ := strconv.Atoi(m[6])
-			x, _ := strconv.ParseFloat(m[7], 64)
-			y, _ := strconv.ParseFloat(m[8], 64)
+			span, _ := strconv.ParseFloat(m[7], 64)
+			x, _ := strconv.ParseFloat(m[8], 64)
+			y, _ := strconv.ParseFloat(m[9], 64)
 			layers = append(layers, struct {
-				id, cls            string
-				baseX, baseY, x, y float64
-				dragX, dragY       int
-			}{m[2], m[1], bx, by, x, y, dxMM, dyMM})
+				id, cls                  string
+				baseX, baseY, x, y, span float64
+				dragX, dragY             int
+			}{m[2], m[1], bx, by, x, y, span, dxMM, dyMM})
 		}
 		return layers, guideY
 	}
@@ -263,9 +264,18 @@ func TestOverlayGeometryAlignmentAndURL(t *testing.T) {
 		t.Errorf("spread=1&shift=1 did not apply both offsets: %v", bothByID)
 	}
 
-	// Overlay legend, spread=1, and shift=1 follow the Order by control (and rev=1)
-	// just like Pinned tiles, while SVG paint order stays largest behind smallest.
-	reLegend := regexp.MustCompile(`<div class="ov-row"[^>]*data-id="([^"]+)"`)
+	// Overlay legend, horizontal bottom cube row, spread=1, and shift=1 follow the Order by control
+	// (and rev=1) just like Pinned tiles, while SVG paint order stays largest behind smallest
+	// and each bird keeps its URL pin-order color class and 1-8 badge across every sort.
+	reLegend := regexp.MustCompile(`<div class="ov-row"[^>]*data-id="([^"]+)"[\s\S]*?<span class="ov-num (ov-c\d)"[^>]*>([^<]+)</span>`)
+	reTag := regexp.MustCompile(`<span class="ov-tag ov-wtag (ov-c\d)" data-id="([^"]+)"[^>]*>([^<]+)</span>`)
+	reCubeTag := regexp.MustCompile(`<span class="ov-tag ov-ctag (ov-c\d)" data-id="([^"]+)"[^>]*>([^<]+)</span>`)
+	reCube := regexp.MustCompile(`<g class="ov-cube (ov-c\d)" data-id="([^"]+)">[\s\S]*?<rect class="mcface" x="([^"]+)" y="([^"]+)"\s+width="([^"]+)" height="([^"]+)"/>`)
+	wantPinBadge := map[string]struct{ cls, label string }{
+		"thimur": {"ov-c0", "1"},
+		"amecro": {"ov-c1", "2"},
+		"blasti": {"ov-c2", "3"},
+	}
 	for _, ord := range []string{"", "&by=length", "&by=length&rev=1", "&by=mass", "&by=wingspan", "&by=bill"} {
 		const pins = "&pin=thimur&pin=amecro&pin=blasti"
 		pinnedPage := s.nextPage(httptest.NewRequest("GET", "/?show=pinned"+pins+ord, nil))
@@ -277,16 +287,48 @@ func TestOverlayGeometryAlignmentAndURL(t *testing.T) {
 		var gotLegend []string
 		for _, m := range reLegend.FindAllStringSubmatch(ordBody, -1) {
 			gotLegend = append(gotLegend, m[1])
+			if w := wantPinBadge[m[1]]; m[2] != w.cls || m[3] != w.label {
+				t.Errorf("order %q legend badge %s = (%s,%q), want (%s,%q)", ord, m[1], m[2], m[3], w.cls, w.label)
+			}
 		}
 		if !slices.Equal(gotLegend, wantOrder) {
 			t.Errorf("order %q: legend = %v, want %v (matching Pinned)", ord, gotLegend, wantOrder)
 		}
+		tags := map[string]struct{ cls, label string }{}
+		for _, m := range reTag.FindAllStringSubmatch(ordBody, -1) {
+			tags[m[2]] = struct{ cls, label string }{m[1], m[3]}
+		}
+		if len(tags) != 3 {
+			t.Errorf("order %q: found %d wingtip .ov-wtag badges, want 3", ord, len(tags))
+		}
+		for id, w := range wantPinBadge {
+			if g := tags[id]; g != w {
+				t.Errorf("order %q wingtip .ov-wtag %s = %+v, want %+v", ord, id, g, w)
+			}
+		}
+		var cubeTagOrder []string
+		for _, m := range reCubeTag.FindAllStringSubmatch(ordBody, -1) {
+			cubeTagOrder = append(cubeTagOrder, m[2])
+			if w := wantPinBadge[m[2]]; m[1] != w.cls || m[3] != w.label {
+				t.Errorf("order %q cube badge %s = (%s,%q), want (%s,%q)", ord, m[2], m[1], m[3], w.cls, w.label)
+			}
+		}
+		if !slices.Equal(cubeTagOrder, wantOrder) {
+			t.Errorf("order %q: cube badge order = %v, want %v", ord, cubeTagOrder, wantOrder)
+		}
 		ordLayers, _ := parseAttrs(ordBody)
 		var paintIDs []string
 		posByID := map[string]struct{ x, y float64 }{}
+		maxBirdTailY := 0.0
 		for _, l := range ordLayers {
 			paintIDs = append(paintIDs, l.id)
 			posByID[l.id] = struct{ x, y float64 }{l.x, l.y}
+			if tailY := l.y + l.span; tailY > maxBirdTailY {
+				maxBirdTailY = tailY
+			}
+			if w := wantPinBadge[l.id]; l.cls != w.cls {
+				t.Errorf("order %q SVG layer %s class = %s, want %s (locked to URL pin order)", ord, l.id, l.cls, w.cls)
+			}
 		}
 		wantPaint := []string{"amecro", "thimur", "blasti"}
 		if !slices.Equal(paintIDs, wantPaint) {
@@ -296,6 +338,42 @@ func TestOverlayGeometryAlignmentAndURL(t *testing.T) {
 			a, b := posByID[wantOrder[i-1]], posByID[wantOrder[i]]
 			if !(a.x < b.x) || math.Abs((b.y-a.y)-overlaySpreadStep) > 0.05 {
 				t.Errorf("order %q: spread order broke between %s (%v) and %s (%v)", ord, wantOrder[i-1], a, wantOrder[i], b)
+			}
+		}
+		type cubeBox struct {
+			id, cls    string
+			x, y, side float64
+		}
+		var cubes []cubeBox
+		for _, m := range reCube.FindAllStringSubmatch(ordBody, -1) {
+			x, _ := strconv.ParseFloat(m[3], 64)
+			y, _ := strconv.ParseFloat(m[4], 64)
+			side, _ := strconv.ParseFloat(m[5], 64)
+			cubes = append(cubes, cubeBox{m[2], m[1], x, y, side})
+		}
+		if len(cubes) != 3 {
+			t.Errorf("order %q: got %d cubes, want 3", ord, len(cubes))
+		} else {
+			var cubeOrder []string
+			floorY := cubes[0].y + cubes[0].side
+			for i, c := range cubes {
+				cubeOrder = append(cubeOrder, c.id)
+				if w := wantPinBadge[c.id]; c.cls != w.cls {
+					t.Errorf("order %q cube %s class = %s, want %s", ord, c.id, c.cls, w.cls)
+				}
+				if math.Abs((c.y+c.side)-floorY) > 0.2 {
+					t.Errorf("order %q cube %s floor = %.2f, want shared %.2f", ord, c.id, c.y+c.side, floorY)
+				}
+				if cubeTop := c.y - c.side*massCubeDepth; cubeTop <= maxBirdTailY {
+					t.Errorf("order %q cube %s top = %.2f overlaps bird tails maxY = %.2f", ord, c.id, cubeTop, maxBirdTailY)
+				}
+				if i > 0 && cubes[i-1].x+cubes[i-1].side*(1+massCubeDepth) >= c.x {
+					t.Errorf("order %q cubes %s (x=%.2f,w=%.2f) and %s (x=%.2f) overlap horizontally",
+						ord, cubes[i-1].id, cubes[i-1].x, cubes[i-1].side*(1+massCubeDepth), c.id, c.x)
+				}
+			}
+			if !slices.Equal(cubeOrder, wantOrder) {
+				t.Errorf("order %q: cube row order = %v, want %v", ord, cubeOrder, wantOrder)
 			}
 		}
 	}
@@ -380,10 +458,32 @@ window.addEventListener("load", function () {
       out.barTops.push(Math.round(e.getBoundingClientRect().top));
     });
     var svg = document.querySelector("svg.ov-dia");
+    var canvas = document.querySelector(".ov-canvas");
     var pickCrow = document.querySelector('.ov-row[data-id="amecro"] .ov-pick');
     var crowG = document.querySelector('.ov-bird[data-id="amecro"]');
     var resetBtn = document.querySelector('.ov-reset');
     var zeroCrow = document.querySelector('.ov-row[data-id="amecro"] .ov-zero');
+    function tagBox(sel, id) {
+      var el = document.querySelector(sel + '[data-id="' + id + '"]');
+      if (!el || !canvas) return null;
+      var r = el.getBoundingClientRect(), cr = canvas.getBoundingClientRect();
+      return {
+        id: id,
+        left: r.left, top: r.top, right: r.right, bottom: r.bottom,
+        fontSize: parseFloat(getComputedStyle(el).fontSize),
+        inside: r.left >= cr.left - 1 && r.right <= cr.right + 1 && r.top >= cr.top - 1 && r.bottom <= cr.bottom + 1
+      };
+    }
+    function allTagBoxes(sel) {
+      var list = [];
+      document.querySelectorAll(sel + "[data-id]").forEach(function (el) {
+        list.push(tagBox(sel, el.getAttribute("data-id")));
+      });
+      return list;
+    }
+    out.tagRects = allTagBoxes(".ov-tag.ov-wtag");
+    out.cubeTagRects = allTagBoxes(".ov-tag.ov-ctag");
+    out.tagBeforeDrag = tagBox(".ov-tag.ov-wtag", "amecro");
     if (svg && crowG && typeof PointerEvent !== "undefined") {
       var r0 = crowG.getBoundingClientRect();
       var x0 = r0.left + r0.width / 2, y0 = r0.top + r0.height / 2;
@@ -414,6 +514,7 @@ window.addEventListener("load", function () {
       out.zeroHiddenAfterDrag = !!(zeroCrow && zeroCrow.hasAttribute("hidden"));
       var billLink = document.querySelector('.ov-bar .seg a[href*="align=bill"]');
       out.billHrefAfterDrag = billLink ? billLink.getAttribute("href") : "";
+      out.tagAfterDrag = tagBox(".ov-tag.ov-wtag", "amecro");
     }
     document.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowLeft", shiftKey: true, bubbles: true}));
     document.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowUp", shiftKey: true, bubbles: true}));
@@ -427,6 +528,7 @@ window.addEventListener("load", function () {
       out.afterResetY = crowG ? crowG.getAttribute("data-drag-y") : "";
       out.afterResetURL = location.search;
       out.resetHiddenAfterReset = resetBtn.hasAttribute("hidden");
+      out.tagAfterReset = tagBox(".ov-tag.ov-wtag", "amecro");
     }
     document.documentElement.setAttribute("data-ovprobe", JSON.stringify(out));
   }, 150);
@@ -468,30 +570,96 @@ window.addEventListener("load", function () {
 	if m == nil {
 		t.Fatal("desktop overlay probe missing")
 	}
+	type ovTagBox struct {
+		ID       string  `json:"id"`
+		Left     float64 `json:"left"`
+		Top      float64 `json:"top"`
+		Right    float64 `json:"right"`
+		Bottom   float64 `json:"bottom"`
+		FontSize float64 `json:"fontSize"`
+		Inside   bool    `json:"inside"`
+	}
 	type ovProbeResult struct {
-		Width                 int    `json:"width"`
-		ScrollW               int    `json:"scrollW"`
-		ShowTops              []int  `json:"showTops"`
-		BarTops               []int  `json:"barTops"`
-		OverflowRight         int    `json:"overflowRight"`
-		UnselHasSel           bool   `json:"unselHasSel"`
-		UnselDragX            string `json:"unselDragX"`
-		UnselDragY            string `json:"unselDragY"`
-		UnselURL              string `json:"unselURL"`
-		SelectedLast          string `json:"selectedLast"`
-		HasSel                bool   `json:"hasSel"`
-		AfterDragX            string `json:"afterDragX"`
-		AfterDragY            string `json:"afterDragY"`
-		AfterDragURL          string `json:"afterDragURL"`
-		ResetHiddenAfterDrag  bool   `json:"resetHiddenAfterDrag"`
-		ZeroHiddenAfterDrag   bool   `json:"zeroHiddenAfterDrag"`
-		BillHrefAfterDrag     string `json:"billHrefAfterDrag"`
-		AfterKeyX             string `json:"afterKeyX"`
-		AfterKeyY             string `json:"afterKeyY"`
-		AfterResetX           string `json:"afterResetX"`
-		AfterResetY           string `json:"afterResetY"`
-		AfterResetURL         string `json:"afterResetURL"`
-		ResetHiddenAfterReset bool   `json:"resetHiddenAfterReset"`
+		Width                 int        `json:"width"`
+		ScrollW               int        `json:"scrollW"`
+		ShowTops              []int      `json:"showTops"`
+		BarTops               []int      `json:"barTops"`
+		OverflowRight         int        `json:"overflowRight"`
+		UnselHasSel           bool       `json:"unselHasSel"`
+		UnselDragX            string     `json:"unselDragX"`
+		UnselDragY            string     `json:"unselDragY"`
+		UnselURL              string     `json:"unselURL"`
+		SelectedLast          string     `json:"selectedLast"`
+		HasSel                bool       `json:"hasSel"`
+		AfterDragX            string     `json:"afterDragX"`
+		AfterDragY            string     `json:"afterDragY"`
+		AfterDragURL          string     `json:"afterDragURL"`
+		ResetHiddenAfterDrag  bool       `json:"resetHiddenAfterDrag"`
+		ZeroHiddenAfterDrag   bool       `json:"zeroHiddenAfterDrag"`
+		BillHrefAfterDrag     string     `json:"billHrefAfterDrag"`
+		AfterKeyX             string     `json:"afterKeyX"`
+		AfterKeyY             string     `json:"afterKeyY"`
+		AfterResetX           string     `json:"afterResetX"`
+		AfterResetY           string     `json:"afterResetY"`
+		AfterResetURL         string     `json:"afterResetURL"`
+		ResetHiddenAfterReset bool       `json:"resetHiddenAfterReset"`
+		TagRects              []ovTagBox `json:"tagRects"`
+		CubeTagRects          []ovTagBox `json:"cubeTagRects"`
+		TagBeforeDrag         *ovTagBox  `json:"tagBeforeDrag"`
+		TagAfterDrag          *ovTagBox  `json:"tagAfterDrag"`
+		TagAfterReset         *ovTagBox  `json:"tagAfterReset"`
+	}
+	checkTags := func(label string, tags []ovTagBox, wantCount int) {
+		t.Helper()
+		if len(tags) != wantCount {
+			t.Errorf("%s: got %d .ov-tag badges, want %d", label, len(tags), wantCount)
+		}
+		for _, tg := range tags {
+			if tg.FontSize < 13 {
+				t.Errorf("%s badge %s fontSize = %.1fpx, want >= 13px", label, tg.ID, tg.FontSize)
+			}
+			if !tg.Inside {
+				t.Errorf("%s badge %s fell outside .ov-canvas: %+v", label, tg.ID, tg)
+			}
+		}
+		for i := 0; i < len(tags); i++ {
+			for j := i + 1; j < len(tags); j++ {
+				a, b := tags[i], tags[j]
+				if a.Left < b.Right && a.Right > b.Left && a.Top < b.Bottom && a.Bottom > b.Top {
+					t.Errorf("%s badges %s (%+v) and %s (%+v) overlap", label, a.ID, a, b.ID, b)
+				}
+			}
+		}
+	}
+	checkCubeTags := func(label string, tags []ovTagBox, wantOrder []string) {
+		t.Helper()
+		checkTags(label+" cubes", tags, len(wantOrder))
+		if len(tags) != len(wantOrder) {
+			return
+		}
+		for i, tg := range tags {
+			if tg.ID != wantOrder[i] {
+				t.Errorf("%s cube badge %d id = %q, want %q", label, i, tg.ID, wantOrder[i])
+			}
+			if i > 0 {
+				if math.Abs(tg.Top-tags[i-1].Top) > 2 {
+					t.Errorf("%s cube badges %s (top=%.1f) and %s (top=%.1f) not on one horizontal row",
+						label, tags[i-1].ID, tags[i-1].Top, tg.ID, tg.Top)
+				}
+				if tg.Left <= tags[i-1].Left {
+					t.Errorf("%s cube badges %s (left=%.1f) and %s (left=%.1f) not increasing left-to-right",
+						label, tags[i-1].ID, tags[i-1].Left, tg.ID, tg.Left)
+				}
+			}
+		}
+	}
+	pinnedOrder := func(query string) []string {
+		p := s.nextPage(httptest.NewRequest("GET", query, nil))
+		var ids []string
+		for _, tl := range p.GroupTiles {
+			ids = append(ids, tl.S.ID)
+		}
+		return ids
 	}
 	var res ovProbeResult
 	if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
@@ -536,6 +704,40 @@ window.addEventListener("load", function () {
 		t.Errorf("after Reset drags: (x,y)=(%q,%q) url=%q hidden=%v, want (0,0), no drag=, hidden=true",
 			res.AfterResetX, res.AfterResetY, res.AfterResetURL, res.ResetHiddenAfterReset)
 	}
+	checkTags("desktop [annhum,amecro,greblu]", res.TagRects, 3)
+	checkCubeTags("desktop [annhum,amecro,greblu]", res.CubeTagRects, pinnedOrder("/?show=pinned&pin=annhum&pin=amecro&pin=greblu"))
+	if res.TagBeforeDrag == nil || res.TagAfterDrag == nil || res.TagAfterReset == nil {
+		t.Errorf("missing amecro .ov-tag position during drag lifecycle: before=%v after=%v reset=%v",
+			res.TagBeforeDrag, res.TagAfterDrag, res.TagAfterReset)
+	} else {
+		if res.TagAfterDrag.Left <= res.TagBeforeDrag.Left+10 || res.TagAfterDrag.Top <= res.TagBeforeDrag.Top+10 {
+			t.Errorf("amecro .ov-tag did not track 2D drag (+40,+30): before=%+v after=%+v", res.TagBeforeDrag, res.TagAfterDrag)
+		}
+		if math.Abs(res.TagAfterReset.Left-res.TagBeforeDrag.Left) > 2 || math.Abs(res.TagAfterReset.Top-res.TagBeforeDrag.Top) > 2 {
+			t.Errorf("amecro .ov-tag did not return on Reset drags: before=%+v reset=%+v", res.TagBeforeDrag, res.TagAfterReset)
+		}
+	}
+
+	// Close-wingtip de-overlap check (thimur 726mm & blasti 750mm with Spread ↕ off).
+	closeOut, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
+		"--no-first-run", "--no-default-browser-check", "--disable-background-networking",
+		"--disable-component-update", "--disable-sync", "--disable-extensions",
+		"--user-data-dir="+profileDir(t), "--window-size=800,900",
+		"--virtual-time-budget=3000", "--dump-dom",
+		ts.URL+"/?show=overlay&pin=thimur&pin=amecro&pin=blasti#ovprobe=1").Output()
+	if err != nil {
+		t.Fatalf("chrome close wingtips: %v", err)
+	}
+	cm := reProbe.FindSubmatch(closeOut)
+	if cm == nil {
+		t.Fatal("close-wingtip overlay probe missing")
+	}
+	var closeRes ovProbeResult
+	if err := json.Unmarshal([]byte(html.UnescapeString(string(cm[1]))), &closeRes); err != nil {
+		t.Fatal(err)
+	}
+	checkTags("close wingtips [thimur,amecro,blasti]", closeRes.TagRects, 3)
+	checkCubeTags("close wingtips [thimur,amecro,blasti]", closeRes.CubeTagRects, pinnedOrder("/?show=pinned&pin=thimur&pin=amecro&pin=blasti"))
 
 	// Phone 360px check: no horizontal overflow and Show row holds 5 controls.
 	phoneOut, err := exec.CommandContext(ctx, chrome, "--headless", "--disable-gpu",
@@ -567,4 +769,5 @@ window.addEventListener("load", function () {
 	if res.OverflowRight > 0 {
 		t.Errorf("Show row control reached right=%dpx past %dpx", res.OverflowRight, res.Width)
 	}
+	checkCubeTags("phone 360px [annhum,amecro,greblu]", res.CubeTagRects, pinnedOrder("/?show=pinned&pin=annhum&pin=amecro&pin=greblu"))
 }

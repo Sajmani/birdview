@@ -76,9 +76,10 @@ The fourth, inline in `next.html`, moves an opened setting's choices left only a
 on the screen, closes them on a tap elsewhere, and reopens the setting a choice was made in, at the
 same scroll position. The fifth is `next-overlay.js`, inlined only in Overlay mode
 (`show=overlay`), which waits until a bird is selected in the legend before enabling 2D canvas
-drags and arrow-key nudges (bringing it forward and expanding the viewBox) while syncing
-millimeter `drag=<id>:<dx>,<dy>` offsets via `history.replaceState`, leaving layout geometry,
-color assignment, and non-JavaScript alignment, spread, and reset links in Go
+drags and arrow-key nudges (bringing it forward, expanding the viewBox, and repositioning and
+de-overlapping the on-canvas numbered badges on resize and drag) while syncing millimeter
+`drag=<id>:<dx>,<dy>` offsets via `history.replaceState`, leaving layout geometry, stable `pin`-order
+color and number assignment, and non-JavaScript alignment, spread, and reset links in Go
 (`cmd/birdview/overlay.go`). The rule all five protect is that *logic* stays in Go, not
 that the client is inert; without JavaScript the page still works, minus these five (the bird and
 place search boxes then need Enter, Overlay alignment, spread, and reset links reload via URL, and

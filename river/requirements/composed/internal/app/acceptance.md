@@ -204,7 +204,7 @@ order links to itself unreversed, reversed mass runs largest first, and reversed
 the most recorded duck last. Every home page, with no month included, carries an ETag; the
 `month=now` redirect is no-store with no validator, and keeps every other setting. Every
 count-line setting is a `<details>` sharing one name, so the browser opens one at a time, and
-Reset links to /. The pinned list names each pinned bird in alphabetical order by displayed name, linking to its tile, with a pin
+Reset links to /. The pinned list names each pinned bird in URL `pin` order ([decisions.pinnedListFollowsPinOrder](../../../decisions/decisions.md#pinnedlistfollowspinorder), deduplicated at first occurrence and unchanged by `Names` or `Order by`), linking to its tile, with a pin
 that unpins it, and has no Compare of its own; no pin link jumps the page, and in headless Chrome a page loaded by a pin opens
 scrolled where the pin was clicked. Reset keeps the pins, in order, and drops every setting; Clear pins,
 before it and only when something is pinned, drops the pins and keeps every setting. The phone-width and contrast checks reach the home page through the crawl, open
@@ -1086,19 +1086,27 @@ and headless Chrome interaction and phone-width checks
    is enabled for 2–8 pins (`show=overlay`), and is disabled above 8 pins; requesting `show=overlay`
    with <2 or >8 pins renders a clear notice instead of an overlay.
 2. **Shared scale, order, alignment, and provenance.** All pinned birds share one pixels-per-mm scale,
-   paint largest behind smallest, order the legend and horizontal/vertical spread (`spread=1`,
-   `shift=1`) by the active **Order by** control (and `rev=1`) matching `Pinned`, align at Wings
-   (`align=wings`, default), Bill, Tail, or Center (clearing vertical drags while keeping horizontal
-   drags), preserve solid/dashed stroke classes and structural marks without inline color styles or
-   attributes, render matching inline SVG spread arrows (no `▲`/`▼` legend buttons), show `Reset drags`
-   beside `Select a bird below to highlight and drag` below the provenance caption, and apply 2D
-   millimeter `drag=<id>:<dx>,<dy>` offsets across viewports.
-3. **Select-first 2D drag, nudge, bar alignment, and 360px fit.** In headless Chrome, dragging directly
-   on an unselected bird neither selects nor moves it; clicking a legend row selects and brings that
-   bird to the front, dragging/nudging moves it in 2D and updates `drag=` in the URL via
-   `history.replaceState` (with `Align` preserving `dx` and clearing `dy`), `Reset drags` clears all
-   drags, the Spread controls align vertically with `Wings|Bill|Tail|Center`, and at 360px the
-   Overlay page and `.showrow` have no horizontal overflow.
+   paint largest behind smallest, order the legend, horizontal bottom water-mass cube row, and
+   horizontal/vertical spread (`spread=1`, `shift=1`) by the active **Order by** control (and
+   `rev=1`) matching `Pinned` while locking each bird's color class (`.ov-c0`–`.ov-c7`) and `1`–`8`
+   badge to its URL `pin` order across reorderings, lay water-mass cubes out in one non-overlapping
+   horizontal row along a shared floor below every bird's tail tip, render matching `1`–`8` HTML
+   badges in each legend row, above each right wingtip (with vertical de-overlap), and beneath each
+   mass cube at `>= 13px`, align at Wings (`align=wings`, default), Bill, Tail, or Center (clearing
+   vertical drags while keeping horizontal drags), preserve solid/dashed stroke classes and structural
+   marks without inline color styles or attributes, render matching inline SVG spread arrows (no
+   `▲`/`▼` legend buttons), show `Reset drags` beside `Select a bird below to highlight and drag`
+   below the provenance caption, and apply 2D millimeter `drag=<id>:<dx>,<dy>` offsets across
+   viewports.
+3. **Select-first 2D drag, nudge, badge tracking, bar alignment, and 360px fit.** In headless Chrome,
+   dragging directly on an unselected bird neither selects nor moves it; clicking a legend row selects
+   and brings that bird to the front (dimming unselected badges), dragging/nudging moves both the
+   figure and its `>= 13px` wingtip badge in 2D and updates `drag=` in the URL via
+   `history.replaceState` (with `Align` preserving `dx` and clearing `dy`), close wingtip badges
+   de-overlap without overlapping bounding boxes inside the canvas, cube badges align in a single
+   horizontal row below the canvas floor in **Order by** order without overlapping or leaving the
+   canvas, `Reset drags` clears all drags, the Spread controls align vertically with
+   `Wings|Bill|Tail|Center`, and at 360px the Overlay page and `.showrow` have no horizontal overflow.
 
 ## everydayDefinitionsShown
 

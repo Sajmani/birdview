@@ -17,8 +17,9 @@
  * The server renders the full shared-scale SVG and legend so the page works
  * cleanly without JavaScript. Birds are not draggable on the canvas until one
  * is selected below, keeping page touch scrolling intact; once selected, this
- * script supports 2D canvas drags and arrow-key nudges while syncing 2D offsets
- * in real millimeters (drag=<id>:<dx>,<dy>) via history.replaceState. */
+ * script supports 2D canvas drags and arrow-key nudges, tracks and de-overlaps
+ * wingtip and mass-cube badges, and syncs 2D offsets in real millimeters
+ * (drag=<id>:<dx>,<dy>) via history.replaceState. */
 (function () {
   "use strict";
   var wrap = document.querySelector(".ov-wrap");
@@ -29,11 +30,17 @@
   var nudgeMm = parseInt(wrap.getAttribute("data-nudge-mm"), 10) || 10;
   var boxW = parseFloat(wrap.getAttribute("data-box-w")) || 640;
   var origBoxH = parseFloat(wrap.getAttribute("data-box-h")) || 468;
-  var origViewX = parseFloat(wrap.getAttribute("data-view-x")) || 0;
+  var cubeMinX = parseFloat(wrap.getAttribute("data-cube-min-x"));
+  if (isNaN(cubeMinX)) cubeMinX = 0;
+  var cubeMaxX = parseFloat(wrap.getAttribute("data-cube-max-x"));
+  if (isNaN(cubeMaxX)) cubeMaxX = boxW;
+  var cubeFloorY = parseFloat(wrap.getAttribute("data-cube-floor-y")) || 0;
+  var cubeReserve = parseFloat(wrap.getAttribute("data-cube-reserve")) || 80;
   var pad = 24;
   var maxOffset = 5000;
   if (!(pxPerMm > 0)) return;
 
+  var canvas = wrap.querySelector(".ov-canvas");
   var birdsLayer = svg.querySelector(".ov-birds");
   var cubesLayer = svg.querySelector(".ov-cubes");
   var guideLine = svg.querySelector(".ov-guide");
@@ -47,16 +54,21 @@
   svg.querySelectorAll(".ov-bird[data-id]").forEach(function (el) {
     var id = el.getAttribute("data-id");
     var row = wrap.querySelector('.ov-row[data-id="' + id + '"]');
+    var cubeTagEl = wrap.querySelector('.ov-tag.ov-ctag[data-id="' + id + '"]');
     var b = {
       id: id,
       el: el,
       cubeEl: svg.querySelector('.ov-cube[data-id="' + id + '"]'),
+      tagEl: wrap.querySelector('.ov-tag.ov-wtag[data-id="' + id + '"]'),
+      cubeTagEl: cubeTagEl,
+      cubeX: cubeTagEl ? parseFloat(cubeTagEl.getAttribute("data-cube-x")) || 0 : 0,
       baseX: parseFloat(el.getAttribute("data-base-x")) || 0,
       baseY: parseFloat(el.getAttribute("data-base-y")) || 0,
       dragX: parseInt(el.getAttribute("data-drag-x"), 10) || 0,
       dragY: parseInt(el.getAttribute("data-drag-y"), 10) || 0,
       cx: parseFloat(el.getAttribute("data-cx")) || 0,
       halfW: parseFloat(el.getAttribute("data-half-w")) || 0,
+      shoulderY: parseFloat(el.getAttribute("data-shoulder-y")) || 0,
       span: parseFloat(el.getAttribute("data-span")) || 0,
       row: row,
       pick: row ? row.querySelector(".ov-pick") : null,
@@ -79,12 +91,15 @@
     if (id && !birds[id]) id = "";
     selectedId = id;
     svg.classList.toggle("has-sel", !!id);
+    if (canvas) canvas.classList.toggle("has-sel", !!id);
     if (!id) svg.classList.remove("dragging");
     order.forEach(function (k) {
       var b = birds[k];
       var on = k === id;
       b.el.classList.toggle("selected", on);
       if (b.cubeEl) b.cubeEl.classList.toggle("selected", on);
+      if (b.tagEl) b.tagEl.classList.toggle("selected", on);
+      if (b.cubeTagEl) b.cubeTagEl.classList.toggle("selected", on);
       if (b.row) b.row.classList.toggle("selected", on);
       if (b.pick) b.pick.setAttribute("aria-pressed", on ? "true" : "false");
     });
@@ -94,9 +109,92 @@
     }
   }
 
+  function updateTags(vx, vy, vw, vh, drop) {
+    var rect = svg.getBoundingClientRect();
+    if (!(rect.width > 0 && rect.height > 0 && vw > 0 && vh > 0)) return;
+    var s = Math.min(rect.width / vw, rect.height / vh);
+    var offX = (rect.width - vw * s) / 2;
+    var offY = (rect.height - vh * s) / 2;
+    var minX = 12;
+    var maxX = Math.max(12, rect.width - 12);
+    var minY = 12;
+    var maxY = Math.max(12, rect.height - 12);
+    var minDX = 22;
+    var minDY = 22;
+
+    var placed = [];
+    function conflicts(px, py) {
+      for (var i = 0; i < placed.length; i++) {
+        if (Math.abs(px - placed[i].x) < minDX && Math.abs(py - placed[i].y) < minDY) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    order.forEach(function (id) {
+      var b = birds[id];
+      if (!b.tagEl) return;
+      var bx = b.baseX + b.dragX * pxPerMm;
+      var by = b.baseY + b.dragY * pxPerMm;
+      var tipX = offX + (bx + b.cx + b.halfW - vx) * s;
+      var tipY = offY + (by + b.shoulderY - vy) * s - 14;
+      var px = Math.max(minX, Math.min(maxX, tipX));
+      var basePy = Math.max(minY, Math.min(maxY, tipY));
+      var py = basePy;
+      if (conflicts(px, py)) {
+        var found = false;
+        for (var step = 1; step <= 12; step++) {
+          var up = basePy - step * minDY;
+          if (up >= minY && !conflicts(px, up)) {
+            py = up;
+            found = true;
+            break;
+          }
+          var dn = basePy + step * minDY;
+          if (dn <= maxY && !conflicts(px, dn)) {
+            py = dn;
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          var bestClear = -1;
+          for (var cy = minY; cy <= maxY; cy += 2) {
+            var nearest = 1e9;
+            for (var i = 0; i < placed.length; i++) {
+              if (Math.abs(px - placed[i].x) < minDX) {
+                var d = Math.abs(cy - placed[i].y);
+                if (d < nearest) nearest = d;
+              }
+            }
+            if (nearest > bestClear) {
+              bestClear = nearest;
+              py = cy;
+            }
+          }
+        }
+      }
+      placed.push({ x: px, y: py });
+      b.tagEl.style.left = ((px / rect.width) * 100).toFixed(2) + "%";
+      b.tagEl.style.top = ((py / rect.height) * 100).toFixed(2) + "%";
+    });
+
+    if (cubeFloorY > 0) {
+      var cubePy = Math.max(minY, Math.min(maxY, offY + (cubeFloorY + drop - vy) * s + 14));
+      order.forEach(function (id) {
+        var b = birds[id];
+        if (!b.cubeTagEl) return;
+        var cpx = Math.max(minX, Math.min(maxX, offX + (b.cubeX - vx) * s));
+        b.cubeTagEl.style.left = ((cpx / rect.width) * 100).toFixed(2) + "%";
+        b.cubeTagEl.style.top = ((cubePy / rect.height) * 100).toFixed(2) + "%";
+      });
+    }
+  }
+
   function updateBounds() {
-    var minX = 0;
-    var maxX = boxW;
+    var minX = Math.min(0, cubeMinX);
+    var maxX = Math.max(boxW, cubeMaxX);
     var minY = 0;
     var maxY = origBoxH;
     order.forEach(function (id) {
@@ -108,25 +206,24 @@
       if (left < minX) minX = left;
       if (right > maxX) maxX = right;
       if (y - pad < minY) minY = y - pad;
-      if (y + b.span + pad > maxY) maxY = y + b.span + pad;
+      if (y + b.span + cubeReserve > maxY) maxY = y + b.span + cubeReserve;
     });
-    svg.setAttribute(
-      "viewBox",
-      minX.toFixed(2) + " " + minY.toFixed(2) + " " + (maxX - minX).toFixed(2) + " " + (maxY - minY).toFixed(2)
-    );
+    var vw = maxX - minX;
+    var vh = maxY - minY;
+    svg.setAttribute("viewBox", minX.toFixed(2) + " " + minY.toFixed(2) + " " + vw.toFixed(2) + " " + vh.toFixed(2));
     if (guideLine) {
       guideLine.setAttribute("x1", minX.toFixed(2));
       guideLine.setAttribute("x2", maxX.toFixed(2));
     }
+    var drop = maxY - origBoxH;
     if (cubesLayer) {
-      var dx = minX - origViewX;
-      var dy = maxY - origBoxH;
-      if (Math.abs(dx) > 0.01 || Math.abs(dy) > 0.01) {
-        cubesLayer.setAttribute("transform", "translate(" + dx.toFixed(2) + "," + dy.toFixed(2) + ")");
+      if (Math.abs(drop) > 0.01) {
+        cubesLayer.setAttribute("transform", "translate(0," + drop.toFixed(2) + ")");
       } else {
         cubesLayer.removeAttribute("transform");
       }
     }
+    updateTags(minX, minY, vw, vh, drop);
   }
 
   function appendDrags(params, ids, verticalToo) {
@@ -290,4 +387,7 @@
       select("");
     }
   });
+
+  window.addEventListener("resize", updateBounds);
+  updateBounds();
 })();

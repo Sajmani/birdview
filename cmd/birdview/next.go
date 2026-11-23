@@ -204,8 +204,9 @@ type nextData struct {
 	// not pins; every other parameter is kept.
 	HereNowURL      template.URL
 	HereNowTemplate string
-	// Pinned lists the pinned birds in alphabetical order, each with its
-	// pin and a link to its tile.
+	// Pinned lists the pinned birds in URL pin order
+	// (decisions.pinnedListFollowsPinOrder), each with its pin and a link to
+	// its tile.
 	Pinned []nextPinned
 	// Find is the find box's text and Found how many birds it matches;
 	// Matches lists them when there are nextFindLimit or fewer.
@@ -755,13 +756,6 @@ func (s *server) nextPage(r *http.Request) nextData {
 		page.Pinned = append(page.Pinned, nextPinned{Name: sp.Name(opt.Locale), Scientific: sp.ScientificName,
 			Anchor: pinnedAnchor(id), URL: nextPin(q, id)})
 	}
-	sort.Slice(page.Pinned, func(i, j int) bool {
-		li, lj := strings.ToLower(page.Pinned[i].Name), strings.ToLower(page.Pinned[j].Name)
-		if li != lj {
-			return li < lj
-		}
-		return page.Pinned[i].Name < page.Pinned[j].Name
-	})
 	if len(added) > 0 {
 		// Showing only the pinned birds means nothing once none are.
 		page.ClearPinsURL = nextSet(q, "pin", "", "show")
@@ -784,7 +778,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 	refLen, refSpan := view.Reference(shown)
 	u := unitsFor(opt.Metric3, masses...)
 	if overlayMode {
-		page.Overlay = s.buildOverlay(q, shown, opt, u)
+		page.Overlay = s.buildOverlay(q, shown, keep["pin"], opt, u)
 		page.OverlayScript = s.nextOverlayJS
 	} else {
 		// The tiers' headings, in the page's units, with one precision for

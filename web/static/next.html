@@ -74,8 +74,8 @@
   {{with .ClearPinsURL}}<a class="reset" href="{{.}}" rel="nofollow" title="Unpin every bird, keeping the settings">Clear pins</a>{{end}}
 </div>
 <template id="pinicon">{{template "pinicon"}}</template>
-{{/* The pinned birds, in alphabetical order: the name goes to the bird's tile,
-     the pin unpins it (product.nextView). */}}
+{{/* The pinned birds, in URL pin order (decisions.pinnedListFollowsPinOrder):
+     the name goes to the bird's tile, the pin unpins it (product.nextView). */}}
 {{with .Pinned}}<div class="pinned" role="region" aria-label="Pinned birds">
   <span class="lbl">Pinned</span>
   <ul>
@@ -186,7 +186,9 @@
   <p class="empty">Overlay compares up to {{.MaxPins}} pinned birds ({{.PinCount}} are pinned). Unpin some above or <a href="{{$.ShowPinnedURL}}" rel="nofollow">view Pinned</a>.</p>
   {{else}}
   <div class="ov-wrap" data-px-per-mm="{{f4 .PxPerMm}}" data-nudge-mm="{{.NudgeMM}}"
-       data-box-w="{{f1 .BoxW}}" data-box-h="{{f2 .BoxH}}" data-view-x="{{f2 .ViewX}}">
+       data-box-w="{{f1 .BoxW}}" data-box-h="{{f2 .BoxH}}" data-view-x="{{f2 .ViewX}}"
+       data-cube-min-x="{{f2 .CubeMinX}}" data-cube-max-x="{{f2 .CubeMaxX}}"
+       data-cube-floor-y="{{f2 .CubeBaseY}}" data-cube-reserve="{{f2 .CubeReserveH}}">
     <div class="ov-bar">
       <div class="seg" role="group" aria-label="Align overlaid birds">
         {{range .Aligns}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}" rel="nofollow"{{if .On}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}
@@ -199,19 +201,22 @@
          title="Spread birds vertically so overlapping wing crossbars separate">Spread <svg class="ov-arrow" viewBox="0 0 14 14" width="13" height="13" aria-hidden="true" focusable="false"><path d="M7 1.5v11M4.5 4L7 1.5 9.5 4M4.5 10L7 12.5 9.5 10"/></svg></a>
     </div>
     <div class="ov-stage">
-      <svg class="dia ov-dia" viewBox="{{f2 .ViewX}} 0 {{f2 .ViewW}} {{f2 .BoxH}}" preserveAspectRatio="xMidYMid meet"
-           role="img" aria-label="Overlay of {{.PinCount}} pinned birds to one scale">
-        <line class="ov-guide" x1="{{f2 .ViewX}}" y1="{{f1 .GuideY}}" x2="{{f2 (add .ViewX .ViewW)}}" y2="{{f1 .GuideY}}"/>
-        <g class="ov-cubes">
-          {{range .Layers}}{{$b := .}}{{with .MassCube}}{{if .Side}}<g class="ov-cube ov-c{{$b.ColorIdx}}" data-id="{{$b.ID}}">{{template "masscube" .}}</g>{{end}}{{end}}{{end}}
-        </g>
-        <g class="ov-birds">
-          {{range .Layers}}<g class="ov-bird ov-c{{.ColorIdx}}" data-id="{{.ID}}" data-base-x="{{f2 .BaseX}}" data-base-y="{{f2 .BaseY}}" data-drag-x="{{.DragXMM}}" data-drag-y="{{.DragYMM}}" data-cx="{{f2 .Geom.CX}}" data-half-w="{{f2 .Geom.CrossbarHalfWidth}}" data-span="{{f2 .SpanPx}}" transform="translate({{f2 .X}},{{f2 .Y}})">
-            <title>{{.Name}} ({{.Scientific}}): Length {{.Length}}, Wingspan {{.Wing}}, Mass {{.Mass}}</title>
-            <g class="ov-fig">{{template "birdstrokes" .}}</g>
-          </g>{{end}}
-        </g>
-      </svg>
+      <div class="ov-canvas">
+        <svg class="dia ov-dia" viewBox="{{f2 .ViewX}} 0 {{f2 .ViewW}} {{f2 .BoxH}}" preserveAspectRatio="xMidYMid meet"
+             role="img" aria-label="Overlay of {{.PinCount}} pinned birds to one scale">
+          <line class="ov-guide" x1="{{f2 .ViewX}}" y1="{{f1 .GuideY}}" x2="{{f2 (add .ViewX .ViewW)}}" y2="{{f1 .GuideY}}"/>
+          <g class="ov-cubes">
+            {{range .Legend}}{{$b := .}}{{with .MassCube}}{{if .Side}}<g class="ov-cube ov-c{{$b.ColorIdx}}" data-id="{{$b.ID}}">{{template "masscube" .}}</g>{{end}}{{end}}{{end}}
+          </g>
+          <g class="ov-birds">
+            {{range .Layers}}<g class="ov-bird ov-c{{.ColorIdx}}" data-id="{{.ID}}" data-base-x="{{f2 .BaseX}}" data-base-y="{{f2 .BaseY}}" data-drag-x="{{.DragXMM}}" data-drag-y="{{.DragYMM}}" data-cx="{{f2 .Geom.CX}}" data-half-w="{{f2 .Geom.CrossbarHalfWidth}}" data-shoulder-y="{{f2 .Geom.YShoulder}}" data-span="{{f2 .SpanPx}}" transform="translate({{f2 .X}},{{f2 .Y}})">
+              <title>{{.Name}} ({{.Scientific}}): Length {{.Length}}, Wingspan {{.Wing}}, Mass {{.Mass}}</title>
+              <g class="ov-fig">{{template "birdstrokes" .}}</g>
+            </g>{{end}}
+          </g>
+        </svg>
+        <div class="ov-tags">{{range .Legend}}<span class="ov-tag ov-wtag ov-c{{.ColorIdx}}" data-id="{{.ID}}" style="left:{{f1 .TagLeft}}%;top:{{f1 .TagTop}}%" aria-hidden="true">{{.Label}}</span>{{end}}{{range .Legend}}{{if .MassCube.Side}}<span class="ov-tag ov-ctag ov-c{{.ColorIdx}}" data-id="{{.ID}}" data-cube-x="{{f2 .CubeTagX}}" style="left:{{f1 .CubeTagLeft}}%;top:{{f1 .CubeTagTop}}%" aria-hidden="true">{{.Label}}</span>{{end}}{{end}}</div>
+      </div>
     </div>
     <p class="ov-hint">Solid lines are measured; dashed lines and hollow heads are estimated.</p>
     <div class="ov-leghead">
@@ -222,7 +227,7 @@
     <div class="ov-legend" role="list" aria-label="Overlaid birds">
       {{range .Legend}}<div class="ov-row" id="{{.Anchor}}" role="listitem" data-id="{{.ID}}">
         <button type="button" class="btn ov-pick" aria-pressed="false" title="Select {{.Name}} to highlight and drag">
-          <span class="ov-dot ov-c{{.ColorIdx}}" aria-hidden="true">&#9679;</span>
+          <span class="ov-num ov-c{{.ColorIdx}}" aria-hidden="true">{{.Label}}</span>
           <span class="ov-name">{{.Name}}</span>
         </button>
         <span class="ov-stats">Length {{.Length}} &middot; Wingspan {{.Wing}} &middot; Mass {{.Mass}}</span>
