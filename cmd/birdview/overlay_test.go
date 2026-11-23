@@ -25,6 +25,7 @@ import (
 	"net/url"
 	"os/exec"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -125,10 +126,10 @@ func TestOverlayShowRowAndPinBounds(t *testing.T) {
 	}
 
 	// Switching away from show=overlay to Pinned drops overlay-only params.
-	_, ov := get(t, s, "/?show=overlay&align=tail&spread=1&shift=1&dy=amecro:-20&pin=amecro&pin=annhum")
+	_, ov := get(t, s, "/?show=overlay&align=tail&spread=1&shift=1&drag=amecro:30,-20&pin=amecro&pin=annhum")
 	pinBtn := mustMatch(t, ov, `<a class="btn" href="([^"]+)"[^>]*>Pinned \(2\)</a>`, "Pinned button")
 	href := html.UnescapeString(pinBtn)
-	for _, drop := range []string{"align=", "spread=", "shift=", "dy="} {
+	for _, drop := range []string{"align=", "spread=", "shift=", "drag="} {
 		if strings.Contains(href, drop) {
 			t.Errorf("Pinned button %q retained overlay param %q", href, drop)
 		}
@@ -136,7 +137,7 @@ func TestOverlayShowRowAndPinBounds(t *testing.T) {
 }
 
 // TestOverlayGeometryAlignmentAndURL checks shared scale, largest-behind-smallest
-// layering, alignment presets, horizontal spread, millimeter dy= shifts, and
+// layering, alignment presets, horizontal spread, 2D drag= URL parameters, and
 // preserved provenance cues.
 //
 // Verifies: app.overlayModeComparesPinnedBirds.
@@ -146,25 +147,25 @@ func TestOverlayGeometryAlignmentAndURL(t *testing.T) {
 	// Three birds with distinct silhouettes and provenance: hummingbird (smallest),
 	// crow (wing modeled, solid tail/bill, dashed body), heron (largest, folded neck).
 	parseAttrs := func(body string) (layers []struct {
-		id, cls string
-		baseY   float64
-		dx, y   float64
-		dyMM    int
+		id, cls            string
+		baseX, baseY, x, y float64
+		dragX, dragY       int
 	}, guideY float64) {
 		gm := mustMatch(t, body, `<line class="ov-guide"[^>]*y1="([^"]+)"`, "overlay guide")
 		guideY, _ = strconv.ParseFloat(gm, 64)
-		reBird := regexp.MustCompile(`<g class="ov-bird (ov-c\d)" data-id="([^"]+)" data-base-y="([^"]+)" data-dx="([^"]+)" data-dy="([^"]+)"[^>]*transform="translate\(([^,]+),([^)]+)\)"`)
+		reBird := regexp.MustCompile(`<g class="ov-bird (ov-c\d)" data-id="([^"]+)" data-base-x="([^"]+)" data-base-y="([^"]+)" data-drag-x="([^"]+)" data-drag-y="([^"]+)"[^>]*transform="translate\(([^,]+),([^)]+)\)"`)
 		for _, m := range reBird.FindAllStringSubmatch(body, -1) {
-			by, _ := strconv.ParseFloat(m[3], 64)
-			dx, _ := strconv.ParseFloat(m[6], 64)
-			y, _ := strconv.ParseFloat(m[7], 64)
-			dy, _ := strconv.Atoi(m[5])
+			bx, _ := strconv.ParseFloat(m[3], 64)
+			by, _ := strconv.ParseFloat(m[4], 64)
+			dxMM, _ := strconv.Atoi(m[5])
+			dyMM, _ := strconv.Atoi(m[6])
+			x, _ := strconv.ParseFloat(m[7], 64)
+			y, _ := strconv.ParseFloat(m[8], 64)
 			layers = append(layers, struct {
-				id, cls string
-				baseY   float64
-				dx, y   float64
-				dyMM    int
-			}{m[2], m[1], by, dx, y, dy})
+				id, cls            string
+				baseX, baseY, x, y float64
+				dragX, dragY       int
+			}{m[2], m[1], bx, by, x, y, dxMM, dyMM})
 		}
 		return layers, guideY
 	}
@@ -183,13 +184,13 @@ func TestOverlayGeometryAlignmentAndURL(t *testing.T) {
 		t.Errorf("overlay bird carries inline style")
 	}
 	// Wing alignment puts every bird's shoulder (top + geom.YShoulder) on guideY.
-	byID := map[string]struct{ baseY, dx, y float64 }{}
+	byID := map[string]struct{ baseY, x, y float64 }{}
 	for _, l := range layers {
-		byID[l.id] = struct{ baseY, dx, y float64 }{l.baseY, l.dx, l.y}
+		byID[l.id] = struct{ baseY, x, y float64 }{l.baseY, l.x, l.y}
 	}
-	// Non-spread: every bird shares the exact same horizontal dx.
-	if byID["greblu"].dx != byID["amecro"].dx || byID["amecro"].dx != byID["annhum"].dx {
-		t.Errorf("without spread=1, dx differed: %v", byID)
+	// Non-spread: every bird shares the exact same horizontal x.
+	if byID["greblu"].x != byID["amecro"].x || byID["amecro"].x != byID["annhum"].x {
+		t.Errorf("without spread=1, x differed: %v", byID)
 	}
 	if guideY <= 0 {
 		t.Errorf("guideY = %v, want > 0", guideY)
@@ -204,29 +205,45 @@ func TestOverlayGeometryAlignmentAndURL(t *testing.T) {
 		}
 	}
 
-	// Spread=1 separates dx by pin order symmetrically while keeping y untouched.
-	_, spBody := get(t, s, "/?show=overlay&align=bill&spread=1&pin=annhum&pin=amecro&pin=greblu")
-	if !strings.Contains(spBody, ">Spread ↔</a>") || !strings.Contains(spBody, ">Spread ↕</a>") {
-		t.Errorf("overlay bar missing Spread ↔ / Spread ↕ toggle labels")
+	// Spread=1 separates x by active Order by order symmetrically while keeping y untouched;
+	// spread buttons use matching monochrome SVG arrows, and Reset drags + prompt sit below canvas without ▲/▼ buttons.
+	_, spBody := get(t, s, "/?show=overlay&by=length&align=bill&spread=1&pin=annhum&pin=amecro&pin=greblu")
+	spBtn := mustMatch(t, spBody, `(?s)<a class="btn ov-spread[^"]*"[^>]*>(.*?)</a>`, "Spread horizontal button")
+	shBtn := mustMatch(t, spBody, `(?s)<a class="btn ov-shift[^"]*"[^>]*>(.*?)</a>`, "Spread vertical button")
+	if !strings.Contains(spBtn, `<svg class="ov-arrow"`) || strings.Contains(spBtn, "↔") ||
+		!strings.Contains(shBtn, `<svg class="ov-arrow"`) || strings.Contains(shBtn, "↕") {
+		t.Errorf("spread buttons do not use uniform inline SVG arrows: spread=%q shift=%q", spBtn, shBtn)
+	}
+	hint := mustMatch(t, spBody, `(?s)<p class="ov-hint">(.*?)</p>`, "overlay provenance hint")
+	if !strings.Contains(hint, "Solid lines are measured; dashed lines and hollow heads are estimated.") ||
+		strings.Contains(hint, "grab one") {
+		t.Errorf("unexpected ov-hint copy: %q", hint)
+	}
+	legHead := mustMatch(t, spBody, `(?s)<div class="ov-leghead">(.*?)</div>`, "overlay legend header")
+	if !strings.Contains(legHead, "Select a bird below to highlight and drag") || !strings.Contains(legHead, "Reset drags") {
+		t.Errorf("ov-leghead missing prompt or Reset drags button: %q", legHead)
+	}
+	if strings.Contains(spBody, "ov-up") || strings.Contains(spBody, "ov-dn") {
+		t.Errorf("overlay legend still contains up/down arrow buttons")
 	}
 	spLayers, _ := parseAttrs(spBody)
 	spByID := map[string]float64{}
 	for _, l := range spLayers {
-		spByID[l.id] = l.dx
+		spByID[l.id] = l.x
 	}
 	if !(spByID["annhum"] < spByID["amecro"] && spByID["amecro"] < spByID["greblu"]) {
-		t.Errorf("spread=1 dx not ordered by pin order: %v", spByID)
+		t.Errorf("spread=1 x not ordered by length: %v", spByID)
 	}
 
-	// Shift=1 staggers y vertically by exact overlaySpreadStep in pin order while keeping dx untouched.
-	_, shfBody := get(t, s, "/?show=overlay&align=bill&shift=1&pin=annhum&pin=amecro&pin=greblu")
+	// Shift=1 staggers y vertically by exact overlaySpreadStep in active Order by order while keeping x untouched.
+	_, shfBody := get(t, s, "/?show=overlay&by=length&align=bill&shift=1&pin=annhum&pin=amecro&pin=greblu")
 	shfLayers, _ := parseAttrs(shfBody)
-	shfByID := map[string]struct{ dx, y float64 }{}
+	shfByID := map[string]struct{ x, y float64 }{}
 	for _, l := range shfLayers {
-		shfByID[l.id] = struct{ dx, y float64 }{l.dx, l.y}
+		shfByID[l.id] = struct{ x, y float64 }{l.x, l.y}
 	}
-	if shfByID["annhum"].dx != shfByID["amecro"].dx || shfByID["amecro"].dx != shfByID["greblu"].dx {
-		t.Errorf("shift=1 changed horizontal dx: %v", shfByID)
+	if shfByID["annhum"].x != shfByID["amecro"].x || shfByID["amecro"].x != shfByID["greblu"].x {
+		t.Errorf("shift=1 changed horizontal x: %v", shfByID)
 	}
 	dy01 := shfByID["amecro"].y - shfByID["annhum"].y
 	dy12 := shfByID["greblu"].y - shfByID["amecro"].y
@@ -235,39 +252,105 @@ func TestOverlayGeometryAlignmentAndURL(t *testing.T) {
 	}
 
 	// Spread=1&shift=1 applies both horizontal and vertical offsets together.
-	_, bothBody := get(t, s, "/?show=overlay&align=bill&spread=1&shift=1&pin=annhum&pin=amecro&pin=greblu")
+	_, bothBody := get(t, s, "/?show=overlay&by=length&align=bill&spread=1&shift=1&pin=annhum&pin=amecro&pin=greblu")
 	bothLayers, _ := parseAttrs(bothBody)
-	bothByID := map[string]struct{ dx, y float64 }{}
+	bothByID := map[string]struct{ x, y float64 }{}
 	for _, l := range bothLayers {
-		bothByID[l.id] = struct{ dx, y float64 }{l.dx, l.y}
+		bothByID[l.id] = struct{ x, y float64 }{l.x, l.y}
 	}
-	if !(bothByID["annhum"].dx < bothByID["amecro"].dx && bothByID["amecro"].dx < bothByID["greblu"].dx) ||
+	if !(bothByID["annhum"].x < bothByID["amecro"].x && bothByID["amecro"].x < bothByID["greblu"].x) ||
 		math.Abs((bothByID["amecro"].y-bothByID["annhum"].y)-overlaySpreadStep) > 0.05 {
 		t.Errorf("spread=1&shift=1 did not apply both offsets: %v", bothByID)
 	}
 
-	// Millimeter shift dy=amecro:-100 shifts amecro up by 100 * PxPerMm without moving others.
-	_, shBody := get(t, s, "/?show=overlay&pin=annhum&pin=amecro&pin=greblu&dy=amecro:-100")
-	pxMatch := mustMatch(t, shBody, `data-px-per-mm="([^"]+)"`, "pxPerMm")
-	pxPerMm, _ := strconv.ParseFloat(pxMatch, 64)
-	shLayers, _ := parseAttrs(shBody)
-	for _, l := range shLayers {
-		if l.id == "amecro" {
-			wantShift := -100 * pxPerMm
-			gotShift := l.y - l.baseY
-			if gotShift-wantShift > 0.2 || wantShift-gotShift > 0.2 {
-				t.Errorf("dy=amecro:-100 shifted by %.2f px, want %.2f px (pxPerMm=%.4f)", gotShift, wantShift, pxPerMm)
-			}
-		} else if l.y != l.baseY {
-			t.Errorf("dy=amecro:-100 moved unshifted bird %s: y=%.2f baseY=%.2f", l.id, l.y, l.baseY)
+	// Overlay legend, spread=1, and shift=1 follow the Order by control (and rev=1)
+	// just like Pinned tiles, while SVG paint order stays largest behind smallest.
+	reLegend := regexp.MustCompile(`<div class="ov-row"[^>]*data-id="([^"]+)"`)
+	for _, ord := range []string{"", "&by=length", "&by=length&rev=1", "&by=mass", "&by=wingspan", "&by=bill"} {
+		const pins = "&pin=thimur&pin=amecro&pin=blasti"
+		pinnedPage := s.nextPage(httptest.NewRequest("GET", "/?show=pinned"+pins+ord, nil))
+		var wantOrder []string
+		for _, tl := range pinnedPage.GroupTiles {
+			wantOrder = append(wantOrder, tl.S.ID)
 		}
+		_, ordBody := get(t, s, "/?show=overlay&align=bill&spread=1&shift=1"+pins+ord)
+		var gotLegend []string
+		for _, m := range reLegend.FindAllStringSubmatch(ordBody, -1) {
+			gotLegend = append(gotLegend, m[1])
+		}
+		if !slices.Equal(gotLegend, wantOrder) {
+			t.Errorf("order %q: legend = %v, want %v (matching Pinned)", ord, gotLegend, wantOrder)
+		}
+		ordLayers, _ := parseAttrs(ordBody)
+		var paintIDs []string
+		posByID := map[string]struct{ x, y float64 }{}
+		for _, l := range ordLayers {
+			paintIDs = append(paintIDs, l.id)
+			posByID[l.id] = struct{ x, y float64 }{l.x, l.y}
+		}
+		wantPaint := []string{"amecro", "thimur", "blasti"}
+		if !slices.Equal(paintIDs, wantPaint) {
+			t.Errorf("order %q: paint order = %v, want %v (largest behind smallest)", ord, paintIDs, wantPaint)
+		}
+		for i := 1; i < len(wantOrder); i++ {
+			a, b := posByID[wantOrder[i-1]], posByID[wantOrder[i]]
+			if !(a.x < b.x) || math.Abs((b.y-a.y)-overlaySpreadStep) > 0.05 {
+				t.Errorf("order %q: spread order broke between %s (%v) and %s (%v)", ord, wantOrder[i-1], a, wantOrder[i], b)
+			}
+		}
+	}
+
+	// Millimeter drag=amecro:80,-100 moves amecro by (+80, -100) * PxPerMm without moving others;
+	// Align preserves dx (clearing dy to 0), Spread keeps both axes, Reset clears all drags,
+	// and per-bird × reset appears only for amecro.
+	_, drBody := get(t, s, "/?show=overlay&pin=annhum&pin=amecro&pin=greblu&drag=amecro:80,-100")
+	pxMatch := mustMatch(t, drBody, `data-px-per-mm="([^"]+)"`, "pxPerMm")
+	pxPerMm, _ := strconv.ParseFloat(pxMatch, 64)
+	drLayers, _ := parseAttrs(drBody)
+	for _, l := range drLayers {
+		if l.id == "amecro" {
+			wantDX, wantDY := 80*pxPerMm, -100*pxPerMm
+			gotDX, gotDY := l.x-l.baseX, l.y-l.baseY
+			if math.Abs(gotDX-wantDX) > 0.2 || math.Abs(gotDY-wantDY) > 0.2 {
+				t.Errorf("drag=amecro:80,-100 moved by (%.2f, %.2f) px, want (%.2f, %.2f) px (pxPerMm=%.4f)",
+					gotDX, gotDY, wantDX, wantDY, pxPerMm)
+			}
+		} else if l.x != l.baseX || l.y != l.baseY {
+			t.Errorf("drag=amecro:80,-100 moved undragged bird %s: (x,y)=(%.2f,%.2f) base=(%.2f,%.2f)",
+				l.id, l.x, l.y, l.baseX, l.baseY)
+		}
+	}
+	reRowZero := regexp.MustCompile(`<div class="ov-row"[^>]*data-id="([^"]+)"[\s\S]*?<a class="btn ov-zero"([^>]*)>`)
+	zeroHidden := map[string]bool{}
+	for _, m := range reRowZero.FindAllStringSubmatch(drBody, -1) {
+		zeroHidden[m[1]] = strings.Contains(m[2], " hidden")
+	}
+	if zeroHidden["amecro"] || !zeroHidden["annhum"] || !zeroHidden["greblu"] {
+		t.Errorf("per-bird reset hidden states = %v, want only amecro visible", zeroHidden)
+	}
+	billHref := html.UnescapeString(mustMatch(t, drBody, `<a class="btn" href="([^"]*align=bill[^"]*)"`, "Bill align link"))
+	if bu, err := url.Parse(billHref); err != nil || !slices.Equal(bu.Query()["drag"], []string{"amecro:80,0"}) {
+		t.Errorf("Align link drag query = %v (%q), want [amecro:80,0]", bu.Query()["drag"], billHref)
+	}
+	spreadHref := html.UnescapeString(mustMatch(t, drBody, `<a class="btn ov-spread[^"]*" href="([^"]+)"`, "Spread link"))
+	if su, err := url.Parse(spreadHref); err != nil || !slices.Equal(su.Query()["drag"], []string{"amecro:80,-100"}) {
+		t.Errorf("Spread link drag query = %v (%q), want [amecro:80,-100]", su.Query()["drag"], spreadHref)
+	}
+	resetTag := mustMatch(t, drBody, `<a class="btn reset ov-reset"([^>]*)>`, "Reset drags link")
+	if strings.Contains(resetTag, " hidden") {
+		t.Errorf("Reset drags stayed hidden when drag= was active: %q", resetTag)
+	}
+	resetHref := html.UnescapeString(mustMatch(t, resetTag, `href="([^"]+)"`, "Reset drags href"))
+	if strings.Contains(resetHref, "drag=") {
+		t.Errorf("Reset drags link retained drag=: %q", resetHref)
 	}
 }
 
-// TestOverlayInTheBrowser verifies interactive selection (legend click brings
-// bird to front and dims others), vertical nudge updating transform and URL via
-// history.replaceState, pointer drag on canvas, and 360px phone layout without
-// horizontal overflow.
+// TestOverlayInTheBrowser verifies select-first interaction (dragging on canvas
+// before selecting does nothing; legend click brings bird to front and dims
+// others), 2D pointer drag and arrow-key nudges updating transform and drag= URL
+// via history.replaceState (with Align preserving dx and clearing dy), Reset
+// drags, and 360px phone layout without horizontal overflow.
 //
 // Verifies: app.overlayModeComparesPinnedBirds.
 func TestOverlayInTheBrowser(t *testing.T) {
@@ -296,30 +379,54 @@ window.addEventListener("load", function () {
     document.querySelectorAll(".ov-bar .seg > .btn, .ov-bar .ov-spread, .ov-bar .ov-shift").forEach(function (e) {
       out.barTops.push(Math.round(e.getBoundingClientRect().top));
     });
+    var svg = document.querySelector("svg.ov-dia");
     var pickCrow = document.querySelector('.ov-row[data-id="amecro"] .ov-pick');
     var crowG = document.querySelector('.ov-bird[data-id="amecro"]');
-    var upCrow = document.querySelector('.ov-row[data-id="amecro"] .ov-up');
+    var resetBtn = document.querySelector('.ov-reset');
+    var zeroCrow = document.querySelector('.ov-row[data-id="amecro"] .ov-zero');
+    if (svg && crowG && typeof PointerEvent !== "undefined") {
+      var r0 = crowG.getBoundingClientRect();
+      var x0 = r0.left + r0.width / 2, y0 = r0.top + r0.height / 2;
+      crowG.dispatchEvent(new PointerEvent("pointerdown", {bubbles:true, clientX:x0, clientY:y0, button:0, pointerId:1}));
+      crowG.dispatchEvent(new PointerEvent("pointermove", {bubbles:true, clientX:x0+40, clientY:y0+30, pointerId:1}));
+      crowG.dispatchEvent(new PointerEvent("pointerup",   {bubbles:true, clientX:x0+40, clientY:y0+30, pointerId:1}));
+      out.unselHasSel = svg.classList.contains("has-sel");
+      out.unselDragX = crowG.getAttribute("data-drag-x");
+      out.unselDragY = crowG.getAttribute("data-drag-y");
+      out.unselURL = location.search;
+    }
     if (pickCrow && crowG) {
       pickCrow.click();
       var birds = document.querySelectorAll('.ov-birds .ov-bird');
       out.selectedLast = birds[birds.length - 1].getAttribute("data-id");
-      out.hasSel = document.querySelector('svg.ov-dia').classList.contains("has-sel");
+      out.hasSel = svg && svg.classList.contains("has-sel");
     }
-    if (upCrow) {
-      upCrow.click();
-      out.afterNudgeURL = location.search;
-      out.afterNudgeDy = crowG.getAttribute("data-dy");
-      out.afterNudgeTransform = crowG.getAttribute("transform");
-    }
-    var svg = document.querySelector("svg.ov-dia");
     if (svg && crowG && typeof PointerEvent !== "undefined") {
-      var r = crowG.getBoundingClientRect();
+      var r = svg.getBoundingClientRect();
       var x = r.left + r.width / 2, y = r.top + r.height / 2;
-      svg.dispatchEvent(new PointerEvent("pointerdown", {bubbles:true, clientX:x, clientY:y, button:0, pointerId:1}));
-      svg.dispatchEvent(new PointerEvent("pointermove", {bubbles:true, clientX:x, clientY:y+30, pointerId:1}));
-      svg.dispatchEvent(new PointerEvent("pointerup",   {bubbles:true, clientX:x, clientY:y+30, pointerId:1}));
-      out.afterDragDy = crowG.getAttribute("data-dy");
+      svg.dispatchEvent(new PointerEvent("pointerdown", {bubbles:true, clientX:x, clientY:y, button:0, pointerId:2}));
+      svg.dispatchEvent(new PointerEvent("pointermove", {bubbles:true, clientX:x+40, clientY:y+30, pointerId:2}));
+      svg.dispatchEvent(new PointerEvent("pointerup",   {bubbles:true, clientX:x+40, clientY:y+30, pointerId:2}));
+      out.afterDragX = crowG.getAttribute("data-drag-x");
+      out.afterDragY = crowG.getAttribute("data-drag-y");
       out.afterDragURL = location.search;
+      out.resetHiddenAfterDrag = !!(resetBtn && resetBtn.hasAttribute("hidden"));
+      out.zeroHiddenAfterDrag = !!(zeroCrow && zeroCrow.hasAttribute("hidden"));
+      var billLink = document.querySelector('.ov-bar .seg a[href*="align=bill"]');
+      out.billHrefAfterDrag = billLink ? billLink.getAttribute("href") : "";
+    }
+    document.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowLeft", shiftKey: true, bubbles: true}));
+    document.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowUp", shiftKey: true, bubbles: true}));
+    if (crowG) {
+      out.afterKeyX = crowG.getAttribute("data-drag-x");
+      out.afterKeyY = crowG.getAttribute("data-drag-y");
+    }
+    if (resetBtn) {
+      resetBtn.click();
+      out.afterResetX = crowG ? crowG.getAttribute("data-drag-x") : "";
+      out.afterResetY = crowG ? crowG.getAttribute("data-drag-y") : "";
+      out.afterResetURL = location.search;
+      out.resetHiddenAfterReset = resetBtn.hasAttribute("hidden");
     }
     document.documentElement.setAttribute("data-ovprobe", JSON.stringify(out));
   }, 150);
@@ -362,18 +469,29 @@ window.addEventListener("load", function () {
 		t.Fatal("desktop overlay probe missing")
 	}
 	type ovProbeResult struct {
-		Width               int    `json:"width"`
-		ScrollW             int    `json:"scrollW"`
-		ShowTops            []int  `json:"showTops"`
-		BarTops             []int  `json:"barTops"`
-		OverflowRight       int    `json:"overflowRight"`
-		SelectedLast        string `json:"selectedLast"`
-		HasSel              bool   `json:"hasSel"`
-		AfterNudgeURL       string `json:"afterNudgeURL"`
-		AfterNudgeDy        string `json:"afterNudgeDy"`
-		AfterNudgeTransform string `json:"afterNudgeTransform"`
-		AfterDragDy         string `json:"afterDragDy"`
-		AfterDragURL        string `json:"afterDragURL"`
+		Width                 int    `json:"width"`
+		ScrollW               int    `json:"scrollW"`
+		ShowTops              []int  `json:"showTops"`
+		BarTops               []int  `json:"barTops"`
+		OverflowRight         int    `json:"overflowRight"`
+		UnselHasSel           bool   `json:"unselHasSel"`
+		UnselDragX            string `json:"unselDragX"`
+		UnselDragY            string `json:"unselDragY"`
+		UnselURL              string `json:"unselURL"`
+		SelectedLast          string `json:"selectedLast"`
+		HasSel                bool   `json:"hasSel"`
+		AfterDragX            string `json:"afterDragX"`
+		AfterDragY            string `json:"afterDragY"`
+		AfterDragURL          string `json:"afterDragURL"`
+		ResetHiddenAfterDrag  bool   `json:"resetHiddenAfterDrag"`
+		ZeroHiddenAfterDrag   bool   `json:"zeroHiddenAfterDrag"`
+		BillHrefAfterDrag     string `json:"billHrefAfterDrag"`
+		AfterKeyX             string `json:"afterKeyX"`
+		AfterKeyY             string `json:"afterKeyY"`
+		AfterResetX           string `json:"afterResetX"`
+		AfterResetY           string `json:"afterResetY"`
+		AfterResetURL         string `json:"afterResetURL"`
+		ResetHiddenAfterReset bool   `json:"resetHiddenAfterReset"`
 	}
 	var res ovProbeResult
 	if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &res); err != nil {
@@ -387,19 +505,36 @@ window.addEventListener("load", function () {
 			t.Errorf("desktop ov-bar control %d top=%dpx, want aligned with first (%dpx): %v", i, top, res.BarTops[0], res.BarTops)
 		}
 	}
+	if res.UnselHasSel || (res.UnselDragX != "" && res.UnselDragX != "0") || (res.UnselDragY != "" && res.UnselDragY != "0") || strings.Contains(res.UnselURL, "drag=") {
+		t.Errorf("unselected drag moved or selected bird: hasSel=%v dx=%q dy=%q url=%q",
+			res.UnselHasSel, res.UnselDragX, res.UnselDragY, res.UnselURL)
+	}
 	if !res.HasSel || res.SelectedLast != "amecro" {
 		t.Errorf("clicking amecro legend row: hasSel=%v selectedLast=%q, want true/\"amecro\"", res.HasSel, res.SelectedLast)
 	}
-	if !strings.Contains(res.AfterNudgeURL, "dy=amecro%3A-") && !strings.Contains(res.AfterNudgeURL, "dy=amecro:-") {
-		t.Errorf("after nudge URL = %q, want negative dy for amecro", res.AfterNudgeURL)
+	dragX, _ := strconv.Atoi(res.AfterDragX)
+	dragY, _ := strconv.Atoi(res.AfterDragY)
+	if dragX <= 0 || dragY <= 0 {
+		t.Errorf("after selected 2D drag (+40,+30 px): (dragX,dragY)=(%q,%q), want both > 0", res.AfterDragX, res.AfterDragY)
 	}
-	if res.AfterNudgeDy == "" || res.AfterNudgeDy == "0" {
-		t.Errorf("after nudge data-dy = %q, want non-zero", res.AfterNudgeDy)
+	if !strings.Contains(res.AfterDragURL, "drag=amecro%3A") && !strings.Contains(res.AfterDragURL, "drag=amecro:") {
+		t.Errorf("after 2D drag URL = %q, want drag=amecro:...", res.AfterDragURL)
 	}
-	nudgeVal, _ := strconv.Atoi(res.AfterNudgeDy)
-	dragVal, _ := strconv.Atoi(res.AfterDragDy)
-	if dragVal <= nudgeVal {
-		t.Errorf("after downward drag data-dy=%d did not increase from nudge=%d (url=%q)", dragVal, nudgeVal, res.AfterDragURL)
+	if res.ResetHiddenAfterDrag || res.ZeroHiddenAfterDrag {
+		t.Errorf("after 2D drag: resetHidden=%v zeroHidden=%v, want both visible", res.ResetHiddenAfterDrag, res.ZeroHiddenAfterDrag)
+	}
+	if wantBill := fmt.Sprintf("drag=amecro:%d,0", dragX); !strings.Contains(res.BillHrefAfterDrag, wantBill) &&
+		!strings.Contains(res.BillHrefAfterDrag, url.QueryEscape(fmt.Sprintf("amecro:%d,0", dragX))) {
+		t.Errorf("after 2D drag Bill align href = %q, want %q preserved", res.BillHrefAfterDrag, wantBill)
+	}
+	keyX, _ := strconv.Atoi(res.AfterKeyX)
+	keyY, _ := strconv.Atoi(res.AfterKeyY)
+	if keyX >= dragX || keyY >= dragY {
+		t.Errorf("after ArrowLeft+ArrowUp: (keyX,keyY)=(%d,%d) did not decrease from (%d,%d)", keyX, keyY, dragX, dragY)
+	}
+	if res.AfterResetX != "0" || res.AfterResetY != "0" || strings.Contains(res.AfterResetURL, "drag=") || !res.ResetHiddenAfterReset {
+		t.Errorf("after Reset drags: (x,y)=(%q,%q) url=%q hidden=%v, want (0,0), no drag=, hidden=true",
+			res.AfterResetX, res.AfterResetY, res.AfterResetURL, res.ResetHiddenAfterReset)
 	}
 
 	// Phone 360px check: no horizontal overflow and Show row holds 5 controls.

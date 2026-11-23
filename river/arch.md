@@ -75,12 +75,13 @@ A browser test holds it to the server's `place=` rendering.
 The fourth, inline in `next.html`, moves an opened setting's choices left only as far as keeps them
 on the screen, closes them on a tap elsewhere, and reopens the setting a choice was made in, at the
 same scroll position. The fifth is `next-overlay.js`, inlined only in Overlay mode
-(`show=overlay`), which brings a clicked bird to the front, handles vertical pointer drags and
-`ArrowUp`/`ArrowDown` nudges, and syncs millimeter `dy=` offsets via `history.replaceState`, while
-layout geometry, color assignment, and non-JavaScript alignment, spread, and up/down nudge links
-stay in Go (`cmd/birdview/overlay.go`). The rule all five protect is that *logic* stays in Go, not
+(`show=overlay`), which waits until a bird is selected in the legend before enabling 2D canvas
+drags and arrow-key nudges (bringing it forward and expanding the viewBox) while syncing
+millimeter `drag=<id>:<dx>,<dy>` offsets via `history.replaceState`, leaving layout geometry,
+color assignment, and non-JavaScript alignment, spread, and reset links in Go
+(`cmd/birdview/overlay.go`). The rule all five protect is that *logic* stays in Go, not
 that the client is inert; without JavaScript the page still works, minus these five (the bird and
-place search boxes then need Enter, Overlay alignment, spread, and nudge links reload via URL, and
+place search boxes then need Enter, Overlay alignment, spread, and reset links reload via URL, and
 a phone shows a setting's choices under the whole count line).
 
 The routes: the home page `/`, species pages `/species/<id>`, the guides `/docs/`, `/added`,

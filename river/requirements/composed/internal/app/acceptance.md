@@ -1086,16 +1086,19 @@ and headless Chrome interaction and phone-width checks
    is enabled for 2–8 pins (`show=overlay`), and is disabled above 8 pins; requesting `show=overlay`
    with <2 or >8 pins renders a clear notice instead of an overlay.
 2. **Shared scale, order, alignment, and provenance.** All pinned birds share one pixels-per-mm scale,
-   paint largest behind smallest, align at Wings (`align=wings`, default), Bill, Tail, or Center,
-   spread horizontally when `spread=1`, stagger vertically by the same step when `shift=1`,
-   preserve solid/dashed stroke classes and structural marks
-   without inline color styles or attributes, and apply millimeter `dy=<id>:<mm>` shifts across
-   viewports.
-3. **Interactive selection, nudge, drag, bar alignment, and 360px fit.** In headless Chrome, clicking
-   a legend row selects and brings that bird to the front, nudging/dragging shifts the bird
-   vertically and updates `dy=` in the URL via `history.replaceState`, the `Spread ↔` and `Spread ↕`
-   controls align vertically with `Wings|Bill|Tail|Center`, and at 360px the Overlay page and
-   `.showrow` have no horizontal overflow.
+   paint largest behind smallest, order the legend and horizontal/vertical spread (`spread=1`,
+   `shift=1`) by the active **Order by** control (and `rev=1`) matching `Pinned`, align at Wings
+   (`align=wings`, default), Bill, Tail, or Center (clearing vertical drags while keeping horizontal
+   drags), preserve solid/dashed stroke classes and structural marks without inline color styles or
+   attributes, render matching inline SVG spread arrows (no `▲`/`▼` legend buttons), show `Reset drags`
+   beside `Select a bird below to highlight and drag` below the provenance caption, and apply 2D
+   millimeter `drag=<id>:<dx>,<dy>` offsets across viewports.
+3. **Select-first 2D drag, nudge, bar alignment, and 360px fit.** In headless Chrome, dragging directly
+   on an unselected bird neither selects nor moves it; clicking a legend row selects and brings that
+   bird to the front, dragging/nudging moves it in 2D and updates `drag=` in the URL via
+   `history.replaceState` (with `Align` preserving `dx` and clearing `dy`), `Reset drags` clears all
+   drags, the Spread controls align vertically with `Wings|Bill|Tail|Center`, and at 360px the
+   Overlay page and `.showrow` have no horizontal overflow.
 
 ## everydayDefinitionsShown
 

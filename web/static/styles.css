@@ -522,7 +522,7 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .ov-wrap { margin-top: 14px; max-width: 760px; }
 .ov-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 10px; }
 .ov-bar .seg { margin-bottom: 0; }
-.ov-bar .reset { padding: 3px 6px; border-radius: 6px; }
+.ov-arrow { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 .ov-stage { width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
   padding: 6px; }
 .ov-guide { stroke: var(--line); stroke-width: 1; stroke-dasharray: 4 4; }
@@ -532,18 +532,18 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .ov-dia .mcface { fill: currentColor; fill-opacity: 0.24; }
 .ov-dia .mctop  { fill: currentColor; fill-opacity: 0.40; }
 .ov-dia .mcside { fill: currentColor; fill-opacity: 0.12; }
-.ov-dia .ov-bird { opacity: 0.82; cursor: ns-resize; touch-action: none; }
+.ov-dia .ov-bird { opacity: 0.82; }
 .ov-dia .ov-cube { opacity: 0.78; }
-.ov-dia.has-sel { cursor: ns-resize; touch-action: none; }
+.ov-dia.has-sel { cursor: grab; touch-action: none; }
+.ov-dia.has-sel.dragging { cursor: grabbing; }
 .ov-dia.has-sel .ov-bird { opacity: 0.35; }
 .ov-dia.has-sel .ov-bird.selected { opacity: 1; }
 .ov-dia.has-sel .ov-cube { opacity: 0.25; }
 .ov-dia.has-sel .ov-cube.selected { opacity: 1; }
-.ov-dia .ov-hit line, .ov-dia .ov-hit path, .ov-dia .ov-hit ellipse {
-  fill: none; stroke: #000000; stroke-opacity: 0; stroke-width: 18; stroke-linecap: round;
-  pointer-events: stroke; }
-.ov-dia .ov-hit ellipse { fill: #000000; fill-opacity: 0; pointer-events: all; }
-.ov-hint { margin: 8px 0; color: var(--dim); font-size: 13px; }
+.ov-hint { margin: 8px 0 0; color: var(--dim); font-size: 13px; }
+.ov-leghead { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 16px 0 8px; }
+.ov-prompt { margin: 0; color: var(--ink); font-size: 13px; font-weight: 600; }
+.ov-leghead .reset { padding: 3px 6px; border-radius: 6px; }
 .ov-legend { display: flex; flex-direction: column; gap: 6px; }
 .ov-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;
   background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
@@ -554,6 +554,5 @@ h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; ga
 .ov-stats { color: var(--dim); font-size: 13px; }
 .ov-detail { font-size: 13px; text-decoration: none; }
 .ov-detail:hover { text-decoration: underline; }
-.ov-nudge { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; }
-.ov-dy { color: var(--dim); font-size: 13px; font-variant-numeric: tabular-nums; min-width: 5.5ch; text-align: right; }
+.ov-zero { margin-left: auto; }
 

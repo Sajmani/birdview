@@ -297,7 +297,7 @@ func leavePinnedOnly(q url.Values) {
 		q.Del("align")
 		q.Del("spread")
 		q.Del("shift")
-		q.Del("dy")
+		q.Del("drag")
 	}
 }
 
@@ -692,16 +692,16 @@ func (s *server) nextPage(r *http.Request) nextData {
 	after := 0
 	page.Show, page.Cap = mode, strconv.Itoa(capN)
 	for _, k := range sortedKeys(q) {
-		if k == "show" || k == "bird" || k == "align" || k == "spread" || k == "shift" || k == "dy" {
+		if k == "show" || k == "bird" || k == "align" || k == "spread" || k == "shift" || k == "drag" {
 			continue
 		}
 		for _, v := range q[k] {
 			page.ShowFields = append(page.ShowFields, hiddenField{k, v})
 		}
 	}
-	page.ShowAllURL = nextSet(q, "show", "all", "align", "spread", "shift", "dy")
-	page.ShowPinnedURL = nextSet(q, "show", "pinned", "align", "spread", "shift", "dy")
-	page.ShowFirstURL = nextSet(q, "show", "", "align", "spread", "shift", "dy")
+	page.ShowAllURL = nextSet(q, "show", "all", "align", "spread", "shift", "drag")
+	page.ShowPinnedURL = nextSet(q, "show", "pinned", "align", "spread", "shift", "drag")
+	page.ShowFirstURL = nextSet(q, "show", "", "align", "spread", "shift", "drag")
 	page.Matching = len(matched)
 	inMatched := map[string]bool{}
 	for _, sp := range matched {
@@ -784,7 +784,7 @@ func (s *server) nextPage(r *http.Request) nextData {
 	refLen, refSpan := view.Reference(shown)
 	u := unitsFor(opt.Metric3, masses...)
 	if overlayMode {
-		page.Overlay = s.buildOverlay(q, keep["pin"], opt, u)
+		page.Overlay = s.buildOverlay(q, shown, opt, u)
 		page.OverlayScript = s.nextOverlayJS
 	} else {
 		// The tiers' headings, in the page's units, with one precision for

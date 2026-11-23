@@ -46,21 +46,21 @@ type overlayView struct {
 	PinCount        int
 	MaxPins         int
 
-	BoxW, BoxH float64
-	PxPerMm    float64
-	GuideY     float64
-	Align      string
-	AlignLabel string
-	Spread     bool
-	Shift      bool
-	Metric     bool
-	NudgeMM    int
-	SpreadURL  template.URL
-	ShiftURL   template.URL
-	ResetURL   template.URL
-	Aligns     []overlayAlignChoice
-	Layers     []overlayBird // sorted largest behind smallest (SVG paint order)
-	Legend     []overlayBird // sorted by pinOrder (matching Pinned list / colors)
+	ViewX, ViewW float64
+	BoxW, BoxH   float64
+	PxPerMm      float64
+	GuideY       float64
+	Align        string
+	AlignLabel   string
+	Spread       bool
+	Shift        bool
+	NudgeMM      int
+	SpreadURL    template.URL
+	ShiftURL     template.URL
+	ResetURL     template.URL
+	Aligns       []overlayAlignChoice
+	Layers       []overlayBird // sorted largest behind smallest (SVG paint order)
+	Legend       []overlayBird // sorted by active Order by setting (matching Pinned list / colors)
 }
 
 type overlayAlignChoice struct {
@@ -88,15 +88,14 @@ type overlayBird struct {
 	WingModeled bool
 	MassCube    massCube
 
-	BaseY  float64
-	DX     float64
-	Y      float64
-	SpanPx float64
-	DyMM   int
-	DyText string
-	UpURL  template.URL
-	DnURL  template.URL
-	Zero   template.URL
+	BaseX   float64
+	BaseY   float64
+	X       float64
+	Y       float64
+	SpanPx  float64
+	DragXMM int
+	DragYMM int
+	Zero    template.URL
 }
 
 var overlayAlignOptions = []struct {
@@ -129,89 +128,103 @@ func overlayShift(q url.Values) bool {
 	return q.Get("shift") == "1"
 }
 
-// overlayOffsets parses repeatable dy=<id>:<mm> query parameters for pinned
-// birds, returning non-zero millimeter vertical offsets keyed by species ID.
-func overlayOffsets(q url.Values, allowed map[string]bool) map[string]int {
-	out := map[string]int{}
-	for _, raw := range q["dy"] {
-		id, val, ok := strings.Cut(raw, ":")
+type overlayDrag struct {
+	X, Y int
+}
+
+func clampOverlayOffset(mm int) int {
+	if mm < -overlayMaxOffset {
+		return -overlayMaxOffset
+	}
+	if mm > overlayMaxOffset {
+		return overlayMaxOffset
+	}
+	return mm
+}
+
+// overlayDrags parses repeatable drag=<id>:<dx>,<dy> query parameters for
+// pinned birds, returning non-zero millimeter offsets keyed by species ID.
+func overlayDrags(q url.Values, allowed map[string]bool) map[string]overlayDrag {
+	out := map[string]overlayDrag{}
+	for _, raw := range q["drag"] {
+		id, coords, ok := strings.Cut(raw, ":")
 		if !ok || !allowed[id] {
 			continue
 		}
-		mm, err := strconv.Atoi(val)
-		if err != nil || mm == 0 {
+		xStr, yStr, ok := strings.Cut(coords, ",")
+		if !ok {
 			continue
 		}
-		if mm < -overlayMaxOffset {
-			mm = -overlayMaxOffset
-		} else if mm > overlayMaxOffset {
-			mm = overlayMaxOffset
+		dx, errX := strconv.Atoi(xStr)
+		dy, errY := strconv.Atoi(yStr)
+		if errX != nil || errY != nil {
+			continue
 		}
-		out[id] = mm
+		dx, dy = clampOverlayOffset(dx), clampOverlayOffset(dy)
+		if dx == 0 && dy == 0 {
+			continue
+		}
+		out[id] = overlayDrag{X: dx, Y: dy}
 	}
 	return out
 }
 
-func overlayWriteOffsets(q url.Values, dy map[string]int) {
-	q.Del("dy")
-	if len(dy) == 0 {
+func overlayWriteDrags(q url.Values, drags map[string]overlayDrag) {
+	q.Del("drag")
+	if len(drags) == 0 {
 		return
 	}
-	ids := make([]string, 0, len(dy))
-	for id, mm := range dy {
-		if mm != 0 {
+	ids := make([]string, 0, len(drags))
+	for id, d := range drags {
+		if d.X != 0 || d.Y != 0 {
 			ids = append(ids, id)
 		}
 	}
 	sort.Strings(ids)
 	for _, id := range ids {
-		q.Add("dy", id+":"+strconv.Itoa(dy[id]))
+		d := drags[id]
+		q.Add("drag", fmt.Sprintf("%s:%d,%d", id, d.X, d.Y))
 	}
 }
 
-// overlaySetOffset returns the page URL with species id's vertical offset set
-// to mm (or cleared when mm == 0), keeping only valid offsets for pinned birds.
-func overlaySetOffset(q url.Values, allowed map[string]bool, id string, mm int) template.URL {
+// overlayClearOneDrag returns the page URL with species id's drag cleared,
+// keeping valid drags for all other pinned birds.
+func overlayClearOneDrag(q url.Values, allowed map[string]bool, id string) template.URL {
 	nq := cloneValues(q)
-	dy := overlayOffsets(nq, allowed)
-	if mm == 0 {
-		delete(dy, id)
-	} else {
-		if mm < -overlayMaxOffset {
-			mm = -overlayMaxOffset
-		} else if mm > overlayMaxOffset {
-			mm = overlayMaxOffset
-		}
-		dy[id] = mm
-	}
-	overlayWriteOffsets(nq, dy)
+	drags := overlayDrags(nq, allowed)
+	delete(drags, id)
+	overlayWriteDrags(nq, drags)
 	return nextURL(nq)
 }
 
-// overlayDropPin removes any dy=<id>:<mm> entry when id is unpinned.
+// overlayClearVerticalDrags resets vertical drags on q to 0 while preserving
+// any horizontal drags (used when switching Align presets).
+func overlayClearVerticalDrags(q url.Values, allowed map[string]bool) {
+	drags := overlayDrags(q, allowed)
+	for id, d := range drags {
+		if d.X == 0 {
+			delete(drags, id)
+		} else {
+			drags[id] = overlayDrag{X: d.X, Y: 0}
+		}
+	}
+	overlayWriteDrags(q, drags)
+}
+
+// overlayDropPin removes any drag=<id>:<dx>,<dy> entry when id is unpinned.
 func overlayDropPin(q url.Values, id string) {
 	prefix := id + ":"
 	var kept []string
-	for _, raw := range q["dy"] {
+	for _, raw := range q["drag"] {
 		if !strings.HasPrefix(raw, prefix) {
 			kept = append(kept, raw)
 		}
 	}
 	if len(kept) == 0 {
-		q.Del("dy")
+		q.Del("drag")
 	} else {
-		q["dy"] = kept
+		q["drag"] = kept
 	}
-}
-
-func formatOverlayShift(mm int, metric bool) string {
-	if mm == 0 {
-		return ""
-	}
-	if metric {
-		return fmt.Sprintf("%+.1f cm", float64(mm)/10)
-	}
-	return fmt.Sprintf("%+.2f in", float64(mm)/25.4)
 }
 
 func overlayAnchorY(g view.Geometry, align string) float64 {
@@ -227,19 +240,23 @@ func overlayAnchorY(g view.Geometry, align string) float64 {
 	}
 }
 
-func (s *server) buildOverlay(q url.Values, pinOrder []string, opt options, u units) *overlayView {
+func (s *server) buildOverlay(q url.Values, species []*dataset.Species, opt options, u units) *overlayView {
 	ov := &overlayView{
-		PinCount: len(pinOrder),
+		PinCount: len(species),
 		MaxPins:  overlayMaxPins,
-		Metric:   opt.Metric3,
 	}
-	if len(pinOrder) < overlayMinPins {
+	if len(species) < overlayMinPins {
 		ov.TooFew = true
 		return ov
 	}
-	if len(pinOrder) > overlayMaxPins {
+	if len(species) > overlayMaxPins {
 		ov.TooMany = true
 		return ov
+	}
+
+	allowed := make(map[string]bool, len(species))
+	for _, sp := range species {
+		allowed[sp.ID] = true
 	}
 
 	align := overlayAlign(q)
@@ -254,7 +271,7 @@ func (s *server) buildOverlay(q url.Values, pinOrder []string, opt options, u un
 			ov.AlignLabel = optAlign.label
 		}
 		aq := cloneValues(q)
-		aq.Del("dy")
+		overlayClearVerticalDrags(aq, allowed)
 		if optAlign.key == "wings" {
 			aq.Del("align")
 		} else {
@@ -284,18 +301,10 @@ func (s *server) buildOverlay(q url.Values, pinOrder []string, opt options, u un
 	}
 	ov.ShiftURL = nextURL(vhq)
 
-	allowed := make(map[string]bool, len(pinOrder))
-	species := make([]*dataset.Species, 0, len(pinOrder))
-	for _, id := range pinOrder {
-		if sp, ok := s.byID[id]; ok {
-			allowed[id] = true
-			species = append(species, sp)
-		}
-	}
-	dyMap := overlayOffsets(q, allowed)
-	if len(dyMap) > 0 {
+	drags := overlayDrags(q, allowed)
+	if len(drags) > 0 {
 		rq := cloneValues(q)
-		rq.Del("dy")
+		rq.Del("drag")
 		ov.ResetURL = nextURL(rq)
 	}
 
@@ -310,11 +319,12 @@ func (s *server) buildOverlay(q url.Values, pinOrder []string, opt options, u un
 		sp       *dataset.Species
 		idx      int
 		geom     view.Geometry
-		dx       float64
+		baseX    float64
 		staggerY float64
 		anchorY  float64
-		dyMM     int
-		shiftPx  float64
+		drag     overlayDrag
+		dragXPx  float64
+		dragYPx  float64
 	}
 	items := make([]placed, len(species))
 	maxAnchor := 0.0
@@ -325,34 +335,44 @@ func (s *server) buildOverlay(q url.Values, pinOrder []string, opt options, u un
 			maxAnchor = anc
 		}
 		stepOffset := (float64(i) - float64(len(species)-1)/2) * overlaySpreadStep
-		dx := edgePad
+		baseX := edgePad
 		if spread {
-			dx += stepOffset
+			baseX += stepOffset
 		}
 		var staggerY float64
 		if shift {
 			staggerY = stepOffset
 		}
-		dyMM := dyMap[sp.ID]
+		dr := drags[sp.ID]
 		items[i] = placed{
 			sp:       sp,
 			idx:      i,
 			geom:     g,
-			dx:       dx,
+			baseX:    baseX,
 			staggerY: staggerY,
 			anchorY:  anc,
-			dyMM:     dyMM,
-			shiftPx:  float64(dyMM) * g.PxPerMm,
+			drag:     dr,
+			dragXPx:  float64(dr.X) * g.PxPerMm,
+			dragYPx:  float64(dr.Y) * g.PxPerMm,
 		}
 		ov.PxPerMm = g.PxPerMm
 	}
 
+	minX := 0.0
+	maxX := overlayBoxW
 	minY := 0.0
 	maxY := overlayDrawH
 	maxCubeHeight := 0.0
 	for _, it := range items {
+		x := it.baseX + it.dragXPx
+		if left := x + it.geom.CX - it.geom.CrossbarHalfWidth - overlayPad; left < minX {
+			minX = left
+		}
+		if right := x + it.geom.CX + it.geom.CrossbarHalfWidth + overlayPad; right > maxX {
+			maxX = right
+		}
 		baseY := maxAnchor - it.anchorY + it.staggerY
-		y := baseY + it.shiftPx
+		y := baseY + it.dragYPx
 		if y < minY {
 			minY = y
 		}
@@ -368,6 +388,8 @@ func (s *server) buildOverlay(q url.Values, pinOrder []string, opt options, u un
 	if minH := maxCubeHeight + 2*overlayPad; boxH < minH {
 		boxH = minH
 	}
+	ov.ViewX = minX
+	ov.ViewW = maxX - minX
 	ov.BoxW = overlayBoxW
 	ov.BoxH = boxH
 	ov.GuideY = maxAnchor + topOffset
@@ -376,12 +398,13 @@ func (s *server) buildOverlay(q url.Values, pinOrder []string, opt options, u un
 	for i, it := range items {
 		sp := it.sp
 		baseY := maxAnchor - it.anchorY + it.staggerY + topOffset
-		y := baseY + it.shiftPx
+		x := it.baseX + it.dragXPx
+		y := baseY + it.dragYPx
 		cube := newMassCube(sp, boxH, it.geom.PxPerMm)
-		cube.X = 12
+		cube.X = minX + 12
 		var zeroURL template.URL
-		if it.dyMM != 0 {
-			zeroURL = overlaySetOffset(q, allowed, sp.ID, 0)
+		if it.drag.X != 0 || it.drag.Y != 0 {
+			zeroURL = overlayClearOneDrag(q, allowed, sp.ID)
 		}
 		birds[i] = overlayBird{
 			ID:          sp.ID,
@@ -397,14 +420,13 @@ func (s *server) buildOverlay(q url.Values, pinOrder []string, opt options, u un
 			Geom:        it.geom,
 			WingModeled: sp.Wingspan.Prov.Kind != dataset.Measured,
 			MassCube:    cube,
+			BaseX:       it.baseX,
 			BaseY:       baseY,
-			DX:          it.dx,
+			X:           x,
 			Y:           y,
 			SpanPx:      it.geom.YTailTip,
-			DyMM:        it.dyMM,
-			DyText:      formatOverlayShift(it.dyMM, opt.Metric3),
-			UpURL:       overlaySetOffset(q, allowed, sp.ID, it.dyMM-nudgeMM),
-			DnURL:       overlaySetOffset(q, allowed, sp.ID, it.dyMM+nudgeMM),
+			DragXMM:     it.drag.X,
+			DragYMM:     it.drag.Y,
 			Zero:        zeroURL,
 		}
 	}

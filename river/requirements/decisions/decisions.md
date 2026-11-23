@@ -5810,22 +5810,30 @@ Affects: [product.nextView](../local/product/presentation.md#nextview), [product
    smallest with slight transparency; all non-color diagram cues remain intact (solid vs. dashed
    strokes for measured vs. modeled lengths, hollow head oval, folded-neck S-curve, wing-chord
    ticks, and body/tail junction tick).
-3. **Alignment, horizontal/vertical spread, and shareable millimeter offsets.** Above the canvas, **Align** chooses
-   **Wings** (default — aligns shoulders), **Bill** (bill tips), **Tail** (tail tips), or **Center**,
-   clearing manual shifts; **Spread ↔** (`spread=1`) gently offsets vertical centerlines horizontally
-   so overlapping bills and tails can be read side by side without changing vertical scale; and
-   **Spread ↕** (`shift=1`) staggers birds vertically by the same step so overlapping wing crossbars
-   separate without changing alignment presets or scale. Manual
-   vertical shifts are stored in the URL as repeatable `dy=<id>:<mm>` parameters in real
+3. **Alignment, horizontal/vertical spread, ordering, and shareable 2D millimeter drags.** Above the
+   canvas, **Align** chooses **Wings** (default — aligns shoulders), **Bill** (bill tips), **Tail**
+   (tail tips), or **Center**, clearing vertical drags while preserving horizontal drags (`dx`);
+   **Spread ↔** (`spread=1`) and **Spread ↕** (`shift=1`) render matching monochrome inline SVG
+   arrows (so cross-platform glyph/emoji styling stays uniform) and preserve manual drags while
+   gently staggering centerlines horizontally (so bills and tails separate side by side) or vertically
+   (so wing crossbars separate) without changing scale. Legend rows, **Spread ↔**, **Spread ↕**,
+   and palette assignment follow the active **Order by** control (including reversal, `rev=1`),
+   matching **Pinned**, while SVG paint order remains largest behind smallest. Manual
+   2D drags are stored in the URL as repeatable `drag=<id>:<dx>,<dy>` parameters in real
    millimeters so shared links match across screen sizes, updated in place during interactive drags
-   and nudges via `history.replaceState`.
-4. **Selecting and moving.** Clicking a bird in the legend selects it and brings it to the front at
-   full opacity (dimming others on the canvas, leaving legend text at full contrast), allowing
-   vertical drag anywhere on the canvas and `ArrowUp`/`ArrowDown` keyboard nudges; grabbing a bird
-   directly on the canvas via a wide transparent hit stroke selects and drags it in one motion; and
-   inline up/down/reset buttons on each legend row work with or without JavaScript. Shows only the
-   overlay canvas and legend (no duplicate tiles below). `.showrow` remains on one line at 360px
-   with 0–1 pins and wraps cleanly inside 360px when Overlay joins at 2+ pins.
+   and keyboard nudges via `history.replaceState`.
+4. **Selecting and moving.** Birds on the canvas are not draggable (keeping touch scrolling normal)
+   until selected below. Below the canvas, the provenance caption is followed by a blank-line gap,
+   a header reading **Select a bird below to highlight and drag**, and **Reset drags** (when any
+   bird has been dragged). Clicking a bird in the legend selects it and brings it to the front at
+   full opacity (dimming others on the canvas, leaving legend text at full contrast), enabling 2D
+   dragging anywhere on the canvas and `ArrowLeft`/`ArrowRight`/`ArrowUp`/`ArrowDown` keyboard
+   nudges (expanding the SVG viewBox as needed while keeping mass cubes lower-left); tapping the
+   canvas without dragging, clicking the selected legend button again, or pressing `Escape`
+   deselects. Legend rows carry the selector button, measurements, a `Details` link, and a compact
+   per-bird `×` reset link when dragged (no `▲`/`▼` arrow buttons). Shows only the overlay canvas
+   and legend (no duplicate tiles below). `.showrow` remains on one line at 360px with 0–1 pins and
+   wraps cleanly inside 360px when Overlay joins at 2+ pins.
 
 ### Why
 

@@ -1624,10 +1624,11 @@ Guardrails: `cmd/birdview/overlay_test.go:TestOverlayShowRowAndPinBounds`;
 
 Gates: yes, in `go test ./...` (CI and image build; browser check skips without Chrome)
 
-Watched failing: 2026-11-22, across 6 mutations:
+Watched failing: 2026-11-23, across 7 mutations:
 - disabling the `>8` pin check in `cmd/birdview/next.go` failed `TestOverlayShowRowAndPinBounds` (`9 pins: Show row did not disable Overlay`);
 - returning `g.YShoulder` for `"bill"` in `overlayAnchorY` failed `TestOverlayGeometryAlignmentAndURL` on all three birds (`align=bill: bird greblu y=24.00, guide=121.70`);
 - zeroing `staggerY` in `cmd/birdview/overlay.go` failed `TestOverlayGeometryAlignmentAndURL` (`shift=1 vertical steps = (0.00, 0.00), want exact 14.00`);
-- omitting layer bring-to-front and `history.replaceState` in `web/static/next-overlay.js` failed `TestOverlayInTheBrowser` (`selectedLast="annhum", want "amecro"` and missing `dy=amecro:-` in URL);
+- passing raw URL pin order `keep["pin"]` to `buildOverlay` instead of sorted `shown` failed `TestOverlayGeometryAlignmentAndURL` across `Order by` metrics (`order "&by=length": legend = [thimur amecro blasti], want [blasti thimur amecro]`, `order "&by=mass": legend = [thimur amecro blasti], want [blasti amecro thimur]`);
+- allowing unselected pointer drags on `.ov-bird` before `selectedId` is set failed `TestOverlayInTheBrowser` (`unselected drag moved or selected bird: hasSel=true dx="" dy="" url="...&dy=amecro%3A82"`);
 - removing `.ov-bar .seg { margin-bottom: 0; }` in `web/static/styles.css` failed `TestOverlayInTheBrowser` bar alignment check (`desktop ov-bar control 4 top=412px, want aligned with first (408px)`);
 - setting `.ov-stage` to `width: 500px` in `web/static/styles.css` failed `TestOverlayInTheBrowser` phone check (`360px overlay page scrollWidth=512 > clientWidth=360`).

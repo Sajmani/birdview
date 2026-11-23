@@ -1402,10 +1402,30 @@ func TestNextWelcomeLine(t *testing.T) {
 					t.Errorf("the open-country hunters draw %s, of habitats %v and niches %v", tl.S.ID, tl.S.Habitats, tl.S.Niches)
 				}
 			}
+		case text == "four shorebirds":
+			u, _ := url.Parse(href)
+			pins := u.Query()["pin"]
+			p := nextAt(s, href)
+			var legendIDs []string
+			if p.Overlay != nil {
+				for _, b := range p.Overlay.Legend {
+					legendIDs = append(legendIDs, b.ID)
+				}
+			}
+			wantIDs := []string{"leasan", "baisan", "whrsan", "sander"}
+			if u.Query().Get("show") != "overlay" || u.Query().Get("by") != "length" ||
+				u.Query().Get("spread") != "1" || u.Query().Get("shift") != "1" ||
+				!slices.Equal(pins, wantIDs) || p.Overlay == nil || !slices.Equal(legendIDs, wantIDs) {
+				t.Errorf("four shorebirds (%s): show=%q by=%q spread=%q shift=%q pins=%v legend=%v; want overlay length-ordered %v with spread=1&shift=1",
+					href, u.Query().Get("show"), u.Query().Get("by"), u.Query().Get("spread"), u.Query().Get("shift"), pins, legendIDs, wantIDs)
+			}
 		}
 	}
 	if !strings.Contains(w[1], ">open-country hunters</a>") {
 		t.Error("the welcome line does not offer the open-country hunters")
+	}
+	if !strings.Contains(w[1], ">four shorebirds</a>") {
+		t.Error("the welcome line does not offer the four shorebirds overlay")
 	}
 	if sizes != 5 {
 		t.Errorf("the welcome line compares %d sizes of birds, want 5 (tiny, small, medium, large, huge)", sizes)

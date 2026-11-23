@@ -96,8 +96,8 @@ Every setting that can be all starts its choices with **All**, marked when it is
 - **Show:** **First** 100 (type another number), **All** the birds the settings match,
   **Pinned** for only your pins, or **Overlay** (appears at 2+ pins, active for 2–8) to stack
   pinned stick figures to one scale — align by **Wings**, **Bill**, **Tail**, or **Center**, toggle
-  **Spread ↔** / **Spread ↕** to separate overlaps, and tap or drag any bird vertically to compare
-  parts directly. **Clear pins** unpins every bird; **Reset**, after the settings, returns every
+  horizontal or vertical **Spread**, and select a bird below to highlight and drag it in any
+  direction to compare parts directly. **Clear pins** unpins every bird; **Reset**, after the settings, returns every
   setting to its default and keeps the pins.
 - **Order by:** **Frequency**, how often a bird is recorded, most often first (see
   [below](#sorting-by-how-often-a-bird-is-recorded)), or **Length**, **Wingspan**, **Mass**,
@@ -176,6 +176,12 @@ using the *1 in N* figure on every tile. The tiers are powers of ten: 1 in 10 to
   - *Huge:* California Condor, American White Pelican, Mute Swan, Magnificent Frigatebird, Bald
     Eagle, and Black-footed Albatross, all with wings over two meters. The albatross is the
     shortest, 709 mm, yet spans 2265 mm; the frigatebird weighs about a seventh of the swan.
+- **Overlay [four shorebirds](/?by=length&pin=leasan&pin=baisan&pin=whrsan&pin=sander&show=overlay&spread=1&shift=1).**
+  Least Sandpiper, Baird's Sandpiper, White-rumped Sandpiper, and Sanderling, overlaid to one
+  scale by length with horizontal and vertical spread on. Baird's (176 mm) and White-rumped
+  (177 mm) are nearly the same length yet out-span the longer, heavier Sanderling (190 mm, 52 g;
+  352 mm wingspan against 380 mm and 370 mm), while Least Sandpiper (141 mm, 23 g, 295 mm
+  modeled wingspan) is smaller in every part.
 - **See the [open-country hunters](/?habitat=Grassland&habitat=Shrubland&habitat=Desert&habitat=Rock&niche=Vertivore).** Habitat set to Open country
   and Diet to Hunts animals: seventeen hawks, falcons, owls, an eagle, and Northern Shrike, a
   songbird that hunts like a hawk. The Golden Eagle weighs 67 times as much as the shrike, 4.25 kg

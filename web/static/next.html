@@ -43,6 +43,7 @@
     <a href="/?by=length&amp;pin=blujay&amp;pin=amekes&amp;pin=calthr&amp;pin=moudov&amp;pin=belkin1&amp;pin=chwwid&amp;show=pinned" rel="nofollow">medium birds</a>,
     <a href="/?by=length&amp;pin=turvul&amp;pin=gbbgul&amp;pin=greegr&amp;pin=cangoo&amp;pin=grecor&amp;pin=rosspo1&amp;show=pinned" rel="nofollow">large birds</a>,
     <a href="/?by=length&amp;pin=calcon&amp;pin=amwpel&amp;pin=mutswa&amp;pin=magfri&amp;pin=baleag&amp;pin=bkfalb&amp;show=pinned" rel="nofollow">huge birds</a> &middot;
+    overlay <a href="/?by=length&amp;pin=leasan&amp;pin=baisan&amp;pin=whrsan&amp;pin=sander&amp;show=overlay&amp;spread=1&amp;shift=1" rel="nofollow">four shorebirds</a> &middot;
     see the <a href="/?habitat=Grassland&amp;habitat=Shrubland&amp;habitat=Desert&amp;habitat=Rock&amp;niche=Vertivore" rel="nofollow">open-country hunters</a>,
     all <a href="/?family=Ardeidae&amp;family=Anatidae&amp;month=all" rel="nofollow">herons and ducks</a> &middot;
     <a href="/docs/using#some-things-to-try">more ideas</a>
@@ -185,51 +186,48 @@
   <p class="empty">Overlay compares up to {{.MaxPins}} pinned birds ({{.PinCount}} are pinned). Unpin some above or <a href="{{$.ShowPinnedURL}}" rel="nofollow">view Pinned</a>.</p>
   {{else}}
   <div class="ov-wrap" data-px-per-mm="{{f4 .PxPerMm}}" data-nudge-mm="{{.NudgeMM}}"
-       data-box-w="{{f1 .BoxW}}" data-box-h="{{f2 .BoxH}}" data-metric="{{if .Metric}}1{{end}}">
+       data-box-w="{{f1 .BoxW}}" data-box-h="{{f2 .BoxH}}" data-view-x="{{f2 .ViewX}}">
     <div class="ov-bar">
       <div class="seg" role="group" aria-label="Align overlaid birds">
         {{range .Aligns}}<a class="btn{{if .On}} on{{end}}" href="{{.URL}}" rel="nofollow"{{if .On}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}
       </div>
       <a class="btn ov-spread{{if .Spread}} on{{end}}" href="{{.SpreadURL}}" rel="nofollow"
-         aria-pressed="{{if .Spread}}true{{else}}false{{end}}"
-         title="Spread birds horizontally so overlapping bills and tails separate">Spread ↔</a>
+         aria-pressed="{{if .Spread}}true{{else}}false{{end}}" aria-label="Spread horizontally"
+         title="Spread birds horizontally so overlapping bills and tails separate">Spread <svg class="ov-arrow" viewBox="0 0 14 14" width="13" height="13" aria-hidden="true" focusable="false"><path d="M1.5 7h11M4 4.5L1.5 7 4 9.5M10 4.5L12.5 7 10 9.5"/></svg></a>
       <a class="btn ov-shift{{if .Shift}} on{{end}}" href="{{.ShiftURL}}" rel="nofollow"
-         aria-pressed="{{if .Shift}}true{{else}}false{{end}}"
-         title="Spread birds vertically so overlapping wing crossbars separate">Spread ↕</a>
-      <a class="btn reset ov-reset"{{if not .ResetURL}} hidden{{end}} href="{{if .ResetURL}}{{.ResetURL}}{{else}}#{{end}}" rel="nofollow"
-         title="Clear vertical shifts back to {{.AlignLabel}} alignment">Reset shifts</a>
+         aria-pressed="{{if .Shift}}true{{else}}false{{end}}" aria-label="Spread vertically"
+         title="Spread birds vertically so overlapping wing crossbars separate">Spread <svg class="ov-arrow" viewBox="0 0 14 14" width="13" height="13" aria-hidden="true" focusable="false"><path d="M7 1.5v11M4.5 4L7 1.5 9.5 4M4.5 10L7 12.5 9.5 10"/></svg></a>
     </div>
     <div class="ov-stage">
-      <svg class="dia ov-dia" viewBox="0 0 {{f1 .BoxW}} {{f2 .BoxH}}" preserveAspectRatio="xMidYMid meet"
+      <svg class="dia ov-dia" viewBox="{{f2 .ViewX}} 0 {{f2 .ViewW}} {{f2 .BoxH}}" preserveAspectRatio="xMidYMid meet"
            role="img" aria-label="Overlay of {{.PinCount}} pinned birds to one scale">
-        <line class="ov-guide" x1="0" y1="{{f1 .GuideY}}" x2="{{f1 .BoxW}}" y2="{{f1 .GuideY}}"/>
+        <line class="ov-guide" x1="{{f2 .ViewX}}" y1="{{f1 .GuideY}}" x2="{{f2 (add .ViewX .ViewW)}}" y2="{{f1 .GuideY}}"/>
         <g class="ov-cubes">
           {{range .Layers}}{{$b := .}}{{with .MassCube}}{{if .Side}}<g class="ov-cube ov-c{{$b.ColorIdx}}" data-id="{{$b.ID}}">{{template "masscube" .}}</g>{{end}}{{end}}{{end}}
         </g>
         <g class="ov-birds">
-          {{range .Layers}}<g class="ov-bird ov-c{{.ColorIdx}}" data-id="{{.ID}}" data-base-y="{{f2 .BaseY}}" data-dx="{{f2 .DX}}" data-dy="{{.DyMM}}" data-span="{{f2 .SpanPx}}" transform="translate({{f2 .DX}},{{f2 .Y}})">
+          {{range .Layers}}<g class="ov-bird ov-c{{.ColorIdx}}" data-id="{{.ID}}" data-base-x="{{f2 .BaseX}}" data-base-y="{{f2 .BaseY}}" data-drag-x="{{.DragXMM}}" data-drag-y="{{.DragYMM}}" data-cx="{{f2 .Geom.CX}}" data-half-w="{{f2 .Geom.CrossbarHalfWidth}}" data-span="{{f2 .SpanPx}}" transform="translate({{f2 .X}},{{f2 .Y}})">
             <title>{{.Name}} ({{.Scientific}}): Length {{.Length}}, Wingspan {{.Wing}}, Mass {{.Mass}}</title>
-            <g class="ov-hit">{{template "birdhit" .}}</g>
             <g class="ov-fig">{{template "birdstrokes" .}}</g>
           </g>{{end}}
         </g>
       </svg>
     </div>
-    <p class="ov-hint">Solid lines are measured; dashed lines and hollow heads are estimated. Tap a bird below (or grab one on the drawing) to bring it forward and drag up or down.</p>
+    <p class="ov-hint">Solid lines are measured; dashed lines and hollow heads are estimated.</p>
+    <div class="ov-leghead">
+      <p class="ov-prompt">Select a bird below to highlight and drag</p>
+      <a class="btn reset ov-reset"{{if not .ResetURL}} hidden{{end}} href="{{if .ResetURL}}{{.ResetURL}}{{else}}#{{end}}" rel="nofollow"
+         title="Clear manual drags back to {{.AlignLabel}} alignment">Reset drags</a>
+    </div>
     <div class="ov-legend" role="list" aria-label="Overlaid birds">
       {{range .Legend}}<div class="ov-row" id="{{.Anchor}}" role="listitem" data-id="{{.ID}}">
-        <button type="button" class="btn ov-pick" aria-pressed="false" title="Select {{.Name}} to highlight and drag vertically">
+        <button type="button" class="btn ov-pick" aria-pressed="false" title="Select {{.Name}} to highlight and drag">
           <span class="ov-dot ov-c{{.ColorIdx}}" aria-hidden="true">&#9679;</span>
           <span class="ov-name">{{.Name}}</span>
         </button>
         <span class="ov-stats">Length {{.Length}} &middot; Wingspan {{.Wing}} &middot; Mass {{.Mass}}</span>
         <a class="ov-detail" href="{{.DetailURL}}">Details</a>
-        <span class="ov-nudge">
-          <a class="btn ov-up" href="{{.UpURL}}" rel="nofollow" title="Move {{.Name}} up" aria-label="Move {{.Name}} up">&#9650;</a>
-          <a class="btn ov-dn" href="{{.DnURL}}" rel="nofollow" title="Move {{.Name}} down" aria-label="Move {{.Name}} down">&#9660;</a>
-          <span class="ov-dy"{{if eq .DyMM 0}} hidden{{end}}>{{.DyText}}</span>
-          <a class="btn ov-zero"{{if not .Zero}} hidden{{end}} href="{{if .Zero}}{{.Zero}}{{else}}#{{end}}" rel="nofollow" title="Reset {{.Name}} shift" aria-label="Reset {{.Name}} shift">&times;</a>
-        </span>
+        <a class="btn ov-zero"{{if not .Zero}} hidden{{end}} href="{{if .Zero}}{{.Zero}}{{else}}#{{end}}" rel="nofollow" title="Reset {{.Name}} drag" aria-label="Reset {{.Name}} drag">&times;</a>
       </div>{{end}}
     </div>
   </div>
